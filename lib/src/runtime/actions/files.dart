@@ -3,15 +3,15 @@
 import '../../services/file_picking.dart' show FilePicker;
 import 'action_error.dart' show CodedFailure;
 import 'runner.dart';
-import 'ui.dart' show NavigatorActionUi, PickedFile;
+import 'ui.dart' show OptionalFilePicker, PickedFile;
 
 /// Lets the person choose files: the app shell's picker when it gives one
-/// (`NavigatorActionUi.files`, or another [ActionUi]), else the services'
+/// (an [ActionUi] with one), else the services'
 /// [FilePicker] (the platform's file dialog). Without either, none.
 Future<List<PickedFile>> pickFiles(ActionRun run, {required bool images, required bool multiple}) {
   final ui = run.host.ui;
   final picker = run.service<FilePicker>();
-  if (ui is NavigatorActionUi && ui.files == null && picker != null) {
+  if (ui case final OptionalFilePicker own when !own.picksFiles && picker != null) {
     return picker.pick(images: images, multiple: multiple);
   }
   return ui.pickFiles(images: images, multiple: multiple);

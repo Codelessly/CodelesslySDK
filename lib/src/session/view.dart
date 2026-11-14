@@ -21,6 +21,7 @@ import '../render/contracts.dart' show ImageBytesLoader;
 import '../render/node_tree.dart' show NodeBox, ResponsiveWidth;
 import '../runtime/contracts.dart' show CodelesslyServices;
 import '../render/node_view.dart';
+import '../app/navigator_ui.dart';
 import '../runtime/actions/actions.dart';
 import '../runtime/expressions/bindings.dart' show NodeBinder;
 import '../runtime/expressions/engine.dart' show Expressions;
