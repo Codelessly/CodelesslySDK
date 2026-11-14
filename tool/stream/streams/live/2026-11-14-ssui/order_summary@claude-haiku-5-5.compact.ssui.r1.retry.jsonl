@@ -1,0 +1,102 @@
+{"meta":{"ui":"order_summary","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["order_summary@claude-haiku-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":802,"usage":{"inputTokens":5413,"outputTokens":802,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":473,"firstToolDeltaMs":515,"totalMs":2704,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":473,"check":{"ops":7,"opsApplied":5,"opsRejected":2,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":["unknown_id /ops/1/id","unknown_id /ops/2/id"],"lints":[],"warnings":0,"nodes":24,"scripts":0,"scriptChars":0,"designSystemComponents":0,"replacedControls":6},"assets":null}}
+{"tMs":515,"delta":"{\"ops\": [{\"op"}
+{"tMs":537,"delta":"\": \"set\", \"id\": \""}
+{"tMs":557,"delta":"list\", \"par"}
+{"tMs":578,"delta":"ent\": \"card\", \"index\":"}
+{"tMs":604,"delta":" 1, \"node\": {\""}
+{"tMs":621,"delta":"type\": \"listView\", \"children"}
+{"tMs":650,"delta":"\": [\"row\"], \"lay"}
+{"tMs":664,"delta":"out\": {\"width\": {\""}
+{"tMs":686,"delta":"fill\": 358}, \""}
+{"tMs":707,"delta":"height\": {\"hug\": "}
+{"tMs":729,"delta":"300}}, \"props\": {"}
+{"tMs":750,"delta":"\"sc"}
+{"tMs":771,"delta":"rollable\": false, \"sp"}
+{"tMs":793,"delta":"acing\": 8}, \""}
+{"tMs":817,"delta":"bind\": {\"data\": \""}
+{"tMs":836,"delta":"${items}\"}}},"}
+{"tMs":857,"delta":" {\"op\": \"patch\","}
+{"tMs":879,"delta":" \"id\": \"qtyM"}
+{"tMs":900,"delta":"inus\", \"patch\": {"}
+{"tMs":922,"delta":"\"props\": {\"icon\":"}
+{"tMs":944,"delta":" \"remove\"}}},"}
+{"tMs":965,"delta":" {\"op\": \"patch\","}
+{"tMs":986,"delta":" \"id\": \"qtyP"}
+{"tMs":1008,"delta":"lus\", \"patch\": {"}
+{"tMs":1029,"delta":"\"props\": {\"icon\":"}
+{"tMs":1051,"delta":" \"add\"}}}, {"}
+{"tMs":1074,"delta":"\"op\": \"set\", \"id"}
+{"tMs":1094,"delta":"\": \"qtyMinus"}
+{"tMs":1115,"delta":"\", \"parent\": \"row\","}
+{"tMs":1136,"delta":" \"index\": 2"}
+{"tMs":1158,"delta":", \"node\": {\"type\":"}
+{"tMs":1179,"delta":" \"iconButton\", \"lay"}
+{"tMs":1201,"delta":"out\": {\"width\": 28"}
+{"tMs":1225,"delta":", \"height\": 28},"}
+{"tMs":1245,"delta":" \"props\": {\"icon\":"}
+{"tMs":1266,"delta":" \"remove\"}, \"act"}
+{"tMs":1287,"delta":"ions\": [{\"trigger"}
+{"tMs":1308,"delta":"\": {\"type\": \"click\""}
+{"tMs":1330,"delta":"}, \"actions\": [{"}
+{"tMs":1351,"delta":"\"type\": \"setVariable"}
+{"tMs":1374,"delta":"\", \"variable\": \"items\","}
+{"tMs":1394,"delta":" \"op\": \"set\", \"value"}
+{"tMs":1416,"delta":"\": \"${= items.map(("}
+{"tMs":1437,"delta":"x, i) => i == index"}
+{"tMs":1459,"delta":" ? {"}
+{"tMs":1480,"delta":"...x, qty: x."}
+{"tMs":1501,"delta":"qty - 1} : x"}
+{"tMs":1523,"delta":").filter(x => x."}
+{"tMs":1544,"delta":"qty > 0)}\""}
+{"tMs":1568,"delta":"}]}]}}, {"}
+{"tMs":1587,"delta":"\"op\": \"set\", \"id"}
+{"tMs":1609,"delta":"\": \"qtyPlus"}
+{"tMs":1630,"delta":"\", \"parent\": \"row\","}
+{"tMs":1652,"delta":" \"index\": 4, \"node"}
+{"tMs":1673,"delta":"\": {\"type\": \"icon"}
+{"tMs":1694,"delta":"Button\", \"layout\": {"}
+{"tMs":1717,"delta":"\"width\": 28, \"height"}
+{"tMs":1737,"delta":"\": 28}, \"props\":"}
+{"tMs":1759,"delta":" {\"icon\": \"add\""}
+{"tMs":1783,"delta":"}, \"actions\": [{"}
+{"tMs":1802,"delta":"\"trigger\": {\"type"}
+{"tMs":1823,"delta":"\": \"click\"}, \"act"}
+{"tMs":1845,"delta":"ions\": [{\"type\": \""}
+{"tMs":1866,"delta":"setVariable\", \"variable"}
+{"tMs":1888,"delta":"\": \"items\", \"op\": \""}
+{"tMs":1909,"delta":"set\", \"value\": \"${="}
+{"tMs":1931,"delta":" items.map((x, i)"}
+{"tMs":1952,"delta":" => i == index ? {..."}
+{"tMs":1975,"delta":"x, qty: x.q"}
+{"tMs":1995,"delta":"ty + 1} : x)"}
+{"tMs":2017,"delta":"}\"}]}]}}"}
+{"tMs":2038,"delta":", {\"op\": \"set\","}
+{"tMs":2072,"delta":" \"id\": \"promoField\","}
+{"tMs":2081,"delta":" \"parent\": \"promoR"}
+{"tMs":2103,"delta":"ow\", \"index\": 0,"}
+{"tMs":2137,"delta":" \"node\": {\"type\": \""}
+{"tMs":2145,"delta":"textField\", \"layout\": {"}
+{"tMs":2167,"delta":"\"width\": {\"fill\":"}
+{"tMs":2188,"delta":" 260}, \"height\": "}
+{"tMs":2210,"delta":"28}, \"props\": {\""}
+{"tMs":2231,"delta":"decoration\": {\"h"}
+{"tMs":2253,"delta":"intText\": \"Promo code"}
+{"tMs":2274,"delta":"\"}}, \"bind\":"}
+{"tMs":2296,"delta":" {\"props.initialValue"}
+{"tMs":2317,"delta":"\": \"${promo}\"}"}
+{"tMs":2339,"delta":", \"actions\": [{\""}
+{"tMs":2360,"delta":"trigger\": {\"type\":"}
+{"tMs":2381,"delta":" \"changed\"}, \"act"}
+{"tMs":2403,"delta":"ions\": [{\"type\": \""}
+{"tMs":2424,"delta":"setVariable\", \"variable"}
+{"tMs":2446,"delta":"\": \"promo\", \"value\":"}
+{"tMs":2467,"delta":" \"${result}\"}]}"}
+{"tMs":2489,"delta":"]}}, {\"op\":"}
+{"tMs":2511,"delta":" \"patch\", \"id\": \""}
+{"tMs":2532,"delta":"row\", \"patch\": {\""}
+{"tMs":2553,"delta":"props\": {\"crossAx"}
+{"tMs":2575,"delta":"isAlignment\": \"center"}
+{"tMs":2596,"delta":"\","}
+{"tMs":2619,"delta":" \"spacing\": 8}"}
+{"tMs":2639,"delta":"}}]"}
+{"tMs":2703,"delta":"}"}

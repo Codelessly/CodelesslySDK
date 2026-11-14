@@ -1,0 +1,60 @@
+{
+ "stream": "question_flow@claude-haiku-5-5.compact.ssui.r1.retry2.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 573,
+ "timeToFirstPaintMs": 1082,
+ "timeToFirstTextMs": 1082,
+ "timeToFirstSectionMs": 1082,
+ "timeToCompleteMs": 1430,
+ "outputTokens": 326,
+ "tokensEstimated": false,
+ "chars": 623,
+ "deltas": 40,
+ "opsApplied": 5,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 1,
+  "componentsRendered": 1,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 10,
+   "rejected": 6
+  },
+  {
+   "stream": "retry",
+   "applied": 5,
+   "rejected": 4
+  }
+ ],
+ "streamedOps": 5,
+ "rejections": [],
+ "nodes": 14,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 18,
+  "max": 18
+ },
+ "frames": 34,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 75,
+ "pumpMsMedian": 0.14,
+ "renderExceptions": [],
+ "warnings": 0
+}

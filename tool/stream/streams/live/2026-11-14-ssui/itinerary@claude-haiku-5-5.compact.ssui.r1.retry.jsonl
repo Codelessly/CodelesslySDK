@@ -1,0 +1,140 @@
+{"meta":{"ui":"itinerary","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["itinerary@claude-haiku-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":871,"usage":{"inputTokens":2049,"outputTokens":871,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":412,"firstToolDeltaMs":454,"totalMs":3304,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":412,"check":{"ops":7,"opsApplied":7,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":38,"scripts":0,"scriptChars":0,"designSystemComponents":6,"replacedControls":0},"assets":null}}
+{"tMs":454,"delta":"{\"ops\": [{\"op"}
+{"tMs":471,"delta":"\":\"set"}
+{"tMs":490,"delta":"\",\"id\":\"t1aD"}
+{"tMs":509,"delta":"etail\",\"par"}
+{"tMs":530,"delta":"ent\":\"t1a\",\"node"}
+{"tMs":552,"delta":"\":{\"type\":\"text\",\""}
+{"tMs":571,"delta":"layout\":{\"width\":{"}
+{"tMs":591,"delta":"\"fill\":320"}
+{"tMs":612,"delta":"},\"height\":{\"hug"}
+{"tMs":632,"delta":"\":40"}
+{"tMs":653,"delta":"}},\"props\":{\"text"}
+{"tMs":672,"delta":"\":\"Arrive"}
+{"tMs":692,"delta":" early"}
+{"tMs":710,"delta":" to"}
+{"tMs":729,"delta":" see"}
+{"tMs":750,"delta":" the b"}
+{"tMs":768,"delta":"am"}
+{"tMs":787,"delta":"boo before"}
+{"tMs":807,"delta":" cr"}
+{"tMs":829,"delta":"owds. All"}
+{"tMs":846,"delta":"ow "}
+{"tMs":865,"delta":"1"}
+{"tMs":885,"delta":"."}
+{"tMs":907,"delta":"5 hours.\",\"style\":"}
+{"tMs":928,"delta":"{\"fontSize\":12"}
+{"tMs":949,"delta":",\"color\":\"#FF"}
+{"tMs":970,"delta":"6B7280\"}}}"}
+{"tMs":991,"delta":"},{\"op\":\"set\",\""}
+{"tMs":1014,"delta":"id\":\"t1bDet"}
+{"tMs":1034,"delta":"ail\",\"parent\":\"t1"}
+{"tMs":1054,"delta":"b\",\"node\":{\"type\":"}
+{"tMs":1075,"delta":"\"text\",\"layout\":{\""}
+{"tMs":1096,"delta":"width\":{\"fill\":320"}
+{"tMs":1116,"delta":"},\"height\":{\"hug"}
+{"tMs":1137,"delta":"\":40}},\"props\":{"}
+{"tMs":1162,"delta":"\"text\":\"Wal"}
+{"tMs":1180,"delta":"k the Phil"}
+{"tMs":1198,"delta":"osop"}
+{"tMs":1218,"delta":"her's"}
+{"tMs":1238,"delta":" Path. All"}
+{"tMs":1258,"delta":"ow 1 "}
+{"tMs":1280,"delta":"hour.\",\"style\":{\""}
+{"tMs":1300,"delta":"fontSize\":12,\""}
+{"tMs":1320,"delta":"color\":\"#FF6B"}
+{"tMs":1341,"delta":"7280\"}}}},{"}
+{"tMs":1362,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":1383,"delta":"\"t1cDetail\",\""}
+{"tMs":1403,"delta":"parent\":\"t1c\",\""}
+{"tMs":1424,"delta":"node\":{\"type\":\"text"}
+{"tMs":1445,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":1465,"delta":"{\"fill\":320},\""}
+{"tMs":1486,"delta":"height\":{\"hug\":40"}
+{"tMs":1506,"delta":"}},\"props\":{\"text"}
+{"tMs":1527,"delta":"\":\"L"}
+{"tMs":1546,"delta":"unch in"}
+{"tMs":1587,"delta":" Nishi"}
+{"tMs":1607,"delta":"ki"}
+{"tMs":1630,"delta":" Market. Allow 1"}
+{"tMs":1648,"delta":" hour.\",\"style\":{"}
+{"tMs":1670,"delta":"\"fontSize\":12,"}
+{"tMs":1689,"delta":"\"color\":\"#FF6"}
+{"tMs":1710,"delta":"B7280\"}}}"}
+{"tMs":1730,"delta":"},{\"op\":\"set\",\""}
+{"tMs":1751,"delta":"id\":\"t1dDet"}
+{"tMs":1771,"delta":"ail\",\"parent\":\"t1"}
+{"tMs":1792,"delta":"d\",\"node\":{\"type\":"}
+{"tMs":1812,"delta":"\"text\",\"layout\":{\""}
+{"tMs":1833,"delta":"width\":{\"fill\":320"}
+{"tMs":1854,"delta":"},\"height\":{\"hug"}
+{"tMs":1874,"delta":"\":40}},\"props\":{"}
+{"tMs":1895,"delta":"\"text\":\"Evening st"}
+{"tMs":1915,"delta":"roll through"}
+{"tMs":1935,"delta":" Gion"}
+{"tMs":1955,"delta":". Allow 1."}
+{"tMs":1976,"delta":"5 hours.\",\"style\":"}
+{"tMs":1997,"delta":"{\"fontSize\":12"}
+{"tMs":2017,"delta":",\"color\":\"#FF"}
+{"tMs":2038,"delta":"6B7280\"}}}"}
+{"tMs":2059,"delta":"},{\"op\":\"set\",\""}
+{"tMs":2079,"delta":"id\":\"t2aDet"}
+{"tMs":2099,"delta":"ail\",\"parent\":\"t2"}
+{"tMs":2120,"delta":"a\",\"node\":{\"type\":"}
+{"tMs":2142,"delta":"\"text\",\"layout\":{\""}
+{"tMs":2170,"delta":"width\":{\"fill\":320"}
+{"tMs":2181,"delta":"},\"height\":{\"hug"}
+{"tMs":2206,"delta":"\":40}},\"props\":{"}
+{"tMs":2223,"delta":"\"text\":\"F"}
+{"tMs":2244,"delta":"ushimi"}
+{"tMs":2266,"delta":" Inari"}
+{"tMs":2283,"delta":" at d"}
+{"tMs":2303,"delta":"awn, about"}
+{"tMs":2323,"delta":" 2 hours."}
+{"tMs":2344,"delta":"\",\"style\":{\"fontS"}
+{"tMs":2365,"delta":"ize\":12,\"color\":\""}
+{"tMs":2385,"delta":"#FF6B7280\""}
+{"tMs":2406,"delta":"}}}},{\"op\":"}
+{"tMs":2426,"delta":"\"set\",\"id\":\"t2"}
+{"tMs":2447,"delta":"bDetail\",\"parent\":"}
+{"tMs":2467,"delta":"\"t2b\",\"node\":{"}
+{"tMs":2487,"delta":"\"type\":\"text\",\"layout"}
+{"tMs":2508,"delta":"\":{\"width\":{\"f"}
+{"tMs":2528,"delta":"ill\":320},\"height\":{"}
+{"tMs":2548,"delta":"\"hug\":40}},\""}
+{"tMs":2570,"delta":"props\":{\"text\":\""}
+{"tMs":2589,"delta":"Ki"}
+{"tMs":2610,"delta":"yom"}
+{"tMs":2631,"delta":"izu-"}
+{"tMs":2651,"delta":"dera temple and"}
+{"tMs":2674,"delta":" Hig"}
+{"tMs":2691,"delta":"ashi"}
+{"tMs":2712,"delta":"yama stre"}
+{"tMs":2732,"delta":"ets. Allow 2"}
+{"tMs":2753,"delta":" hours.\",\"style\":{"}
+{"tMs":2773,"delta":"\"fontSize\":12,"}
+{"tMs":2793,"delta":"\"color\":\"#FF6"}
+{"tMs":2813,"delta":"B7"}
+{"tMs":2835,"delta":"280\"}}}"}
+{"tMs":2854,"delta":"},{\"op\":\"set\",\""}
+{"tMs":2874,"delta":"id\":\"t2cD"}
+{"tMs":2895,"delta":"etail\",\"parent\":\"t"}
+{"tMs":2916,"delta":"2c\",\"node\":{\"type"}
+{"tMs":2938,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":2957,"delta":"\"width\":{\"f"}
+{"tMs":2977,"delta":"ill\":320},\"height\":{"}
+{"tMs":2997,"delta":"\"hug\":40}},\""}
+{"tMs":3018,"delta":"props\":{\"text\":\""}
+{"tMs":3038,"delta":"Kai"}
+{"tMs":3059,"delta":"seki d"}
+{"tMs":3079,"delta":"inner in"}
+{"tMs":3099,"delta":" Pontoc"}
+{"tMs":3119,"delta":"ho. Book"}
+{"tMs":3140,"delta":" "}
+{"tMs":3160,"delta":"ahead.\",\"style\":{\""}
+{"tMs":3181,"delta":"fontSize\":12,\""}
+{"tMs":3201,"delta":"color\":\"#FF6B"}
+{"tMs":3221,"delta":"7"}
+{"tMs":3243,"delta":"280\"}}}}"}
+{"tMs":3262,"delta":"]"}
+{"tMs":3301,"delta":"}"}

@@ -1,0 +1,162 @@
+{
+ "stream": "itinerary@claude-haiku-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 442,
+ "timeToFirstPaintMs": 1997,
+ "timeToFirstTextMs": 2283,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 16974,
+ "outputTokens": 5437,
+ "tokensEstimated": false,
+ "chars": 10760,
+ "deltas": 805,
+ "opsApplied": 33,
+ "opsRejected": 7,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 7,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/t1aDetail/visible",
+  "wrong_type /nodes/t1bDetail/visible",
+  "wrong_type /nodes/t1cDetail/visible",
+  "wrong_type /nodes/t1dDetail/visible",
+  "wrong_type /nodes/t2aDetail/visible",
+  "wrong_type /nodes/t2bDetail/visible",
+  "wrong_type /nodes/t2cDetail/visible",
+  "dangling_child /nodes/t1a/children/1",
+  "dangling_child /nodes/t1b/children/1",
+  "dangling_child /nodes/t1c/children/1",
+  "dangling_child /nodes/t1d/children/1",
+  "dangling_child /nodes/t2a/children/1",
+  "dangling_child /nodes/t2b/children/1",
+  "dangling_child /nodes/t2c/children/1"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 6,
+  "componentsRendered": 6,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 40,
+ "rejections": [
+  {
+   "op": 9,
+   "code": "wrong_type",
+   "path": "/nodes/t1aDetail/visible",
+   "message": "Expected a boolean (true or false), got the text \"${open1 == 0}\".",
+   "nodeId": "t1aDetail"
+  },
+  {
+   "op": 12,
+   "code": "wrong_type",
+   "path": "/nodes/t1bDetail/visible",
+   "message": "Expected a boolean (true or false), got the text \"${open1 == 1}\".",
+   "nodeId": "t1bDetail"
+  },
+  {
+   "op": 15,
+   "code": "wrong_type",
+   "path": "/nodes/t1cDetail/visible",
+   "message": "Expected a boolean (true or false), got the text \"${open1 == 2}\".",
+   "nodeId": "t1cDetail"
+  },
+  {
+   "op": 18,
+   "code": "wrong_type",
+   "path": "/nodes/t1dDetail/visible",
+   "message": "Expected a boolean (true or false), got the text \"${open1 == 3}\".",
+   "nodeId": "t1dDetail"
+  },
+  {
+   "op": 28,
+   "code": "wrong_type",
+   "path": "/nodes/t2aDetail/visible",
+   "message": "Expected a boolean (true or false), got the text \"${open2 == 0}\".",
+   "nodeId": "t2aDetail"
+  },
+  {
+   "op": 31,
+   "code": "wrong_type",
+   "path": "/nodes/t2bDetail/visible",
+   "message": "Expected a boolean (true or false), got the text \"${open2 == 1}\".",
+   "nodeId": "t2bDetail"
+  },
+  {
+   "op": 34,
+   "code": "wrong_type",
+   "path": "/nodes/t2cDetail/visible",
+   "message": "Expected a boolean (true or false), got the text \"${open2 == 2}\".",
+   "nodeId": "t2cDetail"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/t1a/children/1",
+   "message": "Child \"t1aDetail\" of \"t1a\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "t1a"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/t1b/children/1",
+   "message": "Child \"t1bDetail\" of \"t1b\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "t1b"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/t1c/children/1",
+   "message": "Child \"t1cDetail\" of \"t1c\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "t1c"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/t1d/children/1",
+   "message": "Child \"t1dDetail\" of \"t1d\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "t1d"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/t2a/children/1",
+   "message": "Child \"t2aDetail\" of \"t2a\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "t2a"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/t2b/children/1",
+   "message": "Child \"t2bDetail\" of \"t2b\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "t2b"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/t2c/children/1",
+   "message": "Child \"t2cDetail\" of \"t2c\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "t2c"
+  }
+ ],
+ "nodes": 31,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 3,
+  "p90": 6,
+  "max": 7
+ },
+ "frames": 180,
+ "frameMs": 99,
+ "pumpsOverBudget16ms": 14,
+ "pumps": 986,
+ "pumpMsMedian": 0.099,
+ "renderExceptions": [],
+ "warnings": 0
+}

@@ -1,0 +1,68 @@
+{
+ "ui": "plan_progress",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agent",
+ "scripts": false,
+ "designSystem": {
+  "id": "ssui",
+  "name": "Soft SaaS UI",
+  "version": "1.0.0"
+ },
+ "systemPromptChars": 60071,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 26033,
+ "generate": {
+  "inputTokens": 1177,
+  "outputTokens": 3021,
+  "cacheReadInputTokens": 51908,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1043,
+  "firstToolDeltaMs": 3837,
+  "totalMs": 17063,
+  "stopReason": "StopReason.toolUse",
+  "lookups": [
+   {
+    "tool": "ui_docs",
+    "input": {
+     "topic": "timer"
+    },
+    "ms": 1592,
+    "outputTokens": 72,
+    "resultChars": 1558
+   }
+  ],
+  "ops": 23,
+  "opsApplied": 23,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 21,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 5,
+  "replacedControls": 0
+ },
+ "retries": [],
+ "final": {
+  "ops": 23,
+  "opsApplied": 23,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 21,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 5,
+  "replacedControls": 0
+ }
+}

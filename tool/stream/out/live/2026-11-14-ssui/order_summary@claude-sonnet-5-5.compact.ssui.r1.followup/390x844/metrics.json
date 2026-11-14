@@ -1,0 +1,60 @@
+{
+ "stream": "order_summary@claude-sonnet-5-5.compact.ssui.r1.followup.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1359,
+ "timeToFirstPaintMs": 3960,
+ "timeToFirstTextMs": 3960,
+ "timeToFirstSectionMs": 3960,
+ "timeToCompleteMs": 6433,
+ "outputTokens": 915,
+ "tokensEstimated": false,
+ "chars": 1463,
+ "deltas": 96,
+ "opsApplied": 7,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 8,
+  "componentsRendered": 8,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 34,
+   "rejected": 2
+  },
+  {
+   "stream": "retry",
+   "applied": 2,
+   "rejected": 0
+  }
+ ],
+ "streamedOps": 7,
+ "rejections": [],
+ "nodes": 40,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 4,
+  "p90": 14,
+  "max": 14
+ },
+ "frames": 110,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 207,
+ "pumpMsMedian": 0.116,
+ "renderExceptions": [],
+ "warnings": 0
+}

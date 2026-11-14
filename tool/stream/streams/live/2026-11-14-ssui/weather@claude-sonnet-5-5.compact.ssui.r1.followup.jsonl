@@ -1,0 +1,12 @@
+{"meta":{"ui":"weather","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"followup","followup":"Make it dark.","base":["weather@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":173,"usage":{"inputTokens":3918,"outputTokens":173,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":1578,"firstToolDeltaMs":1611,"totalMs":2009,"stopReason":"StopReason.toolUse"},"text":"The design system's colours each have a dark value, so I'll switch the theme mode to dark with a single action. To make it apply right away, I'll run it on the canvas load.","ttftMs":1578,"check":{"ops":1,"opsApplied":0,"opsRejected":1,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":["capability_not_allowed /nodes/wx/actions/0/actions/0"],"lints":[],"warnings":0,"nodes":27,"scripts":0,"scriptChars":0,"designSystemComponents":1,"replacedControls":0},"assets":null}}
+{"tMs":1611,"delta":"{\"ops\": ["}
+{"tMs":1644,"delta":"{\"op\": \"patch\","}
+{"tMs":1679,"delta":" \"id\": \"wx\", \""}
+{"tMs":1712,"delta":"patch\": {\"actions\":"}
+{"tMs":1746,"delta":" [{\"trigger\": {"}
+{"tMs":1838,"delta":"\"type\": \"load\"},"}
+{"tMs":1838,"delta":" \"actions\": [{\"type"}
+{"tMs":1846,"delta":"\": \"setThemeMode"}
+{"tMs":1880,"delta":"\", \"mode\": \"dark"}
+{"tMs":1913,"delta":"\"}]}]}}]"}
+{"tMs":2008,"delta":"}"}

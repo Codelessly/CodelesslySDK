@@ -1,0 +1,66 @@
+{
+ "stream": "code_diff@claude-haiku-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 616,
+ "timeToFirstPaintMs": 1935,
+ "timeToFirstTextMs": 2192,
+ "timeToFirstSectionMs": 4595,
+ "timeToCompleteMs": 9723,
+ "outputTokens": 3170,
+ "tokensEstimated": false,
+ "chars": 6319,
+ "deltas": 423,
+ "opsApplied": 27,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/applyBtn/props/enabled",
+  "dangling_child /nodes/card/children/5"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 6,
+  "componentsRendered": 6,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 28,
+ "rejections": [
+  {
+   "op": 27,
+   "code": "wrong_type",
+   "path": "/nodes/applyBtn/props/enabled",
+   "message": "Expected a boolean (true or false), got the text \"${= allDecided}\".",
+   "nodeId": "applyBtn"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/card/children/5",
+   "message": "Child \"applyBtn\" of \"card\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "card"
+  }
+ ],
+ "nodes": 25,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 8,
+  "max": 8
+ },
+ "frames": 160,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 10,
+ "pumps": 584,
+ "pumpMsMedian": 0.115,
+ "renderExceptions": [],
+ "warnings": 1
+}

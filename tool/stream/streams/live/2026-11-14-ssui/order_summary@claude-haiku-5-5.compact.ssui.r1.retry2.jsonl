@@ -1,0 +1,48 @@
+{"meta":{"ui":"order_summary","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":2,"followup":"Fix the problems the tool result lists.","base":["order_summary@claude-haiku-5-5.compact.ssui.r1.jsonl","order_summary@claude-haiku-5-5.compact.ssui.r1.retry.jsonl"],"source":"live","outputTokens":392,"usage":{"inputTokens":6648,"outputTokens":392,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":424,"firstToolDeltaMs":467,"totalMs":1474,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":424,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":24,"scripts":0,"scriptChars":0,"designSystemComponents":0,"replacedControls":6},"assets":null}}
+{"tMs":467,"delta":"{\"ops\": [{\"op"}
+{"tMs":484,"delta":"\": \"set"}
+{"tMs":506,"delta":"\", \"id\": \"qty"}
+{"tMs":528,"delta":"Minus\", \"parent\":"}
+{"tMs":550,"delta":" \"row\", \"index\": 2"}
+{"tMs":573,"delta":", \"node\": {\"type\":"}
+{"tMs":593,"delta":" \"iconButton\", \"lay"}
+{"tMs":615,"delta":"out\": {\"width\": 28"}
+{"tMs":637,"delta":", \"height\": 28},"}
+{"tMs":659,"delta":" \"props\": {\"icon\":"}
+{"tMs":686,"delta":" \"remove\"}, \"act"}
+{"tMs":701,"delta":"ions\": [{\"trigger"}
+{"tMs":723,"delta":"\": {\"type\": \"click\""}
+{"tMs":745,"delta":"}, \"actions\": [{"}
+{"tMs":766,"delta":"\"type\": \"setVariable"}
+{"tMs":790,"delta":"\", \"variable\": \"items\","}
+{"tMs":810,"delta":" \"op\": \"set\", \"value"}
+{"tMs":830,"delta":"\": \"${= items.map(("}
+{"tMs":852,"delta":"x, i) => i == index"}
+{"tMs":873,"delta":" ? {...x, qty"}
+{"tMs":895,"delta":": x.qty - 1"}
+{"tMs":917,"delta":"} : x).filter(x"}
+{"tMs":938,"delta":" => x.qty > 0"}
+{"tMs":959,"delta":")}\"}]}]}"}
+{"tMs":981,"delta":"}, {\"op\": \"set"}
+{"tMs":1003,"delta":"\", \"id\": \"qty"}
+{"tMs":1024,"delta":"Plus\", \"parent\":"}
+{"tMs":1045,"delta":" \"row\", \"index\": 4"}
+{"tMs":1067,"delta":", \"node\": {\"type\":"}
+{"tMs":1096,"delta":" \"iconButton\", \"lay"}
+{"tMs":1110,"delta":"out\": {\"width\": 28"}
+{"tMs":1131,"delta":", \"height\": 28},"}
+{"tMs":1153,"delta":" \"props\": {\"icon\":"}
+{"tMs":1174,"delta":" \"add\"}, \"actions"}
+{"tMs":1196,"delta":"\": [{\"trigger\":"}
+{"tMs":1217,"delta":" {\"type\": \"click\"}"}
+{"tMs":1239,"delta":", \"actions\": [{\""}
+{"tMs":1260,"delta":"type\": \"setVariable\","}
+{"tMs":1282,"delta":" \"variable\": \"items\", \""}
+{"tMs":1303,"delta":"op\": \"set\", \"value\":"}
+{"tMs":1324,"delta":" \"${= items.map((x"}
+{"tMs":1347,"delta":", i) => i == index "}
+{"tMs":1367,"delta":"? {...x, qty:"}
+{"tMs":1390,"delta":" x.qty + 1}"}
+{"tMs":1410,"delta":" : x)}\"}]}"}
+{"tMs":1432,"delta":"]}}]"}
+{"tMs":1473,"delta":"}"}

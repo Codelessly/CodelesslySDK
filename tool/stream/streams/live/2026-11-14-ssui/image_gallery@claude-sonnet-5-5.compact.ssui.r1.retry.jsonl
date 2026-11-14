@@ -1,0 +1,63 @@
+{"meta":{"ui":"image_gallery","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["image_gallery@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":554,"usage":{"inputTokens":4536,"outputTokens":554,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":1615,"firstToolDeltaMs":1682,"totalMs":3744,"stopReason":"StopReason.toolUse"},"text":"I'll resend the grid without the invalid `scrollable` prop, and wrap the caption text in a box so its scrim fill is actually drawn.","ttftMs":1615,"check":{"ops":6,"opsApplied":2,"opsRejected":4,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":["multiple_parents /nodes/capBox","unknown_id /ops/2/id","unknown_id /ops/3/parent","structural_key_in_patch /nodes/tile/children"],"lints":[],"warnings":2,"nodes":18,"scripts":0,"scriptChars":0,"designSystemComponents":4,"replacedControls":0},"assets":null}}
+{"tMs":1682,"delta":"{\"ops\": [{\"op"}
+{"tMs":1716,"delta":"\": \"set\", \"id\": \""}
+{"tMs":1749,"delta":"grid\", \"node\": {\""}
+{"tMs":1783,"delta":"type\": \"gridView\", \""}
+{"tMs":1816,"delta":"children\": [\"tile\"],"}
+{"tMs":2006,"delta":" \"layout\": {\"width\":"}
+{"tMs":2006,"delta":" {\"fill\": 366}"}
+{"tMs":2006,"delta":", \"height\": {\"hug"}
+{"tMs":2006,"delta":"\": 380}}, \"props"}
+{"tMs":2006,"delta":"\": {\"crossAxis"}
+{"tMs":2431,"delta":"Count\": 3, \"m"}
+{"tMs":2431,"delta":"ainAxisSpacing"}
+{"tMs":2431,"delta":"\": 8, \"crossA"}
+{"tMs":2431,"delta":"xisSpacing\": "}
+{"tMs":2431,"delta":"8, \"physics\": \"never"}
+{"tMs":2431,"delta":"\","}
+{"tMs":2431,"delta":" \"shrinkWrap"}
+{"tMs":2431,"delta":"Rows\": true}, \"b"}
+{"tMs":2431,"delta":"ind\": {\"data\": \"${"}
+{"tMs":2431,"delta":"photos}\"}}},"}
+{"tMs":2431,"delta":" {\"op\": \"set"}
+{"tMs":2431,"delta":"\", \"id\": \"cap"}
+{"tMs":2925,"delta":"Box\", \"node\": {\""}
+{"tMs":2925,"delta":"type\": \"column\", \"children\":"}
+{"tMs":2925,"delta":" [\"tileCap\"],"}
+{"tMs":2925,"delta":" \"layout\": {\"width\":"}
+{"tMs":2925,"delta":" {\"fill\": 116}"}
+{"tMs":2925,"delta":", \"height\": {\"hug"}
+{"tMs":2925,"delta":"\": 28}, \"x\":"}
+{"tMs":2925,"delta":" {\"start\": 0, \""}
+{"tMs":2925,"delta":"end\": 0}, \"y"}
+{"tMs":2925,"delta":"\": {\"end\": 0}"}
+{"tMs":2925,"delta":", \"padding\": 6}"}
+{"tMs":2925,"delta":", \"props\": {\"cross"}
+{"tMs":3337,"delta":"AxisAlignment\":"}
+{"tMs":3337,"delta":" \"start\"}, \"deco"}
+{"tMs":3337,"delta":"ration\": {\"fills\": ["}
+{"tMs":3337,"delta":"{\"color\": \"#59000"}
+{"tMs":3337,"delta":"000\"}]}}},"}
+{"tMs":3337,"delta":" {\"op\": \"move"}
+{"tMs":3337,"delta":"\", \"id\": \"cap"}
+{"tMs":3337,"delta":"Box\", \"parent\": \""}
+{"tMs":3337,"delta":"tile\""}
+{"tMs":3337,"delta":"}, {\"op\": \"move"}
+{"tMs":3337,"delta":"\", \"id\": \"tileC"}
+{"tMs":3337,"delta":"ap\", \"parent\": \"cap"}
+{"tMs":3710,"delta":"Box\"}, {\"op"}
+{"tMs":3710,"delta":"\": \"patch\", \"id\":"}
+{"tMs":3710,"delta":" \"tileCap\", \"pat"}
+{"tMs":3710,"delta":"ch\": {\"layout\": {"}
+{"tMs":3710,"delta":"\"width\": {\"fill\":"}
+{"tMs":3710,"delta":" 104}, \"height\": {"}
+{"tMs":3710,"delta":"\"hug\": 16"}
+{"tMs":3710,"delta":"}, \"x\": null"}
+{"tMs":3710,"delta":", \"y\": null, \"pad"}
+{"tMs":3710,"delta":"ding\": null}, \"deco"}
+{"tMs":3710,"delta":"ration\": null}}, {\""}
+{"tMs":3710,"delta":"op\": \"patch\", \"id"}
+{"tMs":3710,"delta":"\": \"tile\", \"patch"}
+{"tMs":3710,"delta":"\": {\"children\": [\"cap"}
+{"tMs":3710,"delta":"Box\"]}}]"}
+{"tMs":3743,"delta":"}"}

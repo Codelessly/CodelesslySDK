@@ -1,0 +1,63 @@
+{
+ "stream": "weather@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1041,
+ "timeToFirstPaintMs": 2625,
+ "timeToFirstTextMs": 3505,
+ "timeToFirstSectionMs": 3897,
+ "timeToCompleteMs": 16077,
+ "outputTokens": 3048,
+ "tokensEstimated": false,
+ "chars": 6069,
+ "deltas": 423,
+ "opsApplied": 29,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 1,
+  "componentsRendered": 1,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "alert|notify|rain"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 29,
+ "rejections": [],
+ "nodes": 27,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 2,
+  "p90": 9,
+  "max": 21
+ },
+ "frames": 180,
+ "frameMs": 94,
+ "pumpsOverBudget16ms": 11,
+ "pumps": 604,
+ "pumpMsMedian": 0.1,
+ "renderExceptions": [],
+ "warnings": 1
+}

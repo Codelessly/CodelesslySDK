@@ -1,0 +1,18 @@
+{"meta":{"ui":"flights","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["flights@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":191,"usage":{"inputTokens":3468,"outputTokens":191,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":1302,"firstToolDeltaMs":1371,"totalMs":1967,"stopReason":"StopReason.toolUse"},"text":"I'll resend the rejected `times` node without the stray `hug` key.","ttftMs":1302,"check":{"ops":1,"opsApplied":1,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":20,"scripts":0,"scriptChars":0,"designSystemComponents":2,"replacedControls":0},"assets":null}}
+{"tMs":1371,"delta":"{\"ops\": [{\"op\":"}
+{"tMs":1398,"delta":" \"set\", \"id\": \"times"}
+{"tMs":1796,"delta":"\", \"par"}
+{"tMs":1796,"delta":"ent\": \"r1\", \"index"}
+{"tMs":1796,"delta":"\": 0, \"node\": {"}
+{"tMs":1796,"delta":"\"type\": \"text\", \"lay"}
+{"tMs":1796,"delta":"out\": {\"width\": {\""}
+{"tMs":1796,"delta":"hug\": 120}, \""}
+{"tMs":1796,"delta":"height\": {\"hug\": "}
+{"tMs":1796,"delta":"20}}, \"props\": {"}
+{"tMs":1796,"delta":"\"text\": \"${item.d"}
+{"tMs":1796,"delta":"ep} - ${item.ar"}
+{"tMs":1796,"delta":"r}\", \"style\": {\""}
+{"tMs":1798,"delta":"from\": \"sectionTit"}
+{"tMs":1831,"delta":"le\", \"color\": \"prima"}
+{"tMs":1866,"delta":"ryText\"}}}}]"}
+{"tMs":1966,"delta":"}"}

@@ -1,0 +1,77 @@
+{
+ "stream": "flights@claude-haiku-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 560,
+ "timeToFirstPaintMs": 2050,
+ "timeToFirstTextMs": 2335,
+ "timeToFirstSectionMs": 5051,
+ "timeToCompleteMs": 6620,
+ "outputTokens": 2083,
+ "tokensEstimated": false,
+ "chars": 4167,
+ "deltas": 296,
+ "opsApplied": 18,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [
+  "no_size itemTag"
+ ],
+ "finalDiagnostics": [
+  "no_size /nodes/itemTag/layout"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 1,
+  "componentsRendered": 1,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "worksWhenUsed": {
+  "ok": true,
+  "steps": [
+   {
+    "step": {
+     "tap": {
+      "text": "13:45|easyJet|option 2"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   },
+   {
+    "step": {
+     "tap": {
+      "text": "confirm"
+     }
+    },
+    "found": true,
+    "changed": true,
+    "events": []
+   }
+  ]
+ },
+ "streamedOps": 18,
+ "rejections": [],
+ "nodes": 16,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 12,
+  "max": 19
+ },
+ "frames": 113,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 8,
+ "pumps": 410,
+ "pumpMsMedian": 0.122,
+ "renderExceptions": [],
+ "warnings": 0
+}

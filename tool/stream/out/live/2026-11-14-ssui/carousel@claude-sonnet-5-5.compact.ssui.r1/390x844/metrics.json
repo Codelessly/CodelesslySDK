@@ -1,0 +1,72 @@
+{
+ "stream": "carousel@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1248,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 19582,
+ "outputTokens": 3571,
+ "tokensEstimated": false,
+ "chars": 7301,
+ "deltas": 500,
+ "opsApplied": 26,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/card/decoration/radius",
+  "dangling_child /nodes/shoes/slots/body"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 5,
+  "componentsRendered": 0,
+  "componentsNotRendered": [
+   "prev (IconButton)",
+   "next (IconButton)",
+   "back (Button)",
+   "sizeChip (Chip)",
+   "addBtn (Button)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 27,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "wrong_type",
+   "path": "/nodes/card/decoration/radius",
+   "message": "Not a BorderRadius: got the text \"${theme.radii.panel}\". A BorderRadius is a number (every corner), [x, y] (every corner elliptical) or [topLeft, topRight, bottomRight, bottomLeft] (each a number or [x, y]).",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/shoes/slots/body",
+   "message": "Slot \"body\" of \"shoes\" names \"card\", which never arrived.",
+   "nodeId": "shoes"
+  }
+ ],
+ "nodes": 24,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 1
+ },
+ "frames": 179,
+ "frameMs": 114,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 680,
+ "pumpMsMedian": 0.092,
+ "renderExceptions": [],
+ "warnings": 5
+}

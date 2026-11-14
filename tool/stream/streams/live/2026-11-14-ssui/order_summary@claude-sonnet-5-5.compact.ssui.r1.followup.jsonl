@@ -1,0 +1,97 @@
+{"meta":{"ui":"order_summary","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"followup","followup":"Add a tip row with 0, 10 and 15 percent.","base":["order_summary@claude-sonnet-5-5.compact.ssui.r1.jsonl","order_summary@claude-sonnet-5-5.compact.ssui.r1.retry.jsonl"],"source":"live","outputTokens":915,"usage":{"inputTokens":7565,"outputTokens":915,"cacheReadInputTokens":51908,"cacheCreationInputTokens":0,"ttftMs":1359,"firstToolDeltaMs":3575,"totalMs":6435,"stopReason":"StopReason.toolUse","lookups":[{"tool":"ui_read","input":{"ids":["card","sumDel","sumTotal","delL","delV","totV"]},"ms":1625,"outputTokens":98,"resultChars":1254}]},"text":"I need to see the current summary structure and total formula to slot the tip in.I'll add a tip variable, a computed tip amount, include it in the total, and add a tip selector row plus a tip line in the summary.","ttftMs":1359,"check":{"ops":7,"opsApplied":7,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":40,"scripts":0,"scriptChars":0,"designSystemComponents":8,"replacedControls":0},"assets":null}}
+{"tMs":3575,"delta":"{\"ops\": [{\"op"}
+{"tMs":3575,"delta":"\":\"vars\",\"sc"}
+{"tMs":3575,"delta":"ope\":\"order\",\"set\":{"}
+{"tMs":3575,"delta":"\"tipPct\":{\""}
+{"tMs":3575,"delta":"type\":\"text\",\"value\":\""}
+{"tMs":3575,"delta":"0%\"},\"tip\":"}
+{"tMs":3575,"delta":"{\"type\":\"decimal"}
+{"tMs":3575,"delta":"\",\"formula\":\"(subt"}
+{"tMs":3575,"delta":"otal - discount) * ("}
+{"tMs":3960,"delta":"tipPct == '10"}
+{"tMs":3960,"delta":"%' ? 0.1"}
+{"tMs":3960,"delta":" : ("}
+{"tMs":3960,"delta":"tipPct == '15%"}
+{"tMs":3960,"delta":"' ? 0.15 "}
+{"tMs":3960,"delta":": 0))\"},\"total"}
+{"tMs":3960,"delta":"\":{\"type\":\"decim"}
+{"tMs":3960,"delta":"al\",\"formula\":\"subt"}
+{"tMs":3960,"delta":"otal - discount + deliv"}
+{"tMs":3960,"delta":"ery + tip\"}}},"}
+{"tMs":3960,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":3960,"delta":"\":\"tipRow\",\"par"}
+{"tMs":4352,"delta":"ent\":\"card\",\"index\":8"}
+{"tMs":4352,"delta":",\"node\":{\"type\":"}
+{"tMs":4352,"delta":"\"row\",\"children\":[\"tip"}
+{"tMs":4352,"delta":"L\",\"tipSeg\""}
+{"tMs":4352,"delta":"],\"layout\":{\"width"}
+{"tMs":4352,"delta":"\":{\"fill\":366},"}
+{"tMs":4352,"delta":"\"height\":{\"hug\":"}
+{"tMs":4352,"delta":"28}},\"props\":{\""}
+{"tMs":4352,"delta":"mainAxisAlign"}
+{"tMs":4352,"delta":"ment\":\"spaceBet"}
+{"tMs":4352,"delta":"ween\",\"crossAxisA"}
+{"tMs":4352,"delta":"lignment\":\"center\"}"}
+{"tMs":4757,"delta":"}},{\"op\":\"set"}
+{"tMs":4758,"delta":"\",\"id\":\"tipL\",\""}
+{"tMs":4758,"delta":"node\":{\"type\":\"text"}
+{"tMs":4758,"delta":"\",\"layout\":{\"width\":"}
+{"tMs":4758,"delta":"{\"hug\":30"}
+{"tMs":4758,"delta":"},\"height\":{\"hug"}
+{"tMs":4758,"delta":"\":16}},\"props\":{"}
+{"tMs":4758,"delta":"\"text\":\"Tip\",\""}
+{"tMs":4758,"delta":"style\":{\"from\":\"b"}
+{"tMs":4758,"delta":"odySecondary\",\"color\":"}
+{"tMs":4758,"delta":"\"secondaryText\"}"}
+{"tMs":4758,"delta":"}}},{\"op\":\""}
+{"tMs":5159,"delta":"set\",\"id\":\"tipS"}
+{"tMs":5159,"delta":"eg\",\"node\":{\"type"}
+{"tMs":5159,"delta":"\":\"SegmentedContro"}
+{"tMs":5159,"delta":"l\",\"lay"}
+{"tMs":5159,"delta":"out\":{\"width\":{\""}
+{"tMs":5159,"delta":"hug\":150},\"height\":"}
+{"tMs":5159,"delta":"{\"hug\":28}},"}
+{"tMs":5159,"delta":"\"props\":{\"options\":[\""}
+{"tMs":5159,"delta":"0%\",\"10%\",\"15%"}
+{"tMs":5159,"delta":"\"],\"value\":\"tip"}
+{"tMs":5159,"delta":"Pct\"}}},{\""}
+{"tMs":5159,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":5650,"delta":"sumTip\",\"parent\":"}
+{"tMs":5650,"delta":"\"card\",\"index\":9,\""}
+{"tMs":5650,"delta":"node\":{\"type\":\"row"}
+{"tMs":5650,"delta":"\",\"children\":[\"tipL"}
+{"tMs":5650,"delta":"b"}
+{"tMs":5650,"delta":"l\",\"tipV\"],\""}
+{"tMs":5650,"delta":"layout\":{\"width\":{"}
+{"tMs":5650,"delta":"\"fill\":366},\"height"}
+{"tMs":5650,"delta":"\":{\"hug\":16}"}
+{"tMs":5650,"delta":"},\"props\":{\"main"}
+{"tMs":5650,"delta":"AxisAlignment\":"}
+{"tMs":5650,"delta":"\"spaceBetween\""}
+{"tMs":6062,"delta":"}}},{\"op\":\""}
+{"tMs":6062,"delta":"set\",\"id\":\"tipL"}
+{"tMs":6062,"delta":"bl\",\"node\":{\"type"}
+{"tMs":6062,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":6062,"delta":"\"width\":{\"hug\":"}
+{"tMs":6062,"delta":"60},\"height\":{\"h"}
+{"tMs":6062,"delta":"ug\":16}},\"props\":"}
+{"tMs":6062,"delta":"{\"text\":\"Tip"}
+{"tMs":6062,"delta":" amount\",\"style\":{\"from"}
+{"tMs":6062,"delta":"\":\"bodySecondary"}
+{"tMs":6062,"delta":"\",\"color\":\"secondary"}
+{"tMs":6062,"delta":"Text\"}}}},{\""}
+{"tMs":6380,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":6380,"delta":"tipV\",\"node\":{\""}
+{"tMs":6380,"delta":"type\":\"text\",\"layout\":"}
+{"tMs":6380,"delta":"{\"width\":{\"hug"}
+{"tMs":6380,"delta":"\":60},\"height\":{\""}
+{"tMs":6380,"delta":"hug\":16}},\"props"}
+{"tMs":6380,"delta":"\":{\"textAlign\":"}
+{"tMs":6380,"delta":"\"right\",\"style\":{\"from"}
+{"tMs":6380,"delta":"\":\"body\",\"color\":\"prim"}
+{"tMs":6380,"delta":"aryText\"}},\"b"}
+{"tMs":6380,"delta":"ind\":{\"props.text\":"}
+{"tMs":6380,"delta":"\"${= money(tip,"}
+{"tMs":6380,"delta":" '$')}\"}}}"}
+{"tMs":6380,"delta":"]"}
+{"tMs":6433,"delta":"}"}

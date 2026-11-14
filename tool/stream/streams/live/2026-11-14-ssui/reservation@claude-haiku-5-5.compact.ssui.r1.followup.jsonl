@@ -1,0 +1,53 @@
+{"meta":{"ui":"reservation","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"followup","followup":"Add a field for a note to the restaurant.","base":["reservation@claude-haiku-5-5.compact.ssui.r1.jsonl","reservation@claude-haiku-5-5.compact.ssui.r1.retry.jsonl"],"source":"live","outputTokens":380,"usage":{"inputTokens":6685,"outputTokens":380,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":566,"firstToolDeltaMs":606,"totalMs":1874,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":566,"check":{"ops":5,"opsApplied":5,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":32,"scripts":0,"scriptChars":0,"designSystemComponents":2,"replacedControls":0},"assets":null}}
+{"tMs":606,"delta":"{\"ops\": [{\"op"}
+{"tMs":622,"delta":"\": \"v"}
+{"tMs":644,"delta":"ars\", \"scope\": \"boo"}
+{"tMs":665,"delta":"king\", \"set\": {\"note"}
+{"tMs":685,"delta":"\": {\"type\": \"text\","}
+{"tMs":707,"delta":" \"value\": \"\"}}}"}
+{"tMs":726,"delta":", {\"op\": \"set\","}
+{"tMs":746,"delta":" \"id\": \"no"}
+{"tMs":766,"delta":"teLabel\", \"par"}
+{"tMs":787,"delta":"ent\": \"card\", \"index"}
+{"tMs":806,"delta":"\": 7"}
+{"tMs":827,"delta":", \"node\": {\"type\":"}
+{"tMs":847,"delta":" \"text\", \"layout\": {"}
+{"tMs":868,"delta":"\"width\": {\"fill\":"}
+{"tMs":889,"delta":" 358}, \"height\": {"}
+{"tMs":909,"delta":"\"hug\": 18}}"}
+{"tMs":930,"delta":", \"props\": {\"text\":"}
+{"tMs":949,"delta":" \"Note for"}
+{"tMs":970,"delta":" the restaurant\", \"style"}
+{"tMs":991,"delta":"\": {\"fontSize\":"}
+{"tMs":1012,"delta":" 12, \"fontWe"}
+{"tMs":1032,"delta":"ight\": 600, \"color\":"}
+{"tMs":1053,"delta":" \"#FF374151\"}"}
+{"tMs":1073,"delta":"}}}, {\"op\":"}
+{"tMs":1094,"delta":" \"set\", \"id\": \"no"}
+{"tMs":1411,"delta":"teField\", \"parent\": \""}
+{"tMs":1465,"delta":"card\", \"index\": 8,"}
+{"tMs":1596,"delta":" \"node\": {\"type\": \""}
+{"tMs":1611,"delta":"TextArea\", \"props"}
+{"tMs":1640,"delta":"\": {\"plac"}
+{"tMs":1658,"delta":"eholder\": \"All"}
+{"tMs":1664,"delta":"ergies, occ"}
+{"tMs":1680,"delta":"asion"}
+{"tMs":1699,"delta":", se"}
+{"tMs":1699,"delta":"ating...\", \"value\": \"note"}
+{"tMs":1707,"delta":"\"}, \"layout\": {"}
+{"tMs":1720,"delta":"\"width\": {\"fill\":"}
+{"tMs":1726,"delta":" 358}, \"height\": "}
+{"tMs":1736,"delta":"64"}
+{"tMs":1749,"delta":"}}}, {\"op\":"}
+{"tMs":1755,"delta":" \"patch\", \"id\": \""}
+{"tMs":1764,"delta":"card\", \"patch\": {\""}
+{"tMs":1777,"delta":"layout\": {\"height\": {"}
+{"tMs":1783,"delta":"\"hug\": 600"}
+{"tMs":1794,"delta":"}}}},"}
+{"tMs":1804,"delta":" {\"op\": \"patch\","}
+{"tMs":1817,"delta":" \"id\": \"booking\", \""}
+{"tMs":1825,"delta":"patch\": {\"layout\":"}
+{"tMs":1834,"delta":" {\"height\": {\"hug"}
+{"tMs":1839,"delta":"\": 600}}}}"}
+{"tMs":1849,"delta":"]"}
+{"tMs":1873,"delta":"}"}

@@ -1,0 +1,390 @@
+{"meta":{"ui":"dashboard","kind":"card","model":"claude-haiku-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"generate","prompt":"Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.","source":"live","outputTokens":2436,"usage":{"inputTokens":342,"outputTokens":2436,"cacheReadInputTokens":0,"cacheCreationInputTokens":25954,"ttftMs":906,"firstToolDeltaMs":936,"totalMs":8910,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":906,"check":{"ops":21,"opsApplied":19,"opsRejected":2,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":2,"errors":["wrong_type /nodes/revChart/props/data","unknown_prop /nodes/chanChart/props/data","dangling_child /nodes/revCard/children/0","dangling_child /nodes/chanCard/children/0"],"lints":[],"warnings":0,"nodes":17,"scripts":0,"scriptChars":0,"designSystemComponents":8,"replacedControls":0},"assets":null}}
+{"tMs":936,"delta":"{\"ops\": [{\"op"}
+{"tMs":955,"delta":"\":\"roots\",\"roots\":"}
+{"tMs":972,"delta":"[\"dash"}
+{"tMs":996,"delta":"\"]},{\"op\":\""}
+{"tMs":1014,"delta":"set\",\"id\":\"dash\",\""}
+{"tMs":1037,"delta":"node\":{\"type\":\"can"}
+{"tMs":1056,"delta":"vas\",\"slots\":{\""}
+{"tMs":1075,"delta":"body\":\"page"}
+{"tMs":1096,"delta":"\"},\"layout\":{\""}
+{"tMs":1120,"delta":"width\":390,\"height\":{"}
+{"tMs":1138,"delta":"\"hug\":1"}
+{"tMs":1155,"delta":"400"}
+{"tMs":1174,"delta":"}}"}
+{"tMs":1194,"delta":"}},"}
+{"tMs":1214,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":1235,"delta":"\":\"page\",\"node\":{\""}
+{"tMs":1257,"delta":"type\":\"column\",\"children\":[\""}
+{"tMs":1280,"delta":"head"}
+{"tMs":1294,"delta":"\",\"range"}
+{"tMs":1315,"delta":"\",\"t"}
+{"tMs":1334,"delta":"iles\",\"rev"}
+{"tMs":1353,"delta":"C"}
+{"tMs":1373,"delta":"ard\",\"chan"}
+{"tMs":1394,"delta":"Card\",\"pl"}
+{"tMs":1415,"delta":"ansCard\"],\"layout"}
+{"tMs":1435,"delta":"\":{\"width\":{\"f"}
+{"tMs":1457,"delta":"ill\":390},\"height\":{"}
+{"tMs":1477,"delta":"\"hug\":1400},\""}
+{"tMs":1498,"delta":"padding\":16},\"props\":"}
+{"tMs":1518,"delta":"{\"crossAxisA"}
+{"tMs":1539,"delta":"lignment\":\"st"}
+{"tMs":1560,"delta":"retch\",\"spacing\":12"}
+{"tMs":1580,"delta":"},\"decoration\":{\""}
+{"tMs":1601,"delta":"fills\":[{\"color\":"}
+{"tMs":1621,"delta":"\"#FFF"}
+{"tMs":1644,"delta":"9FAFB"}
+{"tMs":1663,"delta":"\"}]}}},{\""}
+{"tMs":1683,"delta":"op\":\"set"}
+{"tMs":1704,"delta":"\",\"id\":\"head\",\"node\":"}
+{"tMs":1724,"delta":"{\"type\":\"text\",\"lay"}
+{"tMs":1748,"delta":"out\":{\"width\":{\""}
+{"tMs":1765,"delta":"fill\":358},\"height\":"}
+{"tMs":1786,"delta":"{\"hug\":28"}
+{"tMs":1806,"delta":"}},\"props\":{\"text"}
+{"tMs":1831,"delta":"\":\"This"}
+{"tMs":1846,"delta":" month\",\""}
+{"tMs":1867,"delta":"style\":\"pageTitle"}
+{"tMs":1887,"delta":"\"}}},{\"op\":"}
+{"tMs":1907,"delta":"\"vars\",\"scope\":\""}
+{"tMs":1928,"delta":"dash\",\""}
+{"tMs":1948,"delta":"set\":{\"days\":{\""}
+{"tMs":1972,"delta":"type\":\"integ"}
+{"tMs":1989,"delta":"er\",\"value\":30"}
+{"tMs":2009,"delta":"},"}
+{"tMs":2029,"delta":"\"range"}
+{"tMs":2051,"delta":"\":{\"type\":\"text\",\""}
+{"tMs":2070,"delta":"value\":\"30\"},\"rev"}
+{"tMs":2093,"delta":"enue\":{\"type\":\""}
+{"tMs":2112,"delta":"text"}
+{"tMs":2134,"delta":"\",\"formula\":\"days"}
+{"tMs":2155,"delta":" == 7 ? '"}
+{"tMs":2179,"delta":"$12"}
+{"tMs":2192,"delta":"."}
+{"tMs":2213,"delta":"4k' : days == 90"}
+{"tMs":2233,"delta":" ? '$318"}
+{"tMs":2256,"delta":"k"}
+{"tMs":2275,"delta":"' : '$96"}
+{"tMs":2293,"delta":"."}
+{"tMs":2314,"delta":"2k'\"},\"signups"}
+{"tMs":2334,"delta":"\":{\"type\":\"text\",\""}
+{"tMs":2355,"delta":"formula\":\"days == 7"}
+{"tMs":2375,"delta":" ? '412"}
+{"tMs":2396,"delta":"' : days == 90 "}
+{"tMs":2416,"delta":"? '3"}
+{"tMs":2486,"delta":","}
+{"tMs":2486,"delta":"980"}
+{"tMs":2487,"delta":"' : '1,684"}
+{"tMs":2497,"delta":"'\"},\"churn\":{"}
+{"tMs":2518,"delta":"\"type\":\"text\",\"formula"}
+{"tMs":2543,"delta":"\":\"days == 7 "}
+{"tMs":2559,"delta":"? '2"}
+{"tMs":2579,"delta":".1%' : days == "}
+{"tMs":2603,"delta":"90 ? '3.4"}
+{"tMs":2620,"delta":"%' : '2.8%"}
+{"tMs":2641,"delta":"'\"},\"active"}
+{"tMs":2663,"delta":"\":{\"type\":\"text\",\""}
+{"tMs":2682,"delta":"formula\":\"days == 7"}
+{"tMs":2717,"delta":" ? '5"}
+{"tMs":2733,"delta":",240' : days == 90"}
+{"tMs":2743,"delta":" ? '6"}
+{"tMs":2763,"delta":",910"}
+{"tMs":2784,"delta":"' : '6"}
+{"tMs":2804,"delta":",102"}
+{"tMs":2824,"delta":"'\""}
+{"tMs":2844,"delta":"},\"revS"}
+{"tMs":2865,"delta":"eries\":{\"type\":\""}
+{"tMs":2886,"delta":"list\",\"form"}
+{"tMs":2909,"delta":"ula\":\"days == 7 "}
+{"tMs":2926,"delta":"? [8"}
+{"tMs":2946,"delta":",9,11,10"}
+{"tMs":2967,"delta":",12,13,14"}
+{"tMs":2987,"delta":"] : days == 90"}
+{"tMs":3008,"delta":" ? [60"}
+{"tMs":3028,"delta":",72"}
+{"tMs":3048,"delta":",80"}
+{"tMs":3069,"delta":",95,110"}
+{"tMs":3089,"delta":",118"}
+{"tMs":3109,"delta":",130,"}
+{"tMs":3129,"delta":"140"}
+{"tMs":3149,"delta":",150,160,170,180"}
+{"tMs":3170,"delta":"] : [20"}
+{"tMs":3190,"delta":",25,22"}
+{"tMs":3211,"delta":",30"}
+{"tMs":3231,"delta":",34"}
+{"tMs":3252,"delta":",31"}
+{"tMs":3272,"delta":",38,42,40"}
+{"tMs":3293,"delta":",46"}
+{"tMs":3313,"delta":",50"}
+{"tMs":3332,"delta":",55]\"},"}
+{"tMs":3354,"delta":"\"chanSeries\":{"}
+{"tMs":3375,"delta":"\"type\":\"list\",\"formula"}
+{"tMs":3411,"delta":"\":\"days == 7 "}
+{"tMs":3414,"delta":"? [40"}
+{"tMs":3435,"delta":",70"}
+{"tMs":3455,"delta":",25"}
+{"tMs":3490,"delta":",90,"}
+{"tMs":3495,"delta":"30] : days == 90 "}
+{"tMs":3516,"delta":"? [900"}
+{"tMs":3540,"delta":",1400"}
+{"tMs":3556,"delta":",600"}
+{"tMs":3586,"delta":",1800"}
+{"tMs":3604,"delta":",700"}
+{"tMs":3617,"delta":"] : [300"}
+{"tMs":3638,"delta":",520,210"}
+{"tMs":3671,"delta":",640"}
+{"tMs":3679,"delta":",214"}
+{"tMs":3699,"delta":"]\"},"}
+{"tMs":3719,"delta":"\"plans"}
+{"tMs":3741,"delta":"\":{\"type\":\"list\",\""}
+{"tMs":3760,"delta":"value\":[{\"pl"}
+{"tMs":3780,"delta":"an\":\"Team"}
+{"tMs":3801,"delta":"\",\"rev"}
+{"tMs":3821,"delta":"enue\":\""}
+{"tMs":3841,"delta":"$38"}
+{"tMs":3862,"delta":"."}
+{"tMs":3882,"delta":"1"}
+{"tMs":3902,"delta":"k\",\"sign"}
+{"tMs":3922,"delta":"ups\":420"}
+{"tMs":3943,"delta":",\"churn\":\""}
+{"tMs":3963,"delta":"1.9"}
+{"tMs":3985,"delta":"%\"},{\"plan\":"}
+{"tMs":4004,"delta":"\"Pro\",\"revenue"}
+{"tMs":4024,"delta":"\":\"$29.4"}
+{"tMs":4045,"delta":"k\",\"signups\":512"}
+{"tMs":4065,"delta":",\"churn\":\"2."}
+{"tMs":4086,"delta":"4%\"},{\"plan"}
+{"tMs":4106,"delta":"\":\"Starter\",\"reven"}
+{"tMs":4127,"delta":"ue\":\"$14"}
+{"tMs":4152,"delta":".0"}
+{"tMs":4168,"delta":"k\",\"signups\":610"}
+{"tMs":4188,"delta":",\"churn\":\"4"}
+{"tMs":4209,"delta":".1%\"},{\"pl"}
+{"tMs":4229,"delta":"an\":\"Business"}
+{"tMs":4250,"delta":"\",\"revenue\":\"$9"}
+{"tMs":4270,"delta":".8k\",\"signups\":88"}
+{"tMs":4291,"delta":",\"churn\":\"1"}
+{"tMs":4311,"delta":".2"}
+{"tMs":4332,"delta":"%\"},{\"plan\":"}
+{"tMs":4352,"delta":"\"Free"}
+{"tMs":4372,"delta":" tr"}
+{"tMs":4393,"delta":"ial\",\"revenue\":\"$"}
+{"tMs":4413,"delta":"4"}
+{"tMs":4433,"delta":".9k\",\"signups\":1"}
+{"tMs":4454,"delta":"140"}
+{"tMs":4478,"delta":",\"churn\":\"6"}
+{"tMs":4495,"delta":".3"}
+{"tMs":4515,"delta":"%\"}]},\"sort"}
+{"tMs":4535,"delta":"Key\":{\"type\":\""}
+{"tMs":4556,"delta":"text\",\"value\":\"rev"}
+{"tMs":4577,"delta":"enue\"}"}
+{"tMs":4596,"delta":"}},"}
+{"tMs":4618,"delta":"{\"op\":\"set\",\"id"}
+{"tMs":4644,"delta":"\":\"range\",\"node\":{\""}
+{"tMs":4662,"delta":"type\":\"S"}
+{"tMs":4685,"delta":"egmentedContro"}
+{"tMs":4703,"delta":"l\",\"props"}
+{"tMs":4724,"delta":"\":{\"options\":[\"7 "}
+{"tMs":4744,"delta":"days\",\"30 days\",\"90 "}
+{"tMs":4762,"delta":"days\"],\"value\":\"range"}
+{"tMs":4780,"delta":"\"},\"layout\":{\""}
+{"tMs":4802,"delta":"width\":{\"fill\":358"}
+{"tMs":4822,"delta":"},\"height\":{\"h"}
+{"tMs":4842,"delta":"ug\":28}},\"actions"}
+{"tMs":4863,"delta":"\":[{\"trigger\":"}
+{"tMs":4884,"delta":"{\"type\":\"event"}
+{"tMs":4903,"delta":"\",\"event\":\"onChanged"}
+{"tMs":4924,"delta":"\"},\"actions\":[{"}
+{"tMs":4947,"delta":"\"type\":\"setVariable"}
+{"tMs":4965,"delta":"\",\"variable\":\"days\",\"value"}
+{"tMs":4989,"delta":"\":\"${="}
+{"tMs":5005,"delta":" range"}
+{"tMs":5026,"delta":" == '7 days' ?"}
+{"tMs":5046,"delta":" 7 : range == '90"}
+{"tMs":5072,"delta":" days' ? 90 "}
+{"tMs":5087,"delta":": 30}\""}
+{"tMs":5108,"delta":"}]}]}},{\""}
+{"tMs":5131,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":5152,"delta":"tiles\",\"node\":{\""}
+{"tMs":5172,"delta":"type\":\"column"}
+{"tMs":5190,"delta":"\",\"children\":[\"t"}
+{"tMs":5210,"delta":"1\",\"t2\",\"t3\",\""}
+{"tMs":5230,"delta":"t4\"],\"layout\":"}
+{"tMs":5251,"delta":"{\"width\":{\"fill"}
+{"tMs":5273,"delta":"\":358},\"height\":{\""}
+{"tMs":5292,"delta":"hug\":200"}
+{"tMs":5312,"delta":"}},\"props\":{\"cr"}
+{"tMs":5332,"delta":"ossAxisAlignment"}
+{"tMs":5355,"delta":"\":\"stretch\",\"spac"}
+{"tMs":5373,"delta":"ing\":8}}},{\""}
+{"tMs":5395,"delta":"op\":\"set\",\"id\":\""}
+{"tMs":5419,"delta":"t"}
+{"tMs":5435,"delta":"1\",\"node\":{\"type\":"}
+{"tMs":5455,"delta":"\""}
+{"tMs":5476,"delta":"Card\",\"props"}
+{"tMs":5509,"delta":"\":{\"title\":\"Rev"}
+{"tMs":5516,"delta":"enue\",\"subtitle\":"}
+{"tMs":5542,"delta":"\"+12.4% v"}
+{"tMs":5557,"delta":"s previ"}
+{"tMs":5578,"delta":"ous\""}
+{"tMs":5598,"delta":"},\"children"}
+{"tMs":5619,"delta":"\":[\"t"}
+{"tMs":5639,"delta":"1v\"],\"layout\":"}
+{"tMs":5662,"delta":"{\"width\":{\"fill"}
+{"tMs":5681,"delta":"\":358},\"height\":{\""}
+{"tMs":5704,"delta":"hug\":60}}}"}
+{"tMs":5721,"delta":"},{\"op\":\"set\",\""}
+{"tMs":5742,"delta":"id\":\"t1v\",\"node"}
+{"tMs":5766,"delta":"\":{\"type\":\"text\",\""}
+{"tMs":5782,"delta":"layout\":{\"width\":{"}
+{"tMs":5802,"delta":"\"fill\":318},\"height"}
+{"tMs":5826,"delta":"\":{\"hug\":24"}
+{"tMs":5851,"delta":"}},\"props\":{\"text"}
+{"tMs":5869,"delta":"\":\"${revenue}\",\""}
+{"tMs":5890,"delta":"style\":{\"fontSize"}
+{"tMs":5910,"delta":"\":20,\"fontWe"}
+{"tMs":5930,"delta":"ight\":600,\"color\":\""}
+{"tMs":5952,"delta":"#FF111827\"}}"}
+{"tMs":5968,"delta":"}},{\"op\":\"set"}
+{"tMs":5987,"delta":"\",\"id\":\"t2\",\"node"}
+{"tMs":6008,"delta":"\":{\"type\":\"Card"}
+{"tMs":6028,"delta":"\",\"props\":{\"title\":\""}
+{"tMs":6048,"delta":"Sign-ups\",\"sub"}
+{"tMs":6068,"delta":"title\":\"+8"}
+{"tMs":6089,"delta":".1"}
+{"tMs":6110,"delta":"% vs previous\"},\""}
+{"tMs":6130,"delta":"children\":[\"t2v\"],"}
+{"tMs":6150,"delta":"\"layout\":{\"width\":"}
+{"tMs":6171,"delta":"{\"fill\":358},"}
+{"tMs":6191,"delta":"\"height\":{\"hug\":"}
+{"tMs":6212,"delta":"60}}}},{\"op"}
+{"tMs":6232,"delta":"\":\"set\",\"id\":\"t"}
+{"tMs":6253,"delta":"2v\",\"node\":{\"type"}
+{"tMs":6273,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":6294,"delta":"\"width\":{\"fill\":"}
+{"tMs":6315,"delta":"318},\"height\":{\"h"}
+{"tMs":6334,"delta":"ug\":24}},\"props\":"}
+{"tMs":6356,"delta":"{\"text\":\"${signups"}
+{"tMs":6375,"delta":"}\",\"style\":{\"font"}
+{"tMs":6398,"delta":"Size\":20,\"font"}
+{"tMs":6416,"delta":"Weight\":600,\"color"}
+{"tMs":6436,"delta":"\":\"#FF111827\""}
+{"tMs":6457,"delta":"}}}},{\"op\":"}
+{"tMs":6478,"delta":"\"set\",\"id\":\"t3"}
+{"tMs":6498,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":6518,"delta":"Card\",\"props\":{\"title"}
+{"tMs":6538,"delta":"\":\"Churn\",\"subt"}
+{"tMs":6559,"delta":"itle\":\"-0.4"}
+{"tMs":6580,"delta":"% v"}
+{"tMs":6600,"delta":"s previous\"},\"children\":"}
+{"tMs":6620,"delta":"[\"t3v\"],\"lay"}
+{"tMs":6641,"delta":"out\":{\"width\":{\""}
+{"tMs":6661,"delta":"fill\":358},"}
+{"tMs":6681,"delta":"\"height\":{\"hug\":"}
+{"tMs":6702,"delta":"60}}}},{\"op"}
+{"tMs":6728,"delta":"\":\"set\",\"id\":\"t"}
+{"tMs":6743,"delta":"3v\",\"node\":{\"type"}
+{"tMs":6763,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":6784,"delta":"\"width\":{\"fill\":"}
+{"tMs":6805,"delta":"318},\"height\":{\"h"}
+{"tMs":6825,"delta":"ug\":24}},\"props\":"}
+{"tMs":6845,"delta":"{\"text\":\"${churn"}
+{"tMs":6866,"delta":"}\",\"style\":{\"font"}
+{"tMs":6887,"delta":"Size\":20,\"font"}
+{"tMs":6906,"delta":"Weight\":600,\"color"}
+{"tMs":6928,"delta":"\":\"#FF111827\""}
+{"tMs":6947,"delta":"}}}},{\"op\":"}
+{"tMs":6968,"delta":"\"set\",\"id\":\"t4"}
+{"tMs":6989,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":7009,"delta":"Card\",\"props\":{\"title"}
+{"tMs":7030,"delta":"\":\"Active users\",\"subt"}
+{"tMs":7052,"delta":"itle\":\"+5"}
+{"tMs":7070,"delta":".6"}
+{"tMs":7090,"delta":"% vs previous\"},\""}
+{"tMs":7111,"delta":"children\":[\"t4v\"],"}
+{"tMs":7131,"delta":"\"layout\":{\"width\":"}
+{"tMs":7151,"delta":"{\"fill\":358},"}
+{"tMs":7172,"delta":"\"height\":{\"hug\":"}
+{"tMs":7193,"delta":"60}}}},{\"op"}
+{"tMs":7213,"delta":"\":\"set\",\"id\":\"t"}
+{"tMs":7233,"delta":"4v\",\"node\":{\"type"}
+{"tMs":7256,"delta":"\":\"text\",\"layout\":{"}
+{"tMs":7274,"delta":"\"width\":{\"fill\":"}
+{"tMs":7295,"delta":"318},\"height\":{\"h"}
+{"tMs":7317,"delta":"ug\":24}},\"props\":"}
+{"tMs":7336,"delta":"{\"text\":\"${active}"}
+{"tMs":7360,"delta":"\",\"style\":{\"fontS"}
+{"tMs":7376,"delta":"ize\":20,\"fontW"}
+{"tMs":7398,"delta":"eight\":600,\"color\":"}
+{"tMs":7417,"delta":"\"#FF111827\"}"}
+{"tMs":7438,"delta":"}}},{\"op\":\""}
+{"tMs":7458,"delta":"set\",\"id\":\"revCard"}
+{"tMs":7479,"delta":"\",\"node\":{\"type\":\""}
+{"tMs":7503,"delta":"Card\",\"props\":{\"title"}
+{"tMs":7520,"delta":"\":\"Revenue\",\""}
+{"tMs":7540,"delta":"subtitle\":\"Da"}
+{"tMs":7573,"delta":"ily\"},\"children\":[\"rev"}
+{"tMs":7581,"delta":"Ch"}
+{"tMs":7602,"delta":"art\"],\"layout\":{"}
+{"tMs":7622,"delta":"\"width\":{\"fill\":"}
+{"tMs":7642,"delta":"358},\"height\":{\"h"}
+{"tMs":7663,"delta":"ug\":200"}
+{"tMs":7683,"delta":"}}}},{\"op\":"}
+{"tMs":7703,"delta":"\"set\",\"id\":\"revCh"}
+{"tMs":7724,"delta":"art\",\"node\":{\"type\":"}
+{"tMs":7745,"delta":"\"lineChart\",\"props\":"}
+{"tMs":7764,"delta":"{\"data"}
+{"tMs":7785,"delta":"\":\"${revSeries}"}
+{"tMs":7805,"delta":"\"},\"layout\":{\""}
+{"tMs":7828,"delta":"width\":{\"fill\":326"}
+{"tMs":7846,"delta":"},\"height\":160"}
+{"tMs":7867,"delta":"}}},{\"op\":\""}
+{"tMs":7887,"delta":"set\",\"id\":\"chanC"}
+{"tMs":7908,"delta":"ard\",\"node\":{\"type\":"}
+{"tMs":7928,"delta":"\"Card\",\"props\":{\""}
+{"tMs":7948,"delta":"title\":\"Sign-"}
+{"tMs":7969,"delta":"ups by channel\""}
+{"tMs":7989,"delta":"},\"children\":[\"ch"}
+{"tMs":8009,"delta":"anChart\"],\"layout"}
+{"tMs":8030,"delta":"\":{\"width\":{\"f"}
+{"tMs":8050,"delta":"ill\":358},\"height\":{"}
+{"tMs":8071,"delta":"\"hug\":200}}}"}
+{"tMs":8092,"delta":"},{\"op\":\"set\",\""}
+{"tMs":8112,"delta":"id\":\"chanChart\",\""}
+{"tMs":8134,"delta":"node\":{\"type\":\"bar"}
+{"tMs":8153,"delta":"Chart\",\"props\":{\"data"}
+{"tMs":8173,"delta":"\":\"${chanSeries"}
+{"tMs":8195,"delta":"}\",\"labels\":[\"Organ"}
+{"tMs":8214,"delta":"ic\",\"Pa"}
+{"tMs":8234,"delta":"id\",\"Refer"}
+{"tMs":8256,"delta":"ral\",\"Social"}
+{"tMs":8275,"delta":"\",\"Email"}
+{"tMs":8296,"delta":"\"]},\"layout\":{"}
+{"tMs":8316,"delta":"\"width\":{\"fill\":"}
+{"tMs":8336,"delta":"326},\"height\":160}}"}
+{"tMs":8357,"delta":"},{\"op\":\"set\",\""}
+{"tMs":8377,"delta":"id\":\"plansCard\",\""}
+{"tMs":8398,"delta":"node\":{\"type\":\""}
+{"tMs":8418,"delta":"Card\",\"props\":{\"title\":"}
+{"tMs":8438,"delta":"\"Top five plans\",\""}
+{"tMs":8459,"delta":"subtitle\":\"T"}
+{"tMs":8483,"delta":"ap a column"}
+{"tMs":8499,"delta":" header"}
+{"tMs":8520,"delta":" to sort\"},\"children\":"}
+{"tMs":8540,"delta":"[\"plansTable\"],\""}
+{"tMs":8561,"delta":"layout\":{\"width\":{"}
+{"tMs":8581,"delta":"\"fill\":358},\"height"}
+{"tMs":8602,"delta":"\":{\"hug\":260"}
+{"tMs":8623,"delta":"}}}},{\"op\":"}
+{"tMs":8642,"delta":"\"set\",\"id\":\"plans"}
+{"tMs":8663,"delta":"Table\",\"node\":{\"type"}
+{"tMs":8683,"delta":"\":\"tableView\",\"layout"}
+{"tMs":8704,"delta":"\":{\"width\":{\"f"}
+{"tMs":8724,"delta":"ill\":326},\"height\":{"}
+{"tMs":8744,"delta":"\"hug\":220}},\""}
+{"tMs":8765,"delta":"b"}
+{"tMs":8785,"delta":"ind\":{\"data\":\"${"}
+{"tMs":8806,"delta":"plans}\"}}}]"}
+{"tMs":8826,"delta":"}"}
+{"tMs":8892,"delta":"}"}

@@ -1,0 +1,105 @@
+{
+ "stream": "question_flow@claude-haiku-5-5.compact.ssui.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 597,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 2675,
+ "outputTokens": 738,
+ "tokensEstimated": false,
+ "chars": 1462,
+ "deltas": 100,
+ "opsApplied": 5,
+ "opsRejected": 4,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "invalid_parent /ops/0/parent",
+  "structural_key_in_patch /nodes/progress/children",
+  "structural_key_in_patch /nodes/choices/children",
+  "structural_key_in_patch /nodes/nav/children",
+  "dangling_child /nodes/quiz/slots/body"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 1,
+  "componentsRendered": 0,
+  "componentsNotRendered": [
+   "restart (Button)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 10,
+   "rejected": 6
+  }
+ ],
+ "streamedOps": 9,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "invalid_parent",
+   "path": "/ops/0/parent",
+   "message": "A canvas takes no children list: give a \"slot\" (body, appBar, floatingActionButton, bottomNavigationBar).",
+   "nodeId": "quiz",
+   "expected": [
+    "body",
+    "appBar",
+    "floatingActionButton",
+    "bottomNavigationBar"
+   ]
+  },
+  {
+   "op": 6,
+   "code": "structural_key_in_patch",
+   "path": "/nodes/progress/children",
+   "message": "A patch cannot change \"children\": use set (with parent), move and remove.",
+   "nodeId": "progress"
+  },
+  {
+   "op": 7,
+   "code": "structural_key_in_patch",
+   "path": "/nodes/choices/children",
+   "message": "A patch cannot change \"children\": use set (with parent), move and remove.",
+   "nodeId": "choices"
+  },
+  {
+   "op": 8,
+   "code": "structural_key_in_patch",
+   "path": "/nodes/nav/children",
+   "message": "A patch cannot change \"children\": use set (with parent), move and remove.",
+   "nodeId": "nav"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/quiz/slots/body",
+   "message": "Slot \"body\" of \"quiz\" names \"card\", which never arrived.",
+   "nodeId": "quiz"
+  }
+ ],
+ "nodes": 13,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 0
+ },
+ "frames": 53,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 0,
+ "pumps": 154,
+ "pumpMsMedian": 0.103,
+ "renderExceptions": [],
+ "warnings": 4
+}

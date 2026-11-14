@@ -1,0 +1,65 @@
+{
+ "stream": "message_draft@claude-haiku-5-5.compact.ssui.r1.retry.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 382,
+ "timeToFirstPaintMs": 500,
+ "timeToFirstTextMs": 500,
+ "timeToFirstSectionMs": 500,
+ "timeToCompleteMs": 1453,
+ "outputTokens": 367,
+ "tokensEstimated": false,
+ "chars": 734,
+ "deltas": 50,
+ "opsApplied": 4,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 0,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "unknown_id /ops/0/id"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 7,
+  "componentsRendered": 7,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "bases": [
+  {
+   "stream": "generate",
+   "applied": 17,
+   "rejected": 4
+  }
+ ],
+ "streamedOps": 5,
+ "rejections": [
+  {
+   "op": 0,
+   "code": "unknown_id",
+   "path": "/ops/0/id",
+   "message": "No node \"toInput\" to patch (it is listed by \"toField\" but has not arrived: set it first).",
+   "nodeId": "toInput"
+  }
+ ],
+ "nodes": 19,
+ "reappliedBoxesPerOp": {
+  "min": 3,
+  "median": 7,
+  "p90": 11,
+  "max": 11
+ },
+ "frames": 35,
+ "frameMs": 66,
+ "pumpsOverBudget16ms": 4,
+ "pumps": 86,
+ "pumpMsMedian": 0.168,
+ "renderExceptions": [],
+ "warnings": 0
+}

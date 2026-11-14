@@ -1,0 +1,31 @@
+{"meta":{"ui":"carousel","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["carousel@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":311,"usage":{"inputTokens":5194,"outputTokens":311,"cacheReadInputTokens":25954,"cacheCreationInputTokens":0,"ttftMs":1569,"firstToolDeltaMs":1637,"totalMs":2674,"stopReason":"StopReason.toolUse"},"text":"I'll resend the card with a numeric radius, and point the pager's valueChanged at the page variable so swipes update the dots.","ttftMs":1569,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":25,"scripts":0,"scriptChars":0,"designSystemComponents":5,"replacedControls":0},"assets":null}}
+{"tMs":1637,"delta":"{\"ops\": [{\"op\":"}
+{"tMs":1672,"delta":" \"set\", \"id\": \"card"}
+{"tMs":1707,"delta":"\", \"node\": {\"type\":"}
+{"tMs":1741,"delta":" \"column\", \"children\": [\""}
+{"tMs":1775,"delta":"carouselView\", \"detail"}
+{"tMs":1809,"delta":"View\"], \"layout\": {"}
+{"tMs":1843,"delta":"\"width\": {\"fill\":"}
+{"tMs":1976,"delta":" 390}, \"height\": {"}
+{"tMs":2607,"delta":"\"hug\": 420},"}
+{"tMs":2607,"delta":" \"padding\": 12},"}
+{"tMs":2607,"delta":" \"props\": {\"crossA"}
+{"tMs":2607,"delta":"xisAlignment\": \""}
+{"tMs":2607,"delta":"stretch\", \"spacing"}
+{"tMs":2607,"delta":"\": 12}, \"deco"}
+{"tMs":2607,"delta":"ration\": {\"fills\": ["}
+{"tMs":2607,"delta":"{\"color\": \"primary"}
+{"tMs":2607,"delta":"Background\"}], \"rad"}
+{"tMs":2607,"delta":"ius\": 8, \"strok"}
+{"tMs":2607,"delta":"es\": [{\"color\": \""}
+{"tMs":2607,"delta":"primaryBorder\"}"}
+{"tMs":2607,"delta":"]}}}, {\"op"}
+{"tMs":2607,"delta":"\": \"patch\", \"id\":"}
+{"tMs":2607,"delta":" \"pager\", \"patch\":"}
+{"tMs":2607,"delta":" {\"actions\": [{\""}
+{"tMs":2607,"delta":"trigger\": {\"type\":"}
+{"tMs":2607,"delta":" \"valueChanged\", \""}
+{"tMs":2607,"delta":"variable\": \"page\"},"}
+{"tMs":2607,"delta":" \"actions\": []}]}"}
+{"tMs":2607,"delta":"}]"}
+{"tMs":2673,"delta":"}"}

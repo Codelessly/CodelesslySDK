@@ -1,0 +1,157 @@
+{
+ "stream": "checkout@claude-haiku-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-haiku-5-5",
+ "ttftMs": 569,
+ "timeToFirstPaintMs": 2880,
+ "timeToFirstTextMs": 3983,
+ "timeToFirstSectionMs": 3289,
+ "timeToCompleteMs": 15736,
+ "outputTokens": 5261,
+ "tokensEstimated": false,
+ "chars": 10980,
+ "deltas": 742,
+ "opsApplied": 43,
+ "opsRejected": 6,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 5,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/tName/props/error",
+  "wrong_type /nodes/tAddr/props/error",
+  "wrong_type /nodes/tCity/props/error",
+  "wrong_type /nodes/tPost/props/error",
+  "expression_syntax /nodes/fEmail/props/error",
+  "wrong_type /nodes/tEmail/props/error",
+  "expression_syntax /nodes/tEmail/props/error",
+  "dangling_child /nodes/shipStep/children/5",
+  "dangling_child /nodes/fName/children/0",
+  "dangling_child /nodes/fAddr/children/0",
+  "dangling_child /nodes/fCity/children/0",
+  "dangling_child /nodes/fPost/children/0"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 14,
+  "componentsRendered": 4,
+  "componentsNotRendered": [
+   "fName (Field)",
+   "fAddr (Field)",
+   "fCity (Field)",
+   "fPost (Field)",
+   "backCart (Button)",
+   "shipNext (Button)",
+   "standard (Radio)",
+   "express (Radio)",
+   "backShip (Button)",
+   "payNext (Button)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 49,
+ "rejections": [
+  {
+   "op": 23,
+   "code": "wrong_type",
+   "path": "/nodes/tName/props/error",
+   "message": "Expected a boolean (true or false), got the text \"${= fullName == ''}\".",
+   "nodeId": "tName"
+  },
+  {
+   "op": 25,
+   "code": "wrong_type",
+   "path": "/nodes/tAddr/props/error",
+   "message": "Expected a boolean (true or false), got the text \"${= address == ''}\".",
+   "nodeId": "tAddr"
+  },
+  {
+   "op": 27,
+   "code": "wrong_type",
+   "path": "/nodes/tCity/props/error",
+   "message": "Expected a boolean (true or false), got the text \"${= city == ''}\".",
+   "nodeId": "tCity"
+  },
+  {
+   "op": 29,
+   "code": "wrong_type",
+   "path": "/nodes/tPost/props/error",
+   "message": "Expected a boolean (true or false), got the text \"${= postcode == ''}\".",
+   "nodeId": "tPost"
+  },
+  {
+   "op": 30,
+   "code": "expression_syntax",
+   "path": "/nodes/fEmail/props/error",
+   "message": "The formula \"${= email == '' ? 'Email is required.' : (email.indexOf('@') < 0 ? 'Enter a valid email.' : '')}\" does not parse: Expected \")\" at 52.",
+   "nodeId": "fEmail"
+  },
+  {
+   "op": 31,
+   "code": "wrong_type",
+   "path": "/nodes/tEmail/props/error",
+   "message": "Expected a boolean (true or false), got the text \"${= email == '' || email.indexOf('@') < ...\".",
+   "nodeId": "tEmail"
+  },
+  {
+   "op": 31,
+   "code": "expression_syntax",
+   "path": "/nodes/tEmail/props/error",
+   "message": "The formula \"${= email == '' || email.indexOf('@') < 0}\" does not parse: Unexpected \"(\" at 29.",
+   "nodeId": "tEmail"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/shipStep/children/5",
+   "message": "Child \"fEmail\" of \"shipStep\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "shipStep"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fName/children/0",
+   "message": "Child \"tName\" of \"fName\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fName"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fAddr/children/0",
+   "message": "Child \"tAddr\" of \"fAddr\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fAddr"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fCity/children/0",
+   "message": "Child \"tCity\" of \"fCity\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fCity"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/fPost/children/0",
+   "message": "Child \"tPost\" of \"fPost\" never arrived: send its set op, or remove it from the children.",
+   "nodeId": "fPost"
+  }
+ ],
+ "nodes": 41,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 8,
+  "max": 15
+ },
+ "frames": 180,
+ "frameMs": 92,
+ "pumpsOverBudget16ms": 5,
+ "pumps": 923,
+ "pumpMsMedian": 0.099,
+ "renderExceptions": [],
+ "warnings": 2
+}

@@ -1,0 +1,74 @@
+{
+ "stream": "question_flow@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1063,
+ "timeToFirstPaintMs": null,
+ "timeToFirstTextMs": null,
+ "timeToFirstSectionMs": null,
+ "timeToCompleteMs": 19612,
+ "outputTokens": 3638,
+ "tokensEstimated": false,
+ "chars": 7423,
+ "deltas": 511,
+ "opsApplied": 24,
+ "opsRejected": 1,
+ "opsRecoveredFromMalformed": 0,
+ "jsonRepairs": 0,
+ "pending": 1,
+ "renderDiagnostics": [],
+ "finalDiagnostics": [
+  "wrong_type /nodes/card/decoration/radius",
+  "dangling_child /nodes/lap/slots/body"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 7,
+  "componentsRendered": 0,
+  "componentsNotRendered": [
+   "back (IconButton)",
+   "bar (ProgressBar)",
+   "q1o (ListRow)",
+   "q2o (ListRow)",
+   "q3o (ListRow)",
+   "resBadge (Badge)",
+   "resBtn (Button)"
+  ],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 25,
+ "rejections": [
+  {
+   "op": 3,
+   "code": "wrong_type",
+   "path": "/nodes/card/decoration/radius",
+   "message": "Not a BorderRadius: got the text \"${theme.radii.panel}\". A BorderRadius is a number (every corner), [x, y] (every corner elliptical) or [topLeft, topRight, bottomRight, bottomLeft] (each a number or [x, y]).",
+   "nodeId": "card"
+  },
+  {
+   "op": -1,
+   "code": "dangling_child",
+   "path": "/nodes/lap/slots/body",
+   "message": "Slot \"body\" of \"lap\" names \"card\", which never arrived.",
+   "nodeId": "lap"
+  }
+ ],
+ "nodes": 22,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 0,
+  "p90": 0,
+  "max": 1
+ },
+ "frames": 180,
+ "frameMs": 114,
+ "pumpsOverBudget16ms": 1,
+ "pumps": 692,
+ "pumpMsMedian": 0.097,
+ "renderExceptions": [],
+ "warnings": 6
+}

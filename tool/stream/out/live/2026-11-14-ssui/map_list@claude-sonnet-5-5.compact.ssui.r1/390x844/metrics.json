@@ -1,0 +1,60 @@
+{
+ "stream": "map_list@claude-sonnet-5-5.compact.ssui.r1.jsonl",
+ "size": "390x844",
+ "source": "live",
+ "model": "claude-sonnet-5-5",
+ "ttftMs": 1323,
+ "timeToFirstPaintMs": 5088,
+ "timeToFirstTextMs": 5606,
+ "timeToFirstSectionMs": 19099,
+ "timeToCompleteMs": 19102,
+ "outputTokens": 3482,
+ "tokensEstimated": false,
+ "chars": 6791,
+ "deltas": 473,
+ "opsApplied": 26,
+ "opsRejected": 0,
+ "opsRecoveredFromMalformed": 23,
+ "jsonRepairs": 1,
+ "pending": 0,
+ "renderDiagnostics": [
+  "empty_button p0",
+  "empty_button p1",
+  "empty_button p2",
+  "empty_button p3",
+  "empty_button p4"
+ ],
+ "finalDiagnostics": [
+  "empty_button /nodes/p0",
+  "empty_button /nodes/p1",
+  "empty_button /nodes/p2",
+  "empty_button /nodes/p3",
+  "empty_button /nodes/p4"
+ ],
+ "scripts": 0,
+ "designSystem": {
+  "id": "ssui",
+  "version": "1.0.0",
+  "componentNodes": 0,
+  "componentsRendered": 0,
+  "componentsNotRendered": [],
+  "replacedControls": []
+ },
+ "themeMode": "light",
+ "streamedOps": 26,
+ "rejections": [],
+ "nodes": 24,
+ "reappliedBoxesPerOp": {
+  "min": 0,
+  "median": 1,
+  "p90": 6,
+  "max": 18
+ },
+ "frames": 180,
+ "frameMs": 111,
+ "pumpsOverBudget16ms": 7,
+ "pumps": 654,
+ "pumpMsMedian": 0.103,
+ "renderExceptions": [],
+ "warnings": 6
+}
