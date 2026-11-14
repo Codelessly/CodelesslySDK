@@ -1,0 +1,1141 @@
+{
+ "schema": 3,
+ "id": "RichTextToolbar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "RichTextToolbar",
+  "doc": "The formatting bar of a text editor: undo and redo, bold, italic, underline, code, heading, quote, lists, link and image. Fires onCommand with the button's name.",
+  "props": [
+   {
+    "key": "active",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The names of the buttons shown as on (Bold, Italic, Bulleted list...)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onCommand",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    400,
+    36
+   ],
+   "props": {
+    "active": [
+     "Bold"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "tools"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": 3
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2,
+    "clip": "antiAlias"
+   }
+  },
+  "tools": {
+   "type": "row",
+   "children": [
+    "undo",
+    "redo",
+    "rule1",
+    "format_bold",
+    "format_italic",
+    "format_underlined",
+    "code",
+    "rule2",
+    "title",
+    "format_quote",
+    "rule3",
+    "format_list_bulleted",
+    "format_list_numbered",
+    "rule4",
+    "link",
+    "image"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2,
+    "scrollable": true,
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "undo": {
+   "type": "row",
+   "children": [
+    "undoGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Undo",
+   "bind": {
+    "selected": "${= contains(props.active, 'Undo')}"
+   },
+   "states": {
+    "hovered": {
+     "undo": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "undo": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "undoGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Undo"
+      }
+     ]
+    }
+   ]
+  },
+  "undoGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "undo",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "redo": {
+   "type": "row",
+   "children": [
+    "redoGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Redo",
+   "bind": {
+    "selected": "${= contains(props.active, 'Redo')}"
+   },
+   "states": {
+    "hovered": {
+     "redo": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "redo": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "redoGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Redo"
+      }
+     ]
+    }
+   ]
+  },
+  "redoGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "redo",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "rule1": {
+   "type": "box",
+   "layout": {
+    "width": 1,
+    "height": 18,
+    "margin": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ]
+   }
+  },
+  "format_bold": {
+   "type": "row",
+   "children": [
+    "format_boldGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Bold",
+   "bind": {
+    "selected": "${= contains(props.active, 'Bold')}"
+   },
+   "states": {
+    "hovered": {
+     "format_bold": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "format_bold": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "format_boldGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Bold"
+      }
+     ]
+    }
+   ]
+  },
+  "format_boldGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "format_bold",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "format_italic": {
+   "type": "row",
+   "children": [
+    "format_italicGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Italic",
+   "bind": {
+    "selected": "${= contains(props.active, 'Italic')}"
+   },
+   "states": {
+    "hovered": {
+     "format_italic": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "format_italic": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "format_italicGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Italic"
+      }
+     ]
+    }
+   ]
+  },
+  "format_italicGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "format_italic",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "format_underlined": {
+   "type": "row",
+   "children": [
+    "format_underlinedGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Underline",
+   "bind": {
+    "selected": "${= contains(props.active, 'Underline')}"
+   },
+   "states": {
+    "hovered": {
+     "format_underlined": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "format_underlined": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "format_underlinedGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Underline"
+      }
+     ]
+    }
+   ]
+  },
+  "format_underlinedGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "format_underlined",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "code": {
+   "type": "row",
+   "children": [
+    "codeGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Code",
+   "bind": {
+    "selected": "${= contains(props.active, 'Code')}"
+   },
+   "states": {
+    "hovered": {
+     "code": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "code": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "codeGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Code"
+      }
+     ]
+    }
+   ]
+  },
+  "codeGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "code",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "rule2": {
+   "type": "box",
+   "layout": {
+    "width": 1,
+    "height": 18,
+    "margin": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ]
+   }
+  },
+  "title": {
+   "type": "row",
+   "children": [
+    "titleGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Heading",
+   "bind": {
+    "selected": "${= contains(props.active, 'Heading')}"
+   },
+   "states": {
+    "hovered": {
+     "title": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "title": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "titleGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Heading"
+      }
+     ]
+    }
+   ]
+  },
+  "titleGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "title",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "format_quote": {
+   "type": "row",
+   "children": [
+    "format_quoteGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Quote",
+   "bind": {
+    "selected": "${= contains(props.active, 'Quote')}"
+   },
+   "states": {
+    "hovered": {
+     "format_quote": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "format_quote": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "format_quoteGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Quote"
+      }
+     ]
+    }
+   ]
+  },
+  "format_quoteGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "format_quote",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "rule3": {
+   "type": "box",
+   "layout": {
+    "width": 1,
+    "height": 18,
+    "margin": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ]
+   }
+  },
+  "format_list_bulleted": {
+   "type": "row",
+   "children": [
+    "format_list_bulletedGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Bulleted list",
+   "bind": {
+    "selected": "${= contains(props.active, 'Bulleted list')}"
+   },
+   "states": {
+    "hovered": {
+     "format_list_bulleted": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "format_list_bulleted": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "format_list_bulletedGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Bulleted list"
+      }
+     ]
+    }
+   ]
+  },
+  "format_list_bulletedGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "format_list_bulleted",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "format_list_numbered": {
+   "type": "row",
+   "children": [
+    "format_list_numberedGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Numbered list",
+   "bind": {
+    "selected": "${= contains(props.active, 'Numbered list')}"
+   },
+   "states": {
+    "hovered": {
+     "format_list_numbered": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "format_list_numbered": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "format_list_numberedGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Numbered list"
+      }
+     ]
+    }
+   ]
+  },
+  "format_list_numberedGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "format_list_numbered",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "rule4": {
+   "type": "box",
+   "layout": {
+    "width": 1,
+    "height": 18,
+    "margin": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ]
+   }
+  },
+  "link": {
+   "type": "row",
+   "children": [
+    "linkGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Link",
+   "bind": {
+    "selected": "${= contains(props.active, 'Link')}"
+   },
+   "states": {
+    "hovered": {
+     "link": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "link": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "linkGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Link"
+      }
+     ]
+    }
+   ]
+  },
+  "linkGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "link",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "image": {
+   "type": "row",
+   "children": [
+    "imageGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "tooltip": "Image",
+   "bind": {
+    "selected": "${= contains(props.active, 'Image')}"
+   },
+   "states": {
+    "hovered": {
+     "image": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "image": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "imageGlyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCommand",
+       "value": "Image"
+      }
+     ]
+    }
+   ]
+  },
+  "imageGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "image",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  }
+ }
+}

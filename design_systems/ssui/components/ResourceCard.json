@@ -1,0 +1,502 @@
+{
+ "schema": 3,
+ "id": "ResourceCard",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "ResourceCard",
+  "doc": "A saved thing as a picture tile: an image, a video, a link, a note or a document, with star and delete buttons. Fires onSelected, onStar and onDelete.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Its name, shown when there is no picture."
+   },
+   {
+    "key": "image",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The picture's address (empty: an icon for its kind)."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "document",
+      "image",
+      "video",
+      "link",
+      "note"
+     ]
+    },
+    "default": "document",
+    "doc": "What it is: the corner chip's icon."
+   },
+   {
+    "key": "starred",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The star is set."
+   },
+   {
+    "key": "deletable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The delete button."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected"
+   },
+   {
+    "key": "onStar"
+   },
+   {
+    "key": "onDelete"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Document",
+   "size": [
+    160,
+    120
+   ],
+   "props": {
+    "title": "Launch brief"
+   }
+  },
+  {
+   "name": "Starred",
+   "size": [
+    160,
+    120
+   ],
+   "props": {
+    "title": "Moodboard",
+    "kind": "image",
+    "starred": true
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "stack",
+   "children": [
+    "room",
+    "blank",
+    "fade",
+    "chip",
+    "tools"
+   ],
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "",
+       "fit": "cover"
+      },
+      "visible": false
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[1].image.url": "${props.image}",
+    "decoration.fills[1].visible": "${= props.image != ''}"
+   },
+   "states": {
+    "hovered": {
+     "card": {
+      "decoration": {
+       "effects": [
+        {
+         "type": "dropShadow",
+         "color": "#1A000000",
+         "offset": [
+          0,
+          2
+         ],
+         "blurRadius": 4,
+         "spreadRadius": -1
+        },
+        {
+         "type": "dropShadow",
+         "color": "#0D000000",
+         "offset": [
+          0,
+          1
+         ],
+         "blurRadius": 2
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected"
+      }
+     ]
+    }
+   ]
+  },
+  "room": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": 120
+   }
+  },
+  "blank": {
+   "type": "column",
+   "children": [
+    "blankIcon",
+    "blankTitle"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": 120,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.image == ''}"
+   }
+  },
+  "blankIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "description",
+    "color": "#26000000",
+    "size": 32
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "bind": {
+    "props.icon": "${= props.kind == 'image' ? 'image' : (props.kind == 'video' ? 'videocam' : (props.kind == 'link' ? 'link' : (props.kind == 'note' ? 'sticky_note_2' : 'description')))}"
+   }
+  },
+  "blankTitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "#4D000000",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= props.title != ''}"
+   }
+  },
+  "fade": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": 60,
+    "y": {
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": [
+       0,
+       1
+      ],
+      "end": [
+       0,
+       -1
+      ],
+      "stops": [
+       {
+        "color": "#8C000000",
+        "position": 0
+       },
+       {
+        "color": "#26000000",
+        "position": 0.5
+       },
+       {
+        "color": "#00000000",
+        "position": 1
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.image != ''}"
+   }
+  },
+  "chip": {
+   "type": "row",
+   "children": [
+    "chipIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 18
+    },
+    "height": {
+     "hug": 18
+    },
+    "padding": 4,
+    "x": {
+     "start": 8
+    },
+    "y": {
+     "start": 8
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#73000000"
+     }
+    ],
+    "radius": 5
+   }
+  },
+  "chipIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "description",
+    "color": "#FFFFFFFF",
+    "size": 10
+   },
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "bind": {
+    "props.icon": "${= props.kind == 'image' ? 'image' : (props.kind == 'video' ? 'videocam' : (props.kind == 'link' ? 'link' : (props.kind == 'note' ? 'sticky_note_2' : 'description')))}"
+   }
+  },
+  "tools": {
+   "type": "row",
+   "children": [
+    "star",
+    "delete"
+   ],
+   "props": {
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 46
+    },
+    "height": {
+     "hug": 21
+    },
+    "x": {
+     "end": 8
+    },
+    "y": {
+     "end": 8
+    }
+   }
+  },
+  "star": {
+   "type": "row",
+   "children": [
+    "starIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 21
+    },
+    "height": {
+     "hug": 21
+    },
+    "padding": 5
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#66000000"
+     }
+    ],
+    "radius": 6
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.starred ? '#FFEAB308' : '#66000000'}"
+   },
+   "tooltip": "${= props.starred ? 'Unstar' : 'Star'}",
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onStar"
+      }
+     ]
+    }
+   ]
+  },
+  "starIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "star_border",
+    "color": "#FFFFFFFF",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "props.icon": "${= props.starred ? 'star' : 'star_border'}"
+   }
+  },
+  "delete": {
+   "type": "row",
+   "children": [
+    "deleteIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 21
+    },
+    "height": {
+     "hug": 21
+    },
+    "padding": 5
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#66000000"
+     }
+    ],
+    "radius": 6
+   },
+   "tooltip": "Delete",
+   "bind": {
+    "visible": "${props.deletable}"
+   },
+   "states": {
+    "hovered": {
+     "delete": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#CCEF4444"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onDelete"
+      }
+     ]
+    }
+   ]
+  },
+  "deleteIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "delete_outline",
+    "color": "#FFFFFFFF",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  }
+ }
+}

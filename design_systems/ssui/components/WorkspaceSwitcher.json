@@ -1,0 +1,404 @@
+{
+ "schema": 3,
+ "id": "WorkspaceSwitcher",
+ "roots": [
+  "menu"
+ ],
+ "widget": {
+  "type": "WorkspaceSwitcher",
+  "doc": "The list that switches workspace: the current one checked, and a row to make a new one. Fires onSelected with the name and onCreate.",
+  "props": [
+   {
+    "key": "workspaces",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Personal",
+     "Acme",
+     "Side project"
+    ],
+    "doc": "The workspaces' names.",
+    "required": true
+   },
+   {
+    "key": "current",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The one in use: it gets the check."
+   },
+   {
+    "key": "createLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "New workspace",
+    "doc": "The last row's label (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onCreate"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    220,
+    130
+   ],
+   "props": {
+    "current": "Acme"
+   }
+  }
+ ],
+ "nodes": {
+  "menu": {
+   "type": "column",
+   "children": [
+    "list",
+    "none",
+    "create"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 130
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "entry"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 218
+    },
+    "height": {
+     "hug": 90
+    }
+   },
+   "bind": {
+    "data": "${props.workspaces}"
+   }
+  },
+  "entry": {
+   "type": "row",
+   "children": [
+    "tickBox",
+    "name"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 218
+    },
+    "height": {
+     "hug": 30
+    },
+    "padding": [
+     6,
+     7,
+     6,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "entry": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "tickBox": {
+   "type": "row",
+   "children": [
+    "tick"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "tick": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "success",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "visible": "${= item == props.current}"
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 600,
+     "height": 1.35,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 170
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "none": {
+   "type": "text",
+   "props": {
+    "text": "No workspaces yet.",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 190
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     12,
+     8,
+     12,
+     8
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.workspaces) == 0}"
+   }
+  },
+  "create": {
+   "type": "row",
+   "children": [
+    "createBox",
+    "createLabel"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 218
+    },
+    "height": {
+     "hug": 30
+    },
+    "padding": [
+     6,
+     7,
+     6,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "bind": {
+    "visible": "${= props.createLabel != ''}"
+   },
+   "states": {
+    "hovered": {
+     "create": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCreate"
+      }
+     ]
+    }
+   ]
+  },
+  "createBox": {
+   "type": "row",
+   "children": [
+    "createIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "createIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "create_new_folder",
+    "color": "secondaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  },
+  "createLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.createLabel}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 500,
+     "height": 1.35,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

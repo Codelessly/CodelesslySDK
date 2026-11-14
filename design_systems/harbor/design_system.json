@@ -559,7 +559,13 @@
   "components/ViewerDialog.json",
   "components/SlidingPanel.json",
   "components/DropdownMultiselect.json",
-  "components/IconSelect.json"
+  "components/IconSelect.json",
+  "components/ResourceCard.json",
+  "components/WorkspaceSwitcher.json",
+  "components/ModelSelectMenu.json",
+  "components/RichTextToolbar.json",
+  "components/CollapsibleSection.json",
+  "components/SplitPaneTabs.json"
  ],
  "replaces": [
   "filledButton",

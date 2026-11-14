@@ -307,7 +307,8 @@
    ],
    "props": {
     "crossAxisAlignment": "start",
-    "scrollable": true
+    "scrollable": true,
+    "scrollDirection": "horizontal"
    },
    "layout": {
     "width": {
