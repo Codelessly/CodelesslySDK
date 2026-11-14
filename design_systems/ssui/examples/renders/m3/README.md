@@ -17,3 +17,18 @@ Measured against the reference over the button rows (x 24–700, y 24–332): 0.
 SSUI variant → core node: primary `filledButton`; secondary and destructive `filledButton` with that
 `style.backgroundColor`; outline `outlinedButton`; ghost `textButton`. Size → the node's height (24/28/32/36/44); 28
 (compact) is a button with no size: it hugs.
+
+## Text fields (WS-A)
+
+The reference page's field row (an empty field with a hint, one with a value, one with a value and an error) rebuilt
+from zero-prop `textField` nodes (only the texts set), Roboto, light and dark, cropped to y 320–420. Made by
+`test/controls/text_field_reference_test.dart` with `CODELESSLY_M3_RENDERS=<dir>`.
+
+| File | What |
+|---|---|
+| `text-fields-before-{light,dark}.png` | the `_TextFieldIsland` (Material `TextField`) in a `MaterialApp`: Material outline and error red, and its texts in no loaded font (boxes) although the theme names Roboto |
+| `text-fields-{light,dark}.png` | this SDK: `RenderTextField`, SSUI's field frame |
+| `text-fields-compare-{light,dark}.png` | before, after and the SSUI reference, stacked |
+
+Measured against the reference over the field row (x 24–712, y 344–396): 0.00 % of the pixels differ in light and
+in dark (a channel more than 40 apart); the test holds it under 1 %.
