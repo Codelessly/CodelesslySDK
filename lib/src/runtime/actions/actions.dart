@@ -7,7 +7,7 @@ export 'feature.dart';
 export 'handlers.dart' show delayMilliseconds, sourceFiles;
 export 'node_values.dart';
 export 'app_events.dart';
-export 'capture.dart' show CodelesslyCaptureScope, CaptureRegistry, captureImage;
+export 'capture.dart' show BoundaryFinder, CaptureRegistry, captureImage;
 export 'runner.dart';
 export 'script_host.dart';
 export 'text_fields.dart' show TextFieldHandle;

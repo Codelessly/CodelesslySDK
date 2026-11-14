@@ -11,10 +11,10 @@ import 'package:codelessly_api/codelessly_api.dart'
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 
-import '../runtime/actions/capture.dart';
 import 'ui/presentation_scope.dart';
 import '../runtime/actions/ui.dart';
 import 'navigator_ui.dart';
+import 'ui/capture_scope.dart';
 import '../services/services.dart' show Services;
 import 'backdrop_screens.dart';
 import 'codelessly.dart';

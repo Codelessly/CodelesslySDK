@@ -5,66 +5,46 @@ import 'dart:convert';
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 
 import '../../render/node_tree.dart';
 
-/// Where captures come from: each shown layout's boundary (by its node
-/// tree) and the app's capture scope.
+/// Finds a repaint boundary when a capture is asked for (it may not be laid
+/// out, or there, before).
+typedef BoundaryFinder = RenderRepaintBoundary? Function();
+
+/// Where a `captureScreenshot` action finds what to capture: the boundary
+/// around each layout shown, and the ones the host put around its app. The
+/// host registers them (a `CodelesslyWidget`, a `CodelesslyCaptureScope`);
+/// the action only reads.
 abstract final class CaptureRegistry {
-  static final Expando<GlobalKey> _layouts = Expando('codelessly capture boundary');
-  static final List<GlobalKey> _apps = [];
+  static final Expando<BoundaryFinder> _layouts = Expando('codelessly capture boundary');
+  static final List<BoundaryFinder> _apps = [];
 
-  /// Layout [tree] is painted in the [RepaintBoundary] keyed [key].
-  static void bindLayout(RenderTree tree, GlobalKey key) => _layouts[tree] = key;
+  /// The boundary around the layout [tree] draws.
+  static void bindLayout(RenderTree tree, BoundaryFinder find) => _layouts[tree] = find;
 
-  /// The boundary layout [tree] is painted in, while shown.
-  static RenderRepaintBoundary? layoutOf(RenderTree? tree) => tree == null ? null : _boundary(_layouts[tree]);
+  /// The boundary around [tree]'s layout, when it is on screen.
+  static RenderRepaintBoundary? layoutOf(RenderTree? tree) => tree == null ? null : _attached(_layouts[tree]);
 
-  /// The innermost [CodelesslyCaptureScope] shown (the app's), if any.
+  /// Adds a boundary around the whole app; the last one added that is on
+  /// screen is [app].
+  static void addApp(BoundaryFinder find) => _apps.add(find);
+
+  static void removeApp(BoundaryFinder find) => _apps.remove(find);
+
+  /// The innermost app boundary on screen.
   static RenderRepaintBoundary? get app {
-    for (final key in _apps.reversed) {
-      final b = _boundary(key);
+    for (final find in _apps.reversed) {
+      final b = _attached(find);
       if (b != null) return b;
     }
     return null;
   }
 
-  static RenderRepaintBoundary? _boundary(GlobalKey? key) {
-    final r = key?.currentContext?.findRenderObject();
-    return r is RenderRepaintBoundary && r.attached ? r : null;
+  static RenderRepaintBoundary? _attached(BoundaryFinder? find) {
+    final r = find?.call();
+    return r != null && r.attached ? r : null;
   }
-}
-
-/// Wraps the host app (or any part of it) so that a `captureScreenshot`
-/// action with `target: app` captures it, including what isn't a Codelessly
-/// layout. `CodelesslyPresenterHost` adds one.
-class CodelesslyCaptureScope extends StatefulWidget {
-  const CodelesslyCaptureScope({super.key, required this.child});
-
-  final Widget child;
-
-  @override
-  State<CodelesslyCaptureScope> createState() => _CodelesslyCaptureScopeState();
-}
-
-class _CodelesslyCaptureScopeState extends State<CodelesslyCaptureScope> {
-  final GlobalKey _key = GlobalKey(debugLabel: 'Codelessly capture scope');
-
-  @override
-  void initState() {
-    super.initState();
-    CaptureRegistry._apps.add(_key);
-  }
-
-  @override
-  void dispose() {
-    CaptureRegistry._apps.remove(_key);
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) => RepaintBoundary(key: _key, child: widget.child);
 }
 
 /// [boundary] (or, with [box], the part of it [box] covers) as a PNG:
@@ -102,6 +82,6 @@ Future<Map<String, Object?>> captureImage(RenderRepaintBoundary boundary, {Rende
 }
 
 double _devicePixelRatio() {
-  final views = WidgetsBinding.instance.platformDispatcher.views;
+  final views = ui.PlatformDispatcher.instance.views;
   return views.isEmpty ? 1 : views.first.devicePixelRatio;
 }

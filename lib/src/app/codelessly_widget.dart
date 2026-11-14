@@ -34,6 +34,7 @@ import 'ui/route_transition.dart';
 import '../runtime/actions/script_host.dart' show scriptNodeValues;
 import '../runtime/actions/ui.dart';
 import 'navigator_ui.dart';
+import 'ui/capture_scope.dart';
 import '../runtime/actions/variable_animator.dart';
 import '../runtime/actions/wiring.dart';
 import '../runtime/actions/runner.dart' show ActionCancellation, CoreActions;
@@ -1311,7 +1312,7 @@ class _LayoutViewState extends State<_LayoutView> {
     final dark = _dark && (theme.hasDark || theme.mode == api.ThemeMode.dark);
     content = FeedbackThemeScope(theme: _feedbackTheme(dark), child: KeyedSubtree(key: _chromeKey, child: content));
     // What a captureScreenshot action of this screen captures.
-    CaptureRegistry.bindLayout(_screen.tree, _captureKey);
+    CaptureRegistry.bindLayout(_screen.tree, () => boundaryOf(_captureKey));
     content = RepaintBoundary(key: _captureKey, child: content);
     content = Theme(
       data: themeDataOf(theme.forBrightness(dark: dark), brightness: dark ? Brightness.dark : Brightness.light),
