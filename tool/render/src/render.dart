@@ -1441,7 +1441,11 @@ String? _canvasOf(NodeBox b) {
               '${write.toSet().length == write.length ? write.join(' or ') : 'they are on one canvas: give them different ids'}',
         );
       }
-      chosen = all.last;
+      // Of the copies a list or a table repeats, the first one in view (a
+      // table's five headers: the one a person would see first); the last
+      // made when none is.
+      final view = Offset.zero & binding.renderViews.first.size;
+      chosen = all.where((b) => b.attached && b.hasSize && _rectOf(b).overlaps(view)).firstOrNull ?? all.last;
     }
     if (i < segments.length - 1) {
       final within = chosen;
