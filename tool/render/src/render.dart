@@ -449,7 +449,8 @@ Future<void> _renderAll(
   String? siteDir,
 }) async {
   // 3. Which screens.
-  final screens = _screens(published, docs, args.screens, (s) => issue(s));
+  final screens = _screens(published, docs, args.screens, (s) => issue(s),
+      components: [if (components != null) for (final t in components.types) components[t]!.document.toJson()]);
   final recorder = _Recorder();
   final binding = tester.binding;
   final exporter = _OutDirExporter(args.out, report);
@@ -788,17 +789,46 @@ List<String> _screenList(
     ];
 
 /// The layouts to render: those [wanted] names (a canvas id, a layout id,
-/// a screen name or a canvas name), else every screen.
+/// a screen name or a canvas name), else every screen: every layout but the
+/// overlays and backdrops, and but those only ever opened as a modal (an
+/// `openModal` in a page or in a component, [components] included, names
+/// each of its canvases and no `navigate` does).
 List<String> _screens(
   ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published,
   Map<String, api.Json> docs,
   List<String> wanted,
-  void Function(RuntimeIssue) issue,
-) {
+  void Function(RuntimeIssue) issue, {
+  List<api.Json> components = const [],
+}) {
   final all = published.screens.keys.toList();
   if (wanted.isEmpty) {
     final model = published.bundle.model;
-    return [for (final s in all) if (!model.overlayLayoutIds.contains(s) && !model.backdropLayoutIds.contains(s)) s];
+    final modals = <String>{}, navigated = <String>{};
+    void walk(Object? v) {
+      if (v is Map) {
+        final to = v['to'];
+        if (to is String && v['type'] == api.OpenModalAction.typeName) modals.add(to);
+        if (to is String && v['type'] == api.NavigateAction.typeName) navigated.add(to);
+        v.values.forEach(walk);
+      } else if (v is List) {
+        v.forEach(walk);
+      }
+    }
+
+    docs.values.forEach(walk);
+    components.forEach(walk);
+    bool onlyModal(String layout) {
+      final canvases = published.screens[layout] ?? const <String>[];
+      return layout != model.entryLayoutId &&
+          canvases.isNotEmpty &&
+          canvases.every((c) => modals.contains(c) && !navigated.contains(c)) &&
+          !navigated.contains(layout);
+    }
+
+    return [
+      for (final s in all)
+        if (!model.overlayLayoutIds.contains(s) && !model.backdropLayoutIds.contains(s) && !onlyModal(s)) s,
+    ];
   }
   final out = <String>[];
   for (final w in wanted) {

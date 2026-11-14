@@ -25,6 +25,8 @@
   notes it depends on the theme (`RenderTree.dependOnTheme`) and a theme change (`ComponentRegistry.theme`,
   `themeChanged`) re-applies it. Before, only nodes naming theme colours re-applied, so an unstyled gauge kept the
   old mode's colours.
+- The render command with no `--screen` no longer renders a canvas only ever opened as a modal as a screen of its
+  own, whether the `openModal` is on a page or inside a component (the site's or its design system's).
 
 ## 30.1.0
 

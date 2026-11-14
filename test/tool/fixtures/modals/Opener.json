@@ -1,0 +1,36 @@
+{
+ "schema": 3,
+ "id": "Opener",
+ "roots": [
+  "o"
+ ],
+ "widget": {
+  "type": "Opener",
+  "doc": "A button that opens a dialog."
+ },
+ "nodes": {
+  "o": {
+   "type": "filledButton",
+   "props": {
+    "label": "More"
+   },
+   "layout": {
+    "width": 160,
+    "height": 40
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "compDlg"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}
