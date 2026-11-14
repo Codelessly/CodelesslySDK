@@ -263,6 +263,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // 2. Fonts and assets. A font handler left by an earlier run in this
   // process would load into a disposed instance.
   FontDemand.handler = null;
+  _mouse = null;
   final root = flutterRoot ?? Platform.environment['FLUTTER_ROOT'] ?? '';
   unreadFonts.clear();
   // The site's folder: what its fonts' and images' relative paths start from.
@@ -734,6 +735,10 @@ Future<void> _renderAll(
             .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(boxes));
       }
 
+      // The mouse a --hover step put on the screen leaves with it: the next
+      // size's hover adds it again (Flutter's mouse tracker asserts on a
+      // device added twice).
+      await _removeMouse();
       await tester.pumpWidget(const SizedBox());
       await tester.pump(const Duration(seconds: 10));
       collect();
@@ -741,6 +746,15 @@ Future<void> _renderAll(
       codelessly.dispose();
     }
   }
+}
+
+/// The mouse `--hover` steps move, while a capture is made.
+TestGesture? _mouse;
+
+Future<void> _removeMouse() async {
+  final m = _mouse;
+  _mouse = null;
+  if (m != null) await m.removePointer();
 }
 
 Object? _valueAt(api.Json json, String pointer) {
@@ -1469,8 +1483,12 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     case 'hover':
       final (at, problem) = await pointAt(step.target, 'hover');
       if (at == null) return problem;
-      final g = await tester.createGesture(kind: PointerDeviceKind.mouse);
-      await g.addPointer(location: ui.Offset.zero);
+      // One mouse per capture: a later hover moves it on.
+      var g = _mouse;
+      if (g == null) {
+        g = _mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+        await g.addPointer(location: ui.Offset.zero);
+      }
       await g.moveTo(at);
       return null;
     case 'focus' || 'type':
