@@ -103,8 +103,8 @@ void main() {
   testWidgets('the status filter keeps the matching records', (tester) async {
     await _show(tester);
     await _tap(tester, 'All');
-    await tester.tap(find.text('Overdue').last);
-    await tester.pumpAndSettle();
+    // The menu's rows draw their own labels, in the root's overlay layer.
+    await _tap(tester, 'Overdue');
     expect(_rows(tester), ['INV-2', 'INV-4']);
     expect(_shows(tester, '1–2 of 2'), isTrue, reason: '${_texts(tester)}');
   });
