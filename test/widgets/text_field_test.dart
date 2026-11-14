@@ -238,6 +238,98 @@ Iterable<RenderObject> _below(RenderObject r) sync* {
 }
 
 void main() {
+  group('a focused field that goes away', () {
+    Map<String, Json> form() => {
+          'col': {'type': 'column', 'children': ['form', 'thanks'], 'layout': {'width': 400, 'height': 400}},
+          'form': {
+            'type': 'column',
+            'children': ['field', 'submit'],
+            'layout': {'width': 360, 'height': {'hug': 120}},
+            'bind': {'visible': r'${= !done}'},
+          },
+          'field': {
+            'type': 'textField',
+            'layout': {'width': 360, 'height': 56},
+            'bind': {'props.initialValue': r'${email}'},
+            'actions': [
+              harness.reaction('changed', [
+                {'type': 'setVariable', 'variable': 'email', 'value': r'${result}'},
+              ]),
+            ],
+          },
+          'submit': {
+            'type': 'box',
+            'layout': {'width': 200, 'height': 48},
+            'decoration': {'fills': [{'color': '#FF000000'}]},
+            'actions': [
+              harness.reaction('click', [
+                {'type': 'setVariable', 'variable': 'done', 'value': r'${= true}'},
+              ]),
+            ],
+          },
+          'thanks': {'type': 'box', 'layout': {'width': 100, 'height': 20}, 'bind': {'visible': r'${done}'}},
+        };
+
+    testWidgets('typing, then a tap that hides the form, removes the field cleanly', (tester) async {
+      final s = await harness.show(tester, form(), variables: [
+        harness.v('email', ''),
+        harness.v('done', false, VariableType.boolean),
+      ]);
+      await tester.enterText(find.byType(EditableText), 'a@b.co');
+      await tester.pump();
+      expect(s['email'], 'a@b.co');
+      await tester.tapAt(s.center('submit'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(s['done'], true);
+      expect(tester.state<EditableTextState>(find.byType(EditableText)).widget.focusNode.hasFocus, isFalse,
+          reason: 'a hidden field gives the focus back');
+    });
+
+    testWidgets('a focused field in a list item that a tap removes goes without an error', (tester) async {
+      final s = await harness.show(tester, {
+        'col': {'type': 'column', 'children': ['list', 'clear'], 'layout': {'width': 400, 'height': 400}},
+        'list': {
+          'type': 'listView',
+          'children': ['field'],
+          'layout': {'width': 360, 'height': {'hug': 120}},
+          'props': {'scrollable': false},
+          'bind': {'data': r'${rows}'},
+        },
+        'field': {'type': 'textField', 'layout': {'width': 360, 'height': 56}, 'bind': {'props.initialValue': r'${item}'}},
+        'clear': {
+          'type': 'box',
+          'layout': {'width': 200, 'height': 48},
+          'decoration': {'fills': [{'color': '#FF000000'}]},
+          'actions': [
+            harness.reaction('click', [
+              {'type': 'setVariable', 'variable': 'rows', 'value': r'${= []}'},
+            ]),
+          ],
+        },
+      }, variables: [harness.v('rows', ['a', 'b'], VariableType.list)]);
+      await tester.enterText(find.byType(EditableText).first, 'xyz');
+      await tester.pump();
+      await tester.tapAt(s.center('clear'));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(EditableText), findsNothing);
+    });
+
+    testWidgets('a focused field hidden by a variable change lets the focus go without an error', (tester) async {
+      final s = await harness.show(tester, form(), variables: [
+        harness.v('email', ''),
+        harness.v('done', false, VariableType.boolean),
+      ]);
+      await tester.showKeyboard(find.byType(EditableText));
+      await tester.pump();
+      s.scope.set('done', true);
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+      expect(FocusManager.instance.primaryFocus?.context?.widget, isNot(isA<EditableText>()));
+    });
+  });
+
   for (final density in [VisualDensity.standard, VisualDensity.compact]) {
     testWidgets('a fixed-height field keeps its height under $density density', (tester) async {
       final tree = NodeTree(DocumentSource(_doc({
