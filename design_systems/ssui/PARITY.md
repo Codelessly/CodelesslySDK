@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 121. Still to rebuild: 43.**
+**Here: 126. Still to rebuild: 38.**
 
 ## Here
 
@@ -26,6 +26,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Banner | Banner |  |
 | BatchProgressBar | BatchProgressBar |  |
 | Breadcrumb | Breadcrumb |  |
+| BrowserTabs | BrowserTabs |  |
 | Button | Button | buttons (filled, outlined, text, elevated) |
 | CardActions | CardActions |  |
 | Carousel |  | pageView |
@@ -35,6 +36,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | CloudSyncIndicator | CloudSyncIndicator |  |
 | CodeBlock | CodeBlock |  |
 | ColorInput | ColorInput |  |
+| Combobox | Combobox |  |
 | CommandPalette | CommandPalette |  |
 | CompactAppBar | CompactAppBar |  |
 | ConnectionStatus | ConnectionStatus |  |
@@ -63,6 +65,8 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Hyperlink | Hyperlink |  |
 | IconBox | IconBox |  |
 | IconButton | IconButton | iconButton |
+| IconSegmentedControl | IconSegmentedControl |  |
+| ImageUpload | ImageUpload |  |
 | InlineStat | InlineStat |  |
 | LoadingSpinner |  | activityIndicator |
 | LoadMore | LoadMore |  |
@@ -132,6 +136,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Toast |  | showToast action |
 | ToggleRow | ToggleRow |  |
 | Tooltip | Tooltip | tooltip behavior |
+| Tree | Tree |  |
 | TrialBanner | TrialBanner |  |
 | UpgradeButton | UpgradeButton |  |
 | UserMenu | UserMenu |  |
@@ -151,18 +156,18 @@ CodePreview
 
 FolderCard, ResourceCard
 
-### Inputs (12)
+### Inputs (9)
 
-Combobox, NumberPresetInput, ExtensionChipsInput, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInputWithBanner
+NumberPresetInput, ExtensionChipsInput, IconSelect, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInputWithBanner
 
-### Navigation and chrome (8)
+### Navigation and chrome (7)
 
-BrowserTabs, TabOverflowScroll, SplitPaneTabs, SidebarTogglePattern, Toolbar, CollapsibleSection, CanvasShell, ResizableRow
+TabOverflowScroll, SplitPaneTabs, SidebarTogglePattern, Toolbar, CollapsibleSection, CanvasShell, ResizableRow
 
 ### Menus and overlays (9)
 
 AddContextMenu, FileTreeContextMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, NotePopover, SlidingPanel, ViewerDialog, VariableContractHover
 
-### Data and specialized (11)
+### Data and specialized (10)
 
-Tree, FileTree, DateTimelineAxis, ImageGallery, NestedTaskLedger, ReorderableList, ReorderGhost, SuggestionReviewItem, CompactSuggestionReviewItem, SuggestionActionObject, VariableContractList
+FileTree, DateTimelineAxis, ImageGallery, NestedTaskLedger, ReorderableList, ReorderGhost, SuggestionReviewItem, CompactSuggestionReviewItem, SuggestionActionObject, VariableContractList

@@ -1,0 +1,401 @@
+{
+ "schema": 3,
+ "id": "ImageUpload",
+ "roots": [
+  "uploader"
+ ],
+ "widget": {
+  "type": "ImageUpload",
+  "doc": "Where pictures are dropped or picked, with the picked ones shown as thumbnails under it. Fires onPick when pressed and onRemove with a picture's address.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Upload images",
+    "doc": "The drop area's title."
+   },
+   {
+    "key": "description",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Drag and drop or click to browse",
+    "doc": "The line under it."
+   },
+   {
+    "key": "hint",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted line under that (formats, a size limit)."
+   },
+   {
+    "key": "images",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The picked pictures' addresses."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPick"
+   },
+   {
+    "key": "onRemove",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    340,
+    220
+   ],
+   "props": {
+    "hint": "PNG, JPG or WebP, up to 5 MB each"
+   }
+  }
+ ],
+ "nodes": {
+  "uploader": {
+   "type": "column",
+   "children": [
+    "drop",
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 16
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 220
+    }
+   }
+  },
+  "drop": {
+   "type": "column",
+   "children": [
+    "plate",
+    "texts"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 16
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 220
+    },
+    "padding": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "strokeWidth": 2,
+    "radius": 12,
+    "dashPattern": [
+     6,
+     5
+    ]
+   },
+   "states": {
+    "hovered": {
+     "drop": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ],
+       "strokes": [
+        {
+         "color": "primary"
+        }
+       ]
+      }
+     },
+     "glyph": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPick"
+      }
+     ]
+    }
+   ]
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 64,
+    "height": 64
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "image",
+    "color": "tertiaryText",
+    "size": 32
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "description",
+    "hint"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 60
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 18,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 25
+    }
+   }
+  },
+  "description": {
+   "type": "text",
+   "props": {
+    "text": "${props.description}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "hint": {
+   "type": "text",
+   "props": {
+    "text": "${props.hint}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 180
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${= props.hint != ''}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "thumb"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": 96
+   },
+   "bind": {
+    "data": "${props.images}",
+    "visible": "${= length(props.images) > 0}"
+   }
+  },
+  "thumb": {
+   "type": "stack",
+   "children": [
+    "remove"
+   ],
+   "layout": {
+    "width": 96,
+    "height": {
+     "fill": 96
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "",
+       "fit": "cover"
+      },
+      "visible": false
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.fills[1].image.url": "${item}",
+    "decoration.fills[1].visible": "${= item != ''}"
+   }
+  },
+  "remove": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20,
+    "x": {
+     "end": 4
+    },
+    "y": {
+     "start": 4
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#99000000"
+     }
+    ],
+    "radius": 9999
+   },
+   "tooltip": "Remove",
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onRemove",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "#FFFFFFFF",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  }
+ }
+}
