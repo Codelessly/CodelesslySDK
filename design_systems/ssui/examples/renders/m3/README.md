@@ -29,3 +29,18 @@ One page of an `appBar` (56), a `tabBar` (36), a `tabBar` with icons (48), a `na
 | `bars-{light,dark}.png` | this SDK: render-object bars, SSUI defaults |
 | `tabs-ssui-{light,dark}.png` | SSUI's `Tabs` component (components/Tabs.json) rendered by `tool/render/render.sh --component Tabs`: the reference `test/controls/tab_bar_test.dart` matches a zero-prop `tabBar` to (0.00 % of the pixels differ, light and dark) |
 | `navigation-ssui-{light,dark}.png` | soft_saas_ui's own `SoftSaaSTabBar` (`tool/ssui_golden/test/ssui_nav_golden_test.dart`): the reference `test/controls/navigation_bar_test.dart` matches a zero-prop `navigationBar` to (1.24 % light, 0.86 % dark; the rest is the labels' letter spacing, 0.25 inherited from Material's bodyMedium in the reference, none in SSUI's typography) |
+## Date and time pickers (workstream G)
+
+`test/controls/pickers_reference_test.dart` rebuilds SSUI's picker page (`../ssui-reference/ssui-pickers-*.png`,
+rendered from soft_saas_ui's own `SoftSaaSDatePicker`, `SoftSaaSTimePicker` and `SoftSaaSCalendar` by
+`tool/ssui_golden/test/ssui_pickers_test.dart`) from zero-prop `datePicker` / `timePicker` nodes, with the first
+field's calendar open.
+
+| File | What |
+|---|---|
+| `pickers-before-{light,dark}.png` | 30.1.0's Material islands (the empty picker showed today's date; a tap opened Material's dialog) |
+| `pickers-{light,dark}.png` | this SDK: SSUI's field and calendar popover, drawn as render objects |
+
+Measured against the reference: fields 4.2 % (light) / 4.8 % (dark) of the pixels differ by more than 40 in a channel,
+the calendar 6.1 % / 7.0 %; nearly all of it is text spacing (SSUI's own `Text` inherits Material's 0.25 letter
+spacing, which its `inputText` token does not have) and lucide's icon glyphs drawn as paths. The test holds it under 9 %.
