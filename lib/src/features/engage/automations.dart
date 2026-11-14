@@ -7,7 +7,8 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart'
     show ActionDef, Automation, AutomationTrigger, EmitEventAction, Node, PublishModelAutomations, Reaction, Trigger, TriggerType, engageCatalog;
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
+import 'dart:ui' show AppLifecycleState;
 
 import '../../app/codelessly.dart';
 import '../../runtime/actions/app_events.dart';
@@ -60,8 +61,12 @@ const String kUsageStorageKey = 'codelessly.usage';
 /// storage: `launches`, `sessions`, `firstSeen`, `lastSeen`,
 /// `isFirstLaunch`, `isFirstSession`, `events.<name>.count`/`.last`,
 /// `automations.<id>.count`/`.last`/`.session`.
-class CodelesslyAutomations with WidgetsBindingObserver implements AppEventBus {
-  CodelesslyAutomations(this.codelessly, this._usage);
+class CodelesslyAutomations implements AppEventBus {
+  CodelesslyAutomations(this.codelessly, this._usage, {this.lifecycle});
+
+  /// Tells it when the app pauses and resumes (the host's: a Flutter app's
+  /// binding). Without one, the app calls [handleLifecycle].
+  final AppLifecycleSource? lifecycle;
 
   final Codelessly codelessly;
   final ValuesScope _usage;
@@ -126,12 +131,8 @@ class CodelesslyAutomations with WidgetsBindingObserver implements AppEventBus {
     codelessly.route.addListener(_routeChanged);
     _authWatch = watchName(codelessly.appVariables, 'auth');
     _authWatch?.addListener(_authChanged);
-    try {
-      WidgetsBinding.instance.addObserver(this);
-      _observing = true;
-    } catch (_) {
-      // No binding (a headless test): the app calls handleLifecycle.
-    }
+    lifecycle?.addListener(handleLifecycle);
+    _observing = lifecycle != null;
     _switchUser(_currentUserKey(), startSession: true);
     _ready = true;
     final start = _event('appStart');
@@ -176,8 +177,6 @@ class CodelesslyAutomations with WidgetsBindingObserver implements AppEventBus {
 
   // --- lifecycle -----------------------------------------------------------------
 
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) => handleLifecycle(state);
 
   /// The app's lifecycle moved to [state] (the binding's observer calls it).
   void handleLifecycle(AppLifecycleState state) {
@@ -429,7 +428,7 @@ class CodelesslyAutomations with WidgetsBindingObserver implements AppEventBus {
     if (_disposed) return;
     _disposed = true;
     _stopIntervals();
-    if (_observing) WidgetsBinding.instance.removeObserver(this);
+    if (_observing) lifecycle?.removeListener(handleLifecycle);
     if (_starting != null) {
       codelessly.removeListener(_modelChanged);
       codelessly.route.removeListener(_routeChanged);
@@ -437,4 +436,11 @@ class CodelesslyAutomations with WidgetsBindingObserver implements AppEventBus {
     _authWatch?.removeListener(_authChanged);
     unawaited(_events.close());
   }
+}
+
+/// Where app lifecycle changes come from: paused, resumed, hidden. A Flutter
+/// widget app's is its binding (lib/src/app/host_lifecycle.dart).
+abstract interface class AppLifecycleSource {
+  void addListener(ValueChanged<AppLifecycleState> listener);
+  void removeListener(ValueChanged<AppLifecycleState> listener);
 }

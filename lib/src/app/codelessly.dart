@@ -17,6 +17,7 @@ import '../runtime/contracts.dart';
 import '../runtime/expressions/scopes.dart';
 import '../services/services.dart';
 import 'automations.dart';
+import 'host_lifecycle.dart';
 import 'config.dart';
 import 'fonts.dart';
 import 'hosted_plugins.dart';
@@ -438,7 +439,7 @@ class Codelessly extends ChangeNotifier {
 
   /// Its automations and app events: started by a `CodelesslyPresenterHost` (or
   /// [CodelesslyAutomations.start]).
-  late final CodelesslyAutomations automations = CodelesslyAutomations(this, _usage);
+  late final CodelesslyAutomations automations = CodelesslyAutomations(this, _usage, lifecycle: WidgetsLifecycleSource.instance);
 
   /// Shows layout [layoutId] above the host app, from anywhere (no
   /// [CodelesslyWidget] on the current screen needed), and completes with

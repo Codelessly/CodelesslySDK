@@ -105,6 +105,7 @@ const widgetImportRatchet = {
   'src/app/backdrop_screens.dart',
   'src/app/codelessly.dart',
   'src/app/codelessly_widget.dart',
+  'src/app/host_lifecycle.dart',
   'src/app/navigator_ui.dart',
   'src/app/overlay_screens.dart',
   'src/app/page_transitions.dart',
@@ -120,7 +121,6 @@ const widgetImportRatchet = {
   'src/app/ui/route_transition.dart',
   'src/app/ui/toast.dart',
   'src/app/viewport.dart',
-  'src/features/engage/automations.dart',
   'src/features/media/embedded_player_native.dart',
   'src/features/media/embedded_player_web.dart',
   'src/features/media/players.dart',
@@ -156,7 +156,7 @@ const hostAdapterPaths = ['src/app/', 'src/session/view.dart', 'src/features/med
 
 /// The core files still on the ratchet when this was last counted. It only
 /// goes down: lower it with the list.
-const coreWidgetImports = 18;
+const coreWidgetImports = 17;
 
 /// One import or export directive: [target] is `dart:x`, `package:x/...`, or
 /// a path under lib/src (`render/convert.dart`) for a file of this package.
