@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 143. Still to rebuild: 21.**
+**Here: 151. Still to rebuild: 13.**
 
 ## Here
 
@@ -17,6 +17,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 |---|---|---|
 | ActionListItem | ActionListItem |  |
 | AddButton | AddButton |  |
+| AddContextMenu | AddContextMenu |  |
 | AgentChip | AgentChip |  |
 | AuthInput | AuthInput |  |
 | AuthPromptBanner | AuthPromptBanner |  |
@@ -28,6 +29,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Breadcrumb | Breadcrumb |  |
 | BrowserTabs | BrowserTabs |  |
 | Button | Button | buttons (filled, outlined, text, elevated) |
+| CanvasShell | CanvasShell |  |
 | CardActions | CardActions |  |
 | Carousel |  | pageView |
 | Checkbox | Checkbox | checkbox |
@@ -61,6 +63,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | FileListItem | FileListItem |  |
 | FileMetadataCard | FileMetadataCard |  |
 | FileTree | FileTree |  |
+| FileTreeContextMenu | FileTreeContextMenu |  |
 | FileUploader | FileUploader |  |
 | FilterLegend | FilterLegend |  |
 | FloatingActionButton |  | floatingActionButton |
@@ -82,6 +85,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | MetaInfo | MetaInfo |  |
 | ModelAvatarStack | ModelAvatarStack |  |
 | ModelSelectMenu | ModelSelectMenu |  |
+| MultiSelectDropdown | MultiSelectDropdown |  |
 | NavigationMenu | NavigationMenu |  |
 | NestedTaskLedger | NestedTaskLedger |  |
 | NotePopover | NotePopover |  |
@@ -103,8 +107,10 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | PulsingDots | PulsingDots |  |
 | RadialProgress | RadialProgress |  |
 | RadioButton | Radio | radio |
+| ResizableRow | ResizableRow |  |
 | ResourceCard | ResourceCard |  |
 | ResourceChip | ResourceChip |  |
+| RichTextField | RichTextField |  |
 | RichTextToolbar | RichTextToolbar |  |
 | RunHistoryList | RunHistoryList |  |
 | RunningIndicator | RunningIndicator |  |
@@ -118,6 +124,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Select | Select | dropdown |
 | SelectableListRow | SelectableListRow |  |
 | Sidebar | Sidebar |  |
+| SidebarTogglePattern | SidebarTogglePattern |  |
 | Skeleton | Skeleton |  |
 | Slider | Slider | slider |
 | SlidingPanel | SlidingPanel |  |
@@ -155,6 +162,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | TrialBanner | TrialBanner |  |
 | UpgradeButton | UpgradeButton |  |
 | UserMenu | UserMenu |  |
+| VariableContractHover | VariableContractHover |  |
 | ViewerDialog | ViewerDialog |  |
 | WindowToolbar | WindowToolbar |  |
 | WorkspaceSwitcher | WorkspaceSwitcher |  |
@@ -169,17 +177,17 @@ In the order planned: what generated UI reaches for first, then the application 
 
 FolderCard
 
-### Inputs (6)
+### Inputs (4)
 
-NumberPresetInput, ExtensionChipsInput, MultiSelectDropdown, HierarchicalPicker, RichTextField, PromptInputWithBanner
+NumberPresetInput, ExtensionChipsInput, HierarchicalPicker, PromptInputWithBanner
 
-### Navigation and chrome (5)
+### Navigation and chrome (2)
 
-TabOverflowScroll, SidebarTogglePattern, Toolbar, CanvasShell, ResizableRow
+TabOverflowScroll, Toolbar
 
-### Menus and overlays (4)
+### Menus and overlays (1)
 
-AddContextMenu, FileTreeContextMenu, ProjectSelector, VariableContractHover
+ProjectSelector
 
 ### Data and specialized (5)
 

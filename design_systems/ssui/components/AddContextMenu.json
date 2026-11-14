@@ -1,0 +1,313 @@
+{
+ "schema": 3,
+ "id": "AddContextMenu",
+ "roots": [
+  "menu"
+ ],
+ "widget": {
+  "type": "AddContextMenu",
+  "doc": "The small menu that adds something to a prompt: a file, a link, a note. Fires onSelected with the row's title.",
+  "props": [
+   {
+    "key": "items",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "File",
+     "Link",
+     "Note"
+    ],
+    "doc": "The rows' titles.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "attach_file",
+     "link",
+     "sticky_note_2"
+    ],
+    "doc": "One icon per row (empty: none)."
+   },
+   {
+    "key": "subtitles",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One muted line per row (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    176,
+    90
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "menu": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 176
+    },
+    "height": {
+     "hug": 90
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "row"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 174
+    },
+    "height": {
+     "hug": 88
+    }
+   },
+   "bind": {
+    "data": "${props.items}"
+   }
+  },
+  "row": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "texts"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 174
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     8,
+     6,
+     8,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder",
+      "visible": false
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "bind": {
+    "decoration.strokes[0].visible": "${= false && index > 0}"
+   },
+   "states": {
+    "hovered": {
+     "row": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "secondaryBackground"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "color": "secondaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index && props.icons[index] != ''}",
+    "props.icon": "${= length(props.icons) > index && props.icons[index] != '' ? props.icons[index] : 'circle'}",
+    "props.color": "${= false ? theme.error : theme.colors.secondaryText}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "subtitle"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "height": 1.35,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "props.style.color": "${= false ? theme.error : theme.colors.primaryText}"
+   }
+  },
+  "subtitle": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.subtitles) > index ? props.subtitles[index] : ''}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.subtitles) > index ? props.subtitles[index] : '' != ''}"
+   }
+  }
+ }
+}

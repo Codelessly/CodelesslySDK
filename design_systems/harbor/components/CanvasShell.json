@@ -1,0 +1,94 @@
+{
+ "schema": 3,
+ "id": "CanvasShell",
+ "roots": [
+  "shell"
+ ],
+ "widget": {
+  "type": "CanvasShell",
+  "doc": "The working area of an editor or a viewer: a toolbar from the call over a soft, padded surface that scrolls the call's children.",
+  "props": [
+   {
+    "key": "padding",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 20,
+    "doc": "The room round the content."
+   }
+  ],
+  "slots": [
+   "toolbar"
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    320,
+    160
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "shell": {
+   "type": "column",
+   "children": [
+    "toolbar",
+    "canvas"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "fill": 160
+    }
+   }
+  },
+  "toolbar": {
+   "type": "slot",
+   "props": {
+    "name": "toolbar"
+   }
+  },
+  "canvas": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "scrollable": true
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "fill": 120
+    },
+    "padding": 23
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ]
+   },
+   "bind": {
+    "layout.padding": "${props.padding}"
+   }
+  },
+  "content": {
+   "type": "slot"
+  }
+ }
+}
