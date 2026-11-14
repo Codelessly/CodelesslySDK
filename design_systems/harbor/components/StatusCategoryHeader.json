@@ -1,0 +1,229 @@
+{
+ "schema": 3,
+ "id": "StatusCategoryHeader",
+ "roots": [
+  "header"
+ ],
+ "widget": {
+  "type": "StatusCategoryHeader",
+  "doc": "The header of a group of items in one state: a state icon, a label, how many, and a chevron that opens and closes the group. Fires onToggle.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Running",
+    "doc": "The group's name.",
+    "required": true
+   },
+   {
+    "key": "count",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "How many items it holds."
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "running",
+      "failed",
+      "idle",
+      "ready",
+      "passed",
+      "cancelled"
+     ]
+    },
+    "default": "running",
+    "doc": "running, failed, idle, ready, passed or cancelled."
+   },
+   {
+    "key": "expanded",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "Open: the chevron points down."
+   },
+   {
+    "key": "variant",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "agents",
+      "workflow"
+     ]
+    },
+    "default": "agents",
+    "doc": "workflow: a larger label."
+   }
+  ],
+  "events": [
+   {
+    "key": "onToggle"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Running",
+   "size": [
+    160,
+    22
+   ],
+   "props": {
+    "label": "Running",
+    "count": 3
+   }
+  },
+  {
+   "name": "Failed",
+   "size": [
+    160,
+    22
+   ],
+   "props": {
+    "label": "Failed",
+    "count": 1,
+    "status": "failed",
+    "expanded": false
+   }
+  }
+ ],
+ "nodes": {
+  "header": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label",
+    "count",
+    "chevron"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": [
+     0,
+     2,
+     0,
+     2
+    ]
+   },
+   "decoration": {
+    "radius": 12
+   },
+   "states": {
+    "hovered": {
+     "chevron": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onToggle",
+       "value": "${= !props.expanded}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "autorenew",
+    "color": "primary",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "props.icon": "${= props.status == 'running' ? 'autorenew' : (props.status == 'failed' ? 'error_outline' : (props.status == 'idle' ? 'new_releases' : (props.status == 'cancelled' ? 'pause' : 'check_circle_outline')))}",
+    "props.color": "${= props.status == 'running' ? theme.primary : (props.status == 'failed' ? theme.error : (props.status == 'ready' || props.status == 'passed' ? theme.success : theme.colors.tertiaryText))}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "props.style.fontSize": "${= props.variant == 'workflow' ? 14.5 : 12}"
+   }
+  },
+  "count": {
+   "type": "CountBadge",
+   "props": {
+    "count": 0,
+    "showZero": true
+   },
+   "layout": {
+    "width": {
+     "hug": 18
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.count": "${props.count}"
+   }
+  },
+  "chevron": {
+   "type": "icon",
+   "props": {
+    "icon": "expand_more",
+    "color": "tertiaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "props.icon": "${= props.expanded ? 'expand_more' : 'chevron_right'}"
+   }
+  }
+ }
+}

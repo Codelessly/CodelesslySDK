@@ -3478,6 +3478,231 @@ add(component(
     },
 ))
 
+def _one_line(t, st, w, h):
+    """A text on one line, cut with an ellipsis."""
+    return {**text(t, st, w, h), 'props': {'text': t, 'style': st, 'maxLines': 1, 'overflow': 'ellipsis'}}
+
+
+# SectionToolbar (SectionToolbar.tsx): the bar over a section: 36 px on the secondary background over a
+# hairline, padding 4 4 4 12, 8 px apart: an icon in tertiary, the title 12/650, an 11 px turning arc while
+# it loads, then the call's actions at the end, 4 px apart.
+add(component(
+    'SectionToolbar',
+    'The bar over a section: an icon, a title, a spinner while it loads, and the call\'s actions at the end.',
+    'bar',
+    props=[prop('title', STRING, 'Section', 'The title.', required=True),
+           prop('icon', STRING, '', 'An icon before the title (empty: none).'),
+           prop('loading', BOOL, False, 'A small spinner after the title.')],
+    slots=['actions'],
+    previews=[preview('Default', 300, 36, title='Files', icon='folder'), preview('Loading', 300, 36, title='Runs', loading=True)],
+    nodes={
+        'bar': {'type': 'row', 'children': ['strut', 'glyph', 'title', 'spin', 'gap', 'actions'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                'layout': {'width': {'fill': 300}, 'height': {'hug': 36}, 'padding': [12, 0, 4, 0]},
+                'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'strut': {'type': 'box', 'layout': {'width': 0, 'height': 35}},
+        'glyph': {**icon('folder', 'tertiaryText', 14), 'bind': {'visible': "${= props.icon != ''}", 'props.icon': '${props.icon}'}},
+        'title': _one_line('${props.title}', style(12, 600, 'primaryText', 1.3), {'hug': 60}, {'hug': 16}),
+        'spin': {'type': 'circularProgressIndicator', 'layout': {'width': 11, 'height': 11}, 'props': {'color': 'tertiaryText', 'strokeWidth': 1.5},
+                 'bind': {'visible': '${props.loading}'}},
+        'gap': {'type': 'box', 'layout': {'width': {'fill': 20}, 'height': 1}},
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+    },
+))
+
+# PaneToolbar (PaneToolbar.tsx): the bar of a pane, the SectionToolbar's shape with a title you can press, a
+# muted note 11 after it, the call's actions and a close button at the end.
+add(component(
+    'PaneToolbar',
+    'The bar of a pane: an icon, a title, a muted note, the call\'s actions and a close button. Fires onTitle and onClose.',
+    'bar',
+    props=[prop('title', STRING, 'Pane', 'The title.', required=True),
+           prop('meta', STRING, '', 'A muted note after the title (a count, a branch).'),
+           prop('icon', STRING, '', 'An icon before the title (empty: none).'),
+           prop('loading', BOOL, False, 'A small spinner after the title.'),
+           prop('closable', BOOL, True, 'A close button at the end.')],
+    events=['onTitle', 'onClose'],
+    slots=['actions'],
+    previews=[preview('Default', 300, 36, title='Preview', meta='main', icon='visibility')],
+    nodes={
+        'bar': {'type': 'row', 'children': ['strut', 'glyph', 'title', 'meta', 'spin', 'gap', 'actions', 'close'],
+                'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                'layout': {'width': {'fill': 300}, 'height': {'hug': 36}, 'padding': [12, 0, 4, 0]},
+                'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'strut': {'type': 'box', 'layout': {'width': 0, 'height': 35}},
+        'glyph': {**icon('visibility', 'tertiaryText', 14), 'bind': {'visible': "${= props.icon != ''}", 'props.icon': '${props.icon}'}},
+        'title': {**_one_line('${props.title}', style(12, 600, 'primaryText', 1.3), {'hug': 60}, {'hug': 16}),
+                  'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onTitle'}]}]},
+        'meta': {**_one_line('${props.meta}', style(11, 400, 'tertiaryText', 1.3), {'hug': 30}, {'hug': 15}),
+                 'bind': {'visible': "${= props.meta != ''}"}},
+        'spin': {'type': 'circularProgressIndicator', 'layout': {'width': 11, 'height': 11}, 'props': {'color': 'tertiaryText', 'strokeWidth': 1.5},
+                 'bind': {'visible': '${props.loading}'}},
+        'gap': {'type': 'box', 'layout': {'width': {'fill': 20}, 'height': 1}},
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+        'close': {'type': 'IconButton', 'props': {'icon': 'close', 'size': 'compact'}, 'layout': {'width': 28, 'height': 28},
+                  'bind': {'visible': '${props.closable}'}, 'tooltip': 'Close',
+                  'actions': [{'trigger': {'type': 'event', 'event': 'onPressed'}, 'actions': [{'type': 'componentEvent', 'event': 'onClose'}]}]},
+    },
+))
+
+# CompactAppBar (CompactAppBar.tsx): a small window's app bar: 46 px over a hairline, padding 0 6 0 12: a
+# 24 px brand plate, radius 6, a 12 % tint of the brand color with a 14 px icon; 8 px on, the title 13/600
+# (-0.2) over a status line 10 in tertiary with an optional 5 px dot; then the call's actions (28 px round
+# ghost buttons, 16 px icons).
+add(component(
+    'CompactAppBar',
+    'The app bar of a small window or a panel: a brand plate, a title over a status line, the call\'s actions at the end.',
+    'bar',
+    props=[prop('title', STRING, 'App', 'The title.', required=True),
+           prop('status', STRING, '', 'The line under the title.'),
+           prop('statusColor', STRING, '', 'A 5 px dot of this color before the status (empty: none).'),
+           prop('icon', STRING, 'bolt', 'The brand plate\'s icon.')],
+    slots=['actions'],
+    previews=[preview('Default', 320, 46, title='Relay', status='Connected', statusColor='#FF22C55E')],
+    nodes={
+        'bar': {'type': 'row', 'children': ['strut', 'plate', 'texts', 'actions'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                'layout': {'width': {'fill': 320}, 'height': {'hug': 46}, 'padding': [12, 0, 6, 0]},
+                'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'strut': {'type': 'box', 'layout': {'width': 0, 'height': 45}},
+        'plate': {'type': 'row', 'children': ['glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': 24, 'height': 24}, 'decoration': {'fills': [{'color': 'primaryTint'}], 'radius': 6}},
+        'glyph': {**icon('bolt', 'primary', 14), 'bind': {'props.icon': '${props.icon}'}},
+        'texts': {'type': 'column', 'children': ['title', 'line'], 'props': {'crossAxisAlignment': 'start', 'spacing': 2},
+                  'layout': {'width': {'fill': 200}, 'height': {'hug': 28}}},
+        'title': _one_line('${props.title}', style(13, 600, 'primaryText', 1.15, letterSpacing=-0.2), {'fill': 200}, {'hug': 15}),
+        'line': {'type': 'row', 'children': ['dot', 'status'], 'props': {'crossAxisAlignment': 'center', 'spacing': 3},
+                 'layout': {'width': {'fill': 200}, 'height': {'hug': 12}}, 'bind': {'visible': "${= props.status != ''}"}},
+        'dot': {'type': 'box', 'layout': {'width': 5, 'height': 5}, 'decoration': {'fills': [{'color': '#FF22C55E'}], 'radius': 9999},
+                'bind': {'visible': "${= props.statusColor != ''}",
+                         'decoration.fills[0].color': "${= props.statusColor != '' ? props.statusColor : '#00000000'}"}},
+        'status': _one_line('${props.status}', style(10, 400, 'tertiaryText', 1.2, letterSpacing=-0.1), {'hug': 60}, {'hug': 12}),
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+    },
+))
+
+# StatusCategoryHeader (StatusCategoryHeader.tsx): the button over a group of items in one state, radius 6,
+# 2 px above and below, 6 px apart: a 12 px state icon in the state's color (brand while running, red when
+# failed, green when ready or passed, tertiary idle or cancelled), the label 11/650 (13 for a workflow), a
+# count pill, and a 16 px chevron in tertiary: down when open, right when closed.
+SC = ['running', 'failed', 'idle', 'ready', 'passed', 'cancelled']
+add(component(
+    'StatusCategoryHeader',
+    'The header of a group of items in one state: a state icon, a label, how many, and a chevron that opens and closes the group. Fires onToggle.',
+    'header',
+    props=[prop('label', STRING, 'Running', 'The group\'s name.', required=True),
+           prop('count', NUMBER, 0, 'How many items it holds.'),
+           prop('status', enum(*SC), 'running', 'running, failed, idle, ready, passed or cancelled.'),
+           prop('expanded', BOOL, True, 'Open: the chevron points down.'),
+           prop('variant', enum('agents', 'workflow'), 'agents', 'workflow: a larger label.')],
+    events=['onToggle'],
+    previews=[preview('Running', 160, 22, label='Running', count=3), preview('Failed', 160, 22, label='Failed', count=1, status='failed', expanded=False)],
+    nodes={
+        'header': {'type': 'row', 'children': ['glyph', 'label', 'count', 'chevron'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                   'layout': {'width': {'hug': 160}, 'height': {'hug': 22}, 'padding': [0, 2, 0, 2]}, 'decoration': {'radius': 6},
+                   'states': {'hovered': {'chevron': {'props': {'color': 'primaryText'}}}},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onToggle', 'value': '${= !props.expanded}'}]}]},
+        'glyph': {**icon('autorenew', 'primary', 12),
+                  'bind': {'props.icon': "${= props.status == 'running' ? 'autorenew' : (props.status == 'failed' ? 'error_outline' : (props.status == 'idle' ? 'new_releases' : (props.status == 'cancelled' ? 'pause' : 'check_circle_outline')))}",
+                           'props.color': "${= props.status == 'running' ? theme.primary : (props.status == 'failed' ? theme.error : (props.status == 'ready' || props.status == 'passed' ? theme.success : theme.colors.tertiaryText))}"}},
+        'label': {**text('${props.label}', style(11, 600, 'primaryText', 1.3, letterSpacing=-0.1), {'hug': 50}, {'hug': 15}),
+                  'bind': {'props.style.fontSize': "${= props.variant == 'workflow' ? 13 : 11}"}},
+        'count': {'type': 'CountBadge', 'props': {'count': 0, 'showZero': True}, 'layout': {'width': {'hug': 18}, 'height': {'hug': 16}},
+                  'bind': {'props.count': '${props.count}'}},
+        'chevron': {**icon('expand_more', 'tertiaryText', 16), 'bind': {'props.icon': "${= props.expanded ? 'expand_more' : 'chevron_right'}"}},
+    },
+))
+
+# SectionCategoryHeaderFull (SectionCategoryHeaderFull.tsx): the full-width label over a group in a list: on
+# the secondary background over a 70 % hairline, 6 x 10, its title 10/700 in tertiary, upper case, 0.06 em apart.
+add(component(
+    'SectionCategoryHeaderFull',
+    'The full-width label over a group in a list: small upper-case letters on a soft band.',
+    'band',
+    props=[prop('title', STRING, 'Recent', 'The group\'s name.', required=True)],
+    slots=['trailing'],
+    previews=[preview('Default', 300, 26, title='Recent')],
+    nodes={
+        'band': {'type': 'row', 'children': ['title', 'trailing'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                 'layout': {'width': {'fill': 300}, 'height': {'hug': 26}, 'padding': [10, 6, 10, 6]},
+                 'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'title': _one_line('${= upper(props.title)}', style(10, 700, 'tertiaryText', 1.3, letterSpacing=0.6), {'fill': 240}, {'hug': 13}),
+        'trailing': {'type': 'slot', 'props': {'name': 'trailing'}},
+    },
+))
+
+# ScrollToBottomFAB (ScrollToBottomFAB.tsx): the round button that takes a conversation back to its end:
+# 30 px, on the page color with a 1 px 14 % border and a soft shadow (0 8 20 at 14 %), a 14 px chevron down.
+add(component(
+    'ScrollToBottomFAB',
+    'The small round button over a conversation or a log that takes it back to its end. Fires onPressed.',
+    'button',
+    events=['onPressed'],
+    previews=[preview('Default', 30, 30)],
+    nodes={
+        'button': {'type': 'row', 'children': ['glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                   'layout': {'width': {'hug': 30}, 'height': {'hug': 30}, 'padding': 8},
+                   'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'secondaryBorder'}], 'radius': 9999,
+                                  'effects': [shadow('#240F172A', 8, 20)]},
+                   'tooltip': 'Scroll to bottom',
+                   'states': {'hovered': {'button': HOVER, 'glyph': {'props': {'color': 'primaryText'}}}, 'pressed': {'button': PRESS}},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed'}]}]},
+        'glyph': icon('expand_more', 'secondaryText', 14),
+    },
+))
+
+# TabBarWithBadges (TabBarWithBadges.tsx): the tab bar at the foot of an app: its tabs share the width, each
+# 10 x 4 with a 20 px icon on a 40 x 32 plate, radius 8 (tinted when chosen), 3 px over a label 10 (600 and
+# the brand color when chosen, tertiary otherwise); a badge at the plate's corner, 16 px high, 9/700 white on
+# red for a count, blue for a word. Default: a hairline over it; floating: radius 14, a border and a shadow.
+add(component(
+    'TabBarWithBadges',
+    'The tab bar at the foot of an app: icons over labels, with a badge on a tab that has news. The chosen tab is kept in your variable. Fires onChanged.',
+    'bar',
+    props=[prop('tabs', STRINGS, ['Home', 'Inbox', 'Profile'], 'The tabs\' labels.', required=True),
+           prop('icons', STRINGS, ['home', 'inbox', 'person'], 'One icon per tab.', required=True),
+           prop('badges', STRINGS, [], 'One badge per tab: a count, a word, or empty for none.'),
+           prop('value', var(STRING), '', 'The name of your text variable holding the chosen tab\'s label.'),
+           prop('variant', enum('default', 'floating'), 'default', 'default: edge to edge under a hairline. floating: a rounded bar with a shadow.')],
+    events=[{'key': 'onChanged', 'payload': STRING}],
+    previews=[preview('Default', 320, 62, tabs=['Home', 'Inbox', 'Profile'], icons=['home', 'inbox', 'person'], badges=['', '3', ''], value='Home')],
+    nodes={
+        'bar': {'type': 'column', 'children': ['list'], 'props': {'crossAxisAlignment': 'stretch'},
+                'layout': {'width': {'fill': 320}, 'height': {'hug': 62}},
+                'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'top',
+                               'radius': 0, 'effects': []},
+                'bind': {'decoration.radius': "${= props.variant == 'floating' ? 14 : 0}",
+                         'decoration.strokeSides': "${= props.variant == 'floating' ? 'all' : 'top'}",
+                         'decoration.effects': "${= props.variant == 'floating' ? theme.shadows.level3 : []}"}},
+        'list': {'type': 'gridView', 'children': ['tab'],
+                 'props': {'crossAxisCount': 3, 'mainAxisExtent': 62, 'physics': 'never', 'alwaysScroll': False},
+                 'layout': {'width': {'fill': 320}, 'height': 62},
+                 'bind': {'data': '${props.tabs}', 'props.crossAxisCount': '${= max(1, length(props.tabs))}'}},
+        'tab': {'type': 'column', 'children': ['plate', 'label'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center', 'spacing': 3},
+                'layout': {'width': {'fill': 100}, 'height': {'fill': 62}, 'padding': [4, 0, 4, 0]},
+                'bind': {'selected': '${= item == props.value}'},
+                'states': {'selected': {'plate': {'decoration': {'fills': [{'color': 'primaryTint'}]}},
+                                        'glyph': {'props': {'color': 'primary'}},
+                                        'label': {'props': {'style': {'color': 'primary', 'fontWeight': 600}}}},
+                           'hovered': {'plate': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}}},
+                'actions': [{'trigger': 'click', 'actions': [
+                    {'type': 'setVariable', 'variable': 'props.value', 'value': '${item}'},
+                    {'type': 'componentEvent', 'event': 'onChanged', 'value': '${item}'}]}]},
+        'plate': {'type': 'stack', 'children': ['glyphBox', 'badge'], 'layout': {'width': 40, 'height': 32},
+                  'decoration': {'fills': [{'color': '#00000000'}], 'radius': 8}},
+        'glyphBox': {'type': 'row', 'children': ['glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                     'layout': {'width': 40, 'height': 32}},
+        'glyph': {**icon('circle', 'tertiaryText', 20),
+                  'bind': {'props.icon': "${= length(props.icons) > index ? props.icons[index] : 'circle'}"}},
+        'badge': {'type': 'row', 'children': ['badgeText'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': {'hug': 16}, 'height': 16, 'padding': [4, 0, 4, 0], 'constraints': {'minWidth': 16},
+                             'x': {'end': -4}, 'y': {'start': -2}},
+                  'decoration': {'fills': [{'color': '#FFEF4444'}], 'radius': 9999},
+                  'bind': {'visible': "${= length(props.badges) > index && props.badges[index] != ''}",
+                           'decoration.fills[0].color': "${= length(props.badges) > index && matches(props.badges[index], '^[0-9+]+$') ? '#FFEF4444' : '#FF3B82F6'}"}},
+        'badgeText': text("${= length(props.badges) > index ? props.badges[index] : ''}", style(9, 700, '#FFFFFFFF', 1.0), {'hug': 6}, {'hug': 9}),
+        'label': text('${item}', style(10, 400, 'tertiaryText', 1.2), {'hug': 30}, {'hug': 12}),
+    },
+))
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:

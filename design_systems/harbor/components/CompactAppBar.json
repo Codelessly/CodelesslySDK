@@ -1,0 +1,285 @@
+{
+ "schema": 3,
+ "id": "CompactAppBar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "CompactAppBar",
+  "doc": "The app bar of a small window or a panel: a brand plate, a title over a status line, the call's actions at the end.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "App",
+    "doc": "The title.",
+    "required": true
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The line under the title."
+   },
+   {
+    "key": "statusColor",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A 5 px dot of this color before the status (empty: none)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "bolt",
+    "doc": "The brand plate's icon."
+   }
+  ],
+  "slots": [
+   "actions"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    320,
+    46
+   ],
+   "props": {
+    "title": "Relay",
+    "status": "Connected",
+    "statusColor": "#FF22C55E"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "strut",
+    "barContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 46
+    },
+    "padding": [
+     14,
+     0,
+     7,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 52
+   }
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 24,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 12
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt",
+    "color": "primary",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "line"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 14.5,
+     "fontWeight": 600,
+     "height": 1.15,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.2
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "dot",
+    "status"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "bind": {
+    "visible": "${= props.status != ''}"
+   }
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 5,
+    "height": 5
+   },
+   "bind": {
+    "visible": "${= props.statusColor != ''}",
+    "decoration.fills[0].color": "${= props.statusColor != '' ? props.statusColor : '#00000000'}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF22C55E"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "status": {
+   "type": "text",
+   "props": {
+    "text": "${props.status}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.2,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 12
+    }
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  },
+  "barContent": {
+   "type": "row",
+   "children": [
+    "plate",
+    "texts",
+    "actions"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,205 @@
+{
+ "schema": 3,
+ "id": "SectionToolbar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "SectionToolbar",
+  "doc": "The bar over a section: an icon, a title, a spinner while it loads, and the call's actions at the end.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Section",
+    "doc": "The title.",
+    "required": true
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "An icon before the title (empty: none)."
+   },
+   {
+    "key": "loading",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A small spinner after the title."
+   }
+  ],
+  "slots": [
+   "actions"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    36
+   ],
+   "props": {
+    "title": "Files",
+    "icon": "folder"
+   }
+  },
+  {
+   "name": "Loading",
+   "size": [
+    300,
+    36
+   ],
+   "props": {
+    "title": "Runs",
+    "loading": true
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "strut",
+    "barContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     14,
+     0,
+     5,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 40
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "folder",
+    "color": "tertiaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.icon": "${props.icon}"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "spin": {
+   "type": "circularProgressIndicator",
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "props": {
+    "color": "tertiaryText",
+    "strokeWidth": 1.5
+   },
+   "bind": {
+    "visible": "${props.loading}"
+   }
+  },
+  "gap": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 20
+    },
+    "height": 1
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  },
+  "barContent": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "title",
+    "spin",
+    "gap",
+    "actions"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}
