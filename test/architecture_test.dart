@@ -148,6 +148,16 @@ const widgetImportRatchet = {
 /// The render-object controls: never on the ratchet.
 const widgetFreePaths = ['src/render/controls/', 'src/widgets/controls.dart'];
 
+/// Where a widget library is at home (design 11 §3.3 and §8): the adapter
+/// that puts the SDK in a Flutter widget app (`CodelesslyWidget`, its routes
+/// and presenter, the session view) and the players a plugin only ships as
+/// widgets. Everything else on the ratchet is the core, which goes to zero.
+const hostAdapterPaths = ['src/app/', 'src/session/view.dart', 'src/features/media/'];
+
+/// The core files still on the ratchet when this was last counted. It only
+/// goes down: lower it with the list.
+const coreWidgetImports = 28;
+
 /// One import or export directive: [target] is `dart:x`, `package:x/...`, or
 /// a path under lib/src (`render/convert.dart`) for a file of this package.
 typedef Directive = ({String file, String target});
@@ -308,7 +318,11 @@ void main() {
     for (final path in widgetFreePaths) {
       expect(importing.where((f) => f.startsWith(path)), isEmpty, reason: 'the render-object controls import no widget library');
     }
+    final core = importing.where((f) => !hostAdapterPaths.any(f.startsWith)).toList()..sort();
+    expect(core.length, lessThanOrEqualTo(coreWidgetImports), reason: 'the core imports of a widget library only go down');
+    expect(core.length, coreWidgetImports, reason: 'fewer now: lower coreWidgetImports to ${core.length}');
     // ignore: avoid_print
-    print('widget-library imports: ${importing.length} files');
+    print('widget-library imports: ${importing.length} files (${core.length} in the core, '
+        '${importing.length - core.length} in the host adapter and the plugin players)');
   });
 }
