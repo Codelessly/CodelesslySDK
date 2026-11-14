@@ -12,6 +12,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import '../../tool/render/src/args.dart';
 import '../../tool/render/src/compare.dart';
+import '../../tool/render/src/fonts.dart' show DirectoryFontFetcher;
 import '../../tool/render/src/render.dart';
 
 const fixtures = 'test/tool/fixtures';
@@ -24,6 +25,7 @@ List<String> codes(RenderReport r, [String? severity]) => [
 
 void main() {
   _modalScreens();
+  _lateFonts();
   late Directory out;
   setUp(() => out = Directory.systemTemp.createTempSync('render_command_test'));
   tearDown(() => out.deleteSync(recursive: true));
@@ -552,6 +554,27 @@ void main() {
     expect(wide.where((b) => b['id'] == 'cell'), hasLength(9), reason: 'three rows of three cells from one cell node');
     final narrow = boxes('390x844').singleWhere((b) => b['id'] == 'rail');
     expect([narrow['x'], narrow['w']], [24, 342.0]);
+  });
+}
+
+void _lateFonts() {
+  testWidgets('a text whose font arrives late by name is measured in it, not in the fallback: no false text_clipped', (tester) async {
+    final out = Directory.systemTemp.createTempSync('render_late_font');
+    addTearDown(() => out.deleteSync(recursive: true));
+    // The family is named by a binding (no layout lists it: it is asked for
+    // by name when the text lays out) and its file takes a while to read.
+    DirectoryFontFetcher.debugLatency = const Duration(milliseconds: 1500);
+    addTearDown(() => DirectoryFontFetcher.debugLatency = Duration.zero);
+    final report = await runRender(
+        tester,
+        RenderArgs(
+          inputs: ['$fixtures/latefont/page'],
+          out: out.path,
+          sizes: const [Size(390, 844)],
+          fontDirs: const ['$fixtures/latefont/fonts'],
+        ));
+    expect(codes(report), isNot(contains('text_clipped')), reason: '${report.diagnostics}');
+    expect(codes(report), isNot(contains('font_fallback')), reason: '${report.diagnostics}');
   });
 }
 

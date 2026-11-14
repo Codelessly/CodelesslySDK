@@ -1,0 +1,67 @@
+{
+ "schema": 3,
+ "id": "home",
+ "roots": [
+  "home"
+ ],
+ "variables": {
+  "home": [
+   {
+    "name": "face",
+    "type": "text",
+    "value": "Anton"
+   }
+  ]
+ },
+ "nodes": {
+  "home": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "headline"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "headline": {
+   "type": "text",
+   "props": {
+    "text": "CONDENSED HEADLINE THAT FITS",
+    "style": {
+     "fontSize": 22,
+     "color": "#FF000000"
+    }
+   },
+   "layout": {
+    "width": 300,
+    "height": 34
+   },
+   "bind": {
+    "props.style.fontFamily": "${face}"
+   }
+  }
+ }
+}

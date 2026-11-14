@@ -36,6 +36,10 @@
   in a site (`CodelesslyWidget`) and in a session (`CodelesslyView`). `RenderTree.textDefault` holds it under every
   node's inherited default text style. Before, controls took the theme's font and text nodes the platform's. No
   parity golden or render test changed.
+- The render command waits for its own font fetches still in flight before its runtime checks: a family asked for by
+  name late (named by a binding, so no layout lists it, its file slow to read) was measured in the fallback, so
+  `text_clipped` was reported for text the PNG drew in the real font. `DirectoryFontFetcher.debugLatency` simulates a
+  slow source in tests.
 
 ## 30.1.0
 
