@@ -2950,6 +2950,301 @@ add(component(
     },
 ))
 
+# AgentChip (AgentChip.tsx): a running helper as a small bordered pill, radius 6, 2 x 8, its parts 4 px apart,
+# 11 in secondary: an 11 px status icon (a turning arc in the brand color while running, a green check when
+# done, an x on an error; idle: a bot), the label on one line (220 px at most), and an x to dismiss it
+# (tertiary at 60 %, full on hover).
+add(component(
+    'AgentChip',
+    'A helper at work as a small pill: its state, its name and an x to dismiss it. Fires onPressed and onDismiss.',
+    'chip',
+    props=[prop('label', STRING, 'Agent', 'Its name.', required=True),
+           prop('status', enum('idle', 'running', 'done', 'error'), 'idle', 'idle, running, done or error.'),
+           prop('dismissible', BOOL, False, 'An x after the label.'),
+           prop('emphasized', BOOL, False, 'The label in the primary text color.')],
+    events=['onPressed', 'onDismiss'],
+    previews=[preview('Running', 120, 22, label='Researcher', status='running', dismissible=True),
+              preview('Done', 100, 22, label='Reviewer', status='done')],
+    nodes={
+        'chip': {'type': 'row', 'children': ['spin', 'glyph', 'label', 'dismiss'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                 'layout': {'width': {'hug': 100}, 'height': {'hug': 22}, 'padding': [8, 2, 8, 2]},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 6},
+                 'states': {'hovered': {'chip': HOVER}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed'}]}]},
+        'spin': {'type': 'circularProgressIndicator', 'layout': {'width': 11, 'height': 11}, 'props': {'color': 'primary', 'strokeWidth': 1.5},
+                 'bind': {'visible': "${= props.status == 'running'}"}},
+        'glyph': {**icon('smart_toy', 'tertiaryText', 11),
+                  'bind': {'visible': "${= props.status != 'running'}",
+                           'props.icon': "${= props.status == 'done' ? 'check_circle' : (props.status == 'error' ? 'close' : 'smart_toy')}",
+                           'props.color': "${= props.status == 'done' ? theme.success : (props.status == 'error' ? theme.error : theme.colors.tertiaryText)}"}},
+        'label': {**text('${props.label}', style(11, 400, 'secondaryText', 1.5), {'hug': 60}, {'hug': 17}),
+                  'props': {'text': '${props.label}', 'style': style(11, 400, 'secondaryText', 1.5), 'maxLines': 1, 'overflow': 'ellipsis'},
+                  'layout': {'width': {'hug': 60}, 'height': {'hug': 17}, 'constraints': {'maxWidth': 220}},
+                  'bind': {'props.style.color': '${= props.emphasized ? theme.colors.primaryText : theme.colors.secondaryText}',
+                           'props.style.fontWeight': '${= props.emphasized ? 500 : 400}'}},
+        'dismiss': {'type': 'row', 'children': ['x'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                    'layout': {'width': 15, 'height': 15, 'margin': [2, 0, 0, 0]}, 'decoration': {'radius': 4}, 'opacity': 0.6,
+                    'bind': {'visible': '${props.dismissible}'},
+                    'tooltip': 'Dismiss',
+                    'states': {'hovered': {'dismiss': {'opacity': 1, 'decoration': {'fills': [{'color': 'pressedOverlay'}]}}}},
+                    'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onDismiss'}]}]},
+        'x': icon('close', 'tertiaryText', 11),
+    },
+))
+
+# SelectableListRow (SelectableListRow.tsx): a row of a master list over a hairline, padding 9 12 10, 9 px
+# between what leads and the text: the title 12.5/600 on an 18 px line with what trails 10.5 in tertiary at
+# its end, 2 px under it a subtitle 11 on a 16 px line in secondary (monospace 10.5), then the call's meta
+# 4 px under. Hovered: the hover wash; selected: the brand tint.
+add(component(
+    'SelectableListRow',
+    'A row of a list you pick from: a title, a subtitle, a note at the end, selected or not. The call\'s children go under the text. Fires onSelected.',
+    'row',
+    props=[prop('title', STRING, 'Item', 'The title.', required=True),
+           prop('subtitle', STRING, '', 'A line under it.'),
+           prop('subtitleMono', BOOL, False, 'The subtitle in monospace (a path, an id).'),
+           prop('trailing', STRING, '', 'A short note at the end of the title\'s line (a time, a count).'),
+           prop('selected', BOOL, False, 'Tinted as the chosen row.')],
+    events=['onSelected'],
+    slots=['leading'],
+    children='list',
+    previews=[preview('Selected', 300, 54, title='Weekly digest', subtitle='Runs every Monday at 9', trailing='2h ago', selected=True),
+              preview('Plain', 300, 54, title='Nightly export', subtitle='jobs/export.yaml', subtitleMono=True)],
+    nodes={
+        'row': {'type': 'row', 'children': ['leading', 'texts'], 'props': {'crossAxisAlignment': 'start', 'spacing': 9},
+                'layout': {'width': {'fill': 300}, 'height': {'hug': 54}, 'padding': [12, 9, 12, 10]},
+                'decoration': {'fills': [{'color': '#00000000'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'},
+                'bind': {'selected': '${props.selected}'},
+                'states': {'hovered': {'row': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}},
+                           'selected': {'row': {'decoration': {'fills': [{'color': 'primaryTint'}]}}}},
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onSelected'}]}]},
+        'leading': {'type': 'slot', 'props': {'name': 'leading'}},
+        'texts': {'type': 'column', 'children': ['line', 'subtitle', 'meta'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 2},
+                  'layout': {'width': {'fill': 240}, 'height': {'hug': 36}}},
+        'line': {'type': 'row', 'children': ['title', 'trailing'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                 'layout': {'width': {'fill': 240}, 'height': {'hug': 18}}},
+        'title': {**text('${props.title}', style(12.5, 600, 'primaryText', 18 / 12.5), {'fill': 180}, {'hug': 18}),
+                  'props': {'text': '${props.title}', 'style': style(12.5, 600, 'primaryText', 18 / 12.5), 'maxLines': 1, 'overflow': 'ellipsis'}},
+        'trailing': {**text('${props.trailing}', style(10.5, 400, 'tertiaryText', 1.3), {'hug': 40}, {'hug': 14}),
+                     'bind': {'visible': "${= props.trailing != ''}"}},
+        'subtitle': {**text('${props.subtitle}', style(11, 400, 'secondaryText', 16 / 11), {'fill': 240}, {'hug': 16}),
+                     'props': {'text': '${props.subtitle}', 'style': style(11, 400, 'secondaryText', 16 / 11), 'maxLines': 1, 'overflow': 'ellipsis'},
+                     'bind': {'visible': "${= props.subtitle != ''}",
+                              'props.style.fontFamily': "${= props.subtitleMono ? 'monospace' : theme.fontFamily}",
+                              'props.style.fontSize': '${= props.subtitleMono ? 10.5 : 11}'}},
+        'meta': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'start', 'spacing': 4},
+                 'layout': {'width': {'fill': 240}, 'height': {'hug': 0}, 'padding': [0, 2, 0, 0]}},
+        'content': {'type': 'slot'},
+    },
+))
+
+# ActionListItem (ActionListItem.tsx): something you can act on, as a bordered card, radius 5, a faint shadow:
+# a 52 px preview column on the secondary background with a 17 px icon, past a hairline the title 13/650,
+# 4 px under it a path in monospace 10.5 in tertiary, 6 px under that a meta line 10.5 in tertiary; what the
+# call puts at its end (buttons) sits centered, 6 8 6 0. Disabled: 58 %.
+add(component(
+    'ActionListItem',
+    'Something you can act on, as a card: an icon panel, a title, a path and a note, with the call\'s actions at its end. Fires onPressed.',
+    'card',
+    props=[prop('title', STRING, 'Action', 'The title.', required=True),
+           prop('path', STRING, '', 'A path or id under it, in monospace.'),
+           prop('meta', STRING, '', 'A muted note under that.'),
+           prop('icon', STRING, 'bolt', 'The icon in the panel.'),
+           prop('enabled', BOOL, True, 'False dims it.')],
+    events=['onPressed'],
+    slots=['actions'],
+    previews=[preview('Default', 340, 66, title='Summarize new tickets', path='automations/summarize.yaml', meta='Last run 2h ago')],
+    nodes={
+        'card': {'type': 'row', 'children': ['panel', 'texts', 'tail'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 8},
+                 'layout': {'width': {'fill': 340}, 'height': {'hug': 66}, 'padding': 1},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 5, 'clip': 'antiAlias',
+                                'effects': [shadow('#0A0F172A', 1, 2)]},
+                 'bind': {'opacity': '${= props.enabled ? 1 : 0.58}'},
+                 'actions': [click('onPressed')]},
+        'panel': {'type': 'row', 'children': ['glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': 52, 'height': {'hug': 40}, 'constraints': {'minHeight': 40}},
+                  'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'right'}},
+        'glyph': {**icon('bolt', 'primaryText', 17), 'bind': {'props.icon': '${props.icon}'}},
+        'texts': {'type': 'column', 'children': ['title', 'path', 'meta'], 'props': {'crossAxisAlignment': 'stretch', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': {'fill': 200}, 'height': {'hug': 50}, 'padding': [0, 7, 0, 7]}},
+        'title': {**text('${props.title}', style(13, 600, 'primaryText', 1.3), {'fill': 200}, {'hug': 17}),
+                  'props': {'text': '${props.title}', 'style': style(13, 600, 'primaryText', 1.3), 'maxLines': 1, 'overflow': 'ellipsis'}},
+        'path': {**text('${props.path}', style(10.5, 400, 'tertiaryText', 1.25, fontFamily='monospace'), {'fill': 200}, {'hug': 13}),
+                 'props': {'text': '${props.path}', 'style': style(10.5, 400, 'tertiaryText', 1.25, fontFamily='monospace'), 'maxLines': 1, 'overflow': 'ellipsis'},
+                 'layout': {'width': {'fill': 200}, 'height': {'hug': 13}, 'margin': [0, 4, 0, 0]},
+                 'bind': {'visible': "${= props.path != ''}"}},
+        'meta': {**text('${props.meta}', style(10.5, 400, 'tertiaryText', 1.3), {'fill': 200}, {'hug': 14}),
+                 'layout': {'width': {'fill': 200}, 'height': {'hug': 14}, 'margin': [0, 6, 0, 0]},
+                 'bind': {'visible': "${= props.meta != ''}"}},
+        'tail': {'type': 'row', 'children': ['actions'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                 'layout': {'width': {'hug': 40}, 'height': {'hug': 40}, 'padding': [0, 6, 8, 6]}},
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+    },
+))
+
+# FileMetadataCard (FileMetadataCard.tsx): what is known about a file as a two column grid, 8 px between rows
+# and 10 between columns: a 92 px label 11/600 in tertiary, then its value 12 in primary (monospace 11.5); an
+# optional amber callout under it (border #FDE68A, radius 6, on #FFFBEB, 7 x 8, 11.5 in #92400E).
+add(component(
+    'FileMetadataCard',
+    'Facts about a file or a record as label and value rows, with an optional amber callout under them.',
+    'card',
+    props=[prop('labels', STRINGS, ['Path', 'Status', 'Updated'], 'The labels, one per row.', required=True),
+           prop('values', STRINGS, ['docs/brief.md', 'Draft', 'Today'], 'The values, one per label.', required=True),
+           prop('mono', BOOL, False, 'The values in monospace.'),
+           prop('callout', STRING, '', 'A note in an amber box under the rows (empty: none).')],
+    previews=[preview('Default', 300, 100, labels=['Path', 'Status', 'Updated'], values=['docs/brief.md', 'Draft', 'Today'],
+                      callout='The template changed since this file was written.')],
+    nodes={
+        'card': {'type': 'column', 'children': ['rows', 'callout'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 10},
+                 'layout': {'width': {'fill': 300}, 'height': {'hug': 100}}},
+        'rows': {'type': 'listView', 'children': ['row'], 'props': {'scrollable': False, 'spacing': 8},
+                 'layout': {'width': {'fill': 300}, 'height': {'hug': 60}}, 'bind': {'data': '${props.labels}'}},
+        'row': {'type': 'row', 'children': ['label', 'value'], 'props': {'crossAxisAlignment': 'start', 'spacing': 10},
+                'layout': {'width': {'fill': 300}, 'height': {'hug': 16}}},
+        'label': text('${item}', style(11, 600, 'tertiaryText', 16 / 11), 92, {'hug': 16}),
+        'value': {**text("${= length(props.values) > index ? props.values[index] : '—'}", style(12, 400, 'primaryText', 16 / 12), {'fill': 190}, {'hug': 16}),
+                  'bind': {'props.style.fontFamily': "${= props.mono ? 'monospace' : theme.fontFamily}",
+                           'props.style.fontSize': '${= props.mono ? 11.5 : 12}'}},
+        'callout': {'type': 'row', 'children': ['note'], 'layout': {'width': {'fill': 300}, 'height': {'hug': 30}, 'padding': [8, 7, 8, 7]},
+                    'decoration': {'fills': [{'color': 'warningTint'}], 'strokes': [{'color': 'warningTintBorder'}], 'radius': 6},
+                    'bind': {'visible': "${= props.callout != ''}"}},
+        'note': text('${props.callout}', style(11.5, 400, 'warning', 1.4), {'fill': 280}, {'hug': 16}),
+    },
+))
+
+# RunRecordRow (RunRecordRow.tsx): one past run, padding 8 14 8 16: the title 12.5/600 (-0.2) with the time 10
+# in secondary 8 px after it, under it the message 11.5 on a 1.4 line in secondary and the diff chips; at the
+# end, 2 px down, a 16 px state: a turning arc in the brand color, a green check or a red x.
+add(component(
+    'RunRecordRow',
+    'One past run in a history: what ran, when, a message, what it changed and how it ended.',
+    'row',
+    props=[prop('title', STRING, 'Run', 'What ran.', required=True),
+           prop('timestamp', STRING, '', 'When, after the title.'),
+           prop('message', STRING, '', 'A line under the title.'),
+           prop('status', enum('running', 'success', 'error', 'none'), 'success', 'running, success, error or none.'),
+           prop('created', NUMBER, 0, 'Files created.'), prop('modified', NUMBER, 0, 'Files modified.'),
+           prop('deleted', NUMBER, 0, 'Files deleted.')],
+    previews=[preview('Success', 320, 56, title='Sync docs', timestamp='2h ago', message='Updated 3 pages from the handbook.', created=1, modified=3),
+              preview('Running', 320, 34, title='Rebuild index', timestamp='now', status='running')],
+    nodes={
+        'row': {'type': 'row', 'children': ['texts', 'spin', 'state'], 'props': {'crossAxisAlignment': 'start', 'spacing': 4},
+                'layout': {'width': {'fill': 320}, 'height': {'hug': 56}, 'padding': [16, 8, 14, 8]}},
+        'texts': {'type': 'column', 'children': ['line', 'message', 'diff'], 'props': {'crossAxisAlignment': 'start', 'spacing': 3},
+                  'layout': {'width': {'fill': 260}, 'height': {'hug': 40}}},
+        'line': {'type': 'row', 'children': ['title', 'time'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                 'layout': {'width': {'fill': 260}, 'height': {'hug': 18}}},
+        'title': {**text('${props.title}', style(12.5, 600, 'primaryText', 1.4, letterSpacing=-0.2), {'hug': 80}, {'hug': 18}),
+                  'props': {'text': '${props.title}', 'style': style(12.5, 600, 'primaryText', 1.4, letterSpacing=-0.2), 'maxLines': 1, 'overflow': 'ellipsis'}},
+        'time': {**text('${props.timestamp}', style(10, 400, 'secondaryText', 1.4), {'hug': 30}, {'hug': 14}),
+                 'bind': {'visible': "${= props.timestamp != ''}"}},
+        'message': {**text('${props.message}', style(11.5, 400, 'secondaryText', 1.4), {'fill': 260}, {'hug': 16}),
+                    'bind': {'visible': "${= props.message != ''}"}},
+        'diff': {'type': 'DiffStatsBadge', 'layout': {'width': {'hug': 80}, 'height': {'hug': 16}, 'margin': [0, 2, 0, 0]},
+                 'bind': {'props.created': '${props.created}', 'props.modified': '${props.modified}', 'props.deleted': '${props.deleted}',
+                          'visible': '${= props.created + props.modified + props.deleted > 0}'}},
+        'spin': {'type': 'circularProgressIndicator', 'layout': {'width': 14, 'height': 14, 'margin': [0, 3, 1, 0]}, 'props': {'color': 'primary', 'strokeWidth': 2},
+                 'bind': {'visible': "${= props.status == 'running'}"}},
+        'state': {**icon('check_circle', 'success', 16), 'layout': {'width': 16, 'height': 16, 'margin': [0, 2, 0, 0]},
+                  'bind': {'visible': "${= props.status == 'success' || props.status == 'error'}",
+                           'props.icon': "${= props.status == 'error' ? 'cancel' : 'check_circle'}",
+                           'props.color': "${= props.status == 'error' ? theme.error : theme.success}"}},
+    },
+))
+
+# TrialBanner (TrialBanner.tsx, its compact bar): a trial running out, radius 8, padding 12, a 1 px tinted
+# border: a 16 px icon, 8 px, the message 14/500, and at its end an upgrade button and an x. Blue while there
+# is time; red when urgent.
+add(component(
+    'TrialBanner',
+    'A bar telling how much of a trial is left, with an upgrade button and an x. Urgent turns it red. Fires onUpgrade and onDismiss.',
+    'banner',
+    props=[prop('message', STRING, '7 days left in your trial', 'What it says.'),
+           prop('urgent', BOOL, False, 'Red: the trial is about to end or has.'),
+           prop('actionLabel', STRING, 'Upgrade', 'The button\'s label (empty: no button).'),
+           prop('dismissible', BOOL, True, 'An x at the end.')],
+    events=['onUpgrade', 'onDismiss'],
+    previews=[preview('Info', 380, 54), preview('Urgent', 380, 54, message='Your trial ends today', urgent=True)],
+    nodes={
+        'banner': {'type': 'row', 'children': ['glyph', 'message', 'action', 'dismiss'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                   'layout': {'width': {'fill': 380}, 'height': {'hug': 54}, 'padding': 12},
+                   'decoration': {'fills': [{'color': 'primaryTint'}], 'strokes': [{'color': 'primaryTintBorder'}], 'radius': 8},
+                   'bind': {'decoration.fills[0].color': '${= props.urgent ? theme.colors.errorTint : theme.colors.primaryTint}',
+                            'decoration.strokes[0].color': '${= props.urgent ? theme.colors.errorTintBorder : theme.colors.primaryTintBorder}'}},
+        'glyph': {**icon('schedule', 'primary', 16),
+                  'bind': {'props.icon': "${= props.urgent ? 'warning_amber' : 'schedule'}", 'props.color': '${= props.urgent ? theme.error : theme.primary}'}},
+        'message': {**text('${props.message}', style(14, 500, 'primaryText', 1.4), {'fill': 200}, {'hug': 20}),
+                    'bind': {'props.style.color': '${= props.urgent ? theme.error : theme.colors.primaryText}'}},
+        'action': {'type': 'Button', 'props': {'label': 'Upgrade', 'size': 'small'}, 'layout': {'width': {'hug': 80}, 'height': {'hug': 32}},
+                   'bind': {'props.label': '${props.actionLabel}', 'visible': "${= props.actionLabel != ''}",
+                            'props.variant': "${= props.urgent ? 'destructive' : 'primary'}"},
+                   'actions': [{'trigger': {'type': 'event', 'event': 'onPressed'}, 'actions': [{'type': 'componentEvent', 'event': 'onUpgrade'}]}]},
+        'dismiss': {'type': 'IconButton', 'props': {'icon': 'close', 'size': 'xs'}, 'layout': {'width': 24, 'height': 24},
+                    'bind': {'visible': '${props.dismissible}'},
+                    'actions': [{'trigger': {'type': 'event', 'event': 'onPressed'}, 'actions': [{'type': 'componentEvent', 'event': 'onDismiss'}]}]},
+    },
+))
+
+# AuthPromptBanner (AuthPromptBanner.tsx): an invitation to sign in, radius 12, padding 12, an 8 % tint of
+# its accent with a 30 % border: a 36 px gradient plate, radius 10, with an 18 px white icon; 12 px on, the
+# title 12/700, 3 px under it the description 11 on a 1.45 line in tertiary, 10 px under that a gradient
+# button (6 x 12, radius 7, white 11/600 after a 12 px icon); a 20 px x in the top corner.
+AUTH = {'blue': ('#FF3B82F6', '#FF2563EB'), 'purple': ('#FF8B5CF6', '#FF7C3AED'), 'green': ('#FF10B981', '#FF059669'), 'orange': ('#FFF59E0B', '#FFD97706')}
+def _auth(pos, alpha=None):
+    def c(k):
+        v = AUTH[k][pos]
+        return v if alpha is None else '#' + alpha + v[3:]
+    return "${= props.accent == 'purple' ? '%s' : (props.accent == 'green' ? '%s' : (props.accent == 'orange' ? '%s' : '%s'))}" % (
+        c('purple'), c('green'), c('orange'), c('blue'))
+def _auth_gradient():
+    return {'fills': [{'type': 'linear', 'begin': [-1, -1], 'end': [1, 1],
+                       'stops': [{'color': AUTH['blue'][0], 'position': 0}, {'color': AUTH['blue'][1], 'position': 1}]}]}
+AUTH_BIND = {'decoration.fills[0].stops[0].color': _auth(0), 'decoration.fills[0].stops[1].color': _auth(1)}
+add(component(
+    'AuthPromptBanner',
+    'An invitation to sign in: an icon plate, a title, a line and a button, tinted in an accent. Fires onSignIn and onDismiss.',
+    'banner',
+    props=[prop('title', STRING, 'Sign in to sync', 'The title.'),
+           prop('description', STRING, 'Keep your work across devices.', 'The line under it.'),
+           prop('buttonLabel', STRING, 'Sign in', 'The button\'s label.'),
+           prop('icon', STRING, 'cloud', 'The icon on the plate.'),
+           prop('accent', enum('blue', 'purple', 'green', 'orange'), 'blue', 'blue, purple, green or orange.'),
+           prop('busy', BOOL, False, 'Signing in: a spinner in the button.'),
+           prop('dismissible', BOOL, True, 'An x in the corner.')],
+    events=['onSignIn', 'onDismiss'],
+    previews=[preview('Blue', 340, 92), preview('Purple', 340, 92, accent='purple', title='Connect your team', icon='group')],
+    nodes={
+        'banner': {'type': 'row', 'children': ['plate', 'texts', 'dismiss'], 'props': {'crossAxisAlignment': 'start', 'spacing': 12},
+                   'layout': {'width': {'fill': 340}, 'height': {'hug': 92}, 'padding': 12},
+                   'decoration': {'fills': [{'color': '#143B82F6'}], 'strokes': [{'color': '#4D3B82F6'}], 'radius': 12},
+                   'bind': {'decoration.fills[0].color': _auth(0, '14'), 'decoration.strokes[0].color': _auth(0, '4D')}},
+        'plate': {'type': 'row', 'children': ['glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': 36, 'height': 36}, 'decoration': {**_auth_gradient(), 'radius': 10}, 'bind': dict(AUTH_BIND)},
+        'glyph': {**icon('cloud', '#FFFFFFFF', 18), 'bind': {'props.icon': '${props.icon}'}},
+        'texts': {'type': 'column', 'children': ['title', 'description', 'button'], 'props': {'crossAxisAlignment': 'start'},
+                  'layout': {'width': {'fill': 240}, 'height': {'hug': 68}}},
+        'title': text('${props.title}', style(12, 700, 'primaryText', 1.3), {'fill': 240}, {'hug': 16}),
+        'description': {**text('${props.description}', style(11, 400, 'tertiaryText', 1.45), {'fill': 240}, {'hug': 16}),
+                        'layout': {'width': {'fill': 240}, 'height': {'hug': 16}, 'margin': [0, 3, 0, 10]}},
+        'button': {'type': 'row', 'children': ['spin', 'login', 'label'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                   'layout': {'width': {'hug': 80}, 'height': {'hug': 26}, 'padding': [12, 6, 12, 6]},
+                   'decoration': {**_auth_gradient(), 'radius': 7}, 'bind': {**AUTH_BIND, 'opacity': '${= props.busy ? 0.7 : 1}'},
+                   'states': {'hovered': {'button': HOVER}, 'pressed': {'button': PRESS}},
+                   'actions': [{'trigger': {'type': 'click', 'when': '!props.busy'}, 'actions': [{'type': 'componentEvent', 'event': 'onSignIn'}]}]},
+        'spin': {'type': 'circularProgressIndicator', 'layout': {'width': 12, 'height': 12}, 'props': {'color': '#FFFFFFFF', 'strokeWidth': 2},
+                 'bind': {'visible': '${props.busy}'}},
+        'login': {**icon('login', '#FFFFFFFF', 12), 'bind': {'visible': '${= !props.busy}'}},
+        'label': text('${props.buttonLabel}', style(11, 600, '#FFFFFFFF', 1.25), {'hug': 40}, {'hug': 14}),
+        'dismiss': {'type': 'row', 'children': ['x'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                    'layout': {'width': 20, 'height': 20}, 'decoration': {'radius': 5},
+                    'bind': {'visible': '${props.dismissible}'},
+                    'states': {'hovered': {'dismiss': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}, 'x': {'props': {'color': 'primaryText'}}}},
+                    'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onDismiss'}]}]},
+        'x': icon('close', 'tertiaryText', 13),
+    },
+))
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:

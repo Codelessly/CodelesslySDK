@@ -1,0 +1,281 @@
+{
+ "schema": 3,
+ "id": "AgentChip",
+ "roots": [
+  "chip"
+ ],
+ "widget": {
+  "type": "AgentChip",
+  "doc": "A helper at work as a small pill: its state, its name and an x to dismiss it. Fires onPressed and onDismiss.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Agent",
+    "doc": "Its name.",
+    "required": true
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "idle",
+      "running",
+      "done",
+      "error"
+     ]
+    },
+    "default": "idle",
+    "doc": "idle, running, done or error."
+   },
+   {
+    "key": "dismissible",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "An x after the label."
+   },
+   {
+    "key": "emphasized",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The label in the primary text color."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   },
+   {
+    "key": "onDismiss"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Running",
+   "size": [
+    120,
+    22
+   ],
+   "props": {
+    "label": "Researcher",
+    "status": "running",
+    "dismissible": true
+   }
+  },
+  {
+   "name": "Done",
+   "size": [
+    100,
+    22
+   ],
+   "props": {
+    "label": "Reviewer",
+    "status": "done"
+   }
+  }
+ ],
+ "nodes": {
+  "chip": {
+   "type": "row",
+   "children": [
+    "spin",
+    "glyph",
+    "label",
+    "dismiss"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": [
+     8,
+     2,
+     8,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2
+   },
+   "states": {
+    "hovered": {
+     "chip": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "spin": {
+   "type": "circularProgressIndicator",
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "props": {
+    "color": "primary",
+    "strokeWidth": 1.5
+   },
+   "bind": {
+    "visible": "${= props.status == 'running'}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "smart_toy",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "visible": "${= props.status != 'running'}",
+    "props.icon": "${= props.status == 'done' ? 'check_circle' : (props.status == 'error' ? 'close' : 'smart_toy')}",
+    "props.color": "${= props.status == 'done' ? theme.success : (props.status == 'error' ? theme.error : theme.colors.tertiaryText)}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 17
+    },
+    "constraints": {
+     "maxWidth": 220
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.emphasized ? theme.colors.primaryText : theme.colors.secondaryText}",
+    "props.style.fontWeight": "${= props.emphasized ? 500 : 400}"
+   }
+  },
+  "dismiss": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15,
+    "margin": [
+     2,
+     0,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "opacity": 0.6,
+   "bind": {
+    "visible": "${props.dismissible}"
+   },
+   "tooltip": "Dismiss",
+   "states": {
+    "hovered": {
+     "dismiss": {
+      "opacity": 1,
+      "decoration": {
+       "fills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onDismiss"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  }
+ }
+}

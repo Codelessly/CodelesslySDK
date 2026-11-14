@@ -9,13 +9,16 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 86. Still to rebuild: 78.**
+**Here: 93. Still to rebuild: 71.**
 
 ## Here
 
 | SSUI component | Design-system document | Control the tree draws |
 |---|---|---|
+| ActionListItem | ActionListItem |  |
 | AddButton | AddButton |  |
+| AgentChip | AgentChip |  |
+| AuthPromptBanner | AuthPromptBanner |  |
 | Avatar | Avatar |  |
 | BackButton | BackButton |  |
 | Badge | Badge |  |
@@ -44,6 +47,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | FeatureBulletItem | FeatureBulletItem |  |
 | Field | Field |  |
 | FileListItem | FileListItem |  |
+| FileMetadataCard | FileMetadataCard |  |
 | FilterLegend | FilterLegend |  |
 | FloatingActionButton |  | floatingActionButton |
 | Hyperlink | Hyperlink |  |
@@ -71,10 +75,12 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | RadioButton | Radio | radio |
 | ResourceChip | ResourceChip |  |
 | RunningIndicator | RunningIndicator |  |
+| RunRecordRow | RunRecordRow |  |
 | SearchBar | SearchBar |  |
 | SectionCard | SectionCard |  |
 | SegmentedControl | SegmentedControl | segmentedButton |
 | Select | Select | dropdown |
+| SelectableListRow | SelectableListRow |  |
 | Skeleton | Skeleton |  |
 | Slider | Slider | slider |
 | SplitButton | SplitButton |  |
@@ -99,6 +105,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Toast |  | showToast action |
 | ToggleRow | ToggleRow |  |
 | Tooltip | Tooltip | tooltip behavior |
+| TrialBanner | TrialBanner |  |
 | UpgradeButton | UpgradeButton |  |
 | WindowToolbar | WindowToolbar |  |
 
@@ -112,9 +119,9 @@ In the order planned: what generated UI reaches for first, then the application 
 
 CodePreview
 
-### Cards and rows (13)
+### Cards and rows (6)
 
-FolderCard, ResourceCard, AgentChip, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, TrialBanner, AuthPromptBanner
+FolderCard, ResourceCard, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack
 
 ### Inputs (19)
 
