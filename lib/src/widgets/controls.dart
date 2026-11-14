@@ -24,9 +24,12 @@ import '../render/controls/dropdown.dart';
 import '../render/controls/expansion.dart';
 import '../render/controls/navigation_bar.dart';
 import '../render/controls/pickers.dart';
+import '../render/controls/segmented.dart';
+import '../render/controls/slider.dart';
 import '../render/controls/tab_bar.dart';
 import '../render/controls/text_field.dart';
 import '../render/controls/tile.dart';
+import '../render/controls/toggles.dart';
 import '../render/recipe.dart';
 import '../runtime/actions/text_fields.dart' show textFieldServices;
 import 'picker_locale.dart';
@@ -73,6 +76,16 @@ final Map<String, WidgetRecipe> tileRecipes = {
   ExpansionTileProps.spec.type: expansionTileRecipe,
 };
 
+/// Toggles, slider and segmented button (render/controls/{toggles,slider,
+/// segmented}.dart).
+final Map<String, WidgetRecipe> toggleRecipes = {
+  'checkbox': checkboxRecipe,
+  'switch': switchRecipe,
+  'radio': radioRecipe,
+  'slider': sliderRecipe,
+  'segmentedButton': segmentedRecipe,
+};
+
 /// The render-object controls, by node type.
 final Map<String, WidgetRecipe> controlRecipes = {
   ...buttonRecipes,
@@ -81,4 +94,5 @@ final Map<String, WidgetRecipe> controlRecipes = {
   ...dropdownRecipes,
   ...textFieldRecipes,
   ...tileRecipes,
+  ...toggleRecipes,
 };

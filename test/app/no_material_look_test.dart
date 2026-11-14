@@ -20,6 +20,7 @@ import 'package:codelessly_sdk/src/render/controls/expansion.dart' show RenderEx
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledControl;
 import 'package:codelessly_sdk/src/render/controls/pickers.dart' show RenderPickerField;
 import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTile;
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledControl, RenderControl;
 import 'package:codelessly_sdk/src/widgets/collections.dart' show collectionsRecipes;
 import 'package:codelessly_sdk/src/widgets/controls.dart' show controlRecipes;
 import 'package:codelessly_sdk/src/widgets/indicators.dart' show indicatorsRecipes;
@@ -425,6 +426,12 @@ String? _inherited(InlineSpan root, InlineSpan target) {
 const _renderPickers = ['datePicker', 'timePicker', 'dateTimeInput'];
 /// The tile family's types and the render object each draws as.
 const _tileControls = [('listTile', RenderListTile), ('expansionTile', RenderExpansion), ('accordion', RenderExpansion)];
+/// The controls drawn as render objects, by family (each family adds its
+/// own line): what must be on the page as a render-object control, with no
+/// Material widget's paragraph inside.
+const _renderControls = <String, List<String>>{
+  'toggles': ['checkbox', 'switch', 'radio', 'slider', 'segmentedButton'],
+};
 
 /// The labelled controls whose label must sit centred in their box.
 const _labelled = [
@@ -673,6 +680,19 @@ void main() {
       }
       expect(find.byType(ListTile), findsNothing);
       expect(find.byType(ExpansionTile), findsNothing);
+      // Render-object controls: drawn by a control's render object, with no
+      // island (and so no Material widget) inside their box.
+      for (final type in _renderControls.values.expand((t) => t)) {
+        final found = <RenderObject>[];
+        void visit(RenderObject o) {
+          if (o is RenderControl || o is RenderParagraph) found.add(o);
+          o.visitChildren(visit);
+        }
+
+        visit(controller.tree!.boxOf(type)!);
+        expect(found.whereType<RenderControl>(), hasLength(1), reason: '$type is a render-object control');
+        expect(found.whereType<RenderParagraph>(), isEmpty, reason: '$type draws its own text');
+      }
 
       // Fields: no underline-only border. A field's border is what its
       // decorator draws (its decoration over the theme's) or the box a

@@ -1,11 +1,14 @@
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/segmented.dart';
+import 'package:codelessly_sdk/src/render/controls/slider.dart';
+import 'package:codelessly_sdk/src/render/controls/toggles.dart';
 import 'package:codelessly_sdk/src/widgets/inputs_shapes.dart';
-import 'package:codelessly_sdk/src/widgets/inputs_toggle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../controls/toggles_support.dart';
 import '../lists/support.dart' as lists;
 import '../support/screen.dart' as harness;
 
@@ -189,23 +192,9 @@ bool _selected(WidgetTester tester, String type) => type == 'choiceChip'
     ? tester.widget<ChoiceChip>(find.byType(ChoiceChip)).selected
     : tester.widget<FilterChip>(find.byType(FilterChip)).selected;
 
-SegmentedButton<String> control(NodeTree tree) {
-  SegmentedButton<String>? found;
-  void visit(Element e) {
-    if (e.widget is SegmentedButton<String>) {
-      found = e.widget as SegmentedButton<String>;
-    }
-    e.visitChildren(visit);
-  }
+RenderSegmentedButton control(NodeTree tree, [String id = 'tabs']) => controlIn<RenderSegmentedButton>(tree, id);
 
-  for (final host in tree.islands.hosts) {
-    final e = host.element;
-    if (e != null) visit(e);
-  }
-  return found!;
-}
-
-Future<void> _showSegmented(WidgetTester tester, Map<String, Object?> props, {double width = 96, double height = 28}) async {
+Future<NodeTree> _showSegmented(WidgetTester tester, Map<String, Object?> props, {double width = 96, double height = 28}) async {
   final source = DocumentSource(LayoutDocument.fromJson({
     'roots': ['seg'],
     'nodes': {
@@ -233,6 +222,7 @@ Future<void> _showSegmented(WidgetTester tester, Map<String, Object?> props, {do
     tree.dispose();
     scope.dispose();
   });
+  return tree;
 }
 
 // An input island follows its bindings when a variable changes after the
@@ -260,7 +250,7 @@ Map<String, Object?> _switch({bool value = false, Map<String, Object?> props = c
       },
     };
 
-Future<void> _showSwitch(WidgetTester tester, Map<String, Object?> node) async {
+Future<RenderToggle> _showSwitch(WidgetTester tester, Map<String, Object?> node) async {
   final tree = NodeTree(DocumentSource(LayoutDocument.fromJson({
     'roots': ['s'],
     'nodes': {'s': node},
@@ -269,11 +259,8 @@ Future<void> _showSwitch(WidgetTester tester, Map<String, Object?> node) async {
   await tester.pumpWidget(MaterialApp(
     home: Align(alignment: Alignment.topLeft, child: NodeView(key: UniqueKey(), tree: tree, rootId: 's', interactive: true)),
   ));
+  return controlIn<RenderToggle>(tree, 's');
 }
-
-Finder get _paint => find.descendant(of: find.byType(PlainToggle), matching: find.byType(CustomPaint)).first;
-
-double _position(WidgetTester tester) => (tester.widget<CustomPaint>(_paint).painter! as PlainTogglePainter).position.value;
 
 const _border = {'inactiveThumbBorderColor': '#FFDDDDDD', 'activeThumbBorderColor': '#FF111111', 'thumbBorderWidth': 1};
 
@@ -357,21 +344,21 @@ void main() {
   });
 
   group('a checkbox', () {
-    testWidgets('fills its unchecked box with its fill color', (tester) async {
-      await lists.show(
+    testWidgets('fills its unchecked box with its fill color, its checked one with its active color', (tester) async {
+      final screen = await lists.show(
         tester,
         _box({'fillColor': '#FF1C1C21', 'activeColor': '#FF1FE07A'}),
         variables: [lists.v('on', false, VariableType.boolean)],
       );
-      final c = tester.widget<Checkbox>(find.byType(Checkbox));
-      expect(c.fillColor!.resolve({}), const Color(0xFF1C1C21));
-      // Checked, its activeColor fills it.
-      expect(c.fillColor!.resolve({WidgetState.selected}), isNull);
-      expect(c.activeColor, const Color(0xFF1FE07A));
+      final c = controlIn<RenderToggle>(screen.tree, 'cb');
+      expect(c.markFill, const Color(0xFF1C1C21));
+      screen.scope.set('on', true);
+      await tester.pumpAndSettle();
+      expect(c.markFill, const Color(0xFF1FE07A));
     });
 
-    testWidgets('keeps its size, compact or full', (tester) async {
-      await lists.show(
+    testWidgets('keeps its size, compact or full: its corners and sides are node pixels', (tester) async {
+      var screen = await lists.show(
         tester,
         _box({
           'compact': true,
@@ -380,10 +367,10 @@ void main() {
         }, size: 18),
         variables: [lists.v('on', false, VariableType.boolean)],
       );
-      var c = tester.widget<Checkbox>(find.byType(Checkbox));
-      expect((c.shape! as RoundedRectangleBorder).borderRadius, BorderRadius.circular(4));
-      expect(c.side!.width, 2);
-      await lists.show(
+      var c = controlIn<RenderToggle>(screen.tree, 'cb');
+      expect(c.markRect.size, const Size(18, 18), reason: 'compact: the box is the node');
+      expect(c.markSide!.width, 2);
+      screen = await lists.show(
         tester,
         _box({
           'borderRadius': 4,
@@ -391,35 +378,21 @@ void main() {
         }, size: 80),
         variables: [lists.v('on', false, VariableType.boolean)],
       );
-      c = tester.widget<Checkbox>(find.byType(Checkbox));
-      expect((c.shape! as RoundedRectangleBorder).borderRadius, BorderRadius.circular(4));
-      expect(c.side!.width, 2);
+      c = controlIn<RenderToggle>(screen.tree, 'cb');
+      expect(c.size, const Size(80, 80));
+      expect(c.markRect.size, const Size(36, 36), reason: 'Flutter\'s 18 px box in its 40 px target, scaled to the node');
+      expect(c.markSide!.width, 2);
     });
 
     testWidgets('shows checked at once on the design canvas', (tester) async {
-      final s = await lists.show(tester, _box({}), variables: [lists.v('on', false, VariableType.boolean)]);
-      await tester.pumpWidget(
-        TickerMode(
-          enabled: false,
-          child: MaterialApp(
-            home: Scaffold(
-              body: Align(
-                alignment: Alignment.topLeft,
-                child: NodeView(tree: s.tree, rootId: 'col'),
-              ),
-            ),
-          ),
-        ),
-      );
-      await tester.pump();
+      final s = await lists.show(tester, _box({}), variables: [lists.v('on', false, VariableType.boolean)], interactive: false);
       s.scope.set('on', true);
       await tester.pump();
       await tester.pump();
-      final state = tester.state(find.byType(Checkbox)) as ToggleableStateMixin;
-      expect(tester.widget<Checkbox>(find.byType(Checkbox)).value, isTrue);
-      expect(state.position.value, 1.0);
+      final c = controlIn<RenderToggle>(s.tree, 'cb');
+      expect(c.value, isTrue);
+      expect(c.position, 1.0);
     });
-
   });
 
   group('a switch', () {
@@ -435,10 +408,10 @@ void main() {
         variables: [lists.v('on', false, VariableType.boolean)],
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(Switch));
+      await tester.tapAt(s.center('sw'));
       await tester.pumpAndSettle();
       expect(s['on'], false);
-      expect(tester.widget<Switch>(find.byType(Switch)).value, false);
+      expect(controlIn<RenderToggle>(s.tree, 'sw').value, false);
     });
 
     testWidgets('bound to a value shows only what its reactions set', (tester) async {
@@ -453,13 +426,13 @@ void main() {
         variables: [lists.v('on', false, VariableType.boolean), lists.v('taps', 0, VariableType.integer)],
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.byType(Switch));
+      await tester.tapAt(s.center('sw'));
       await tester.pumpAndSettle();
       expect(s['taps'], 1);
-      expect(tester.widget<Switch>(find.byType(Switch)).value, false);
+      expect(controlIn<RenderToggle>(s.tree, 'sw').value, false);
       s.scope.set('on', true);
       await tester.pumpAndSettle();
-      expect(tester.widget<Switch>(find.byType(Switch)).value, true);
+      expect(controlIn<RenderToggle>(s.tree, 'sw').value, true);
     });
   });
 
@@ -570,10 +543,9 @@ void main() {
             home: NodeView(tree: tree, rootId: 'tabs', interactive: true),
           ),
         );
-        final style = control(tree).style!.textStyle!.resolve({});
-        expect(style!.fontFamily, 'Alegreya');
-        expect(style.fontSize, 13);
-        expect(style.fontWeight, FontWeight.w700);
+        final label = control(tree).labels.first;
+        expect(label.fontFamily, 'Alegreya');
+        final glyph13 = label.glyphs.first.height;
         source.document = source.document.copyWith(
           nodes: {
             'tabs': source.document['tabs']!.withProp(
@@ -583,12 +555,12 @@ void main() {
           },
         );
         await tester.pump();
-        expect(control(tree).style!.textStyle!.resolve({})!.fontSize, 18);
+        expect(control(tree).labels.first.glyphs.first.height, greaterThan(glyph13), reason: 'its labels take the new size');
         await tester.pumpWidget(const SizedBox());
         tree.dispose();
       },
     );
-    testWidgets('without a label style takes the app theme\'s', (
+    testWidgets('without a label style takes the document theme\'s font', (
       tester,
     ) async {
       final source = DocumentSource(
@@ -608,19 +580,19 @@ void main() {
           },
         }),
       );
-      final tree = NodeTree(source);
+      final tree = NodeTree(source)..theme = ThemeTokens.fromJson({'fontFamily': 'Barlow'});
       await tester.pumpWidget(
         MaterialApp(
           home: NodeView(tree: tree, rootId: 'tabs'),
         ),
       );
-      expect(control(tree).style!.textStyle, isNull);
+      expect(control(tree).labels.single.fontFamily, 'Barlow');
       await tester.pumpWidget(const SizedBox());
       tree.dispose();
     });
 
-    testWidgets('set compact fits a 96 × 28 box', (tester) async {
-      await _showSegmented(tester, {
+    testWidgets('set compact fits a 96 × 28 box, its segments sharing the width', (tester) async {
+      final tree = await _showSegmented(tester, {
         'expanded': true,
         'segmentHeight': 28,
         'shrinkTapTarget': true,
@@ -628,20 +600,20 @@ void main() {
         'backgroundColor': '#00000000',
       });
       expect(tester.takeException(), isNull);
-      final size = tester.getSize(find.byType(SegmentedButton<String>));
-      expect(size.width, closeTo(96, 0.5));
-      expect(size.height, closeTo(28, 0.5));
-      final b = tester.widget<SegmentedButton<String>>(find.byType(SegmentedButton<String>));
-      expect(b.expandedInsets, EdgeInsets.zero);
+      final b = control(tree, 'seg');
+      expect(b.size.width, closeTo(96, 0.5));
+      expect(b.size.height, closeTo(28, 0.5));
+      expect(b.segmentRects.map((r) => r.width), everyElement(closeTo((96 - 4) / 3, 0.01)));
     });
 
-    testWidgets('by default is Flutter\'s segmented button, its segments the node\'s height', (tester) async {
-      await _showSegmented(tester, {}, width: 200, height: 32);
+    testWidgets('by default is SSUI\'s segmented control, its segments the node\'s height less the well\'s inset', (tester) async {
+      final tree = await _showSegmented(tester, {}, width: 200, height: 32);
       expect(tester.takeException(), isNull);
-      final b = tester.widget<SegmentedButton<String>>(find.byType(SegmentedButton<String>));
-      expect(b.expandedInsets, isNull);
-      expect(tester.getSize(find.byType(SegmentedButton<String>)).height, closeTo(32, 0.5));
-      expect(b.style?.tapTargetSize, MaterialTapTargetSize.shrinkWrap);
+      final b = control(tree, 'seg');
+      expect(b.size, const Size(200, 32));
+      expect(b.segmentRects.map((r) => r.height), everyElement(28));
+      expect(b.trackColor, const Color(0xFFF3F4F6), reason: 'SSUI\'s subtleFill');
+      expect(b.selectedColor, const Color(0xFFFFFFFF));
     });
   });
 
@@ -669,12 +641,13 @@ void main() {
           interactive: interactive,
         );
         await tester.pumpAndSettle();
-        expect(tester.widget<RadioGroup<String>>(find.byType(RadioGroup<String>)).groupValue, '');
+        expect(controlIn<RenderToggle>(s.tree, 'r').value, '');
         s.scope.set('plan', 'Team');
         s.scope.set('size', 12.0);
         await tester.pumpAndSettle();
-        expect(tester.widget<RadioGroup<String>>(find.byType(RadioGroup<String>)).groupValue, 'Team');
-        expect(tester.widget<Slider>(find.byType(Slider)).value, 12.0);
+        expect(controlIn<RenderToggle>(s.tree, 'r').value, 'Team');
+        expect(controlIn<RenderToggle>(s.tree, 'r').checked, isTrue);
+        expect(controlIn<RenderSlider>(s.tree, 's').value, 12.0);
       });
     }
   });
@@ -682,11 +655,12 @@ void main() {
   group('a switch with its own look', () {
     for (final on in [false, true]) {
       testWidgets('draws its thumb\'s ${on ? 'on' : 'off'} border inside the thumb\'s edge', (tester) async {
-        await _showSwitch(tester, _switch(value: on, props: _border));
+        final toggle = await _showSwitch(tester, _switch(value: on, props: _border));
         // Thumb 24 across at (15|35, 15): fill, then a 1 px ring inside it.
         final x = on ? 35.0 : 15.0;
+        expect(toggle.thumb, (centre: Offset(x, 15), radius: 12.0));
         expect(
-          tester.renderObject(_paint),
+          toggle,
           paints
             ..rrect()
             ..circle(x: x, y: 15, radius: 12, color: const Color(0xFFFFFFFF))
@@ -696,17 +670,17 @@ void main() {
     }
 
     testWidgets('slides its thumb over its duration and along its curve', (tester) async {
-      await _showSwitch(tester, _switch(props: {'toggleDurationMs': 180, 'toggleCurve': 'linear'}));
-      await tester.tap(find.byType(PlainToggle));
+      final toggle = await _showSwitch(tester, _switch(props: {'toggleDurationMs': 180, 'toggleCurve': 'linear'}));
+      await tester.tapAt(toggle.localToGlobal(toggle.size.center(Offset.zero)));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 90));
-      expect(_position(tester), closeTo(0.5, 0.01));
+      expect(toggle.position, closeTo(0.5, 0.01));
       await tester.pump(const Duration(milliseconds: 90));
-      expect(_position(tester), 1);
+      expect(toggle.position, 1);
     });
 
-    testWidgets('with a thumb inset or shadows draws its own track and thumb', (tester) async {
-      await show(tester, {
+    testWidgets('with a thumb inset and shadows draws its own track and thumb, the thumb round at any size', (tester) async {
+      final (tree, _) = await show(tester, {
         's': {
           'type': 'switch',
           'layout': {'width': 50, 'height': 30},
@@ -720,16 +694,13 @@ void main() {
           },
         },
       }, 's');
-      expect(find.byType(PlainToggle), findsOneWidget);
-      expect(find.byType(Switch), findsNothing);
-      final node = api.Node.fromJson({'type': 'switch', 'props': {'fillTrack': true, 'thumbInset': 3}}, id: 's')!;
-      expect(PlainToggle.thumbDiameters(node, 30, material3: true), (on: 24.0, off: 16.0));
-      final painter = PlainTogglePainter(
-          position: const AlwaysStoppedAnimation(1), node: node, material3: true, textDirection: TextDirection.ltr);
-      expect(painter.thumbAt(const Size(50, 30), 1).center, const Offset(35, 15));
-      expect(painter.thumbAt(const Size(50, 30), 0).center, const Offset(15, 15));
+      final toggle = controlIn<RenderToggle>(tree, 's');
+      expect(toggle.markRect, const Rect.fromLTWH(0, 0, 50, 30), reason: 'its track fills the node');
+      expect(toggle.trackColor, const Color(0xFF00AA00));
+      expect(toggle.thumb, (centre: const Offset(35, 15), radius: 12.0));
+      // The shadow, then the thumb.
+      expect(toggle, paints..rrect(color: const Color(0xFF00AA00))..circle(x: 35, y: 16)..circle(x: 35, y: 15, radius: 12));
     });
-
-  
   });
+
 }
