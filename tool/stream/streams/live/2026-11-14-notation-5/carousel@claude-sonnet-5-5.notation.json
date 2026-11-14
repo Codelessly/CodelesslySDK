@@ -1,0 +1,921 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "row1",
+    "row4",
+    "row5",
+    "column5",
+    "row6",
+    "text8",
+    "text9",
+    "row8",
+    "filledButton1",
+    "textButton1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Running shoes"
+   },
+   "bind": {
+    "visible": "${= !detail}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "bind": {
+    "visible": "${= !detail}"
+   },
+   "children": [
+    "iconButton1",
+    "column2",
+    "iconButton2"
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_left"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "i",
+       "value": "${= i==0?5:i-1}"
+      }
+     ]
+    }
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": 12,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF2F2F2"
+     }
+    ],
+    "radius": 12
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "size",
+       "value": ""
+      }
+     ]
+    }
+   ],
+   "children": [
+    "column3",
+    "text2",
+    "row2"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "height": 160,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFD9D9D9"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "icon1"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "image"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= shoes[i].name}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "row3"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "$${= shoes[i].price}"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text4"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= shoes[i].rating}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_right"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "i",
+       "value": "${= i==5?0:i+1}"
+      }
+     ]
+    }
+   ]
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= !detail}"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${= range(6)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column4"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 5,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item==i?\"#FF3366CC\":\"#FFCCCCCC\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "i",
+       "value": "${= item}"
+      }
+     ]
+    }
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "bind": {
+    "visible": "${= detail}"
+   },
+   "children": [
+    "iconButton3",
+    "text5"
+   ]
+  },
+  "iconButton3": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "arrow_back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= shoes[i].name}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "height": 160,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFD9D9D9"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "visible": "${= detail}"
+   },
+   "children": [
+    "icon3"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "image"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= detail}"
+   },
+   "children": [
+    "text6",
+    "row7"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "$${= shoes[i].price}"
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon4",
+    "text7"
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= shoes[i].rating}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "${= shoes[i].desc}"
+   },
+   "bind": {
+    "visible": "${= detail}"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Size"
+   },
+   "bind": {
+    "visible": "${= detail}"
+   }
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= detail}"
+   },
+   "children": [
+    "listView2"
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${= [7,8,9,10,11]}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "choiceChip1"
+   ]
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.selected": "${= size==item}",
+    "props.label": "${item}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "size",
+       "value": "${= item}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Add to bag"
+   },
+   "bind": {
+    "props.enabled": "${= size!=\"\"}",
+    "visible": "${= detail}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addToBag",
+       "value": "${= shoes[i].id}"
+      },
+      {
+       "type": "showToast",
+       "message": "Added to bag"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back to carousel"
+   },
+   "bind": {
+    "visible": "${= detail}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "shoes",
+    "type": "list",
+    "value": [
+     {
+      "id": 0,
+      "name": "Aero Runner",
+      "price": 120,
+      "rating": 4.8,
+      "desc": "Lightweight daily trainer with responsive foam for smooth miles."
+     },
+     {
+      "id": 1,
+      "name": "Trail Blazer",
+      "price": 135,
+      "rating": 4.6,
+      "desc": "Grippy outsole and rock plate built for rough trails."
+     },
+     {
+      "id": 2,
+      "name": "Cloud Strider",
+      "price": 150,
+      "rating": 4.9,
+      "desc": "Max cushioning for long recovery runs."
+     },
+     {
+      "id": 3,
+      "name": "Swift Racer",
+      "price": 170,
+      "rating": 4.7,
+      "desc": "Carbon-plated racing shoe for personal bests."
+     },
+     {
+      "id": 4,
+      "name": "Urban Pacer",
+      "price": 110,
+      "rating": 4.4,
+      "desc": "Versatile city shoe with breathable knit upper."
+     },
+     {
+      "id": 5,
+      "name": "Endurance Pro",
+      "price": 140,
+      "rating": 4.5,
+      "desc": "Stable and durable for marathon training."
+     }
+    ]
+   },
+   {
+    "name": "i",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "detail",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "size",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

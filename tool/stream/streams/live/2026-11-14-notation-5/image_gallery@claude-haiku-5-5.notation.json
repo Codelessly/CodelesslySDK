@@ -1,0 +1,474 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "grid1",
+    "modal1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Trip photos"
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "gridView1"
+   ]
+  },
+  "gridView1": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisSpacing": 8,
+    "crossAxisSpacing": 8,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${photos}"
+   },
+   "children": [
+    "gridView1Item"
+   ]
+  },
+  "gridView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "height": 100,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "{item.c}"
+     }
+    ],
+    "radius": 8
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= item.index}"
+      },
+      {
+       "type": "openModal",
+       "modal": "lightbox"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${item.caption}"
+   }
+  },
+  "modal1": {
+   "type": "modal",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "column3"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "column4",
+    "row2"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "iconButton1"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "${= idx+1} of 9"
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "height": 280,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "{photos[idx].c}"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= photos[idx].caption}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "iconButton2",
+    "text5",
+    "iconButton3"
+   ]
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_left"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= max(0,idx-1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= photos[idx].caption}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "iconButton3": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_right"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "idx",
+       "value": "${= min(8,idx+1)}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "photos",
+    "type": "list",
+    "value": [
+     {
+      "caption": "Harbour at dawn",
+      "c": "#FF1E88E5"
+     },
+     {
+      "caption": "Old town lanes",
+      "c": "#FF8E24AA"
+     },
+     {
+      "caption": "Mountain pass",
+      "c": "#FF43A047"
+     },
+     {
+      "caption": "Night market",
+      "c": "#FFF4511E"
+     },
+     {
+      "caption": "Desert road",
+      "c": "#FFFDD835"
+     },
+     {
+      "caption": "Lake crossing",
+      "c": "#FF00ACC1"
+     },
+     {
+      "caption": "Cliff steps",
+      "c": "#FF6D4C41"
+     },
+     {
+      "caption": "Street cafe",
+      "c": "#FFE53935"
+     },
+     {
+      "caption": "Sunset beach",
+      "c": "#FF3949AB"
+     }
+    ]
+   },
+   {
+    "name": "idx",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

@@ -1,0 +1,96 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"Card gap:12 pad:16\n  Text.title \"Blog migration\"\n  state running=false\n  state paused=false\n  state done=false\n  state step=0\n  state elapsed=0\n  state steps=[{\"name\":\"Export posts\",\"desc\":\"Pull all posts and drafts from the old CMS.\"},{\"name\":\"Convert content\",\"desc\":\"Turn HTML bodies into Markdown.\"},{\"name\":\"Move media\",\"desc\":\"Copy images and attachments to the new storage.\"},{\"name\":\"Fix links\",\"desc\":\"Rewrite internal URLs to the new paths.\"},{\"name\":\"Set up redirects\",\"desc\":\"Map old URLs to new ones to keep SEO.\"},{\"name\":\"Verify site\",\"desc\":\"Check pages, feeds and search indexing.\"}]\n  Row gap:8\n    Button \"Start\" -> running=true; done=false; step=0; elapsed=0\n    Button.outline \"Pause\" -> paused=!paused\n  if running && !done\n    Progress =step/6\n    Text.muted \"Elapsed: {elapsed}s\"\n  if done\n    Badge.success \"Complete\"\n    Text.success \"All 6 steps finished in {elapsed}s.\"\n  List\n    each row in steps\n      Row gap:12 pad:8\n        Icon \"check\" hidden:=step<=row.index\n        CircularProgressIndicator hidden:=step!=row.index\n        Column gap:2 grow\n          Text.strong \"{row.name}\"\n          Text.muted \"{row.desc}\"","usage":{"input_tokens":2378,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":491,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":974,"totalMs":3167}}
+{"tMs":974,"delta":"Card"}
+{"tMs":1098,"delta":" g"}
+{"tMs":1098,"delta":"ap:12 "}
+{"tMs":1099,"delta":"pad:16\n  Text"}
+{"tMs":1099,"delta":".title \"Bl"}
+{"tMs":1099,"delta":"og migration\""}
+{"tMs":1116,"delta":"\n  state"}
+{"tMs":1136,"delta":" running"}
+{"tMs":1157,"delta":"=false\n  state pa"}
+{"tMs":1179,"delta":"used=false\n  state done="}
+{"tMs":1200,"delta":"false\n  state step=0"}
+{"tMs":1221,"delta":"\n  state elapsed=0"}
+{"tMs":1241,"delta":"\n  state ste"}
+{"tMs":1610,"delta":"ps=[{\"name\":\""}
+{"tMs":1610,"delta":"Export pos"}
+{"tMs":1610,"delta":"ts\",\"desc\":\"P"}
+{"tMs":1610,"delta":"ull all pos"}
+{"tMs":1610,"delta":"ts and dr"}
+{"tMs":1610,"delta":"afts from the old C"}
+{"tMs":1610,"delta":"MS.\""}
+{"tMs":1610,"delta":"},{\"name\":\"Conv"}
+{"tMs":1610,"delta":"ert content"}
+{"tMs":1610,"delta":"\",\"desc\":\"Tur"}
+{"tMs":1610,"delta":"n H"}
+{"tMs":1610,"delta":"TML b"}
+{"tMs":1856,"delta":"odies into Markdown.\""}
+{"tMs":1856,"delta":"},{\"name\":\"Move"}
+{"tMs":1856,"delta":" media"}
+{"tMs":1856,"delta":"\",\"desc\":\"Cop"}
+{"tMs":1856,"delta":"y images and att"}
+{"tMs":1856,"delta":"achments to the new stor"}
+{"tMs":1856,"delta":"age.\"},{\"name\":\""}
+{"tMs":1857,"delta":"Fix links"}
+{"tMs":1857,"delta":"\",\"desc\":\"Rew"}
+{"tMs":1857,"delta":"rite internal UR"}
+{"tMs":1857,"delta":"Ls to the new paths.\""}
+{"tMs":1857,"delta":"},{\"name\":\"Set"}
+{"tMs":2146,"delta":" up"}
+{"tMs":2147,"delta":" redirects\",\"desc\":\""}
+{"tMs":2147,"delta":"Map old URLs to new"}
+{"tMs":2147,"delta":" ones to"}
+{"tMs":2147,"delta":" keep S"}
+{"tMs":2147,"delta":"EO.\""}
+{"tMs":2147,"delta":"},{\"name\":\"Ver"}
+{"tMs":2147,"delta":"ify site"}
+{"tMs":2147,"delta":"\",\"desc\":\"Check"}
+{"tMs":2147,"delta":" p"}
+{"tMs":2147,"delta":"ages, fe"}
+{"tMs":2147,"delta":"eds and search ind"}
+{"tMs":2443,"delta":"exing.\"}]\n  "}
+{"tMs":2443,"delta":"Row gap:8\n    "}
+{"tMs":2443,"delta":"Button \"Start\" -> running"}
+{"tMs":2443,"delta":"=true; done=false"}
+{"tMs":2443,"delta":"; step=0; elaps"}
+{"tMs":2443,"delta":"ed=0"}
+{"tMs":2443,"delta":"\n    Button."}
+{"tMs":2443,"delta":"out"}
+{"tMs":2443,"delta":"line \"Pause\" ->"}
+{"tMs":2443,"delta":" paused=!paused\n  "}
+{"tMs":2443,"delta":"if running"}
+{"tMs":2443,"delta":" &&"}
+{"tMs":2595,"delta":" !done\n    Prog"}
+{"tMs":2595,"delta":"ress =step"}
+{"tMs":2595,"delta":"/"}
+{"tMs":2595,"delta":"6\n    Text.muted"}
+{"tMs":2595,"delta":" \""}
+{"tMs":2595,"delta":"Elapsed:"}
+{"tMs":2595,"delta":" {elapsed}s\""}
+{"tMs":2595,"delta":"\n  if done\n    Bad"}
+{"tMs":2595,"delta":"ge.success \"Compl"}
+{"tMs":2595,"delta":"ete\"\n    Text.success"}
+{"tMs":2595,"delta":" \"All "}
+{"tMs":2595,"delta":"6 steps fin"}
+{"tMs":2826,"delta":"ished in {elapsed}"}
+{"tMs":2826,"delta":"s.\"\n  List"}
+{"tMs":2826,"delta":"\n    each row in"}
+{"tMs":2826,"delta":" steps\n      Row gap"}
+{"tMs":2826,"delta":":12"}
+{"tMs":2826,"delta":" pad:8"}
+{"tMs":2826,"delta":"\n        Ic"}
+{"tMs":2826,"delta":"on \"check\""}
+{"tMs":2826,"delta":" hidden:=step<"}
+{"tMs":2826,"delta":"="}
+{"tMs":2826,"delta":"row"}
+{"tMs":3157,"delta":".index\n        C"}
+{"tMs":3157,"delta":"ircularProgressIndic"}
+{"tMs":3157,"delta":"ator hidden:=step!"}
+{"tMs":3157,"delta":"=row.index\n        Column"}
+{"tMs":3157,"delta":" gap:2"}
+{"tMs":3157,"delta":" "}
+{"tMs":3157,"delta":"grow"}
+{"tMs":3157,"delta":"\n          Text."}
+{"tMs":3157,"delta":"strong \"{row.name}"}
+{"tMs":3157,"delta":"\"\n          Text.muted"}
+{"tMs":3157,"delta":" \"{row.desc}\""}

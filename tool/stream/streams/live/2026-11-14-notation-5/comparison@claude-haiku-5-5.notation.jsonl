@@ -1,0 +1,77 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"Column gap:12 pad:16 w:390\n  Text.title \"Compare phone plans\"\n  Grid cols:2 gap:12\n    Card gap:8\n      Text.heading \"Plan A\"\n      Text.strong \"$30/mo\"\n      Text \"Data: 20 GB\"\n      Text \"Calls: Unlimited\"\n      Text \"Roaming: Extra charge\"\n      Text \"Contract: 24 months\"\n      Text \"Extras: Hotspot\"\n      Badge.success \"Better value: Price\"\n      Button \"Choose Plan A\" -> choice=\"A\"; emit pick plan A\n    Card gap:8\n      Text.heading \"Plan B\"\n      Text.strong \"$38/mo\"\n      Text \"Data: 50 GB\"\n      Text \"Calls: Unlimited\"\n      Text \"Roaming: Included\"\n      Text \"Contract: 12 months\"\n      Text \"Extras: Hotspot, streaming\"\n      Badge.success \"Better value: Data, roaming, contract\"\n      Button \"Choose Plan B\" -> choice=\"B\"; emit pick plan B\n  Card gap:6\n    Text.strong \"Recommendation: Plan B\"\n    Text.body \"Plan B costs $8 more but gives 2.5x the data, included roaming and a shorter contract, so it is the better value for most users.\"\n  Text.muted \"Calls: both plans are equal, so neither is marked.\"","usage":{"input_tokens":2371,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":461,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":561,"totalMs":2148}}
+{"tMs":561,"delta":"Column"}
+{"tMs":685,"delta":" gap:12 "}
+{"tMs":685,"delta":"pad:16 "}
+{"tMs":685,"delta":"w:390\n  Text."}
+{"tMs":686,"delta":"title \"Compare ph"}
+{"tMs":686,"delta":"one plans\"\n  Gr"}
+{"tMs":688,"delta":"id cols:2 gap"}
+{"tMs":708,"delta":":12"}
+{"tMs":729,"delta":"\n    Card"}
+{"tMs":749,"delta":" gap:8"}
+{"tMs":769,"delta":"\n      Text.heading \""}
+{"tMs":790,"delta":"Plan A\"\n      "}
+{"tMs":811,"delta":"Text"}
+{"tMs":830,"delta":".str"}
+{"tMs":851,"delta":"ong \"$30"}
+{"tMs":871,"delta":"/m"}
+{"tMs":892,"delta":"o\"\n      Text \""}
+{"tMs":912,"delta":"Data: 20"}
+{"tMs":932,"delta":" GB\"\n      Text"}
+{"tMs":954,"delta":" \"Calls: Unl"}
+{"tMs":974,"delta":"imited\"\n      Text \""}
+{"tMs":994,"delta":"Roaming: Ext"}
+{"tMs":1020,"delta":"ra charge\"\n      Text"}
+{"tMs":1035,"delta":" \"Contract: 24"}
+{"tMs":1057,"delta":" months\"\n      Text"}
+{"tMs":1077,"delta":" \"Extras: H"}
+{"tMs":1097,"delta":"otspot\""}
+{"tMs":1117,"delta":"\n      Badge.success \""}
+{"tMs":1137,"delta":"Better value:"}
+{"tMs":1159,"delta":" Price\""}
+{"tMs":1178,"delta":"\n      Button \"Choose"}
+{"tMs":1219,"delta":" Plan A\" -> cho"}
+{"tMs":1239,"delta":"ice=\"A"}
+{"tMs":1260,"delta":"\"; emit p"}
+{"tMs":1280,"delta":"ick pl"}
+{"tMs":1300,"delta":"an A\n    Card gap"}
+{"tMs":1321,"delta":":8\n      Text.he"}
+{"tMs":1343,"delta":"ading \"Plan B\""}
+{"tMs":1362,"delta":"\n      Text.strong \"$"}
+{"tMs":1382,"delta":"38"}
+{"tMs":1404,"delta":"/mo\"\n      Text"}
+{"tMs":1423,"delta":" \"Data: 50 G"}
+{"tMs":1444,"delta":"B\"\n      Text \""}
+{"tMs":1464,"delta":"Calls: Unlimited"}
+{"tMs":1484,"delta":"\"\n      Text \"Ro"}
+{"tMs":1505,"delta":"aming: Included\"\n      "}
+{"tMs":1525,"delta":"Text \"Contract: "}
+{"tMs":1546,"delta":"12 months\"\n      Text"}
+{"tMs":1566,"delta":" \"Extras: Hot"}
+{"tMs":1590,"delta":"spot, stre"}
+{"tMs":1607,"delta":"aming\"\n      Badge"}
+{"tMs":1627,"delta":".success \"Better value:"}
+{"tMs":1648,"delta":" Data, roaming, cont"}
+{"tMs":1668,"delta":"ract\"\n      Button \""}
+{"tMs":1689,"delta":"Choose Plan B\""}
+{"tMs":1709,"delta":" -> choice=\"B\";"}
+{"tMs":1730,"delta":" emit pick plan B"}
+{"tMs":1750,"delta":"\n  Card gap:6"}
+{"tMs":1771,"delta":"\n    Text.strong \""}
+{"tMs":1791,"delta":"Recommendation:"}
+{"tMs":1811,"delta":" Plan B\"\n    "}
+{"tMs":1832,"delta":"Text.body \"Plan B"}
+{"tMs":1852,"delta":" cost"}
+{"tMs":1873,"delta":"s $8 more but gives"}
+{"tMs":1893,"delta":" "}
+{"tMs":1914,"delta":"2.5x the"}
+{"tMs":1934,"delta":" data, included"}
+{"tMs":1955,"delta":" roaming and a shorter"}
+{"tMs":1975,"delta":" contract, so it is the"}
+{"tMs":1995,"delta":" better value for most"}
+{"tMs":2016,"delta":" users.\"\n  Text.mu"}
+{"tMs":2036,"delta":"ted \"Cal"}
+{"tMs":2056,"delta":"ls: both"}
+{"tMs":2077,"delta":" plans are equal,"}
+{"tMs":2097,"delta":" so ne"}
+{"tMs":2118,"delta":"ither is marked.\""}

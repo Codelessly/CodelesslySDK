@@ -1,0 +1,1722 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "row1",
+    "progressBar1",
+    "text2",
+    "listView1",
+    "divider1",
+    "row4",
+    "filledButton1",
+    "text8",
+    "column3",
+    "column4",
+    "column5",
+    "column6",
+    "column7",
+    "row5",
+    "text15",
+    "listView2",
+    "divider2",
+    "text18",
+    "row7",
+    "row8",
+    "row9",
+    "text23",
+    "row10",
+    "column8"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "badge1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Checkout"
+   }
+  },
+  "badge1": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDBEAFE",
+    "textColor": "#FF1D4ED8"
+   },
+   "bind": {
+    "props.label": "Step ${step} of 3",
+    "visible": "${= step<4}"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= step/3}",
+    "visible": "${= step<4}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "My cart"
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${items}",
+    "visible": "${= step==1}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "children": [
+    "column2",
+    "row3"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text3",
+    "text4"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "${= money(item.price,'$',2)} each"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton1",
+    "text5",
+    "outlinedButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "-"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= updateWhere(items,r=>r.id==item.id,r=>with(r,\"qty\",max(1,r.qty-1)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${item.qty}"
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "+"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= updateWhere(items,r=>r.id==item.id,r=>with(r,\"qty\",r.qty+1))}"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   },
+   "children": [
+    "text6",
+    "text7"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Subtotal"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= money(sum(items,r=>r.price*r.qty),'$',2)}"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Continue to shipping"
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Shipping"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "textField1",
+    "text9"
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Full name"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${name}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FFB91C1C"
+    },
+    "text": "Please enter your full name"
+   },
+   "bind": {
+    "visible": "${= tried && length(trim(name))<2}"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "textField2",
+    "text10"
+   ]
+  },
+  "textField2": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Address"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${address}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "address",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FFB91C1C"
+    },
+    "text": "Please enter your street address"
+   },
+   "bind": {
+    "visible": "${= tried && length(trim(address))<5}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "textField3",
+    "text11"
+   ]
+  },
+  "textField3": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "City"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${city}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "city",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FFB91C1C"
+    },
+    "text": "Please enter your city"
+   },
+   "bind": {
+    "visible": "${= tried && length(trim(city))<2}"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "textField4",
+    "text12"
+   ]
+  },
+  "textField4": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Postcode"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${postcode}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "postcode",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FFB91C1C"
+    },
+    "text": "Postcode must be at least 4 characters"
+   },
+   "bind": {
+    "visible": "${= tried && length(trim(postcode))<4}"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "textField5",
+    "text13",
+    "text14"
+   ]
+  },
+  "textField5": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Email",
+     "hintText": "you@example.com"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${email}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "email",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FFB91C1C"
+    },
+    "text": "Enter a valid email address"
+   },
+   "bind": {
+    "visible": "${= tried && !(contains(email,\"@\") && contains(email,\".\"))}"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "All fields are required"
+   },
+   "bind": {
+    "visible": "${= !tried}"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "outlinedButton3",
+    "spacer1",
+    "filledButton2"
+   ]
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Continue to payment"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tried",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= (length(trim(name))>=2 && length(trim(address))>=5 && length(trim(city))>=2 && length(trim(postcode))>=4 && contains(email,\"@\") && contains(email,\".\"))?3:2}"
+      }
+     ]
+    }
+   ]
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Payment summary"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${items}",
+    "visible": "${= step==3}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row6"
+   ]
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text16",
+    "text17"
+   ]
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.qty} × ${item.name}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= money(item.price*item.qty,'$',2)}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Delivery"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "children": [
+    "choiceChip1",
+    "choiceChip2"
+   ]
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Standard $5"
+   },
+   "bind": {
+    "props.selected": "${= delivery==\"standard\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "delivery",
+       "value": "standard"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip2": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Express $15"
+   },
+   "bind": {
+    "props.selected": "${= delivery==\"express\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "delivery",
+       "value": "express"
+      }
+     ]
+    }
+   ]
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "children": [
+    "text19",
+    "text20"
+   ]
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "Shipping"
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= delivery=='express' ? '$15.00' : '$5.00'}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "children": [
+    "text21",
+    "text22"
+   ]
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Total"
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= money(sum(items,r=>r.price*r.qty)+(delivery=='express'?15:5),'$',2)}"
+   }
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "Ship to ${name}, ${address}, ${city} ${postcode}"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "children": [
+    "outlinedButton4",
+    "spacer2",
+    "filledButton3"
+   ]
+  },
+  "outlinedButton4": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Place order"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "order",
+       "value": "${= \"ORD-\"+(10000+sum(items,r=>r.qty)*137+length(name)*91+length(address)*13)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 4}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "placeOrder",
+       "value": "${order}"
+      }
+     ]
+    }
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= step==4}"
+   },
+   "children": [
+    "icon1",
+    "text24",
+    "text25",
+    "badge2",
+    "text26",
+    "outlinedButton5"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check_circle"
+   }
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Thank you, ${name}!"
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    },
+    "text": "Your order is confirmed."
+   }
+  },
+  "badge2": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDCFCE7",
+    "textColor": "#FF15803D"
+   },
+   "bind": {
+    "props.label": "Order number ${order}"
+   }
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "A receipt was sent to ${email}. Delivery: ${delivery}."
+   }
+  },
+  "outlinedButton5": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Start a new order"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "tried",
+       "value": "${= false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "delivery",
+       "value": "standard"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Espresso beans, 1 kg",
+      "price": 24,
+      "qty": 1
+     },
+     {
+      "id": 2,
+      "name": "Ceramic mug",
+      "price": 12,
+      "qty": 2
+     },
+     {
+      "id": 3,
+      "name": "Milk frother",
+      "price": 18,
+      "qty": 1
+     }
+    ]
+   },
+   {
+    "name": "delivery",
+    "type": "text",
+    "value": "standard"
+   },
+   {
+    "name": "name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "address",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "city",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "postcode",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "email",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "tried",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "order",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "nameOk",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

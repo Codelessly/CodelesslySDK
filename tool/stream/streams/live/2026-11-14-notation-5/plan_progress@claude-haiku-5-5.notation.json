@@ -1,0 +1,463 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "row1",
+    "progressBar1",
+    "text2",
+    "badge1",
+    "text3",
+    "listView1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Blog migration"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "filledButton1",
+    "outlinedButton1"
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Start"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Pause"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "paused",
+       "value": "${= !paused}"
+      }
+     ]
+    }
+   ]
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= step/6}",
+    "visible": "${= running && !done}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "Elapsed: ${elapsed}s"
+   },
+   "bind": {
+    "visible": "${= running && !done}"
+   }
+  },
+  "badge1": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDCFCE7",
+    "textColor": "#FF15803D",
+    "label": "Complete"
+   },
+   "bind": {
+    "visible": "${= done}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF15803D"
+    },
+    "text": "All 6 steps finished in ${elapsed}s."
+   },
+   "bind": {
+    "visible": "${= done}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "listView2"
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${steps}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "circularProgressIndicator1",
+    "column2"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check"
+   },
+   "bind": {
+    "visible": "${= !(step<=item.index)}"
+   }
+  },
+  "circularProgressIndicator1": {
+   "type": "circularProgressIndicator",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= !(step!=item.index)}"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text4",
+    "text5"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "${item.desc}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "running",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "paused",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "done",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "elapsed",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "steps",
+    "type": "list",
+    "value": [
+     {
+      "name": "Export posts",
+      "desc": "Pull all posts and drafts from the old CMS."
+     },
+     {
+      "name": "Convert content",
+      "desc": "Turn HTML bodies into Markdown."
+     },
+     {
+      "name": "Move media",
+      "desc": "Copy images and attachments to the new storage."
+     },
+     {
+      "name": "Fix links",
+      "desc": "Rewrite internal URLs to the new paths."
+     },
+     {
+      "name": "Set up redirects",
+      "desc": "Map old URLs to new ones to keep SEO."
+     },
+     {
+      "name": "Verify site",
+      "desc": "Check pages, feeds and search indexing."
+     }
+    ]
+   }
+  ]
+ }
+}

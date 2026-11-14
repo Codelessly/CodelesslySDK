@@ -1,0 +1,879 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "text2",
+    "column2",
+    "column3",
+    "column4",
+    "filledButton1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Review config changes"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "${= (d1=='keep'?1:0)+(d2=='keep'?1:0)+(d3=='keep'?1:0)} of 3 hunks kept"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#FFF5F5F5"
+     }
+    ]
+   },
+   "children": [
+    "row1",
+    "text4",
+    "text5",
+    "text6",
+    "row2"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "badge1"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Hunk 1 · @@ -4,2 +4,2 @@"
+   }
+  },
+  "badge1": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDBEAFE",
+    "textColor": "#FF1D4ED8"
+   },
+   "bind": {
+    "props.label": "${= d1=='keep'?'Kept':'Discarded'}",
+    "visible": "${= d1!=\"\"}"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FFC62828",
+     "fontFamily": "monospace"
+    },
+    "text": "4  - port: 8080"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFEBEE"
+     }
+    ]
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF2E7D32",
+     "fontFamily": "monospace"
+    },
+    "text": "4  + port: 9090"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE8F5E9"
+     }
+    ]
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280",
+     "fontFamily": "monospace"
+    },
+    "text": "5    host: localhost"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton1",
+    "textButton1"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Keep"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d1",
+       "value": "keep"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d1",
+       "value": "discard"
+      }
+     ]
+    }
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#FFF5F5F5"
+     }
+    ]
+   },
+   "children": [
+    "row3",
+    "text8",
+    "text9",
+    "text10",
+    "text11",
+    "row4"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text7",
+    "badge2"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Hunk 2 · @@ -12,3 +12,2 @@"
+   }
+  },
+  "badge2": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDBEAFE",
+    "textColor": "#FF1D4ED8"
+   },
+   "bind": {
+    "props.label": "${= d2=='keep'?'Kept':'Discarded'}",
+    "visible": "${= d2!=\"\"}"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280",
+     "fontFamily": "monospace"
+    },
+    "text": "12    logging:"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FFC62828",
+     "fontFamily": "monospace"
+    },
+    "text": "13 -   level: debug"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFEBEE"
+     }
+    ]
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FFC62828",
+     "fontFamily": "monospace"
+    },
+    "text": "14 -   file: /tmp/app.log"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFEBEE"
+     }
+    ]
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF2E7D32",
+     "fontFamily": "monospace"
+    },
+    "text": "13 +   level: warn"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE8F5E9"
+     }
+    ]
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton2",
+    "textButton2"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Keep"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d2",
+       "value": "keep"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d2",
+       "value": "discard"
+      }
+     ]
+    }
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#FFF5F5F5"
+     }
+    ]
+   },
+   "children": [
+    "row5",
+    "text13",
+    "text14",
+    "text15",
+    "row6"
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text12",
+    "badge3"
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Hunk 3 · @@ -20,1 +19,3 @@"
+   }
+  },
+  "badge3": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDBEAFE",
+    "textColor": "#FF1D4ED8"
+   },
+   "bind": {
+    "props.label": "${= d3=='keep'?'Kept':'Discarded'}",
+    "visible": "${= d3!=\"\"}"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280",
+     "fontFamily": "monospace"
+    },
+    "text": "19    cache:"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF2E7D32",
+     "fontFamily": "monospace"
+    },
+    "text": "20 +   enabled: true"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE8F5E9"
+     }
+    ]
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF2E7D32",
+     "fontFamily": "monospace"
+    },
+    "text": "21 +   ttl: 300"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE8F5E9"
+     }
+    ]
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton3",
+    "textButton3"
+   ]
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Keep"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d3",
+       "value": "keep"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d3",
+       "value": "discard"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Apply changes"
+   },
+   "bind": {
+    "props.enabled": "${= d1!=\"\"&&d2!=\"\"&&d3!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "apply"
+      },
+      {
+       "type": "showToast",
+       "message": "Changes applied"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "d1",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "d2",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "d3",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "kept",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

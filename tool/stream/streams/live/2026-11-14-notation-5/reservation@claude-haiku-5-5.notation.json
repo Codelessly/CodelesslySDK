@@ -1,0 +1,519 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "text2",
+    "dropdown1",
+    "text3",
+    "dropdown2",
+    "text4",
+    "grid1",
+    "filledButton1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Book a table"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Date"
+   }
+  },
+  "dropdown1": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ]
+   },
+   "bind": {
+    "props.value": "${day}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "day",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Party size"
+   }
+  },
+  "dropdown2": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "8"
+    ]
+   },
+   "bind": {
+    "props.value": "${size}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "size",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Time"
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1",
+    "grid1Row2"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "choiceChip1",
+    "choiceChip2",
+    "choiceChip3"
+   ]
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "17:00"
+   },
+   "bind": {
+    "props.selected": "${= time==\"17:00\"}",
+    "props.isEnabled": "${= !(day==\"Fri\"&&size>4)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": "17:00"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip2": {
+   "type": "choiceChip",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "18:00"
+   },
+   "bind": {
+    "props.selected": "${= time==\"18:00\"}",
+    "props.isEnabled": "${= !(day==\"Sat\"&&size>2)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": "18:00"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip3": {
+   "type": "choiceChip",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "19:00"
+   },
+   "bind": {
+    "props.selected": "${= time==\"19:00\"}",
+    "props.isEnabled": "${= !(day==\"Sat\"&&size>4)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": "19:00"
+      }
+     ]
+    }
+   ]
+  },
+  "grid1Row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "choiceChip4",
+    "choiceChip5",
+    "choiceChip6"
+   ]
+  },
+  "choiceChip4": {
+   "type": "choiceChip",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "20:00"
+   },
+   "bind": {
+    "props.selected": "${= time==\"20:00\"}",
+    "props.isEnabled": "${= !(day==\"Fri\"&&size>2)&&!(day==\"Sat\"&&size>2)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": "20:00"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip5": {
+   "type": "choiceChip",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "21:00"
+   },
+   "bind": {
+    "props.selected": "${= time==\"21:00\"}",
+    "props.isEnabled": "${= !(day==\"Sun\"&&size>6)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": "21:00"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip6": {
+   "type": "choiceChip",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "21:30"
+   },
+   "bind": {
+    "props.selected": "${= time==\"21:30\"}",
+    "props.isEnabled": "${= !(day==\"Thu\"&&size>3)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": "21:30"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Confirm booking"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "book"
+      },
+      {
+       "type": "showToast",
+       "message": "Booked ${day}, party of ${size} at ${time}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "size",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

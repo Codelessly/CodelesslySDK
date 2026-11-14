@@ -1,0 +1,247 @@
+{"meta":{"ui":"question_flow","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"state step=1\nstate use=\"\"\nstate detail=\"\"\nstate budget=500\nstate recs=[]\n\nCard w:390 gap:16\n  Row between middle\n    Text.heading \"Laptop finder\"\n    Text.muted \"Step {min(step,3)} of 3\"\n  Progress =step/3 visible:=step<=3\n  if step==1\n    Text.strong \"What will you mostly use it for?\"\n    Column gap:8\n      ChoiceChip \"School or study\" selected:=use==\"study\" -> use=\"study\"; detail=\"\"\n      ChoiceChip \"Work and office\" selected:=use==\"work\" -> use=\"work\"; detail=\"\"\n      ChoiceChip \"Gaming\" selected:=use==\"gaming\" -> use=\"gaming\"; detail=\"\"\n      ChoiceChip \"Creative projects\" selected:=use==\"creative\" -> use=\"creative\"; detail=\"\"\n    Button \"Next\" enabled:=use!=\"\" -> step=2\n  if step==2\n    if use==\"study\"\n      Text.strong \"What matters most for school?\"\n      Column gap:8\n        ChoiceChip \"Long battery life\" selected:=detail==\"battery\" -> detail=\"battery\"\n        ChoiceChip \"Light to carry\" selected:=detail==\"light\" -> detail=\"light\"\n        ChoiceChip \"Note-taking with a pen\" selected:=detail==\"pen\" -> detail=\"pen\"\n    if use==\"work\"\n      Text.strong \"How do you work?\"\n      Column gap:8\n        ChoiceChip \"Travel a lot\" selected:=detail==\"travel\" -> detail=\"travel\"\n        ChoiceChip \"Mostly at a desk\" selected:=detail==\"desk\" -> detail=\"desk\"\n        ChoiceChip \"Video calls all day\" selected:=detail==\"calls\" -> detail=\"calls\"\n    if use==\"gaming\"\n      Text.strong \"What kind of games?\"\n      Column gap:8\n        ChoiceChip \"Competitive and fast\" selected:=detail==\"fast\" -> detail=\"fast\"\n        ChoiceChip \"Big modern titles\" selected:=detail==\"aaa\" -> detail=\"aaa\"\n        ChoiceChip \"Casual and indie\" selected:=detail==\"casual\" -> detail=\"casual\"\n    if use==\"creative\"\n      Text.strong \"What do you create?\"\n      Column gap:8\n        ChoiceChip \"Photo editing\" selected:=detail==\"photo\" -> detail=\"photo\"\n        ChoiceChip \"Video editing\" selected:=detail==\"video\" -> detail=\"video\"\n        ChoiceChip \"Music and design\" selected:=detail==\"music\" -> detail=\"music\"\n    Row gap:8\n      Button.outline \"Back\" -> step=1\n      Spacer grow\n      Button \"Next\" enabled:=detail!=\"\" -> step=3\n  if step==3\n    Text.strong \"What is your budget?\"\n    Text.heading \"{money(budget,'$',0)}\"\n    Slider =budget min:400 max:3000\n    Row between\n      Text.caption \"$400\"\n      Text.caption \"$3,000\"\n    Row gap:8\n      Button.outline \"Back\" -> step=2\n      Spacer grow\n      Button \"See my match\" -> step=4\n  if step==4\n    Text.caption \"Your match\"\n    Card gap:8\n      if budget<800\n        Text.heading \"Acer Aspire 5\"\n        Text.muted \"About $650\"\n      if budget>=800 && budget<1500\n        Text.heading \"Lenovo ThinkPad / Asus Zenbook class\"\n        Text.muted \"About $1,100\"\n      if budget>=1500\n        Text.heading \"MacBook Pro / Razer Blade class\"\n        Text.muted \"About $2,000+\"\n      Divider\n      Text.strong \"Why it fits\"\n      Row gap:8\n        Icon \"check\"\n        Text \"Fits your {use} use, with a focus on {detail}\"\n      Row gap:8\n        Icon \"check\"\n        Text \"Within your {money(budget,'$',0)} budget\"\n      Row gap:8\n        Icon \"check\"\n        Text \"{budget<800 ? 'Solid value without extras you will not use' : budget<1500 ? 'Balanced speed, build quality and battery' : 'Top performance and a premium display'}\"\n    Row gap:8\n      Button.outline \"Back\" -> step=3\n      Spacer grow\n      Button.secondary \"Start over\" -> step=1; use=\"\"; detail=\"\"; budget=500","usage":{"input_tokens":2364,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1466,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":631,"totalMs":8826}}
+{"tMs":631,"delta":"state"}
+{"tMs":966,"delta":" step=1"}
+{"tMs":967,"delta":"\nstate use=\"\"\nstate det"}
+{"tMs":968,"delta":"ail=\"\"\nstate budget="}
+{"tMs":968,"delta":"500"}
+{"tMs":968,"delta":"\nstate recs"}
+{"tMs":968,"delta":"=[]\n\nCard w"}
+{"tMs":968,"delta":":390 gap:16"}
+{"tMs":968,"delta":"\n  Row"}
+{"tMs":968,"delta":" between"}
+{"tMs":983,"delta":" midd"}
+{"tMs":1017,"delta":"le\n    Text.heading"}
+{"tMs":1050,"delta":" \"Laptop fin"}
+{"tMs":1303,"delta":"der\"\n    Text.mu"}
+{"tMs":1303,"delta":"ted \"Step {min"}
+{"tMs":1303,"delta":"(step,3)} of "}
+{"tMs":1303,"delta":"3\"\n  Progress ="}
+{"tMs":1303,"delta":"step/3 "}
+{"tMs":1303,"delta":"visible:=step<"}
+{"tMs":1303,"delta":"=3\n  if step==1"}
+{"tMs":1318,"delta":"\n    Text.str"}
+{"tMs":1352,"delta":"ong \"What will"}
+{"tMs":1384,"delta":" you m"}
+{"tMs":1418,"delta":"ostly use it for?\""}
+{"tMs":1452,"delta":"\n    Column gap:8"}
+{"tMs":1645,"delta":"\n      ChoiceChip"}
+{"tMs":1645,"delta":" \"School or"}
+{"tMs":1645,"delta":" study"}
+{"tMs":1645,"delta":"\" selected:=use==\""}
+{"tMs":1646,"delta":"study"}
+{"tMs":1651,"delta":"\" -> use=\"study"}
+{"tMs":1685,"delta":"\"; detail="}
+{"tMs":1718,"delta":"\"\"\n      Choice"}
+{"tMs":1751,"delta":"Chip \"Work and"}
+{"tMs":1785,"delta":" office\" selected:=use="}
+{"tMs":1818,"delta":"=\"work\" -> use=\"work"}
+{"tMs":1852,"delta":"\"; detail=\"\"\n      "}
+{"tMs":1980,"delta":"ChoiceChip \""}
+{"tMs":1980,"delta":"Gaming\" selected:"}
+{"tMs":1980,"delta":"=use==\"gaming\""}
+{"tMs":1985,"delta":" -> use=\"gaming\""}
+{"tMs":2019,"delta":"; detail=\"\"\n      "}
+{"tMs":2052,"delta":"ChoiceChip \""}
+{"tMs":2086,"delta":"Creative proj"}
+{"tMs":2119,"delta":"ects\" selected:=use="}
+{"tMs":2152,"delta":"=\"creative\" -> use=\""}
+{"tMs":2186,"delta":"creative\"; detail=\"\""}
+{"tMs":2220,"delta":"\n    Button"}
+{"tMs":2252,"delta":" \""}
+{"tMs":2318,"delta":"Next\" enabled:="}
+{"tMs":2319,"delta":"use!=\"\" -> step="}
+{"tMs":2352,"delta":"2\n  if step==2"}
+{"tMs":2385,"delta":"\n    if"}
+{"tMs":2419,"delta":" use==\"study\"\n      "}
+{"tMs":2453,"delta":"Text.strong \"What matters"}
+{"tMs":2485,"delta":" most for"}
+{"tMs":2519,"delta":" school"}
+{"tMs":2553,"delta":"?\"\n      Column gap"}
+{"tMs":2587,"delta":":8\n        Choi"}
+{"tMs":2619,"delta":"ceChip \"Long battery"}
+{"tMs":2653,"delta":" life\" selected:=detail"}
+{"tMs":2686,"delta":"==\"batt"}
+{"tMs":2719,"delta":"ery\" -> detail=\"batt"}
+{"tMs":2752,"delta":"ery\"\n        Choi"}
+{"tMs":2786,"delta":"ceChip \"Light to"}
+{"tMs":2819,"delta":" carry\" selected:=det"}
+{"tMs":2853,"delta":"ail==\"light"}
+{"tMs":2886,"delta":"\" -> detail=\"light\""}
+{"tMs":2919,"delta":"\n        "}
+{"tMs":2952,"delta":"ChoiceChip \""}
+{"tMs":2986,"delta":"Note"}
+{"tMs":3019,"delta":"-"}
+{"tMs":3052,"delta":"taking with a p"}
+{"tMs":3086,"delta":"en\" selected:=detail"}
+{"tMs":3119,"delta":"==\"pen\" -> det"}
+{"tMs":3152,"delta":"ail=\"pen\"\n    if"}
+{"tMs":3186,"delta":" use==\"work\"\n      "}
+{"tMs":3219,"delta":"Text.strong \"How"}
+{"tMs":3253,"delta":" do you work?\"\n      "}
+{"tMs":3286,"delta":"Column gap:8"}
+{"tMs":3319,"delta":"\n        ChoiceCh"}
+{"tMs":3352,"delta":"ip \"Trav"}
+{"tMs":3386,"delta":"el a"}
+{"tMs":3419,"delta":" lot\" selected:=det"}
+{"tMs":3456,"delta":"ail==\"travel\" ->"}
+{"tMs":3490,"delta":" detail=\"travel\""}
+{"tMs":3519,"delta":"\n        ChoiceCh"}
+{"tMs":3553,"delta":"ip \"Mostly at a"}
+{"tMs":3586,"delta":" desk\" selected:=det"}
+{"tMs":3619,"delta":"ail==\"desk\" ->"}
+{"tMs":3653,"delta":" detail=\"desk\"\n        "}
+{"tMs":3686,"delta":"ChoiceChip \""}
+{"tMs":3719,"delta":"Video calls all"}
+{"tMs":3752,"delta":" day\" selected:=detail"}
+{"tMs":3786,"delta":"==\"calls\" -> det"}
+{"tMs":3819,"delta":"ail=\"calls\"\n    if"}
+{"tMs":3852,"delta":" use==\"gaming\""}
+{"tMs":3885,"delta":"\n      Text.strong \"What"}
+{"tMs":3920,"delta":" kind of games?"}
+{"tMs":3953,"delta":"\"\n      Column gap:"}
+{"tMs":3986,"delta":"8\n        Choice"}
+{"tMs":4019,"delta":"Chip \"Compet"}
+{"tMs":4054,"delta":"itive and"}
+{"tMs":4086,"delta":" fast\" selected:=det"}
+{"tMs":4119,"delta":"ail==\"fast\" ->"}
+{"tMs":4153,"delta":" detail=\"fast\"\n        "}
+{"tMs":4185,"delta":"ChoiceChip \""}
+{"tMs":4219,"delta":"Big mod"}
+{"tMs":4252,"delta":"ern tit"}
+{"tMs":4286,"delta":"les\" selected:=detail"}
+{"tMs":4319,"delta":"==\"a"}
+{"tMs":4352,"delta":"a"}
+{"tMs":4385,"delta":"a\" -> detail=\"a"}
+{"tMs":4420,"delta":"aa\"\n        Cho"}
+{"tMs":4452,"delta":"iceChip \"Casual"}
+{"tMs":4486,"delta":" and indie\" selected:="}
+{"tMs":4519,"delta":"detail==\"casual\" -"}
+{"tMs":4552,"delta":"> detail=\"casual\""}
+{"tMs":4586,"delta":"\n    if use==\"creative\""}
+{"tMs":4619,"delta":"\n      Text.strong \""}
+{"tMs":4652,"delta":"What do"}
+{"tMs":4686,"delta":" you create?\"\n      Column"}
+{"tMs":4720,"delta":" gap:8\n        Ch"}
+{"tMs":4753,"delta":"oiceChip \"Phot"}
+{"tMs":4786,"delta":"o editing\" selected:="}
+{"tMs":4819,"delta":"detail==\"photo\" -"}
+{"tMs":4853,"delta":"> detail=\"photo\""}
+{"tMs":4891,"delta":"\n        ChoiceChip"}
+{"tMs":4920,"delta":" \"Video editing\" selected"}
+{"tMs":4953,"delta":":=detail==\"video\""}
+{"tMs":4986,"delta":" -> detail=\"video\""}
+{"tMs":5019,"delta":"\n        ChoiceChip"}
+{"tMs":5053,"delta":" \"Music"}
+{"tMs":5086,"delta":" and design\" selected:=det"}
+{"tMs":5120,"delta":"ail==\"music\" -> det"}
+{"tMs":5153,"delta":"ail=\"music\"\n    Row"}
+{"tMs":5188,"delta":" gap:8\n      Button"}
+{"tMs":5219,"delta":".outline \"Back\" -"}
+{"tMs":5272,"delta":"> step=1\n      Sp"}
+{"tMs":5286,"delta":"acer grow\n      Button"}
+{"tMs":5319,"delta":" \"Next\" enabled:"}
+{"tMs":5353,"delta":"=detail!=\"\" ->"}
+{"tMs":5386,"delta":" step=3\n  if step=="}
+{"tMs":5419,"delta":"3\n    Text.strong"}
+{"tMs":5452,"delta":" \"What is your budget?\""}
+{"tMs":5486,"delta":"\n    Text.heading \""}
+{"tMs":5519,"delta":"{money(budget,'"}
+{"tMs":5553,"delta":"$',0"}
+{"tMs":5588,"delta":")}\"\n    Slider"}
+{"tMs":5620,"delta":" =budget min:400"}
+{"tMs":5652,"delta":" max:3"}
+{"tMs":5686,"delta":"000"}
+{"tMs":5720,"delta":"\n    Row between"}
+{"tMs":5753,"delta":"\n      Text"}
+{"tMs":5790,"delta":".caption \"$400\""}
+{"tMs":5819,"delta":"\n      Text.caption \"$"}
+{"tMs":5853,"delta":"3,000\"\n    Row"}
+{"tMs":5886,"delta":" gap:8\n      Button"}
+{"tMs":5925,"delta":".outline \"Back\" -"}
+{"tMs":5956,"delta":"> step=2\n      Sp"}
+{"tMs":5986,"delta":"acer grow\n      Button"}
+{"tMs":6020,"delta":" \"See my"}
+{"tMs":6053,"delta":" match"}
+{"tMs":6086,"delta":"\" -> step=4\n  "}
+{"tMs":6119,"delta":"if step==4\n    Text"}
+{"tMs":6152,"delta":".ca"}
+{"tMs":6186,"delta":"ption \"Your"}
+{"tMs":6219,"delta":" match"}
+{"tMs":6253,"delta":"\"\n    Card"}
+{"tMs":6286,"delta":" gap:8\n      if"}
+{"tMs":6319,"delta":" budget<800"}
+{"tMs":6355,"delta":"\n        Text.heading \""}
+{"tMs":6386,"delta":"Ac"}
+{"tMs":6419,"delta":"er A"}
+{"tMs":6453,"delta":"spire "}
+{"tMs":6486,"delta":"5\"\n        Text.mu"}
+{"tMs":6519,"delta":"ted \"About"}
+{"tMs":6552,"delta":" $650"}
+{"tMs":6586,"delta":"\"\n      if bud"}
+{"tMs":6619,"delta":"get>=800 && budget"}
+{"tMs":6653,"delta":"<1500"}
+{"tMs":6686,"delta":"\n        Text.heading \""}
+{"tMs":6720,"delta":"L"}
+{"tMs":6752,"delta":"enovo "}
+{"tMs":6797,"delta":"ThinkPad /"}
+{"tMs":6824,"delta":" As"}
+{"tMs":6859,"delta":"us Z"}
+{"tMs":6885,"delta":"enbook class"}
+{"tMs":6920,"delta":"\"\n        Text.muted"}
+{"tMs":6953,"delta":" \"About $1,100\""}
+{"tMs":6986,"delta":"\n      if budget>=1500"}
+{"tMs":7021,"delta":"\n        Text.heading \""}
+{"tMs":7054,"delta":"M"}
+{"tMs":7086,"delta":"acBook Pro /"}
+{"tMs":7120,"delta":" Raz"}
+{"tMs":7153,"delta":"er Bl"}
+{"tMs":7186,"delta":"ade class\"\n        Text."}
+{"tMs":7221,"delta":"muted \"About $2,000"}
+{"tMs":7253,"delta":"+"}
+{"tMs":7286,"delta":"\"\n      Div"}
+{"tMs":7320,"delta":"ider\n      Text.strong"}
+{"tMs":7353,"delta":" \"Why it"}
+{"tMs":7386,"delta":" fits\"\n      Row g"}
+{"tMs":7419,"delta":"ap:8\n        Icon"}
+{"tMs":7452,"delta":" \"check\"\n        Text \""}
+{"tMs":7486,"delta":"Fits your {"}
+{"tMs":7519,"delta":"use"}
+{"tMs":7552,"delta":"} use,"}
+{"tMs":7585,"delta":" with a"}
+{"tMs":7619,"delta":" focus on {detail}\""}
+{"tMs":7653,"delta":"\n      Row gap:8"}
+{"tMs":7686,"delta":"\n        Icon \"check\""}
+{"tMs":7720,"delta":"\n        Text \"Within your"}
+{"tMs":7752,"delta":" {money(budget,'"}
+{"tMs":7786,"delta":"$',0)} budget\""}
+{"tMs":7820,"delta":"\n      Row gap:8"}
+{"tMs":7852,"delta":"\n        Icon \"check\""}
+{"tMs":7886,"delta":"\n        Text \"{"}
+{"tMs":7919,"delta":"bud"}
+{"tMs":7952,"delta":"get<800 ? '"}
+{"tMs":7986,"delta":"Solid value"}
+{"tMs":8019,"delta":" without"}
+{"tMs":8052,"delta":" ext"}
+{"tMs":8085,"delta":"ras"}
+{"tMs":8119,"delta":" you"}
+{"tMs":8152,"delta":" will"}
+{"tMs":8186,"delta":" not use"}
+{"tMs":8219,"delta":"' : budget<1500"}
+{"tMs":8252,"delta":" ? 'Bal"}
+{"tMs":8286,"delta":"anced spe"}
+{"tMs":8319,"delta":"ed, build"}
+{"tMs":8352,"delta":" quality and batt"}
+{"tMs":8386,"delta":"ery' : 'Top"}
+{"tMs":8419,"delta":" perform"}
+{"tMs":8452,"delta":"ance and"}
+{"tMs":8485,"delta":" a prem"}
+{"tMs":8520,"delta":"ium display'}\"\n    "}
+{"tMs":8552,"delta":"Row gap:8\n      "}
+{"tMs":8586,"delta":"Button.outline \"Back\""}
+{"tMs":8619,"delta":" -> step=3\n      "}
+{"tMs":8652,"delta":"Spacer grow\n      "}
+{"tMs":8688,"delta":"Button.sec"}
+{"tMs":8719,"delta":"ondary \"Start over\" -"}
+{"tMs":8753,"delta":"> step=1; use="}
+{"tMs":8786,"delta":"\"\"; detail=\"\"; bud"}
+{"tMs":8819,"delta":"get=500"}

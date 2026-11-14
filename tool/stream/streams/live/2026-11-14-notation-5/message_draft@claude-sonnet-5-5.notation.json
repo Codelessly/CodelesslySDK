@@ -1,0 +1,630 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "row1",
+    "text2",
+    "text3",
+    "text4",
+    "row2",
+    "outlinedButton1",
+    "row3",
+    "textField1",
+    "textField2",
+    "segmentedButton1",
+    "textField3",
+    "text7",
+    "row4"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= sent}"
+   },
+   "children": [
+    "icon1",
+    "text1"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check_circle"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Email sent"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "To: ${to}"
+   },
+   "bind": {
+    "visible": "${= sent}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${subject}"
+   },
+   "bind": {
+    "visible": "${= sent}"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    },
+    "text": "${body}"
+   },
+   "bind": {
+    "visible": "${= sent}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= discarded}"
+   },
+   "children": [
+    "icon2",
+    "text5"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "delete"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Draft discarded"
+   }
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Start over"
+   },
+   "bind": {
+    "visible": "${= discarded}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "discarded",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= !sent && !discarded}"
+   },
+   "children": [
+    "text6",
+    "badge1"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Draft email"
+   }
+  },
+  "badge1": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFDBEAFE",
+    "textColor": "#FF1D4ED8",
+    "label": "Draft"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "To",
+     "hintText": "name@example.com"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${to}",
+    "visible": "${= !sent && !discarded}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "to",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "textField2": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Subject"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${subject}",
+    "visible": "${= !sent && !discarded}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "subject",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "Polite",
+      "label": "Polite"
+     },
+     {
+      "value": "Firm",
+      "label": "Firm"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [tone]}",
+    "visible": "${= !sent && !discarded}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tone",
+       "value": "${result[0]}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "body",
+       "value": "${= (tone==\"Polite\" ? \"Hi,\\n\\nI hope you're well. The heating in my apartment has stopped working. Could you please arrange for someone to take a look as soon as you're able? I'm happy to work around your schedule for access.\\n\\nThank you very much,\\nAlex\" : \"Hello,\\n\\nThe heating in my apartment is broken and has not been working. This needs to be repaired promptly. Please confirm today when a technician will visit. If it is not fixed soon, I will have to look at my options under my tenancy agreement.\\n\\nRegards,\\nAlex\")}"
+      }
+     ]
+    }
+   ]
+  },
+  "textField3": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Message"
+    },
+    "maxLines": 10
+   },
+   "bind": {
+    "props.initialValue": "${body}",
+    "visible": "${= !sent && !discarded}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "body",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FFB91C1C"
+    },
+    "text": "Add a recipient and a subject to send."
+   },
+   "bind": {
+    "visible": "${= (!sent && !discarded) && (trim(to)==\"\" || trim(subject)==\"\")}"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= !sent && !discarded}"
+   },
+   "children": [
+    "textButton1",
+    "filledButton1"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "discarded",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": ""
+   },
+   "bind": {
+    "props.enabled": "${= trim(to)!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sent",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "send"
+      },
+      {
+       "type": "showToast",
+       "message": "Email sent"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "to",
+    "type": "text",
+    "value": "landlord@example.com"
+   },
+   {
+    "name": "subject",
+    "type": "text",
+    "value": "Heating not working in my apartment"
+   },
+   {
+    "name": "tone",
+    "type": "text",
+    "value": "Polite"
+   },
+   {
+    "name": "body",
+    "type": "text",
+    "value": "Hi,\n\nI hope you're well. The heating in my apartment has stopped working. Could you please arrange for someone to take a look as soon as you're able? I'm happy to work around your schedule for access.\n\nThank you very much,\nAlex"
+   },
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "discarded",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

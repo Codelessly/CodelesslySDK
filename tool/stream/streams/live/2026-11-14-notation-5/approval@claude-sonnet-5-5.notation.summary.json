@@ -1,0 +1,106 @@
+{
+ "ui": "approval",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 5412,
+ "turns": [
+  {
+   "input_tokens": 2382,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1241,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 684,
+   "totalMs": 7395,
+   "chars": 2862,
+   "lines": 80,
+   "jsonTails": 0,
+   "nodes": 35,
+   "outputTokensPerNode": "35.5",
+   "notationIssues": [
+    "line 21:16: Unknown word \"showFiles\" on a Button. Props are written key:value.",
+    "line 21:26: Unknown word \"?\" on a Button. Props are written key:value.",
+    "line 37:12: Unknown word \"decision==\" on a Icon. Props are written key:value.",
+    "line 37:33: Unknown word \"?\" on a Icon. Props are written key:value.",
+    "line 41:1: No node type \"Wait\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…).",
+    "line 45:1: A second root: the first line is the root, everything else is indented under it.",
+    "line 46:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 47:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 48:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 49:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 50:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 51:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 52:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 53:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 54:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 55:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 56:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 57:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 58:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 59:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 60:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 61:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 62:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 63:3: An \"if\" needs a parent: indent it under a node.",
+    "line 64:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 65:3: An \"if\" needs a parent: indent it under a node.",
+    "line 66:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 67:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 68:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 69:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 70:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 71:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 72:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 73:3: An \"if\" needs a parent: indent it under a node.",
+    "line 74:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 75:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 76:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 77:3: An \"if\" needs a parent: indent it under a node.",
+    "line 78:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 79:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 80:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 81:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 82:5: A second root: the first line is the root, everything else is indented under it."
+   ],
+   "errors": [
+    "unknown_prop /nodes/textButton1/props/: A textButton has no prop \"\". Its props: label, textAlign, icon, iconAlignment, spacing, enabled, style, autofocus, loading.",
+    "unknown_prop /nodes/icon3/props/: A icon has no prop \"\". Its props: icon, color, size."
+   ]
+  },
+  {
+   "input_tokens": 4983,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 603,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 644,
+   "totalMs": 3157,
+   "chars": 1368,
+   "lines": 41,
+   "jsonTails": 0,
+   "nodes": 36,
+   "outputTokensPerNode": "16.8",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

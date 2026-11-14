@@ -1,0 +1,627 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "text2",
+    "grid1",
+    "text3",
+    "grid2",
+    "text4",
+    "grid3",
+    "text5",
+    "divider1",
+    "text6",
+    "text7",
+    "filledButton1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Book a table"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Day"
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "gridView1"
+   ]
+  },
+  "gridView1": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisSpacing": 8,
+    "crossAxisSpacing": 8,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${days}"
+   },
+   "children": [
+    "gridView1Item"
+   ]
+  },
+  "gridView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "choiceChip1"
+   ]
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.selected": "${= day==item.i}",
+    "props.label": "${item.l}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "day",
+       "value": "${= item.i}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Party size"
+   }
+  },
+  "grid2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "gridView2"
+   ]
+  },
+  "gridView2": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 4,
+    "mainAxisSpacing": 8,
+    "crossAxisSpacing": 8,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${sizes}"
+   },
+   "children": [
+    "gridView2Item"
+   ]
+  },
+  "gridView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "choiceChip2"
+   ]
+  },
+  "choiceChip2": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.selected": "${= party==item}",
+    "props.label": "${item}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "party",
+       "value": "${= item}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Time"
+   }
+  },
+  "grid3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "gridView3"
+   ]
+  },
+  "gridView3": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisSpacing": 8,
+    "crossAxisSpacing": 8,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${slots}"
+   },
+   "children": [
+    "gridView3Item"
+   ]
+  },
+  "gridView3Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "choiceChip3"
+   ]
+  },
+  "choiceChip3": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.selected": "${= time==item.t}",
+    "props.isEnabled": "${= (day*3+item.i*5+party*2)%4!=0&&!(party>6&&item.i%2==0)}",
+    "props.label": "${item.t}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": "${= item.t}"
+      }
+     ]
+    }
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Greyed-out times are full."
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "Choose a day, party size and time."
+   },
+   "bind": {
+    "visible": "${= time==\"\"}"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= days[day].l} · party of ${party} · ${time}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   },
+   "bind": {
+    "visible": "${= time!=\"\"}"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Confirm booking"
+   },
+   "bind": {
+    "visible": "${= time!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "book",
+       "value": "${time}"
+      },
+      {
+       "type": "showToast",
+       "message": "Booked: ${= days[day].l}, table for ${party} at ${time}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "party",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "days",
+    "type": "list",
+    "value": [
+     {
+      "i": 0,
+      "l": "Today"
+     },
+     {
+      "i": 1,
+      "l": "Tomorrow"
+     },
+     {
+      "i": 2,
+      "l": "In 2 days"
+     },
+     {
+      "i": 3,
+      "l": "In 3 days"
+     },
+     {
+      "i": 4,
+      "l": "In 4 days"
+     },
+     {
+      "i": 5,
+      "l": "In 5 days"
+     },
+     {
+      "i": 6,
+      "l": "In 6 days"
+     }
+    ]
+   },
+   {
+    "name": "sizes",
+    "type": "list",
+    "value": [
+     1,
+     2,
+     3,
+     4,
+     5,
+     6,
+     7,
+     8
+    ]
+   },
+   {
+    "name": "slots",
+    "type": "list",
+    "value": [
+     {
+      "i": 0,
+      "t": "17:30"
+     },
+     {
+      "i": 1,
+      "t": "18:00"
+     },
+     {
+      "i": 2,
+      "t": "18:30"
+     },
+     {
+      "i": 3,
+      "t": "19:00"
+     },
+     {
+      "i": 4,
+      "t": "19:30"
+     },
+     {
+      "i": 5,
+      "t": "20:00"
+     },
+     {
+      "i": 6,
+      "t": "20:30"
+     },
+     {
+      "i": 7,
+      "t": "21:00"
+     },
+     {
+      "i": 8,
+      "t": "21:30"
+     }
+    ]
+   }
+  ]
+ }
+}

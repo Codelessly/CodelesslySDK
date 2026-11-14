@@ -1,0 +1,745 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text1",
+    "stack1",
+    "listView2",
+    "column9"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Coffee shops near you"
+   }
+  },
+  "stack1": {
+   "type": "stack",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 180
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF1ECE2"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2",
+    "column3",
+    "column4",
+    "column5",
+    "column6",
+    "listView1"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "x": 0,
+    "y": 70,
+    "width": 340,
+    "height": 6
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "x": 0,
+    "y": 150,
+    "width": 340,
+    "height": 4
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "x": 90,
+    "y": 0,
+    "width": 6,
+    "height": 180
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "x": 230,
+    "y": 0,
+    "width": 4,
+    "height": 180
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "x": 0,
+    "y": 20,
+    "width": 340,
+    "height": 3
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE2DACB"
+     }
+    ]
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${shops}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column7"
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 14,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "layout.x": "${item.x}",
+    "layout.y": "${item.y}",
+    "decoration.fills[0].color": "${= sel==item.id?\"#FFD9381E\":\"#FF5A3E2B\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${item.id}"
+   }
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${shops}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column8"
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "padding": 10,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==item.id?\"#FFFBE3DD\":\"#FFF7F7F7\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "row1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "badge1",
+    "text3",
+    "spacer1",
+    "icon1"
+   ]
+  },
+  "badge1": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "#FFF3F4F6",
+    "textColor": "#FF374151"
+   },
+   "bind": {
+    "props.label": "${item.id}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_right"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "visible": "${= sel>0}"
+   },
+   "children": [
+    "text4",
+    "row2",
+    "row5"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= find(shops,s=>s.id==sel).name}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row3",
+    "row4"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text5"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= find(shops,s=>s.id==sel).rating}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon3",
+    "text6"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "place"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= find(shops,s=>s.id==sel).dist}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon4",
+    "text7"
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "schedule"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Open ${= find(shops,s=>s.id==sel).hours}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "shops",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Bean There",
+      "rating": 4.6,
+      "dist": "0.2 km",
+      "hours": "7:00-18:00",
+      "x": 40,
+      "y": 30
+     },
+     {
+      "id": 2,
+      "name": "Daily Grind",
+      "rating": 4.3,
+      "dist": "0.4 km",
+      "hours": "6:30-17:00",
+      "x": 200,
+      "y": 24
+     },
+     {
+      "id": 3,
+      "name": "Roast & Co",
+      "rating": 4.8,
+      "dist": "0.6 km",
+      "hours": "8:00-20:00",
+      "x": 120,
+      "y": 88
+     },
+     {
+      "id": 4,
+      "name": "The Steam Cup",
+      "rating": 4.1,
+      "dist": "0.9 km",
+      "hours": "7:00-15:00",
+      "x": 260,
+      "y": 110
+     },
+     {
+      "id": 5,
+      "name": "Cafe Lune",
+      "rating": 4.5,
+      "dist": "1.1 km",
+      "hours": "9:00-22:00",
+      "x": 60,
+      "y": 135
+     }
+    ]
+   }
+  ]
+ }
+}

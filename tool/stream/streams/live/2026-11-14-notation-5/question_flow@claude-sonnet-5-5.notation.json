@@ -1,0 +1,1757 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "row1",
+    "progressBar1",
+    "text3",
+    "column2",
+    "filledButton1",
+    "text4",
+    "column3",
+    "text5",
+    "column4",
+    "text6",
+    "column5",
+    "text7",
+    "column6",
+    "row2",
+    "text8",
+    "text9",
+    "slider1",
+    "row3",
+    "row4",
+    "text12",
+    "column7",
+    "row8"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Laptop finder"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "Step ${= min(step,3)} of 3"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= step/3}",
+    "visible": "${= step<=3}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "What will you mostly use it for?"
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   },
+   "children": [
+    "choiceChip1",
+    "choiceChip2",
+    "choiceChip3",
+    "choiceChip4"
+   ]
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "School or study"
+   },
+   "bind": {
+    "props.selected": "${= use==\"study\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "use",
+       "value": "study"
+      },
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip2": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Work and office"
+   },
+   "bind": {
+    "props.selected": "${= use==\"work\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "use",
+       "value": "work"
+      },
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip3": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Gaming"
+   },
+   "bind": {
+    "props.selected": "${= use==\"gaming\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "use",
+       "value": "gaming"
+      },
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip4": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Creative projects"
+   },
+   "bind": {
+    "props.selected": "${= use==\"creative\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "use",
+       "value": "creative"
+      },
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next"
+   },
+   "bind": {
+    "props.enabled": "${= use!=\"\"}",
+    "visible": "${= step==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "What matters most for school?"
+   },
+   "bind": {
+    "visible": "${= (step==2) && (use==\"study\")}"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= (step==2) && (use==\"study\")}"
+   },
+   "children": [
+    "choiceChip5",
+    "choiceChip6",
+    "choiceChip7"
+   ]
+  },
+  "choiceChip5": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Long battery life"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"battery\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "battery"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip6": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Light to carry"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"light\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "light"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip7": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Note-taking with a pen"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"pen\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "pen"
+      }
+     ]
+    }
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "How do you work?"
+   },
+   "bind": {
+    "visible": "${= (step==2) && (use==\"work\")}"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= (step==2) && (use==\"work\")}"
+   },
+   "children": [
+    "choiceChip8",
+    "choiceChip9",
+    "choiceChip10"
+   ]
+  },
+  "choiceChip8": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Travel a lot"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"travel\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "travel"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip9": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Mostly at a desk"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"desk\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "desk"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip10": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Video calls all day"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"calls\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "calls"
+      }
+     ]
+    }
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "What kind of games?"
+   },
+   "bind": {
+    "visible": "${= (step==2) && (use==\"gaming\")}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= (step==2) && (use==\"gaming\")}"
+   },
+   "children": [
+    "choiceChip11",
+    "choiceChip12",
+    "choiceChip13"
+   ]
+  },
+  "choiceChip11": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Competitive and fast"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"fast\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "fast"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip12": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Big modern titles"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"aaa\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "aaa"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip13": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Casual and indie"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"casual\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "casual"
+      }
+     ]
+    }
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "What do you create?"
+   },
+   "bind": {
+    "visible": "${= (step==2) && (use==\"creative\")}"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= (step==2) && (use==\"creative\")}"
+   },
+   "children": [
+    "choiceChip14",
+    "choiceChip15",
+    "choiceChip16"
+   ]
+  },
+  "choiceChip14": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Photo editing"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"photo\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "photo"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip15": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Video editing"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"video\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "video"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip16": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Music and design"
+   },
+   "bind": {
+    "props.selected": "${= detail==\"music\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": "music"
+      }
+     ]
+    }
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "outlinedButton1",
+    "spacer1",
+    "filledButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next"
+   },
+   "bind": {
+    "props.enabled": "${= detail!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "What is your budget?"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= money(budget,'$',0)}"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "slider1": {
+   "type": "slider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "min": 400,
+    "max": 3000
+   },
+   "bind": {
+    "props.value": "${budget}",
+    "visible": "${= step==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "budget",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "children": [
+    "text10",
+    "text11"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "$400"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "$3,000"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "children": [
+    "outlinedButton2",
+    "spacer2",
+    "filledButton3"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "See my match"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Your match"
+   },
+   "bind": {
+    "visible": "${= step==4}"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "visible": "${= step==4}"
+   },
+   "children": [
+    "text13",
+    "text14",
+    "text15",
+    "text16",
+    "text17",
+    "text18",
+    "divider1",
+    "text19",
+    "row5",
+    "row6",
+    "row7"
+   ]
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Acer Aspire 5"
+   },
+   "bind": {
+    "visible": "${= budget<800}"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "About $650"
+   },
+   "bind": {
+    "visible": "${= budget<800}"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Lenovo ThinkPad / Asus Zenbook class"
+   },
+   "bind": {
+    "visible": "${= budget>=800 && budget<1500}"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "About $1,100"
+   },
+   "bind": {
+    "visible": "${= budget>=800 && budget<1500}"
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "MacBook Pro / Razer Blade class"
+   },
+   "bind": {
+    "visible": "${= budget>=1500}"
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "About $2,000+"
+   },
+   "bind": {
+    "visible": "${= budget>=1500}"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Why it fits"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text20"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check"
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Fits your ${use} use, with a focus on ${detail}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text21"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check"
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Within your ${= money(budget,'$',0)} budget",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon3",
+    "text22"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check"
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= budget<800 ? 'Solid value without extras you will not use' : budget<1500 ? 'Balanced speed, build quality and battery' : 'Top performance and a premium display'}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==4}"
+   },
+   "children": [
+    "outlinedButton3",
+    "spacer3",
+    "filledButton4"
+   ]
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "filledButton4": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "tonal": true,
+    "label": "Start over"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "use",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "detail",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "budget",
+       "value": "${= 500}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "use",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "detail",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "budget",
+    "type": "integer",
+    "value": 500
+   },
+   {
+    "name": "recs",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

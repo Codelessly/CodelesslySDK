@@ -1,0 +1,172 @@
+{"meta":{"ui":"carousel","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"state shoes=[{\"id\":0,\"name\":\"Aero Runner\",\"price\":120,\"rating\":4.8,\"desc\":\"Lightweight daily trainer with responsive foam for smooth miles.\"},{\"id\":1,\"name\":\"Trail Blazer\",\"price\":135,\"rating\":4.6,\"desc\":\"Grippy outsole and rock plate built for rough trails.\"},{\"id\":2,\"name\":\"Cloud Strider\",\"price\":150,\"rating\":4.9,\"desc\":\"Max cushioning for long recovery runs.\"},{\"id\":3,\"name\":\"Swift Racer\",\"price\":170,\"rating\":4.7,\"desc\":\"Carbon-plated racing shoe for personal bests.\"},{\"id\":4,\"name\":\"Urban Pacer\",\"price\":110,\"rating\":4.4,\"desc\":\"Versatile city shoe with breathable knit upper.\"},{\"id\":5,\"name\":\"Endurance Pro\",\"price\":140,\"rating\":4.5,\"desc\":\"Stable and durable for marathon training.\"}]\nstate i=0\nstate detail=false\nstate size=\"\"\nCard w:390 gap:12\n  if !detail\n    Text.title \"Running shoes\"\n    Row middle gap:8\n      IconButton \"chevron_left\" -> i=i==0?5:i-1\n      Box grow gap:8 pad:12 fill:#FFF2F2F2 radius:12 -> detail=true; size=\"\"\n        Box h:160 fill:#FFD9D9D9 radius:8 center middle\n          Icon \"image\"\n        Text.heading \"{shoes[i].name}\"\n        Row between\n          Text.strong \"${shoes[i].price}\"\n          Row gap:4\n            Icon \"star\"\n            Text \"{shoes[i].rating}\"\n      IconButton \"chevron_right\" -> i=i==5?0:i+1\n    Row center gap:8\n      each n in range(6)\n        Box w:10 h:10 radius:5 fill:=n==i?\"#FF3366CC\":\"#FFCCCCCC\" -> i=n\n  if detail\n    Row middle gap:8\n      IconButton \"arrow_back\" -> detail=false\n      Text.heading \"{shoes[i].name}\"\n    Box h:160 fill:#FFD9D9D9 radius:8 center middle\n      Icon \"image\"\n    Row between\n      Text.strong \"${shoes[i].price}\"\n      Row gap:4\n        Icon \"star\"\n        Text \"{shoes[i].rating}\"\n    Text.muted \"{shoes[i].desc}\"\n    Text.strong \"Size\"\n    Row gap:8\n      each s in [7,8,9,10,11]\n        ChoiceChip \"{s}\" selected:=size==s -> size=s\n    Button \"Add to bag\" enabled:=size!=\"\" -> emit addToBag shoes[i].id; toast \"Added to bag\"\n    Button.ghost \"Back to carousel\" -> detail=false","usage":{"input_tokens":2376,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":947,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":979,"totalMs":6696}}
+{"tMs":979,"delta":"state"}
+{"tMs":1297,"delta":" shoes=[{\"id"}
+{"tMs":1297,"delta":"\":0,\"name\":\""}
+{"tMs":1297,"delta":"A"}
+{"tMs":1298,"delta":"ero"}
+{"tMs":1298,"delta":" Run"}
+{"tMs":1298,"delta":"ner\",\"price\":120"}
+{"tMs":1298,"delta":",\"rating\":4.8"}
+{"tMs":1298,"delta":",\"desc\":\"L"}
+{"tMs":1298,"delta":"ightweight da"}
+{"tMs":1325,"delta":"ily tr"}
+{"tMs":1358,"delta":"ainer with"}
+{"tMs":1390,"delta":" respon"}
+{"tMs":1638,"delta":"sive fo"}
+{"tMs":1638,"delta":"am for"}
+{"tMs":1638,"delta":" sm"}
+{"tMs":1638,"delta":"ooth mi"}
+{"tMs":1638,"delta":"les.\"},{\"id\":1"}
+{"tMs":1638,"delta":",\"name\":\"Trail"}
+{"tMs":1638,"delta":" Bl"}
+{"tMs":1656,"delta":"az"}
+{"tMs":1690,"delta":"er\",\"price\":135"}
+{"tMs":1724,"delta":",\"rating\":4.6"}
+{"tMs":1757,"delta":",\"desc\":\"Gr"}
+{"tMs":1791,"delta":"ippy out"}
+{"tMs":1970,"delta":"s"}
+{"tMs":1970,"delta":"ole and"}
+{"tMs":1971,"delta":" rock"}
+{"tMs":1971,"delta":" pl"}
+{"tMs":1971,"delta":"ate built for rough"}
+{"tMs":1991,"delta":" trails.\"},{\"id\":"}
+{"tMs":2025,"delta":"2,\"name\":\"C"}
+{"tMs":2057,"delta":"loud Str"}
+{"tMs":2091,"delta":"ider\",\"price\":150"}
+{"tMs":2124,"delta":",\"rating\":4.9"}
+{"tMs":2158,"delta":",\"desc\":\"Max"}
+{"tMs":2191,"delta":" cushioning for"}
+{"tMs":2309,"delta":" long recovery runs.\"},"}
+{"tMs":2309,"delta":"{\"id\":3,\"name"}
+{"tMs":2309,"delta":"\":\"Sw"}
+{"tMs":2324,"delta":"ift Rac"}
+{"tMs":2358,"delta":"er\",\"price\":170"}
+{"tMs":2392,"delta":",\"rating\":4.7"}
+{"tMs":2425,"delta":",\"desc\":\"Car"}
+{"tMs":2458,"delta":"bon-pl"}
+{"tMs":2491,"delta":"ated rac"}
+{"tMs":2525,"delta":"ing shoe for person"}
+{"tMs":2558,"delta":"al b"}
+{"tMs":2592,"delta":"ests.\"},{\"id\":4"}
+{"tMs":2645,"delta":",\"name\":\"Ur"}
+{"tMs":2658,"delta":"ban P"}
+{"tMs":2691,"delta":"ac"}
+{"tMs":2725,"delta":"er\",\"price\":110,\"r"}
+{"tMs":2758,"delta":"ating\":4.4"}
+{"tMs":2794,"delta":",\"desc\":\"Vers"}
+{"tMs":2825,"delta":"atile city sh"}
+{"tMs":2858,"delta":"oe with breathable kn"}
+{"tMs":2892,"delta":"it up"}
+{"tMs":2925,"delta":"per.\"},{\"id\":5"}
+{"tMs":2959,"delta":",\"name\":\"Endur"}
+{"tMs":2993,"delta":"ance P"}
+{"tMs":3025,"delta":"ro\",\"price\":140"}
+{"tMs":3059,"delta":",\"rating\":4.5"}
+{"tMs":3092,"delta":",\"desc\":\"St"}
+{"tMs":3125,"delta":"able and"}
+{"tMs":3159,"delta":" durable for marathon training"}
+{"tMs":3192,"delta":".\"}]\nstate i"}
+{"tMs":3226,"delta":"=0\nstate det"}
+{"tMs":3258,"delta":"ail=false"}
+{"tMs":3292,"delta":"\nstate size=\"\"\nCard"}
+{"tMs":3326,"delta":" w:390 g"}
+{"tMs":3359,"delta":"ap:12"}
+{"tMs":3392,"delta":"\n  if !"}
+{"tMs":3426,"delta":"detail\n    Text"}
+{"tMs":3459,"delta":".title \"Running"}
+{"tMs":3492,"delta":" shoes\"\n    Row"}
+{"tMs":3525,"delta":" midd"}
+{"tMs":3559,"delta":"le g"}
+{"tMs":3592,"delta":"ap:8\n      IconBut"}
+{"tMs":3625,"delta":"ton \"chevron_left\""}
+{"tMs":3660,"delta":" -> i=i"}
+{"tMs":3692,"delta":"==0?5"}
+{"tMs":3725,"delta":":i-1\n      Box"}
+{"tMs":3764,"delta":" grow g"}
+{"tMs":3792,"delta":"ap:8 pad:12"}
+{"tMs":3825,"delta":" "}
+{"tMs":3859,"delta":"f"}
+{"tMs":3892,"delta":"ill:#F"}
+{"tMs":3925,"delta":"FF2F2"}
+{"tMs":3959,"delta":"F2 radius:12"}
+{"tMs":3992,"delta":" "}
+{"tMs":4026,"delta":"-> det"}
+{"tMs":4062,"delta":"ail=true; size=\"\""}
+{"tMs":4092,"delta":"\n        Box"}
+{"tMs":4125,"delta":" h:160"}
+{"tMs":4159,"delta":" fill:#FFD"}
+{"tMs":4192,"delta":"9D9D9 radius"}
+{"tMs":4226,"delta":":8 center midd"}
+{"tMs":4259,"delta":"le\n          Icon \"image"}
+{"tMs":4292,"delta":"\"\n        Text.he"}
+{"tMs":4326,"delta":"ading \""}
+{"tMs":4359,"delta":"{shoes[i].name"}
+{"tMs":4392,"delta":"}\"\n        Row"}
+{"tMs":4426,"delta":" between\n          Text.strong"}
+{"tMs":4459,"delta":" \"${shoes[i]."}
+{"tMs":4492,"delta":"price}\"\n          Row"}
+{"tMs":4526,"delta":" gap:4\n            Ic"}
+{"tMs":4559,"delta":"on \"star\"\n            Text"}
+{"tMs":4593,"delta":" \"{shoes[i]."}
+{"tMs":4630,"delta":"rating}\"\n      Icon"}
+{"tMs":4659,"delta":"Button \"chevron_right"}
+{"tMs":4693,"delta":"\" -> i=i==5"}
+{"tMs":4726,"delta":"?0:i+1\n    "}
+{"tMs":4759,"delta":"Row center g"}
+{"tMs":4793,"delta":"ap:8\n      each"}
+{"tMs":4826,"delta":" n"}
+{"tMs":4859,"delta":" in range(6)\n        "}
+{"tMs":4893,"delta":"Box w"}
+{"tMs":4926,"delta":":10 h:10 rad"}
+{"tMs":4959,"delta":"ius:5"}
+{"tMs":4993,"delta":" fill:="}
+{"tMs":5026,"delta":"n==i?\""}
+{"tMs":5059,"delta":"#FF3"}
+{"tMs":5092,"delta":"366C"}
+{"tMs":5126,"delta":"C\":\"#FFC"}
+{"tMs":5159,"delta":"CCCCC\" ->"}
+{"tMs":5193,"delta":" i=n\n  "}
+{"tMs":5226,"delta":"if detail\n    Row midd"}
+{"tMs":5260,"delta":"le gap:8\n      I"}
+{"tMs":5313,"delta":"conButton \"arrow_"}
+{"tMs":5325,"delta":"back\" -> detail=false"}
+{"tMs":5359,"delta":"\n      Text.heading \""}
+{"tMs":5392,"delta":"{shoes[i].name"}
+{"tMs":5426,"delta":"}\"\n    Box h:"}
+{"tMs":5460,"delta":"160"}
+{"tMs":5493,"delta":" fill:#FFD"}
+{"tMs":5527,"delta":"9D9D9 radius"}
+{"tMs":5559,"delta":":8 center middle\n      "}
+{"tMs":5592,"delta":"Icon \"image\"\n    "}
+{"tMs":5626,"delta":"Row between\n      Text."}
+{"tMs":5661,"delta":"strong \"${shoes["}
+{"tMs":5693,"delta":"i].price}\"\n      "}
+{"tMs":5726,"delta":"Row gap:4\n        "}
+{"tMs":5759,"delta":"Icon \"star\"\n        "}
+{"tMs":5793,"delta":"Text \"{shoes[i"}
+{"tMs":5826,"delta":"].rating}\"\n    "}
+{"tMs":5860,"delta":"Text.mu"}
+{"tMs":5893,"delta":"ted \"{shoes[i"}
+{"tMs":5927,"delta":"].desc}\"\n    "}
+{"tMs":5960,"delta":"Text.strong \"Size"}
+{"tMs":5994,"delta":"\"\n    Row gap:"}
+{"tMs":6026,"delta":"8"}
+{"tMs":6061,"delta":"\n      each"}
+{"tMs":6093,"delta":" s in ["}
+{"tMs":6127,"delta":"7,8,9,10,"}
+{"tMs":6160,"delta":"11]\n        Choi"}
+{"tMs":6193,"delta":"ceChip \"{s}\""}
+{"tMs":6227,"delta":" selected:=size"}
+{"tMs":6260,"delta":"==s -> size=s"}
+{"tMs":6293,"delta":"\n    Button \""}
+{"tMs":6327,"delta":"Add to bag\" en"}
+{"tMs":6360,"delta":"abled:=size!=\"\""}
+{"tMs":6393,"delta":" -> em"}
+{"tMs":6426,"delta":"it add"}
+{"tMs":6460,"delta":"ToBag sh"}
+{"tMs":6493,"delta":"oes[i].id; to"}
+{"tMs":6526,"delta":"ast \"Added to bag\""}
+{"tMs":6593,"delta":"\n    Button.ghost \""}
+{"tMs":6626,"delta":"Back to car"}
+{"tMs":6660,"delta":"ousel\" -> detail="}
+{"tMs":6694,"delta":"false"}

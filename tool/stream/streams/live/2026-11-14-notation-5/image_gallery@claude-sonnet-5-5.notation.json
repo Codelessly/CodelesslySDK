@@ -1,0 +1,521 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "stack1"
+   ]
+  },
+  "stack1": {
+   "type": "stack",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "column2",
+    "column5"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "gridView1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "My trip"
+   }
+  },
+  "gridView1": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisSpacing": 8,
+    "crossAxisSpacing": 8,
+    "shrinkWrapRows": true
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${photos}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column3"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column4",
+    "text2"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "height": 90,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.c}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cur",
+       "value": "${= item.i}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${item.t}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": 16
+   },
+   "props": {
+    "spacing": 12,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#F2000000"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "visible": "${= open}"
+   },
+   "children": [
+    "row1",
+    "column6",
+    "text4",
+    "row2"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "iconButton1"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= cur+1} of ${= length(photos)}"
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 240
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 12,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= photos[cur].c}"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= photos[cur].t}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "iconButton2",
+    "iconButton3"
+   ]
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_left"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cur",
+       "value": "${= cur==0?length(photos)-1:cur-1}"
+      }
+     ]
+    }
+   ]
+  },
+  "iconButton3": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_right"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cur",
+       "value": "${= cur==length(photos)-1?0:cur+1}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "cur",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "photos",
+    "type": "list",
+    "value": [
+     {
+      "i": 0,
+      "c": "#FF42A5F5",
+      "t": "Harbour at sunrise"
+     },
+     {
+      "i": 1,
+      "c": "#FFEF5350",
+      "t": "Old town market"
+     },
+     {
+      "i": 2,
+      "c": "#FF66BB6A",
+      "t": "Forest trail"
+     },
+     {
+      "i": 3,
+      "c": "#FFFFA726",
+      "t": "Desert dunes"
+     },
+     {
+      "i": 4,
+      "c": "#FFAB47BC",
+      "t": "Evening skyline"
+     },
+     {
+      "i": 5,
+      "c": "#FF26A69A",
+      "t": "Hidden lagoon"
+     },
+     {
+      "i": 6,
+      "c": "#FF8D6E63",
+      "t": "Mountain hut"
+     },
+     {
+      "i": 7,
+      "c": "#FFEC407A",
+      "t": "Street festival"
+     },
+     {
+      "i": 8,
+      "c": "#FF5C6BC0",
+      "t": "Night train"
+     }
+    ]
+   }
+  ]
+ }
+}

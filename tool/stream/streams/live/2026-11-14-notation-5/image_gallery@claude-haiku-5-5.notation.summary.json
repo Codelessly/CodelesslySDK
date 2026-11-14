@@ -1,0 +1,71 @@
+{
+ "ui": "image_gallery",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 5412,
+ "turns": [
+  {
+   "input_tokens": 2378,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 599,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 482,
+   "totalMs": 3222,
+   "chars": 1265,
+   "lines": 20,
+   "jsonTails": 0,
+   "nodes": 19,
+   "outputTokensPerNode": "31.5",
+   "notationIssues": [
+    "line 9:1: Not valid JSON: {item.c}",
+    "line 11:9: Unknown word \"lightbox\" on a modal. Props are written key:value.",
+    "line 16:1: Not valid JSON: {photos[idx].c}"
+   ],
+   "errors": [
+    "children_not_allowed /nodes/modal1/children: A modal takes no \"children\": it takes slots (trigger, content). Put the child under \"slots\", e.g. {\"trigger\": \"<id>\"}.",
+    "wrong_type /nodes/column2/decoration/fills/0/color: Not a Color: got the text \"{item.c}\". A Color is \"#AARRGGBB\" or \"#RRGGBB\" (hex, alpha first).",
+    "unknown_action_key /nodes/column2/actions/0/actions/1/modal: A openModal action has no \"modal\". It takes: to, params, presentation, barrierDismissible, barrierColor, barrierBlur, showDragHandle, alignment, anchor, placement, anchorGap, anchorOffset, anchorReserve, anchorNode, anchorItem, insets, sheetWidth, sheetRadius, sheetBelow, maxHeightFactor, cover, enterScale, routeTransition (and enabled, nonBlocking, when).",
+    "unknown_screen /nodes/column2/actions/0/actions/1/to: A openModal needs \"to\": the canvas id it shows.",
+    "wrong_type /nodes/column4/decoration/fills/0/color: Not a Color: got the text \"{photos[idx].c}\". A Color is \"#AARRGGBB\" or \"#RRGGBB\" (hex, alpha first)."
+   ]
+  },
+  {
+   "input_tokens": 3533,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1135,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 385,
+   "totalMs": 4267,
+   "chars": 2742,
+   "lines": 54,
+   "jsonTails": 0,
+   "nodes": 43,
+   "outputTokensPerNode": "26.4",
+   "notationIssues": [
+    "line 57:1: No node type \"Two\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": []
+  }
+ ]
+}

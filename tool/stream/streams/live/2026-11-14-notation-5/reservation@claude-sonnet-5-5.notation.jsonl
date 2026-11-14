@@ -1,0 +1,99 @@
+{"meta":{"ui":"reservation","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"Card w:390 gap:12\n  state day=0\n  state party=2\n  state time=\"\"\n  state days=[{\"i\":0,\"l\":\"Today\"},{\"i\":1,\"l\":\"Tomorrow\"},{\"i\":2,\"l\":\"In 2 days\"},{\"i\":3,\"l\":\"In 3 days\"},{\"i\":4,\"l\":\"In 4 days\"},{\"i\":5,\"l\":\"In 5 days\"},{\"i\":6,\"l\":\"In 6 days\"}]\n  state sizes=[1,2,3,4,5,6,7,8]\n  state slots=[{\"i\":0,\"t\":\"17:30\"},{\"i\":1,\"t\":\"18:00\"},{\"i\":2,\"t\":\"18:30\"},{\"i\":3,\"t\":\"19:00\"},{\"i\":4,\"t\":\"19:30\"},{\"i\":5,\"t\":\"20:00\"},{\"i\":6,\"t\":\"20:30\"},{\"i\":7,\"t\":\"21:00\"},{\"i\":8,\"t\":\"21:30\"}]\n  Text.title \"Book a table\"\n  Text.strong \"Day\"\n  Grid cols:3 gap:8\n    each d in days\n      ChoiceChip \"{d.l}\" selected:=day==d.i -> day=d.i; time=\"\"\n  Text.strong \"Party size\"\n  Grid cols:4 gap:8\n    each p in sizes\n      ChoiceChip \"{p}\" selected:=party==p -> party=p; time=\"\"\n  Text.strong \"Time\"\n  Grid cols:3 gap:8\n    each s in slots\n      ChoiceChip \"{s.t}\" selected:=time==s.t enabled:=(day*3+s.i*5+party*2)%4!=0&&!(party>6&&s.i%2==0) -> time=s.t\n  Text.caption \"Greyed-out times are full.\"\n  Divider\n  if time==\"\"\n    Text.muted \"Choose a day, party size and time.\"\n  if time!=\"\"\n    Text \"{days[day].l} · party of {party} · {time}\"\n    Button \"Confirm booking\" -> emit book time; toast \"Booked: {days[day].l}, table for {party} at {time}\"","usage":{"input_tokens":2373,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1331,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":639}},"ttftMs":6661,"totalMs":9922}}
+{"tMs":6661,"delta":"Card w:390 "}
+{"tMs":6693,"delta":"gap:12"}
+{"tMs":6727,"delta":"\n  state day=0"}
+{"tMs":6760,"delta":"\n  state party=2"}
+{"tMs":6794,"delta":"\n  state time=\"\"\n  "}
+{"tMs":6827,"delta":"state days=[{\"i\":"}
+{"tMs":6863,"delta":"0,\"l\":\"Today"}
+{"tMs":6894,"delta":"\"},{\"i\":1,"}
+{"tMs":6928,"delta":"\"l\":\"Tomor"}
+{"tMs":6962,"delta":"row\"},{\"i\":"}
+{"tMs":6996,"delta":"2,\"l\":\"In "}
+{"tMs":7030,"delta":"2 days\"},{\"i"}
+{"tMs":7064,"delta":"\":3,\"l\":\"In"}
+{"tMs":7097,"delta":" 3 days\"},{\""}
+{"tMs":7130,"delta":"i\":4,\"l\":\""}
+{"tMs":7164,"delta":"In 4 days\"},{"}
+{"tMs":7199,"delta":"\"i\":5,\"l\":"}
+{"tMs":7231,"delta":"\"In 5 days\"},"}
+{"tMs":7265,"delta":"{\"i\":6,\"l"}
+{"tMs":7298,"delta":"\":\"In 6 days\""}
+{"tMs":7332,"delta":"}]\n  state s"}
+{"tMs":7365,"delta":"izes=[1,2,"}
+{"tMs":7399,"delta":"3,4,5,6,"}
+{"tMs":7440,"delta":"7,8]\n  state sl"}
+{"tMs":7466,"delta":"ots=[{\"i\":0"}
+{"tMs":7499,"delta":",\"t\":\"17:30"}
+{"tMs":7533,"delta":"\"},{\"i\":1,"}
+{"tMs":7566,"delta":"\"t\":\"18:00\""}
+{"tMs":7600,"delta":"},{\"i\":2,\""}
+{"tMs":7634,"delta":"t\":\"18:30\"},"}
+{"tMs":7667,"delta":"{\"i\":3,\"t"}
+{"tMs":7701,"delta":"\":\"19:00\"},{"}
+{"tMs":7734,"delta":"\"i\":4,\"t\":"}
+{"tMs":7768,"delta":"\"19:30\"},{\""}
+{"tMs":7802,"delta":"i\":5,\"t\":\""}
+{"tMs":7835,"delta":"20:00\"},{\"i"}
+{"tMs":7868,"delta":"\":6,\"t\":\"20"}
+{"tMs":7902,"delta":":30\"},{\"i\":"}
+{"tMs":7935,"delta":"7,\"t\":\"21:"}
+{"tMs":7969,"delta":"00\"},{\"i\":8"}
+{"tMs":8002,"delta":",\"t\":\"21:30"}
+{"tMs":8036,"delta":"\"}]\n  Text."}
+{"tMs":8070,"delta":"title \"Book a table\""}
+{"tMs":8103,"delta":"\n  Text"}
+{"tMs":8136,"delta":".strong \"Day\""}
+{"tMs":8170,"delta":"\n  Grid cols:3"}
+{"tMs":8203,"delta":" gap:8\n    each"}
+{"tMs":8237,"delta":" d in days"}
+{"tMs":8270,"delta":"\n      ChoiceChip"}
+{"tMs":8304,"delta":" \"{d.l}\" sel"}
+{"tMs":8339,"delta":"ected:=day==d.i"}
+{"tMs":8379,"delta":" -> day=d.i;"}
+{"tMs":8409,"delta":" time=\"\"\n  Text."}
+{"tMs":8438,"delta":"strong \"Party size\""}
+{"tMs":8471,"delta":"\n  Grid cols:4"}
+{"tMs":8505,"delta":" gap:8\n    each"}
+{"tMs":8540,"delta":" p in sizes\n      "}
+{"tMs":8572,"delta":"ChoiceChip \"{"}
+{"tMs":8605,"delta":"p}\" selected:=party"}
+{"tMs":8639,"delta":"==p -> party=p;"}
+{"tMs":8672,"delta":" time=\"\"\n  Text."}
+{"tMs":8706,"delta":"strong \"Time\"\n  "}
+{"tMs":8739,"delta":"Grid cols:3 "}
+{"tMs":8772,"delta":"gap:8\n    each s"}
+{"tMs":8806,"delta":" in slots\n      Cho"}
+{"tMs":8841,"delta":"iceChip \"{s."}
+{"tMs":8873,"delta":"t}\" selected:=time"}
+{"tMs":8907,"delta":"==s.t enabled:"}
+{"tMs":8940,"delta":"=(day*3+s."}
+{"tMs":8974,"delta":"i*5+party*2)"}
+{"tMs":9008,"delta":"%4!=0&"}
+{"tMs":9040,"delta":"&!(party>6&&"}
+{"tMs":9074,"delta":"s.i%2==0)"}
+{"tMs":9107,"delta":" -> time=s.t"}
+{"tMs":9140,"delta":"\n  Text.ca"}
+{"tMs":9174,"delta":"ption \"Gre"}
+{"tMs":9207,"delta":"yed-"}
+{"tMs":9241,"delta":"out times are full.\"\n  "}
+{"tMs":9274,"delta":"Divider\n  if time=="}
+{"tMs":9309,"delta":"\"\"\n    Text."}
+{"tMs":9340,"delta":"muted \"Cho"}
+{"tMs":9374,"delta":"ose a day"}
+{"tMs":9407,"delta":", party size and time.\""}
+{"tMs":9440,"delta":"\n  if"}
+{"tMs":9478,"delta":" time!=\"\"\n    Text"}
+{"tMs":9507,"delta":" \"{"}
+{"tMs":9541,"delta":"days[day].l} · party"}
+{"tMs":9575,"delta":" of {party} · {time}"}
+{"tMs":9609,"delta":"\"\n    Button \""}
+{"tMs":9642,"delta":"Confirm boo"}
+{"tMs":9674,"delta":"king\" -> em"}
+{"tMs":9708,"delta":"it book"}
+{"tMs":9740,"delta":" time"}
+{"tMs":9774,"delta":"; toast \"Booked:"}
+{"tMs":9808,"delta":" {days[day].l}"}
+{"tMs":9840,"delta":", table"}
+{"tMs":9874,"delta":" for {party}"}
+{"tMs":9907,"delta":" at {time}\""}
