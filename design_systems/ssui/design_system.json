@@ -506,7 +506,14 @@
   "components/TextExpandable.json",
   "components/StackedProgressBar.json",
   "components/TabToggle.json",
-  "components/ChipTabs.json"
+  "components/ChipTabs.json",
+  "components/MenuButton.json",
+  "components/SplitButton.json",
+  "components/WindowToolbar.json",
+  "components/DocumentItem.json",
+  "components/TextItem.json",
+  "components/CodeBlock.json",
+  "components/BatchProgressBar.json"
  ],
  "replaces": [
   "filledButton",

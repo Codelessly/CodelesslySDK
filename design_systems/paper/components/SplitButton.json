@@ -1,0 +1,362 @@
+{
+ "schema": 3,
+ "id": "SplitButton",
+ "roots": [
+  "shell"
+ ],
+ "widget": {
+  "type": "SplitButton",
+  "doc": "An action with a second half that opens its choices. Fires onPressed (the action) and onMenu (the chevron).",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Run",
+    "doc": "The action's label (small shows the icon alone)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "play_arrow",
+    "doc": "The action's icon (empty: none)."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "small",
+      "medium",
+      "large"
+     ]
+    },
+    "default": "medium",
+    "doc": "small (22), medium (28) or large (32)."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "neutral",
+      "primary"
+     ]
+    },
+    "default": "neutral",
+    "doc": "neutral: bordered. primary: filled with the brand color."
+   },
+   {
+    "key": "busy",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A spinner for the icon; both halves stop."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False dims it and stops presses."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   },
+   {
+    "key": "onMenu"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Neutral",
+   "size": [
+    96,
+    28
+   ],
+   "props": {
+    "label": "Run"
+   }
+  },
+  {
+   "name": "Primary",
+   "size": [
+    120,
+    28
+   ],
+   "props": {
+    "label": "Generate",
+    "tone": "primary"
+   }
+  }
+ ],
+ "nodes": {
+  "shell": {
+   "type": "row",
+   "children": [
+    "main",
+    "seam",
+    "trigger"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 96
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "raisedBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "radius": 2,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${= props.size == 'small' ? 5 : (props.size == 'medium' ? 7 : (8))}",
+    "decoration.fills[0].color": "${= props.tone == 'primary' ? theme.primary : theme.colors.raisedBackground}",
+    "decoration.strokes[0].color": "${= props.tone == 'primary' ? theme.primary : theme.colors.secondaryBorder}",
+    "opacity": "${= props.enabled && !props.busy ? 1 : 0.55}"
+   }
+  },
+  "main": {
+   "type": "row",
+   "children": [
+    "spin",
+    "glyph",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": 26,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "bind": {
+    "layout.height": "${= props.size == 'small' ? 20 : (props.size == 'medium' ? 26 : (30))}",
+    "layout.padding": "${= props.size == 'small' ? [5, 0, 5, 0] : (props.size == 'medium' ? [8, 0, 8, 0] : ([8, 0, 8, 0]))}"
+   },
+   "states": {
+    "hovered": {
+     "main": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "main": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled && !props.busy"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "spin": {
+   "type": "activityIndicator",
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "props": {
+    "color": "primaryText"
+   },
+   "bind": {
+    "visible": "${props.busy}",
+    "props.color": "${= props.tone == 'primary' ? theme.colors.onAccent : theme.colors.primaryText}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "play_arrow",
+    "color": "primaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "visible": "${= props.icon != '' && !props.busy}",
+    "props.icon": "${props.icon}",
+    "props.color": "${= props.tone == 'primary' ? theme.colors.onAccent : theme.colors.primaryText}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "height": 1.1,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != '' && props.size != 'small'}",
+    "props.style.color": "${= props.tone == 'primary' ? theme.colors.onAccent : theme.colors.primaryText}",
+    "props.style.fontSize": "${= props.size == 'small' ? 11 : (props.size == 'medium' ? 11 : (12))}"
+   }
+  },
+  "seam": {
+   "type": "box",
+   "layout": {
+    "width": 1,
+    "height": 26
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBorder"
+     }
+    ]
+   },
+   "bind": {
+    "layout.height": "${= props.size == 'small' ? 20 : (props.size == 'medium' ? 26 : (30))}",
+    "decoration.fills[0].color": "${= props.tone == 'primary' ? '#4DFFFFFF' : theme.colors.secondaryBorder}"
+   }
+  },
+  "trigger": {
+   "type": "row",
+   "children": [
+    "chevron"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26
+   },
+   "bind": {
+    "layout.width": "${= props.size == 'small' ? 20 : (props.size == 'medium' ? 26 : (30))}",
+    "layout.height": "${= props.size == 'small' ? 20 : (props.size == 'medium' ? 26 : (30))}"
+   },
+   "states": {
+    "hovered": {
+     "trigger": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "trigger": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled && !props.busy"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onMenu"
+      }
+     ]
+    }
+   ]
+  },
+  "chevron": {
+   "type": "icon",
+   "props": {
+    "icon": "expand_more",
+    "color": "primaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "props.color": "${= props.tone == 'primary' ? theme.colors.onAccent : theme.colors.primaryText}"
+   }
+  }
+ }
+}

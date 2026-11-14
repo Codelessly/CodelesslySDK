@@ -1,0 +1,294 @@
+{
+ "schema": 3,
+ "id": "DocumentItem",
+ "roots": [
+  "item"
+ ],
+ "widget": {
+  "type": "DocumentItem",
+  "doc": "A compact document object: a title bar over a content surface holding the call's children. Fires onOpen when the title is pressed.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Document",
+    "doc": "The title in the bar.",
+    "required": true
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "description",
+    "doc": "The bar's icon (empty: none)."
+   },
+   {
+    "key": "description",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted line above the content."
+   },
+   {
+    "key": "surface",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "gray",
+      "white"
+     ]
+    },
+    "default": "gray",
+    "doc": "gray: the soft secondary surface. white: a white page."
+   }
+  ],
+  "events": [
+   {
+    "key": "onOpen"
+   }
+  ],
+  "slots": [
+   "actions"
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    90
+   ],
+   "props": {
+    "title": "Brief",
+    "description": "Shared with the team"
+   }
+  }
+ ],
+ "nodes": {
+  "item": {
+   "type": "column",
+   "children": [
+    "bar",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 90
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 1,
+    "clip": "antiAlias"
+   }
+  },
+  "bar": {
+   "type": "row",
+   "children": [
+    "strut",
+    "barContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 298
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     7,
+     0,
+     7,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 27
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "description",
+    "color": "tertiaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.icon": "${props.icon}"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 500,
+     "height": 1.2,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onOpen"
+      }
+     ]
+    }
+   ]
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "description",
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 298
+    },
+    "height": {
+     "hug": 40
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.surface == 'white' ? theme.colors.primaryBackground : theme.colors.subtleFill}"
+   }
+  },
+  "description": {
+   "type": "text",
+   "props": {
+    "text": "${props.description}",
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 400,
+     "height": 1.35,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.description != ''}"
+   }
+  },
+  "content": {
+   "type": "slot"
+  },
+  "barContent": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "title",
+    "actions"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

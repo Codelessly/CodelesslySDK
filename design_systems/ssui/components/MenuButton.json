@@ -1,0 +1,89 @@
+{
+ "schema": 3,
+ "id": "MenuButton",
+ "roots": [
+  "button"
+ ],
+ "widget": {
+  "type": "MenuButton",
+  "doc": "A menu (hamburger) button. Fires onPressed.",
+  "props": [
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "xs",
+      "compact",
+      "small",
+      "medium",
+      "large"
+     ]
+    },
+    "default": "medium",
+    "doc": "xs, compact, small, medium or large."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False dims it and stops presses."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    36,
+    36
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "button": {
+   "type": "IconButton",
+   "props": {
+    "icon": "menu",
+    "variant": "ghost"
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "bind": {
+    "props.size": "${props.size}",
+    "props.enabled": "${props.enabled}"
+   },
+   "tooltip": "Open menu",
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 79. Still to rebuild: 85.**
+**Here: 86. Still to rebuild: 78.**
 
 ## Here
 
@@ -20,6 +20,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | BackButton | BackButton |  |
 | Badge | Badge |  |
 | Banner | Banner |  |
+| BatchProgressBar | BatchProgressBar |  |
 | Breadcrumb | Breadcrumb |  |
 | Button | Button | buttons (filled, outlined, text, elevated) |
 | CardActions | CardActions |  |
@@ -28,12 +29,14 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Chip | Chip | chip family |
 | ChipTabs | ChipTabs |  |
 | CloudSyncIndicator | CloudSyncIndicator |  |
+| CodeBlock | CodeBlock |  |
 | ConnectionStatus | ConnectionStatus |  |
 | CopyButton | CopyButton |  |
 | CountBadge | CountBadge |  |
 | DatePicker |  | datePicker |
 | Dialog | Dialog | confirm action / modal |
 | DiffStatsBadge | DiffStatsBadge |  |
+| DocumentItem | DocumentItem |  |
 | DownloadButton | DownloadButton |  |
 | Dropdown |  | dropdown |
 | EmptyState | EmptyState |  |
@@ -49,6 +52,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | InlineStat | InlineStat |  |
 | LoadingSpinner |  | activityIndicator |
 | LoadMore | LoadMore |  |
+| MenuButton | MenuButton |  |
 | MetaInfo | MetaInfo |  |
 | NotificationBadge | NotificationBadge |  |
 | OnboardingBanner | OnboardingBanner |  |
@@ -73,6 +77,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Select | Select | dropdown |
 | Skeleton | Skeleton |  |
 | Slider | Slider | slider |
+| SplitButton | SplitButton |  |
 | StackedProgressBar | StackedProgressBar |  |
 | StatsRow | StatTile (dashboard density), InlineStat (compact) |  |
 | StatusBadge | StatusBadge |  |
@@ -88,12 +93,14 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | TextField | TextInput | textField |
 | TextInput | TextInput | textField |
 | TextInputLabel | TextInputLabel |  |
+| TextItem | TextItem |  |
 | ThemeToggle | ThemeToggle |  |
 | TimePicker |  | timePicker |
 | Toast |  | showToast action |
 | ToggleRow | ToggleRow |  |
 | Tooltip | Tooltip | tooltip behavior |
 | UpgradeButton | UpgradeButton |  |
+| WindowToolbar | WindowToolbar |  |
 
 Also here with no source file of the same name: Card, ListRow, SectionHeader, Tabs.
 
@@ -101,25 +108,21 @@ Also here with no source file of the same name: Card, ListRow, SectionHeader, Ta
 
 In the order planned: what generated UI reaches for first, then the application chrome.
 
-### Status and feedback (1)
+### Text and small content (1)
 
-BatchProgressBar
+CodePreview
 
-### Text and small content (5)
+### Cards and rows (13)
 
-TextItem, CodeBlock, CodePreview, SplitButton, MenuButton
-
-### Cards and rows (14)
-
-FolderCard, ResourceCard, AgentChip, DocumentItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, TrialBanner, AuthPromptBanner
+FolderCard, ResourceCard, AgentChip, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, TrialBanner, AuthPromptBanner
 
 ### Inputs (19)
 
 FullWidthSearchInput, HeaderSearchInput, Combobox, NumberInput, NumberPresetInput, ColorInput, AuthInput, ExtensionChipsInput, FileUploader, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInput, PromptInputWithBanner
 
-### Navigation and chrome (18)
+### Navigation and chrome (17)
 
-BrowserTabs, TabBarWithBadges, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, NavigationMenu, CompactAppBar, WindowToolbar, SectionToolbar, PaneToolbar, Toolbar, SectionCategoryHeaderFull, StatusCategoryHeader, CollapsibleSection, ScrollToBottomFAB, CanvasShell, ResizableRow
+BrowserTabs, TabBarWithBadges, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, NavigationMenu, CompactAppBar, SectionToolbar, PaneToolbar, Toolbar, SectionCategoryHeaderFull, StatusCategoryHeader, CollapsibleSection, ScrollToBottomFAB, CanvasShell, ResizableRow
 
 ### Menus and overlays (14)
 

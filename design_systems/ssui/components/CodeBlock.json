@@ -1,0 +1,360 @@
+{
+ "schema": 3,
+ "id": "CodeBlock",
+ "roots": [
+  "block"
+ ],
+ "widget": {
+  "type": "CodeBlock",
+  "doc": "Code in monospace with a header: a title, a language tag and a copy button. Embedded drops the frame. Fires onCopy.",
+  "props": [
+   {
+    "key": "code",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The code.",
+    "required": true
+   },
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A title in the header."
+   },
+   {
+    "key": "language",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A language tag in the header (empty: none)."
+   },
+   {
+    "key": "copyable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A copy button in the header."
+   },
+   {
+    "key": "embedded",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The body of a card around it: no border, no header, smaller type."
+   }
+  ],
+  "events": [
+   {
+    "key": "onCopy"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Titled",
+   "size": [
+    360,
+    130
+   ],
+   "props": {
+    "code": "const total = items\n  .map((i) => i.price)\n  .reduce((a, b) => a + b, 0);",
+    "title": "total.ts",
+    "language": "ts"
+   }
+  },
+  {
+   "name": "Embedded",
+   "size": [
+    300,
+    60
+   ],
+   "props": {
+    "code": "npm install\nnpm run build",
+    "embedded": true
+   }
+  }
+ ],
+ "nodes": {
+  "block": {
+   "type": "column",
+   "children": [
+    "header",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 130
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 12,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.strokes[0].visible": "${= !props.embedded}",
+    "decoration.radius": "${= props.embedded ? 0 : 12}",
+    "layout.padding": "${= props.embedded ? 0 : 1}"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "title",
+    "tag",
+    "gap",
+    "copy"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "visible": "${= !props.embedded}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "code",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "bind": {
+    "visible": "${= props.title != ''}"
+   }
+  },
+  "tag": {
+   "type": "row",
+   "children": [
+    "language"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     8,
+     4,
+     8,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= props.language != ''}"
+   }
+  },
+  "language": {
+   "type": "text",
+   "props": {
+    "text": "${props.language}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "gap": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 20
+    },
+    "height": 1
+   }
+  },
+  "copy": {
+   "type": "CopyButton",
+   "props": {
+    "text": ""
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": 28
+   },
+   "bind": {
+    "props.text": "${props.code}",
+    "visible": "${props.copyable}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onCopy"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCopy",
+       "value": "${props.code}"
+      }
+     ]
+    }
+   ]
+  },
+  "body": {
+   "type": "row",
+   "children": [
+    "code"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "scrollable": true
+   },
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 60
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ]
+   },
+   "bind": {
+    "layout.padding": "${= props.embedded ? [12, 10, 12, 10] : [16, 16, 16, 16]}",
+    "decoration.fills[0].color": "${= props.embedded ? theme.colors.primaryBackground : theme.colors.secondaryBackground}"
+   }
+  },
+  "code": {
+   "type": "text",
+   "props": {
+    "text": "${props.code}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 400,
+     "height": 1.7142857142857142,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "bind": {
+    "props.style.fontSize": "${= props.embedded ? 11.5 : 14}",
+    "props.style.height": "${= props.embedded ? 1.652 : 1.714}"
+   }
+  }
+ }
+}
