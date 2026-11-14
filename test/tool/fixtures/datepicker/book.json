@@ -1,0 +1,13 @@
+{
+  "schema": 3,
+  "id": "book",
+  "roots": ["book"],
+  "variables": {"book": [{"name": "date", "type": "text", "value": ""}]},
+  "nodes": {
+    "book": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 200}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "col": {"type": "column", "children": ["picker"], "layout": {"width": {"fill": 390}, "height": {"fill": 200}, "padding": 20}},
+    "picker": {"type": "datePicker", "layout": {"width": {"fill": 350}, "height": 50}, "props": {"format": "yyyy-MM-dd", "helpText": "Choose your evening"},
+      "bind": {"props.value": "${date}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "date", "value": "${result}"}]}]}
+  }
+}
