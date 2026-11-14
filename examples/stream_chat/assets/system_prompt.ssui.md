@@ -163,9 +163,9 @@ Every UI you make is in Soft SaaS UI: A flat desktop SaaS and editor language: q
 
 - **Colours** (write the name wherever a colour goes, `"color": "primaryBackground"`; each has a dark value): `primary`, `onPrimary`, `surface`, `onSurface`, `error`, `success`, `warning`, `primaryBackground`, `secondaryBackground`, `tertiaryBackground`, `primaryText`, `secondaryText`, `tertiaryText`, `primaryBorder`, `secondaryBorder`, `info`, `purple`, `subtleFill`, `neutralFill`, `raisedBackground`, `track`, `scrim`, `onAccent`, `focusBorder`, `hoverOverlay`, `pressedOverlay`, `activeTint`, `primaryTint`, `primaryTintBorder`, `successTint`, `successTintBorder`, `warningTint`, `warningTintBorder`, `errorTint`, `errorTintBorder`, `infoTint`, `infoTintBorder`, `neutralTint`, `neutralTintBorder`, `tooltipBackground`, `tooltipText`, `tooltipMuted`.
 - **Text styles** (`"style": "pageTitle"`, or `{"from": "pageTitle", "color": ...}`): `pageTitle` 20/600, `sectionTitle` 14/600, `dialogTitle` 14/600, `panelTitle` 12/600, `body` 13/400, `bodySecondary` 12/400, `inputText` 12.5/400, `placeholder` 12.5/400, `fieldLabel` 11.5/600, `caption` 11/400, `mono` 12/400, `badge` 11/500, `controlXs` 11.5/500, `controlCompact` 12/500, `controlSmall` 12.5/500, `controlMedium` 13/500, `controlLarge` 15/500, `heading1` 30/700, `heading2` 24/700, `heading3` 18/600.
-- **Spacing** (`${theme.spacing.1}` in a binding): `1` 4, `2` 8, `3` 12, `4` 16, `5` 20, `6` 24, `8` 32, `10` 40, `12` 48, `16` 64.
-- **Radii** (`${theme.radii.inner}` in a binding): `inner` 5, `control` 7, `panel` 8, `dialog` 12, `full` 9999.
-- **Sizes** (`${theme.sizes.xs}` in a binding): `xs` 24, `compact` 28, `small` 32, `medium` 36, `large` 44, `topBar` 44, `panelHeader` 36, `tableRow` 36, `tableRowDense` 28, `tableHeader` 32, `dialogHeader` 48, `dialogFooter` 49, `statusBar` 24, `dialogSmall` 400, `dialogMedium` 520, `dialogLarge` 720.
+- **Spacing** (bound, not written: `"bind": {"layout.padding": "${theme.spacing.1}"}`): `1` 4, `2` 8, `3` 12, `4` 16, `5` 20, `6` 24, `8` 32, `10` 40, `12` 48, `16` 64.
+- **Radii** (bound, not written: `"bind": {"decoration.radius": "${theme.radii.inner}"}`): `inner` 5, `control` 7, `panel` 8, `dialog` 12, `full` 9999.
+- **Sizes** (bound, not written: `"bind": {"layout.height": "${theme.sizes.xs}"}`): `xs` 24, `compact` 28, `small` 32, `medium` 36, `large` 44, `topBar` 44, `panelHeader` 36, `tableRow` 36, `tableRowDense` 28, `tableHeader` 32, `dialogHeader` 48, `dialogFooter` 49, `statusBar` 24, `dialogSmall` 400, `dialogMedium` 520, `dialogLarge` 720.
 - **Shadows** (`"bind": {"decoration.effects": "${theme.shadows.level1}"}`): `level1`, `level2`, `level3`, `level4`.
 - **Durations** (`${theme.durations.control}` in a binding): `control` 150 ms, `transition` 200 ms, `tooltipDelay` 400 ms.
 - **Curves** (`${theme.curves.standard}` in a binding): `standard` easeInOut, `enter` easeOut.
@@ -474,11 +474,11 @@ Soft SaaS UI's components stand in for `filledButton`, `elevatedButton`, `outlin
   'Required.' : ''}"`), a `form` around the fields and a `validate` action on send
   (validation (ui_docs "forms-validation-and-an-error-state")). Styling every control: forms (ui_docs "forms").
 - **Lists**: a `listView` or `gridView` repeats its **first child** once per item of its `data` binding:
-  `"bind": {"data": "${plans}"}`; inside, `${item.name}` and `${index}`. An item fills the list across (its
-  cross-axis size is `fill`). In a page that scrolls, give the list
-  `"scrollable": false` (a gridView: `"physics": "never"`). A grid of as many equal columns as fit:
+  `"bind": {"data": "${plans}"}`; inside, `${item.name}` and `${index}`. Items fill the list across. In a scrolling
+  page, give it `"scrollable": false` (a gridView: `"physics": "never"`). As many equal columns as fit:
   `minCrossAxisExtent` (CSS `repeat(auto-fit, minmax(280px, 1fr))`); equal-height cards: `"shrinkWrapRows": true`.
-  Nested lists, tables, pagination: lists (ui_docs "lists").
+  Nested lists, tables: lists (ui_docs "lists"). Filters read the item through a lambda: `filter(rows, r => r.ok)`
+  (more (ui_docs "lists-filter-sort-and-page-a-list")).
 - **Icons**: `props.icon` is a Material icon name (`"arrow_forward"`, `"check_circle"`; `_outlined`, `_rounded`
   suffixes), with `color` and `size`.
 - **Images**: an image fill on a `box` (see Decoration). **Divider**: `divider` with `thickness` and `color`, or a
@@ -660,6 +660,7 @@ Look up anything below with ui_docs {"topic": "<topic>"}: a page, a section, or 
 | A grid of cards from data, as many columns as fit; gaps between wrapped items | "lists-a-grid-of-cards" |
 | Nested lists; the outer item inside the inner list (`parent`) | "lists-nested-lists" |
 | A comparison table from one row and one cell template | "lists-a-table-from-one-template" |
+| Filter, sort, page a list | "lists-filter-sort-and-page-a-list" |
 | A weekly grid (days × habits) | "lists-a-weekly-grid" |
 | A carousel with arrows, dots and progress; snapping to cards; scroll to an item; long lists loaded in pages | "lists-a-carousel-pages-and-pagination" |
 | Several screens; a page's URL path | "navigation-screens" |
