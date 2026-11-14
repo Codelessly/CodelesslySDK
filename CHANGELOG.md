@@ -45,7 +45,12 @@ and matching no item). The formula engine is right; nothing told the model.
   `changed` with the new state; a list tile with a `click` reaction takes focus and the hand cursor. On a design
   canvas an expansion tile is drawn as it is (it was a placeholder). Zero-prop pages match SSUI's own Accordion and
   its ListRow to 0.00 % of the pixels (`test/controls/tile_reference_test.dart`). Size changes: a hugging list tile
-  takes its content's size (it was its design size, often 0 × 0); a hugging accordion's header is 46 px high (SSUI's).
+  takes its content's size (it was its design size, often 0 × 0); a hugging accordion's header is 46 px high (SSUI's). Parity goldens re-pinned
+  (`samples-collections/controls`, the accordion page): the header child sits 16 px inside SSUI's 1 px border and is
+  as wide as the room beside the chevron (row `rc17` 300×64 at (20, 38) → 238×64 at (37, 33), its text `t18` with
+  it), the content starts under the 46 px header in a 16 px panel (`r20` y 102 → 127), and the collapsed one's header
+  child moves the same way (`r22` (20, 303) → (37, 273)). The `listTile` layout test now expects its slots centred on
+  the tile (36 in a 72 px tile), not on Material's 56 px row.
 - **Size changes of buttons** (parity goldens): a hugging button is 28 high (Material's was 40); the icon beside a
   label is SSUI's (14–18) with a 6 px gap (Material's 18 and 8), so labelled buttons with an icon are 2 px narrower.
   `samples-material/buttons`: `elev_hug` 186×39 → 184×38.6, `filled_hug` 184 → 182 wide, `text_icon` 118 → 116
