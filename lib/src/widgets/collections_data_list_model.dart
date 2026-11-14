@@ -106,6 +106,18 @@ bool usesDataList(Node n) =>
     !n.prop(ListViewProps.wrap) &&
     n.prop(ListViewProps.layout) == api.ListLayout.list;
 
+/// Whether a running list [n] is drawn by render objects alone: it shows
+/// its data, paged forward or not. Sections, swipe actions, pull to refresh,
+/// sticking to the end and paging both ways still take the [DataListView]
+/// island.
+bool dataListIsBoxes(Node n) =>
+    !n.sectioned &&
+    !n.swipes &&
+    !n.pullsToRefresh &&
+    !n.sticksToEnd &&
+    n.pagination?.pullToRefresh != true &&
+    n.pagination?.mode != PaginationMode.bidirectional;
+
 /// An item swiped away with Undo offered: [commit] runs its removal and
 /// reaction when the Undo bar goes.
 class PendingSwipe {

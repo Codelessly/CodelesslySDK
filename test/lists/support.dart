@@ -70,3 +70,40 @@ List<String> textsUnder(RenderObject root) {
   visit(root);
   return out;
 }
+
+/// The scroll box of the list on screen: the SDK's own (a list drawn by
+/// render objects), or the scroll view of one still drawn by slivers.
+RenderBox listBox(WidgetTester tester) {
+  final view = find.byType(CustomScrollView);
+  if (view.evaluate().isNotEmpty) return tester.renderObject(view);
+  return listScroll(tester);
+}
+
+/// The SDK's scroll box of the data list on screen.
+RenderDesignScroll listScroll(WidgetTester tester) {
+  RenderDesignScroll? found;
+  void visit(RenderObject o) {
+    if (found != null) return;
+    if (o is RenderDesignScroll && o.child is RenderListWithFooter) {
+      found = o;
+    } else {
+      o.visitChildren(visit);
+    }
+  }
+
+  visit(tester.renderObject(find.byType(NodeView)));
+  return found!;
+}
+
+/// Whether the list on screen is drawn by render objects alone.
+bool listIsBoxes(WidgetTester tester) => find.byType(CustomScrollView).evaluate().isEmpty;
+
+Rect listRect(WidgetTester tester) {
+  final box = listBox(tester);
+  return box.localToGlobal(Offset.zero) & box.size;
+}
+
+Future<void> dragList(WidgetTester tester, Offset by) => tester.dragFrom(listRect(tester).center, by);
+
+Future<void> flingList(WidgetTester tester, Offset by, double speed) =>
+    tester.flingFrom(listRect(tester).center, by, speed);
