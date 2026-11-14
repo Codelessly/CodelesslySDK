@@ -1,0 +1,466 @@
+{
+ "schema": 3,
+ "id": "CompactSuggestionReviewItem",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "CompactSuggestionReviewItem",
+  "doc": "The compact row of a proposed change: what it does, why, and Apply and Reject buttons; once decided it shows the outcome. Fires onApply and onReject.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Update the brief",
+    "doc": "What the change does.",
+    "required": true
+   },
+   {
+    "key": "why",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The reason, under the title."
+   },
+   {
+    "key": "operation",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "edit",
+      "create",
+      "delete"
+     ]
+    },
+    "default": "edit",
+    "doc": "edit, create or delete: the plate's icon."
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "pending",
+      "applied",
+      "rejected"
+     ]
+    },
+    "default": "pending",
+    "doc": "pending: the buttons. applied or rejected: the outcome."
+   },
+   {
+    "key": "applyLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Apply",
+    "doc": "The accept button's label."
+   },
+   {
+    "key": "rejectLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Reject",
+    "doc": "The decline button's label."
+   },
+   {
+    "key": "busy",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Working: a spinner on the plate; the buttons stop."
+   }
+  ],
+  "events": [
+   {
+    "key": "onApply"
+   },
+   {
+    "key": "onReject"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Pending",
+   "size": [
+    380,
+    60
+   ],
+   "props": {
+    "why": "The launch date moved to the 21st."
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "row",
+   "children": [
+    "plate",
+    "texts",
+    "buttons",
+    "outcome"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 380
+    },
+    "height": {
+     "hug": 60
+    },
+    "padding": [
+     9,
+     7,
+     9,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2
+   }
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "spin",
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2
+   }
+  },
+  "spin": {
+   "type": "circularProgressIndicator",
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "props": {
+    "color": "secondaryText",
+    "strokeWidth": 1.5
+   },
+   "bind": {
+    "visible": "${props.busy}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "edit",
+    "color": "secondaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "visible": "${= !props.busy}",
+    "props.icon": "${= props.operation == 'create' ? 'note_add' : (props.operation == 'delete' ? 'delete_outline' : 'edit')}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "whyRow"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "whyRow": {
+   "type": "row",
+   "children": [
+    "whyLabel",
+    "why"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${= props.why != ''}"
+   }
+  },
+  "whyLabel": {
+   "type": "text",
+   "props": {
+    "text": "WHY",
+    "style": {
+     "fontSize": 9,
+     "fontWeight": 700,
+     "height": 1.6916666666666667,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": 0.4
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 22
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "why": {
+   "type": "text",
+   "props": {
+    "text": "${props.why}",
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 400,
+     "height": 1.45,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 170
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "buttons": {
+   "type": "row",
+   "children": [
+    "reject",
+    "apply"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "bind": {
+    "visible": "${= props.status == 'pending'}"
+   }
+  },
+  "reject": {
+   "type": "Button",
+   "props": {
+    "label": "Reject",
+    "variant": "ghost",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 56
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "bind": {
+    "props.label": "${props.rejectLabel}",
+    "props.enabled": "${= !props.busy}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onReject"
+      }
+     ]
+    }
+   ]
+  },
+  "apply": {
+   "type": "Button",
+   "props": {
+    "label": "Apply",
+    "variant": "primary",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 56
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "bind": {
+    "props.label": "${props.applyLabel}",
+    "props.enabled": "${= !props.busy}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onApply"
+      }
+     ]
+    }
+   ]
+  },
+  "outcome": {
+   "type": "row",
+   "children": [
+    "outcomeIcon",
+    "outcomeText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "bind": {
+    "visible": "${= props.status != 'pending'}"
+   }
+  },
+  "outcomeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_circle",
+    "color": "success",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "props.icon": "${= props.status == 'applied' ? 'check_circle' : 'cancel'}",
+    "props.color": "${= props.status == 'applied' ? theme.success : theme.error}"
+   }
+  },
+  "outcomeText": {
+   "type": "text",
+   "props": {
+    "text": "${= props.status == 'applied' ? 'Applied' : 'Rejected'}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "success",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.status == 'applied' ? theme.success : theme.error}"
+   }
+  }
+ }
+}

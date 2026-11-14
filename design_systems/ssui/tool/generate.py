@@ -5212,6 +5212,187 @@ add(component(
     },
 ))
 
+# FileTree (FileTree.tsx): a project's files as a Tree: folders with a folder icon, pictures with an image
+# icon, the rest a file icon; the chosen file tinted.
+FT_DEEPER = 'length(props.depths) > index + 1 && number(props.depths[index + 1]) > number(props.depths[index])'
+add(component(
+    'FileTree',
+    'A project\'s files as an outline: give each row its name and how deep it sits; a row with rows under it is a folder. The chosen file is kept in your variable. Fires onSelected with the name.',
+    'tree',
+    props=[prop('names', STRINGS, ['lib', 'main.dart', 'assets', 'logo.png', 'README.md'], 'The rows, top to bottom.', required=True),
+           prop('depths', STRINGS, ['0', '1', '0', '1', '0'], 'How deep each row sits: 0 at the edge.', required=True),
+           prop('value', var(STRING), '', 'The name of your text variable holding the chosen file.')],
+    events=[{'key': 'onSelected', 'payload': STRING}],
+    previews=[preview('Default', 260, 175, value='main.dart')],
+    nodes={
+        'tree': {'type': 'listView', 'children': ['row'], 'props': {'scrollable': False},
+                 'layout': {'width': {'fill': 260}, 'height': {'hug': 175}}, 'bind': {'data': '${props.names}'}},
+        'row': {'type': 'row', 'children': ['indent', 'chevron', 'glyph', 'label'], 'props': {'crossAxisAlignment': 'center'},
+                'layout': {'width': {'fill': 260}, 'height': {'hug': 35}, 'padding': 8},
+                'decoration': {'fills': [{'color': '#00000000'}], 'radius': 6},
+                'bind': {'selected': '${= item == props.value}'},
+                'states': {'hovered': {'row': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}},
+                           'selected': {'row': {'decoration': {'fills': [{'color': 'primaryTint'}]}},
+                                        'label': {'props': {'style': {'fontWeight': 600}}}}},
+                'actions': [{'trigger': {'type': 'click', 'when': '!(%s)' % FT_DEEPER}, 'actions': [
+                    {'type': 'setVariable', 'variable': 'props.value', 'value': '${item}'},
+                    {'type': 'componentEvent', 'event': 'onSelected', 'value': '${item}'}]}]},
+        'indent': {'type': 'box', 'layout': {'width': 0, 'height': 1},
+                   'bind': {'layout.width': '${= 16 * (length(props.depths) > index ? number(props.depths[index]) : 0)}'}},
+        'chevron': {**icon('expand_more', 'secondaryText', 18), 'layout': {'width': 18, 'height': 18, 'margin': [0, 0, 4, 0]},
+                    'bind': {'opacity': '${= %s ? 1 : 0}' % FT_DEEPER}},
+        'glyph': {**icon('description', 'secondaryText', 18), 'layout': {'width': 18, 'height': 18, 'margin': [0, 0, 8, 0]},
+                  'bind': {'props.icon': "${= %s ? 'folder' : (matches(lower(item), '\\\\.(png|jpe?g|gif|webp|svg)$') ? 'image' : (matches(lower(item), '\\\\.(dart|ts|tsx|js|py|go|rs)$') ? 'code' : 'description'))}" % FT_DEEPER}},
+        'label': _one_line('${item}', style(14, 400, 'primaryText', 1.35), {'fill': 160}, {'hug': 19}),
+    },
+))
+
+# ImageGallery (ImageGallery.tsx, its grid): pictures as square tiles, radius 12, 16 px apart, each with its
+# title 14/500 in white over a dark fade at the foot, padding 12.
+add(component(
+    'ImageGallery',
+    'Pictures as a grid of square tiles with their titles over a fade at the foot. Fires onSelected with the picture\'s address.',
+    'gallery',
+    props=[prop('images', STRINGS, [], 'The pictures\' addresses.', required=True),
+           prop('titles', STRINGS, [], 'One title per picture (empty: none).'),
+           prop('columns', NUMBER, 3, 'How many across.')],
+    events=[{'key': 'onSelected', 'payload': STRING}],
+    previews=[preview('Three', 340, 108, images=['a', 'b', 'c'], titles=['Harbor', 'Studio', 'Field'])],
+    nodes={
+        'gallery': {'type': 'gridView', 'children': ['tile'],
+                    'props': {'crossAxisCount': 3, 'mainAxisSpacing': 16, 'crossAxisSpacing': 16, 'childAspectRatio': 1, 'physics': 'never',
+                              'alwaysScroll': False},
+                    'layout': {'width': {'fill': 340}, 'height': {'hug': 108}},
+                    'bind': {'data': '${props.images}', 'props.crossAxisCount': '${= max(1, props.columns)}'}},
+        'tile': {'type': 'stack', 'children': ['fade', 'title'], 'layout': {'width': {'fill': 100}, 'height': {'fill': 100}},
+                 'decoration': {'fills': [{'color': 'tertiaryBackground'}, {'type': 'image', 'image': {'url': '', 'fit': 'cover'}, 'visible': False}],
+                                'radius': 12, 'clip': 'antiAlias'},
+                 'bind': {'decoration.fills[1].image.url': '${item}', 'decoration.fills[1].visible': "${= item != ''}"},
+                 'states': {'hovered': {'tile': {'decoration': {'effects': SHADOWS_LIGHT['level2']}}}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onSelected', 'value': '${item}'}]}]},
+        'fade': {'type': 'box', 'layout': {'width': {'fill': 100}, 'height': 56, 'y': {'end': 0}},
+                 'decoration': {'fills': [{'type': 'linear', 'begin': [0, 1], 'end': [0, -1],
+                                           'stops': [{'color': '#99000000', 'position': 0}, {'color': '#00000000', 'position': 1}]}]},
+                 'bind': {'visible': "${= length(props.titles) > index && props.titles[index] != ''}"}},
+        'title': {**_one_line("${= length(props.titles) > index ? props.titles[index] : ''}", style(14, 500, '#FFFFFFFF', 1.3), {'fill': 76}, {'hug': 18}),
+                  'layout': {'width': {'fill': 76}, 'height': {'hug': 18}, 'x': {'start': 12, 'end': 12}, 'y': {'end': 12}}},
+    },
+))
+
+# SuggestionReviewItem (SuggestionReviewItem.tsx): a change someone proposed, waiting for a yes or a no: a
+# card, radius 8, bordered, 10 x 11, 9 px apart: a 28 px plate, radius 7, bordered on the secondary
+# background, with a 14 px icon for the operation; the title 13/600, 5 px under it "WHY" 9/750 in tertiary
+# then the reason 11.5 on a 1.45 line in secondary; at the end Reject and Apply buttons, or, once decided, a
+# green or red mark with the word.
+SR_ICON = "${= props.operation == 'create' ? 'note_add' : (props.operation == 'delete' ? 'delete_outline' : 'edit')}"
+def _sr(name, compact):
+    plate, title, why = (22, 12, 10.5) if compact else (28, 13, 11.5)
+    pad = [9, 7, 9, 7] if compact else [11, 10, 11, 10]
+    return component(
+        name,
+        ('The compact row of a proposed change: ' if compact else 'A change someone proposed, waiting for a decision: ') +
+        'what it does, why, and Apply and Reject buttons; once decided it shows the outcome. Fires onApply and onReject.',
+        'card',
+        props=[prop('title', STRING, 'Update the brief', 'What the change does.', required=True),
+               prop('why', STRING, '', 'The reason, under the title.'),
+               prop('operation', enum('edit', 'create', 'delete'), 'edit', 'edit, create or delete: the plate\'s icon.'),
+               prop('status', enum('pending', 'applied', 'rejected'), 'pending', 'pending: the buttons. applied or rejected: the outcome.'),
+               prop('applyLabel', STRING, 'Apply', 'The accept button\'s label.'),
+               prop('rejectLabel', STRING, 'Reject', 'The decline button\'s label.'),
+               prop('busy', BOOL, False, 'Working: a spinner on the plate; the buttons stop.')],
+        events=['onApply', 'onReject'],
+        previews=[preview('Pending', 380, 60 if compact else 70, why='The launch date moved to the 21st.')],
+        nodes={
+            'card': {'type': 'row', 'children': ['plate', 'texts', 'buttons', 'outcome'], 'props': {'crossAxisAlignment': 'center', 'spacing': 9},
+                     'layout': {'width': {'fill': 380}, 'height': {'hug': 60}, 'padding': pad},
+                     'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 6 if compact else 8}},
+            'plate': {'type': 'row', 'children': ['spin', 'glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                      'layout': {'width': plate, 'height': plate},
+                      'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 7}},
+            'spin': {'type': 'circularProgressIndicator', 'layout': {'width': 12, 'height': 12}, 'props': {'color': 'secondaryText', 'strokeWidth': 1.5},
+                     'bind': {'visible': '${props.busy}'}},
+            'glyph': {**icon('edit', 'secondaryText', 12 if compact else 14), 'bind': {'visible': '${= !props.busy}', 'props.icon': SR_ICON}},
+            'texts': {'type': 'column', 'children': ['title', 'whyRow'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 3 if compact else 5},
+                      'layout': {'width': {'fill': 200}, 'height': {'hug': 36}}},
+            'title': _one_line('${props.title}', style(title, 600, 'primaryText', 1.3), {'fill': 200}, {'hug': 17}),
+            'whyRow': {'type': 'row', 'children': ['whyLabel', 'why'], 'props': {'crossAxisAlignment': 'start', 'spacing': 5},
+                       'layout': {'width': {'fill': 200}, 'height': {'hug': 17}}, 'bind': {'visible': "${= props.why != ''}"}},
+            'whyLabel': {**text('WHY', style(9, 700, 'tertiaryText', why * 1.45 / 9, letterSpacing=0.4), {'hug': 22}, {'hug': 16})},
+            'why': text('${props.why}', style(why, 400, 'secondaryText', 1.45), {'fill': 170}, {'hug': 17}),
+            'buttons': {'type': 'row', 'children': ['reject', 'apply'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                        'layout': {'width': {'hug': 120}, 'height': {'hug': 28}}, 'bind': {'visible': "${= props.status == 'pending'}"}},
+            'reject': {'type': 'Button', 'props': {'label': 'Reject', 'variant': 'ghost', 'size': 'xs' if compact else 'compact'},
+                       'layout': {'width': {'hug': 56}, 'height': {'hug': 28}},
+                       'bind': {'props.label': '${props.rejectLabel}', 'props.enabled': '${= !props.busy}'},
+                       'actions': [{'trigger': {'type': 'event', 'event': 'onPressed'}, 'actions': [{'type': 'componentEvent', 'event': 'onReject'}]}]},
+            'apply': {'type': 'Button', 'props': {'label': 'Apply', 'variant': 'primary', 'size': 'xs' if compact else 'compact'},
+                      'layout': {'width': {'hug': 56}, 'height': {'hug': 28}},
+                      'bind': {'props.label': '${props.applyLabel}', 'props.enabled': '${= !props.busy}'},
+                      'actions': [{'trigger': {'type': 'event', 'event': 'onPressed'}, 'actions': [{'type': 'componentEvent', 'event': 'onApply'}]}]},
+            'outcome': {'type': 'row', 'children': ['outcomeIcon', 'outcomeText'], 'props': {'crossAxisAlignment': 'center', 'spacing': 5},
+                        'layout': {'width': {'hug': 80}, 'height': {'hug': 18}}, 'bind': {'visible': "${= props.status != 'pending'}"}},
+            'outcomeIcon': {**icon('check_circle', 'success', 16 if compact else 18),
+                            'bind': {'props.icon': "${= props.status == 'applied' ? 'check_circle' : 'cancel'}",
+                                     'props.color': "${= props.status == 'applied' ? theme.success : theme.error}"}},
+            'outcomeText': {**text("${= props.status == 'applied' ? 'Applied' : 'Rejected'}", style(11.5, 600, 'success', 1.3), {'hug': 50}, {'hug': 15}),
+                            'bind': {'props.style.color': "${= props.status == 'applied' ? theme.success : theme.error}"}},
+        },
+    )
+add(_sr('SuggestionReviewItem', False))
+add(_sr('CompactSuggestionReviewItem', True))
+
+# NestedTaskLedger (NestedTaskLedger.tsx, its rows): work broken into nested tasks: each row at least 34 px
+# over a 55 % hairline, 12 px at its end and 14 px further in per level, 8 px apart: a 13 px chevron when it
+# holds rows, a 15 px state (a green check, a red x, a turning arc in the brand color, or a dashed circle),
+# the name 12.5, a count 11 in tertiary and, at the end, a bar 96 x 5 filled to its share (red when failed).
+NT_DEEPER = 'length(props.depths) > index + 1 && number(props.depths[index + 1]) > number(props.depths[index])'
+NT_STATUS = "(length(props.statuses) > index ? props.statuses[index] : 'pending')"
+NT_SHARE = '(length(props.progress) > index ? clamp(number(props.progress[index]), 0, 100) : 0)'
+add(component(
+    'NestedTaskLedger',
+    'Work broken into nested tasks: each row with its state (pending, running, done or failed), a count and a small progress bar. Fires onSelected with the task\'s name.',
+    'ledger',
+    props=[prop('tasks', STRINGS, ['Build', 'Compile', 'Bundle', 'Deploy'], 'The tasks, top to bottom.', required=True),
+           prop('depths', STRINGS, ['0', '1', '1', '0'], 'How deep each row sits: 0 at the edge.'),
+           prop('statuses', STRINGS, ['running', 'done', 'running', 'pending'], 'One state per task: pending, running, done or failed.'),
+           prop('counts', STRINGS, [], 'A short count per task ("2/5"; empty: none).'),
+           prop('progress', STRINGS, [], 'How far each task is, 0 to 100 (empty: no bar).')],
+    events=[{'key': 'onSelected', 'payload': STRING}],
+    previews=[preview('Default', 360, 140, counts=['1/2', '', '', ''], progress=['50', '100', '40', ''])],
+    nodes={
+        'ledger': {'type': 'listView', 'children': ['row'], 'props': {'scrollable': False},
+                   'layout': {'width': {'fill': 360}, 'height': {'hug': 140}}, 'bind': {'data': '${props.tasks}'}},
+        'row': {'type': 'row', 'children': ['strut', 'indent', 'chevron', 'spin', 'state', 'name', 'count', 'track'],
+                'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                'layout': {'width': {'fill': 360}, 'height': {'hug': 34}, 'padding': [12, 0, 12, 0]},
+                'decoration': {'fills': [{'color': '#00000000'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'},
+                'states': {'hovered': {'row': HOVER}},
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onSelected', 'value': '${item}'}]}]},
+        'strut': {'type': 'box', 'layout': {'width': 0, 'height': 33}},
+        'indent': {'type': 'box', 'layout': {'width': 0, 'height': 1},
+                   'bind': {'layout.width': '${= 14 * (length(props.depths) > index ? number(props.depths[index]) : 0)}'}},
+        'chevron': {**icon('expand_more', 'tertiaryText', 13), 'bind': {'opacity': '${= %s ? 1 : 0}' % NT_DEEPER}},
+        'spin': {'type': 'circularProgressIndicator', 'layout': {'width': 13, 'height': 13, 'margin': [1, 0, 1, 0]}, 'props': {'color': 'primary', 'strokeWidth': 1.5},
+                 'bind': {'visible': "${= %s == 'running'}" % NT_STATUS}},
+        'state': {**icon('radio_button_unchecked', 'tertiaryText', 15),
+                  'bind': {'visible': "${= %s != 'running'}" % NT_STATUS,
+                           'props.icon': "${= %s == 'done' ? 'check_circle_outline' : (%s == 'failed' ? 'highlight_off' : 'radio_button_unchecked')}" % (NT_STATUS, NT_STATUS),
+                           'props.color': "${= %s == 'done' ? theme.success : (%s == 'failed' ? theme.error : theme.colors.tertiaryText)}" % (NT_STATUS, NT_STATUS)}},
+        'name': _one_line('${item}', style(12.5, 500, 'primaryText', 1.3), {'fill': 140}, {'hug': 17}),
+        'count': {**text("${= length(props.counts) > index ? props.counts[index] : ''}", style(11, 500, 'tertiaryText', 1.3), {'hug': 20}, {'hug': 15}),
+                  'bind': {'visible': "${= length(props.counts) > index && props.counts[index] != ''}"}},
+        'track': {'type': 'row', 'children': ['fill', 'rest'], 'layout': {'width': 96, 'height': 5},
+                  'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'radius': 9999, 'clip': 'antiAlias'},
+                  'bind': {'visible': "${= length(props.progress) > index && props.progress[index] != ''}"}},
+        'fill': {'type': 'box', 'layout': {'width': {'fill': 48}, 'height': {'fill': 5}, 'flex': 1},
+                 'decoration': {'fills': [{'color': 'primary'}], 'radius': 9999},
+                 'bind': {'visible': '${= %s > 0}' % NT_SHARE, 'layout.flex': '${= max(1, round(%s * 10))}' % NT_SHARE,
+                          'decoration.fills[0].color': "${= %s == 'failed' ? theme.error : (%s == 'done' ? theme.success : theme.primary)}" % (NT_STATUS, NT_STATUS)}},
+        'rest': {'type': 'box', 'layout': {'width': {'fill': 48}, 'height': {'fill': 5}, 'flex': 1},
+                 'bind': {'visible': '${= %s < 100}' % NT_SHARE, 'layout.flex': '${= max(1, round((100 - %s) * 10))}' % NT_SHARE}},
+    },
+))
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:

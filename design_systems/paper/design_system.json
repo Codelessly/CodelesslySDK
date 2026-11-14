@@ -565,7 +565,12 @@
   "components/ModelSelectMenu.json",
   "components/RichTextToolbar.json",
   "components/CollapsibleSection.json",
-  "components/SplitPaneTabs.json"
+  "components/SplitPaneTabs.json",
+  "components/FileTree.json",
+  "components/ImageGallery.json",
+  "components/SuggestionReviewItem.json",
+  "components/CompactSuggestionReviewItem.json",
+  "components/NestedTaskLedger.json"
  ],
  "replaces": [
   "filledButton",
