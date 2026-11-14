@@ -1,0 +1,139 @@
+{"meta":{"ui":"reservation","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"Card gap:12 pad:16 w:390\n  Text.heading \"Book a table\"\n  Select =day items:[\"Mon 12\",\"Tue 13\",\"Wed 14\",\"Thu 15\",\"Fri 16\",\"Sat 17\",\"Sun 18\"]\n  Text.strong \"Party size\"\n  Row gap:6\n    ChoiceChip \"1\" selected:=size==1 -> size=1\n    ChoiceChip \"2\" selected:=size==2 -> size=2\n    ChoiceChip \"3\" selected:=size==3 -> size=3\n    ChoiceChip \"4\" selected:=size==4 -> size=4\n    ChoiceChip \"5\" selected:=size==5 -> size=5\n    ChoiceChip \"6\" selected:=size==6 -> size=6\n    ChoiceChip \"7\" selected:=size==7 -> size=7\n    ChoiceChip \"8\" selected:=size==8 -> size=8\n  state size=2\n  state time=\"\"\n  Text.strong \"Time slots\"\n  Grid cols:3 gap:8\n    ChoiceChip \"17:00\" selected:=time==\"17:00\" enabled:=(day==\"Mon 12\" || size<=2) -> time=\"17:00\"\n    ChoiceChip \"17:30\" selected:=time==\"17:30\" enabled:=(day!=\"Sat 17\" || size<=4) -> time=\"17:30\"\n    ChoiceChip \"18:00\" selected:=time==\"18:00\" enabled:=(day!=\"Fri 16\" || size<=2) -> time=\"18:00\"\n    ChoiceChip \"18:30\" selected:=time==\"18:30\" enabled:=(size<=4 && day!=\"Sun 18\") -> time=\"18:30\"\n    ChoiceChip \"19:00\" selected:=time==\"19:00\" enabled:=(day!=\"Sat 17\" && size<=6) -> time=\"19:00\"\n    ChoiceChip \"19:30\" selected:=time==\"19:30\" enabled:=(day!=\"Wed 14\" || size<=2) -> time=\"19:30\"\n    ChoiceChip \"20:00\" selected:=time==\"20:00\" enabled:=(size<=3 || day==\"Thu 15\") -> time=\"20:00\"\n    ChoiceChip \"20:30\" selected:=time==\"20:30\" enabled:=(day!=\"Sat 17\") -> time=\"20:30\"\n    ChoiceChip \"21:00\" selected:=time==\"21:00\" enabled:=(size<=2 && day!=\"Tue 13\") -> time=\"21:00\"\n  Button.primary \"Confirm booking\" enabled:=time!=\"\" -> emit book day time size; toast \"Booked {day} at {time} for {size}\"","usage":{"input_tokens":1695,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":872,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":574,"totalMs":3380}}
+{"tMs":574,"delta":"Card"}
+{"tMs":792,"delta":" g"}
+{"tMs":792,"delta":"ap:12 "}
+{"tMs":793,"delta":"pad:16 "}
+{"tMs":793,"delta":"w:390\n  Text."}
+{"tMs":793,"delta":"heading \"Book"}
+{"tMs":793,"delta":" a table\"\n  Select ="}
+{"tMs":793,"delta":"day items:[\"Mon "}
+{"tMs":794,"delta":"12\",\"Tue 13\",\""}
+{"tMs":794,"delta":"Wed 14\",\"Th"}
+{"tMs":794,"delta":"u 15\",\"Fri "}
+{"tMs":804,"delta":"16\",\"Sat 17\",\""}
+{"tMs":824,"delta":"Sun 18\"]"}
+{"tMs":912,"delta":"\n  Text.str"}
+{"tMs":912,"delta":"ong \"Party size\"\n  "}
+{"tMs":912,"delta":"Row gap:6"}
+{"tMs":912,"delta":"\n    "}
+{"tMs":927,"delta":"ChoiceChip \"1"}
+{"tMs":947,"delta":"\" sel"}
+{"tMs":967,"delta":"ected:=size"}
+{"tMs":989,"delta":"==1 -> size"}
+{"tMs":1008,"delta":"=1\n    Choi"}
+{"tMs":1028,"delta":"ceChip \"2\" selected"}
+{"tMs":1049,"delta":":=size==2 ->"}
+{"tMs":1069,"delta":" size=2\n    Cho"}
+{"tMs":1118,"delta":"iceChip \"3\" sel"}
+{"tMs":1118,"delta":"ected:=size==3 -"}
+{"tMs":1132,"delta":"> size=3\n    Ch"}
+{"tMs":1151,"delta":"oiceChip \"4\""}
+{"tMs":1172,"delta":" selected:=size==4 "}
+{"tMs":1192,"delta":"-> size=4\n    "}
+{"tMs":1213,"delta":"ChoiceChip \"5"}
+{"tMs":1233,"delta":"\" selected:=size==5"}
+{"tMs":1254,"delta":" -> size=5\n    "}
+{"tMs":1275,"delta":"ChoiceChip \""}
+{"tMs":1295,"delta":"6\" selected:=size=="}
+{"tMs":1315,"delta":"6 -> size=6"}
+{"tMs":1335,"delta":"\n    ChoiceChip"}
+{"tMs":1356,"delta":" \"7\" selected:=size"}
+{"tMs":1376,"delta":"==7 -> size=7"}
+{"tMs":1397,"delta":"\n    ChoiceCh"}
+{"tMs":1417,"delta":"ip \"8\" selected:="}
+{"tMs":1437,"delta":"size==8 -> size="}
+{"tMs":1458,"delta":"8\n  state"}
+{"tMs":1478,"delta":" size"}
+{"tMs":1498,"delta":"=2"}
+{"tMs":1519,"delta":"\n  state time=\"\"\n  "}
+{"tMs":1540,"delta":"Text.strong \"Time"}
+{"tMs":1560,"delta":" slots\"\n  Grid"}
+{"tMs":1580,"delta":" cols:3"}
+{"tMs":1600,"delta":" gap:8\n    "}
+{"tMs":1621,"delta":"ChoiceChip \"17"}
+{"tMs":1642,"delta":":00\" sel"}
+{"tMs":1662,"delta":"ected:=time"}
+{"tMs":1683,"delta":"="}
+{"tMs":1703,"delta":"=\"17:00\" enabled"}
+{"tMs":1723,"delta":":=("}
+{"tMs":1744,"delta":"day==\"Mon 12"}
+{"tMs":1767,"delta":"\""}
+{"tMs":1784,"delta":" || size"}
+{"tMs":1804,"delta":"<"}
+{"tMs":1825,"delta":"=2) -> time=\""}
+{"tMs":1845,"delta":"17:00\"\n    Ch"}
+{"tMs":1867,"delta":"oiceChip \"17"}
+{"tMs":1887,"delta":":30\" selected:=time"}
+{"tMs":1906,"delta":"==\"17:30\" enab"}
+{"tMs":1927,"delta":"led:=(day!"}
+{"tMs":1947,"delta":"=\"S"}
+{"tMs":1968,"delta":"at 17"}
+{"tMs":1988,"delta":"\" ||"}
+{"tMs":2009,"delta":" size<=4) -> time"}
+{"tMs":2028,"delta":"=\"17:30\"\n    "}
+{"tMs":2049,"delta":"ChoiceChip \"18"}
+{"tMs":2069,"delta":":00\" selected:=time"}
+{"tMs":2090,"delta":"==\"18:00\" enab"}
+{"tMs":2110,"delta":"led:=(day!"}
+{"tMs":2130,"delta":"=\"F"}
+{"tMs":2151,"delta":"ri 16\" || size<="}
+{"tMs":2172,"delta":"2) -> time=\"18:"}
+{"tMs":2192,"delta":"00\"\n    Choi"}
+{"tMs":2213,"delta":"ceChip \"18:30\""}
+{"tMs":2232,"delta":" selected:=time==\"18"}
+{"tMs":2253,"delta":":30\" enabled:="}
+{"tMs":2274,"delta":"(size<=4 &&"}
+{"tMs":2296,"delta":" day!=\"Sun 18"}
+{"tMs":2314,"delta":"\") -> time=\"18:30"}
+{"tMs":2335,"delta":"\"\n    Choice"}
+{"tMs":2355,"delta":"Chip \"19:00\" sel"}
+{"tMs":2375,"delta":"ected:=time==\"19:"}
+{"tMs":2396,"delta":"00\" enabled:=("}
+{"tMs":2416,"delta":"day"}
+{"tMs":2437,"delta":"!=\"S"}
+{"tMs":2457,"delta":"at 17\" &&"}
+{"tMs":2477,"delta":" size<=6) -> time"}
+{"tMs":2499,"delta":"=\"19:00\"\n    "}
+{"tMs":2519,"delta":"ChoiceChip \"19"}
+{"tMs":2539,"delta":":30\" selected:=time"}
+{"tMs":2559,"delta":"==\"19:30\" enab"}
+{"tMs":2580,"delta":"led:=(day!=\""}
+{"tMs":2600,"delta":"Wed 14"}
+{"tMs":2621,"delta":"\" || size<=2) -"}
+{"tMs":2642,"delta":"> time=\"19:30\""}
+{"tMs":2662,"delta":"\n    ChoiceChip"}
+{"tMs":2681,"delta":" \"20:00\" selected:"}
+{"tMs":2702,"delta":"=time==\"20:00\""}
+{"tMs":2723,"delta":" enabled:=(size"}
+{"tMs":2743,"delta":"<=3"}
+{"tMs":2763,"delta":" || day="}
+{"tMs":2784,"delta":"=\"Thu 15"}
+{"tMs":2807,"delta":"\") -> time=\"20:00"}
+{"tMs":2825,"delta":"\"\n    Choice"}
+{"tMs":2845,"delta":"Chip \"20:30\" sel"}
+{"tMs":2866,"delta":"ected:=time==\"20:"}
+{"tMs":2886,"delta":"30\" enabled:=("}
+{"tMs":2906,"delta":"day!=\"S"}
+{"tMs":2927,"delta":"at 17\")"}
+{"tMs":2948,"delta":" -> time=\"20:30\""}
+{"tMs":2968,"delta":"\n    ChoiceCh"}
+{"tMs":2988,"delta":"ip \"21:00\" selected"}
+{"tMs":3009,"delta":":=time==\"21:00"}
+{"tMs":3029,"delta":"\" enabled:=(size"}
+{"tMs":3049,"delta":"<=2 &&"}
+{"tMs":3070,"delta":" day!=\"Tue 13"}
+{"tMs":3090,"delta":"\") -> time=\"21:00"}
+{"tMs":3111,"delta":"\"\n  Button"}
+{"tMs":3131,"delta":".primary \"Confirm"}
+{"tMs":3151,"delta":" boo"}
+{"tMs":3172,"delta":"king\" en"}
+{"tMs":3192,"delta":"abled:=time"}
+{"tMs":3212,"delta":"!=\""}
+{"tMs":3238,"delta":"\" -> emit book"}
+{"tMs":3253,"delta":" day"}
+{"tMs":3274,"delta":" time"}
+{"tMs":3295,"delta":" size"}
+{"tMs":3315,"delta":"; toast \"Boo"}
+{"tMs":3335,"delta":"ked {day} at"}
+{"tMs":3356,"delta":" {time} for {size}"}
+{"tMs":3376,"delta":"\""}

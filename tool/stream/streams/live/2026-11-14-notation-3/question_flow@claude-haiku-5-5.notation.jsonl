@@ -1,0 +1,145 @@
+{"meta":{"ui":"question_flow","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"Card gap:12 pad:16 w:390\n  state step=1\n  state use=\"\"\n  state screen=\"\"\n  state budget=\"\"\n  Progress =step\n  if step==1\n    Text.heading \"What will you mainly use it for?\"\n    Column gap:8\n      ChoiceChip \"Office and browsing\" -> use=\"office\"; step=2\n      ChoiceChip \"Creative work\" -> use=\"creative\"; step=2\n      ChoiceChip \"Gaming\" -> use=\"gaming\"; step=2\n      ChoiceChip \"Programming\" -> use=\"programming\"; step=2\n  if step==2\n    Text.heading \"What matters most for {use}?\"\n    Column gap:8\n      if use==\"gaming\"\n        ChoiceChip \"Graphics power\" -> screen=\"gpu\"; step=3\n        ChoiceChip \"High refresh screen\" -> screen=\"screen\"; step=3\n      if use==\"creative\"\n        ChoiceChip \"Colour-accurate screen\" -> screen=\"screen\"; step=3\n        ChoiceChip \"Raw performance\" -> screen=\"gpu\"; step=3\n      if use==\"programming\"\n        ChoiceChip \"Fast compiles\" -> screen=\"gpu\"; step=3\n        ChoiceChip \"Long battery life\" -> screen=\"battery\"; step=3\n      if use==\"office\"\n        ChoiceChip \"Long battery life\" -> screen=\"battery\"; step=3\n        ChoiceChip \"Light and portable\" -> screen=\"battery\"; step=3\n    Button.ghost \"Back\" -> step=1\n  if step==3\n    Text.heading \"What is your budget?\"\n    Column gap:8\n      ChoiceChip \"Under $800\" -> budget=\"low\"; step=4\n      ChoiceChip \"$800 to $1,500\" -> budget=\"mid\"; step=4\n      ChoiceChip \"Over $1,500\" -> budget=\"high\"; step=4\n    Button.ghost \"Back\" -> step=2\n  if step==4\n    Text.title \"Our pick for you\"\n    Card gap:6\n      Text.strong \"{budget=='low'?'Acer Aspire 5':budget=='mid'?'Dell XPS 13':'MacBook Pro 14'}\"\n      Text.body \"Chosen for {use} use, with a focus on {screen}, at your {budget} budget.\"\n      Text.muted \"It balances performance, battery and price within your range.\"\n    Button.primary \"Start over\" -> step=1; use=\"\"; screen=\"\"; budget=\"\"","usage":{"input_tokens":1686,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":813,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":619,"totalMs":3735}}
+{"tMs":619,"delta":"Card g"}
+{"tMs":827,"delta":"ap:12 "}
+{"tMs":827,"delta":"pad:16 "}
+{"tMs":828,"delta":"w:390\n  state step="}
+{"tMs":828,"delta":"1\n  state use="}
+{"tMs":828,"delta":"\"\"\n  state scre"}
+{"tMs":828,"delta":"en=\"\""}
+{"tMs":828,"delta":"\n  state bud"}
+{"tMs":828,"delta":"get=\"\"\n  Progress"}
+{"tMs":830,"delta":" ="}
+{"tMs":852,"delta":"step"}
+{"tMs":873,"delta":"\n  if"}
+{"tMs":895,"delta":" step==1\n    Text."}
+{"tMs":1046,"delta":"heading \"What will"}
+{"tMs":1046,"delta":" you m"}
+{"tMs":1046,"delta":"ainly use it for?\""}
+{"tMs":1046,"delta":"\n    Column"}
+{"tMs":1046,"delta":" gap:8\n      Ch"}
+{"tMs":1046,"delta":"oiceChip \"Office"}
+{"tMs":1046,"delta":" and"}
+{"tMs":1067,"delta":" brow"}
+{"tMs":1090,"delta":"sing\" -> use=\"office"}
+{"tMs":1111,"delta":"\"; step=2\n      "}
+{"tMs":1133,"delta":"ChoiceChip \""}
+{"tMs":1155,"delta":"Cre"}
+{"tMs":1265,"delta":"ative work"}
+{"tMs":1265,"delta":"\" -> use=\"cre"}
+{"tMs":1265,"delta":"ative\"; step=2\n      "}
+{"tMs":1265,"delta":"ChoiceChip \""}
+{"tMs":1265,"delta":"Gaming\" -> use"}
+{"tMs":1285,"delta":"=\"gaming\"; step="}
+{"tMs":1306,"delta":"2\n      Choice"}
+{"tMs":1328,"delta":"Chip \"Program"}
+{"tMs":1349,"delta":"ming\" -> use=\"programming"}
+{"tMs":1373,"delta":"\"; step=2\n  if"}
+{"tMs":1392,"delta":" step==2\n    Text."}
+{"tMs":1414,"delta":"heading \"What"}
+{"tMs":1487,"delta":" mat"}
+{"tMs":1487,"delta":"ters most for"}
+{"tMs":1487,"delta":" {"}
+{"tMs":1499,"delta":"use}?\"\n    Column"}
+{"tMs":1520,"delta":" gap:8\n      if"}
+{"tMs":1542,"delta":" use==\"g"}
+{"tMs":1563,"delta":"aming\"\n        Cho"}
+{"tMs":1585,"delta":"iceChip \"Gra"}
+{"tMs":1606,"delta":"phics power\" -> screen"}
+{"tMs":1628,"delta":"=\"gp"}
+{"tMs":1650,"delta":"u\"; step=3\n        "}
+{"tMs":1671,"delta":"ChoiceChip \""}
+{"tMs":1708,"delta":"High"}
+{"tMs":1714,"delta":" refresh scre"}
+{"tMs":1735,"delta":"en\" -> screen=\"scre"}
+{"tMs":1761,"delta":"en\"; step=3\n      "}
+{"tMs":1778,"delta":"if use==\"creative\""}
+{"tMs":1800,"delta":"\n        ChoiceChip"}
+{"tMs":1821,"delta":" \"Colour-"}
+{"tMs":1843,"delta":"accurate screen\" ->"}
+{"tMs":1864,"delta":" screen=\"screen\"; step"}
+{"tMs":1886,"delta":"=3\n        Choi"}
+{"tMs":1909,"delta":"ceChip \"Ra"}
+{"tMs":1930,"delta":"w perform"}
+{"tMs":1967,"delta":"ance\" -> screen=\"g"}
+{"tMs":1980,"delta":"pu\"; step=3"}
+{"tMs":2002,"delta":"\n      if use==\"program"}
+{"tMs":2019,"delta":"ming\"\n        Choi"}
+{"tMs":2040,"delta":"ceChip \"F"}
+{"tMs":2063,"delta":"ast comp"}
+{"tMs":2079,"delta":"iles"}
+{"tMs":2101,"delta":"\" -> screen=\"g"}
+{"tMs":2122,"delta":"pu\"; step=3"}
+{"tMs":2144,"delta":"\n        ChoiceChip"}
+{"tMs":2167,"delta":" \"Long battery life\" -"}
+{"tMs":2187,"delta":"> screen=\"battery\";"}
+{"tMs":2220,"delta":" step=3\n      if use="}
+{"tMs":2237,"delta":"=\"office\"\n        Cho"}
+{"tMs":2257,"delta":"iceChip \"Long batt"}
+{"tMs":2278,"delta":"ery life\" -> screen=\""}
+{"tMs":2295,"delta":"battery\"; step=3"}
+{"tMs":2316,"delta":"\n        ChoiceChip"}
+{"tMs":2337,"delta":" \"Light and"}
+{"tMs":2359,"delta":" portable\" -> screen=\""}
+{"tMs":2380,"delta":"batt"}
+{"tMs":2402,"delta":"ery\"; step=3\n    "}
+{"tMs":2426,"delta":"Button"}
+{"tMs":2444,"delta":"."}
+{"tMs":2487,"delta":"ghost \"Back\" ->"}
+{"tMs":2509,"delta":" step=1\n  if step=="}
+{"tMs":2530,"delta":"3\n    Text.heading"}
+{"tMs":2551,"delta":" \"What is"}
+{"tMs":2573,"delta":" your budget?\"\n    "}
+{"tMs":2594,"delta":"Column gap:8\n      "}
+{"tMs":2617,"delta":"ChoiceChip \""}
+{"tMs":2638,"delta":"Under $800"}
+{"tMs":2659,"delta":"\" -> budget=\"low"}
+{"tMs":2681,"delta":"\"; step=4\n      "}
+{"tMs":2704,"delta":"ChoiceChip \"$"}
+{"tMs":2723,"delta":"800 to $1,500"}
+{"tMs":2745,"delta":"\" -> budget=\"mid"}
+{"tMs":2767,"delta":"\"; step=4\n      "}
+{"tMs":2788,"delta":"ChoiceChip \""}
+{"tMs":2809,"delta":"Over $1,500\" ->"}
+{"tMs":2831,"delta":" budget=\"high\"; step="}
+{"tMs":2855,"delta":"4\n    Button.gh"}
+{"tMs":2874,"delta":"ost \"Back\" -> step"}
+{"tMs":2896,"delta":"=2\n  if step==4"}
+{"tMs":2918,"delta":"\n    Text"}
+{"tMs":2938,"delta":".title \"Our"}
+{"tMs":2960,"delta":" p"}
+{"tMs":2983,"delta":"ick for"}
+{"tMs":3003,"delta":" you\"\n    Card"}
+{"tMs":3024,"delta":" gap:6"}
+{"tMs":3046,"delta":"\n      "}
+{"tMs":3067,"delta":"Text.strong \"{"}
+{"tMs":3089,"delta":"bud"}
+{"tMs":3111,"delta":"get=='"}
+{"tMs":3132,"delta":"low'?'Ac"}
+{"tMs":3153,"delta":"er A"}
+{"tMs":3175,"delta":"spire "}
+{"tMs":3196,"delta":"5':budget=='mid"}
+{"tMs":3218,"delta":"'?'D"}
+{"tMs":3238,"delta":"ell X"}
+{"tMs":3260,"delta":"PS 13':'M"}
+{"tMs":3281,"delta":"acBook Pro 14"}
+{"tMs":3303,"delta":"'"}
+{"tMs":3324,"delta":"}\"\n      Text.body"}
+{"tMs":3345,"delta":" \"Ch"}
+{"tMs":3367,"delta":"osen for {"}
+{"tMs":3388,"delta":"use} use"}
+{"tMs":3411,"delta":", with a foc"}
+{"tMs":3431,"delta":"us on {screen}, at"}
+{"tMs":3452,"delta":" your"}
+{"tMs":3474,"delta":" {budget} budget.\""}
+{"tMs":3498,"delta":"\n      Text.mu"}
+{"tMs":3518,"delta":"ted \"It"}
+{"tMs":3539,"delta":" balances perform"}
+{"tMs":3561,"delta":"ance, battery and"}
+{"tMs":3581,"delta":" price"}
+{"tMs":3602,"delta":" within"}
+{"tMs":3624,"delta":" your range"}
+{"tMs":3646,"delta":".\"\n    Button.prim"}
+{"tMs":3667,"delta":"ary \"Start over\" ->"}
+{"tMs":3689,"delta":" step=1; use=\"\";"}
+{"tMs":3710,"delta":" screen=\"\"; budget="}
+{"tMs":3732,"delta":"\"\""}

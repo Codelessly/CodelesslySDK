@@ -1,0 +1,198 @@
+{"meta":{"ui":"image_gallery","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"The notation has no gradient or keyboard primitives, so I'm using solid fills as placeholders, a modal for the large view, and a state index for next/previous. Arrow keys and escape aren't expressible here, so those are left out.\n\nstate open=0\nstate idx=1\nCard gap:12 w:390\n  Text.heading \"Trip photos\"\n  Grid cols:3 gap:8\n    Box fill:#FF4F7BAC radius:8 h:100 -> idx=1; open=1\n      Text.small \"Beach sunrise\" pad:6\n    Box fill:#FFF2A65A radius:8 h:100 -> idx=2; open=1\n      Text.small \"Mountain trail\" pad:6\n    Box fill:#FF2A9D8F radius:8 h:100 -> idx=3; open=1\n      Text.small \"Old town market\" pad:6\n    Box fill:#FFE76F51 radius:8 h:100 -> idx=4; open=1\n      Text.small \"Harbour at dusk\" pad:6\n    Box fill:#FF264653 radius:8 h:100 -> idx=5; open=1\n      Text.small \"Desert road\" pad:6\n    Box fill:#FF8AB17D radius:8 h:100 -> idx=6; open=1\n      Text.small \"Forest waterfall\" pad:6\n    Box fill:#FFB5838D radius:8 h:100 -> idx=7; open=1\n      Text.small \"Night street\" pad:6\n    Box fill:#FF6D597A radius:8 h:100 -> idx=8; open=1\n      Text.small \"Lake reflections\" pad:6\n    Box fill:#FFEAC435 radius:8 h:100 -> idx=9; open=1\n      Text.small \"Last supper\" pad:6\n\nif open==1\n  Card gap:12 w:390 pad:16\n    Row between\n      Text.muted \"{idx} of 9\"\n      IconButton \"close\" -> open=0\n    Box fill:#FF4F7BAC radius:8 h:240 visible:=idx==1\n      Text.small \"Beach sunrise\" pad:8\n    Box fill:#FFF2A65A radius:8 h:240 visible:=idx==2\n      Text.small \"Mountain trail\" pad:8\n    Box fill:#FF2A9D8F radius:8 h:240 visible:=idx==3\n      Text.small \"Old town market\" pad:8\n    Box fill:#FFE76F51 radius:8 h:240 visible:=idx==4\n      Text.small \"Harbour at dusk\" pad:8\n    Box fill:#FF264653 radius:8 h:240 visible:=idx==5\n      Text.small \"Desert road\" pad:8\n    Box fill:#FF8AB17D radius:8 h:240 visible:=idx==6\n      Text.small \"Forest waterfall\" pad:8\n    Box fill:#FFB5838D radius:8 h:240 visible:=idx==7\n      Text.small \"Night street\" pad:8\n    Box fill:#FF6D597A radius:8 h:240 visible:=idx==8\n      Text.small \"Lake reflections\" pad:8\n    Box fill:#FFEAC435 radius:8 h:240 visible:=idx==9\n      Text.small \"Last supper\" pad:8\n    Row between\n      IconButton \"chevron_left\" -> idx=max(1,idx-1)\n      IconButton \"chevron_right\" -> idx=min(9,idx+1)","usage":{"input_tokens":1701,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1145,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":538,"totalMs":4777}}
+{"tMs":538,"delta":"The"}
+{"tMs":755,"delta":" notation has"}
+{"tMs":755,"delta":" no g"}
+{"tMs":755,"delta":"radient or"}
+{"tMs":755,"delta":" ke"}
+{"tMs":755,"delta":"yboard prim"}
+{"tMs":755,"delta":"itives, so"}
+{"tMs":755,"delta":" I'"}
+{"tMs":755,"delta":"m using sol"}
+{"tMs":755,"delta":"id fills as"}
+{"tMs":759,"delta":" placeholders, a"}
+{"tMs":781,"delta":" modal for the large view, and"}
+{"tMs":802,"delta":" a state index"}
+{"tMs":971,"delta":" for next"}
+{"tMs":971,"delta":"/previous."}
+{"tMs":971,"delta":" Arrow keys and esc"}
+{"tMs":972,"delta":"ape a"}
+{"tMs":972,"delta":"ren't expressible here"}
+{"tMs":972,"delta":", so those"}
+{"tMs":972,"delta":" are"}
+{"tMs":972,"delta":" left out."}
+{"tMs":992,"delta":"\n\nstate open"}
+{"tMs":1013,"delta":"=0\nstate id"}
+{"tMs":1034,"delta":"x=1"}
+{"tMs":1061,"delta":"\nCard"}
+{"tMs":1195,"delta":" gap:12 w:390"}
+{"tMs":1195,"delta":"\n  Text.heading \""}
+{"tMs":1195,"delta":"Trip photos\"\n  "}
+{"tMs":1195,"delta":"Grid cols:3 "}
+{"tMs":1195,"delta":"gap:8\n    Box"}
+{"tMs":1195,"delta":" fill:#F"}
+{"tMs":1206,"delta":"F4F"}
+{"tMs":1229,"delta":"7"}
+{"tMs":1249,"delta":"B"}
+{"tMs":1271,"delta":"A"}
+{"tMs":1292,"delta":"C radius:8 h"}
+{"tMs":1315,"delta":":100"}
+{"tMs":1418,"delta":" -"}
+{"tMs":1418,"delta":"> id"}
+{"tMs":1418,"delta":"x=1; open="}
+{"tMs":1418,"delta":"1\n      "}
+{"tMs":1420,"delta":"Text.small"}
+{"tMs":1442,"delta":" \"Be"}
+{"tMs":1463,"delta":"ach s"}
+{"tMs":1485,"delta":"unr"}
+{"tMs":1507,"delta":"ise\""}
+{"tMs":1528,"delta":" p"}
+{"tMs":1549,"delta":"ad:6"}
+{"tMs":1571,"delta":"\n    Box fill:#"}
+{"tMs":1642,"delta":"FF"}
+{"tMs":1642,"delta":"F2"}
+{"tMs":1642,"delta":"A65A radius:8 "}
+{"tMs":1657,"delta":"h:100 -> idx"}
+{"tMs":1679,"delta":"=2; open=1"}
+{"tMs":1700,"delta":"\n      Text.small \""}
+{"tMs":1721,"delta":"M"}
+{"tMs":1743,"delta":"ountain tr"}
+{"tMs":1764,"delta":"ail\" pad:6\n    "}
+{"tMs":1786,"delta":"Box fill:#FF"}
+{"tMs":1807,"delta":"2"}
+{"tMs":1829,"delta":"A9"}
+{"tMs":1868,"delta":"D8F"}
+{"tMs":1873,"delta":" radius:8 h:100"}
+{"tMs":1893,"delta":" -> idx=3;"}
+{"tMs":1915,"delta":" open=1\n      Text."}
+{"tMs":1937,"delta":"small \"Old town market\" p"}
+{"tMs":1958,"delta":"ad:6\n    Box f"}
+{"tMs":1979,"delta":"ill:#FFE76F"}
+{"tMs":2001,"delta":"51"}
+{"tMs":2027,"delta":" radius:8 h:"}
+{"tMs":2044,"delta":"100 -> idx=4"}
+{"tMs":2066,"delta":"; open=1\n      Text"}
+{"tMs":2087,"delta":".small \"Harbour at"}
+{"tMs":2109,"delta":" d"}
+{"tMs":2130,"delta":"usk\" pad:6"}
+{"tMs":2151,"delta":"\n    Box fill:#F"}
+{"tMs":2175,"delta":"F264653 radius:8"}
+{"tMs":2194,"delta":" h:100 -> id"}
+{"tMs":2216,"delta":"x=5; open=1"}
+{"tMs":2237,"delta":"\n      Text.small \"Des"}
+{"tMs":2259,"delta":"ert road"}
+{"tMs":2280,"delta":"\" pad:6\n    "}
+{"tMs":2302,"delta":"Box fill:#FF8"}
+{"tMs":2323,"delta":"A"}
+{"tMs":2345,"delta":"B17"}
+{"tMs":2366,"delta":"D"}
+{"tMs":2388,"delta":" radius:8 h:100"}
+{"tMs":2411,"delta":" -> idx=6;"}
+{"tMs":2431,"delta":" open=1\n      Text."}
+{"tMs":2452,"delta":"small \"For"}
+{"tMs":2473,"delta":"est wa"}
+{"tMs":2495,"delta":"terfall\" pad:6"}
+{"tMs":2516,"delta":"\n    Box fill:#"}
+{"tMs":2537,"delta":"FFB5"}
+{"tMs":2559,"delta":"838"}
+{"tMs":2580,"delta":"D"}
+{"tMs":2602,"delta":" radius:8 h:100"}
+{"tMs":2639,"delta":" -> idx=7;"}
+{"tMs":2645,"delta":" open=1\n      Text."}
+{"tMs":2666,"delta":"small \"Night"}
+{"tMs":2688,"delta":" street"}
+{"tMs":2709,"delta":"\" pad:6\n    "}
+{"tMs":2731,"delta":"Box fill:#FF"}
+{"tMs":2752,"delta":"6D597"}
+{"tMs":2774,"delta":"A radius:8 h:"}
+{"tMs":2796,"delta":"100 -> idx=8"}
+{"tMs":2817,"delta":"; open=1\n      Text"}
+{"tMs":2838,"delta":".small \"L"}
+{"tMs":2860,"delta":"ake re"}
+{"tMs":2881,"delta":"flections"}
+{"tMs":2902,"delta":"\" pad:6\n    "}
+{"tMs":2924,"delta":"Box fill:#FFE"}
+{"tMs":2947,"delta":"A"}
+{"tMs":2967,"delta":"C"}
+{"tMs":2988,"delta":"435"}
+{"tMs":3010,"delta":" radius:8 h:"}
+{"tMs":3032,"delta":"100 -> idx=9"}
+{"tMs":3053,"delta":"; open=1\n      Text"}
+{"tMs":3074,"delta":".small \"Last"}
+{"tMs":3096,"delta":" sup"}
+{"tMs":3117,"delta":"per\" pad:6"}
+{"tMs":3139,"delta":"\n\nif open=="}
+{"tMs":3160,"delta":"1\n  Card"}
+{"tMs":3184,"delta":" gap:12 w:390"}
+{"tMs":3206,"delta":" pad:16"}
+{"tMs":3224,"delta":"\n    Row between"}
+{"tMs":3246,"delta":"\n      Text.mu"}
+{"tMs":3268,"delta":"ted \"{idx} of "}
+{"tMs":3289,"delta":"9\"\n      I"}
+{"tMs":3310,"delta":"conButton \"close"}
+{"tMs":3333,"delta":"\" -> open=0\n    "}
+{"tMs":3353,"delta":"Box fill:#FF"}
+{"tMs":3375,"delta":"4F7BAC radius"}
+{"tMs":3397,"delta":":8 h:240"}
+{"tMs":3418,"delta":" "}
+{"tMs":3439,"delta":"vis"}
+{"tMs":3461,"delta":"ible:=idx==1"}
+{"tMs":3483,"delta":"\n      Text.small \"Be"}
+{"tMs":3504,"delta":"ach sunrise\" pad"}
+{"tMs":3525,"delta":":8"}
+{"tMs":3546,"delta":"\n    Box fill:#"}
+{"tMs":3569,"delta":"FFF2A65A rad"}
+{"tMs":3590,"delta":"ius:8 h:240 "}
+{"tMs":3610,"delta":"visible:=idx==2"}
+{"tMs":3633,"delta":"\n      Text.small \""}
+{"tMs":3654,"delta":"Mountain trail\" pad"}
+{"tMs":3675,"delta":":8\n    Box fill"}
+{"tMs":3697,"delta":":#FF2A9D"}
+{"tMs":3719,"delta":"8F radius:8 h"}
+{"tMs":3742,"delta":":240 visible:=id"}
+{"tMs":3762,"delta":"x==3\n      Text."}
+{"tMs":3783,"delta":"small \"Old town market\" p"}
+{"tMs":3804,"delta":"ad:8\n    Box f"}
+{"tMs":3826,"delta":"ill:#FFE76F"}
+{"tMs":3847,"delta":"51 radius:8 h"}
+{"tMs":3868,"delta":":240 visible:=id"}
+{"tMs":3890,"delta":"x==4\n      Text."}
+{"tMs":3911,"delta":"small \"Harbour at d"}
+{"tMs":3933,"delta":"usk\" pad:8"}
+{"tMs":3954,"delta":"\n    Box fill:#F"}
+{"tMs":3977,"delta":"F264653 radius:8"}
+{"tMs":3997,"delta":" h:240 visible:"}
+{"tMs":4019,"delta":"=idx==5\n      "}
+{"tMs":4041,"delta":"Text.small \"Desert road"}
+{"tMs":4062,"delta":"\" pad:8\n    "}
+{"tMs":4083,"delta":"Box fill:#FF8"}
+{"tMs":4104,"delta":"AB17D radius:8"}
+{"tMs":4126,"delta":" h:240 visible:"}
+{"tMs":4148,"delta":"=idx==6\n      "}
+{"tMs":4169,"delta":"Text.small \"Forest wa"}
+{"tMs":4190,"delta":"terfall\" pad:8"}
+{"tMs":4211,"delta":"\n    Box fill:#"}
+{"tMs":4234,"delta":"FFB5838D radius"}
+{"tMs":4255,"delta":":8 h:240 vis"}
+{"tMs":4276,"delta":"ible:=idx==7"}
+{"tMs":4298,"delta":"\n      Text.small \"Night"}
+{"tMs":4319,"delta":" street\" pad:8\n    "}
+{"tMs":4341,"delta":"Box fill:#FF"}
+{"tMs":4362,"delta":"6D597A radius:8"}
+{"tMs":4386,"delta":" h:240 visible:"}
+{"tMs":4405,"delta":"=idx==8\n      "}
+{"tMs":4426,"delta":"Text.small \"Lake re"}
+{"tMs":4450,"delta":"flections\" pad:8"}
+{"tMs":4469,"delta":"\n    Box fill:#F"}
+{"tMs":4495,"delta":"FEAC435 radius"}
+{"tMs":4513,"delta":":8 h:240 vis"}
+{"tMs":4534,"delta":"ible:=idx==9"}
+{"tMs":4555,"delta":"\n      Text.small \"Last"}
+{"tMs":4577,"delta":" supper\" pad:8"}
+{"tMs":4598,"delta":"\n    Row between"}
+{"tMs":4620,"delta":"\n      IconButton \"ch"}
+{"tMs":4641,"delta":"evron_left\" -> id"}
+{"tMs":4664,"delta":"x=max(1,idx"}
+{"tMs":4688,"delta":"-1)\n      I"}
+{"tMs":4706,"delta":"conButton \"chevron_"}
+{"tMs":4727,"delta":"right\" -> idx=min"}
+{"tMs":4749,"delta":"(9,idx+1)"}

@@ -1,0 +1,34 @@
+{
+ "ui": "approval",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3958,
+ "turns": [
+  {
+   "input_tokens": 1705,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 572,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 615,
+   "totalMs": 3875,
+   "chars": 1276,
+   "lines": 39,
+   "jsonTails": 0,
+   "nodes": 34,
+   "outputTokensPerNode": "16.8",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,102 @@
+{"meta":{"ui":"order_summary","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show my grocery order as an inline card before you place it: five line items with a picture placeholder, price and a quantity I can raise or lower (removing at zero), a promo code field that takes SAVE10, the subtotal, delivery and total kept up to date, and confirm and cancel buttons that tell you what I decided.","text":"Card gap:10 pad:16 w:390\n  Text.title \"Grocery order\"\n  Row gap:10\n    Image \"placeholder\" w:48 h:48\n    Column grow\n      Text.strong \"Bananas, 1 bunch\"\n      Text.muted \"$3.00 each\"\n    Row gap:6\n      Button.outline \"-\" -> q1=max(0,q1-1)\n      Text.strong \"{q1}\"\n      Button.outline \"+\" -> q1=q1+1\n  if q1==0\n    Text.muted \"Bananas removed from order\"\n  state q1=2\n  state q2=1\n  state q3=1\n  state q4=1\n  state q5=1\n  state promo=\"\"\n  state applied=false\n  state discount=0\n  state subtotal=q1*3+q2*4.5+q3*2.25+q4*5+q5*6\n  state total=subtotal-discount+delivery\n  state delivery=5\n  Row gap:8\n    Input \"Promo code\" \"Enter code\" =promo\n    Button.secondary \"Apply\" -> applied=promo==\"SAVE10\"; discount=promo==\"SAVE10\"?subtotal*0.1:0\n  if applied\n    Text.success \"SAVE10 applied: 10% off\"\n  Divider\n  Row between\n    Text \"Subtotal\"\n    Text \"${subtotal}\"\n  Row between\n    Text \"Delivery\"\n    Text \"${delivery}\"\n  Row between\n    Text \"Discount\"\n    Text.success \"-${discount}\"\n  Row between\n    Text.heading \"Total\"\n    Text.heading \"${total}\"\n  Row gap:8\n    Button.ghost \"Cancel\" -> toast \"Order cancelled\"; emit cancelOrder\n    Spacer grow\n    Button.primary \"Confirm order\" -> toast \"Order confirmed\"; emit confirmOrder","usage":{"input_tokens":1713,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":606,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":513,"totalMs":2688}}
+{"tMs":513,"delta":"Card g"}
+{"tMs":726,"delta":"ap:10"}
+{"tMs":726,"delta":" p"}
+{"tMs":726,"delta":"ad:16"}
+{"tMs":728,"delta":" w:390\n  "}
+{"tMs":728,"delta":"Text.title \"Grocery"}
+{"tMs":728,"delta":" order\"\n  Row gap"}
+{"tMs":728,"delta":":10"}
+{"tMs":728,"delta":"\n    Image \"plac"}
+{"tMs":728,"delta":"eholder\""}
+{"tMs":728,"delta":" w"}
+{"tMs":746,"delta":":48"}
+{"tMs":768,"delta":" h:48\n    Column"}
+{"tMs":937,"delta":" grow"}
+{"tMs":937,"delta":"\n      Text.str"}
+{"tMs":937,"delta":"ong \"Bananas,"}
+{"tMs":937,"delta":" 1 bunch\""}
+{"tMs":937,"delta":"\n      Text.mu"}
+{"tMs":937,"delta":"ted \"$3"}
+{"tMs":937,"delta":".00 "}
+{"tMs":941,"delta":"each\"\n    Row"}
+{"tMs":962,"delta":" gap:6"}
+{"tMs":984,"delta":"\n      Button.outline \""}
+{"tMs":1007,"delta":"-\" -> q"}
+{"tMs":1027,"delta":"1=max(0"}
+{"tMs":1156,"delta":",q1-1)\n      "}
+{"tMs":1157,"delta":"Text.strong \"{q"}
+{"tMs":1157,"delta":"1}\"\n      Button."}
+{"tMs":1157,"delta":"outline \"+\" -> q"}
+{"tMs":1157,"delta":"1=q1+1\n  "}
+{"tMs":1157,"delta":"if"}
+{"tMs":1179,"delta":" q1==0\n    Text"}
+{"tMs":1201,"delta":".muted \"B"}
+{"tMs":1222,"delta":"ananas removed from"}
+{"tMs":1243,"delta":" order\"\n  state q1="}
+{"tMs":1264,"delta":"2"}
+{"tMs":1287,"delta":"\n  state q2=1"}
+{"tMs":1381,"delta":"\n  state q3=1\n  "}
+{"tMs":1381,"delta":"state q4=1\n  state"}
+{"tMs":1381,"delta":" q5=1\n  state prom"}
+{"tMs":1381,"delta":"o=\"\"\n  state appl"}
+{"tMs":1394,"delta":"ied=false\n  state disc"}
+{"tMs":1416,"delta":"ount=0\n  state subt"}
+{"tMs":1437,"delta":"otal=q1*3+"}
+{"tMs":1459,"delta":"q2*4."}
+{"tMs":1482,"delta":"5+q3*2.25"}
+{"tMs":1505,"delta":"+q4*5"}
+{"tMs":1523,"delta":"+q5*6"}
+{"tMs":1544,"delta":"\n  state total"}
+{"tMs":1600,"delta":"=subtotal-"}
+{"tMs":1601,"delta":"discount+delivery\n  "}
+{"tMs":1609,"delta":"state delivery=5\n  "}
+{"tMs":1640,"delta":"Row gap:8\n    "}
+{"tMs":1652,"delta":"Input \"Promo code\""}
+{"tMs":1674,"delta":" \""}
+{"tMs":1697,"delta":"Enter code"}
+{"tMs":1717,"delta":"\" =promo\n    Button"}
+{"tMs":1738,"delta":".sec"}
+{"tMs":1766,"delta":"ondary \"Apply\" -"}
+{"tMs":1781,"delta":"> applied=promo="}
+{"tMs":1802,"delta":"=\"SAVE10\";"}
+{"tMs":1823,"delta":" discount=prom"}
+{"tMs":1845,"delta":"o==\"SAVE10"}
+{"tMs":1867,"delta":"\"?subtotal*0"}
+{"tMs":1888,"delta":".1:0\n  if"}
+{"tMs":1910,"delta":" applied\n    Text.success"}
+{"tMs":1931,"delta":" \"S"}
+{"tMs":1954,"delta":"AVE10 applied:"}
+{"tMs":1973,"delta":" "}
+{"tMs":1996,"delta":"10% off\"\n  Div"}
+{"tMs":2017,"delta":"ider\n  Row between"}
+{"tMs":2038,"delta":"\n    Text \""}
+{"tMs":2060,"delta":"Subtotal\"\n    "}
+{"tMs":2081,"delta":"Text \"${"}
+{"tMs":2103,"delta":"subtotal}\"\n  "}
+{"tMs":2124,"delta":"Row between\n    Text \""}
+{"tMs":2146,"delta":"Delivery\"\n    "}
+{"tMs":2169,"delta":"Text \"${delivery}\""}
+{"tMs":2189,"delta":"\n  Row between\n    "}
+{"tMs":2210,"delta":"Text \""}
+{"tMs":2233,"delta":"Discount\"\n    Text"}
+{"tMs":2253,"delta":"."}
+{"tMs":2275,"delta":"success \"-${discount}\""}
+{"tMs":2297,"delta":"\n  Row between\n    "}
+{"tMs":2317,"delta":"Text.he"}
+{"tMs":2339,"delta":"ading \"Total\"\n    "}
+{"tMs":2361,"delta":"Text.heading \"${total}"}
+{"tMs":2382,"delta":"\"\n  Row gap:"}
+{"tMs":2403,"delta":"8\n    Button."}
+{"tMs":2426,"delta":"ghost \"Cancel\""}
+{"tMs":2446,"delta":" -> to"}
+{"tMs":2468,"delta":"ast \"Order cancelled"}
+{"tMs":2489,"delta":"\";"}
+{"tMs":2510,"delta":" emit cancel"}
+{"tMs":2533,"delta":"Order\n    Sp"}
+{"tMs":2553,"delta":"acer grow\n    Button"}
+{"tMs":2575,"delta":".primary \"Confirm"}
+{"tMs":2596,"delta":" order"}
+{"tMs":2618,"delta":"\" -> toast \"Order"}
+{"tMs":2640,"delta":" confirmed\"; emit"}
+{"tMs":2661,"delta":" confirmOrder"}

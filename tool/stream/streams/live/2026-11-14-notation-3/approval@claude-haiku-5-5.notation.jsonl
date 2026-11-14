@@ -1,0 +1,69 @@
+{"meta":{"ui":"approval","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","text":"Card w:390 gap:12 pad:16\n  Text.heading \"Confirm deletion\"\n  Text.body \"About to delete 214 old files from the shared drive, freeing about 3.8 GB.\"\n  Text.danger \"This cannot be undone. Deleted files will not be recoverable.\"\n  Text.muted \"Folder: /Shared/Archive/2019-2021\"\n  state decision=\"\"\n  if decision==\"\"\n    Accordion\n      ListTile \"Preview first 5 file names\"\n        Text.small \"report_q1_2019.pdf\"\n        Text.small \"budget_draft_v2.xlsx\"\n        Text.small \"meeting_notes_0412.docx\"\n        Text.small \"photo_0093.jpg\"\n        Text.small \"old_backup_tmp.zip\"\n    Row gap:8\n      Button.destructive \"Approve deletion\" -> decision=\"approved\"; emit approveDelete\n      Button.outline \"Deny\" -> decision=\"denied\"; emit denyDelete\n  if decision!=\"\"\n    Badge.neutral \"Decision: {decision}\"","usage":{"input_tokens":1704,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":352,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":494,"totalMs":2067}}
+{"tMs":494,"delta":"Card w"}
+{"tMs":701,"delta":":390 g"}
+{"tMs":701,"delta":"ap:12 "}
+{"tMs":702,"delta":"pad:16\n  Text"}
+{"tMs":702,"delta":".he"}
+{"tMs":702,"delta":"ading \"Conf"}
+{"tMs":702,"delta":"irm deletion\"\n  "}
+{"tMs":702,"delta":"Text.body"}
+{"tMs":702,"delta":" \"About to delete 214 "}
+{"tMs":702,"delta":"old files from the shared drive"}
+{"tMs":709,"delta":", fre"}
+{"tMs":730,"delta":"eing about 3"}
+{"tMs":751,"delta":".8"}
+{"tMs":946,"delta":" GB.\"\n  Text"}
+{"tMs":946,"delta":".dan"}
+{"tMs":946,"delta":"ger \"This"}
+{"tMs":946,"delta":" cannot be undone."}
+{"tMs":946,"delta":" De"}
+{"tMs":946,"delta":"leted files will"}
+{"tMs":946,"delta":" not be reco"}
+{"tMs":946,"delta":"verable.\"\n  Text."}
+{"tMs":946,"delta":"muted \"Folder: /"}
+{"tMs":987,"delta":"Shared/Archive/"}
+{"tMs":1009,"delta":"2019"}
+{"tMs":1030,"delta":"-"}
+{"tMs":1190,"delta":"2021"}
+{"tMs":1190,"delta":"\"\n  state"}
+{"tMs":1190,"delta":" decision=\"\""}
+{"tMs":1190,"delta":"\n  if decision=="}
+{"tMs":1190,"delta":"\"\"\n    Accordion"}
+{"tMs":1190,"delta":"\n      "}
+{"tMs":1190,"delta":"ListTile \"Preview first"}
+{"tMs":1202,"delta":" 5 file names\"\n        "}
+{"tMs":1223,"delta":"Text.small"}
+{"tMs":1245,"delta":" \"report"}
+{"tMs":1265,"delta":"_q"}
+{"tMs":1287,"delta":"1_2019.pdf"}
+{"tMs":1415,"delta":"\"\n        Text.small \""}
+{"tMs":1415,"delta":"bud"}
+{"tMs":1415,"delta":"get_dra"}
+{"tMs":1415,"delta":"ft_v"}
+{"tMs":1415,"delta":"2.xlsx\""}
+{"tMs":1416,"delta":"\n        Text.small \"mee"}
+{"tMs":1438,"delta":"ting_notes_0"}
+{"tMs":1459,"delta":"412"}
+{"tMs":1481,"delta":".docx\"\n        Text"}
+{"tMs":1503,"delta":".small \"photo_0"}
+{"tMs":1524,"delta":"093"}
+{"tMs":1545,"delta":".jpg\"\n        "}
+{"tMs":1638,"delta":"Text.small \"old"}
+{"tMs":1638,"delta":"_back"}
+{"tMs":1638,"delta":"up_t"}
+{"tMs":1638,"delta":"mp.z"}
+{"tMs":1653,"delta":"ip\"\n    Row gap"}
+{"tMs":1675,"delta":":8\n      Button.dest"}
+{"tMs":1696,"delta":"ructive \"Appro"}
+{"tMs":1717,"delta":"ve de"}
+{"tMs":1739,"delta":"letion\" -> decision=\""}
+{"tMs":1760,"delta":"approved\"; emit approve"}
+{"tMs":1782,"delta":"Delete\n      Button."}
+{"tMs":1803,"delta":"outline \"Deny\" -"}
+{"tMs":2060,"delta":"> decision=\"denied\";"}
+{"tMs":2060,"delta":" emit denyDelete"}
+{"tMs":2060,"delta":"\n  if decision!"}
+{"tMs":2060,"delta":"=\"\"\n    Bad"}
+{"tMs":2060,"delta":"ge.ne"}
+{"tMs":2060,"delta":"utral \"Dec"}
+{"tMs":2060,"delta":"ision: {decision}\""}

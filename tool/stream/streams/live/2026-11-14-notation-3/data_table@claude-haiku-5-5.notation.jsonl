@@ -1,0 +1,36 @@
+{"meta":{"ui":"data_table","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the twelve invoices you found as a table: number, customer, date, amount and status. I can sort by any column, filter by status, type to search the customer, page through five at a time, tick rows (and a tick-all for the page), and a bar appears with the count and total of what I ticked and a button to send reminders for them.","text":"I can't build this from what's here: there are no invoices in this conversation, so I have no numbers, customers, dates or statuses to show. I'd be inventing twelve rows, which would look like real data. If you paste the invoices (number, customer, date, amount, status, one per line) I'll build the table with the sorting, filtering, search, paging, selection and reminder bar you described.","usage":{"input_tokens":1710,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":121,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":539,"totalMs":1234}}
+{"tMs":539,"delta":"I can"}
+{"tMs":664,"delta":"'t build"}
+{"tMs":664,"delta":" this"}
+{"tMs":664,"delta":" from what"}
+{"tMs":664,"delta":"'s"}
+{"tMs":664,"delta":" here"}
+{"tMs":665,"delta":": there are no inv"}
+{"tMs":672,"delta":"oices in this"}
+{"tMs":695,"delta":" conversation, so"}
+{"tMs":715,"delta":" I have"}
+{"tMs":735,"delta":" no num"}
+{"tMs":756,"delta":"bers,"}
+{"tMs":779,"delta":" customers, dates or statu"}
+{"tMs":801,"delta":"ses to show. I"}
+{"tMs":820,"delta":"'d be"}
+{"tMs":840,"delta":" in"}
+{"tMs":862,"delta":"venting twelve rows,"}
+{"tMs":882,"delta":" which would look"}
+{"tMs":902,"delta":" like real"}
+{"tMs":923,"delta":" data. If"}
+{"tMs":943,"delta":" you pa"}
+{"tMs":964,"delta":"ste the"}
+{"tMs":984,"delta":" invoices (number"}
+{"tMs":1005,"delta":", customer, date, amount"}
+{"tMs":1027,"delta":", status,"}
+{"tMs":1048,"delta":" one per"}
+{"tMs":1066,"delta":" line) I'"}
+{"tMs":1086,"delta":"ll build"}
+{"tMs":1107,"delta":" the table with"}
+{"tMs":1128,"delta":" the sorting, filt"}
+{"tMs":1148,"delta":"ering, search"}
+{"tMs":1169,"delta":", paging,"}
+{"tMs":1190,"delta":" selection and reminder bar"}
+{"tMs":1211,"delta":" you"}
+{"tMs":1230,"delta":" described."}

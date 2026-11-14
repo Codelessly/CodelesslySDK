@@ -1,0 +1,97 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"Card w:390 gap:10 pad:14\n  Text.title \"Config change review\"\n  state k1=0\n  state k2=0\n  state k3=0\n  Text.caption \"Hunk 1 · lines 4-6\"\n  Box fill:#FFFDECEC radius:6 pad:8\n    Text.small \"- timeout: 30\"\n    Text.small \"- retries: 1\"\n  Text.small \"+ timeout: 60\"\n  Text.small \"+ retries: 3\"\n  Row gap:8\n    Button.outline \"Keep\" -> k1=1\n    Button.ghost \"Discard\" -> k1=2\n  Text.caption \"Hunk 2 · lines 12-13\"\n  Box fill:#FFFDECEC radius:6 pad:8\n    Text.small \"- cache: false\"\n  Text.small \"+ cache: true\"\n  Row gap:8\n    Button.outline \"Keep\" -> k2=1\n    Button.ghost \"Discard\" -> k2=2\n  Text.caption \"Hunk 3 · lines 20-22\"\n  Box fill:#FFFDECEC radius:6 pad:8\n    Text.small \"- logLevel: info\"\n  Text.small \"+ logLevel: debug\"\n  Row gap:8\n    Button.outline \"Keep\" -> k3=1\n    Button.ghost \"Discard\" -> k3=2\n  Text.muted \"Kept: {(k1==1)+(k2==1)+(k3==1)} of 3\"\n  Button \"Apply\" enabled:=k1>0&&k2>0&&k3>0 -> emit apply","usage":{"input_tokens":1706,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":520,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":504,"totalMs":2475}}
+{"tMs":504,"delta":"Card w"}
+{"tMs":630,"delta":":"}
+{"tMs":630,"delta":"390"}
+{"tMs":630,"delta":" gap:10"}
+{"tMs":630,"delta":" "}
+{"tMs":630,"delta":"pad:14"}
+{"tMs":639,"delta":"\n  Text.title \""}
+{"tMs":658,"delta":"Config change"}
+{"tMs":680,"delta":" review\"\n  state"}
+{"tMs":699,"delta":" k"}
+{"tMs":723,"delta":"1=0\n  state k2"}
+{"tMs":745,"delta":"=0\n  state k3="}
+{"tMs":766,"delta":"0\n  Text.ca"}
+{"tMs":787,"delta":"ption \"Hunk 1"}
+{"tMs":809,"delta":" ·"}
+{"tMs":828,"delta":" l"}
+{"tMs":847,"delta":"ines "}
+{"tMs":867,"delta":"4"}
+{"tMs":887,"delta":"-"}
+{"tMs":907,"delta":"6"}
+{"tMs":927,"delta":"\"\n  "}
+{"tMs":947,"delta":"Box"}
+{"tMs":967,"delta":" f"}
+{"tMs":987,"delta":"ill:#F"}
+{"tMs":1008,"delta":"FFD"}
+{"tMs":1028,"delta":"EC"}
+{"tMs":1048,"delta":"E"}
+{"tMs":1068,"delta":"C"}
+{"tMs":1088,"delta":" radius:6"}
+{"tMs":1109,"delta":" pad:8"}
+{"tMs":1130,"delta":"\n    Text.small \"-"}
+{"tMs":1150,"delta":" tim"}
+{"tMs":1174,"delta":"eout:"}
+{"tMs":1192,"delta":" 30\"\n    Text."}
+{"tMs":1213,"delta":"small \"- ret"}
+{"tMs":1233,"delta":"ries: 1"}
+{"tMs":1254,"delta":"\"\n  Text.small \""}
+{"tMs":1276,"delta":"+ timeout: 60"}
+{"tMs":1296,"delta":"\"\n  Text"}
+{"tMs":1318,"delta":".small \"+ retries:"}
+{"tMs":1338,"delta":" 3\"\n  Row g"}
+{"tMs":1359,"delta":"ap:8\n    Button."}
+{"tMs":1378,"delta":"out"}
+{"tMs":1399,"delta":"line \"Keep\" ->"}
+{"tMs":1420,"delta":" k1=1\n    Button"}
+{"tMs":1440,"delta":"."}
+{"tMs":1461,"delta":"ghost \"Discard\" -"}
+{"tMs":1481,"delta":"> k1=2"}
+{"tMs":1502,"delta":"\n  Text.caption \""}
+{"tMs":1523,"delta":"Hunk 2 ·"}
+{"tMs":1543,"delta":" lines 12-13"}
+{"tMs":1564,"delta":"\"\n  Box fill:"}
+{"tMs":1585,"delta":"#FFF"}
+{"tMs":1604,"delta":"D"}
+{"tMs":1625,"delta":"ECEC radius:6 "}
+{"tMs":1646,"delta":"pad:8\n    Text"}
+{"tMs":1667,"delta":".small \"- c"}
+{"tMs":1686,"delta":"ache:"}
+{"tMs":1707,"delta":" false\"\n  Text.small"}
+{"tMs":1728,"delta":" \"+ cache: true\""}
+{"tMs":1748,"delta":"\n  Row gap:8"}
+{"tMs":1769,"delta":"\n    Button.outline \""}
+{"tMs":1789,"delta":"Keep\" -> k2"}
+{"tMs":1810,"delta":"=1\n    Button."}
+{"tMs":1830,"delta":"ghost \"Discard\" -"}
+{"tMs":1851,"delta":"> k2=2\n  "}
+{"tMs":1871,"delta":"Text.caption \"Hun"}
+{"tMs":1892,"delta":"k 3 · lines "}
+{"tMs":1913,"delta":"20-22\"\n  Box"}
+{"tMs":1933,"delta":" fill:#FFF"}
+{"tMs":1954,"delta":"DECEC radius:6"}
+{"tMs":1974,"delta":" pad:8\n    "}
+{"tMs":1994,"delta":"Text.small \"- logL"}
+{"tMs":2015,"delta":"evel: info\"\n  "}
+{"tMs":2036,"delta":"Text.small \"+ logL"}
+{"tMs":2057,"delta":"evel: debug\"\n  "}
+{"tMs":2079,"delta":"Row gap:8\n    "}
+{"tMs":2097,"delta":"Button.outline \"Ke"}
+{"tMs":2118,"delta":"ep\" -> k3=1"}
+{"tMs":2138,"delta":"\n    Button.ghost"}
+{"tMs":2158,"delta":" \"Discard\" -> k"}
+{"tMs":2180,"delta":"3=2\n  Text."}
+{"tMs":2199,"delta":"mu"}
+{"tMs":2220,"delta":"ted \"K"}
+{"tMs":2240,"delta":"ept: {("}
+{"tMs":2261,"delta":"k1==1)+(k"}
+{"tMs":2281,"delta":"2==1)+(k3"}
+{"tMs":2301,"delta":"==1)} of 3\""}
+{"tMs":2322,"delta":"\n  Button"}
+{"tMs":2342,"delta":" \""}
+{"tMs":2363,"delta":"Apply\" en"}
+{"tMs":2383,"delta":"abled:=k"}
+{"tMs":2403,"delta":"1>0&"}
+{"tMs":2424,"delta":"&k2>0&&k"}
+{"tMs":2444,"delta":"3>0 -> emit"}
+{"tMs":2465,"delta":" apply"}

@@ -1,0 +1,84 @@
+{"meta":{"ui":"message_draft","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Draft an email to my landlord about the broken heating and show it as an inline card I can edit before it goes: to, subject and body fields filled in, a tone switch between polite and firm that rewrites the body, and send and discard buttons. Sending needs a recipient and a subject, and afterwards the card shows it as sent.","text":"Card w:390 gap:12 pad:16\n  Text.heading \"Email to landlord\"\n  state to=\"landlord@example.com\"\n  state subject=\"Heating not working\"\n  state tone=\"polite\"\n  state sent=false\n  state body=\"Hello,\\n\\nThe heating in my flat has stopped working. Could you arrange for it to be repaired as soon as possible?\\n\\nThank you,\"\n  if sent\n    Badge.success \"Sent\"\n    Text.body \"Your email to {to} has been sent.\"\n  if !sent\n    Input \"To\" =to\n    Input \"Subject\" =subject\n    SegmentedButton =tone items:[\"polite\",\"firm\"] -> body=tone==\"firm\"?\"Hello,\\n\\nThe heating in my flat has been broken for some time and still has not been repaired. I need this fixed urgently. Please confirm when a repair will take place.\\n\\nRegards,\":\"Hello,\\n\\nThe heating in my flat has stopped working. Could you arrange for it to be repaired as soon as possible?\\n\\nThank you,\"\n    Input \"Body\" =body\n    Row gap:8 end\n      Button.ghost \"Discard\" -> to=\"\"; subject=\"\"; body=\"\"\n      Button \"Send\" enabled:=to!=\"\"&&subject!=\"\" -> sent=true; emit send","usage":{"input_tokens":1714,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":424,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":549,"totalMs":2414}}
+{"tMs":549,"delta":"Card"}
+{"tMs":765,"delta":" w"}
+{"tMs":765,"delta":":390 g"}
+{"tMs":765,"delta":"ap:12 pad:16"}
+{"tMs":766,"delta":"\n  Text.heading \""}
+{"tMs":766,"delta":"Email to landlord\""}
+{"tMs":766,"delta":"\n  state"}
+{"tMs":766,"delta":" to"}
+{"tMs":766,"delta":"=\"land"}
+{"tMs":766,"delta":"lord@example.com\""}
+{"tMs":766,"delta":"\n  state subject=\"He"}
+{"tMs":786,"delta":"ating not working\"\n  state t"}
+{"tMs":807,"delta":"one=\"polite\"\n  state"}
+{"tMs":1000,"delta":" sent=false\n  state body"}
+{"tMs":1000,"delta":"=\""}
+{"tMs":1000,"delta":"Hello"}
+{"tMs":1000,"delta":",\\n\\nTh"}
+{"tMs":1000,"delta":"e heating in my"}
+{"tMs":1000,"delta":" fl"}
+{"tMs":1000,"delta":"at has stopped working."}
+{"tMs":1000,"delta":" Could you ar"}
+{"tMs":1000,"delta":"range for"}
+{"tMs":1021,"delta":" it"}
+{"tMs":1042,"delta":" to be rep"}
+{"tMs":1064,"delta":"aired as soon as possible"}
+{"tMs":1233,"delta":"?\\n\\nThank you"}
+{"tMs":1233,"delta":","}
+{"tMs":1233,"delta":"\""}
+{"tMs":1233,"delta":"\n  if s"}
+{"tMs":1233,"delta":"ent"}
+{"tMs":1233,"delta":"\n    Bad"}
+{"tMs":1233,"delta":"ge.success \"Sent\""}
+{"tMs":1235,"delta":"\n    "}
+{"tMs":1257,"delta":"Text.body"}
+{"tMs":1278,"delta":" \"Your email to"}
+{"tMs":1300,"delta":" {"}
+{"tMs":1321,"delta":"to} has been sent.\""}
+{"tMs":1467,"delta":"\n  if !sent\n    "}
+{"tMs":1467,"delta":"Input \"To\" ="}
+{"tMs":1467,"delta":"to\n    Input \"Sub"}
+{"tMs":1467,"delta":"ject\" =subject\n    S"}
+{"tMs":1467,"delta":"egmentedButton ="}
+{"tMs":1467,"delta":"tone items:[\"polite\",\""}
+{"tMs":1474,"delta":"firm\"] -> body"}
+{"tMs":1493,"delta":"="}
+{"tMs":1515,"delta":"tone==\"fir"}
+{"tMs":1536,"delta":"m\"?\"Hello,"}
+{"tMs":1558,"delta":"\\n\\nThe heating"}
+{"tMs":1580,"delta":" in my flat has been"}
+{"tMs":1721,"delta":" broken for"}
+{"tMs":1721,"delta":" some"}
+{"tMs":1721,"delta":" time and"}
+{"tMs":1721,"delta":" still has"}
+{"tMs":1721,"delta":" not been repaired. I need"}
+{"tMs":1721,"delta":" this"}
+{"tMs":1729,"delta":" fixed ur"}
+{"tMs":1752,"delta":"gently."}
+{"tMs":1773,"delta":" Please conf"}
+{"tMs":1793,"delta":"irm when"}
+{"tMs":1815,"delta":" a"}
+{"tMs":1837,"delta":" repair will take"}
+{"tMs":1963,"delta":" place.\\n\\nR"}
+{"tMs":1963,"delta":"egards,\":\"Hello"}
+{"tMs":1963,"delta":",\\n\\nThe he"}
+{"tMs":1963,"delta":"ating in my flat has stop"}
+{"tMs":1963,"delta":"ped working. Could you arr"}
+{"tMs":1965,"delta":"ange for it to be repaired"}
+{"tMs":1987,"delta":" as soon as possible?\\"}
+{"tMs":2009,"delta":"n\\nThank you,\""}
+{"tMs":2031,"delta":"\n    Input \"Body\""}
+{"tMs":2052,"delta":" =body\n    Row gap"}
+{"tMs":2073,"delta":":8 end"}
+{"tMs":2095,"delta":"\n      Button."}
+{"tMs":2408,"delta":"ghost \"Discard\" -"}
+{"tMs":2409,"delta":"> to"}
+{"tMs":2409,"delta":"=\"\"; subject=\"\";"}
+{"tMs":2409,"delta":" body=\"\""}
+{"tMs":2409,"delta":"\n      Button \"Send\" en"}
+{"tMs":2409,"delta":"abled:=to!="}
+{"tMs":2409,"delta":"\"\"&&subject!=\"\""}
+{"tMs":2409,"delta":" -> s"}
+{"tMs":2409,"delta":"ent=true; em"}
+{"tMs":2409,"delta":"it send"}
