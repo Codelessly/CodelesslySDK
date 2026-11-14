@@ -210,6 +210,16 @@ void main() {
       expect(d.message, contains('its content "card" never arrived'));
     });
 
+    testWidgets('plan_progress@claude-haiku-5-5: a static mock-up, and the stream\'s result says its buttons do nothing', (tester) async {
+      final stream = RecordedStream.read('$dir/plan_progress@claude-haiku-5-5.compact.ssui.r1.jsonl');
+      final ds = (await tester.runAsync(_ssui))!;
+      final session = _strict(ds: ds);
+      addTearDown(session.dispose);
+      final r = await session.applyStream(Stream.value(stream.text));
+      expect(r.errors, isEmpty, reason: 'it validated cleanly');
+      expect({for (final d in r.warnings) if (d.code == 'dead_control') d.nodeId}, {'startBtn', 'pauseBtn'});
+    });
+
     testWidgets('reservation@claude-sonnet-5-5: its time slots are a formula written as JavaScript, and list_empty says the grid gets nothing',
         (tester) async {
       final stream = RecordedStream.read('$dir/reservation@claude-sonnet-5-5.compact.ssui.r1.jsonl');
