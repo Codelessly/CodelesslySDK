@@ -48,7 +48,13 @@ def brief(app, screen, persona):
 def main():
     app = json.loads((here / 'app.json').read_text())
     model = opt('--model', 'claude-sonnet-5-5')
-    out = here / 'generated'
+    # --design-system skip: every person gets the app's own design system (its
+    # blocks and illustrations), each under their token set; --blocks-only
+    # lists only its screen blocks to the model, not the 159 base controls.
+    ds_all = opt('--design-system')
+    out = here / (opt('--out') or 'generated')
+    out.mkdir(exist_ok=True)
+    blocks = 'Screen,TopBar,HeroSession,StreakFlame,ProgressGoal,WeekStrip,SectionTitle,SessionRow,ChartCard,StatTrio,RecordCard,EmptyState,Illustration'
     for pf in sorted((here / 'personas').glob('*.json')):
         persona = json.loads(pf.read_text())
         if opt('--persona') not in (None, persona['id']):
@@ -57,7 +63,10 @@ def main():
             if opt('--only') not in (None, screen['id']):
                 continue
             name = f"{screen['id']}.{persona['id']}"
-            (out / f'{name}.brief.txt').write_text(brief(app, screen, persona))
+            text = brief(app, screen, persona)
+            if ds_all and persona.get('audience'):
+                text += f"\nOn blocks that take audience, write audience:\"{persona['audience']}\"."
+            (out / f'{name}.brief.txt').write_text(text)
             # The contract's state is the host's: it goes before whatever the model writes.
             (out / 'contract.txt').write_text(''.join(
                 f"state {k}={json.dumps(v, separators=(',', ':'))}\n" for k, v in app['contract']['variables'].items()))
@@ -65,7 +74,8 @@ def main():
                 'dart', 'run', 'tool/record_notation.dart', '--ui', name, '--model', model,
                 '--brief-file', str(out / f'{name}.brief.txt'), '--frame', 'one phone screen 390 wide',
                 '--prelude-file', str(out / 'contract.txt'),
-                '--design-system', str(sdk / 'design_systems' / persona['designSystem']),
+                '--design-system', str(sdk / 'design_systems' / (ds_all or persona['designSystem'])),
+                *(['--components', blocks] if '--blocks-only' in sys.argv else []),
                 '--out', str(out / f'{name}.jsonl'),
             ], cwd=recorder, capture_output=True, text=True)
             try:

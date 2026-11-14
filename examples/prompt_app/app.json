@@ -86,7 +86,7 @@
     }
   },
   "rules": [
-    "One phone screen 390 wide and about 844 tall, one column, the most important thing first. Write the root as Column scroll so a longer screen scrolls.",
+    "One phone screen 390 wide and about 844 tall, one column, the most important thing first. If the design system has a Screen block, it is the root (it scrolls and paints the page); otherwise write the root as Column scroll.",
     "Use the design system's components and text styles; write no colors of your own except where data needs one.",
     "Every button calls one of the contract's actions with emit, or changes state on this screen.",
     "No images by URL and no emoji. Use Icon with a Material icon name."
