@@ -1,0 +1,32 @@
+[
+ {
+  "screen": "session.athlete",
+  "turns": 2,
+  "nodes": 26,
+  "lines": 31,
+  "outputTokensAll": 1087,
+  "secondsAll": 6.7,
+  "firstTokenMs": 733,
+  "inputTokens": 5052
+ },
+ {
+  "screen": "session.beginner",
+  "turns": 1,
+  "nodes": 21,
+  "lines": 28,
+  "outputTokensAll": 638,
+  "secondsAll": 4.4,
+  "firstTokenMs": 659,
+  "inputTokens": 5074
+ },
+ {
+  "screen": "session.kid",
+  "turns": 2,
+  "nodes": 17,
+  "lines": 26,
+  "outputTokensAll": 1116,
+  "secondsAll": 8.0,
+  "firstTokenMs": 790,
+  "inputTokens": 5083
+ }
+]

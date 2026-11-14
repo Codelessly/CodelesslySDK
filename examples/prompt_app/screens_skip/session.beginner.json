@@ -27,28 +27,47 @@
      "trigger": {
       "type": "timer",
       "intervalMs": 1000,
-      "when": "${= !paused && !done}"
+      "when": "${= (phase==\"set\"||phase==\"work\"||phase==\"rest\") && !paused}"
      },
      "actions": [
       {
        "type": "setVariable",
-       "variable": "left",
-       "value": "${= left>1?left-1:(phase==\"work\"?today.rest:today.work)}"
-      },
-      {
-       "type": "setVariable",
-       "variable": "frac",
-       "value": "${= left>1?(phase==\"work\"?(today.work-left+1)/today.work:(today.rest-left+1)/today.rest):0}"
-      },
-      {
-       "type": "setVariable",
-       "variable": "round",
-       "value": "${= (left<=1&&phase==\"rest\"&&round<today.rounds)?round+1:round}"
+       "variable": "elapsed",
+       "value": "${= elapsed+(phase==\"set\"?0:1)}"
       },
       {
        "type": "setVariable",
        "variable": "phase",
-       "value": "${= left<=1?(phase==\"work\"?\"rest\":\"work\"):phase}"
+       "value": "${= left>1?phase:(phase!=\"work\"?\"work\":(round<today.rounds?\"rest\":\"done\"))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "round",
+       "value": "${= (left<=1&&phase==\"work\")?round+1:round}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "left",
+       "value": "${= left>1?left-1:(phase==\"work\"?today.work:today.rest)}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= phase==\"done\" && !saved}"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "finish_session",
+       "value": "${count}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= true}"
       }
      ]
     }
@@ -65,29 +84,34 @@
     }
    },
    "children": [
-    "TopBar1",
+    "SessionBar1",
+    "Illustration1",
     "column1",
-    "column2",
-    "row2",
-    "column3"
+    "text5",
+    "BigButton1",
+    "SessionBar2",
+    "SessionDial1",
+    "TapPad1",
+    "SessionControls1",
+    "SessionSummary1",
+    "BigButton2",
+    "BigButton3"
    ]
   },
-  "TopBar1": {
-   "type": "TopBar",
+  "SessionBar1": {
+   "type": "SessionBar",
    "layout": {
     "width": {
      "fill": 0
     },
-    "height": {
-     "hug": 0
-    }
+    "height": 48.0
    },
    "props": {
-    "title": "Today's session",
-    "back": true
+    "title": "Today's session"
    },
    "bind": {
-    "props.subtitle": "${today.name}: ${today.rounds} rounds, about ${today.minutes} minutes"
+    "props.detail": "${today.minutes} minutes, ${today.rounds} rounds",
+    "visible": "${= phase==\"ready\"}"
    },
    "actions": [
     {
@@ -104,6 +128,19 @@
     }
    ]
   },
+  "Illustration1": {
+   "type": "Illustration",
+   "layout": {
+    "width": 200,
+    "height": 200
+   },
+   "props": {
+    "role": "hero"
+   },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
+   }
+  },
   "column1": {
    "type": "column",
    "layout": {
@@ -116,7 +153,7 @@
     }
    },
    "props": {
-    "spacing": 12,
+    "spacing": 8,
     "crossAxisAlignment": "start"
    },
    "decoration": {
@@ -132,11 +169,13 @@
     ],
     "radius": 17
    },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
+   },
    "children": [
     "text1",
     "text2",
     "text3",
-    "progressBar1",
     "text4"
    ]
   },
@@ -152,13 +191,13 @@
    },
    "props": {
     "style": {
-     "fontSize": 11.5,
-     "fontWeight": 700,
-     "letterSpacing": 1.3,
-     "height": 1.2,
-     "color": "#FF9793B0"
+     "fontSize": 23,
+     "fontWeight": 600,
+     "letterSpacing": -0.2,
+     "height": 1.3,
+     "color": "#FF15122E"
     },
-    "text": "${= phase==\"work\" ? \"Jump\" : \"Rest\"}"
+    "text": "What will happen"
    }
   },
   "text2": {
@@ -172,14 +211,13 @@
     }
    },
    "props": {
+    "text": "You jump for ${today.work} seconds. That is your work time.",
     "style": {
-     "fontSize": 96,
-     "fontWeight": 700,
-     "letterSpacing": -0.9,
-     "height": 1.02,
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.5,
      "color": "#FF15122E"
-    },
-    "text": "${left}"
+    }
    }
   },
   "text3": {
@@ -193,33 +231,13 @@
     }
    },
    "props": {
+    "text": "Then you rest for ${today.rest} seconds to catch your breath.",
     "style": {
-     "fontSize": 14,
+     "fontSize": 15,
      "fontWeight": 400,
      "height": 1.5,
-     "color": "#B815122E"
-    },
-    "text": "${= phase==\"work\" ? \"Jump for \" + today.work + \" seconds, then rest.\" : \"Catch your breath. Next round starts soon.\"}"
-   }
-  },
-  "progressBar1": {
-   "type": "progressBar",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
+     "color": "#FF15122E"
     }
-   },
-   "props": {
-    "max": 1,
-    "borderRadius": 2,
-    "color": "#FF5B3DF5",
-    "backgroundColor": "#FFE8E5F7"
-   },
-   "bind": {
-    "props.value": "${frac}"
    }
   },
   "text4": {
@@ -235,46 +253,12 @@
    "props": {
     "style": {
      "fontSize": 15,
-     "fontWeight": 600,
+     "fontWeight": 400,
      "height": 1.5,
-     "color": "#FF15122E"
+     "color": "#B815122E"
     },
-    "text": "Round ${round} of ${today.rounds}"
+    "text": "That repeats ${today.rounds} times. About ${today.minutes} minutes in all."
    }
-  },
-  "column2": {
-   "type": "column",
-   "layout": {
-    "padding": 12,
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "spacing": 12,
-    "crossAxisAlignment": "start"
-   },
-   "decoration": {
-    "fills": [
-     {
-      "color": "#FFFFFFFF"
-     }
-    ],
-    "strokes": [
-     {
-      "color": "#FFE3E3E6"
-     }
-    ],
-    "radius": 17
-   },
-   "children": [
-    "text5",
-    "text6",
-    "row1"
-   ]
   },
   "text5": {
    "type": "text",
@@ -288,263 +272,274 @@
    },
    "props": {
     "style": {
-     "fontSize": 16,
-     "fontWeight": 600,
-     "height": 1.4,
-     "color": "#FF15122E"
-    },
-    "text": "Jumps so far"
-   }
-  },
-  "text6": {
-   "type": "text",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "style": {
-     "fontSize": 56,
-     "fontWeight": 900,
-     "letterSpacing": -2,
-     "height": 1.0,
-     "color": "#FF15122E"
-    },
-    "text": "${count}"
-   }
-  },
-  "row1": {
-   "type": "row",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "spacing": 8,
-    "crossAxisAlignment": "center"
-   },
-   "children": [
-    "outlinedButton1",
-    "filledButton1"
-   ]
-  },
-  "outlinedButton1": {
-   "type": "outlinedButton",
-   "layout": {
-    "width": {
-     "hug": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "label": "-1"
-   },
-   "actions": [
-    {
-     "trigger": {
-      "type": "click"
-     },
-     "actions": [
-      {
-       "type": "setVariable",
-       "variable": "count",
-       "value": "${= max(0,count-1)}"
-      }
-     ]
-    }
-   ]
-  },
-  "filledButton1": {
-   "type": "filledButton",
-   "layout": {
-    "flex": 1,
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "label": "Tap for each jump"
-   },
-   "actions": [
-    {
-     "trigger": {
-      "type": "click"
-     },
-     "actions": [
-      {
-       "type": "setVariable",
-       "variable": "count",
-       "value": "${= count+1}"
-      }
-     ]
-    }
-   ]
-  },
-  "row2": {
-   "type": "row",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "spacing": 12,
-    "crossAxisAlignment": "center"
-   },
-   "children": [
-    "filledButton2",
-    "filledButton3"
-   ]
-  },
-  "filledButton2": {
-   "type": "filledButton",
-   "layout": {
-    "flex": 1,
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "tonal": true
-   },
-   "bind": {
-    "props.label": "${= paused ? \"Resume\" : \"Pause\"}"
-   },
-   "actions": [
-    {
-     "trigger": {
-      "type": "click"
-     },
-     "actions": [
-      {
-       "type": "setVariable",
-       "variable": "paused",
-       "value": "${= !paused}"
-      }
-     ]
-    }
-   ]
-  },
-  "filledButton3": {
-   "type": "filledButton",
-   "layout": {
-    "flex": 1,
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "label": "Finish"
-   },
-   "actions": [
-    {
-     "trigger": {
-      "type": "click"
-     },
-     "actions": [
-      {
-       "type": "componentEvent",
-       "event": "finish_session",
-       "value": "${count}"
-      }
-     ]
-    }
-   ]
-  },
-  "column3": {
-   "type": "column",
-   "layout": {
-    "padding": 12,
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "spacing": 4,
-    "crossAxisAlignment": "start"
-   },
-   "decoration": {
-    "fills": [
-     {
-      "color": "#FFFFFFFF"
-     }
-    ],
-    "strokes": [
-     {
-      "color": "#FFE3E3E6"
-     }
-    ],
-    "radius": 17
-   },
-   "children": [
-    "text7",
-    "text8"
-   ]
-  },
-  "text7": {
-   "type": "text",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "style": {
      "fontSize": 15,
-     "fontWeight": 600,
-     "height": 1.5,
-     "color": "#FF15122E"
-    },
-    "text": "How it works"
-   }
-  },
-  "text8": {
-   "type": "text",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "style": {
-     "fontSize": 14,
      "fontWeight": 400,
      "height": 1.5,
      "color": "#B815122E"
     },
-    "text": "Work is when you jump. Rest is a short break. Each round is one of each. Stopping early is fine."
+    "text": "Short and steady is enough. You have done ${sessionsThisWeek} of ${weeklyGoal} sessions this week."
+   },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
    }
+  },
+  "BigButton1": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "Start session",
+    "icon": "play_arrow"
+   },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "set"
+      },
+      {
+       "type": "setVariable",
+       "variable": "left",
+       "value": "${= 3}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "round",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "count",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "paused",
+       "value": "${= false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= false}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "start_session"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionBar2": {
+   "type": "SessionBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48.0
+   },
+   "bind": {
+    "props.title": "${today.name}",
+    "props.detail": "Round ${= round<1?1:round} of ${today.rounds}",
+    "visible": "${= phase==\"set\"||phase==\"work\"||phase==\"rest\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionDial1": {
+   "type": "SessionDial",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 428.0
+   },
+   "props": {
+    "note": "Jump while it is bright, rest while it is calm",
+    "workLabel": "Jump",
+    "restLabel": "Rest",
+    "setLabel": "Get ready",
+    "readyLabel": "Ready"
+   },
+   "bind": {
+    "props.left": "${left}",
+    "props.phase": "${phase}",
+    "props.round": "${= round<1?1:round}",
+    "props.rounds": "${today.rounds}",
+    "props.work": "${today.work}",
+    "props.rest": "${today.rest}",
+    "props.paused": "${paused}",
+    "visible": "${= phase==\"set\"||phase==\"work\"||phase==\"rest\"}"
+   }
+  },
+  "TapPad1": {
+   "type": "TapPad",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 172.0
+   },
+   "props": {
+    "label": "Tap for every jump",
+    "count": "count",
+    "hint": "Tap each time you jump"
+   },
+   "bind": {
+    "visible": "${= (phase==\"set\"||phase==\"work\"||phase==\"rest\") && (phase==\"work\")}"
+   }
+  },
+  "SessionControls1": {
+   "type": "SessionControls",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "paused": "paused",
+    "pause": "Pause",
+    "resume": "Keep going",
+    "finish": "Finish"
+   },
+   "bind": {
+    "visible": "${= phase==\"set\"||phase==\"work\"||phase==\"rest\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionSummary1": {
+   "type": "SessionSummary",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Well done",
+    "detail": "Next: a rest day, then come back for your next short session.",
+    "streakLabel": "sessions in a row",
+    "unit": "jumps",
+    "eyebrow": "Session complete"
+   },
+   "bind": {
+    "props.jumps": "${count}",
+    "props.best": "${= 0}",
+    "props.rounds": "${round}",
+    "props.of": "${today.rounds}",
+    "props.seconds": "${elapsed}",
+    "props.streak": "${streak}",
+    "visible": "${= phase==\"done\"}"
+   }
+  },
+  "BigButton2": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "Back to home",
+    "icon": "home"
+   },
+   "bind": {
+    "visible": "${= phase==\"done\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_home"
+      }
+     ]
+    }
+   ]
+  },
+  "BigButton3": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "See my progress",
+    "icon": "show_chart",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= phase==\"done\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_history"
+      }
+     ]
+    }
+   ]
   }
  },
  "variables": {
@@ -632,7 +627,17 @@
     ]
    },
    {
-    "name": "frac",
+    "name": "phase",
+    "type": "text",
+    "value": "ready"
+   },
+   {
+    "name": "left",
+    "type": "integer",
+    "value": 3
+   },
+   {
+    "name": "round",
     "type": "integer",
     "value": 0
    },
@@ -647,22 +652,12 @@
     "value": false
    },
    {
-    "name": "phase",
-    "type": "text",
-    "value": "work"
-   },
-   {
-    "name": "round",
+    "name": "elapsed",
     "type": "integer",
-    "value": 1
+    "value": 0
    },
    {
-    "name": "left",
-    "type": "integer",
-    "value": 40
-   },
-   {
-    "name": "done",
+    "name": "saved",
     "type": "boolean",
     "value": false
    }

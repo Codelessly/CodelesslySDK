@@ -27,23 +27,47 @@
      "trigger": {
       "type": "timer",
       "intervalMs": 1000,
-      "when": "${= !paused}"
+      "when": "${= (phase==\"set\"||phase==\"work\"||phase==\"rest\") && !paused}"
      },
      "actions": [
       {
        "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= elapsed+(phase==\"set\"?0:1)}"
+      },
+      {
+       "type": "setVariable",
        "variable": "phase",
-       "value": "${= left<=1?(phase==\"work\"?\"rest\":\"work\"):phase}"
+       "value": "${= left>1?phase:(phase!=\"work\"?\"work\":(round<today.rounds?\"rest\":\"done\"))}"
       },
       {
        "type": "setVariable",
        "variable": "round",
-       "value": "${= (left<=1&&phase==\"rest\")?min(round+1,today.rounds):round}"
+       "value": "${= (left<=1&&phase==\"work\")?round+1:round}"
       },
       {
        "type": "setVariable",
        "variable": "left",
-       "value": "${= left<=1?(phase==\"work\"?today.rest:today.work):left-1}"
+       "value": "${= left>1?left-1:(phase==\"work\"?today.work:today.rest)}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= phase==\"done\" && !saved}"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "finish_session",
+       "value": "${count}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= true}"
       }
      ]
     }
@@ -60,28 +84,31 @@
     }
    },
    "children": [
-    "TopBar1",
+    "SessionBar1",
     "column1",
-    "column2",
-    "row5"
+    "row5",
+    "BigButton1",
+    "SessionBar2",
+    "SessionDial1",
+    "TapPad1",
+    "SessionControls1",
+    "SessionSummary1",
+    "BigButton2",
+    "BigButton3"
    ]
   },
-  "TopBar1": {
-   "type": "TopBar",
+  "SessionBar1": {
+   "type": "SessionBar",
    "layout": {
     "width": {
      "fill": 0
     },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "back": true
+    "height": 48.0
    },
    "bind": {
     "props.title": "${today.name}",
-    "props.subtitle": "${today.rounds} x ${today.work}s / ${today.rest}s"
+    "props.detail": "${today.rounds} x ${today.work}s / ${today.rest}s",
+    "visible": "${= phase==\"ready\"}"
    },
    "actions": [
     {
@@ -126,11 +153,15 @@
     ],
     "radius": 17
    },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
+   },
    "children": [
     "row1",
-    "text3",
-    "progressBar1",
-    "row2"
+    "row2",
+    "row3",
+    "divider1",
+    "row4"
    ]
   },
   "row1": {
@@ -165,13 +196,12 @@
    },
    "props": {
     "style": {
-     "fontSize": 11.5,
-     "fontWeight": 700,
-     "letterSpacing": 1.3,
-     "height": 1.2,
-     "color": "#FF9793B0"
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#B815122E"
     },
-    "text": "${= upper(phase)}"
+    "text": "Rounds"
    }
   },
   "text2": {
@@ -187,53 +217,13 @@
    },
    "props": {
     "style": {
-     "fontSize": 15,
-     "fontWeight": 600,
-     "height": 1.5,
-     "color": "#FF15122E"
-    },
-    "text": "Round ${round}/${today.rounds}"
-   }
-  },
-  "text3": {
-   "type": "text",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "style": {
-     "fontSize": 96,
+     "fontSize": 40,
      "fontWeight": 900,
-     "letterSpacing": -0.9,
-     "height": 1.02,
+     "letterSpacing": -1.2,
+     "height": 1.0,
      "color": "#FF15122E"
     },
-    "text": "${left}s"
-   }
-  },
-  "progressBar1": {
-   "type": "progressBar",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "max": 1,
-    "borderRadius": 2,
-    "color": "#FF5B3DF5",
-    "backgroundColor": "#FFE8E5F7"
-   },
-   "bind": {
-    "props.value": "${= 0}"
+    "text": "${today.rounds}"
    }
   },
   "row2": {
@@ -251,10 +241,30 @@
     "crossAxisAlignment": "center"
    },
    "children": [
-    "text4",
-    "text5",
-    "text6"
+    "text3",
+    "text4"
    ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#B815122E"
+    },
+    "text": "Work"
+   }
   },
   "text4": {
    "type": "text",
@@ -269,13 +279,33 @@
    },
    "props": {
     "style": {
-     "fontSize": 13,
-     "fontWeight": 500,
-     "height": 1.35,
-     "color": "#FF9793B0"
+     "fontSize": 40,
+     "fontWeight": 900,
+     "letterSpacing": -1.2,
+     "height": 1.0,
+     "color": "#FF15122E"
     },
-    "text": "Work ${today.work}s"
+    "text": "${today.work}s"
    }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text5",
+    "text6"
+   ]
   },
   "text5": {
    "type": "text",
@@ -290,12 +320,12 @@
    },
    "props": {
     "style": {
-     "fontSize": 13,
-     "fontWeight": 500,
-     "height": 1.35,
-     "color": "#FF9793B0"
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#B815122E"
     },
-    "text": "Rest ${today.rest}s"
+    "text": "Rest"
    }
   },
   "text6": {
@@ -311,49 +341,27 @@
    },
    "props": {
     "style": {
-     "fontSize": 13,
-     "fontWeight": 500,
-     "height": 1.35,
-     "color": "#FF9793B0"
+     "fontSize": 40,
+     "fontWeight": 900,
+     "letterSpacing": -1.2,
+     "height": 1.0,
+     "color": "#FF15122E"
     },
-    "text": "Total ${today.minutes} min"
+    "text": "${today.rest}s"
    }
   },
-  "column2": {
-   "type": "column",
+  "divider1": {
+   "type": "divider",
    "layout": {
-    "padding": 12,
     "width": {
      "fill": 0
     },
     "height": {
      "hug": 0
     }
-   },
-   "props": {
-    "spacing": 8,
-    "crossAxisAlignment": "start"
-   },
-   "decoration": {
-    "fills": [
-     {
-      "color": "#FFFFFFFF"
-     }
-    ],
-    "strokes": [
-     {
-      "color": "#FFE3E3E6"
-     }
-    ],
-    "radius": 17
-   },
-   "children": [
-    "row3",
-    "text9",
-    "row4"
-   ]
+   }
   },
-  "row3": {
+  "row4": {
    "type": "row",
    "layout": {
     "width": {
@@ -385,13 +393,12 @@
    },
    "props": {
     "style": {
-     "fontSize": 11.5,
-     "fontWeight": 700,
-     "letterSpacing": 1.3,
-     "height": 1.2,
-     "color": "#FF9793B0"
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#B815122E"
     },
-    "text": "Jumps"
+    "text": "Total"
    }
   },
   "text8": {
@@ -407,140 +414,14 @@
    },
    "props": {
     "style": {
-     "fontSize": 13,
-     "fontWeight": 500,
-     "height": 1.35,
-     "color": "#FF9793B0"
-    },
-    "text": "Rounds left ${= today.rounds-round}"
-   }
-  },
-  "text9": {
-   "type": "text",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "style": {
-     "fontSize": 56,
+     "fontSize": 40,
      "fontWeight": 900,
-     "letterSpacing": -2,
+     "letterSpacing": -1.2,
      "height": 1.0,
      "color": "#FF15122E"
     },
-    "text": "${count}"
+    "text": "${today.minutes} min"
    }
-  },
-  "row4": {
-   "type": "row",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "spacing": 8,
-    "crossAxisAlignment": "center"
-   },
-   "children": [
-    "outlinedButton1",
-    "outlinedButton2",
-    "textButton1"
-   ]
-  },
-  "outlinedButton1": {
-   "type": "outlinedButton",
-   "layout": {
-    "flex": 1,
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "label": "+1"
-   },
-   "actions": [
-    {
-     "trigger": {
-      "type": "click"
-     },
-     "actions": [
-      {
-       "type": "setVariable",
-       "variable": "count",
-       "value": "${= count+1}"
-      }
-     ]
-    }
-   ]
-  },
-  "outlinedButton2": {
-   "type": "outlinedButton",
-   "layout": {
-    "flex": 1,
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "label": "+10"
-   },
-   "actions": [
-    {
-     "trigger": {
-      "type": "click"
-     },
-     "actions": [
-      {
-       "type": "setVariable",
-       "variable": "count",
-       "value": "${= count+10}"
-      }
-     ]
-    }
-   ]
-  },
-  "textButton1": {
-   "type": "textButton",
-   "layout": {
-    "width": {
-     "hug": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "label": "-1"
-   },
-   "actions": [
-    {
-     "trigger": {
-      "type": "click"
-     },
-     "actions": [
-      {
-       "type": "setVariable",
-       "variable": "count",
-       "value": "${= max(0,count-1)}"
-      }
-     ]
-    }
-   ]
   },
   "row5": {
    "type": "row",
@@ -556,82 +437,210 @@
     "spacing": 8,
     "crossAxisAlignment": "center"
    },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
+   },
    "children": [
-    "filledButton1",
-    "filledButton2",
-    "filledButton3"
+    "StreakFlame1",
+    "ProgressGoal1"
    ]
   },
-  "filledButton1": {
-   "type": "filledButton",
+  "StreakFlame1": {
+   "type": "StreakFlame",
    "layout": {
-    "flex": 1,
     "width": {
      "fill": 0
     },
-    "height": {
-     "hug": 0
-    }
+    "height": 176.0
    },
    "props": {
-    "tonal": true,
-    "label": "Resume"
+    "label": "days",
+    "note": "streak"
    },
    "bind": {
-    "visible": "${paused}"
+    "props.count": "${streak}"
+   }
+  },
+  "ProgressGoal1": {
+   "type": "ProgressGoal",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176.0
+   },
+   "props": {
+    "title": "sessions",
+    "note": "this week"
+   },
+   "bind": {
+    "props.done": "${sessionsThisWeek}",
+    "props.goal": "${weeklyGoal}"
+   }
+  },
+  "BigButton1": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "Start",
+    "icon": "play_arrow"
+   },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
    },
    "actions": [
     {
      "trigger": {
-      "type": "click"
+      "type": "event",
+      "event": "onPressed"
      },
      "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "set"
+      },
+      {
+       "type": "setVariable",
+       "variable": "left",
+       "value": "${= 3}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "round",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "count",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= 0}"
+      },
       {
        "type": "setVariable",
        "variable": "paused",
        "value": "${= false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= false}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "start_session"
       }
      ]
     }
    ]
   },
-  "filledButton2": {
-   "type": "filledButton",
+  "SessionBar2": {
+   "type": "SessionBar",
    "layout": {
-    "flex": 1,
     "width": {
      "fill": 0
     },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "tonal": true,
-    "label": "Pause"
+    "height": 48.0
    },
    "bind": {
-    "visible": "${= !paused}"
+    "props.title": "${today.name}",
+    "props.detail": "Round ${= round<1?1:round}/${today.rounds} · ${elapsed}s",
+    "visible": "${= phase==\"set\"||phase==\"work\"||phase==\"rest\"}"
    },
    "actions": [
     {
      "trigger": {
-      "type": "click"
+      "type": "event",
+      "event": "onPressed"
      },
      "actions": [
       {
        "type": "setVariable",
-       "variable": "paused",
-       "value": "${= true}"
+       "variable": "phase",
+       "value": "done"
       }
      ]
     }
    ]
   },
-  "filledButton3": {
-   "type": "filledButton",
+  "SessionDial1": {
+   "type": "SessionDial",
    "layout": {
-    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 428.0
+   },
+   "bind": {
+    "props.note": "${count} jumps",
+    "props.left": "${left}",
+    "props.phase": "${phase}",
+    "props.round": "${= round<1?1:round}",
+    "props.rounds": "${today.rounds}",
+    "props.work": "${today.work}",
+    "props.rest": "${today.rest}",
+    "props.paused": "${paused}",
+    "visible": "${= phase==\"set\"||phase==\"work\"||phase==\"rest\"}"
+   }
+  },
+  "TapPad1": {
+   "type": "TapPad",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 172.0
+   },
+   "props": {
+    "label": "Jumps",
+    "count": "count"
+   },
+   "bind": {
+    "visible": "${= (phase==\"set\"||phase==\"work\"||phase==\"rest\") && (phase==\"work\")}"
+   }
+  },
+  "SessionControls1": {
+   "type": "SessionControls",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "paused": "paused"
+   },
+   "bind": {
+    "visible": "${= phase==\"set\"||phase==\"work\"||phase==\"rest\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionSummary1": {
+   "type": "SessionSummary",
+   "layout": {
     "width": {
      "fill": 0
     },
@@ -639,19 +648,73 @@
      "hug": 0
     }
    },
+   "bind": {
+    "props.title": "${today.rounds} x ${today.work}s / ${today.rest}s",
+    "props.jumps": "${count}",
+    "props.best": "${= sessions[0].best}",
+    "props.rounds": "${round}",
+    "props.of": "${today.rounds}",
+    "props.seconds": "${elapsed}",
+    "props.streak": "${streak}",
+    "visible": "${= phase==\"done\"}"
+   }
+  },
+  "BigButton2": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
    "props": {
-    "label": "Finish"
+    "label": "History",
+    "icon": "bar_chart"
+   },
+   "bind": {
+    "visible": "${= phase==\"done\"}"
    },
    "actions": [
     {
      "trigger": {
-      "type": "click"
+      "type": "event",
+      "event": "onPressed"
      },
      "actions": [
       {
        "type": "componentEvent",
-       "event": "finish_session",
-       "value": "${count}"
+       "event": "open_history"
+      }
+     ]
+    }
+   ]
+  },
+  "BigButton3": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "Home",
+    "icon": "home",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= phase==\"done\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_home"
       }
      ]
     }
@@ -745,17 +808,17 @@
    {
     "name": "phase",
     "type": "text",
-    "value": "work"
-   },
-   {
-    "name": "round",
-    "type": "integer",
-    "value": 1
+    "value": "ready"
    },
    {
     "name": "left",
     "type": "integer",
-    "value": 40
+    "value": 3
+   },
+   {
+    "name": "round",
+    "type": "integer",
+    "value": 0
    },
    {
     "name": "count",
@@ -765,7 +828,17 @@
    {
     "name": "paused",
     "type": "boolean",
-    "value": true
+    "value": false
+   },
+   {
+    "name": "elapsed",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "saved",
+    "type": "boolean",
+    "value": false
    }
   ]
  }

@@ -1,29 +1,21 @@
 Screen
-  TopBar "Today's session" "{today.name}: {today.rounds} rounds, about {today.minutes} minutes" back:true -> emit open_home
-  Card gap:12
-    Text.eyebrow "{phase==\"work\" ? \"Jump\" : \"Rest\"}"
-    Text.display "{left}" size:96 weight:700
-    Text.bodySecondary "{phase==\"work\" ? \"Jump for \" + today.work + \" seconds, then rest.\" : \"Catch your breath. Next round starts soon.\"}"
-    Progress =frac
-    Text.strong "Round {round} of {today.rounds}"
-  Card gap:12
-    Text.sectionTitle "Jumps so far"
-    Text.numberLarge "{count}"
-    Row gap:8
-      Button.outline "-1" -> count=max(0,count-1)
-      Button "Tap for each jump" grow -> count=count+1
-  Row gap:12
-    Button.secondary "{paused ? \"Resume\" : \"Pause\"}" grow -> paused=!paused
-    Button "Finish" grow -> emit finish_session count
-  Card gap:4
-    Text.strong "How it works"
-    Text.bodySecondary "Work is when you jump. Rest is a short break. Each round is one of each. Stopping early is fine."
-
-state phase="work"
-state round=1
-state left=40
-state count=0
-state paused=false
-state frac=0
-every 1s when !paused && !done -> left=left>1?left-1:(phase=="work"?today.rest:today.work); frac=left>1?(phase=="work"?(today.work-left+1)/today.work:(today.rest-left+1)/today.rest):0; round=(left<=1&&phase=="rest"&&round<today.rounds)?round+1:round; phase=left<=1?(phase=="work"?"rest":"work"):phase
-state done=false
+  if phase=="ready"
+    SessionBar "Today's session" "{today.minutes} minutes, {today.rounds} rounds" -> emit open_home
+    Illustration role:hero w:200 h:200
+    Card gap:8
+      Text.title "What will happen"
+      Text "You jump for {today.work} seconds. That is your work time."
+      Text "Then you rest for {today.rest} seconds to catch your breath."
+      Text.muted "That repeats {today.rounds} times. About {today.minutes} minutes in all."
+    Text.muted "Short and steady is enough. You have done {sessionsThisWeek} of {weeklyGoal} sessions this week."
+    BigButton "Start session" icon:"play_arrow" -> phase="set"; left=3; round=0; count=0; elapsed=0; paused=false; saved=false; emit start_session
+  if phase=="set"||phase=="work"||phase=="rest"
+    SessionBar "{today.name}" "Round {round<1?1:round} of {today.rounds}" -> phase="done"
+    SessionDial "Jump while it is bright, rest while it is calm" left:=left phase:=phase round:=round<1?1:round rounds:=today.rounds work:=today.work rest:=today.rest paused:=paused workLabel:"Jump" restLabel:"Rest" setLabel:"Get ready" readyLabel:"Ready"
+    if phase=="work"
+      TapPad "Tap for every jump" =count hint:"Tap each time you jump"
+    SessionControls =paused pause:"Pause" resume:"Keep going" finish:"Finish" -> phase="done"
+  if phase=="done"
+    SessionSummary "Well done" "Next: a rest day, then come back for your next short session." jumps:=count best:=0 rounds:=round of:=today.rounds seconds:=elapsed streak:=streak streakLabel:"sessions in a row" unit:"jumps" eyebrow:"Session complete"
+    BigButton "Back to home" icon:"home" -> emit open_home
+    BigButton "See my progress" icon:"show_chart" tone:"quiet" -> emit open_history

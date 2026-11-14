@@ -1,28 +1,23 @@
-state phase="work"
-state round=1
-state left=0
-state count=0
-state paused=false
-state started=false
-
-every 1s when started && !paused -> left=left>1?left-1:0
-
 Screen
-  TopBar "Let's jump!" "Round {round} of {today.rounds}" back:true -> emit open_home
-  Card gap:8 fill:=phase=="work"?"#FFFFB300":"#FF4FC3F7"
-    Text.eyebrow "{phase=='work' ? 'JUMP!' : 'REST'}" color:#FF212121
-    Text.display "{started ? left : today.work}" size:96 weight:800 color:#FF212121
-    Text.body "{phase=='work' ? 'Go go go!' : 'Breathe. You rock!'}" color:#FF212121
-  Card gap:12
-    Text.eyebrow "Your jumps"
-    Text.display "{count}" size:80 weight:800
-    Button "Jump +1" -> count=count+1
-  if !started
-    Button "Start" -> started=true; left=today.work; phase="work"; round=1; emit start_session
-  if started
-    Row gap:12
-      Button.outline "{paused ? 'Resume' : 'Pause'}" -> paused=!paused
-      Button.secondary "Next" -> phase=(phase=="work")?"rest":"work"; left=(phase=="work")?today.rest:today.work; round=(phase=="rest")?round+1:round
-  Button.destructive "Finish" -> emit finish_session count
-  if count>=50
-    Text.sectionTitle "Wow! 50 jumps! Star jumper!" color:#FFF57C00
+  if phase=="ready"
+    TopBar "Let's jump!" "Today: {today.name}" back:true -> emit open_home
+    HeroSession "{today.name}" "{today.rounds} rounds. Jump {today.work}, rest {today.rest}." minutes:=today.minutes cta:"Start" audience:"kid" -> phase="set"; left=3; round=0; count=0; elapsed=0; paused=false
+    StreakFlame "days in a row" "Keep it going!" count:=streak
+  if phase=="set"
+    SessionBar "Get ready!" "{today.name}" -> phase="ready"
+    SessionDial "Here we go!" left:=left phase:="set" round:=round rounds:=today.rounds work:=today.work rest:=today.rest paused:=paused audience:"kid"
+    SessionControls =paused -> phase="done"
+  if phase=="work"
+    SessionBar "Jump!" "{today.name}" -> phase="done"
+    SessionDial "Jump jump jump!" left:=left phase:="work" round:=round rounds:=today.rounds work:=today.work rest:=today.rest paused:=paused audience:"kid"
+    TapPad "Tap each jump" =count
+    SessionControls =paused -> phase="done"
+  if phase=="rest"
+    SessionBar "Rest" "{today.name}" -> phase="done"
+    SessionDial "Breathe. Shake it out!" left:=left phase:="rest" round:=round rounds:=today.rounds work:=today.work rest:=today.rest paused:=paused audience:"kid"
+    TapPad "Missed some? Add them" =count
+    SessionControls =paused -> phase="done"
+  if phase=="done"
+    SessionSummary "You did it!" "Great job. See you next time!" jumps:=count best:=0 rounds:=round of:=today.rounds seconds:=elapsed streak:=streak streakLabel:"days in a row" audience:"kid"
+    BigButton "Home" icon:"home" -> emit open_home
+    BigButton "See my jumps" icon:"star" tone:"quiet" -> emit open_history

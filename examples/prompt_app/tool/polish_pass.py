@@ -43,7 +43,7 @@ def main():
         # Keep the grammar and the app's blocks; drop the long list of base controls.
         head, _, rest = system.partition('COMPONENTS')
         keep = ('Screen', 'TopBar', 'HeroSession', 'StreakFlame', 'ProgressGoal', 'WeekStrip', 'SectionTitle', 'SessionRow', 'ChartCard',
-                'StatTrio', 'RecordCard', 'EmptyState', 'Illustration')
+                'StatTrio', 'RecordCard', 'EmptyState', 'Illustration', 'SessionBar', 'SessionDial', 'TapPad', 'SessionControls', 'BigButton', 'SessionSummary')
         lines = rest.split('\n')
         comp = [l for l in lines if l.strip().split(' ')[0] in keep]
         tail = '\n'.join(lines[next((i for i, l in enumerate(lines) if l.startswith('FORMULAS') or l.startswith('BEYOND')), len(lines)):])
