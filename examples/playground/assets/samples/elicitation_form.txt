@@ -1,0 +1,46 @@
+state status="ask"
+state region=""
+state size="small"
+state backups=true
+Card gap:10
+  Row gap:10 top
+    Box w:30 h:30 radius:7 fill:#1A2563EB center middle
+      Icon "dns" {"props": {"size": 15, "color": "#FF2563EB"}}
+    Column gap:1 grow
+      Text.sectionTitle "Three details before I create the database"
+      Text.bodySecondary "create_database is paused until you answer"
+  if status=="ask"
+    Column gap:10
+      Input "Name" hint:"orders-prod" =name
+      Column gap:6
+        Text.fieldLabel "Region"
+        Select "Choose a region" items:["eu-west-1","us-east-1","ap-southeast-2"] =region
+      Column gap:6
+        Text.fieldLabel "Size"
+        SegmentedButton items:["small","medium","large"] =size
+        Text.caption "{size=="small" ? "2 vCPU, 4 GB, about $38 a month" : size=="medium" ? "4 vCPU, 16 GB, about $145 a month" : "8 vCPU, 32 GB, about $290 a month"}"
+      Checkbox "Daily backups, kept 14 days" =backups
+    Divider
+    Row between
+      Text.caption "{(name!=""?1:0)+(region!=""?1:0)+1} of 3 answered"
+      Row gap:6
+        Button.ghost "Cancel" -> status="cancelled"; emit cancel
+        Button "Continue" enabled:=name!="" && region!="" -> status="sent"; emit submit
+  if status=="sent"
+    Column fill:#FFF9FAFB radius:6 pad:10 gap:4 border:#FFE5E7EB
+      Row between
+        Text.bodySecondary "Name"
+        Text.strong "{name}"
+      Row between
+        Text.bodySecondary "Region"
+        Text.strong "{region}"
+      Row between
+        Text.bodySecondary "Size"
+        Text.strong "{size}{backups ? ", daily backups" : ""}"
+    Row gap:8
+      ActivityIndicator
+      Text.bodySecondary "Creating the database…"
+  if status=="cancelled"
+    Row gap:8
+      Icon "cancel" {"props": {"size": 16, "color": "#FF9CA3AF"}}
+      Text.bodySecondary "Cancelled. No database was created."

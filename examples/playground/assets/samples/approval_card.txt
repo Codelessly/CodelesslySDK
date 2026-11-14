@@ -1,0 +1,40 @@
+state status="request"
+Card gap:10
+  Row gap:10 top
+    Box w:30 h:30 radius:7 fill:#1ADC2626 center middle
+      Icon "delete" {"props": {"size": 15, "color": "#FFDC2626"}}
+    Column gap:1 grow
+      Text.sectionTitle "Delete 214 archived files?"
+      Text.bodySecondary "Shared Drive / Archive 2019 · 3.2 GB"
+  Text "This removes the files for everyone with access. It cannot be undone."
+  Column fill:#FFF9FAFB radius:6 pad:8 border:#FFE5E7EB
+    Text.mono "rm -r \"/Shared Drive/Archive 2019\""
+  Column gap:4
+    Row between
+      Text.bodySecondary "Files"
+      Text.strong "214"
+    Row between
+      Text.bodySecondary "Space freed"
+      Text.strong "3.2 GB"
+  Divider
+  if status=="request"
+    Row end gap:6
+      Button.ghost "Deny" -> status="denied"; emit deny
+      Button.outline "Always allow" -> status="running"; emit allowAlways
+      Button.destructive "Allow once" -> status="running"; emit allowOnce
+  if status=="running"
+    Row gap:8
+      ActivityIndicator
+      Text.bodySecondary "Deleting files…"
+      Spacer grow
+      Button.ghost "Mark done" -> status="done"
+  if status=="done"
+    Row gap:8
+      Icon "check_circle" {"props": {"size": 16, "color": "#FF16A34A"}}
+      Text.strong "Allowed once"
+      Text.bodySecondary "214 files deleted"
+  if status=="denied"
+    Row gap:8
+      Icon "cancel" {"props": {"size": 16, "color": "#FF9CA3AF"}}
+      Text.strong "Denied"
+      Text.bodySecondary "Nothing was deleted"
