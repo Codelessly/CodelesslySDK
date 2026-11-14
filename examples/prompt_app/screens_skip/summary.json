@@ -1,0 +1,92 @@
+[
+ {
+  "screen": "history.athlete",
+  "turns": 1,
+  "nodes": 9,
+  "lines": 7,
+  "outputTokensAll": 320,
+  "secondsAll": 2.5,
+  "firstTokenMs": 626,
+  "inputTokens": 4993
+ },
+ {
+  "screen": "history.beginner",
+  "turns": 1,
+  "nodes": 15,
+  "lines": 14,
+  "outputTokensAll": 496,
+  "secondsAll": 3.7,
+  "firstTokenMs": 701,
+  "inputTokens": 5015
+ },
+ {
+  "screen": "history.kid",
+  "turns": 1,
+  "nodes": 10,
+  "lines": 8,
+  "outputTokensAll": 306,
+  "secondsAll": 2.5,
+  "firstTokenMs": 635,
+  "inputTokens": 5024
+ },
+ {
+  "screen": "home.athlete",
+  "turns": 1,
+  "nodes": 13,
+  "lines": 11,
+  "outputTokensAll": 482,
+  "secondsAll": 3.8,
+  "firstTokenMs": 1069,
+  "inputTokens": 4990
+ },
+ {
+  "screen": "home.beginner",
+  "turns": 1,
+  "nodes": 10,
+  "lines": 9,
+  "outputTokensAll": 360,
+  "secondsAll": 3.1,
+  "firstTokenMs": 729,
+  "inputTokens": 5012
+ },
+ {
+  "screen": "home.kid",
+  "turns": 1,
+  "nodes": 11,
+  "lines": 10,
+  "outputTokensAll": 392,
+  "secondsAll": 3.2,
+  "firstTokenMs": 750,
+  "inputTokens": 5021
+ },
+ {
+  "screen": "session.athlete",
+  "turns": 2,
+  "nodes": 26,
+  "lines": 31,
+  "outputTokensAll": 1087,
+  "secondsAll": 6.7,
+  "firstTokenMs": 733,
+  "inputTokens": 5052
+ },
+ {
+  "screen": "session.beginner",
+  "turns": 1,
+  "nodes": 21,
+  "lines": 28,
+  "outputTokensAll": 638,
+  "secondsAll": 4.4,
+  "firstTokenMs": 659,
+  "inputTokens": 5074
+ },
+ {
+  "screen": "session.kid",
+  "turns": 2,
+  "nodes": 17,
+  "lines": 26,
+  "outputTokensAll": 1116,
+  "secondsAll": 8.0,
+  "firstTokenMs": 790,
+  "inputTokens": 5083
+ }
+]

@@ -1,0 +1,9 @@
+Screen
+  TopBar "Today" "Short and steady wins." eyebrow:"Skip"
+  HeroSession "Intervals" "8 rounds: jump for 40 seconds (work), then rest for 20 seconds. That's all." eyebrow:"Today's session" minutes:8 cta:"Start, 8 minutes" -> emit start_session
+  Row gap:12
+    StreakFlame "sessions in a row" "Nice, keep it going." count:=streak
+    ProgressGoal "This week" "{weeklyGoal-sessionsThisWeek} more to reach your goal" done:=sessionsThisWeek goal:=weeklyGoal
+  Text.bodySecondary "Short sessions count. Three a week is plenty."
+  SectionTitle "Your last session" action:"See all" -> emit open_history
+  SessionRow "{sessions[0].name}" "{sessions[0].date}, {sessions[0].minutes} min" value:=sessions[0].jumps unit:"jumps" share:=1 -> emit open_session sessions[0].date

@@ -2,9 +2,16 @@
   "id": "beginner",
   "designSystem": "ssui",
   "memory": {
-    "stated": {"goal": "get fitter, three short sessions a week", "experience": "started two weeks ago"},
+    "stated": {
+      "goal": "get fitter, three short sessions a week",
+      "experience": "started two weeks ago"
+    },
     "stage": "beginner",
     "tone": "encouraging and plain, no jargon",
-    "notes": ["Skipped two sessions after a hard one: keep sessions short and say how long they take.", "Does not know what an interval is: explain work and rest in a few words."]
-  }
+    "notes": [
+      "Skipped two sessions after a hard one: keep sessions short and say how long they take.",
+      "Does not know what an interval is: explain work and rest in a few words."
+    ]
+  },
+  "skipTheme": "default"
 }

@@ -1,0 +1,11 @@
+Screen
+  TopBar "Today" "Session {sessionsThisWeek}/{weeklyGoal} this week"
+  HeroSession "{today.name}" "{today.rounds} x {today.work}s work / {today.rest}s rest" minutes:"{today.minutes} min" cta:"Start" -> emit start_session
+  Row gap:12
+    StreakFlame "day streak" "" count:=streak
+    ProgressGoal "this week" "{weeklyGoal-sessionsThisWeek} left" done:=sessionsThisWeek goal:=weeklyGoal
+  ChartCard "Jumps per week" values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label) unit:"jumps" deltaLabel:"vs prior week"
+  StatTrio values:=[sum(sessions,s=>s.jumps),sum(sessions,s=>s.minutes),max(max(sessions[0].best,sessions[1].best),max(sessions[2].best,sessions[3].best))] labels:["jumps","minutes","best streak"] icons:["bolt","timer","emoji_events"]
+  SectionTitle "Recent" action:"History" -> emit open_history
+  each s in sessions
+    SessionRow "{s.name}" "{s.date} · {s.minutes} min · best {s.best}" value:=s.jumps unit:"jumps" -> emit open_session s.date

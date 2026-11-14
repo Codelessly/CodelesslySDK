@@ -2,9 +2,17 @@
   "id": "kid",
   "designSystem": "harbor",
   "memory": {
-    "stated": {"goal": "learn tricks and beat my own record", "experience": "age 9, jumps at school"},
+    "stated": {
+      "goal": "learn tricks and beat my own record",
+      "experience": "age 9, jumps at school"
+    },
     "stage": "beginner",
     "tone": "playful, short words, celebrate small wins",
-    "notes": ["Likes seeing the record and trying to beat it.", "Loses interest in numbers and charts: show few numbers, big."]
-  }
+    "notes": [
+      "Likes seeing the record and trying to beat it.",
+      "Loses interest in numbers and charts: show few numbers, big."
+    ]
+  },
+  "skipTheme": "pink",
+  "audience": "kid"
 }
