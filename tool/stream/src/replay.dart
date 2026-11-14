@@ -49,7 +49,8 @@ class ReplayArgs {
       this.frameMs,
       this.frames,
       this.designSystem,
-      this.dark = false});
+      this.dark = false,
+      this.dumpDocument = false});
   final String stream;
   final String out;
   final List<ui.Size> sizes;
@@ -62,6 +63,12 @@ class ReplayArgs {
 
   /// Whether the UI is shown in its theme's dark mode (light by default).
   final bool dark;
+
+  /// Whether to write the document the session held when the stream ended
+  /// (`document.json`, before any scripted interaction) and the state its
+  /// views showed (`state.json`: `UiSession.values`), next to the
+  /// metrics. Off by default.
+  final bool dumpDocument;
 
   /// Virtual ms between captures (null: the stream's length / [frames]).
   final int? frameMs;
@@ -386,6 +393,11 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     now += frameMs;
   }
   final result = await done;
+  if (args.dumpDocument) {
+    const enc = JsonEncoder.withIndent(' ');
+    File('${out.path}/document.json').writeAsStringSync(enc.convert(session.document.toJson()));
+    File('${out.path}/state.json').writeAsStringSync(enc.convert(jsonDecode(jsonEncode(session.values, toEncodable: (o) => '$o'))));
+  }
   final usage = ds == null ? null : _designSystemUsage(tester, session.document, ds);
   // What only layout can tell, after the last frame.
   final layout = session.layoutDiagnostics();

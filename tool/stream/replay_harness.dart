@@ -35,6 +35,7 @@ void main() {
           frames: int.tryParse(opt('--frames') ?? ''),
           designSystem: opt('--design-system'),
           dark: opt('--theme') == 'dark',
+          dumpDocument: lines.contains('--dump-document'),
         ));
     File('$argsFile.report').writeAsStringSync(const JsonEncoder.withIndent(' ').convert(metrics));
   }, timeout: const Timeout(Duration(minutes: 30)));

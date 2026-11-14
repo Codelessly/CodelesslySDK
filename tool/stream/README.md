@@ -11,7 +11,7 @@ tool/stream/run_all.sh                                      # every stream into 
 ```
 
 `replay.sh <stream.jsonl> --out <dir> [--sizes 390x844,1440x900] [--fonts dir]... [--frame-ms n | --frames n]
-[--no-video] [--design-system id|folder] [--theme light|dark]` replays the stream through `UiSession.applyStream` (the core catalog, `TrustProfile.agent`, the strict
+[--no-video] [--design-system id|folder] [--theme light|dark] [--dump-document]` replays the stream through `UiSession.applyStream` (the core catalog, `TrustProfile.agent`, the strict
 validator on each op) on a virtual clock, at each size, and writes `<dir>/<size>/`:
 
 | File | |
@@ -20,6 +20,7 @@ validator on each op) on a virtual clock, at each size, and writes `<dir>/<size>
 | `contact.png` | Frames at 5, 15, 30, 50, 75 and 100% of the time to complete, with the metrics in the title. |
 | `metrics.json` | Below. |
 | `frames.json` | The timeline: per frame its time, tokens and nodes. |
+| `document.json`, `state.json` | With `--dump-document`: the document the session held when the stream ended, and the values of its views' variables then (`UiSession.values`; a computed variable's value included). What to read when a frame shows something the stream does not explain. |
 
 A recording made with a design system (`examples/stream_chat/tool/record.dart --design-system`: its meta's
 `designSystem`) replays with it: `UiSession(designSystem:)`, so its components render as their definitions and its
