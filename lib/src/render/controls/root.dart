@@ -51,6 +51,17 @@ class RenderControlRoot extends RenderProxyBox {
 
   final List<RenderOverlayEntry> _overlay = [];
 
+  /// Whether the overlay entries are painted. A capture tool turns it off
+  /// to take the content alone (the slices of a full-page capture, where a
+  /// menu or a tooltip shows once, in the first window).
+  bool get paintsOverlay => _paintsOverlay;
+  bool _paintsOverlay = true;
+  set paintsOverlay(bool value) {
+    if (value == _paintsOverlay) return;
+    _paintsOverlay = value;
+    markNeedsPaint();
+  }
+
   /// The entries shown, bottom first.
   List<RenderOverlayEntry> get overlayEntries => List.unmodifiable(_overlay);
 
@@ -117,6 +128,7 @@ class RenderControlRoot extends RenderProxyBox {
   @override
   void paint(PaintingContext context, Offset offset) {
     super.paint(context, offset);
+    if (!paintsOverlay) return;
     for (final e in _overlay) {
       context.paintChild(e, offset + (e.parentData! as BoxParentData).offset);
     }
