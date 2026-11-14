@@ -1,0 +1,20 @@
+{
+ "screen": "session.beginner",
+ "model": "claude-sonnet-5-5",
+ "seconds": 9.7,
+ "critique": "the countdown sits on a plain white card, so it doesn't stand out. Two filled buttons (Tap and Finish) compete for primary. The \"How it works\" card and the repeated round and subtitle text add noise.",
+ "input_tokens": 5866,
+ "cache_creation_input_tokens": 0,
+ "cache_read_input_tokens": 0,
+ "cache_creation": {
+  "ephemeral_5m_input_tokens": 0,
+  "ephemeral_1h_input_tokens": 0
+ },
+ "output_tokens": 1330,
+ "output_tokens_details": {
+  "thinking_tokens": 608
+ },
+ "service_tier": "standard",
+ "inference_geo": "global",
+ "speed": "standard"
+}
