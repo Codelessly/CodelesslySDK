@@ -9,6 +9,7 @@ import 'dart:convert';
 
 import 'package:codelessly_api/core.dart';
 import 'package:codelessly_api/core.dart' as api show outline;
+import 'package:codelessly_api/notation.dart';
 import 'package:flutter/foundation.dart';
 
 import '../render/source.dart' show NodeSource;
@@ -242,6 +243,48 @@ class UiSession implements NodeSource {
     _revision.value = r.rev;
     if (notify && !_changes.isClosed) _changes.add(r);
   }
+
+  /// Applies a UI written in the compact notation
+  /// (`package:codelessly_api/notation.dart`: one node per line, nested by
+  /// indentation) as it arrives: each completed line becomes its edit
+  /// operations and is applied at once, so the UI paints line by line. The
+  /// rest is [applyStream]: one revision, one undo step, the same checks
+  /// and result. What the notation could not read is in [notationIssues].
+  Future<EditResult> applyNotation(
+    Stream<String> text, {
+    NotationOptions options = const NotationOptions(),
+    String author = 'agent',
+    void Function(StreamProgress progress)? onOp,
+  }) {
+    final notation = Catalog.run(catalog, () => NotationStream(catalog: catalog, options: options));
+    Stream<String> ops() async* {
+      yield '{"ops":[';
+      var first = true;
+      String encode(List<Json> ops) {
+        final b = StringBuffer();
+        for (final op in ops) {
+          if (!first) b.write(',');
+          first = false;
+          b.write(jsonEncode(op));
+        }
+        return b.toString();
+      }
+
+      await for (final chunk in text) {
+        final out = encode(Catalog.run(catalog, () => notation.add(chunk)));
+        if (out.isNotEmpty) yield out;
+      }
+      final out = encode(Catalog.run(catalog, notation.close));
+      if (out.isNotEmpty) yield out;
+      yield ']}';
+    }
+
+    return applyStream(ops(), author: author, onOp: onOp).whenComplete(() => _notationIssues = notation.issues);
+  }
+
+  /// What the last [applyNotation] could not read, by line.
+  List<NotationIssue> get notationIssues => _notationIssues;
+  List<NotationIssue> _notationIssues = const [];
 
   /// Applies a streamed `ui_apply` tool input: [deltas] are the raw text
   /// chunks as the model's API delivers them. Each op is applied the moment
