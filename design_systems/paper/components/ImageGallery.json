@@ -1,0 +1,254 @@
+{
+ "schema": 3,
+ "id": "ImageGallery",
+ "roots": [
+  "gallery"
+ ],
+ "widget": {
+  "type": "ImageGallery",
+  "doc": "Pictures as a grid of square tiles with their titles over a fade at the foot. Fires onSelected with the picture's address.",
+  "props": [
+   {
+    "key": "images",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The pictures' addresses.",
+    "required": true
+   },
+   {
+    "key": "titles",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One title per picture (empty: none)."
+   },
+   {
+    "key": "columns",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 3,
+    "doc": "How many across."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Three",
+   "size": [
+    340,
+    108
+   ],
+   "props": {
+    "images": [
+     "a",
+     "b",
+     "c"
+    ],
+    "titles": [
+     "Harbor",
+     "Studio",
+     "Field"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "gallery": {
+   "type": "gridView",
+   "children": [
+    "tile"
+   ],
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisSpacing": 16,
+    "crossAxisSpacing": 16,
+    "childAspectRatio": 1,
+    "physics": "never",
+    "alwaysScroll": false
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 108
+    }
+   },
+   "bind": {
+    "data": "${props.images}",
+    "props.crossAxisCount": "${= max(1, props.columns)}"
+   }
+  },
+  "tile": {
+   "type": "stack",
+   "children": [
+    "fade",
+    "title"
+   ],
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "fill": 100
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "",
+       "fit": "cover"
+      },
+      "visible": false
+     }
+    ],
+    "radius": 3,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.fills[1].image.url": "${item}",
+    "decoration.fills[1].visible": "${= item != ''}"
+   },
+   "states": {
+    "hovered": {
+     "tile": {
+      "decoration": {
+       "effects": [
+        {
+         "type": "dropShadow",
+         "color": "#1A000000",
+         "offset": [
+          0,
+          2
+         ],
+         "blurRadius": 4,
+         "spreadRadius": -1
+        },
+        {
+         "type": "dropShadow",
+         "color": "#0D000000",
+         "offset": [
+          0,
+          1
+         ],
+         "blurRadius": 2
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "fade": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": 56,
+    "y": {
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": [
+       0,
+       1
+      ],
+      "end": [
+       0,
+       -1
+      ],
+      "stops": [
+       {
+        "color": "#99000000",
+        "position": 0
+       },
+       {
+        "color": "#00000000",
+        "position": 1
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.titles) > index && props.titles[index] != ''}"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.titles) > index ? props.titles[index] : ''}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "#FFFFFFFF",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 76
+    },
+    "height": {
+     "hug": 18
+    },
+    "x": {
+     "start": 12,
+     "end": 12
+    },
+    "y": {
+     "end": 12
+    }
+   }
+  }
+ }
+}

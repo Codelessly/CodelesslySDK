@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 138. Still to rebuild: 26.**
+**Here: 143. Still to rebuild: 21.**
 
 ## Here
 
@@ -41,6 +41,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Combobox | Combobox |  |
 | CommandPalette | CommandPalette |  |
 | CompactAppBar | CompactAppBar |  |
+| CompactSuggestionReviewItem | CompactSuggestionReviewItem |  |
 | ConnectionStatus | ConnectionStatus |  |
 | ContextMenu | ContextMenu |  |
 | CopyButton | CopyButton |  |
@@ -59,6 +60,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Field | Field |  |
 | FileListItem | FileListItem |  |
 | FileMetadataCard | FileMetadataCard |  |
+| FileTree | FileTree |  |
 | FileUploader | FileUploader |  |
 | FilterLegend | FilterLegend |  |
 | FloatingActionButton |  | floatingActionButton |
@@ -70,6 +72,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | IconButton | IconButton | iconButton |
 | IconSegmentedControl | IconSegmentedControl |  |
 | IconSelect | IconSelect |  |
+| ImageGallery | ImageGallery |  |
 | ImageUpload | ImageUpload |  |
 | InlineStat | InlineStat |  |
 | LoadingSpinner |  | activityIndicator |
@@ -80,6 +83,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | ModelAvatarStack | ModelAvatarStack |  |
 | ModelSelectMenu | ModelSelectMenu |  |
 | NavigationMenu | NavigationMenu |  |
+| NestedTaskLedger | NestedTaskLedger |  |
 | NotePopover | NotePopover |  |
 | NotificationBadge | NotificationBadge |  |
 | NumberInput | NumberInput |  |
@@ -130,6 +134,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | StatusIndicator | StatusIndicator |  |
 | StepIndicator | StepIndicator |  |
 | Stepper | Stepper |  |
+| SuggestionReviewItem | SuggestionReviewItem |  |
 | Switch | Switch | switch |
 | TabBarWithBadges | TabBarWithBadges |  |
 | Table |  | tableView |
@@ -176,6 +181,6 @@ TabOverflowScroll, SidebarTogglePattern, Toolbar, CanvasShell, ResizableRow
 
 AddContextMenu, FileTreeContextMenu, ProjectSelector, VariableContractHover
 
-### Data and specialized (10)
+### Data and specialized (5)
 
-FileTree, DateTimelineAxis, ImageGallery, NestedTaskLedger, ReorderableList, ReorderGhost, SuggestionReviewItem, CompactSuggestionReviewItem, SuggestionActionObject, VariableContractList
+DateTimelineAxis, ReorderableList, ReorderGhost, SuggestionActionObject, VariableContractList
