@@ -116,6 +116,38 @@ void main() {
     });
   });
 
+  group('full-page stitching', () {
+    const site = 'test/tool/fixtures/fullpage';
+    RenderArgs page(List<Step> steps, String label) =>
+        RenderArgs(inputs: [site], out: out.path, sizes: const [Size(390, 600)], steps: steps, fullPage: true, label: label);
+
+    testWidgets('a header that shrinks once the page scrolls leaves no seam: every band below the first window is whole', (tester) async {
+      final report = await runRender(tester, page(const [], 'plain'));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final p = await pixelsOf(tester, report.images.single);
+      // Four 400 px bands, dark and light by turn: below the first window
+      // each one whole (not one cut short and the next doubled at a seam).
+      final light = runsOf(rowsOf(p, 300, 0x606060));
+      expect(light.map((r) => r.$2), [400, 400], reason: 'light bands at $light');
+      expect(runsOf(rowsOf(p, 300, 0x202020)).last.$2, 400);
+    });
+
+    testWidgets('an open dropdown menu is drawn once, in the first window, not again in every slice', (tester) async {
+      final closed = await runRender(tester, page(const [], 'closed'));
+      final open = await runRender(tester, page(const [Step('tap', 'pick')], 'open'));
+      expect(open.errors, 0, reason: '${open.diagnostics}');
+      final a = await pixelsOf(tester, closed.images.single), b = await pixelsOf(tester, open.images.single);
+      expect(b.height, a.height);
+      var differ = 0;
+      for (var y = 600; y < a.height; y++) {
+        for (var x = 0; x < 390; x += 3) {
+          if (rgbAt(a, x, y) != rgbAt(b, x, y)) differ++;
+        }
+      }
+      expect(differ, 0, reason: 'below the first window the page is as without the menu');
+    });
+  });
+
   group('--navigate with route parameters', () {
     for (final target in ['detail?id=42', '/detail?id=42', 'Detail?id=42']) {
       testWidgets('--navigate $target opens the screen with id=42 as \${route.id}', (tester) async {
@@ -224,6 +256,31 @@ void main() {
       expect(await flag(tester, report.images.firstWhere((i) => i.contains('390x844')), 'fMenu'), 0x00FF00);
     });
 
+    testWidgets('a step on a component\'s node (by its path) hidden at one width is skipped there with a note, not failed', (tester) async {
+      final report = await runRender(tester, steps(const [Step('tap', 'footer/narrowOnly')], sizes: const [Size(390, 844), Size(1440, 900)]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final note = report.diagnostics.single;
+      expect(note['size'], '1440x900');
+      expect(note['code'], 'step_skipped', reason: 'a skip, not a failed interaction');
+      expect(note['message'], contains('--tap footer/narrowOnly (hidden at this width)'));
+    });
+
+    testWidgets('a hover step at several sizes moves one mouse per size and captures each', (tester) async {
+      final report = await runRender(tester,
+          steps(const [Step('hover', 'slider'), Step('hover', 'footer/saved')], sizes: const [Size(390, 844), Size(834, 1112), Size(1440, 900)]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(report.images, hasLength(3));
+    });
+
+    testWidgets('--type names a field by an id a component\'s text shares: the one with a text field is typed into', (tester) async {
+      var report = await runRender(tester, steps(const [Step('type', 'email', 'a@b.co')]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      // A tap has no such tie-break: both are named, as paths to write.
+      report = await runRender(tester, steps(const [Step('tap', 'email')]));
+      final failed = report.diagnostics.where((d) => d['code'] == 'interaction_failed').single;
+      expect(failed['message'], allOf(contains('page/email'), contains('footer/email')));
+    });
+
     testWidgets('typing into a field and then tapping a button that removes the form leaves no exception', (tester) async {
       final report = await runRender(tester, steps(const [Step('type', 'email', 'a@b.co'), Step('tap', 'send')]));
       expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
@@ -286,5 +343,88 @@ void main() {
     expect(unknown.first['message'], allOf(contains('No screen "about": 3 links'), contains('"pages"')));
     expect(unknown.first['count'], 3);
     expect(unknown.last['message'], startsWith('No screen "contact": "to" is a canvas id'));
+  });
+
+  testWidgets('pages listed in site.json but not written yet are one warning per file, not unknown_screen errors per link', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/unwritten'], out: out.path, validateOnly: true));
+    final notWritten = report.diagnostics.where((d) => d['code'] == 'page_not_written').toList();
+    expect(notWritten.map((d) => d['file']), ['about.json', 'team.json'], reason: '${report.diagnostics}');
+    expect(notWritten.map((d) => d['severity']).toSet(), {'warning'});
+    expect(notWritten.first['message'], allOf(contains('listed in site.json, file not written yet'), contains('3 links')));
+    // A link to a screen no listed file would be is still an error.
+    final unknown = report.diagnostics.where((d) => d['code'] == 'unknown_screen').toList();
+    expect(unknown.map((d) => d['message']), [startsWith('No screen "contact"')]);
+  });
+
+  testWidgets('a navigate whose "to" is built by a binding goes to the screen it names', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/navexpr'], out: out.path, screens: const ['home'],
+        // The wait: in a process that rendered before, loading the screen
+        // waits out its 2 s timeout (font loads begun under an earlier
+        // test's clock never end under this one).
+        sizes: const [Size(390, 400)], steps: const [Step('tap', 'result#1'), Step('wait', '2500')], dumpLayout: true));
+    expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+    final boxes = jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
+    expect(boxes.cast<Map>().map((b) => b['id']), contains('changelogTitle'), reason: 'the second result names changelog');
+  });
+
+  testWidgets('a canvas opened as a modal takes the size its media rules give it at the screen\'s width', (tester) async {
+    Future<Map> searchBox(Size size) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/modalmedia'], out: out.path, screens: const ['home'],
+          sizes: [size], steps: const [Step('tap', 'open')], dumpLayout: true, label: 'open'));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final boxes = jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
+      return boxes.cast<Map>().firstWhere((b) => b['id'] == 'searchBox');
+    }
+
+    final phone = await searchBox(const Size(390, 844));
+    expect([phone['w'], phone['h']], [360, 780], reason: 'the phone patch: $phone');
+    final desktop = await searchBox(const Size(1440, 900));
+    expect([desktop['w'], desktop['h']], [620, 650], reason: 'the design size: $desktop');
+  });
+
+  testWidgets('setVariable with op update and an index replaces that list line, as a quantity stepper does', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/listupdate'], out: out.path,
+        sizes: const [Size(390, 300)], steps: const [Step('tap', 'plus#1'), Step('tap', 'plus#1')], dumpLayout: true));
+    expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+    final boxes = (jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List).cast<Map>();
+    final bars = boxes.where((b) => b['id'] == 'qtyBar').map((b) => b['w']).toList();
+    expect(bars, [20, 80], reason: 'the second line went from 2 to 4; the first is as it was');
+  });
+
+  testWidgets('an image path is relative to the site folder in components too; one written from the component\'s file is named with the fix', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/compimage'], out: out.path, sizes: const [Size(390, 200)]));
+    final failed = report.diagnostics.where((d) => d['code'] == 'image_failed').toList();
+    expect(failed, hasLength(1), reason: '${report.diagnostics}');
+    expect(failed.single['message'], allOf(contains('relative to the site folder'), contains('"images/dot.svg"')));
+  });
+
+  testWidgets('a fixed-height card whose content outgrows it in one copy says what it needs and what to change', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/cardoverflow'], out: out.path, sizes: const [Size(390, 400)]));
+    final overflow = report.diagnostics.lastWhere((d) => d['code'] == 'render_exception', orElse: () => const {});
+    expect(overflow['message'], allOf(
+      contains('"dish#1"'),
+      contains('height is fixed at 60'),
+      contains('needs 92'),
+      contains('dishName'),
+      contains('{"hug": 60}'),
+    ), reason: '${report.diagnostics}');
+  });
+
+  testWidgets('a grid with fillGaps places a later small item in the hole an earlier span left (grid-auto-flow: dense)', (tester) async {
+    Future<List<Map>> cards(bool dense) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/densegrid'], out: out.path, sizes: const [Size(390, 400)],
+          steps: [Step('set', 'dense', '$dense')], dumpLayout: true, label: 'dense-$dense'));
+      expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+      final boxes = (jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List).cast<Map>();
+      return boxes.where((b) => b['id'] == 'card').toList();
+    }
+
+    // Spans 2, 2, 1 in three columns: sparse puts the 1 after the second 2
+    // (row 2); dense puts it in the first row's free cell.
+    final sparse = await cards(false);
+    expect(sparse.map((b) => b['y']), [0, 60, 60]);
+    final dense = await cards(true);
+    expect(dense.map((b) => b['y']), [0, 60, 0]);
+    expect(dense.last['x'], 260);
   });
 }

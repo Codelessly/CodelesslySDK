@@ -1,0 +1,14 @@
+{
+  "schema": 3,
+  "id": "grid",
+  "roots": ["grid"],
+  "variables": {"grid": [{"name": "dense", "type": "boolean", "value": false},
+    {"name": "cards", "type": "list", "value": [{"id": "a", "span": 2}, {"id": "b", "span": 2}, {"id": "c", "span": 1}]}]},
+  "nodes": {
+    "grid": {"type": "canvas", "slots": {"body": "cardGrid"}, "layout": {"width": 390, "height": 400}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "cardGrid": {"type": "gridView", "children": ["card"], "layout": {"width": {"fill": 390}, "height": {"fill": 400}},
+      "props": {"crossAxisCount": 3, "mainAxisExtent": 60}, "bind": {"data": "${cards}", "props.fillGaps": "${dense}"}},
+    "card": {"type": "box", "layout": {"width": {"fill": 130}, "height": {"fill": 60}}, "decoration": {"fills": [{"color": "#FF2255FF"}]},
+      "bind": {"layout.columnSpan": "${item.span}"}}
+  }
+}
