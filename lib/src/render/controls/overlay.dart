@@ -173,6 +173,19 @@ class RenderTooltipRegion extends RenderMouseRegion {
     b.dispose();
   }
 
+  /// The pointer is over it wherever it is inside (so it hovers), and it is
+  /// hit exactly where what it wraps is: a tap goes on to the button under
+  /// it and to the reactions around it. (A mouse region that is not opaque
+  /// answers "not hit" even when its child was, which hid the node from
+  /// every layer above.)
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (!size.contains(position)) return false;
+    final hit = hitTestChildren(result, position: position);
+    result.add(BoxHitTestEntry(this, position));
+    return hit;
+  }
+
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
     if (event is PointerDownEvent) hide();
