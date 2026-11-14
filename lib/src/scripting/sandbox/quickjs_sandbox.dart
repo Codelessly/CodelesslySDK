@@ -118,7 +118,8 @@ class QuickJsLibrary {
     }
     throw ScriptEngineUnavailable(
       'The script engine is missing. Add the codelessly_quickjs package to the app '
-      '(flutter pub add codelessly_quickjs) to run scripts on this platform.'
+      '(flutter pub add codelessly_quickjs) to run scripts on this platform. '
+      'In the SDK\'s own tools (tool/render, tool/stream), build it once with tool/build_quickjs.sh.'
       '${errors.isEmpty ? '' : ' (${errors.join('; ')})'}',
     );
   }

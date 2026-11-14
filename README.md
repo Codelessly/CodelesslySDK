@@ -245,8 +245,10 @@ A layout is data, so an agent can write one. Four things in this repository are 
     TrialBanner "7 days left in your trial" -> emit upgrade
   ```
 
-  `dart run tool/notation/expand.dart <file.txt> --design-system design_systems/ssui` turns that into a layout
-  document, and says on the line what a component does not take.
+  `tool/notation/notation.sh expand <file.txt> --design-system design_systems/ssui` turns that into a layout
+  document, and says on the line what a component does not take; `tool/notation/notation.sh prompt` prints what a
+  model is told to write it. The script uses the codelessly_api checked out beside this repository
+  (`../CodelesslyAPI`, its master branch): the notation is newer than the published package.
 - **A render tool** ([`tool/render`](https://github.com/Codelessly/CodelesslySDK/tree/master/tool/render)). It
   validates a document, draws it at the sizes asked for, and drives it (`--tap`, `--type`, `--drag`, `--scroll`), so
   what was generated can be checked without an app.

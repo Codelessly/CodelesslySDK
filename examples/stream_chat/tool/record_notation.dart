@@ -10,7 +10,9 @@
 //
 // With --design-system <folder> (a folder holding design_system.json), the
 // prompt also lists that design system's components and the answer may call
-// them by name; --components A,B,C narrows the list.
+// them by name; --components A,B,C narrows the list. --brief-file <file>
+// gives a brief of your own (--ui then only names the recording), and
+// --frame says what the answer is ("a phone screen 390 wide").
 //
 // The key is read from the environment only and never written anywhere.
 import 'dart:async';
@@ -34,11 +36,15 @@ Future<void> main(List<String> args) async {
     exit(2);
   }
   final ui = opt('--ui') ?? 'approval';
-  final brief = kBriefs[ui];
+  // --brief-file <file>: the brief is that file's text, and --ui only names
+  // the recording. --frame: what the answer is to be (a card by default).
+  final briefFile = opt('--brief-file');
+  final Brief? brief = briefFile != null ? (kind: 'page', prompt: File(briefFile).readAsStringSync().trim(), followup: null) : kBriefs[ui];
   if (brief == null) {
     stderr.writeln('No brief "$ui". Briefs: ${kBriefs.keys.join(', ')}');
     exit(2);
   }
+  final frame = opt('--frame') ?? 'an inline card 390 wide';
   final model = opt('--model') ?? 'claude-haiku-5-5';
   final out = opt('--out') ?? 'recordings/$ui@$model.notation.jsonl';
   final retries = int.tryParse(opt('--retries') ?? '') ?? 1;
@@ -59,7 +65,7 @@ Future<void> main(List<String> args) async {
   final options = ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds);
   final only = opt('--components')?.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toSet();
   final system = Catalog.run(catalog, () => notationPrompt(catalog: catalog, options: options, designSystem: ds, only: only));
-  final user = '${brief.prompt}\n\n(Answer with the notation only: an inline card 390 wide.)';
+  final user = '${brief.prompt}\n\n(Answer with the notation only: $frame.)';
   final messages = <Map<String, Object?>>[
     {'role': 'user', 'content': user},
   ];
