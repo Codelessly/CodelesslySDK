@@ -12,6 +12,7 @@ import 'package:flutter/widgets.dart' show FocusNode;
 import '../../render/node_tree.dart';
 import '../../render/recipe.dart';
 import '../../render/source.dart';
+import '../expressions/bindings.dart' show ProvidedItem;
 
 /// One validating field: Flutter's `FormFieldState`.
 class FormFieldEntry {
@@ -67,6 +68,31 @@ class FormRegistry {
     return null;
   }
 
+  /// The instance form [form] is shown in, for a node shown in [instance]
+  /// inside it: the items of a list inside the form (or of the form itself,
+  /// when it is the list) are the form's, as a Form's fields are however
+  /// deep its builders put them; a form a list repeats is its item's.
+  static Object? formInstanceOf(NodeSource source, String form, Object? instance) {
+    bool inside(String id) {
+      for (String? at = id; at != null; at = source.parentOf(at)) {
+        if (at == form) return true;
+      }
+      return false;
+    }
+
+    var at = instance;
+    while (at is ProvidedItem && inside(at.owner)) {
+      at = at.outer;
+    }
+    return at;
+  }
+
+  /// The form instance (form id, instance) the field at [box] belongs to.
+  static (String, Object?)? _formOfBox(NodeBuilder box) {
+    final form = formOf(box.source, box.id);
+    return form == null ? null : (form, formInstanceOf(box.source, form, box.instance));
+  }
+
   /// The form's own autovalidate mode for the field at [box].
   static AutovalidateMode formModeOf(NodeBuilder box) {
     final form = formOf(box.source, box.id);
@@ -75,12 +101,16 @@ class FormRegistry {
         : box.source.node(form)?.behaviors.form?.autovalidateMode ?? AutovalidateMode.disabled;
   }
 
-  /// The fields of form [form] (null: every field of the tree), in the order
+  /// The fields of form [form] (null: every field of the tree) shown in
+  /// [instance] ([anyInstance]: every instance of the form), in the order
   /// they show, top to bottom, then start to end.
-  List<FormFieldEntry> fieldsOf(String? form) {
+  List<FormFieldEntry> fieldsOf(String? form, {Object? instance = anyInstance}) {
     final out = [
       for (final e in _fields.values)
-        if (form == null || formOf(e.box.source, e.box.id) == form) e,
+        if (form == null ||
+            (formOf(e.box.source, e.box.id) == form &&
+                (identical(instance, anyInstance) || formInstanceOf(e.box.source, form, e.box.instance) == instance)))
+          e,
     ];
     Offset at(FormFieldEntry e) {
       if (e.box case final RenderBox box when box.attached) return box.localToGlobal(Offset.zero);
@@ -95,22 +125,25 @@ class FormRegistry {
     return out;
   }
 
-  /// Flutter's `FormState.validate()` on form [form] (null: every field):
-  /// each field shows its validator's error, the first invalid one takes
-  /// the focus when [focusFirstError]. Whether all are valid.
-  bool validate(String? form, {bool focusFirstError = true}) {
+  /// Stands for every instance of a form ([fieldsOf], [validate]).
+  static const Object anyInstance = _AnyInstance();
+
+  /// Flutter's `FormState.validate()` on form [form] (null: every field)
+  /// shown in [instance] ([anyInstance]: every instance of it): each field
+  /// shows its validator's error, the first invalid one takes the focus
+  /// when [focusFirstError]. Whether all are valid.
+  bool validate(String? form, {Object? instance = anyInstance, bool focusFirstError = true}) {
     FormFieldEntry? first;
-    for (final f in fieldsOf(form)) {
+    for (final f in fieldsOf(form, instance: instance)) {
       final error = f.check();
       f.shown = error;
       f.show(error);
       if (error != null) first ??= f;
     }
     if (focusFirstError) first?.focusNode.requestFocus();
-    if (form != null) _publishSoon(form);
+    // Every form instance a field belongs to publishes again.
     for (final f in _fields.values) {
-      final own = formOf(f.box.source, f.box.id);
-      if (own != null && own != form) _publishSoon(own);
+      if (_formOfBox(f.box) case (final own, final at)) _publishSoon(own, f.box.source, at);
     }
     return first == null;
   }
@@ -118,21 +151,20 @@ class FormRegistry {
   /// A field at [box] changed its value or the error it shows: its form
   /// publishes `form` again (after the frame, never while building).
   void changed(NodeBuilder box) {
-    final form = formOf(box.source, box.id);
-    if (form != null) _publishSoon(form, source: box.source, instance: box.instance);
+    if (_formOfBox(box) case (final form, final at)) _publishSoon(form, box.source, at);
   }
 
-  final Map<String, (NodeSource?, Object?)> _pending = {};
+  final Map<(String, Object?), NodeSource> _pending = {};
 
-  void _publishSoon(String form, {NodeSource? source, Object? instance}) {
-    final had = _pending.containsKey(form);
-    final was = _pending[form];
-    _pending[form] = (source ?? was?.$1, instance ?? was?.$2);
+  void _publishSoon(String form, NodeSource source, Object? instance) {
+    final key = (form, instance);
+    final had = _pending.containsKey(key);
+    _pending[key] = source;
     if (had) return;
     void publish() {
-      final p = _pending.remove(form);
+      final p = _pending.remove(key);
       if (p == null) return;
-      _publish(form, p.$1, p.$2);
+      _publish(form, p, instance);
     }
 
     if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.idle) {
@@ -143,11 +175,9 @@ class FormRegistry {
     }
   }
 
-  void _publish(String form, NodeSource? source, Object? instance) {
-    final fields = fieldsOf(form);
-    final src = source ?? (fields.isEmpty ? null : fields.first.box.source);
-    if (src == null) return;
-    tree.bindings?.publish(src, form, instance, 'form', {
+  void _publish(String form, NodeSource source, Object? instance) {
+    final fields = fieldsOf(form, instance: instance);
+    tree.bindings?.publish(source, form, instance, 'form', {
       'valid': fields.every((f) => f.check() == null),
       'errors': [
         for (final f in fields)
@@ -155,4 +185,8 @@ class FormRegistry {
       ],
     });
   }
+}
+
+final class _AnyInstance {
+  const _AnyInstance();
 }

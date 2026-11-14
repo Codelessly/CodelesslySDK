@@ -199,6 +199,69 @@ void main() {
     expect(Focus.of(tester.element(find.byType(Radio<String>).at(1))).hasFocus, isTrue, reason: 'the focus moves with the choice');
   });
 
+  testWidgets('fields a list repeats inside a form belong to it: validating checks each, and the form counts them', (tester) async {
+    final s = await harness.show(tester, {
+      'col': {
+        'type': 'column',
+        'children': ['guests', 'send', 'summary'],
+        'layout': {'width': 320, 'height': {'hug': 400}},
+        'form': {},
+      },
+      'guests': {
+        'type': 'listView',
+        'children': ['guest'],
+        'layout': {'width': 320, 'height': {'hug': 200}},
+        'bind': {'data': r'${= ["a", "b", "c"]}'},
+      },
+      'guest': _field(_nameValidator, label: 'Guest'),
+      'send': _form()['send']!,
+      'summary': _form()['summary']!,
+    }, variables: [harness.v('sent', false, VariableType.boolean)]);
+    await tester.pump();
+    expect(find.byType(EditableText), findsNWidgets(3));
+    await tester.tapAt(s.center('send'));
+    await tester.pumpAndSettle();
+    expect(find.text('Enter your name.'), findsNWidgets(3));
+    expect(harness.textOf(s.tree, 'summary'), '3 to fix');
+    expect(s['sent'], false);
+    // The form follows its fields as they change, without validating again.
+    for (var i = 0; i < 3; i++) {
+      await tester.enterText(_editable(i), 'Guest $i');
+      await tester.pumpAndSettle();
+    }
+    expect(harness.textOf(s.tree, 'summary'), 'ok');
+    await tester.tapAt(s.center('send'));
+    await tester.pumpAndSettle();
+    expect(s['sent'], true);
+  });
+
+  testWidgets('a form a list repeats holds only the fields of its own item', (tester) async {
+    final s = await harness.show(tester, {
+      'col': {'type': 'column', 'children': ['cards'], 'layout': {'width': 320, 'height': {'hug': 400}}},
+      'cards': {
+        'type': 'listView',
+        'children': ['card'],
+        'layout': {'width': 320, 'height': {'hug': 300}},
+        'bind': {'data': r'${= ["a", "b"]}'},
+      },
+      'card': {
+        'type': 'column',
+        'children': ['name', 'send'],
+        'layout': {'width': 320, 'height': {'hug': 120}},
+        'form': {},
+      },
+      'name': _field(_nameValidator, label: 'Name'),
+      'send': _form()['send']!,
+    }, variables: [harness.v('sent', false, VariableType.boolean)]);
+    await tester.pump();
+    final sends = s.tree.boxesOf('send').toList();
+    expect(sends, hasLength(2));
+    final first = sends.first.localToGlobal(sends.first.size.center(Offset.zero));
+    await tester.tapAt(first);
+    await tester.pumpAndSettle();
+    expect(find.text('Enter your name.'), findsOneWidget, reason: 'only the first card\'s field is checked');
+  });
+
   testWidgets('an outlined field that sets no padding keeps its text off the border, as Flutter does', (tester) async {
     final s = await harness.show(tester, {
       'col': {'type': 'column', 'children': ['email'], 'layout': {'width': 320, 'height': {'hug': 100}}},
