@@ -1753,7 +1753,7 @@ class _TimePickerIslandState extends State<_TimePickerIsland> {
     }
     final time = _time(picked ?? value) ?? const TimeOfDay(hour: 0, minute: 0);
     final help = n.prop(PickerFieldProps.helpText);
-    final use24h = n.prop(TimePickerProps.use24h);
+    final use24h = n.prop(TimePickerProps.alwaysUse24HourFormat);
     return _pickerFace(
       context,
       n,
