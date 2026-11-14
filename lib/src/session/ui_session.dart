@@ -9,7 +9,6 @@ import 'dart:convert';
 
 import 'package:codelessly_api/core.dart';
 import 'package:codelessly_api/core.dart' as api show outline;
-import 'package:codelessly_api/notation.dart';
 import 'package:flutter/foundation.dart';
 
 import '../render/source.dart' show NodeSource;
