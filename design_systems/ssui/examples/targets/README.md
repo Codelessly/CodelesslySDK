@@ -88,7 +88,6 @@ dart run tool/notation/expand.dart design_systems/ssui/examples/targets/handoff.
 
 and render the document with `tool/render/render.sh` from a site whose `site.json` names the design system.
 
-Not written here, on purpose: Mermaid diagrams, diagrams, flow graphs, math, the two maps and the voice orb. Each
-is a domain with its own language and a dedicated renderer (Mermaid's syntax, TeX, map tiles, an audio-reactive
-animation); boxes and arrows composed in the notation do not reach that quality. They are to be node types backed
-by those renderers (codelessly_api `docs/design/14-inline-layout-targets.md`).
+Not here, and not supported: Mermaid diagrams, diagrams, flow graphs, math, maps and the voice orb. Each is a
+domain with its own language and renderer elsewhere; they are dropped as card types (codelessly_api
+`docs/design/14-inline-layout-targets.md`).
