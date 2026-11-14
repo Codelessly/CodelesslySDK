@@ -1,0 +1,362 @@
+{
+ "schema": 3,
+ "id": "ModelSelectMenu",
+ "roots": [
+  "menu"
+ ],
+ "widget": {
+  "type": "ModelSelectMenu",
+  "doc": "The menu that picks which models to use, several at once: each row ends in a checkbox. The chosen names are kept in your list variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "models",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Claude",
+     "Gemini",
+     "Local"
+    ],
+    "doc": "The models' names.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "list",
+      "flutter": "List<String>",
+      "item": {
+       "kind": "string",
+       "flutter": "String"
+      }
+     }
+    },
+    "default": "",
+    "doc": "The name of your list variable holding the chosen names."
+   },
+   {
+    "key": "heading",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Generate with",
+    "doc": "The small heading (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    220,
+    110
+   ],
+   "props": {
+    "value": [
+     "Claude"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "menu": {
+   "type": "column",
+   "children": [
+    "heading",
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 110
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "heading": {
+   "type": "row",
+   "children": [
+    "headingText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 218
+    },
+    "height": {
+     "hug": 25
+    },
+    "padding": [
+     8,
+     6,
+     8,
+     6
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "visible": "${= props.heading != ''}"
+   }
+  },
+  "headingText": {
+   "type": "text",
+   "props": {
+    "text": "${props.heading}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "row"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 218
+    },
+    "height": {
+     "hug": 84
+    }
+   },
+   "bind": {
+    "data": "${props.models}"
+   }
+  },
+  "row": {
+   "type": "row",
+   "children": [
+    "name",
+    "box"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 218
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     8,
+     6,
+     8,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "selected": "${= contains(props.value, item)}"
+   },
+   "states": {
+    "hovered": {
+     "row": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "secondaryBackground"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "box": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "neutralFill"
+        }
+       ],
+       "strokes": [
+        {
+         "color": "neutralFill"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= contains(props.value, item) ? without(props.value, item) : append(props.value, item)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.35,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "box": {
+   "type": "row",
+   "children": [
+    "tick"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "tick": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "#FFFFFFFF",
+    "size": 10
+   },
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "bind": {
+    "visible": "${= contains(props.value, item)}"
+   }
+  }
+ }
+}

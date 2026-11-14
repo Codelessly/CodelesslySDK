@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 132. Still to rebuild: 32.**
+**Here: 138. Still to rebuild: 26.**
 
 ## Here
 
@@ -36,6 +36,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | CloudSyncIndicator | CloudSyncIndicator |  |
 | CodeBlock | CodeBlock |  |
 | CodePreview | CodePreview |  |
+| CollapsibleSection | CollapsibleSection |  |
 | ColorInput | ColorInput |  |
 | Combobox | Combobox |  |
 | CommandPalette | CommandPalette |  |
@@ -77,6 +78,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | MenuPopover | MenuPopover (with MenuItem) |  |
 | MetaInfo | MetaInfo |  |
 | ModelAvatarStack | ModelAvatarStack |  |
+| ModelSelectMenu | ModelSelectMenu |  |
 | NavigationMenu | NavigationMenu |  |
 | NotePopover | NotePopover |  |
 | NotificationBadge | NotificationBadge |  |
@@ -97,7 +99,9 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | PulsingDots | PulsingDots |  |
 | RadialProgress | RadialProgress |  |
 | RadioButton | Radio | radio |
+| ResourceCard | ResourceCard |  |
 | ResourceChip | ResourceChip |  |
+| RichTextToolbar | RichTextToolbar |  |
 | RunHistoryList | RunHistoryList |  |
 | RunningIndicator | RunningIndicator |  |
 | RunRecordRow | RunRecordRow |  |
@@ -115,6 +119,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | SlidingPanel | SlidingPanel |  |
 | SortMenu | SortMenu |  |
 | SplitButton | SplitButton |  |
+| SplitPaneTabs | SplitPaneTabs |  |
 | StackedProgressBar | StackedProgressBar |  |
 | StatsCarousel | StatsCarousel |  |
 | StatsRow | StatTile (dashboard density), InlineStat (compact) |  |
@@ -147,6 +152,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | UserMenu | UserMenu |  |
 | ViewerDialog | ViewerDialog |  |
 | WindowToolbar | WindowToolbar |  |
+| WorkspaceSwitcher | WorkspaceSwitcher |  |
 
 Also here with no source file of the same name: Card, ListRow, SectionHeader, Tabs.
 
@@ -154,21 +160,21 @@ Also here with no source file of the same name: Card, ListRow, SectionHeader, Ta
 
 In the order planned: what generated UI reaches for first, then the application chrome.
 
-### Cards and rows (2)
+### Cards and rows (1)
 
-FolderCard, ResourceCard
+FolderCard
 
-### Inputs (7)
+### Inputs (6)
 
-NumberPresetInput, ExtensionChipsInput, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInputWithBanner
+NumberPresetInput, ExtensionChipsInput, MultiSelectDropdown, HierarchicalPicker, RichTextField, PromptInputWithBanner
 
-### Navigation and chrome (7)
+### Navigation and chrome (5)
 
-TabOverflowScroll, SplitPaneTabs, SidebarTogglePattern, Toolbar, CollapsibleSection, CanvasShell, ResizableRow
+TabOverflowScroll, SidebarTogglePattern, Toolbar, CanvasShell, ResizableRow
 
-### Menus and overlays (6)
+### Menus and overlays (4)
 
-AddContextMenu, FileTreeContextMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, VariableContractHover
+AddContextMenu, FileTreeContextMenu, ProjectSelector, VariableContractHover
 
 ### Data and specialized (10)
 

@@ -2884,7 +2884,7 @@ add(component(
         'copy': {'type': 'CopyButton', 'props': {'text': ''}, 'layout': {'width': {'hug': 28}, 'height': 28},
                  'bind': {'props.text': '${props.code}', 'visible': '${props.copyable}'},
                  'actions': [{'trigger': {'type': 'event', 'event': 'onCopy'}, 'actions': [{'type': 'componentEvent', 'event': 'onCopy', 'value': '${props.code}'}]}]},
-        'body': {'type': 'row', 'children': ['code'], 'props': {'crossAxisAlignment': 'start', 'scrollable': True},
+        'body': {'type': 'row', 'children': ['code'], 'props': {'crossAxisAlignment': 'start', 'scrollable': True, 'scrollDirection': 'horizontal'},
                  'layout': {'width': {'fill': 358}, 'height': {'hug': 60}, 'padding': 16},
                  'decoration': {'fills': [{'color': 'secondaryBackground'}]},
                  'bind': {'layout.padding': '${= props.embedded ? [12, 10, 12, 10] : [16, 16, 16, 16]}',
@@ -4943,6 +4943,272 @@ add(component(
         'optionLabel': {**_one_line('${item}', style(12, 400, 'primaryText', 1.3), {'fill': 120}, {'hug': 16}),
                         'bind': {'props.style.fontSize': by('size', {'compact': 11.5, 'small': 12, 'medium': 12.5})}},
         'tick': {**icon('check', 'primary', 14), 'bind': {'visible': '${= item == props.value}'}},
+    },
+))
+
+# ResourceCard (ResourceCard.tsx): a saved thing as a tile, radius 10: its picture edge to edge (or, without
+# one, a 32 px type icon at 15 % over a caption 10 at 30 %), a dark fade rising from the foot, a type chip at
+# the top corner (4 px around a 10 px white icon on 45 % black, radius 5) and, at the foot, star and delete
+# buttons (5 px around 11 px icons on 40 % black, radius 6; the star gold when set).
+RC_ICON = "${= props.kind == 'image' ? 'image' : (props.kind == 'video' ? 'videocam' : (props.kind == 'link' ? 'link' : (props.kind == 'note' ? 'sticky_note_2' : 'description')))}"
+add(component(
+    'ResourceCard',
+    'A saved thing as a picture tile: an image, a video, a link, a note or a document, with star and delete buttons. Fires onSelected, onStar and onDelete.',
+    'card',
+    props=[prop('title', STRING, '', 'Its name, shown when there is no picture.'),
+           prop('image', STRING, '', 'The picture\'s address (empty: an icon for its kind).'),
+           prop('kind', enum('document', 'image', 'video', 'link', 'note'), 'document', 'What it is: the corner chip\'s icon.'),
+           prop('starred', BOOL, False, 'The star is set.'),
+           prop('deletable', BOOL, True, 'The delete button.')],
+    events=['onSelected', 'onStar', 'onDelete'],
+    previews=[preview('Document', 160, 120, title='Launch brief'), preview('Starred', 160, 120, title='Moodboard', kind='image', starred=True)],
+    nodes={
+        'card': {'type': 'stack', 'children': ['room', 'blank', 'fade', 'chip', 'tools'], 'layout': {'width': {'fill': 160}, 'height': {'hug': 120}},
+                 'decoration': {'fills': [{'color': 'tertiaryBackground'}, {'type': 'image', 'image': {'url': '', 'fit': 'cover'}, 'visible': False}],
+                                'strokes': [{'color': 'primaryBorder'}], 'radius': 10, 'clip': 'antiAlias', 'effects': SHADOWS_LIGHT['level1']},
+                 'bind': {'decoration.fills[1].image.url': '${props.image}', 'decoration.fills[1].visible': "${= props.image != ''}"},
+                 'states': {'hovered': {'card': {'decoration': {'effects': SHADOWS_LIGHT['level2']}}}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onSelected'}]}]},
+        # The tile's height: 120, whatever the call's own layout says.
+        'room': {'type': 'box', 'layout': {'width': {'fill': 160}, 'height': 120}},
+        'blank': {'type': 'column', 'children': ['blankIcon', 'blankTitle'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center', 'spacing': 8},
+                  'layout': {'width': {'fill': 160}, 'height': 120, 'padding': [8, 0, 8, 0]},
+                  'bind': {'visible': "${= props.image == ''}"}},
+        'blankIcon': {**icon('description', '#26000000', 32), 'bind': {'props.icon': RC_ICON}},
+        'blankTitle': {**_one_line('${props.title}', style(10, 400, '#4D000000', 1.3), {'hug': 80}, {'hug': 13}),
+                       'bind': {'visible': "${= props.title != ''}"}},
+        'fade': {'type': 'box', 'layout': {'width': {'fill': 160}, 'height': 60, 'y': {'end': 0}},
+                 'decoration': {'fills': [{'type': 'linear', 'begin': [0, 1], 'end': [0, -1],
+                                           'stops': [{'color': '#8C000000', 'position': 0}, {'color': '#26000000', 'position': 0.5}, {'color': '#00000000', 'position': 1}]}]},
+                 'bind': {'visible': "${= props.image != ''}"}},
+        'chip': {'type': 'row', 'children': ['chipIcon'], 'layout': {'width': {'hug': 18}, 'height': {'hug': 18}, 'padding': 4, 'x': {'start': 8}, 'y': {'start': 8}},
+                 'decoration': {'fills': [{'color': '#73000000'}], 'radius': 5}},
+        'chipIcon': {**icon('description', '#FFFFFFFF', 10), 'bind': {'props.icon': RC_ICON}},
+        'tools': {'type': 'row', 'children': ['star', 'delete'], 'props': {'spacing': 4},
+                  'layout': {'width': {'hug': 46}, 'height': {'hug': 21}, 'x': {'end': 8}, 'y': {'end': 8}}},
+        'star': {'type': 'row', 'children': ['starIcon'], 'layout': {'width': {'hug': 21}, 'height': {'hug': 21}, 'padding': 5},
+                 'decoration': {'fills': [{'color': '#66000000'}], 'radius': 6},
+                 'bind': {'decoration.fills[0].color': "${= props.starred ? '#FFEAB308' : '#66000000'}"},
+                 'tooltip': "${= props.starred ? 'Unstar' : 'Star'}",
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onStar'}]}]},
+        'starIcon': {**icon('star_border', '#FFFFFFFF', 11), 'bind': {'props.icon': "${= props.starred ? 'star' : 'star_border'}"}},
+        'delete': {'type': 'row', 'children': ['deleteIcon'], 'layout': {'width': {'hug': 21}, 'height': {'hug': 21}, 'padding': 5},
+                   'decoration': {'fills': [{'color': '#66000000'}], 'radius': 6}, 'tooltip': 'Delete',
+                   'bind': {'visible': '${props.deletable}'},
+                   'states': {'hovered': {'delete': {'decoration': {'fills': [{'color': '#CCEF4444'}]}}}},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onDelete'}]}]},
+        'deleteIcon': icon('delete_outline', '#FFFFFFFF', 11),
+    },
+))
+
+# WorkspaceSwitcher (WorkspaceSwitcher.tsx, its open list): the workspaces one under another, each 7 x 6,
+# 6 px apart: a 16 px column with an 11 px green check for the current one, the name 11.5/600; under a
+# hairline, a row with a 13 px folder-plus icon to make a new one. With none: "No workspaces yet." 11 in
+# tertiary, 8 x 12.
+add(component(
+    'WorkspaceSwitcher',
+    'The list that switches workspace: the current one checked, and a row to make a new one. Fires onSelected with the name and onCreate.',
+    'menu',
+    props=[prop('workspaces', STRINGS, ['Personal', 'Acme', 'Side project'], 'The workspaces\' names.', required=True),
+           prop('current', STRING, '', 'The one in use: it gets the check.'),
+           prop('createLabel', STRING, 'New workspace', 'The last row\'s label (empty: none).')],
+    events=[{'key': 'onSelected', 'payload': STRING}, 'onCreate'],
+    previews=[preview('Default', 220, 130, current='Acme')],
+    nodes={
+        'menu': {'type': 'column', 'children': ['list', 'none', 'create'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 220}, 'height': {'hug': 130}, 'padding': 1},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8,
+                                'clip': 'antiAlias', 'effects': SHADOWS_LIGHT['level3']},
+                 'bind': {'decoration.effects': '${theme.shadows.level3}'}},
+        'list': {'type': 'listView', 'children': ['entry'], 'props': {'scrollable': False},
+                 'layout': {'width': {'fill': 218}, 'height': {'hug': 90}}, 'bind': {'data': '${props.workspaces}'}},
+        'entry': {'type': 'row', 'children': ['tickBox', 'name'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                  'layout': {'width': {'fill': 218}, 'height': {'hug': 30}, 'padding': [6, 7, 6, 7]},
+                  'decoration': {'fills': [{'color': '#00000000'}]},
+                  'states': {'hovered': {'entry': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}}},
+                  'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onSelected', 'value': '${item}'}]}]},
+        'tickBox': {'type': 'row', 'children': ['tick'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                    'layout': {'width': 16, 'height': 16}},
+        'tick': {**icon('check', 'success', 11), 'bind': {'visible': '${= item == props.current}'}},
+        'name': _one_line('${item}', style(11.5, 600, 'primaryText', 1.35), {'fill': 170}, {'hug': 16}),
+        'none': {**text('No workspaces yet.', style(11, 400, 'tertiaryText', 1.4), {'fill': 190}, {'hug': 16}),
+                 'layout': {'width': {'fill': 190}, 'height': {'hug': 16}, 'margin': [12, 8, 12, 8]},
+                 'bind': {'visible': '${= length(props.workspaces) == 0}'}},
+        'create': {'type': 'row', 'children': ['createBox', 'createLabel'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                   'layout': {'width': {'fill': 218}, 'height': {'hug': 30}, 'padding': [6, 7, 6, 7]},
+                   'decoration': {'fills': [{'color': '#00000000'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'top'},
+                   'bind': {'visible': "${= props.createLabel != ''}"},
+                   'states': {'hovered': {'create': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}}},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onCreate'}]}]},
+        'createBox': {'type': 'row', 'children': ['createIcon'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                      'layout': {'width': 16, 'height': 16}},
+        'createIcon': icon('create_new_folder', 'secondaryText', 13),
+        'createLabel': text('${props.createLabel}', style(11.5, 500, 'primaryText', 1.35), {'hug': 90}, {'hug': 16}),
+    },
+))
+
+# ModelSelectMenu (ModelSelectMenu.tsx): a MenuPopover, 220 px, headed "Generate with": one row per model,
+# its name 11 at weight 400, and a neutral checkbox mark at the end, set for each model in use.
+add(component(
+    'ModelSelectMenu',
+    'The menu that picks which models to use, several at once: each row ends in a checkbox. The chosen names are kept in your list variable. Fires onChanged.',
+    'menu',
+    props=[prop('models', STRINGS, ['Claude', 'Gemini', 'Local'], 'The models\' names.', required=True),
+           prop('value', var(STRINGS), '', 'The name of your list variable holding the chosen names.'),
+           prop('heading', STRING, 'Generate with', 'The small heading (empty: none).')],
+    events=[{'key': 'onChanged', 'payload': STRINGS}],
+    previews=[preview('Default', 220, 110, value=['Claude'])],
+    nodes={
+        'menu': {'type': 'column', 'children': ['heading', 'list'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 220}, 'height': {'hug': 110}, 'padding': 1},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8,
+                                'clip': 'antiAlias', 'effects': SHADOWS_LIGHT['level3']},
+                 'bind': {'decoration.effects': '${theme.shadows.level3}'}},
+        'heading': {'type': 'row', 'children': ['headingText'], 'layout': {'width': {'fill': 218}, 'height': {'hug': 25}, 'padding': [8, 6, 8, 6]},
+                    'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'},
+                    'bind': {'visible': "${= props.heading != ''}"}},
+        'headingText': _one_line('${props.heading}', style(10, 700, 'tertiaryText', 1.3), {'fill': 200}, {'hug': 13}),
+        'list': {'type': 'listView', 'children': ['row'], 'props': {'scrollable': False},
+                 'layout': {'width': {'fill': 218}, 'height': {'hug': 84}}, 'bind': {'data': '${props.models}'}},
+        'row': {'type': 'row', 'children': ['name', 'box'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                'layout': {'width': {'fill': 218}, 'height': {'hug': 28}, 'padding': [8, 6, 8, 6]},
+                'decoration': {'fills': [{'color': '#00000000'}]},
+                'bind': {'selected': '${= contains(props.value, item)}'},
+                'states': {'hovered': {'row': {'decoration': {'fills': [{'color': 'secondaryBackground'}]}}},
+                           'selected': {'box': {'decoration': {'fills': [{'color': 'neutralFill'}], 'strokes': [{'color': 'neutralFill'}]}}}},
+                'actions': [{'trigger': 'click', 'actions': [
+                    {'type': 'setVariable', 'variable': 'props.value',
+                     'value': '${= contains(props.value, item) ? without(props.value, item) : append(props.value, item)}'},
+                    {'type': 'componentEvent', 'event': 'onChanged', 'value': '${props.value}'}]}]},
+        'name': _one_line('${item}', style(11, 400, 'primaryText', 1.35), {'fill': 160}, {'hug': 15}),
+        'box': {'type': 'row', 'children': ['tick'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                'layout': {'width': 14, 'height': 14},
+                'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'secondaryBorder'}], 'radius': 4}},
+        'tick': {**icon('check', '#FFFFFFFF', 10), 'bind': {'visible': '${= contains(props.value, item)}'}},
+    },
+))
+
+# RichTextToolbar (RichTextToolbar.tsx): the formatting bar of an editor: 36 px, bordered, radius 6, 2 px
+# around small ghost icon buttons 2 px apart, in groups parted by 1 x 18 hairlines: history, inline styles,
+# blocks, lists, inserts.
+RT_GROUPS = [('undo', 'redo'), ('format_bold', 'format_italic', 'format_underlined', 'code'),
+             ('title', 'format_quote'), ('format_list_bulleted', 'format_list_numbered'), ('link', 'image')]
+RT_NAMES = {'undo': 'Undo', 'redo': 'Redo', 'format_bold': 'Bold', 'format_italic': 'Italic', 'format_underlined': 'Underline', 'code': 'Code',
+            'title': 'Heading', 'format_quote': 'Quote', 'format_list_bulleted': 'Bulleted list', 'format_list_numbered': 'Numbered list',
+            'link': 'Link', 'image': 'Image'}
+def _rt_nodes():
+    kids, nodes = [], {}
+    for gi, group in enumerate(RT_GROUPS):
+        if gi:
+            kids.append('rule%d' % gi)
+            nodes['rule%d' % gi] = {'type': 'box', 'layout': {'width': 1, 'height': 18, 'margin': [2, 0, 2, 0]},
+                                   'decoration': {'fills': [{'color': 'primaryBorder'}]}}
+        for name in group:
+            kids.append(name)
+            nodes[name] = {'type': 'row', 'children': [name + 'Glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                           'layout': {'width': 28, 'height': 28}, 'decoration': {'fills': [{'color': '#00000000'}], 'radius': 6},
+                           'tooltip': RT_NAMES[name],
+                           'bind': {'selected': "${= contains(props.active, '%s')}" % RT_NAMES[name]},
+                           'states': {'hovered': {name: {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}},
+                                      'selected': {name: {'decoration': {'fills': [{'color': 'primaryTint'}]}},
+                                                   name + 'Glyph': {'props': {'color': 'primary'}}}},
+                           'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onCommand', 'value': RT_NAMES[name]}]}]}
+            nodes[name + 'Glyph'] = icon(name, 'secondaryText', 16)
+    return kids, nodes
+_rt_kids, _rt = _rt_nodes()
+add(component(
+    'RichTextToolbar',
+    'The formatting bar of a text editor: undo and redo, bold, italic, underline, code, heading, quote, lists, link and image. Fires onCommand with the button\'s name.',
+    'bar',
+    props=[prop('active', STRINGS, [], 'The names of the buttons shown as on (Bold, Italic, Bulleted list...).')],
+    events=[{'key': 'onCommand', 'payload': STRING}],
+    previews=[preview('Default', 400, 36, active=['Bold'])],
+    nodes={
+        'bar': {'type': 'row', 'children': ['tools'], 'props': {'crossAxisAlignment': 'center'},
+                'layout': {'width': {'fill': 400}, 'height': {'hug': 36}, 'padding': 3},
+                'decoration': {'strokes': [{'color': 'primaryBorder'}], 'radius': 6, 'clip': 'antiAlias'}},
+        # Narrower than its buttons, the bar scrolls sideways.
+        'tools': {'type': 'row', 'children': _rt_kids, 'props': {'crossAxisAlignment': 'center', 'spacing': 2, 'scrollable': True, 'scrollDirection': 'horizontal'},
+                  'layout': {'width': {'fill': 390}, 'height': {'hug': 28}}},
+        **_rt,
+    },
+))
+
+# CollapsibleSection (CollapsibleSection.tsx): a section of cards under a header (8 x 10 over a hairline: an
+# icon, 8 px, the title 12/600 and a count pill) with, under its content, a centered button 12/500 in
+# secondary with a 12 px chevron: "View n more", then "Show less".
+add(component(
+    'CollapsibleSection',
+    'A section under a header with a title and a count: its children, then a button that asks for the rest ("View 6 more") or folds them again. Fires onToggle with whether it is now open.',
+    'section',
+    props=[prop('title', STRING, 'Section', 'The title.', required=True),
+           prop('count', NUMBER, 0, 'How many items it holds, beside the title.'),
+           prop('icon', STRING, '', 'An icon before the title (empty: none).'),
+           prop('hiddenCount', NUMBER, 0, 'How many more there are to show (0: no button).'),
+           prop('expanded', BOOL, False, 'All are shown: the button reads "Show less".')],
+    events=[{'key': 'onToggle', 'payload': BOOL}],
+    slots=['actions'],
+    children='list',
+    previews=[preview('Default', 320, 80, title='Images', count=14, icon='image', hiddenCount=6)],
+    nodes={
+        'section': {'type': 'column', 'children': ['header', 'body', 'more'], 'props': {'crossAxisAlignment': 'stretch'},
+                    'layout': {'width': {'fill': 320}, 'height': {'hug': 80}}},
+        'header': {'type': 'row', 'children': ['glyph', 'title', 'count', 'gap', 'actions'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                   'layout': {'width': {'fill': 320}, 'height': {'hug': 33}, 'padding': [10, 8, 10, 8]},
+                   'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'glyph': {**icon('image', 'secondaryText', 14), 'bind': {'visible': "${= props.icon != ''}", 'props.icon': '${props.icon}'}},
+        'title': _one_line('${props.title}', style(12, 600, 'primaryText', 1.3), {'hug': 60}, {'hug': 16}),
+        'count': {'type': 'CountBadge', 'props': {'count': 0, 'showZero': True}, 'layout': {'width': {'hug': 18}, 'height': {'hug': 16}},
+                  'bind': {'props.count': '${props.count}'}},
+        'gap': {'type': 'box', 'layout': {'width': {'fill': 20}, 'height': 1}},
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+        'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 320}, 'height': {'hug': 20}}},
+        'content': {'type': 'slot'},
+        'more': {'type': 'row', 'children': ['moreIcon', 'moreText'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center', 'spacing': 6},
+                 'layout': {'width': {'fill': 320}, 'height': {'hug': 32}, 'padding': [0, 8, 0, 8]},
+                 'bind': {'visible': '${= props.hiddenCount > 0 || props.expanded}'},
+                 'states': {'hovered': {'moreText': {'props': {'style': {'color': 'primaryText'}}}, 'moreIcon': {'props': {'color': 'primaryText'}}}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onToggle', 'value': '${= !props.expanded}'}]}]},
+        'moreIcon': {**icon('expand_more', 'secondaryText', 12), 'bind': {'props.icon': "${= props.expanded ? 'expand_less' : 'expand_more'}"}},
+        'moreText': text("${= props.expanded ? 'Show less' : 'View ' + text(props.hiddenCount) + ' more'}", style(12, 500, 'secondaryText', 1.3), {'hug': 80}, {'hug': 16}),
+    },
+))
+
+# SplitPaneTabs (SplitPaneTabs.tsx): the tabs over a pane of a split view, edge to edge over a hairline: each
+# 12 px either side, 12/600, parted by a hairline at its right; the chosen one on the page color in the
+# primary text, the rest on the secondary background in secondary; an 11 px x to close.
+add(component(
+    'SplitPaneTabs',
+    'The tabs over one pane of a split view: square, edge to edge, each with an x. The chosen one is kept in your variable. Fires onChanged and onClose with the label.',
+    'bar',
+    props=[prop('tabs', STRINGS, ['index.ts', 'styles.css'], 'The tabs\' labels.', required=True),
+           prop('value', var(STRING), '', 'The name of your text variable holding the chosen label.'),
+           prop('closable', BOOL, True, 'An x on each tab.')],
+    events=[{'key': 'onChanged', 'payload': STRING}, {'key': 'onClose', 'payload': STRING}],
+    previews=[preview('Default', 300, 32, value='index.ts')],
+    nodes={
+        'bar': {'type': 'row', 'children': ['list'], 'layout': {'width': {'fill': 300}, 'height': {'hug': 32}},
+                'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'list': {'type': 'listView', 'children': ['tab'], 'props': {'scrollDirection': 'horizontal', 'scrollable': False},
+                 'layout': {'width': {'hug': 200}, 'height': 31}, 'bind': {'data': '${props.tabs}'}},
+        'tab': {'type': 'row', 'children': ['label', 'close'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                'layout': {'width': {'hug': 90}, 'height': {'fill': 31}, 'padding': [12, 0, 6, 0]},
+                'decoration': {'fills': [{'color': '#00000000'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'right'},
+                'bind': {'selected': '${= item == props.value}'},
+                'states': {'selected': {'tab': {'decoration': {'fills': [{'color': 'primaryBackground'}]}},
+                                        'label': {'props': {'style': {'color': 'primaryText'}}}},
+                           'hovered': {'tab': HOVER}},
+                'actions': [{'trigger': 'click', 'actions': [
+                    {'type': 'setVariable', 'variable': 'props.value', 'value': '${item}'},
+                    {'type': 'componentEvent', 'event': 'onChanged', 'value': '${item}'}]}]},
+        'label': _one_line('${item}', style(12, 600, 'secondaryText', 1.3), {'hug': 60}, {'hug': 16}),
+        'close': {'type': 'row', 'children': ['x'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': 18, 'height': 18}, 'decoration': {'radius': 4},
+                  'bind': {'visible': '${props.closable}'},
+                  'states': {'hovered': {'close': {'decoration': {'fills': [{'color': 'pressedOverlay'}]}}, 'x': {'props': {'color': 'primaryText'}}}},
+                  'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onClose', 'value': '${item}'}]}]},
+        'x': icon('close', 'tertiaryText', 11),
     },
 ))
 
