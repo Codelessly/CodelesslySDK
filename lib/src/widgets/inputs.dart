@@ -1,16 +1,10 @@
 // Widget recipes: inputs. See lib/src/render/recipe.dart.
 //
-// Inputs are islands: real Flutter widgets (TextField, Checkbox, Slider...)
-// built from the node's props, inside their box: a fit box
-// for the ones that size to their node's fits, the design size for the ones
-// that always take it (checkbox, radio, signature, and non-fill sliders), nothing for the
-// pickers (their button's own size).
-//
-// The widgets keep their own state (typed text, a toggled checkbox) and, in a
-// running app, report it as the node's `changed` (and `submitted`,
-// `changeEnd`, focus) trigger: the runtime writes the value to the variable
-// the input's value is bound to and runs the node's reactions.
-
+// Every input but one is a render object (lib/src/render/controls). What is
+// left here is the signature pad, the last input island: a Flutter widget at
+// its node's design size that keeps its strokes and reports them as the
+// node's `changed` trigger. The dropdown is listed so the catalog still
+// counts it an input.
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
     show
@@ -54,8 +48,6 @@ final Map<String, WidgetRecipe> inputsRecipes = {
   'signature': (b, n, chain) => _sized(b, n, chain, (context) => _SignatureIsland(node: n)),
 };
 
-bool _interactive(NodeBuilder b) => b.tree.islands.environment.interactive;
-
 Size _designSize(Node n) => Size(n.layout.width.value, n.layout.height.value);
 
 /// The input island of [b]'s node: [build] under what reports its events.
@@ -81,12 +73,6 @@ void _fire(BuildContext context, String trigger, Object? value) {
   if (b != null) fireTrigger(b, trigger, event: {'value': value});
 }
 
-/// The node's fit box around [build].
-void _fitted(NodeBuilder b, Node n, List<RenderBox> chain, WidgetBuilder build) {
-  chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, _designSize(n)));
-  chain.add(_island(b, build));
-}
-
 /// The node's design size around
 /// [build].
 void _sized(NodeBuilder b, Node n, List<RenderBox> chain, WidgetBuilder build) {
@@ -97,16 +83,6 @@ void _sized(NodeBuilder b, Node n, List<RenderBox> chain, WidgetBuilder build) {
 }
 
 // --- shared -------------------------------------------------------------------
-
-/// [s] as Flutter's style, or null when unset (the theme's).
-TextStyle? _styleOrNull(api.TextStyle s, [api.TextStyle? inherited]) => s.isEmpty ? null : textStyle(s, inherited);
-
-/// [text] in [style], as a decoration's texts are built (a span in a
-/// `Text.rich`).
-Widget _text(String text, api.TextStyle style,
-        {TextAlign? textAlign, int? maxLines, TextOverflow? overflow, api.TextStyle? textDefault}) =>
-    Text.rich(TextSpan(children: [TextSpan(text: text, style: _styleOrNull(style, textDefault))]),
-        textAlign: textAlign, maxLines: maxLines, overflow: overflow);
 
 /// An input's icon: its glyph (or image) in a square of its size.
 Widget? _icon(api.InputIcon? icon, {double? size, Color? color}) {
@@ -147,322 +123,8 @@ class _Glyph extends LeafRenderObjectWidget {
     ..color = _color(context);
 }
 
-BorderSide _side(api.BorderSide s) => BorderSide(
-      color: s.color?.flutter ?? const Color(0xFF000000),
-      width: s.width,
-      style: s.style == api.BorderStyle.none ? BorderStyle.none : BorderStyle.solid,
-      strokeAlign: s.strokeAlign.value,
-    );
-
-InputBorder? _inputBorder(api.InputBorder? b, {Color? color}) {
-  if (b == null) return null;
-  var side = _side(b.borderSide);
-  if (color != null) side = side.copyWith(color: color);
-  return switch (b.type) {
-    api.InputBorderType.none => InputBorder.none,
-    api.InputBorderType.outline =>
-      OutlineInputBorder(borderRadius: b.borderRadius.flutter, borderSide: side, gapPadding: b.gapPadding),
-    api.InputBorderType.underline => UnderlineInputBorder(borderRadius: b.borderRadius.flutter, borderSide: side),
-  };
-}
-
-BoxConstraints? _constraintsOrNull(api.BoxConstraints c) => c.isEmpty ? null : c.flutter;
-
-Color? _color(api.Color? c) => c?.flutter;
-
-// --- textField ----------------------------------------------------------------
-
-/// [text] as a design canvas shows it before bindings run: its formulas
-/// (`${= ...}`) come out empty, its variables (`${name}`) stay as written; an
-/// empty or blank result is no text.
-String? previewText(String? text) {
-  if (text == null || text.isEmpty) return null;
-  if (!text.contains(r'${=')) return text;
-  final out = StringBuffer();
-  var i = 0;
-  while (i < text.length) {
-    if (text.startsWith(r'${=', i)) {
-      var depth = 0, j = i + 1;
-      for (; j < text.length; j++) {
-        if (text[j] == '{') depth++;
-        if (text[j] == '}' && --depth == 0) break;
-      }
-      i = j + 1;
-    } else {
-      out.write(text[i++]);
-    }
-  }
-  final s = out.toString();
-  return s.trim().isEmpty ? null : s;
-}
-
-/// The content padding of a field whose decoration and node set none:
-/// Flutter's `InputDecorator` default for an outlined or filled field (12 px
-/// at the sides, so the text and label clear the border), else the node's
-/// [padding] (an unfilled underline field has no side padding in Flutter
-/// either).
-api.EdgeInsets defaultContentPadding(api.InputDecoration d, api.EdgeInsets padding) {
-  if (d.isCollapsed || padding != api.EdgeInsets.zero) return padding;
-  final borders = [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder];
-  final outlined = borders.any((b) => b?.type == api.InputBorderType.outline);
-  final dense = d.isDense ?? false;
-  // No border of its own: the theme's outline, the label inside as a hint
-  // (it never floats), so the same padding all round.
-  if (borders.every((b) => b == null) && !(d.filled ?? false)) {
-    return dense ? const api.EdgeInsets.fromLTRB(12, 8, 12, 8) : const api.EdgeInsets.fromLTRB(12, 12, 12, 12);
-  }
-  if (outlined) return dense ? const api.EdgeInsets.fromLTRB(12, 16, 12, 8) : const api.EdgeInsets.fromLTRB(12, 20, 12, 12);
-  if (d.filled ?? false) return dense ? const api.EdgeInsets.fromLTRB(12, 4, 12, 4) : const api.EdgeInsets.fromLTRB(12, 8, 12, 8);
-  return padding;
-}
-
-/// [padding] grown by the width of the border [d] draws in this state when
-/// it has `paddingIncludesBorder` (an outline on every side, an underline
-/// below): disabled, then error (focused or not), then focused, then enabled.
-EdgeInsets paddingWithBorder(EdgeInsets padding, api.InputDecoration d, {bool error = false, bool focused = false}) {
-  if (!d.paddingIncludesBorder) return padding;
-  final border = !d.enabled
-      ? d.disabledBorder
-      : error
-          ? (focused ? d.focusedErrorBorder : d.errorBorder)
-          : focused
-              ? d.focusedBorder
-              : d.enabledBorder;
-  if (border == null || border.type == api.InputBorderType.none) return padding;
-  final w = border.borderSide.width;
-  if (w <= 0) return padding;
-  if (border.type == api.InputBorderType.underline) return padding.copyWith(bottom: padding.bottom + w);
-  return padding + EdgeInsets.all(w);
-}
-
-/// An always-visible prefix or suffix text, beside its icon if it has one,
-/// for an icon slot.
-Widget _affix(Widget? icon, Widget text, {required bool before}) {
-  final padded = Padding(
-    padding: before
-        ? const EdgeInsetsDirectional.only(start: 12, end: 4)
-        : const EdgeInsetsDirectional.only(start: 4, end: 12),
-    child: text,
-  );
-  if (icon == null) return padded;
-  return Row(mainAxisSize: MainAxisSize.min, children: before ? [icon, padded] : [padded, icon]);
-}
-
-/// A text field's decoration; [padding] is the node's, the content padding
-/// when the decoration sets none. [focused] and [error] pick the border a
-/// padding that includes it grows by.
-InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
-    {bool focused = false,
-    bool? error,
-    void Function(bool prefix)? onIconTap,
-    api.TextStyle? textDefault,
-    bool labelAbove = false}) {
-  Widget? affixIcon(api.InputIcon? icon, api.EdgeInsets? iconPadding) {
-    var glyph = _icon(icon);
-    if (glyph == null) return null;
-    // An icon with reactions (a clear "×") runs them when tapped.
-    if (onIconTap != null && icon!.actions.isNotEmpty) {
-      final prefix = identical(icon, d.prefixIcon);
-      glyph = MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(behavior: HitTestBehavior.opaque, onTap: () => onIconTap(prefix), child: glyph),
-      );
-    }
-    final Widget aligned = Align(widthFactor: 1, heightFactor: 1, child: glyph);
-    return iconPadding == null ? aligned : Padding(padding: iconPadding.flutter, child: aligned);
-  }
-
-  var label = previewText(d.labelText);
-  final errorText = previewText(d.errorText);
-  var hint = previewText(d.hintText);
-  var hintStyle = d.hintStyle;
-  // No border and no label behavior of its own: the theme's outlined field,
-  // whose label never floats. It is the placeholder (as Flutter shows a
-  // label that never floats, over the hint): the line stays centered
-  // whether the field is empty or not.
-  final themed = d.floatingLabelBehavior == null &&
-      [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder]
-          .every((b) => b == null);
-  // With [labelAbove] the caller draws the label above the field
-  // ([labelAboveField]); otherwise it is the placeholder.
-  if (themed && label != null && label.isNotEmpty) {
-    if (!labelAbove) {
-      hint = label;
-      if (!d.labelStyle.isEmpty) hintStyle = d.labelStyle;
-    }
-    label = null;
-  }
-  final prefix = previewText(d.prefixText), suffix = previewText(d.suffixText);
-  final counter = d.counterText == '' ? '' : previewText(d.counterText);
-  // Units that show before anything is typed go in the icon slots, which
-  // Flutter always shows.
-  final always = d.affixesAlwaysVisible;
-  final prefixWidget = prefix == null || prefix.isEmpty ? null : _text(prefix, d.prefixStyle, textDefault: textDefault);
-  final suffixWidget = suffix == null || suffix.isEmpty ? null : _text(suffix, d.suffixStyle, textDefault: textDefault);
-  final prefixIcon = affixIcon(d.prefixIcon, d.prefixIconPadding);
-  final suffixIcon = affixIcon(d.suffixIcon, d.suffixIconPadding);
-  // Unset constraints keep Flutter's 48 px icon slot, unless the icon has a
-  // padding of its own or the slot holds only an always-visible text.
-  BoxConstraints? iconConstraints(api.BoxConstraints c, api.EdgeInsets? iconPadding, Widget? text, Widget? icon) =>
-      !c.isEmpty
-          ? c.flutter
-          : iconPadding != null || (always && text != null && icon == null)
-              ? const BoxConstraints()
-              : null;
-  return InputDecoration(
-    icon: _icon(d.icon),
-    label: label == null || label.isEmpty ? null : _text(label, d.labelStyle, textDefault: textDefault),
-    floatingLabelStyle: _styleOrNull(d.floatingLabelStyle, textDefault),
-    helperText: previewText(d.helperText),
-    helperStyle: _styleOrNull(d.helperStyle, textDefault),
-    helperMaxLines: d.helperMaxLines,
-    hintText: hint,
-    hintStyle: _styleOrNull(hintStyle, textDefault),
-    hintMaxLines: d.hintMaxLines,
-    // In error without a message (an error text bound to `true`): the
-    // error border, nothing under the field.
-    error: errorText == api.kErrorWithoutMessage
-        ? const SizedBox.shrink()
-        : (errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle, textDefault: textDefault)),
-    errorStyle: _styleOrNull(d.errorStyle, textDefault),
-    errorMaxLines: d.errorMaxLines,
-    // Unset, a field with a border of its own floats its label as Flutter's
-    // does; one without takes the theme's (the label never floats).
-    floatingLabelBehavior: switch (d.floatingLabelBehavior) {
-      null => [d.border, d.enabledBorder, d.focusedBorder].any((b) => b != null) ? FloatingLabelBehavior.auto : null,
-      final b => FloatingLabelBehavior.values.byName(b.name),
-    },
-    isCollapsed: d.isCollapsed,
-    isDense: d.isDense,
-    // A collapsed decoration is the bare input, and a set content padding is
-    // the designed one: a platform's compact density (desktop) must not
-    // shrink either, or the field is ~8px shorter on desktop than designed.
-    visualDensity: d.isCollapsed || d.contentPadding != null ? VisualDensity.standard : null,
-    contentPadding: paddingWithBorder((d.contentPadding ?? defaultContentPadding(d, padding)).flutter, d,
-        error: error ?? (errorText == api.kErrorWithoutMessage || (errorText != null && errorText.trim().isNotEmpty)),
-        focused: focused),
-    prefixIcon: always && prefixWidget != null ? _affix(prefixIcon, prefixWidget, before: true) : prefixIcon,
-    prefixIconConstraints: iconConstraints(d.prefixIconConstraints, d.prefixIconPadding, prefixWidget, prefixIcon),
-    prefix: always ? null : prefixWidget,
-    prefixStyle: _styleOrNull(d.prefixStyle, textDefault),
-    suffixIcon: always && suffixWidget != null ? _affix(suffixIcon, suffixWidget, before: false) : suffixIcon,
-    suffixIconConstraints: iconConstraints(d.suffixIconConstraints, d.suffixIconPadding, suffixWidget, suffixIcon),
-    suffix: always ? null : suffixWidget,
-    suffixStyle: _styleOrNull(d.suffixStyle, textDefault),
-    counter: counter == null || counter.isEmpty ? null : _text(counter, d.counterStyle, textDefault: textDefault),
-    counterText: counter != null && counter.isEmpty ? '' : null,
-    counterStyle: _styleOrNull(d.counterStyle, textDefault),
-    filled: d.filled,
-    fillColor: _color(d.fillColor),
-    focusColor: _color(d.focusColor),
-    hoverColor: _color(d.hoverColor),
-    errorBorder: _inputBorder(d.errorBorder),
-    focusedBorder: _inputBorder(d.focusedBorder),
-    focusedErrorBorder: _inputBorder(d.focusedErrorBorder),
-    disabledBorder: _inputBorder(d.disabledBorder),
-    enabledBorder: _inputBorder(d.enabledBorder),
-    border: _inputBorder(d.border),
-    enabled: d.enabled,
-    semanticCounterText: d.semanticCounterText,
-    alignLabelWithHint: d.alignLabelWithHint,
-    constraints: _constraintsOrNull(d.constraints),
-  );
-}
-
 /// A [LayoutBuilder] that reports a zero intrinsic size instead of throwing,
-/// so a field built with it can sit under intrinsic measurement.
-/// A one-line input [height] tall. InputDecorator doesn't stretch its
-/// container (fill, border) to a height: a dense 50 px field painted a 20 px
-/// box at its top. So a box paints them at full height and a borderless
-/// decorator of that height sits in it, its line centered (as a Container
-/// around a TextField would). Its icons center in the whole height too, and
-/// one with no icon gets an empty suffix as wide as its end padding and as
-/// tall as the field, so small text centers as well (the decorator's own
-/// container is otherwise 48 px).
-Widget fullHeightField(
-  BuildContext context,
-  InputDecoration decoration,
-  double height,
-  Widget Function(InputDecoration borderless) build, {
-  bool focused = false,
-}) {
-  final error = decoration.errorText != null || decoration.error != null;
-  final own = (error ? (focused ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
-      (focused ? decoration.focusedBorder : null) ??
-      decoration.enabledBorder ??
-      decoration.border;
-  // No border of its own: the theme's field shape, its side by state as
-  // Flutter's InputDecorator draws it.
-  final InputBorder border = own ?? themeFieldBorder(context, error: error, focused: focused, enabled: decoration.enabled);
-  final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
-  final padEnd = (decoration.contentPadding ?? EdgeInsets.zero).resolve(Directionality.of(context)).right;
-  // Without a floating label, the line is centered in the box at its own
-  // (dense) height, whatever the box's height: a 28 px field is not laid out
-  // for Material's 48 px and cut.
-  final center = decoration.label == null && decoration.labelText == null;
-  final spacer = decoration.prefixIcon == null && decoration.suffixIcon == null;
-  return DecoratedBox(
-    decoration: ShapeDecoration(color: fill, shape: border),
-    child: _centered(center, build(
-      decoration.copyWith(
-        contentPadding: centeredPadding(context, decoration),
-        isDense: center ? true : null,
-        filled: false,
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        disabledBorder: InputBorder.none,
-        errorBorder: InputBorder.none,
-        focusedErrorBorder: InputBorder.none,
-        constraints: center ? null : BoxConstraints.tightFor(height: height),
-        prefixIconConstraints:
-            decoration.prefixIcon == null ? null : _tallIcon(decoration.prefixIconConstraints, height),
-        suffixIcon: spacer ? SizedBox(width: padEnd, height: height) : decoration.suffixIcon,
-        suffixIconConstraints: spacer
-            ? BoxConstraints.tightFor(width: padEnd, height: height)
-            : decoration.suffixIcon == null
-                ? null
-                : _tallIcon(decoration.suffixIconConstraints, height),
-      ),
-    )),
-  );
-}
-
-/// [decoration]'s content padding for a field of a set height whose line
-/// is centered (TextAlignVertical.center): its horizontal padding only, so a
-/// 28 or 32 px field is not laid out for a taller line box and its text and
-/// hint sit on its center. A field whose label floats keeps its padding (the
-/// label needs the room above the line).
-EdgeInsetsGeometry? centeredPadding(BuildContext context, InputDecoration decoration) {
-  final p = decoration.contentPadding;
-  if (p == null || decoration.label != null || decoration.labelText != null) return p;
-  final r = p.resolve(Directionality.of(context));
-  return EdgeInsets.fromLTRB(r.left, 0, r.right, 0);
-}
-
-/// The border of a field that sets none: the theme's field shape (an
-/// outline of the control radius; an underline under a theme without one)
-/// with the side Flutter's InputDecorator gives it in this state.
-InputBorder themeFieldBorder(BuildContext context, {bool error = false, bool focused = false, bool enabled = true}) {
-  final theme = Theme.of(context);
-  final scheme = theme.colorScheme;
-  final shape = theme.inputDecorationTheme.border ?? const UnderlineInputBorder();
-  final color = !enabled
-      ? scheme.onSurface.withValues(alpha: .12)
-      : error
-          ? scheme.error
-          : focused
-              ? scheme.primary
-              : scheme.outline;
-  return shape.copyWith(borderSide: BorderSide(color: color, width: focused && enabled ? 2 : 1));
-}
-
-Widget _centered(bool center, Widget field) => center ? Center(child: field) : field;
-
-/// An icon box as tall as a fixed-height field.
-BoxConstraints _tallIcon(BoxConstraints? c, double height) =>
-    (c ?? const BoxConstraints(minWidth: kMinInteractiveDimension)).copyWith(minHeight: height, maxHeight: height);
-
+/// so what is built with it can sit under intrinsic measurement.
 class IntrinsicSafeLayoutBuilder extends ConstrainedLayoutBuilder<BoxConstraints> {
   const IntrinsicSafeLayoutBuilder({super.key, required super.builder});
 
