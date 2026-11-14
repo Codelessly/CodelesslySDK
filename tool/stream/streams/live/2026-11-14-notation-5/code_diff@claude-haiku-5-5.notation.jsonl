@@ -1,0 +1,88 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"Card w:390 gap:12 pad:16\n  Text.heading \"Config change review\"\n  Text.caption \"3 hunks: 0 kept, 0 discarded, 3 undecided\"\n  state h1=\"\"\n  state h2=\"\"\n  state h3=\"\"\n  state kept=0\n  state decided=0\n  Card gap:6 pad:8\n    Text.caption \"@@ -12,3 +12,3 @@\"\n    Text.danger \"- timeout: 30\"\n    Text.success \"+ timeout: 60\"\n    Row gap:8\n      Button.outline \"Keep\" -> h1=\"keep\"; kept=kept+1; decided=decided+1\n      Button.ghost \"Discard\" -> h1=\"discard\"; decided=decided+1\n  Card gap:6 pad:8\n    Text.caption \"@@ -27,2 +27,3 @@\"\n    Text.danger \"- retries: 2\"\n    Text.success \"+ retries: 5\"\n    Text.success \"+ backoff: exponential\"\n    Row gap:8\n      Button.outline \"Keep\" -> h2=\"keep\"; kept=kept+1; decided=decided+1\n      Button.ghost \"Discard\" -> h2=\"discard\"; decided=decided+1\n  Card gap:6 pad:8\n    Text.caption \"@@ -48,1 +49,1 @@\"\n    Text.danger \"- log_level: info\"\n    Text.success \"+ log_level: debug\"\n    Row gap:8\n      Button.outline \"Keep\" -> h3=\"keep\"; kept=kept+1; decided=decided+1\n      Button.ghost \"Discard\" -> h3=\"discard\"; decided=decided+1\n  Text.body \"Kept: {kept} of 3\"\n  Button \"Apply\" enabled:=decided==3 -> emit apply","usage":{"input_tokens":2383,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":583,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":532,"totalMs":2427}}
+{"tMs":532,"delta":"Card w"}
+{"tMs":753,"delta":":390 g"}
+{"tMs":753,"delta":"ap:12 "}
+{"tMs":754,"delta":"pad:16\n  Text"}
+{"tMs":754,"delta":".heading \"Config change"}
+{"tMs":754,"delta":" review\"\n  Text"}
+{"tMs":754,"delta":".ca"}
+{"tMs":754,"delta":"ption \"3 hunks:"}
+{"tMs":754,"delta":" 0"}
+{"tMs":754,"delta":" kept, 0 disc"}
+{"tMs":768,"delta":"arded,"}
+{"tMs":789,"delta":" 3"}
+{"tMs":811,"delta":" undecided\"\n  state"}
+{"tMs":983,"delta":" h"}
+{"tMs":983,"delta":"1=\"\""}
+{"tMs":983,"delta":"\n  state h2=\"\""}
+{"tMs":983,"delta":"\n  state h3=\"\"\n  "}
+{"tMs":983,"delta":"state kept=0\n  state"}
+{"tMs":983,"delta":" dec"}
+{"tMs":983,"delta":"ided=0\n  Card"}
+{"tMs":984,"delta":" gap:6"}
+{"tMs":1005,"delta":" pad:8\n    "}
+{"tMs":1027,"delta":"Text.caption \"@"}
+{"tMs":1049,"delta":"@ -12,3"}
+{"tMs":1074,"delta":" +12,3 @@"}
+{"tMs":1212,"delta":"\"\n    Text.dan"}
+{"tMs":1212,"delta":"ger \"-"}
+{"tMs":1212,"delta":" timeout: 30\""}
+{"tMs":1212,"delta":"\n    Text.success \"+"}
+{"tMs":1212,"delta":" timeout: 60"}
+{"tMs":1212,"delta":"\"\n    Row gap:"}
+{"tMs":1221,"delta":"8\n      Button.outline"}
+{"tMs":1242,"delta":" \"Keep\" -> h"}
+{"tMs":1264,"delta":"1=\"keep\"; kept"}
+{"tMs":1285,"delta":"=kept+1;"}
+{"tMs":1308,"delta":" decided=decided+1"}
+{"tMs":1328,"delta":"\n      Button."}
+{"tMs":1437,"delta":"ghost \"Discard\" -"}
+{"tMs":1437,"delta":"> h1=\"discard\";"}
+{"tMs":1437,"delta":" decided=decided+1"}
+{"tMs":1437,"delta":"\n  Card gap:6 "}
+{"tMs":1437,"delta":"pad:8\n    Text"}
+{"tMs":1458,"delta":".caption \"@@ -"}
+{"tMs":1479,"delta":"27"}
+{"tMs":1500,"delta":",2 +27,3"}
+{"tMs":1522,"delta":" @@\"\n    Text"}
+{"tMs":1549,"delta":".danger \"- retries:"}
+{"tMs":1566,"delta":" 2\"\n    Text."}
+{"tMs":1587,"delta":"success \"+ retries: "}
+{"tMs":1763,"delta":"5\"\n    Text.success"}
+{"tMs":1763,"delta":" \"+ backoff: ex"}
+{"tMs":1763,"delta":"ponential\"\n    Row g"}
+{"tMs":1763,"delta":"ap:8\n      Button."}
+{"tMs":1763,"delta":"outline \"Keep\" -"}
+{"tMs":1763,"delta":"> h2=\"keep\";"}
+{"tMs":1763,"delta":" kept=kept+1;"}
+{"tMs":1763,"delta":" decided=decided+1"}
+{"tMs":1781,"delta":"\n      Button.ghost \""}
+{"tMs":1802,"delta":"Discard\" -> h2"}
+{"tMs":1824,"delta":"=\"discard\"; decided="}
+{"tMs":1845,"delta":"decided+1\n  Card"}
+{"tMs":1885,"delta":" gap:6 pad:"}
+{"tMs":1888,"delta":"8\n    Text.caption"}
+{"tMs":1911,"delta":" \"@@ -48"}
+{"tMs":1932,"delta":",1"}
+{"tMs":1952,"delta":" +49"}
+{"tMs":1975,"delta":",1 @@\"\n    "}
+{"tMs":1995,"delta":"Text.danger \"- log"}
+{"tMs":2017,"delta":"_level: info"}
+{"tMs":2044,"delta":"\"\n    Text.success \""}
+{"tMs":2059,"delta":"+ log_level: debug"}
+{"tMs":2081,"delta":"\"\n    Row gap:"}
+{"tMs":2102,"delta":"8\n      Button.outline"}
+{"tMs":2124,"delta":" \"Keep\" -> h"}
+{"tMs":2145,"delta":"3=\"keep\"; kept"}
+{"tMs":2167,"delta":"=kept+1; decided"}
+{"tMs":2190,"delta":"=decided+1\n      "}
+{"tMs":2211,"delta":"Button.ghost \"Disc"}
+{"tMs":2232,"delta":"ard\" -> h3=\"disc"}
+{"tMs":2253,"delta":"ard\"; decided=decided"}
+{"tMs":2275,"delta":"+1\n  Text.body"}
+{"tMs":2296,"delta":" \"Kept: {kept"}
+{"tMs":2317,"delta":"} of 3\""}
+{"tMs":2339,"delta":"\n  Button"}
+{"tMs":2360,"delta":" \"Apply\" en"}
+{"tMs":2382,"delta":"abled:=decided==3"}
+{"tMs":2403,"delta":" -> emit apply"}

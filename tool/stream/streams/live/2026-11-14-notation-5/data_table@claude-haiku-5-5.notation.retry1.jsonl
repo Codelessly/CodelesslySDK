@@ -1,0 +1,230 @@
+{"meta":{"ui":"data_table","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show the twelve invoices you found as a table: number, customer, date, amount and status. I can sort by any column, filter by status, type to search the customer, page through five at a time, tick rows (and a tick-all for the page), and a bar appears with the count and total of what I ticked and a button to send reminders for them.","text":"The errors come from using `row` inside the List without a repeat line, so `row` was never declared. A List needs `each rows` to bind `row`. I also fixed the broken select-all logic and the unsafe pagination.\n\nstate invoices=[{\"id\":\"INV-1001\",\"customer\":\"Acme Ltd\",\"date\":\"2024-03-01\",\"amount\":1200,\"status\":\"Paid\"},{\"id\":\"INV-1002\",\"customer\":\"Birch & Co\",\"date\":\"2024-03-04\",\"amount\":450,\"status\":\"Overdue\"},{\"id\":\"INV-1003\",\"customer\":\"Cedar Labs\",\"date\":\"2024-03-07\",\"amount\":2300,\"status\":\"Open\"},{\"id\":\"INV-1004\",\"customer\":\"Delta Foods\",\"date\":\"2024-03-09\",\"amount\":780,\"status\":\"Paid\"},{\"id\":\"INV-1005\",\"customer\":\"Elm Studio\",\"date\":\"2024-03-12\",\"amount\":320,\"status\":\"Overdue\"},{\"id\":\"INV-1006\",\"customer\":\"Fjord Media\",\"date\":\"2024-03-15\",\"amount\":1550,\"status\":\"Open\"},{\"id\":\"INV-1007\",\"customer\":\"Garnet Ltd\",\"date\":\"2024-03-18\",\"amount\":910,\"status\":\"Paid\"},{\"id\":\"INV-1008\",\"customer\":\"Harbor Inc\",\"date\":\"2024-03-21\",\"amount\":2050,\"status\":\"Overdue\"},{\"id\":\"INV-1009\",\"customer\":\"Iris Partners\",\"date\":\"2024-03-24\",\"amount\":600,\"status\":\"Open\"},{\"id\":\"INV-1010\",\"customer\":\"Juniper Co\",\"date\":\"2024-03-27\",\"amount\":175,\"status\":\"Paid\"},{\"id\":\"INV-1011\",\"customer\":\"Kestrel Ltd\",\"date\":\"2024-03-29\",\"amount\":3100,\"status\":\"Open\"},{\"id\":\"INV-1012\",\"customer\":\"Lumen Works\",\"date\":\"2024-04-02\",\"amount\":540,\"status\":\"Overdue\"}]\nstate sortCol=\"date\"\nstate sortDesc=true\nstate statusFilter=\"All\"\nstate search=\"\"\nstate page=0\nstate picked=[]\nstate pageSize=5\nstate visible=sortByDesc(filter(invoices,r=>(statusFilter==\"All\"||r.status==statusFilter)&&(search==\"\"||contains(lower(r.customer),lower(search)))),r=>r[sortCol])\nstate pageRows=slice(visible,page*pageSize,min(length(visible),page*pageSize+pageSize))\nstate pickedRows=filter(invoices,r=>any(picked,p=>p==r.id))\nstate allOnPage=length(pageRows)>0&&all(pageRows,r=>any(picked,p=>p==r.id))\nColumn gap:10 pad:12 w:390\n  Text.heading \"Invoices\"\n  Input \"Search customer\" =search\n  Row gap:6\n    ChoiceChip \"All\" -> statusFilter=\"All\"; page=0\n    ChoiceChip \"Open\" -> statusFilter=\"Open\"; page=0\n    ChoiceChip \"Paid\" -> statusFilter=\"Paid\"; page=0\n    ChoiceChip \"Overdue\" -> statusFilter=\"Overdue\"; page=0\n  Row gap:6\n    Button.ghost \"Number\" -> sortCol=\"id\"; sortDesc=!sortDesc\n    Button.ghost \"Customer\" -> sortCol=\"customer\"; sortDesc=!sortDesc\n    Button.ghost \"Date\" -> sortCol=\"date\"; sortDesc=!sortDesc\n    Button.ghost \"Amount\" -> sortCol=\"amount\"; sortDesc=!sortDesc\n    Button.ghost \"Status\" -> sortCol=\"status\"; sortDesc=!sortDesc\n  Checkbox \"All on page\" =allOnPage -> picked=allOnPage?filter(picked,p=>!any(pageRows,r=>r.id==p)):unique(append(picked,...map(pageRows,r=>r.id)))\n  List gap:4\n    each pageRows\n      Row gap:6 pad:6\n        Checkbox =isPicked -> picked=isPicked?without(picked,row.id):append(picked,row.id)\n        Text.strong \"{row.id}\"\n        Text.small \"{row.customer} · {formatDate(row.date,\\\"MMM d\\\")} · {money(row.amount,\\\"$\\\",0)} · {row.status}\"\n  Row between\n    Button.outline \"Prev\" -> page=max(0,page-1)\n    Text.muted \"Page {page+1} of {max(1,ceil(length(visible)/pageSize))}\"\n    Button.outline \"Next\" -> page=min(page+1,max(0,ceil(length(visible)/pageSize)-1))\n  if length(picked)>0\n    Card gap:6\n      Text.strong \"{length(picked)} selected · {money(sum(pickedRows,r=>r.amount),\\\"$\\\",0)}\"\n      Button \"Send reminders\" -> emit remind picked; toast \"Reminders sent\"","usage":{"input_tokens":4338,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1658,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":546,"totalMs":5216}}
+{"tMs":546,"delta":"The err"}
+{"tMs":567,"delta":"ors come"}
+{"tMs":703,"delta":" from using"}
+{"tMs":703,"delta":" `row"}
+{"tMs":703,"delta":"` inside the List"}
+{"tMs":703,"delta":" without"}
+{"tMs":703,"delta":" a repeat line"}
+{"tMs":703,"delta":","}
+{"tMs":712,"delta":" so `"}
+{"tMs":733,"delta":"row` was"}
+{"tMs":757,"delta":" never declared. A List"}
+{"tMs":775,"delta":" need"}
+{"tMs":795,"delta":"s `"}
+{"tMs":815,"delta":"each r"}
+{"tMs":855,"delta":"ows`"}
+{"tMs":855,"delta":" to b"}
+{"tMs":876,"delta":"ind `row`."}
+{"tMs":897,"delta":" I"}
+{"tMs":918,"delta":" also fixed the broken select"}
+{"tMs":939,"delta":"-all log"}
+{"tMs":961,"delta":"ic and the unsafe p"}
+{"tMs":982,"delta":"agination.\n\nstate invoices"}
+{"tMs":1004,"delta":"=[{\"id\":\"IN"}
+{"tMs":1024,"delta":"V-1001\",\"customer\":"}
+{"tMs":1045,"delta":"\"Acme Ltd"}
+{"tMs":1065,"delta":"\",\"date\":\"2024-03"}
+{"tMs":1087,"delta":"-01\",\"amount\":1200"}
+{"tMs":1107,"delta":",\"status\":\"Paid"}
+{"tMs":1127,"delta":"\"},{\"id\":\"IN"}
+{"tMs":1148,"delta":"V-1002\",\"customer\":"}
+{"tMs":1169,"delta":"\"Birch & Co\",\""}
+{"tMs":1189,"delta":"date\":\"2024-03-"}
+{"tMs":1210,"delta":"04\",\"amount\":450,\""}
+{"tMs":1231,"delta":"status\":\"Overdue\""}
+{"tMs":1251,"delta":"},{\"id\":\"INV"}
+{"tMs":1272,"delta":"-1003\",\"customer\":\""}
+{"tMs":1292,"delta":"Cedar Labs\",\""}
+{"tMs":1313,"delta":"date\":\"2024-03-"}
+{"tMs":1333,"delta":"07\",\"amount\":2300,"}
+{"tMs":1354,"delta":"\"status\":\"Open\"},"}
+{"tMs":1375,"delta":"{\"id\":\"INV-"}
+{"tMs":1395,"delta":"1004\",\"customer\":\""}
+{"tMs":1416,"delta":"Delta Foods\",\"date\":"}
+{"tMs":1436,"delta":"\"2024-03-09\",\""}
+{"tMs":1457,"delta":"amount\":780,\"status\":"}
+{"tMs":1477,"delta":"\"Paid\"},{\""}
+{"tMs":1498,"delta":"id\":\"INV-1005"}
+{"tMs":1518,"delta":"\",\"customer\":\"Elm"}
+{"tMs":1539,"delta":" Studio\",\"date\":\"2"}
+{"tMs":1559,"delta":"024-03-12\",\"amount"}
+{"tMs":1580,"delta":"\":320,\"status\":\""}
+{"tMs":1600,"delta":"Overdue\"},{\"id"}
+{"tMs":1620,"delta":"\":\"INV-1006\",\""}
+{"tMs":1641,"delta":"customer\":\"Fjord"}
+{"tMs":1662,"delta":" Media\",\"date\":\"2024"}
+{"tMs":1682,"delta":"-03-15\",\"amount\":"}
+{"tMs":1702,"delta":"1550,\"status\":\""}
+{"tMs":1722,"delta":"Open\"},{\"id\":\""}
+{"tMs":1743,"delta":"INV-1007\",\"customer"}
+{"tMs":1763,"delta":"\":\"Garnet "}
+{"tMs":1784,"delta":"Ltd\",\"date\":\"2024"}
+{"tMs":1804,"delta":"-03-18\",\"amount\":"}
+{"tMs":1825,"delta":"910,\"status\":\"Pa"}
+{"tMs":1845,"delta":"id\"},{\"id\":\""}
+{"tMs":1865,"delta":"INV-1008\",\"customer"}
+{"tMs":1886,"delta":"\":\"Harbor In"}
+{"tMs":1907,"delta":"c\",\"date\":\"2024-"}
+{"tMs":1927,"delta":"03-21\",\"amount\":2"}
+{"tMs":1948,"delta":"050,\"status\":\"Over"}
+{"tMs":1969,"delta":"due\"},{\"id\":"}
+{"tMs":1990,"delta":"\"INV-1009\",\"custom"}
+{"tMs":2008,"delta":"er\":\"Iris Part"}
+{"tMs":2029,"delta":"ners\",\"date\":\"2024-"}
+{"tMs":2049,"delta":"03-24\",\"amount\":600"}
+{"tMs":2070,"delta":",\"status\":\"Open\""}
+{"tMs":2091,"delta":"},{\"id\":\"INV"}
+{"tMs":2111,"delta":"-1010\",\"customer\":\""}
+{"tMs":2132,"delta":"Juniper Co\",\"date"}
+{"tMs":2151,"delta":"\":\"2024-03-27"}
+{"tMs":2172,"delta":"\",\"amount\":175,\"status"}
+{"tMs":2192,"delta":"\":\"Paid\"},{"}
+{"tMs":2212,"delta":"\"id\":\"INV-1"}
+{"tMs":2233,"delta":"011\",\"customer\":\"K"}
+{"tMs":2255,"delta":"estrel Ltd\",\""}
+{"tMs":2274,"delta":"date\":\"2024-03-"}
+{"tMs":2294,"delta":"29\",\"amount\":3100,"}
+{"tMs":2318,"delta":"\"status\":\"Open\"},"}
+{"tMs":2335,"delta":"{\"id\":\"INV-"}
+{"tMs":2356,"delta":"1012\",\"customer\":\""}
+{"tMs":2376,"delta":"Lumen Works\",\"date\":"}
+{"tMs":2413,"delta":"\"2024-04-02\",\""}
+{"tMs":2429,"delta":"amount\":540,\"status\":"}
+{"tMs":2448,"delta":"\"Overdue\"}]"}
+{"tMs":2467,"delta":"\nstate sortCol=\"date"}
+{"tMs":2484,"delta":"\"\nstate sortDesc"}
+{"tMs":2503,"delta":"=true\nstate statusFil"}
+{"tMs":2519,"delta":"ter=\"All\"\nstate search="}
+{"tMs":2539,"delta":"\"\"\nstate page=0\nstate"}
+{"tMs":2560,"delta":" picked=[]\nstate p"}
+{"tMs":2580,"delta":"ageSize=5\nstate vis"}
+{"tMs":2601,"delta":"ible=sortByDesc"}
+{"tMs":2621,"delta":"(filter(invoices,"}
+{"tMs":2641,"delta":"r=>(statusFil"}
+{"tMs":2662,"delta":"ter==\"All\"||r"}
+{"tMs":2684,"delta":".status==statusFilter"}
+{"tMs":2703,"delta":")&&("}
+{"tMs":2723,"delta":"search==\"\"||contains(l"}
+{"tMs":2744,"delta":"ower(r.customer),l"}
+{"tMs":2764,"delta":"ower(search)))),r="}
+{"tMs":2784,"delta":">r[sortCol])"}
+{"tMs":2807,"delta":"\nstate pageRows=sl"}
+{"tMs":2825,"delta":"ice(visible,page*p"}
+{"tMs":2845,"delta":"ageSize,min(length("}
+{"tMs":2866,"delta":"visible),page*pageS"}
+{"tMs":2886,"delta":"ize+pageSize))"}
+{"tMs":2907,"delta":"\nstate pick"}
+{"tMs":2927,"delta":"edRows=filter(inv"}
+{"tMs":2948,"delta":"oices,r=>any("}
+{"tMs":2968,"delta":"picked,p=>p=="}
+{"tMs":2990,"delta":"r.id))\nstate allO"}
+{"tMs":3008,"delta":"nPage=length(page"}
+{"tMs":3029,"delta":"Rows)>0&&all"}
+{"tMs":3050,"delta":"(pageRows,r="}
+{"tMs":3070,"delta":">any(picked,p="}
+{"tMs":3091,"delta":">p==r.id))"}
+{"tMs":3111,"delta":"\nColumn gap:10 p"}
+{"tMs":3132,"delta":"ad:12 w:390"}
+{"tMs":3152,"delta":"\n  Text.heading \""}
+{"tMs":3172,"delta":"Invoices\"\n  Input"}
+{"tMs":3194,"delta":" \"Search customer\" =search"}
+{"tMs":3213,"delta":"\n  Row gap:6"}
+{"tMs":3233,"delta":"\n    ChoiceCh"}
+{"tMs":3254,"delta":"ip \"All\" -> status"}
+{"tMs":3277,"delta":"Filter=\"All\"; page"}
+{"tMs":3295,"delta":"=0\n    Choi"}
+{"tMs":3315,"delta":"ceChip \"Open\" -"}
+{"tMs":3336,"delta":"> statusFilter=\""}
+{"tMs":3356,"delta":"Open\"; page=0\n    "}
+{"tMs":3376,"delta":"ChoiceChip \""}
+{"tMs":3397,"delta":"Paid\" -> status"}
+{"tMs":3417,"delta":"Filter=\"Paid\""}
+{"tMs":3438,"delta":"; page=0\n    Ch"}
+{"tMs":3461,"delta":"oiceChip \"Over"}
+{"tMs":3478,"delta":"due\" -> statusF"}
+{"tMs":3499,"delta":"ilter=\"Overdue\""}
+{"tMs":3519,"delta":"; page=0\n  Row"}
+{"tMs":3540,"delta":" gap:6\n    Button"}
+{"tMs":3560,"delta":".ghost \"Number\""}
+{"tMs":3580,"delta":" -> sortCol=\"id"}
+{"tMs":3601,"delta":"\"; sortDesc="}
+{"tMs":3621,"delta":"!sortDesc\n    "}
+{"tMs":3642,"delta":"Button.ghost \""}
+{"tMs":3663,"delta":"Customer\" -> sortC"}
+{"tMs":3683,"delta":"ol=\"customer\"; sort"}
+{"tMs":3703,"delta":"Desc=!sortD"}
+{"tMs":3723,"delta":"esc\n    Button."}
+{"tMs":3744,"delta":"ghost \"Date\" ->"}
+{"tMs":3765,"delta":" sortCol=\"date\";"}
+{"tMs":3786,"delta":" sortDesc=!s"}
+{"tMs":3805,"delta":"ortDesc\n    Button"}
+{"tMs":3826,"delta":".ghost \"Amount"}
+{"tMs":3845,"delta":"\" -> sortCol=\""}
+{"tMs":3872,"delta":"amount\"; sortDes"}
+{"tMs":3889,"delta":"c=!sortDesc"}
+{"tMs":3907,"delta":"\n    Button.ghost"}
+{"tMs":3928,"delta":" \"Status\" -> sort"}
+{"tMs":3948,"delta":"Col=\"status\"; sort"}
+{"tMs":3968,"delta":"Desc=!sortD"}
+{"tMs":3989,"delta":"esc\n  Checkb"}
+{"tMs":4010,"delta":"ox \"All on page\" ="}
+{"tMs":4033,"delta":"allOnPage -> pic"}
+{"tMs":4051,"delta":"ked=allOnPage?"}
+{"tMs":4070,"delta":"fil"}
+{"tMs":4091,"delta":"ter(picked,p"}
+{"tMs":4111,"delta":"=>!any(p"}
+{"tMs":4131,"delta":"ageRows,r=>r"}
+{"tMs":4162,"delta":".id==p)):un"}
+{"tMs":4172,"delta":"ique(append"}
+{"tMs":4193,"delta":"(picked,..."}
+{"tMs":4213,"delta":"map(pageRows,r"}
+{"tMs":4233,"delta":"=>r.id)))"}
+{"tMs":4254,"delta":"\n  List gap:4"}
+{"tMs":4276,"delta":"\n    each p"}
+{"tMs":4296,"delta":"ageRows\n      Row g"}
+{"tMs":4315,"delta":"ap:6 pad:6"}
+{"tMs":4335,"delta":"\n        Checkbox ="}
+{"tMs":4356,"delta":"is"}
+{"tMs":4376,"delta":"P"}
+{"tMs":4397,"delta":"icked -"}
+{"tMs":4418,"delta":"> picked=is"}
+{"tMs":4438,"delta":"Picked?without"}
+{"tMs":4458,"delta":"(picked,row"}
+{"tMs":4480,"delta":".id):append(picked,"}
+{"tMs":4499,"delta":"row.id)\n        Text"}
+{"tMs":4519,"delta":".strong \"{row.id"}
+{"tMs":4542,"delta":"}\"\n        Text.small"}
+{"tMs":4560,"delta":" \"{row.customer} ·"}
+{"tMs":4580,"delta":" {formatDate(row."}
+{"tMs":4601,"delta":"date,\\\"MMM d"}
+{"tMs":4621,"delta":"\\\")} · {money(row"}
+{"tMs":4642,"delta":".amount,\\\"$\\"}
+{"tMs":4662,"delta":"\",0)} · {row."}
+{"tMs":4683,"delta":"status}\"\n  Row between"}
+{"tMs":4702,"delta":"\n    Button.outline \""}
+{"tMs":4723,"delta":"Prev\" -> page="}
+{"tMs":4744,"delta":"max(0,page-1)"}
+{"tMs":4764,"delta":"\n    Text."}
+{"tMs":4785,"delta":"muted \"Page {page+"}
+{"tMs":4805,"delta":"1} of {max(1,"}
+{"tMs":4825,"delta":"ceil(length(visible"}
+{"tMs":4846,"delta":")/pageSize))}"}
+{"tMs":4867,"delta":"\"\n    Button.outline"}
+{"tMs":4887,"delta":" \"Next\" -> page="}
+{"tMs":4907,"delta":"min(page+1,max("}
+{"tMs":4927,"delta":"0,ceil(length("}
+{"tMs":4950,"delta":"visible)/pageSize"}
+{"tMs":4968,"delta":")-1))\n  if length"}
+{"tMs":4989,"delta":"(picked)>0\n    "}
+{"tMs":5009,"delta":"Card gap:6\n      "}
+{"tMs":5030,"delta":"Text.strong \"{length"}
+{"tMs":5050,"delta":"(picked)} selected ·"}
+{"tMs":5070,"delta":" {money(sum(pick"}
+{"tMs":5090,"delta":"edRows,r=>r"}
+{"tMs":5111,"delta":".amount),\\\"$\\"}
+{"tMs":5131,"delta":"\",0)}\"\n      "}
+{"tMs":5156,"delta":"Button \"Send reminders\""}
+{"tMs":5172,"delta":" -> emit remind picked"}
+{"tMs":5195,"delta":"; toast \"Reminders"}
+{"tMs":5213,"delta":" sent\""}

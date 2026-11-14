@@ -1,0 +1,106 @@
+{"meta":{"ui":"image_gallery","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"Card w:390 pad:12\n  state open=false\n  state cur=0\n  state photos=[{\"i\":0,\"c\":\"#FF42A5F5\",\"t\":\"Harbour at sunrise\"},{\"i\":1,\"c\":\"#FFEF5350\",\"t\":\"Old town market\"},{\"i\":2,\"c\":\"#FF66BB6A\",\"t\":\"Forest trail\"},{\"i\":3,\"c\":\"#FFFFA726\",\"t\":\"Desert dunes\"},{\"i\":4,\"c\":\"#FFAB47BC\",\"t\":\"Evening skyline\"},{\"i\":5,\"c\":\"#FF26A69A\",\"t\":\"Hidden lagoon\"},{\"i\":6,\"c\":\"#FF8D6E63\",\"t\":\"Mountain hut\"},{\"i\":7,\"c\":\"#FFEC407A\",\"t\":\"Street festival\"},{\"i\":8,\"c\":\"#FF5C6BC0\",\"t\":\"Night train\"}]\n  Stack\n    Column gap:12\n      Text.title \"My trip\"\n      GridView cols:3 gap:8\n        each p in photos\n          Column gap:4\n            Box h:90 radius:8 fill:=p.c -> cur=p.i; open=true\n            Text.caption \"{p.t}\"\n    if open\n      Box w:fill h:fill fill:#F2000000 pad:16 gap:12 radius:12 center middle\n        Row between middle\n          Text.strong \"{cur+1} of {length(photos)}\"\n          IconButton \"close\" -> open=false\n        Box w:fill h:240 radius:12 fill:=photos[cur].c\n        Text.heading \"{photos[cur].t}\"\n        Row between middle\n          IconButton \"chevron_left\" -> cur=cur==0?length(photos)-1:cur-1\n          IconButton \"chevron_right\" -> cur=cur==length(photos)-1?0:cur+1","usage":{"input_tokens":2379,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1062,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":456}},"ttftMs":5323,"totalMs":8876}}
+{"tMs":5323,"delta":"Card w"}
+{"tMs":5355,"delta":":390 pad:12"}
+{"tMs":5389,"delta":"\n  state"}
+{"tMs":5422,"delta":" open"}
+{"tMs":5455,"delta":"=false\n  state cur="}
+{"tMs":5489,"delta":"0\n  state photos=["}
+{"tMs":5522,"delta":"{\"i"}
+{"tMs":5556,"delta":"\":0,\"c\":\"#"}
+{"tMs":5590,"delta":"FF42"}
+{"tMs":5623,"delta":"A5"}
+{"tMs":5657,"delta":"F5\",\"t\":\"Har"}
+{"tMs":5690,"delta":"bour"}
+{"tMs":5723,"delta":" at sunr"}
+{"tMs":5758,"delta":"ise\"},{\"i\":1"}
+{"tMs":5791,"delta":",\"c\":\"#FF"}
+{"tMs":5825,"delta":"EF5350\",\"t\":\""}
+{"tMs":5859,"delta":"Old"}
+{"tMs":5891,"delta":" town"}
+{"tMs":5924,"delta":" market"}
+{"tMs":5958,"delta":"\"},{\"i\":2,"}
+{"tMs":5992,"delta":"\"c\":\"#FF"}
+{"tMs":6026,"delta":"66BB6A\",\"t\":"}
+{"tMs":6059,"delta":"\"Forest tr"}
+{"tMs":6093,"delta":"ail\"},{\"i\":3"}
+{"tMs":6127,"delta":",\"c\":\"#FF"}
+{"tMs":6160,"delta":"FFA"}
+{"tMs":6194,"delta":"726\",\"t\":\"Des"}
+{"tMs":6226,"delta":"ert d"}
+{"tMs":6263,"delta":"un"}
+{"tMs":6294,"delta":"es\"},{\"i\":4"}
+{"tMs":6327,"delta":",\"c\":\"#F"}
+{"tMs":6360,"delta":"F"}
+{"tMs":6394,"delta":"AB47BC\",\"t\":"}
+{"tMs":6427,"delta":"\"Ev"}
+{"tMs":6461,"delta":"ening sk"}
+{"tMs":6494,"delta":"yline\"},{\"i\":"}
+{"tMs":6528,"delta":"5,\"c\":\"#F"}
+{"tMs":6561,"delta":"F26A69A\",\"t\":"}
+{"tMs":6595,"delta":"\"H"}
+{"tMs":6630,"delta":"idden l"}
+{"tMs":6661,"delta":"agoon\"},{\"i"}
+{"tMs":6695,"delta":"\":6,\"c\":\"#"}
+{"tMs":6729,"delta":"FF"}
+{"tMs":6762,"delta":"8D"}
+{"tMs":6796,"delta":"6E63\",\"t\":\""}
+{"tMs":6829,"delta":"Mountain h"}
+{"tMs":6862,"delta":"ut\"},{\"i\":7"}
+{"tMs":6896,"delta":",\"c\":\"#FF"}
+{"tMs":6929,"delta":"E"}
+{"tMs":6962,"delta":"C407"}
+{"tMs":6996,"delta":"A\",\"t\":\"Street"}
+{"tMs":7030,"delta":" fest"}
+{"tMs":7073,"delta":"ival\"},{\"i\":8"}
+{"tMs":7103,"delta":",\"c\":\"#F"}
+{"tMs":7139,"delta":"F5C6"}
+{"tMs":7168,"delta":"BC0"}
+{"tMs":7196,"delta":"\",\"t\":\"Night"}
+{"tMs":7230,"delta":" train"}
+{"tMs":7263,"delta":"\"}]\n  Stack"}
+{"tMs":7330,"delta":"\n    Column gap:12"}
+{"tMs":7363,"delta":"\n      Text.title"}
+{"tMs":7397,"delta":" \"My trip\"\n      G"}
+{"tMs":7431,"delta":"ridView cols:3 g"}
+{"tMs":7464,"delta":"ap:8\n        each p in"}
+{"tMs":7498,"delta":" photos\n          Column g"}
+{"tMs":7531,"delta":"ap:4\n            Box h"}
+{"tMs":7564,"delta":":90"}
+{"tMs":7598,"delta":" rad"}
+{"tMs":7631,"delta":"ius:8 fill:="}
+{"tMs":7665,"delta":"p.c -> c"}
+{"tMs":7698,"delta":"ur=p.i; open="}
+{"tMs":7732,"delta":"true\n            Text.caption"}
+{"tMs":7766,"delta":" \"{p.t}\""}
+{"tMs":7799,"delta":"\n    if open\n      Box w"}
+{"tMs":7833,"delta":":fill h:fill f"}
+{"tMs":7866,"delta":"ill:#F"}
+{"tMs":7899,"delta":"2000000 p"}
+{"tMs":7933,"delta":"ad:16 gap:12"}
+{"tMs":7966,"delta":" rad"}
+{"tMs":8000,"delta":"ius:12 center midd"}
+{"tMs":8033,"delta":"le\n        Row between midd"}
+{"tMs":8066,"delta":"le\n          Text"}
+{"tMs":8100,"delta":".str"}
+{"tMs":8133,"delta":"ong \"{cur+"}
+{"tMs":8166,"delta":"1} of {length"}
+{"tMs":8202,"delta":"(photos)}\"\n          "}
+{"tMs":8233,"delta":"IconButton \"close\" -"}
+{"tMs":8269,"delta":"> open=false\n        Box"}
+{"tMs":8300,"delta":" w"}
+{"tMs":8333,"delta":":fill h:240 rad"}
+{"tMs":8367,"delta":"ius:12 fill:="}
+{"tMs":8400,"delta":"photos[cur].c"}
+{"tMs":8434,"delta":"\n        Text.heading \"{"}
+{"tMs":8468,"delta":"photos[cur].t}"}
+{"tMs":8501,"delta":"\"\n        Row between middle"}
+{"tMs":8535,"delta":"\n          IconButton \"ch"}
+{"tMs":8569,"delta":"evron_left"}
+{"tMs":8602,"delta":"\" -> cur=cur"}
+{"tMs":8635,"delta":"==0?length(photos)"}
+{"tMs":8669,"delta":"-1:cur-1"}
+{"tMs":8702,"delta":"\n          I"}
+{"tMs":8736,"delta":"conButton \"chevron_"}
+{"tMs":8769,"delta":"right\" -> cur=c"}
+{"tMs":8802,"delta":"ur==length(photos)-"}
+{"tMs":8836,"delta":"1?0:cur+1"}

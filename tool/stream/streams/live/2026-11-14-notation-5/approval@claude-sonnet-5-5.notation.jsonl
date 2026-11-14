@@ -1,0 +1,200 @@
+{"meta":{"ui":"approval","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","text":"Card w:390 gap:12\n  state decision=\"\"\n  state showFiles=false\n  Row gap:8 middle\n    Icon \"warning\"\n    Text.heading \"Delete 214 old files?\"\n  Text.body \"I'm about to permanently delete old files from your shared drive. Nothing will be removed until you approve.\"\n  Box fill:#FFF5F5F5 radius:8 pad:12 gap:6\n    Row between\n      Text.muted \"Folder\"\n      Text.strong \"Shared Drive / Archive\"\n    Row between\n      Text.muted \"Files\"\n      Text.strong \"214\"\n    Row between\n      Text.muted \"Space freed\"\n      Text.strong \"3.2 GB\"\n  Row gap:8 middle\n    Icon \"error\"\n    Text.danger \"This cannot be undone.\"\n  Button.ghost showFiles ? \"Hide file names\" : \"Show first few file names\" -> showFiles=!showFiles\n  if showFiles\n    Box fill:#FFF5F5F5 radius:8 pad:12 gap:4\n      Text.small \"budget_2017_final.xlsx\"\n      Text.small \"meeting_notes_2016-03.docx\"\n      Text.small \"logo_draft_v2.psd\"\n      Text.small \"old_photos_backup.zip\"\n      Text.small \"invoice_2018-07.pdf\"\n      Text.caption \"…and 209 more\"\n  if decision==\"\"\n    Row gap:8 end\n      Button.outline \"Deny\" -> decision=\"denied\"; emit deny\n      Button.destructive \"Approve deletion\" -> decision=\"approved\"; emit approve\n  if decision!=\"\"\n    Divider\n    Row gap:8 middle\n      Icon decision==\"approved\" ? \"check_circle\" : \"cancel\"\n      Text.strong \"You {decision} this request.\"\n    Text.caption \"This decision is locked.\"\n\nWait, I need to correct that: state lines belong at the top level, and the text and icon props must use valid forms. Here is the corrected version.\n\nstate decision=\"\"\nstate showFiles=false\nCard w:390 gap:12\n  Row gap:8 middle\n    Icon \"warning\"\n    Text.heading \"Delete 214 old files?\"\n  Text.body \"I'm about to permanently delete old files from your shared drive. Nothing will be removed until you approve.\"\n  Box fill:#FFF5F5F5 radius:8 pad:12 gap:6\n    Row between\n      Text.muted \"Folder\"\n      Text.strong \"Shared Drive / Archive\"\n    Row between\n      Text.muted \"Files\"\n      Text.strong \"214\"\n    Row between\n      Text.muted \"Space freed\"\n      Text.strong \"3.2 GB\"\n  Row gap:8 middle\n    Icon \"error\"\n    Text.danger \"This cannot be undone.\"\n  if decision==\"\"\n    Button.ghost \"Show or hide first file names\" -> showFiles=!showFiles\n  if showFiles\n    Box fill:#FFF5F5F5 radius:8 pad:12 gap:4\n      Text.small \"budget_2017_final.xlsx\"\n      Text.small \"meeting_notes_2016-03.docx\"\n      Text.small \"logo_draft_v2.psd\"\n      Text.small \"old_photos_backup.zip\"\n      Text.small \"invoice_2018-07.pdf\"\n      Text.caption \"…and 209 more\"\n  if decision==\"\"\n    Row gap:8 end\n      Button.outline \"Deny\" -> decision=\"denied\"; emit deny\n      Button.destructive \"Approve\" -> decision=\"approved\"; emit approve\n  if decision!=\"\"\n    Divider\n    Row gap:8 middle\n      Icon \"lock\"\n      Text.strong \"You {decision} this request.\"\n    Text.caption \"This decision is locked.\"","usage":{"input_tokens":2382,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1241,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":684,"totalMs":7395}}
+{"tMs":684,"delta":"Card w:"}
+{"tMs":1004,"delta":"390 gap:12"}
+{"tMs":1005,"delta":"\n  state"}
+{"tMs":1005,"delta":" decision=\"\"\n  state"}
+{"tMs":1005,"delta":" showFiles=false\n  "}
+{"tMs":1005,"delta":"Row g"}
+{"tMs":1005,"delta":"ap:8 middle\n    "}
+{"tMs":1005,"delta":"Icon \"warning\""}
+{"tMs":1005,"delta":"\n    Text.he"}
+{"tMs":1005,"delta":"ading \"Delete 214 "}
+{"tMs":1021,"delta":"old files?\"\n  Text"}
+{"tMs":1053,"delta":".body"}
+{"tMs":1085,"delta":" \"I"}
+{"tMs":1378,"delta":"'"}
+{"tMs":1378,"delta":"m"}
+{"tMs":1378,"delta":" about to perm"}
+{"tMs":1378,"delta":"anently delete old"}
+{"tMs":1378,"delta":" files from your shared drive."}
+{"tMs":1378,"delta":" Nothing will be removed until"}
+{"tMs":1378,"delta":" you approve.\"\n  Box"}
+{"tMs":1387,"delta":" f"}
+{"tMs":1415,"delta":"ill:#F"}
+{"tMs":1448,"delta":"FF5"}
+{"tMs":1481,"delta":"F5F"}
+{"tMs":1513,"delta":"5"}
+{"tMs":1718,"delta":" radius:8 p"}
+{"tMs":1718,"delta":"ad:12 gap:6"}
+{"tMs":1718,"delta":"\n    Row between"}
+{"tMs":1718,"delta":"\n      Text.muted \""}
+{"tMs":1718,"delta":"Folder\"\n      Text"}
+{"tMs":1719,"delta":".strong \""}
+{"tMs":1750,"delta":"Shared Drive / Arch"}
+{"tMs":1784,"delta":"ive\"\n    Row between"}
+{"tMs":1818,"delta":"\n      Text.muted \""}
+{"tMs":1851,"delta":"Files\"\n      Text.str"}
+{"tMs":1884,"delta":"ong \"214\"\n    Row"}
+{"tMs":1918,"delta":" between\n      Text.muted"}
+{"tMs":2053,"delta":" \"Space fre"}
+{"tMs":2054,"delta":"ed\"\n      Text.str"}
+{"tMs":2054,"delta":"ong \"3"}
+{"tMs":2054,"delta":".2"}
+{"tMs":2084,"delta":" GB\"\n  Row"}
+{"tMs":2118,"delta":" gap:8"}
+{"tMs":2151,"delta":" middle\n    Ic"}
+{"tMs":2185,"delta":"on \"error"}
+{"tMs":2218,"delta":"\"\n    Text.danger"}
+{"tMs":2251,"delta":" \"This c"}
+{"tMs":2285,"delta":"annot be undone.\"\n  "}
+{"tMs":2318,"delta":"Button.ghost showF"}
+{"tMs":2390,"delta":"iles ? \"H"}
+{"tMs":2390,"delta":"ide file"}
+{"tMs":2418,"delta":" names\" : \"Show first few"}
+{"tMs":2452,"delta":" file names\" -> showFi"}
+{"tMs":2485,"delta":"les=!showFiles"}
+{"tMs":2519,"delta":"\n  if showFiles\n    "}
+{"tMs":2552,"delta":"Box fill:#FF"}
+{"tMs":2586,"delta":"F5F5F5 rad"}
+{"tMs":2620,"delta":"ius:8 pad:12"}
+{"tMs":2653,"delta":" gap:4\n      "}
+{"tMs":2686,"delta":"Text.small \"bud"}
+{"tMs":2719,"delta":"get_2017"}
+{"tMs":2753,"delta":"_final"}
+{"tMs":2786,"delta":".xlsx\"\n      "}
+{"tMs":2819,"delta":"Text.small \"meeting"}
+{"tMs":2854,"delta":"_notes_2016-"}
+{"tMs":2886,"delta":"03.docx\"\n      "}
+{"tMs":2919,"delta":"Text.small \"log"}
+{"tMs":2953,"delta":"o_dra"}
+{"tMs":2986,"delta":"ft_v2.ps"}
+{"tMs":3019,"delta":"d\"\n      Text.small"}
+{"tMs":3053,"delta":" \"old_photos_back"}
+{"tMs":3086,"delta":"up.zip\"\n      "}
+{"tMs":3120,"delta":"Text.small \"inv"}
+{"tMs":3153,"delta":"oice_2"}
+{"tMs":3185,"delta":"018"}
+{"tMs":3219,"delta":"-07"}
+{"tMs":3253,"delta":".pdf\"\n      "}
+{"tMs":3289,"delta":"Text.caption \"…"}
+{"tMs":3320,"delta":"and 209 more\"\n  "}
+{"tMs":3352,"delta":"if decision=="}
+{"tMs":3386,"delta":"\"\"\n    Row"}
+{"tMs":3419,"delta":" gap:8 "}
+{"tMs":3453,"delta":"end\n      Button.outline"}
+{"tMs":3487,"delta":" \"Deny\" -> dec"}
+{"tMs":3519,"delta":"ision=\"den"}
+{"tMs":3552,"delta":"ied\"; emit deny"}
+{"tMs":3586,"delta":"\n      Button.dest"}
+{"tMs":3619,"delta":"ructive \"Approve de"}
+{"tMs":3653,"delta":"letion\" -> decision=\""}
+{"tMs":3686,"delta":"approved\"; emit approve"}
+{"tMs":3719,"delta":"\n  if decision!"}
+{"tMs":3752,"delta":"="}
+{"tMs":3786,"delta":"\"\"\n    Divider"}
+{"tMs":3820,"delta":"\n    Row gap:8 "}
+{"tMs":3853,"delta":"middle\n      Icon dec"}
+{"tMs":3886,"delta":"ision="}
+{"tMs":3920,"delta":"=\"approved\" ? \"check"}
+{"tMs":3953,"delta":"_circle\" : \"c"}
+{"tMs":3986,"delta":"ancel\"\n      Text."}
+{"tMs":4019,"delta":"strong \""}
+{"tMs":4052,"delta":"You"}
+{"tMs":4086,"delta":" {"}
+{"tMs":4119,"delta":"decision} this"}
+{"tMs":4152,"delta":" request"}
+{"tMs":4185,"delta":".\""}
+{"tMs":4219,"delta":"\n    Text.ca"}
+{"tMs":4252,"delta":"ption \"This"}
+{"tMs":4285,"delta":" decision is locked.\""}
+{"tMs":4352,"delta":"\n\nWait, I need"}
+{"tMs":4387,"delta":" to corre"}
+{"tMs":4420,"delta":"ct that:"}
+{"tMs":4451,"delta":" state l"}
+{"tMs":4485,"delta":"ines bel"}
+{"tMs":4518,"delta":"ong at the top level,"}
+{"tMs":4551,"delta":" and the"}
+{"tMs":4584,"delta":" text and ic"}
+{"tMs":4621,"delta":"on props must use val"}
+{"tMs":4650,"delta":"id for"}
+{"tMs":4684,"delta":"ms."}
+{"tMs":4718,"delta":" Here is the cor"}
+{"tMs":4751,"delta":"rected version.\n\nstate"}
+{"tMs":4784,"delta":" decision=\"\"\nstate"}
+{"tMs":4818,"delta":" showFiles=false"}
+{"tMs":4851,"delta":"\nCard w:390 "}
+{"tMs":4884,"delta":"gap:12\n  Row"}
+{"tMs":4918,"delta":" gap:8 middle"}
+{"tMs":4952,"delta":"\n    Icon \"warning\""}
+{"tMs":4984,"delta":"\n    Text.heading \""}
+{"tMs":5018,"delta":"Delete 214 old files"}
+{"tMs":5051,"delta":"?\"\n  Text.body"}
+{"tMs":5084,"delta":" \"I'm about to perman"}
+{"tMs":5118,"delta":"ently delete old files from your sh"}
+{"tMs":5153,"delta":"ared drive. Nothing"}
+{"tMs":5187,"delta":" will be removed until you approve"}
+{"tMs":5222,"delta":".\"\n  Box fill:"}
+{"tMs":5262,"delta":"#FFF5F5F"}
+{"tMs":5292,"delta":"5 radius:8 p"}
+{"tMs":5323,"delta":"ad:12 gap:6"}
+{"tMs":5356,"delta":"\n    Row between\n      "}
+{"tMs":5386,"delta":"Text.muted \"Folder"}
+{"tMs":5419,"delta":"\"\n      Text.strong"}
+{"tMs":5452,"delta":" \"Shared Drive /"}
+{"tMs":5486,"delta":" Archive\"\n    Row"}
+{"tMs":5520,"delta":" between\n      Text.muted"}
+{"tMs":5552,"delta":" \"Files\"\n      Text"}
+{"tMs":5587,"delta":".strong \"214\"\n    "}
+{"tMs":5619,"delta":"Row between\n      Text."}
+{"tMs":5653,"delta":"muted \"Space freed\""}
+{"tMs":5686,"delta":"\n      Text.strong \""}
+{"tMs":5720,"delta":"3.2 GB\""}
+{"tMs":5753,"delta":"\n  Row gap:8 "}
+{"tMs":5786,"delta":"middle\n    Icon \""}
+{"tMs":5820,"delta":"error\"\n    Text.dan"}
+{"tMs":5853,"delta":"ger \"This cannot be und"}
+{"tMs":5886,"delta":"one.\"\n  if"}
+{"tMs":5920,"delta":" dec"}
+{"tMs":5953,"delta":"ision==\"\"\n    Button."}
+{"tMs":5987,"delta":"ghost \"Show"}
+{"tMs":6020,"delta":" or"}
+{"tMs":6053,"delta":" hide first file"}
+{"tMs":6086,"delta":" names\" -> showFiles"}
+{"tMs":6120,"delta":"=!showFiles\n  "}
+{"tMs":6154,"delta":"if showFiles\n    "}
+{"tMs":6187,"delta":"Box fill:#FFF"}
+{"tMs":6220,"delta":"5F5F5 radius"}
+{"tMs":6253,"delta":":8 pad:12 "}
+{"tMs":6287,"delta":"gap:4\n      Text"}
+{"tMs":6320,"delta":".small \"budget_2017"}
+{"tMs":6353,"delta":"_final.xlsx\""}
+{"tMs":6387,"delta":"\n      Text.small \"me"}
+{"tMs":6420,"delta":"eting_notes_2016"}
+{"tMs":6454,"delta":"-03.docx\"\n      "}
+{"tMs":6487,"delta":"Text.small \"logo_"}
+{"tMs":6520,"delta":"draft_v2.psd"}
+{"tMs":6553,"delta":"\"\n      Text.small \""}
+{"tMs":6587,"delta":"old_photos_backup."}
+{"tMs":6620,"delta":"zip\"\n      Text."}
+{"tMs":6654,"delta":"small \"invoice_2018"}
+{"tMs":6688,"delta":"-07.pdf\""}
+{"tMs":6720,"delta":"\n      Text.caption \"…"}
+{"tMs":6754,"delta":"and 209 more\"\n  "}
+{"tMs":6787,"delta":"if decision==\"\"\n    "}
+{"tMs":6821,"delta":"Row gap:8 end"}
+{"tMs":6854,"delta":"\n      Button.outline \""}
+{"tMs":6887,"delta":"Deny\" -> decision=\""}
+{"tMs":6929,"delta":"denied\"; emit deny"}
+{"tMs":6954,"delta":"\n      Button.destructive"}
+{"tMs":6987,"delta":" \"Approve\""}
+{"tMs":7021,"delta":" -> decision=\"approved\""}
+{"tMs":7054,"delta":"; emit approve\n  if"}
+{"tMs":7087,"delta":" decision!=\"\"\n    "}
+{"tMs":7121,"delta":"Divider\n    Row gap"}
+{"tMs":7154,"delta":":8 middle\n      "}
+{"tMs":7187,"delta":"Icon \"l"}
+{"tMs":7220,"delta":"ock\"\n      Text.str"}
+{"tMs":7254,"delta":"ong \"You {decision} this"}
+{"tMs":7287,"delta":" request.\""}
+{"tMs":7320,"delta":"\n    Text.caption \""}
+{"tMs":7355,"delta":"This decision is locked.\""}

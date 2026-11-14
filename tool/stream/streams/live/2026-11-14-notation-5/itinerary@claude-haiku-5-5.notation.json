@@ -1,0 +1,1430 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "column2",
+    "column8"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Two days in Kyoto"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "${booked} of 6 bookings left to make"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text3",
+    "accordion1",
+    "text20",
+    "column7"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Day 1: Northwest and Gion"
+   }
+  },
+  "accordion1": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "listTile1",
+    "listTile2",
+    "listTile3",
+    "listTile4"
+   ]
+  },
+  "listTile1": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "text4",
+    "subtitle": "text5",
+    "trailing": "column3"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "08:30 Kinkaku-ji",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Golden pavilion, about 1 hour",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text6",
+    "text7"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Stop by Kyoto Station, then the city bus 205 to Kinkakuji-michi, about 40 min."
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Arrive early to beat tour groups. Allow 60 min on site."
+   }
+  },
+  "listTile2": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "text8",
+    "subtitle": "text9",
+    "trailing": "column4"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "10:45 Arashiyama",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Bamboo grove and Tenryu-ji",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    }
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text10",
+    "text11"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Train from Kitaoji line transfer, roughly 25 min by JR Sagano line."
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "The grove is quietest before 9:00 but still calm at midday. Plan 90 min."
+   }
+  },
+  "listTile3": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "text12",
+    "subtitle": "text13",
+    "trailing": "column5"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "13:30 Lunch, Tofuya-Ukai",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Tofu kaiseki by the river",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    }
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text14",
+    "text15"
+   ]
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Walk 10 min from the grove, along the Katsura river path."
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Reservations recommended, budget about 60 min."
+   }
+  },
+  "listTile4": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "text16",
+    "subtitle": "text17",
+    "trailing": "column6"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "16:00 Gion",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Old streets at dusk",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    }
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text18",
+    "text19"
+   ]
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Train back to Kyoto Station, then bus 206 to Gion, about 45 min total."
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Best light is around 17:30 on Hanami-koji."
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Things to book"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "checkbox1",
+    "checkbox2",
+    "checkbox3"
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Kinkaku-ji timed entry"
+   },
+   "bind": {
+    "props.value": "${d1a}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d1a",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Kaiseki dinner in Gion"
+   },
+   "bind": {
+    "props.value": "${d1b}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d1b",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox3": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Arashiyama bamboo grove guide"
+   },
+   "bind": {
+    "props.value": "${d1c}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d1c",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "text21",
+    "accordion2",
+    "text38",
+    "column13"
+   ]
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Day 2: Eastern hills and markets"
+   }
+  },
+  "accordion2": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "children": [
+    "listTile5",
+    "listTile6",
+    "listTile7",
+    "listTile8"
+   ]
+  },
+  "listTile5": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "text22",
+    "subtitle": "text23",
+    "trailing": "column9"
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "07:30 Fushimi Inari",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Torii gates, about 2 hours to the summit",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    }
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text24",
+    "text25"
+   ]
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Train from Kyoto Station to Inari station, 5 min."
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Go before 8:00 for empty paths. Round trip to summit takes about 2 hours."
+   }
+  },
+  "listTile6": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "text26",
+    "subtitle": "text27",
+    "trailing": "column10"
+   }
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "10:30 Kiyomizu-dera",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text27": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Hillside temple and Sannenzaka lane",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    }
+   }
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text28",
+    "text29"
+   ]
+  },
+  "text28": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Bus 206 from Inari area to Kiyomizu-michi, about 30 min."
+   }
+  },
+  "text29": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Walk down through the lanes. Allow 90 min."
+   }
+  },
+  "listTile7": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "text30",
+    "subtitle": "text31",
+    "trailing": "column11"
+   }
+  },
+  "text30": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "13:00 Tea ceremony",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text31": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Higashiyama teahouse",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    }
+   }
+  },
+  "column11": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text32",
+    "text33"
+   ]
+  },
+  "text32": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Walk 15 min through Ninenzaka to the teahouse."
+   }
+  },
+  "text33": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Sessions last about 45 min."
+   }
+  },
+  "listTile8": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "text34",
+    "subtitle": "text35",
+    "trailing": "column12"
+   }
+  },
+  "text34": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "17:00 Nishiki Market",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text35": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Food stalls and cooking class",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    }
+   }
+  },
+  "column12": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text36",
+    "text37"
+   ]
+  },
+  "text36": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Bus 206 to Shijo-Kawaramachi, about 20 min, then walk 5 min."
+   }
+  },
+  "text37": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Market closes around 18:00. Grab street snacks early."
+   }
+  },
+  "text38": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Things to book"
+   }
+  },
+  "column13": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "checkbox4",
+    "checkbox5",
+    "checkbox6"
+   ]
+  },
+  "checkbox4": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Fushimi Inari early slot"
+   },
+   "bind": {
+    "props.value": "${d2a}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d2a",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox5": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Tea ceremony in Higashiyama"
+   },
+   "bind": {
+    "props.value": "${d2b}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d2b",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox6": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Nishiki Market cooking class"
+   },
+   "bind": {
+    "props.value": "${d2c}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d2c",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "booked",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "d1book",
+    "type": "list",
+    "value": [
+     {
+      "item": "Kinkaku-ji timed entry",
+      "done": false
+     },
+     {
+      "item": "Kaiseki dinner in Gion",
+      "done": false
+     },
+     {
+      "item": "Arashiyama bamboo grove guide",
+      "done": false
+     }
+    ]
+   },
+   {
+    "name": "d2book",
+    "type": "list",
+    "value": [
+     {
+      "item": "Fushimi Inari early slot",
+      "done": false
+     },
+     {
+      "item": "Tea ceremony in Higashiyama",
+      "done": false
+     },
+     {
+      "item": "Nishiki Market cooking class",
+      "done": false
+     }
+    ]
+   },
+   {
+    "name": "d1a",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d1b",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d1c",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d2a",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d2b",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d2c",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

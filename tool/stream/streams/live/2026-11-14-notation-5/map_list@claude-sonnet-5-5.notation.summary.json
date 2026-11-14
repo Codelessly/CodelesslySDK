@@ -1,0 +1,34 @@
+{
+ "ui": "map_list",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 5412,
+ "turns": [
+  {
+   "input_tokens": 2382,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1565,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 662
+   },
+   "ttftMs": 6447,
+   "totalMs": 11531,
+   "chars": 1570,
+   "lines": 33,
+   "jsonTails": 0,
+   "nodes": 33,
+   "outputTokensPerNode": "47.4",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

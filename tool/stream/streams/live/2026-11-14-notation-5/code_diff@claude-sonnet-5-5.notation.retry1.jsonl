@@ -1,0 +1,138 @@
+{"meta":{"ui":"code_diff","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"state d1=\"\"\nstate d2=\"\"\nstate d3=\"\"\nstate kept=0\nCard w:390 gap:12\n  Text.title \"Review config changes\"\n  Text.muted \"{(d1=='keep'?1:0)+(d2=='keep'?1:0)+(d3=='keep'?1:0)} of 3 hunks kept\"\n  Box gap:6 pad:8 radius:6 fill:#FFF5F5F5\n    Row between\n      Text.caption \"Hunk 1 · @@ -4,2 +4,2 @@\"\n      if d1!=\"\"\n        Badge.info \"{d1=='keep'?'Kept':'Discarded'}\"\n    Text.caption \"4  - port: 8080\" fontFamily:monospace fill:#FFFFEBEE color:#FFC62828\n    Text.caption \"4  + port: 9090\" fontFamily:monospace fill:#FFE8F5E9 color:#FF2E7D32\n    Text.caption \"5    host: localhost\" fontFamily:monospace\n    Row gap:8\n      Button.outline \"Keep\" -> d1=\"keep\"\n      Button.ghost \"Discard\" -> d1=\"discard\"\n  Box gap:6 pad:8 radius:6 fill:#FFF5F5F5\n    Row between\n      Text.caption \"Hunk 2 · @@ -12,3 +12,2 @@\"\n      if d2!=\"\"\n        Badge.info \"{d2=='keep'?'Kept':'Discarded'}\"\n    Text.caption \"12    logging:\" fontFamily:monospace\n    Text.caption \"13 -   level: debug\" fontFamily:monospace fill:#FFFFEBEE color:#FFC62828\n    Text.caption \"14 -   file: /tmp/app.log\" fontFamily:monospace fill:#FFFFEBEE color:#FFC62828\n    Text.caption \"13 +   level: warn\" fontFamily:monospace fill:#FFE8F5E9 color:#FF2E7D32\n    Row gap:8\n      Button.outline \"Keep\" -> d2=\"keep\"\n      Button.ghost \"Discard\" -> d2=\"discard\"\n  Box gap:6 pad:8 radius:6 fill:#FFF5F5F5\n    Row between\n      Text.caption \"Hunk 3 · @@ -20,1 +19,3 @@\"\n      if d3!=\"\"\n        Badge.info \"{d3=='keep'?'Kept':'Discarded'}\"\n    Text.caption \"19    cache:\" fontFamily:monospace\n    Text.caption \"20 +   enabled: true\" fontFamily:monospace fill:#FFE8F5E9 color:#FF2E7D32\n    Text.caption \"21 +   ttl: 300\" fontFamily:monospace fill:#FFE8F5E9 color:#FF2E7D32\n    Row gap:8\n      Button.outline \"Keep\" -> d3=\"keep\"\n      Button.ghost \"Discard\" -> d3=\"discard\"\n  Button \"Apply changes\" enabled:=d1!=\"\"&&d2!=\"\"&&d3!=\"\" -> emit apply; toast \"Changes applied\"","usage":{"input_tokens":3943,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1040,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":965,"totalMs":5532}}
+{"tMs":965,"delta":"state"}
+{"tMs":1014,"delta":" d1="}
+{"tMs":1056,"delta":"\"\"\nstate d2=\"\""}
+{"tMs":1091,"delta":"\nstate d3=\"\"\nstate k"}
+{"tMs":1125,"delta":"ept=0\nCard w:"}
+{"tMs":1159,"delta":"390 gap:12\n  "}
+{"tMs":1192,"delta":"Text.title \"Review config"}
+{"tMs":1226,"delta":" changes\"\n  Text."}
+{"tMs":1259,"delta":"muted \"{(d1="}
+{"tMs":1293,"delta":"='"}
+{"tMs":1331,"delta":"keep'?1:0)"}
+{"tMs":1708,"delta":"+(d2=='keep"}
+{"tMs":1708,"delta":"'?1:0)+("}
+{"tMs":1708,"delta":"d3=='keep'?"}
+{"tMs":1708,"delta":"1:"}
+{"tMs":1708,"delta":"0)} of 3 h"}
+{"tMs":1708,"delta":"unks kept\"\n  "}
+{"tMs":1708,"delta":"Box gap:6 pad"}
+{"tMs":1708,"delta":":8 radius:6 "}
+{"tMs":1708,"delta":"fill:#FFF5"}
+{"tMs":1708,"delta":"F5F5\n    Row"}
+{"tMs":1708,"delta":" between\n      Text.caption"}
+{"tMs":1726,"delta":" \"Hunk 1 "}
+{"tMs":2077,"delta":"· @@ -4,2"}
+{"tMs":2077,"delta":" +4,2 "}
+{"tMs":2077,"delta":"@@\"\n      if"}
+{"tMs":2077,"delta":" d1!=\"\""}
+{"tMs":2077,"delta":"\n        Bad"}
+{"tMs":2077,"delta":"ge.info"}
+{"tMs":2077,"delta":" \"{d1=='keep"}
+{"tMs":2077,"delta":"'?'Kept':'"}
+{"tMs":2077,"delta":"Discarded'}\""}
+{"tMs":2077,"delta":"\n    Text.caption \"4"}
+{"tMs":2093,"delta":"  - port: 8080\""}
+{"tMs":2126,"delta":" fontFamily:monosp"}
+{"tMs":2448,"delta":"ace fill:#FFF"}
+{"tMs":2448,"delta":"FEBEE color:#"}
+{"tMs":2448,"delta":"FFC62828\n    "}
+{"tMs":2448,"delta":"Text.caption \"4  +"}
+{"tMs":2448,"delta":" port: 9090\" font"}
+{"tMs":2448,"delta":"Family:monospace f"}
+{"tMs":2448,"delta":"ill:#FFE8F"}
+{"tMs":2448,"delta":"5E9 color:#F"}
+{"tMs":2448,"delta":"F2E7D32\n    "}
+{"tMs":2459,"delta":"Text.caption \"5    "}
+{"tMs":2493,"delta":"host: localhost\" font"}
+{"tMs":2527,"delta":"Family:monospace"}
+{"tMs":2857,"delta":"\n    Row gap:8"}
+{"tMs":2857,"delta":"\n      Button.outline \""}
+{"tMs":2857,"delta":"Keep\" -> d1=\""}
+{"tMs":2857,"delta":"keep\"\n      Button."}
+{"tMs":2857,"delta":"ghost \"Discard\""}
+{"tMs":2857,"delta":" -> d1=\"discard\""}
+{"tMs":2857,"delta":"\n  Box gap:6"}
+{"tMs":2857,"delta":" pad:8 radius"}
+{"tMs":2857,"delta":":6 fill:#F"}
+{"tMs":2859,"delta":"FF5F5F5"}
+{"tMs":2893,"delta":"\n    Row between\n      Text"}
+{"tMs":2926,"delta":".caption \"Hunk"}
+{"tMs":3230,"delta":" 2 · @@ -"}
+{"tMs":3230,"delta":"12,3 +12,2"}
+{"tMs":3230,"delta":" @@\"\n      if d"}
+{"tMs":3230,"delta":"2!=\"\"\n        Bad"}
+{"tMs":3230,"delta":"ge.info \"{d2="}
+{"tMs":3230,"delta":"='keep'?'K"}
+{"tMs":3230,"delta":"ept':'Discarded'"}
+{"tMs":3230,"delta":"}\"\n    Text.ca"}
+{"tMs":3230,"delta":"ption \"12    logging:\""}
+{"tMs":3259,"delta":" fontFamily:monosp"}
+{"tMs":3293,"delta":"ace\n    Text.caption"}
+{"tMs":3326,"delta":" \"13 -   level: deb"}
+{"tMs":3610,"delta":"ug\" fontFamily:"}
+{"tMs":3610,"delta":"monospace fill:#F"}
+{"tMs":3610,"delta":"FFFEBEE color"}
+{"tMs":3610,"delta":":#FFC62828"}
+{"tMs":3610,"delta":"\n    Text.caption \"14"}
+{"tMs":3610,"delta":" -   file: /tm"}
+{"tMs":3610,"delta":"p/app.log\" font"}
+{"tMs":3610,"delta":"Family:monospace f"}
+{"tMs":3626,"delta":"ill:#FFFFE"}
+{"tMs":3660,"delta":"BEE color:#FF"}
+{"tMs":3693,"delta":"C62828\n    Text."}
+{"tMs":3726,"delta":"caption \"13 +   level"}
+{"tMs":3977,"delta":": warn\" fontFam"}
+{"tMs":3977,"delta":"ily:monospace fill:"}
+{"tMs":3977,"delta":"#FFE8F5E"}
+{"tMs":3977,"delta":"9 color:#FF2"}
+{"tMs":3977,"delta":"E7D32\n    Row"}
+{"tMs":3977,"delta":" gap:8\n      Button"}
+{"tMs":3977,"delta":".outline \"Keep\""}
+{"tMs":3994,"delta":" -> d2=\"keep\""}
+{"tMs":4026,"delta":"\n      Button.ghost"}
+{"tMs":4065,"delta":" \"Discard\" -> d"}
+{"tMs":4093,"delta":"2=\"discard\"\n  "}
+{"tMs":4126,"delta":"Box gap:6 pad"}
+{"tMs":4353,"delta":":8 radius:6 "}
+{"tMs":4353,"delta":"fill:#FFF5"}
+{"tMs":4353,"delta":"F5F5\n    Row"}
+{"tMs":4353,"delta":" between\n      Text.caption"}
+{"tMs":4353,"delta":" \"Hunk 3 "}
+{"tMs":4353,"delta":"· @@ -20,1"}
+{"tMs":4360,"delta":" +19,3 @@"}
+{"tMs":4393,"delta":"\"\n      if d3!="}
+{"tMs":4426,"delta":"\"\"\n        Badge.info"}
+{"tMs":4460,"delta":" \"{d3=='keep"}
+{"tMs":4500,"delta":"'?'Kept':'"}
+{"tMs":4527,"delta":"Discarded'}\""}
+{"tMs":4752,"delta":"\n    Text.caption \"19"}
+{"tMs":4752,"delta":"    cache:\" fontF"}
+{"tMs":4752,"delta":"amily:monospace\n    "}
+{"tMs":4752,"delta":"Text.caption \"20 "}
+{"tMs":4752,"delta":"+   enabled: true\""}
+{"tMs":4752,"delta":" fontFamily:monosp"}
+{"tMs":4760,"delta":"ace fill:#FFE"}
+{"tMs":4793,"delta":"8F5E9 color:"}
+{"tMs":4827,"delta":"#FF2E7D32"}
+{"tMs":4865,"delta":"\n    Text.caption \""}
+{"tMs":4893,"delta":"21 +   ttl:"}
+{"tMs":4927,"delta":" 300\" fontFamily"}
+{"tMs":5393,"delta":":monospace fill:#"}
+{"tMs":5393,"delta":"FFE8F5E9"}
+{"tMs":5393,"delta":" color:#FF2E"}
+{"tMs":5393,"delta":"7D32\n    Row g"}
+{"tMs":5393,"delta":"ap:8\n      Button."}
+{"tMs":5393,"delta":"outline \"Keep\" -"}
+{"tMs":5393,"delta":"> d3=\"keep\""}
+{"tMs":5393,"delta":"\n      Button.ghost \""}
+{"tMs":5393,"delta":"Discard\" -> d3"}
+{"tMs":5393,"delta":"=\"discard\"\n  Button"}
+{"tMs":5393,"delta":" \"Apply changes\" en"}
+{"tMs":5393,"delta":"abled:=d1!="}
+{"tMs":5393,"delta":"\"\""}
+{"tMs":5394,"delta":"&&d2!=\"\"&"}
+{"tMs":5427,"delta":"&d3!=\""}
+{"tMs":5459,"delta":"\" -> emit apply;"}
+{"tMs":5493,"delta":" toast \"Changes applied"}
+{"tMs":5527,"delta":"\""}

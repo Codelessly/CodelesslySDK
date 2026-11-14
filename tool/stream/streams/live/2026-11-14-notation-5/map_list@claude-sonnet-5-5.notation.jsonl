@@ -1,0 +1,153 @@
+{"meta":{"ui":"map_list","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"state sel=0\nstate shops=[{\"id\":1,\"name\":\"Bean There\",\"rating\":4.6,\"dist\":\"0.2 km\",\"hours\":\"7:00-18:00\",\"x\":40,\"y\":30},{\"id\":2,\"name\":\"Daily Grind\",\"rating\":4.3,\"dist\":\"0.4 km\",\"hours\":\"6:30-17:00\",\"x\":200,\"y\":24},{\"id\":3,\"name\":\"Roast & Co\",\"rating\":4.8,\"dist\":\"0.6 km\",\"hours\":\"8:00-20:00\",\"x\":120,\"y\":88},{\"id\":4,\"name\":\"The Steam Cup\",\"rating\":4.1,\"dist\":\"0.9 km\",\"hours\":\"7:00-15:00\",\"x\":260,\"y\":110},{\"id\":5,\"name\":\"Cafe Lune\",\"rating\":4.5,\"dist\":\"1.1 km\",\"hours\":\"9:00-22:00\",\"x\":60,\"y\":135}]\nCard w:390 gap:12\n  Text.heading \"Coffee shops near you\"\n  Stack w:fill h:180 fill:#FFF1ECE2 radius:8\n    Box x:0 y:70 w:340 h:6 fill:#FFFFFFFF\n    Box x:0 y:150 w:340 h:4 fill:#FFFFFFFF\n    Box x:90 y:0 w:6 h:180 fill:#FFFFFFFF\n    Box x:230 y:0 w:4 h:180 fill:#FFFFFFFF\n    Box x:0 y:20 w:340 h:3 fill:#FFE2DACB\n    each s in shops\n      Box x:=s.x y:=s.y w:28 h:28 radius:14 center middle fill:=sel==s.id?\"#FFD9381E\":\"#FF5A3E2B\" -> sel=s.id\n        Text.strong \"{s.id}\"\n  each s in shops\n    Box pad:10 radius:8 fill:=sel==s.id?\"#FFFBE3DD\":\"#FFF7F7F7\" -> sel=s.id\n      Row gap:10 middle\n        Badge.neutral \"{s.id}\"\n        Text.strong \"{s.name}\"\n        Spacer grow\n        Icon \"chevron_right\"\n  if sel>0\n    Card gap:6\n      Text.heading \"{find(shops,s=>s.id==sel).name}\"\n      Row gap:16\n        Row gap:4\n          Icon \"star\"\n          Text \"{find(shops,s=>s.id==sel).rating}\"\n        Row gap:4\n          Icon \"place\"\n          Text \"{find(shops,s=>s.id==sel).dist}\"\n      Row gap:4\n        Icon \"schedule\"\n        Text \"Open {find(shops,s=>s.id==sel).hours}\"","usage":{"input_tokens":2382,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1565,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":662}},"ttftMs":6447,"totalMs":11531}}
+{"tMs":6447,"delta":"state"}
+{"tMs":6479,"delta":" sel=0\nstate"}
+{"tMs":6512,"delta":" shops=[{\"id\":"}
+{"tMs":6545,"delta":"1,\"name\":\"B"}
+{"tMs":6579,"delta":"ean There\",\"rating\":4."}
+{"tMs":6612,"delta":"6,\"dist\":\"0"}
+{"tMs":6646,"delta":".2 km\",\"hours\":"}
+{"tMs":6679,"delta":"\"7:00-"}
+{"tMs":6713,"delta":"18:00\",\"x\":40"}
+{"tMs":6748,"delta":",\"y\":30"}
+{"tMs":6780,"delta":"},{\"id\":2,\""}
+{"tMs":6814,"delta":"name\":\"Da"}
+{"tMs":6846,"delta":"ily Gr"}
+{"tMs":6880,"delta":"ind\",\"rating\":4.3"}
+{"tMs":6914,"delta":",\"dist\":\"0."}
+{"tMs":6948,"delta":"4 km\",\"hours\":\""}
+{"tMs":6981,"delta":"6:30-17"}
+{"tMs":7014,"delta":":00\",\"x\":200"}
+{"tMs":7048,"delta":",\"y\":24"}
+{"tMs":7082,"delta":"},{\"id\":3,\""}
+{"tMs":7115,"delta":"name\":\"Roast &"}
+{"tMs":7148,"delta":" Co"}
+{"tMs":7182,"delta":"\",\"rating\":4.8,"}
+{"tMs":7225,"delta":"\"dist\":\"0.6"}
+{"tMs":7249,"delta":" km\",\"hours\":\"8"}
+{"tMs":7282,"delta":":00-20:00\",\"x"}
+{"tMs":7316,"delta":"\":120"}
+{"tMs":7351,"delta":",\"y\":88},{\""}
+{"tMs":7383,"delta":"id\":4,\"name\":\""}
+{"tMs":7416,"delta":"The"}
+{"tMs":7449,"delta":" Ste"}
+{"tMs":7482,"delta":"am"}
+{"tMs":7515,"delta":" C"}
+{"tMs":7549,"delta":"up\",\"rating\":4.1"}
+{"tMs":7583,"delta":",\"dist\":\"0."}
+{"tMs":7616,"delta":"9"}
+{"tMs":7649,"delta":" km\",\"hours\":\"7"}
+{"tMs":7683,"delta":":00-15"}
+{"tMs":7716,"delta":":00\",\"x\":260"}
+{"tMs":7750,"delta":",\"y\":110"}
+{"tMs":7783,"delta":"},{\"id\":5,\""}
+{"tMs":7816,"delta":"name\":\"Cafe"}
+{"tMs":7849,"delta":" L"}
+{"tMs":7883,"delta":"une"}
+{"tMs":7916,"delta":"\",\"rating\":4.5"}
+{"tMs":7950,"delta":",\"dist\":\"1."}
+{"tMs":7983,"delta":"1"}
+{"tMs":8016,"delta":" km\",\"hours\":\"9"}
+{"tMs":8050,"delta":":00-22:00\",\"x"}
+{"tMs":8083,"delta":"\":60"}
+{"tMs":8116,"delta":",\"y\":135}]"}
+{"tMs":8151,"delta":"\nCard w:390 gap"}
+{"tMs":8184,"delta":":12\n  Text.he"}
+{"tMs":8217,"delta":"ading \"Coffee sh"}
+{"tMs":8251,"delta":"ops near you\"\n  St"}
+{"tMs":8284,"delta":"ack w:fill h:180"}
+{"tMs":8318,"delta":" fill:#FFF"}
+{"tMs":8351,"delta":"1"}
+{"tMs":8384,"delta":"ECE"}
+{"tMs":8417,"delta":"2"}
+{"tMs":8451,"delta":" radius:8\n    "}
+{"tMs":8485,"delta":"Box x:0 y:70"}
+{"tMs":8518,"delta":" w:340"}
+{"tMs":8551,"delta":" h:6"}
+{"tMs":8585,"delta":" fill:#FFF"}
+{"tMs":8619,"delta":"FFFFF\n    "}
+{"tMs":8652,"delta":"Box x:0 y:150"}
+{"tMs":8685,"delta":" w:340 h:4"}
+{"tMs":8719,"delta":" fill:#FFF"}
+{"tMs":8752,"delta":"FFFFF\n    "}
+{"tMs":8785,"delta":"Box x:90"}
+{"tMs":8819,"delta":" y:0 w:6"}
+{"tMs":8852,"delta":" h:180 fill:"}
+{"tMs":8886,"delta":"#FFFFFFF"}
+{"tMs":8919,"delta":"F\n    Box x:230"}
+{"tMs":8952,"delta":" y:0 w:4"}
+{"tMs":8987,"delta":" h:180 fill:"}
+{"tMs":9020,"delta":"#FFFFFFF"}
+{"tMs":9053,"delta":"F\n    "}
+{"tMs":9086,"delta":"Box x:0 y:20"}
+{"tMs":9120,"delta":" w:340 h:3"}
+{"tMs":9154,"delta":" fill:#FFE"}
+{"tMs":9187,"delta":"2"}
+{"tMs":9220,"delta":"D"}
+{"tMs":9253,"delta":"AC"}
+{"tMs":9286,"delta":"B\n    each s in shops"}
+{"tMs":9320,"delta":"\n      Box x:="}
+{"tMs":9353,"delta":"s.x y:=s."}
+{"tMs":9386,"delta":"y w:28 h:28"}
+{"tMs":9420,"delta":" radius:14 center"}
+{"tMs":9453,"delta":" midd"}
+{"tMs":9487,"delta":"le fill:=sel=="}
+{"tMs":9523,"delta":"s.id?\""}
+{"tMs":9554,"delta":"#FF"}
+{"tMs":9587,"delta":"D9381"}
+{"tMs":9620,"delta":"E"}
+{"tMs":9654,"delta":"\":\"#FF5"}
+{"tMs":9686,"delta":"A"}
+{"tMs":9720,"delta":"3"}
+{"tMs":9753,"delta":"E"}
+{"tMs":9786,"delta":"2"}
+{"tMs":9819,"delta":"B\" -> sel=s"}
+{"tMs":9853,"delta":".id\n        Text.str"}
+{"tMs":9886,"delta":"ong \"{s.id}\""}
+{"tMs":9920,"delta":"\n  each"}
+{"tMs":9953,"delta":" s"}
+{"tMs":9987,"delta":" in shops\n    Box p"}
+{"tMs":10020,"delta":"ad:10"}
+{"tMs":10053,"delta":" radius:8 fill"}
+{"tMs":10089,"delta":":=sel==s.id"}
+{"tMs":10120,"delta":"?\"#FFFB"}
+{"tMs":10153,"delta":"E3"}
+{"tMs":10187,"delta":"D"}
+{"tMs":10239,"delta":"D"}
+{"tMs":10253,"delta":"\":\"#FFF7"}
+{"tMs":10286,"delta":"F7"}
+{"tMs":10320,"delta":"F7\" -> sel="}
+{"tMs":10354,"delta":"s.id\n      Row g"}
+{"tMs":10386,"delta":"ap:10"}
+{"tMs":10420,"delta":" middle\n        Bad"}
+{"tMs":10453,"delta":"ge.ne"}
+{"tMs":10486,"delta":"utral \"{s.id}"}
+{"tMs":10520,"delta":"\"\n        Text.strong"}
+{"tMs":10554,"delta":" \"{s.name}\""}
+{"tMs":10587,"delta":"\n        Spacer grow"}
+{"tMs":10621,"delta":"\n        Icon \"ch"}
+{"tMs":10654,"delta":"evron_right\"\n  if"}
+{"tMs":10687,"delta":" sel>0\n    Card"}
+{"tMs":10721,"delta":" gap:6"}
+{"tMs":10787,"delta":"\n      Text.he"}
+{"tMs":10821,"delta":"ading \"{find(shops,"}
+{"tMs":10854,"delta":"s=>s.id==s"}
+{"tMs":10888,"delta":"el).name}\"\n      "}
+{"tMs":10921,"delta":"Row gap:16"}
+{"tMs":10954,"delta":"\n        Row"}
+{"tMs":10988,"delta":" gap:4"}
+{"tMs":11021,"delta":"\n          Icon \"star\""}
+{"tMs":11054,"delta":"\n          Text \"{find("}
+{"tMs":11088,"delta":"shops,s=>s."}
+{"tMs":11121,"delta":"id==sel).rating}"}
+{"tMs":11155,"delta":"\"\n        Row gap:"}
+{"tMs":11188,"delta":"4\n          Icon \"place"}
+{"tMs":11221,"delta":"\"\n          Text \"{find"}
+{"tMs":11255,"delta":"(shops,s=>s"}
+{"tMs":11288,"delta":".id==sel).dist"}
+{"tMs":11332,"delta":"}\"\n      "}
+{"tMs":11361,"delta":"Row gap:4\n        "}
+{"tMs":11388,"delta":"Icon \"schedule\""}
+{"tMs":11422,"delta":"\n        Text \"Open"}
+{"tMs":11455,"delta":" {find(shops,s="}
+{"tMs":11489,"delta":">s.id==sel)."}
+{"tMs":11522,"delta":"hours}\""}

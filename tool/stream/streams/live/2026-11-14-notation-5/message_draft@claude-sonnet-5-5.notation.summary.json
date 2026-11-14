@@ -1,0 +1,62 @@
+{
+ "ui": "message_draft",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 5412,
+ "turns": [
+  {
+   "input_tokens": 2392,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 710,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 885,
+   "totalMs": 5246,
+   "chars": 1779,
+   "lines": 32,
+   "jsonTails": 0,
+   "nodes": 23,
+   "outputTokensPerNode": "30.9",
+   "notationIssues": [
+    "line 33:43: Unknown word \"&&\" on a Button. Props are written key:value.",
+    "line 33:46: Unknown word \"trim(subject)!=\" on a Button. Props are written key:value."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 3192,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 717,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 562,
+   "totalMs": 3693,
+   "chars": 1794,
+   "lines": 33,
+   "jsonTails": 0,
+   "nodes": 23,
+   "outputTokensPerNode": "31.2",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

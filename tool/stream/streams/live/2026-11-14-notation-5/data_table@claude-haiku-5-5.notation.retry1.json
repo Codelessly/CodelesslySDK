@@ -1,0 +1,932 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "textField1",
+    "row1",
+    "row2",
+    "checkbox1",
+    "listView1",
+    "row4",
+    "column2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "Invoices"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Search customer"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${search}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "search",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "choiceChip1",
+    "choiceChip2",
+    "choiceChip3",
+    "choiceChip4"
+   ]
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "All"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "statusFilter",
+       "value": "All"
+      },
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip2": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Open"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "statusFilter",
+       "value": "Open"
+      },
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip3": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Paid"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "statusFilter",
+       "value": "Paid"
+      },
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip4": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Overdue"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "statusFilter",
+       "value": "Overdue"
+      },
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "textButton1",
+    "textButton2",
+    "textButton3",
+    "textButton4",
+    "textButton5"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Number"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortCol",
+       "value": "id"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortDesc",
+       "value": "${= !sortDesc}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Customer"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortCol",
+       "value": "customer"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortDesc",
+       "value": "${= !sortDesc}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Date"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortCol",
+       "value": "date"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortDesc",
+       "value": "${= !sortDesc}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton4": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Amount"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortCol",
+       "value": "amount"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortDesc",
+       "value": "${= !sortDesc}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton5": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Status"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sortCol",
+       "value": "status"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sortDesc",
+       "value": "${= !sortDesc}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "All on page"
+   },
+   "bind": {
+    "props.value": "${allOnPage}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "allOnPage",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= allOnPage?filter(picked,p=>!any(pageRows,r=>r.id==p)):unique(append(picked,...map(pageRows,r=>r.id)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4
+   },
+   "children": [
+    "row3"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "padding": 6,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "checkbox2",
+    "text2",
+    "text3"
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${isPicked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "isPicked",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= isPicked?without(picked,row.id):append(picked,row.id)}"
+      }
+     ]
+    }
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${row.id}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "${row.customer} · ${= formatDate(row.date,\"MMM d\")} · ${= money(row.amount,\"$\",0)} · ${row.status}"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton1",
+    "text4",
+    "outlinedButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Prev"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= max(0,page-1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "color": "#FF6B7280"
+    },
+    "text": "Page ${= page+1} of ${= max(1,ceil(length(visible)/pageSize))}"
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= min(page+1,max(0,ceil(length(visible)/pageSize)-1))}"
+      }
+     ]
+    }
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "visible": "${= length(picked)>0}"
+   },
+   "children": [
+    "text5",
+    "filledButton1"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF111827"
+    },
+    "text": "${= length(picked)} selected · ${= money(sum(pickedRows,r=>r.amount),\"$\",0)}"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send reminders"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "remind",
+       "value": "${picked}"
+      },
+      {
+       "type": "showToast",
+       "message": "Reminders sent"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "invoices",
+    "type": "list",
+    "value": [
+     {
+      "id": "INV-1001",
+      "customer": "Acme Ltd",
+      "date": "2024-03-01",
+      "amount": 1200,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1002",
+      "customer": "Birch & Co",
+      "date": "2024-03-04",
+      "amount": 450,
+      "status": "Overdue"
+     },
+     {
+      "id": "INV-1003",
+      "customer": "Cedar Labs",
+      "date": "2024-03-07",
+      "amount": 2300,
+      "status": "Open"
+     },
+     {
+      "id": "INV-1004",
+      "customer": "Delta Foods",
+      "date": "2024-03-09",
+      "amount": 780,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1005",
+      "customer": "Elm Studio",
+      "date": "2024-03-12",
+      "amount": 320,
+      "status": "Overdue"
+     },
+     {
+      "id": "INV-1006",
+      "customer": "Fjord Media",
+      "date": "2024-03-15",
+      "amount": 1550,
+      "status": "Open"
+     },
+     {
+      "id": "INV-1007",
+      "customer": "Garnet Ltd",
+      "date": "2024-03-18",
+      "amount": 910,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1008",
+      "customer": "Harbor Inc",
+      "date": "2024-03-21",
+      "amount": 2050,
+      "status": "Overdue"
+     },
+     {
+      "id": "INV-1009",
+      "customer": "Iris Partners",
+      "date": "2024-03-24",
+      "amount": 600,
+      "status": "Open"
+     },
+     {
+      "id": "INV-1010",
+      "customer": "Juniper Co",
+      "date": "2024-03-27",
+      "amount": 175,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-1011",
+      "customer": "Kestrel Ltd",
+      "date": "2024-03-29",
+      "amount": 3100,
+      "status": "Open"
+     },
+     {
+      "id": "INV-1012",
+      "customer": "Lumen Works",
+      "date": "2024-04-02",
+      "amount": 540,
+      "status": "Overdue"
+     }
+    ]
+   },
+   {
+    "name": "sortCol",
+    "type": "text",
+    "value": "date"
+   },
+   {
+    "name": "sortDesc",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "statusFilter",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "search",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "picked",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "pageSize",
+    "type": "integer",
+    "value": 5
+   },
+   {
+    "name": "visible",
+    "type": "text",
+    "value": "sortByDesc(filter(invoices,r=>(statusFilter==\"All\"||r.status==statusFilter)&&(search==\"\"||contains(lower(r.customer),lower(search)))),r=>r[sortCol])"
+   },
+   {
+    "name": "pageRows",
+    "type": "text",
+    "value": "slice(visible,page*pageSize,min(length(visible),page*pageSize+pageSize))"
+   },
+   {
+    "name": "pickedRows",
+    "type": "text",
+    "value": "filter(invoices,r=>any(picked,p=>p==r.id))"
+   },
+   {
+    "name": "allOnPage",
+    "type": "text",
+    "value": "length(pageRows)>0&&all(pageRows,r=>any(picked,p=>p==r.id))"
+   },
+   {
+    "name": "isPicked",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}
