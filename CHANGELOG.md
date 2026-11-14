@@ -1,5 +1,35 @@
 ## Unreleased
 
+**No special cases left** (with codelessly_api's unreleased removal of the last 21 one-look fields, each now a
+general mechanism; its CHANGELOG has the table). The renderer no longer reads them:
+
+| Removed | Drawn now by | SDK |
+|---|---|---|
+| text `countUp`, `countUpDuration`, `countUpCurve`, `countUpOnShow` | a transition and an animation of `props.text` | `RenderCountUpParagraph` (count_up.dart) is gone: a transition or track on a text prop counts the number in it (`RenderAnimations`, `isTextPath`); an animated text re-applies instead of retexting in place, so its player sees each change |
+| slider ruler ticks, marker, `activeTrackStartOpacity`, `thumbGripColor` | the slider's `customPaint` | a slider draws its node's custom paint between its parts (slider_paint.dart): `painter` over the track and under the thumb, `foregroundPainter` over the thumb, reading `size` and `slider` (`value`, `min`, `max`, `trackRect`, `thumbCenter`); `RenderCustomPaintLayer.drawnByContent` and `drawFor`. The ruler track draws its strip and fill, the marked track (`fillFromEnd`) its fill, the rectangular thumb its body and border |
+| slider `deriveOverlayColorFromThumb` | nothing (it was never read) | — |
+| text field `highlightStart`, `highlightEnd`, `highlightStyle` | the field's `runs` | `HighlightTextController.runs`: every run, merged in order over the field's style, as a text node's runs |
+| table `selectedRowEdgeColor`, `selectedRowEdgeWidth` | the cell template's `selected` state style | both table renderers draw no edge |
+| date/time input `displayFormat` | `format` | formatted with `format` only |
+
+test/migration/special_fields_test.dart draws what the migration makes of a node that used each and matches what
+the previous renderer drew from the same node (goldens and recorded texts taken with it): identical; a count, frame
+for frame; the slider's fade within one level but for 12 anti-aliased pixels at the track's rounded end (the fade is
+now the inactive colour laid over the active track). A `ruler` track in a document already at schema 3 draws no
+ticks of its own: they are custom paint ops (the migration writes them for a schema-2 document).
+
+- **Radio group: arrow keys move the choice.** Each radio is its own island with its own `RadioGroup`, which saw
+  one radio: right and down now choose the next radio of the group in reading order, left and up the previous,
+  wrapping at the ends, the focus moving with the choice, as Flutter's `RadioGroup` does.
+- **Forms: fields a list repeats inside a form belong to it.** A field published its form's state to its own list
+  item's instance, so the form saw only fields in its own instance, and a form a list repeats validated every
+  item's fields. A field's form instance is now its instance with the items of lists inside the form left behind:
+  each form instance validates and publishes its own fields; `validate` checks the instance of the form around the
+  node whose reaction runs it (`FormRegistry.formInstanceOf`, `anyInstance`).
+- **A box that hugs both ways and keeps an aspect ratio sizes as `AspectRatio` does** (the widest it may be, else
+  the tallest). It took no size while its intrinsic height said its width over the ratio, so in a grid row that
+  shrink-wraps it drew nothing in the room the row made for it.
+
 **A site looks like itself: theme mode, declared fonts, local images** (with codelessly_api's unreleased
 additions).
 
