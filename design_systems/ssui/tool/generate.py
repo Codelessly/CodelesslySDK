@@ -1750,6 +1750,136 @@ add(component(
     },
 ))
 
+# --- batch 7: panel, progress and connection -------------------------------------------------------------------
+
+# Panel (Panel.tsx): a bordered container, radius 10: a header (padding 10 x 14, a 16 px icon, 8 px, the title
+# 12/600 with a subtitle 10.5 in tertiary 2 px under it, then what trails) over a hairline, then the content.
+# Expandable: the header toggles the content and ends in a 15 px chevron that turns; elevated: the level 2 shadow.
+add(component(
+    'Panel',
+    'A bordered section with a header: a title, an optional icon and subtitle, the call\'s children below. '
+    'Expandable opens and closes on its header. Fires onToggle.',
+    'panel',
+    props=[prop('title', STRING, 'Section', 'The header\'s title (empty and not expandable: no header).'),
+           prop('subtitle', STRING, '', 'A muted line under the title.'),
+           prop('icon', STRING, '', 'An icon before the title (empty: none).'),
+           prop('variant', enum('default', 'expandable', 'elevated'), 'default',
+                'default: a header over the content. expandable: the header opens and closes it. elevated: with a shadow.'),
+           prop('open', BOOL, False, 'Expandable: whether the content shows at first.')],
+    events=[{'key': 'onToggle', 'payload': BOOL}],
+    slots=['trailing'],
+    children='list',
+    variables=[{'name': 'toggled', 'type': 'boolean', 'value': False}],
+    previews=[preview('Default', 280, 90, title='Billing', subtitle='Plan and invoices'),
+              preview('Expandable', 280, 40, title='Advanced', variant='expandable')],
+    nodes={
+        'panel': {'type': 'column', 'children': ['header', 'body'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 280}, 'height': {'hug': 90}},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 10,
+                                 'clip': 'antiAlias', 'effects': []},
+                  'bind': {'decoration.effects': "${= props.variant == 'elevated' ? theme.shadows.level2 : []}"}},
+        'header': {'type': 'row', 'children': ['glyph', 'titles', 'trailing', 'chevron'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                   'layout': {'width': {'fill': 280}, 'height': {'hug': 34}, 'padding': [14, 10, 14, 10]},
+                   'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'},
+                   'bind': {'visible': "${= props.title != '' || props.variant == 'expandable'}",
+                            'decoration.strokes[0].visible': "${= props.variant != 'expandable' || (props.open != toggled)}"},
+                   'actions': [{'trigger': {'type': 'click', 'when': "props.variant == 'expandable'"}, 'actions': [
+                       {'type': 'setVariable', 'variable': 'toggled', 'value': '${= !toggled}'},
+                       {'type': 'componentEvent', 'event': 'onToggle', 'value': '${= (props.open != toggled)}'}]}]},
+        'glyph': {**icon('settings', 'secondaryText', 16), 'bind': {'visible': "${= props.icon != ''}", 'props.icon': '${props.icon}'}},
+        'titles': {'type': 'column', 'children': ['title', 'subtitle'], 'props': {'crossAxisAlignment': 'start', 'spacing': 2},
+                   'layout': {'width': {'fill': 200}, 'height': {'hug': 14}}},
+        'title': text('${props.title}', style(12, 600, 'primaryText', 1.15), {'hug': 60}, {'hug': 14}),
+        'subtitle': {**text('${props.subtitle}', style(10.5, 400, 'tertiaryText', 1.3), {'hug': 80}, {'hug': 14}),
+                     'bind': {'visible': "${= props.subtitle != ''}"}},
+        'trailing': {'type': 'slot', 'props': {'name': 'trailing'}},
+        'chevron': {**icon('chevron_right', 'tertiaryText', 15),
+                    'bind': {'visible': "${= props.variant == 'expandable'}", 'props.icon': "${= (props.open != toggled) ? 'expand_more' : 'chevron_right'}"}},
+        'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 280}, 'height': {'hug': 40}},
+                 'bind': {'visible': "${= props.variant != 'expandable' || (props.open != toggled)}"}},
+        'content': {'type': 'slot'},
+    },
+))
+
+# LoadMoreFooter (LoadMore.tsx): a 32 px centered footer under a list, 11 px muted: a small spinner and "Loading
+# more…" while loading; "Couldn't load more" and Retry on an error; a "Load more" link when there is more; else the
+# end's label.
+add(component(
+    'LoadMore',
+    'The foot of a long list: a "Load more" link, a spinner while it loads, Retry after an error, or the end\'s label. Fires onLoadMore.',
+    'footer',
+    props=[prop('hasMore', BOOL, True, 'Whether more can be loaded.'),
+           prop('loading', BOOL, False, 'A load is under way.'),
+           prop('error', STRING, '', 'Why the last load failed (empty: it did not).'),
+           prop('loadLabel', STRING, 'Load more', 'The link\'s words.'),
+           prop('endLabel', STRING, '', 'What to say when there is no more (empty: nothing).')],
+    events=['onLoadMore'],
+    previews=[preview('More', 240, 32), preview('Loading', 240, 32, loading=True), preview('Error', 240, 32, error='timeout')],
+    nodes={
+        'footer': {'type': 'row', 'children': ['spinner', 'words', 'link'],
+                   'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center', 'spacing': 6},
+                   'layout': {'width': {'fill': 240}, 'height': 32}},
+        'spinner': {'type': 'circularProgressIndicator', 'props': {'color': 'primary', 'strokeWidth': 1.5, 'strokeCap': 'round'},
+                    'layout': {'width': 11, 'height': 11}, 'bind': {'visible': '${props.loading}'}},
+        'words': {**text("${= props.loading ? 'Loading more…' : (props.error != '' ? 'Couldn’t load more' : props.endLabel)}",
+                         style(11, 400, 'tertiaryText', 1.3), {'hug': 80}, {'hug': 14}),
+                  'bind': {'visible': "${= props.loading || props.error != '' || (!props.hasMore && props.endLabel != '')}"}},
+        'link': {'type': 'row', 'children': ['linkText'], 'layout': {'width': {'hug': 60}, 'height': {'hug': 18}, 'padding': [6, 2, 6, 2]},
+                 'decoration': {'radius': 4},
+                 'bind': {'visible': "${= !props.loading && (props.error != '' || props.hasMore)}"},
+                 'states': {'hovered': {'link': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onLoadMore'}]}]},
+        'linkText': text("${= props.error != '' ? 'Retry' : props.loadLabel}", style(11, 400, 'primary', 1.3), {'hug': 50}, {'hug': 14}),
+    },
+))
+
+# ConnectionStatus (ConnectionStatus.tsx): a live connection in one line: an 11 px plug in the state's color
+# (success connected, warning reconnecting, error disconnected, tertiary connecting), 4 px, the label 10/600 in
+# secondary text.
+LINK_STATES = ['connecting', 'connected', 'reconnecting', 'disconnected']
+add(component(
+    'ConnectionStatus',
+    'Whether a live connection is up: a small plug in the state\'s color and its name.',
+    'row',
+    props=[prop('status', enum(*LINK_STATES), 'connected', 'connecting, connected, reconnecting or disconnected.'),
+           prop('label', STRING, '', 'Other words than the state\'s own (empty: "Connected", "Reconnecting…"...).')],
+    previews=[preview('Connected', 80, 14, status='connected'), preview('Reconnecting', 90, 14, status='reconnecting')],
+    nodes={
+        'row': {'type': 'row', 'children': ['glyph', 'label'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                'layout': {'width': {'hug': 80}, 'height': {'hug': 14}}},
+        'glyph': {**icon('power', 'success', 11),
+                  'bind': {'props.icon': "${= props.status == 'connected' ? 'power' : 'power_off'}",
+                           'props.color': "${= props.status == 'connected' ? theme.success : (props.status == 'reconnecting' ? theme.warning : (props.status == 'disconnected' ? theme.error : theme.colors.tertiaryText))}"}},
+        'label': text("${= props.label != '' ? props.label : (props.status == 'connected' ? 'Connected' : (props.status == 'reconnecting' ? 'Reconnecting…' : (props.status == 'disconnected' ? 'Disconnected' : 'Connecting…')))}",
+                      style(10, 600, 'secondaryText', 1.3), {'hug': 60}, {'hug': 13}),
+    },
+))
+
+# RadialProgress (RadialProgress.tsx): an 18 px ring 3 thick with the percent inside, 6.5/800: error under 20,
+# warning under 60, success from there; muted is tertiary at 55 %.
+add(component(
+    'RadialProgress',
+    'A percent as a tiny ring with the number inside: red under 20, amber under 60, green above.',
+    'ring',
+    props=[prop('value', NUMBER, 60, 'From 0 to 100.', required=True),
+           prop('muted', BOOL, False, 'Not counted yet: gray and dimmed.')],
+    previews=[preview('Sixty', 18, 18, value=60), preview('Low', 18, 18, value=12), preview('Muted', 18, 18, value=40, muted=True)],
+    nodes={
+        'ring': {'type': 'stack', 'children': ['arc', 'center'], 'layout': {'width': 18, 'height': 18},
+                 'bind': {'opacity': '${= props.muted ? 0.55 : 1}'}},
+        'arc': {'type': 'circularProgressIndicator',
+                'props': {'value': 0.6, 'color': 'success', 'backgroundColor': 'track', 'strokeWidth': 3, 'strokeAlign': -1},
+                'layout': {'width': 18, 'height': 18},
+                'bind': {'props.value': '${= max(0, min(100, props.value)) / 100}',
+                         'props.color': "${= props.muted ? theme.colors.tertiaryText : (props.value < 20 ? theme.error : (props.value < 60 ? theme.warning : theme.success))}"}},
+        'center': {'type': 'row', 'children': ['number'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                   'layout': {'width': 18, 'height': 18}},
+        'number': {**text('${= round(max(0, min(100, props.value)))}', style(6.5, 800, 'secondaryText', 1, letterSpacing=-0.39), {'hug': 8}, {'hug': 7}),
+                   'bind': {'props.style.color': "${= props.muted ? theme.colors.tertiaryText : theme.colors.secondaryText}"}},
+    },
+))
+
 
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)

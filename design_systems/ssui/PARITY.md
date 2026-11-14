@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 54. Still to rebuild: 110.**
+**Here: 58. Still to rebuild: 106.**
 
 ## Here
 
@@ -24,6 +24,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Carousel |  | pageView |
 | Checkbox | Checkbox | checkbox |
 | Chip | Chip | chip family |
+| ConnectionStatus | ConnectionStatus |  |
 | CopyButton | CopyButton |  |
 | CountBadge | CountBadge |  |
 | DatePicker |  | datePicker |
@@ -41,13 +42,16 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | IconButton | IconButton | iconButton |
 | InlineStat | InlineStat |  |
 | LoadingSpinner |  | activityIndicator |
+| LoadMore | LoadMore |  |
 | MetaInfo | MetaInfo |  |
 | NotificationBadge | NotificationBadge |  |
 | Pagination |  | pagination |
+| Panel | Panel |  |
 | PersonChip | PersonChip |  |
 | ProgressIndicator | ProgressBar | progressBar |
 | ProviderPill | ProviderPill |  |
 | PulsingDots | PulsingDots |  |
+| RadialProgress | RadialProgress |  |
 | RadioButton | Radio | radio |
 | ResourceChip | ResourceChip |  |
 | SectionCard | SectionCard |  |
@@ -76,17 +80,17 @@ Also here with no source file of the same name: Card, ListRow, SectionHeader, Ta
 
 In the order planned: what generated UI reaches for first, then the application chrome.
 
-### Status and feedback (7)
+### Status and feedback (4)
 
-RunningIndicator, RadialProgress, StackedProgressBar, BatchProgressBar, ConnectionStatus, CloudSyncIndicator, LoadMore
+RunningIndicator, StackedProgressBar, BatchProgressBar, CloudSyncIndicator
 
 ### Text and small content (10)
 
 TextItem, TextExpandable, CodeBlock, CodePreview, DownloadButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
 
-### Cards and rows (21)
+### Cards and rows (20)
 
-Panel, CardActions, ProviderCard, ProviderIcon, FolderCard, ResourceCard, AgentChip, DocumentItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OptionIcon, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
+CardActions, ProviderCard, ProviderIcon, FolderCard, ResourceCard, AgentChip, DocumentItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OptionIcon, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
 
 ### Inputs (21)
 
@@ -100,6 +104,6 @@ Breadcrumb, BrowserTabs, ChipTabs, TabBarWithBadges, TabOverflowScroll, SplitPan
 
 ContextMenu, AddContextMenu, FileTreeContextMenu, MenuPopover, SortMenu, UserMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, CommandPalette, NotePopover, SlidingPanel, ViewerDialog, VariableContractHover
 
-### Data and specialised (14)
+### Data and specialized (14)
 
 Tree, FileTree, DiffViewer, Terminal, HistoryTimeline, DateTimelineAxis, ImageGallery, NestedTaskLedger, ReorderableList, ReorderGhost, SuggestionReviewItem, CompactSuggestionReviewItem, SuggestionActionObject, VariableContractList
