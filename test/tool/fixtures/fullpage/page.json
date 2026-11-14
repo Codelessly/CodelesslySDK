@@ -1,0 +1,19 @@
+{
+  "schema": 3,
+  "id": "page",
+  "roots": ["page"],
+  "variables": {"page": [{"name": "compact", "type": "boolean", "value": false}, {"name": "pick", "type": "text", "value": "a"}]},
+  "nodes": {
+    "page": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 600}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "col": {"type": "column", "children": ["head", "pickRow", "b1", "b2", "b3", "b4"], "layout": {"width": {"fill": 390}, "height": {"fill": 600}},
+      "props": {"scrollable": true},
+      "actions": [{"trigger": {"type": "scroll"}, "actions": [{"type": "setVariable", "variable": "compact", "value": "${= result.offset > 24}"}]}]},
+    "head": {"type": "box", "layout": {"width": {"fill": 390}, "height": 80}, "bind": {"layout.height": "${= compact ? 60 : 80}"}, "decoration": {"fills": [{"color": "#FF0000FF"}]}},
+    "pickRow": {"type": "row", "children": ["pick"], "layout": {"width": {"fill": 390}, "height": 60}},
+    "pick": {"type": "dropdown", "layout": {"width": 200, "height": 48}, "props": {"items": ["a", "b", "c"]}, "bind": {"props.value": "${pick}"}},
+    "b1": {"type": "box", "layout": {"width": {"fill": 390}, "height": 400}, "decoration": {"fills": [{"color": "#FF202020"}]}},
+    "b2": {"type": "box", "layout": {"width": {"fill": 390}, "height": 400}, "decoration": {"fills": [{"color": "#FF606060"}]}},
+    "b3": {"type": "box", "layout": {"width": {"fill": 390}, "height": 400}, "decoration": {"fills": [{"color": "#FF202020"}]}},
+    "b4": {"type": "box", "layout": {"width": {"fill": 390}, "height": 400}, "decoration": {"fills": [{"color": "#FF606060"}]}}
+  }
+}
