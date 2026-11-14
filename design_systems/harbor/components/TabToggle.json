@@ -1,0 +1,257 @@
+{
+ "schema": 3,
+ "id": "TabToggle",
+ "roots": [
+  "track"
+ ],
+ "widget": {
+  "type": "TabToggle",
+  "doc": "A choice between a few views as a pill track: the chosen one raised. The choice is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "List",
+     "Grid"
+    ],
+    "doc": "The choices.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the choice."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "sm",
+      "md",
+      "lg"
+     ]
+    },
+    "default": "md",
+    "doc": "sm, md or lg."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Two",
+   "size": [
+    160,
+    32
+   ],
+   "props": {
+    "options": [
+     "List",
+     "Grid"
+    ],
+    "value": "List"
+   }
+  }
+ ],
+ "nodes": {
+  "track": {
+   "type": "row",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 15
+   },
+   "bind": {
+    "layout.padding": "${= props.size == 'sm' ? 3 : (props.size == 'md' ? 3 : (5))}",
+    "decoration.radius": "${= props.size == 'sm' ? 6 : (props.size == 'md' ? 8 : (10))}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "option"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "hug": 150
+    },
+    "height": 34
+   },
+   "bind": {
+    "data": "${props.options}",
+    "layout.height": "${= props.size == 'sm' ? 29 : (props.size == 'md' ? 34 : (41))}"
+   }
+  },
+  "option": {
+   "type": "row",
+   "children": [
+    "label"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "fill": 30
+    },
+    "padding": [
+     16,
+     0,
+     16,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "selected": "${= item == props.value}",
+    "layout.padding": "${= props.size == 'sm' ? [12, 0, 12, 0] : (props.size == 'md' ? [16, 0, 16, 0] : ([21, 0, 21, 0]))}",
+    "decoration.radius": "${= props.size == 'sm' ? 4 : (props.size == 'md' ? 6 : (7))}"
+   },
+   "states": {
+    "selected": {
+     "option": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "raisedBackground"
+        }
+       ],
+       "effects": [
+        {
+         "type": "dropShadow",
+         "color": "#0D000000",
+         "offset": [
+          0,
+          1
+         ],
+         "blurRadius": 2
+        }
+       ]
+      }
+     },
+     "label": {
+      "props": {
+       "style": {
+        "color": "primaryText",
+        "fontWeight": 500
+       }
+      }
+     }
+    },
+    "hovered": {
+     "label": {
+      "props": {
+       "style": {
+        "color": "secondaryText"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.2,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.style.fontSize": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 15 : (16))}"
+   }
+  }
+ }
+}

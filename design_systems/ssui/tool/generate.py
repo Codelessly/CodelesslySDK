@@ -2580,6 +2580,93 @@ add(component(
     },
 ))
 
+# --- batch 13: tab toggle and chip tabs --------------------------------------------------------------------------
+
+# TabToggle (TabToggle.tsx): a pill track with one raised pill for the choice: the track in the subtle fill with
+# a hairline, radius 6 / 8 / 10 and 2 / 2 / 3 px inside; each option padded 5 x 10, 7 x 14 or 9 x 18 at 12.5,
+# 13.5 or 14.5; the chosen one on the raised background with radius 4 / 6 / 7 and the low shadow, 500 in primary
+# text, the others 400 in tertiary text (secondary on hover).
+TT = ['sm', 'md', 'lg']
+add(component(
+    'TabToggle',
+    'A choice between a few views as a pill track: the chosen one raised. The choice is kept in your variable. Fires onChanged.',
+    'track',
+    props=[prop('options', STRINGS, ['List', 'Grid'], 'The choices.', required=True),
+           prop('value', var(STRING), '', 'The name of your text variable holding the choice.'),
+           prop('size', enum(*TT), 'md', 'sm, md or lg.')],
+    events=[{'key': 'onChanged', 'payload': STRING}],
+    previews=[preview('Two', 160, 32, options=['List', 'Grid'], value='List')],
+    nodes={
+        'track': {'type': 'row', 'children': ['list'], 'props': {'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'hug': 160}, 'height': {'hug': 32}, 'padding': 3},
+                  'decoration': {'fills': [{'color': 'subtleFill'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8},
+                  'bind': {'layout.padding': by('size', {'sm': 3, 'md': 3, 'lg': 4}),
+                           'decoration.radius': by('size', {'sm': 6, 'md': 8, 'lg': 10})}},
+        'list': {'type': 'listView', 'children': ['option'], 'props': {'scrollDirection': 'horizontal', 'scrollable': False},
+                 'layout': {'width': {'hug': 150}, 'height': 30},
+                 'bind': {'data': '${props.options}', 'layout.height': by('size', {'sm': 25, 'md': 30, 'lg': 36})}},
+        'option': {'type': 'row', 'children': ['label'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                   'layout': {'width': {'hug': 60}, 'height': {'fill': 30}, 'padding': [14, 0, 14, 0]},
+                   'decoration': {'fills': [{'color': '#00000000'}], 'radius': 6},
+                   'bind': {'selected': '${= item == props.value}',
+                            'layout.padding': by('size', {'sm': [10, 0, 10, 0], 'md': [14, 0, 14, 0], 'lg': [18, 0, 18, 0]}),
+                            'decoration.radius': by('size', {'sm': 4, 'md': 6, 'lg': 7})},
+                   'states': {
+                       'selected': {'option': {'decoration': {'fills': [{'color': 'raisedBackground'}], 'effects': SHADOWS_LIGHT['level1']}},
+                                    'label': {'props': {'style': {'color': 'primaryText', 'fontWeight': 500}}}},
+                       'hovered': {'label': {'props': {'style': {'color': 'secondaryText'}}}},
+                   },
+                   'actions': [{'trigger': 'click', 'actions': [
+                       {'type': 'setVariable', 'variable': 'props.value', 'value': '${item}'},
+                       {'type': 'componentEvent', 'event': 'onChanged', 'value': '${item}'}]}]},
+        'label': {**text('${item}', style(13.5, 400, 'tertiaryText', 1.2), {'hug': 40}, {'hug': 16}),
+                  'bind': {'props.style.fontSize': by('size', {'sm': 12.5, 'md': 13.5, 'lg': 14.5})}},
+    },
+))
+
+# ChipTabs (ChipTabs.tsx): open documents as a row of 24 px pills, 5 px apart: each bordered, on the secondary
+# background (the raised one when chosen, with the brand border and a 2 px soft ring), 8 px either side, the
+# label 10.5/500 (secondary text; primary when chosen); an optional 18 px round add button at the end.
+add(component(
+    'ChipTabs',
+    'Open items as a row of small pills, the chosen one outlined; an optional add button. Fires onSelected with the label and onAdd.',
+    'row',
+    props=[prop('tabs', STRINGS, ['Draft', 'Review', 'Final'], 'The pills\' labels.', required=True),
+           prop('value', var(STRING), '', 'The name of your text variable holding the chosen label.'),
+           prop('showAdd', BOOL, False, 'A round + after the pills.')],
+    events=[{'key': 'onSelected', 'payload': STRING}, 'onAdd'],
+    previews=[preview('Three', 220, 24, tabs=['Draft', 'Review', 'Final'], value='Review', showAdd=True)],
+    nodes={
+        'row': {'type': 'row', 'children': ['list', 'add'], 'props': {'crossAxisAlignment': 'center', 'spacing': 5},
+                'layout': {'width': {'hug': 220}, 'height': {'hug': 28}}},
+        'list': {'type': 'listView', 'children': ['chip'], 'props': {'scrollDirection': 'horizontal', 'scrollable': False, 'spacing': 5},
+                 'layout': {'width': {'hug': 180}, 'height': 28, 'padding': 2}, 'bind': {'data': '${props.tabs}'}},
+        'chip': {'type': 'row', 'children': ['label'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                 'layout': {'width': {'hug': 50}, 'height': {'fill': 24}, 'padding': [8, 0, 8, 0]},
+                 'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 9999,
+                                'effects': [{'type': 'dropShadow', 'color': 'primaryTint', 'offset': [0, 0], 'blurRadius': 0, 'spreadRadius': 2,
+                                             'visible': False}]},
+                 'bind': {'selected': '${= item == props.value}'},
+                 'states': {
+                     'selected': {'chip': {'decoration': {'fills': [{'color': 'raisedBackground'}], 'strokes': [{'color': 'primary'}],
+                                                         'effects': [{'type': 'dropShadow', 'color': 'primaryTint', 'offset': [0, 0],
+                                                                      'blurRadius': 0, 'spreadRadius': 2}]}},
+                                  'label': {'props': {'style': {'color': 'primaryText'}}}},
+                     'hovered': {'chip': HOVER},
+                 },
+                 'actions': [{'trigger': 'click', 'actions': [
+                     {'type': 'setVariable', 'variable': 'props.value', 'value': '${item}'},
+                     {'type': 'componentEvent', 'event': 'onSelected', 'value': '${item}'}]}]},
+        'label': text('${item}', style(10.5, 500, 'secondaryText', 1.2), {'hug': 34}, {'hug': 13}),
+        'add': {'type': 'row', 'children': ['plus'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                'layout': {'width': 18, 'height': 18}, 'decoration': {'radius': 9999},
+                'bind': {'visible': '${props.showAdd}'},
+                'states': {'hovered': {'add': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}, 'plus': {'props': {'color': 'primaryText'}}}},
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onAdd'}]}]},
+        'plus': icon('add', 'tertiaryText', 12),
+    },
+))
+
 
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
