@@ -644,10 +644,16 @@ void main() {
       final decorations = _below(box).whereType<RenderNodeDecoration>().toList();
       expect(decorations, isNotEmpty);
       expect((decorations.first.decoration as BoxDecoration).borderRadius, BorderRadius.circular(4));
-      // The dropdown widget sits in the padded box: 220 less 10 + 8.
-      final dropdown = tester.getRect(find.byType(DropdownButton<Object>));
-      expect(dropdown.width, 202);
-      expect(dropdown.left - tester.getTopLeft(find.byType(NodeView)).dx - box.localToGlobal(Offset.zero).dx, closeTo(10, 0.5));
+      // The dropdown (a render object) sits in the padded box: 220 less 10 + 8.
+      RenderBox? dropdown;
+      void visit(RenderObject o) {
+        if (o.runtimeType.toString() == 'RenderDropdown') dropdown ??= o as RenderBox;
+        o.visitChildren(visit);
+      }
+
+      visit(box);
+      expect(dropdown!.size.width, 202);
+      expect(dropdown!.localToGlobal(Offset.zero).dx - box.localToGlobal(Offset.zero).dx, closeTo(10, 0.5));
     });
   });
 }
