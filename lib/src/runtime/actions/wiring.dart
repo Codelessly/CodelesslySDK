@@ -10,7 +10,7 @@ import 'dart:async';
 import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
-import 'package:codelessly_api/core.dart' show InputDecoration, InputIcon, Json, Node, PropDef, SwitchProps, TriggerType, Trigger;
+import 'package:codelessly_api/core.dart' show InputDecoration, InputIcon, Json, NavigationBarProps, Node, PropDef, SwitchProps, TriggerType, Trigger;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
@@ -131,6 +131,16 @@ class TreeReactions implements NodeInteractions {
       node = node.copyWith(actions: icon.actions);
       trigger = 'click';
     }
+    // A destination picked in a navigation bar runs its own reactions
+    // (`NavigationDestination.actions`), as a click, after the bar's
+    // `changed`.
+    if (trigger == _destinationTap) {
+      final i = event['value'];
+      final destinations = node.prop(NavigationBarProps.destinations);
+      if (i is! int || i < 0 || i >= destinations.length || destinations[i].actions.isEmpty) return;
+      node = node.copyWith(actions: destinations[i].actions);
+      trigger = 'click';
+    }
     // What a custom paint has under the pointer (render/custom_paint.dart).
     if (node.behaviors.customPaint != null) event = customPaintEvent(box, event);
     // What a modal anchored to its trigger (or the pointer) sits by.
@@ -141,6 +151,7 @@ class TreeReactions implements NodeInteractions {
         box.attached && box.hasSize ? MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size) : null;
     final ctx = contextFor(box);
     if (trigger == 'changed' && event.containsKey('value')) _writeBack(node, event['value'], ctx);
+    final picked = trigger == 'changed' && (node.type == 'navigationBar' || node.type == 'bottomNavigationBar') && event['value'] is int;
     final state = _boxes[box];
     final r = runner;
     if (r is CoreActions) {
@@ -150,6 +161,7 @@ class TreeReactions implements NodeInteractions {
         if (ctx is ActionHost) ctx.reportError(e, s, action: trigger);
       });
     }
+    if (picked) await fire(box, _destinationTap, event: event);
   }
 
   /// [fire], finishing when the reactions have run (a list's pull to
@@ -909,6 +921,10 @@ class _OneFingerPanGestureRecognizer extends PanGestureRecognizer {
 bool isTyping() {
   return RenderTextField.focused != null;
 }
+
+/// What [TreeReactions.fire] runs after a navigation bar's `changed`: the
+/// picked destination's own reactions.
+const _destinationTap = 'destinationTap';
 
 /// The trigger an input reports for a tap on its prefix icon.
 const iconTapPrefix = 'prefixIconTap';

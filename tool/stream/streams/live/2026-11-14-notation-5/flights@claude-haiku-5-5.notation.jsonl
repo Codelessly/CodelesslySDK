@@ -1,0 +1,110 @@
+{"meta":{"ui":"flights","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"Card w:390 gap:12\n  Text.title \"London to Lisbon, Friday\"\n  state pick=0\n  state flights=[{\"id\":0,\"dep\":\"07:15\",\"arr\":\"10:05\",\"airline\":\"TAP Air Portugal\",\"stops\":\"Direct\",\"dur\":\"2h 50m\",\"price\":89,\"tag\":\"Cheapest\"},{\"id\":1,\"dep\":\"12:40\",\"arr\":\"15:35\",\"airline\":\"easyJet\",\"stops\":\"Direct\",\"dur\":\"2h 55m\",\"price\":104,\"tag\":\"Best time\"},{\"id\":2,\"dep\":\"18:20\",\"arr\":\"21:30\",\"airline\":\"British Airways\",\"stops\":\"1 stop\",\"dur\":\"4h 10m\",\"price\":142,\"tag\":\"\"}]\n  each row in flights\n    Card gap:6 fill:#FFF2F6F8 radius:12 pad:12 -> pick=row.id\n      Row between\n        Text.strong \"{row.dep} to {row.arr}\"\n        if row.tag!=\"\"\n          Badge.success \"{row.tag}\"\n      Row between\n        Text.body \"{row.airline}\"\n        Text.strong \"{money(row.price,\\\"$\\\",0)}\"\n      Row between\n        Text.muted \"{row.stops}, {row.dur}\"\n        if pick==row.id\n          Icon \"check_circle\"\n  Divider\n  Row between\n    Text.strong \"Total\"\n    Text.title \"{money(sum(flights, f=>f.id==pick ? f.price : 0),\\\"$\\\",0)}\"\n  Button \"Confirm flight\" -> emit confirm_flight; toast \"You chose {find(flights, f=>f.id==pick).airline} at {find(flights, f=>f.id==pick).dep}\"","usage":{"input_tokens":2374,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":564,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":778,"totalMs":3017}}
+{"tMs":778,"delta":"Card"}
+{"tMs":783,"delta":" w"}
+{"tMs":908,"delta":":390 gap:12"}
+{"tMs":909,"delta":"\n  Text.title \"London"}
+{"tMs":909,"delta":" to Lisbon,"}
+{"tMs":909,"delta":" Friday\"\n  state"}
+{"tMs":909,"delta":" p"}
+{"tMs":924,"delta":"ick=0"}
+{"tMs":949,"delta":"\n  state flights=[{"}
+{"tMs":966,"delta":"\"id\":0,\"d"}
+{"tMs":986,"delta":"ep\":\"07"}
+{"tMs":1006,"delta":":15"}
+{"tMs":1028,"delta":"\",\"arr\":\"10"}
+{"tMs":1049,"delta":":05"}
+{"tMs":1067,"delta":"\",\"air"}
+{"tMs":1087,"delta":"line\":\"TA"}
+{"tMs":1108,"delta":"P Air"}
+{"tMs":1150,"delta":" Portugal\",\"st"}
+{"tMs":1169,"delta":"ops\":\"Direct\",\"d"}
+{"tMs":1191,"delta":"ur\":\"2h 50"}
+{"tMs":1209,"delta":"m\",\"price\":89"}
+{"tMs":1232,"delta":",\"tag\":\"C"}
+{"tMs":1251,"delta":"heapest\"},{\"id"}
+{"tMs":1274,"delta":"\":1,\"dep\":\""}
+{"tMs":1292,"delta":"12"}
+{"tMs":1312,"delta":":40"}
+{"tMs":1333,"delta":"\",\"arr\":\"15:35"}
+{"tMs":1353,"delta":"\",\"airline\":\"easyJ"}
+{"tMs":1374,"delta":"et\",\"stops\":\"Dire"}
+{"tMs":1394,"delta":"ct\",\"dur\":\"2h"}
+{"tMs":1415,"delta":" 55m\",\"price\":104"}
+{"tMs":1435,"delta":",\"tag\":\"Best"}
+{"tMs":1456,"delta":" time\"},{\"id\":2"}
+{"tMs":1476,"delta":",\"dep\":\"18:"}
+{"tMs":1497,"delta":"20\",\"arr\":\"21:"}
+{"tMs":1517,"delta":"30"}
+{"tMs":1538,"delta":"\",\"airline\":\"British"}
+{"tMs":1558,"delta":" Airways\",\"stops\":\""}
+{"tMs":1579,"delta":"1 stop\",\"dur\":"}
+{"tMs":1601,"delta":"\"4h 10"}
+{"tMs":1620,"delta":"m\",\"price\":142"}
+{"tMs":1640,"delta":",\"tag\":\"\"}]"}
+{"tMs":1660,"delta":"\n  each"}
+{"tMs":1680,"delta":" row in"}
+{"tMs":1701,"delta":" flights\n    Card"}
+{"tMs":1722,"delta":" gap:6"}
+{"tMs":1741,"delta":" f"}
+{"tMs":1763,"delta":"ill:#F"}
+{"tMs":1782,"delta":"FF"}
+{"tMs":1803,"delta":"2F6"}
+{"tMs":1824,"delta":"F8"}
+{"tMs":1843,"delta":" radius:12"}
+{"tMs":1864,"delta":" pad:12"}
+{"tMs":1884,"delta":" "}
+{"tMs":1905,"delta":"-"}
+{"tMs":1925,"delta":"> p"}
+{"tMs":1945,"delta":"ick=row.id\n      "}
+{"tMs":1966,"delta":"Row between"}
+{"tMs":1986,"delta":"\n        Text.strong \""}
+{"tMs":2006,"delta":"{row.dep} to"}
+{"tMs":2027,"delta":" {row.arr}\""}
+{"tMs":2049,"delta":"\n        if"}
+{"tMs":2067,"delta":" row."}
+{"tMs":2088,"delta":"tag!"}
+{"tMs":2108,"delta":"=\"\"\n          Badge."}
+{"tMs":2129,"delta":"success \"{row.tag}"}
+{"tMs":2149,"delta":"\"\n      Row"}
+{"tMs":2169,"delta":" between"}
+{"tMs":2190,"delta":"\n        Text."}
+{"tMs":2210,"delta":"body"}
+{"tMs":2231,"delta":" \"{row.airline}\""}
+{"tMs":2252,"delta":"\n        Text.str"}
+{"tMs":2272,"delta":"ong \"{money"}
+{"tMs":2292,"delta":"(row.price,\\"}
+{"tMs":2312,"delta":"\"$"}
+{"tMs":2332,"delta":"\\\",0"}
+{"tMs":2353,"delta":")}\"\n      Row"}
+{"tMs":2373,"delta":" between"}
+{"tMs":2394,"delta":"\n        Text.muted \""}
+{"tMs":2414,"delta":"{row.stops},"}
+{"tMs":2435,"delta":" {row.dur}\""}
+{"tMs":2455,"delta":"\n        if pick==row.id"}
+{"tMs":2476,"delta":"\n          Ic"}
+{"tMs":2496,"delta":"on \"check_"}
+{"tMs":2517,"delta":"circle\"\n  Div"}
+{"tMs":2537,"delta":"ider\n  "}
+{"tMs":2557,"delta":"Row between"}
+{"tMs":2579,"delta":"\n    Text.strong \""}
+{"tMs":2599,"delta":"Total\"\n    Text."}
+{"tMs":2618,"delta":"title"}
+{"tMs":2639,"delta":" \"{money(s"}
+{"tMs":2659,"delta":"um(flights,"}
+{"tMs":2680,"delta":" f"}
+{"tMs":2701,"delta":"=>f.id"}
+{"tMs":2723,"delta":"==pick "}
+{"tMs":2741,"delta":"? f.price : 0),"}
+{"tMs":2761,"delta":"\\\"$\\\",0)}"}
+{"tMs":2782,"delta":"\"\n  Button \"Conf"}
+{"tMs":2802,"delta":"irm fl"}
+{"tMs":2823,"delta":"ight\" -> emit confir"}
+{"tMs":2843,"delta":"m_"}
+{"tMs":2864,"delta":"flight; toast \"You"}
+{"tMs":2884,"delta":" chose {find(flights,"}
+{"tMs":2904,"delta":" f=>f.id==p"}
+{"tMs":2927,"delta":"ick).air"}
+{"tMs":2946,"delta":"line}"}
+{"tMs":2966,"delta":" at {find(flights, f"}
+{"tMs":2986,"delta":"=>f.id==pick"}
+{"tMs":3008,"delta":").dep}\""}
