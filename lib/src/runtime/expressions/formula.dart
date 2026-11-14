@@ -371,12 +371,49 @@ class FormulaEvaluator {
       return null;
     } on FormatException catch (error) {
       final int? offset = error.offset;
-      return offset == null || offset >= expression.trim().length
+      final String message = offset == null || offset >= expression.trim().length
           ? error.message
           : '${error.message} at ${offset + 1}';
+      final String? hint = _javaScriptHint(expression);
+      return hint == null ? message : '$message. $hint';
     } catch (error) {
       return error.toString();
     }
+  }
+
+  // JavaScript a model writes in a formula, and what the formula language
+  // has instead: methods are functions, lambdas are arrows.
+  static const Map<String, String> _methods = {
+    'toFixed': 'fixed(x, 2), not x.toFixed(2)',
+    'toUpperCase': 'upper(s), not s.toUpperCase()',
+    'toLowerCase': 'lower(s), not s.toLowerCase()',
+    'trim': 'trim(s), not s.trim() (and upper(trim(s)) for s.trim().toUpperCase())',
+    'map': 'map(list, x => ...), not list.map(...)',
+    'filter': 'filter(list, x => ...), not list.filter(...)',
+    'reduce': 'sum(list, x => ...), not list.reduce(...)',
+    'includes': 'contains(list or text, value), not x.includes(value)',
+    'join': 'join(list, ", "), not list.join(", ")',
+    'slice': 'slice(list, start, end), not list.slice(...)',
+    'toString': 'text(x), not x.toString()',
+    'toLocaleString': 'formatNumber(x), not x.toLocaleString()',
+    'find': 'find(list, x => ...), not list.find(...)',
+    'some': 'any(list, x => ...), not list.some(...)',
+    'every': 'all(list, x => ...), not list.every(...)',
+  };
+
+  static final RegExp _methodCall = RegExp(r'\.([A-Za-z]+)\s*\(');
+
+  /// What to write instead, when [expression] is written as JavaScript:
+  /// a method call (`x.toFixed(2)`) or a `function` lambda.
+  static String? _javaScriptHint(String expression) {
+    if (RegExp(r'\bfunction\s*\(').hasMatch(expression)) {
+      return 'A lambda is written (s, i) => value, not function (s, i) { return value }; an object is {t: s, full: i > 2}';
+    }
+    for (final Match m in _methodCall.allMatches(expression)) {
+      final String? hint = _methods[m[1]];
+      if (hint != null) return 'Formulas have functions, not methods: write $hint';
+    }
+    return null;
   }
 
   /// Why a `${= ...}` formula in [text] doesn't parse, quoting it and the
