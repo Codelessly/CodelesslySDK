@@ -116,6 +116,38 @@ void main() {
     });
   });
 
+  group('full-page stitching', () {
+    const site = 'test/tool/fixtures/fullpage';
+    RenderArgs page(List<Step> steps, String label) =>
+        RenderArgs(inputs: [site], out: out.path, sizes: const [Size(390, 600)], steps: steps, fullPage: true, label: label);
+
+    testWidgets('a header that shrinks once the page scrolls leaves no seam: every band below the first window is whole', (tester) async {
+      final report = await runRender(tester, page(const [], 'plain'));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final p = await pixelsOf(tester, report.images.single);
+      // Four 400 px bands, dark and light by turn: below the first window
+      // each one whole (not one cut short and the next doubled at a seam).
+      final light = runsOf(rowsOf(p, 300, 0x606060));
+      expect(light.map((r) => r.$2), [400, 400], reason: 'light bands at $light');
+      expect(runsOf(rowsOf(p, 300, 0x202020)).last.$2, 400);
+    });
+
+    testWidgets('an open dropdown menu is drawn once, in the first window, not again in every slice', (tester) async {
+      final closed = await runRender(tester, page(const [], 'closed'));
+      final open = await runRender(tester, page(const [Step('tap', 'pick')], 'open'));
+      expect(open.errors, 0, reason: '${open.diagnostics}');
+      final a = await pixelsOf(tester, closed.images.single), b = await pixelsOf(tester, open.images.single);
+      expect(b.height, a.height);
+      var differ = 0;
+      for (var y = 600; y < a.height; y++) {
+        for (var x = 0; x < 390; x += 3) {
+          if (rgbAt(a, x, y) != rgbAt(b, x, y)) differ++;
+        }
+      }
+      expect(differ, 0, reason: 'below the first window the page is as without the menu');
+    });
+  });
+
   group('--navigate with route parameters', () {
     for (final target in ['detail?id=42', '/detail?id=42', 'Detail?id=42']) {
       testWidgets('--navigate $target opens the screen with id=42 as \${route.id}', (tester) async {
