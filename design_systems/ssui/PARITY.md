@@ -9,35 +9,47 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 44. Still to rebuild: 120.**
+**Here: 48. Still to rebuild: 116.**
 
 ## Here
 
 | SSUI component | Design-system document | Control the tree draws |
 |---|---|---|
+| AddButton | AddButton |  |
 | Avatar | Avatar |  |
+| BackButton | BackButton |  |
 | Badge | Badge |  |
 | Banner | Banner |  |
 | Button | Button | buttons (filled, outlined, text, elevated) |
 | Carousel |  | pageView |
 | Checkbox | Checkbox | checkbox |
 | Chip | Chip | chip family |
+| CopyButton | CopyButton |  |
 | CountBadge | CountBadge |  |
 | DatePicker |  | datePicker |
 | Dialog | Dialog | confirm action / modal |
 | Dropdown |  | dropdown |
 | EmptyState | EmptyState |  |
+| ErrorBar | ErrorBar |  |
+| FeatureBulletItem | FeatureBulletItem |  |
 | Field | Field |  |
 | FloatingActionButton |  | floatingActionButton |
+| Hyperlink | Hyperlink |  |
 | IconBox | IconBox |  |
 | IconButton | IconButton | iconButton |
 | InlineStat | InlineStat |  |
 | LoadingSpinner |  | activityIndicator |
+| MetaInfo | MetaInfo |  |
+| NotificationBadge | NotificationBadge |  |
 | Pagination |  | pagination |
 | ProgressIndicator | ProgressBar | progressBar |
+| ProviderPill | ProviderPill |  |
+| PulsingDots | PulsingDots |  |
 | RadioButton | Radio | radio |
+| SectionCard | SectionCard |  |
 | SegmentedControl | SegmentedControl | segmentedButton |
 | Select | Select | dropdown |
+| Skeleton | Skeleton |  |
 | Slider | Slider | slider |
 | StatsRow | StatTile (dashboard density), InlineStat (compact) |  |
 | StatusBadge | StatusBadge |  |
@@ -51,14 +63,6 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Toast |  | showToast action |
 | ToggleRow | ToggleRow |  |
 | Tooltip | Tooltip | tooltip behavior |
-| Skeleton | Skeleton |  |
-| ErrorBar | ErrorBar |  |
-| FeatureBulletItem | FeatureBulletItem |  |
-| SectionCard | SectionCard |  |
-| MetaInfo | MetaInfo |  |
-| Hyperlink | Hyperlink |  |
-| NotificationBadge | NotificationBadge |  |
-| PulsingDots | PulsingDots |  |
 
 Also here with no source file of the same name: Card, ListRow, SectionHeader, Tabs.
 
@@ -72,11 +76,11 @@ StatusIndicator, RunningIndicator, RadialProgress, StackedProgressBar, BatchProg
 
 ### Text and small content (14)
 
-TextItem, TextExpandable, TextInputLabel, CodeBlock, CodePreview, CopyButton, DownloadButton, BackButton, AddButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
+TextItem, TextExpandable, TextInputLabel, CodeBlock, CodePreview, DownloadButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
 
 ### Cards and rows (25)
 
-Panel, CardActions, ProviderCard, ProviderIcon, ProviderPill, FolderCard, ResourceCard, ResourceChip, PersonChip, AgentChip, DocumentItem, FileListItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OptionIcon, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
+Panel, CardActions, ProviderCard, ProviderIcon, FolderCard, ResourceCard, ResourceChip, PersonChip, AgentChip, DocumentItem, FileListItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OptionIcon, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
 
 ### Inputs (21)
 

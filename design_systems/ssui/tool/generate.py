@@ -1452,6 +1452,109 @@ add(component(
 ))
 
 
+# --- batch 5: small buttons ----------------------------------------------------------------------------------
+
+# AddButton (AddButton.tsx): a quiet list-footer action: a 13 px icon and a 12/500 label (-0.1), 5 px apart, all in
+# tertiary text, centered in its row.
+add(component(
+    'AddButton',
+    'A quiet "add another" under a list: a small muted icon and label, centered. Fires onPressed.',
+    'row',
+    props=[prop('label', STRING, 'Add folder', 'The words.', required=True),
+           prop('icon', STRING, 'add', 'The icon before them.')],
+    events=['onPressed'],
+    previews=[preview('Add', 280, 20, label='Add folder')],
+    nodes={
+        'row': {'type': 'row', 'children': ['glyph', 'label'],
+                'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center', 'spacing': 5},
+                'layout': {'width': {'fill': 280}, 'height': {'hug': 20}},
+                'states': {'hovered': {'label': {'props': {'style': {'color': 'secondaryText'}}}, 'glyph': {'props': {'color': 'secondaryText'}}}},
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed'}]}]},
+        'glyph': {**icon('add', 'tertiaryText', 13), 'bind': {'props.icon': '${props.icon}'}},
+        'label': text('${props.label}', style(12, 500, 'tertiaryText', 1.3, letterSpacing=-0.1), {'hug': 60}, {'hug': 16}),
+    },
+))
+
+# ProviderPill (ProviderPill.tsx): a small bordered action pill: 2 x 7 padding, radius 6, the primary background with
+# a 1 px border, 11/500 secondary text on a 16 px line, an optional icon 4 px before.
+add(component(
+    'ProviderPill',
+    'A small bordered pill for a row\'s action or state ("Add key", "Connected"). Fires onPressed.',
+    'pill',
+    props=[prop('label', STRING, 'Add key', 'The words.', required=True),
+           prop('icon', STRING, '', 'An icon before them (empty: none).')],
+    events=['onPressed'],
+    previews=[preview('Add key', 60, 22, label='Add key'), preview('Connected', 90, 22, label='Connected', icon='check')],
+    nodes={
+        'pill': {'type': 'row', 'children': ['glyph', 'label'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                 'layout': {'width': {'hug': 56}, 'height': {'hug': 22}, 'padding': [7, 2, 7, 2]},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 6},
+                 'states': {'hovered': {'pill': HOVER}, 'pressed': {'pill': PRESS}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed'}]}]},
+        'glyph': {**icon('check', 'secondaryText', 11), 'bind': {'visible': "${= props.icon != ''}", 'props.icon': '${props.icon}'}},
+        'label': text('${props.label}', style(11, 500, 'secondaryText', 16 / 11), {'hug': 40}, {'hug': 16}),
+    },
+))
+
+# CopyButton (CopyButton.tsx): a ghost icon button showing "copy" that copies its text, then shows a check for 2 s;
+# with showLabel it is a labeled button reading "Copy", then "Copied!".
+add(component(
+    'CopyButton',
+    'Copies its text to the clipboard and shows a check for two seconds. Fires onCopy.',
+    'button',
+    props=[prop('text', STRING, '', 'What is copied.', required=True),
+           prop('showLabel', BOOL, False, 'A label ("Copy", then "Copied!") after the icon.')],
+    events=['onCopy'],
+    variables=[{'name': 'copied', 'type': 'boolean', 'value': False}],
+    previews=[preview('Icon', 28, 28, text='npm install'), preview('Labeled', 80, 28, text='npm install', showLabel=True)],
+    nodes={
+        'button': {'type': 'row', 'children': ['glyph', 'label'],
+                   'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center', 'spacing': 6},
+                   'layout': {'width': {'hug': 28}, 'height': 28, 'padding': [7, 0, 7, 0], 'constraints': {'minWidth': 28}},
+                   'decoration': {'fills': [{'color': '#00000000'}], 'radius': 7},
+                   'bind': {'decoration.fills[0].color': "${= copied && props.showLabel ? theme.primary : '#00000000'}"},
+                   'states': {'hovered': {'button': HOVER}, 'pressed': {'button': PRESS}},
+                   'tooltip': 'Copy to clipboard',
+                   'actions': [{'trigger': 'click', 'actions': [
+                       {'type': 'copyToClipboard', 'text': '${props.text}'},
+                       {'type': 'setVariable', 'variable': 'copied', 'value': '${= true}'},
+                       {'type': 'componentEvent', 'event': 'onCopy', 'value': '${props.text}'},
+                       {'type': 'delay', 'ms': 2000},
+                       {'type': 'setVariable', 'variable': 'copied', 'value': '${= false}'}]}]},
+        'glyph': {**icon('content_copy', 'secondaryText', 14),
+                  'bind': {'props.icon': "${= copied ? 'check' : 'content_copy'}",
+                           'props.color': "${= copied && props.showLabel ? theme.onPrimary : theme.colors.secondaryText}"}},
+        'label': {**text('Copy', {'from': 'controlCompact'}, {'hug': 30}, {'hug': 15}),
+                  'bind': {'visible': '${props.showLabel}', 'props.text': "${= copied ? 'Copied!' : 'Copy'}",
+                           'props.style.color': "${= copied ? theme.onPrimary : theme.colors.primaryText}"}},
+    },
+))
+
+# BackButton (BackButton.tsx): an arrow and "Back" 8 px apart, 14/500, 4 x 8 padding, radius 2; the subtle fill when
+# hovered and the border color when pressed; muted and inert when disabled.
+add(component(
+    'BackButton',
+    'Goes back: a left arrow and a label. Fires onPressed.',
+    'button',
+    props=[prop('label', STRING, 'Back', 'The words.'),
+           prop('enabled', BOOL, True, 'False: muted, takes no press.')],
+    events=['onPressed'],
+    previews=[preview('Back', 70, 30)],
+    nodes={
+        'button': {'type': 'row', 'children': ['glyph', 'label'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                   'layout': {'width': {'hug': 70}, 'height': {'hug': 30}, 'padding': [8, 4, 8, 4]},
+                   'decoration': {'fills': [{'color': '#00000000'}], 'radius': 2},
+                   'bind': {'disabled': '${= !props.enabled}'},
+                   'states': {'hovered': {'button': {'decoration': {'fills': [{'color': 'subtleFill'}]}}, 'glyph': {'props': {'color': 'primaryText'}}},
+                              'pressed': {'button': {'decoration': {'fills': [{'color': 'primaryBorder'}]}}},
+                              'disabled': {'label': {'props': {'style': {'color': 'tertiaryText'}}}, 'glyph': {'props': {'color': 'tertiaryText'}}}},
+                   'actions': [click('onPressed')]},
+        'glyph': icon('arrow_back', 'secondaryText', 16),
+        'label': text('${props.label}', style(14, 500, 'primaryText', 1.4, letterSpacing=-0.14), {'hug': 34}, {'hug': 20}),
+    },
+))
+
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:

@@ -469,7 +469,11 @@
   "components/MetaInfo.json",
   "components/Hyperlink.json",
   "components/NotificationBadge.json",
-  "components/PulsingDots.json"
+  "components/PulsingDots.json",
+  "components/AddButton.json",
+  "components/ProviderPill.json",
+  "components/CopyButton.json",
+  "components/BackButton.json"
  ],
  "replaces": [
   "filledButton",
