@@ -249,13 +249,22 @@ class UiSession implements NodeSource {
   /// operations and is applied at once, so the UI paints line by line. The
   /// rest is [applyStream]: one revision, one undo step, the same checks
   /// and result. What the notation could not read is in [notationIssues].
+  ///
+  /// With a [designSystem], its blocks and components are called by name and
+  /// its looks are the defaults ([options] replaces them). [prelude] is
+  /// notation the host puts before the model's answer: the state of an app's
+  /// data contract, a screen's clock, anything that must be right and is not
+  /// the model's to write (see [notationInstructions]).
   Future<EditResult> applyNotation(
     Stream<String> text, {
-    NotationOptions options = const NotationOptions(),
+    NotationOptions? options,
+    String prelude = '',
     String author = 'agent',
     void Function(StreamProgress progress)? onOp,
   }) {
-    final notation = Catalog.run(catalog, () => NotationStream(catalog: catalog, options: options));
+    final ds = designSystem;
+    final used = options ?? (ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds));
+    final notation = Catalog.run(catalog, () => NotationStream(catalog: catalog, options: used));
     Stream<String> ops() async* {
       yield '{"ops":[';
       var first = true;
@@ -269,6 +278,10 @@ class UiSession implements NodeSource {
         return b.toString();
       }
 
+      if (prelude.trim().isNotEmpty) {
+        final out = encode(Catalog.run(catalog, () => notation.add('${prelude.trimRight()}\n')));
+        if (out.isNotEmpty) yield out;
+      }
       await for (final chunk in text) {
         final out = encode(Catalog.run(catalog, () => notation.add(chunk)));
         if (out.isNotEmpty) yield out;
@@ -279,6 +292,23 @@ class UiSession implements NodeSource {
     }
 
     return applyStream(ops(), author: author, onOp: onOp).whenComplete(() => _notationIssues = notation.issues);
+  }
+
+  /// What a model is told so that it writes this session's UI in the compact
+  /// notation: the grammar, the words, and the [designSystem]'s components.
+  /// [blocks] names the only components to list (an app's own screen blocks,
+  /// not the whole base set), which keeps the instructions short.
+  String notationInstructions({Set<String>? blocks}) {
+    final ds = designSystem;
+    return Catalog.run(
+      catalog,
+      () => notationPrompt(
+        catalog: catalog,
+        options: ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds),
+        designSystem: ds,
+        only: blocks,
+      ),
+    );
   }
 
   /// What the last [applyNotation] could not read, by line.
