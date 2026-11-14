@@ -1,0 +1,22 @@
+state picked=[]
+state answered=false
+Card gap:8
+  Text.sectionTitle "Which environments should I deploy to?"
+  Text.bodySecondary "Choose one or more."
+  if !answered
+    Column gap:6
+      each o in [{"id":"staging","label":"Staging","note":"Safe to break; resets nightly"},{"id":"canary","label":"Canary","note":"5 % of production traffic"},{"id":"prod","label":"Production","note":"All customers"}]
+        Row gap:10 pad:10 radius:7 fill:=contains(picked,o.id)?"#1A2563EB":"#FFFFFFFF" border:#FFE5E7EB -> picked=contains(picked,o.id)?without(picked,o.id):append(picked,o.id)
+          Checkbox checked:=contains(picked,o.id)
+          Column gap:1 grow
+            Text.strong "{o.label}"
+            Text.bodySecondary "{o.note}"
+    Row between
+      Text.caption "{length(picked)} of 3 selected"
+      Button "Confirm" enabled:=length(picked)>0 -> answered=true; emit confirm picked
+  if answered
+    Row gap:8
+      Icon "check_circle" {"props": {"size": 16, "color": "#FF16A34A"}}
+      Text.strong "{length(picked)==0 ? "Nothing selected" : join(picked,", ")}"
+      Spacer grow
+      Button.ghost "Change" -> answered=false
