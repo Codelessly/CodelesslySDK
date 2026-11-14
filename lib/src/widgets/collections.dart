@@ -20,7 +20,10 @@ import '../render/node_tree.dart';
 import '../render/source.dart' show NodeSource;
 import '../render/recipe.dart';
 import '../runtime/expressions/bindings.dart' show ProvidedItem, RenderTreeBinder;
+import '../render/controls/tokens.dart';
+import '../runtime/lists/pagination.dart' show PaginationController;
 import 'collections_data_list.dart';
+import 'collections_data_list_boxes.dart';
 import 'collections_list_runtime.dart';
 import 'collections_layout.dart';
 import 'collections_pagination.dart';
@@ -185,6 +188,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   // canvas too (its items come from its data, as when it runs).
   if ((b.tree.animates || (n.sectioned && n.bind.containsKey('data') && ListRuntime(b, n).data != null)) &&
       usesDataList(n)) {
+    if (b.tree.animates && dataListIsBoxes(n)) return _dataListBoxes(b, n, chain, itemId, item);
     return _dataList(b, n, chain, itemId, item);
   }
   if (b.tree.animates) {
@@ -213,7 +217,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   if (b.tree.animates && n.bind.containsKey('data') && n.behaviors.dropTarget == null && !_opensDropSlots(b, n) &&
       n.prop(ListViewProps.scrollable) && !_wraps(n) &&
       n.prop(ListViewProps.layout) == api.ListLayout.list && ListRuntime(b, n).data != null) {
-    return _dataList(b, n, chain, itemId, item);
+    return _dataListBoxes(b, n, chain, itemId, item);
   }
   final count = _itemCount(n);
   final layout = n.prop(ListViewProps.layout);
@@ -467,6 +471,107 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final start = count ?? _startCount(view, n.designMain, itemMain ?? (vertical ? item.outerHeight : item.outerWidth));
   _syncItems(b, n, container, itemId, start);
   chain.add(view);
+}
+
+/// A running list of data items, paged or not, as render objects: every
+/// loaded item in a line inside the SDK's scroll box, the paging footer
+/// after them. Its items are scoped by their key, so an item keeps its
+/// state when the list changes around it.
+void _dataListBoxes(NodeBuilder b, Node n, List<RenderBox> chain, String itemId, Node item) {
+  final stretchItems = n.prop(ListViewProps.stretchItems);
+  final hugCross = n.crossFit == SizeFit.hug && !stretchItems;
+  final scrollable = n.prop(ListViewProps.scrollable);
+  final reverse = n.prop(CollectionScrollProps.reverse);
+  final padding = n.layout.padding.flutter;
+  chain.add(_viewportBox(b, n, canShrinkWrap: true, hugCross: hugCross));
+  final view = b.obtain<RenderDataItems>('dataItems', RenderDataItems.new);
+  final scroll = b.obtain<RenderDesignScroll>('listScroll', () => RenderDesignScroll(axis: n.axis))
+    ..interactive = true
+    ..userScrollable = scrollable && n.prop(CollectionScrollProps.physics) != api.ScrollPhysicsType.never
+    ..itemSnapping = n.prop(CollectionScrollProps.itemSnapping)
+    ..onScroll = ((event) => fireTrigger(b, 'scroll', event: event))
+    ..onScrollEnd = ((event) => fireTrigger(b, 'scrollEnd', event: event))
+    ..onViewport = ((extent) => view.viewport = extent)
+    ..axis = n.axis
+    ..reverse = reverse
+    ..clipBehavior = _clip(n);
+  chain.add(scroll);
+  final holder = b.obtain<RenderListWithFooter>('withFooter', RenderListWithFooter.new)
+    ..axis = n.axis
+    ..reverse = reverse
+    ..padding = padding;
+  chain
+    ..add(holder)
+    ..add(view);
+
+  final separator = listSeparator(n);
+  final spacing = n.prop(ListViewProps.spacing);
+  final runtime = ListRuntime(b, n);
+  view.bind(runtime, runtime.data, scroll);
+  final model = view.model;
+  final tokens = ControlTokens.of(b);
+  final textDefault = n.behaviors.defaultTextStyle;
+
+  void sync() {
+    final items = model.items;
+    view
+      ..shareFill = false
+      ..clipBehavior = Clip.none
+      ..paintReversed = false
+      ..measurable = true
+      ..onNeedItems = null
+      ..update(
+        axis: n.axis,
+        reverse: reverse,
+        anchorEnd: false,
+        padding: padding,
+        hugMain: true,
+        hugCross: hugCross,
+        stretch: stretchItems,
+        itemMain: _itemMain(n, item),
+        gap: separator == api.ListSeparator.none ? 0 : math.max(0, spacing),
+        overlap: separator == api.ListSeparator.space && spacing < 0 ? -spacing : 0,
+        divider: separator == api.ListSeparator.divider
+            ? ListDivider(
+                color: n.prop(ListViewProps.dividerColor).flutter,
+                thickness: n.prop(ListViewProps.dividerThickness),
+                indent: n.prop(ListViewProps.dividerIndent),
+                endIndent: n.prop(ListViewProps.dividerEndIndent),
+              )
+            : null,
+        itemCount: items.length,
+        cacheExtent: 0,
+      );
+    b.syncChildren(
+      view,
+      List.filled(items.length, itemId),
+      Slot(SlotKind.root, n),
+      instances: [for (final (i, it) in items.indexed) model.provide('row', model.keyOf(it), i, it)],
+    );
+    holder.footer = _footerBox(b, n, model, holder.footer, tokens, textDefault);
+  }
+
+  view.onItems = sync;
+  sync();
+}
+
+/// The footer a paging list shows now: [current] when it still is the one,
+/// else a new one.
+RenderBox? _footerBox(NodeBuilder b, Node n, DataListModel model, RenderBox? current, ControlTokens tokens, api.TextStyle? textDefault) {
+  final footer = model.footer;
+  if (footer == null) return null;
+  final (kind, slot) = footer;
+  final box = current is RenderListFooter && current.kind == kind ? current : RenderListFooter(kind);
+  final PaginationController controller = model.controller!;
+  box.onTap = kind == DataListFooter.error ? controller.retry : null;
+  if (slot != null) {
+    box.showNode(b.tree.obtain(slot, Slot(SlotKind.root, n), instance: b.instance));
+  } else if (kind == DataListFooter.loading) {
+    box.showSpinner(tokens.primary);
+  } else {
+    box.showError(textStyle(textDefault ?? api.TextStyle.empty, textDefault).copyWith(color: tokens.onSurface), tokens.primary);
+  }
+  return box;
 }
 
 /// A running list that pages, groups into sections or swipes: a
