@@ -167,6 +167,44 @@ void main() {
       expect(outlined.hovered, isFalse);
     });
 
+    testWidgets('a state comes and goes over SSUI\'s 150 ms, eased on the tree\'s ticker', (tester) async {
+      final (tree, _) = await _show(tester, {'outlined': hugging('outlinedButton', {'label': 'Cancel'})});
+      final b = _button(tree, 'outlined');
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      addTearDown(mouse.removePointer);
+      await mouse.moveTo(centreOf(tree, 'outlined'));
+      await tester.pump();
+      expect(b.stateOverlay, const Color(0x0A000000), reason: 'the state itself is at once');
+      expect(b.transitioning, isTrue);
+      await tester.pump(const Duration(milliseconds: 50));
+      final part = b.paintedOverlay!.a;
+      expect(part, greaterThan(0));
+      expect(part, lessThan(const Color(0x0A000000).a));
+      expect(b.stateValue(api.WidgetState.hovered), greaterThan(50 / 150), reason: 'ease-out: ahead of linear');
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
+      expect(b.paintedOverlay, const Color(0x0A000000));
+      expect(b.transitioning, isFalse);
+      await mouse.moveTo(const Offset(390, 290));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(b.paintedOverlay!.a, greaterThan(0), reason: 'and eases out');
+      await tester.pump(const Duration(milliseconds: 80));
+      expect(b.paintedOverlay, isNull);
+    });
+
+    testWidgets('a theme\'s durations.control sets the ease; 0 shows each state at once', (tester) async {
+      final (tree, _) = await _show(tester, {'go': hugging('textButton', {'label': 'Go'})}, theme: {
+        'durations': {'control': 0},
+      });
+      final b = _button(tree, 'go');
+      tree.setState('go', api.WidgetState.selected, true);
+      await tester.pump();
+      expect(_button(tree, 'go').stateValue(api.WidgetState.selected), 1);
+      expect(b.transitioning, isFalse);
+    });
+
     testWidgets('a disabled button draws at half opacity, takes no tap and no Tab stop, and says so to screen readers',
         (tester) async {
       final handle = tester.ensureSemantics();
