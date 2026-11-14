@@ -1,0 +1,396 @@
+{
+ "schema": 3,
+ "id": "Stepper",
+ "roots": [
+  "stepper"
+ ],
+ "widget": {
+  "type": "Stepper",
+  "doc": "A number changed one step at a time: minus, the value, plus. The value is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable."
+   },
+   {
+    "key": "min",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "The least it goes."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 100,
+    "doc": "The most it goes."
+   },
+   {
+    "key": "step",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "How much a press changes it."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Words before it (empty: none)."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: dimmed, no presses."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "number",
+     "flutter": "double"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Three",
+   "size": [
+    140,
+    36
+   ],
+   "props": {
+    "value": 3
+   }
+  },
+  {
+   "name": "Labeled",
+   "size": [
+    220,
+    36
+   ],
+   "props": {
+    "value": 1,
+    "label": "Seats"
+   }
+  }
+ ],
+ "nodes": {
+  "stepper": {
+   "type": "row",
+   "children": [
+    "label",
+    "group"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "bind": {
+    "opacity": "${= props.enabled ? 1 : 0.5}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != ''}"
+   }
+  },
+  "group": {
+   "type": "row",
+   "children": [
+    "minus",
+    "value",
+    "plus"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 124
+    },
+    "height": 36,
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 3,
+    "clip": "antiAlias"
+   }
+  },
+  "minus": {
+   "type": "row",
+   "children": [
+    "minusIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": {
+     "fill": 36
+    }
+   },
+   "decoration": {
+    "radius": [
+     3,
+     0,
+     0,
+     3
+    ]
+   },
+   "bind": {
+    "disabled": "${= !(props.enabled && props.value > props.min)}"
+   },
+   "states": {
+    "hovered": {
+     "minus": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "disabled": {
+     "minusIcon": {
+      "props": {
+       "color": "tertiaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled && props.value > props.min"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= max(props.min, props.value - props.step)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "minusIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "remove",
+    "color": "primaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "value": {
+   "type": "row",
+   "children": [
+    "number"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "fill": 34
+    },
+    "padding": [
+     16,
+     0,
+     16,
+     0
+    ],
+    "constraints": {
+     "minWidth": 60
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "leftRight"
+   }
+  },
+  "number": {
+   "type": "text",
+   "props": {
+    "text": "${props.value}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "plus": {
+   "type": "row",
+   "children": [
+    "plusIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": {
+     "fill": 36
+    }
+   },
+   "decoration": {
+    "radius": [
+     0,
+     3,
+     3,
+     0
+    ]
+   },
+   "bind": {
+    "disabled": "${= !(props.enabled && props.value < props.max)}"
+   },
+   "states": {
+    "hovered": {
+     "plus": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "disabled": {
+     "plusIcon": {
+      "props": {
+       "color": "tertiaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled && props.value < props.max"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= min(props.max, props.value + props.step)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "plusIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "add",
+    "color": "primaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  }
+ }
+}

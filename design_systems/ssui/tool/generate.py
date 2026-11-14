@@ -2124,6 +2124,157 @@ add(component(
     },
 ))
 
+# --- batch 10: stepper, search bar, theme toggle, download ------------------------------------------------------
+
+def _step_button(id_, glyph, side, formula, enabled):
+    radius = [8, 0, 0, 8] if side == 'start' else [0, 8, 8, 0]
+    return {
+        id_: {'type': 'row', 'children': [id_ + 'Icon'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+              'layout': {'width': 32, 'height': {'fill': 36}}, 'decoration': {'radius': radius},
+              'bind': {'disabled': '${= !(%s)}' % enabled},
+              'states': {'hovered': {id_: {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}},
+                         'disabled': {id_ + 'Icon': {'props': {'color': 'tertiaryText'}}}},
+              'actions': [{'trigger': {'type': 'click', 'when': enabled}, 'actions': [
+                  {'type': 'setVariable', 'variable': 'props.value', 'value': '${= %s}' % formula},
+                  {'type': 'componentEvent', 'event': 'onChanged', 'value': '${props.value}'}]}]},
+        id_ + 'Icon': icon(glyph, 'primaryText', 16),
+    }
+
+
+# Stepper (Stepper.tsx): a number with a minus and a plus: an optional label 14/500, 12 px, then a bordered group
+# with radius 8: 32 px buttons with 16 px icons either side of the value 14/500 (16 px either side of it, at least
+# 60 wide, hairlines between); a button at its limit is tertiary.
+add(component(
+    'Stepper',
+    'A number changed one step at a time: minus, the value, plus. The value is kept in your variable. Fires onChanged.',
+    'stepper',
+    props=[prop('value', var(NUMBER), '', 'The name of your number variable.'),
+           prop('min', NUMBER, 0, 'The least it goes.'),
+           prop('max', NUMBER, 100, 'The most it goes.'),
+           prop('step', NUMBER, 1, 'How much a press changes it.'),
+           prop('label', STRING, '', 'Words before it (empty: none).'),
+           prop('enabled', BOOL, True, 'False: dimmed, no presses.')],
+    events=[{'key': 'onChanged', 'payload': NUMBER}],
+    previews=[preview('Three', 140, 36, value=3), preview('Labeled', 220, 36, value=1, label='Seats')],
+    nodes={
+        'stepper': {'type': 'row', 'children': ['label', 'group'], 'props': {'crossAxisAlignment': 'center', 'spacing': 12},
+                    'layout': {'width': {'hug': 140}, 'height': {'hug': 36}},
+                    'bind': {'opacity': '${= props.enabled ? 1 : 0.5}'}},
+        'label': {**text('${props.label}', style(14, 500, 'primaryText', 1.4), {'hug': 40}, {'hug': 20}),
+                  'bind': {'visible': "${= props.label != ''}"}},
+        'group': {'type': 'row', 'children': ['minus', 'value', 'plus'], 'props': {'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'hug': 124}, 'height': 36, 'padding': 1},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8,
+                                 'clip': 'antiAlias'}},
+        **_step_button('minus', 'remove', 'start', 'max(props.min, props.value - props.step)', 'props.enabled && props.value > props.min'),
+        'value': {'type': 'row', 'children': ['number'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'hug': 60}, 'height': {'fill': 34}, 'padding': [16, 0, 16, 0], 'constraints': {'minWidth': 60}},
+                  'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'leftRight'}},
+        'number': text('${props.value}', style(14, 500, 'primaryText', 1.4), {'hug': 20}, {'hug': 20}),
+        **_step_button('plus', 'add', 'end', 'min(props.max, props.value + props.step)', 'props.enabled && props.value < props.max'),
+    },
+))
+
+# SearchBar (SearchBar.tsx): a search field with radius 12 and a hairline on the primary background: a 16 px
+# secondary search icon, 8 px, the text (14; 16 large) and, once there is text, a clear button (a 16 px x, 4 px
+# around it, radius 6). 32, 40 or 48 high with 12, 16 or 20 px either side.
+SEARCH_H = {'sm': 32, 'md': 40, 'lg': 48}
+add(component(
+    'SearchBar',
+    'A rounded search field with a search icon and a clear button, its text kept in your variable. Fires onChanged, onSubmitted and onClear.',
+    'bar',
+    props=[prop('value', var(STRING), '', 'The name of your text variable.'),
+           prop('placeholder', STRING, 'Search...', 'Shown while empty.'),
+           prop('size', enum('sm', 'md', 'lg'), 'md', 'sm 32, md 40, lg 48 high.')],
+    events=[{'key': 'onChanged', 'payload': STRING}, {'key': 'onSubmitted', 'payload': STRING}, 'onClear'],
+    previews=[preview('Empty', 300, 40), preview('Typed', 300, 40, value='invoices')],
+    nodes={
+        'bar': {'type': 'row', 'children': ['strut', 'glyph', 'field', 'clear'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                'layout': {'width': {'fill': 300}, 'height': {'hug': 40}, 'padding': [16, 0, 16, 0]},
+                'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 12},
+                'bind': {'layout.padding': by('size', {'sm': [12, 0, 12, 0], 'md': [16, 0, 16, 0], 'lg': [20, 0, 20, 0]})}},
+        'strut': strut(by('size', SEARCH_H), 40),
+        'glyph': icon('search', 'secondaryText', 16),
+        'field': {
+            'type': 'textField', 'layout': {'width': {'fill': 200}, 'height': {'hug': 24}},
+            'props': {'style': {'from': 'inputText', 'fontSize': 14},
+                      'decoration': {'isDense': True, 'isCollapsed': True, 'border': {'type': 'none'}, 'hintStyle': 'placeholder'},
+                      'cursorColor': 'primary', 'textInputAction': 'search'},
+            'bind': {'props.initialValue': '${props.value}', 'props.decoration.hintText': '${props.placeholder}',
+                     'props.style.fontSize': by('size', {'sm': 14, 'md': 14, 'lg': 16})},
+            'actions': [
+                {'trigger': {'type': 'changed'}, 'actions': [
+                    {'type': 'setVariable', 'variable': 'props.value', 'value': '${result}'},
+                    {'type': 'componentEvent', 'event': 'onChanged', 'value': '${result}'}]},
+                {'trigger': {'type': 'submitted'}, 'actions': [{'type': 'componentEvent', 'event': 'onSubmitted', 'value': '${result}'}]},
+            ],
+        },
+        'clear': {'type': 'row', 'children': ['x'], 'layout': {'width': {'hug': 24}, 'height': {'hug': 24}, 'padding': 4},
+                  'decoration': {'radius': 6}, 'bind': {'visible': "${= props.value != ''}"},
+                  'states': {'hovered': {'clear': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}, 'x': {'props': {'color': 'primaryText'}}}},
+                  'actions': [{'trigger': 'click', 'actions': [
+                      {'type': 'setVariable', 'variable': 'props.value', 'value': ''},
+                      {'type': 'componentEvent', 'event': 'onChanged', 'value': ''},
+                      {'type': 'componentEvent', 'event': 'onClear'}]}]},
+        'x': icon('close', 'secondaryText', 16),
+    },
+))
+
+# ThemeToggle (ThemeToggle.tsx): a 36 px button, radius 8, 8 px round a 20 px icon: a moon on the light theme
+# (a hairline round it), a sun on the dark one; pressing it switches the site's mode.
+add(component(
+    'ThemeToggle',
+    'Switches the site between light and dark: a moon in light mode, a sun in dark. Fires onChanged with the new mode.',
+    'button',
+    events=[{'key': 'onChanged', 'payload': STRING}],
+    previews=[preview('Light', 36, 36)],
+    nodes={
+        'button': {'type': 'row', 'children': ['glyph'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                   'layout': {'width': {'hug': 36}, 'height': {'hug': 36}, 'padding': 8},
+                   'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8},
+                   'bind': {'decoration.strokes[0].visible': '${= !theme.isDark}',
+                            'decoration.fills[0].color': '${= theme.isDark ? theme.colors.tertiaryBackground : theme.colors.primaryBackground}'},
+                   'states': {'hovered': {'button': HOVER}, 'pressed': {'button': PRESS}},
+                   'actions': [{'trigger': 'click', 'actions': [
+                       {'type': 'componentEvent', 'event': 'onChanged', 'value': "${= theme.isDark ? 'light' : 'dark'}"},
+                       {'type': 'setThemeMode', 'mode': "${= theme.isDark ? 'light' : 'dark'}"}]}]},
+        'glyph': {**icon('dark_mode', 'primaryText', 20), 'bind': {'props.icon': "${= theme.isDark ? 'light_mode' : 'dark_mode'}"}},
+    },
+))
+
+# DownloadButton (DownloadButton.tsx): a button that starts a download: a download icon and a label on the control
+# scale (the primary look), or the ghost icon alone; a spinner in the icon's place while it runs.
+add(component(
+    'DownloadButton',
+    'Starts a download: a download icon with a label, or the icon alone. Fires onPressed.',
+    'button',
+    props=[prop('label', STRING, 'Download', 'The words (empty: the icon alone, on a ghost button).'),
+           prop('loading', BOOL, False, 'A spinner in the icon\'s place; no presses.'),
+           prop('enabled', BOOL, True, 'False: dimmed, no presses.')],
+    events=['onPressed'],
+    previews=[preview('Labeled', 110, 36), preview('Icon', 36, 36, label='')],
+    nodes={
+        'button': {'type': 'row', 'children': ['spinner', 'glyph', 'label'],
+                   'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center', 'spacing': 6},
+                   'layout': {'width': {'hug': 110}, 'height': 36, 'padding': [10, 0, 10, 0], 'constraints': {'minWidth': 36}},
+                   'decoration': {'fills': [{'color': 'primary'}], 'radius': 7},
+                   'bind': {'decoration.fills[0].color': "${= props.label == '' ? '#00000000' : theme.primary}",
+                            'decoration.radius': '${theme.radii.control}',
+                            'opacity': '${= props.enabled ? 1 : 0.5}'},
+                   'states': {'hovered': {'button': HOVER}, 'pressed': {'button': PRESS}},
+                   'actions': [click('onPressed', when='props.enabled && !props.loading')]},
+        'spinner': {'type': 'circularProgressIndicator', 'props': {'color': 'onAccent', 'strokeWidth': 1.5, 'strokeCap': 'round'},
+                    'layout': {'width': 13, 'height': 13},
+                    'bind': {'visible': '${props.loading}',
+                             'props.color': "${= props.label == '' ? theme.colors.secondaryText : theme.colors.onAccent}"}},
+        'glyph': {**icon('download', 'onAccent', 16),
+                  'bind': {'visible': '${= !props.loading}',
+                           'props.color': "${= props.label == '' ? theme.colors.secondaryText : theme.colors.onAccent}"}},
+        'label': {**text('${props.label}', {'from': 'controlMedium', 'color': 'onAccent'}, {'hug': 60}, {'hug': 18}),
+                  'bind': {'visible': "${= props.label != ''}"}},
+    },
+))
+
 
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)

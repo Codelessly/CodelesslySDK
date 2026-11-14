@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 65. Still to rebuild: 99.**
+**Here: 69. Still to rebuild: 95.**
 
 ## Here
 
@@ -32,6 +32,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | DatePicker |  | datePicker |
 | Dialog | Dialog | confirm action / modal |
 | DiffStatsBadge | DiffStatsBadge |  |
+| DownloadButton | DownloadButton |  |
 | Dropdown |  | dropdown |
 | EmptyState | EmptyState |  |
 | ErrorBar | ErrorBar |  |
@@ -60,6 +61,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | RadialProgress | RadialProgress |  |
 | RadioButton | Radio | radio |
 | ResourceChip | ResourceChip |  |
+| SearchBar | SearchBar |  |
 | SectionCard | SectionCard |  |
 | SegmentedControl | SegmentedControl | segmentedButton |
 | Select | Select | dropdown |
@@ -70,12 +72,14 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | StatusDot | StatusDot |  |
 | StatusIndicator | StatusIndicator |  |
 | StepIndicator | StepIndicator |  |
+| Stepper | Stepper |  |
 | Switch | Switch | switch |
 | Table |  | tableView |
 | TextArea | TextArea | textField (maxLines) |
 | TextField | TextInput | textField |
 | TextInput | TextInput | textField |
 | TextInputLabel | TextInputLabel |  |
+| ThemeToggle | ThemeToggle |  |
 | TimePicker |  | timePicker |
 | Toast |  | showToast action |
 | ToggleRow | ToggleRow |  |
@@ -91,17 +95,17 @@ In the order planned: what generated UI reaches for first, then the application 
 
 RunningIndicator, StackedProgressBar, BatchProgressBar, CloudSyncIndicator
 
-### Text and small content (10)
+### Text and small content (8)
 
-TextItem, TextExpandable, CodeBlock, CodePreview, DownloadButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
+TextItem, TextExpandable, CodeBlock, CodePreview, UpgradeButton, SplitButton, MenuButton, TabToggle
 
 ### Cards and rows (16)
 
 FolderCard, ResourceCard, AgentChip, DocumentItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
 
-### Inputs (21)
+### Inputs (19)
 
-SearchBar, FullWidthSearchInput, HeaderSearchInput, Combobox, NumberInput, NumberPresetInput, Stepper, ColorInput, AuthInput, ExtensionChipsInput, FileUploader, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInput, PromptInputWithBanner
+FullWidthSearchInput, HeaderSearchInput, Combobox, NumberInput, NumberPresetInput, ColorInput, AuthInput, ExtensionChipsInput, FileUploader, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInput, PromptInputWithBanner
 
 ### Navigation and chrome (20)
 
