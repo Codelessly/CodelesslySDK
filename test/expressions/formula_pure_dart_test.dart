@@ -44,4 +44,13 @@ void main() {
     expect(ok.error, isNull);
     expect(ok.paths, containsAll(['slots', 'dayIdx']));
   });
+
+  test('a formula written as JavaScript says what to write instead (order_summary, reservation)', () {
+    // order_summary@claude-haiku-5-5 failed three turns on methods: the
+    // parser said only 'Unexpected "(" at 38'.
+    expect(FormulaEvaluator.errorOf("'\$' + (item.price * item.qty).toFixed(2)"), contains('fixed(x, 2), not x.toFixed(2)'));
+    expect(FormulaEvaluator.errorOf("promo.trim().toUpperCase() == 'SAVE10'"), contains('upper(trim(s)) for s.trim().toUpperCase()'));
+    expect(FormulaEvaluator.errorOf('items.map((x, i) => x)'), contains('map(list, x => ...), not list.map(...)'));
+    expect(FormulaEvaluator.errorOf('map(slots, function(s, i) { return s })'), contains('(s, i) => value, not function'));
+  });
 }
