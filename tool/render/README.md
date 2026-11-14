@@ -108,7 +108,8 @@ once per screen (`unknown_screen`, with how many links name it and where), not o
 | `unknown_screen_arg` | error | `--screen` names no canvas, screen or layout. |
 | `render_exception` | error | Flutter threw while building, laying out or painting; the message names the node (`Node "price-row" (row): ...`). A flex overflow under 0.01 px (rounding) is not reported. |
 | `action_error` | error | An action chain failed (a `load` reaction, or one a step ran). |
-| `interaction_failed` | error | A step could not be applied: no such node on screen, an id two shown nodes have (the message names each by path), nothing scrolls, the node is covered wherever it shows (the message names what covers it), nothing in it takes a tap (no fill, no reaction), no text field to type into, no such screen. A warning when the steps' nodes are not shown at that size (skipped there). |
+| `interaction_failed` | error | A step could not be applied: no such node on screen, an id two shown nodes have (the message names each by path), nothing scrolls, the node is covered wherever it shows (the message names what covers it), nothing in it takes a tap (no fill, no reaction), no text field to type into, no such screen. |
+| `step_skipped` | warning | A step names a node not shown at that size (hidden there by a media rule or a binding, or on another breakpoint's canvas; a component's node named by its path too): skipped there, one note per size listing the steps; the other steps ran and the capture was made. Nothing to fix when the node is meant to be hidden at that width (a menu button shown only on phones). |
 | `tap_no_reaction` | warning | A `--tap` hit its node, but neither it nor anything around it reacts to a tap: nothing happened. |
 | `missing_glyph` | warning | A text has characters its font has no glyph for (drawn as empty boxes): the message lists them. |
 | `icon_not_drawn` | warning | An icon names no glyph the renderer can draw. |
@@ -172,7 +173,13 @@ real fonts. A run takes about 6 seconds once Flutter has compiled the harness (t
 takes 20 to 30 seconds), plus about half a second per screen and size.
 
 `render.sh` finds Flutter in `$FLUTTER` (the `flutter` command), else `$FLUTTER_ROOT/bin/flutter`, else `flutter`
-on the `PATH`, else `/opt/flutter/bin/flutter`. It resolves the SDK's dependencies itself (`flutter pub get`) when
+on the `PATH`, else the usual install places (`/opt/flutter`, `~/flutter`, `~/.tools/flutter`,
+`/workspace/.tools/flutter`, `/usr/local/flutter`, `~/development/flutter`). When it finds none it says so and exits
+2: set `FLUTTER=/path/to/flutter/bin/flutter` on the command (`FLUTTER=... tool/render/render.sh site/ --out shots/`).
+This command and the reference (codelessly_api's `docs/reference/`) are on the `master` branch of both repositories:
+a checkout without `tool/render` or `docs/reference` is an older branch (`git fetch origin master && git checkout
+master`). Every run first prints what it uses: `Rendering with codelessly_sdk <version> @ <commit> on <branch> at
+<path>, codelessly_api <version> @ <commit> from <path>, Flutter <path>`. It resolves the SDK's dependencies itself (`flutter pub get`) when
 they never were or the pubspec (or its overrides) changed since. `codelessly_api` comes from a sibling checkout
 when there is one (`../CodelesslyAPI` or `../codelessly_api` next to the SDK, or the directory `$CODELESSLY_API`
 names): the script writes a `pubspec_overrides.yaml` saying so on its first line, and removes it when the sibling

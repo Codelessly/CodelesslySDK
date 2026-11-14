@@ -64,6 +64,7 @@ const runtimeCodes = <(String, String, String)>[
   ('render_exception', 'error', 'Flutter threw while building, laying out or painting the screen.'),
   ('action_error', 'error', 'An action chain failed (a load reaction, or one an interaction ran).'),
   ('interaction_failed', 'error', 'A --tap/--hover/--focus/--type/--scroll/--set/--navigate step could not be applied (no such node, not on screen, covered by another node: the message names it).'),
+  ('step_skipped', 'warning', 'A step names a node not shown at this size (hidden by a media rule or a binding, or on another breakpoint\'s canvas): it is skipped at this size, the other steps run and the capture is made. One note per size.'),
   ('tap_no_reaction', 'warning', 'A --tap hit its node, but neither it nor anything around it reacts to a tap (no click reaction, no button or input): nothing happens.'),
   ('missing_glyph', 'warning', 'A text has characters its font has no glyph for: they are drawn as empty boxes. Use another character, an icon, or a box with a path.'),
   ('icon_not_drawn', 'warning', 'An icon names no glyph the renderer can draw (an unknown Material icon name, or an object without a type or name).'),
@@ -594,9 +595,10 @@ Future<void> _renderAll(
       if (skipped.isNotEmpty) {
         // One line per size, not one per step: these nodes are on another
         // breakpoint's canvas of the screen.
-        issue(RuntimeIssue('interaction_failed', 'warning',
-            'Skipped at this size, their nodes not being shown here: ${skipped.join(', ')}. The other steps ran. '
-            'A node on a breakpoint\'s own canvas: to reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.',
+        issue(RuntimeIssue('step_skipped', 'warning',
+            'Skipped at this size, their nodes not being shown here: ${skipped.join(', ')}. The other steps ran and the capture was made; '
+            'nothing is wrong when the node is meant to be hidden at this width.'
+            '${skipped.any((s) => s.endsWith('(not on the canvas shown at this width)')) ? ' A node on a breakpoint\'s own canvas: to reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.' : ''}',
             screen: label, size: sizeName));
       }
       // Full page: the page's own scroll view (the largest one a user can
@@ -1183,7 +1185,14 @@ String? _canvasOf(NodeBox b) {
   if (byPath) {
     for (final b in boxes) {
       final found = b.tree.boxAtPath(id);
-      if (found != null && found.attached && found.hasSize) return (box: found, problem: null);
+      if (found != null && found.attached && found.hasSize) {
+        // A component's node a media rule or a binding hides here (laid out
+        // with no size, or not drawn) is skipped at this size, as a page's.
+        if (!_shown(found)) {
+          return (box: null, problem: '$_notShownHere"$id" is hidden here (visible false, or a media rule hides it at this width)');
+        }
+        return (box: found, problem: null);
+      }
     }
     if (!id.contains('/')) return (box: null, problem: 'no node "$id" is on screen');
   }
