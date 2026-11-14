@@ -1,0 +1,18 @@
+state seats=1
+state plan="Monthly"
+Card gap:12
+  Text.sectionTitle "State and actions"
+  Text.bodySecondary "state declares a variable, =name binds a control to one, and -> runs on tap: set a variable, emit to the host, show a toast."
+  Row gap:8 middle
+    Button.outline "-" -> seats=max(1,seats-1)
+    Text.strong "{seats}"
+    Button.outline "+" -> seats=seats+1
+    Spacer grow
+    Button.ghost "Reset" enabled:=seats>1 -> seats=1
+  SegmentedButton =plan items:["Monthly","Yearly"]
+  if plan=="Yearly"
+    Badge.success "Two months free"
+  Divider
+  Row between middle
+    Text.caption "Seats: {seats}, billed {lower(plan)}"
+    Button "Checkout" -> emit checkout seats; toast "Sent to the host"

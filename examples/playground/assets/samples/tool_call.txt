@@ -1,0 +1,22 @@
+state open=false
+Card gap:0 pad:0
+  Row gap:8 pad:[12,9,12,9] -> open=!open
+    Icon "build" {"props": {"size": 14, "color": "#FF4B5563"}}
+    Text.mono "search_orders" grow
+    Badge.success "200 · 412 ms"
+    Icon "{open?"expand_less":"expand_more"}" {"props": {"size": 16, "color": "#FF9CA3AF"}}
+  if open
+    Column gap:0 border:#FFE5E7EB
+      Column gap:4 pad:12 fill:#FFF9FAFB
+        Text.fieldLabel "Arguments"
+        Text.mono "customer: \"acme-inc\""
+        Text.mono "status: \"open\""
+        Text.mono "limit: 5"
+      Column gap:4 pad:12
+        Text.fieldLabel "Result"
+        each o in [{"id":"#4812","total":"$1,240.00","age":"2 d"},{"id":"#4790","total":"$380.50","age":"6 d"},{"id":"#4731","total":"$2,015.00","age":"11 d"}]
+          Row gap:8
+            Text.mono "{o.id}" w:56
+            Text.body "{o.total}" grow
+            Text.caption "{o.age}"
+        Text.caption "3 of 3 orders"

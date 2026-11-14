@@ -1,0 +1,16 @@
+state tasks=[{"id":1,"title":"Write the notation","done":true},{"id":2,"title":"Read it back","done":false},{"id":3,"title":"Ship it","done":false}]
+Card gap:10
+  Row between middle
+    Text.sectionTitle "Lists"
+    Badge "{count(tasks,t=>t.done)} of {length(tasks)} done"
+  Text.bodySecondary "each repeats the lines under it once per element. A list never changes in place: an action sets the variable to a new list."
+  each task in tasks
+    Row gap:8 middle
+      Text "{task.title}" grow
+      if task.done
+        Badge.success "Done"
+      if !task.done
+        Button.ghost "Mark done" -> tasks=updateWhere(tasks,t=>t.id==task.id,t=>with(t,"done",true)); emit done task.id
+      Button.ghost "Remove" -> tasks=removeWhere(tasks,t=>t.id==task.id)
+  if isEmpty(tasks)
+    Text.muted "Nothing left to do."

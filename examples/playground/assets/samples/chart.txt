@@ -1,0 +1,12 @@
+state range="30"
+Card gap:10
+  Row gap:8
+    Column gap:1 grow
+      Text.sectionTitle "Weekly active users"
+      Text.caption "Up 12% on the period before"
+    SegmentedControl =range options:["7","30","90"]
+  LineChart values:[1210,1340,1295,1480,1620,1575,1790] labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+  Row gap:16
+    InlineStat "Peak 1,790" icon:"north"
+    InlineStat "Average 1,473" icon:"horizontal_rule"
+    InlineStat "Low 1,210" icon:"south"
