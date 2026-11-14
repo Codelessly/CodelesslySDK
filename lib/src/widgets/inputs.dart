@@ -257,8 +257,14 @@ String? previewText(String? text) {
 /// either).
 api.EdgeInsets defaultContentPadding(api.InputDecoration d, api.EdgeInsets padding) {
   if (d.isCollapsed || padding != api.EdgeInsets.zero) return padding;
-  final outlined = [d.border, d.enabledBorder, d.focusedBorder].any((b) => b?.type == api.InputBorderType.outline);
+  final borders = [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder];
+  final outlined = borders.any((b) => b?.type == api.InputBorderType.outline);
   final dense = d.isDense ?? false;
+  // No border of its own: the theme's outline, the label inside as a hint
+  // (it never floats), so the same padding all round.
+  if (borders.every((b) => b == null) && !(d.filled ?? false)) {
+    return dense ? const api.EdgeInsets.fromLTRB(12, 8, 12, 8) : const api.EdgeInsets.fromLTRB(12, 12, 12, 12);
+  }
   if (outlined) return dense ? const api.EdgeInsets.fromLTRB(12, 16, 12, 8) : const api.EdgeInsets.fromLTRB(12, 20, 12, 12);
   if (d.filled ?? false) return dense ? const api.EdgeInsets.fromLTRB(12, 4, 12, 4) : const api.EdgeInsets.fromLTRB(12, 8, 12, 8);
   return padding;
@@ -316,7 +322,22 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     return iconPadding == null ? aligned : Padding(padding: iconPadding.flutter, child: aligned);
   }
 
-  final label = previewText(d.labelText), errorText = previewText(d.errorText);
+  var label = previewText(d.labelText);
+  final errorText = previewText(d.errorText);
+  var hint = previewText(d.hintText);
+  var hintStyle = d.hintStyle;
+  // No border and no label behavior of its own: the theme's outlined field,
+  // whose label never floats. It is the placeholder (as Flutter shows a
+  // label that never floats, over the hint): the line stays centred
+  // whether the field is empty or not.
+  final themed = d.floatingLabelBehavior == null &&
+      [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder]
+          .every((b) => b == null);
+  if (themed && label != null && label.isNotEmpty) {
+    hint = label;
+    if (!d.labelStyle.isEmpty) hintStyle = d.labelStyle;
+    label = null;
+  }
   final prefix = previewText(d.prefixText), suffix = previewText(d.suffixText);
   final counter = d.counterText == '' ? '' : previewText(d.counterText);
   // Units that show before anything is typed go in the icon slots, which
@@ -341,8 +362,8 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     helperText: previewText(d.helperText),
     helperStyle: _styleOrNull(d.helperStyle, textDefault),
     helperMaxLines: d.helperMaxLines,
-    hintText: previewText(d.hintText),
-    hintStyle: _styleOrNull(d.hintStyle, textDefault),
+    hintText: hint,
+    hintStyle: _styleOrNull(hintStyle, textDefault),
     hintMaxLines: d.hintMaxLines,
     // In error without a message (an error text bound to `true`): the
     // error border, nothing under the field.
@@ -351,8 +372,10 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
         : (errorText == null || errorText.trim().isEmpty ? null : _text(errorText, d.errorStyle, textDefault: textDefault)),
     errorStyle: _styleOrNull(d.errorStyle, textDefault),
     errorMaxLines: d.errorMaxLines,
+    // Unset, a field with a border of its own floats its label as Flutter's
+    // does; one without takes the theme's (the label never floats).
     floatingLabelBehavior: switch (d.floatingLabelBehavior) {
-      null => null,
+      null => [d.border, d.enabledBorder, d.focusedBorder].any((b) => b != null) ? FloatingLabelBehavior.auto : null,
       final b => FloatingLabelBehavior.values.byName(b.name),
     },
     isCollapsed: d.isCollapsed,
@@ -785,11 +808,13 @@ Widget fullHeightField(
   bool focused = false,
 }) {
   final error = decoration.errorText != null || decoration.error != null;
-  final border = (error ? (focused ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
+  final own = (error ? (focused ? decoration.focusedErrorBorder : null) ?? decoration.errorBorder : null) ??
       (focused ? decoration.focusedBorder : null) ??
       decoration.enabledBorder ??
-      decoration.border ??
-      const UnderlineInputBorder();
+      decoration.border;
+  // No border of its own: the theme's field shape, its side by state as
+  // Flutter's InputDecorator draws it.
+  final InputBorder border = own ?? themeFieldBorder(context, error: error, focused: focused, enabled: decoration.enabled);
   final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
   final padEnd = (decoration.contentPadding ?? EdgeInsets.zero).resolve(Directionality.of(context)).right;
   final spacer = decoration.prefixIcon == null && decoration.suffixIcon == null;
@@ -816,6 +841,23 @@ Widget fullHeightField(
       ),
     ),
   );
+}
+
+/// The border of a field that sets none: the theme's field shape (an
+/// outline of the control radius; an underline under a theme without one)
+/// with the side Flutter's InputDecorator gives it in this state.
+InputBorder themeFieldBorder(BuildContext context, {bool error = false, bool focused = false, bool enabled = true}) {
+  final theme = Theme.of(context);
+  final scheme = theme.colorScheme;
+  final shape = theme.inputDecorationTheme.border ?? const UnderlineInputBorder();
+  final color = !enabled
+      ? scheme.onSurface.withValues(alpha: .12)
+      : error
+          ? scheme.error
+          : focused
+              ? scheme.primary
+              : scheme.outline;
+  return shape.copyWith(borderSide: BorderSide(color: color, width: focused && enabled ? 2 : 1));
 }
 
 /// An icon box as tall as a fixed-height field.
@@ -1361,6 +1403,13 @@ class _DropdownIslandState extends State<_DropdownIsland> {
     final iconSize = n.prop(DropdownProps.iconSize);
     final enabled = n.prop(DropdownProps.enabled);
     final radius = n.prop(DropdownProps.borderRadius);
+    // `underline`: the field's border, the theme's outline around the button
+    // (padded at the sides when the node sets no padding), not Material's
+    // underline.
+    final outlined = n.prop(DropdownProps.underline);
+    final padding = outlined && n.layout.padding == api.EdgeInsets.zero
+        ? const EdgeInsets.symmetric(horizontal: 12)
+        : n.layout.padding.flutter;
     final button = DropdownButton<Object>(
       value: value,
       isDense: n.prop(DropdownProps.isDense),
@@ -1379,14 +1428,14 @@ class _DropdownIslandState extends State<_DropdownIsland> {
       focusColor: _color(n.prop(DropdownProps.focusColor)),
       elevation: n.prop(DropdownProps.elevation),
       borderRadius: radius?.flutter,
-      padding: n.layout.padding.flutter,
+      padding: padding,
       onChanged: enabled
           ? (v) {
               setState(() => selected = v);
               _fire(context, 'changed', v);
             }
           : null,
-      underline: n.prop(DropdownProps.underline) ? null : const SizedBox.shrink(),
+      underline: const SizedBox.shrink(),
       items: [
         for (final item in items)
           DropdownMenuItem<Object>(value: item, alignment: itemAlignment, child: content(item, itemStyle)),
@@ -1408,7 +1457,9 @@ class _DropdownIslandState extends State<_DropdownIsland> {
       ],
     );
     final menuStyle = n.prop(DropdownProps.menuStyle);
-    Widget field = button;
+    Widget field = !outlined
+        ? button
+        : DecoratedBox(decoration: ShapeDecoration(shape: themeFieldBorder(context, enabled: enabled)), child: button);
     if (menuStyle != null) {
       field = _AnchoredMenu(
         node: n,
@@ -1422,7 +1473,7 @@ class _DropdownIslandState extends State<_DropdownIsland> {
           setState(() => selected = v);
           _fire(context, 'changed', v);
         },
-        child: button,
+        child: field,
       );
     }
     if (n.layout.width.fit == SizeFit.hug) field = IntrinsicWidth(child: field);
@@ -1707,7 +1758,7 @@ String _formatted(DateTime value, String pattern, String fallback) {
 /// A picker's face: the outlined button, or with a decoration a read-only
 /// field (hover and press feedback, the decoration's border, icons and
 /// error) that opens the picker.
-Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTap, {bool empty = false}) {
+Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTap, {bool empty = false, IconData? icon}) {
   var style = n.prop(PickerFieldProps.style);
   final d = n.prop(PickerFieldProps.decoration);
   // No value yet: the decoration's hint (`—`, "Pick a day") in its style.
@@ -1716,10 +1767,15 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
     text = hint;
     if (!d.hintStyle.isEmpty) style = d.hintStyle;
   }
+  // Without a decoration: a plain field (the theme's outline, the value at
+  // the start, a calendar or clock icon at the end) that opens the picker.
+  var decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), error: d.errorText != null && d.errorText!.isNotEmpty);
   if (d.isEmpty) {
-    return OutlinedButton(onPressed: onTap, child: Text(text, style: _styleOrNull(style, _textDefault(context, n))));
+    decoration = decoration.copyWith(
+      suffixIcon: Icon(icon ?? Icons.calendar_today_outlined, size: 18),
+      suffixIconConstraints: const BoxConstraints(minWidth: 40),
+    );
   }
-  final decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), error: d.errorText != null && d.errorText!.isNotEmpty);
   return MouseRegion(
     cursor: onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
     child: GestureDetector(
@@ -1866,6 +1922,7 @@ class _TimePickerIslandState extends State<_TimePickerIsland> {
       context,
       n,
       _formatted(DateTime(2000, 1, 1, time.hour, time.minute), n.prop(PickerFieldProps.format), _clock(time)),
+      icon: Icons.schedule,
       empty: _time(picked ?? value) == null,
       !n.prop(TimePickerProps.enabled) || !widget.interactive
           ? null
@@ -1956,18 +2013,19 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
     final icon = _icon(n.prop(DateTimeInputProps.icon));
     var decoration = styled
         ? _withHintAndIcon(inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), focused: false), hint, icon)
+        // The theme's outlined field; the label is its placeholder (it never
+        // floats).
         : InputDecoration(
-            labelText: label,
-            hintText: label == null || label.isEmpty
-                ? hint ?? 'Select ${switch (mode) {
+            hintText: label != null && label.isNotEmpty
+                ? label
+                : hint ?? 'Select ${switch (mode) {
                     DateTimeInputMode.date => 'date',
                     DateTimeInputMode.time => 'time',
                     DateTimeInputMode.dateTime => 'date and time',
-                  }}'
-                : null,
-            suffixIcon: icon ?? Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today),
+                  }}',
+            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            suffixIcon: icon ?? Icon(mode == DateTimeInputMode.time ? Icons.access_time : Icons.calendar_today, size: 18),
             enabled: enabled,
-            border: const OutlineInputBorder(),
           );
     // A fixed height is the field's, as a text field's, for a field that
     // draws its own decoration (older fields kept their natural height).
