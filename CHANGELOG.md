@@ -13,6 +13,12 @@ and matching no item). The formula engine is right; nothing told the model.
   `state.json` (`UiSession.values`).
 - Tests: the reference's filter, sort and page example works as it says (`test/lists/filter_sort_page_example_test.dart`);
   the recording's end-of-stream errors (`test/session/ui_session_list_formula_test.dart`).
+- A session without a design system draws its gauges and charts in its theme: the colours they leave unset
+  (indicator_theme.dart) come from the theme the tree reads from its component registry, and only a session with a
+  design system had one, so a plain session's (`UiSession(theme:)`) were always the neutral set. Every session's view
+  now has a registry (empty without a design system), so a site, a session with a design system and a plain session
+  take the same path (`test/session/session_indicator_theme_test.dart`). With no theme they are the neutral ink and
+  greys, as before.
 
 **Generative UI with a design system, recorded and replayed.**
 

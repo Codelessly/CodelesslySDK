@@ -82,7 +82,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
   late VariableScope _scope;
   late SessionValues _nodeValues;
   late ThemedSource _themed;
-  ComponentRegistry? _components;
+  late ComponentRegistry _components;
   bool? _dark;
   late NodeBinder _binder;
   late NodeTree _tree;
@@ -106,9 +106,10 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _scope = VariableScope(const [], parent: _values);
     _themed = ThemedSource(_session, _session.theme);
     _nodeValues = SessionValues(_themed);
-    _components = _session.designSystem == null
-        ? null
-        : (ComponentRegistry(_session.designSystem!.components.definitions.values)..theme = _session.theme);
+    // The registry is also what the tree reads the theme from (an
+    // indicator's unset colours), as a site's: every session has one, empty
+    // without a design system.
+    _components = ComponentRegistry(_session.designSystem?.components.definitions.values ?? const [])..theme = _session.theme;
     _binder = NodeBinder(scope: _scope, logic: LayoutLogic.fromJson(_session.document.extra), engine: const Expressions());
     _logicExtra = _session.document.extra;
     _tree = NodeTree(_nodeValues,
@@ -262,7 +263,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _scope.dispose();
     _values.dispose();
     _themed.dispose();
-    _components?.dispose();
+    _components.dispose();
   }
 
   @override
@@ -289,7 +290,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     if (dark != _dark) {
       _dark = dark;
       _themed.theme = shown;
-      _components?.theme = shown;
+      _components.theme = shown;
       _values.set('theme', themeValues(tokens, dark: dark));
     }
     return Theme(
