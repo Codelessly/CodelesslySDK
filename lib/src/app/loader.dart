@@ -179,14 +179,52 @@ PublishComponent _bundled(PublishBundle bundle, String type, String where) {
   return c;
 }
 
+/// A loader of a site that ships files beside its documents: the fonts it
+/// declares (`site.json`'s `fonts`) and its local images, which documents
+/// name by their path relative to the site (`fonts/Inter.ttf`,
+/// `images/hero.jpg`), as a Flutter app names its assets. The runtime reads
+/// them through the loader that loaded the site.
+abstract interface class PublishAssetSource {
+  /// Where file [path] is served, when it has a URL (an image is then
+  /// loaded from there, cached by the platform); null when it is read as
+  /// bytes only ([loadAsset]).
+  Uri? assetUrl(String path);
+
+  /// The bytes of file [path]; throws [PublishLoadException] when there is
+  /// no such file.
+  Future<Uint8List> loadAsset(String path);
+}
+
 /// A [PublishLoader] over bundles in memory: tests, previews, and apps that
 /// ship their layouts. [bundles] holds one bundle per source; a source
 /// without one uses [PublishSource.publish]'s.
-class MemoryPublishLoader implements PublishLoader, PluginSource {
-  MemoryPublishLoader(PublishBundle bundle, {Map<PublishSource, PublishBundle> others = const {}})
+///
+/// [assets] are the site's files by their relative path (a site read from a
+/// folder: its fonts and images); [readAsset], when given, reads the ones
+/// not there (from the folder, on demand).
+class MemoryPublishLoader implements PublishLoader, PluginSource, PublishAssetSource {
+  MemoryPublishLoader(PublishBundle bundle,
+      {Map<PublishSource, PublishBundle> others = const {}, this.assets = const {}, this.readAsset})
       : bundles = {PublishSource.publish: bundle, ...others};
 
   final Map<PublishSource, PublishBundle> bundles;
+
+  /// The site's files, by path relative to the site.
+  final Map<String, Uint8List> assets;
+
+  /// Reads a site file [assets] does not hold; null: none.
+  final Future<Uint8List?> Function(String path)? readAsset;
+
+  @override
+  Uri? assetUrl(String path) => null;
+
+  @override
+  Future<Uint8List> loadAsset(String path) async {
+    final key = normalizeAssetPath(path);
+    final bytes = assets[key] ?? await readAsset?.call(key);
+    if (bytes == null) throw PublishLoadException('No file [$key] in the site');
+    return bytes;
+  }
 
   /// Calls made, for tests: `model:<source>`, `layout:<source>:<id>` and
   /// `component:<source>:<type>`.
@@ -249,8 +287,27 @@ Object? decodeJsonBytes(List<int> bytes) {
 
 /// A [PublishLoader] over a bundle shipped as an asset (`.json` or
 /// `.json.gz`): runs offline. Loaded once.
-class AssetPublishLoader implements PublishLoader, PluginSource {
+///
+/// The site's files ([PublishAssetSource]) are assets beside it: a bundle
+/// at `assets/site/bundle.json` reads `fonts/Inter.ttf` from the asset
+/// `assets/site/fonts/Inter.ttf` (list them in the app's pubspec).
+class AssetPublishLoader implements PublishLoader, PluginSource, PublishAssetSource {
   AssetPublishLoader(this.asset, {AssetBundle? bundle}) : _assets = bundle;
+
+  @override
+  Uri? assetUrl(String path) => null;
+
+  @override
+  Future<Uint8List> loadAsset(String path) async {
+    final dir = asset.contains('/') ? asset.substring(0, asset.lastIndexOf('/') + 1) : '';
+    final key = '$dir${normalizeAssetPath(path)}';
+    try {
+      final data = await (_assets ?? rootBundle).load(key);
+      return data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+    } catch (e) {
+      throw PublishLoadException('Could not load site file asset [$key]', e);
+    }
+  }
 
   final String asset;
   final AssetBundle? _assets;
@@ -297,7 +354,10 @@ class AssetPublishLoader implements PublishLoader, PluginSource {
 /// [urlFor] maps a storage path to a URL; the default joins it to
 /// [baseUrl] (a Firebase Storage bucket's `.../o/` endpoint encodes the
 /// path, see [HttpPublishLoader.firebaseStorage]).
-class HttpPublishLoader implements PublishLoader, PluginSource {
+///
+/// The site's files ([PublishAssetSource]) are at
+/// [PublishSource.assetPath] (`publish/{slug}/files/{path}`).
+class HttpPublishLoader implements PublishLoader, PluginSource, PublishAssetSource {
   HttpPublishLoader({
     required this.projectId,
     this.baseUrl = '',
@@ -339,6 +399,26 @@ class HttpPublishLoader implements PublishLoader, PluginSource {
     if (f != null) return f(path);
     final base = baseUrl.endsWith('/') ? baseUrl : '$baseUrl/';
     return Uri.parse('$base$path');
+  }
+
+  @override
+  Uri? assetUrl(String path) => urlFor(PublishSource.publish.assetPath(projectId, normalizeAssetPath(path)));
+
+  @override
+  Future<Uint8List> loadAsset(String path) async {
+    final url = assetUrl(path)!;
+    final client = _client ?? http.Client();
+    try {
+      final res = await client.get(url, headers: headers);
+      if (res.statusCode != 200) throw PublishLoadException('GET $url: ${res.statusCode}');
+      return res.bodyBytes;
+    } on PublishLoadException {
+      rethrow;
+    } catch (e) {
+      throw PublishLoadException('GET $url failed', e);
+    } finally {
+      if (_client == null) client.close();
+    }
   }
 
   Future<Object?> _get(String path) async {
@@ -431,3 +511,12 @@ class MemoryPublishCache implements PublishCache {
 
 /// Bytes of [data] (from an asset or a response) as a list.
 Uint8List bytesOf(ByteData data) => data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes);
+
+/// [path] (relative to a site) without a leading `./`.
+String normalizeAssetPath(String path) {
+  var p = path.trim();
+  while (p.startsWith('./')) {
+    p = p.substring(2);
+  }
+  return p;
+}

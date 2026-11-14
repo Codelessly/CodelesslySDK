@@ -26,6 +26,7 @@ import 'navigation.dart';
 import 'paywalls.dart';
 import 'persisted_variables.dart';
 import 'presenter.dart';
+import 'site_files.dart';
 import 'runtime.dart';
 
 /// The publish model's key holding the project's paywall setup
@@ -81,13 +82,16 @@ class Codelessly extends ChangeNotifier {
     PluginSource? plugins,
   })  : loader = loader ?? _defaultLoader(config),
         cache = cache ?? MemoryPublishCache(),
-        fonts = CodelesslyFonts(fetcher: fonts ?? HttpFontFetcher()),
+        // A declared font (its url a path relative to the site) is read
+        // through the loader's files, when it has them.
+        fonts = CodelesslyFonts(fetcher: siteFontFetcher(fonts ?? HttpFontFetcher())),
         data = MapValueScope(values: {'data': data}),
         components = components ?? ComponentRegistry() {
     if (managedComponents != null) {
       managed = ManagedComponentResolver(source: managedComponents, cache: this.cache);
     }
     final l = this.loader;
+    if (this.fonts.fetcher case final SiteFontFetcher site) site.files = l is PublishAssetSource ? l as PublishAssetSource : null;
     pluginSource = plugins ?? (l is PluginSource ? l as PluginSource : null);
     // Node types the installed features implement as data (hosted plugins
     // installed in the app's runner).
@@ -717,6 +721,12 @@ class Codelessly extends ChangeNotifier {
         }
       }
     }
+    final files = loader;
+    if (files is PublishAssetSource && siteImagesIn(component.document.toJson()).isNotEmpty) {
+      final json = await resolveSiteImages(component.toJson(), files as PublishAssetSource,
+          onMissing: (path, e) => _logSiteFileMissing(path, e));
+      component = PublishComponent.fromJson(json, catalog: config.catalog, id: type);
+    }
     _published[type] = component;
     if (!_ownComponents.contains(type)) components.define(component.document);
     final fonts = {
@@ -724,6 +734,28 @@ class Codelessly extends ChangeNotifier {
     };
     if (fonts.isNotEmpty) await this.fonts.load(fonts).timeout(config.fontTimeout, onTimeout: () {});
     return component;
+  }
+
+  /// [layout] with the images it names by a path relative to the site
+  /// (`images/hero.jpg`) read through the loader's files: their URL, or
+  /// their bytes as a `data:` URL. Itself when the loader has no files or
+  /// the layout names none.
+  Future<PublishLayout> _withSiteImages(PublishLayout layout, Catalog catalog) async {
+    final files = loader;
+    if (files is! PublishAssetSource) return layout;
+    final json = layout.toJson();
+    if (siteImagesIn(json['nodes']).isEmpty) return layout;
+    final resolved = await resolveSiteImages(json, files as PublishAssetSource, onMissing: _logSiteFileMissing);
+    return PublishLayout.fromJson(resolved, catalog: catalog);
+  }
+
+  /// A file the site names that its loader does not have: logged
+  /// (`site_file_missing`); the image draws nothing.
+  void _logSiteFileMissing(String path, Object error) {
+    final s = services;
+    if (s is Services) {
+      s.analytics.logError(PublishLoadException('site_file_missing: $path', error), type: 'site_file_missing');
+    }
   }
 
   void _logComponentError(String type, Object error, [StackTrace? stack]) {
@@ -780,6 +812,7 @@ class Codelessly extends ChangeNotifier {
     if (!(layout.document.catalog?.includes(catalog) ?? false)) {
       layout = PublishLayout.fromJson(layout.toJson(), catalog: catalog);
     }
+    layout = await _withSiteImages(layout, catalog);
     final resolver = managed;
     if (resolver != null) {
       // Never fails: an instance whose update fails keeps its snapshot.

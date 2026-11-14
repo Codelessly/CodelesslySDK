@@ -31,6 +31,7 @@ final class RenderArgs {
     this.props,
     this.slots,
     this.compare,
+    this.theme,
   });
 
   static const defaultSizes = [Size(390, 844), Size(834, 1112), Size(1440, 900)];
@@ -68,6 +69,11 @@ final class RenderArgs {
   /// they differ.
   final String? compare;
 
+  /// `--theme`: the theme mode the site starts in (`light`, `dark` or
+  /// `system`), as a `setThemeMode` action would set it; steps may change
+  /// it. Null: the site's own (`theme.mode`, else the device's: light).
+  final String? theme;
+
   /// These arguments with other [sizes] and [screens].
   RenderArgs copyWith({List<Size>? sizes, List<String>? screens}) => RenderArgs(
         inputs: inputs,
@@ -85,6 +91,7 @@ final class RenderArgs {
         props: props,
         slots: slots,
         compare: compare,
+        theme: theme,
       );
 }
 
@@ -107,6 +114,10 @@ Options:
                           folder (node_modules/@fontsource/<family>), a site's fonts.
                           `system`: the system's font directories. Repeatable.
                           Roboto and Material Icons are built in.
+  --theme <mode>          Start in this theme mode: light, dark or system (the
+                          device's: light), as a setThemeMode action sets it;
+                          named colors, text styles and controls follow. PNGs
+                          get -<mode> in their names. Steps may toggle it.
   --tap <nodeId>          Tap the node (where it shows on screen). <nodeId>#<n>
                           picks the n-th copy (0-based) of a node a list repeats.
   --hover <nodeId>        Move a mouse over the node.
@@ -141,7 +152,9 @@ Options:
   --slots <file>          What the call passes to the component's slots:
                           {"children": [ids], "slots": {name: id}, "nodes": {...}}.
 A directory with site.json (or a components/ directory) is a site: its pages
-and its components (one file each, the file named after the component type).
+and its components (one file each, the file named after the component type),
+the fonts site.json declares ("fonts", files beside it: no --fonts needed) and
+the images its documents name by a path relative to the site (images/a.jpg).
 Steps name nodes inside components by path: --tap plans/card1/cta (the call
 ids from the page down, then the node's id; <segment>#<n> picks a list copy).
 Steps (--tap, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --navigate, --wait) run in the order given.
@@ -156,7 +169,7 @@ RenderArgs parseArgs(List<String> argv) {
   final steps = <Step>[];
   final fonts = <String>[];
   var fullPage = false, validateOnly = false, dumpLayout = false, componentsAll = false;
-  String? label, component, props, slots, compare;
+  String? label, component, props, slots, compare, theme;
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
     return argv[i + 1];
@@ -197,6 +210,11 @@ RenderArgs parseArgs(List<String> argv) {
         slots = next(i++, a);
       case '--compare':
         compare = next(i++, a);
+      case '--theme':
+        theme = next(i++, a).trim().toLowerCase();
+        if (!const ['light', 'dark', 'system'].contains(theme)) {
+          throw FormatException('--theme takes light, dark or system (Flutter\'s ThemeMode), got "$theme".');
+        }
       case '--unfocus':
         steps.add(const Step('unfocus', ''));
       case '--tap' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key':
@@ -231,5 +249,6 @@ RenderArgs parseArgs(List<String> argv) {
     props: props,
     slots: slots,
     compare: compare,
+    theme: theme,
   );
 }

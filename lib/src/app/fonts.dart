@@ -15,6 +15,7 @@ import 'package:flutter/foundation.dart' show kIsWeb, listEquals, visibleForTest
 import 'package:http/http.dart' as http;
 
 import '../render/convert.dart' show FontDemand;
+import 'site_files.dart' show SiteFontFetcher;
 
 /// Gets the file of a font.
 abstract interface class FontFetcher {
@@ -163,7 +164,12 @@ class CodelesslyFonts {
     // Families only bindings reach are fetched when first drawn (Google
     // Fonts by name; a project's uploaded fonts are in the publish).
     if (fetcher is GlyphFontFetcher && kIsWeb) FontDemand.glyphFallback = true;
-    if (fetcher is! NoFontFetcher) {
+    // A site's own fonts over no fetcher fetch nothing by name either.
+    final named = switch (fetcher) {
+      final SiteFontFetcher site => site.fallback,
+      final other => other,
+    };
+    if (named is! NoFontFetcher) {
       FontDemand.handler ??= (family, weight, italic) => load([
             PublishFont(id: 'demand:$family/$weight/$italic', family: family, weight: weight, italic: italic),
           ]);
