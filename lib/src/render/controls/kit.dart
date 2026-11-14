@@ -268,6 +268,14 @@ extension on Rect {
   Rect inflateSides(double dx, double dy) => Rect.fromLTRB(left - dx, top - dy, right + dx, bottom + dy);
 }
 
+/// A control that draws text itself (no RenderParagraph): what the label
+/// guard (test/app/no_material_look_test.dart) and tools measure.
+abstract interface class LabelledControl implements RenderBox {
+  /// Each label: its text, font family, and glyph boxes in local
+  /// coordinates.
+  List<({String text, String? fontFamily, List<Rect> glyphs})> get labels;
+}
+
 /// Paints [overlay] over [shape] (the state layer: hover, press).
 void paintStateLayer(Canvas canvas, RRect shape, Color? overlay) {
   if (overlay == null || overlay.a == 0) return;
@@ -346,6 +354,21 @@ class ControlLabel {
   }
 
   Size get size => _painter.size;
+
+  /// Where its glyphs are (ascent to descent of each line's text) when it
+  /// is painted from [left] centred on [centreY].
+  List<Rect> glyphBoxes(double left, double centreY) {
+    if (_text.isEmpty) return const [];
+    final top = centreY - _glyphCentre;
+    return [
+      for (final b in _painter.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: _painter.plainText.length),
+          boxHeightStyle: BoxHeightStyle.tight))
+        b.toRect().shift(Offset(left, top)),
+    ];
+  }
+
+  /// The family it is set in (null: the platform's).
+  String? get fontFamily => _style?.fontFamily;
 
   /// Paints it with its glyphs centred on [centreY], from [left].
   void paint(Canvas canvas, double left, double centreY) {
