@@ -391,6 +391,38 @@ class UiSession implements NodeSource {
   /// (for tools and tests: what an interaction changed).
   Map<String, Object?> get values => {for (final p in _valueProbes) ...p()};
 
+  final Set<List<EditDiagnostic> Function()> _shownProbes = {};
+
+  /// Registers a laid-out view's check of what it shows (what
+  /// [shownDiagnostics] reads); the returned callback unregisters it.
+  VoidCallback attachShownProbe(List<EditDiagnostic> Function() check) {
+    _shownProbes.add(check);
+    return () => _shownProbes.remove(check);
+  }
+
+  /// What the views showing this session show wrong, once they have laid it
+  /// out (call it after a frame): a document can be valid and show nothing.
+  /// [layoutDiagnostics] (`no_size`), and `empty_view` (the canvas shows no
+  /// text, icon, image or control), `list_empty` (a list with no items while
+  /// its data is not a list, has no template, or is empty while the list it
+  /// reads is not), `empty_label` (a control or component whose label gave
+  /// nothing), `expression_not_evaluated`, `text_no_color` (no colour, or
+  /// a transparent one) and `component_empty` (a call that rendered
+  /// nothing). A host adds them to the stream's result before it answers
+  /// the model (`result.withDiagnostics(session.shownDiagnostics())`), so a
+  /// model whose valid UI shows nothing is told, in its retry.
+  List<EditDiagnostic> shownDiagnostics() {
+    final seen = <(String, String)>{};
+    final shown = [for (final p in _shownProbes) ...p()];
+    // A node reported for what it shows is not also reported for its size
+    // (a list with no items lays out with no height).
+    final named = {for (final d in shown) d.nodeId};
+    return [
+      for (final d in [...shown, ...layoutDiagnostics().where((d) => !named.contains(d.nodeId))])
+        if (seen.add((d.code, d.path))) d,
+    ];
+  }
+
   /// `no_size` warnings: nodes with content (text, an icon, a fill, children
   /// that show) that the views showing this session laid out with no width
   /// or no height. Call it after a frame.

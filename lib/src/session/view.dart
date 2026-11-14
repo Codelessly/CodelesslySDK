@@ -27,6 +27,7 @@ import '../runtime/expressions/engine.dart' show Expressions;
 import '../runtime/expressions/scopes.dart';
 import '../runtime/http_image_loader.dart';
 import '../widgets/tree.dart';
+import 'shown.dart';
 import 'ui_session.dart';
 
 /// Shows [session]'s canvas [canvas] (default: its first root that has
@@ -136,10 +137,14 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _syncVariables();
     _changes = _session.changes.listen((_) => _documentChanged());
     _detachProbe = _session.attachLayoutProbe(_sizes);
+    _detachShown = _session.attachShownProbe(() {
+      final root = mounted ? context.findRenderObject() : null;
+      return root == null ? const [] : shownDiagnostics(root, _session.document, canvas: _canvasId(), pending: _session.pending);
+    });
     _detachValues = _session.attachValuesProbe(() => _scope.values);
   }
 
-  VoidCallback? _detachProbe, _detachValues;
+  VoidCallback? _detachProbe, _detachValues, _detachShown;
 
   /// Every node box this view laid out, with its size.
   Iterable<(String, double, double)> _sizes() {
@@ -254,6 +259,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
   void _dispose() {
     _changes?.cancel();
     _detachProbe?.call();
+    _detachShown?.call();
     _detachValues?.call();
     _reactions.dispose();
     _context.dispose();
