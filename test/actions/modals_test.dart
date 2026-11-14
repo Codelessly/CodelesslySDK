@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/pickers.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -329,7 +330,7 @@ void main() {
       expect(find.byType(TextField), findsNothing);
     });
 
-    testWidgets('date and time pickers stay in the hosted app\'s navigator', (tester) async {
+    testWidgets('date and time pickers open in the root\'s overlay layer: nothing is pushed on a navigator', (tester) async {
       final root = GlobalKey<NavigatorState>(), nested = GlobalKey<NavigatorState>();
       final doc = LayoutDocument.fromJson({'roots': ['fields'], 'nodes': {
         'fields': {'type': 'column', 'children': ['date', 'time'], 'layout': {'width': 300, 'height': 160}},
@@ -341,22 +342,17 @@ void main() {
       final screen = Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'fields', interactive: true));
       await tester.pumpWidget(scopedApp(screen, root, nested));
       await tester.pumpAndSettle();
-      await tester.tap(find.text('2026-11-09'));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      expect(find.byType(DatePickerDialog), findsOneWidget);
-      expect(nested.currentState!.canPop(), isTrue);
-      expect(root.currentState!.canPop(), isFalse);
-      nested.currentState!.pop();
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('08:00'));
-      await tester.pumpAndSettle();
-      expect(tester.takeException(), isNull);
-      expect(find.byType(TimePickerDialog), findsOneWidget);
-      expect(nested.currentState!.canPop(), isTrue);
-      expect(root.currentState!.canPop(), isFalse);
-      nested.currentState!.pop();
-      await tester.pumpAndSettle();
+      for (final id in ['date', 'time']) {
+        final box = tree.boxOf(id)!;
+        await tester.tapAt(box.localToGlobal(box.size.center(Offset.zero)));
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(_picker(tree, id).open, isTrue, reason: id);
+        expect(nested.currentState!.canPop(), isFalse);
+        expect(root.currentState!.canPop(), isFalse);
+        _picker(tree, id).close();
+        await tester.pump();
+      }
     });
   });
 
@@ -631,4 +627,16 @@ void main() {
       });
     }
   });
+}
+
+/// The picker field drawn for node [id] (render/controls/pickers.dart).
+RenderPickerField _picker(RenderTree tree, String id) {
+  RenderPickerField? found;
+  void visit(RenderObject o) {
+    if (o is RenderPickerField) found ??= o;
+    o.visitChildren(visit);
+  }
+
+  visit(tree.boxOf(id)!);
+  return found!;
 }
