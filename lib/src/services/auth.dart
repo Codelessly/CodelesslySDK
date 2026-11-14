@@ -5,7 +5,7 @@ import 'dart:async';
 
 import 'package:codelessly_api/codelessly_api.dart' show CollectionSchema, DataRules;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart' show StringCharacters;
+import 'package:characters/characters.dart';
 
 import 'cloud/database.dart';
 import 'cloud/fields.dart';

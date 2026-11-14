@@ -137,10 +137,7 @@ const widgetImportRatchet = {
   'src/runtime/actions/route_transition.dart',
   'src/runtime/actions/toast.dart',
   'src/runtime/actions/ui.dart',
-  'src/runtime/actions/wiring.dart',
-  'src/runtime/expressions/paths.dart',
   'src/runtime/gestures/drag_and_drop.dart',
-  'src/services/auth.dart',
   'src/session/view.dart',
   'src/widgets/collections.dart',
   'src/widgets/collections_data_list.dart',
@@ -153,7 +150,6 @@ const widgetImportRatchet = {
   'src/widgets/indicator_theme.dart',
   'src/widgets/inputs.dart',
   'src/widgets/inputs_shapes.dart',
-  'src/widgets/material.dart',
   'src/widgets/media.dart',
 };
 

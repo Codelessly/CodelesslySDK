@@ -8,12 +8,12 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show DividerProps, Node;
-import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../render/control_theme.dart' show backdropOf, onColor, themeDataOf;
 import '../render/convert.dart';
 import '../render/node_tree.dart';
+import '../render/controls/tokens.dart' show ControlTokens;
 import '../render/recipe.dart';
 
 /// Recipes for the material group, by node type.
@@ -56,11 +56,6 @@ Color? labelColor(api.Color? foreground, api.TextStyle? label, api.Color? backgr
 //
 // Badges are render objects: render/controls/chips.dart.
 
-/// The neutral colors (no theme reaches a render object) for what [b]'s
-/// node is drawn on.
-ColorScheme _neutral(NodeBuilder b) =>
-    themeDataOf(api.ThemeTokens.none, surface: backdropOf(b.source.node, b.source.parentOf, b.id)).colorScheme;
-
 // --- divider ------------------------------------------------------------------
 
 void _divider(NodeBuilder b, Node n, List<RenderBox> chain) {
@@ -71,7 +66,7 @@ void _divider(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..extent = vertical ? n.layout.width.value : n.layout.height.value
     ..thickness = n.prop(DividerProps.thickness)
     // Unset: the theme's faint outline over what it's drawn on.
-    ..color = _color(n.prop(DividerProps.color)) ?? _neutral(b).outlineVariant
+    ..color = _color(n.prop(DividerProps.color)) ?? ControlTokens.of(b).primaryBorder
     ..indent = n.prop(DividerProps.indent)
     ..endIndent = n.prop(DividerProps.endIndent));
 }

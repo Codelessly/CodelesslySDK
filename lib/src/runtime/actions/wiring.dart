@@ -16,7 +16,6 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart' show EditableText, FocusManager;
 
 import '../../render/controls/text_field.dart' show RenderTextField;
 
@@ -486,8 +485,7 @@ class _BoxReactions {
   }
 
   static bool _textFieldFocused() =>
-      RenderTextField.focused != null ||
-      FocusManager.instance.primaryFocus?.context?.findAncestorWidgetOfExactType<EditableText>() != null;
+      RenderTextField.focused != null;
 
   bool _disposed = false;
 
@@ -909,10 +907,7 @@ class _OneFingerPanGestureRecognizer extends PanGestureRecognizer {
 
 /// Whether the keyboard focus is in a text field (someone is typing).
 bool isTyping() {
-  if (RenderTextField.focused != null) return true;
-  final focused = FocusManager.instance.primaryFocus?.context;
-  return focused != null &&
-      (focused.widget is EditableText || focused.findAncestorWidgetOfExactType<EditableText>() != null);
+  return RenderTextField.focused != null;
 }
 
 /// The trigger an input reports for a tap on its prefix icon.
