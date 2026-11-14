@@ -19,6 +19,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show RenderControl;
+import 'package:codelessly_sdk/src/render/controls/kit_bars.dart' show RenderItemBar;
+import 'package:codelessly_sdk/src/render/controls/segmented.dart' show RenderSegmentedButton;
 import 'package:codelessly_sdk/src/render/controls/root.dart' show RenderControlRoot;
 import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTile;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
@@ -1539,8 +1541,39 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
   }
 
   // Where to put the pointer for [id], or the problem.
-  Future<(ui.Offset?, String?)> pointAt(String id, String verb) async {
+  Future<(ui.Offset?, String?)> pointAt(String target, String verb) async {
+    // `<id>@<n>`: the n-th part (from 0) of a control with several: a
+    // segment, a tab, a navigation destination.
+    final part = RegExp(r'^(.*)@(\d+)$').firstMatch(target);
+    final id = part == null ? target : part[1]!;
     final found = _locate(binding, id);
+    if (part != null && found.box != null) {
+      final n = int.parse(part[2]!);
+      RenderBox? control;
+      List<ui.Rect> rects = const [];
+      void visit(RenderObject o) {
+        if (control != null) return;
+        if (o is RenderItemBar) {
+          control = o;
+          rects = o.itemRects;
+        } else if (o is RenderSegmentedButton) {
+          control = o;
+          rects = o.segmentRects;
+        } else {
+          o.visitChildren(visit);
+        }
+      }
+
+      visit(found.box!);
+      if (control == null) {
+        return (null, '--$verb $target: "$id" has no parts to name with @: that is for a segmented button, a tab bar and a navigation bar. Tap it with --$verb $id.');
+      }
+      if (n >= rects.length) {
+        return (null, '--$verb $target: "$id" has ${rects.length} part${rects.length == 1 ? '' : 's'} (@0 to @${rects.length - 1}).');
+      }
+      await centerInView(found.box!);
+      return (control!.localToGlobal(rects[n].center), null);
+    }
     final box = found.box;
     if (box == null) {
       return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.' : '--$verb $id: ${found.problem}.');
@@ -1621,9 +1654,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         warn('tap_no_reaction',
             '--tap ${step.target}: neither the node nor anything around it reacts to a tap (no "click" reaction, button or input), so the tap did nothing. '
                 'Add {"trigger": "click", "actions": [...]} to the node, or tap the node that has it.',
-            step.target.split('#').first);
+            step.target.split('#').first.split('@').first);
       }
-      await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
+      await _unfocusFieldOutside(tester, _boxOf(binding, step.target.replaceFirst(RegExp(r'@\d+$'), '')));
       await tester.tapAt(at);
       return null;
     case 'drag':
