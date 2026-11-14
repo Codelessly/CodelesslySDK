@@ -31,6 +31,7 @@ import '../paint/icon_glyph.dart';
 import '../paint/icon_names.dart';
 import '../recipe.dart';
 import 'kit.dart';
+import 'spinner.dart';
 import 'tokens.dart';
 
 /// The kinds of button, as SSUI draws them.
@@ -42,8 +43,10 @@ enum ButtonKind { filled, tonal, elevated, outlined, text, icon, fab }
 void buttonRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   final fab = n.type == FloatingActionButtonProps.spec.type;
   final l = n.layout;
-  chain.add(b.fitBox('fit', fab ? SizeFit.fixed : l.width.fit, fab ? SizeFit.fixed : l.height.fit,
-      Size(l.width.value, l.height.value)));
+  // A floating button is its design size (as Flutter's is its own), unless
+  // it hugs: its type's size (56; small 40, large 96).
+  SizeFit fit(api.AxisSize a) => fab && !a.isHug ? SizeFit.fixed : a.fit;
+  chain.add(b.fitBox('fit', fit(l.width), fit(l.height), Size(l.width.value, l.height.value)));
   final interactive = b.tree.animates;
   final states = b.tree.statesOf(b.id, instance: b.instance);
   final patched = n.behaviors.states.patches.keys.toSet();
@@ -59,6 +62,7 @@ void buttonRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
           }
         : null;
   box.enabled = box.spec.enabled && !states.contains(api.WidgetState.disabled);
+  box.busy = box.spec.loading;
   box.autofocus = interactive && box.spec.autofocus;
   chain.add(box);
   // A touch lands on it in a 44 × 44 target around a smaller button
@@ -87,6 +91,7 @@ class ButtonSpec {
     this.spacing,
     this.enabled = true,
     this.autofocus = false,
+    this.loading = false,
     this.background,
     this.foreground,
     this.iconColor,
@@ -114,6 +119,10 @@ class ButtonSpec {
   final bool enabled;
   final bool autofocus;
 
+  /// Busy: a spinner in place of the icon, presses ignored, drawn as
+  /// disabled (SSUI's `isLoading`).
+  final bool loading;
+
   /// The node's own colours (`style`), over the variant's.
   final Color? background, foreground, iconColor;
   final double? iconSize;
@@ -130,6 +139,9 @@ class ButtonSpec {
   final Color? hoverColor, focusColor, splashColor;
 
   bool get hasIcon => icon.isNotEmpty && icon['show'] != false;
+
+  /// Something sits in the icon's place: the icon, or the spinner.
+  bool get hasIconSlot => loading || hasIcon;
 
   /// [n]'s button, drawn with [tokens]; [inherited] is the default text
   /// style it is under.
@@ -177,6 +189,7 @@ class ButtonSpec {
       spacing: !icon && n.props.has(ButtonProps.spacing) ? n.prop(ButtonProps.spacing) : null,
       enabled: n.prop(ButtonProps.enabled),
       autofocus: n.prop(ButtonProps.autofocus),
+      loading: n.prop(ButtonProps.loading),
       background: c(s.backgroundColor),
       foreground: c(s.foregroundColor) ?? s.textStyle.color?.flutter,
       iconColor: c(s.iconColor),
@@ -205,6 +218,7 @@ class ButtonSpec {
       other.spacing == spacing &&
       other.enabled == enabled &&
       other.autofocus == autofocus &&
+      other.loading == loading &&
       other.background == background &&
       other.foreground == foreground &&
       other.iconColor == iconColor &&
@@ -272,6 +286,17 @@ OutlinedBorder outlinedBorder(api.ShapeBorder s) {
   };
 }
 
+/// A button's fill, ink and border in one set of states.
+typedef _Look = ({Color? fill, Color ink, Color iconInk, BorderSide? side, bool filled});
+
+_Look _lerpLook(_Look a, _Look b, double t) => (
+        fill: a.fill == null && b.fill == null ? null : Color.lerp(a.fill, b.fill, t),
+        ink: Color.lerp(a.ink, b.ink, t)!,
+        iconInk: Color.lerp(a.iconInk, b.iconInk, t)!,
+        side: a.side == null || b.side == null ? (t < .5 ? a.side : b.side) : BorderSide.lerp(a.side!, b.side!, t),
+        filled: t < .5 ? a.filled : b.filled,
+      );
+
 /// The geometry of a button at a height.
 class _Metrics {
   _Metrics(this.scale, this.padX, this.fontSize, this.iconSize, this.gap, this.radius);
@@ -286,6 +311,10 @@ class RenderButton extends RenderControl implements LabelledControl {
 
   final ControlLabel _label = ControlLabel();
   RenderIconGlyph? _glyph;
+  RenderSpinner? _spinner;
+
+  /// The spinner shown while it is loading.
+  RenderSpinner? get spinner => identical(icon, _spinner) ? _spinner : null;
 
   bool _interactive = false;
 
@@ -295,14 +324,19 @@ class RenderButton extends RenderControl implements LabelledControl {
     if (v == _interactive) return;
     _interactive = v;
     if (!v) focusNode.leave();
+    _spinner?.animating = v;
     markNeedsPaint();
   }
+
+  @override
+  bool get animatesStates => _interactive;
 
   ButtonSpec? _spec;
   ButtonSpec get spec => _spec!;
   set spec(ButtonSpec v) {
     if (v == _spec) return;
     _spec = v;
+    transitionDuration = Duration(milliseconds: v.tokens.controlMs);
     _syncIcon();
     markNeedsLayout();
     markNeedsSemanticsUpdate();
@@ -310,6 +344,17 @@ class RenderButton extends RenderControl implements LabelledControl {
 
   void _syncIcon() {
     final s = spec;
+    if (s.loading) {
+      // SSUI's button spinner: a quarter arc on a 25 % ring of the ink,
+      // turning once a second.
+      final sp = _spinner ??= RenderSpinner()
+        ..sweep = .25
+        ..period = const Duration(seconds: 1);
+      sp.animating = _interactive;
+      if (!identical(icon, sp)) icon = sp;
+      _inkSpinner();
+      return;
+    }
     if (!s.hasIcon) {
       icon = null;
       _glyph = null;
@@ -318,7 +363,7 @@ class RenderButton extends RenderControl implements LabelledControl {
     final g = _glyph ??= RenderIconGlyph();
     if (!identical(icon, g)) icon = g;
     g.icon = s.icon;
-    g.color = _look().iconInk;
+    g.color = _look(eased: true).iconInk;
   }
 
   /// The icon's colour follows the states: set whenever the button is to
@@ -327,7 +372,15 @@ class RenderButton extends RenderControl implements LabelledControl {
   void markNeedsPaint() {
     super.markNeedsPaint();
     final g = _glyph;
-    if (g != null && _spec != null) g.color = _look().iconInk;
+    if (g != null && _spec != null) g.color = _look(eased: true).iconInk;
+    if (_spinner != null && _spec != null) _inkSpinner();
+  }
+
+  void _inkSpinner() {
+    final ink = _look(eased: true).iconInk;
+    _spinner!
+      ..color = ink
+      ..track = ink.withValues(alpha: ink.a * .25);
   }
 
   ButtonKind get kind => spec.kind;
@@ -370,7 +423,7 @@ class RenderButton extends RenderControl implements LabelledControl {
   double get _contentHeight {
     final m = _metricsAt(spec.tokens.defaultHeight);
     final line = _iconOnly ? 0.0 : m.fontSize * (spec.labelStyle.height ?? 1.2);
-    return math.max(line, spec.hasIcon ? m.iconSize : 0);
+    return math.max(line, spec.hasIconSlot ? m.iconSize : 0);
   }
 
   _Metrics _metricsAt(double height) {
@@ -420,7 +473,7 @@ class RenderButton extends RenderControl implements LabelledControl {
     if (_iconOnly) return m.iconSize;
     _label.update(spec.label, _textStyle(m, const Color(0xFF000000)), align: spec.align);
     final text = _label.intrinsicWidth;
-    if (!spec.hasIcon) return text;
+    if (!spec.hasIconSlot) return text;
     return m.iconSize + (spec.label.isEmpty ? 0 : m.gap) + text;
   }
 
@@ -461,12 +514,11 @@ class RenderButton extends RenderControl implements LabelledControl {
     final m = _m = _metricsAt(size.height);
     final pad = spec.padding ?? EdgeInsets.symmetric(horizontal: m.padX);
     final inner = Rect.fromLTRB(pad.left, 0, size.width - pad.right, size.height);
-    final g = _glyph;
     if (_iconOnly) {
       _iconRect = Rect.fromCenter(center: size.center(Offset.zero), width: m.iconSize, height: m.iconSize);
     } else {
       _label.update(spec.label, _textStyle(m, const Color(0xFF000000)), align: spec.align);
-      final iconW = spec.hasIcon ? m.iconSize + (spec.label.isEmpty ? 0 : m.gap) : 0.0;
+      final iconW = spec.hasIconSlot ? m.iconSize + (spec.label.isEmpty ? 0 : m.gap) : 0.0;
       _label.layout(math.max(0, inner.width - iconW));
       final content = iconW + _label.size.width;
       // The label and icon together, centred (or as the label's alignment
@@ -478,7 +530,7 @@ class RenderButton extends RenderControl implements LabelledControl {
             TextAlign.right || TextAlign.end => free,
             _ => free / 2,
           };
-      if (spec.hasIcon && !spec.iconAtEnd) {
+      if (spec.hasIconSlot && (spec.loading || !spec.iconAtEnd)) {
         _iconRect = Rect.fromLTWH(start, (size.height - m.iconSize) / 2, m.iconSize, m.iconSize);
         _labelLeft = start + iconW;
       } else {
@@ -486,15 +538,25 @@ class RenderButton extends RenderControl implements LabelledControl {
         _iconRect = Rect.fromLTWH(start + _label.size.width + m.gap, (size.height - m.iconSize) / 2, m.iconSize, m.iconSize);
       }
     }
-    // The glyph fills its square (its own size is the box's).
-    g?.layout(BoxConstraints.tight(_iconRect.size));
+    // The glyph (or the spinner) fills its square.
+    _spinner?.strokeWidth = m.iconSize * 3 / 24;
+    icon?.layout(BoxConstraints.tight(_iconRect.size));
   }
 
   // --- paint -------------------------------------------------------------------------
 
   /// The fill, ink and border of the variant, then the node's style, then
-  /// the selected look.
-  ({Color? fill, Color ink, Color iconInk, BorderSide? side, bool filled}) _look() {
+  /// the selected look: of its states now, or ([eased]) as far as each has
+  /// eased in.
+  _Look _look({bool eased = false}) {
+    if (!eased) return _lookFor(hovered: hovered, selected: selected);
+    final h = stateValue(api.WidgetState.hovered), sel = stateValue(api.WidgetState.selected);
+    if ((h == 0 || h == 1) && (sel == 0 || sel == 1)) return _lookFor(hovered: h == 1, selected: sel == 1);
+    _Look at(bool s) => _lerpLook(_lookFor(hovered: false, selected: s), _lookFor(hovered: true, selected: s), h);
+    return _lerpLook(at(false), at(true), sel);
+  }
+
+  _Look _lookFor({required bool hovered, required bool selected}) {
     final s = spec, t = s.tokens;
     Color? fill;
     Color ink;
@@ -536,6 +598,20 @@ class RenderButton extends RenderControl implements LabelledControl {
     return (fill: fill, ink: ink, iconInk: s.iconColor ?? ink, side: side, filled: filled);
   }
 
+  /// The state layer as far as each state has eased in: the focus colour
+  /// (when the node sets one), then hover, then press over it.
+  Color? _easedOverlay(bool filled) {
+    final s = spec, t = spec.tokens;
+    final h = stateValue(api.WidgetState.hovered), p = stateValue(api.WidgetState.pressed);
+    final f = s.focusColor == null ? 0.0 : stateValue(api.WidgetState.focused);
+    if (h == 0 && p == 0 && f == 0) return null;
+    Color faded(Color c, double v) => c.withValues(alpha: c.a * v);
+    var c = s.focusColor == null ? const Color(0x00000000) : faded(s.focusColor!, f);
+    if (h > 0) c = Color.lerp(c, s.hoverColor ?? (filled ? t.filledOverlay(pressed: false) : t.hoverOverlay), h)!;
+    if (p > 0) c = Color.lerp(c, s.splashColor ?? (filled ? t.filledOverlay(pressed: true) : t.pressedOverlay), p)!;
+    return c;
+  }
+
   @override
   List<({String text, String? fontFamily, List<Rect> glyphs})> get labels => _iconOnly || spec.label.isEmpty || !hasSize
       ? const []
@@ -552,6 +628,10 @@ class RenderButton extends RenderControl implements LabelledControl {
 
   /// The overlay of its state now (hover, press), if any.
   Color? get stateOverlay => _overlay(_look().filled);
+
+  /// The state layer as painted now: part of the way while a state eases
+  /// in or out ([stateOverlay] is where it is heading).
+  Color? get paintedOverlay => _easedOverlay(_look(eased: true).filled);
 
   /// The shadows it casts.
   List<BoxShadow> get shadows => _shadows();
@@ -586,9 +666,12 @@ class RenderButton extends RenderControl implements LabelledControl {
 
   @override
   void paint(PaintingContext context, Offset offset) {
-    if (!enabled) {
+    // Loading draws as disabled (SSUI's button).
+    final off = busy ? 1.0 : stateValue(api.WidgetState.disabled);
+    if (off > 0) {
       // Disabled: the whole button at SSUI's 50 %.
-      _opacity.layer = context.pushOpacity(offset, 128, _paintButton, oldLayer: _opacity.layer);
+      final alpha = (255 - 127 * off).round();
+      _opacity.layer = context.pushOpacity(offset, alpha, _paintButton, oldLayer: _opacity.layer);
       return;
     }
     _opacity.layer = null;
@@ -598,21 +681,23 @@ class RenderButton extends RenderControl implements LabelledControl {
   void _paintButton(PaintingContext context, Offset offset) {
     final canvas = context.canvas;
     final rect = offset & size;
-    final look = _look();
+    final look = _look(eased: true);
     final shape = _shape;
     final path = shape.getOuterPath(rect);
     for (final sh in _shadows()) {
       canvas.drawPath(path.shift(sh.offset), sh.toPaint());
     }
     if (look.fill case final Color fill when fill.a > 0) canvas.drawPath(path, Paint()..color = fill);
-    final overlay = _overlay(look.filled);
+    final overlay = _easedOverlay(look.filled);
     if (overlay != null && overlay.a > 0) canvas.drawPath(path, Paint()..color = overlay);
     if (look.side case final BorderSide side when side.width > 0 && side.color.a > 0) {
       shape.copyWith(side: side.copyWith(strokeAlign: BorderSide.strokeAlignInside)).paint(canvas, rect);
     }
-    if (focusHighlight) {
+    final ring = stateValue(api.WidgetState.focused);
+    if (ring > 0) {
+      final c = spec.tokens.focusBorder;
       shape
-          .copyWith(side: BorderSide(color: spec.tokens.focusBorder, width: 1.5, strokeAlign: BorderSide.strokeAlignOutside))
+          .copyWith(side: BorderSide(color: c.withValues(alpha: c.a * ring), width: 1.5, strokeAlign: BorderSide.strokeAlignOutside))
           .paint(canvas, rect);
     }
     if (!_iconOnly) {
@@ -620,13 +705,13 @@ class RenderButton extends RenderControl implements LabelledControl {
       _label.layout(_laidOutLabelWidth);
       _label.paint(canvas, offset.dx + _labelLeft, offset.dy + size.height / 2);
     }
-    final g = _glyph;
-    if (g != null && identical(icon, g)) context.paintChild(g, offset + _iconRect.topLeft);
+    final shown = icon;
+    if (shown != null) context.paintChild(shown, offset + _iconRect.topLeft);
   }
 
   double get _laidOutLabelWidth {
     final pad = spec.padding ?? EdgeInsets.symmetric(horizontal: _m.padX);
-    final iconW = spec.hasIcon ? _m.iconSize + (spec.label.isEmpty ? 0 : _m.gap) : 0.0;
+    final iconW = spec.hasIconSlot ? _m.iconSize + (spec.label.isEmpty ? 0 : _m.gap) : 0.0;
     return math.max(0, size.width - pad.horizontal - iconW);
   }
 

@@ -114,3 +114,18 @@ mark, drawn as a path where SSUI uses Lucide's font glyph), sliders 0.09 % / 0.0
 ours has a 1 px hairline in light and nothing in dark), segmented 0.00 % / 0.00 %. The reference's segment labels
 carry Material's 0.25 letter spacing (SSUI's Flutter widget inherits it from ThemeData's typography; the design
 system's control text styles have none, nor do the SDK's segments), so the page sets it on its segments.
+## Chips and badges (workstream C)
+
+`test/controls/chips_reference_test.dart` rebuilds SSUI's chip and badge page
+(`../ssui-reference/chips-{light,dark}.png`, rendered from `SoftSaaSChip` and `SoftSaaSBadge` by
+`tool/ssui_golden/test/ssui_chips_golden_test.dart`, with the host Material's 0.25 letter spacing removed) from
+zero-prop `chip` and `badge` nodes, 600 × 160 at 1×.
+
+| File | What |
+|---|---|
+| `chips-before-{light,dark}.png` | the same page through the Material chip islands and the old badge (labels in the test font) |
+| `chips-{light,dark}.png` | render-object chips and badges, SSUI defaults |
+| `chips-compare-{light,dark}.png` | before, after and the SSUI reference, stacked |
+
+Measured over the chip and badge rows (x 16–320, y 16–96): 0.00 % of the pixels differ in light and in dark (a
+channel more than 40 apart); the test holds it under 0.5 %.

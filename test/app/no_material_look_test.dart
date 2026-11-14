@@ -17,6 +17,7 @@ import 'package:codelessly_api/codelessly_api.dart' as api show InputBorderType;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/expansion.dart' show RenderExpansion;
+import 'package:codelessly_sdk/src/render/controls/chips.dart' show RenderChip;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledControl;
 import 'package:codelessly_sdk/src/render/controls/pickers.dart' show RenderPickerField;
 import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTile;
@@ -720,7 +721,19 @@ void main() {
         }
 
         visit(box);
-        expect(labels, isNotEmpty, reason: '$id has a label');
+        // A chip drawn as a render object (render/controls/chips.dart).
+        final chips = <RenderChip>[];
+        void visitChips(RenderObject o) {
+          if (o is RenderChip) chips.add(o);
+          o.visitChildren(visitChips);
+        }
+
+        visitChips(box);
+        expect([...labels, ...chips], isNotEmpty, reason: '$id has a label');
+        for (final chip in chips) {
+          final w = chip.labelWidths;
+          expect(w.laidOut, greaterThanOrEqualTo(w.whole - .5), reason: '$id label "${chip.spec.label}" cut');
+        }
         for (final label in labels) {
           final whole = label.getMaxIntrinsicWidth(double.infinity);
           expect(label.size.width, greaterThanOrEqualTo(whole - .5), reason: '$id label "${label.text.toPlainText()}" cut');
