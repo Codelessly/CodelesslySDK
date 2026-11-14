@@ -272,6 +272,15 @@ void main() {
       expect(report.images, hasLength(3));
     });
 
+    testWidgets('--type names a field by an id a component\'s text shares: the one with a text field is typed into', (tester) async {
+      var report = await runRender(tester, steps(const [Step('type', 'email', 'a@b.co')]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      // A tap has no such tie-break: both are named, as paths to write.
+      report = await runRender(tester, steps(const [Step('tap', 'email')]));
+      final failed = report.diagnostics.where((d) => d['code'] == 'interaction_failed').single;
+      expect(failed['message'], allOf(contains('page/email'), contains('footer/email')));
+    });
+
     testWidgets('typing into a field and then tapping a button that removes the form leaves no exception', (tester) async {
       final report = await runRender(tester, steps(const [Step('type', 'email', 'a@b.co'), Step('tap', 'send')]));
       expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
