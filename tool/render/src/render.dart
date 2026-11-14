@@ -19,7 +19,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
-import 'package:codelessly_sdk/src/runtime/actions/variable_animator.dart' show VariableAnimator;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
 
 import 'args.dart';
