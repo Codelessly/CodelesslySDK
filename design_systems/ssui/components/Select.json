@@ -1,0 +1,217 @@
+{
+ "schema": 3,
+ "id": "Select",
+ "roots": [
+  "shell"
+ ],
+ "widget": {
+  "type": "Select",
+  "doc": "A dropdown of options on the control scale, the choice kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "One",
+     "Two",
+     "Three"
+    ],
+    "doc": "The options, as shown.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen option."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Select…",
+    "doc": "Shown while nothing is chosen."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Draws the error border."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: 50 % opacity, closed."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Chosen",
+   "size": [
+    200,
+    28
+   ],
+   "props": {
+    "options": [
+     "Weekly",
+     "Monthly",
+     "Yearly"
+    ],
+    "value": "Monthly"
+   }
+  },
+  {
+   "name": "Empty",
+   "size": [
+    200,
+    28
+   ],
+   "props": {
+    "options": [
+     "Weekly",
+     "Monthly"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "shell": {
+   "type": "row",
+   "children": [
+    "menu"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": 28,
+    "padding": [
+     8,
+     0,
+     4,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 7
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= props.error ? theme.error : theme.colors.primaryBorder}",
+    "disabled": "${= !props.enabled}"
+   },
+   "states": {
+    "hovered": {
+     "shell": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "secondaryBorder"
+        }
+       ]
+      }
+     }
+    },
+    "disabled": {
+     "shell": {
+      "opacity": 0.5
+     }
+    }
+   }
+  },
+  "menu": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 188
+    },
+    "height": {
+     "fill": 28
+    }
+   },
+   "props": {
+    "underline": false,
+    "isExpanded": true,
+    "isDense": true,
+    "style": "inputText",
+    "selectedItemStyle": "inputText",
+    "hintStyle": "placeholder",
+    "iconSize": 18,
+    "iconEnabledColor": "tertiaryText",
+    "iconDisabledColor": "tertiaryText",
+    "dropdownColor": "primaryBackground",
+    "borderRadius": 7,
+    "elevation": 3
+   },
+   "bind": {
+    "props.items": "${props.options}",
+    "props.value": "${props.value}",
+    "props.hint": "${props.placeholder}",
+    "props.enabled": "${props.enabled}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

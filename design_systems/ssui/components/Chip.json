@@ -1,0 +1,291 @@
+{
+ "schema": 3,
+ "id": "Chip",
+ "roots": [
+  "chip"
+ ],
+ "widget": {
+  "type": "Chip",
+  "doc": "A compact label: a tag, a filter (selected or not) or a removable value. Fires onPressed and onRemove.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Chip",
+    "doc": "The text.",
+    "required": true
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The active tint and primary text (a filter that is on)."
+   },
+   {
+    "key": "removable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "An x after the label that fires onRemove."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name before the label (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   },
+   {
+    "key": "onRemove"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Tag",
+   "size": [
+    96,
+    24
+   ],
+   "props": {
+    "label": "Design"
+   }
+  },
+  {
+   "name": "Selected",
+   "size": [
+    96,
+    24
+   ],
+   "props": {
+    "label": "Design",
+    "selected": true
+   }
+  },
+  {
+   "name": "Removable",
+   "size": [
+    110,
+    24
+   ],
+   "props": {
+    "label": "Design",
+    "removable": true
+   }
+  }
+ ],
+ "nodes": {
+  "chip": {
+   "type": "row",
+   "children": [
+    "strut",
+    "icon",
+    "label",
+    "remove"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 5
+   },
+   "bind": {
+    "selected": "${props.selected}",
+    "layout.padding": "${= props.removable ? [8, 0, 4, 0] : [8, 0, 8, 0]}"
+   },
+   "states": {
+    "selected": {
+     "chip": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "activeTint"
+        }
+       ],
+       "strokes": [
+        {
+         "color": "primaryTintBorder"
+        }
+       ]
+      }
+     },
+     "label": {
+      "props": {
+       "style": {
+        "color": "primary"
+       }
+      }
+     },
+     "icon": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    },
+    "hovered": {
+     "chip": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": ""
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 24
+   }
+  },
+  "icon": {
+   "type": "icon",
+   "props": {
+    "icon": "sell",
+    "color": "secondaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.icon": "${props.icon}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "controlCompact",
+     "color": "primaryText"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "remove": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${props.removable}"
+   },
+   "states": {
+    "hovered": {
+     "remove": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onRemove",
+       "value": "${props.label}"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "secondaryText",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  }
+ }
+}

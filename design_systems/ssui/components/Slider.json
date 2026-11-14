@@ -1,0 +1,143 @@
+{
+ "schema": 3,
+ "id": "Slider",
+ "roots": [
+  "slider"
+ ],
+ "widget": {
+  "type": "Slider",
+  "doc": "A value between min and max, dragged, kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable."
+   },
+   {
+    "key": "min",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "The smallest value."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 100,
+    "doc": "The largest value."
+   },
+   {
+    "key": "divisions",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "Steps between min and max (0: continuous)."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: 50 % opacity."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "number",
+     "flutter": "double"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Half",
+   "size": [
+    240,
+    28
+   ],
+   "props": {
+    "value": 50
+   }
+  }
+ ],
+ "nodes": {
+  "slider": {
+   "type": "slider",
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": 28
+   },
+   "props": {
+    "trackHeight": 4,
+    "activeTrackColor": "primary",
+    "inactiveTrackColor": "track",
+    "thumbColor": "#FFFFFFFF",
+    "thumbRadius": 7,
+    "thumbBorderColor": "secondaryBorder",
+    "thumbBorderWidth": 1,
+    "overlayColor": "activeTint",
+    "showValueIndicator": "never",
+    "padding": [
+     7,
+     0,
+     7,
+     0
+    ]
+   },
+   "bind": {
+    "props.value": "${= props.value == null ? props.min : props.value}",
+    "props.min": "${props.min}",
+    "props.max": "${props.max}",
+    "props.divisions": "${= props.divisions > 0 ? props.divisions : null}",
+    "disabled": "${= !props.enabled}"
+   },
+   "states": {
+    "disabled": {
+     "slider": {
+      "opacity": 0.5
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

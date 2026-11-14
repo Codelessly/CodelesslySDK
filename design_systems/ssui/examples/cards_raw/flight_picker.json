@@ -1,0 +1,264 @@
+{
+ "schema": 3,
+ "id": "flight_picker",
+ "roots": [
+  "c"
+ ],
+ "variables": {
+  "c": [
+   {
+    "name": "flights",
+    "type": "list",
+    "value": [
+     {
+      "id": "tp1351",
+      "depart": "07:10",
+      "arrive": "09:45",
+      "airline": "TAP",
+      "duration": "2h 35m",
+      "stops": "Direct",
+      "price": "£84"
+     },
+     {
+      "id": "ba500",
+      "depart": "11:55",
+      "arrive": "14:35",
+      "airline": "British Airways",
+      "duration": "2h 40m",
+      "stops": "Direct",
+      "price": "£112"
+     },
+     {
+      "id": "u2731",
+      "depart": "16:20",
+      "arrive": "20:50",
+      "airline": "easyJet",
+      "duration": "3h 30m",
+      "stops": "1 stop",
+      "price": "£61"
+     }
+    ]
+   },
+   {
+    "name": "chosen",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ },
+ "nodes": {
+  "c": {
+   "type": "canvas",
+   "name": "flight_picker",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 600
+    }
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "card"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "hug": 600
+    },
+    "padding": 16
+   }
+  },
+  "card": {
+   "type": "column",
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 400
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE0E0E0"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "title",
+    "sub",
+    "list",
+    "foot"
+   ]
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "Choose your flight",
+    "style": {
+     "fontSize": 18,
+     "fontWeight": 600,
+     "color": "#FF111111"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 334
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "sub": {
+   "type": "text",
+   "props": {
+    "text": "London LHR → Lisbon LIS · Fri 21 Nov · 1 adult",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF5F6368"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 334
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "flight"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": {
+     "hug": 200
+    }
+   },
+   "bind": {
+    "data": "${flights}"
+   }
+  },
+  "flight": {
+   "type": "listTile",
+   "props": {
+    "title": "Flight",
+    "leading": {
+     "name": "flight_takeoff"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": 64
+   },
+   "bind": {
+    "props.title": "${item.depart} – ${item.arrive}   ${item.price}",
+    "props.subtitle": "${item.airline} · ${item.duration} · ${item.stops}",
+    "props.selected": "${= item.id == chosen}"
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "chosen",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "cancel",
+    "confirm"
+   ],
+   "props": {
+    "mainAxisAlignment": "end",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "cancel": {
+   "type": "textButton",
+   "props": {
+    "label": "Cancel"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": 40
+   }
+  },
+  "confirm": {
+   "type": "filledButton",
+   "props": {
+    "label": "Confirm"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": 40
+   },
+   "bind": {
+    "props.enabled": "${= chosen != ''}"
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "confirm",
+       "value": {
+        "flight": "${chosen}"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

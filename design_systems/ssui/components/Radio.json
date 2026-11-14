@@ -1,0 +1,205 @@
+{
+ "schema": 3,
+ "id": "Radio",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "Radio",
+  "doc": "One option of a group: selected while your variable holds its value; tapping sets it. Fires onChanged.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "This option's value.",
+    "required": true
+   },
+   {
+    "key": "group",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the group's chosen value."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Text beside the circle."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: 50 % opacity."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Selected",
+   "size": [
+    160,
+    28
+   ],
+   "props": {
+    "value": "a",
+    "group": "a",
+    "label": "Standard"
+   }
+  },
+  {
+   "name": "Not selected",
+   "size": [
+    160,
+    28
+   ],
+   "props": {
+    "value": "b",
+    "group": "a",
+    "label": "Express"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "ring",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 28
+    },
+    "constraints": {
+     "minHeight": 24
+    }
+   },
+   "bind": {
+    "selected": "${= props.group == props.value}",
+    "disabled": "${= !props.enabled}"
+   },
+   "states": {
+    "selected": {
+     "ring": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "primary"
+        }
+       ],
+       "strokeWidth": 5
+      }
+     }
+    },
+    "hovered": {
+     "ring": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "tertiaryText"
+        }
+       ]
+      }
+     }
+    },
+    "disabled": {
+     "row": {
+      "opacity": 0.5
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.group",
+       "value": "${props.value}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "ring": {
+   "type": "box",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "strokeWidth": 1,
+    "radius": 8
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "body"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 19
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != ''}"
+   }
+  }
+ }
+}
