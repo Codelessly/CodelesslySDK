@@ -19,6 +19,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
+import 'package:codelessly_sdk/src/runtime/actions/variable_animator.dart' show VariableAnimator;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
 
 import 'args.dart';
@@ -658,6 +659,11 @@ Future<void> _renderAll(
         if (page != null && page.maxScrollExtent >= 1) fullPage = page;
       }
 
+      // Counters still counting (animate ... animateTo on a variable, one
+      // after another in a load reaction) end before the capture: it shows
+      // the numbers they arrive at, not a frame on the way.
+      await _countersSettled(tester);
+
       // A --set holds against what no step did: a timer or a load reaction
       // that wrote the variable after it (a clock) is undone, and said.
       final held = <String, Object?>{};
@@ -824,6 +830,14 @@ Future<void> _settle(WidgetTester tester) async {
     await PaintImages.settled(timeout: const Duration(seconds: 3));
   });
   for (var i = 0; i < 4; i++) {
+    await tester.pump(const Duration(milliseconds: 100));
+  }
+}
+
+/// Pumps (in 100 ms steps, at most 20 s of the screen's time) while a
+/// number variable's timeline plays.
+Future<void> _countersSettled(WidgetTester tester) async {
+  for (var i = 0; i < 200 && VariableAnimator.anyPlaying; i++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
 }
