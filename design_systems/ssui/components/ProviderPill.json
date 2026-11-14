@@ -1,0 +1,172 @@
+{
+ "schema": 3,
+ "id": "ProviderPill",
+ "roots": [
+  "pill"
+ ],
+ "widget": {
+  "type": "ProviderPill",
+  "doc": "A small bordered pill for a row's action or state (\"Add key\", \"Connected\"). Fires onPressed.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Add key",
+    "doc": "The words.",
+    "required": true
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "An icon before them (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Add key",
+   "size": [
+    60,
+    22
+   ],
+   "props": {
+    "label": "Add key"
+   }
+  },
+  {
+   "name": "Connected",
+   "size": [
+    90,
+    22
+   ],
+   "props": {
+    "label": "Connected",
+    "icon": "check"
+   }
+  }
+ ],
+ "nodes": {
+  "pill": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 56
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": [
+     7,
+     2,
+     7,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 6
+   },
+   "states": {
+    "hovered": {
+     "pill": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "pill": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "secondaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.icon": "${props.icon}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "height": 1.4545454545454546,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

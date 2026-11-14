@@ -1,0 +1,202 @@
+{
+ "schema": 3,
+ "id": "CopyButton",
+ "roots": [
+  "button"
+ ],
+ "widget": {
+  "type": "CopyButton",
+  "doc": "Copies its text to the clipboard and shows a check for two seconds. Fires onCopy.",
+  "props": [
+   {
+    "key": "text",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What is copied.",
+    "required": true
+   },
+   {
+    "key": "showLabel",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A label (\"Copy\", then \"Copied!\") after the icon."
+   }
+  ],
+  "events": [
+   {
+    "key": "onCopy"
+   }
+  ]
+ },
+ "variables": {
+  "button": [
+   {
+    "name": "copied",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Icon",
+   "size": [
+    28,
+    28
+   ],
+   "props": {
+    "text": "npm install"
+   }
+  },
+  {
+   "name": "Labeled",
+   "size": [
+    80,
+    28
+   ],
+   "props": {
+    "text": "npm install",
+    "showLabel": true
+   }
+  }
+ ],
+ "nodes": {
+  "button": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": 28,
+    "padding": [
+     7,
+     0,
+     7,
+     0
+    ],
+    "constraints": {
+     "minWidth": 28
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 7
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= copied && props.showLabel ? theme.primary : '#00000000'}"
+   },
+   "states": {
+    "hovered": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "tooltip": "Copy to clipboard",
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "copyToClipboard",
+       "text": "${props.text}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "copied",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onCopy",
+       "value": "${props.text}"
+      },
+      {
+       "type": "delay",
+       "ms": 2000
+      },
+      {
+       "type": "setVariable",
+       "variable": "copied",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "content_copy",
+    "color": "secondaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "props.icon": "${= copied ? 'check' : 'content_copy'}",
+    "props.color": "${= copied && props.showLabel ? theme.onPrimary : theme.colors.secondaryText}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "Copy",
+    "style": {
+     "from": "controlCompact"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "visible": "${props.showLabel}",
+    "props.text": "${= copied ? 'Copied!' : 'Copy'}",
+    "props.style.color": "${= copied ? theme.onPrimary : theme.colors.primaryText}"
+   }
+  }
+ }
+}
