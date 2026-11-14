@@ -1,5 +1,38 @@
 ## Unreleased
 
+**What ten sites built as data (brief 3) ran into.**
+
+- Text inside an SVG image is drawn in the site's fonts: a generic family (`sans-serif`, `monospace`) and text with
+  no family take the theme's `fontFamily`, a named family is asked for as a text style's is with the theme's font as
+  its fallback, and the picture is recorded once they load (in the render command it was drawn as solid blocks).
+  The render command names the SVG in `font_fallback` when a family is not had.
+- `navigate` evaluates a `to` (and `base`) built by a binding (`${item.to}`): it threw "no such screen".
+- A canvas opened as a modal takes the size its media rules give it at the screen's width (the patch was ignored).
+- A `lineChart` with no `axisLabelStyle` colour draws its tick labels and axis title in the axis colour (they were
+  white).
+- `gridView.fillGaps` (CSS `grid-auto-flow: dense`).
+- `VariableAnimator.anyPlaying`: whether a number variable's timeline plays anywhere.
+- Render command:
+  - every run first prints the SDK and API versions, commits and paths it uses; Flutter is looked for in the usual
+    install places too, and when none is found the message says to set `FLUTTER=/path/to/flutter/bin/flutter` and
+    that the tool and reference are on `master`;
+  - a step on a component's node (by its path) hidden at a size is skipped there, and a skip is its own warning,
+    `step_skipped`, not `interaction_failed`;
+  - `--hover` at several sizes no longer crashes the harness (Flutter's mouse tracker assertion);
+  - full-page captures draw an open dropdown menu or toast once, in the first window, and a page whose content
+    changes height once it scrolls (a header compacting on scroll) is stitched without a doubled line at a seam;
+  - `--type` names the one node with a text field among nodes sharing an id;
+  - a page `site.json` lists but not written yet is one `page_not_written` warning per file, not `unknown_screen`
+    errors;
+  - counters animated in a load reaction (one after another) are captured where they end;
+  - image paths are relative to the site's folder in every document, components included (the README said the
+    document's), and a path written from a component's folder is reported with the path to write;
+  - a variable font declared once counts as having every weight of its `wght` axis (no `font_fallback`);
+  - a flex overflow names the list copy that overflows and says what its content needs and what to change.
+- Skipped tests for the controls engineer: invalid form fields vanish when the theme's `error` role names a theme
+  colour (`test/tool/form_named_error_role_test.dart`); an empty `datePicker` shows today's date
+  (`test/tool/date_picker_empty_test.dart`).
+
 **Generative UI with a design system, recorded and replayed.**
 
 - `UiSession(designSystem:)` allows the design system's components under the session's trust profile
