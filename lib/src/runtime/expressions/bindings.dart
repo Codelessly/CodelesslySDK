@@ -295,16 +295,38 @@ class NodeBinder implements TreeBindings, InstanceBindings {
   void publish(NodeSource source, String id, Object? instance, String name, Object? value) =>
       nodeScope(source, id, instance: instance)?.update(name, value);
 
+  /// The radio group [node] (a radio with no `groupValue` binding of its
+  /// own) is in: Flutter's `RadioGroup` around a `Radio`. Its value is the
+  /// group's, as written, or as the group's binding gives it.
+  ({BoundProperty? bound, String literal})? _radioGroupFor(NodeSource source, Node node) {
+    if (node.type != api.RadioProps.spec.type || node.bind.containsKey('props.groupValue')) return null;
+    for (var id = source.parentOf(node.id); id != null; id = source.parentOf(id)) {
+      final g = source.node(id);
+      final behavior = g?.behaviors.radioGroup;
+      if (g == null || behavior == null) continue;
+      final expression = g.bind['radioGroup.groupValue'];
+      return (
+        bound: expression == null ? null : _groupBindings[expression] ??= BoundProperty('props.groupValue', expression),
+        literal: behavior.groupValue,
+      );
+    }
+    return null;
+  }
+
+  static final Map<String, BoundProperty> _groupBindings = {};
+
   /// [node] (in repeat [instance]) as shown.
   @override
   BoundNode bind(NodeSource source, Node node, Object? instance) {
     final b = NodeBindings.of(node);
     final targets = _conditionsFor(source).byNode[node.id] ?? const [];
-    if (b.isEmpty && targets.isEmpty) return BoundNode(node);
+    final group = _radioGroupFor(source, node);
+    if (b.isEmpty && targets.isEmpty && group == null) return BoundNode(node);
     final s = _binds ? scopeFor(source, node.id, instance) : null;
     final reads = <String>{};
     ClockTick? clock;
     var out = node;
+    if (group != null) out = out.withProp(api.RadioProps.groupValue, group.literal);
     bool? visible;
     final states = <api.WidgetState, bool>{};
     if (s != null) {
@@ -317,6 +339,11 @@ class NodeBinder implements TreeBindings, InstanceBindings {
         reads.addAll(p.reads);
         clock = p.clock?.finer(clock) ?? clock;
         out = p.applyTo(out, engine, s);
+      }
+      if (group?.bound case final BoundProperty p) {
+        reads.addAll(p.reads);
+        clock = p.clock?.finer(clock) ?? clock;
+        out = out.withProp(api.RadioProps.groupValue, '${p.valueIn(engine, s) ?? ''}');
       }
       if (b.visible case final BoundProperty v) {
         reads.addAll(v.reads);
@@ -859,8 +886,16 @@ final class _ScopeVariable implements BoundVariable {
 /// [text] with [f] applied to each styled run (and the plain text between
 /// runs) on its own, the runs moved to where their text now is: a run's
 /// `${...}` stays in its style.
+///
+/// A run that starts or ends inside an expression cannot style the text as
+/// written (the expression has no characters of its own to split): its
+/// offsets count characters of the text as shown, as bound runs do. A drop
+/// cap on a bound paragraph is `{"start": 0, "end": 1}`.
 (String, List<TextRun>) interpolateRuns(String text, List<TextRun> runs, String Function(String) f) {
   if (runs.isEmpty) return (f(text), runs);
+  final spans = [for (final m in expressionSyntax.allMatches(text)) (m.start, m.end)];
+  bool inside(int i) => spans.any((s) => i > s.$1 && i < s.$2);
+  if (runs.any((r) => inside(r.start) || inside(r.end))) return (f(text), runs);
   final sorted = [...runs]..sort((a, b) => a.start.compareTo(b.start));
   final out = StringBuffer();
   final next = <TextRun>[];

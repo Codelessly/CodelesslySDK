@@ -304,6 +304,7 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
   /// Unmounts the island's widgets; the host can't be used again.
   void release() {
     if (_disposed) return;
+    releaseFocus();
     _disposed = true;
     manager._hosts.remove(this);
     final owner = _owner;
@@ -311,6 +312,39 @@ class IslandHost extends RenderProxyBox with RenderObjectWithLayoutCallbackMixin
       owner._drop(this);
     } else {
       _disposeRenderHost();
+    }
+  }
+
+  /// Takes the focus from a widget in this island (a field being typed
+  /// into) as it goes away, as Flutter does when a focused widget is
+  /// removed, but now: its elements are unmounted only at the next layout,
+  /// and its render objects have already left the tree, where a keyboard
+  /// connection kept until then would read their position. Outside the
+  /// build and layout phase the change applies at once.
+  /// Leaving the render tree between frames (a binding changed by a tap's
+  /// actions removed or hid its node), the island lets the focus go: no
+  /// frame will put it back before the post-frame callbacks run. A host
+  /// moved during build or layout (to another parent) keeps it.
+  @override
+  void detach() {
+    final phase = SchedulerBinding.instance.schedulerPhase;
+    if (phase == SchedulerPhase.idle || phase == SchedulerPhase.postFrameCallbacks) releaseFocus();
+    super.detach();
+  }
+
+  void releaseFocus() {
+    final scope = _scope;
+    final focus = FocusManager.instance.primaryFocus;
+    final context = focus?.context;
+    if (scope == null || focus == null || context == null || !context.mounted) return;
+    var inside = identical(context, scope);
+    if (!inside) {
+      context.visitAncestorElements((e) => !(inside = identical(e, scope)));
+    }
+    if (!inside) return;
+    focus.unfocus();
+    if (SchedulerBinding.instance.schedulerPhase != SchedulerPhase.persistentCallbacks) {
+      FocusManager.instance.applyFocusChangesIfNeeded();
     }
   }
 
