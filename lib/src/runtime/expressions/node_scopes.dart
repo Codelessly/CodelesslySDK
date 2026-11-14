@@ -49,7 +49,7 @@ class NodeValuesScope extends ValuesScope {
 /// behaviors declares all their names in one scope).
 final List<NodeScopeDeclarer> nodeScopeDeclarers = [
   trackScopeValues, flipScopeValues, tiltScopeValues, transformScopeValues, stickyScopeValues, viewScopeValues, //
-  animationScopeValues,
+  animationScopeValues, formScopeValues,
 ];
 
 /// What [node] declares (empty: nothing), read in [parent].
@@ -72,6 +72,7 @@ bool declaresNodeScope(Node node) {
       be.sticky != null ||
       be.viewProgress != null ||
       be.animations.isNotEmpty ||
+      be.form != null ||
       ownSwitchPoints(node).isNotEmpty;
 }
 
@@ -190,5 +191,15 @@ Map<String, Object?>? viewScopeValues(Node node, ValueScope parent) {
   if (node.behaviors.viewProgress == null) return null;
   return const {
     'view': {'progress': 0.0, 'visible': false},
+  };
+}
+
+/// A form's `form`: whether every field inside passes its validator and the
+/// errors they show (`{field, label, message}`, top to bottom); the fields
+/// publish them as they change (runtime/actions/form_fields.dart).
+Map<String, Object?>? formScopeValues(Node node, ValueScope parent) {
+  if (node.behaviors.form == null) return null;
+  return const {
+    'form': {'valid': true, 'errors': <Object?>[]},
   };
 }
