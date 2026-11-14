@@ -1259,7 +1259,13 @@ class _LayoutViewState extends State<_LayoutView> {
       _screen.tree.responsive = ResponsiveWidth(
           breakpoints, sizing == CanvasSizing.design ? MediaQuery.sizeOf(context).width : width,
           height: MediaQuery.sizeOf(context).height);
-      final canvas = canvasId == null ? null : layout.document[canvasId];
+      // The canvas at the screen's size: its media rules may resize it (a
+      // dialog's design size on a phone), as they do its nodes.
+      final responsive = _screen.tree.responsive;
+      var canvas = canvasId == null ? null : layout.document[canvasId];
+      if (canvas != null && responsive != null && canvas.media.isNotEmpty) {
+        canvas = canvas.atScreen(responsive.width, responsive.height, responsive.breakpoints);
+      }
       if (canvasId == null || canvas == null) return const SizedBox.shrink();
       _seed(canvasId);
       _shownCanvas(canvasId);
