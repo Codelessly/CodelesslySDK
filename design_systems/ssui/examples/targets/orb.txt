@@ -1,0 +1,17 @@
+state mode="listening"
+Card gap:12
+  Row between
+    Text.sectionTitle "Voice"
+    Badge.primary "{mode}"
+  Row center
+    Stack w:140 h:140
+      node {"type": "column", "layout": {"width": 140, "height": 140, "x": 0, "y": 0},
+        "decoration": {"radius": 70, "fills": [{"type": "radial", "stops": [{"position": 0, "color": "#662563EB"}, {"position": 1, "color": "#002563EB"}]}]}}
+      node {"type": "column", "layout": {"width": 96, "height": 96, "x": 22, "y": 22},
+        "decoration": {"radius": 48, "fills": [{"type": "radial", "stops": [{"position": 0, "color": "#FF93C5FD"}, {"position": 0.6, "color": "#FF2563EB"}, {"position": 1, "color": "#FF1E3A8A"}]}]}}
+      Box x:44 y:36 w:26 h:16 radius:13 fill:#66FFFFFF
+  Text.bodySecondary "{mode=="listening"?"Listening. Say what you need.":(mode=="thinking"?"Thinking it over…":"Speaking. Tap to interrupt.")}"
+  Row center gap:8
+    Button.outline "Listening" -> mode="listening"
+    Button.outline "Thinking" -> mode="thinking"
+    Button.outline "Speaking" -> mode="speaking"
