@@ -288,6 +288,30 @@ void main() {
     expect(paragraphText(tree, 't'), 'Hi Ben, 6 items !');
   });
 
+  testWidgets('a run that starts or ends inside an expression styles the text as shown (a drop cap)', (tester) async {
+    final vars = VariableScope([v('lead', 'At the end of a narrow road')]);
+    final (tree, _) = await show(
+      tester,
+      page({
+        'col': {'type': 'column', 'children': ['t'], 'layout': {'width': 300, 'height': {'hug': 20}}},
+        't': {
+          'type': 'text',
+          'layout': {'width': {'hug': 100}, 'height': {'hug': 20}},
+          'props': {
+            'text': r"${= lead + '.'}",
+            'runs': [
+              {'start': 0, 'end': 1, 'style': {'fontSize': 46}},
+            ],
+          },
+        },
+      }),
+      NodeBinder(scope: vars),
+    );
+    expect(paragraphText(tree, 't'), 'At the end of a narrow road.');
+    final runs = tree.boxOf('t')!.node!.prop(TextProps.runs);
+    expect([for (final r in runs) (r.start, r.end)], [(0, 1)]);
+  });
+
   testWidgets('on the design canvas bound text shows placeholders, or the sample values it is given', (tester) async {
     final doc = page({
       'col': {'type': 'column', 'children': ['t'], 'layout': {'width': 300, 'height': {'hug': 20}}},

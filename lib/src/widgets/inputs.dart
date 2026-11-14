@@ -43,6 +43,8 @@ import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
 import '../runtime/expressions/formula.dart' show FormulaEvaluator;
 import '../runtime/actions/text_fields.dart';
+import '../runtime/actions/form_fields.dart';
+import '../render/contracts.dart' show ExpressionValues;
 import '../runtime/actions/wiring.dart' show iconTapPrefix, iconTapSuffix;
 import '../runtime/actions/feedback_theme.dart';
 import '../render/paint/icon_glyph.dart';
@@ -248,6 +250,20 @@ String? previewText(String? text) {
   return s.trim().isEmpty ? null : s;
 }
 
+/// The content padding of a field whose decoration and node set none:
+/// Flutter's `InputDecorator` default for an outlined or filled field (12 px
+/// at the sides, so the text and label clear the border), else the node's
+/// [padding] (an unfilled underline field has no side padding in Flutter
+/// either).
+api.EdgeInsets defaultContentPadding(api.InputDecoration d, api.EdgeInsets padding) {
+  if (d.isCollapsed || padding != api.EdgeInsets.zero) return padding;
+  final outlined = [d.border, d.enabledBorder, d.focusedBorder].any((b) => b?.type == api.InputBorderType.outline);
+  final dense = d.isDense ?? false;
+  if (outlined) return dense ? const api.EdgeInsets.fromLTRB(12, 16, 12, 8) : const api.EdgeInsets.fromLTRB(12, 20, 12, 12);
+  if (d.filled ?? false) return dense ? const api.EdgeInsets.fromLTRB(12, 4, 12, 4) : const api.EdgeInsets.fromLTRB(12, 8, 12, 8);
+  return padding;
+}
+
 /// [padding] grown by the width of the border [d] draws in this state when
 /// it has `paddingIncludesBorder` (an outline on every side, an underline
 /// below): disabled, then error (focused or not), then focused, then enabled.
@@ -345,7 +361,7 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
     // the designed one: a platform's compact density (desktop) must not
     // shrink either, or the field is ~8px shorter on desktop than designed.
     visualDensity: d.isCollapsed || d.contentPadding != null ? VisualDensity.standard : null,
-    contentPadding: paddingWithBorder((d.contentPadding ?? padding).flutter, d,
+    contentPadding: paddingWithBorder((d.contentPadding ?? defaultContentPadding(d, padding)).flutter, d,
         error: error ?? (errorText == api.kErrorWithoutMessage || (errorText != null && errorText.trim().isNotEmpty)),
         focused: focused),
     prefixIcon: always && prefixWidget != null ? _affix(prefixIcon, prefixWidget, before: true) : prefixIcon,
@@ -499,13 +515,78 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final b = _builderOf(context);
     if (!identical(b, _builder)) {
       if (_builder != null) TextFieldHandle.unregister(_builder!, controller);
+      if (_builder != null && _entry != null) FormRegistry.of(_builder!.tree).unregister(_builder!, _entry!);
       _builder = b;
       if (b != null) TextFieldHandle.register(b, TextFieldHandle(controller, focusNode));
+      if (b != null && widget.interactive) {
+        FormRegistry.of(b.tree).register(_entry = FormFieldEntry(
+          box: b,
+          focusNode: focusNode,
+          check: _check,
+          show: (error) {
+            if (mounted && error != _error) setState(() => _error = error);
+          },
+          label: () => widget.node.prop(TextFieldProps.decoration).labelText ?? widget.node.id,
+        ));
+      }
     }
+  }
+
+  // --- validation: Flutter's FormFieldState --------------------------------------
+
+  FormFieldEntry? _entry;
+
+  /// The error the field shows (its validator's, when it last ran).
+  String? _error;
+
+  /// The validator's message for the text now; null when valid (or when
+  /// the field has no validator).
+  String? _check() {
+    final validator = widget.node.prop(TextFieldProps.validator);
+    final b = _builder;
+    if (validator.trim().isEmpty || b == null) return null;
+    final values = b.tree.bindings?.valuesFor(b.source, b.id, b.instance);
+    if (values is! ExpressionValues) return null;
+    Object? result;
+    try {
+      result = values.evaluate(validator, {'value': controller.text});
+    } catch (_) {
+      return null;
+    }
+    final message = result == null ? '' : '$result'.trim();
+    return message.isEmpty ? null : message;
+  }
+
+  /// The field's own autovalidate mode and its form's.
+  Set<api.AutovalidateMode> get _modes {
+    final b = _builder;
+    return {
+      widget.node.prop(TextFieldProps.autovalidateMode),
+      if (b != null) FormRegistry.formModeOf(b),
+    };
+  }
+
+  void _showError(String? error) {
+    _entry?.shown = error;
+    if (error != _error) setState(() => _error = error);
+  }
+
+  /// Validates as the modes say after the user typed.
+  void _validateOnChange() {
+    final modes = _modes;
+    if (modes.contains(api.AutovalidateMode.onUserInteraction) ||
+        (modes.contains(api.AutovalidateMode.onUserInteractionIfError) && _error != null)) {
+      _showError(_check());
+    }
+    if (_builder != null && _entry != null) FormRegistry.of(_builder!.tree).changed(_builder!);
   }
 
   void _focusChanged() {
     final n = widget.node;
+    if (mounted && !focusNode.hasFocus && _entry != null && _modes.contains(api.AutovalidateMode.onUnfocus)) {
+      _showError(_check());
+      FormRegistry.of(_builder!.tree).changed(_builder!);
+    }
     if (mounted) _fire(context, focusNode.hasFocus ? 'focusGained' : 'focusLost', controller.text);
     if (!focusNode.hasFocus && _edited && mounted) {
       _edited = false;
@@ -527,6 +608,7 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
   @override
   void dispose() {
     if (_builder != null) TextFieldHandle.unregister(_builder!, controller);
+    if (_builder != null && _entry != null) FormRegistry.of(_builder!.tree).unregister(_builder!, _entry!);
     controller.dispose();
     focusNode.dispose();
     super.dispose();
@@ -536,7 +618,18 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
   Widget build(BuildContext context) {
     final n = widget.node;
     final hFit = n.layout.width.fit, vFit = n.layout.height.fit;
-    final d = n.prop(TextFieldProps.decoration);
+    if (_entry != null && _modes.contains(api.AutovalidateMode.always)) {
+      final error = _check();
+      if (error != _error) {
+        _error = error;
+        FormRegistry.of(_builder!.tree).changed(_builder!);
+      }
+      _entry!.shown = error;
+    }
+    // The validator's error, when it shows one, is the decoration's
+    // (TextFormField's `errorText: field.errorText`).
+    final own = n.prop(TextFieldProps.decoration);
+    final d = _error == null ? own : own.set(api.InputDecorationFields.errorText, _error);
     final maxLinesProp = n.prop(TextFieldProps.maxLines);
     final minLinesProp = n.prop(TextFieldProps.minLines);
     // A one-line field stays one line even when it fills a fixed height; a
@@ -591,6 +684,7 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
             _edited = true;
             _sent.add(v);
             if (_sent.length > 64) _sent.removeAt(0);
+            _validateOnChange();
             _fire(context, 'changed', v);
           },
           onSubmitted: (v) => _fire(context, 'submitted', v),
@@ -937,6 +1031,19 @@ class _SwitchIslandState extends State<_SwitchIsland> {
   }
 }
 
+/// Reports a radio's new [value] to the `changed` reactions of the radio
+/// group around it (Flutter's `RadioGroup.onChanged`).
+void _fireRadioGroup(BuildContext context, Object? value) {
+  final b = _builderOf(context);
+  if (b == null) return;
+  for (var id = b.source.parentOf(b.id); id != null; id = b.source.parentOf(id)) {
+    if (b.source.node(id)?.behaviors.radioGroup == null) continue;
+    final group = b.tree.boxOf(id, instance: b.instance) ?? b.tree.boxesOf(id).firstOrNull;
+    if (group != null) fireTrigger(group, 'changed', event: {'value': value});
+    return;
+  }
+}
+
 class _RadioIsland extends StatefulWidget {
   const _RadioIsland({required this.node});
   final Node node;
@@ -971,6 +1078,7 @@ class _RadioIslandState extends State<_RadioIsland> {
         onChanged: (v) {
           setState(() => groupValue = v);
           _fire(context, 'changed', v);
+          _fireRadioGroup(context, v);
         },
         child: Radio<String>(
           value: n.prop(RadioProps.value),

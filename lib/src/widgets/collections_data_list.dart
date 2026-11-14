@@ -13,7 +13,7 @@ import 'package:codelessly_api/core.dart'
     show CollectionScrollProps, CollectionSlots, ListApply, ListSections, ListViewProps, Node, Pagination,
         PaginationMode, PaginationSource, SwipeAction, SwipeActions, TriggerType;
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show ScrollCacheExtent;
+import 'package:flutter/rendering.dart' show RenderAbstractViewport, ScrollCacheExtent;
 import 'package:flutter/scheduler.dart';
 
 import '../render/convert.dart';
@@ -218,6 +218,91 @@ class DataListView extends StatefulWidget {
 class DataListViewState extends State<DataListView> {
   final ScrollController scrollController = ScrollController();
 
+  // --- items: the current index and snapping -------------------------------------
+
+  /// The items built now, by index.
+  final Map<int, BuildContext> _built = {};
+
+  /// The scroll offset that puts each built item at the start of the view,
+  /// by index.
+  Map<int, double> _itemStarts() {
+    final out = <int, double>{};
+    for (final e in _built.entries) {
+      if (!e.value.mounted) continue;
+      final ro = e.value.findRenderObject();
+      if (ro is! RenderBox || !ro.attached || !ro.hasSize) continue;
+      final viewport = RenderAbstractViewport.maybeOf(ro);
+      if (viewport == null) continue;
+      out[e.key] = viewport.getOffsetToReveal(ro, 0).offset;
+    }
+    return out;
+  }
+
+  /// The scroll reaction's values: offset, max, fraction, and the item at
+  /// the start of the view (the last at the end) and how many there are.
+  Map<String, Object?> _scrollEvent(ScrollMetrics m) {
+    final count = _items.length;
+    var index = 0;
+    if (m.maxScrollExtent > 0 && m.pixels >= m.maxScrollExtent - 0.5) {
+      index = math.max(0, count - 1);
+    } else {
+      double? best;
+      for (final e in _itemStarts().entries) {
+        final d = (e.value - m.pixels).abs();
+        if (best == null || d < best) {
+          best = d;
+          index = e.key;
+        }
+      }
+    }
+    final max = m.maxScrollExtent;
+    return {
+      'offset': m.pixels,
+      'pixels': m.pixels,
+      'min': m.minScrollExtent,
+      'max': max,
+      'viewport': m.viewportDimension,
+      'fraction': max > 0 ? (m.pixels / max).clamp(0.0, 1.0) : 0.0,
+      'progress': max > 0 ? (m.pixels / max).clamp(0.0, 1.0) : 0.0,
+      'axis': m.axis.name,
+      'index': index,
+      'count': count,
+    };
+  }
+
+  /// The item starts as of the last frame: what the snapping physics read
+  /// (they can be asked during layout, where the items can't be measured).
+  List<double> _snapStarts = const [];
+  bool _snapStartsPending = false;
+
+  void _refreshSnapStartsSoon() {
+    if (_snapStartsPending || !_node.prop(CollectionScrollProps.itemSnapping)) return;
+    _snapStartsPending = true;
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      _snapStartsPending = false;
+      if (mounted) _snapStarts = _itemStarts().values.toList();
+    });
+  }
+
+  bool _scrollEventPending = false;
+
+  /// Reports the list's own scrolling to its `scroll` and `scrollEnd`
+  /// reactions, as a scrolling row does.
+  bool _onOwnScroll(ScrollNotification n) {
+    if (n.depth != 0) return false;
+    _refreshSnapStartsSoon();
+    if (n is ScrollUpdateNotification && !_scrollEventPending) {
+      _scrollEventPending = true;
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        _scrollEventPending = false;
+        if (mounted && scrollController.hasClients) _r.fire('scroll', event: _scrollEvent(scrollController.position));
+      });
+    } else if (n is ScrollEndNotification) {
+      _r.fire('scrollEnd', event: _scrollEvent(n.metrics));
+    }
+    return false;
+  }
+
   /// The key of the sliver that anchors a list loading both ways.
   final Key _centerKey = UniqueKey();
 
@@ -380,6 +465,14 @@ class DataListViewState extends State<DataListView> {
     });
   }
 
+  /// [physics] that, with the list's `itemSnapping`, come to rest with an
+  /// item at the start of the view.
+  ScrollPhysics? _withSnapping(ScrollPhysics? physics) {
+    if (!_node.prop(CollectionScrollProps.itemSnapping)) return physics;
+    _refreshSnapStartsSoon();
+    return ItemSnapPhysics(starts: () => _snapStarts, parent: physics);
+  }
+
   @override
   void dispose() {
     _controller?.removeListener(_changed);
@@ -472,7 +565,7 @@ class DataListViewState extends State<DataListView> {
 
   Widget _item(BuildContext context, int index, Object? item) {
     final key = _keyOf(item);
-    Widget child = _node$('row', widget.itemId, key, index, item);
+    Widget child = _IndexedItem(index: index, list: this, child: _node$('row', widget.itemId, key, index, item));
     if (widget.gridDelegate == null) {
       child = ListItemBox(axis: _axis, main: widget.itemMain, stretch: widget.stretch, child: child);
     }
@@ -844,7 +937,7 @@ class DataListViewState extends State<DataListView> {
           reverse: _node.prop(CollectionScrollProps.reverse),
           shrinkWrap: !bounded || widget.hugMain,
           center: center,
-          physics: refreshable ? const AlwaysScrollableScrollPhysics().applyTo(widget.physics) : widget.physics,
+          physics: _withSnapping(refreshable ? const AlwaysScrollableScrollPhysics().applyTo(widget.physics) : widget.physics),
           scrollCacheExtent: cache == null ? null : ScrollCacheExtent.pixels(cache),
           clipBehavior: clip(_node.prop(CollectionScrollProps.clipBehavior)),
           slivers: [
@@ -861,6 +954,7 @@ class DataListViewState extends State<DataListView> {
     if (model != null && model.thresholdPixels > 0) {
       list = NotificationListener<ScrollNotification>(onNotification: _onScroll, child: list);
     }
+    list = NotificationListener<ScrollNotification>(onNotification: _onOwnScroll, child: list);
 
     if (refreshable) {
       list = RefreshIndicator(
@@ -1137,4 +1231,78 @@ class _DefaultErrorFooter extends StatelessWidget {
           ],
         ),
       );
+}
+
+/// An item of a [DataListView], known to the list by its index while built.
+class _IndexedItem extends StatefulWidget {
+  const _IndexedItem({required this.index, required this.list, required this.child});
+  final int index;
+  final DataListViewState list;
+  final Widget child;
+
+  @override
+  State<_IndexedItem> createState() => _IndexedItemState();
+}
+
+class _IndexedItemState extends State<_IndexedItem> {
+  @override
+  void initState() {
+    super.initState();
+    widget.list._built[widget.index] = context;
+  }
+
+  @override
+  void didUpdateWidget(covariant _IndexedItem oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.index != widget.index && identical(widget.list._built[oldWidget.index], context)) {
+      widget.list._built.remove(oldWidget.index);
+    }
+    widget.list._built[widget.index] = context;
+  }
+
+  @override
+  void dispose() {
+    if (identical(widget.list._built[widget.index], context)) widget.list._built.remove(widget.index);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
+}
+
+/// Scroll physics that come to rest with an item at the start of the view
+/// (CSS `scroll-snap-align: start`), as `PageScrollPhysics` comes to rest on
+/// a page: the item start nearest where the [parent]'s fling would end, at
+/// least one item on in the direction of a fling.
+class ItemSnapPhysics extends ScrollPhysics {
+  const ItemSnapPhysics({required this.starts, super.parent});
+
+  /// The offsets that put each built item at the start of the view.
+  final Iterable<double> Function() starts;
+
+  @override
+  ItemSnapPhysics applyTo(ScrollPhysics? ancestor) => ItemSnapPhysics(starts: starts, parent: buildParent(ancestor));
+
+  @override
+  Simulation? createBallisticSimulation(ScrollMetrics position, double velocity) {
+    if ((velocity <= 0 && position.pixels <= position.minScrollExtent) ||
+        (velocity >= 0 && position.pixels >= position.maxScrollExtent)) {
+      return super.createBallisticSimulation(position, velocity);
+    }
+    final all = [for (final s in starts()) s.clamp(position.minScrollExtent, position.maxScrollExtent)]..sort();
+    if (all.isEmpty) return super.createBallisticSimulation(position, velocity);
+    final coast = super.createBallisticSimulation(position, velocity)?.x(double.infinity) ?? position.pixels;
+    var target = all.reduce((a, b) => (a - coast).abs() <= (b - coast).abs() ? a : b);
+    final tolerance = toleranceFor(position);
+    if (velocity > tolerance.velocity && target <= position.pixels + tolerance.distance) {
+      target = all.firstWhere((s) => s > position.pixels + tolerance.distance, orElse: () => target);
+    } else if (velocity < -tolerance.velocity && target >= position.pixels - tolerance.distance) {
+      target = all.lastWhere((s) => s < position.pixels - tolerance.distance, orElse: () => target);
+    }
+    if ((target - position.pixels).abs() < tolerance.distance) return null;
+    return ScrollSpringSimulation(spring, position.pixels, target, velocity, tolerance: tolerance);
+  }
+
+  @override
+  bool get allowImplicitScrolling => false;
 }

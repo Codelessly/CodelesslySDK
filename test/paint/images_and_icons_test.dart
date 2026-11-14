@@ -245,6 +245,42 @@ void main() {
         final glyph = tester.renderObject(find.byType(NodeView));
         expect(glyph, paints..paragraph());
       });
+
+      testWidgets('an icon button bound to an icon name draws that glyph and follows the name', (tester) async {
+        IconSources.codepointOf = (name, style) => switch ((name, style)) {
+              ('favorite', 'filled') => 0xe25b,
+              ('favorite_border', 'filled') => 0xe25c,
+              _ => null,
+            };
+        addTearDown(() => IconSources.codepointOf = null);
+        final vars = VariableScope([
+          const Variable(id: 'saved', name: 'saved', type: VariableType.boolean, value: false),
+        ]);
+        addTearDown(vars.dispose);
+        final doc = LayoutDocument.fromJson({
+          'roots': ['b'],
+          'nodes': {
+            'b': {
+              'type': 'iconButton',
+              'layout': {'width': 48, 'height': 48},
+              'props': {'icon': 'favorite_border'},
+              'bind': {'props.icon': r"${= saved ? 'favorite' : 'favorite_border'}"},
+            },
+          },
+        });
+        final tree = NodeTree(DocumentSource(doc), binder: NodeBinder(scope: vars));
+        addTearDown(tree.dispose);
+        await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'b'))));
+        RenderIconGlyph glyph() => tester.renderObject<RenderIconGlyph>(find.byWidgetPredicate(
+            (w) => w is LeafRenderObjectWidget && w.runtimeType.toString() == '_Glyph'));
+        // The network is off in tests: the glyph comes from the font, by name.
+        expect(glyph(), paints..paragraph());
+        expect(IconSources.glyphOf(glyph().icon), 0xe25c);
+        vars.set('saved', true);
+        await tester.pump();
+        expect(IconSources.glyphOf(glyph().icon), 0xe25b);
+        expect(glyph(), paints..paragraph());
+      });
     });
 
     group('images', () {
