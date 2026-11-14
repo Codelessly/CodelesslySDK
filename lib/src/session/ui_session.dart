@@ -111,12 +111,12 @@ class UiSession implements NodeSource {
   /// of [catalog] (a call is checked against its declaration), its tokens are
   /// [theme], and a model's prompt is generated from it
   /// (`runtimeStarter(designSystem: ...)`). Null: none; the UI's controls are
-  /// neutral.
+  /// SSUI's, the bundled default.
   final DesignSystem? designSystem;
 
   /// The theme the UI is shown in: the design system's tokens with the
-  /// app's [theme] over them, else that theme, else none (neutral controls,
-  /// no font family: text and control text alike take the platform's).
+  /// app's [theme] over them, else that theme, else none (the controls are
+  /// SSUI's, the bundled default; plain text takes the platform's font).
   /// Nothing comes from the theme of the app around the view.
   final ThemeTokens theme;
 

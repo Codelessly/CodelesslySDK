@@ -16,10 +16,23 @@ leaves unset:
   pickers, tabs, navigation bars);
 - the runtime's own UI: toasts, confirmation dialogs, date and time pickers, menus, tooltips.
 
-Controls take their colors and fonts from the project's theme. Without a theme they are neutral: ink on paper
-(near-black on white, near-white on near-black in dark mode) and the greys between, in no font family of their
-own. Nothing is inherited from Material's defaults (no purple, no tints, no ripples, no elevation, no Roboto) or
-from your app's `Theme`.
+Controls take their colors and fonts from the project's theme. Without a theme they are SSUI's (the default
+design system, bundled with the SDK as data): its blue accent, greys, radii, sizes and type, light or dark.
+Nothing is inherited from Material's defaults (no purple, no tints, no ripples, no elevation, no Roboto) or from
+your app's `Theme`.
+
+### Where the design starts
+
+Structure and design are separate, and the line between them is the line between a box and a control:
+
+| | Boxes, layouts, text, icons, images | Controls |
+|---|---|---|
+| Look with nothing written | None: no fill, border or shadow. Text is 12 px, regular, in the platform's font | SSUI's |
+| Where the look comes from | What the node itself writes, or a theme color or text style it names | The node's own style, over the project's theme, over SSUI's tokens |
+| A different design system changes it | No | Yes, with no change to the layout |
+
+So a layout made only of boxes and text looks the same under any design system, and a design system is the
+answer to "what does a control look like", plus the named colors and text styles a box or a text may refer to.
 
 ## The project's theme
 

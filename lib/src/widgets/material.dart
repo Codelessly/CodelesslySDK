@@ -31,13 +31,6 @@ void _fit(NodeBuilder b, Node n, List<RenderBox> chain) =>
 
 Color? _color(api.Color? c) => c?.flutter;
 
-/// The types whose island takes a tap itself and reports it as the node's
-/// `click` (the node's own tap layer leaves it to them).
-const Set<String> selfTappedTypes = {
-  'elevatedButton', 'filledButton', 'textButton', 'outlinedButton', 'iconButton', 'floatingActionButton', //
-  'chip', 'actionChip', 'choiceChip', 'filterChip', 'inputChip',
-};
-
 // --- buttons ------------------------------------------------------------------
 //
 // Buttons are render objects: render/controls/buttons.dart.

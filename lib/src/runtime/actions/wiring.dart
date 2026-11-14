@@ -22,7 +22,6 @@ import '../../render/controls/text_field.dart' show RenderTextField;
 import '../../render/custom_paint.dart' show customPaintEvent;
 import '../../render/node_tree.dart';
 import '../../render/visible_share.dart';
-import '../../widgets/material.dart' show selfTappedTypes;
 import '../contracts.dart';
 import '../expressions/bindings.dart' show RenderTreeBinder;
 import '../expressions/formula.dart';
@@ -35,6 +34,13 @@ import 'key_matching.dart';
 import '../../render/components.dart' show componentInstanceOf;
 
 export '../../render/visible_share.dart' show visibleShare;
+
+/// The types whose control takes a tap itself and reports it as the node's
+/// `click` (the node's own tap layer leaves it to them).
+const Set<String> _selfTappedTypes = {
+  'elevatedButton', 'filledButton', 'textButton', 'outlinedButton', 'iconButton', 'floatingActionButton', //
+  'chip', 'actionChip', 'choiceChip', 'filterChip', 'inputChip',
+};
 
 /// Wires the reactions of a [RenderTree]'s nodes ([RenderTree.interactions]):
 /// each runs with [runner] in [context] (a list item's node in its item's
@@ -91,7 +97,7 @@ class TreeReactions implements NodeInteractions {
     if (types.contains(TriggerType.dragStart) && types.contains(TriggerType.drag) && n.behaviors.draggable == null) {
       pointer.add(TriggerType.dragStart);
     }
-    if (selfTappedTypes.contains(n.type)) pointer.remove(TriggerType.click);
+    if (_selfTappedTypes.contains(n.type)) pointer.remove(TriggerType.click);
     // A node with a drag drags itself: it fires its swipes when it flies
     // off, and its drag and drag end (gestures/drag_motion.dart,
     // render/drag_track.dart); a reorder handle's list takes its drag.
