@@ -6,9 +6,8 @@ import 'package:intl/date_symbols.dart';
 import 'package:intl/date_time_patterns.dart';
 import 'package:intl/intl.dart';
 
-import 'package:flutter/foundation.dart' show visibleForTesting;
-
-import 'formula_clock.dart';
+// Pure Dart (no Flutter): a recorder checks formulas with it outside Flutter.
+import 'formula_time.dart';
 
 /// The body of a formula: text and quoted strings, with braces only in
 /// balanced pairs nested up to [depth] deep, such as the object literal in
@@ -174,8 +173,8 @@ class FormulaEvaluator {
   static final Map<String, _Node?> _cache = {};
 
   /// Evaluates [expression], resolving variable paths with [resolve].
-  /// Called on every [evaluate] (tests count evaluations with it).
-  @visibleForTesting
+  /// Called on every [evaluate] (tests count evaluations with it; for tests
+  /// only).
   static void Function()? debugOnEvaluate;
 
   static Object? evaluate(String expression, FormulaPathResolver resolve) {
@@ -208,6 +207,12 @@ class FormulaEvaluator {
     node.collectUserCalls(names);
     return names;
   }
+
+  /// What a validator needs of [formula] (`ValidateOptions.formulas` in
+  /// codelessly_api's validate library): its syntax error ([errorOf]) and
+  /// the paths it reads ([referencedPaths]). A host gives it to
+  /// `strictEditCheck`, so a model's formulas are checked as it writes them.
+  static ({String? error, Set<String> paths}) report(String formula) => (error: errorOf(formula), paths: referencedPaths(formula));
 
   /// The variable paths [expression] reads, e.g. `storage.cart` and `qty`.
   static Set<String> referencedPaths(String expression) {
@@ -2412,7 +2417,7 @@ String? _timeAgo(Object? value, Object? style, Object? locale, Object? labels) {
     return text.replaceAll('{n}', _localeNumber(n, 0, locale ?? _defaultLocale));
   }
 
-  final DateTime now = FormulaClock.now().toLocal();
+  final DateTime now = FormulaTime.now().toLocal();
   final Duration diff = now.difference(date);
   final bool past = !diff.isNegative;
   final Duration size = diff.abs();
@@ -2658,8 +2663,8 @@ Duration? _offset(Object? value) {
 /// time without one. Returned without a zone, like other formula dates.
 DateTime _nowAt(Object? offset) {
   final Duration? delta = _offset(offset);
-  if (delta == null) return FormulaClock.now().toLocal();
-  final DateTime utc = FormulaClock.now().toUtc().add(delta);
+  if (delta == null) return FormulaTime.now().toLocal();
+  final DateTime utc = FormulaTime.now().toUtc().add(delta);
   return DateTime(
     utc.year,
     utc.month,
@@ -3219,7 +3224,7 @@ final Map<String, _Function> _functions = {
   ],
   'now': (a) => _dateText(_nowAt(_arg(a, 0))),
   'nowMs': (a) =>
-      (FormulaClock.pinned ?? DateTime.now()).millisecondsSinceEpoch,
+      (FormulaTime.now()).millisecondsSinceEpoch,
   'today': (a) {
     final DateTime now = _nowAt(_arg(a, 0));
     return _dateText(DateTime(now.year, now.month, now.day));
@@ -3244,10 +3249,10 @@ final Map<String, _Function> _functions = {
   'diffMinutes': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inMinutes,
   'timeAgo': (a) => _timeAgo(_arg(a, 0), _arg(a, 1), _arg(a, 2), _arg(a, 3)),
   'formatRelative': (a) => _timeAgo(_arg(a, 0), _arg(a, 1), _arg(a, 2), _arg(a, 3)),
-  'isToday': (a) => _sameDay(_arg(a, 0), FormulaClock.now()),
+  'isToday': (a) => _sameDay(_arg(a, 0), FormulaTime.now()),
   'isSameDay': (a) => _sameDay(_arg(a, 0), _arg(a, 1)),
-  'isPast': (a) => _dateOrder(_arg(a, 0), FormulaClock.now(), before: true),
-  'isFuture': (a) => _dateOrder(_arg(a, 0), FormulaClock.now(), before: false),
+  'isPast': (a) => _dateOrder(_arg(a, 0), FormulaTime.now(), before: true),
+  'isFuture': (a) => _dateOrder(_arg(a, 0), FormulaTime.now(), before: false),
   'isBefore': (a) => _dateOrder(_arg(a, 0), _arg(a, 1), before: true),
   'isAfter': (a) => _dateOrder(_arg(a, 0), _arg(a, 1), before: false),
   'diffHours': (a) => _difference(_arg(a, 0), _arg(a, 1))?.inHours,

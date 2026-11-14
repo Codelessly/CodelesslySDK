@@ -3,22 +3,9 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/scheduler.dart';
 
-/// How often a formula's value can change as time passes, finest first:
-/// what a widget showing it must be rebuilt on ([FormulaClock.of]).
-///
-/// * [frame]: `nowMs()`, a millisecond clock (every frame);
-/// * [second]: `now()`, a time of day or a countdown (every second);
-/// * [minute]: `today()`, `timeAgo(date)`, `isToday(date)`, `isPast(date)`,
-///   `isFuture(date)`: values that change at most once a minute, or that
-///   may show a minute late (every minute).
-enum ClockTick {
-  frame,
-  second,
-  minute;
+import 'formula_time.dart';
 
-  /// The finer of this and [other] (either may be null).
-  ClockTick finer(ClockTick? other) => other == null || index <= other.index ? this : other;
-}
+export 'formula_time.dart' show ClockTick;
 
 /// Ticks while anything listens, so widgets whose formulas read the clock
 /// rebuild and their clocks, countdowns and relative times stay live:
@@ -30,11 +17,13 @@ enum ClockTick {
 class FormulaClock extends ChangeNotifier {
   FormulaClock._(this._interval);
 
-  /// Optional instant pinned by an editor or preview for deterministic dates.
-  static DateTime? pinned;
+  /// Optional instant pinned by an editor or preview for deterministic dates
+  /// ([FormulaTime.pinned]).
+  static DateTime? get pinned => FormulaTime.pinned;
+  static set pinned(DateTime? value) => FormulaTime.pinned = value;
 
   /// The pinned instant, or the device clock for live formulas.
-  static DateTime now() => pinned ?? DateTime.now();
+  static DateTime now() => FormulaTime.now();
 
   /// The clock every formula reading `now()` shares: ticks every [interval].
   static final FormulaClock instance = FormulaClock._(() => interval);
