@@ -99,7 +99,7 @@ void _toggleRecipe(NodeBuilder b, Node n, List<RenderBox> chain, ToggleKind kind
 
 /// A checkbox, a switch or a radio: its value, its look in its states, the
 /// keyboard and screen readers.
-class RenderToggle extends RenderControl {
+class RenderToggle extends RenderControl implements LabelledControl {
   RenderToggle() {
     onPressed = _toggle;
     focusNode.onKey = _key;
@@ -141,6 +141,18 @@ class RenderToggle extends RenderControl {
       ..curve = kind == ToggleKind.switchToggle && n.props.has(SwitchProps.toggleCurve)
           ? n.prop(SwitchProps.toggleCurve)
           : api.AnimationCurve.easeOut;
+    final label = switch (kind) {
+      ToggleKind.checkbox => n.prop(CheckboxProps.label),
+      ToggleKind.switchToggle => n.prop(SwitchProps.label),
+      ToggleKind.radio => n.prop(RadioProps.label),
+    };
+    final style = TextStyle(fontFamily: tokens.fontFamily, fontSize: 13, height: 1.5, color: tokens.primaryText);
+    if (_labelText.update(label, style, align: TextAlign.start) || label != _label) {
+      _label = label;
+      _labelText.layout(double.infinity);
+      markNeedsLayout();
+      markNeedsSemanticsUpdate();
+    }
     _follow(_boundValue(n));
     if (changed) {
       markNeedsLayout();
@@ -303,14 +315,41 @@ class RenderToggle extends RenderControl {
 
   // --- geometry -----------------------------------------------------------------
 
-  /// Its size when it hugs: its design size, else SSUI's.
-  Size get _natural {
+  String _label = '';
+  final ControlLabel _labelText = ControlLabel();
+
+  bool get _hasLabel => _label.isNotEmpty;
+
+  /// The text beside the mark ('' for none).
+  String get label => _label;
+
+  /// The gap between the mark and its label (SSUI's 8).
+  static const double labelGap = 8;
+
+  /// The mark's size when it hugs: its design size, else SSUI's. With a
+  /// label the mark is always SSUI's and the design size is the whole
+  /// control's.
+  Size get _markNatural {
     final ssui = switch (_kind) {
       ToggleKind.switchToggle => const Size(36, 20),
       _ => const Size(16, 16),
     };
+    if (_hasLabel) return ssui;
     return Size(_design.width > 0 ? _design.width : ssui.width, _design.height > 0 ? _design.height : ssui.height);
   }
+
+  /// Its size when it hugs: the mark, and its label beside it.
+  Size get _natural {
+    final mark = _markNatural;
+    if (!_hasLabel) return mark;
+    return Size(mark.width + labelGap + _labelText.intrinsicWidth.ceilToDouble(),
+        math.max(mark.height, _labelText.size.height.ceilToDouble()));
+  }
+
+  @override
+  List<({String text, String? fontFamily, List<Rect> glyphs})> get labels => !_hasLabel || !hasSize
+      ? const []
+      : [(text: _label, fontFamily: _labelText.fontFamily, glyphs: _labelText.glyphBoxes(_markNatural.width + labelGap, size.height / 2))];
 
   @override
   double computeMinIntrinsicWidth(double height) => _natural.width;
@@ -325,10 +364,21 @@ class RenderToggle extends RenderControl {
   Size computeDryLayout(covariant BoxConstraints constraints) => constraints.constrain(_natural);
 
   @override
-  void performLayout() => size = constraints.constrain(_natural);
+  void performLayout() {
+    if (_hasLabel) {
+      final room = constraints.maxWidth - _markNatural.width - labelGap;
+      _labelText.layout(room.isFinite ? math.max(0, room) : double.infinity);
+    }
+    size = constraints.constrain(_natural);
+  }
 
   /// Where the mark is: a checkbox's box, a radio's ring, a switch's track.
   Rect get markRect {
+    if (_hasLabel) {
+      // Beside its label: SSUI's mark at the start, centred on the line.
+      final m = _markNatural;
+      return Rect.fromLTWH(0, (size.height - m.height) / 2, m.width, m.height);
+    }
     final box = Offset.zero & size;
     final n = node;
     switch (_kind) {
@@ -439,6 +489,7 @@ class RenderToggle extends RenderControl {
       case ToggleKind.switchToggle:
         _paintSwitch(canvas);
     }
+    if (_hasLabel) _labelText.paint(canvas, _markNatural.width + labelGap, size.height / 2);
     canvas.restore();
   }
 
@@ -565,7 +616,7 @@ class RenderToggle extends RenderControl {
   // --- semantics -----------------------------------------------------------------
 
   @override
-  String get semanticsName => '';
+  String get semanticsName => _label;
 
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {

@@ -1,5 +1,9 @@
 ## Unreleased
 
+- **A checkbox, radio or switch draws its `label`** beside the mark (8 px away, centred on it, the control hugging
+  both); a tap anywhere on it toggles. A list tile no longer draws a hairline of its own: a list draws the dividers
+  between its rows (`separator`).
+
 **Tell the model when its valid UI shows nothing.** Final frames of recorded SSUI generations
 (tool/stream/streams/live/2026-11-14-ssui) showed blank cards or cards missing their content while the summary's
 final validation was clean. The causes, and what changed:
