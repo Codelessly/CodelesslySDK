@@ -156,6 +156,38 @@ List<({String name, String path, String text})> loadInputs(List<String> inputs) 
   return out;
 }
 
+/// One `unknown_screen` per screen that is missing, not one per link to
+/// it: a site whose pages are written before its manifest lists them all
+/// has dozens of links to each page still to come.
+List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics) {
+  final byScreen = <String, List<api.Json>>{};
+  for (final d in diagnostics) {
+    if (d['code'] != 'unknown_screen') continue;
+    final to = RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}')?[1];
+    if (to != null) (byScreen[to] ??= []).add(d);
+  }
+  final out = <api.Json>[];
+  for (final d in diagnostics) {
+    final match = d['code'] == 'unknown_screen' ? RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}') : null;
+    final to = match?[1];
+    final group = to == null ? null : byScreen[to];
+    if (group == null || group.length == 1) {
+      out.add(d);
+      continue;
+    }
+    if (!identical(group.first, d)) continue;
+    final where = [for (final g in group) '${g['file'] == null ? '' : '${g['file']} '}${g['path']}'];
+    out.add({
+      ...d,
+      'message': 'No screen "$to": ${group.length} links name it (${where.take(6).join('; ')}${where.length > 6 ? '; and ${where.length - 6} more' : ''}). '
+          '"to" is a canvas id of a page of the site: list every page in site.json\'s "pages" before writing the pages that link to them, '
+          'or correct the links.',
+      'count': group.length,
+    });
+  }
+  return out;
+}
+
 String _jsonError(Object e, String text) {
   if (e is FormatException && e.offset != null) {
     final before = text.substring(0, e.offset!.clamp(0, text.length));
@@ -209,7 +241,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
   final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
   // Notes (a schema-2 document, migrated as it loads) are not findings.
-  report.diagnostics.addAll(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()));
+  report.diagnostics.addAll(_summarizeUnknownScreens(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()).toList()));
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
   report.diagnostics.addAll(validateTheme(themeJson,
@@ -490,14 +522,17 @@ Future<void> _renderAll(
             warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
                 nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])));
         if (problem != null) {
-          // A node of another canvas of the screen (another breakpoint's
-          // design) is absent here by design: a warning, not an error.
-          final target = step.target.split('#').first;
-          final elsewhere = problem.contains('no node') &&
+          // A node hidden at this width, or of another canvas of the screen
+          // (another breakpoint's design), is absent here by design: the
+          // step is skipped at this size, with a note, not an error.
+          final target = step.target.split('/').last.split('#').first;
+          final elsewhere = problem.contains('no node "$target"') &&
               (fileOfNode.containsKey(target) ||
                   docs.values.any((d) => (api.readMap(d['nodes']) ?? const {}).values.any((n) => api.readMap(n)?['name'] == target)));
-          if (elsewhere) {
-            skipped.add('$step');
+          if (problem.startsWith(_notShownHere)) {
+            skipped.add('$step (hidden at this width)');
+          } else if (elsewhere) {
+            skipped.add('$step (not on the canvas shown at this width)');
           } else {
             issue(RuntimeIssue('interaction_failed', 'error', problem, screen: label, size: sizeName));
           }
@@ -511,8 +546,8 @@ Future<void> _renderAll(
         // One line per size, not one per step: these nodes are on another
         // breakpoint's canvas of the screen.
         issue(RuntimeIssue('interaction_failed', 'warning',
-            'Skipped at this size (their nodes are on another breakpoint\'s canvas): ${skipped.join(', ')}. '
-            'To reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.',
+            'Skipped at this size, their nodes not being shown here: ${skipped.join(', ')}. The other steps ran. '
+            'A node on a breakpoint\'s own canvas: to reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.',
             screen: label, size: sizeName));
       }
       // Full page: the page's own scroll view (the largest one a user can
@@ -603,11 +638,12 @@ Future<void> _renderAll(
       }
       report.images.add(file);
       if (args.compare case final String reference) {
-        final found = referenceFor(file, reference);
+        final found = referenceFor(file, reference, map: args.compareMap);
         if (found.file == null) {
           issue(RuntimeIssue('compare_failed', 'warning',
               '--compare: no reference for $name in $reference${found.candidates.isEmpty ? '' : ' among ${found.candidates.map((c) => c.split('/').last).join(', ')}'}: '
-              'name the file, or give the state a --label the reference file names.',
+              'a reference matches when its name is the screen, the state (the --label, else default or none) and the size, exactly; '
+              'name the file, give the state the --label the reference names, or map the names with --compare-map ${label.toLowerCase()}=<reference name>.',
               screen: label, size: sizeName));
         } else {
           try {
@@ -998,27 +1034,120 @@ List<NodeBox> _boxes(WidgetsBinding binding) {
 
 /// The box of node [id] on screen: the topmost (the last painted), or with
 /// `id#n` the n-th (0-based) of the copies a list repeats.
-NodeBox? _boxOf(WidgetsBinding binding, String id) {
+NodeBox? _boxOf(WidgetsBinding binding, String id) => _locate(binding, id).box;
+
+/// Marks a step's problem as "not shown at this size": the step is skipped
+/// there, with a note, not failed.
+const _notShownHere = 'not shown at this size: ';
+
+/// Whether [b] draws: it and every node box above it shown, with a size.
+bool _shown(NodeBox b) {
+  if (b.size.isEmpty) return false;
+  for (RenderObject? p = b; p != null; p = p.parent) {
+    if (p is NodeBox && !p.drawn) return false;
+  }
+  return true;
+}
+
+/// The canvas a node box is on (its screen, or a modal shown over it).
+String? _canvasOf(NodeBox b) {
+  for (RenderObject? p = b; p != null; p = p.parent) {
+    if (p is NodeBox && p.node?.type == 'canvas') return p.id;
+  }
+  return null;
+}
+
+/// Node [id] on screen, or why there is none, or that two nodes answer to
+/// it. [id] is a node id or `name` (`saved`), `<id>#<n>` for a list's n-th
+/// copy, or a path: a component's node by its call ids (`footer/saved`), a
+/// node inside a list's copy (`evCard#0/evReserve`).
+({NodeBox? box, String? problem}) _locate(WidgetsBinding binding, String id) {
+  final boxes = _boxes(binding);
+  (String, int?) split(String segment) {
+    final hash = segment.lastIndexOf('#');
+    final index = hash < 0 ? null : int.tryParse(segment.substring(hash + 1));
+    return (index == null ? segment : segment.substring(0, hash), index);
+  }
+
   // A node inside a component, by path: `plans/card1/cta`; a call by its
   // id (its box is its definition root's): `send`, `sizes#3`.
-  final byPath = id.contains('/') || _boxes(binding).any((b) => b.id != id.split('#').first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == id.split('#').first);
+  final first = id.split('/').first.split('#').first;
+  final byPath = id.contains('/') ||
+      boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first);
   if (byPath) {
-    for (final b in _boxes(binding)) {
+    for (final b in boxes) {
       final found = b.tree.boxAtPath(id);
-      if (found != null && found.attached && found.hasSize) return found;
+      if (found != null && found.attached && found.hasSize) return (box: found, problem: null);
     }
-    return null;
+    if (!id.contains('/')) return (box: null, problem: 'no node "$id" is on screen');
   }
-  final hash = id.lastIndexOf('#');
-  final index = hash < 0 ? null : int.tryParse(id.substring(hash + 1));
-  final name = index == null ? id : id.substring(0, hash);
-  var all = [for (final b in _boxes(binding)) if (b.id == name) b];
-  // A node may be named by its `name` too: the same name on a screen's
-  // breakpoint canvases reaches whichever is shown.
-  if (all.isEmpty) all = [for (final b in _boxes(binding)) if (b.node?.name == name) b];
-  if (all.isEmpty) return null;
-  if (index == null) return all.last;
-  return index < all.length ? all[index] : null;
+  // Segment by segment, each inside the one before: `evCard#0/evReserve`.
+  var scope = boxes;
+  NodeBox? chosen;
+  final segments = id.split('/');
+  for (var i = 0; i < segments.length; i++) {
+    final (name, index) = split(segments[i]);
+    var all = [for (final b in scope) if (b.id == name) b];
+    // A node may be named by its `name` too: the same name on a screen's
+    // breakpoint canvases reaches whichever is shown.
+    if (all.isEmpty) all = [for (final b in scope) if (b.node?.name == name) b];
+    final upTo = segments.take(i + 1).join('/');
+    if (all.isEmpty) {
+      return (box: null, problem: i == 0 ? 'no node "$name" is on screen' : 'no node "$name" is inside "${segments.take(i).join('/')}"');
+    }
+    if (index != null) {
+      if (index >= all.length) return (box: null, problem: '"$upTo": there are ${all.length} copies of "$name" on screen (#0 to #${all.length - 1})');
+      chosen = all[index];
+    } else {
+      // Two different nodes answer to the id (a page's and a component's,
+      // a page's and a modal's): say which to write. Copies a list repeats
+      // are one node.
+      final kinds = <String, NodeBox>{};
+      for (final b in all) {
+        final path = b.tree.pathOf(b.id, b.instance);
+        kinds.putIfAbsent('${identityHashCode(b.tree)}|$path', () => b);
+      }
+      // Under a canvas (`page/saved`), the page's own node: not one of a
+      // component's.
+      if (kinds.length > 1 && i > 0 && chosen?.node?.type == 'canvas') {
+        final own = [for (final b in kinds.values) if (componentInstanceOf(b.instance) == null) b];
+        if (own.length == 1) {
+          kinds
+            ..clear()
+            ..['own'] = own.single;
+          all = [for (final b in all) if (componentInstanceOf(b.instance) == null) b];
+        }
+      }
+      if (kinds.length > 1) {
+        final paths = {for (final b in kinds.values) b.tree.pathOf(b.id, b.instance)};
+        final names = [
+          for (final b in kinds.values)
+            paths.length == kinds.length
+                ? b.tree.pathOf(b.id, b.instance)
+                : '${b.tree.pathOf(b.id, b.instance)} (on canvas ${_canvasOf(b) ?? '?'})',
+        ];
+        final write = [
+          for (final b in kinds.values)
+            componentInstanceOf(b.instance) == null ? '${_canvasOf(b) ?? '<canvas id>'}/$name' : b.tree.pathOf(b.id, b.instance),
+        ];
+        return (
+          box: null,
+          problem: 'ambiguous: ${kinds.length} different nodes on screen are "$upTo": ${names.join(', ')}. '
+              'Ids are per document, so a page, a component and a modal may each have one. Name the one meant: '
+              '${write.toSet().length == write.length ? write.join(' or ') : 'they are on one canvas: give them different ids'}',
+        );
+      }
+      chosen = all.last;
+    }
+    if (i < segments.length - 1) {
+      final within = chosen;
+      scope = [for (final b in boxes) if (!identical(b, within) && _isInside(b, within)) b];
+    }
+  }
+  if (chosen != null && !_shown(chosen)) {
+    return (box: null, problem: '$_notShownHere"$id" is hidden here (visible false, or a media rule hides it at this width)');
+  }
+  return (box: chosen, problem: null);
 }
 
 /// The page's scroll view: of the vertical ones a user can scroll that have
@@ -1117,8 +1246,11 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
 
   // Where to put the pointer for [id], or the problem.
   Future<(ui.Offset?, String?)> pointAt(String id, String verb) async {
-    final box = _boxOf(binding, id);
-    if (box == null) return (null, '--$verb $id: no node "$id" is on screen.');
+    final found = _locate(binding, id);
+    final box = found.box;
+    if (box == null) {
+      return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.' : '--$verb $id: ${found.problem}.');
+    }
     var at = reachable(box);
     if (at == null) {
       await centerInView(box);
@@ -1184,7 +1316,40 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
                 'Add {"trigger": "click", "actions": [...]} to the node, or tap the node that has it.',
             step.target.split('#').first);
       }
+      await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
       await tester.tapAt(at);
+      return null;
+    case 'drag':
+      // To a point (dx,dy from where it is pressed) or onto another node.
+      final by = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$').firstMatch(step.value ?? '');
+      ui.Offset? onto;
+      if (by == null) {
+        if ((step.value ?? '').trim().isEmpty) return '--drag ${step.target}: say where to: --drag ${step.target}=<dx>,<dy> or --drag ${step.target}=<nodeId>.';
+        final (t, problem) = await pointAt(step.value!.trim(), 'drag');
+        if (t == null) return problem!.replaceFirst('--drag ', '--drag ${step.target}=');
+        onto = t;
+      }
+      final (from, problem) = await pointAt(step.target, 'drag');
+      if (from == null) return problem;
+      if (onto != null) onto = (await pointAt(step.value!.trim(), 'drag')).$1 ?? onto;
+      final to = onto ?? from + ui.Offset(double.parse(by![1]!), double.parse(by[2]!));
+      final source = _boxOf(binding, step.target);
+      await _unfocusFieldOutside(tester, source);
+      // A drag that starts on a long press (a reorder on touch, a long-press
+      // draggable) is held first.
+      final held = source != null &&
+          find
+              .byWidgetPredicate((w) => w is LongPressDraggable || w is ReorderableDelayedDragStartListener)
+              .evaluate()
+              .any((e) => e.renderObject != null && (_isInside(source, e.renderObject!) || _isInside(e.renderObject!, source)));
+      final g = await tester.startGesture(from);
+      if (held) await tester.pump(const Duration(milliseconds: 700));
+      const moves = 12;
+      for (var i = 1; i <= moves; i++) {
+        await g.moveTo(ui.Offset.lerp(from, to, i / moves)!);
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await g.up();
       return null;
     case 'hover':
       final (at, problem) = await pointAt(step.target, 'hover');
@@ -1197,7 +1362,11 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       final verb = step.kind;
       var field = fieldIn(step.target);
       if (field == null) {
-        if (_boxOf(binding, step.target) == null) return '--$verb ${step.target}: no node "${step.target}" is on screen.';
+        final found = _locate(binding, step.target);
+        if (found.box == null) {
+          final p = found.problem!;
+          return p.startsWith(_notShownHere) ? '$_notShownHere--$verb ${step.target}: ${p.substring(_notShownHere.length)}.' : '--$verb ${step.target}: $p.';
+        }
         return '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).';
       }
       final box = _boxOf(binding, step.target)!;
@@ -1221,8 +1390,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (step.target == 'screen' || step.target.isEmpty) {
         scroll = _pageScroll(binding);
       } else {
-        final b = _boxOf(binding, step.target);
-        if (b == null) return '--scroll ${step.target}: no node "${step.target}" on screen.';
+        final found = _locate(binding, step.target);
+        final b = found.box;
+        if (b == null) return '--scroll ${step.target}: ${found.problem}.';
         scroll = _descendants(b).whereType<RenderDesignScroll>().firstOrNull;
         if (scroll == null) {
           // A list or other Flutter scrollable inside the node.
@@ -1250,6 +1420,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       }
       final route = CodelesslyWidget.onGenerateRoute(codelessly)(RouteSettings(name: '/$location'));
       if (route == null) return '--navigate ${step.target}: no such screen.';
+      await _unfocusFieldOutside(tester, null);
       unawaited(navigator.currentState!.push(route));
       return null;
     case 'wait':
@@ -1293,6 +1464,22 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
   }
   return 'Unknown step ${step.kind}.';
+}
+
+/// Takes the focus from a text field before a step acts elsewhere (a tap,
+/// a drag, a navigation), as a click outside a field does in a browser: its
+/// blur reactions run first, and nothing is left holding a field the step
+/// removes (a form a submit hides). A step on the field itself keeps it.
+Future<void> _unfocusFieldOutside(WidgetTester tester, NodeBox? target) async {
+  final focus = FocusManager.instance.primaryFocus;
+  if (focus == null || focus.context == null) return;
+  final field = find.byType(EditableText).evaluate().where((e) => (e.widget as EditableText).focusNode.hasFocus).firstOrNull;
+  if (field == null) return;
+  final ro = field.renderObject;
+  if (target != null && ro != null && _isInside(ro, target)) return;
+  focus.unfocus();
+  tester.testTextInput.hide();
+  await tester.pump();
 }
 
 const _keyNames = <String, LogicalKeyboardKey>{

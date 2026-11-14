@@ -14,6 +14,7 @@ import '../../tool/render/src/compare.dart';
 import '../../tool/render/src/render.dart';
 
 const capture = 'test/tool/fixtures/capture';
+const stepsSite = 'test/tool/fixtures/steps';
 
 List<String> codes(RenderReport r, [String? severity]) => [
       for (final d in r.diagnostics)
@@ -171,5 +172,119 @@ void main() {
       expect(rgbAt(p, 195, 220), 0x00FF00);
       expect(codes(report, 'warning'), contains('set_overwritten'));
     });
+  });
+
+  group('steps on a site of pages and components', () {
+    RenderArgs steps(List<Step> steps, {List<Size> sizes = const [Size(390, 844)]}) =>
+        RenderArgs(inputs: [stepsSite], out: out.path, sizes: sizes, steps: steps, dumpLayout: true);
+
+    // The colour of flag [id] (green: what it watches happened) in [png].
+    Future<int> flag(WidgetTester tester, String png, String id) async {
+      final boxes = jsonDecode(File(png.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
+      final b = boxes.cast<Map>().firstWhere((b) => b['id'] == id);
+      final p = await pixelsOf(tester, png);
+      return rgbAt(p, (b['x'] as int) + 20, (b['y'] as int) + 20);
+    }
+
+    testWidgets('an id two shown nodes share (a page\'s and a component\'s) is an error that lists how to name each', (tester) async {
+      final report = await runRender(tester, steps(const [Step('tap', 'saved')]));
+      final failed = report.diagnostics.where((d) => d['code'] == 'interaction_failed').single;
+      expect(failed['severity'], 'error');
+      expect(failed['message'], allOf(contains('ambiguous'), contains('page/saved'), contains('footer/saved')));
+      expect(await flag(tester, report.images.single, 'fSaved'), 0x000000);
+      expect(await flag(tester, report.images.single, 'fFooter'), 0x000000);
+    });
+
+    testWidgets('the page\'s own node is named under its canvas, the component\'s by its call', (tester) async {
+      var report = await runRender(tester, steps(const [Step('tap', 'page/saved')]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(await flag(tester, report.images.single, 'fSaved'), 0x00FF00);
+      expect(await flag(tester, report.images.single, 'fFooter'), 0x000000);
+      report = await runRender(tester, steps(const [Step('tap', 'footer/saved')]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(await flag(tester, report.images.single, 'fSaved'), 0x000000);
+      expect(await flag(tester, report.images.single, 'fFooter'), 0x00FF00);
+    });
+
+    testWidgets('a node inside a list\'s n-th copy is named <template>#<n>/<node>, as <node>#<n> is', (tester) async {
+      for (final target in ['evCard#1/evReserve', 'evReserve#1']) {
+        final report = await runRender(tester, steps([Step('tap', target)]));
+        expect(report.diagnostics, isEmpty, reason: '$target: ${report.diagnostics}');
+        expect(await flag(tester, report.images.single, 'fReserved'), 0x00FF00, reason: target);
+      }
+    });
+
+    testWidgets('a step on a node hidden at one width is skipped there with a note, and runs at the others', (tester) async {
+      final report = await runRender(tester, steps(const [Step('tap', 'menu')], sizes: const [Size(390, 844), Size(1440, 900)]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final note = report.diagnostics.single;
+      expect(note['severity'], 'warning');
+      expect(note['size'], '1440x900');
+      expect(note['message'], contains('--tap menu (hidden at this width)'));
+      expect(await flag(tester, report.images.firstWhere((i) => i.contains('390x844')), 'fMenu'), 0x00FF00);
+    });
+
+    testWidgets('typing into a field and then tapping a button that removes the form leaves no exception', (tester) async {
+      final report = await runRender(tester, steps(const [Step('type', 'email', 'a@b.co'), Step('tap', 'send')]));
+      expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+      final boxes = jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
+      expect(boxes.cast<Map>().any((b) => b['id'] == 'thanks' && (b['h'] as num) > 0), isTrue);
+    });
+
+    testWidgets('a drag step moves a slider by an offset', (tester) async {
+      final report = await runRender(tester, steps(const [Step('drag', 'slider', '150,0')]));
+      expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+      expect(await flag(tester, report.images.single, 'fVolume'), 0x00FF00);
+    });
+
+    testWidgets('a drag step says where to when it is given nowhere', (tester) async {
+      final report = await runRender(tester, steps(const [Step('drag', 'slider', '')]));
+      expect(report.diagnostics.single['message'], contains('--drag slider=<dx>,<dy>'));
+    });
+  });
+
+  group('--compare finds the reference by its exact name', () {
+    late Directory refs;
+    setUp(() {
+      refs = Directory('${out.path}/refs')..createSync();
+      for (final f in [
+        'section--saved--390x844.png', 'section--saved-empty--390x844.png', 'search--results--390x844.png',
+        'search--no-results--390x844.png', 'index--default--390x844.png', 'about--default--390x844.png', 'about--390x844.png',
+        'section--saved--1440x900.png',
+      ]) {
+        File('${refs.path}/$f').writeAsBytesSync(const []);
+      }
+    });
+    String? pick(String capture, [Map<String, String> map = const {}]) => referenceFor('/x/$capture', refs.path, map: map).file?.split('/').last;
+
+    test('a state whose name begins another state\'s name gets its own file', () {
+      expect(pick('section@390x844-saved.png'), 'section--saved--390x844.png');
+      expect(pick('section@390x844-saved-empty.png'), 'section--saved-empty--390x844.png');
+      expect(pick('search@390x844-results.png'), 'search--results--390x844.png');
+      expect(pick('search@390x844-no-results.png'), 'search--no-results--390x844.png');
+      expect(pick('section@1440x900-saved.png'), 'section--saved--1440x900.png');
+    });
+
+    test('no label is the default state; nothing matching is no reference, not a near one', () {
+      expect(pick('about@390x844.png'), 'about--default--390x844.png');
+      expect(pick('section@390x844.png'), isNull);
+      expect(pick('section@390x844-sav.png'), isNull);
+    });
+
+    test('--compare-map names the reference of a screen, or of a screen and state', () {
+      expect(pick('home@390x844.png'), isNull);
+      expect(pick('home@390x844.png', {'home': 'index'}), 'index--default--390x844.png');
+      expect(pick('home@390x844-empty.png', {'home-empty': 'section--saved-empty'}), 'section--saved-empty--390x844.png');
+      expect(parseArgs(['s', '--out', 'o', '--compare', 'r', '--compare-map', 'home=index']).compareMap, {'home': 'index'});
+    });
+  });
+
+  testWidgets('links to a screen that is not there yet are one error per screen, saying how many and where', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/missing'], out: out.path, validateOnly: true));
+    final unknown = report.diagnostics.where((d) => d['code'] == 'unknown_screen').toList();
+    expect(unknown, hasLength(2));
+    expect(unknown.first['message'], allOf(contains('No screen "about": 3 links'), contains('"pages"')));
+    expect(unknown.first['count'], 3);
+    expect(unknown.last['message'], startsWith('No screen "contact": "to" is a canvas id'));
   });
 }
