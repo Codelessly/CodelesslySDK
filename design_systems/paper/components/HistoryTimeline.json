@@ -1,0 +1,396 @@
+{
+ "schema": 3,
+ "id": "HistoryTimeline",
+ "roots": [
+  "timeline"
+ ],
+ "widget": {
+  "type": "HistoryTimeline",
+  "doc": "What happened over time, as cards down a rail: an event, when, and a note each. The chosen event is kept in your variable. Fires onSelected.",
+  "props": [
+   {
+    "key": "events",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Published",
+     "Reviewed",
+     "Drafted"
+    ],
+    "doc": "The events, newest first.",
+    "required": true
+   },
+   {
+    "key": "times",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "2h ago",
+     "Yesterday",
+     "Nov 12"
+    ],
+    "doc": "When each happened."
+   },
+   {
+    "key": "notes",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A note under each (empty: none)."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen event."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    150
+   ],
+   "props": {
+    "notes": [
+     "Version 4 went live.",
+     "",
+     "First outline."
+    ],
+    "value": "Published"
+   }
+  }
+ ],
+ "nodes": {
+  "timeline": {
+   "type": "stack",
+   "children": [
+    "rail",
+    "list"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 150
+    }
+   }
+  },
+  "rail": {
+   "type": "box",
+   "layout": {
+    "width": 2,
+    "height": {
+     "fill": 130
+    },
+    "x": {
+     "start": 3
+    },
+    "y": {
+     "start": 10,
+     "end": 18
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "event"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 150
+    },
+    "padding": [
+     0,
+     2,
+     0,
+     2
+    ]
+   },
+   "bind": {
+    "data": "${props.events}"
+   }
+  },
+  "event": {
+   "type": "row",
+   "children": [
+    "dotBox",
+    "card"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "dotBox": {
+   "type": "row",
+   "children": [
+    "dot"
+   ],
+   "layout": {
+    "width": 8,
+    "height": 18,
+    "padding": [
+     0,
+     10,
+     0,
+     0
+    ]
+   }
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokeWidth": 2,
+    "strokeAlign": "outside",
+    "radius": 9999
+   }
+  },
+  "card": {
+   "type": "column",
+   "children": [
+    "line",
+    "note"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "selected": {
+     "card": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "primary"
+        }
+       ]
+      }
+     }
+    },
+    "hovered": {
+     "card": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "name",
+    "time"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "time": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.times) > index ? props.times[index] : ''}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.times) > index}"
+   }
+  },
+  "note": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.notes) > index ? props.notes[index] : ''}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.notes) > index && props.notes[index] != ''}"
+   }
+  }
+ }
+}

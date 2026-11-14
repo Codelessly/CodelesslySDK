@@ -1,0 +1,235 @@
+{
+ "schema": 3,
+ "id": "Terminal",
+ "roots": [
+  "terminal"
+ ],
+ "widget": {
+  "type": "Terminal",
+  "doc": "A log on a dark surface in monospace: each line with its level (info, debug, warn or error) in color.",
+  "props": [
+   {
+    "key": "lines",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Started watcher",
+     "Scanning src/components"
+    ],
+    "doc": "The lines, oldest first.",
+    "required": true
+   },
+   {
+    "key": "levels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One level per line: info, debug, warn or error (none: info)."
+   },
+   {
+    "key": "emptyMessage",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "No logs yet.",
+    "doc": "Shown when there are no lines."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Mixed",
+   "size": [
+    340,
+    110
+   ],
+   "props": {
+    "lines": [
+     "Started watcher",
+     "Scanning src/components",
+     "Skipped generated file",
+     "Build failed"
+    ],
+    "levels": [
+     "info",
+     "debug",
+     "warn",
+     "error"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "terminal": {
+   "type": "column",
+   "children": [
+    "list",
+    "empty"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 110
+    },
+    "padding": 18
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF0D1117"
+     }
+    ],
+    "radius": 15,
+    "clip": "antiAlias"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "line"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 308
+    },
+    "height": {
+     "hug": 70
+    }
+   },
+   "bind": {
+    "data": "${props.lines}"
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "level",
+    "message"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 308
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "level": {
+   "type": "text",
+   "props": {
+    "text": "[${= upper(length(props.levels) > index ? props.levels[index] : 'info')}]",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#99E6EDF3",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (length(props.levels) > index ? props.levels[index] : 'info') == 'error' ? '#99FF7B72' : ((length(props.levels) > index ? props.levels[index] : 'info') == 'warn' ? '#99D29922' : ((length(props.levels) > index ? props.levels[index] : 'info') == 'debug' ? '#9958A6FF' : '#99E6EDF3'))}"
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FFE6EDF3",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 250
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (length(props.levels) > index ? props.levels[index] : 'info') == 'error' ? '#FFFF7B72' : ((length(props.levels) > index ? props.levels[index] : 'info') == 'warn' ? '#FFD29922' : ((length(props.levels) > index ? props.levels[index] : 'info') == 'debug' ? '#FF58A6FF' : '#FFE6EDF3'))}"
+   }
+  },
+  "empty": {
+   "type": "row",
+   "children": [
+    "emptyText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 308
+    },
+    "height": 138
+   },
+   "bind": {
+    "visible": "${= length(props.lines) == 0}"
+   }
+  },
+  "emptyText": {
+   "type": "text",
+   "props": {
+    "text": "${props.emptyMessage}",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF8B949E",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  }
+ }
+}

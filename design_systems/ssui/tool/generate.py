@@ -3125,12 +3125,15 @@ add(component(
            prop('message', STRING, '', 'A line under the title.'),
            prop('status', enum('running', 'success', 'error', 'none'), 'success', 'running, success, error or none.'),
            prop('created', NUMBER, 0, 'Files created.'), prop('modified', NUMBER, 0, 'Files modified.'),
-           prop('deleted', NUMBER, 0, 'Files deleted.')],
+           prop('deleted', NUMBER, 0, 'Files deleted.'),
+           prop('divider', BOOL, False, 'A hairline over it (every row of a list but the first).')],
     previews=[preview('Success', 320, 56, title='Sync docs', timestamp='2h ago', message='Updated 3 pages from the handbook.', created=1, modified=3),
               preview('Running', 320, 34, title='Rebuild index', timestamp='now', status='running')],
     nodes={
         'row': {'type': 'row', 'children': ['texts', 'spin', 'state'], 'props': {'crossAxisAlignment': 'start', 'spacing': 4},
-                'layout': {'width': {'fill': 320}, 'height': {'hug': 56}, 'padding': [16, 8, 14, 8]}},
+                'layout': {'width': {'fill': 320}, 'height': {'hug': 56}, 'padding': [16, 8, 14, 8]},
+                'decoration': {'strokes': [{'color': 'primaryBorder', 'visible': False}], 'strokeSides': 'top'},
+                'bind': {'decoration.strokes[0].visible': '${props.divider}'}},
         'texts': {'type': 'column', 'children': ['line', 'message', 'diff'], 'props': {'crossAxisAlignment': 'start', 'spacing': 3},
                   'layout': {'width': {'fill': 260}, 'height': {'hug': 40}}},
         'line': {'type': 'row', 'children': ['title', 'time'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
@@ -3908,6 +3911,227 @@ add(component(
                     'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onSignOut'}]}]},
         'outGlyph': icon('logout', 'error', 13),
         'outLabel': text('${props.signOutLabel}', style(12, 400, 'error', 1.25), {'hug': 50}, {'hug': 15}),
+    },
+))
+
+# StatusCard (StatusCardList.tsx, its row): one connection, 9 px above and below, 10 px apart: a 34 px plate,
+# radius 8, bordered, holding a letter 14/700; the label 12.5/600 (-0.2) with a 6 px dot (green when
+# connected), 2 px under it a line 11 in secondary; at the end a pill, radius 6, 3 x 8, 10.5/500 with a 10 px
+# icon: green with a green border when connected, else secondary.
+add(component(
+    'StatusCard',
+    'One connection in a StatusCardList: a letter plate, a name, a line about it and a pill telling whether it is connected. Fires onConfigure.',
+    'row',
+    props=[prop('label', STRING, 'Service', 'Its name.', required=True),
+           prop('detail', STRING, '', 'A line under the name.'),
+           prop('connected', BOOL, False, 'Connected: green.'),
+           prop('letterColor', STRING, '', 'The plate letter\'s color (empty: secondary text).'),
+           prop('divider', BOOL, False, 'A hairline over it (every row but the first).')],
+    events=['onConfigure'],
+    previews=[preview('Connected', 300, 52, label='GitHub', detail='2 repositories', connected=True)],
+    nodes={
+        'row': {'type': 'row', 'children': ['plate', 'texts', 'pill'], 'props': {'crossAxisAlignment': 'center', 'spacing': 10},
+                'layout': {'width': {'fill': 300}, 'height': {'hug': 52}, 'padding': [2, 9, 2, 9]},
+                'decoration': {'strokes': [{'color': 'primaryBorder', 'visible': False}], 'strokeSides': 'top'},
+                'bind': {'decoration.strokes[0].visible': '${props.divider}'}},
+        'plate': {'type': 'row', 'children': ['letter'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': 34, 'height': 34},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8}},
+        'letter': {**text('${= upper(left(props.label, 1))}', style(14, 700, 'secondaryText', 1.0), {'hug': 10}, {'hug': 14}),
+                   'bind': {'props.style.color': "${= props.letterColor != '' ? props.letterColor : theme.colors.secondaryText}"}},
+        'texts': {'type': 'column', 'children': ['line', 'detail'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 2},
+                  'layout': {'width': {'fill': 160}, 'height': {'hug': 32}}},
+        'line': {'type': 'row', 'children': ['label', 'dot'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                 'layout': {'width': {'fill': 160}, 'height': {'hug': 16}}},
+        'label': _one_line('${props.label}', style(12.5, 600, 'primaryText', 1.25, letterSpacing=-0.2), {'hug': 60}, {'hug': 16}),
+        'dot': {'type': 'box', 'layout': {'width': 6, 'height': 6}, 'decoration': {'fills': [{'color': 'secondaryText'}], 'radius': 9999},
+                'bind': {'decoration.fills[0].color': '${= props.connected ? theme.success : theme.colors.tertiaryText}'}},
+        'detail': {**_one_line('${props.detail}', style(11, 400, 'secondaryText', 1.3), {'fill': 160}, {'hug': 14}),
+                   'bind': {'visible': "${= props.detail != ''}"}},
+        'pill': {'type': 'row', 'children': ['pillIcon', 'pillText'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                 'layout': {'width': {'hug': 80}, 'height': {'hug': 22}, 'padding': [8, 3, 8, 3]},
+                 'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 6},
+                 'bind': {'decoration.strokes[0].color': '${= props.connected ? theme.colors.successTintBorder : theme.colors.primaryBorder}'},
+                 'states': {'hovered': {'pill': HOVER}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onConfigure'}]}]},
+        'pillIcon': {**icon('link', 'secondaryText', 10),
+                     'bind': {'props.icon': "${= props.connected ? 'link' : 'key'}",
+                              'props.color': '${= props.connected ? theme.success : theme.colors.secondaryText}'}},
+        'pillText': {**text("${= props.connected ? 'Connected' : 'Set up'}", style(10.5, 500, 'secondaryText', 1.3), {'hug': 50}, {'hug': 14}),
+                     'bind': {'props.style.color': '${= props.connected ? theme.success : theme.colors.secondaryText}'}},
+    },
+))
+
+# StatusCardList (StatusCardList.tsx): connections one under another with hairlines between, and 10 px under
+# them a line: when they were last checked, 11 in secondary, and a refresh button 12 with an 11 px icon.
+add(component(
+    'StatusCardList',
+    'A list of connections with when they were last checked and a refresh button. Its children are StatusCard calls. Fires onRefresh.',
+    'list',
+    props=[prop('updatedLabel', STRING, '', 'When it was last checked (empty: no line).'),
+           prop('refreshLabel', STRING, 'Refresh', 'The refresh button\'s label.')],
+    events=['onRefresh'],
+    children='list',
+    previews=[preview('Default', 300, 40, updatedLabel='Checked 2 minutes ago')],
+    nodes={
+        'list': {'type': 'column', 'children': ['content', 'foot'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 300}, 'height': {'hug': 40}}},
+        'content': {'type': 'slot'},
+        'foot': {'type': 'row', 'children': ['updated', 'refresh'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                 'layout': {'width': {'fill': 300}, 'height': {'hug': 20}, 'margin': [0, 10, 0, 0]},
+                 'bind': {'visible': "${= props.updatedLabel != ''}"}},
+        'updated': text('${props.updatedLabel}', style(11, 400, 'secondaryText', 1.3, letterSpacing=-0.1), {'fill': 200}, {'hug': 14}),
+        'refresh': {'type': 'row', 'children': ['refreshIcon', 'refreshText'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                    'layout': {'width': {'hug': 60}, 'height': {'hug': 20}, 'padding': [4, 2, 4, 2]}, 'decoration': {'radius': 4},
+                    'states': {'hovered': {'refresh': HOVER}},
+                    'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onRefresh'}]}]},
+        'refreshIcon': icon('refresh', 'secondaryText', 11),
+        'refreshText': text('${props.refreshLabel}', style(12, 400, 'secondaryText', 1.3), {'hug': 40}, {'hug': 16}),
+    },
+))
+
+# RunHistoryList (RunHistoryList.tsx): past runs one under another (RunRecordRow calls, each after the first
+# with its hairline), or, with none, a centered empty state: a 28 px list icon, 10 px, a title 13/600, 4 px,
+# a line 12, all in tertiary.
+add(component(
+    'RunHistoryList',
+    'A history of runs: its children are RunRecordRow calls (divider: true after the first). Empty shows a quiet message in their place.',
+    'list',
+    props=[prop('empty', BOOL, False, 'Nothing ran yet: the message shows.'),
+           prop('emptyTitle', STRING, 'No runs yet', 'The message\'s title.'),
+           prop('emptySubtitle', STRING, 'Runs will show here as they finish.', 'The line under it.')],
+    children='list',
+    previews=[preview('Empty', 300, 120, empty=True)],
+    nodes={
+        'list': {'type': 'column', 'children': ['content', 'blank'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 300}, 'height': {'hug': 120}}, 'decoration': {'fills': [{'color': 'primaryBackground'}]}},
+        'content': {'type': 'slot'},
+        'blank': {'type': 'column', 'children': ['blankIcon', 'blankTitle', 'blankLine'], 'props': {'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'fill': 300}, 'height': {'hug': 110}, 'padding': [16, 24, 16, 24]},
+                  'bind': {'visible': '${props.empty}'}},
+        'blankIcon': icon('list', 'tertiaryText', 28),
+        'blankTitle': {**text('${props.emptyTitle}', style(13, 600, 'tertiaryText', 1.3), {'hug': 80}, {'hug': 17}),
+                       'layout': {'width': {'hug': 80}, 'height': {'hug': 17}, 'margin': [0, 10, 0, 4]}},
+        'blankLine': {**text('${props.emptySubtitle}', style(12, 400, 'tertiaryText', 1.4), {'hug': 200}, {'hug': 17}),
+                      'props': {'text': '${props.emptySubtitle}', 'style': style(12, 400, 'tertiaryText', 1.4), 'textAlign': 'center'}},
+    },
+))
+
+# StatsCarousel (StatsCarousel.tsx): one fact at a time: a label 10/700 in tertiary, upper case, with, at its
+# end, an 18 px back button, a 6 px dot per fact (the shown one in secondary, the rest the border color) and
+# an 18 px forward button (11 px chevrons); 8 px under, the fact 12 in secondary.
+add(component(
+    'StatsCarousel',
+    'Several short facts shown one at a time, with arrows and dots to step through them. Which one shows is kept in your number variable.',
+    'carousel',
+    props=[prop('label', STRING, 'Stats', 'The small heading.'),
+           prop('stats', STRINGS, ['12 files changed', '3 runs today', '98% passing'], 'The facts.', required=True),
+           prop('index', var(NUMBER), '', 'The name of your number variable holding which fact shows (0 first).')],
+    events=[{'key': 'onChanged', 'payload': NUMBER}],
+    previews=[preview('First', 240, 44, index=0)],
+    nodes={
+        'carousel': {'type': 'column', 'children': ['head', 'fact'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 8},
+                     'layout': {'width': {'fill': 240}, 'height': {'hug': 44}}},
+        'head': {'type': 'row', 'children': ['label', 'back', 'dots', 'forward'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                 'layout': {'width': {'fill': 240}, 'height': {'hug': 18}}},
+        'label': _one_line('${= upper(props.label)}', style(10, 700, 'tertiaryText', 1.3, letterSpacing=0.5), {'fill': 140}, {'hug': 13}),
+        **{id_: {'type': 'row', 'children': [id_ + 'Glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                 'layout': {'width': 18, 'height': 18}, 'decoration': {'radius': 4},
+                 'states': {'hovered': {id_: HOVER, id_ + 'Glyph': {'props': {'color': 'primaryText'}}}},
+                 'actions': [{'trigger': 'click', 'actions': [
+                     {'type': 'setVariable', 'variable': 'props.index', 'value': formula},
+                     {'type': 'componentEvent', 'event': 'onChanged', 'value': '${props.index}'}]}]}
+           for id_, formula in (('back', '${= (props.index - 1 + length(props.stats)) % max(1, length(props.stats))}'),
+                                ('forward', '${= (props.index + 1) % max(1, length(props.stats))}'))},
+        'backGlyph': icon('chevron_left', 'tertiaryText', 11),
+        'forwardGlyph': icon('chevron_right', 'tertiaryText', 11),
+        'dots': {'type': 'listView', 'children': ['dot'], 'props': {'scrollDirection': 'horizontal', 'scrollable': False, 'spacing': 4},
+                 'layout': {'width': {'hug': 26}, 'height': 6}, 'bind': {'data': '${props.stats}'}},
+        'dot': {'type': 'box', 'layout': {'width': 6, 'height': {'fill': 6}}, 'decoration': {'fills': [{'color': 'primaryBorder'}], 'radius': 9999},
+                'bind': {'selected': '${= index == props.index}'},
+                'states': {'selected': {'dot': {'decoration': {'fills': [{'color': 'secondaryText'}]}}}},
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'setVariable', 'variable': 'props.index', 'value': '${index}'}]}]},
+        'fact': text("${= length(props.stats) > props.index ? props.stats[props.index] : ''}", style(12, 400, 'secondaryText', 1.4), {'fill': 240}, {'hug': 17}),
+    },
+))
+
+# HistoryTimeline (HistoryTimeline.tsx): what happened, newest first, down a 2 px rail: each event an 8 px
+# dot in the brand color (ringed in the secondary background) beside a card, radius 8, 8 x 10, bordered (the
+# brand color when chosen): the event 11/700 with its time 11/600 in tertiary at the end, and 6 px under it
+# a note 11 on a 1.4 line in secondary; 10 px between cards.
+add(component(
+    'HistoryTimeline',
+    'What happened over time, as cards down a rail: an event, when, and a note each. The chosen event is kept in your variable. Fires onSelected.',
+    'timeline',
+    props=[prop('events', STRINGS, ['Published', 'Reviewed', 'Drafted'], 'The events, newest first.', required=True),
+           prop('times', STRINGS, ['2h ago', 'Yesterday', 'Nov 12'], 'When each happened.'),
+           prop('notes', STRINGS, [], 'A note under each (empty: none).'),
+           prop('value', var(STRING), '', 'The name of your text variable holding the chosen event.')],
+    events=[{'key': 'onSelected', 'payload': STRING}],
+    previews=[preview('Default', 300, 150, notes=['Version 4 went live.', '', 'First outline.'], value='Published')],
+    nodes={
+        'timeline': {'type': 'stack', 'children': ['rail', 'list'], 'layout': {'width': {'fill': 300}, 'height': {'hug': 150}}},
+        'rail': {'type': 'box', 'layout': {'width': 2, 'height': {'fill': 130}, 'x': {'start': 3}, 'y': {'start': 10, 'end': 18}},
+                 'decoration': {'fills': [{'color': 'primaryBorder'}], 'radius': 9999}},
+        'list': {'type': 'listView', 'children': ['event'], 'props': {'scrollable': False, 'spacing': 10},
+                 'layout': {'width': {'fill': 300}, 'height': {'hug': 150}, 'padding': [0, 2, 0, 2]}, 'bind': {'data': '${props.events}'}},
+        'event': {'type': 'row', 'children': ['dotBox', 'card'], 'props': {'crossAxisAlignment': 'start', 'spacing': 6},
+                  'layout': {'width': {'fill': 300}, 'height': {'hug': 40}}},
+        'dotBox': {'type': 'row', 'children': ['dot'], 'layout': {'width': 8, 'height': 18, 'padding': [0, 10, 0, 0]}},
+        'dot': {'type': 'box', 'layout': {'width': 8, 'height': 8},
+                'decoration': {'fills': [{'color': 'primary'}], 'strokes': [{'color': 'secondaryBackground'}], 'strokeWidth': 2, 'strokeAlign': 'outside', 'radius': 9999}},
+        'card': {'type': 'column', 'children': ['line', 'note'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 6},
+                 'layout': {'width': {'fill': 280}, 'height': {'hug': 32}, 'padding': [10, 8, 10, 8]},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8},
+                 'bind': {'selected': '${= item == props.value}'},
+                 'states': {'selected': {'card': {'decoration': {'strokes': [{'color': 'primary'}]}}},
+                            'hovered': {'card': HOVER}},
+                 'actions': [{'trigger': 'click', 'actions': [
+                     {'type': 'setVariable', 'variable': 'props.value', 'value': '${item}'},
+                     {'type': 'componentEvent', 'event': 'onSelected', 'value': '${item}'}]}]},
+        'line': {'type': 'row', 'children': ['name', 'time'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                 'layout': {'width': {'fill': 260}, 'height': {'hug': 15}}},
+        'name': _one_line('${item}', style(11, 700, 'primaryText', 1.3), {'fill': 180}, {'hug': 15}),
+        'time': {**text("${= length(props.times) > index ? props.times[index] : ''}", style(11, 600, 'tertiaryText', 1.3), {'hug': 40}, {'hug': 15}),
+                 'bind': {'visible': '${= length(props.times) > index}'}},
+        'note': {**text("${= length(props.notes) > index ? props.notes[index] : ''}", style(11, 400, 'secondaryText', 1.4), {'fill': 260}, {'hug': 16}),
+                 'bind': {'visible': "${= length(props.notes) > index && props.notes[index] != ''}"}},
+    },
+))
+
+# Terminal (Terminal.tsx): a log on a dark surface (#0D1117), padding 16, monospace 11.5 on a 1.5 line: each
+# line a level in brackets at 60 % of its color and weight 600, then the message in the level's color: text
+# #E6EDF3, debug #58A6FF, warn #D29922, error #FF7B72. With no lines, a centered message in #8B949E.
+TERM = {'info': 'E6EDF3', 'debug': '58A6FF', 'warn': 'D29922', 'error': 'FF7B72'}
+def _term(alpha):
+    lv = "(length(props.levels) > index ? props.levels[index] : 'info')"
+    return "${= %s == 'error' ? '#%s%s' : (%s == 'warn' ? '#%s%s' : (%s == 'debug' ? '#%s%s' : '#%s%s'))}" % (
+        lv, alpha, TERM['error'], lv, alpha, TERM['warn'], lv, alpha, TERM['debug'], alpha, TERM['info'])
+add(component(
+    'Terminal',
+    'A log on a dark surface in monospace: each line with its level (info, debug, warn or error) in color.',
+    'terminal',
+    props=[prop('lines', STRINGS, ['Started watcher', 'Scanning src/components'], 'The lines, oldest first.', required=True),
+           prop('levels', STRINGS, [], 'One level per line: info, debug, warn or error (none: info).'),
+           prop('emptyMessage', STRING, 'No logs yet.', 'Shown when there are no lines.')],
+    previews=[preview('Mixed', 340, 110, lines=['Started watcher', 'Scanning src/components', 'Skipped generated file', 'Build failed'],
+                      levels=['info', 'debug', 'warn', 'error'])],
+    nodes={
+        'terminal': {'type': 'column', 'children': ['list', 'empty'], 'props': {'crossAxisAlignment': 'stretch'},
+                     'layout': {'width': {'fill': 340}, 'height': {'hug': 110}, 'padding': 16},
+                     'decoration': {'fills': [{'color': '#FF0D1117'}], 'radius': 8, 'clip': 'antiAlias'}},
+        'list': {'type': 'listView', 'children': ['line'], 'props': {'scrollable': False},
+                 'layout': {'width': {'fill': 308}, 'height': {'hug': 70}}, 'bind': {'data': '${props.lines}'}},
+        'line': {'type': 'row', 'children': ['level', 'message'], 'props': {'crossAxisAlignment': 'start', 'spacing': 6},
+                 'layout': {'width': {'fill': 308}, 'height': {'hug': 17}}},
+        'level': {**text("[${= upper(length(props.levels) > index ? props.levels[index] : 'info')}]",
+                         style(11.5, 600, '#99E6EDF3', 1.5, fontFamily='monospace'), {'hug': 44}, {'hug': 17}),
+                  'bind': {'props.style.color': _term('99')}},
+        'message': {**text('${item}', style(11.5, 400, '#FFE6EDF3', 1.5, fontFamily='monospace'), {'fill': 250}, {'hug': 17}),
+                    'bind': {'props.style.color': _term('FF')}},
+        'empty': {'type': 'row', 'children': ['emptyText'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'fill': 308}, 'height': 120}, 'bind': {'visible': '${= length(props.lines) == 0}'}},
+        'emptyText': text('${props.emptyMessage}', style(11.5, 400, '#FF8B949E', 1.5, fontFamily='monospace'), {'hug': 120}, {'hug': 17}),
     },
 ))
 

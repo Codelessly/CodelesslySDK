@@ -1,0 +1,380 @@
+{
+ "schema": 3,
+ "id": "StatusCard",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "StatusCard",
+  "doc": "One connection in a StatusCardList: a letter plate, a name, a line about it and a pill telling whether it is connected. Fires onConfigure.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Service",
+    "doc": "Its name.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the name."
+   },
+   {
+    "key": "connected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Connected: green."
+   },
+   {
+    "key": "letterColor",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The plate letter's color (empty: secondary text)."
+   },
+   {
+    "key": "divider",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A hairline over it (every row but the first)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onConfigure"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Connected",
+   "size": [
+    300,
+    52
+   ],
+   "props": {
+    "label": "GitHub",
+    "detail": "2 repositories",
+    "connected": true
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "plate",
+    "texts",
+    "pill"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     2,
+     9,
+     2,
+     9
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder",
+      "visible": false
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "bind": {
+    "decoration.strokes[0].visible": "${props.divider}"
+   }
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "letter"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 3
+   }
+  },
+  "letter": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(left(props.label, 1))}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 700,
+     "height": 1.0,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 10
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.letterColor != '' ? props.letterColor : theme.colors.secondaryText}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "line",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "label",
+    "dot"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 600,
+     "height": 1.25,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.2
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.connected ? theme.success : theme.colors.tertiaryText}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryText"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "pill": {
+   "type": "row",
+   "children": [
+    "pillIcon",
+    "pillText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": [
+     8,
+     3,
+     8,
+     3
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= props.connected ? theme.colors.successTintBorder : theme.colors.primaryBorder}"
+   },
+   "states": {
+    "hovered": {
+     "pill": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onConfigure"
+      }
+     ]
+    }
+   ]
+  },
+  "pillIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "link",
+    "color": "secondaryText",
+    "size": 10
+   },
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "bind": {
+    "props.icon": "${= props.connected ? 'link' : 'key'}",
+    "props.color": "${= props.connected ? theme.success : theme.colors.secondaryText}"
+   }
+  },
+  "pillText": {
+   "type": "text",
+   "props": {
+    "text": "${= props.connected ? 'Connected' : 'Set up'}",
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.connected ? theme.success : theme.colors.secondaryText}"
+   }
+  }
+ }
+}

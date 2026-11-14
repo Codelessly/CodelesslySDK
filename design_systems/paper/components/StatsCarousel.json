@@ -1,0 +1,353 @@
+{
+ "schema": 3,
+ "id": "StatsCarousel",
+ "roots": [
+  "carousel"
+ ],
+ "widget": {
+  "type": "StatsCarousel",
+  "doc": "Several short facts shown one at a time, with arrows and dots to step through them. Which one shows is kept in your number variable.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Stats",
+    "doc": "The small heading."
+   },
+   {
+    "key": "stats",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "12 files changed",
+     "3 runs today",
+     "98% passing"
+    ],
+    "doc": "The facts.",
+    "required": true
+   },
+   {
+    "key": "index",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable holding which fact shows (0 first)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "number",
+     "flutter": "double"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "First",
+   "size": [
+    240,
+    44
+   ],
+   "props": {
+    "index": 0
+   }
+  }
+ ],
+ "nodes": {
+  "carousel": {
+   "type": "column",
+   "children": [
+    "head",
+    "fact"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "label",
+    "back",
+    "dots",
+    "forward"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.label)}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": 0.5
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "back": {
+   "type": "row",
+   "children": [
+    "backGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "states": {
+    "hovered": {
+     "back": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     },
+     "backGlyph": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.index",
+       "value": "${= (props.index - 1 + length(props.stats)) % max(1, length(props.stats))}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.index}"
+      }
+     ]
+    }
+   ]
+  },
+  "forward": {
+   "type": "row",
+   "children": [
+    "forwardGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "states": {
+    "hovered": {
+     "forward": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     },
+     "forwardGlyph": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.index",
+       "value": "${= (props.index + 1) % max(1, length(props.stats))}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.index}"
+      }
+     ]
+    }
+   ]
+  },
+  "backGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_left",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  },
+  "forwardGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  },
+  "dots": {
+   "type": "listView",
+   "children": [
+    "dot"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 26
+    },
+    "height": 6
+   },
+   "bind": {
+    "data": "${props.stats}"
+   }
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": {
+     "fill": 6
+    }
+   },
+   "bind": {
+    "selected": "${= index == props.index}"
+   },
+   "states": {
+    "selected": {
+     "dot": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "secondaryText"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.index",
+       "value": "${index}"
+      }
+     ]
+    }
+   ],
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "fact": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.stats) > props.index ? props.stats[props.index] : ''}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  }
+ }
+}
