@@ -1,0 +1,268 @@
+{
+ "schema": 3,
+ "id": "MenuItem",
+ "roots": [
+  "item"
+ ],
+ "widget": {
+  "type": "MenuItem",
+  "doc": "A row of a MenuPopover: an icon, a title, an optional subtitle and a note at the end. Fires onSelected.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Action",
+    "doc": "The title.",
+    "required": true
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted line under it."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "An icon before it (empty: none)."
+   },
+   {
+    "key": "trailing",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A short note at the end (a shortcut)."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "neutral",
+      "danger"
+     ]
+    },
+    "default": "neutral",
+    "doc": "danger: red."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False dims it and stops presses."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    226,
+    28
+   ],
+   "props": {
+    "title": "Copy command",
+    "icon": "content_copy",
+    "trailing": "Ctrl+C"
+   }
+  }
+ ],
+ "nodes": {
+  "item": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "texts",
+    "trailing"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 226
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     9,
+     7,
+     9,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "opacity": "${= props.enabled ? 1 : 0.5}"
+   },
+   "states": {
+    "hovered": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "secondaryBackground"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "color": "secondaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.icon": "${props.icon}",
+    "props.color": "${= props.tone == 'danger' ? theme.error : theme.colors.secondaryText}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "subtitle"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 500,
+     "height": 1.35,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.tone == 'danger' ? theme.error : theme.colors.primaryText}"
+   }
+  },
+  "subtitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.subtitle}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= props.subtitle != ''}"
+   }
+  },
+  "trailing": {
+   "type": "text",
+   "props": {
+    "text": "${props.trailing}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= props.trailing != ''}"
+   }
+  }
+ }
+}

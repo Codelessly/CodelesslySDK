@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 106. Still to rebuild: 58.**
+**Here: 110. Still to rebuild: 54.**
 
 ## Here
 
@@ -37,6 +37,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | ColorInput | ColorInput |  |
 | CompactAppBar | CompactAppBar |  |
 | ConnectionStatus | ConnectionStatus |  |
+| ContextMenu | ContextMenu |  |
 | CopyButton | CopyButton |  |
 | CountBadge | CountBadge |  |
 | DatePicker |  | datePicker |
@@ -62,6 +63,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | LoadingSpinner |  | activityIndicator |
 | LoadMore | LoadMore |  |
 | MenuButton | MenuButton |  |
+| MenuPopover | MenuPopover (with MenuItem) |  |
 | MetaInfo | MetaInfo |  |
 | ModelAvatarStack | ModelAvatarStack |  |
 | NotificationBadge | NotificationBadge |  |
@@ -94,6 +96,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | SelectableListRow | SelectableListRow |  |
 | Skeleton | Skeleton |  |
 | Slider | Slider | slider |
+| SortMenu | SortMenu |  |
 | SplitButton | SplitButton |  |
 | StackedProgressBar | StackedProgressBar |  |
 | StatsRow | StatTile (dashboard density), InlineStat (compact) |  |
@@ -120,6 +123,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Tooltip | Tooltip | tooltip behavior |
 | TrialBanner | TrialBanner |  |
 | UpgradeButton | UpgradeButton |  |
+| UserMenu | UserMenu |  |
 | WindowToolbar | WindowToolbar |  |
 
 Also here with no source file of the same name: Card, ListRow, SectionHeader, Tabs.
@@ -144,9 +148,9 @@ Combobox, NumberPresetInput, ExtensionChipsInput, FileUploader, ImageUpload, Ico
 
 BrowserTabs, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, NavigationMenu, Toolbar, CollapsibleSection, CanvasShell, ResizableRow
 
-### Menus and overlays (14)
+### Menus and overlays (10)
 
-ContextMenu, AddContextMenu, FileTreeContextMenu, MenuPopover, SortMenu, UserMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, CommandPalette, NotePopover, SlidingPanel, ViewerDialog, VariableContractHover
+AddContextMenu, FileTreeContextMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, CommandPalette, NotePopover, SlidingPanel, ViewerDialog, VariableContractHover
 
 ### Data and specialized (14)
 

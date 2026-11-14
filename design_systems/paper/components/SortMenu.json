@@ -1,0 +1,396 @@
+{
+ "schema": 3,
+ "id": "SortMenu",
+ "roots": [
+  "menu"
+ ],
+ "widget": {
+  "type": "SortMenu",
+  "doc": "The menu that picks what a list is sorted by and which way. The choice and the direction (asc or desc) are kept in your variables. Fires onChanged and onDirectionChanged.",
+  "props": [
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Name",
+     "Date modified",
+     "Size"
+    ],
+    "doc": "What it can sort by.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the choice."
+   },
+   {
+    "key": "direction",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding asc or desc."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onDirectionChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    200,
+    118
+   ],
+   "props": {
+    "value": "Name",
+    "direction": "asc"
+   }
+  }
+ ],
+ "nodes": {
+  "menu": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 118
+    },
+    "padding": [
+     5,
+     5,
+     5,
+     5
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 3,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "option"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 190
+    },
+    "height": {
+     "hug": 108
+    }
+   },
+   "bind": {
+    "data": "${props.options}"
+   }
+  },
+  "option": {
+   "type": "row",
+   "children": [
+    "strut",
+    "optionContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 190
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     10,
+     0,
+     6,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 1
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "hovered": {
+     "option": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "option": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "activeTint"
+        }
+       ]
+      }
+     },
+     "label": {
+      "props": {
+       "style": {
+        "color": "primary"
+       }
+      }
+     },
+     "arrow": {
+      "props": {
+       "color": "primary"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 36
+   }
+  },
+  "tick": {
+   "type": "row",
+   "children": [
+    "check"
+   ],
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  },
+  "check": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "primary",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "visible": "${= item == props.value}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 110
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "flip": {
+   "type": "row",
+   "children": [
+    "arrow"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "decoration": {
+    "radius": 1
+   },
+   "tooltip": "${= props.direction == 'desc' ? 'Descending' : 'Ascending'}",
+   "bind": {
+    "visible": "${= item == props.value}"
+   },
+   "states": {
+    "hovered": {
+     "flip": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.direction",
+       "value": "${= props.direction == 'desc' ? 'asc' : 'desc'}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onDirectionChanged",
+       "value": "${props.direction}"
+      }
+     ]
+    }
+   ]
+  },
+  "arrow": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_upward",
+    "color": "tertiaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "props.icon": "${= props.direction == 'desc' ? 'arrow_downward' : 'arrow_upward'}"
+   }
+  },
+  "optionContent": {
+   "type": "row",
+   "children": [
+    "tick",
+    "label",
+    "flip"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}
