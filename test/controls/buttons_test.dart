@@ -92,6 +92,17 @@ void main() {
     });
   });
 
+  testWidgets('a button wider than its label centres it; a textAlign the node sets moves it (test 4: "Save changes" sat at the left of a full-width button)',
+      (tester) async {
+    final (tree, _) = await _show(tester, {
+      'wide': {'type': 'filledButton', 'props': {'label': 'Save changes'}, 'layout': {'width': 300, 'height': 36}},
+      'left': {'type': 'filledButton', 'props': {'label': 'Save changes', 'textAlign': 'left'}, 'layout': {'width': 300, 'height': 36}},
+    });
+    Rect glyphs(String id) => _button(tree, id).labels.single.glyphs.reduce((a, b) => a.expandToInclude(b));
+    expect(glyphs('wide').center.dx, closeTo(150, 1));
+    expect(glyphs('left').left, lessThan(40));
+  });
+
   testWidgets('a column of four buttons with no props and no layout: each hugs its content on the scale, none 0 × 0',
       (tester) async {
     final (tree, _) = await _show(tester, {

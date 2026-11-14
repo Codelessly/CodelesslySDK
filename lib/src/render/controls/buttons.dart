@@ -183,7 +183,9 @@ class ButtonSpec {
       kind: kind,
       tokens: tokens,
       label: icon ? '' : n.prop(ButtonProps.label),
-      align: icon ? TextAlign.center : textAlign(n.prop(ButtonProps.textAlign)),
+      // A button centres its label, however wide it is (Flutter's does); a
+      // textAlign the node sets moves it.
+      align: icon || !n.props.has(ButtonProps.textAlign) ? TextAlign.center : textAlign(n.prop(ButtonProps.textAlign)),
       icon: _glyph(n.prop(icon ? IconButtonProps.icon : ButtonProps.icon)),
       iconAtEnd: !icon && n.prop(ButtonProps.iconAlignment) == api.IconAlignment.end,
       spacing: !icon && n.props.has(ButtonProps.spacing) ? n.prop(ButtonProps.spacing) : null,
