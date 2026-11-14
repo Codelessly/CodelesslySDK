@@ -481,7 +481,11 @@
   "components/ResourceChip.json",
   "components/FileListItem.json",
   "components/StatusIndicator.json",
-  "components/DiffStatsBadge.json"
+  "components/DiffStatsBadge.json",
+  "components/Panel.json",
+  "components/LoadMore.json",
+  "components/ConnectionStatus.json",
+  "components/RadialProgress.json"
  ],
  "replaces": [
   "filledButton",
