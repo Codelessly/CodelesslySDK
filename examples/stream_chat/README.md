@@ -31,6 +31,17 @@ flutter run --dart-define=ANTHROPIC_API_KEY=<key> \
 | `tool/record.dart` | Records one real generation, its retries and its follow-up in the replay format. |
 | `tool/record_all.sh` | The live matrix: records, replays and writes one summary table. |
 
+## With a design system
+
+`--dart-define=DESIGN_SYSTEM=ssui` makes every reply in Soft SaaS UI (the SDK's `design_systems/ssui`): each
+reply's `UiSession` is given the design system (its components are node types, its tokens the theme the view draws
+with, nothing from the app's theme), the compact prompt is generated from it (`systemPromptFor(..., designSystem:)`:
+its principles and patterns in brief, its tokens by name, each component with parameters and a call, no rows for the
+base controls it replaces) and `ui_docs` answers `design`, `patterns` and each component's name.
+`dart run tool/design_system_bundle.dart` bundles the folder into `assets/design_systems/ssui.json`;
+`dart run tool/system_prompt.dart` writes `assets/system_prompt.ssui.md` and prints both sizes: 46,945 characters
+(≈ 11,700 tokens at 4 per token) without a design system, 60,071 (≈ 15,000) with SSUI's 23 components.
+
 ## Prompts
 
 `PromptVariant.compact` (the default, `--prompt compact`) sends codelessly_api's **base** in its runtime form,

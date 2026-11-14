@@ -269,10 +269,11 @@ add(component(
         'button': {
             'type': 'row', 'children': ['strut', 'icon', 'label'],
             'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center', 'spacing': 6},
-            'layout': {'width': {'hug': 72}, 'height': {'hug': 28}, 'padding': [8, 0, 8, 0]},
+            'layout': {'width': {'hug': 72}, 'height': {'hug': 28}, 'padding': [10, 0, 10, 0]},
             'decoration': {'fills': [{'color': 'primary'}], 'strokes': [{'color': '#00000000'}], 'radius': 7},
             'bind': {
-                'layout.padding': sized({s: [PX[s], 0, PX[s], 0] for s in SIZES}),
+                # button.dart: the control's paddingX + 2 (8 / 10 / 12 / 12 / 14).
+                'layout.padding': sized({s: [PX[s] + 2, 0, PX[s] + 2, 0] for s in SIZES}),
                 'props.spacing': sized(GAP),
                 'decoration.radius': sized(RADIUS),
                 'decoration.fills[0].color': "${= props.variant == 'primary' ? theme.primary : (props.variant == 'secondary' ? theme.colors.neutralFill : (props.variant == 'destructive' ? theme.error : '#00000000'))}",

@@ -41,7 +41,7 @@ behavior. This file is the **base**: read it in full first; it is enough to buil
 a page of its own in this folder, linked from here and listed in the [index](#base-index) at the end (the same
 index, with an A–Z of every name, is `index.md`). Open a page when you need what it covers; do not read the folder
 end to end. On a page, *Patterns* is usually what you need; *Reference* holds the generated tables to look one prop
-up. This describes `codelessly_api` 30.0.0; every example here is checked by a test.
+up. This describes `codelessly_api` 30.1.0; every example here is checked by a test.
 
 <a id="base-the-model-in-one-table"></a>
 ## The model in one table
@@ -155,16 +155,41 @@ The theme is the `theme` of the site manifest, `site.json`, next to the pages:
 - In a binding a name is not read: bind the value, `"${theme.colors.ember}"`.
 - Validation reports a name the theme does not have (`unknown_theme_name`, with the nearest name).
 
-Dark mode, a theme that changes with the screen size, every theme key: [theme](theme.md#page-theme).
+Controls (buttons, chips, fields, switches, pickers, tabs) take the colours and fonts their props leave unset
+from the theme's roles (`primary`, `onPrimary`, `surface`, `onSurface`, `error`, `fontFamily`, `buttonRadius`...).
+Without a theme they are neutral: ink on paper and the greys between. Nothing comes from Material's defaults or
+from the app the layout is shown in.
+
+**Light and dark.** `"dark": {"colors": {...}}` in the theme gives the colours that differ in dark mode, and
+`"mode"` which one the site starts in (Flutter's `ThemeMode`: `system`, the default, follows the device; `light`;
+`dark`). A theme switch is one action, `{"type": "setThemeMode", "mode": "${= theme.isDark ? 'light' : 'dark'}"}`:
+every named colour, named text style and control of every screen follows, and the choice is kept for the next
+visit. Read the mode as `${theme.mode}` and `${theme.isDark}`. Name colours in your text styles (`"color": "ink"`)
+so they change with it: [dark mode](theme.md#theme-dark-mode).
+
+**Fonts.** Declare the site's fonts in `site.json` as a pubspec does, files beside it: `"fonts": [{"family":
+"Fraunces", "fonts": [{"asset": "fonts/Fraunces-Regular.ttf"}, {"asset": "fonts/Fraunces-Bold.ttf", "weight":
+700}]}]` (`.ttf`, `.otf` or `.woff`; not `.woff2`). Text styles name the family; the render command and the app
+load the files, and a family nobody declared is reported (`font_fallback`, naming the nodes): [fonts](theme.md#theme-fonts).
+
+**Images.** A photo or illustration is an image fill naming a file beside `site.json` by its relative path:
+`{"type": "image", "image": {"url": "images/hero.jpg", "fit": "cover"}}` (PNG, JPEG, WebP, GIF or SVG); a file
+that is not there is reported (`image_failed`). Drawn art is a `customPaint`: [images and
+illustration](decoration.md#decoration-images).
+
+A theme that changes with the screen size, every theme key: [theme](theme.md#page-theme).
+
+**Design systems.** `"designSystem": "../design_systems/ssui"` in `site.json`: its tokens, base theme; its
+components, callable: [design systems](design-systems.md#page-design-systems).
 
 <a id="base-nodes-ids-children-and-slots"></a>
 ## Nodes, ids, children and slots
 
 `nodes` maps each node's **id** (the map key; do not repeat it inside the node) to the node. A parent lists its
 children's ids in `children`, or names them in `slots`; a child does not name its parent. Every node except a
-canvas has exactly one parent; `roots` lists the canvases, and a canvas is never a child. Ids are any text: use
-short readable ones and keep them unique across a site's documents (actions, diagnostics and the render command
-name nodes by id). A node's main keys: `type`, `layout`, `decoration`, `props` (the type's own parameters),
+canvas has exactly one parent; `roots` lists the canvases, and a canvas is never a child. Ids are any text, and
+**per document**: a page's actions and conditions name its own nodes, a component's ids are its own, and two pages
+may both have a `title`. **Canvas ids are site-wide** (links name screens by them): never repeat one. A node's main keys: `type`, `layout`, `decoration`, `props` (the type's own parameters),
 `children` / `slots`, `bind`, `actions`, `media`, `visible`, `opacity`, `name`.
 
 Which types take children, which take named slots, which take neither:
@@ -405,7 +430,9 @@ The props that matter most; each type's page lists all of them.
   value through their `changed` trigger as `${result}`: store it with `setVariable`. **Two-way**: bind the value
   prop to the variable (`"bind": {"props.initialValue": "${query}"}` for a text field, `"props.value"` for the
   others). A text field's label, hint, border and fill are in `props.decoration` (an
-  [InputDecoration](forms.md#type-InputDecoration)). Styling every control, validation: [forms](forms.md#page-forms).
+  [InputDecoration](forms.md#type-InputDecoration)). Validation is Flutter's: a field's `validator` (`"${= value == '' ?
+  'Required.' : ''}"`), a `form` around the fields and a `validate` action on send
+  ([validation](forms.md#forms-validation-and-an-error-state)). Styling every control: [forms](forms.md#page-forms).
 - **Lists**: a `listView` or `gridView` repeats its **first child** once per item of its `data` binding:
   `"bind": {"data": "${plans}"}`; inside, `${item.name}` and `${index}`. An item fills the list across (its
   cross-axis size is `fill`). In a page that scrolls, give the list
@@ -469,7 +496,10 @@ A node's `actions` is a list of **reactions**: a trigger and the actions it runs
   expression), `navigate` (`to`: a canvas id; `"mode": "pop"` goes back), `openModal` / `closeModal`, `showToast`,
   `if` (`"condition"`: a predicate, `{"left": "${count}", "op": "greaterThan", "right": "5"}` or `{"left":
   "${= valid}", "op": "isTrue"}`; `then` and `else`: action lists), `scrollTo`, `componentEvent` (a component's event, or at run time the event
-  to the host app). Action types here: `navigate`, `openModal`, `closeModal`, `retryFailed`, `openLink`, `setValue`, `setVariant`, `setVariable`, `callFunction`, `if`, `forEach`, `showToast`, `confirm`, `delay`, `copyToClipboard`, `editText`, `focus`, `controlTrack`, `controlDismissible`, `controlTransform`, `scrollTo`, `animate`, `haptic`, `runScript`, `paginate`, `componentEvent`, `callApi`, `setStorage`, `cloudDocuments`, `loadCloudData`, `reloadCloudData`, `cloudFiles`, `cloudData`, `cloudBatch`, `submitForm`, `auth`, `paywall`, `print`, `preloadImages`, `speak`, `playSound`, `captureScreenshot`, `downloadFile`, `emitEvent`.
+  to the host app). Action types here: `navigate`, `openModal`, `closeModal`, `retryFailed`, `openLink`, `setValue`, `setVariant`, `setVariable`, `callFunction`, `if`, `forEach`, `showToast`, `confirm`, `delay`, `copyToClipboard`, `setThemeMode`, `editText`, `focus`, `validate`, `controlTrack`, `controlDismissible`, `controlTransform`, `scrollTo`, `animate`, `haptic`, `runScript`, `paginate`, `componentEvent`, `callApi`, `setStorage`, `cloudDocuments`, `loadCloudData`, `reloadCloudData`, `cloudFiles`, `cloudData`, `cloudBatch`, `submitForm`, `auth`, `paywall`, `print`, `preloadImages`, `speak`, `playSound`, `captureScreenshot`, `downloadFile`, `emitEvent`.
+- Keys are exact; validation names the one meant: `{"type": "scrollTo", "node": "faq"}`, `{"type":
+  "copyToClipboard", "text": "${address}"}`, `{"type": "downloadFile", "fileName": "trip.txt", "text": "${brief}"}`;
+  a list appends with `"op": "add"` (`insert` takes an `index`).
 - In a chain `${result}` is the trigger's event (a text field's text) until an action gives another value.
 - A tap on a control inside a tappable row runs the control's reaction only: to toggle from the whole row, give the
   control `"ignorePointer": true` and bind its value.
@@ -482,13 +512,18 @@ Hover and pressed styles (`states`), drag, gestures: [interaction](interaction.m
 
 1. Prefer layout that fits any width: wrapping rows with `basis`, a `gridView` with `minCrossAxisExtent`, a capped
    band.
-2. A node's `media` is a list of CSS media queries over the node: `[{"minWidth": 600, "patch": {"props": {"style":
+2. **Use the width.** A tablet and a desktop are not a stretched phone: split the page into content and a rail
+   (a `flex` turning horizontal), give content columns (a `gridView` whose `crossAxisCount` grows, a lead item
+   spanning two: `layout.columnSpan`), and let every band fill the width with its content capped and centred. A
+   desktop page that is still one column, or content that stops short of its band, is unfinished:
+   [an editorial page at three sizes](layout.md#layout-an-editorial-page-at-three-sizes).
+3. A node's `media` is a list of CSS media queries over the node: `[{"minWidth": 600, "patch": {"props": {"style":
    {"fontSize": 40}}}}]`. `minWidth`/`maxWidth` are px (inclusive) or a breakpoint name (`"tablet"`).
-3. The `patch` is shaped like the node (`props`, `layout`, `decoration`, `visible`, `motion`, `bind`) and merged
+4. The `patch` is shaped like the node (`props`, `layout`, `decoration`, `visible`, `motion`, `bind`) and merged
    over it; later rules win (the cascade). Write for phones, add `minWidth` rules (mobile first).
-4. A row that becomes a column: a `flex` with a rule patching `"direction": "vertical"`; another order: patch
+5. A row that becomes a column: a `flex` with a rule patching `"direction": "vertical"`; another order: patch
    `layout.order`; hidden: `"visible": false`.
-5. A field both patched and bound shows the binding (`media_overridden`): put the binding in the rule's patch.
+6. A field both patched and bound shows the binding (`media_overridden`): put the binding in the rule's patch.
 
 Breakpoints, sticky headers, scrolling, a canvas per breakpoint: [responsive layout](layout.md#page-layout).
 
@@ -525,7 +560,8 @@ It validates every document strictly, renders each screen at each size (`shots/<
 `shots/diagnostics.json`) and prints one line per problem: a code, the JSON pointer
 (`/nodes/hero-title/props/style/fontSize`) and what to do. It exits 1 on errors. Steps before the capture:
 `--tap <id>` (`<id>#<n>` for the n-th list item), `--hover`, `--focus`, `--type <id>=<text>`,
-`--set <variable>=<json>`, `--scroll <id>=<px>`, `--navigate <canvas>`, `--label <name>`. Look at the
+`--set <variable>=<json>`, `--scroll <id>=<px>`, `--drag <id>=<dx>,<dy>`, `--navigate <canvas>?<param>=<value>`,
+`--label <name>`. Look at the
 screenshots: validation cannot tell you a page is ugly. Every option and diagnostic code: [render](render.md#page-render).
 
 <a id="base-sites-and-components-as-files"></a>
@@ -536,14 +572,16 @@ document with one root and a `widget` declaration of its parameters, slots and e
 `${props.price}`; a page **calls** it with one node of that type (`{"type": "PlanCard", "props": {"price": 47}}`),
 as Flutter builds `PlanCard(price: 47)`. A component never reads its page's variables: pass what it needs as
 parameters, and shared state as a `variable` parameter. A folder with `site.json` (pages, components, theme,
-project variables) is a site.
+project variables) is a site. **Write `site.json` first, with every page listed in `pages`**, before the pages
+that link to them: a link to a page not listed yet is an `unknown_screen` error.
 
 - **List template**: one shape repeated from data in one parent.
 - **Component**: the same structure in two or more places with different values (a card, a chip).
 - **Section**: a top-level band of a page (header, hero, pricing, FAQ, footer), in its own file when it is more
   than about 15 nodes.
 
-Parameter kinds, slots, events, the manifest, rendering one part: [components](components.md#page-components).
+Parameter kinds, slots, events, the manifest, rendering one part: [components](components.md#page-components). A whole site
+(manifest, shared header and footer, route parameters, storage, a modal): [a complete site](components.md#components-a-complete-multi-page-site).
 
 <a id="base-index"></a>
 ## Index
@@ -554,6 +592,8 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 |---|---|
 | A row that becomes a column at a width; another order or hidden at a width | [layout-a-row-that-becomes-a-column](layout.md#layout-a-row-that-becomes-a-column) |
 | Content capped at a width and centered inside a full-width band (CSS max-width + margin auto) | [layout-a-capped-band](layout.md#layout-a-capped-band) |
+| A page at phone, tablet and desktop: one column, a split with a sticky rail, columns with a spanning lead | [layout-an-editorial-page-at-three-sizes](layout.md#layout-an-editorial-page-at-three-sizes) |
+| A grid item spanning two columns or rows; items placed at a row and column (a timetable that is a list on phones) | [layout-grid-spans-a-timetable](layout.md#layout-grid-spans-a-timetable) |
 | Cards three across that wrap to two, then one, with no breakpoint | [layout-cards-that-wrap](layout.md#layout-cards-that-wrap) |
 | Equal-height cards in a grid; a banner above one card; a button pinned to a card's bottom | [lists-equal-height-cards](lists.md#lists-equal-height-cards) |
 | Overlap the section above (a negative margin); bleed past the page gutter | [layout-overlap-and-bleed](layout.md#layout-overlap-and-bleed) |
@@ -582,7 +622,8 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | A star, sparkle or other mark the font does not have; a custom shape | [decoration-small-marks-and-shapes](decoration.md#decoration-small-marks-and-shapes) |
 | Style a text field (border, focus ring, fill, label, icons), a checkbox, a switch or a button, in one place | [forms-styling-the-controls-in-one-place](forms.md#forms-styling-the-controls-in-one-place) |
 | A text field that shows a variable and writes it back (two-way) | [forms-a-text-field-bound-to-a-variable-two-way](forms.md#forms-a-text-field-bound-to-a-variable-two-way) |
-| Validate input and show an error state | [forms-validation-and-an-error-state](forms.md#forms-validation-and-an-error-state) |
+| Validate a form: per-field errors on blur or on send, the first error focused, a summary, a success state | [forms-validation-and-an-error-state](forms.md#forms-validation-and-an-error-state) |
+| A radio group (one choice of several) | [forms-a-radio-group](forms.md#forms-a-radio-group) |
 | A − / + stepper around a number field | [forms-a-stepper-around-a-field](forms.md#forms-a-stepper-around-a-field) |
 | A search icon or a clear (×) button inside a text field | [forms-a-clear-button-in-the-field](forms.md#forms-a-clear-button-in-the-field) |
 | A checkbox or switch with a label, toggled from the whole row | [forms-a-labelled-checkbox-or-switch](forms.md#forms-a-labelled-checkbox-or-switch) |
@@ -595,7 +636,7 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | Nested lists; the outer item inside the inner list (`parent`) | [lists-nested-lists](lists.md#lists-nested-lists) |
 | A comparison table from one row and one cell template | [lists-a-table-from-one-template](lists.md#lists-a-table-from-one-template) |
 | A weekly grid (days × habits) | [lists-a-weekly-grid](lists.md#lists-a-weekly-grid) |
-| A carousel; long lists loaded in pages | [lists-a-carousel-pages-and-pagination](lists.md#lists-a-carousel-pages-and-pagination) |
+| A carousel with arrows, dots and progress; snapping to cards; scroll to an item; long lists loaded in pages | [lists-a-carousel-pages-and-pagination](lists.md#lists-a-carousel-pages-and-pagination) |
 | Several screens; a page's URL path | [navigation-screens](navigation.md#navigation-screens) |
 | Go to a screen with parameters, and back | [navigation-going-to-a-screen-and-back](navigation.md#navigation-going-to-a-screen-and-back) |
 | A dialog, a bottom sheet, a popover, a toast, a confirmation | [navigation-modals-and-toasts](navigation.md#navigation-modals-and-toasts) |
@@ -627,6 +668,9 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | Pass children into a component (slots); events out of it | [components-slots](components.md#components-slots) |
 | The site manifest (`site.json`) | [components-the-site-manifest](components.md#components-the-site-manifest) |
 | Render one component alone | [components-rendering-one-part](components.md#components-rendering-one-part) |
+| A whole multi-page site: manifest first, shared header and footer, route parameters, storage, a modal | [components-a-complete-multi-page-site](components.md#components-a-complete-multi-page-site) |
+| A list kept per page or per item (a key built from `${route.id}`) | [data-storage-on-the-device](data.md#data-storage-on-the-device) |
+| A reading-progress bar driven by the page's scroll | [layout-scroll-progress](layout.md#layout-scroll-progress) |
 | A progress bar or ring bound to a value | [charts-progress-from-state](charts.md#charts-progress-from-state) |
 | Bar, line and series charts | [charts-charts-from-data](charts.md#charts-charts-from-data) |
 | Call an HTTP API and show the result | [data-call-an-api-and-show-the-result](data.md#data-call-an-api-and-show-the-result) |
@@ -638,15 +682,16 @@ Every page is in this folder; `index.md` has the full task table and an A–Z of
 | How one value type is written (colour, alignment, insets) | [values-colours-and-alignments](values.md#values-colours-and-alignments) |
 
 - [layout.md](layout.md): Responsive layout. Documents canvas, row, column, flex, stack, box, spacer, divider, verticalDivider, variance, sticky, floating, measure, scroll, scrollEnd, enterViewport, exitViewport, scrollTo.
-- [theme.md](theme.md): Theme and text. Documents text, textDirection, defaultTextStyle.
+- [theme.md](theme.md): Theme and text. Documents text, textDirection, defaultTextStyle, setThemeMode.
 - [decoration.md](decoration.md): Decoration, images, icons and drawing. Documents icon, path, customPaint, imageLoading, imageLoaded, imageError.
-- [forms.md](forms.md): Buttons, forms and inputs. Documents filledButton, elevatedButton, outlinedButton, textButton, iconButton, floatingActionButton, textField, checkbox, switch, radio, slider, dropdown, segmentedButton, datePicker, timePicker, dateTimeInput, signature, chip, actionChip, choiceChip, filterChip, inputChip, changed, changeEnd, submitted, editingComplete, focusGained, focusLost, keyDown, keyUp, editText, focus.
+- [forms.md](forms.md): Buttons, forms and inputs. Documents filledButton, elevatedButton, outlinedButton, textButton, iconButton, floatingActionButton, textField, checkbox, switch, radio, slider, dropdown, segmentedButton, datePicker, timePicker, dateTimeInput, signature, chip, actionChip, choiceChip, filterChip, inputChip, form, radioGroup, changed, changeEnd, submitted, editingComplete, focusGained, focusLost, keyDown, keyUp, editText, focus, validate.
 - [lists.md](lists.md): Lists, grids, tables and repeated data. Documents listView, gridView, pageView, tableView, listTile, pagination, reorderHandle, reorder, refresh, swipeAction, rowTap, paginate.
 - [navigation.md](navigation.md): Screens, navigation, modals and toasts. Documents appBar, navigationBar, bottomNavigationBar, tabs, tabBar, accordion, expansionTile, modal, load, backPressed, navigate, openModal, closeModal, showToast, confirm, openLink.
 - [state.md](state.md): State and logic. Documents valueChanged, actionError, setVariable, setValue, setVariant, callFunction, if, forEach, delay, runScript, retryFailed.
 - [interaction.md](interaction.md): Interaction: reactions, states and gestures. Documents states, inkWell, tooltip, ignorePointer, draggable, dropTarget, track, dismissible, pan, transformGesture, click, doubleTap, longPress, hold, secondaryClick, pointerDown, pointerUp, hover, cursorEnter, cursorExit, swipeLeft, swipeRight, swipeUp, swipeDown, drag, dragEnd, wheel, pinch, dragStart, dragCancel, dragCompleted, drop, dragEnter, dragExit, dropRejected, controlTrack, controlDismissible, controlTransform, copyToClipboard, haptic.
 - [animation.md](animation.md): Animation and motion. Documents motion, animations, transitions, shimmer, reveal, typewriter, particles, flip, tilt, hero, viewProgress, timer, frame, animate.
 - [components.md](components.md): Components and sections. Documents slot, external, placeholder, singlePlaceholder, event, componentEvent.
+- [design-systems.md](design-systems.md): Design systems.
 - [charts.md](charts.md): Charts, gauges and indicators. Documents progressBar, circularProgressIndicator, activityIndicator, badge, radialGauge, gaugeMeter, chart, barChart, lineChart, plotChart, barcode.
 - [data.md](data.md): Data: APIs, cloud data, storage and form submission. Documents callApi, setStorage, cloudDocuments, loadCloudData, reloadCloudData, cloudFiles, cloudData, cloudBatch, submitForm.
 - [auth.md](auth.md): Auth: signing users in. Documents auth.
