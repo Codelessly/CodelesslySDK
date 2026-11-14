@@ -485,7 +485,11 @@
   "components/Panel.json",
   "components/LoadMore.json",
   "components/ConnectionStatus.json",
-  "components/RadialProgress.json"
+  "components/RadialProgress.json",
+  "components/ProviderIcon.json",
+  "components/OptionIcon.json",
+  "components/ProviderCard.json",
+  "components/CardActions.json"
  ],
  "replaces": [
   "filledButton",

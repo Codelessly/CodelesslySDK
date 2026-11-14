@@ -1,0 +1,423 @@
+{
+ "schema": 3,
+ "id": "ProviderCard",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "ProviderCard",
+  "doc": "A service you connect to, as a row: its logo or letter, name and a dot for connected, a subtitle, and an action pill. Fires onAction.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "GitHub",
+    "doc": "The provider's name.",
+    "required": true
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the name."
+   },
+   {
+    "key": "connected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A green dot (else a gray one)."
+   },
+   {
+    "key": "image",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The logo's URL (empty: the name's first letter)."
+   },
+   {
+    "key": "color",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The letter's color (empty: primary text)."
+   },
+   {
+    "key": "actionLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Connected",
+    "doc": "The pill's words."
+   }
+  ],
+  "events": [
+   {
+    "key": "onAction"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Connected",
+   "size": [
+    300,
+    50
+   ],
+   "props": {
+    "label": "GitHub",
+    "subtitle": "acme-inc · 14 repositories"
+   }
+  },
+  {
+   "name": "Not connected",
+   "size": [
+    300,
+    50
+   ],
+   "props": {
+    "label": "Linear",
+    "connected": false,
+    "actionLabel": "Connect"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "plate",
+    "words",
+    "pill"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 50
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     8
+    ]
+   }
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "plateLetter"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "",
+       "fit": "contain"
+      },
+      "visible": false
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.fills[1].image.url": "${props.image}",
+    "decoration.fills[1].visible": "${= props.image != ''}"
+   }
+  },
+  "plateLetter": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(substring(props.label, 0, 1))}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 700,
+     "height": 1,
+     "color": "primary",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 10
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.image == ''}",
+    "props.style.color": "${= props.color != '' ? props.color : theme.colors.primaryText}"
+   }
+  },
+  "words": {
+   "type": "column",
+   "children": [
+    "line",
+    "subtitle"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 30
+    },
+    "margin": [
+     12,
+     0,
+     8,
+     0
+    ]
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "label",
+    "dot"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.1,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.2
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "success"
+     }
+    ],
+    "radius": 3,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#6616A34A",
+      "offset": [
+       0,
+       0
+      ],
+      "blurRadius": 4,
+      "spreadRadius": 1
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.connected ? theme.success : theme.colors.secondaryText}",
+    "decoration.effects[0].visible": "${props.connected}"
+   }
+  },
+  "subtitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.subtitle}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "visible": "${= props.subtitle != ''}"
+   }
+  },
+  "pill": {
+   "type": "row",
+   "children": [
+    "pillIcon",
+    "pillLabel"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": [
+     7,
+     2,
+     7,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 6
+   },
+   "states": {
+    "hovered": {
+     "pill": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "pill": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAction",
+       "value": "${props.label}"
+      }
+     ]
+    }
+   ]
+  },
+  "pillIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "link",
+    "color": "success",
+    "size": 10
+   },
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "bind": {
+    "props.color": "${= props.connected ? theme.success : theme.colors.secondaryText}"
+   }
+  },
+  "pillLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.actionLabel}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "height": 1.4545454545454546,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 56
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,119 @@
+{
+ "schema": 3,
+ "id": "ProviderIcon",
+ "roots": [
+  "plate"
+ ],
+ "widget": {
+  "type": "ProviderIcon",
+  "doc": "A provider's logo on a small bordered plate, or its letter when there is no logo.",
+  "props": [
+   {
+    "key": "image",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The logo's URL (empty: the letter)."
+   },
+   {
+    "key": "letter",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "?",
+    "doc": "The letter shown without a logo."
+   },
+   {
+    "key": "color",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The letter's color (empty: the brand color)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Letter",
+   "size": [
+    34,
+    34
+   ],
+   "props": {
+    "letter": "S"
+   }
+  }
+ ],
+ "nodes": {
+  "plate": {
+   "type": "row",
+   "children": [
+    "plateLetter"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "",
+       "fit": "contain"
+      },
+      "visible": false
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.fills[1].image.url": "${props.image}",
+    "decoration.fills[1].visible": "${= props.image != ''}"
+   }
+  },
+  "plateLetter": {
+   "type": "text",
+   "props": {
+    "text": "${props.letter}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 700,
+     "height": 1,
+     "color": "primary",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 10
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.image == ''}",
+    "props.style.color": "${= props.color != '' ? props.color : theme.primary}"
+   }
+  }
+ }
+}
