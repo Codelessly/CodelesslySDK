@@ -14,10 +14,11 @@ import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
-import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey;
+import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
+import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
 
 import 'args.dart';
 import 'compare.dart';
@@ -79,6 +80,7 @@ const runtimeCodes = <(String, String, String)>[
   ('image_failed', 'error', 'An image could not be loaded or decoded: a file named by a path relative to the site that is not there (the message names it), or a bad data: URL.'),
   ('image_network', 'warning', 'An image is on the network: the render command does not fetch it, so it is blank in the screenshot.'),
   ('empty_screen', 'warning', 'The screen drew no node boxes (nothing to show).'),
+  ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
   ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
 ];
 
@@ -89,8 +91,36 @@ final class RenderReport {
 
   /// `--compare`: each capture against its reference.
   final List<ImageComparison> comparisons = [];
+
+  /// Files a `downloadFile` action saved (written under `<out>/downloads`).
+  final List<api.Json> downloads = [];
+
+  /// Texts a `copyToClipboard` action copied, in order.
+  final List<api.Json> clipboard = [];
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
+}
+
+/// Saves a `downloadFile` action's file under `<out>/downloads/<capture>/`
+/// (a headless run has no save dialog), and lists it in the report.
+final class _OutDirExporter implements FileExporter {
+  _OutDirExporter(this.out, this.report);
+  final String out;
+  final RenderReport report;
+
+  /// The capture's name (`home@390x844-label`), set per screen and size.
+  String capture = '';
+  String screen = '', size = '';
+
+  @override
+  Future<bool> saveText({required String fileName, required String text, String mimeType = 'text/plain'}) async {
+    final name = exportFileName(fileName);
+    final file = File('$out/downloads/$capture/$name');
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync(text);
+    report.downloads.add({'file': file.path, 'fileName': name, 'mimeType': mimeType, 'bytes': utf8.encode(text).length, 'screen': screen, 'size': size});
+    return true;
+  }
 }
 
 final class _Recorder implements AnalyticsService {
@@ -124,6 +154,38 @@ List<({String name, String path, String text})> loadInputs(List<String> inputs) 
       final base = f.uri.pathSegments.last;
       out.add((name: base.endsWith('.json') ? base.substring(0, base.length - 5) : base, path: f.path, text: f.readAsStringSync()));
     }
+  }
+  return out;
+}
+
+/// One `unknown_screen` per screen that is missing, not one per link to
+/// it: a site whose pages are written before its manifest lists them all
+/// has dozens of links to each page still to come.
+List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics) {
+  final byScreen = <String, List<api.Json>>{};
+  for (final d in diagnostics) {
+    if (d['code'] != 'unknown_screen') continue;
+    final to = RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}')?[1];
+    if (to != null) (byScreen[to] ??= []).add(d);
+  }
+  final out = <api.Json>[];
+  for (final d in diagnostics) {
+    final match = d['code'] == 'unknown_screen' ? RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}') : null;
+    final to = match?[1];
+    final group = to == null ? null : byScreen[to];
+    if (group == null || group.length == 1) {
+      out.add(d);
+      continue;
+    }
+    if (!identical(group.first, d)) continue;
+    final where = [for (final g in group) '${g['file'] == null ? '' : '${g['file']} '}${g['path']}'];
+    out.add({
+      ...d,
+      'message': 'No screen "$to": ${group.length} links name it (${where.take(6).join('; ')}${where.length > 6 ? '; and ${where.length - 6} more' : ''}). '
+          '"to" is a canvas id of a page of the site: list every page in site.json\'s "pages" before writing the pages that link to them, '
+          'or correct the links.',
+      'count': group.length,
+    });
   }
   return out;
 }
@@ -181,7 +243,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
   final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
   // Notes (a schema-2 document, migrated as it loads) are not findings.
-  report.diagnostics.addAll(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()));
+  report.diagnostics.addAll(_summarizeUnknownScreens(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()).toList()));
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
   report.diagnostics.addAll(validateTheme(themeJson,
@@ -316,6 +378,24 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     _errorLog.add(details);
     previousOnError?.call(details);
   };
+  // The clipboard, in memory (a headless run has none): what is copied is
+  // listed in the report, and reads give it back.
+  String? clipboardText;
+  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, (MethodCall call) async {
+    switch (call.method) {
+      case 'Clipboard.setData':
+        clipboardText = (call.arguments as Map?)?['text'] as String?;
+        report.clipboard.add({'text': clipboardText, if (clipboardAt != null) 'screen': clipboardAt!.$1, if (clipboardAt != null) 'size': clipboardAt!.$2});
+        return null;
+      case 'Clipboard.getData':
+        return clipboardText == null ? null : {'text': clipboardText};
+      case 'Clipboard.hasStrings':
+        return {'value': clipboardText?.isNotEmpty ?? false};
+    }
+    return null;
+  });
+  // `--now`: the time now() returns.
+  FormulaClock.pinned = args.now;
   // Icons named without a codepoint (a bound name) draw from the font.
   IconSources.codepointOf = (name, style) =>
       codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
@@ -340,6 +420,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     debugDisableShadows = true;
     FlutterError.onError = previousOnError;
     IconSources.codepointOf = null;
+    FormulaClock.pinned = null;
+    tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(SystemChannels.platform, null);
     _errorDetails.clear();
     _errorLog.clear();
   }
@@ -365,10 +447,16 @@ Future<void> _renderAll(
   final screens = _screens(published, docs, args.screens, (s) => issue(s));
   final recorder = _Recorder();
   final binding = tester.binding;
+  final exporter = _OutDirExporter(args.out, report);
   for (final screen in screens) {
     final label = _screenName(published, docs, screen);
     for (final size in args.sizes) {
       final sizeName = '${size.width.round()}x${size.height.round()}';
+      exporter
+        ..capture = '${_fileSafe(label)}@$sizeName${args.label == null ? '' : '-${_fileSafe(args.label!)}'}'
+        ..screen = label
+        ..size = sizeName;
+      clipboardAt = (label, sizeName);
       final codelessly = Codelessly(
         // The site's files (declared fonts), read from its folder.
         loader: MemoryPublishLoader(published.bundle, readAsset: siteDir == null ? null : (path) async {
@@ -377,7 +465,7 @@ Future<void> _renderAll(
         }),
         components: components,
         fonts: fetcher,
-        config: CodelesslyConfig(services: Services(analytics: recorder), fontTimeout: const Duration(seconds: 5)),
+        config: CodelesslyConfig(services: Services(analytics: recorder, exports: exporter), fontTimeout: const Duration(seconds: 5)),
       );
       final controller = CodelesslyWidgetController();
       final navigator = GlobalKey<NavigatorState>();
@@ -463,18 +551,21 @@ Future<void> _renderAll(
       // 4. Interactions, in order.
       final skipped = <String>[];
       for (final step in args.steps) {
-        final problem = await _apply(tester, step, controller, navigator, codelessly,
+        final problem = await _apply(tester, step, controller, navigator, codelessly, screens: _screenList(published, docs),
             warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
                 nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])));
         if (problem != null) {
-          // A node of another canvas of the screen (another breakpoint's
-          // design) is absent here by design: a warning, not an error.
-          final target = step.target.split('#').first;
-          final elsewhere = problem.contains('no node') &&
+          // A node hidden at this width, or of another canvas of the screen
+          // (another breakpoint's design), is absent here by design: the
+          // step is skipped at this size, with a note, not an error.
+          final target = step.target.split('/').last.split('#').first;
+          final elsewhere = problem.contains('no node "$target"') &&
               (fileOfNode.containsKey(target) ||
                   docs.values.any((d) => (api.readMap(d['nodes']) ?? const {}).values.any((n) => api.readMap(n)?['name'] == target)));
-          if (elsewhere) {
-            skipped.add('$step');
+          if (problem.startsWith(_notShownHere)) {
+            skipped.add('$step (hidden at this width)');
+          } else if (elsewhere) {
+            skipped.add('$step (not on the canvas shown at this width)');
           } else {
             issue(RuntimeIssue('interaction_failed', 'error', problem, screen: label, size: sizeName));
           }
@@ -488,8 +579,8 @@ Future<void> _renderAll(
         // One line per size, not one per step: these nodes are on another
         // breakpoint's canvas of the screen.
         issue(RuntimeIssue('interaction_failed', 'warning',
-            'Skipped at this size (their nodes are on another breakpoint\'s canvas): ${skipped.join(', ')}. '
-            'To reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.',
+            'Skipped at this size, their nodes not being shown here: ${skipped.join(', ')}. The other steps ran. '
+            'A node on a breakpoint\'s own canvas: to reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.',
             screen: label, size: sizeName));
       }
       // Full page: the page's own scroll view (the largest one a user can
@@ -511,6 +602,27 @@ Future<void> _renderAll(
           page = _pageScroll(binding);
         }
         if (page != null && page.maxScrollExtent >= 1) fullPage = page;
+      }
+
+      // A --set holds against what no step did: a timer or a load reaction
+      // that wrote the variable after it (a clock) is undone, and said.
+      final held = <String, Object?>{};
+      for (final step in args.steps) {
+        if (step.kind == 'set') {
+          held[step.target] = _stepValue(step);
+        } else if (!const {'wait', 'set'}.contains(step.kind)) {
+          held.clear();
+        }
+      }
+      for (final e in held.entries) {
+        final now = _readVariable(binding, controller, e.key);
+        if (jsonEncode(now) == jsonEncode(e.value)) continue;
+        _writeVariable(binding, controller, e.key, e.value);
+        await tester.pump();
+        issue(RuntimeIssue('set_overwritten', 'warning',
+            '--set ${e.key}: a reaction (a timer, a load) set it to ${jsonEncode(now)} after the step; the capture shows it as set, ${jsonEncode(e.value)}. '
+            'A clock written from now() stays put with --now <ISO time> (now() returns it).',
+            screen: label, size: sizeName));
       }
 
       // 6. Runtime checks, then the PNG.
@@ -564,11 +676,12 @@ Future<void> _renderAll(
       }
       report.images.add(file);
       if (args.compare case final String reference) {
-        final found = referenceFor(file, reference);
+        final found = referenceFor(file, reference, map: args.compareMap);
         if (found.file == null) {
           issue(RuntimeIssue('compare_failed', 'warning',
               '--compare: no reference for $name in $reference${found.candidates.isEmpty ? '' : ' among ${found.candidates.map((c) => c.split('/').last).join(', ')}'}: '
-              'name the file, or give the state a --label the reference file names.',
+              'a reference matches when its name is the screen, the state (the --label, else default or none) and the size, exactly; '
+              'name the file, give the state the --label the reference names, or map the names with --compare-map ${label.toLowerCase()}=<reference name>.',
               screen: label, size: sizeName));
         } else {
           try {
@@ -656,6 +769,19 @@ String _screenName(
   return layout;
 }
 
+/// Every screen by what a step may name it: its canvases' paths, else
+/// their screen names, else the canvas ids.
+List<String> _screenList(
+  ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published,
+  Map<String, api.Json> docs,
+) =>
+    [
+      for (final d in docs.values)
+        for (final e in (api.readMap(d['nodes']) ?? const {}).entries)
+          if (api.readMap(e.value) case final api.Json n when n['type'] == 'canvas' && published.layoutOfCanvas.containsKey(e.key))
+            n['path'] is String && (n['path'] as String).isNotEmpty ? n['path'] as String : e.key,
+    ];
+
 /// The layouts to render: those [wanted] names (a canvas id, a layout id,
 /// a screen name or a canvas name), else every screen.
 List<String> _screens(
@@ -691,10 +817,11 @@ List<String> _screens(
   return out;
 }
 
-Iterable<RenderObject> _descendants(RenderObject root) sync* {
+Iterable<RenderObject> _descendants(RenderObject root, {Set<RenderObject> skip = const {}}) sync* {
   final stack = <RenderObject>[root];
   while (stack.isNotEmpty) {
     final o = stack.removeLast();
+    if (skip.contains(o)) continue;
     yield o;
     final kids = <RenderObject>[];
     o.visitChildren(kids.add);
@@ -703,6 +830,9 @@ Iterable<RenderObject> _descendants(RenderObject root) sync* {
 }
 
 final Map<String, Set<int>?> _coverage = {};
+
+/// The screen and size a copy to the clipboard happens at.
+(String, String)? clipboardAt;
 
 /// The bounds of SVG path [data] in its own units, or null.
 ui.Rect? _pathBounds(String data) {
@@ -753,11 +883,16 @@ ui.Rect? _visibleClip(RenderBox b) {
 
 /// The PNG of the whole of [page] (the page's scroll view) as a window
 /// [ro] keeps its size: the first window as it shows, then the rest of the
-/// page a viewport at a time, scrolled into the window with the boxes fixed
-/// to the window over the page (painted after it: a header, a drawer, a
-/// bottom bar) left out, stitched below; the window's part below the page
-/// view as it is at the page's end. As tall as the window plus what the
-/// page scrolls. The page is left at its top.
+/// page a viewport at a time, stitched below it; the window's part below
+/// the page view as it is at the page's end. As tall as the window plus
+/// what the page scrolls. The page is left at its top.
+///
+/// What a reader sees once is drawn once: in the windows after the first,
+/// the boxes fixed to the window over the page (painted after it: a header,
+/// a drawer, a bottom bar) are left out, a sticky node is drawn where it is
+/// in the page (not pinned at the top of each window), and only the page's
+/// own route is drawn (a modal, a dialog or a sheet open over it, and its
+/// barrier, show in the first window only).
 Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro, RenderDesignScroll page, WidgetsBinding binding) async {
   final window = ro.size;
   final view = _rectOf(page);
@@ -768,8 +903,20 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   final over = pageBox == null
       ? const <NodeBox>[]
       : [for (final b in _fixedAround(binding, pageBox)) if (all.indexOf(b) > pageIndex && !_isInside(b, page)) b];
-  Future<ui.Image> shot() async => (await tester.runAsync(() => ro.toImage(pixelRatio: 1)))!;
-  final first = await shot();
+  // The page's route alone: the outermost repaint boundary between the
+  // page and its navigator's theater (routes over it are its siblings).
+  final theaters = {for (final (_, t) in _theaters()) t};
+  RenderRepaintBoundary? route;
+  for (RenderObject? p = page; p != null && !identical(p, ro); p = p.parent) {
+    if (theaters.contains(p)) break;
+    if (p is RenderRepaintBoundary) route = p;
+  }
+  // Only when something is open over the page; else the window is the route.
+  final covered = route != null && _boxes(binding).any((b) => !_isInside(b, route!) && !over.contains(b) && all.indexOf(b) > pageIndex);
+  final layer = covered ? route : ro;
+  final layerAt = covered ? route.localToGlobal(Offset.zero) - ro.localToGlobal(Offset.zero) : Offset.zero;
+  Future<ui.Image> shot(RenderRepaintBoundary b) async => (await tester.runAsync(() => b.toImage(pixelRatio: 1)))!;
+  final first = await shot(ro);
   final slices = <(ui.Image, double)>[];
   const hidden = Offset(0, -1e6);
   for (final b in over) {
@@ -780,7 +927,19 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
       final at = math.min(o, max);
       page.jumpTo(at);
       await _settle(tester);
-      slices.add((await shot(), at));
+      // Sticky nodes in place, as the page lays them out.
+      var unpinned = false;
+      for (final s in _descendants(page).whereType<RenderSticky>()) {
+        if (s.shift == 0) continue;
+        s.shift = 0;
+        s.markNeedsPaint();
+        unpinned = true;
+      }
+      if (unpinned) {
+        page.markNeedsPaint();
+        await tester.pump();
+      }
+      slices.add((await shot(layer), at));
       if (at >= max) break;
     }
   } finally {
@@ -794,15 +953,16 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   final recorder = ui.PictureRecorder();
   final canvas = Canvas(recorder);
   final paint = Paint()..filterQuality = FilterQuality.none;
+  // Rows of [img] (a capture of [layer]) in window coordinates.
+  void rows(ui.Image img, double top, double height, double to) => canvas.drawImageRect(
+      img, Rect.fromLTWH(-layerAt.dx, top - layerAt.dy, window.width, height), Rect.fromLTWH(0, to, window.width, height), paint);
   for (final (img, at) in slices) {
     // The viewport's rows: the page from offset [at].
-    canvas.drawImageRect(img, Rect.fromLTWH(0, view.top, window.width, view.height),
-        Rect.fromLTWH(0, view.top + at, window.width, view.height), paint);
+    rows(img, view.top, view.height, view.top + at);
   }
   // Below the page view at the page's end (the fixed boxes left out).
   final (last, lastAt) = slices.last;
-  canvas.drawImageRect(last, Rect.fromLTWH(0, view.bottom, window.width, window.height - view.bottom),
-      Rect.fromLTWH(0, view.bottom + lastAt, window.width, window.height - view.bottom), paint);
+  rows(last, view.bottom, window.height - view.bottom, view.bottom + lastAt);
   // The first window on top, as it shows.
   canvas.drawImage(first, Offset.zero, paint);
   final picture = recorder.endRecording();
@@ -864,36 +1024,168 @@ List<NodeBox> _fixedAround(WidgetsBinding binding, NodeBox page) {
   return out;
 }
 
-/// Every node box on screen, in paint order (later ones are on top).
-List<NodeBox> _boxes(WidgetsBinding binding) => [
-      for (final view in binding.renderViews)
-        for (final o in _descendants(view))
-          if (o is NodeBox && o.attached && o.hasSize) o,
-    ];
+/// The overlays' theaters (each navigator's stack of routes).
+List<(Element, RenderObject)> _theaters() {
+  final out = <(Element, RenderObject)>[];
+  for (final overlay in find.byType(Overlay, skipOffstage: false).evaluate()) {
+    Element? el = overlay;
+    while (el != null && el is! RenderObjectElement) {
+      Element? next;
+      el.visitChildren((c) => next ??= c);
+      el = next;
+    }
+    final ro = el?.renderObject;
+    if (el != null && ro != null) out.add((el, ro));
+  }
+  return out;
+}
+
+/// The render objects of the routes a navigator keeps offstage (a page
+/// covered by the page pushed over it): still attached with their last
+/// layout, but neither painted nor hit. Steps, checks and captures skip them.
+Set<RenderObject> _offstage() {
+  final out = <RenderObject>{};
+  for (final (theater, _) in _theaters()) {
+    final all = <Element>[];
+    theater.visitChildren(all.add);
+    final onstage = <Element>{};
+    theater.debugVisitOnstageChildren(onstage.add);
+    for (final e in all) {
+      if (onstage.contains(e)) continue;
+      final ro = e.renderObject;
+      if (ro != null) out.add(ro);
+    }
+  }
+  return out;
+}
+
+/// Every node box on screen, in paint order (later ones are on top); not
+/// those of a page covered by another.
+List<NodeBox> _boxes(WidgetsBinding binding) {
+  final skip = _offstage();
+  return [
+    for (final view in binding.renderViews)
+      for (final o in _descendants(view, skip: skip))
+        if (o is NodeBox && o.attached && o.hasSize) o,
+  ];
+}
 
 /// The box of node [id] on screen: the topmost (the last painted), or with
 /// `id#n` the n-th (0-based) of the copies a list repeats.
-NodeBox? _boxOf(WidgetsBinding binding, String id) {
+NodeBox? _boxOf(WidgetsBinding binding, String id) => _locate(binding, id).box;
+
+/// Marks a step's problem as "not shown at this size": the step is skipped
+/// there, with a note, not failed.
+const _notShownHere = 'not shown at this size: ';
+
+/// Whether [b] draws: it and every node box above it shown, with a size.
+bool _shown(NodeBox b) {
+  if (b.size.isEmpty) return false;
+  for (RenderObject? p = b; p != null; p = p.parent) {
+    if (p is NodeBox && !p.drawn) return false;
+  }
+  return true;
+}
+
+/// The canvas a node box is on (its screen, or a modal shown over it).
+String? _canvasOf(NodeBox b) {
+  for (RenderObject? p = b; p != null; p = p.parent) {
+    if (p is NodeBox && p.node?.type == 'canvas') return p.id;
+  }
+  return null;
+}
+
+/// Node [id] on screen, or why there is none, or that two nodes answer to
+/// it. [id] is a node id or `name` (`saved`), `<id>#<n>` for a list's n-th
+/// copy, or a path: a component's node by its call ids (`footer/saved`), a
+/// node inside a list's copy (`evCard#0/evReserve`).
+({NodeBox? box, String? problem}) _locate(WidgetsBinding binding, String id) {
+  final boxes = _boxes(binding);
+  (String, int?) split(String segment) {
+    final hash = segment.lastIndexOf('#');
+    final index = hash < 0 ? null : int.tryParse(segment.substring(hash + 1));
+    return (index == null ? segment : segment.substring(0, hash), index);
+  }
+
   // A node inside a component, by path: `plans/card1/cta`; a call by its
   // id (its box is its definition root's): `send`, `sizes#3`.
-  final byPath = id.contains('/') || _boxes(binding).any((b) => b.id != id.split('#').first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == id.split('#').first);
+  final first = id.split('/').first.split('#').first;
+  final byPath = id.contains('/') ||
+      boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first);
   if (byPath) {
-    for (final b in _boxes(binding)) {
+    for (final b in boxes) {
       final found = b.tree.boxAtPath(id);
-      if (found != null && found.attached && found.hasSize) return found;
+      if (found != null && found.attached && found.hasSize) return (box: found, problem: null);
     }
-    return null;
+    if (!id.contains('/')) return (box: null, problem: 'no node "$id" is on screen');
   }
-  final hash = id.lastIndexOf('#');
-  final index = hash < 0 ? null : int.tryParse(id.substring(hash + 1));
-  final name = index == null ? id : id.substring(0, hash);
-  var all = [for (final b in _boxes(binding)) if (b.id == name) b];
-  // A node may be named by its `name` too: the same name on a screen's
-  // breakpoint canvases reaches whichever is shown.
-  if (all.isEmpty) all = [for (final b in _boxes(binding)) if (b.node?.name == name) b];
-  if (all.isEmpty) return null;
-  if (index == null) return all.last;
-  return index < all.length ? all[index] : null;
+  // Segment by segment, each inside the one before: `evCard#0/evReserve`.
+  var scope = boxes;
+  NodeBox? chosen;
+  final segments = id.split('/');
+  for (var i = 0; i < segments.length; i++) {
+    final (name, index) = split(segments[i]);
+    var all = [for (final b in scope) if (b.id == name) b];
+    // A node may be named by its `name` too: the same name on a screen's
+    // breakpoint canvases reaches whichever is shown.
+    if (all.isEmpty) all = [for (final b in scope) if (b.node?.name == name) b];
+    final upTo = segments.take(i + 1).join('/');
+    if (all.isEmpty) {
+      return (box: null, problem: i == 0 ? 'no node "$name" is on screen' : 'no node "$name" is inside "${segments.take(i).join('/')}"');
+    }
+    if (index != null) {
+      if (index >= all.length) return (box: null, problem: '"$upTo": there are ${all.length} copies of "$name" on screen (#0 to #${all.length - 1})');
+      chosen = all[index];
+    } else {
+      // Two different nodes answer to the id (a page's and a component's,
+      // a page's and a modal's): say which to write. Copies a list repeats
+      // are one node.
+      final kinds = <String, NodeBox>{};
+      for (final b in all) {
+        final path = b.tree.pathOf(b.id, b.instance);
+        kinds.putIfAbsent('${identityHashCode(b.tree)}|$path', () => b);
+      }
+      // Under a canvas (`page/saved`), the page's own node: not one of a
+      // component's.
+      if (kinds.length > 1 && i > 0 && chosen?.node?.type == 'canvas') {
+        final own = [for (final b in kinds.values) if (componentInstanceOf(b.instance) == null) b];
+        if (own.length == 1) {
+          kinds
+            ..clear()
+            ..['own'] = own.single;
+          all = [for (final b in all) if (componentInstanceOf(b.instance) == null) b];
+        }
+      }
+      if (kinds.length > 1) {
+        final paths = {for (final b in kinds.values) b.tree.pathOf(b.id, b.instance)};
+        final names = [
+          for (final b in kinds.values)
+            paths.length == kinds.length
+                ? b.tree.pathOf(b.id, b.instance)
+                : '${b.tree.pathOf(b.id, b.instance)} (on canvas ${_canvasOf(b) ?? '?'})',
+        ];
+        final write = [
+          for (final b in kinds.values)
+            componentInstanceOf(b.instance) == null ? '${_canvasOf(b) ?? '<canvas id>'}/$name' : b.tree.pathOf(b.id, b.instance),
+        ];
+        return (
+          box: null,
+          problem: 'ambiguous: ${kinds.length} different nodes on screen are "$upTo": ${names.join(', ')}. '
+              'Ids are per document, so a page, a component and a modal may each have one. Name the one meant: '
+              '${write.toSet().length == write.length ? write.join(' or ') : 'they are on one canvas: give them different ids'}',
+        );
+      }
+      chosen = all.last;
+    }
+    if (i < segments.length - 1) {
+      final within = chosen;
+      scope = [for (final b in boxes) if (!identical(b, within) && _isInside(b, within)) b];
+    }
+  }
+  if (chosen != null && !_shown(chosen)) {
+    return (box: null, problem: '$_notShownHere"$id" is hidden here (visible false, or a media rule hides it at this width)');
+  }
+  return (box: chosen, problem: null);
 }
 
 /// The page's scroll view: of the vertical ones a user can scroll that have
@@ -901,8 +1193,9 @@ NodeBox? _boxOf(WidgetsBinding binding, String id) {
 /// tie).
 RenderDesignScroll? _pageScroll(WidgetsBinding binding) {
   RenderDesignScroll? best;
+  final skip = _offstage();
   for (final view in binding.renderViews) {
-    for (final o in _descendants(view)) {
+    for (final o in _descendants(view, skip: skip)) {
       if (o is RenderDesignScroll && o.attached && o.hasSize && o.interactive && o.userScrollable && o.maxScrollExtent > 0) {
         final vertical = o.child != null && o.child!.size.height > o.size.height;
         if (!vertical) continue;
@@ -938,7 +1231,7 @@ ui.Rect _rectOf(RenderBox b) {
 
 Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetController controller,
     GlobalKey<NavigatorState> navigator, Codelessly codelessly,
-    {required void Function(String code, String message, String? nodeId) warn}) async {
+    {required void Function(String code, String message, String? nodeId) warn, List<String> screens = const []}) async {
   final binding = tester.binding;
   ui.Rect viewRect() => ui.Offset.zero & (tester.view.physicalSize / tester.view.devicePixelRatio);
 
@@ -991,8 +1284,11 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
 
   // Where to put the pointer for [id], or the problem.
   Future<(ui.Offset?, String?)> pointAt(String id, String verb) async {
-    final box = _boxOf(binding, id);
-    if (box == null) return (null, '--$verb $id: no node "$id" is on screen.');
+    final found = _locate(binding, id);
+    final box = found.box;
+    if (box == null) {
+      return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.' : '--$verb $id: ${found.problem}.');
+    }
     var at = reachable(box);
     if (at == null) {
       await centerInView(box);
@@ -1058,7 +1354,40 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
                 'Add {"trigger": "click", "actions": [...]} to the node, or tap the node that has it.',
             step.target.split('#').first);
       }
+      await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
       await tester.tapAt(at);
+      return null;
+    case 'drag':
+      // To a point (dx,dy from where it is pressed) or onto another node.
+      final by = RegExp(r'^\s*(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)\s*$').firstMatch(step.value ?? '');
+      ui.Offset? onto;
+      if (by == null) {
+        if ((step.value ?? '').trim().isEmpty) return '--drag ${step.target}: say where to: --drag ${step.target}=<dx>,<dy> or --drag ${step.target}=<nodeId>.';
+        final (t, problem) = await pointAt(step.value!.trim(), 'drag');
+        if (t == null) return problem!.replaceFirst('--drag ', '--drag ${step.target}=');
+        onto = t;
+      }
+      final (from, problem) = await pointAt(step.target, 'drag');
+      if (from == null) return problem;
+      if (onto != null) onto = (await pointAt(step.value!.trim(), 'drag')).$1 ?? onto;
+      final to = onto ?? from + ui.Offset(double.parse(by![1]!), double.parse(by[2]!));
+      final source = _boxOf(binding, step.target);
+      await _unfocusFieldOutside(tester, source);
+      // A drag that starts on a long press (a reorder on touch, a long-press
+      // draggable) is held first.
+      final held = source != null &&
+          find
+              .byWidgetPredicate((w) => w is LongPressDraggable || w is ReorderableDelayedDragStartListener)
+              .evaluate()
+              .any((e) => e.renderObject != null && (_isInside(source, e.renderObject!) || _isInside(e.renderObject!, source)));
+      final g = await tester.startGesture(from);
+      if (held) await tester.pump(const Duration(milliseconds: 700));
+      const moves = 12;
+      for (var i = 1; i <= moves; i++) {
+        await g.moveTo(ui.Offset.lerp(from, to, i / moves)!);
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await g.up();
       return null;
     case 'hover':
       final (at, problem) = await pointAt(step.target, 'hover');
@@ -1071,7 +1400,11 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       final verb = step.kind;
       var field = fieldIn(step.target);
       if (field == null) {
-        if (_boxOf(binding, step.target) == null) return '--$verb ${step.target}: no node "${step.target}" is on screen.';
+        final found = _locate(binding, step.target);
+        if (found.box == null) {
+          final p = found.problem!;
+          return p.startsWith(_notShownHere) ? '$_notShownHere--$verb ${step.target}: ${p.substring(_notShownHere.length)}.' : '--$verb ${step.target}: $p.';
+        }
         return '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).';
       }
       final box = _boxOf(binding, step.target)!;
@@ -1086,13 +1419,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       }
       return null;
     case 'set':
-      Object? value;
-      try {
-        value = jsonDecode(step.value ?? 'null');
-      } catch (_) {
-        value = step.value;
-      }
-      controller.setVariable(step.target, value);
+      _writeVariable(binding, controller, step.target, _stepValue(step));
       return null;
     case 'scroll':
       final px = double.tryParse(step.value ?? '');
@@ -1101,8 +1428,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (step.target == 'screen' || step.target.isEmpty) {
         scroll = _pageScroll(binding);
       } else {
-        final b = _boxOf(binding, step.target);
-        if (b == null) return '--scroll ${step.target}: no node "${step.target}" on screen.';
+        final found = _locate(binding, step.target);
+        final b = found.box;
+        if (b == null) return '--scroll ${step.target}: ${found.problem}.';
         scroll = _descendants(b).whereType<RenderDesignScroll>().firstOrNull;
         if (scroll == null) {
           // A list or other Flutter scrollable inside the node.
@@ -1119,8 +1447,18 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       scroll.jumpTo(px);
       return null;
     case 'navigate':
-      final route = CodelesslyWidget.onGenerateRoute(codelessly)(RouteSettings(name: '/${step.target}'));
+      // A URL path (`/project?id=x`), a canvas id or a screen name, with a
+      // query string the screen reads as `${route.<name>}`.
+      final location = step.target.trim().replaceFirst(RegExp(r'^/+'), '');
+      final model = codelessly.publishModel;
+      // ignore: invalid_use_of_visible_for_testing_member
+      if (model != null && location.isNotEmpty && CodelesslyWidget.resolveScreen(model, location) == null) {
+        return '--navigate ${step.target}: no screen "${location.split('?').first}". Name a canvas id, a screen name or a URL path '
+            '(with a query string for its params: speaker?id=ada). Screens: ${screens.join(', ')}.';
+      }
+      final route = CodelesslyWidget.onGenerateRoute(codelessly)(RouteSettings(name: '/$location'));
       if (route == null) return '--navigate ${step.target}: no such screen.';
+      await _unfocusFieldOutside(tester, null);
       unawaited(navigator.currentState!.push(route));
       return null;
     case 'wait':
@@ -1166,6 +1504,22 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
   return 'Unknown step ${step.kind}.';
 }
 
+/// Takes the focus from a text field before a step acts elsewhere (a tap,
+/// a drag, a navigation), as a click outside a field does in a browser: its
+/// blur reactions run first, and nothing is left holding a field the step
+/// removes (a form a submit hides). A step on the field itself keeps it.
+Future<void> _unfocusFieldOutside(WidgetTester tester, NodeBox? target) async {
+  final focus = FocusManager.instance.primaryFocus;
+  if (focus == null || focus.context == null) return;
+  final field = find.byType(EditableText).evaluate().where((e) => (e.widget as EditableText).focusNode.hasFocus).firstOrNull;
+  if (field == null) return;
+  final ro = field.renderObject;
+  if (target != null && ro != null && _isInside(ro, target)) return;
+  focus.unfocus();
+  tester.testTextInput.hide();
+  await tester.pump();
+}
+
 const _keyNames = <String, LogicalKeyboardKey>{
   'ArrowLeft': LogicalKeyboardKey.arrowLeft,
   'ArrowRight': LogicalKeyboardKey.arrowRight,
@@ -1192,6 +1546,42 @@ LogicalKeyboardKey? _keyNamed(String name) {
   if (RegExp(r'^[A-Za-z]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.keyA.keyId + name.toLowerCase().codeUnitAt(0) - 0x61);
   if (RegExp(r'^[0-9]$').hasMatch(name)) return LogicalKeyboardKey(LogicalKeyboardKey.digit0.keyId + name.codeUnitAt(0) - 0x30);
   return null;
+}
+
+/// A `--set` step's value: JSON, else the text as it is.
+Object? _stepValue(Step step) {
+  try {
+    return jsonDecode(step.value ?? 'null');
+  } catch (_) {
+    return step.value;
+  }
+}
+
+/// The root scope of the screen shown when it is not [controller]'s (a
+/// screen navigated to), else null: steps act on the screen in view.
+ValueScope? _shownScope(WidgetsBinding binding, CodelesslyWidgetController controller) {
+  final own = controller.tree;
+  final canvases = [for (final b in _boxes(binding)) if (b.node?.type == 'canvas') b];
+  if (own == null || canvases.isEmpty || canvases.any((b) => identical(b.tree, own))) return null;
+  final top = canvases.last;
+  final bindings = top.tree.bindings;
+  return bindings is NodeBinder ? bindings.rootScopeOf(top.id) : null;
+}
+
+/// Sets variable [name] of the screen in view.
+void _writeVariable(WidgetsBinding binding, CodelesslyWidgetController controller, String name, Object? value) {
+  final scope = _shownScope(binding, controller);
+  if (scope != null) {
+    setVariableIn(scope, name, value);
+  } else {
+    controller.setVariable(name, value);
+  }
+}
+
+/// Variable [name] of the screen in view.
+Object? _readVariable(WidgetsBinding binding, CodelesslyWidgetController controller, String name) {
+  final scope = _shownScope(binding, controller);
+  return scope != null ? readPath(scope, name) : controller.read(name);
 }
 
 bool _isInside(RenderObject o, RenderObject ancestor) {
@@ -1474,6 +1864,8 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     'warnings': report.warnings,
     'images': [for (final i in report.images) i.split('/').last],
     if (report.comparisons.isNotEmpty) 'comparisons': [for (final c in report.comparisons) c.toJson()],
+    if (report.downloads.isNotEmpty) 'downloads': report.downloads,
+    if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
     'diagnostics': report.diagnostics,
   }));
   return report;
@@ -1497,6 +1889,13 @@ String formatReport(RenderReport report) {
   }
   for (final c in report.comparisons) {
     b.writeln(c.summary());
+  }
+  for (final d in report.downloads) {
+    b.writeln('downloaded ${d['file']} (${d['bytes']} bytes, ${d['mimeType']}) [screen ${d['screen']} ${d['size']}]');
+  }
+  for (final c in report.clipboard) {
+    final t = '${c['text']}';
+    b.writeln('copied to the clipboard: ${jsonEncode(t.length > 120 ? '${t.substring(0, 120)}...' : t)}${c['screen'] == null ? '' : ' [screen ${c['screen']} ${c['size']}]'}');
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();

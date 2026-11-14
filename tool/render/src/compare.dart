@@ -136,29 +136,66 @@ Future<List<int>> _png(ui.Image image) async {
   return data!.buffer.asUint8List();
 }
 
-/// The reference for capture [png] (`<screen>@<w>x<h>[-<label>].png`) in
-/// [reference]: the file itself, or in a directory the file naming the
-/// same size and the screen, preferring one that names the label (else
-/// `default`). Null, with the candidates, when none fits.
-({String? file, List<String> candidates}) referenceFor(String png, String reference) {
+/// The reference screenshot for capture [png] (`<screen>@<WxH>[-<label>].png`):
+/// [reference] itself when it is a file; in a directory, the PNG of the
+/// same size whose name is the screen and the state exactly, the state
+/// being the capture's label (else `default`, or none): `home--default--390x844.png`,
+/// `home@390x844.png`, `section--saved--390x844.png` for `--label saved`
+/// (and not `section--saved-empty--390x844.png`). Separators between the
+/// parts are any of `--`, `-`, `_`, `@`, `.`. [map] renames a screen (or a
+/// `<screen>-<label>` pair) to the reference's name for it: `home` →
+/// `index`, `section-saved` → `section--saved-list`.
+({String? file, List<String> candidates}) referenceFor(String png, String reference, {Map<String, String> map = const {}}) {
   final type = FileSystemEntity.typeSync(reference);
   if (type == FileSystemEntityType.file) return (file: reference, candidates: const []);
   if (type != FileSystemEntityType.directory) return (file: null, candidates: const []);
   final name = png.split('/').last;
   final m = RegExp(r'^(.*)@(\d+x\d+)(?:-(.*))?\.png$').firstMatch(name);
   if (m == null) return (file: null, candidates: const []);
-  final screen = m[1]!.toLowerCase(), size = m[2]!, label = m[3]?.toLowerCase();
+  var screen = m[1]!.toLowerCase();
+  final size = m[2]!;
+  String? label = m[3]?.toLowerCase();
+  final lower = {for (final e in map.entries) e.key.toLowerCase(): e.value.toLowerCase()};
+  String? stem; // the reference's whole name for this capture, sans size
+  if (label != null && lower['$screen-$label'] != null) {
+    stem = lower['$screen-$label'];
+  } else if (lower[screen] != null) {
+    screen = lower[screen]!;
+  }
   final files = [
     for (final f in Directory(reference).listSync())
-      if (f is File && f.path.toLowerCase().endsWith('.png') && f.path.split('/').last.contains(size)) f.path,
+      if (f is File && f.path.toLowerCase().endsWith('.png') && !f.path.endsWith('.compare.png') && !f.path.endsWith('.diff.png') &&
+          RegExp('(^|[^0-9])${RegExp.escape(size)}([^0-9]|\$)').hasMatch(f.path.split('/').last))
+        f.path,
   ]..sort();
-  final ofScreen = [for (final f in files) if (f.split('/').last.toLowerCase().startsWith(screen)) f];
-  bool names(String f, String word) => RegExp('(^|[^a-z0-9])${RegExp.escape(word)}([^a-z0-9]|\$)').hasMatch(f.split('/').last.toLowerCase());
-  final pool = ofScreen.isEmpty ? files : ofScreen;
-  final pick = pool.where((f) => names(f, label ?? 'default')).toList();
-  if (pick.length == 1) return (file: pick.single, candidates: pool);
-  if (pool.length == 1) return (file: pool.single, candidates: pool);
-  return (file: null, candidates: pool);
+  const sep = r'(?:--|[-_@.])';
+  String norm(String s) => s.replaceAll(RegExp(r'[-_@.]+'), '-').replaceAll(RegExp(r'^-+|-+$'), '');
+  // The name with the size taken out, its parts joined by single dashes.
+  String rest(String f) {
+    final base = f.split('/').last.toLowerCase().replaceFirst(RegExp(r'\.png$'), '');
+    return norm(base.replaceFirst(RegExp('$sep?${RegExp.escape(size)}$sep?'), '-'));
+  }
+  final ofScreen = [
+    for (final f in files)
+      if (rest(f) == norm(screen) || rest(f).startsWith('${norm(screen)}-')) f,
+  ];
+  if (stem != null) {
+    final pick = [for (final f in files) if (rest(f) == norm(stem)) f];
+    return (file: pick.length == 1 ? pick.single : null, candidates: files);
+  }
+  String stateOf(String f) {
+    final r = rest(f);
+    return r == norm(screen) ? '' : r.substring(norm(screen).length + 1);
+  }
+  final want = label == null ? const {'', 'default'} : {norm(label)};
+  final pick = [for (final f in ofScreen) if (want.contains(stateOf(f))) f];
+  if (pick.length == 1) return (file: pick.single, candidates: ofScreen);
+  // Both `home--390x844.png` and `home--default--390x844.png`: the default.
+  if (pick.length > 1 && label == null) {
+    final d = [for (final f in pick) if (stateOf(f) == 'default') f];
+    if (d.length == 1) return (file: d.single, candidates: ofScreen);
+  }
+  return (file: null, candidates: ofScreen.isEmpty ? files : ofScreen);
 }
 
 /// Compares capture [capturePath] with [referencePath]; writes

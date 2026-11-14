@@ -1,0 +1,66 @@
+{
+ "schema": 3,
+ "id": "Footer",
+ "roots": [
+  "foot"
+ ],
+ "widget": {
+  "type": "Footer",
+  "props": [
+   {
+    "key": "hits",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "integer",
+      "flutter": "int"
+     }
+    },
+    "default": ""
+   }
+  ]
+ },
+ "nodes": {
+  "foot": {
+   "type": "row",
+   "children": [
+    "saved"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 50
+   }
+  },
+  "saved": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF999999"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.hits",
+       "op": "add",
+       "value": "1"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

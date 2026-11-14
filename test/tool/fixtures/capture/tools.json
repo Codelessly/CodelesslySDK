@@ -1,0 +1,198 @@
+{
+ "schema": 3,
+ "roots": [
+  "tools"
+ ],
+ "variables": {
+  "tools": [
+   {
+    "name": "done",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "copied",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "clock",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ },
+ "nodes": {
+  "tools": {
+   "type": "canvas",
+   "name": "Tools",
+   "path": "tools",
+   "slots": {
+    "body": "tcol"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "clock",
+       "value": "${= now()}"
+      }
+     ]
+    }
+   ]
+  },
+  "tcol": {
+   "type": "column",
+   "children": [
+    "dl",
+    "cp",
+    "doneFlag",
+    "copiedFlag",
+    "clockFlag"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "dl": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF333333"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "downloadFile",
+       "fileName": "brief.txt",
+       "text": "Day 1: Zurich"
+      },
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "cp": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF555555"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "copyToClipboard",
+       "text": "12 Rue Example"
+      },
+      {
+       "type": "setVariable",
+       "variable": "copied",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "doneFlag": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= done ? '#FF00FF00' : '#FF000000'}"
+   }
+  },
+  "copiedFlag": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= copied ? '#FF00FF00' : '#FF000000'}"
+   }
+  },
+  "clockFlag": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= startsWith(clock, '2026-01-01') ? '#FF00FF00' : '#FF000000'}"
+   }
+  }
+ }
+}
