@@ -604,7 +604,11 @@ NodeBox? repeatOf(RenderTree tree, String id, String item, {Object? instance}) {
   if (binder == null) return null;
   NodeBox? byIndex;
   final index = int.tryParse(item);
-  for (final b in scopedBoxesOf(tree, id, instance)) {
+  // A component call a list repeats is drawn by its definition's root: the
+  // copies are found by the call's id.
+  var copies = scopedBoxesOf(tree, id, instance);
+  if (copies.isEmpty) copies = tree.boxesAtPath(id);
+  for (final b in copies) {
     if (!b.attached) continue;
     final scope = binder.scopeFor(b.source, b.id, b.instance);
     if (scope == null) continue;
@@ -651,7 +655,9 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   final tree = run.host.tree;
   final id = run.text(a.node).trim();
   final item = run.text(a.item).trim();
-  NodeBox? named() => tree == null ? null : (tree.boxOf(id, instance: run.instance) ?? scopedBoxesOf(tree, id, run.instance).lastOrNull);
+  NodeBox? named() => tree == null
+      ? null
+      : (tree.boxOf(id, instance: run.instance) ?? scopedBoxesOf(tree, id, run.instance).lastOrNull ?? tree.boxesAtPath(id).lastOrNull);
   final box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance)) ?? named();
   if (box == null || !box.attached) {
     // Nothing to reveal: said, not skipped silently (the chain goes on).

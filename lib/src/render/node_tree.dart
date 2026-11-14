@@ -891,6 +891,10 @@ class RenderTree {
     return found.firstOrNull;
   }
 
+  /// Every box at tool path [path] without copy indexes: all the copies of
+  /// a component call a list repeats (`card`: each copy's definition root).
+  List<NodeBox> boxesAtPath(String path) => [for (final b in _boxes.values) if (_plainPath(b) == path) b];
+
   static Offset? _topLeftOf(NodeBox b) => b.attached && b.hasSize ? b.localToGlobal(Offset.zero) : null;
 
   /// [b]'s path without copy indexes.

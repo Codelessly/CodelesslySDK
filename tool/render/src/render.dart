@@ -1365,6 +1365,14 @@ String? _canvasOf(NodeBox b) {
       }
     }
     if (!id.contains('/')) return (box: null, problem: 'no node "$id" is on screen');
+    // A component's root named after its call (`nav/tabs`, where `tabs` is
+    // the root of the component `nav` calls): the call's own box.
+    final cut = id.lastIndexOf('/');
+    final (rootName, _) = split(id.substring(cut + 1));
+    for (final b in boxes) {
+      final found = b.tree.boxAtPath(id.substring(0, cut));
+      if (found != null && found.attached && found.hasSize && found.id == rootName && _shown(found)) return (box: found, problem: null);
+    }
   }
   // Segment by segment, each inside the one before: `evCard#0/evReserve`.
   var scope = boxes;
@@ -1575,6 +1583,21 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return (control!.localToGlobal(rects[n].center), null);
     }
     final box = found.box;
+    if (box == null && part == null && !id.contains('/')) {
+      // A tab, segment or destination named by its own id (`--tap stay` for
+      // the tab {"id": "stay"}): the part of the one control that has it.
+      final owners = <String>{};
+      for (final b in _boxes(binding)) {
+        final props = (b.node?.toJson()['props'] as Map?) ?? const {};
+        for (final key in const ['tabs', 'segments', 'destinations']) {
+          final list = props[key];
+          if (list is! List) continue;
+          final n = list.indexWhere((e) => e is Map && (e['id'] == id || e['value'] == id));
+          if (n >= 0) owners.add('${b.id}@$n');
+        }
+      }
+      if (owners.length == 1) return pointAt(owners.single, verb);
+    }
     if (box == null) {
       return (null, found.problem!.startsWith(_notShownHere) ? '$_notShownHere--$verb $id: ${found.problem!.substring(_notShownHere.length)}.' : '--$verb $id: ${found.problem}.');
     }

@@ -224,6 +224,17 @@ void main() {
       expect(report.errors, 0, reason: '${report.diagnostics}');
     });
 
+    testWidgets('test 4 reproductions: a component root by its call path, scrollTo a repeated component call, a tab by its own id', (tester) async {
+      for (final (site, step) in const [
+        ('component_path', Step('tap', 'mobileNav/tabs@1')),
+        ('component_scroll', Step('tap', 'next')),
+        ('tab_id', Step('tap', 'stay')),
+      ]) {
+        final report = await runRender(tester, RenderArgs(inputs: ['$a/test4/$site'], out: out.path, sizes: const [Size(390, 844)], steps: [step], label: site));
+        expect(report.errors, 0, reason: '$site: ${report.diagnostics}');
+      }
+    });
+
     testWidgets('a tap on a covered node names what covers it', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
           steps: const [Step('tap', 'last')]));
