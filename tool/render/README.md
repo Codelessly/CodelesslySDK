@@ -97,12 +97,14 @@ tool/render/render.sh site/ --out shots/ --screen contact --tap submit --label e
 
 Validation codes are listed in the API reference (codelessly_api's `docs/reference/render.md`, "Validation
 codes"; the reference starts with `docs/reference/STARTER.md`, the base). Links to one missing screen are reported
-once per screen (`unknown_screen`, with how many links name it and where), not once per link: list every page in
-`site.json` before writing the pages that link to them. The render step adds:
+once per screen (`unknown_screen`, with how many links name it and where), not once per link. A page `site.json`
+lists whose file is not written yet is one `page_not_written` warning per file (with the links that name its
+screen, the file's name), not an error: write the site page by page. The render step adds:
 
 | Code | Severity | Meaning |
 |---|---|---|
 | `invalid_json` | error | A file is not valid JSON (with line and column). |
+| `page_not_written` | warning | A page `site.json` lists has no file yet: once per file, with how many links name its screen and where (they are checked once it is written). |
 | `design_system_missing` | error | The design system `site.json` names (`"designSystem"`, a folder relative to it) has no readable `design_system.json`. |
 | `no_documents` | error | No `.json` documents at the paths given. |
 | `unknown_screen_arg` | error | `--screen` names no canvas, screen or layout. |
