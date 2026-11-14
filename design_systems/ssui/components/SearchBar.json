@@ -1,0 +1,307 @@
+{
+ "schema": 3,
+ "id": "SearchBar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "SearchBar",
+  "doc": "A rounded search field with a search icon and a clear button, its text kept in your variable. Fires onChanged, onSubmitted and onClear.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Search...",
+    "doc": "Shown while empty."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "sm",
+      "md",
+      "lg"
+     ]
+    },
+    "default": "md",
+    "doc": "sm 32, md 40, lg 48 high."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSubmitted",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onClear"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    300,
+    40
+   ],
+   "props": {}
+  },
+  {
+   "name": "Typed",
+   "size": [
+    300,
+    40
+   ],
+   "props": {
+    "value": "invoices"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "strut",
+    "barContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 40
+    },
+    "padding": [
+     16,
+     0,
+     16,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "layout.padding": "${= props.size == 'sm' ? [12, 0, 12, 0] : (props.size == 'md' ? [16, 0, 16, 0] : ([20, 0, 20, 0]))}"
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 40
+   },
+   "bind": {
+    "layout.height": "${= props.size == 'sm' ? 32 : (props.size == 'md' ? 40 : (48))}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "search",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 14
+    },
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": "placeholder"
+    },
+    "cursorColor": "primary",
+    "textInputAction": "search"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}",
+    "props.style.fontSize": "${= props.size == 'sm' ? 14 : (props.size == 'md' ? 14 : (16))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSubmitted",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "clear": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": 4
+   },
+   "decoration": {
+    "radius": 6
+   },
+   "bind": {
+    "visible": "${= props.value != ''}"
+   },
+   "states": {
+    "hovered": {
+     "clear": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     },
+     "x": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": ""
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": ""
+      },
+      {
+       "type": "componentEvent",
+       "event": "onClear"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "barContent": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "field",
+    "clear"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

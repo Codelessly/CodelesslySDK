@@ -492,7 +492,11 @@
   "components/CardActions.json",
   "components/Breadcrumb.json",
   "components/PageControl.json",
-  "components/StepIndicator.json"
+  "components/StepIndicator.json",
+  "components/Stepper.json",
+  "components/SearchBar.json",
+  "components/ThemeToggle.json",
+  "components/DownloadButton.json"
  ],
  "replaces": [
   "filledButton",

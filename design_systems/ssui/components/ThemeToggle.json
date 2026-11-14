@@ -1,0 +1,123 @@
+{
+ "schema": 3,
+ "id": "ThemeToggle",
+ "roots": [
+  "button"
+ ],
+ "widget": {
+  "type": "ThemeToggle",
+  "doc": "Switches the site between light and dark: a moon in light mode, a sun in dark. Fires onChanged with the new mode.",
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Light",
+   "size": [
+    36,
+    36
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "button": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "decoration.strokes[0].visible": "${= !theme.isDark}",
+    "decoration.fills[0].color": "${= theme.isDark ? theme.colors.tertiaryBackground : theme.colors.primaryBackground}"
+   },
+   "states": {
+    "hovered": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= theme.isDark ? 'light' : 'dark'}"
+      },
+      {
+       "type": "setThemeMode",
+       "mode": "${= theme.isDark ? 'light' : 'dark'}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "dark_mode",
+    "color": "primaryText",
+    "size": 20
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "bind": {
+    "props.icon": "${= theme.isDark ? 'light_mode' : 'dark_mode'}"
+   }
+  }
+ }
+}
