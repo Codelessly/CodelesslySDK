@@ -251,10 +251,10 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
   final OutlinedBorder cardShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
   final OutlinedBorder surfaceShape =
       RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius), side: BorderSide(color: outlineVariant));
-  // Fields: an outline of the button radius (a hairline at rest, the
-  // accent when focused), the label inside as a hint, never floating into a
-  // notch; no underline.
-  final fieldRadius = BorderRadius.circular(buttonRadius);
+  // Fields: an outline of the theme's radius, else the control radius (a
+  // hairline at rest, the accent when focused), the label inside as a hint,
+  // never floating into a notch; no underline.
+  final fieldRadius = BorderRadius.circular(tokens.radius ?? kControlRadius);
 
   // Buttons: no elevation unless a node sets one (then a black shadow), no
   // tint, no splash; a faint state layer of the label's color.
@@ -520,8 +520,9 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       hoverColor: onSurface.withValues(alpha: .04),
       focusColor: onSurface.withValues(alpha: .10),
       // The shape only: Flutter draws its side by state (outline at rest,
-      // primary when focused, error, faint when disabled).
-      floatingLabelBehavior: FloatingLabelBehavior.never,
+      // primary when focused, error, faint when disabled). A field without
+      // a border of its own shows its label as its placeholder
+      // (`inputDecoration`), so nothing floats into a notch.
       border: OutlineInputBorder(borderRadius: fieldRadius),
     ),
   );
