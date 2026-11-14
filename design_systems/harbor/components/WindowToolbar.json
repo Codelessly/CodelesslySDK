@@ -1,0 +1,175 @@
+{
+ "schema": 3,
+ "id": "WindowToolbar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "WindowToolbar",
+  "doc": "The title bar of a document or a pane: an icon, a title and what the call puts at its end. Fires onTitle when the title is pressed.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Untitled",
+    "doc": "The title.",
+    "required": true
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "description",
+    "doc": "The icon before the title (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onTitle"
+   }
+  ],
+  "slots": [
+   "actions"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    280,
+    28
+   ],
+   "props": {
+    "title": "Release notes"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "strut",
+    "barContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "description",
+    "color": "tertiaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.icon": "${props.icon}"
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 31
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 500,
+     "height": 1.2,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onTitle"
+      }
+     ]
+    }
+   ]
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  },
+  "barContent": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "title",
+    "actions"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

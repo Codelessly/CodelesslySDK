@@ -2668,6 +2668,288 @@ add(component(
 ))
 
 
+# MenuButton (MenuButton.tsx): the ghost IconButton with the menu glyph.
+add(component(
+    'MenuButton',
+    'A menu (hamburger) button. Fires onPressed.',
+    'button',
+    props=[prop('size', enum(*SIZES), 'medium', 'xs, compact, small, medium or large.'),
+           prop('enabled', BOOL, True, 'False dims it and stops presses.')],
+    events=['onPressed'],
+    previews=[preview('Default', 36, 36)],
+    nodes={
+        'button': {'type': 'IconButton', 'props': {'icon': 'menu', 'variant': 'ghost'}, 'layout': {'width': {'hug': 36}, 'height': {'hug': 36}},
+                   'bind': {'props.size': '${props.size}', 'props.enabled': '${props.enabled}'},
+                   'tooltip': 'Open menu',
+                   'actions': [{'trigger': {'type': 'event', 'event': 'onPressed'}, 'actions': [{'type': 'componentEvent', 'event': 'onPressed'}]}]},
+    },
+))
+
+# SplitButton (SplitButton.tsx): two halves in one bordered shell (small 22 px radius 5, medium 28 radius 7,
+# large 32 radius 8): the action (an icon and a label 11/500, 8 px either side; small is the icon alone, 5 px
+# around) and, past a 1 px seam, the trigger (a chevron). Neutral: the raised background and the strong border;
+# primary: the brand color with a light seam and white ink. Busy turns the icon into a spinner and dims both.
+SPLIT = ['small', 'medium', 'large']
+SPLIT_INK = "${= props.tone == 'primary' ? theme.colors.onAccent : theme.colors.primaryText}"
+add(component(
+    'SplitButton',
+    'An action with a second half that opens its choices. Fires onPressed (the action) and onMenu (the chevron).',
+    'shell',
+    props=[prop('label', STRING, 'Run', 'The action\'s label (small shows the icon alone).'),
+           prop('icon', STRING, 'play_arrow', 'The action\'s icon (empty: none).'),
+           prop('size', enum(*SPLIT), 'medium', 'small (22), medium (28) or large (32).'),
+           prop('tone', enum('neutral', 'primary'), 'neutral', 'neutral: bordered. primary: filled with the brand color.'),
+           prop('busy', BOOL, False, 'A spinner for the icon; both halves stop.'),
+           prop('enabled', BOOL, True, 'False dims it and stops presses.')],
+    events=['onPressed', 'onMenu'],
+    previews=[preview('Neutral', 96, 28, label='Run'), preview('Primary', 120, 28, label='Generate', tone='primary')],
+    nodes={
+        'shell': {'type': 'row', 'children': ['main', 'seam', 'trigger'], 'props': {'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'hug': 96}, 'height': {'hug': 28}, 'padding': 1},
+                  'decoration': {'fills': [{'color': 'raisedBackground'}], 'strokes': [{'color': 'secondaryBorder'}], 'radius': 7, 'clip': 'antiAlias'},
+                  'bind': {'decoration.radius': by('size', {'small': 5, 'medium': 7, 'large': 8}),
+                           'decoration.fills[0].color': "${= props.tone == 'primary' ? theme.primary : theme.colors.raisedBackground}",
+                           'decoration.strokes[0].color': "${= props.tone == 'primary' ? theme.primary : theme.colors.secondaryBorder}",
+                           'opacity': '${= props.enabled && !props.busy ? 1 : 0.55}'}},
+        'main': {'type': 'row', 'children': ['spin', 'glyph', 'label'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center', 'spacing': 6},
+                 'layout': {'width': {'hug': 60}, 'height': 26, 'padding': [8, 0, 8, 0]},
+                 'bind': {'layout.height': by('size', {'small': 20, 'medium': 26, 'large': 30}),
+                          'layout.padding': by('size', {'small': [5, 0, 5, 0], 'medium': [8, 0, 8, 0], 'large': [8, 0, 8, 0]})},
+                 'states': {'hovered': {'main': HOVER}, 'pressed': {'main': PRESS}},
+                 'actions': [click('onPressed', 'props.enabled && !props.busy')]},
+        'spin': {'type': 'activityIndicator', 'layout': {'width': 12, 'height': 12}, 'props': {'color': 'primaryText'},
+                 'bind': {'visible': '${props.busy}', 'props.color': SPLIT_INK}},
+        'glyph': {**icon('play_arrow', 'primaryText', 12),
+                  'bind': {'visible': "${= props.icon != '' && !props.busy}", 'props.icon': '${props.icon}', 'props.color': SPLIT_INK}},
+        'label': {**text('${props.label}', style(11, 500, 'primaryText', 1.1), {'hug': 30}, {'hug': 13}),
+                  'bind': {'visible': "${= props.label != '' && props.size != 'small'}", 'props.style.color': SPLIT_INK,
+                           'props.style.fontSize': by('size', {'small': 11, 'medium': 11, 'large': 12})}},
+        'seam': {'type': 'box', 'layout': {'width': 1, 'height': 26}, 'decoration': {'fills': [{'color': 'secondaryBorder'}]},
+                 'bind': {'layout.height': by('size', {'small': 20, 'medium': 26, 'large': 30}),
+                          'decoration.fills[0].color': "${= props.tone == 'primary' ? '#4DFFFFFF' : theme.colors.secondaryBorder}"}},
+        'trigger': {'type': 'row', 'children': ['chevron'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                    'layout': {'width': 26, 'height': 26},
+                    'bind': {'layout.width': by('size', {'small': 20, 'medium': 26, 'large': 30}), 'layout.height': by('size', {'small': 20, 'medium': 26, 'large': 30})},
+                    'states': {'hovered': {'trigger': HOVER}, 'pressed': {'trigger': PRESS}},
+                    'actions': [click('onMenu', 'props.enabled && !props.busy')]},
+        'chevron': {**icon('expand_more', 'primaryText', 12), 'bind': {'props.color': SPLIT_INK}},
+    },
+))
+
+# WindowToolbar (WindowToolbar.tsx): a 28 px bar on the secondary background over a hairline, 7 px either
+# side, 6 px apart: a 13 px icon in tertiary, the title 11.5/500 on one line, then what trails at the end.
+add(component(
+    'WindowToolbar',
+    'The title bar of a document or a pane: an icon, a title and what the call puts at its end. Fires onTitle when the title is pressed.',
+    'bar',
+    props=[prop('title', STRING, 'Untitled', 'The title.', required=True),
+           prop('icon', STRING, 'description', 'The icon before the title (empty: none).')],
+    events=['onTitle'],
+    slots=['actions'],
+    previews=[preview('Default', 280, 28, title='Release notes')],
+    nodes={
+        'bar': {'type': 'row', 'children': ['strut', 'glyph', 'title', 'actions'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                'layout': {'width': {'fill': 280}, 'height': {'hug': 28}, 'padding': [7, 0, 7, 0]},
+                'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'glyph': {**icon('description', 'tertiaryText', 13), 'bind': {'visible': "${= props.icon != ''}", 'props.icon': '${props.icon}'}},
+        'strut': {'type': 'box', 'layout': {'width': 0, 'height': 27}},
+        'title': {**text('${props.title}', style(11.5, 500, 'primaryText', 1.2), {'fill': 180}, {'hug': 14}),
+                  'props': {'text': '${props.title}', 'style': style(11.5, 500, 'primaryText', 1.2), 'maxLines': 1, 'overflow': 'ellipsis'},
+                  'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onTitle'}]}]},
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+    },
+))
+
+# DocumentItem (DocumentItem.tsx): the compact document object: bordered, radius 5, a WindowToolbar over a
+# content surface (the secondary background at 62 %, or white), padding 8 10 9, its entries 7 px apart; an
+# optional description first, 10.5 on a 1.35 line in tertiary.
+add(component(
+    'DocumentItem',
+    'A compact document object: a title bar over a content surface holding the call\'s children. Fires onOpen when the title is pressed.',
+    'item',
+    props=[prop('title', STRING, 'Document', 'The title in the bar.', required=True),
+           prop('icon', STRING, 'description', 'The bar\'s icon (empty: none).'),
+           prop('description', STRING, '', 'A muted line above the content.'),
+           prop('surface', enum('gray', 'white'), 'gray', 'gray: the soft secondary surface. white: a white page.')],
+    events=['onOpen'],
+    slots=['actions'],
+    children='list',
+    previews=[preview('Default', 300, 90, title='Brief', description='Shared with the team')],
+    nodes={
+        'item': {'type': 'column', 'children': ['bar', 'body'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 300}, 'height': {'hug': 90}, 'padding': 1},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 5, 'clip': 'antiAlias'}},
+        'bar': {'type': 'row', 'children': ['strut', 'glyph', 'title', 'actions'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                'layout': {'width': {'fill': 298}, 'height': {'hug': 28}, 'padding': [7, 0, 7, 0]},
+                'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'strut': {'type': 'box', 'layout': {'width': 0, 'height': 27}},
+        'glyph': {**icon('description', 'tertiaryText', 13), 'bind': {'visible': "${= props.icon != ''}", 'props.icon': '${props.icon}'}},
+        'title': {**text('${props.title}', style(11.5, 500, 'primaryText', 1.2), {'fill': 180}, {'hug': 14}),
+                  'props': {'text': '${props.title}', 'style': style(11.5, 500, 'primaryText', 1.2), 'maxLines': 1, 'overflow': 'ellipsis'},
+                  'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onOpen'}]}]},
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+        'body': {'type': 'column', 'children': ['description', 'content'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 7},
+                 'layout': {'width': {'fill': 298}, 'height': {'hug': 40}, 'padding': [10, 8, 10, 9]},
+                 'decoration': {'fills': [{'color': 'subtleFill'}]},
+                 'bind': {'decoration.fills[0].color': "${= props.surface == 'white' ? theme.colors.primaryBackground : theme.colors.subtleFill}"}},
+        'description': {**text('${props.description}', style(10.5, 400, 'tertiaryText', 1.35), {'fill': 280}, {'hug': 14}),
+                        'bind': {'visible': "${= props.description != ''}"}},
+        'content': {'type': 'slot'},
+    },
+))
+
+# TextItem (TextItem.tsx with TextItem.css): a DocumentItem whose content is text: paragraphs 11.5 on a 1.45
+# line in secondary, five lines at most; none: the empty line in tertiary italic. Its bar ends in the item's
+# meta, 9.5 in tertiary: a status pill (radius 999, 2 x 6, weight 650; amber for pending or proposed, green
+# for approved, confirmed or promoted, red for rejected) or a date, then a kind in monospace.
+TI_AMBER = "(props.status == 'pending' || props.status == 'proposed')"
+TI_GREEN = "(props.status == 'approved' || props.status == 'confirmed' || props.status == 'promoted')"
+add(component(
+    'TextItem',
+    'A text object: a titled bar with a status or date over a preview of the text. Instructions, notes, learnings. Fires onOpen.',
+    'item',
+    props=[prop('title', STRING, 'Note', 'The title in the bar.', required=True),
+           prop('value', STRING, '', 'The text shown (five lines at most).'),
+           prop('description', STRING, '', 'A muted context line above the text.'),
+           prop('status', STRING, '', 'A status pill in the bar: pending, proposed, approved, confirmed, promoted, rejected or your own.'),
+           prop('date', STRING, '', 'A date in the bar, shown in place of the status.'),
+           prop('kind', STRING, '', 'A kind after it, in monospace.'),
+           prop('emptyLabel', STRING, 'No text captured yet.', 'Shown when there is no text.')],
+    events=['onOpen'],
+    previews=[preview('Pending', 320, 96, title='Tone of voice', value='Write plainly. Lead with the answer, then the reasons.', status='pending', kind='rule'),
+              preview('Empty', 320, 70, title='Blockers', date='Nov 14')],
+    nodes={
+        'item': {'type': 'DocumentItem', 'props': {'title': 'Note'}, 'layout': {'width': {'fill': 320}, 'height': {'hug': 96}},
+                 'children': ['value', 'empty'], 'slots': {'actions': 'meta'},
+                 'bind': {'props.title': '${props.title}', 'props.description': '${props.description}'},
+                 'actions': [{'trigger': {'type': 'event', 'event': 'onOpen'}, 'actions': [{'type': 'componentEvent', 'event': 'onOpen'}]}]},
+        'meta': {'type': 'row', 'children': ['date', 'pill', 'dot', 'kind'], 'props': {'crossAxisAlignment': 'center', 'spacing': 5},
+                 'layout': {'width': {'hug': 80}, 'height': {'hug': 16}}},
+        'date': {**text('${props.date}', style(9.5, 400, 'tertiaryText', 1.2), {'hug': 40}, {'hug': 12}),
+                 'bind': {'visible': "${= props.date != ''}"}},
+        'pill': {'type': 'row', 'children': ['status'], 'props': {'crossAxisAlignment': 'center'},
+                 'layout': {'width': {'hug': 40}, 'height': {'hug': 16}, 'padding': [6, 2, 6, 2]},
+                 'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'radius': 9999},
+                 'bind': {'visible': "${= props.status != '' && props.date == ''}",
+                          'decoration.fills[0].color': "${= %s ? theme.colors.warningTint : (%s ? theme.colors.successTint : (props.status == 'rejected' ? theme.colors.errorTint : theme.colors.tertiaryBackground))}" % (TI_AMBER, TI_GREEN)}},
+        'status': {**text('${props.status}', style(9.5, 600, 'secondaryText', 1.2), {'hug': 30}, {'hug': 12}),
+                   'bind': {'props.style.color': "${= %s ? theme.warning : (%s ? theme.success : (props.status == 'rejected' ? theme.error : theme.colors.secondaryText))}" % (TI_AMBER, TI_GREEN)}},
+        'dot': {**text('·', style(9.5, 400, 'secondaryBorder', 1.2), {'hug': 4}, {'hug': 12}),
+                'bind': {'visible': "${= props.kind != '' && (props.date != '' || props.status != '')}"}},
+        'kind': {**text('${props.kind}', style(9.5, 400, 'tertiaryText', 1.2, fontFamily='monospace'), {'hug': 24}, {'hug': 12}),
+                 'bind': {'visible': "${= props.kind != ''}"}},
+        'value': {**text('${props.value}', style(11.5, 400, 'secondaryText', 1.45), {'fill': 300}, {'hug': 17}),
+                  'props': {'text': '${props.value}', 'style': style(11.5, 400, 'secondaryText', 1.45), 'maxLines': 5, 'overflow': 'ellipsis'},
+                  'bind': {'visible': "${= props.value != ''}"}},
+        'empty': {**text('${props.emptyLabel}', {**style(11.5, 400, 'tertiaryText', 1.45), 'fontStyle': 'italic'}, {'fill': 300}, {'hug': 17}),
+                  'bind': {'visible': "${= props.value == ''}"}},
+    },
+))
+
+# CodeBlock (CodeBlock.tsx): code in a bordered box, radius 12: a header on the secondary background over a
+# hairline (padding 12 x 16: a 16 px code icon, 12 px, the title 14/600, a language tag 12/500 on a 4 px
+# radius chip padded 4 x 8; at the end a copy button), then the code in monospace 14 on a 24 px line,
+# padding 16. Embedded (the body of a card around it): no border or header, 11.5 on a 19 px line, padding 10 x 12.
+add(component(
+    'CodeBlock',
+    'Code in monospace with a header: a title, a language tag and a copy button. Embedded drops the frame. Fires onCopy.',
+    'block',
+    props=[prop('code', STRING, '', 'The code.', required=True),
+           prop('title', STRING, '', 'A title in the header.'),
+           prop('language', STRING, '', 'A language tag in the header (empty: none).'),
+           prop('copyable', BOOL, True, 'A copy button in the header.'),
+           prop('embedded', BOOL, False, 'The body of a card around it: no border, no header, smaller type.')],
+    events=['onCopy'],
+    previews=[preview('Titled', 360, 130, code='const total = items\n  .map((i) => i.price)\n  .reduce((a, b) => a + b, 0);', title='total.ts', language='ts'),
+              preview('Embedded', 300, 60, code='npm install\nnpm run build', embedded=True)],
+    nodes={
+        'block': {'type': 'column', 'children': ['header', 'body'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 360}, 'height': {'hug': 130}, 'padding': 1},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 12, 'clip': 'antiAlias'},
+                  'bind': {'decoration.strokes[0].visible': '${= !props.embedded}', 'decoration.radius': '${= props.embedded ? 0 : 12}',
+                           'layout.padding': '${= props.embedded ? 0 : 1}'}},
+        'header': {'type': 'row', 'children': ['glyph', 'title', 'tag', 'gap', 'copy'], 'props': {'crossAxisAlignment': 'center', 'spacing': 12},
+                   'layout': {'width': {'fill': 358}, 'height': {'hug': 52}, 'padding': [16, 12, 16, 12]},
+                   'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'},
+                   'bind': {'visible': '${= !props.embedded}'}},
+        'glyph': icon('code', 'secondaryText', 16),
+        'title': {**text('${props.title}', style(14, 600, 'primaryText', 1.3), {'hug': 60}, {'hug': 18}),
+                  'bind': {'visible': "${= props.title != ''}"}},
+        'tag': {'type': 'row', 'children': ['language'], 'props': {'crossAxisAlignment': 'center'},
+                'layout': {'width': {'hug': 30}, 'height': {'hug': 24}, 'padding': [8, 4, 8, 4]},
+                'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'radius': 4},
+                'bind': {'visible': "${= props.language != ''}"}},
+        'language': text('${props.language}', style(12, 500, 'secondaryText', 1.3), {'hug': 20}, {'hug': 16}),
+        'gap': {'type': 'box', 'layout': {'width': {'fill': 20}, 'height': 1}},
+        'copy': {'type': 'CopyButton', 'props': {'text': ''}, 'layout': {'width': {'hug': 28}, 'height': 28},
+                 'bind': {'props.text': '${props.code}', 'visible': '${props.copyable}'},
+                 'actions': [{'trigger': {'type': 'event', 'event': 'onCopy'}, 'actions': [{'type': 'componentEvent', 'event': 'onCopy', 'value': '${props.code}'}]}]},
+        'body': {'type': 'row', 'children': ['code'], 'props': {'crossAxisAlignment': 'start', 'scrollable': True},
+                 'layout': {'width': {'fill': 358}, 'height': {'hug': 60}, 'padding': 16},
+                 'decoration': {'fills': [{'color': 'secondaryBackground'}]},
+                 'bind': {'layout.padding': '${= props.embedded ? [12, 10, 12, 10] : [16, 16, 16, 16]}',
+                          'decoration.fills[0].color': '${= props.embedded ? theme.colors.primaryBackground : theme.colors.secondaryBackground}'}},
+        'code': {**text('${props.code}', style(14, 400, 'primaryText', 24 / 14, fontFamily='monospace'), {'hug': 200}, {'hug': 24}),
+                 'bind': {'props.style.fontSize': '${= props.embedded ? 11.5 : 14}', 'props.style.height': '${= props.embedded ? 1.652 : 1.714}'}},
+    },
+))
+
+# BatchProgressBar (BatchProgressBar.tsx): one running operation as a row over a hairline on the secondary
+# background, padding 8 x 10: a 13 px status icon, 6 px, the label 11/500 (the operation while it uploads,
+# else Queued, Complete, Failed or Cancelled), then done/total 10 in tertiary with "(n failed)" in red; 6 px
+# under it a 4 px pill track filled to the share done (blue, green when complete, red on an error, muted when
+# cancelled) and, while it uploads, a 16 px round cancel button.
+BATCH = ['pending', 'uploading', 'complete', 'error', 'cancelled']
+BATCH_INK = "${= props.status == 'complete' ? '#FF22C55E' : (props.status == 'error' ? '#FFEF4444' : (props.status == 'uploading' ? '#FF3B82F6' : theme.colors.tertiaryText))}"
+add(component(
+    'BatchProgressBar',
+    'One operation over many items: its state, how many are done, a thin bar and a cancel button while it runs. Stack one per operation. Fires onCancel.',
+    'item',
+    props=[prop('operation', STRING, 'Uploading', 'What is running, shown while it does.', required=True),
+           prop('status', enum(*BATCH), 'uploading', 'pending, uploading, complete, error or cancelled.'),
+           prop('completed', NUMBER, 0, 'How many are done.'),
+           prop('total', NUMBER, 0, 'How many there are.'),
+           prop('failed', NUMBER, 0, 'How many failed (0: not shown).'),
+           prop('cancellable', BOOL, True, 'A cancel button while it uploads.')],
+    events=['onCancel'],
+    previews=[preview('Uploading', 280, 44, operation='Uploading images', completed=7, total=12),
+              preview('Failed', 280, 44, operation='Processing', status='error', completed=2, total=8, failed=3)],
+    nodes={
+        'item': {'type': 'column', 'children': ['top', 'bottom'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 6},
+                 'layout': {'width': {'fill': 280}, 'height': {'hug': 44}, 'padding': [10, 8, 10, 8]},
+                 'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'top'}},
+        'top': {'type': 'row', 'children': ['glyph', 'label', 'count', 'failed'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                'layout': {'width': {'fill': 260}, 'height': {'hug': 14}}},
+        'glyph': {**icon('upload', 'primary', 13),
+                  'bind': {'props.color': BATCH_INK,
+                           'props.icon': "${= props.status == 'uploading' ? 'upload' : (props.status == 'pending' ? 'schedule' : (props.status == 'complete' ? 'check_circle' : 'cancel'))}"}},
+        'label': text("${= props.status == 'uploading' ? props.operation : (props.status == 'pending' ? 'Queued' : (props.status == 'complete' ? 'Complete' : (props.status == 'error' ? 'Failed' : 'Cancelled')))}",
+                      style(11, 500, 'primaryText', 1.25), {'fill': 160}, {'hug': 14}),
+        'count': text('${props.completed}/${props.total}', style(10, 400, 'tertiaryText', 1.3), {'hug': 24}, {'hug': 13}),
+        'failed': {**text('(${props.failed} failed)', style(10, 400, 'error', 1.3), {'hug': 40}, {'hug': 13}),
+                   'bind': {'visible': '${= props.failed > 0}'}},
+        'bottom': {'type': 'row', 'children': ['track', 'cancel'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                   'layout': {'width': {'fill': 260}, 'height': {'hug': 16}}},
+        'track': {'type': 'row', 'children': ['fill', 'rest'], 'layout': {'width': {'fill': 240}, 'height': 4},
+                  'decoration': {'fills': [{'color': 'hoverOverlay'}], 'radius': 9999, 'clip': 'antiAlias'}},
+        'fill': {'type': 'box', 'layout': {'width': {'fill': 100}, 'height': {'fill': 4}, 'flex': 1},
+                 'decoration': {'fills': [{'color': 'primary'}], 'radius': 9999},
+                 'bind': {'visible': '${= props.completed > 0 && props.total > 0}',
+                          'layout.flex': '${= max(1, round(min(props.completed, props.total) * 1000 / max(1, props.total)))}',
+                          'decoration.fills[0].color': BATCH_INK}},
+        'rest': {'type': 'box', 'layout': {'width': {'fill': 100}, 'height': {'fill': 4}, 'flex': 1},
+                 'bind': {'visible': '${= props.completed < props.total || props.total <= 0}',
+                          'layout.flex': '${= max(1, round((props.total - min(props.completed, props.total)) * 1000 / max(1, props.total)))}'}},
+        'cancel': {'type': 'row', 'children': ['x'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                   'layout': {'width': 16, 'height': 16}, 'decoration': {'fills': [{'color': 'hoverOverlay'}], 'radius': 9999},
+                   'bind': {'visible': "${= props.status == 'uploading' && props.cancellable}"},
+                   'tooltip': 'Cancel',
+                   'states': {'hovered': {'cancel': {'decoration': {'fills': [{'color': 'pressedOverlay'}]}}, 'x': {'props': {'color': 'primaryText'}}}},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onCancel'}]}]},
+        'x': icon('close', 'tertiaryText', 9),
+    },
+))
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:

@@ -1,0 +1,400 @@
+{
+ "schema": 3,
+ "id": "BatchProgressBar",
+ "roots": [
+  "item"
+ ],
+ "widget": {
+  "type": "BatchProgressBar",
+  "doc": "One operation over many items: its state, how many are done, a thin bar and a cancel button while it runs. Stack one per operation. Fires onCancel.",
+  "props": [
+   {
+    "key": "operation",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Uploading",
+    "doc": "What is running, shown while it does.",
+    "required": true
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "pending",
+      "uploading",
+      "complete",
+      "error",
+      "cancelled"
+     ]
+    },
+    "default": "uploading",
+    "doc": "pending, uploading, complete, error or cancelled."
+   },
+   {
+    "key": "completed",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "How many are done."
+   },
+   {
+    "key": "total",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "How many there are."
+   },
+   {
+    "key": "failed",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "How many failed (0: not shown)."
+   },
+   {
+    "key": "cancellable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A cancel button while it uploads."
+   }
+  ],
+  "events": [
+   {
+    "key": "onCancel"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Uploading",
+   "size": [
+    280,
+    44
+   ],
+   "props": {
+    "operation": "Uploading images",
+    "completed": 7,
+    "total": 12
+   }
+  },
+  {
+   "name": "Failed",
+   "size": [
+    280,
+    44
+   ],
+   "props": {
+    "operation": "Processing",
+    "status": "error",
+    "completed": 2,
+    "total": 8,
+    "failed": 3
+   }
+  }
+ ],
+ "nodes": {
+  "item": {
+   "type": "column",
+   "children": [
+    "top",
+    "bottom"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 44
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "top": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label",
+    "count",
+    "failed"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "upload",
+    "color": "primary",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "props.color": "${= props.status == 'complete' ? '#FF22C55E' : (props.status == 'error' ? '#FFEF4444' : (props.status == 'uploading' ? '#FF3B82F6' : theme.colors.tertiaryText))}",
+    "props.icon": "${= props.status == 'uploading' ? 'upload' : (props.status == 'pending' ? 'schedule' : (props.status == 'complete' ? 'check_circle' : 'cancel'))}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${= props.status == 'uploading' ? props.operation : (props.status == 'pending' ? 'Queued' : (props.status == 'complete' ? 'Complete' : (props.status == 'error' ? 'Failed' : 'Cancelled')))}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "height": 1.25,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "count": {
+   "type": "text",
+   "props": {
+    "text": "${props.completed}/${props.total}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "failed": {
+   "type": "text",
+   "props": {
+    "text": "(${props.failed} failed)",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "error",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= props.failed > 0}"
+   }
+  },
+  "bottom": {
+   "type": "row",
+   "children": [
+    "track",
+    "cancel"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "track": {
+   "type": "row",
+   "children": [
+    "fill",
+    "rest"
+   ],
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "hoverOverlay"
+     }
+    ],
+    "radius": 9999,
+    "clip": "antiAlias"
+   }
+  },
+  "fill": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "fill": 4
+    },
+    "flex": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 9999
+   },
+   "bind": {
+    "visible": "${= props.completed > 0 && props.total > 0}",
+    "layout.flex": "${= max(1, round(min(props.completed, props.total) * 1000 / max(1, props.total)))}",
+    "decoration.fills[0].color": "${= props.status == 'complete' ? '#FF22C55E' : (props.status == 'error' ? '#FFEF4444' : (props.status == 'uploading' ? '#FF3B82F6' : theme.colors.tertiaryText))}"
+   }
+  },
+  "rest": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "fill": 4
+    },
+    "flex": 1
+   },
+   "bind": {
+    "visible": "${= props.completed < props.total || props.total <= 0}",
+    "layout.flex": "${= max(1, round((props.total - min(props.completed, props.total)) * 1000 / max(1, props.total)))}"
+   }
+  },
+  "cancel": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "hoverOverlay"
+     }
+    ],
+    "radius": 9999
+   },
+   "bind": {
+    "visible": "${= props.status == 'uploading' && props.cancellable}"
+   },
+   "tooltip": "Cancel",
+   "states": {
+    "hovered": {
+     "cancel": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     },
+     "x": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onCancel"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "tertiaryText",
+    "size": 9
+   },
+   "layout": {
+    "width": 9,
+    "height": 9
+   }
+  }
+ }
+}

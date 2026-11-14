@@ -1,0 +1,353 @@
+{
+ "schema": 3,
+ "id": "TextItem",
+ "roots": [
+  "item"
+ ],
+ "widget": {
+  "type": "TextItem",
+  "doc": "A text object: a titled bar with a status or date over a preview of the text. Instructions, notes, learnings. Fires onOpen.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Note",
+    "doc": "The title in the bar.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The text shown (five lines at most)."
+   },
+   {
+    "key": "description",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted context line above the text."
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A status pill in the bar: pending, proposed, approved, confirmed, promoted, rejected or your own."
+   },
+   {
+    "key": "date",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A date in the bar, shown in place of the status."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A kind after it, in monospace."
+   },
+   {
+    "key": "emptyLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "No text captured yet.",
+    "doc": "Shown when there is no text."
+   }
+  ],
+  "events": [
+   {
+    "key": "onOpen"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Pending",
+   "size": [
+    320,
+    96
+   ],
+   "props": {
+    "title": "Tone of voice",
+    "value": "Write plainly. Lead with the answer, then the reasons.",
+    "status": "pending",
+    "kind": "rule"
+   }
+  },
+  {
+   "name": "Empty",
+   "size": [
+    320,
+    70
+   ],
+   "props": {
+    "title": "Blockers",
+    "date": "Nov 14"
+   }
+  }
+ ],
+ "nodes": {
+  "item": {
+   "type": "DocumentItem",
+   "props": {
+    "title": "Note"
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 96
+    }
+   },
+   "children": [
+    "value",
+    "empty"
+   ],
+   "slots": {
+    "actions": "meta"
+   },
+   "bind": {
+    "props.title": "${props.title}",
+    "props.description": "${props.description}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onOpen"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onOpen"
+      }
+     ]
+    }
+   ]
+  },
+  "meta": {
+   "type": "row",
+   "children": [
+    "date",
+    "pill",
+    "dot",
+    "kind"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "date": {
+   "type": "text",
+   "props": {
+    "text": "${props.date}",
+    "style": {
+     "fontSize": 9.5,
+     "fontWeight": 400,
+     "height": 1.2,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "bind": {
+    "visible": "${= props.date != ''}"
+   }
+  },
+  "pill": {
+   "type": "row",
+   "children": [
+    "status"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    },
+    "padding": [
+     6,
+     2,
+     6,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 9999
+   },
+   "bind": {
+    "visible": "${= props.status != '' && props.date == ''}",
+    "decoration.fills[0].color": "${= (props.status == 'pending' || props.status == 'proposed') ? theme.colors.warningTint : ((props.status == 'approved' || props.status == 'confirmed' || props.status == 'promoted') ? theme.colors.successTint : (props.status == 'rejected' ? theme.colors.errorTint : theme.colors.tertiaryBackground))}"
+   }
+  },
+  "status": {
+   "type": "text",
+   "props": {
+    "text": "${props.status}",
+    "style": {
+     "fontSize": 9.5,
+     "fontWeight": 600,
+     "height": 1.2,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.status == 'pending' || props.status == 'proposed') ? theme.warning : ((props.status == 'approved' || props.status == 'confirmed' || props.status == 'promoted') ? theme.success : (props.status == 'rejected' ? theme.error : theme.colors.secondaryText))}"
+   }
+  },
+  "dot": {
+   "type": "text",
+   "props": {
+    "text": "·",
+    "style": {
+     "fontSize": 9.5,
+     "fontWeight": 400,
+     "height": 1.2,
+     "color": "secondaryBorder",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 4
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "bind": {
+    "visible": "${= props.kind != '' && (props.date != '' || props.status != '')}"
+   }
+  },
+  "kind": {
+   "type": "text",
+   "props": {
+    "text": "${props.kind}",
+    "style": {
+     "fontSize": 9.5,
+     "fontWeight": 400,
+     "height": 1.2,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "bind": {
+    "visible": "${= props.kind != ''}"
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${props.value}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.45,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 5,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${= props.value != ''}"
+   }
+  },
+  "empty": {
+   "type": "text",
+   "props": {
+    "text": "${props.emptyLabel}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.45,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "fontStyle": "italic"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${= props.value == ''}"
+   }
+  }
+ }
+}
