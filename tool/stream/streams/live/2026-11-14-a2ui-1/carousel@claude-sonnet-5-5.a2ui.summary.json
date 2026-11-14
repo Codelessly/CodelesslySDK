@@ -1,0 +1,38 @@
+{
+ "ui": "carousel",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21166,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2592,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 731
+   },
+   "ttftMs": 8102,
+   "totalMs": 17084,
+   "chars": 4161,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 12,
+   "outputTokensPerNode": "216.0",
+   "notationIssues": [],
+   "notes": [
+    "Modal \"item\": only its trigger is drawn."
+   ],
+   "messages": 1,
+   "errors": []
+  }
+ ]
+}

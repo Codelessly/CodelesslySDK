@@ -1,0 +1,820 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "column3"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "column4",
+    "column7"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "column5",
+    "row1",
+    "row2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Running Shoes",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "column6"
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "box1",
+    "text2",
+    "text3",
+    "text4",
+    "filledButton1"
+   ]
+  },
+  "box1": {
+   "type": "box",
+   "layout": {
+    "height": 140,
+    "width": {
+     "fill": 0
+    }
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "image": {
+       "url": "${shoes_current_image}",
+       "fit": "cover"
+      }
+     }
+    ]
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${shoes_current_name}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${shoes_current_price}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${shoes_current_rating}"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "View details"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openShoe",
+       "value": {
+        "index": "${shoes_index}"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${shoes_dots}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "icon1"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "circle"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "children": [
+    "textButton1",
+    "textButton2"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": ""
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "prevShoe"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": ""
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "nextShoe"
+      }
+     ]
+    }
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "box2",
+    "text5",
+    "text6",
+    "text7",
+    "text8",
+    "text9",
+    "text10",
+    "dropdown1",
+    "filledButton2",
+    "textButton3"
+   ]
+  },
+  "box2": {
+   "type": "box",
+   "layout": {
+    "height": 140,
+    "width": {
+     "fill": 0
+    }
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "image": {
+       "url": "${shoes_selected_image}",
+       "fit": "cover"
+      }
+     }
+    ]
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${shoes_selected_name}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${shoes_selected_price}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${shoes_selected_rating}"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${shoes_selected_description}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Choose size"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Size"
+   }
+  },
+  "dropdown1": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "7",
+     "8",
+     "9",
+     "10",
+     "11",
+     "12"
+    ]
+   },
+   "bind": {
+    "props.value": "${shoes_selected_size}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "shoes_selected_size",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Add to bag"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addToBag",
+       "value": {
+        "index": "${shoes_index}",
+        "size": "${shoes_selected_size}"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back to carousel"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "backToCarousel"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "shoes_index",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "shoes_dotIcon",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shoes_dots",
+    "type": "list",
+    "value": [
+     {
+      "dotIcon": "star"
+     },
+     {
+      "dotIcon": "star"
+     },
+     {
+      "dotIcon": "star"
+     },
+     {
+      "dotIcon": "star"
+     },
+     {
+      "dotIcon": "star"
+     },
+     {
+      "dotIcon": "star"
+     }
+    ]
+   },
+   {
+    "name": "shoes_current_name",
+    "type": "text",
+    "value": "Swift Runner"
+   },
+   {
+    "name": "shoes_current_price",
+    "type": "text",
+    "value": "$89.99"
+   },
+   {
+    "name": "shoes_current_rating",
+    "type": "text",
+    "value": "4.5 / 5"
+   },
+   {
+    "name": "shoes_current_image",
+    "type": "text",
+    "value": "https://placehold.co/390x220?text=Shoe+1"
+   },
+   {
+    "name": "shoes_selected_name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shoes_selected_price",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shoes_selected_rating",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shoes_selected_image",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shoes_selected_description",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shoes_selected_size",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "shoes_items",
+    "type": "list",
+    "value": [
+     {
+      "name": "Swift Runner",
+      "price": "$89.99",
+      "rating": "4.5 / 5",
+      "image": "https://placehold.co/390x220?text=Shoe+1",
+      "description": "Lightweight daily trainer with responsive cushioning."
+     },
+     {
+      "name": "Trail Blaze GTX",
+      "price": "$129.99",
+      "rating": "4.7 / 5",
+      "image": "https://placehold.co/390x220?text=Shoe+2",
+      "description": "Waterproof trail shoe with aggressive grip."
+     },
+     {
+      "name": "Road Glide 2",
+      "price": "$99.99",
+      "rating": "4.4 / 5",
+      "image": "https://placehold.co/390x220?text=Shoe+3",
+      "description": "Smooth road shoe built for long distances."
+     },
+     {
+      "name": "Sprint Pro",
+      "price": "$149.99",
+      "rating": "4.8 / 5",
+      "image": "https://placehold.co/390x220?text=Shoe+4",
+      "description": "Race-day shoe with carbon plate and lightweight mesh."
+     },
+     {
+      "name": "Cloud Step",
+      "price": "$79.99",
+      "rating": "4.2 / 5",
+      "image": "https://placehold.co/390x220?text=Shoe+5",
+      "description": "Plush everyday runner for recovery and easy miles."
+     },
+     {
+      "name": "Peak Stability",
+      "price": "$119.99",
+      "rating": "4.6 / 5",
+      "image": "https://placehold.co/390x220?text=Shoe+6",
+      "description": "Supportive shoe with stable midfoot for overpronators."
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,346 @@
+{"meta":{"ui":"itinerary","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Plan two days in Kyoto as an inline itinerary: a timeline per day with times, places, how to get between them and how long it takes. Each stop expands for details, each day has a checklist of things to book that I can tick off, and a line at the top says how many are left.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"kyoto\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Column\",\"children\":[\"header\",\"day1Title\",\"day1Timeline\",\"day1Checks\",\"divider\",\"day2Title\",\"day2Timeline\",\"day2Checks\"],\"align\":\"stretch\"},{\"id\":\"header\",\"component\":\"Text\",\"text\":{\"@path\":\"/summary/remaining\"},\"variant\":\"body\",\"weight\":0},{\"id\":\"day1Title\",\"component\":\"Text\",\"text\":\"Day 1 · Eastern Kyoto\",\"variant\":\"body\"},{\"id\":\"day1Timeline\",\"component\":\"Column\",\"children\":[\"d1s1\",\"d1s2\",\"d1s3\"]},{\"id\":\"d1s1\",\"component\":\"Card\",\"child\":\"d1s1Col\"},{\"id\":\"d1s1Col\",\"component\":\"Column\",\"children\":[\"d1s1Head\",\"d1s1Details\"]},{\"id\":\"d1s1Head\",\"component\":\"Text\",\"text\":\"08:30 · Fushimi Inari Taisha\\nTake JR Nara Line to Inari Station (5 min from Kyoto Stn), then walk 1 hr to summit.\"},{\"id\":\"d1s1Details\",\"component\":\"Text\",\"text\":\"Walk time: 2 hr round trip. Arrive early to avoid crowds. Wear comfortable shoes.\",\"variant\":\"caption\"},{\"id\":\"d1s2\",\"component\":\"Card\",\"child\":\"d1s2Col\"},{\"id\":\"d1s2Col\",\"component\":\"Column\",\"children\":[\"d1s2Head\",\"d1s2Details\"]},{\"id\":\"d1s2Head\",\"component\":\"Text\",\"text\":\"11:30 · Kiyomizu-dera\\nBus 206 from Inari area to Kiyomizu-michi (about 25 min), then 10 min uphill walk.\"},{\"id\":\"d1s2Details\",\"component\":\"Text\",\"text\":\"Visit time: 1.5 hr. Ticket about ¥400. Stroll Sannenzaka and Ninenzaka afterwards.\",\"variant\":\"caption\"},{\"id\":\"d1s3\",\"component\":\"Card\",\"child\":\"d1s3Col\"},{\"id\":\"d1s3Col\",\"component\":\"Column\",\"children\":[\"d1s3Head\",\"d1s3Details\"]},{\"id\":\"d1s3Head\",\"component\":\"Text\",\"text\":\"18:00 · Gion evening walk\\nWalk 25 min downhill from Kiyomizu-dera via Higashiyama.\"},{\"id\":\"d1s3Details\",\"component\":\"Text\",\"text\":\"Time: 1.5 hr. Look for geiko around Hanamikoji. Dinner nearby in Pontocho alley.\",\"variant\":\"caption\"},{\"id\":\"day1Checks\",\"component\":\"Column\",\"children\":[\"d1c1\",\"d1c2\"]},{\"id\":\"d1c1\",\"component\":\"CheckBox\",\"label\":\"Book Kiyomizu-dera evening illumination (seasonal)\",\"value\":{\"@path\":\"/checks/d1c1\"}},{\"id\":\"d1c2\",\"component\":\"CheckBox\",\"label\":\"Reserve Pontocho dinner\",\"value\":{\"@path\":\"/checks/d1c2\"}},{\"id\":\"divider\",\"component\":\"Divider\"},{\"id\":\"day2Title\",\"component\":\"Text\",\"text\":\"Day 2 · Arashiyama & West\",\"variant\":\"body\"},{\"id\":\"day2Timeline\",\"component\":\"Column\",\"children\":[\"d2s1\",\"d2s2\",\"d2s3\"]},{\"id\":\"d2s1\",\"component\":\"Card\",\"child\":\"d2s1Col\"},{\"id\":\"d2s1Col\",\"component\":\"Column\",\"children\":[\"d2s1Head\",\"d2s1Details\"]},{\"id\":\"d2s1Head\",\"component\":\"Text\",\"text\":\"07:45 · Arashiyama Bamboo Grove\\nBus or train: Hankyu Kyoto Line to Arashiyama (about 15 min from Kawaramachi), then walk 5 min.\"},{\"id\":\"d2s1Details\",\"component\":\"Text\",\"text\":\"Time: 45 min. Best before 9:00 for quiet paths.\",\"variant\":\"caption\"},{\"id\":\"d2s2\",\"component\":\"Card\",\"child\":\"d2s2Col\"},{\"id\":\"d2s2Col\",\"component\":\"Column\",\"children\":[\"d2s2Head\",\"d2s2Details\"]},{\"id\":\"d2s2Head\",\"component\":\"Text\",\"text\":\"10:00 · Tenryu-ji and Togetsukyo Bridge\\nWalk 10 min from the bamboo grove.\"},{\"id\":\"d2s2Details\",\"component\":\"Text\",\"text\":\"Time: 1.5 hr. Garden ticket about ¥500. Stroll along the Katsura River.\",\"variant\":\"caption\"},{\"id\":\"d2s3\",\"component\":\"Card\",\"child\":\"d2s3Col\"},{\"id\":\"d2s3Col\",\"component\":\"Column\",\"children\":[\"d2s3Head\",\"d2s3Details\"]},{\"id\":\"d2s3Head\",\"component\":\"Text\",\"text\":\"14:00 · Kinkaku-ji (Golden Pavilion)\\nBus 205 from Arashiyama to Kinkakuji-michi (about 40 min).\"},{\"id\":\"d2s3Details\",\"component\":\"Text\",\"text\":\"Time: 1 hr. Ticket about ¥500. Book early for a timed entry slot.\",\"variant\":\"caption\"},{\"id\":\"day2Checks\",\"component\":\"Column\",\"children\":[\"d2c1\",\"d2c2\"]},{\"id\":\"d2c1\",\"component\":\"CheckBox\",\"label\":\"Book Tenryu-ji garden entry time slot\",\"value\":{\"@path\":\"/checks/d2c1\"}},{\"id\":\"d2c2\",\"component\":\"CheckBox\",\"label\":\"Buy Kinkaku-ji tickets in advance\",\"value\":{\"@path\":\"/checks/d2c2\"}}]}}\n{\"version\":\"1.0\",\"updateDataModel\":{\"surfaceId\":\"kyoto\",\"value\":{\"summary\":{\"remaining\":\"4 bookings left to make\"},\"checks\":{\"d1c1\":false,\"d1c2\":false,\"d2c1\":false,\"d2c2\":false}}}}","usage":{"input_tokens":21162,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1993,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":486,"totalMs":7858}}
+{"tMs":486,"delta":"{\"version\":\"1.0"}
+{"tMs":694,"delta":"\",\"createSurface\":{\""}
+{"tMs":694,"delta":"surfaceId\":\"k"}
+{"tMs":694,"delta":"yoto\",\""}
+{"tMs":694,"delta":"catalogId\":\"https://"}
+{"tMs":694,"delta":"a2ui.org/spec"}
+{"tMs":694,"delta":"ification/v1_0/cat"}
+{"tMs":694,"delta":"alogs/basic/cat"}
+{"tMs":694,"delta":"alog.json\",\"components\":["}
+{"tMs":694,"delta":"{\"id\":\"root\",\"component"}
+{"tMs":694,"delta":"\":\"Column\",\"children\":[\""}
+{"tMs":713,"delta":"header\",\"day1"}
+{"tMs":734,"delta":"Title\",\"day1Tim"}
+{"tMs":924,"delta":"eline\",\"day1Checks"}
+{"tMs":924,"delta":"\",\"div"}
+{"tMs":924,"delta":"ider\",\"day2Title\",\"day"}
+{"tMs":924,"delta":"2Timeline\",\"day2"}
+{"tMs":924,"delta":"Checks\"],\"align\":"}
+{"tMs":924,"delta":"\"stretch\"},{\""}
+{"tMs":924,"delta":"id\":\"header\",\"component\":\""}
+{"tMs":924,"delta":"Text\",\"text\":{"}
+{"tMs":926,"delta":"\"@path\":\"/summ"}
+{"tMs":947,"delta":"ary/"}
+{"tMs":968,"delta":"remaining\"},\"variant"}
+{"tMs":990,"delta":"\":\"body"}
+{"tMs":1147,"delta":"\",\"weight\":0"}
+{"tMs":1147,"delta":"},{\"id\":\"day1"}
+{"tMs":1147,"delta":"Title\",\"component\":\"Text"}
+{"tMs":1148,"delta":"\",\"text\":\""}
+{"tMs":1148,"delta":"Day 1 · E"}
+{"tMs":1148,"delta":"astern Kyoto\",\""}
+{"tMs":1148,"delta":"variant\":\"body\"},{"}
+{"tMs":1162,"delta":"\"id\":\"day1Tim"}
+{"tMs":1183,"delta":"eline\",\"component\":\""}
+{"tMs":1205,"delta":"Column\",\"children\":[\"d"}
+{"tMs":1225,"delta":"1s"}
+{"tMs":1247,"delta":"1\",\"d1s2\",\"d"}
+{"tMs":1374,"delta":"1s3\"]"}
+{"tMs":1374,"delta":"},{\"id\":\"d1"}
+{"tMs":1374,"delta":"s1\",\"component\":\"Card"}
+{"tMs":1374,"delta":"\",\"child\":\"d1s1"}
+{"tMs":1374,"delta":"Col\"},{\"id\":"}
+{"tMs":1376,"delta":"\"d1s1Col\",\""}
+{"tMs":1397,"delta":"component\":\"Column\",\"children\":"}
+{"tMs":1419,"delta":"[\"d1s1Head"}
+{"tMs":1441,"delta":"\",\"d1s1Details"}
+{"tMs":1462,"delta":"\"]},{\"id\":\""}
+{"tMs":1484,"delta":"d1s1Head\",\"component"}
+{"tMs":1505,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":1603,"delta":"08"}
+{"tMs":1603,"delta":":30 · Fushim"}
+{"tMs":1603,"delta":"i In"}
+{"tMs":1603,"delta":"ari Ta"}
+{"tMs":1611,"delta":"isha\\"}
+{"tMs":1632,"delta":"n"}
+{"tMs":1653,"delta":"Take"}
+{"tMs":1675,"delta":" J"}
+{"tMs":1696,"delta":"R"}
+{"tMs":1717,"delta":" Nara"}
+{"tMs":1742,"delta":" Line to"}
+{"tMs":1759,"delta":" In"}
+{"tMs":1830,"delta":"ari Station ("}
+{"tMs":1830,"delta":"5"}
+{"tMs":1830,"delta":" min from Kyoto"}
+{"tMs":1845,"delta":" St"}
+{"tMs":1866,"delta":"n"}
+{"tMs":1887,"delta":"), then walk 1 h"}
+{"tMs":1909,"delta":"r to"}
+{"tMs":1930,"delta":" summit.\""}
+{"tMs":1951,"delta":"},{\"id\":\"d1"}
+{"tMs":1973,"delta":"s1Details\",\"component\":\""}
+{"tMs":1995,"delta":"Text\",\"text\":\"Wal"}
+{"tMs":2016,"delta":"k time"}
+{"tMs":2059,"delta":": "}
+{"tMs":2059,"delta":"2"}
+{"tMs":2079,"delta":" hr"}
+{"tMs":2101,"delta":" round"}
+{"tMs":2122,"delta":" trip."}
+{"tMs":2143,"delta":" Arrive early to"}
+{"tMs":2164,"delta":" avoid crowds."}
+{"tMs":2186,"delta":" W"}
+{"tMs":2207,"delta":"ear com"}
+{"tMs":2229,"delta":"fortable shoes.\",\""}
+{"tMs":2250,"delta":"variant\":\"caption\"},"}
+{"tMs":2272,"delta":"{\"id\":\"d1s"}
+{"tMs":2296,"delta":"2\",\"component\":\"Card\",\""}
+{"tMs":2318,"delta":"child\":\"d1s2"}
+{"tMs":2337,"delta":"Col\"},{\"id\":\""}
+{"tMs":2358,"delta":"d1s2Col\",\"component"}
+{"tMs":2381,"delta":"\":\"Column\",\"children\":[\""}
+{"tMs":2402,"delta":"d1s2Head\",\"d"}
+{"tMs":2423,"delta":"1s2Details\"]},"}
+{"tMs":2445,"delta":"{\"id\":\"d1s"}
+{"tMs":2467,"delta":"2Head\",\"component\":\""}
+{"tMs":2488,"delta":"Text\",\"text\":\"11:30"}
+{"tMs":2510,"delta":" · Kiyomiz"}
+{"tMs":2532,"delta":"u-"}
+{"tMs":2552,"delta":"dera\\nB"}
+{"tMs":2574,"delta":"us 206"}
+{"tMs":2594,"delta":" from In"}
+{"tMs":2616,"delta":"ari area"}
+{"tMs":2637,"delta":" to"}
+{"tMs":2659,"delta":" Kiyomizu-"}
+{"tMs":2680,"delta":"mich"}
+{"tMs":2702,"delta":"i (about"}
+{"tMs":2722,"delta":" 25"}
+{"tMs":2744,"delta":" min), then "}
+{"tMs":2767,"delta":"10"}
+{"tMs":2787,"delta":" min u"}
+{"tMs":2809,"delta":"phill wal"}
+{"tMs":2830,"delta":"k.\"},{\"id\":\""}
+{"tMs":2851,"delta":"d1s2Details\",\"component"}
+{"tMs":2873,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":2894,"delta":"Visit time: 1"}
+{"tMs":2916,"delta":".5 hr. "}
+{"tMs":2937,"delta":"Ticket about"}
+{"tMs":2958,"delta":" "}
+{"tMs":2979,"delta":"¥400"}
+{"tMs":3001,"delta":". St"}
+{"tMs":3022,"delta":"ro"}
+{"tMs":3043,"delta":"ll"}
+{"tMs":3081,"delta":" S"}
+{"tMs":3086,"delta":"ann"}
+{"tMs":3107,"delta":"en"}
+{"tMs":3128,"delta":"za"}
+{"tMs":3150,"delta":"ka and Ninenza"}
+{"tMs":3171,"delta":"ka afterwards.\",\"vari"}
+{"tMs":3194,"delta":"ant\":\"caption\"},{"}
+{"tMs":3215,"delta":"\"id\":\"d1s3"}
+{"tMs":3236,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":3258,"delta":"\":\"d1s3Col"}
+{"tMs":3279,"delta":"\"},{\"id\":\"d"}
+{"tMs":3301,"delta":"1s3Col\",\"component\":"}
+{"tMs":3323,"delta":"\"Column\",\"children\":[\"d"}
+{"tMs":3344,"delta":"1s3Head\",\"d1"}
+{"tMs":3366,"delta":"s3Details\"]},{"}
+{"tMs":3387,"delta":"\"id\":\"d1s3"}
+{"tMs":3409,"delta":"Head\",\"component\":\"Text"}
+{"tMs":3430,"delta":"\",\"text\":\"18:00 "}
+{"tMs":3452,"delta":"· Gion"}
+{"tMs":3473,"delta":" ev"}
+{"tMs":3494,"delta":"ening wal"}
+{"tMs":3516,"delta":"k\\nW"}
+{"tMs":3537,"delta":"alk 25"}
+{"tMs":3558,"delta":" min down"}
+{"tMs":3580,"delta":"hill from Kiyom"}
+{"tMs":3602,"delta":"izu-"}
+{"tMs":3623,"delta":"dera via Hig"}
+{"tMs":3644,"delta":"ashi"}
+{"tMs":3666,"delta":"yama.\"},{\"id\":"}
+{"tMs":3687,"delta":"\"d1s3Details\",\""}
+{"tMs":3712,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":3730,"delta":"\"Time"}
+{"tMs":3752,"delta":": 1"}
+{"tMs":3773,"delta":".5 hr. Look"}
+{"tMs":3795,"delta":" for ge"}
+{"tMs":3816,"delta":"i"}
+{"tMs":3838,"delta":"ko around"}
+{"tMs":3858,"delta":" H"}
+{"tMs":3882,"delta":"anamik"}
+{"tMs":3902,"delta":"oji. Dinner n"}
+{"tMs":3934,"delta":"earby in P"}
+{"tMs":3952,"delta":"ontocho al"}
+{"tMs":3973,"delta":"ley.\",\"variant\":\"ca"}
+{"tMs":3987,"delta":"ption\"},{\"id\":\""}
+{"tMs":4009,"delta":"day1Checks\",\"component\":"}
+{"tMs":4030,"delta":"\"Column\",\"children\":[\"d"}
+{"tMs":4052,"delta":"1c1\",\"d1c2"}
+{"tMs":4073,"delta":"\"]},{\"id\":\""}
+{"tMs":4095,"delta":"d1c1\",\"component\":\""}
+{"tMs":4117,"delta":"CheckBox\",\"label\":"}
+{"tMs":4139,"delta":"\"Book Kiyom"}
+{"tMs":4160,"delta":"izu-dera ev"}
+{"tMs":4181,"delta":"ening ill"}
+{"tMs":4202,"delta":"umination (se"}
+{"tMs":4224,"delta":"asonal)\",\"value\":{"}
+{"tMs":4245,"delta":"\"@path\":\"/chec"}
+{"tMs":4267,"delta":"ks/d"}
+{"tMs":4289,"delta":"1c1\"}},{\""}
+{"tMs":4310,"delta":"id\":\"d1c2\",\""}
+{"tMs":4332,"delta":"component\":\"CheckBox"}
+{"tMs":4353,"delta":"\",\"label\":\"Re"}
+{"tMs":4375,"delta":"serve"}
+{"tMs":4396,"delta":" Pontoc"}
+{"tMs":4417,"delta":"ho dinner\",\"value\":{"}
+{"tMs":4439,"delta":"\"@path\":\"/checks"}
+{"tMs":4461,"delta":"/d1c2\"}},"}
+{"tMs":4482,"delta":"{\"id\":\"divider\",\""}
+{"tMs":4504,"delta":"component\":\"Divider\"},"}
+{"tMs":4525,"delta":"{\"id\":\"day2"}
+{"tMs":4547,"delta":"Title\",\"component\":\"Text\",\""}
+{"tMs":4568,"delta":"text\":\"Day 2 "}
+{"tMs":4589,"delta":"· Ar"}
+{"tMs":4611,"delta":"ash"}
+{"tMs":4632,"delta":"i"}
+{"tMs":4653,"delta":"yama &"}
+{"tMs":4675,"delta":" West\",\"variant\":\"body\""}
+{"tMs":4696,"delta":"},{\"id\":\"day2"}
+{"tMs":4719,"delta":"Timeline\",\"component\":\""}
+{"tMs":4739,"delta":"Column\",\"children\":[\"d2"}
+{"tMs":4761,"delta":"s1\",\"d2s2\",\""}
+{"tMs":4783,"delta":"d2s3\"]},{"}
+{"tMs":4804,"delta":"\"id\":\"d2s1"}
+{"tMs":4826,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":4847,"delta":"\":\"d2s1Col"}
+{"tMs":4869,"delta":"\"},{\"id\":\"d"}
+{"tMs":4890,"delta":"2s1Col\",\"component\":"}
+{"tMs":4912,"delta":"\"Column\",\"children\":[\"d"}
+{"tMs":4933,"delta":"2s1Head\",\"d2"}
+{"tMs":4955,"delta":"s1Details\"]},{"}
+{"tMs":4976,"delta":"\"id\":\"d2s1"}
+{"tMs":4998,"delta":"Head\",\"component\":\"Text"}
+{"tMs":5019,"delta":"\",\"text\":\"07:45"}
+{"tMs":5041,"delta":" · Arashiyama"}
+{"tMs":5062,"delta":" Bamboo Gr"}
+{"tMs":5084,"delta":"ove\\nBus or"}
+{"tMs":5105,"delta":" train"}
+{"tMs":5126,"delta":":"}
+{"tMs":5150,"delta":" H"}
+{"tMs":5169,"delta":"ankyu"}
+{"tMs":5190,"delta":" K"}
+{"tMs":5212,"delta":"y"}
+{"tMs":5233,"delta":"oto"}
+{"tMs":5255,"delta":" Line to Arashiyama"}
+{"tMs":5276,"delta":" ("}
+{"tMs":5297,"delta":"about 15"}
+{"tMs":5319,"delta":" min from Kaw"}
+{"tMs":5340,"delta":"aram"}
+{"tMs":5362,"delta":"achi), then walk 5"}
+{"tMs":5384,"delta":" min.\"},{\"id\":"}
+{"tMs":5413,"delta":"\"d2s1Details\",\""}
+{"tMs":5426,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":5449,"delta":"\"Time"}
+{"tMs":5470,"delta":": 45"}
+{"tMs":5491,"delta":" min. Best"}
+{"tMs":5512,"delta":" before"}
+{"tMs":5533,"delta":" "}
+{"tMs":5555,"delta":"9:"}
+{"tMs":5577,"delta":"00 for qu"}
+{"tMs":5598,"delta":"iet pa"}
+{"tMs":5620,"delta":"ths.\",\"variant\":\"ca"}
+{"tMs":5641,"delta":"ption\"},{\"id\":\""}
+{"tMs":5663,"delta":"d2s2\",\"component\":\""}
+{"tMs":5684,"delta":"Card\",\"child\":\"d2"}
+{"tMs":5705,"delta":"s2Col\"},{\""}
+{"tMs":5727,"delta":"id\":\"d2s2"}
+{"tMs":5748,"delta":"Col"}
+{"tMs":5770,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":5791,"delta":"\":[\"d2s2Head"}
+{"tMs":5813,"delta":"\",\"d2s2Details\""}
+{"tMs":5836,"delta":"]},{\"id\":\"d"}
+{"tMs":5856,"delta":"2s2Head\",\"component\":"}
+{"tMs":5877,"delta":"\"Text\",\"text\":\"10"}
+{"tMs":5898,"delta":":00"}
+{"tMs":5920,"delta":" · Ten"}
+{"tMs":5941,"delta":"ry"}
+{"tMs":5963,"delta":"u"}
+{"tMs":5985,"delta":"-ji and"}
+{"tMs":6010,"delta":" Tog"}
+{"tMs":6027,"delta":"et"}
+{"tMs":6049,"delta":"suk"}
+{"tMs":6070,"delta":"yo"}
+{"tMs":6091,"delta":" Bridge\\nW"}
+{"tMs":6113,"delta":"alk 10 min from the"}
+{"tMs":6134,"delta":" bamboo grove.\"},"}
+{"tMs":6156,"delta":"{\"id\":\"d2s"}
+{"tMs":6177,"delta":"2Details\",\"component\":\""}
+{"tMs":6199,"delta":"Text\",\"text\":\"Time:"}
+{"tMs":6220,"delta":" 1"}
+{"tMs":6241,"delta":".5 hr. Gar"}
+{"tMs":6263,"delta":"den "}
+{"tMs":6284,"delta":"ticket about ¥500"}
+{"tMs":6306,"delta":". Stroll along"}
+{"tMs":6329,"delta":" the"}
+{"tMs":6349,"delta":" Katsura"}
+{"tMs":6370,"delta":" River.\",\"variant\":\"ca"}
+{"tMs":6393,"delta":"ption\"},{\"id\":\""}
+{"tMs":6413,"delta":"d2s3\",\"component\":\""}
+{"tMs":6434,"delta":"Card\",\"child\":\"d2"}
+{"tMs":6456,"delta":"s3Col\"},{\""}
+{"tMs":6478,"delta":"id\":\"d2s3"}
+{"tMs":6499,"delta":"Col"}
+{"tMs":6521,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":6542,"delta":"\":[\"d2s3Head"}
+{"tMs":6563,"delta":"\",\"d2s3Details\""}
+{"tMs":6585,"delta":"]},{\"id\":\"d"}
+{"tMs":6607,"delta":"2s3Head\",\"component\":"}
+{"tMs":6628,"delta":"\"Text\",\"text\":\"14"}
+{"tMs":6650,"delta":":00 · Kin"}
+{"tMs":6671,"delta":"kaku-ji ("}
+{"tMs":6693,"delta":"Golden Pav"}
+{"tMs":6714,"delta":"ilion)\\nB"}
+{"tMs":6736,"delta":"us 205"}
+{"tMs":6757,"delta":" from Arashiyama"}
+{"tMs":6779,"delta":" to"}
+{"tMs":6800,"delta":" Kinkak"}
+{"tMs":6821,"delta":"uji-mich"}
+{"tMs":6842,"delta":"i ("}
+{"tMs":6864,"delta":"about 40"}
+{"tMs":6885,"delta":" min).\"},{\"id"}
+{"tMs":6907,"delta":"\":\"d2s3Details"}
+{"tMs":6929,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":6950,"delta":"\":\"Time: 1 "}
+{"tMs":6971,"delta":"hr. Ticket about"}
+{"tMs":6993,"delta":" ¥500. Book"}
+{"tMs":7019,"delta":" early for a tim"}
+{"tMs":7036,"delta":"ed entry sl"}
+{"tMs":7059,"delta":"ot.\",\"variant\":\"ca"}
+{"tMs":7080,"delta":"ption\"},{\"id\":\""}
+{"tMs":7101,"delta":"day2Checks\",\"component\":"}
+{"tMs":7122,"delta":"\"Column\",\"children\":[\"d"}
+{"tMs":7144,"delta":"2c1\",\"d2c2"}
+{"tMs":7165,"delta":"\""}
+{"tMs":7186,"delta":"]},{\"id\":\"d"}
+{"tMs":7209,"delta":"2c1\",\"component\":\"C"}
+{"tMs":7229,"delta":"heckBox\",\"label\":\""}
+{"tMs":7250,"delta":"Book Tenryu-"}
+{"tMs":7272,"delta":"ji garden entry time"}
+{"tMs":7293,"delta":" slot\",\"value\":{\"@"}
+{"tMs":7318,"delta":"path\":\"/checks/d"}
+{"tMs":7336,"delta":"2c1\"}},{\""}
+{"tMs":7358,"delta":"id\":\"d2c2\",\""}
+{"tMs":7379,"delta":"component\":\"CheckBox"}
+{"tMs":7401,"delta":"\",\"label\":\"Bu"}
+{"tMs":7422,"delta":"y"}
+{"tMs":7444,"delta":" Kinkaku-ji"}
+{"tMs":7469,"delta":" t"}
+{"tMs":7488,"delta":"ickets in"}
+{"tMs":7509,"delta":" advance\",\"value\":{\"@"}
+{"tMs":7530,"delta":"path\":\"/checks/d"}
+{"tMs":7551,"delta":"2c2\"}}]}"}
+{"tMs":7573,"delta":"}\n{\"version"}
+{"tMs":7594,"delta":"\":\"1.0\",\"update"}
+{"tMs":7615,"delta":"DataModel\":{\"sur"}
+{"tMs":7638,"delta":"faceId\":\"ky"}
+{"tMs":7659,"delta":"oto\",\"value\":{\"summ"}
+{"tMs":7680,"delta":"ary\":{\"remaining\":"}
+{"tMs":7702,"delta":"\"4 b"}
+{"tMs":7723,"delta":"ookings left to"}
+{"tMs":7745,"delta":" make\"},\"checks\":{"}
+{"tMs":7766,"delta":"\"d1c1\":false,"}
+{"tMs":7788,"delta":"\"d1c2\":false,"}
+{"tMs":7809,"delta":"\"d2c1\":false,"}
+{"tMs":7831,"delta":"\"d2c2\":false}"}
+{"tMs":7852,"delta":"}}}"}

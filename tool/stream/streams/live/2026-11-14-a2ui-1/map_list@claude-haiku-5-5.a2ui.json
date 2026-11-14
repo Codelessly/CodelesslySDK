@@ -1,0 +1,480 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "row1",
+    "column5"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Coffee shops near you",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "column3",
+    "column4"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Map (simplified)"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "textButton1",
+    "textButton2",
+    "textButton3",
+    "textButton4",
+    "textButton5"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "1. Bean & Leaf — ★ 4.6"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "selectShop",
+       "value": {
+        "id": 1
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "2. Roast House — ★ 4.4"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "selectShop",
+       "value": {
+        "id": 2
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "3. Corner Espresso — ★ 4.8"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "selectShop",
+       "value": {
+        "id": 3
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton4": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "4. Morning Cup — ★ 4.2"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "selectShop",
+       "value": {
+        "id": 4
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton5": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "5. Velvet Brew — ★ 4.5"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "selectShop",
+       "value": {
+        "id": 5
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column6"
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text3",
+    "text4",
+    "text5",
+    "text6"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "$(/selected/name)",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "$(formatString(\"Rating: ★ $(/selected/rating)\"))"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "$(formatString(\"Distance: $(/selected/distance)\"))"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "$(formatString(\"Open: $(/selected/hours)\"))"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "selected_name",
+    "type": "text",
+    "value": "Corner Espresso"
+   },
+   {
+    "name": "selected_rating",
+    "type": "text",
+    "value": "4.8"
+   },
+   {
+    "name": "selected_distance",
+    "type": "text",
+    "value": "0.3 km"
+   },
+   {
+    "name": "selected_hours",
+    "type": "text",
+    "value": "7:00–18:00"
+   }
+  ]
+ }
+}

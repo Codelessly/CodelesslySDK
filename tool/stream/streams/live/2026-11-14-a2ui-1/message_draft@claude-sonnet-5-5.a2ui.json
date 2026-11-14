@@ -1,0 +1,430 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "textField1",
+    "textField2",
+    "row1",
+    "textField3",
+    "text3",
+    "row2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Draft email: broken heating",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "To",
+     "hintText": "landlord@example.com"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${email_to}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "email_to",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "textField2": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Subject"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${email_subject}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "email_subject",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text2",
+    "outlinedButton1",
+    "outlinedButton2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Tone: ${email_tone}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Polite"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "setTone",
+       "value": {
+        "tone": "polite"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Firm"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "setTone",
+       "value": {
+        "tone": "firm"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textField3": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Body"
+    },
+    "maxLines": 4
+   },
+   "bind": {
+    "props.initialValue": "${email_body}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "email_body",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${email_status}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "end"
+   },
+   "children": [
+    "textButton1",
+    "filledButton1"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "discardEmail"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sendEmail",
+       "value": {
+        "to": "${email_to}",
+        "subject": "${email_subject}",
+        "body": "${email_body}"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "email_to",
+    "type": "text",
+    "value": "landlord@example.com"
+   },
+   {
+    "name": "email_subject",
+    "type": "text",
+    "value": "Broken heating in my flat – urgent repair needed"
+   },
+   {
+    "name": "email_tone",
+    "type": "text",
+    "value": "polite"
+   },
+   {
+    "name": "email_status",
+    "type": "text",
+    "value": "Draft – not sent yet"
+   },
+   {
+    "name": "email_body",
+    "type": "text",
+    "value": "Dear Landlord,\n\nI hope you are well. I am writing to let you know that the heating in my flat has stopped working. With temperatures dropping, it is becoming quite uncomfortable.\n\nCould you please arrange for someone to look at it as soon as possible? I am happy to provide access at any time that suits.\n\nThank you very much for your help.\n\nKind regards"
+   }
+  ]
+ }
+}

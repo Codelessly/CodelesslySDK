@@ -1,0 +1,222 @@
+{"meta":{"ui":"comparison","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"plans\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"main\"},{\"id\":\"main\",\"component\":\"Column\",\"children\":[\"title\",\"hdr\",\"d0\",\"r1\",\"d1\",\"r2\",\"d2\",\"r3\",\"d3\",\"r4\",\"d4\",\"r5\",\"d5\",\"r6\",\"d6\",\"rec\",\"btnRow\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Compare Phone Plans\"},{\"id\":\"hdr\",\"component\":\"Row\",\"children\":[\"hBlank\",\"hA\",\"hB\"],\"align\":\"center\"},{\"id\":\"hBlank\",\"component\":\"Text\",\"text\":\"\",\"weight\":1},{\"id\":\"hA\",\"component\":\"Text\",\"text\":\"**Plan A: Swift**\",\"weight\":2},{\"id\":\"hB\",\"component\":\"Text\",\"text\":\"**Plan B: Horizon**\",\"weight\":2},{\"id\":\"d0\",\"component\":\"Divider\"},{\"id\":\"r1\",\"component\":\"Row\",\"children\":[\"r1l\",\"r1a\",\"r1b\"],\"align\":\"center\"},{\"id\":\"r1l\",\"component\":\"Text\",\"text\":\"**Price**\",\"weight\":1},{\"id\":\"r1a\",\"component\":\"Text\",\"text\":\"✅ $25/mo\",\"weight\":2},{\"id\":\"r1b\",\"component\":\"Text\",\"text\":\"$40/mo\",\"weight\":2},{\"id\":\"d1\",\"component\":\"Divider\"},{\"id\":\"r2\",\"component\":\"Row\",\"children\":[\"r2l\",\"r2a\",\"r2b\"],\"align\":\"center\"},{\"id\":\"r2l\",\"component\":\"Text\",\"text\":\"**Data**\",\"weight\":1},{\"id\":\"r2a\",\"component\":\"Text\",\"text\":\"10 GB\",\"weight\":2},{\"id\":\"r2b\",\"component\":\"Text\",\"text\":\"✅ Unlimited\",\"weight\":2},{\"id\":\"d2\",\"component\":\"Divider\"},{\"id\":\"r3\",\"component\":\"Row\",\"children\":[\"r3l\",\"r3a\",\"r3b\"],\"align\":\"center\"},{\"id\":\"r3l\",\"component\":\"Text\",\"text\":\"**Calls**\",\"weight\":1},{\"id\":\"r3a\",\"component\":\"Text\",\"text\":\"Unlimited local\",\"weight\":2},{\"id\":\"r3b\",\"component\":\"Text\",\"text\":\"✅ Unlimited national\",\"weight\":2},{\"id\":\"d3\",\"component\":\"Divider\"},{\"id\":\"r4\",\"component\":\"Row\",\"children\":[\"r4l\",\"r4a\",\"r4b\"],\"align\":\"center\"},{\"id\":\"r4l\",\"component\":\"Text\",\"text\":\"**Roaming**\",\"weight\":1},{\"id\":\"r4a\",\"component\":\"Text\",\"text\":\"Not included\",\"weight\":2},{\"id\":\"r4b\",\"component\":\"Text\",\"text\":\"✅ 5 GB in 30 countries\",\"weight\":2},{\"id\":\"d4\",\"component\":\"Divider\"},{\"id\":\"r5\",\"component\":\"Row\",\"children\":[\"r5l\",\"r5a\",\"r5b\"],\"align\":\"center\"},{\"id\":\"r5l\",\"component\":\"Text\",\"text\":\"**Contract**\",\"weight\":1},{\"id\":\"r5a\",\"component\":\"Text\",\"text\":\"✅ No contract\",\"weight\":2},{\"id\":\"r5b\",\"component\":\"Text\",\"text\":\"24 months\",\"weight\":2},{\"id\":\"d5\",\"component\":\"Divider\"},{\"id\":\"r6\",\"component\":\"Row\",\"children\":[\"r6l\",\"r6a\",\"r6b\"],\"align\":\"center\"},{\"id\":\"r6l\",\"component\":\"Text\",\"text\":\"**Extras**\",\"weight\":1},{\"id\":\"r6a\",\"component\":\"Text\",\"text\":\"None\",\"weight\":2},{\"id\":\"r6b\",\"component\":\"Text\",\"text\":\"✅ Streaming + cloud storage\",\"weight\":2},{\"id\":\"d6\",\"component\":\"Divider\"},{\"id\":\"rec\",\"component\":\"Text\",\"text\":\"**Recommendation:** Horizon wins 4 of 6 rows, and its unlimited data and roaming justify the extra $15 a month unless you want zero commitment.\"},{\"id\":\"btnRow\",\"component\":\"Row\",\"children\":[\"btnA\",\"btnB\"],\"justify\":\"spaceEvenly\"},{\"id\":\"btnAT\",\"component\":\"Text\",\"text\":\"Choose Swift\"},{\"id\":\"btnBT\",\"component\":\"Text\",\"text\":\"Choose Horizon\"},{\"id\":\"btnA\",\"component\":\"Button\",\"child\":\"btnAT\",\"action\":{\"event\":{\"name\":\"choose_plan\",\"userMessage\":\"You picked Plan A: Swift\",\"context\":{\"plan\":\"Swift\"}}},\"weight\":1},{\"id\":\"btnB\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"btnBT\",\"action\":{\"event\":{\"name\":\"choose_plan\",\"userMessage\":\"You picked Plan B: Horizon\",\"context\":{\"plan\":\"Horizon\"}}},\"weight\":1}],\"dataModel\":{}}}","usage":{"input_tokens":21162,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1537,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":768,"totalMs":8090}}
+{"tMs":768,"delta":"{\"version\":\"1.0"}
+{"tMs":1092,"delta":"\",\"createSurface\":{\""}
+{"tMs":1092,"delta":"surfaceId\":\"pl"}
+{"tMs":1092,"delta":"ans"}
+{"tMs":1092,"delta":"\",\"catalogId\":\"https"}
+{"tMs":1092,"delta":"://a2ui.org/"}
+{"tMs":1092,"delta":"specification/v1_0/"}
+{"tMs":1092,"delta":"catalogs/basic/"}
+{"tMs":1092,"delta":"catalog.json\",\"components\":"}
+{"tMs":1092,"delta":"[{\"id\":\"root\",\""}
+{"tMs":1092,"delta":"component\":\"Card\",\"child\":"}
+{"tMs":1121,"delta":"\"main\"},{\"id\":"}
+{"tMs":1154,"delta":"\"main\",\"component\":\"Column"}
+{"tMs":1433,"delta":"\",\"children\":[\"title\",\"h"}
+{"tMs":1433,"delta":"dr\",\"d"}
+{"tMs":1433,"delta":"0"}
+{"tMs":1433,"delta":"\",\"r1"}
+{"tMs":1433,"delta":"\",\"d1\",\"r2\",\"d"}
+{"tMs":1433,"delta":"2\",\"r3\",\"d3\",\""}
+{"tMs":1433,"delta":"r4\",\"d4\",\"r5"}
+{"tMs":1433,"delta":"\",\"d5\",\"r"}
+{"tMs":1450,"delta":"6\",\"d6\",\"r"}
+{"tMs":1483,"delta":"ec\",\"bt"}
+{"tMs":1515,"delta":"n"}
+{"tMs":1547,"delta":"Row\""}
+{"tMs":1762,"delta":"]},{\"id\":\"title"}
+{"tMs":1762,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":1762,"delta":"\":\"Compare Ph"}
+{"tMs":1762,"delta":"one Plans\"},{\""}
+{"tMs":1762,"delta":"id\":\"hdr\",\"component"}
+{"tMs":1762,"delta":"\":\"Row\",\"children\":[\""}
+{"tMs":1781,"delta":"hB"}
+{"tMs":1815,"delta":"lank\",\"hA"}
+{"tMs":1848,"delta":"\",\"hB\"],\"align"}
+{"tMs":1881,"delta":"\":\"center\"},{\"id"}
+{"tMs":1915,"delta":"\":\"hBlank\",\"component"}
+{"tMs":1949,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":2092,"delta":"\",\"weight\":1},"}
+{"tMs":2092,"delta":"{\"id\":\"hA\",\""}
+{"tMs":2092,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":2092,"delta":"\"**"}
+{"tMs":2127,"delta":"Pl"}
+{"tMs":2153,"delta":"an A:"}
+{"tMs":2188,"delta":" Sw"}
+{"tMs":2214,"delta":"ift**"}
+{"tMs":2246,"delta":"\",\"weight\":2},{\""}
+{"tMs":2280,"delta":"id\":\"hB\",\"component\":"}
+{"tMs":2314,"delta":"\"Text\",\"text\":\"**"}
+{"tMs":2347,"delta":"Plan B: Hor"}
+{"tMs":2428,"delta":"izon**\",\"weight\":2"}
+{"tMs":2428,"delta":"},{\"id\":\"d0"}
+{"tMs":2448,"delta":"\",\"component\":\"Divider\""}
+{"tMs":2482,"delta":"},{\"id\":\"r1"}
+{"tMs":2523,"delta":"\",\"component\":\"Row\",\"children"}
+{"tMs":2548,"delta":"\":[\"r"}
+{"tMs":2580,"delta":"1l"}
+{"tMs":2614,"delta":"\",\"r1a\",\"r1b"}
+{"tMs":2648,"delta":"\"],\"align\":\"center\""}
+{"tMs":2681,"delta":"},{\"id\":\"r1"}
+{"tMs":2715,"delta":"l\",\"component\":\"Text\",\""}
+{"tMs":2748,"delta":"text\":\"**Price**\",\""}
+{"tMs":2782,"delta":"weight\":1},{\"id"}
+{"tMs":2817,"delta":"\":\"r1a\",\"component\":"}
+{"tMs":2849,"delta":"\"Text\",\"text\":\""}
+{"tMs":2883,"delta":"✅ $25/mo\",\""}
+{"tMs":2916,"delta":"weight\":2},{\"id"}
+{"tMs":2950,"delta":"\":\"r1b\",\"component\":"}
+{"tMs":2983,"delta":"\"Text\",\"text\":\"$"}
+{"tMs":3016,"delta":"40"}
+{"tMs":3053,"delta":"/mo\",\"weight\":2"}
+{"tMs":3085,"delta":"},{\"id\":\"d1"}
+{"tMs":3116,"delta":"\",\"component\":\"Divider\""}
+{"tMs":3149,"delta":"},{\"id\":\"r2"}
+{"tMs":3183,"delta":"\",\"component\":\"Row\",\"children"}
+{"tMs":3216,"delta":"\":[\"r2l\",\"r2"}
+{"tMs":3250,"delta":"a\",\"r2b\"],\""}
+{"tMs":3285,"delta":"align\":\"center\"},{\""}
+{"tMs":3317,"delta":"id\":\"r2l\",\"component"}
+{"tMs":3350,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":3383,"delta":"**Data**\",\"weight\":"}
+{"tMs":3417,"delta":"1},{\"id\":\"r"}
+{"tMs":3451,"delta":"2a\",\"component\":\"Text"}
+{"tMs":3485,"delta":"\",\"text\":\"10 GB"}
+{"tMs":3522,"delta":"\",\"weight\":2},{\""}
+{"tMs":3551,"delta":"id\":\"r2b\",\"component"}
+{"tMs":3584,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":3617,"delta":"✅ Unlimited"}
+{"tMs":3665,"delta":"\",\"weight\":2},{\""}
+{"tMs":3684,"delta":"id\":\"d2\",\"component\":"}
+{"tMs":3718,"delta":"\"Divider\"},{\""}
+{"tMs":3751,"delta":"id\":\"r3\",\"component\":"}
+{"tMs":3784,"delta":"\"Row\",\"children\":[\"r"}
+{"tMs":3819,"delta":"3l\",\"r3a\",\"r"}
+{"tMs":3866,"delta":"3b\"],\"align\":\""}
+{"tMs":3885,"delta":"center\"},{\"id\":\""}
+{"tMs":3919,"delta":"r3l\",\"component\":\""}
+{"tMs":3951,"delta":"Text\",\"text\":\"**Cal"}
+{"tMs":3985,"delta":"ls**\",\"weight\":1},"}
+{"tMs":4018,"delta":"{\"id\":\"r3a"}
+{"tMs":4051,"delta":"\",\"component\":\"Text"}
+{"tMs":4085,"delta":"\",\"text\":\""}
+{"tMs":4118,"delta":"Unlimited local"}
+{"tMs":4151,"delta":"\",\"weight\":2},{\""}
+{"tMs":4185,"delta":"id\":\"r3b\",\"component"}
+{"tMs":4218,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":4252,"delta":"✅ Unlimited"}
+{"tMs":4286,"delta":" national"}
+{"tMs":4318,"delta":"\",\"weight\":2},{\""}
+{"tMs":4352,"delta":"id\":\"d3\",\"component\":"}
+{"tMs":4387,"delta":"\"Divider\"},{\""}
+{"tMs":4418,"delta":"id\":\"r4\",\"component\":"}
+{"tMs":4452,"delta":"\"Row\",\"children\":[\"r"}
+{"tMs":4486,"delta":"4l\",\"r4a\",\"r"}
+{"tMs":4519,"delta":"4b\"],\"align\":\""}
+{"tMs":4552,"delta":"center\"},{\"id\":\""}
+{"tMs":4585,"delta":"r4l\",\"component\":\""}
+{"tMs":4618,"delta":"Text\",\"text\":\"**Ro"}
+{"tMs":4651,"delta":"aming**\",\"weight\":1"}
+{"tMs":4686,"delta":"},{\"id\":\"r4"}
+{"tMs":4718,"delta":"a\",\"component\":\"Text\",\""}
+{"tMs":4752,"delta":"text\":\"Not included\",\"we"}
+{"tMs":4785,"delta":"ight\":2},{\"id\":"}
+{"tMs":4819,"delta":"\"r4b\",\"component\":\""}
+{"tMs":4853,"delta":"Text\",\"text\":\"✅"}
+{"tMs":4885,"delta":" 5"}
+{"tMs":4918,"delta":" G"}
+{"tMs":4951,"delta":"B in "}
+{"tMs":4985,"delta":"30 countries\",\"weight\":"}
+{"tMs":5018,"delta":"2},{\"id\":\"d"}
+{"tMs":5052,"delta":"4\",\"component\":\"Divider"}
+{"tMs":5085,"delta":"\"},{\"id\":\"r"}
+{"tMs":5118,"delta":"5\",\"component\":\"Row\",\""}
+{"tMs":5152,"delta":"children\":[\"r5l\",\"r"}
+{"tMs":5187,"delta":"5a\",\"r5b\"],"}
+{"tMs":5219,"delta":"\"align\":\"center\"},{"}
+{"tMs":5252,"delta":"\"id\":\"r5l\",\""}
+{"tMs":5285,"delta":"component\":\"Text"}
+{"tMs":5318,"delta":"\",\"text\":\"**Contract"}
+{"tMs":5352,"delta":"**\",\"weight\":1},{"}
+{"tMs":5385,"delta":"\"id\":\"r5a\",\""}
+{"tMs":5419,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":5452,"delta":"\"✅ No contract\",\""}
+{"tMs":5486,"delta":"weight\":2},{\"id"}
+{"tMs":5519,"delta":"\":\"r5b\",\"component\":"}
+{"tMs":5552,"delta":"\"Text\",\"text\":\"24"}
+{"tMs":5586,"delta":" months\",\"weight\":2},"}
+{"tMs":5619,"delta":"{\"id\":\"d5\",\""}
+{"tMs":5652,"delta":"component\":\"Divider\"},"}
+{"tMs":5690,"delta":"{\"id\":\"r6\",\""}
+{"tMs":5719,"delta":"component\":\"Row\",\"children\":"}
+{"tMs":5753,"delta":"[\"r6l\",\"r6a"}
+{"tMs":5786,"delta":"\",\"r6b\"],\"align"}
+{"tMs":5819,"delta":"\":\"center\"},{\"id"}
+{"tMs":5854,"delta":"\":\"r6l\",\"component\":"}
+{"tMs":5886,"delta":"\"Text"}
+{"tMs":5919,"delta":"\",\"text\":\"**Extras"}
+{"tMs":5953,"delta":"**\",\"weight\":1},{"}
+{"tMs":5986,"delta":"\"id\":\"r6a\",\""}
+{"tMs":6019,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":6053,"delta":"\"None"}
+{"tMs":6085,"delta":"\",\"weight\":2},{\""}
+{"tMs":6119,"delta":"id\":\"r6b\",\"component"}
+{"tMs":6152,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":6186,"delta":"✅ Streaming +"}
+{"tMs":6221,"delta":" cloud stor"}
+{"tMs":6252,"delta":"age\",\"weight\":2},{"}
+{"tMs":6285,"delta":"\"id\":\"d6\",\"component"}
+{"tMs":6322,"delta":"\":\"Divider\"},{"}
+{"tMs":6352,"delta":"\"id\":\"rec\",\"component"}
+{"tMs":6386,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":6419,"delta":"**Recommendation:**"}
+{"tMs":6452,"delta":" Horizon wins "}
+{"tMs":6486,"delta":"4 of 6 rows"}
+{"tMs":6519,"delta":", and"}
+{"tMs":6552,"delta":" its un"}
+{"tMs":6587,"delta":"limited data and roaming"}
+{"tMs":6619,"delta":" just"}
+{"tMs":6652,"delta":"ify the ext"}
+{"tMs":6686,"delta":"ra $15 a"}
+{"tMs":6725,"delta":" month unless you want"}
+{"tMs":6758,"delta":" z"}
+{"tMs":6785,"delta":"ero commitment.\""}
+{"tMs":6818,"delta":"},{\"id\":\"btn"}
+{"tMs":6851,"delta":"Row\",\"component\":\"Row"}
+{"tMs":6885,"delta":"\",\"children\":[\"btnA\",\""}
+{"tMs":6918,"delta":"btnB\"],\"justify"}
+{"tMs":6952,"delta":"\":\"sp"}
+{"tMs":6985,"delta":"aceE"}
+{"tMs":7024,"delta":"venly\"},{\"id"}
+{"tMs":7052,"delta":"\":\"btnA"}
+{"tMs":7085,"delta":"T"}
+{"tMs":7118,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":7152,"delta":"\":\"Choose Swift"}
+{"tMs":7185,"delta":"\"},{\"id\":\"bt"}
+{"tMs":7218,"delta":"nBT\",\"component\":\""}
+{"tMs":7251,"delta":"Text\",\"text\":\"Choose"}
+{"tMs":7285,"delta":" Horizon\"},{\""}
+{"tMs":7318,"delta":"id\":\"btnA\",\"component"}
+{"tMs":7351,"delta":"\":\"Button\",\"child\":\""}
+{"tMs":7385,"delta":"btnAT\",\"action\":{"}
+{"tMs":7418,"delta":"\"event\":{\"name\":\""}
+{"tMs":7452,"delta":"choose_plan\",\"userM"}
+{"tMs":7485,"delta":"essage\":\"You picked"}
+{"tMs":7518,"delta":" Plan A: Swift\",\""}
+{"tMs":7552,"delta":"context\":{\"plan\":\""}
+{"tMs":7585,"delta":"Swift\"}}},\""}
+{"tMs":7619,"delta":"weight\":1},{\"id"}
+{"tMs":7652,"delta":"\":\"btnB\",\"component\":"}
+{"tMs":7685,"delta":"\"Button\",\"vari"}
+{"tMs":7719,"delta":"ant\":\"primary\",\"child\":"}
+{"tMs":7752,"delta":"\"btnBT\",\"action\":"}
+{"tMs":7785,"delta":"{\"event\":{\"name\":"}
+{"tMs":7819,"delta":"\"choose_plan\",\"user"}
+{"tMs":7852,"delta":"Message\":\"You picked"}
+{"tMs":7890,"delta":" Plan B: Horiz"}
+{"tMs":7919,"delta":"on\",\"context\":{\"plan"}
+{"tMs":7952,"delta":"\":\"Horizon\"}"}
+{"tMs":7985,"delta":"}},\"weight\":1}"}
+{"tMs":8019,"delta":"],"}
+{"tMs":8052,"delta":"\"dataModel\":{}"}
+{"tMs":8085,"delta":"}}"}

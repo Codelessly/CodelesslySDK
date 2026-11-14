@@ -1,0 +1,856 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "row1",
+    "divider1",
+    "row2",
+    "divider2",
+    "row3",
+    "divider3",
+    "row4",
+    "divider4",
+    "row5",
+    "divider5",
+    "row6",
+    "divider6",
+    "row7",
+    "divider7",
+    "text23",
+    "row8"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Compare Phone Plans",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text2",
+    "text3",
+    "text4"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Plan A: Swift**",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Plan B: Horizon**",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text5",
+    "text6",
+    "text7"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Price**",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "✅ $25/mo",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "$40/mo",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text8",
+    "text9",
+    "text10"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Data**",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "10 GB",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "✅ Unlimited",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text11",
+    "text12",
+    "text13"
+   ]
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Calls**",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Unlimited local",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "✅ Unlimited national",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider4": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text14",
+    "text15",
+    "text16"
+   ]
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Roaming**",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Not included",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "✅ 5 GB in 30 countries",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider5": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text17",
+    "text18",
+    "text19"
+   ]
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Contract**",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "✅ No contract",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "24 months",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider6": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text20",
+    "text21",
+    "text22"
+   ]
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Extras**",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "None",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "✅ Streaming + cloud storage",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider7": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Recommendation:** Horizon wins 4 of 6 rows, and its unlimited data and roaming justify the extra $15 a month unless you want zero commitment.",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceEvenly"
+   },
+   "children": [
+    "outlinedButton1",
+    "filledButton1"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Choose Swift"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "choose_plan",
+       "value": {
+        "plan": "Swift"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Choose Horizon"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "choose_plan",
+       "value": {
+        "plan": "Horizon"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

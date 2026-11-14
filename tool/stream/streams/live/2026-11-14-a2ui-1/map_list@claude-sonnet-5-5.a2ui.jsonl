@@ -1,0 +1,184 @@
+{"meta":{"ui":"map_list","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"coffee\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"main\"},{\"id\":\"main\",\"component\":\"Column\",\"children\":[\"title\",\"mapLabel\",\"streets\",\"pins\",\"div1\",\"shopList\",\"div2\",\"detail\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Coffee shops near you\"},{\"id\":\"mapLabel\",\"component\":\"Text\",\"text\":\"Map (streets, pins numbered 1-5)\",\"variant\":\"caption\"},{\"id\":\"streets\",\"component\":\"Icon\",\"name\":{\"svgPath\":\"M0 11h24v1H0z M0 5h24v1H0z M0 18h24v1H0z M7 0h1v24H7z M16 0h1v24h-1z M0 3l24 6v1L0 4z\"}},{\"id\":\"pins\",\"component\":\"List\",\"direction\":\"horizontal\",\"children\":{\"path\":\"/shops\",\"componentId\":\"pinBtn\"}},{\"id\":\"pinBtn\",\"component\":\"Button\",\"variant\":{\"@path\":\"variant\"},\"child\":\"pinTxt\",\"action\":{\"event\":{\"name\":\"selectShop\",\"context\":{\"shopId\":{\"@path\":\"id\"},\"source\":\"pin\"}}}},{\"id\":\"pinTxt\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"📍${n}\"}}},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"shopList\",\"component\":\"List\",\"children\":{\"path\":\"/shops\",\"componentId\":\"shopBtn\"}},{\"id\":\"shopBtn\",\"component\":\"Button\",\"variant\":{\"@path\":\"variant\"},\"child\":\"shopRow\",\"action\":{\"event\":{\"name\":\"selectShop\",\"context\":{\"shopId\":{\"@path\":\"id\"},\"source\":\"list\"}}}},{\"id\":\"shopRow\",\"component\":\"Row\",\"align\":\"center\",\"children\":[\"shopNum\",\"shopName\"]},{\"id\":\"shopNum\",\"component\":\"Text\",\"text\":{\"@path\":\"n\"}},{\"id\":\"shopName\",\"component\":\"Text\",\"text\":{\"@path\":\"name\"}},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"detail\",\"component\":\"Column\",\"children\":[\"dName\",\"dRating\",\"dDist\",\"dHours\"]},{\"id\":\"dName\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/detail/name}\"}}},{\"id\":\"dRating\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Rating: ★ ${/detail/rating}\"}}},{\"id\":\"dDist\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Distance: ${/detail/distance}\"}}},{\"id\":\"dHours\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Hours: ${/detail/hours}\"}}}],\"dataModel\":{\"shops\":[{\"id\":\"s1\",\"n\":\"1\",\"name\":\"Bean There\",\"variant\":\"primary\"},{\"id\":\"s2\",\"n\":\"2\",\"name\":\"Morning Ritual\",\"variant\":\"borderless\"},{\"id\":\"s3\",\"n\":\"3\",\"name\":\"Daily Grind\",\"variant\":\"borderless\"},{\"id\":\"s4\",\"n\":\"4\",\"name\":\"Roast & Co.\",\"variant\":\"borderless\"},{\"id\":\"s5\",\"n\":\"5\",\"name\":\"The Steam Room\",\"variant\":\"borderless\"}],\"detail\":{\"name\":\"1. Bean There\",\"rating\":\"4.7\",\"distance\":\"0.2 mi\",\"hours\":\"7:00 AM – 6:00 PM\"}}}}","usage":{"input_tokens":21172,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1968,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":783}},"ttftMs":8726,"totalMs":14807}}
+{"tMs":8726,"delta":"{"}
+{"tMs":8758,"delta":"\"version\":\"1.0\",\""}
+{"tMs":8790,"delta":"createSurface\":{\"sur"}
+{"tMs":8824,"delta":"faceId\":\"co"}
+{"tMs":8857,"delta":"ffee"}
+{"tMs":8890,"delta":"\",\"catalogId\":\"https"}
+{"tMs":8925,"delta":"://a2ui.org/"}
+{"tMs":8957,"delta":"specification/v1_0/"}
+{"tMs":8990,"delta":"catalogs/basic/"}
+{"tMs":9024,"delta":"catalog.json\",\"components\":"}
+{"tMs":9057,"delta":"[{\"id\":\"root\",\""}
+{"tMs":9091,"delta":"component\":\"Card\",\"child\":"}
+{"tMs":9125,"delta":"\"main"}
+{"tMs":9158,"delta":"\"},{\"id\":\"main"}
+{"tMs":9191,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":9227,"delta":"\":[\"title\",\"m"}
+{"tMs":9258,"delta":"apL"}
+{"tMs":9291,"delta":"abel\",\"stre"}
+{"tMs":9324,"delta":"ets\",\"pins"}
+{"tMs":9358,"delta":"\",\"div"}
+{"tMs":9391,"delta":"1"}
+{"tMs":9425,"delta":"\",\"sh"}
+{"tMs":9458,"delta":"op"}
+{"tMs":9491,"delta":"List\",\"div2\",\"detail\""}
+{"tMs":9524,"delta":"]},{\"id\":\"title"}
+{"tMs":9559,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":9591,"delta":"\":\"Coffee sh"}
+{"tMs":9625,"delta":"ops near you"}
+{"tMs":9659,"delta":"\"},"}
+{"tMs":9691,"delta":"{\"id\":\"mapL"}
+{"tMs":9725,"delta":"abel\",\"component\":\"Text"}
+{"tMs":9758,"delta":"\",\"text\":\"Map (stre"}
+{"tMs":9791,"delta":"ets,"}
+{"tMs":9829,"delta":" pins num"}
+{"tMs":9858,"delta":"bered 1-"}
+{"tMs":9892,"delta":"5)\",\"variant\":\"ca"}
+{"tMs":9929,"delta":"ption\"},{\"id\":\""}
+{"tMs":9959,"delta":"streets\",\"component\":\"Ic"}
+{"tMs":9993,"delta":"on\",\"name\":{\"svg"}
+{"tMs":10025,"delta":"Path\":\"M0 11"}
+{"tMs":10059,"delta":"h24v1H0z M"}
+{"tMs":10092,"delta":"0 5h24v1H"}
+{"tMs":10126,"delta":"0z M0"}
+{"tMs":10159,"delta":" 18h24v1H0"}
+{"tMs":10192,"delta":"z M7 0h1v"}
+{"tMs":10228,"delta":"24H7z M16 0"}
+{"tMs":10259,"delta":"h1v24h-1z"}
+{"tMs":10292,"delta":" M0 3l24 "}
+{"tMs":10326,"delta":"6"}
+{"tMs":10359,"delta":"v1L0 4"}
+{"tMs":10394,"delta":"z\"}},{\"id\":"}
+{"tMs":10426,"delta":"\"pins\",\"component\":\"List"}
+{"tMs":10459,"delta":"\",\"dire"}
+{"tMs":10493,"delta":"ction\":\"horizontal\",\""}
+{"tMs":10526,"delta":"children\":{\"path"}
+{"tMs":10559,"delta":"\":\"/shops\",\"component"}
+{"tMs":10593,"delta":"Id\":\"pinB"}
+{"tMs":10627,"delta":"tn\"}"}
+{"tMs":10661,"delta":"},{\"id\":\"pin"}
+{"tMs":10693,"delta":"Btn\",\"component\":\""}
+{"tMs":10727,"delta":"Button\",\"vari"}
+{"tMs":10760,"delta":"ant\":{"}
+{"tMs":10793,"delta":"\"@"}
+{"tMs":10826,"delta":"path\":\"vari"}
+{"tMs":10859,"delta":"ant\"},\"child"}
+{"tMs":10893,"delta":"\":\"pinT"}
+{"tMs":10927,"delta":"xt\",\"action\":{\"event"}
+{"tMs":10960,"delta":"\":{\"name\":\"select"}
+{"tMs":10994,"delta":"Shop\",\"context\":{\"sh"}
+{"tMs":11027,"delta":"opId\":{\"@path\":"}
+{"tMs":11060,"delta":"\"id\"},"}
+{"tMs":11094,"delta":"\"source\":\"pin\"}"}
+{"tMs":11127,"delta":"}}},{\"id\":\""}
+{"tMs":11160,"delta":"pinTxt\",\"component"}
+{"tMs":11193,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":11226,"delta":"\"@call"}
+{"tMs":11260,"delta":"\":\"formatString\",\""}
+{"tMs":11293,"delta":"args\":{\"value\":\""}
+{"tMs":11327,"delta":"📍${"}
+{"tMs":11360,"delta":"n}\"}}},{\""}
+{"tMs":11393,"delta":"id\":\"div1\",\"component\":"}
+{"tMs":11427,"delta":"\"Divider\"},{\""}
+{"tMs":11460,"delta":"id\":\"shopList\",\"component"}
+{"tMs":11494,"delta":"\":\"List\",\"children\":{\""}
+{"tMs":11527,"delta":"path\":\"/shops\",\"compon"}
+{"tMs":11560,"delta":"entId\":\"shopBt"}
+{"tMs":11594,"delta":"n\"}"}
+{"tMs":11627,"delta":"},{\"id\":\"shop"}
+{"tMs":11660,"delta":"Btn\",\"component\":\""}
+{"tMs":11694,"delta":"Button\",\"variant\":{\"@"}
+{"tMs":11728,"delta":"path\":\"variant\"},\""}
+{"tMs":11760,"delta":"child\":\"shopRow\",\""}
+{"tMs":11797,"delta":"action\":{\"event\":{\""}
+{"tMs":11828,"delta":"name\":\"selectShop\",\""}
+{"tMs":11866,"delta":"context\":{\"shopId\":"}
+{"tMs":11894,"delta":"{\"@path\":\"id\""}
+{"tMs":11927,"delta":"},\"source\":\"list"}
+{"tMs":11961,"delta":"\"}}}},{\"id"}
+{"tMs":11994,"delta":"\":\"shopRow\",\"component"}
+{"tMs":12027,"delta":"\":\"Row\",\"align"}
+{"tMs":12062,"delta":"\":\"center"}
+{"tMs":12094,"delta":"\",\"children\":[\"shopN"}
+{"tMs":12128,"delta":"um\",\"shopName\""}
+{"tMs":12161,"delta":"]},{\"id\":\"sh"}
+{"tMs":12195,"delta":"opNum\",\"component\":\""}
+{"tMs":12228,"delta":"Text\",\"text\":{\"@path"}
+{"tMs":12261,"delta":"\":\"n\"}},{\""}
+{"tMs":12295,"delta":"id\":\"shopName\",\"component"}
+{"tMs":12328,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":12361,"delta":"\"@path\":\"name\"}"}
+{"tMs":12395,"delta":"},{\"id\":\"div2"}
+{"tMs":12428,"delta":"\",\"component\":\"Divider\""}
+{"tMs":12461,"delta":"},{\"id\":\"detail"}
+{"tMs":12494,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":12528,"delta":"\":[\"d"}
+{"tMs":12561,"delta":"Name\",\"dRating\",\"dD"}
+{"tMs":12594,"delta":"ist\",\"dHours\"]},"}
+{"tMs":12628,"delta":"{\"id\":\"dName\",\""}
+{"tMs":12661,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":12694,"delta":"{\"@call"}
+{"tMs":12728,"delta":"\":\"formatString\",\"args\":"}
+{"tMs":12762,"delta":"{\"value\":\"${/det"}
+{"tMs":12795,"delta":"ail/name}\"}}},"}
+{"tMs":12828,"delta":"{\"id\":\"dRating"}
+{"tMs":12862,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":12894,"delta":"\":{\"@call\":\"form"}
+{"tMs":12934,"delta":"atString\",\"args\":{\"value"}
+{"tMs":12969,"delta":"\":\""}
+{"tMs":12995,"delta":"Rating: ★ ${"}
+{"tMs":13028,"delta":"/detail/rating}\""}
+{"tMs":13062,"delta":"}}},{\"id\":\""}
+{"tMs":13095,"delta":"dDist\",\"component\":\""}
+{"tMs":13132,"delta":"Text\",\"text\":{\"@call"}
+{"tMs":13161,"delta":"\":\"formatString\",\"args\":"}
+{"tMs":13195,"delta":"{\"value\":\"Distance"}
+{"tMs":13228,"delta":": ${/detail/dist"}
+{"tMs":13262,"delta":"ance}\"}}},{\""}
+{"tMs":13295,"delta":"id\":\"dHours\",\"component"}
+{"tMs":13328,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":13362,"delta":"\"@call\":\"formatString"}
+{"tMs":13395,"delta":"\",\"args\":{\"value\":\""}
+{"tMs":13428,"delta":"Hours: ${/det"}
+{"tMs":13463,"delta":"ail/hours}\"}}"}
+{"tMs":13495,"delta":"}],"}
+{"tMs":13529,"delta":"\"dataModel\":{\""}
+{"tMs":13565,"delta":"shops\":[{\"id\":"}
+{"tMs":13597,"delta":"\"s1\",\"n\":\"1"}
+{"tMs":13629,"delta":"\",\"name\":\"Bean"}
+{"tMs":13662,"delta":" There"}
+{"tMs":13695,"delta":"\",\"variant\":\"primary\""}
+{"tMs":13728,"delta":"},{\"id\":\"s2"}
+{"tMs":13763,"delta":"\",\"n\":\"2\",\"name\":"}
+{"tMs":13796,"delta":"\"Morning "}
+{"tMs":13829,"delta":"Ritual\",\"variant\":\"bor"}
+{"tMs":13862,"delta":"derless\"},{\"id\":"}
+{"tMs":13897,"delta":"\"s3\",\"n\":\"3"}
+{"tMs":13929,"delta":"\",\"name\":\"Da"}
+{"tMs":13962,"delta":"ily Gr"}
+{"tMs":13995,"delta":"ind\",\"variant\":\"border"}
+{"tMs":14029,"delta":"less\"},{\"id\":\""}
+{"tMs":14062,"delta":"s4\",\"n\":\"4\",\""}
+{"tMs":14096,"delta":"name\":\"Roast &"}
+{"tMs":14129,"delta":" Co"}
+{"tMs":14163,"delta":"."}
+{"tMs":14196,"delta":"\",\"variant\":\"borderless"}
+{"tMs":14229,"delta":"\"},{\"id\":\"s"}
+{"tMs":14263,"delta":"5\",\"n\":\"5\",\"name"}
+{"tMs":14297,"delta":"\":\"The"}
+{"tMs":14329,"delta":" Ste"}
+{"tMs":14362,"delta":"am"}
+{"tMs":14395,"delta":" Room"}
+{"tMs":14429,"delta":"\",\"variant\":\"borderless"}
+{"tMs":14463,"delta":"\"}],\"detail\":{"}
+{"tMs":14496,"delta":"\"name\":\"1"}
+{"tMs":14529,"delta":"."}
+{"tMs":14562,"delta":" Bean There\",\"rating\":"}
+{"tMs":14598,"delta":"\"4.7"}
+{"tMs":14629,"delta":"\",\"distance\":\"0.2"}
+{"tMs":14662,"delta":" m"}
+{"tMs":14695,"delta":"i\",\"hours\":\"7"}
+{"tMs":14729,"delta":":00 AM – 6"}
+{"tMs":14762,"delta":":00 PM\"}}"}
+{"tMs":14796,"delta":"}}"}

@@ -1,0 +1,194 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"migration\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"col\"},{\"id\":\"col\",\"component\":\"Column\",\"children\":[\"title\",\"progress\",\"elapsed\",\"s1\",\"s2\",\"s3\",\"s4\",\"s5\",\"s6\",\"controls\",\"summary\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Blog migration plan\",\"variant\":\"body\",\"weight\":1},{\"id\":\"progress\",\"component\":\"Slider\",\"label\":\"Progress\",\"value\":{\"@path\":\"/progress\"},\"max\":100},{\"id\":\"elapsed\",\"component\":\"Text\",\"text\":{\"@path\":\"/elapsedLabel\"},\"variant\":\"caption\"},{\"id\":\"s1\",\"component\":\"Row\",\"children\":[\"s1icon\",\"s1text\"],\"align\":\"center\"},{\"id\":\"s1icon\",\"component\":\"Icon\",\"name\":{\"@path\":\"/steps/0/icon\"}},{\"id\":\"s1text\",\"component\":\"Text\",\"text\":\"1. Export content: pull posts, pages and media from the current platform.\"},{\"id\":\"s2\",\"component\":\"Row\",\"children\":[\"s2icon\",\"s2text\"],\"align\":\"center\"},{\"id\":\"s2icon\",\"component\":\"Icon\",\"name\":{\"@path\":\"/steps/1/icon\"}},{\"id\":\"s2text\",\"component\":\"Text\",\"text\":\"2. Convert formats: turn exported markup into Markdown with front matter.\"},{\"id\":\"s3\",\"component\":\"Row\",\"children\":[\"s3icon\",\"s3text\"],\"align\":\"center\"},{\"id\":\"s3icon\",\"component\":\"Icon\",\"name\":{\"@path\":\"/steps/2/icon\"}},{\"id\":\"s3text\",\"component\":\"Text\",\"text\":\"3. Move media: upload images and fix asset paths in every post.\"},{\"id\":\"s4\",\"component\":\"Row\",\"children\":[\"s4icon\",\"s4text\"],\"align\":\"center\"},{\"id\":\"s4icon\",\"component\":\"Icon\",\"name\":{\"@path\":\"/steps/3/icon\"}},{\"id\":\"s4text\",\"component\":\"Text\",\"text\":\"4. Preserve URLs: add redirects so old links keep working.\"},{\"id\":\"s5\",\"component\":\"Row\",\"children\":[\"s5icon\",\"s5text\"],\"align\":\"center\"},{\"id\":\"s5icon\",\"component\":\"Icon\",\"name\":{\"@path\":\"/steps/4/icon\"}},{\"id\":\"s5text\",\"component\":\"Text\",\"text\":\"5. Rebuild and test: generate the site locally and check layout and links.\"},{\"id\":\"s6\",\"component\":\"Row\",\"children\":[\"s6icon\",\"s6text\"],\"align\":\"center\"},{\"id\":\"s6icon\",\"component\":\"Icon\",\"name\":{\"@path\":\"/steps/5/icon\"}},{\"id\":\"s6text\",\"component\":\"Text\",\"text\":\"6. Launch: switch DNS, verify the live site and monitor for errors.\"},{\"id\":\"controls\",\"component\":\"Row\",\"children\":[\"startBtn\",\"pauseBtn\"],\"justify\":\"spaceBetween\"},{\"id\":\"startBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"startTxt\",\"action\":{\"event\":{\"name\":\"startMigration\"}}},{\"id\":\"startTxt\",\"component\":\"Text\",\"text\":\"Start\"},{\"id\":\"pauseBtn\",\"component\":\"Button\",\"variant\":\"default\",\"child\":\"pauseTxt\",\"action\":{\"event\":{\"name\":\"pauseMigration\"}}},{\"id\":\"pauseTxt\",\"component\":\"Text\",\"text\":\"Pause\"},{\"id\":\"summary\",\"component\":\"Text\",\"text\":{\"@path\":\"/summary\"},\"variant\":\"caption\"}],\"dataModel\":{\"progress\":0,\"elapsedLabel\":\"Elapsed: 0s\",\"summary\":\"\",\"steps\":[{\"icon\":\"refresh\"},{\"icon\":\"refresh\"},{\"icon\":\"refresh\"},{\"icon\":\"refresh\"},{\"icon\":\"refresh\"},{\"icon\":\"refresh\"}]}}}","usage":{"input_tokens":21168,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1271,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":541,"totalMs":4675}}
+{"tMs":541,"delta":"{"}
+{"tMs":752,"delta":"\"version\":\"1.0\",\""}
+{"tMs":752,"delta":"createSurface\":{\"sur"}
+{"tMs":752,"delta":"faceId\":\"mig"}
+{"tMs":752,"delta":"ration\",\"catalogId\":\""}
+{"tMs":752,"delta":"https://a2ui.org"}
+{"tMs":752,"delta":"/specification/v1_0"}
+{"tMs":752,"delta":"/catalogs/basic"}
+{"tMs":752,"delta":"/catalog.json\",\"components"}
+{"tMs":752,"delta":"\":[{\"id\":\"root"}
+{"tMs":767,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":788,"delta":"\":\"col"}
+{"tMs":810,"delta":"\"},{\"id\":\"col"}
+{"tMs":966,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":966,"delta":"\":[\"title\",\"prog"}
+{"tMs":966,"delta":"ress\",\"el"}
+{"tMs":966,"delta":"apsed\",\"s"}
+{"tMs":966,"delta":"1\",\"s2\",\"s3\",\""}
+{"tMs":966,"delta":"s4\",\"s5\",\"s6"}
+{"tMs":966,"delta":"\",\"contro"}
+{"tMs":982,"delta":"ls\",\"summary\"]},{"}
+{"tMs":1003,"delta":"\"id\":\"title\",\"component\":"}
+{"tMs":1024,"delta":"\"Text\",\"text\":\""}
+{"tMs":1046,"delta":"Blog migration plan\",\""}
+{"tMs":1067,"delta":"variant\":\"body"}
+{"tMs":1184,"delta":"\",\""}
+{"tMs":1184,"delta":"weight\":1"}
+{"tMs":1184,"delta":"},{\"id\":\"progress"}
+{"tMs":1184,"delta":"\",\"component\":\""}
+{"tMs":1184,"delta":"Slider\",\"label"}
+{"tMs":1196,"delta":"\":\"Progress\",\"value\":"}
+{"tMs":1218,"delta":"{\"@path\":\"/prog"}
+{"tMs":1239,"delta":"ress\"},\"max\":100},"}
+{"tMs":1261,"delta":"{\"id\":\"elaps"}
+{"tMs":1282,"delta":"ed\",\"component\":\"Text\",\""}
+{"tMs":1303,"delta":"text\":{"}
+{"tMs":1324,"delta":"\"@"}
+{"tMs":1393,"delta":"path\":\"/elapsed"}
+{"tMs":1394,"delta":"Label\"},\"variant"}
+{"tMs":1394,"delta":"\":\"caption\"},{\""}
+{"tMs":1415,"delta":"id\":\"s1\",\"component\":"}
+{"tMs":1436,"delta":"\"Row\",\"children\":[\"s"}
+{"tMs":1453,"delta":"1ic"}
+{"tMs":1475,"delta":"on\",\"s1text\"],\""}
+{"tMs":1496,"delta":"align\":\"center"}
+{"tMs":1518,"delta":"\"},{\"id\":\"s"}
+{"tMs":1539,"delta":"1icon\",\"component\":\""}
+{"tMs":1561,"delta":"Icon\",\"name\":{\"@"}
+{"tMs":1582,"delta":"path\":\"/ste"}
+{"tMs":1606,"delta":"ps/0"}
+{"tMs":1625,"delta":"/icon\"}},{\""}
+{"tMs":1646,"delta":"id\":\"s1text\",\"component"}
+{"tMs":1669,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":1689,"delta":"1. Export content"}
+{"tMs":1711,"delta":": p"}
+{"tMs":1732,"delta":"ull posts,"}
+{"tMs":1753,"delta":" p"}
+{"tMs":1775,"delta":"ages and"}
+{"tMs":1796,"delta":" media from the current"}
+{"tMs":1818,"delta":" plat"}
+{"tMs":1839,"delta":"form.\"},{\"id\":\""}
+{"tMs":1860,"delta":"s2\",\"component\":\"Row"}
+{"tMs":1882,"delta":"\",\"children\":[\"s2icon"}
+{"tMs":1903,"delta":"\",\"s2text\"],\"align"}
+{"tMs":1925,"delta":"\":\"center\"},{\"id"}
+{"tMs":1946,"delta":"\":\"s2icon\",\"component"}
+{"tMs":1974,"delta":"\":\"Icon\",\"name\":"}
+{"tMs":1994,"delta":"{\"@path\":\"/ste"}
+{"tMs":2011,"delta":"ps/1/icon\"}"}
+{"tMs":2040,"delta":"},{\"id\":\"s2"}
+{"tMs":2054,"delta":"text\",\"component\":\"Text\",\""}
+{"tMs":2076,"delta":"text\":\"2. Convert"}
+{"tMs":2098,"delta":" formats: tur"}
+{"tMs":2119,"delta":"n ex"}
+{"tMs":2140,"delta":"ported markup"}
+{"tMs":2161,"delta":" into Markdown with"}
+{"tMs":2183,"delta":" front"}
+{"tMs":2204,"delta":" matter.\"},{\"id\":"}
+{"tMs":2226,"delta":"\"s3\",\"component\":\""}
+{"tMs":2247,"delta":"Row\",\"children\":[\"s3ic"}
+{"tMs":2269,"delta":"on\",\"s3text\"],\""}
+{"tMs":2290,"delta":"align\":\"center\"},{\""}
+{"tMs":2311,"delta":"id\":\"s3icon\",\""}
+{"tMs":2336,"delta":"component\":\"Icon\",\"name"}
+{"tMs":2354,"delta":"\":{\"@path\":\"/"}
+{"tMs":2376,"delta":"steps/2/icon\""}
+{"tMs":2397,"delta":"}},{\"id\":\"s"}
+{"tMs":2419,"delta":"3text\",\"component\":\"Text"}
+{"tMs":2441,"delta":"\",\"text\":\"3. Move"}
+{"tMs":2462,"delta":" media: up"}
+{"tMs":2484,"delta":"load images"}
+{"tMs":2504,"delta":" and f"}
+{"tMs":2526,"delta":"ix as"}
+{"tMs":2548,"delta":"set paths in"}
+{"tMs":2572,"delta":" every"}
+{"tMs":2591,"delta":" post.\"},{\"id\":\""}
+{"tMs":2612,"delta":"s4\",\"component\":\"Row"}
+{"tMs":2634,"delta":"\",\"children\":[\"s4icon"}
+{"tMs":2655,"delta":"\",\"s4text\"],\"align"}
+{"tMs":2676,"delta":"\":\"center\"},{\"id"}
+{"tMs":2698,"delta":"\":\"s4icon\",\"component"}
+{"tMs":2719,"delta":"\":\"Icon\",\"name\":"}
+{"tMs":2741,"delta":"{\"@path\":\"/ste"}
+{"tMs":2762,"delta":"ps/3/icon\"}"}
+{"tMs":2783,"delta":"},{\"id\":\"s4"}
+{"tMs":2806,"delta":"text\",\"component\":\"Text\",\""}
+{"tMs":2826,"delta":"text\":\"4. Pre"}
+{"tMs":2848,"delta":"serve URLs: add"}
+{"tMs":2870,"delta":" redirects so old"}
+{"tMs":2891,"delta":" links keep working.\"},{\""}
+{"tMs":2914,"delta":"id\":\"s5\",\"component\":"}
+{"tMs":2935,"delta":"\"Row\",\"children\":[\"s"}
+{"tMs":2957,"delta":"5icon\",\"s5text\""}
+{"tMs":2978,"delta":"],\"align\":\"center\"},"}
+{"tMs":2999,"delta":"{\"id\":\"s5ic"}
+{"tMs":3020,"delta":"on\",\"component\":\"Icon"}
+{"tMs":3041,"delta":"\",\"name\":{\"@path\":"}
+{"tMs":3063,"delta":"\"/steps/4/ic"}
+{"tMs":3084,"delta":"on\"}},{\"id\":"}
+{"tMs":3106,"delta":"\"s5text\",\"component\":\""}
+{"tMs":3128,"delta":"Text\",\"text\":\"5."}
+{"tMs":3149,"delta":" R"}
+{"tMs":3170,"delta":"ebuild and"}
+{"tMs":3191,"delta":" test: gener"}
+{"tMs":3213,"delta":"ate the site locally and check lay"}
+{"tMs":3234,"delta":"out and"}
+{"tMs":3256,"delta":" links.\"},{\"id\":\""}
+{"tMs":3277,"delta":"s6\",\"component\":\"Row"}
+{"tMs":3299,"delta":"\",\"children\":[\"s6icon"}
+{"tMs":3321,"delta":"\",\"s6text\"],\"align"}
+{"tMs":3341,"delta":"\":\"center\"},{\"id"}
+{"tMs":3363,"delta":"\":\"s6icon\",\"component"}
+{"tMs":3385,"delta":"\":\"Icon\",\"name\":"}
+{"tMs":3406,"delta":"{\"@path\":\"/ste"}
+{"tMs":3427,"delta":"ps/5/icon\"}"}
+{"tMs":3449,"delta":"},{\"id\":\"s6"}
+{"tMs":3470,"delta":"text\",\"component\":\"Text\",\""}
+{"tMs":3492,"delta":"text\":\"6. Launch"}
+{"tMs":3513,"delta":": swit"}
+{"tMs":3535,"delta":"ch DNS, ver"}
+{"tMs":3556,"delta":"ify the"}
+{"tMs":3577,"delta":" live"}
+{"tMs":3599,"delta":" site and mon"}
+{"tMs":3620,"delta":"itor for"}
+{"tMs":3642,"delta":" errors.\"},{\"id\":"}
+{"tMs":3663,"delta":"\"controls\",\"component\":\""}
+{"tMs":3685,"delta":"Row\",\"children\":[\"startBt"}
+{"tMs":3706,"delta":"n\",\"pauseBtn"}
+{"tMs":3728,"delta":"\"],\"justify\":\"sp"}
+{"tMs":3749,"delta":"aceBetween\"},{"}
+{"tMs":3771,"delta":"\"id\":\"startBtn"}
+{"tMs":3792,"delta":"\",\"component\":\"Button\",\"vari"}
+{"tMs":3814,"delta":"ant\":\"primary\",\"child\":"}
+{"tMs":3835,"delta":"\"startT"}
+{"tMs":3857,"delta":"xt\",\"action\":{\"event"}
+{"tMs":3878,"delta":"\":{\"name\":\"start"}
+{"tMs":3901,"delta":"Migration\"}}},{"}
+{"tMs":3921,"delta":"\"id\":\"startTxt"}
+{"tMs":3943,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":3964,"delta":"\":\"Start\"},{\""}
+{"tMs":3986,"delta":"id\":\"pauseBt"}
+{"tMs":4007,"delta":"n\",\"component\":\"Button\",\""}
+{"tMs":4029,"delta":"vari"}
+{"tMs":4050,"delta":"ant\":\"default\",\"child\":\""}
+{"tMs":4071,"delta":"pauseTxt\",\"action"}
+{"tMs":4093,"delta":"\":{\"event\":{\"name"}
+{"tMs":4115,"delta":"\":\"pauseMigration"}
+{"tMs":4136,"delta":"\"}}},{\"id\":"}
+{"tMs":4158,"delta":"\"pauseTxt\",\""}
+{"tMs":4179,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":4200,"delta":"\"Pause\"},{\""}
+{"tMs":4221,"delta":"id\":\"summary\",\"component\":"}
+{"tMs":4243,"delta":"\"Text\",\"text\":{\""}
+{"tMs":4264,"delta":"@path\":\""}
+{"tMs":4286,"delta":"/summary\"},\"variant"}
+{"tMs":4307,"delta":"\":\"ca"}
+{"tMs":4329,"delta":"ption\"}],\"dataMod"}
+{"tMs":4350,"delta":"el\":{\"progress\":0"}
+{"tMs":4372,"delta":",\"elapsedLab"}
+{"tMs":4393,"delta":"el\":\""}
+{"tMs":4415,"delta":"Elapsed: 0s"}
+{"tMs":4436,"delta":"\",\"summary\":\"\",\""}
+{"tMs":4458,"delta":"steps\":[{\"icon"}
+{"tMs":4479,"delta":"\":\"ref"}
+{"tMs":4500,"delta":"resh\"},{\"icon"}
+{"tMs":4522,"delta":"\":\"ref"}
+{"tMs":4544,"delta":"resh\"},{\"icon"}
+{"tMs":4565,"delta":"\":\"refresh\"},{"}
+{"tMs":4586,"delta":"\"icon\":\"refresh"}
+{"tMs":4608,"delta":"\"},{\"icon\":\""}
+{"tMs":4629,"delta":"refresh\"},{\"ic"}
+{"tMs":4651,"delta":"on\":\"refresh\"}"}
+{"tMs":4672,"delta":"]}}}"}

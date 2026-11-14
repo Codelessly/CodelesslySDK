@@ -1,0 +1,260 @@
+{"meta":{"ui":"image_gallery","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"trip-gallery\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"gallery-column\"},{\"id\":\"gallery-column\",\"component\":\"Column\",\"children\":[\"gallery-title\",\"photo-grid\",\"lightbox-state-note\"]},{\"id\":\"gallery-title\",\"component\":\"Text\",\"text\":\"My Trip Photos\",\"variant\":\"body\",\"weight\":1},{\"id\":\"photo-grid\",\"component\":\"Column\",\"children\":[\"row-1\",\"row-2\",\"row-3\"]},{\"id\":\"row-1\",\"component\":\"Row\",\"children\":[\"photo-1\",\"photo-2\",\"photo-3\"]},{\"id\":\"row-2\",\"component\":\"Row\",\"children\":[\"photo-4\",\"photo-5\",\"photo-6\"]},{\"id\":\"row-3\",\"component\":\"Row\",\"children\":[\"photo-7\",\"photo-8\",\"photo-9\"]},{\"id\":\"photo-1\",\"component\":\"Button\",\"child\":\"photo-1-cap\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"openPhoto\",\"context\":{\"index\":1}}}},{\"id\":\"photo-1-cap\",\"component\":\"Text\",\"text\":\"Sunrise over the bay\"},{\"id\":\"photo-2\",\"component\":\"Button\",\"child\":\"photo-2-cap\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"openPhoto\",\"context\":{\"index\":2}}}},{\"id\":\"photo-2-cap\",\"component\":\"Text\",\"text\":\"Old town alleys\"},{\"id\":\"photo-3\",\"component\":\"Button\",\"child\":\"photo-3-cap\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"openPhoto\",\"context\":{\"index\":3}}}},{\"id\":\"photo-3-cap\",\"component\":\"Text\",\"text\":\"Mountain trail\"},{\"id\":\"photo-4\",\"component\":\"Button\",\"child\":\"photo-4-cap\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"openPhoto\",\"context\":{\"index\":4}}}},{\"id\":\"photo-4-cap\",\"component\":\"Text\",\"text\":\"Market stalls\"},{\"id\":\"photo-5\",\"component\":\"Button\",\"child\":\"photo-5-cap\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"openPhoto\",\"context\":{\"index\":5}}}},{\"id\":\"photo-5-cap\",\"component\":\"Text\",\"text\":\"Lake at dusk\"},{\"id\":\"photo-6\",\"component\":\"Button\",\"child\":\"photo-6-cap\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"openPhoto\",\"context\":{\"index\":6}}}},{\"id\":\"photo-6-cap\",\"component\":\"Text\",\"text\":\"Night train\"},{\"id\":\"photo-7\",\"component\":\"Button\",\"child\":\"photo-7-cap\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"openPhoto\",\"context\":{\"index\":7}}}},{\"id\":\"photo-7-cap\",\"component\":\"Text\",\"text\":\"Harbor boats\"},{\"id\":\"photo-8\",\"component\":\"Button\",\"child\":\"photo-8-cap\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"openPhoto\",\"context\":{\"index\":8}}}},{\"id\":\"photo-8-cap\",\"component\":\"Text\",\"text\":\"Forest path\"},{\"id\":\"photo-9\",\"component\":\"Button\",\"child\":\"photo-9-cap\",\"variant\":\"borderless\",\"action\":{\"event\":{\"name\":\"openPhoto\",\"context\":{\"index\":9}}}},{\"id\":\"photo-9-cap\",\"component\":\"Text\",\"text\":\"Last evening\"},{\"id\":\"lightbox-state-note\",\"component\":\"Text\",\"text\":\"Tap a photo to view it large. Use the arrow keys to move, and Escape to close.\",\"variant\":\"caption\"}],\"dataModel\":{\"lightbox\":{\"open\":false,\"index\":1,\"total\":9,\"counter\":\"1 of 9\",\"caption\":\"Sunrise over the bay\"},\"photos\":[{\"caption\":\"Sunrise over the bay\",\"gradient\":\"linear-gradient(135deg,#ff9a8b,#ffd194)\"},{\"caption\":\"Old town alleys\",\"gradient\":\"linear-gradient(135deg,#a1c4fd,#c2e9fb)\"},{\"caption\":\"Mountain trail\",\"gradient\":\"linear-gradient(135deg,#84fab0,#8fd3f4)\"},{\"caption\":\"Market stalls\",\"gradient\":\"linear-gradient(135deg,#fccb90,#d57eeb)\"},{\"caption\":\"Lake at dusk\",\"gradient\":\"linear-gradient(135deg,#667eea,#764ba2)\"},{\"caption\":\"Night train\",\"gradient\":\"linear-gradient(135deg,#243b55,#141e30)\"},{\"caption\":\"Harbor boats\",\"gradient\":\"linear-gradient(135deg,#43cea2,#185a9d)\"},{\"caption\":\"Forest path\",\"gradient\":\"linear-gradient(135deg,#56ab2f,#a8e063)\"},{\"caption\":\"Last evening\",\"gradient\":\"linear-gradient(135deg,#f093fb,#f5576c)\"}]}}}","usage":{"input_tokens":21168,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1665,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":702,"totalMs":6291}}
+{"tMs":702,"delta":"{"}
+{"tMs":903,"delta":"\"version\":\"1.0\",\""}
+{"tMs":903,"delta":"createSurface\":{\"sur"}
+{"tMs":903,"delta":"faceId\":\"trip"}
+{"tMs":903,"delta":"-gallery\",\"catalog"}
+{"tMs":904,"delta":"Id\":\"https://a2"}
+{"tMs":904,"delta":"ui.org/specification/v"}
+{"tMs":904,"delta":"1_0/catalogs"}
+{"tMs":904,"delta":"/basic/catalog."}
+{"tMs":904,"delta":"json\",\"components\":[{\"id"}
+{"tMs":920,"delta":"\":\"root\",\"component\":\""}
+{"tMs":941,"delta":"Card\",\"child\":\"gallery"}
+{"tMs":963,"delta":"-"}
+{"tMs":1116,"delta":"column\"},{\"id\":\""}
+{"tMs":1116,"delta":"gallery-column\",\"component\":"}
+{"tMs":1116,"delta":"\"Column\",\"children\":[\"g"}
+{"tMs":1116,"delta":"allery-title\",\"phot"}
+{"tMs":1116,"delta":"o-grid\",\""}
+{"tMs":1116,"delta":"l"}
+{"tMs":1116,"delta":"ightbox-state"}
+{"tMs":1134,"delta":"-"}
+{"tMs":1155,"delta":"note\"]},{\"id\":"}
+{"tMs":1177,"delta":"\"gallery-title\",\"component"}
+{"tMs":1198,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":1220,"delta":"My"}
+{"tMs":1334,"delta":" Trip Photos\",\"vari"}
+{"tMs":1335,"delta":"ant\":\"body"}
+{"tMs":1335,"delta":"\",\""}
+{"tMs":1335,"delta":"weight\":1"}
+{"tMs":1335,"delta":"},{\"id\":\"photo"}
+{"tMs":1348,"delta":"-grid\",\"component\":\""}
+{"tMs":1370,"delta":"Column\",\"children\":[\"row"}
+{"tMs":1391,"delta":"-1\",\"row-2\",\""}
+{"tMs":1413,"delta":"row-3\"]},{\""}
+{"tMs":1435,"delta":"id\":\"row-1\",\"component"}
+{"tMs":1456,"delta":"\":\"Row\",\"children\":[\""}
+{"tMs":1477,"delta":"photo-1\",\"photo-"}
+{"tMs":1549,"delta":"2\",\"photo-3\"]"}
+{"tMs":1549,"delta":"},{\"id\":\"row-"}
+{"tMs":1549,"delta":"2\",\"component\":\"Row\",\""}
+{"tMs":1563,"delta":"children\":[\"photo-4\",\""}
+{"tMs":1585,"delta":"photo-5\",\"photo-"}
+{"tMs":1606,"delta":"6\"]},{\"id\":"}
+{"tMs":1628,"delta":"\"row-3\",\"component\":\""}
+{"tMs":1649,"delta":"Row\",\"children\":[\"photo"}
+{"tMs":1670,"delta":"-7\",\"photo-8\",\""}
+{"tMs":1692,"delta":"photo-9\"]},{"}
+{"tMs":1713,"delta":"\"id\":\"photo-1"}
+{"tMs":1735,"delta":"\",\"component\":\"Button"}
+{"tMs":1764,"delta":"\",\"child\":\""}
+{"tMs":1778,"delta":"photo-1-c"}
+{"tMs":1799,"delta":"ap\",\"variant\":\"border"}
+{"tMs":1821,"delta":"less\",\"action\":{\"event\":"}
+{"tMs":1842,"delta":"{\"name\":\"open"}
+{"tMs":1863,"delta":"P"}
+{"tMs":1885,"delta":"hoto\",\"context\":{\""}
+{"tMs":1908,"delta":"index\":1}}}},{"}
+{"tMs":1929,"delta":"\"id\":\"photo-1"}
+{"tMs":1950,"delta":"-cap\",\"component\":\""}
+{"tMs":1971,"delta":"Text\",\"text\":\""}
+{"tMs":1993,"delta":"S"}
+{"tMs":2014,"delta":"unr"}
+{"tMs":2036,"delta":"ise over"}
+{"tMs":2057,"delta":" the b"}
+{"tMs":2078,"delta":"ay\"},{\"id\":\""}
+{"tMs":2101,"delta":"photo-2\",\"component\":\""}
+{"tMs":2122,"delta":"Button\",\"child\":\"photo"}
+{"tMs":2143,"delta":"-2-cap\",\"variant"}
+{"tMs":2165,"delta":"\":\"borderless\",\"action\":"}
+{"tMs":2186,"delta":"{\"event\":{\"name\":"}
+{"tMs":2207,"delta":"\"openPhoto\",\"context"}
+{"tMs":2229,"delta":"\":{\"index\":2}}"}
+{"tMs":2250,"delta":"}},{\"id\":\"phot"}
+{"tMs":2280,"delta":"o-2-cap\",\"component"}
+{"tMs":2293,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":2315,"delta":"Old"}
+{"tMs":2335,"delta":" town al"}
+{"tMs":2357,"delta":"leys\"},{\"id\":"}
+{"tMs":2378,"delta":"\"photo-3\",\"component\":"}
+{"tMs":2401,"delta":"\"Button\",\"child\":\"phot"}
+{"tMs":2422,"delta":"o-3-cap\",\"vari"}
+{"tMs":2443,"delta":"ant\":\"borderless\",\"action"}
+{"tMs":2465,"delta":"\":{\"event\":{\"name"}
+{"tMs":2488,"delta":"\":\"openPhoto\",\""}
+{"tMs":2508,"delta":"context\":{\"index\":3}"}
+{"tMs":2529,"delta":"}}},{\"id\":\""}
+{"tMs":2551,"delta":"photo-3-cap\",\""}
+{"tMs":2572,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":2593,"delta":"\"Mountain tr"}
+{"tMs":2618,"delta":"ail\"},{\"id\":\""}
+{"tMs":2636,"delta":"photo-4\",\"component\":\""}
+{"tMs":2658,"delta":"Button\",\"child\":\"photo"}
+{"tMs":2679,"delta":"-4-cap\",\"variant"}
+{"tMs":2701,"delta":"\":\"borderless\",\"action\":"}
+{"tMs":2722,"delta":"{\"event\":{\"name\":"}
+{"tMs":2743,"delta":"\"openPhoto\",\"context"}
+{"tMs":2765,"delta":"\":{\"index\":4}}"}
+{"tMs":2787,"delta":"}},{\"id\":\"phot"}
+{"tMs":2808,"delta":"o-4-cap\",\"component"}
+{"tMs":2830,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":2851,"delta":"Market st"}
+{"tMs":2872,"delta":"alls\"},{\"id\":"}
+{"tMs":2894,"delta":"\"photo-5\",\"component\":"}
+{"tMs":2915,"delta":"\"Button\",\"child\":\"phot"}
+{"tMs":2942,"delta":"o-5-cap\",\"vari"}
+{"tMs":2959,"delta":"ant\":\"borderless\",\"action"}
+{"tMs":2980,"delta":"\":{\"event\":{\"name"}
+{"tMs":3001,"delta":"\":\"openPhoto\",\""}
+{"tMs":3023,"delta":"context\":{\"index\":5}"}
+{"tMs":3045,"delta":"}}},{\"id\":\""}
+{"tMs":3065,"delta":"photo-5-cap\",\""}
+{"tMs":3087,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":3109,"delta":"\"Lake at dusk"}
+{"tMs":3130,"delta":"\"},{\"id\":\"phot"}
+{"tMs":3151,"delta":"o-6\",\"component\":\""}
+{"tMs":3172,"delta":"Button\",\"child\":\"photo-"}
+{"tMs":3194,"delta":"6-cap\",\"variant\":"}
+{"tMs":3215,"delta":"\"borderless\",\"action\":{"}
+{"tMs":3237,"delta":"\"event\":{\"name\":\""}
+{"tMs":3259,"delta":"openPhoto\",\"context\":"}
+{"tMs":3280,"delta":"{\"index\":6}}}"}
+{"tMs":3302,"delta":"},{\"id\":\"photo"}
+{"tMs":3323,"delta":"-6-cap\",\"component\":"}
+{"tMs":3345,"delta":"\"Text\",\"text\":\""}
+{"tMs":3366,"delta":"Night"}
+{"tMs":3387,"delta":" train"}
+{"tMs":3409,"delta":"\""}
+{"tMs":3430,"delta":"},{\"id\":\"photo"}
+{"tMs":3452,"delta":"-7\",\"component\":\"Button"}
+{"tMs":3473,"delta":"\",\"child\":\"photo-7"}
+{"tMs":3495,"delta":"-cap\",\"variant\":\""}
+{"tMs":3516,"delta":"borderless\",\"action\":{\""}
+{"tMs":3538,"delta":"event\":{\"name\":\"open"}
+{"tMs":3559,"delta":"Photo\",\"context\":{"}
+{"tMs":3580,"delta":"\"index\":7}}}},"}
+{"tMs":3602,"delta":"{\"id\":\"photo-"}
+{"tMs":3624,"delta":"7-cap\",\"component\":\""}
+{"tMs":3645,"delta":"Text\",\"text\":\"Har"}
+{"tMs":3666,"delta":"bor bo"}
+{"tMs":3688,"delta":"ats\"},{\"id\":\""}
+{"tMs":3710,"delta":"photo-8\",\"component\":\""}
+{"tMs":3732,"delta":"Button\",\"child\":\"photo"}
+{"tMs":3753,"delta":"-8-cap\",\"variant"}
+{"tMs":3774,"delta":"\":\"borderless\",\"action\":"}
+{"tMs":3795,"delta":"{\"event\":{\"name\":"}
+{"tMs":3817,"delta":"\"openPhoto\",\"context"}
+{"tMs":3839,"delta":"\":{\"index\":8}}"}
+{"tMs":3860,"delta":"}},{\"id\":\"phot"}
+{"tMs":3881,"delta":"o-8-cap\",\"component"}
+{"tMs":3902,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":3924,"delta":"Forest path"}
+{"tMs":3945,"delta":"\"},{\"id\":\"phot"}
+{"tMs":3967,"delta":"o-9\",\"component\":\""}
+{"tMs":3989,"delta":"Button\",\"child\":\"photo-"}
+{"tMs":4010,"delta":"9-cap\",\"variant\":"}
+{"tMs":4031,"delta":"\"borderless\",\"action\":{"}
+{"tMs":4053,"delta":"\"event\":{\"name\":\""}
+{"tMs":4074,"delta":"openPhoto\",\"context\":"}
+{"tMs":4095,"delta":"{\"index\":9}}}"}
+{"tMs":4117,"delta":"},{\"id\":\"photo"}
+{"tMs":4138,"delta":"-9-cap\",\"component\":"}
+{"tMs":4160,"delta":"\"Text\",\"text\":\""}
+{"tMs":4181,"delta":"Last"}
+{"tMs":4202,"delta":" ev"}
+{"tMs":4225,"delta":"ening\""}
+{"tMs":4248,"delta":"},{\"id\":\"light"}
+{"tMs":4268,"delta":"box-state-note\",\"component"}
+{"tMs":4289,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":4310,"delta":"Tap a photo to view"}
+{"tMs":4332,"delta":" it large. Use"}
+{"tMs":4353,"delta":" the"}
+{"tMs":4374,"delta":" arrow"}
+{"tMs":4396,"delta":" keys to"}
+{"tMs":4418,"delta":" move, and Escape to close"}
+{"tMs":4439,"delta":".\",\"variant\":\"caption"}
+{"tMs":4461,"delta":"\"}],\"dataModel"}
+{"tMs":4482,"delta":"\":{\"l"}
+{"tMs":4503,"delta":"ightbox\":{\"open\":"}
+{"tMs":4527,"delta":"false,\"index\":1"}
+{"tMs":4546,"delta":",\"total\":9,\"coun"}
+{"tMs":4568,"delta":"ter\":\"1 of 9"}
+{"tMs":4590,"delta":"\",\"caption\":\"Sun"}
+{"tMs":4610,"delta":"rise over the bay\"},"}
+{"tMs":4632,"delta":"\"phot"}
+{"tMs":4654,"delta":"os\":[{\"caption\":"}
+{"tMs":4675,"delta":"\"Sunrise over the"}
+{"tMs":4696,"delta":" bay\",\"gradient\":\""}
+{"tMs":4718,"delta":"linear-gradient(135"}
+{"tMs":4739,"delta":"deg,#ff9a"}
+{"tMs":4761,"delta":"8"}
+{"tMs":4782,"delta":"b"}
+{"tMs":4806,"delta":",#ffd194"}
+{"tMs":4826,"delta":")\"},{\"caption\":"}
+{"tMs":4846,"delta":"\"Old town alleys\",\""}
+{"tMs":4868,"delta":"gradient\":\"linear-"}
+{"tMs":4891,"delta":"gradient(135deg,"}
+{"tMs":4911,"delta":"#a1"}
+{"tMs":4933,"delta":"c4f"}
+{"tMs":4955,"delta":"d,#c"}
+{"tMs":4975,"delta":"2e9fb)\"},"}
+{"tMs":4997,"delta":"{\"caption\":\"M"}
+{"tMs":5018,"delta":"ountain trail\",\"gradient"}
+{"tMs":5040,"delta":"\":\"linear-gradient"}
+{"tMs":5061,"delta":"(135deg,#84"}
+{"tMs":5083,"delta":"f"}
+{"tMs":5104,"delta":"ab0"}
+{"tMs":5127,"delta":",#8"}
+{"tMs":5148,"delta":"fd3f"}
+{"tMs":5169,"delta":"4)\"},{\"caption"}
+{"tMs":5190,"delta":"\":\"Market stalls\",\""}
+{"tMs":5211,"delta":"gradient\":\"linear-"}
+{"tMs":5233,"delta":"gradient(135deg,"}
+{"tMs":5254,"delta":"#fcc"}
+{"tMs":5276,"delta":"b"}
+{"tMs":5297,"delta":"90"}
+{"tMs":5318,"delta":",#d"}
+{"tMs":5340,"delta":"57"}
+{"tMs":5361,"delta":"e"}
+{"tMs":5383,"delta":"e"}
+{"tMs":5404,"delta":"b)\"},{\"caption"}
+{"tMs":5426,"delta":"\":\"Lake at dus"}
+{"tMs":5447,"delta":"k\",\"gradient\":\"lin"}
+{"tMs":5469,"delta":"ear-gradient(135de"}
+{"tMs":5491,"delta":"g,#667"}
+{"tMs":5512,"delta":"eea,#764"}
+{"tMs":5533,"delta":"ba2)\"},{\""}
+{"tMs":5555,"delta":"caption\":\"Night train\",\""}
+{"tMs":5576,"delta":"gradient\":\"linear-"}
+{"tMs":5598,"delta":"gradient(135deg,"}
+{"tMs":5619,"delta":"#243"}
+{"tMs":5641,"delta":"b"}
+{"tMs":5662,"delta":"55"}
+{"tMs":5683,"delta":",#141"}
+{"tMs":5705,"delta":"e"}
+{"tMs":5726,"delta":"30"}
+{"tMs":5748,"delta":")\"},{\"caption\":"}
+{"tMs":5770,"delta":"\"Harbor boats\",\""}
+{"tMs":5791,"delta":"gradient\":\"linear-"}
+{"tMs":5812,"delta":"gradient(135deg,"}
+{"tMs":5834,"delta":"#43"}
+{"tMs":5855,"delta":"c"}
+{"tMs":5876,"delta":"ea"}
+{"tMs":5898,"delta":"2"}
+{"tMs":5919,"delta":",#185"}
+{"tMs":5941,"delta":"a9"}
+{"tMs":5962,"delta":"d)\"},{\"caption"}
+{"tMs":5984,"delta":"\":\"Forest path\",\"g"}
+{"tMs":6005,"delta":"radient\":\"linear-g"}
+{"tMs":6026,"delta":"radient(135deg,#"}
+{"tMs":6048,"delta":"56"}
+{"tMs":6091,"delta":"ab2f,#a"}
+{"tMs":6113,"delta":"8e063"}
+{"tMs":6134,"delta":")\"},{\"caption\":"}
+{"tMs":6155,"delta":"\"Last evening\",\"grad"}
+{"tMs":6177,"delta":"ient\":\"linear-grad"}
+{"tMs":6201,"delta":"ient(135deg,#f"}
+{"tMs":6221,"delta":"093fb,#f"}
+{"tMs":6241,"delta":"5576c)\"}]}"}
+{"tMs":6264,"delta":"}}"}

@@ -1,0 +1,715 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "text3",
+    "divider1",
+    "column3",
+    "divider2",
+    "column4",
+    "divider3",
+    "column5",
+    "divider4",
+    "filledButton4"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Review proposed changes",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "`config/app.yaml`"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${keptCount} of 3 kept · ${decidedCount} of 3 decided",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text4",
+    "text5",
+    "text6",
+    "row1"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Hunk 1** · `@@ -4 +4 @@` · ${h1_status}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "`4  - port: 8080`",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "`4  + port: 9090`",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "filledButton1",
+    "outlinedButton1"
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Keep"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "keepHunk",
+       "value": {
+        "hunk": "h1"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "discardHunk",
+       "value": {
+        "hunk": "h1"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text7",
+    "text8",
+    "text9",
+    "row2"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Hunk 2** · `@@ -12 +12 @@` · ${h2_status}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "`12 - log_level: debug`",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "`12 + log_level: info`",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "filledButton2",
+    "outlinedButton2"
+   ]
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Keep"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "keepHunk",
+       "value": {
+        "hunk": "h2"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "discardHunk",
+       "value": {
+        "hunk": "h2"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text10",
+    "text11",
+    "text12",
+    "row3"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Hunk 3** · `@@ -21 +21 @@` · ${h3_status}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "`21 - timeout: 30`",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "`21 + timeout: 60`",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "filledButton3",
+    "outlinedButton3"
+   ]
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Keep"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "keepHunk",
+       "value": {
+        "hunk": "h3"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "discardHunk",
+       "value": {
+        "hunk": "h3"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "divider4": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "filledButton4": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Apply changes"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "applyChanges"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "h1_status",
+    "type": "text",
+    "value": "pending"
+   },
+   {
+    "name": "h2_status",
+    "type": "text",
+    "value": "pending"
+   },
+   {
+    "name": "h3_status",
+    "type": "text",
+    "value": "pending"
+   },
+   {
+    "name": "keptCount",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "decidedCount",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "allDecided",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

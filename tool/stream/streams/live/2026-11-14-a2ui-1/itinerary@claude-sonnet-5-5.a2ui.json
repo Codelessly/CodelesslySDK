@@ -1,0 +1,898 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "text3",
+    "column3",
+    "column5",
+    "divider1",
+    "text8",
+    "column6",
+    "column8"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Kyoto in two days",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${remaining} bookings left to make"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Day 1: Eastern Kyoto",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${day1}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column4"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "text6",
+    "textButton1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text4",
+    "text5"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.time}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.place}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Getting here: ${item.travel} (${item.duration})"
+   }
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Details"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openStopDetails"
+      }
+     ]
+    }
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text7",
+    "checkbox1",
+    "checkbox2",
+    "checkbox3"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "To book on day 1"
+   }
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Fushimi Inari: no booking needed, skip"
+   },
+   "bind": {
+    "props.value": "${book_a}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "book_a",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Kiyomizu-dera evening entry slot"
+   },
+   "bind": {
+    "props.value": "${book_b}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "book_b",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox3": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Gion kaiseki dinner reservation"
+   },
+   "bind": {
+    "props.value": "${book_c}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "book_c",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Day 2: Arashiyama and north",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView2"
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${day2}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column7"
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "text11",
+    "textButton2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text9",
+    "text10"
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.time}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.place}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Getting here: ${item.travel} (${item.duration})"
+   }
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Details"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openStopDetails"
+      }
+     ]
+    }
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text12",
+    "checkbox4",
+    "checkbox5",
+    "checkbox6"
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "To book on day 2"
+   }
+  },
+  "checkbox4": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Sagano Romantic Train tickets"
+   },
+   "bind": {
+    "props.value": "${book_d}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "book_d",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox5": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Tenryu-ji garden entry"
+   },
+   "bind": {
+    "props.value": "${book_e}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "book_e",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox6": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Kinkaku-ji timed visit"
+   },
+   "bind": {
+    "props.value": "${book_f}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "book_f",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "remaining",
+    "type": "integer",
+    "value": 5
+   },
+   {
+    "name": "book_a",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "book_b",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "book_c",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "book_d",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "book_e",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "book_f",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "day1",
+    "type": "list",
+    "value": [
+     {
+      "time": "08:00",
+      "place": "Fushimi Inari Taisha",
+      "travel": "JR Nara Line from Kyoto Station to Inari",
+      "duration": "5 min",
+      "stay": "1.5 hours",
+      "detail": "Walk the torii gate path up the mountain; go early to beat the crowds."
+     },
+     {
+      "time": "11:00",
+      "place": "Kiyomizu-dera",
+      "travel": "Train to Gojo-Keihan, then walk uphill",
+      "duration": "30 min",
+      "stay": "1.5 hours",
+      "detail": "Wooden temple stage with city views; lunch on Matsubara-dori nearby."
+     },
+     {
+      "time": "15:00",
+      "place": "Gion and Hanamikoji",
+      "travel": "Walk via Ninenzaka and Yasaka Shrine",
+      "duration": "25 min",
+      "stay": "2 hours",
+      "detail": "Teahouse streets; maiko are often seen around dusk. Dinner follows."
+     }
+    ]
+   },
+   {
+    "name": "day2",
+    "type": "list",
+    "value": [
+     {
+      "time": "08:30",
+      "place": "Arashiyama Bamboo Grove",
+      "travel": "JR Sagano Line to Saga-Arashiyama",
+      "duration": "17 min",
+      "stay": "1 hour",
+      "detail": "Walk the bamboo path, then visit Tenryu-ji garden next door."
+     },
+     {
+      "time": "11:30",
+      "place": "Sagano Scenic Train",
+      "travel": "Walk to Torokko Saga station",
+      "duration": "10 min",
+      "stay": "1 hour",
+      "detail": "25-minute ride along the Hozu river gorge to Kameoka."
+     },
+     {
+      "time": "15:00",
+      "place": "Kinkaku-ji",
+      "travel": "Bus 59 from Arashiyama via Kitano Hakubaicho",
+      "duration": "50 min",
+      "stay": "1 hour",
+      "detail": "The Golden Pavilion beside its mirror pond; tea garden at the exit."
+     }
+    ]
+   }
+  ]
+ }
+}

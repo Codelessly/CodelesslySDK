@@ -1,0 +1,1056 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "row1",
+    "text2",
+    "segmentedButton1",
+    "text3",
+    "row2",
+    "divider1",
+    "checkbox1",
+    "column3",
+    "divider2",
+    "row4",
+    "divider3",
+    "row5"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**Invoices** · ${total} found",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "textField1",
+    "filledButton1"
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Search customer"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${query}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Apply"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "applyFilters"
+      }
+     ]
+    }
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF111827"
+    },
+    "text": "Status"
+   }
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "All",
+      "label": "All"
+     },
+     {
+      "value": "Paid",
+      "label": "Paid"
+     },
+     {
+      "value": "Pending",
+      "label": "Pending"
+     },
+     {
+      "value": "Overdue",
+      "label": "Overdue"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [statusFilter]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "statusFilter",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Sorted by ${sortBy} (${sortDir}) · tap a column to sort"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "children": [
+    "textButton1",
+    "textButton2",
+    "textButton3",
+    "textButton4",
+    "textButton5"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "No."
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sort",
+       "value": {
+        "column": "number"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Customer"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sort",
+       "value": {
+        "column": "customer"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Date"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sort",
+       "value": {
+        "column": "date"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton4": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Amount"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sort",
+       "value": {
+        "column": "amount"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textButton5": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Status"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sort",
+       "value": {
+        "column": "status"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Select all on this page"
+   },
+   "bind": {
+    "props.value": "${allOnPage}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "allOnPage",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${page}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row3"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "checkbox2",
+    "column4",
+    "text6"
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${item.selected}",
+    "props.label": "${item.number}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "item.selected",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text4",
+    "text5"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.customer}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${item.date} · ${item.status}"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "children": [
+    "outlinedButton1",
+    "text7",
+    "outlinedButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Prev"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "page",
+       "value": {
+        "direction": "prev"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Page ${pageNum} of ${pageCount} · 5 per page"
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "page",
+       "value": {
+        "direction": "next"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text8",
+    "filledButton2"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "**${selectedCount} selected** · ${selectedTotalLabel}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send reminders"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sendReminders"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "total",
+    "type": "integer",
+    "value": 12
+   },
+   {
+    "name": "query",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "statusFilter",
+    "type": "list",
+    "value": [
+     "all"
+    ]
+   },
+   {
+    "name": "sortBy",
+    "type": "text",
+    "value": "date"
+   },
+   {
+    "name": "sortDir",
+    "type": "text",
+    "value": "descending"
+   },
+   {
+    "name": "allOnPage",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "pageNum",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "pageCount",
+    "type": "integer",
+    "value": 3
+   },
+   {
+    "name": "selectedCount",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "selectedTotalLabel",
+    "type": "text",
+    "value": "$0.00"
+   },
+   {
+    "name": "page",
+    "type": "list",
+    "value": [
+     {
+      "number": "INV-1001",
+      "customer": "Acme Corp",
+      "date": "2025-01-05",
+      "amount": 1200,
+      "status": "Paid",
+      "selected": false
+     },
+     {
+      "number": "INV-1002",
+      "customer": "Globex",
+      "date": "2025-01-09",
+      "amount": 845.5,
+      "status": "Pending",
+      "selected": false
+     },
+     {
+      "number": "INV-1003",
+      "customer": "Initech",
+      "date": "2025-01-12",
+      "amount": 2300,
+      "status": "Overdue",
+      "selected": false
+     },
+     {
+      "number": "INV-1004",
+      "customer": "Umbrella Ltd",
+      "date": "2025-01-15",
+      "amount": 560,
+      "status": "Paid",
+      "selected": false
+     },
+     {
+      "number": "INV-1005",
+      "customer": "Hooli",
+      "date": "2025-01-19",
+      "amount": 3150.75,
+      "status": "Pending",
+      "selected": false
+     }
+    ]
+   },
+   {
+    "name": "invoices",
+    "type": "list",
+    "value": [
+     {
+      "number": "INV-1001",
+      "customer": "Acme Corp",
+      "date": "2025-01-05",
+      "amount": 1200,
+      "status": "Paid"
+     },
+     {
+      "number": "INV-1002",
+      "customer": "Globex",
+      "date": "2025-01-09",
+      "amount": 845.5,
+      "status": "Pending"
+     },
+     {
+      "number": "INV-1003",
+      "customer": "Initech",
+      "date": "2025-01-12",
+      "amount": 2300,
+      "status": "Overdue"
+     },
+     {
+      "number": "INV-1004",
+      "customer": "Umbrella Ltd",
+      "date": "2025-01-15",
+      "amount": 560,
+      "status": "Paid"
+     },
+     {
+      "number": "INV-1005",
+      "customer": "Hooli",
+      "date": "2025-01-19",
+      "amount": 3150.75,
+      "status": "Pending"
+     },
+     {
+      "number": "INV-1006",
+      "customer": "Stark Industries",
+      "date": "2025-01-22",
+      "amount": 9800,
+      "status": "Overdue"
+     },
+     {
+      "number": "INV-1007",
+      "customer": "Wayne Enterprises",
+      "date": "2025-01-26",
+      "amount": 4200,
+      "status": "Paid"
+     },
+     {
+      "number": "INV-1008",
+      "customer": "Wonka Inc",
+      "date": "2025-02-01",
+      "amount": 310.25,
+      "status": "Pending"
+     },
+     {
+      "number": "INV-1009",
+      "customer": "Soylent Co",
+      "date": "2025-02-04",
+      "amount": 1475,
+      "status": "Overdue"
+     },
+     {
+      "number": "INV-1010",
+      "customer": "Vandelay Industries",
+      "date": "2025-02-08",
+      "amount": 720,
+      "status": "Paid"
+     },
+     {
+      "number": "INV-1011",
+      "customer": "Cyberdyne",
+      "date": "2025-02-11",
+      "amount": 5600,
+      "status": "Pending"
+     },
+     {
+      "number": "INV-1012",
+      "customer": "Tyrell Corp",
+      "date": "2025-02-15",
+      "amount": 2890.4,
+      "status": "Overdue"
+     }
+    ]
+   },
+   {
+    "name": "item.selected",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

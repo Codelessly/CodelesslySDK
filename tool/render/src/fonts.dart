@@ -111,7 +111,20 @@ typedef UnreadFont = ({String path, String reason});
 final List<UnreadFont> unreadFonts = [];
 
 /// Where decoded web fonts are written (a TrueType/OpenType file each).
-final Directory _decoded = Directory.systemTemp.createTempSync('codelessly-render-fonts');
+Directory get _decoded => _decodedDir ??= Directory.systemTemp.createTempSync('codelessly-render-fonts');
+Directory? _decodedDir;
+
+/// Removes the decoded font files of this run (they were loaded into the
+/// engine; nothing reads the files again).
+void disposeDecodedFonts() {
+  final d = _decodedDir;
+  _decodedDir = null;
+  try {
+    if (d != null && d.existsSync()) d.deleteSync(recursive: true);
+  } catch (_) {
+    // Left for the system's own cleanup.
+  }
+}
 
 /// The font files in [dirs] (searched recursively; `system`: the system's
 /// font directories): `.ttf` and `.otf`, and `.woff` decoded. A font file

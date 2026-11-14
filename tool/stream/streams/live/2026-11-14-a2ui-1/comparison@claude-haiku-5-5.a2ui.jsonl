@@ -1,0 +1,214 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"a2ui","turn":"generate","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"plan-compare\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"main\"},{\"id\":\"main\",\"component\":\"Column\",\"children\":[\"title\",\"planRow\",\"divider1\",\"rowPrice\",\"rowData\",\"rowCalls\",\"rowRoaming\",\"rowContract\",\"rowExtras\",\"divider2\",\"recommendation\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Phone Plan Comparison\",\"variant\":\"body\",\"weight\":1},{\"id\":\"planRow\",\"component\":\"Row\",\"children\":[\"planA\",\"planB\"],\"justify\":\"spaceEvenly\"},{\"id\":\"planA\",\"component\":\"Column\",\"children\":[\"planAName\",\"planAChoose\"],\"align\":\"center\"},{\"id\":\"planAName\",\"component\":\"Text\",\"text\":\"Plan A: Basic 20GB\"},{\"id\":\"planAChoose\",\"component\":\"Button\",\"child\":\"planAChooseText\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"choosePlan\",\"context\":{\"plan\":\"A\"}}}},{\"id\":\"planAChooseText\",\"component\":\"Text\",\"text\":\"Choose Plan A\"},{\"id\":\"planB\",\"component\":\"Column\",\"children\":[\"planBName\",\"planBChoose\"],\"align\":\"center\"},{\"id\":\"planBName\",\"component\":\"Text\",\"text\":\"Plan B: Plus 50GB\"},{\"id\":\"planBChoose\",\"component\":\"Button\",\"child\":\"planBChooseText\",\"variant\":\"primary\",\"action\":{\"event\":{\"name\":\"choosePlan\",\"context\":{\"plan\":\"B\"}}}},{\"id\":\"planBChooseText\",\"component\":\"Text\",\"text\":\"Choose Plan B\"},{\"id\":\"divider1\",\"component\":\"Divider\"},{\"id\":\"rowPrice\",\"component\":\"Row\",\"children\":[\"labelPrice\",\"valPriceA\",\"valPriceB\"],\"justify\":\"spaceBetween\"},{\"id\":\"labelPrice\",\"component\":\"Text\",\"text\":\"Price\"},{\"id\":\"valPriceA\",\"component\":\"Text\",\"text\":\"$25/mo ✓ better\"},{\"id\":\"valPriceB\",\"component\":\"Text\",\"text\":\"$40/mo\"},{\"id\":\"rowData\",\"component\":\"Row\",\"children\":[\"labelData\",\"valDataA\",\"valDataB\"],\"justify\":\"spaceBetween\"},{\"id\":\"labelData\",\"component\":\"Text\",\"text\":\"Data\"},{\"id\":\"valDataA\",\"component\":\"Text\",\"text\":\"20GB\"},{\"id\":\"valDataB\",\"component\":\"Text\",\"text\":\"50GB ✓ better\"},{\"id\":\"rowCalls\",\"component\":\"Row\",\"children\":[\"labelCalls\",\"valCallsA\",\"valCallsB\"],\"justify\":\"spaceBetween\"},{\"id\":\"labelCalls\",\"component\":\"Text\",\"text\":\"Calls\"},{\"id\":\"valCallsA\",\"component\":\"Text\",\"text\":\"Unlimited US\"},{\"id\":\"valCallsB\",\"component\":\"Text\",\"text\":\"Unlimited US ✓ tie\"},{\"id\":\"rowRoaming\",\"component\":\"Row\",\"children\":[\"labelRoaming\",\"valRoamA\",\"valRoamB\"],\"justify\":\"spaceBetween\"},{\"id\":\"labelRoaming\",\"component\":\"Text\",\"text\":\"Roaming\"},{\"id\":\"valRoamA\",\"component\":\"Text\",\"text\":\"Pay per use\"},{\"id\":\"valRoamB\",\"component\":\"Text\",\"text\":\"5GB intl ✓ better\"},{\"id\":\"rowContract\",\"component\":\"Row\",\"children\":[\"labelContract\",\"valContA\",\"valContB\"],\"justify\":\"spaceBetween\"},{\"id\":\"labelContract\",\"component\":\"Text\",\"text\":\"Contract\"},{\"id\":\"valContA\",\"component\":\"Text\",\"text\":\"No contract ✓ better\"},{\"id\":\"valContB\",\"component\":\"Text\",\"text\":\"24 months\"},{\"id\":\"rowExtras\",\"component\":\"Row\",\"children\":[\"labelExtras\",\"valExtrasA\",\"valExtrasB\"],\"justify\":\"spaceBetween\"},{\"id\":\"labelExtras\",\"component\":\"Text\",\"text\":\"Extras\"},{\"id\":\"valExtrasA\",\"component\":\"Text\",\"text\":\"None\"},{\"id\":\"valExtrasB\",\"component\":\"Text\",\"text\":\"Hotspot, streaming ✓ better\"},{\"id\":\"divider2\",\"component\":\"Divider\"},{\"id\":\"recommendation\",\"component\":\"Text\",\"text\":\"Recommendation: Plan B if you use lots of data or travel abroad; otherwise Plan A saves $15/mo with no contract.\"}],\"dataModel\":{}}}","usage":{"input_tokens":21161,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1467,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":521,"totalMs":5094}}
+{"tMs":521,"delta":"{"}
+{"tMs":720,"delta":"\"version\":\"1.0\",\""}
+{"tMs":720,"delta":"createSurface\":{\"sur"}
+{"tMs":720,"delta":"faceId\":\"plan"}
+{"tMs":720,"delta":"-"}
+{"tMs":720,"delta":"comp"}
+{"tMs":721,"delta":"are\",\"catalogId\":\""}
+{"tMs":721,"delta":"https://a2ui.org"}
+{"tMs":721,"delta":"/specification/v1_0"}
+{"tMs":725,"delta":"/catalogs/basic"}
+{"tMs":746,"delta":"/catalog.json\",\"components"}
+{"tMs":769,"delta":"\":[{\"id\":\"root"}
+{"tMs":789,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":934,"delta":"\":\"main"}
+{"tMs":934,"delta":"\"},{\"id\":\"main"}
+{"tMs":934,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":934,"delta":"\":[\"title\",\"planR"}
+{"tMs":934,"delta":"ow\",\"div"}
+{"tMs":934,"delta":"ider1"}
+{"tMs":939,"delta":"\",\"row"}
+{"tMs":962,"delta":"P"}
+{"tMs":982,"delta":"rice\",\"rowData\",\"r"}
+{"tMs":1004,"delta":"owCalls\",\"rowR"}
+{"tMs":1025,"delta":"oaming\",\"rowContract"}
+{"tMs":1048,"delta":"\",\"rowExtras\",\"div"}
+{"tMs":1179,"delta":"ider2\",\"recommendation\""}
+{"tMs":1179,"delta":"]},{\"id\":\"title"}
+{"tMs":1179,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":1179,"delta":"\":\"Phone"}
+{"tMs":1179,"delta":" Plan Comparison\",\"vari"}
+{"tMs":1179,"delta":"ant\":\"body"}
+{"tMs":1197,"delta":"\",\""}
+{"tMs":1218,"delta":"weight\":1"}
+{"tMs":1240,"delta":"},{\"id\":\"planR"}
+{"tMs":1261,"delta":"ow\",\"component\":\"Row\",\""}
+{"tMs":1282,"delta":"children\":[\"planA\",\"planB"}
+{"tMs":1304,"delta":"\"],\"justify\":\"sp"}
+{"tMs":1372,"delta":"aceEvenly\"},"}
+{"tMs":1372,"delta":"{\"id\":\"planA\",\""}
+{"tMs":1372,"delta":"component\":\"Column\",\"children\":"}
+{"tMs":1390,"delta":"[\"planAName"}
+{"tMs":1411,"delta":"\",\"planAChoose\"],"}
+{"tMs":1433,"delta":"\"align\":\"center"}
+{"tMs":1454,"delta":"\"},{\"id\":\"plan"}
+{"tMs":1476,"delta":"AName\",\"component\":\"Text"}
+{"tMs":1497,"delta":"\",\"text\":\"Plan A"}
+{"tMs":1519,"delta":":"}
+{"tMs":1541,"delta":" Bas"}
+{"tMs":1561,"delta":"ic "}
+{"tMs":1598,"delta":"20"}
+{"tMs":1604,"delta":"GB\"},{\"id\":"}
+{"tMs":1626,"delta":"\"planAChoose\",\"component"}
+{"tMs":1652,"delta":"\":\"Button\",\"child\":\""}
+{"tMs":1669,"delta":"planAChoo"}
+{"tMs":1691,"delta":"seText\",\"variant\":\"prim"}
+{"tMs":1712,"delta":"ary\",\"action\":{\"event\":"}
+{"tMs":1734,"delta":"{\"name\":\"choos"}
+{"tMs":1755,"delta":"ePlan\",\"context"}
+{"tMs":1777,"delta":"\":{\"plan\":\"A"}
+{"tMs":1797,"delta":"\"}}}},{\"id"}
+{"tMs":1819,"delta":"\":\"planAChooseText"}
+{"tMs":1842,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":1862,"delta":"\":\"Choose Plan"}
+{"tMs":1883,"delta":" A\"},{\"id\":\""}
+{"tMs":1905,"delta":"planB\",\"component\":\"Column"}
+{"tMs":1927,"delta":"\",\"children\":[\"planBName\",\""}
+{"tMs":1949,"delta":"planBChoose\"],\""}
+{"tMs":1969,"delta":"align\":\"center\"},{\""}
+{"tMs":1991,"delta":"id\":\"planBName\",\"component"}
+{"tMs":2013,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":2034,"delta":"Plan B: Pl"}
+{"tMs":2055,"delta":"us 50GB\"},{"}
+{"tMs":2077,"delta":"\"id\":\"planBCho"}
+{"tMs":2098,"delta":"ose\",\"component\":\"Button\",\""}
+{"tMs":2121,"delta":"child\":\"planBChoose"}
+{"tMs":2141,"delta":"Text\",\"variant\":\"primary"}
+{"tMs":2163,"delta":"\",\"action\":{\"event\":{"}
+{"tMs":2184,"delta":"\"name\":\"choosePl"}
+{"tMs":2206,"delta":"an\",\"context\":{\"plan"}
+{"tMs":2227,"delta":"\":\"B\"}}}},"}
+{"tMs":2249,"delta":"{\"id\":\"planBCh"}
+{"tMs":2270,"delta":"ooseText\",\"component\":\""}
+{"tMs":2292,"delta":"Text\",\"text\":\"Choose"}
+{"tMs":2314,"delta":" Plan B\"},{\""}
+{"tMs":2334,"delta":"id\":\"div"}
+{"tMs":2357,"delta":"ider1\",\"component\":\"Div"}
+{"tMs":2377,"delta":"ider\""}
+{"tMs":2399,"delta":"},{\"id\":\"row"}
+{"tMs":2421,"delta":"Price\",\"component\":\""}
+{"tMs":2442,"delta":"Row\",\"children\":[\"lab"}
+{"tMs":2463,"delta":"elPrice\",\"val"}
+{"tMs":2485,"delta":"P"}
+{"tMs":2506,"delta":"ri"}
+{"tMs":2528,"delta":"ceA\",\"valPriceB"}
+{"tMs":2557,"delta":"\""}
+{"tMs":2570,"delta":"],\"justify\":\"spa"}
+{"tMs":2593,"delta":"ceBetween\"},{\""}
+{"tMs":2613,"delta":"id\":\"labelPrice"}
+{"tMs":2635,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":2656,"delta":"\":\"Price\"},{\""}
+{"tMs":2678,"delta":"id\":\"valPriceA"}
+{"tMs":2699,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":2720,"delta":"\":\"$25/mo "}
+{"tMs":2743,"delta":"✓ better"}
+{"tMs":2764,"delta":"\"},{\"id\":\"val"}
+{"tMs":2785,"delta":"PriceB\",\"component\":\""}
+{"tMs":2807,"delta":"Text\",\"text\":\"$40"}
+{"tMs":2828,"delta":"/mo\"},{\"id"}
+{"tMs":2849,"delta":"\":\"rowData\",\"component\":"}
+{"tMs":2872,"delta":"\"Row\",\"children\":[\"lab"}
+{"tMs":2892,"delta":"elData\",\"valDataA\",\""}
+{"tMs":2915,"delta":"valDataB\"],\"just"}
+{"tMs":2935,"delta":"ify\":\"spaceBet"}
+{"tMs":2959,"delta":"ween\"},{\"id\":\""}
+{"tMs":2978,"delta":"labelData\",\"component\":\""}
+{"tMs":3002,"delta":"Text\",\"text\":\"Data\""}
+{"tMs":3021,"delta":"},{\"id\":\"valD"}
+{"tMs":3053,"delta":"ataA\",\"component\":\"Text"}
+{"tMs":3064,"delta":"\",\"text\":\"20GB\""}
+{"tMs":3086,"delta":"},{\"id\":\"valD"}
+{"tMs":3107,"delta":"ataB\",\"component\":\"Text"}
+{"tMs":3129,"delta":"\",\"text\":\"50GB "}
+{"tMs":3150,"delta":"✓ better\"},{\""}
+{"tMs":3172,"delta":"id\":\"rowCalls"}
+{"tMs":3193,"delta":"\",\"component\":\"Row\",\"children"}
+{"tMs":3214,"delta":"\":[\"labelCalls\",\""}
+{"tMs":3236,"delta":"valCallsA\",\"valC"}
+{"tMs":3257,"delta":"allsB\"],\"justify"}
+{"tMs":3279,"delta":"\":\"spaceBetween"}
+{"tMs":3300,"delta":"\"},{\"id\":\"lab"}
+{"tMs":3322,"delta":"elCalls\",\"component\":\""}
+{"tMs":3343,"delta":"Text\",\"text\":\"Cal"}
+{"tMs":3364,"delta":"ls\"},{\"id\":\""}
+{"tMs":3386,"delta":"valCallsA\",\"component\":"}
+{"tMs":3410,"delta":"\"Text\",\"text\":\""}
+{"tMs":3429,"delta":"Unlimited US"}
+{"tMs":3451,"delta":"\"},{\"id\":\"val"}
+{"tMs":3472,"delta":"CallsB\",\"component\":\""}
+{"tMs":3493,"delta":"Text\",\"text\":\"Un"}
+{"tMs":3515,"delta":"limited US ✓"}
+{"tMs":3536,"delta":" t"}
+{"tMs":3558,"delta":"ie\"},{\"id\":\""}
+{"tMs":3579,"delta":"rowRoaming\",\"component"}
+{"tMs":3600,"delta":"\":\"Row\",\"children\":[\""}
+{"tMs":3622,"delta":"labelRoaming\",\"val"}
+{"tMs":3643,"delta":"RoamA"}
+{"tMs":3665,"delta":"\",\"valRoamB\"],"}
+{"tMs":3686,"delta":"\"justify\":\"space"}
+{"tMs":3708,"delta":"Between\"},{\"id"}
+{"tMs":3731,"delta":"\":\"labelRoaming"}
+{"tMs":3751,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":3772,"delta":"\":\"Roaming\"},"}
+{"tMs":3794,"delta":"{\"id\":\"valRo"}
+{"tMs":3815,"delta":"amA\",\"component\":\"Text"}
+{"tMs":3837,"delta":"\",\"text\":\"Pay per"}
+{"tMs":3858,"delta":" use\"},{\"id\":\""}
+{"tMs":3880,"delta":"valRoamB\",\"component\":"}
+{"tMs":3901,"delta":"\"Text\",\"text\":\"5"}
+{"tMs":3923,"delta":"G"}
+{"tMs":3944,"delta":"B int"}
+{"tMs":3965,"delta":"l "}
+{"tMs":3988,"delta":"✓ better\"},{\""}
+{"tMs":4009,"delta":"id\":\"rowContract\",\""}
+{"tMs":4030,"delta":"component\":\"Row\",\"children\":"}
+{"tMs":4051,"delta":"[\"labelContract\",\"valCont"}
+{"tMs":4072,"delta":"A"}
+{"tMs":4094,"delta":"\",\"valContB\"],\"just"}
+{"tMs":4116,"delta":"ify\":\"spaceBet"}
+{"tMs":4137,"delta":"ween\"},{\"id\":\""}
+{"tMs":4158,"delta":"labelContract\",\"component\":\""}
+{"tMs":4180,"delta":"Text\",\"text\":\"Cont"}
+{"tMs":4201,"delta":"ract\"},{\"id\":\""}
+{"tMs":4223,"delta":"valContA\",\"component\":\""}
+{"tMs":4244,"delta":"Text\",\"text\":\"No contract"}
+{"tMs":4266,"delta":" ✓ better\"},{"}
+{"tMs":4287,"delta":"\"id\":\"valContB\",\""}
+{"tMs":4309,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":4330,"delta":"\"24"}
+{"tMs":4351,"delta":" months"}
+{"tMs":4373,"delta":"\"},{\"id\":\"r"}
+{"tMs":4394,"delta":"owExtras\",\"component\":\""}
+{"tMs":4416,"delta":"Row\",\"children\":[\"label"}
+{"tMs":4438,"delta":"Extras\",\"valExtr"}
+{"tMs":4459,"delta":"asA\",\"valExtras"}
+{"tMs":4480,"delta":"B\"],\"justify\":\""}
+{"tMs":4502,"delta":"spaceBetween\"},"}
+{"tMs":4523,"delta":"{\"id\":\"labelEx"}
+{"tMs":4545,"delta":"tras\",\"component\":\"Text"}
+{"tMs":4566,"delta":"\",\"text\":\"Extras\""}
+{"tMs":4588,"delta":"},{\"id\":\"valEx"}
+{"tMs":4610,"delta":"trasA\",\"component\":\""}
+{"tMs":4631,"delta":"Text\",\"text\":\"None\""}
+{"tMs":4652,"delta":"},{\"id\":\"valEx"}
+{"tMs":4674,"delta":"trasB\",\"component\":\""}
+{"tMs":4695,"delta":"Text\",\"text\":\"H"}
+{"tMs":4717,"delta":"otspot, streaming "}
+{"tMs":4738,"delta":"✓ better\"},{\""}
+{"tMs":4760,"delta":"id\":\"divider2\",\"component"}
+{"tMs":4781,"delta":"\":\"Divider\"},{"}
+{"tMs":4803,"delta":"\"id\":\"recommendation"}
+{"tMs":4824,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":4845,"delta":"\":\"Recommendation:"}
+{"tMs":4867,"delta":" Plan B if"}
+{"tMs":4889,"delta":" you use"}
+{"tMs":4910,"delta":" l"}
+{"tMs":4931,"delta":"ots of data or trav"}
+{"tMs":4952,"delta":"el abroad; ot"}
+{"tMs":4974,"delta":"herwise Plan A sa"}
+{"tMs":4996,"delta":"ves $15/mo with"}
+{"tMs":5017,"delta":" no contract.\""}
+{"tMs":5039,"delta":"}],"}
+{"tMs":5060,"delta":"\"dataModel\":{}"}
+{"tMs":5081,"delta":"}}"}

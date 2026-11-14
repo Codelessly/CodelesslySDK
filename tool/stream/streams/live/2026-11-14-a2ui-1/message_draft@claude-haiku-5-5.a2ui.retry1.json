@@ -1,0 +1,429 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 8
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "textField1",
+    "textField2",
+    "row1",
+    "textField3",
+    "text3",
+    "row2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "New email to landlord",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF374151"
+    }
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "To",
+     "hintText": "landlord@example.com"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${draft_to}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "draft_to",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "textField2": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Subject",
+     "hintText": "Broken heating"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${draft_subject}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "draft_subject",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "start"
+   },
+   "children": [
+    "text2",
+    "outlinedButton1",
+    "outlinedButton2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "Tone:"
+   }
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Polite"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "setTonePolite",
+       "value": {
+        "draftId": "email-draft"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Firm"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "setToneFirm",
+       "value": {
+        "draftId": "email-draft"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "textField3": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Body"
+    },
+    "maxLines": 4
+   },
+   "bind": {
+    "props.initialValue": "${draft_body}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "draft_body",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "color": "#FF6B7280"
+    },
+    "text": "${draft_status}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "end"
+   },
+   "children": [
+    "textButton1",
+    "filledButton1"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Discard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "discardDraft",
+       "value": {
+        "draftId": "email-draft"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sendDraft",
+       "value": {
+        "draftId": "email-draft",
+        "to": "${draft_to}",
+        "subject": "${draft_subject}",
+        "body": "${draft_body}"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "draft_to",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "draft_subject",
+    "type": "text",
+    "value": "Broken heating"
+   },
+   {
+    "name": "draft_body",
+    "type": "text",
+    "value": "Hi,\n\nThe heating in my apartment has stopped working. Could you please arrange for a repair as soon as possible?\n\nThank you,\n[Your name]"
+   },
+   {
+    "name": "draft_status",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}
