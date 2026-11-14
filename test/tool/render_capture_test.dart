@@ -363,4 +363,19 @@ void main() {
     final boxes = jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
     expect(boxes.cast<Map>().map((b) => b['id']), contains('changelogTitle'), reason: 'the second result names changelog');
   });
+
+  testWidgets('a canvas opened as a modal takes the size its media rules give it at the screen\'s width', (tester) async {
+    Future<Map> searchBox(Size size) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/modalmedia'], out: out.path, screens: const ['home'],
+          sizes: [size], steps: const [Step('tap', 'open')], dumpLayout: true, label: 'open'));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final boxes = jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
+      return boxes.cast<Map>().firstWhere((b) => b['id'] == 'searchBox');
+    }
+
+    final phone = await searchBox(const Size(390, 844));
+    expect([phone['w'], phone['h']], [360, 780], reason: 'the phone patch: $phone');
+    final desktop = await searchBox(const Size(1440, 900));
+    expect([desktop['w'], desktop['h']], [620, 650], reason: 'the design size: $desktop');
+  });
 }
