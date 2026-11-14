@@ -11,9 +11,17 @@ it reads as finished beside theirs: alignment, spacing, color, every state.
 | `recommendation_card.txt` | open, applied, dismissed | A proposed change with its confidence, before and after, and an undo. |
 | `permission_grant.txt` | request, granted, denied | What is and is not allowed, the reach chosen with a segmented control. |
 | `guardrail_notice.txt` | one | A refusal with the nearest things that can be done instead. |
+| `elicitation_form.txt` | open, sent | The fields an agent needs before it goes on. |
+| `question_flow.txt` | steps, summary | One question at a time with a way back. |
+| `data_table.txt` | sorted by any column | Header cells sort; plan badges; change in the sign's color; a footer with export. |
+| `comparison.txt` | one plan picked | Three columns of equal width, the pick outlined, the price for the team under them. |
+| `spec_sheet.txt` | one | Grouped rows of label and value under a header with an icon tile and stock. |
+| `score_breakdown.txt` | closed, a reason open | A weighted total in a tinted disc, a bar per area in its band's color. |
+| `cost_meter.txt` | under and near the limit | Spend against a budget, the bar and badge by how much is used, a line per kind. |
+| `timeline.txt` | one | Events down a rail, the dot in each kind's color. |
 
 To render one: expand it with `parseNotation` (or apply it to a `UiSession` with `applyNotation`) and render the
 document with `tool/render/render.sh`.
 
-Still to write from the decision group: elicitation form, question flow. Then the data, sources, code, media and
-progress groups.
+Still to write from the data group: chart, number ticker, heat and activity graphs, trace waterfall, flow graph.
+Then the sources, code, media and progress groups.

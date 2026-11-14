@@ -1,0 +1,21 @@
+state parts=[{"name":"Correctness","score":92,"weight":40,"note":"All 48 tests pass"},{"name":"Performance","score":71,"weight":25,"note":"p95 latency 310 ms, target 250 ms"},{"name":"Readability","score":85,"weight":20,"note":"Two functions over 80 lines"},{"name":"Test coverage","score":58,"weight":15,"note":"Error paths are not covered"}]
+state total=round(sum(parts, p => p.score*p.weight)/100)
+state open=""
+Card gap:12
+  Row gap:12
+    Box w:56 h:56 radius:28 center fill:=total>=80?"#1A16A34A":(total>=60?"#1AEA580C":"#1ADC2626")
+      Text.heading2 "{total}" color:=total>=80?"#FF16A34A":(total>=60?"#FFEA580C":"#FFDC2626")
+    Column gap:2 grow
+      Text.sectionTitle "Review score"
+      Text.bodySecondary "{total>=80?"Ready to merge":(total>=60?"Mergeable after fixes":"Needs work")} · weighted across 4 areas"
+  Column gap:10
+    each p in parts
+      Column gap:5 -> open=open==p.name?"":p.name
+        Row between
+          Row gap:6
+            Text.strong "{p.name}"
+            Text.caption "{p.weight}%"
+          Text.mono "{p.score}" color:=p.score>=80?"#FF16A34A":(p.score>=60?"#FFEA580C":"#FFDC2626")
+        Progress =p.score/100 {"props": {"color": "${= p.score>=80?'#FF16A34A':(p.score>=60?'#FFEA580C':'#FFDC2626')}"}}
+        Text.caption "{p.note}" visible:=open==p.name
+  Text.caption "Tap an area for the reason."

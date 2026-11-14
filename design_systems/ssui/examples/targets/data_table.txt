@@ -1,0 +1,33 @@
+state sort="revenue"
+state desc=true
+state rows=[{"name":"Acme Corp","plan":"Enterprise","seats":240,"revenue":48200,"change":12.4},{"name":"Globex","plan":"Team","seats":36,"revenue":7400,"change":-3.1},{"name":"Initech","plan":"Team","seats":58,"revenue":11900,"change":4.8},{"name":"Umbrella","plan":"Enterprise","seats":410,"revenue":86500,"change":21.0},{"name":"Hooli","plan":"Starter","seats":8,"revenue":960,"change":0}]
+state shown=desc?sortByDesc(rows,sort):sortBy(rows,sort)
+Card gap:0 pad:0
+  Row between pad:12
+    Column gap:2
+      Text.sectionTitle "Top accounts"
+      Text.caption "Monthly revenue, last 30 days"
+    Badge "{length(rows)} rows"
+  Row gap:8 pad:[12,7,12,7] fill:#FFF9FAFB border:#FFE5E7EB
+    Row gap:2 grow:3 -> desc=sort=="name"?!desc:false; sort="name"
+      Text.fieldLabel "Account"
+      Icon "{desc?"arrow_drop_down":"arrow_drop_up"}" visible:=sort=="name" {"props": {"size": 14}}
+    Text.fieldLabel "Plan" grow:2
+    Row gap:2 grow:2 end -> desc=sort=="seats"?!desc:true; sort="seats"
+      Text.fieldLabel "Seats"
+      Icon "{desc?"arrow_drop_down":"arrow_drop_up"}" visible:=sort=="seats" {"props": {"size": 14}}
+    Row gap:2 grow:2 end -> desc=sort=="revenue"?!desc:true; sort="revenue"
+      Text.fieldLabel "Revenue"
+      Icon "{desc?"arrow_drop_down":"arrow_drop_up"}" visible:=sort=="revenue" {"props": {"size": 14}}
+    Text.fieldLabel "Change" grow:2 {"props": {"textAlign": "right"}}
+  each r in shown
+    Row gap:8 pad:[12,9,12,9] border:#FFF3F4F6
+      Text.strong "{r.name}" grow:3
+      Row grow:2
+        Badge "{r.plan}"
+      Text.mono "{r.seats}" grow:2 {"props": {"textAlign": "right"}}
+      Text.mono "{formatCurrency(r.revenue,"USD","en_US",0)}" grow:2 {"props": {"textAlign": "right"}}
+      Text.mono "{r.change>0?"+":""}{round(r.change,1)}%" grow:2 color:=r.change>0?"#FF16A34A":(r.change<0?"#FFDC2626":"#FF9CA3AF") {"props": {"textAlign": "right"}}
+  Row between pad:[12,8,12,8]
+    Text.caption "Sorted by {sort}, {desc?"high to low":"low to high"}"
+    Button.ghost "Export CSV" -> emit export shown

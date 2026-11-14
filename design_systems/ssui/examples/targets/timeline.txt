@@ -1,0 +1,17 @@
+state events=[{"time":"09:12","title":"Deploy started","note":"release 4.18.0 by the release bot","kind":"info"},{"time":"09:14","title":"Migrations applied","note":"3 migrations, 41 s","kind":"success"},{"time":"09:21","title":"Error rate above 2 %","note":"checkout service, eu-west","kind":"error"},{"time":"09:24","title":"Rolled back to 4.17.3","note":"automatic, by the error budget rule","kind":"warning"},{"time":"09:31","title":"Recovered","note":"error rate 0.1 %","kind":"success"}]
+Card gap:10
+  Row between
+    Text.sectionTitle "Incident timeline"
+    Badge.success "Resolved in 19 min"
+  Column gap:0
+    each e in events
+      Row gap:10
+        Text.mono "{e.time}" w:38 {"props": {"style": {"color": "#FF9CA3AF"}}}
+        Column gap:0 w:12 {"props": {"crossAxisAlignment": "center"}}
+          Box w:10 h:10 radius:5 fill:=e.kind=="error"?"#FFDC2626":(e.kind=="warning"?"#FFEA580C":(e.kind=="success"?"#FF16A34A":"#FF2563EB"))
+          Box w:2 h:30 fill:#FFE5E7EB visible:=e.time!="09:31"
+        Column gap:1 grow pad:[0,0,0,10]
+          Text.strong "{e.title}"
+          Text.caption "{e.note}"
+  Row end
+    Button.ghost "Open the postmortem" -> emit open_postmortem

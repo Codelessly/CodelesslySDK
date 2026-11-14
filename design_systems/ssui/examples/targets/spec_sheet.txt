@@ -1,0 +1,19 @@
+Card gap:0 pad:0
+  Row gap:10 pad:12
+    Box w:36 h:36 radius:8 fill:#FFF3F4F6 center
+      Icon "memory" {"props": {"size": 18, "color": "#FF4B5563"}}
+    Column gap:1 grow
+      Text.sectionTitle "c7g.2xlarge"
+      Text.caption "General purpose · Graviton3"
+    Badge.success "In stock"
+  each g in [{"title":"Compute","rows":[["vCPU","8"],["Architecture","arm64"],["Clock speed","2.6 GHz"]]},{"title":"Memory and storage","rows":[["Memory","16 GiB"],["Storage","EBS only"],["EBS bandwidth","up to 10 Gbps"]]},{"title":"Pricing","rows":[["On demand","$0.29 / hour"],["1 year reserved","$0.18 / hour"],["Spot (average)","$0.11 / hour"]]}]
+    Column gap:0
+      Row pad:[12,6,12,6] fill:#FFF9FAFB border:#FFE5E7EB
+        Text.fieldLabel "{g.title}"
+      each r in g.rows
+        Row between pad:[12,7,12,7] border:#FFF3F4F6
+          Text.bodySecondary "{r[0]}"
+          Text.mono "{r[1]}"
+  Row gap:8 pad:12 end
+    Button.ghost "Compare" -> emit compare
+    Button "Launch" -> emit launch
