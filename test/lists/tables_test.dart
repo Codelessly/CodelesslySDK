@@ -2,11 +2,10 @@ import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/widgets/collections_table.dart' show tableRowHeight;
+import 'package:codelessly_sdk/src/widgets/collections_table.dart' show RenderRunningTable, tableRowHeight;
 import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:two_dimensional_scrollables/two_dimensional_scrollables.dart';
 
 import 'support.dart' as lists;
 
@@ -40,6 +39,18 @@ final rows = lists.v('rows', [
   for (var r = 0; r < 1000; r++) {for (var c = 0; c < 50; c++) 'c$c': 'r${r}c$c'},
 ], VariableType.list);
 
+/// The running table's render object, or null on a design canvas.
+RenderRunningTable? runningTable(WidgetTester tester) {
+  RenderRunningTable? found;
+  void visit(RenderObject o) {
+    if (o is RenderRunningTable) found = o;
+    o.visitChildren(visit);
+  }
+
+  tester.binding.renderViews.first.visitChildren(visit);
+  return found;
+}
+
 /// The painted texts of the table and where they are.
 Map<String, Offset> cells(WidgetTester tester) {
   final out = <String, Offset>{};
@@ -48,7 +59,7 @@ Map<String, Offset> cells(WidgetTester tester) {
     o.visitChildren(visit);
   }
 
-  visit(tester.renderObject(find.byType(TableView)));
+  visit(runningTable(tester)!);
   return out;
 }
 
@@ -91,7 +102,7 @@ void main() {
     await lists.show(tester, table(), root: 'table', variables: [rows]);
     await tester.pumpAndSettle();
     expect(tester.takeException(), isNull);
-    final shown = lists.textsUnder(tester.renderObject(find.byType(TableView)));
+    final shown = lists.textsUnder(runningTable(tester)!);
     expect(shown, containsAll(['r0c0', 'Col 0', 'R0']));
     // 1,000 × 50 cells; about 10 rows × 6 columns are on screen.
     expect(shown.length, lessThan(200));
@@ -101,10 +112,12 @@ void main() {
   testWidgets('a table keeps its header row and first column in place while scrolling', (tester) async {
     await lists.show(tester, table(), root: 'table', variables: [rows]);
     await tester.pumpAndSettle();
-    final origin = tester.getTopLeft(find.byType(TableView));
+    final origin = runningTable(tester)!.localToGlobal(Offset.zero);
     await tester.dragFrom(origin + const Offset(300, 200), const Offset(-2000, -16000));
     await tester.pumpAndSettle();
     final shown = cells(tester);
+    expect(runningTable(tester)!.scrollOffset.dx, greaterThan(1900));
+    expect(runningTable(tester)!.scrollOffset.dy, greaterThan(15000));
     expect(shown.keys, isNot(contains('r0c0')));
     final headers = shown.entries.where((e) => e.key.startsWith('Col '));
     expect(headers, isNotEmpty);
@@ -190,7 +203,7 @@ void main() {
 
   testWidgets('on the design canvas a table stays at rest and shows its bound rows', (tester) async {
     await lists.show(tester, table(), root: 'table', variables: [rows], interactive: false);
-    expect(find.byType(TableView), findsNothing);
+    expect(runningTable(tester), isNull);
     await tester.pumpAndSettle();
     final shown = <String>[];
     void visit(RenderObject o) {
@@ -235,7 +248,7 @@ void main() {
     // 600 - 32 padding - 300 fixed = 268 spare: c0 gets 67, c2 201.
     expect(shown['Col 1']!.dx - shown['Col 0']!.dx, closeTo(167, 1));
     expect(shown['Col 2']!.dx - shown['Col 1']!.dx, closeTo(100, 1));
-    expect(shown['Col 0']!.dx - tester.getTopLeft(find.byType(TableView)).dx, closeTo(16, 1));
+    expect(shown['Col 0']!.dx - runningTable(tester)!.localToGlobal(Offset.zero).dx, closeTo(16, 1));
     await tester.tapAt(shown['r2c1']! + const Offset(4, 4));
     await tester.pumpAndSettle();
     expect(s['selected'], 2);
@@ -272,9 +285,15 @@ void main() {
     testWidgets('the last column can take the leftover width', (tester) async {
       await show(tester, stretchTable(), interactive: true);
       await tester.pumpAndSettle();
-      final view = tester.widget<TableView>(find.byType(TableView));
-      final delegate = view.delegate as TableCellBuilderDelegate;
-      expect((delegate.buildColumn(1)!.extent as FixedTableSpanExtent).pixels, 320);
+      // 400 wide: x keeps its 80, y takes the 320 left. The header of y starts at 80 and the table ends at 400.
+      final at = cells(tester);
+      expect(at['y']!.dx, 80);
+      final table = runningTable(tester)!;
+      expect(table.size.width, 400);
+      expect(table.scrollOffset, Offset.zero);
+      await tester.dragFrom(const Offset(200, 100), const Offset(-300, 0));
+      await tester.pump();
+      expect(table.scrollOffset.dx, 0, reason: 'the columns fill the width exactly: nothing to scroll across');
     });
   });
 }

@@ -47,7 +47,6 @@ dependencies:
   just_audio: ^0.10.6
   path_provider: ^2.1.5
   shared_preferences: ^2.5.6
-  two_dimensional_scrollables: ^0.5.6
   url_launcher: ^6.3.3
   web: ^1.1.0
 
