@@ -2,23 +2,18 @@
 /// ActionContext, and their triggers wired into the render tree.
 library;
 
-export 'confirm_dialog.dart' show ConfirmRequest, ThemedConfirmDialog, isConfirmResult, showConfirmDialog;
 export 'context.dart';
-export 'feedback_theme.dart' show FeedbackTheme, FeedbackThemeScope, ResolvedFeedbackTheme;
 export 'feature.dart';
 export 'handlers.dart' show delayMilliseconds, sourceFiles;
-export 'hero_flights.dart' show CodelesslyHeroRoute, HeroArcRectTween, HeroFlights, HeroRoutes;
 export 'node_values.dart';
-export 'presentation_route.dart' show PresentationRoute;
-export 'presentation_scope.dart';
 export 'app_events.dart';
 export 'capture.dart' show CodelesslyCaptureScope, CaptureRegistry, captureImage;
-export 'route_transition.dart';
 export 'runner.dart';
 export 'script_host.dart';
 export 'text_fields.dart' show TextFieldHandle;
-export 'toast.dart' show CodelesslyToast, ToastBelowRoute, ToastOverlayScope, ToastRequest;
 export 'ui.dart';
 export 'values.dart' show applyWrite, evaluateValue, setAtPath;
 export 'variable_animator.dart';
 export 'wiring.dart';
+export 'look.dart';
+export 'reveal_anchor.dart';

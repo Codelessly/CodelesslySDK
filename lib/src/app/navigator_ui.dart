@@ -18,12 +18,12 @@ import 'package:flutter/material.dart' hide NavigationMode;
 import 'package:codelessly_api/core.dart' show NavigationMode;
 
 import 'viewport.dart' show CanvasSizing, CanvasSizingScope;
-import '../runtime/actions/confirm_dialog.dart';
-import '../runtime/actions/feedback_theme.dart';
-import '../runtime/actions/presentation_route.dart';
-import '../runtime/actions/presentation_scope.dart';
-import '../runtime/actions/route_transition.dart';
-import '../runtime/actions/toast.dart';
+import 'ui/confirm_dialog.dart';
+import 'ui/feedback_theme.dart';
+import 'ui/presentation_route.dart';
+import 'ui/presentation_scope.dart';
+import 'ui/route_transition.dart';
+import 'ui/toast.dart';
 import '../runtime/actions/ui.dart';
 
 /// Builds the route that shows screen [destination] (a canvas or layout id)
