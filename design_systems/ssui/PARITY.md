@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 126. Still to rebuild: 38.**
+**Here: 132. Still to rebuild: 32.**
 
 ## Here
 
@@ -35,6 +35,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | ChipTabs | ChipTabs |  |
 | CloudSyncIndicator | CloudSyncIndicator |  |
 | CodeBlock | CodeBlock |  |
+| CodePreview | CodePreview |  |
 | ColorInput | ColorInput |  |
 | Combobox | Combobox |  |
 | CommandPalette | CommandPalette |  |
@@ -50,6 +51,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | DocumentItem | DocumentItem |  |
 | DownloadButton | DownloadButton |  |
 | Dropdown |  | dropdown |
+| DropdownMultiselect | DropdownMultiselect |  |
 | EmptyState | EmptyState |  |
 | ErrorBar | ErrorBar |  |
 | FeatureBulletItem | FeatureBulletItem |  |
@@ -66,6 +68,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | IconBox | IconBox |  |
 | IconButton | IconButton | iconButton |
 | IconSegmentedControl | IconSegmentedControl |  |
+| IconSelect | IconSelect |  |
 | ImageUpload | ImageUpload |  |
 | InlineStat | InlineStat |  |
 | LoadingSpinner |  | activityIndicator |
@@ -75,6 +78,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | MetaInfo | MetaInfo |  |
 | ModelAvatarStack | ModelAvatarStack |  |
 | NavigationMenu | NavigationMenu |  |
+| NotePopover | NotePopover |  |
 | NotificationBadge | NotificationBadge |  |
 | NumberInput | NumberInput |  |
 | OnboardingBanner | OnboardingBanner |  |
@@ -108,6 +112,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Sidebar | Sidebar |  |
 | Skeleton | Skeleton |  |
 | Slider | Slider | slider |
+| SlidingPanel | SlidingPanel |  |
 | SortMenu | SortMenu |  |
 | SplitButton | SplitButton |  |
 | StackedProgressBar | StackedProgressBar |  |
@@ -140,6 +145,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | TrialBanner | TrialBanner |  |
 | UpgradeButton | UpgradeButton |  |
 | UserMenu | UserMenu |  |
+| ViewerDialog | ViewerDialog |  |
 | WindowToolbar | WindowToolbar |  |
 
 Also here with no source file of the same name: Card, ListRow, SectionHeader, Tabs.
@@ -148,25 +154,21 @@ Also here with no source file of the same name: Card, ListRow, SectionHeader, Ta
 
 In the order planned: what generated UI reaches for first, then the application chrome.
 
-### Text and small content (1)
-
-CodePreview
-
 ### Cards and rows (2)
 
 FolderCard, ResourceCard
 
-### Inputs (9)
+### Inputs (7)
 
-NumberPresetInput, ExtensionChipsInput, IconSelect, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInputWithBanner
+NumberPresetInput, ExtensionChipsInput, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInputWithBanner
 
 ### Navigation and chrome (7)
 
 TabOverflowScroll, SplitPaneTabs, SidebarTogglePattern, Toolbar, CollapsibleSection, CanvasShell, ResizableRow
 
-### Menus and overlays (9)
+### Menus and overlays (6)
 
-AddContextMenu, FileTreeContextMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, NotePopover, SlidingPanel, ViewerDialog, VariableContractHover
+AddContextMenu, FileTreeContextMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, VariableContractHover
 
 ### Data and specialized (10)
 

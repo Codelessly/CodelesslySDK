@@ -1,0 +1,579 @@
+{
+ "schema": 3,
+ "id": "IconSelect",
+ "roots": [
+  "column"
+ ],
+ "widget": {
+  "type": "IconSelect",
+  "doc": "One choice from a few, each shown with a small letter plate (a provider, a model, a workspace): press it and the options open under it, in place. The choice is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Claude",
+     "Gemini",
+     "Local"
+    ],
+    "doc": "The choices.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the choice."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Select...",
+    "doc": "Shown with no choice."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "compact",
+      "small",
+      "medium"
+     ]
+    },
+    "default": "small",
+    "doc": "compact (28), small (32) or medium (36)."
+   },
+   {
+    "key": "open",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Whether the options show at first."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "variables": {
+  "column": [
+   {
+    "name": "toggled",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Closed",
+   "size": [
+    200,
+    32
+   ],
+   "props": {
+    "value": "Claude"
+   }
+  },
+  {
+   "name": "Open",
+   "size": [
+    200,
+    140
+   ],
+   "props": {
+    "value": "Claude",
+    "open": true
+   }
+  }
+ ],
+ "nodes": {
+  "column": {
+   "type": "column",
+   "children": [
+    "trigger",
+    "panel"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "trigger": {
+   "type": "row",
+   "children": [
+    "strut",
+    "triggerContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": [
+     9,
+     0,
+     9,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= (props.open != toggled) ? theme.primary : theme.colors.primaryBorder}"
+   },
+   "states": {
+    "hovered": {
+     "trigger": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "toggled",
+       "value": "${= !toggled}"
+      }
+     ]
+    }
+   ]
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 34
+   },
+   "bind": {
+    "layout.height": "${= props.size == 'compact' ? 30 : (props.size == 'small' ? 34 : (39))}"
+   }
+  },
+  "chosen": {
+   "type": "row",
+   "children": [
+    "chosenLetter"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "layout.width": "${= props.size == 'compact' ? 16 : (props.size == 'small' ? 18 : (18))}",
+    "layout.height": "${= props.size == 'compact' ? 16 : (props.size == 'small' ? 18 : (18))}",
+    "decoration.radius": "${= props.size == 'compact' ? 4 : (props.size == 'small' ? 5 : (5))}"
+   }
+  },
+  "chosenLetter": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(left(props.value, 1))}",
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 700,
+     "height": 1.0,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 7
+    },
+    "height": {
+     "hug": 10
+    }
+   }
+  },
+  "choice": {
+   "type": "text",
+   "props": {
+    "text": "${= props.value != '' ? props.value : props.placeholder}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value != '' ? theme.colors.primaryText : theme.colors.tertiaryText}",
+    "props.style.fontSize": "${= props.size == 'compact' ? 13 : (props.size == 'small' ? 14 : (14.5))}"
+   }
+  },
+  "chevron": {
+   "type": "icon",
+   "props": {
+    "icon": "expand_more",
+    "color": "tertiaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "props.icon": "${= (props.open != toggled) ? 'expand_less' : 'expand_more'}"
+   }
+  },
+  "panel": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 96
+    },
+    "padding": 5
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 15,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.open != toggled}",
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "option"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 190
+    },
+    "height": {
+     "hug": 86
+    }
+   },
+   "bind": {
+    "data": "${props.options}"
+   }
+  },
+  "option": {
+   "type": "row",
+   "children": [
+    "optionStrut",
+    "plate",
+    "optionLabel",
+    "tick"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 190
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     7,
+     0,
+     7,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 9
+   },
+   "states": {
+    "hovered": {
+     "option": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "toggled",
+       "value": "${= props.open}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "optionStrut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 32
+   },
+   "bind": {
+    "layout.height": "${= props.size == 'compact' ? 28 : (props.size == 'small' ? 32 : (37))}"
+   }
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "plateLetter"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "layout.width": "${= props.size == 'compact' ? 16 : (props.size == 'small' ? 18 : (18))}",
+    "layout.height": "${= props.size == 'compact' ? 16 : (props.size == 'small' ? 18 : (18))}",
+    "decoration.radius": "${= props.size == 'compact' ? 4 : (props.size == 'small' ? 5 : (5))}"
+   }
+  },
+  "plateLetter": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(left(item, 1))}",
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 700,
+     "height": 1.0,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 7
+    },
+    "height": {
+     "hug": 10
+    }
+   }
+  },
+  "optionLabel": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.style.fontSize": "${= props.size == 'compact' ? 12.5 : (props.size == 'small' ? 13 : (14))}"
+   }
+  },
+  "tick": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "primary",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "visible": "${= item == props.value}"
+   }
+  },
+  "triggerContent": {
+   "type": "row",
+   "children": [
+    "chosen",
+    "choice",
+    "chevron"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

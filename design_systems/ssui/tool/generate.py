@@ -4690,6 +4690,262 @@ add(component(
     },
 ))
 
+# CodePreview (CodePreview.tsx): text or code as it was written, on the page color: monospace 11.5 on a 1.6
+# line (-0.1), padding 16, wrapping; with nothing to show, a centered empty state: a 28 px icon, 10 px, a
+# title 13/600, 4 px, a line 12, all in tertiary.
+add(component(
+    'CodePreview',
+    'Text or code shown as it was written, in monospace, wrapping. With none, a quiet message in its place.',
+    'preview',
+    props=[prop('code', STRING, '', 'The text.', required=True),
+           prop('emptyTitle', STRING, 'Nothing to preview', 'The message\'s title when there is no text.'),
+           prop('emptySubtitle', STRING, '', 'The line under it.')],
+    previews=[preview('Text', 320, 90, code='name: nightly-export\nschedule: "0 2 * * *"\nsteps:\n  - run: export --all'),
+              preview('Empty', 320, 110, emptySubtitle='Pick a file to see it here.')],
+    nodes={
+        'preview': {'type': 'column', 'children': ['code', 'blank'], 'props': {'crossAxisAlignment': 'stretch'},
+                    'layout': {'width': {'fill': 320}, 'height': {'hug': 90}}, 'decoration': {'fills': [{'color': 'primaryBackground'}]}},
+        'code': {**text('${props.code}', style(11.5, 400, 'primaryText', 1.6, letterSpacing=-0.1, fontFamily='monospace'), {'fill': 288}, {'hug': 18}),
+                 'layout': {'width': {'fill': 288}, 'height': {'hug': 18}, 'margin': 16},
+                 'bind': {'visible': "${= props.code != ''}"}},
+        'blank': {'type': 'column', 'children': ['blankIcon', 'blankTitle', 'blankLine'], 'props': {'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'fill': 320}, 'height': {'hug': 110}, 'padding': [16, 24, 16, 24]},
+                  'bind': {'visible': "${= props.code == ''}"}},
+        'blankIcon': icon('code', 'tertiaryText', 28),
+        'blankTitle': {**text('${props.emptyTitle}', style(13, 600, 'tertiaryText', 1.3), {'hug': 120}, {'hug': 17}),
+                       'layout': {'width': {'hug': 120}, 'height': {'hug': 17}, 'margin': [0, 10, 0, 4]}},
+        'blankLine': {**text('${props.emptySubtitle}', style(12, 400, 'tertiaryText', 1.4), {'hug': 160}, {'hug': 17}),
+                      'bind': {'visible': "${= props.emptySubtitle != ''}"}},
+    },
+))
+
+# NotePopover (NotePopover.tsx): words with a dotted underline that open a note when pressed: a bubble at
+# most 240 px wide, radius 6, bordered, the menu shadow, 6 x 9, 11 on a 1.4 line (-0.1) in secondary. Here
+# the note opens in place, under the words.
+add(component(
+    'NotePopover',
+    'Words with a dotted underline that show a short note under them when pressed.',
+    'column',
+    props=[prop('label', STRING, 'What is this?', 'The words that open the note.', required=True),
+           prop('note', STRING, '', 'The note.', required=True),
+           prop('open', BOOL, False, 'Whether the note shows at first.')],
+    variables=[{'name': 'toggled', 'type': 'boolean', 'value': False}],
+    previews=[preview('Open', 240, 60, label='Why two keys?', note='One signs requests, the other reads results.', open=True)],
+    nodes={
+        'column': {'type': 'column', 'children': ['trigger', 'bubble'], 'props': {'crossAxisAlignment': 'start', 'spacing': 6},
+                   'layout': {'width': {'hug': 240}, 'height': {'hug': 60}}},
+        'trigger': {**text('${props.label}', {**style(11, 400, 'secondaryText', 1.4), 'decoration': 'underline', 'decorationStyle': 'dotted'}, {'hug': 80}, {'hug': 16}),
+                    'actions': [{'trigger': 'click', 'actions': [{'type': 'setVariable', 'variable': 'toggled', 'value': '${= !toggled}'}]}]},
+        'bubble': {'type': 'row', 'children': ['note'],
+                   'layout': {'width': {'hug': 240}, 'height': {'hug': 28}, 'padding': [9, 6, 9, 6], 'constraints': {'maxWidth': 240}},
+                   'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 6,
+                                  'effects': SHADOWS_LIGHT['level3']},
+                   'bind': {'visible': '${= props.open != toggled}', 'decoration.effects': '${theme.shadows.level3}'}},
+        'note': text('${props.note}', style(11, 400, 'secondaryText', 1.4, letterSpacing=-0.1), {'hug': 200}, {'hug': 16}),
+    },
+))
+
+# ViewerDialog (ViewerDialog.tsx): the frame that shows a document or a picture large: radius 8 on the page
+# color, a header over a hairline, 12 x 16, with the title 14/500 and a small close button; its body, padded
+# 16, holds the call's children.
+add(component(
+    'ViewerDialog',
+    'The frame that shows a document or a picture large: a title bar with a close button over the call\'s children. Show it with a modal action. Fires onClose.',
+    'dialog',
+    props=[prop('title', STRING, 'Preview', 'The title.', required=True),
+           prop('padded', BOOL, True, 'False: the children reach the frame\'s edges.')],
+    events=['onClose'],
+    slots=['actions'],
+    children='list',
+    previews=[preview('Default', 360, 120, title='brief.pdf')],
+    nodes={
+        'dialog': {'type': 'column', 'children': ['header', 'body'], 'props': {'crossAxisAlignment': 'stretch'},
+                   'layout': {'width': {'fill': 360}, 'height': {'hug': 120}},
+                   'decoration': {'fills': [{'color': 'primaryBackground'}], 'radius': 8, 'clip': 'antiAlias', 'effects': SHADOWS_LIGHT['level3']},
+                   'bind': {'decoration.effects': '${theme.shadows.level3}'}},
+        'header': {'type': 'row', 'children': ['title', 'actions', 'close'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                   'layout': {'width': {'fill': 360}, 'height': {'hug': 52}, 'padding': [16, 12, 16, 12]},
+                   'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'title': _one_line('${props.title}', style(14, 500, 'primaryText', 1.4), {'fill': 260}, {'hug': 20}),
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+        'close': {'type': 'IconButton', 'props': {'icon': 'close', 'size': 'small'}, 'layout': {'width': {'hug': 32}, 'height': {'hug': 32}}, 'tooltip': 'Close',
+                  'actions': [{'trigger': {'type': 'event', 'event': 'onPressed'}, 'actions': [{'type': 'componentEvent', 'event': 'onClose'}]}]},
+        'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 360}, 'height': {'hug': 60}, 'padding': 16},
+                 'bind': {'layout.padding': '${= props.padded ? 16 : 0}'}},
+        'content': {'type': 'slot'},
+    },
+))
+
+# SlidingPanel (SlidingPanel.tsx): the panel that rises from the foot of a pane: a hairline over it, a 44 px
+# header on the secondary background over a hairline, padding 0 8 0 14: a 13 px icon in tertiary, 12 px, the
+# title 12/600 with a subtitle 10.5 in tertiary 3 px under it, and a 28 px button, radius 6, with a 14 px
+# chevron that lowers it; under it the call's children.
+add(component(
+    'SlidingPanel',
+    'The panel that rises from the foot of a pane: a header with a title, a subtitle and a button that lowers it, over the call\'s children. Fires onCollapse.',
+    'panel',
+    props=[prop('title', STRING, 'Details', 'The title.', required=True),
+           prop('subtitle', STRING, '', 'A muted line under it.'),
+           prop('icon', STRING, '', 'An icon before the title (empty: none).')],
+    events=['onCollapse'],
+    slots=['actions'],
+    children='list',
+    previews=[preview('Default', 340, 110, title='Run log', subtitle='42 lines', icon='terminal')],
+    nodes={
+        'panel': {'type': 'column', 'children': ['header', 'body'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 340}, 'height': {'hug': 110}},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'top'}},
+        'header': {'type': 'row', 'children': ['strut', 'glyph', 'titles', 'actions', 'lower'], 'props': {'crossAxisAlignment': 'center', 'spacing': 12},
+                   'layout': {'width': {'fill': 340}, 'height': {'hug': 44}, 'padding': [14, 0, 8, 0]},
+                   'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'strut': {'type': 'box', 'layout': {'width': 0, 'height': 43}},
+        'glyph': {**icon('terminal', 'tertiaryText', 13), 'bind': {'visible': "${= props.icon != ''}", 'props.icon': '${props.icon}'}},
+        'titles': {'type': 'column', 'children': ['title', 'subtitle'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 3},
+                   'layout': {'width': {'fill': 220}, 'height': {'hug': 15}}},
+        'title': _one_line('${props.title}', style(12, 600, 'primaryText', 1.2), {'fill': 220}, {'hug': 15}),
+        'subtitle': {**_one_line('${props.subtitle}', style(10.5, 400, 'tertiaryText', 1.2, letterSpacing=-0.1), {'fill': 220}, {'hug': 13}),
+                     'bind': {'visible': "${= props.subtitle != ''}"}},
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+        'lower': {'type': 'row', 'children': ['chevron'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': 28, 'height': 28}, 'decoration': {'radius': 6}, 'tooltip': 'Collapse',
+                  'states': {'hovered': {'lower': HOVER}},
+                  'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onCollapse'}]}]},
+        'chevron': icon('expand_more', 'tertiaryText', 14),
+        'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 340}, 'height': {'hug': 60}}},
+        'content': {'type': 'slot'},
+    },
+))
+
+# DropdownMultiselect (DropdownMultiselect.tsx): several choices from a list: a trigger 32, 40 or 48 px high,
+# bordered, radius 12 (7 small), 12 px either side, saying what is chosen (or the placeholder in tertiary)
+# with a 16 px chevron; pressed, a panel opens under it with the options, each 8 x 12 with a 16 px box,
+# radius 4 (the brand color with a white check when chosen), 10 px, the label; a chosen row on the brand
+# tint. Here the panel opens in place, under the trigger.
+add(component(
+    'DropdownMultiselect',
+    'Several choices from a list: press it and the options open under it, in place, each with a checkbox. The chosen labels are kept in your list variable. Fires onChanged.',
+    'column',
+    props=[prop('options', STRINGS, ['Design', 'Engineering', 'Marketing'], 'The choices.', required=True),
+           prop('value', var(STRINGS), '', 'The name of your list variable holding the chosen labels.'),
+           prop('placeholder', STRING, 'Select options...', 'Shown with nothing chosen.'),
+           prop('size', enum(*CB), 'medium', 'small (32), medium (40) or large (48).'),
+           prop('open', BOOL, False, 'Whether the options show at first.'),
+           prop('enabled', BOOL, True, 'False dims it and stops presses.')],
+    events=[{'key': 'onChanged', 'payload': STRINGS}],
+    variables=[{'name': 'toggled', 'type': 'boolean', 'value': False}],
+    previews=[preview('Closed', 260, 40, value=['Design']), preview('Open', 260, 170, value=['Design', 'Marketing'], open=True)],
+    nodes={
+        'column': {'type': 'column', 'children': ['trigger', 'panel'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 4},
+                   'layout': {'width': {'fill': 260}, 'height': {'hug': 40}}, 'bind': {'opacity': '${= props.enabled ? 1 : 0.5}'}},
+        'trigger': {'type': 'row', 'children': ['strut', 'choice', 'chevron'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                    'layout': {'width': {'fill': 260}, 'height': {'hug': 40}, 'padding': [12, 0, 12, 0]},
+                    'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 12},
+                    'bind': {'decoration.strokes[0].color': '${= (props.open != toggled) ? theme.primary : theme.colors.primaryBorder}',
+                             'decoration.radius': by('size', {'small': 7, 'medium': 12, 'large': 12})},
+                    'states': {'hovered': {'trigger': HOVER}},
+                    'actions': [{'trigger': {'type': 'click', 'when': 'props.enabled'}, 'actions': [
+                        {'type': 'setVariable', 'variable': 'toggled', 'value': '${= !toggled}'}]}]},
+        'strut': strut(by('size', {k: v - 2 for k, v in CB.items()}), 38),
+        'choice': {**_one_line("${= length(props.value) > 0 ? join(props.value, ', ') : props.placeholder}", style(14, 400, 'primaryText', 1.4), {'fill': 200}, {'hug': 20}),
+                   'bind': {'props.style.color': '${= length(props.value) > 0 ? theme.colors.primaryText : theme.colors.tertiaryText}',
+                            'props.style.fontSize': by('size', {'small': 14, 'medium': 14, 'large': 16})}},
+        'chevron': {**icon('expand_more', 'tertiaryText', 16), 'bind': {'props.icon': "${= (props.open != toggled) ? 'expand_less' : 'expand_more'}"}},
+        'panel': {'type': 'column', 'children': ['list'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 260}, 'height': {'hug': 116}, 'padding': [1, 5, 1, 5]},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 12,
+                                 'clip': 'antiAlias', 'effects': SHADOWS_LIGHT['level3']},
+                  'bind': {'visible': '${= props.open != toggled}', 'decoration.effects': '${theme.shadows.level3}',
+                           'decoration.radius': by('size', {'small': 7, 'medium': 12, 'large': 12})}},
+        'list': {'type': 'listView', 'children': ['option'], 'props': {'scrollable': False},
+                 'layout': {'width': {'fill': 258}, 'height': {'hug': 108}}, 'bind': {'data': '${props.options}'}},
+        'option': {'type': 'row', 'children': ['box', 'optionLabel'], 'props': {'crossAxisAlignment': 'center', 'spacing': 10},
+                   'layout': {'width': {'fill': 258}, 'height': {'hug': 36}, 'padding': [12, 8, 12, 8]},
+                   'decoration': {'fills': [{'color': '#00000000'}]},
+                   'bind': {'selected': '${= contains(props.value, item)}',
+                            'layout.padding': by('size', {'small': [12, 6, 12, 6], 'medium': [12, 8, 12, 8], 'large': [12, 12, 12, 12]})},
+                   'states': {'hovered': {'option': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}},
+                              'selected': {'option': {'decoration': {'fills': [{'color': 'activeTint'}]}},
+                                           'box': {'decoration': {'fills': [{'color': 'primary'}], 'strokes': [{'color': 'primary'}]}}}},
+                   'actions': [{'trigger': 'click', 'actions': [
+                       {'type': 'setVariable', 'variable': 'props.value',
+                        'value': '${= contains(props.value, item) ? without(props.value, item) : append(props.value, item)}'},
+                       {'type': 'componentEvent', 'event': 'onChanged', 'value': '${props.value}'}]}]},
+        'box': {'type': 'row', 'children': ['tick'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                'layout': {'width': 16, 'height': 16},
+                'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'secondaryBorder'}], 'radius': 4}},
+        'tick': {**icon('check', '#FFFFFFFF', 12), 'bind': {'visible': '${= contains(props.value, item)}'}},
+        'optionLabel': {**_one_line('${item}', style(14, 400, 'primaryText', 1.4), {'fill': 200}, {'hug': 20}),
+                        'bind': {'props.style.fontSize': by('size', {'small': 14, 'medium': 14, 'large': 16})}},
+    },
+))
+
+# IconSelect (IconSelect.tsx): one choice from a few, each with a small plate: a trigger 28, 32 or 36 px
+# high, radius 7, bordered (the brand color while open), with the choice's plate (16 or 18 px, radius 4 or 5,
+# bordered, a letter), its label 12 to 13 and a chevron; pressed, the options open under it, each a row 24 to
+# 32 px high, radius 5, with its plate and label, the chosen one with a check. Here they open in place.
+IS = {'compact': 28, 'small': 32, 'medium': 36}
+def _plate(id_, formula):
+    return {
+        id_: {'type': 'row', 'children': [id_ + 'Letter'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+              'layout': {'width': 18, 'height': 18},
+              'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 5},
+              'bind': {'layout.width': by('size', {'compact': 16, 'small': 18, 'medium': 18}),
+                       'layout.height': by('size', {'compact': 16, 'small': 18, 'medium': 18}),
+                       'decoration.radius': by('size', {'compact': 4, 'small': 5, 'medium': 5})}},
+        id_ + 'Letter': text(formula, style(9.5, 700, 'secondaryText', 1.0), {'hug': 7}, {'hug': 10}),
+    }
+add(component(
+    'IconSelect',
+    'One choice from a few, each shown with a small letter plate (a provider, a model, a workspace): press it and the options open under it, in place. The choice is kept in your variable. Fires onChanged.',
+    'column',
+    props=[prop('options', STRINGS, ['Claude', 'Gemini', 'Local'], 'The choices.', required=True),
+           prop('value', var(STRING), '', 'The name of your text variable holding the choice.'),
+           prop('placeholder', STRING, 'Select...', 'Shown with no choice.'),
+           prop('size', enum(*IS), 'small', 'compact (28), small (32) or medium (36).'),
+           prop('open', BOOL, False, 'Whether the options show at first.')],
+    events=[{'key': 'onChanged', 'payload': STRING}],
+    variables=[{'name': 'toggled', 'type': 'boolean', 'value': False}],
+    previews=[preview('Closed', 200, 32, value='Claude'), preview('Open', 200, 140, value='Claude', open=True)],
+    nodes={
+        'column': {'type': 'column', 'children': ['trigger', 'panel'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 4},
+                   'layout': {'width': {'fill': 200}, 'height': {'hug': 32}}},
+        'trigger': {'type': 'row', 'children': ['strut', 'chosen', 'choice', 'chevron'], 'props': {'crossAxisAlignment': 'center', 'spacing': 7},
+                    'layout': {'width': {'fill': 200}, 'height': {'hug': 32}, 'padding': [8, 0, 8, 0]},
+                    'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 7},
+                    'bind': {'decoration.strokes[0].color': '${= (props.open != toggled) ? theme.primary : theme.colors.primaryBorder}'},
+                    'states': {'hovered': {'trigger': HOVER}},
+                    'actions': [{'trigger': 'click', 'actions': [{'type': 'setVariable', 'variable': 'toggled', 'value': '${= !toggled}'}]}]},
+        'strut': strut(by('size', {k: v - 2 for k, v in IS.items()}), 30),
+        **_plate('chosen', '${= upper(left(props.value, 1))}'),
+        'choice': {**_one_line("${= props.value != '' ? props.value : props.placeholder}", style(12.5, 400, 'primaryText', 1.3), {'fill': 120}, {'hug': 16}),
+                   'bind': {'props.style.color': "${= props.value != '' ? theme.colors.primaryText : theme.colors.tertiaryText}",
+                            'props.style.fontSize': by('size', {'compact': 12, 'small': 12.5, 'medium': 13})}},
+        'chevron': {**icon('expand_more', 'tertiaryText', 14), 'bind': {'props.icon': "${= (props.open != toggled) ? 'expand_less' : 'expand_more'}"}},
+        'panel': {'type': 'column', 'children': ['list'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 200}, 'height': {'hug': 96}, 'padding': 4},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8,
+                                 'effects': SHADOWS_LIGHT['level3']},
+                  'bind': {'visible': '${= props.open != toggled}', 'decoration.effects': '${theme.shadows.level3}'}},
+        'list': {'type': 'listView', 'children': ['option'], 'props': {'scrollable': False, 'spacing': 1},
+                 'layout': {'width': {'fill': 190}, 'height': {'hug': 86}}, 'bind': {'data': '${props.options}'}},
+        'option': {'type': 'row', 'children': ['optionStrut', 'plate', 'optionLabel', 'tick'], 'props': {'crossAxisAlignment': 'center', 'spacing': 7},
+                   'layout': {'width': {'fill': 190}, 'height': {'hug': 28}, 'padding': [6, 0, 6, 0]},
+                   'decoration': {'fills': [{'color': '#00000000'}], 'radius': 5},
+                   'states': {'hovered': {'option': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}}},
+                   'actions': [{'trigger': 'click', 'actions': [
+                       {'type': 'setVariable', 'variable': 'props.value', 'value': '${item}'},
+                       {'type': 'setVariable', 'variable': 'toggled', 'value': '${= props.open}'},
+                       {'type': 'componentEvent', 'event': 'onChanged', 'value': '${item}'}]}]},
+        'optionStrut': strut(by('size', {'compact': 24, 'small': 28, 'medium': 32}), 28),
+        **_plate('plate', '${= upper(left(item, 1))}'),
+        'optionLabel': {**_one_line('${item}', style(12, 400, 'primaryText', 1.3), {'fill': 120}, {'hug': 16}),
+                        'bind': {'props.style.fontSize': by('size', {'compact': 11.5, 'small': 12, 'medium': 12.5})}},
+        'tick': {**icon('check', 'primary', 14), 'bind': {'visible': '${= item == props.value}'}},
+    },
+))
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:
