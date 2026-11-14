@@ -1,0 +1,251 @@
+{
+ "schema": 3,
+ "id": "FileMetadataCard",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "FileMetadataCard",
+  "doc": "Facts about a file or a record as label and value rows, with an optional amber callout under them.",
+  "props": [
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Path",
+     "Status",
+     "Updated"
+    ],
+    "doc": "The labels, one per row.",
+    "required": true
+   },
+   {
+    "key": "values",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "docs/brief.md",
+     "Draft",
+     "Today"
+    ],
+    "doc": "The values, one per label.",
+    "required": true
+   },
+   {
+    "key": "mono",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The values in monospace."
+   },
+   {
+    "key": "callout",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A note in an amber box under the rows (empty: none)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    100
+   ],
+   "props": {
+    "labels": [
+     "Path",
+     "Status",
+     "Updated"
+    ],
+    "values": [
+     "docs/brief.md",
+     "Draft",
+     "Today"
+    ],
+    "callout": "The template changed since this file was written."
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "column",
+   "children": [
+    "rows",
+    "callout"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 100
+    }
+   }
+  },
+  "rows": {
+   "type": "listView",
+   "children": [
+    "row"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "bind": {
+    "data": "${props.labels}"
+   }
+  },
+  "row": {
+   "type": "row",
+   "children": [
+    "label",
+    "value"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 600,
+     "height": 1.4545454545454546,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": 92,
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.values) > index ? props.values[index] : '—'}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.3333333333333333,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 190
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.style.fontFamily": "${= props.mono ? 'monospace' : theme.fontFamily}",
+    "props.style.fontSize": "${= props.mono ? 11.5 : 12}"
+   }
+  },
+  "callout": {
+   "type": "row",
+   "children": [
+    "note"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 30
+    },
+    "padding": [
+     8,
+     7,
+     8,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "warningTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "warningTintBorder"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "visible": "${= props.callout != ''}"
+   }
+  },
+  "note": {
+   "type": "text",
+   "props": {
+    "text": "${props.callout}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "warning",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

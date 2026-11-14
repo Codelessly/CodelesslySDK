@@ -1,0 +1,484 @@
+{
+ "schema": 3,
+ "id": "AuthPromptBanner",
+ "roots": [
+  "banner"
+ ],
+ "widget": {
+  "type": "AuthPromptBanner",
+  "doc": "An invitation to sign in: an icon plate, a title, a line and a button, tinted in an accent. Fires onSignIn and onDismiss.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Sign in to sync",
+    "doc": "The title."
+   },
+   {
+    "key": "description",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Keep your work across devices.",
+    "doc": "The line under it."
+   },
+   {
+    "key": "buttonLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Sign in",
+    "doc": "The button's label."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "cloud",
+    "doc": "The icon on the plate."
+   },
+   {
+    "key": "accent",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "blue",
+      "purple",
+      "green",
+      "orange"
+     ]
+    },
+    "default": "blue",
+    "doc": "blue, purple, green or orange."
+   },
+   {
+    "key": "busy",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Signing in: a spinner in the button."
+   },
+   {
+    "key": "dismissible",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "An x in the corner."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSignIn"
+   },
+   {
+    "key": "onDismiss"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Blue",
+   "size": [
+    340,
+    92
+   ],
+   "props": {}
+  },
+  {
+   "name": "Purple",
+   "size": [
+    340,
+    92
+   ],
+   "props": {
+    "accent": "purple",
+    "title": "Connect your team",
+    "icon": "group"
+   }
+  }
+ ],
+ "nodes": {
+  "banner": {
+   "type": "row",
+   "children": [
+    "plate",
+    "texts",
+    "dismiss"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 92
+    },
+    "padding": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#143B82F6"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#4D3B82F6"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.accent == 'purple' ? '#148B5CF6' : (props.accent == 'green' ? '#1410B981' : (props.accent == 'orange' ? '#14F59E0B' : '#143B82F6'))}",
+    "decoration.strokes[0].color": "${= props.accent == 'purple' ? '#4D8B5CF6' : (props.accent == 'green' ? '#4D10B981' : (props.accent == 'orange' ? '#4DF59E0B' : '#4D3B82F6'))}"
+   }
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": [
+       -1,
+       -1
+      ],
+      "end": [
+       1,
+       1
+      ],
+      "stops": [
+       {
+        "color": "#FF3B82F6",
+        "position": 0
+       },
+       {
+        "color": "#FF2563EB",
+        "position": 1
+       }
+      ]
+     }
+    ],
+    "radius": 10
+   },
+   "bind": {
+    "decoration.fills[0].stops[0].color": "${= props.accent == 'purple' ? '#FF8B5CF6' : (props.accent == 'green' ? '#FF10B981' : (props.accent == 'orange' ? '#FFF59E0B' : '#FF3B82F6'))}",
+    "decoration.fills[0].stops[1].color": "${= props.accent == 'purple' ? '#FF7C3AED' : (props.accent == 'green' ? '#FF059669' : (props.accent == 'orange' ? '#FFD97706' : '#FF2563EB'))}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "cloud",
+    "color": "#FFFFFFFF",
+    "size": 18
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "description",
+    "button"
+   ],
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 68
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "description": {
+   "type": "text",
+   "props": {
+    "text": "${props.description}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.45,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     3,
+     0,
+     10
+    ]
+   }
+  },
+  "button": {
+   "type": "row",
+   "children": [
+    "spin",
+    "login",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 26
+    },
+    "padding": [
+     12,
+     6,
+     12,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": [
+       -1,
+       -1
+      ],
+      "end": [
+       1,
+       1
+      ],
+      "stops": [
+       {
+        "color": "#FF3B82F6",
+        "position": 0
+       },
+       {
+        "color": "#FF2563EB",
+        "position": 1
+       }
+      ]
+     }
+    ],
+    "radius": 7
+   },
+   "bind": {
+    "decoration.fills[0].stops[0].color": "${= props.accent == 'purple' ? '#FF8B5CF6' : (props.accent == 'green' ? '#FF10B981' : (props.accent == 'orange' ? '#FFF59E0B' : '#FF3B82F6'))}",
+    "decoration.fills[0].stops[1].color": "${= props.accent == 'purple' ? '#FF7C3AED' : (props.accent == 'green' ? '#FF059669' : (props.accent == 'orange' ? '#FFD97706' : '#FF2563EB'))}",
+    "opacity": "${= props.busy ? 0.7 : 1}"
+   },
+   "states": {
+    "hovered": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "!props.busy"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSignIn"
+      }
+     ]
+    }
+   ]
+  },
+  "spin": {
+   "type": "circularProgressIndicator",
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "props": {
+    "color": "#FFFFFFFF",
+    "strokeWidth": 2
+   },
+   "bind": {
+    "visible": "${props.busy}"
+   }
+  },
+  "login": {
+   "type": "icon",
+   "props": {
+    "icon": "login",
+    "color": "#FFFFFFFF",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "visible": "${= !props.busy}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.buttonLabel}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 600,
+     "height": 1.25,
+     "color": "#FFFFFFFF",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "dismiss": {
+   "type": "row",
+   "children": [
+    "x"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "decoration": {
+    "radius": 5
+   },
+   "bind": {
+    "visible": "${props.dismissible}"
+   },
+   "states": {
+    "hovered": {
+     "dismiss": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     },
+     "x": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onDismiss"
+      }
+     ]
+    }
+   ]
+  },
+  "x": {
+   "type": "icon",
+   "props": {
+    "icon": "close",
+    "color": "tertiaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  }
+ }
+}

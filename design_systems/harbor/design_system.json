@@ -511,7 +511,14 @@
   "components/DocumentItem.json",
   "components/TextItem.json",
   "components/CodeBlock.json",
-  "components/BatchProgressBar.json"
+  "components/BatchProgressBar.json",
+  "components/AgentChip.json",
+  "components/SelectableListRow.json",
+  "components/ActionListItem.json",
+  "components/FileMetadataCard.json",
+  "components/RunRecordRow.json",
+  "components/TrialBanner.json",
+  "components/AuthPromptBanner.json"
  ],
  "replaces": [
   "filledButton",

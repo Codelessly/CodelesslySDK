@@ -1,0 +1,316 @@
+{
+ "schema": 3,
+ "id": "RunRecordRow",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "RunRecordRow",
+  "doc": "One past run in a history: what ran, when, a message, what it changed and how it ended.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Run",
+    "doc": "What ran.",
+    "required": true
+   },
+   {
+    "key": "timestamp",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "When, after the title."
+   },
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the title."
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "running",
+      "success",
+      "error",
+      "none"
+     ]
+    },
+    "default": "success",
+    "doc": "running, success, error or none."
+   },
+   {
+    "key": "created",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "Files created."
+   },
+   {
+    "key": "modified",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "Files modified."
+   },
+   {
+    "key": "deleted",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "Files deleted."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Success",
+   "size": [
+    320,
+    56
+   ],
+   "props": {
+    "title": "Sync docs",
+    "timestamp": "2h ago",
+    "message": "Updated 3 pages from the handbook.",
+    "created": 1,
+    "modified": 3
+   }
+  },
+  {
+   "name": "Running",
+   "size": [
+    320,
+    34
+   ],
+   "props": {
+    "title": "Rebuild index",
+    "timestamp": "now",
+    "status": "running"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "texts",
+    "spin",
+    "state"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 56
+    },
+    "padding": [
+     16,
+     8,
+     14,
+     8
+    ]
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "line",
+    "message",
+    "diff"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "title",
+    "time"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.2
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "time": {
+   "type": "text",
+   "props": {
+    "text": "${props.timestamp}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.timestamp != ''}"
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${props.message}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "visible": "${= props.message != ''}"
+   }
+  },
+  "diff": {
+   "type": "DiffStatsBadge",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     2,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "props.created": "${props.created}",
+    "props.modified": "${props.modified}",
+    "props.deleted": "${props.deleted}",
+    "visible": "${= props.created + props.modified + props.deleted > 0}"
+   }
+  },
+  "spin": {
+   "type": "circularProgressIndicator",
+   "layout": {
+    "width": 14,
+    "height": 14,
+    "margin": [
+     0,
+     3,
+     1,
+     0
+    ]
+   },
+   "props": {
+    "color": "primary",
+    "strokeWidth": 2
+   },
+   "bind": {
+    "visible": "${= props.status == 'running'}"
+   }
+  },
+  "state": {
+   "type": "icon",
+   "props": {
+    "icon": "check_circle",
+    "color": "success",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16,
+    "margin": [
+     0,
+     2,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.status == 'success' || props.status == 'error'}",
+    "props.icon": "${= props.status == 'error' ? 'cancel' : 'check_circle'}",
+    "props.color": "${= props.status == 'error' ? theme.error : theme.success}"
+   }
+  }
+ }
+}

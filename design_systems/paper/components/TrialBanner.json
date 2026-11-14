@@ -1,0 +1,221 @@
+{
+ "schema": 3,
+ "id": "TrialBanner",
+ "roots": [
+  "banner"
+ ],
+ "widget": {
+  "type": "TrialBanner",
+  "doc": "A bar telling how much of a trial is left, with an upgrade button and an x. Urgent turns it red. Fires onUpgrade and onDismiss.",
+  "props": [
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "7 days left in your trial",
+    "doc": "What it says."
+   },
+   {
+    "key": "urgent",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Red: the trial is about to end or has."
+   },
+   {
+    "key": "actionLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Upgrade",
+    "doc": "The button's label (empty: no button)."
+   },
+   {
+    "key": "dismissible",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "An x at the end."
+   }
+  ],
+  "events": [
+   {
+    "key": "onUpgrade"
+   },
+   {
+    "key": "onDismiss"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Info",
+   "size": [
+    380,
+    54
+   ],
+   "props": {}
+  },
+  {
+   "name": "Urgent",
+   "size": [
+    380,
+    54
+   ],
+   "props": {
+    "message": "Your trial ends today",
+    "urgent": true
+   }
+  }
+ ],
+ "nodes": {
+  "banner": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "message",
+    "action",
+    "dismiss"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 380
+    },
+    "height": {
+     "hug": 54
+    },
+    "padding": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryTintBorder"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.urgent ? theme.colors.errorTint : theme.colors.primaryTint}",
+    "decoration.strokes[0].color": "${= props.urgent ? theme.colors.errorTintBorder : theme.colors.primaryTintBorder}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "schedule",
+    "color": "primary",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "props.icon": "${= props.urgent ? 'warning_amber' : 'schedule'}",
+    "props.color": "${= props.urgent ? theme.error : theme.primary}"
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${props.message}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.urgent ? theme.error : theme.colors.primaryText}"
+   }
+  },
+  "action": {
+   "type": "Button",
+   "props": {
+    "label": "Upgrade",
+    "size": "small"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "bind": {
+    "props.label": "${props.actionLabel}",
+    "visible": "${= props.actionLabel != ''}",
+    "props.variant": "${= props.urgent ? 'destructive' : 'primary'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onUpgrade"
+      }
+     ]
+    }
+   ]
+  },
+  "dismiss": {
+   "type": "IconButton",
+   "props": {
+    "icon": "close",
+    "size": "xs"
+   },
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "bind": {
+    "visible": "${props.dismissible}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onDismiss"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}
