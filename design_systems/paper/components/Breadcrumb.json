@@ -1,0 +1,292 @@
+{
+ "schema": 3,
+ "id": "Breadcrumb",
+ "roots": [
+  "nav"
+ ],
+ "widget": {
+  "type": "Breadcrumb",
+  "doc": "The path to this page: each level a link, the last one where you are. Fires onNavigate with the level's label (\"Home\" for the icon).",
+  "props": [
+   {
+    "key": "items",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Projects",
+     "Design system",
+     "Components"
+    ],
+    "doc": "The levels, outermost first.",
+    "required": true
+   },
+   {
+    "key": "showHomeIcon",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A home icon before the first level."
+   }
+  ],
+  "events": [
+   {
+    "key": "onNavigate",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Three",
+   "size": [
+    300,
+    24
+   ],
+   "props": {
+    "items": [
+     "Projects",
+     "Design system",
+     "Components"
+    ]
+   }
+  },
+  {
+   "name": "Home",
+   "size": [
+    320,
+    24
+   ],
+   "props": {
+    "items": [
+     "Settings",
+     "Profile"
+    ],
+    "showHomeIcon": true
+   }
+  }
+ ],
+ "nodes": {
+  "nav": {
+   "type": "row",
+   "children": [
+    "home",
+    "homeSeparator",
+    "levels"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "home": {
+   "type": "row",
+   "children": [
+    "homeIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": 4
+   },
+   "decoration": {
+    "radius": 2
+   },
+   "bind": {
+    "visible": "${props.showHomeIcon}"
+   },
+   "states": {
+    "hovered": {
+     "home": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     },
+     "homeIcon": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onNavigate",
+       "value": "Home"
+      }
+     ]
+    }
+   ]
+  },
+  "homeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "home",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "homeSeparator": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right",
+    "color": "tertiaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${props.showHomeIcon}"
+   }
+  },
+  "levels": {
+   "type": "listView",
+   "children": [
+    "level"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": 20
+   },
+   "bind": {
+    "data": "${props.items}"
+   }
+  },
+  "level": {
+   "type": "row",
+   "children": [
+    "label",
+    "separator"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "fill": 20
+    }
+   },
+   "bind": {
+    "selected": "${= index == length(props.items) - 1}"
+   },
+   "states": {
+    "hovered": {
+     "label": {
+      "props": {
+       "style": {
+        "color": "primaryText"
+       }
+      }
+     }
+    },
+    "selected": {
+     "label": {
+      "props": {
+       "style": {
+        "color": "primaryText"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "index < length(props.items) - 1"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onNavigate",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "separator": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right",
+    "color": "tertiaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= index < length(props.items) - 1}"
+   }
+  }
+ }
+}
