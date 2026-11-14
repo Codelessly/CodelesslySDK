@@ -281,7 +281,7 @@ class _Metrics {
 
 /// A button: its surface, label and icon, in the states [RenderControl]
 /// resolves.
-class RenderButton extends RenderControl {
+class RenderButton extends RenderControl implements LabelledControl {
   RenderButton();
 
   final ControlLabel _label = ControlLabel();
@@ -523,6 +523,11 @@ class RenderButton extends RenderControl {
     }
     return (fill: fill, ink: ink, iconInk: s.iconColor ?? ink, side: side, filled: filled);
   }
+
+  @override
+  List<({String text, String? fontFamily, List<Rect> glyphs})> get labels => _iconOnly || spec.label.isEmpty || !hasSize
+      ? const []
+      : [(text: spec.label, fontFamily: _label.fontFamily, glyphs: _label.glyphBoxes(_labelLeft, size.height / 2))];
 
   /// The label's colour now (its states included).
   Color get labelColor => _look().ink;
