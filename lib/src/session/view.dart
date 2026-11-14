@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:collection' show ListBase;
 
 import 'package:codelessly_api/core.dart';
+import 'package:codelessly_api/core.dart' as api show TextStyle;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' hide NavigationMode;
 
@@ -283,6 +284,8 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     final tokens = _session.theme;
     final dark = tokens.mode.isDark(platformDark: mq?.platformBrightness == Brightness.dark);
     final shown = tokens.forBrightness(dark: dark);
+    // The theme's font is every text's default family, as the controls'.
+    _tree.textDefault = shown.fontFamily == null ? null : api.TextStyle(fontFamily: shown.fontFamily);
     if (dark != _dark) {
       _dark = dark;
       _themed.theme = shown;
@@ -321,13 +324,15 @@ class _CodelesslyViewState extends State<CodelesslyView> {
 /// "primary"`, `"style": "body"`), as a published site's are; the same
 /// nodes when the theme names nothing they use.
 class ThemedSource implements NodeSource {
-  ThemedSource(this.base, ThemeTokens theme) : _theme = theme;
+  ThemedSource(this.base, ThemeTokens theme)
+      : _theme = theme,
+        _refs = ThemeRefs(theme);
 
   final NodeSource base;
   ThemeTokens _theme;
   final Map<String, _ThemedNode> _watched = {};
   final Expando<Node> _resolved = Expando();
-  ThemeRefs _refs = ThemeRefs(ThemeTokens.none);
+  ThemeRefs _refs;
 
   ThemeTokens get theme => _theme;
   set theme(ThemeTokens value) {

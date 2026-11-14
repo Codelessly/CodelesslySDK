@@ -102,7 +102,7 @@ class UiSession implements NodeSource {
     this.holdEmptyContainers = true,
     this.protectRoots = true,
     this.glyphCoverage,
-  })  : profile = profile ?? TrustProfile.agent,
+  })  : profile = designSystem == null ? profile ?? TrustProfile.agent : (profile ?? TrustProfile.agent).withComponents(designSystem.components),
         catalog = designSystem?.catalogOver(catalog) ?? catalog,
         theme = designSystem?.themeUnder(theme ?? ThemeTokens.none) ?? theme ?? ThemeTokens.none,
         _document = document ?? LayoutDocument(catalog: designSystem?.catalogOver(catalog) ?? catalog);
@@ -123,7 +123,8 @@ class UiSession implements NodeSource {
   /// What node and action types decode with.
   final Catalog catalog;
 
-  /// What the document may use ([TrustProfile.agent] by default).
+  /// What the document may use ([TrustProfile.agent] by default), with the
+  /// [designSystem]'s components allowed when there is one.
   final TrustProfile profile;
 
   /// The check each op's nodes pass ([catalogCheck] by default;

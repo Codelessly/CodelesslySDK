@@ -118,6 +118,7 @@ void _master() {
 }
 
 void main() {
+  _inWrappingRow();
   testWidgets('a decorated date picker is a formatted field, and its dialog takes the picker theme', (tester) async {
     const theme = {
       'backgroundColor': '#FFFFFFFF',
@@ -203,4 +204,36 @@ void main() {
     _ours();
     _master();
   });
+}
+
+void _inWrappingRow() {
+  for (final type in ['dateTimeInput', 'datePicker', 'timePicker', 'textField', 'dropdown']) for (final wrap in [true, false]) {
+    testWidgets('a $type of a hugging width in a ${wrap ? 'wrapping ' : ''}row takes its own width, not the row\'s', (tester) async {
+      final doc = LayoutDocument.fromJson({
+        'roots': ['row'],
+        'nodes': {
+          'row': {
+            'type': 'row',
+            'children': ['a', 'b'],
+            'props': {'wrap': wrap, 'spacing': 8, 'runSpacing': 8},
+            'layout': {'width': 600, 'height': {'hug': 120}},
+          },
+          'a': {'type': type, 'layout': {'width': {'hug': 180}, 'height': 40}},
+          'b': {'type': 'box', 'layout': {'width': 80, 'height': 40}, 'decoration': {'fills': [{'color': '#FF000000'}]}},
+        },
+      });
+      final tree = NodeTree(DocumentSource(doc));
+      await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'row'))));
+      await tester.pump();
+      final view = tester.renderObject(find.byType(NodeView));
+      final a = tree.boxOf('a')!.rectIn(view)!;
+      final b = tree.boxOf('b')!.rectIn(view)!;
+      expect(tester.takeException(), isNull);
+      expect(a.width, lessThan(600), reason: '$type is $a in a row 600 wide');
+      expect(b.top, lessThan(a.bottom), reason: 'the box after it ($b) stays on its line, beside $a');
+      expect(b.left, greaterThanOrEqualTo(a.right));
+      await tester.pumpWidget(const SizedBox());
+      tree.dispose();
+    });
+  }
 }

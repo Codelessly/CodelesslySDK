@@ -89,18 +89,41 @@ sends the brief's follow-up edit (`.followup.jsonl`). `.summary.json` has the nu
 environment only: nothing writes it, and the files hold no request headers. Without the key the command exits
 with status 2 and says so.
 
+### With a design system
+
+```sh
+ANTHROPIC_API_KEY=<key> dart run tool/record.dart --ui flights --model claude-haiku-5-5 --design-system ssui --followup \
+    --out ../../tool/stream/streams/live/flights@claude-haiku-5-5.compact.ssui.r1.jsonl
+```
+
+`--design-system <id-or-folder>` (an id of the SDK's `design_systems/`, `ssui` → `../../design_systems/ssui`; a
+design system folder; or a bundle `.json`; compact prompt only) records the UI as `DESIGN_SYSTEM` makes it in the
+app: the system prompt is generated from the design system, `ui_docs` answers its documents and components, and each
+op of the generation, its retries and its follow-up is validated as `UiSession(designSystem:)` applies it (its
+components are node types the agent may call, its token names are the theme's colours and text styles), so the
+retry protocol sends back what is wrong with the design system in view. Each recording's meta has `designSystem`
+(`id`, `name`, `version`); the summary counts `designSystemComponents` (nodes that call its components) and
+`replacedControls` (nodes of a core control it replaces: a raw `filledButton` where its `Button` was meant). The
+replay reads the design system from the meta (`lib/src/record_check.dart` is the check, tested offline in
+`test/record_check_test.dart`).
+
 ## The live matrix
 
 ```sh
 ANTHROPIC_API_KEY=<key> tool/record_all.sh                 # everything; --repeats 2 per card and page cell
 ANTHROPIC_API_KEY=<key> tool/record_all.sh --only apps --app-repeats 2
+ANTHROPIC_API_KEY=<key> tool/record_all.sh --only ssui      # SSUI: 15 use cases, flights, weather x haiku, sonnet
 tool/record_all.sh --dry-run                                # the cells and commands, no request
 ```
 
 Cells: the two cards (flights, weather) on `claude-haiku-5-5`, `claude-sonnet-5-5` and `claude-opus-5-5`, each
 with `--prompt compact` and `--prompt full` and the follow-up; the two page briefs on haiku and sonnet (compact);
 the six app briefs on sonnet and opus (compact, scripts on; `--app-repeats`, default 1), haiku once each, and
-sudoku and basketball once with scripts off. Recordings go to `../../tool/stream/streams/live/<date>/`, replays
+sudoku and basketball once with scripts off. `--only ssui`: the fifteen use cases, flights and weather on haiku and
+sonnet, compact, once each, with their follow-ups, made with the SSUI design system (`<ui>@<model>.compact.ssui.r1`).
+`--design-system <id>` makes every cell use that design system (cells with `--prompt full` are skipped); the table
+then has the design system per cell, its components against the raw controls it replaces, and calls the replay did
+not render as their definition. Recordings go to `../../tool/stream/streams/live/<date>/`, replays
 (video, contact sheet, metrics, and for apps the scripted "works when used" interaction of
 `tool/stream/interactions/<ui>.json`) to `../../tool/stream/out/live/<date>/`, and one table to
 `summary.md` / `summary.json` there: per cell the time to first token, first paint and first text, complete,

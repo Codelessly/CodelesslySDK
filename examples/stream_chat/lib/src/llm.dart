@@ -513,10 +513,11 @@ String userMessage(String brief, String kind) => switch (kind) {
 api.TrustProfile profileFor(String kind, {bool scripts = true}) =>
     kind == 'app' && scripts ? api.TrustProfile.agentApps : api.TrustProfile.agent;
 
-/// The tools for [variant] and [profile] over the core catalog: compact
-/// tools with ui_docs, or the full schemas.
-List<Map<String, Object?>> uiToolsFor(PromptVariant variant, {api.TrustProfile? profile}) => api.uiTools(
-  (profile ?? api.TrustProfile.agent).restrict(api.Catalog.core),
+/// The tools for [variant] and [profile] over the core catalog (with
+/// [designSystem]'s components when there is one): compact tools with
+/// ui_docs, or the full schemas.
+List<Map<String, Object?>> uiToolsFor(PromptVariant variant, {api.TrustProfile? profile, api.DesignSystem? designSystem}) => api.uiTools(
+  _allowed(profile ?? api.TrustProfile.agent, designSystem).restrict(designSystem?.catalogOver(api.Catalog.core) ?? api.Catalog.core),
   compact: variant == PromptVariant.compact,
   docs: variant == PromptVariant.compact,
 );
@@ -551,9 +552,15 @@ Object? answerLookup(
 }) {
   final p = profile ?? api.TrustProfile.agent;
   final catalog = designSystem?.catalogOver(api.Catalog.core) ?? api.Catalog.core;
+  final allowed = _allowed(p, designSystem);
   return switch (tool) {
     'ui_docs' => api.docsTopic('${input['topic'] ?? ''}', profile: p, designSystem: designSystem),
-    'ui_read' => api.readUi(document, input, rev: rev, catalog: p.restrict(catalog)),
+    'ui_read' => api.readUi(document, input, rev: rev, catalog: allowed.restrict(catalog)),
     _ => {'error': 'No tool "$tool".'},
   };
 }
+
+/// [profile] with [designSystem]'s components allowed, as
+/// `UiSession(designSystem:)` has it.
+api.TrustProfile _allowed(api.TrustProfile profile, api.DesignSystem? designSystem) =>
+    designSystem == null ? profile : profile.withComponents(designSystem.components);
