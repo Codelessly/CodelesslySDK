@@ -222,16 +222,18 @@ void main() {
   group('replayed recordings that showed nothing', () {
     const dir = 'tool/stream/streams/live/2026-11-14-ssui';
 
-    testWidgets('question_flow@claude-sonnet-5-5: its card was rejected, the view is blank, and empty_view says what to send', (tester) async {
+    testWidgets('question_flow@claude-sonnet-5-5: its card wrote an expression as a value; it is bound, and the view is not blank', (tester) async {
+      // Recorded: "radius": "${theme.radii.panel}" on the card. That used to
+      // reject the card and leave the canvas empty (empty_view); the
+      // expression is now moved into the binding (expression_bound).
       final stream = RecordedStream.read('$dir/question_flow@claude-sonnet-5-5.compact.ssui.r1.jsonl');
       final ds = (await tester.runAsync(_ssui))!;
       final session = _strict(ds: ds);
       addTearDown(session.dispose);
-      await session.applyStream(Stream.value(stream.text));
-      final d = (await _shown(tester, session)).singleWhere((d) => d.code == 'empty_view');
-      expect(d.error, isTrue);
-      expect(d.message, contains('canvas "lap"'));
-      expect(d.message, contains('its content "card" never arrived'));
+      final r = await session.applyStream(Stream.value(stream.text));
+      expect([for (final d in r.diagnostics) if (d.code == 'expression_bound') d.nodeId], contains('card'));
+      expect(session.document['card'], isNotNull);
+      expect([for (final d in await _shown(tester, session)) if (d.code == 'empty_view') d], isEmpty);
     });
 
     testWidgets('plan_progress@claude-haiku-5-5: a static mock-up, and the stream\'s result says its buttons do nothing', (tester) async {
