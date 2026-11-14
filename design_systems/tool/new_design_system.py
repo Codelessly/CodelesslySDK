@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Writes a design system from a short brand description.
 
-A design system here is data: a theme (colour roles and names, text styles, radii, sizes, shadows, light and
-dark) and component documents that read it by name. SSUI's components name no colour of their own, so another
+A design system here is data: a theme (color roles and names, text styles, radii, sizes, shadows, light and
+dark) and component documents that read it by name. SSUI's components name no color of their own, so another
 design system is the same components over another theme. This writes that theme from a few choices and copies
 the components, giving a folder that drops in wherever `ssui` does (`"designSystem": "<id>"`, `--design-system`).
 
@@ -11,7 +11,7 @@ the components, giving a folder that drops in wherever `ssui` does (`"designSyst
 The brand file:
 
     {"id": "paper", "name": "Paper", "description": "...",
-     "primary": "#0F766E", "primaryDark": "#2DD4BF",      # the brand colour, and its lighter form for dark mode
+     "primary": "#0F766E", "primaryDark": "#2DD4BF",      # the brand color, and its lighter form for dark mode
      "ink": "#1C1917", "surface": "#FFFCF7",              # text and page, light mode
      "inkDark": "#FAFAF9", "surfaceDark": "#1C1917",      # and dark mode
      "radius": 2,                                         # the control radius; panels and dialogs scale from it
@@ -50,7 +50,7 @@ def lum(c):
 
 
 def on(c):
-    """Ink that reads on colour c."""
+    """Ink that reads on color c."""
     return (255, 255, 255) if lum(c) < 0.4 else (17, 24, 39)
 
 
