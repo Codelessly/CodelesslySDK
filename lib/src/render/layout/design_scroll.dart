@@ -86,7 +86,78 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
     'fraction': maxScrollExtent > 0 ? _pixels / maxScrollExtent : 0.0,
     'progress': maxScrollExtent > 0 ? _pixels / maxScrollExtent : 0.0,
     'axis': _axis.name,
+    ..._itemMetrics(),
   };
+
+  // --- items: the current index and snapping -------------------------------------
+
+  /// Comes to rest with an item at the start of the view after a drag or
+  /// fling (CSS `scroll-snap-align: start`; `PageView.pageSnapping` for
+  /// items).
+  bool itemSnapping = false;
+
+  /// The content's items: the children of the first box under this one that
+  /// has several (a row's or a list's), through the single-child boxes
+  /// around them (padding, a content extent).
+  List<RenderBox> get _items {
+    RenderObject? o = child;
+    while (o != null) {
+      final kids = <RenderObject>[];
+      o.visitChildren(kids.add);
+      if (kids.length != 1) return [for (final k in kids) if (k is RenderBox && k.hasSize) k];
+      o = kids.single;
+    }
+    return const [];
+  }
+
+  /// The offset that puts each item at the start of the view, in order,
+  /// clamped to the scroll range.
+  List<double> get itemStarts {
+    if (!hasSize) return const [];
+    final paint = _axis == Axis.vertical ? _paintOffset.dy : _paintOffset.dx;
+    final max = maxScrollExtent;
+    final out = <double>[];
+    for (final it in _items) {
+      final rect = MatrixUtils.transformRect(it.getTransformTo(this), Offset.zero & it.size);
+      final start = (_axis == Axis.vertical ? rect.top : rect.left) - paint;
+      out.add((_reverse ? max - start : start).clamp(0.0, max));
+    }
+    if (_reverse) out.sort();
+    return out;
+  }
+
+  /// `index`: the item at the start of the view (the last once the view is
+  /// at its end, where the last items can't reach the start); `count`: how
+  /// many items there are. What a carousel's dots and arrows read.
+  Map<String, Object?> _itemMetrics() {
+    final starts = itemStarts;
+    if (starts.isEmpty) return const {'index': 0, 'count': 0};
+    var index = 0;
+    if (maxScrollExtent > 0 && _pixels >= maxScrollExtent - 0.5) {
+      index = starts.length - 1;
+    } else {
+      for (var i = 1; i < starts.length; i++) {
+        if ((starts[i] - _pixels).abs() < (starts[index] - _pixels).abs()) index = i;
+      }
+    }
+    return {'index': index, 'count': starts.length};
+  }
+
+  /// The item start a drag released at [velocity] (pixels/s along the
+  /// offset) comes to rest on: the one nearest where it would have
+  /// coasted to, at least one item on in the direction of a fling.
+  double _snapTarget(double velocity) {
+    final starts = itemStarts;
+    if (starts.isEmpty) return _pixels;
+    final coast = velocity.abs() < 50 ? _pixels : FrictionSimulation(.135, _pixels, velocity).finalX;
+    var target = starts.reduce((a, b) => (a - coast).abs() <= (b - coast).abs() ? a : b);
+    if (velocity >= 50 && target <= _pixels + 0.5) {
+      target = starts.firstWhere((s) => s > _pixels + 0.5, orElse: () => target);
+    } else if (velocity <= -50 && target >= _pixels - 0.5) {
+      target = starts.lastWhere((s) => s < _pixels - 0.5, orElse: () => target);
+    }
+    return target;
+  }
   final List<VoidCallback> _scrollListeners = [];
 
   /// Called whenever the offset changes (sticky nodes, view progress).
@@ -299,6 +370,13 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
 
   void _fling(double velocity) {
     _stop();
+    if (itemSnapping) {
+      final target = _snapTarget(velocity);
+      if ((target - _pixels).abs() > 0.5) {
+        unawaited(animateTo(target, duration: const Duration(milliseconds: 300), curve: Curves.easeOutCubic));
+      }
+      return;
+    }
     if (velocity.abs() < 50) {
 
       return;
