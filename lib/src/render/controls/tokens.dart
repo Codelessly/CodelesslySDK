@@ -57,14 +57,17 @@ class ControlScale {
 /// The tokens one control draws with.
 @immutable
 class ControlTokens {
-  ControlTokens._(this.theme, {required this.dark, this.backdrop});
+  ControlTokens._(this.theme, {required this.dark, this.backdrop, this.buttonRadius});
+
+  /// The document's own `buttonRadius` (SSUI's is its `radii`, per step).
+  final double? buttonRadius;
 
   /// SSUI's tokens for [dark], the document's [theme] (already or not yet for
   /// the brightness) over them, roles resolved; [backdrop] is what the
   /// control is drawn on, when the document says (an opaque fill under it).
   factory ControlTokens.resolve(api.ThemeTokens theme, {required bool dark, Color? backdrop}) {
     final merged = ssuiTokens.forBrightness(dark: dark).mergedWith(theme.forBrightness(dark: dark)).resolvedRoles();
-    return ControlTokens._(merged, dark: dark, backdrop: backdrop);
+    return ControlTokens._(merged, dark: dark, backdrop: backdrop, buttonRadius: theme.buttonRadius);
   }
 
   /// The tokens of the control [b] builds: its tree's theme and brightness,
@@ -155,10 +158,10 @@ class ControlTokens {
     return best;
   }
 
-  /// The corner radius of a control at [scale]: the theme's `buttonRadius`,
-  /// else its `radii`.
+  /// The corner radius of a control at [scale]: the document's
+  /// `buttonRadius`, else the `radii` of the step (SSUI: 5 at xs, else 7).
   double radiusFor(ControlScale scale) =>
-      theme.buttonRadius ?? theme.radii[scale.radiusKey] ?? (scale.radiusKey == 'inner' ? 5 : 7);
+      buttonRadius ?? theme.radii[scale.radiusKey] ?? (scale.radiusKey == 'inner' ? 5 : 7);
 
   /// The shadows named [name] in the theme (`level3`...), as Flutter's.
   List<BoxShadow> shadows(String name) => [for (final e in theme.shadows[name] ?? const <api.Effect>[]) if (e.visible) boxShadow(e)];

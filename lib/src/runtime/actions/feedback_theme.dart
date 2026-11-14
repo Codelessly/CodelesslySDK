@@ -87,6 +87,7 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
   /// The look a project's [tokens] set.
   factory FeedbackTheme.fromTokens(api.ThemeTokens? tokens) {
     if (tokens == null || tokens.isEmpty) return const FeedbackTheme();
+    tokens = tokens.resolvedRoles();
     Color? color(api.Color? c) => c?.flutter;
     final body = tokens.fontFamily == null ? null : TextStyle(fontFamily: tokens.fontFamily);
     return FeedbackTheme(

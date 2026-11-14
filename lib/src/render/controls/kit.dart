@@ -350,7 +350,7 @@ class ControlLabel {
     final p = TextPainter(text: _painter.text, textDirection: TextDirection.ltr, maxLines: 1)..layout();
     final w = p.width;
     p.dispose();
-    return w.ceilToDouble();
+    return w;
   }
 
   Size get size => _painter.size;

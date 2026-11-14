@@ -581,6 +581,9 @@ class RenderButton extends RenderControl implements LabelledControl {
 
   final LayerHandle<OpacityLayer> _opacity = LayerHandle<OpacityLayer>();
 
+  /// The alpha it was last painted at (255: opaque; a disabled button 128).
+  int get paintedAlpha => _opacity.layer?.alpha ?? 255;
+
   @override
   void paint(PaintingContext context, Offset offset) {
     if (!enabled) {
