@@ -121,7 +121,7 @@ once per screen (`unknown_screen`, with how many links name it and where), not o
 | `offscreen` | warning | A node extends past the screen's edge where nothing scrolls: on a device it is cut off. |
 | `text_clipped` | warning | A text's lines are taller than its box, or a word is wider than it. |
 | `text_truncated` | warning | A text is cut at `maxLines` with overflow `clip`. |
-| `text_no_color` | warning | A text has no `style.color`: the engine paints it white. |
+| `text_no_color` | warning | A text has no `style.color` (the engine paints it white), or a transparent one (alpha 0). The check is the one a `UiSession` runs on what it shows (`paragraphIssues`). |
 | `font_fallback` | warning | A font family (or a weight far from any it has) is not in the fonts directories. |
 | `image_failed` | error | An image file is missing, or an image does not decode. |
 | `image_network` | warning | An image is on the network: not fetched, so blank in the screenshot. |
