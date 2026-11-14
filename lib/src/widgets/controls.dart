@@ -4,9 +4,12 @@
 // widgets/registry.dart spreads [controlRecipes] after the island recipes,
 // so a family that lands here replaces its islands by being added, without
 // editing the island files. A family adds one line here.
-import 'package:codelessly_api/core.dart' show ButtonProps, FloatingActionButtonProps, IconButtonProps;
+import 'package:codelessly_api/core.dart'
+    show AccordionProps, ButtonProps, ExpansionTileProps, FloatingActionButtonProps, IconButtonProps, ListTileProps;
 
 import '../render/controls/buttons.dart';
+import '../render/controls/expansion.dart';
+import '../render/controls/tile.dart';
 import '../render/recipe.dart';
 
 /// Buttons (render/controls/buttons.dart).
@@ -19,7 +22,15 @@ final Map<String, WidgetRecipe> buttonRecipes = {
   FloatingActionButtonProps.spec.type: buttonRecipe,
 };
 
+/// List tiles, accordions and expansion tiles (render/controls/{tile,expansion}.dart).
+final Map<String, WidgetRecipe> tileRecipes = {
+  ListTileProps.spec.type: listTileRecipe,
+  AccordionProps.spec.type: accordionRecipe,
+  ExpansionTileProps.spec.type: expansionTileRecipe,
+};
+
 /// The render-object controls, by node type.
 final Map<String, WidgetRecipe> controlRecipes = {
   ...buttonRecipes,
+  ...tileRecipes,
 };
