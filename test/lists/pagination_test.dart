@@ -1,7 +1,9 @@
 import 'dart:async';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/widgets/collections_pagination.dart' show RenderPagination;
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart' as lists;
@@ -101,6 +103,27 @@ Map<String, Json> nodes({int pageSize = 10, String controller = 'rowsPager'}) =>
     };
 
 Variable rows(int count) => lists.v('rows', [for (var i = 0; i < count; i++) {'id': i}], VariableType.list);
+
+RenderPagination _pager(WidgetTester tester) {
+  RenderPagination? found;
+  void visit(RenderObject o) {
+    if (o is RenderPagination) found = o;
+    o.visitChildren(visit);
+  }
+
+  tester.binding.renderViews.first.visitChildren(visit);
+  return found!;
+}
+
+/// The texts the pager shows.
+List<String> _shown(WidgetTester tester) => [for (final p in _pager(tester).parts) p.label];
+
+/// Taps the middle of the part reading [label] (or said as [label]).
+Future<void> _tapPart(WidgetTester tester, String label) async {
+  final pager = _pager(tester);
+  final part = pager.parts.firstWhere((p) => p.isButton && (p.label == label || p.semantics == label));
+  await tester.tapAt(pager.localToGlobal(part.rect.center));
+}
 
 void main() {
   group('loading pages', () {
@@ -222,32 +245,45 @@ void main() {
 
     testWidgets('show the current page and move it', (tester) async {
       final c = await pump(tester, 35);
-      expect(find.text('Showing 1–10 of 35'), findsOneWidget);
+      expect(_shown(tester), contains('Showing 1–10 of 35'));
       for (final page in ['1', '2', '3', '4']) {
-        expect(find.text(page), findsOneWidget, reason: page);
+        expect(_shown(tester).where((l) => l == page), hasLength(1), reason: page);
       }
-      await tester.tap(find.text('3'));
+      await _tapPart(tester, '3');
       await tester.pumpAndSettle();
       expect(c.page, 3);
       expect(s['chosen'], '3');
-      expect(find.text('Showing 21–30 of 35'), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel('Next page'));
+      expect(_shown(tester), contains('Showing 21–30 of 35'));
+      await _tapPart(tester, 'Next page');
       await tester.pumpAndSettle();
-      expect(find.text('Showing 31–35 of 35'), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel('First page'));
+      expect(_shown(tester), contains('Showing 31–35 of 35'));
+      await _tapPart(tester, 'First page');
       await tester.pumpAndSettle();
       expect(c.page, 1);
     });
 
     testWidgets('disable previous on the first page', (tester) async {
       await pump(tester, 35);
-      final previous = tester.widget<Semantics>(find
-          .ancestor(
-            of: find.text('‹'),
-            matching: find.byWidgetPredicate((w) => w is Semantics && w.properties.label == 'Previous page'),
-          )
-          .first);
-      expect(previous.properties.enabled, isFalse);
+      final previous = _pager(tester).parts.firstWhere((p) => p.semantics == 'Previous page');
+      expect(previous.label, '‹');
+      expect(previous.enabled, isFalse);
+      // Said to a screen reader as buttons: this one disabled, Next enabled with a tap.
+      final handle = tester.ensureSemantics();
+      await tester.pump();
+      final said = <String, SemanticsData>{};
+      bool visit(SemanticsNode node) {
+        final data = node.getSemanticsData();
+        if (data.label.isNotEmpty) said[data.label] = data;
+        node.visitChildren(visit);
+        return true;
+      }
+
+      visit(tester.binding.renderViews.first.debugSemantics!);
+      expect(said['Previous page']!.flagsCollection.isButton, isTrue);
+      expect(said['Previous page']!.hasAction(SemanticsAction.tap), isFalse);
+      expect(said['Next page']!.hasAction(SemanticsAction.tap), isTrue);
+      expect(said.keys, contains('Showing 1–10 of 35'));
+      handle.dispose();
     });
 
     testWidgets('shorten long page ranges with ellipses', (tester) async {
@@ -255,21 +291,24 @@ void main() {
       await c.goTo(10);
       await tester.pumpAndSettle();
       // 1 … 9 10 11 … 20
-      expect(find.text('…'), findsNWidgets(2));
-      expect(find.text('20'), findsOneWidget);
-      expect(find.text('9'), findsOneWidget);
-      expect(find.text('5'), findsNothing);
+      final shown = _shown(tester);
+      expect(shown.where((l) => l == '…'), hasLength(2));
+      expect(shown.where((l) => l == '20'), hasLength(1));
+      expect(shown, contains('9'));
+      expect(shown, isNot(contains('5')));
     });
 
     testWidgets('change the page size from their size menu', (tester) async {
       final c = await pump(tester, 100);
-      expect(find.text('Rows per page'), findsOneWidget);
-      await tester.tap(find.byType(DropdownButton<int>));
+      expect(_shown(tester), contains('Rows per page'));
+      await _tapPart(tester, 'Rows per page');
       await tester.pumpAndSettle();
-      await tester.tap(find.text('25').last);
+      final menu = _pager(tester).sizeMenu!;
+      expect([for (final i in menu.items) i.label], ['10', '25']);
+      _pager(tester).chooseSize(1);
       await tester.pumpAndSettle();
       expect(c.pageSize, 25);
-      expect(find.text('Showing 1–25 of 100'), findsOneWidget);
+      expect(_shown(tester), contains('Showing 1–25 of 100'));
     });
 
     testWidgets('show a preview on the design canvas', (tester) async {
@@ -278,7 +317,7 @@ void main() {
       addTearDown(tester.view.reset);
       s = await lists.show(tester, {'col': nodes(controller: 'missing')['pager']!}, variables: [lists.v('chosen', '')]);
       await tester.pumpAndSettle();
-      expect(find.text('Showing 1–20 of 200'), findsOneWidget);
+      expect(_shown(tester), contains('Showing 1–20 of 200'));
       expect(tester.takeException(), isNull);
     });
   });
