@@ -17,7 +17,10 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
+import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show RenderControl;
 import 'package:codelessly_sdk/src/render/controls/root.dart' show RenderControlRoot;
+import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTile;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
@@ -1548,7 +1551,21 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
   // or a widget inside the node hit (a button, an input) that handles taps.
   bool reactsToTap(List<RenderObject> path) {
     var inWidget = true;
+    RenderControl? control;
     for (final o in path) {
+      // A control drawn by the SDK (a button, a switch, a field, a tab bar)
+      // takes the tap itself: it changes its value, opens its menu or
+      // picker, or fires its node's reactions. Only a control that does
+      // nothing on its own (a button, an action chip, a list tile) needs a
+      // reaction on its node.
+      if (o is RenderControl && control == null && o.enabled && o.takesInput) {
+        control = o;
+        if (o is! RenderButton && o is! RenderListTile) return true;
+      }
+      if (o is NodeBox && control != null) {
+        if (o.source.node(o.id)?.actions.isNotEmpty ?? false) return true;
+        control = null;
+      }
       if (o is NodeBox) inWidget = false;
       if (o is RenderReactions && o.triggers.intersection(const {
         api.TriggerType.click, api.TriggerType.doubleTap, api.TriggerType.longPress, api.TriggerType.hold, //

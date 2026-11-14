@@ -182,6 +182,20 @@ void main() {
       expect(diag(report, 'tap_no_reaction').map((d) => d['nodeId']), ['plain']);
     });
 
+    testWidgets('a tap on a control the SDK draws reacts: only a button or tile with no reaction on its node is reported (test 4: 13 of 13 builds)', (tester) async {
+      // Buttons, switches, dropdowns and the rest are render objects that
+      // take the tap themselves; the tool used to look only for a reactions
+      // layer or a widget's gesture handler and called every such tap dead.
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [
+        Step('tap', 'go'), Step('tap', 'sw'), Step('tap', 'seg'), Step('tap', 'check'), Step('tap', 'tileGo'), Step('tap', 'drop'), //
+      ]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(diag(report, 'tap_no_reaction'), isEmpty, reason: '${diag(report, 'tap_no_reaction')}');
+      final dead = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)],
+          steps: const [Step('tap', 'bare'), Step('tap', 'tile')], label: 'dead'));
+      expect(diag(dead, 'tap_no_reaction').map((d) => d['nodeId']), ['bare', 'tile']);
+    });
+
     testWidgets('a tap on a covered node names what covers it', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
           steps: const [Step('tap', 'last')]));

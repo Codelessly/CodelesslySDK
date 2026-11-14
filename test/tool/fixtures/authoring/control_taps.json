@@ -1,0 +1,14 @@
+{"schema": 3, "roots": ["s"], "nodes": {
+  "s": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 844}},
+  "col": {"type": "column", "children": ["go", "bare", "sw", "seg", "drop", "check", "tile", "tileGo"], "props": {"spacing": 12, "crossAxisAlignment": "start"}, "layout": {"width": {"fill": 390}, "height": {"hug": 0}, "padding": 16}},
+  "go": {"type": "filledButton", "props": {"label": "Go"}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "n", "value": "${= n + 1}"}]}]},
+  "bare": {"type": "filledButton", "props": {"label": "Nothing"}},
+  "sw": {"type": "switch", "props": {"label": "Wi-Fi"}},
+  "seg": {"type": "segmentedButton", "props": {"segments": [{"value": "a", "label": "A"}, {"value": "b", "label": "B"}], "selected": ["a"]}},
+  "drop": {"type": "dropdown", "props": {"items": ["One", "Two"]}, "layout": {"width": 200, "height": {"hug": 0}}},
+  "check": {"type": "checkbox", "props": {"label": "Agree"}},
+  "tile": {"type": "listTile", "slots": {"title": "tileText"}, "layout": {"width": {"fill": 358}, "height": {"hug": 0}}},
+  "tileText": {"type": "text", "props": {"text": "A row", "style": {"fontSize": 13, "color": "#FF111827"}}, "layout": {"width": {"fill": 300}, "height": {"hug": 0}}},
+  "tileGo": {"type": "listTile", "slots": {"title": "tileGoText"}, "layout": {"width": {"fill": 358}, "height": {"hug": 0}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "n", "value": "${= n + 1}"}]}]},
+  "tileGoText": {"type": "text", "props": {"text": "A row that goes", "style": {"fontSize": 13, "color": "#FF111827"}}, "layout": {"width": {"fill": 300}, "height": {"hug": 0}}}
+ }, "variables": {"s": [{"name": "n", "type": "integer", "value": 0}]}}
