@@ -1,3 +1,25 @@
+## Unreleased
+
+**A site looks like itself: theme mode, declared fonts, local images** (with codelessly_api's unreleased
+additions).
+
+- **Theme mode.** `Codelessly.themeMode`, `themeModeChoice` and `setThemeMode(mode, persist:)`: the site's
+  `ThemeMode` (a choice over the theme's own `mode`, kept in local storage under `codelessly.themeMode` when
+  persisted, so a reload starts in it). Every screen follows it at once: named colours, named text styles, the
+  control theme (control_theme.dart, still the single source) and `${theme.isDark}`, `${screen.isDark}` and the new
+  `${theme.mode}`. The `setThemeMode` action reaches it through `ThemeModeUi`, which the screen's UI implements.
+  `ThemeMode` is hidden from the barrel export (it shares Flutter's name): import codelessly_api with a prefix.
+- **Site files.** `PublishAssetSource`: a loader that serves a site's own files (`MemoryPublishLoader(assets:,
+  readAsset:)`, `AssetPublishLoader` from assets beside the bundle, `HttpPublishLoader` at
+  `publish/{slug}/files/{path}`). A declared font (a `PublishFont` whose `url` is a relative path) is read through it
+  (`SiteFontFetcher`, falling back to the app's fetcher), WOFF unwrapped (`sfntOf`, moved here from the render tool);
+  an image a layout or component names by a relative path (`images/hero.jpg`) becomes the file's URL or a `data:`
+  URL, a missing one logged as `site_file_missing`.
+- **render.sh.** `--theme light|dark|system` (PNG names end `-<mode>`; steps may toggle it). The fonts `site.json`
+  declares are used with no `--fonts`, loaded before the page shows; a missing declared file is `font_missing`, a
+  WOFF2 `font_format`; `font_fallback` names the nodes that asked for the family and how to declare it. Relative
+  image paths start from the site's folder. `--fonts system` is no longer turned into a relative path.
+
 ## 30.1.0
 
 Requires codelessly_api 30.1.0. **The schema stays 3**: every loader reads `"schema": 2` and `3`, migrating 2 in
