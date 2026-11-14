@@ -1,0 +1,224 @@
+{
+ "schema": 3,
+ "id": "impact",
+ "roots": [
+  "impact"
+ ],
+ "variables": {
+  "impact": [
+   {
+    "name": "trees",
+    "type": "decimal",
+    "value": 0
+   },
+   {
+    "name": "people",
+    "type": "decimal",
+    "value": 0
+   },
+   {
+    "name": "goal",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ },
+ "nodes": {
+  "impact": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 400
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "load"
+     },
+     "actions": [
+      {
+       "type": "animate",
+       "variable": "trees",
+       "command": "animateTo",
+       "target": "12480",
+       "duration": "1300",
+       "curve": "easeOutCubic"
+      },
+      {
+       "type": "animate",
+       "variable": "people",
+       "command": "animateTo",
+       "target": "3680",
+       "duration": "1000",
+       "curve": "easeOutCubic"
+      },
+      {
+       "type": "animate",
+       "variable": "goal",
+       "command": "animateTo",
+       "target": "72",
+       "duration": "1100",
+       "curve": "easeOutCubic"
+      }
+     ]
+    }
+   ]
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "lineChart",
+    "counter",
+    "peopleBar",
+    "goalBar"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 400
+    },
+    "padding": [
+     40,
+     20,
+     40,
+     20
+    ]
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "lineChart": {
+   "type": "lineChart",
+   "layout": {
+    "width": {
+     "fill": 310
+    },
+    "height": 240
+   },
+   "props": {
+    "data": [
+     {
+      "x": 1,
+      "y": 100
+     },
+     {
+      "x": 2,
+      "y": 95
+     },
+     {
+      "x": 3,
+      "y": 91
+     },
+     {
+      "x": 4,
+      "y": 87
+     }
+    ],
+    "xMin": 1,
+    "xMax": 4,
+    "yMin": 80,
+    "yMax": 100,
+    "lineColor": "#FF244F3B",
+    "gridColor": "#FFDCD5C8",
+    "xTicks": [
+     {
+      "x": 1,
+      "label": "Plant"
+     },
+     {
+      "x": 2,
+      "label": "Year 1"
+     },
+     {
+      "x": 3,
+      "label": "Year 2"
+     },
+     {
+      "x": 4,
+      "label": "Year 3"
+     }
+    ],
+    "yTicks": [
+     {
+      "y": 80,
+      "label": "80%"
+     },
+     {
+      "y": 90,
+      "label": "90%"
+     },
+     {
+      "y": 100,
+      "label": "100%"
+     }
+    ],
+    "animateIn": true
+   }
+  },
+  "counter": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 310
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "text": "${= round(trees)} trees, ${= round(people)} people, ${= round(goal)}%",
+    "style": {
+     "fontSize": 20,
+     "color": "#FF000000"
+    }
+   }
+  },
+  "peopleBar": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF244F3B"
+     }
+    ]
+   },
+   "bind": {
+    "layout.width": "${= people / 40}"
+   }
+  },
+  "goalBar": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF244F3B"
+     }
+    ]
+   },
+   "bind": {
+    "layout.width": "${= goal * 2}"
+   }
+  }
+ }
+}

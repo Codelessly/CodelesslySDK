@@ -97,6 +97,13 @@ abstract final class VariableAnimator {
 
   static bool isPlaying(VariableScope scope, String name) => of(scope, name)?.paused == false;
 
+  /// The timelines playing now, in any screen.
+  static final Set<VariableTween> _playing = {};
+
+  /// Whether a number variable's timeline is playing anywhere: a counter
+  /// counting up. A screenshot waits for it to end (the render command).
+  static bool get anyPlaying => _playing.isNotEmpty;
+
   /// [name]'s value as a number, or null.
   static double? valueOf(VariableScope scope, String name) => switch (scope.valueOf(name, scope)) {
         final num n when n.isFinite => n.toDouble(),
@@ -166,6 +173,7 @@ class VariableTween {
   void _start() {
     _ticker?.dispose();
     _ticker = null;
+    VariableAnimator._playing.add(this);
     if (_simulation != null) {
       _base = Duration.zero;
       _ticker = Ticker(_tick, debugLabel: 'animateVariable')..start();
@@ -198,12 +206,14 @@ class VariableTween {
   void _pause() {
     _ticker?.dispose();
     _ticker = null;
+    VariableAnimator._playing.remove(this);
   }
 
   /// Ends it: [completed] when it arrived.
   void finish(bool completed) {
     _ticker?.dispose();
     _ticker = null;
+    VariableAnimator._playing.remove(this);
     VariableAnimator._forget(this);
     if (!done.isCompleted) done.complete(completed);
   }
