@@ -10,8 +10,8 @@
   get a button with its value and expanded state and the rows as buttons. No Material arrow, card, route, ripple or
   elevation. The popup layer (`ControlPopup`: barrier, placement, dismissal) is for dialogs and sheets to reuse.
   Matches SSUI's own Select to 0.77 % (light) and 0.73 % (dark) of the pixels (`test/controls/ssui_select_reference_test.dart`).
-  A hugging dropdown is now as wide as its widest item plus the chevron and padding (was Flutter's `DropdownButton`'s
-  width); `isDense` and `isExpanded` no longer change its size; `elevation` maps to SSUI's shadow levels.
+  A dropdown that hugs its height is 28 high (was 48; `isDense` 24: the `samples-inputs` parity goldens re-pinned), and
+  one that hugs its width is as wide as its widest item plus the chevron and padding; `isDense` and `isExpanded` no longer change its size; `elevation` maps to SSUI's shadow levels.
 
 **A list that filtered to nothing, explained.** A recorded SSUI data table (data_table@claude-sonnet-5-5) showed
 "No results" over twelve defined invoices: its `filtered` variable was `filter(invoices, (statusF == 'All' || status ==
