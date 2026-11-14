@@ -138,4 +138,65 @@ void main() {
       expect(tester.widget<Slider>(find.byType(Slider)).value, closeTo(-10, 0.2));
     });
   });
+
+  group('a slider\'s custom paint', () {
+    testWidgets('is drawn between its parts and reads its value and thumb as it is dragged', (tester) async {
+      tester.view.physicalSize = const Size(300, 60);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final doc = LayoutDocument.fromJson({'roots': ['s'], 'nodes': {
+        's': {
+          'type': 'slider',
+          'layout': {'width': 300, 'height': 40},
+          'props': {'value': 0.25, 'thumbColor': '#FFFFFFFF', 'activeTrackColor': '#FF888888', 'inactiveTrackColor': '#FFCCCCCC', 'overlayColor': '#00000000'},
+          'customPaint': {
+            // Over the thumb: a red bar at its center while the value is
+            // under a half, else green.
+            'foregroundPainter': [
+              {
+                'op': 'rect',
+                'rect': [r'${= slider.thumbCenter.x - 1}', 0, 2, 4],
+                'paint': {'color': r"${= slider.value < 0.5 ? '#FFFF0000' : '#FF00FF00'}"},
+              },
+            ],
+          },
+        },
+      }});
+      final scope = VariableScope(const []);
+      final tree = NodeTree(NodeValues(DocumentSource(doc)),
+          binder: NodeBinder(scope: scope), environment: const IslandEnvironment(interactive: true));
+      addTearDown(scope.dispose);
+      addTearDown(tree.dispose);
+      final key = GlobalKey();
+      await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft,
+          child: RepaintBoundary(key: key, child: NodeView(tree: tree, rootId: 's', interactive: true)))));
+      await tester.pumpAndSettle();
+      Future<(int, Color)> bar() async {
+        final boundary = key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
+        final data = (await tester.runAsync(() async {
+          final image = await boundary.toImage();
+          final d = await image.toByteData();
+          image.dispose();
+          return d;
+        }))!;
+        final w = boundary.size.width.round();
+        for (var x = 0; x < w; x++) {
+          final i = (1 * w + x) * 4;
+          final c = Color.fromARGB(data.getUint8(i + 3), data.getUint8(i), data.getUint8(i + 1), data.getUint8(i + 2));
+          if (c.r > 0.9 && c.g < 0.1 || c.g > 0.9 && c.r < 0.1) return (x, c);
+        }
+        return (-1, const Color(0x00000000));
+      }
+
+      final (x0, c0) = await bar();
+      final thumb0 = tester.getRect(find.byType(Slider));
+      expect(x0, greaterThan(thumb0.left));
+      expect(c0, const Color(0xFFFF0000));
+      await tester.dragFrom(Offset(x0.toDouble(), 20), const Offset(150, 0));
+      await tester.pumpAndSettle();
+      final (x1, c1) = await bar();
+      expect(x1, closeTo(x0 + 150, 2), reason: 'the bar follows the thumb');
+      expect(c1, const Color(0xFF00FF00), reason: 'the ops read the value as it is now');
+    });
+  });
 }
