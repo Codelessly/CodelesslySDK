@@ -1,0 +1,11 @@
+Card gap:10
+  Row gap:8
+    IconBox "bookmark"
+    Column gap:1 grow
+      Text.sectionTitle "Saved to memory"
+      Text.caption "2 things I will remember"
+  TextItem "Tone of voice" value:"Write plainly. Lead with the answer, then the reasons." status:confirmed kind:rule
+  TextItem "Reporting day" value:"Weekly numbers go out on Monday morning." status:proposed kind:fact
+  Row end gap:8
+    Button.ghost "Forget both" -> emit forget
+    Button.outline "Manage memory" -> emit manage

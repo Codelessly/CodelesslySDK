@@ -25,10 +25,37 @@ it reads as finished beside theirs: alignment, spacing, color, every state.
 | `tool_call.txt` | closed, open | One line with the status; opened, the arguments and the result. |
 | `tool_failure.txt` | failed, succeeded on retry | What failed and why, when it retries, skip or retry now. |
 | `job_progress.txt` | one | A pipeline's stages as a segmented bar and a list with times. |
+| `terminal_block.txt` | open, closed | A command with its exit state and its log by level; copy, open the log, fix and rerun. Uses `Terminal`, `StatusBadge`, `CopyButton`. |
+| `code_runner.txt` | before and after a run | Code with its language, Run, then the output with how long it took. Uses `CodeBlock`. |
+| `code_diff.txt` | open, applied, discarded | Two files' changes with their counts, then a banner saying what was done. Uses `DiffViewer`, `DiffStatsBadge`, `Banner`. |
+| `file_tree.txt` | a file picked | The files of a change as a tree, the picked one named under it. Uses `FileTree`, `ResourceChip`. |
+| `sources.txt` | three shown, all shown | What an answer rests on, with where each is from. Uses `ListRow`, `CountBadge`, `LoadMore`. |
+| `web_search.txt` | one | The query, how long it took, results with their sites. Uses `SearchBar`, `Hyperlink`, `StatusDot`. |
+| `document_reference.txt` | one | A document with a passage, and files by path. Uses `DocumentItem`, `FileListItem`. |
+| `image_gallery.txt` | none picked, one picked | Generated pictures to pick from; Use this one is off until one is. Uses `ImageGallery`, `DownloadButton`. |
+| `file_attachment.txt` | two files, cleared | A drop area with the files picked. Uses `FileUploader`. |
+| `subagent_list.txt` | one | Helpers at work with what each did and how long, a bar for how many are done. Uses `AgentChip`, `StackedProgressBar`. |
+| `run_activity.txt` | one | Recent runs: done, running, failed, with what each changed. Uses `RunHistoryList`, `RunRecordRow`, `ConnectionStatus`. |
+| `tool_group.txt` | one shown, all shown | Several tool calls folded into a section with a count. Uses `CollapsibleSection`, `ListRow`. |
+| `follow_up_suggestions.txt` | one | What to ask next, as chips. |
+| `message_actions.txt` | no vote, up, down | Copy, regenerate, thumbs and read aloud under a message. Uses `CopyButton`. |
+| `feedback_dialog.txt` | open, sent | Why an answer was wrong, with a note. Uses `Dialog`, `SegmentedControl`, `RichTextField`, `Banner`. |
+| `reasoning.txt` | folded, open | The thinking behind an answer, folded over the answer. Uses `Panel`. |
+| `memory.txt` | one | What was saved to memory, each with its state. Uses `TextItem`, `IconBox`. |
+| `artifact_card.txt` | one | A document made in the chat: what it is, a preview, copy, download, open. Uses `TextExpandable`, `CopyButton`, `DownloadButton`. |
+| `handoff.txt` | offered, taken | Passing the conversation to a person, with what they will see. Uses `ModelAvatarStack`, `StatusDot`. |
 
-To render one: expand it with `parseNotation` (or apply it to a `UiSession` with `applyNotation`) and render the
-document with `tool/render/render.sh`.
+The first nineteen are written with core nodes only. The rest call SSUI's components by name, which the notation
+reads when it is given the design system; expand one with
 
-Still to write: from the data group, chart, number ticker, heat and activity graphs, trace waterfall, flow graph;
-from plans and progress, subagent list, run activity, tool group and timeline, handoff, agent card. Then the
-sources, code and media groups.
+```bash
+dart run tool/notation/expand.dart design_systems/ssui/examples/targets/handoff.txt --design-system design_systems/ssui --out handoff.json
+```
+
+and render the document with `tool/render/render.sh` from a site whose `site.json` names the design system.
+
+Still to write: from the data group, chart, number ticker, heat and activity graphs, trace waterfall, flow graph,
+context display; link preview, inline citation, retrieval chunks, confidence, research report and maps; code runner's
+siblings (syntax highlighter, diagrams, reviewable diff); image, image generation, media player, web preview and
+computer use; tool fallback and timeline, agent card and status; and the other message parts (markdown and streaming
+text, quote, speaker identity, prompt library, read aloud).

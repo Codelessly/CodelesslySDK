@@ -1,0 +1,7 @@
+Column gap:8
+  Panel "Thought for 12 seconds" icon:"psychology" variant:expandable
+    Column gap:6 pad:12
+      Text.small "The request names two plans but only one price list, so the comparison needs the seat counts first."
+      Text.small "Both plans include SSO; only Business has audit logs, which the brief calls a requirement."
+      Text.small "At 40 seats Business costs 12% more. Recommending it, with the yearly price."
+  Text "Business is the better fit: it is the only plan with audit logs, and at 40 seats it costs 12% more."

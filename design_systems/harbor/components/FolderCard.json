@@ -771,6 +771,9 @@
      9,
      7
     ]
+   },
+   "bind": {
+    "visible": "${slots.actions}"
    }
   },
   "actions": {

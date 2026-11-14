@@ -1,0 +1,11 @@
+state shown=false
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Sources" grow
+    CountBadge count:4
+  ListRow "Flutter rendering pipeline" subtitle:"docs.flutter.dev · updated 3 weeks ago" icon:"article" -> emit open 1
+  ListRow "RenderObject class" subtitle:"api.flutter.dev" icon:"code" -> emit open 2
+  ListRow "Inside Flutter" subtitle:"docs.flutter.dev" icon:"article" -> emit open 3
+  if shown
+    ListRow "Layout constraints, explained" subtitle:"medium.com · community" icon:"public" -> emit open 4
+  LoadMore loadLabel:=shown?"Show fewer":"Show 1 more" -> shown=!shown

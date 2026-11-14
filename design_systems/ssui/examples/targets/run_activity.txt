@@ -1,0 +1,10 @@
+Card gap:8
+  Row gap:8
+    Text.sectionTitle "Recent runs" grow
+    ConnectionStatus status:connected
+  RunHistoryList
+    RunRecordRow "Sync docs" timestamp:"2h ago" message:"Updated 3 pages from the handbook." created:1 modified:3
+    RunRecordRow "Rebuild index" timestamp:"now" status:running divider:true
+    RunRecordRow "Publish site" timestamp:"yesterday" message:"The build failed on a missing asset." status:error deleted:2 divider:true
+  Row end
+    Button.ghost "View all" -> emit all

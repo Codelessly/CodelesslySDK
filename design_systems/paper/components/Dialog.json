@@ -292,6 +292,9 @@
      }
     ],
     "strokeSides": "top"
+   },
+   "bind": {
+    "visible": "${slots.actions}"
    }
   },
   "actions": {

@@ -1,0 +1,13 @@
+state decision=""
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Use the price field, drop empty items" grow
+    DiffStatsBadge modified:1
+  DiffViewer "src/total.ts" lines:[" const total = items","-  .map((i) => i.cost)","+  .map((i) => i.price)","+  .filter(Boolean)","   .reduce((a, b) => a + b, 0);"]
+  DiffViewer "src/total.test.ts" status:added lines:["+it('ignores empty items', () => {","+  expect(total([{price: 4}, null])).toBe(4);","+});"]
+  if decision==""
+    Row end gap:8
+      Button.ghost "Discard" -> decision="discarded"; emit discard
+      Button "Apply both files" -> decision="applied"; emit apply
+  if decision!=""
+    Banner decision=="applied" ? "Applied to 2 files." : "Discarded. Nothing was changed." tone:=decision=="applied"?"success":"info"

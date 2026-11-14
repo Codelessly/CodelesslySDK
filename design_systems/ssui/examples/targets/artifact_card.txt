@@ -1,0 +1,13 @@
+Card gap:10
+  Row gap:10
+    IconBox "description"
+    Column gap:1 grow
+      Text.sectionTitle "Launch plan, draft 3"
+      Text.caption "Document · 1,240 words · edited just now"
+    Badge.primary "New"
+  TextExpandable "Preview" open:true
+    Text.small "The launch moves to the 21st. Marketing has the new dates and the press note is with legal. The pricing page ships two days earlier so support can prepare."
+  Row end gap:8
+    CopyButton text:"Launch plan, draft 3" showLabel:true
+    DownloadButton -> emit download
+    Button "Open" -> emit open

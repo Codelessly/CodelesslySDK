@@ -1,0 +1,7 @@
+state files=["brief.pdf","logo.png"]
+Card gap:10
+  Text.sectionTitle "Attachments"
+  FileUploader hint:"PDF or PNG, up to 10 MB" files:=files sizes:["240 KB","18 KB"] -> emit pick
+  Row end gap:8
+    Button.ghost "Clear" -> files=[]
+    Button "Send 2 files" -> emit send

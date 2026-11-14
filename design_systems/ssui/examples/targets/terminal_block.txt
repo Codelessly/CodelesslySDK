@@ -1,0 +1,15 @@
+state open=true
+Card gap:10
+  Row gap:8
+    IconBox "terminal"
+    Column gap:1 grow
+      Text.sectionTitle "npm run build"
+      Text.caption "Exited with code 1 · 4.2 s"
+    StatusBadge "Failed" tone:error
+    IconButton "expand_less" -> open=!open
+  if open
+    Terminal lines:["vite v5.4.0 building for production...","transforming (212) src/app.tsx","Circular import: store.ts -> api.ts","Could not resolve ./theme.css from src/app.tsx","Build failed in 4.2 s"] levels:["info","debug","warn","error","error"]
+  Row end gap:8
+    CopyButton text:"npm run build" showLabel:true
+    Button.outline "Open log" -> emit open_log
+    Button "Fix and rerun" -> emit rerun

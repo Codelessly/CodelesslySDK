@@ -1,0 +1,12 @@
+state reason="Not accurate"
+state note=""
+state sent=false
+Dialog "What went wrong?" description:"Your note goes to the team with this answer."
+  if !sent
+    SegmentedControl =reason options:["Not accurate","Too long","Off topic"]
+    RichTextField =note placeholder:"Tell us more (optional)" minLines:3
+    Row end gap:8
+      Button.ghost "Cancel" -> emit cancel
+      Button "Send feedback" -> sent=true; emit feedback reason
+  if sent
+    Banner "Thanks. We read every note." tone:success

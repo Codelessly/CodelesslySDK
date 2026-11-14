@@ -1,0 +1,9 @@
+state vote=""
+Row gap:2
+  CopyButton text:"The launch moves to the 21st."
+  IconButton "refresh" -> emit regenerate
+  IconButton "{vote=="up"?"thumb_up":"thumb_up_off_alt"}" -> vote=vote=="up"?"":"up"; emit feedback vote
+  IconButton "{vote=="down"?"thumb_down":"thumb_down_off_alt"}" -> vote=vote=="down"?"":"down"; emit feedback vote
+  IconButton "volume_up" -> emit read_aloud
+  Spacer grow
+  Text.caption "{vote==""?"":(vote=="up"?"Marked helpful":"Marked not helpful")}"

@@ -1,0 +1,8 @@
+Card gap:10
+  Text.sectionTitle "Referenced documents"
+  DocumentItem "Q3 launch brief" description:"Shared with the team · 4 pages"
+    Text.small "The launch moves to the 21st. Marketing has the new dates; the press note still needs legal."
+  FileListItem "pricing-v4.xlsx" path:"finance/pricing-v4.xlsx" -> emit open_file
+  FileListItem "handbook.pdf" path:"people/handbook.pdf" -> emit open_file
+  Row end
+    Button.ghost "Remove all" -> emit clear
