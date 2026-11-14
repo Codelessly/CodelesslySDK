@@ -379,6 +379,10 @@ class RenderTree {
   /// A definition arrived, left or changed its declaration: the boxes of
   /// calls to it (and of its instances) are placed again by their parents.
   void _componentsChanged() {
+    if (components?.themeChanged ?? false) {
+      _themeChanged();
+      return;
+    }
     final types = components?.changed ?? const <String>{};
     if (types.isEmpty) return;
     _instanceSources.removeWhere((ci, _) => types.contains(ci.component));
@@ -400,6 +404,44 @@ class RenderTree {
       // placed again.
       p._applied = null;
       p._apply();
+    }
+  }
+
+  /// The default text style of every text in the tree, under the nearest
+  /// `defaultTextStyle` above a node (Flutter: the `DefaultTextStyle` an
+  /// app's theme gives its text): the theme's font family, so a text with
+  /// none is drawn in it as the controls are. Null: none. A change
+  /// re-applies every box.
+  api.TextStyle? get textDefault => _textDefault;
+  api.TextStyle? _textDefault;
+  set textDefault(api.TextStyle? value) {
+    if (value == _textDefault) return;
+    _textDefault = value;
+    for (final b in _boxes.values.toList()) {
+      if (!identical(_boxes[b.key], b)) continue;
+      b._applied = null;
+      b._apply();
+    }
+  }
+
+  /// Boxes that drew with [ComponentRegistry.theme] itself (colours a node
+  /// leaves unset that come from the theme's roles: an indicator's), noted
+  /// by [dependOnTheme]: a change of theme (its mode) re-applies them. A
+  /// node whose own values name the theme re-applies through its source.
+  final Set<NodeBox> _themeDependents = {};
+
+  /// Notes that [builder]'s node is drawn with the theme's colours: it is
+  /// drawn again when the theme changes.
+  void dependOnTheme(NodeBuilder builder) {
+    if (builder is NodeBox) _themeDependents.add(builder);
+  }
+
+  void _themeChanged() {
+    for (final b in _themeDependents.toList()) {
+      _themeDependents.remove(b);
+      if (!identical(_boxes[keyOf(b.id, b.instance)], b)) continue;
+      b._applied = null;
+      b._apply();
     }
   }
 
@@ -875,6 +917,7 @@ class RenderTree {
     components?.removeListener(_componentsChanged);
     _fontNotifications?.removeListener(_fontsChanged);
     _afterFonts.clear();
+    _themeDependents.clear();
     for (final b in _boxes.values.toList()) {
       if (identical(_boxes[b.key], b)) release(b);
     }
@@ -1085,9 +1128,14 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// replacing it), so every text style it draws (its recipes' too) merges
   /// over it.
   Node? _withTextDefault(Node? n) {
-    final inherited = _slot.textDefault;
-    if (n == null || inherited == null || n.behaviors.defaultTextStyle != null) return n;
-    return n.copyWith(behaviors: n.behaviors.copyWith(defaultTextStyle: inherited));
+    if (n == null) return n;
+    final own = n.behaviors.defaultTextStyle;
+    final chosen = own ?? _slot.textDefault;
+    // The tree's default (the theme's font) under it.
+    final base = tree.textDefault;
+    final style = base == null ? chosen : (chosen == null ? base : base.merge(chosen));
+    if (style == null || style == own) return n;
+    return n.copyWith(behaviors: n.behaviors.copyWith(defaultTextStyle: style));
   }
 
   /// Applies [n] when it is a text that differs from [old] only in its
@@ -1246,6 +1294,27 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   // --- reconciliation ---------------------------------------------------------
 
+  /// Whether this box's node is now a call to a registered component (a
+  /// pending child that streamed in as one, or a set that changed its type):
+  /// a call renders as its definition's root, in a box of its own, so its
+  /// parent places its children again and this box is let go.
+  bool _becameCall() {
+    final registry = tree.components;
+    if (registry == null) return false;
+    final type = source.node(id)?.type;
+    if (type == null || registry[type] == null) return false;
+    final (rid, rinstance) = tree._rendersAt(id, instance);
+    if (rid == id && identical(rinstance, instance)) return false;
+    for (RenderObject? p = parent; p != null; p = p.parent) {
+      if (p is NodeBox) {
+        p._applied = null;
+        p._apply();
+        return true;
+      }
+    }
+    return false;
+  }
+
   void _subscribe() {
     _listenable = source.watch(id)..addListener(_apply);
     // An instance's root is also its call: an edit to the call re-applies it.
@@ -1344,6 +1413,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       return;
     }
     if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
+    if (_becameCall()) return;
     final bound = given != null ? given.$1 : tree.resolveBound(id, instance: instance);
     final resolved = _withTextDefault(bound?.node);
     // Bindings give a new node each time: the same one keeps its identity,

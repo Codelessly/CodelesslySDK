@@ -140,7 +140,7 @@ class LlmStreamSource implements StreamSource {
             apiKey: apiKey,
             model: model,
             systemPrompt: systemPromptFor(variant, full: systemPrompt, designSystem: designSystem),
-            tools: uiToolsFor(variant));
+            tools: uiToolsFor(variant, designSystem: designSystem));
 
   final UiModel _model;
 

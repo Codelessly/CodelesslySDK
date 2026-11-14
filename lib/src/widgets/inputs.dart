@@ -1914,7 +1914,10 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
       suffixIconConstraints: const BoxConstraints(minWidth: 40),
     );
   }
-  return MouseRegion(
+  // A width that hugs is the field's content's, as a text field's and a
+  // dropdown's (a decorator takes all the width it is given: in a wrapping
+  // row, the row's).
+  return _hugWidth(n, MouseRegion(
     cursor: onTap == null ? SystemMouseCursors.basic : SystemMouseCursors.click,
     child: GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -1929,8 +1932,15 @@ Widget _pickerFace(BuildContext context, Node n, String text, VoidCallback? onTa
         child: Text(text, style: _styleOrNull(style, _textDefault(context, n)), maxLines: 1, overflow: TextOverflow.ellipsis),
       ),
     ),
-  );
+  ));
 }
+
+/// [field] at its content's width when [n]'s width hugs (Flutter's
+/// `IntrinsicWidth`), as a text field and a dropdown are.
+/// Not with a height that fills, which reads its constraints (a
+/// `LayoutBuilder`, which has no intrinsic size).
+Widget _hugWidth(Node n, Widget field) =>
+    n.layout.width.fit == SizeFit.hug && n.layout.height.fit != SizeFit.fill ? IntrinsicWidth(child: field) : field;
 
 class _HoverDecorator extends StatefulWidget {
   const _HoverDecorator({required this.decoration, required this.enabled, required this.child, this.height, this.fills = false});
@@ -1955,31 +1965,35 @@ class _HoverDecoratorState extends State<_HoverDecorator> {
         onExit: (_) => setState(() => hover = false),
         // The field takes the node's height (a 42-high field stays 42 with
         // a dense decoration), its value centred, as a text field does.
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final height = widget.height ??
-                (widget.fills && constraints.hasBoundedHeight ? constraints.maxHeight : null);
-            final fills = height != null;
-            final decorator = InputDecorator(
-              // Standard density when it fills: a compact theme would draw
-              // the field 8 px shorter than its node.
-              decoration: widget.decoration.copyWith(
-                enabled: widget.enabled,
-                visualDensity: fills ? VisualDensity.standard : null,
-                // A field of a set height centres its line: no vertical
-                // padding to push it off centre when the height is short.
-                contentPadding: fills ? centredPadding(context, widget.decoration) : null,
-              ),
-              isHovering: hover && widget.enabled,
-              isEmpty: false,
-              expands: fills,
-              textAlignVertical: fills ? TextAlignVertical.center : null,
-              child: widget.child,
-            );
-            return fills ? SizedBox(height: height, child: decorator) : decorator;
-          },
-        ),
+        // Only a field that fills its parent's height reads the constraints:
+        // any other reports its intrinsic size (a hugging width).
+        child: !widget.fills
+            ? _decorator(context, const BoxConstraints())
+            : LayoutBuilder(builder: _decorator),
       );
+
+  Widget _decorator(BuildContext context, BoxConstraints constraints) {
+    final height = widget.height ??
+        (widget.fills && constraints.hasBoundedHeight ? constraints.maxHeight : null);
+    final fills = height != null;
+    final decorator = InputDecorator(
+      // Standard density when it fills: a compact theme would draw
+      // the field 8 px shorter than its node.
+      decoration: widget.decoration.copyWith(
+        enabled: widget.enabled,
+        visualDensity: fills ? VisualDensity.standard : null,
+        // A field of a set height centres its line: no vertical
+        // padding to push it off centre when the height is short.
+        contentPadding: fills ? centredPadding(context, widget.decoration) : null,
+      ),
+      isHovering: hover && widget.enabled,
+      isEmpty: false,
+      expands: fills,
+      textAlignVertical: fills ? TextAlignVertical.center : null,
+      child: widget.child,
+    );
+    return fills ? SizedBox(height: height, child: decorator) : decorator;
+  }
 }
 
 class _DatePickerIsland extends StatefulWidget {
@@ -2168,7 +2182,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
     // draws its own decoration (older fields kept their natural height).
     final fixedHeight = vFit == SizeFit.fixed && styled ? n.layout.height.value : null;
     final style = _styleOrNull(n.prop(DateTimeInputProps.style), _textDefault(context, n));
-    return InkWell(
+    return _hugWidth(n, InkWell(
       onTap: !opens || !enabled || !widget.interactive || first.isAfter(last)
           ? null
           : () async {
@@ -2211,7 +2225,7 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
                     child: Text(display.isEmpty ? ' ' : display, style: style, maxLines: 1, overflow: TextOverflow.ellipsis),
                   ),
                 ),
-    );
+    ));
   }
 
   /// [d] with the node's own hint and icon where it sets none.

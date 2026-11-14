@@ -7,6 +7,7 @@
 // tables are zlib streams). Families a document names that no file
 // provides are recorded, so the report can say which text fell back and
 // where the command looked.
+import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 
@@ -208,8 +209,31 @@ class DirectoryFontFetcher implements FontFetcher {
     return same.first;
   }
 
+  /// How long each fetch takes at least: a slow font source (a large file,
+  /// a network), for tests of what is measured before it arrives.
+  static Duration debugLatency = Duration.zero;
+
+  final Set<Future<void>> _inFlight = {};
+
+  /// Whether a fetch is in flight.
+  bool get fetching => _inFlight.isNotEmpty;
+
   @override
-  Future<Uint8List?> fetch(PublishFont font) async {
+  Future<Uint8List?> fetch(PublishFont font) {
+    final f = _fetch(font);
+    final done = f.then<void>((_) {}, onError: (Object _) {});
+    _inFlight.add(done);
+    done.whenComplete(() => _inFlight.remove(done));
+    return f;
+  }
+
+  Future<Uint8List?> _fetch(PublishFont font) async {
+    if (debugLatency > Duration.zero) {
+      // Real time, as a slow file or network is (not a test's fake clock).
+      final waited = Completer<void>();
+      Zone.root.createTimer(debugLatency, waited.complete);
+      await waited.future;
+    }
     // A family with no file at all is drawn in Roboto (the test
     // environment's own fallback draws boxes, which nobody can review).
     final face = match(font.family, font.weight, font.italic) ?? match('Roboto', font.weight, font.italic);

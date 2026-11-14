@@ -1,3 +1,49 @@
+## Unreleased
+
+**Generative UI with a design system, recorded and replayed.**
+
+- `UiSession(designSystem:)` allows the design system's components under the session's trust profile
+  (`TrustProfile.withComponents`): with the default `TrustProfile.agent` every call to one was
+  `capability_not_allowed`, so a model's design-system UI never applied.
+- A session's theme names (`"color": "primaryBackground"`, `"style": "sectionTitle"`) resolve in its own nodes in
+  light mode: `ThemedSource` started with no names and was only given the theme when the mode changed, so they
+  resolved in dark only (components' names did resolve).
+- A component call that streams in after its parent shows (a pending child that arrives as a call, or a set that
+  changes a node's type to one) renders as its definition: its parent places its children again
+  (`NodeBox._becameCall`). It drew as the empty box of an unknown type.
+- The stream replay (`tool/stream/replay.sh`) replays a recording with the design system its meta names (or
+  `--design-system`), in light or `--theme dark`, and reports `designSystem` (component calls rendered and not,
+  core controls the design system replaces) in `metrics.json`. `examples/stream_chat/tool/record.dart
+  --design-system ssui` records with one (prompt, `ui_docs`, per-op validation and retries), `record_all.sh` gains
+  `--design-system <id>` and `--only ssui`, and the live summary has the design system per cell and its components
+  against the raw controls it replaces.
+
+**Fixes.**
+
+- Gauges, charts and barcodes drawn with the theme's colours (the ones they leave unset, `indicator_theme.dart`)
+  repaint when the theme changes at run time (`setThemeMode`, the platform's brightness under `system`): the box
+  notes it depends on the theme (`RenderTree.dependOnTheme`) and a theme change (`ComponentRegistry.theme`,
+  `themeChanged`) re-applies it. Before, only nodes naming theme colours re-applied, so an unstyled gauge kept the
+  old mode's colours.
+- The render command with no `--screen` no longer renders a canvas only ever opened as a modal as a screen of its
+  own, whether the `openModal` is on a page or inside a component (the site's or its design system's).
+- An image whose path a binding builds (`"bind": {"decoration.fills[0].image.url": "images/${id}.jpg"}`), relative
+  to the site, is read from the site's files when it is drawn: the app's tree reads site images through
+  `SiteImageLoader` (the loader's file URL, else its bytes), and a raster image whose URL has no scheme is fetched by
+  the tree's loader instead of `NetworkImage`. Literal paths were already resolved when the layout loads.
+- A theme's `fontFamily` is the default family of every text, as it is the controls' (Flutter: the `DefaultTextStyle`
+  an app's theme gives): a text node with no family (and no `defaultTextStyle` above it naming one) is drawn in it,
+  in a site (`CodelesslyWidget`) and in a session (`CodelesslyView`). `RenderTree.textDefault` holds it under every
+  node's inherited default text style. Before, controls took the theme's font and text nodes the platform's. No
+  parity golden or render test changed.
+- The render command waits for its own font fetches still in flight before its runtime checks: a family asked for by
+  name late (named by a binding, so no layout lists it, its file slow to read) was measured in the fallback, so
+  `text_clipped` was reported for text the PNG drew in the real font. `DirectoryFontFetcher.debugLatency` simulates a
+  slow source in tests.
+- A `dateTimeInput`, `datePicker` or `timePicker` whose width hugs takes its content's width (`IntrinsicWidth`), as a
+  `textField` and a `dropdown` already did: in a wrapping row it took the row's whole width, and in a plain row it
+  failed (an unbounded `InputDecorator`). A picker's field reads its constraints only when its height fills.
+
 ## 30.1.0
 
 **No special cases left** (with codelessly_api's unreleased removal of the last 21 one-look fields, each now a
