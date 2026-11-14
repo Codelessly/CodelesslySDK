@@ -66,7 +66,7 @@ three taps and about three seconds).
 | Screen | Turns | Nodes | Output tokens (all turns) | Seconds (all turns) |
 |---|---|---|---|---|
 | Session, beginner | 1 | 23 | 660 | 4.8 |
-| Session, kid | 2 | 19 | about 1,150 | about 7 |
+| Session, kid | 2 | 19 | 1,176 | 7.9 |
 | Session, athlete | 1 | 26 | 589 | 4.2 |
 
 - The kid's first answer wrote `size:` on a text, which the notation does not have; the retry fixed it.
