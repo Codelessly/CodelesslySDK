@@ -1205,7 +1205,10 @@ String? _canvasOf(NodeBox b) {
 /// it. [id] is a node id or `name` (`saved`), `<id>#<n>` for a list's n-th
 /// copy, or a path: a component's node by its call ids (`footer/saved`), a
 /// node inside a list's copy (`evCard#0/evReserve`).
-({NodeBox? box, String? problem}) _locate(WidgetsBinding binding, String id) {
+///
+/// When two different nodes answer to an id and exactly one of them passes
+/// [prefer] (`--type`: the one with a text field in it), that one is meant.
+({NodeBox? box, String? problem}) _locate(WidgetsBinding binding, String id, {bool Function(NodeBox)? prefer}) {
   final boxes = _boxes(binding);
   (String, int?) split(String segment) {
     final hash = segment.lastIndexOf('#');
@@ -1267,6 +1270,17 @@ String? _canvasOf(NodeBox b) {
             ..clear()
             ..['own'] = own.single;
           all = [for (final b in all) if (componentInstanceOf(b.instance) == null) b];
+        }
+      }
+      if (kinds.length > 1 && prefer != null) {
+        final preferred = [for (final b in kinds.values) if (prefer(b)) b];
+        if (preferred.length == 1) {
+          final keep = preferred.single;
+          kinds
+            ..clear()
+            ..['preferred'] = keep;
+          final keepPath = keep.tree.pathOf(keep.id, keep.instance);
+          all = [for (final b in all) if (identical(b.tree, keep.tree) && b.tree.pathOf(b.id, b.instance) == keepPath) b];
         }
       }
       if (kinds.length > 1) {
@@ -1447,14 +1461,19 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
   }
 
   // The text field ([EditableText]) inside node [id].
-  Element? fieldIn(String id) {
-    final box = _boxOf(binding, id);
-    if (box == null) return null;
+  Element? fieldOf(RenderObject box) {
     for (final e in find.byType(EditableText).evaluate()) {
       final ro = e.renderObject;
       if (ro != null && _isInside(ro, box)) return e;
     }
     return null;
+  }
+
+  // The text field [id] names: of two nodes sharing the id (a page's field
+  // and a component's heading), the one with a field in it.
+  Element? fieldIn(String id) {
+    final box = _locate(binding, id, prefer: (b) => fieldOf(b) != null).box;
+    return box == null ? null : fieldOf(box);
   }
 
   switch (step.kind) {
@@ -1524,7 +1543,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         }
         return '--$verb ${step.target}: the node has no text field in it (only a textField, or a node around one, can be focused or typed into).';
       }
-      final box = _boxOf(binding, step.target)!;
+      final box = _locate(binding, step.target, prefer: (b) => fieldOf(b) != null).box!;
       if (reachable(box) == null) await centerInView(box);
       final finder = find.byElementPredicate((e) => identical(e, field));
       await tester.showKeyboard(finder);
