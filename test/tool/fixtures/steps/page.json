@@ -1,0 +1,462 @@
+{
+ "schema": 3,
+ "roots": [
+  "page"
+ ],
+ "variables": {
+  "page_variables": [
+   {
+    "name": "tabSaved",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "hits",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "reserved",
+    "type": "integer",
+    "value": -1
+   },
+   {
+    "name": "menuOpen",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "emailText",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "volume",
+    "type": "decimal",
+    "value": 0
+   },
+   {
+    "name": "events",
+    "type": "list",
+    "value": [
+     {
+      "n": 1
+     },
+     {
+      "n": 2
+     },
+     {
+      "n": 3
+     }
+    ]
+   }
+  ]
+ },
+ "nodes": {
+  "page": {
+   "type": "canvas",
+   "name": "Page",
+   "path": "page",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "saved",
+    "menu",
+    "evList",
+    "form",
+    "thanks",
+    "slider",
+    "flags",
+    "footer"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "fill": 844
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "scrollable": true
+   }
+  },
+  "saved": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF444444"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tabSaved",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "menu": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF222222"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "menuOpen",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "minWidth": 1000,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "evList": {
+   "type": "listView",
+   "children": [
+    "evCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "hug": 150
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 4
+   },
+   "bind": {
+    "data": "${events}"
+   }
+  },
+  "evCard": {
+   "type": "row",
+   "children": [
+    "evReserve"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 46
+   }
+  },
+  "evReserve": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF666666"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "reserved",
+       "value": "${index}"
+      }
+     ]
+    }
+   ]
+  },
+  "form": {
+   "type": "column",
+   "children": [
+    "email",
+    "send"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "hug": 100
+    }
+   },
+   "props": {
+    "spacing": 8
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "email": {
+   "type": "textField",
+   "layout": {
+    "width": 300,
+    "height": 48
+   },
+   "bind": {
+    "props.initialValue": "${emailText}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "emailText",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "send": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF0000AA"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sent",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "thanks": {
+   "type": "box",
+   "layout": {
+    "width": 120,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF00AA00"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${sent}"
+   }
+  },
+  "slider": {
+   "type": "slider",
+   "layout": {
+    "width": 300,
+    "height": 40
+   },
+   "props": {
+    "min": 0,
+    "max": 100
+   },
+   "bind": {
+    "props.value": "${volume}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "volume",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "flags": {
+   "type": "row",
+   "children": [
+    "fSaved",
+    "fFooter",
+    "fReserved",
+    "fMenu",
+    "fVolume"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 40
+   }
+  },
+  "fSaved": {
+   "type": "box",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= tabSaved ? '#FF00FF00' : '#FF000000'}"
+   }
+  },
+  "fFooter": {
+   "type": "box",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= hits > 0 ? '#FF00FF00' : '#FF000000'}"
+   }
+  },
+  "fReserved": {
+   "type": "box",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= reserved == 1 ? '#FF00FF00' : '#FF000000'}"
+   }
+  },
+  "fMenu": {
+   "type": "box",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= menuOpen ? '#FF00FF00' : '#FF000000'}"
+   }
+  },
+  "fVolume": {
+   "type": "box",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= volume > 30 ? '#FF00FF00' : '#FF000000'}"
+   }
+  },
+  "footer": {
+   "type": "Footer",
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": 50
+   },
+   "props": {
+    "hits": "hits"
+   }
+  }
+ }
+}

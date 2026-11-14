@@ -5,7 +5,7 @@ import 'dart:ui' show Size;
 final class Step {
   const Step(this.kind, this.target, [this.value]);
 
-  /// tap, hover, focus, unfocus, key, type, set, scroll, navigate or wait.
+  /// tap, hover, focus, unfocus, key, type, set, scroll, drag, navigate or wait.
   final String kind;
   final String target;
   final String? value;
@@ -32,6 +32,8 @@ final class RenderArgs {
     this.slots,
     this.compare,
     this.theme,
+    this.compareMap = const {},
+    this.now,
   });
 
   static const defaultSizes = [Size(390, 844), Size(834, 1112), Size(1440, 900)];
@@ -73,6 +75,13 @@ final class RenderArgs {
   /// `system`), as a `setThemeMode` action would set it; steps may change
   /// it. Null: the site's own (`theme.mode`, else the device's: light).
   final String? theme;
+  /// `--compare-map`: the reference name a capture's screen (or
+  /// `<screen>-<label>`) is compared under (`home=index`).
+  final Map<String, String> compareMap;
+
+  /// `--now`: the instant `now()` returns (an ISO 8601 time), so clocks and
+  /// countdowns written from it are the same in every capture.
+  final DateTime? now;
 
   /// These arguments with other [sizes] and [screens].
   RenderArgs copyWith({List<Size>? sizes, List<String>? screens}) => RenderArgs(
@@ -92,6 +101,8 @@ final class RenderArgs {
         slots: slots,
         compare: compare,
         theme: theme,
+        compareMap: compareMap,
+        now: now,
       );
 }
 
@@ -125,9 +136,18 @@ Options:
   --type <nodeId>=<text>  Focus a text field and type text into it, as a user
                           would (its changed reactions run; a field bound to a
                           variable through props.initialValue sets it).
-  --set <name>=<json>     Set a variable of the screen (value as JSON: 1, true, "a").
+  --set <name>=<json>     Set a variable of the screen in view (value as JSON: 1,
+                          true, "a"). It holds: a timer or load reaction that
+                          writes it later does not change the capture.
+  --now <ISO time>        The time now() returns (2026-11-13T09:00:00Z): clocks
+                          and countdowns are the same in every run.
   --scroll <nodeId|screen>=<px>   Scroll a scrolling node (or the page) to px.
-  --navigate <screen>     Push a screen (canvas id, layout id or URL path).
+  --navigate <screen>     Push a screen: a canvas id, a screen name or a URL path,
+                          with a query string for its params (speaker?id=ada,
+                          /project?id=7): the screen reads them as \${route.id}.
+  --drag <nodeId>=<dx>,<dy>   Press on the node, move by dx, dy and release (a
+                          reorder handle, a slider, a draggable card).
+  --drag <nodeId>=<nodeId>    Drag the node onto another node (a drop target).
   --wait <ms>             Let time pass (animations, delays, toasts).
   --unfocus               Take the focus from the focused field (no caret in the
                           capture; its blur/unfocus reactions run).
@@ -139,6 +159,11 @@ Options:
                           file, or a directory holding <screen>...<w>x<h>...png):
                           writes <png>.compare.png (side by side) and
                           <png>.diff.png, and prints the bands where they differ.
+                          A file in the directory matches when its name is the
+                          screen, the state (the --label, else default or none)
+                          and the size, exactly: home--saved--390x844.png.
+  --compare-map <a>=<b>   Compare screen a (or a-<label>) under the reference
+                          name b: home=index. Repeatable.
   --label <text>          Append -<text> to the PNG names (state screenshots);
                           diagnostics go to diagnostics-<text>.json.
   --validate-only         Only validate; render nothing.
@@ -157,7 +182,7 @@ the fonts site.json declares ("fonts", files beside it: no --fonts needed) and
 the images its documents name by a path relative to the site (images/a.jpg).
 Steps name nodes inside components by path: --tap plans/card1/cta (the call
 ids from the page down, then the node's id; <segment>#<n> picks a list copy).
-Steps (--tap, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --navigate, --wait) run in the order given.
+Steps (--tap, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --drag, --navigate, --wait) run in the order given.
 ''';
 
 /// Parses [argv]; throws a [FormatException] with a message for bad input.
@@ -170,6 +195,8 @@ RenderArgs parseArgs(List<String> argv) {
   final fonts = <String>[];
   var fullPage = false, validateOnly = false, dumpLayout = false, componentsAll = false;
   String? label, component, props, slots, compare, theme;
+  DateTime? now;
+  final compareMap = <String, String>{};
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
     return argv[i + 1];
@@ -215,11 +242,20 @@ RenderArgs parseArgs(List<String> argv) {
         if (!const ['light', 'dark', 'system'].contains(theme)) {
           throw FormatException('--theme takes light, dark or system (Flutter\'s ThemeMode), got "$theme".');
         }
+      case '--compare-map':
+        final v = next(i++, a);
+        final eq = v.indexOf('=');
+        if (eq <= 0 || eq == v.length - 1) throw FormatException('--compare-map takes <screen>=<reference name>, got "$v".');
+        compareMap[v.substring(0, eq).trim()] = v.substring(eq + 1).trim();
+      case '--now':
+        final v = next(i++, a);
+        now = DateTime.tryParse(v);
+        if (now == null) throw FormatException('--now takes an ISO 8601 time (2026-11-13T09:00:00Z), got "$v".');
       case '--unfocus':
         steps.add(const Step('unfocus', ''));
       case '--tap' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key':
         steps.add(Step(a.substring(2), next(i++, a)));
-      case '--set' || '--scroll' || '--type':
+      case '--set' || '--scroll' || '--type' || '--drag':
         final v = next(i++, a);
         final eq = v.indexOf('=');
         if (eq < 0) throw FormatException('$a takes <target>=<value>, got "$v".');
@@ -250,5 +286,7 @@ RenderArgs parseArgs(List<String> argv) {
     slots: slots,
     compare: compare,
     theme: theme,
+    compareMap: compareMap,
+    now: now,
   );
 }
