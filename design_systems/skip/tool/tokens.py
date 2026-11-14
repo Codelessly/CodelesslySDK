@@ -25,6 +25,11 @@ DEFAULT = {
         # the dark panel a chart sits on
         'panel': '#FF17132F', 'panelGlow': '#FF3A2A8F', 'onPanel': '#FFFFFFFF', 'onPanelSoft': '#FFA9A4C9',
         'panelBar': '#FF3A3466', 'panelTrack': '#801F1A3B',
+        # the session dial: the work surface (workA to workB) and the rest surface, each with its ink, arc and track
+        'workA': '#FF7352FF', 'workB': '#FF3A1FCB', 'workGlow': '#FFA791FF', 'onWork': '#FFFFFFFF', 'onWorkSoft': '#FFDCD5FF',
+        'workArc': '#FFD6FF3F', 'workTrack': '#2EFFFFFF',
+        'restA': '#FF0E9AA0', 'restB': '#FF0A5F78', 'restGlow': '#FF5FE3D6', 'onRest': '#FFFFFFFF', 'onRestSoft': '#FFD3F4F1',
+        'restArc': '#FFFFFFFF', 'restTrack': '#2EFFFFFF',
         # illustration inks
         'artSkin': '#FFF6B48F', 'artSkinShade': '#FFE39A74', 'artHair': '#FF1C1638', 'artTop': '#FFD6FF3F',
         'artBottom': '#FF15122E', 'artShoe': '#FFFFFFFF', 'artRope': '#FFD6FF3F', 'artHandle': '#FF15122E',
@@ -55,6 +60,10 @@ PINK = {
         'flame': '#FFFF6B2C', 'flameDeep': '#FFF0381B', 'flameLight': '#FFFFC53D', 'flameTint': '#FFFFEEE3',
         'panel': '#FF3A1230', 'panelGlow': '#FF8A1F5C', 'onPanel': '#FFFFFFFF', 'onPanelSoft': '#FFE0B4CB',
         'panelBar': '#FF6B2D55', 'panelTrack': '#80471739',
+        'workA': '#FFFF4F93', 'workB': '#FFFF8442', 'workGlow': '#FFFFC98A', 'onWork': '#FFFFFFFF', 'onWorkSoft': '#FFFFECEF',
+        'workArc': '#FFFFFFFF', 'workTrack': '#38FFFFFF',
+        'restA': '#FF1F8FE5', 'restB': '#FF4456DB', 'restGlow': '#FF8FD2FF', 'onRest': '#FFFFFFFF', 'onRestSoft': '#FFDCEBFF',
+        'restArc': '#FFFFFFFF', 'restTrack': '#33FFFFFF',
         'artSkin': '#FFFFD2B0', 'artSkinShade': '#FFF2B48C', 'artHair': '#FF4A1D2F', 'artTop': '#FFFFE066',
         'artBottom': '#FF2B1220', 'artShoe': '#FFFFFFFF', 'artRope': '#FFFFE066', 'artHandle': '#FF2B1220',
         'artSpark': '#FFFFFFFF', 'artShadow': '#3D6B0F1E', 'artBlob': '#FFFFE4EC', 'artBlobDeep': '#FFFFD0DD',
@@ -84,6 +93,10 @@ ATHLETE = {
         'flame': '#FFFF5A1F', 'flameDeep': '#FFE0320F', 'flameLight': '#FFFFB830', 'flameTint': '#FF2A1710',
         'panel': '#FF18181B', 'panelGlow': '#FF2F3A0C', 'onPanel': '#FFFFFFFF', 'onPanelSoft': '#FF8E8E99',
         'panelBar': '#FF3A3A42', 'panelTrack': '#80202024',
+        'workA': '#FFD4FF33', 'workB': '#FFA6E000', 'workGlow': '#FFF3FFB8', 'onWork': '#FF0A0A0B', 'onWorkSoft': '#B80A0A0B',
+        'workArc': '#FF0A0A0B', 'workTrack': '#240A0A0B',
+        'restA': '#FF26262C', 'restB': '#FF131316', 'restGlow': '#FF1D4A63', 'onRest': '#FFFFFFFF', 'onRestSoft': '#FFA9A9B2',
+        'restArc': '#FF8BD8FF', 'restTrack': '#1FFFFFFF',
         'artSkin': '#FFE9A681', 'artSkinShade': '#FFCB8662', 'artHair': '#FF52525C', 'artTop': '#FFC8FF00',
         'artBottom': '#FFF4F4F5', 'artShoe': '#FFC8FF00', 'artRope': '#FFC8FF00', 'artHandle': '#FFF4F4F5',
         'artSpark': '#FFFFFFFF', 'artShadow': '#66000000', 'artBlob': '#FF222226', 'artBlobDeep': '#FF2E2E34',

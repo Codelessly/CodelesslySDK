@@ -1,0 +1,954 @@
+{
+ "schema": 3,
+ "id": "SessionSummary",
+ "roots": [
+  "summary"
+ ],
+ "widget": {
+  "type": "SessionSummary",
+  "doc": "The finished session as a celebration on the brand gradient: the cheering jumper, jumps in display type, a badge that says whether best (the past record) fell, then rounds of planned rounds, seconds as time and the streak, and a detail line on what comes next; follow it with BigButton lines.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Session complete",
+    "doc": "The headline over the number, e.g. Session complete.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One warm line at the bottom: what it means, what comes next (empty: none)."
+   },
+   {
+    "key": "jumps",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "The jumps counted: the big number.",
+    "required": true
+   },
+   {
+    "key": "best",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "The most jumps in a past session: over it the badge says New record, under it how far short (0: no badge)."
+   },
+   {
+    "key": "rounds",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "Rounds reached."
+   },
+   {
+    "key": "of",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "Rounds planned (0: show only the rounds reached)."
+   },
+   {
+    "key": "seconds",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "Seconds the session ran, shown as m:ss."
+   },
+   {
+    "key": "streak",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "The streak including this session."
+   },
+   {
+    "key": "streakLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "day streak",
+    "doc": "What the streak counts."
+   },
+   {
+    "key": "unit",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "jumps",
+    "doc": "The unit after the big number."
+   },
+   {
+    "key": "eyebrow",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Done",
+    "doc": "A small chip over the art."
+   },
+   {
+    "key": "audience",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "adult",
+      "kid"
+     ]
+    },
+    "default": "adult",
+    "doc": "Who the drawing is for: adult (lean, calm) or kid (rounder, playful, with confetti)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Record",
+   "size": [
+    350,
+    520
+   ],
+   "props": {
+    "jumps": 940,
+    "best": 912,
+    "rounds": 8,
+    "of": 8,
+    "seconds": 460,
+    "streak": 5,
+    "detail": "That is five in a row. Rest up and come back tomorrow."
+   }
+  }
+ ],
+ "nodes": {
+  "summary": {
+   "type": "column",
+   "children": [
+    "stage",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "heroA"
+       },
+       {
+        "position": 1,
+        "color": "heroB"
+       }
+      ]
+     },
+     {
+      "type": "noise",
+      "noise": {
+       "baseFrequency": 0.9,
+       "numOctaves": 2,
+       "seed": 7
+      },
+      "color": "#FFFFFFFF",
+      "opacity": 0.08,
+      "blendMode": "overlay"
+     }
+    ],
+    "radius": 32,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.hero}",
+    "decoration.effects": "${theme.shadows.hero}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 0,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "stage": {
+   "type": "stack",
+   "children": [
+    "glow",
+    "rings",
+    "figureRow",
+    "chip"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 212
+   }
+  },
+  "glow": {
+   "type": "box",
+   "layout": {
+    "width": 260,
+    "height": 260,
+    "x": {
+     "start": 45
+    },
+    "y": {
+     "start": -40
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroGlow"
+     }
+    ],
+    "shape": "circle",
+    "effects": [
+     {
+      "type": "layerBlur",
+      "blurRadius": 46
+     }
+    ]
+   },
+   "opacity": 0.55
+  },
+  "rings": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width / 2}",
+       112
+      ],
+      "radius": 96,
+      "paint": {
+       "color": "${theme.colors.heroLine}",
+       "style": "stroke",
+       "strokeWidth": 1.2,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width / 2}",
+       112
+      ],
+      "radius": 140,
+      "paint": {
+       "color": "${theme.colors.heroLine}",
+       "style": "stroke",
+       "strokeWidth": 1.2,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width / 2}",
+       112
+      ],
+      "radius": 190,
+      "paint": {
+       "color": "${theme.colors.heroLine}",
+       "style": "stroke",
+       "strokeWidth": 1.2,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     }
+    ]
+   }
+  },
+  "figureRow": {
+   "type": "row",
+   "children": [
+    "figure"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 212,
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 6
+    }
+   }
+  },
+  "figure": {
+   "type": "Illustration",
+   "props": {
+    "role": "cheer"
+   },
+   "layout": {
+    "width": 212,
+    "height": 212
+   },
+   "bind": {
+    "props.audience": "${props.audience}"
+   },
+   "animations": [
+    {
+     "id": "bob",
+     "duration": 640,
+     "curve": "easeInOutSine",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "motion.translateY",
+       "from": 3,
+       "to": -5
+      }
+     ]
+    }
+   ]
+  },
+  "chip": {
+   "type": "row",
+   "children": [
+    "chipText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     11,
+     7,
+     11,
+     7
+    ],
+    "x": {
+     "start": 20
+    },
+    "y": {
+     "start": 20
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= props.eyebrow != ''}"
+   }
+  },
+  "chipText": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.eyebrow)}",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 1.1,
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "title",
+    "gapA",
+    "figures",
+    "gapB",
+    "badge",
+    "gapC",
+    "cells",
+    "gapD",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     20,
+     6,
+     20,
+     22
+    ]
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "blockTitle",
+     "color": "onHeroSoft"
+    },
+    "textAlign": "center",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "gapA": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 4
+   }
+  },
+  "figures": {
+   "type": "row",
+   "children": [
+    "jumps",
+    "unit"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "jumps": {
+   "type": "text",
+   "props": {
+    "text": "${= matches(text(props.jumps), '^[0-9.]+$') ? thousands(number(props.jumps)) : text(props.jumps)}",
+    "style": {
+     "from": "numberLarge",
+     "fontSize": 76,
+     "letterSpacing": -3,
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "unit": {
+   "type": "text",
+   "props": {
+    "text": "${props.unit}",
+    "style": {
+     "from": "lead",
+     "color": "onHeroSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     12
+    ]
+   }
+  },
+  "gapB": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 10
+   }
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "badgeIcon",
+    "badgeText"
+   ],
+   "props": {
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 34,
+    "padding": [
+     10,
+     0,
+     14,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= props.best > 0}",
+    "decoration.fills[0].color": "${= (props.best > 0 && props.jumps > props.best) ? theme.colors.gold : theme.colors.heroChip}"
+   }
+  },
+  "badgeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "emoji_events_rounded",
+    "size": 18,
+    "color": "onHero"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.color": "${= (props.best > 0 && props.jumps > props.best) ? theme.colors.onAccent : theme.colors.onHero}"
+   }
+  },
+  "badgeText": {
+   "type": "text",
+   "props": {
+    "text": "${= (props.best > 0 && props.jumps > props.best) ? 'New record, ' + thousands(props.jumps - props.best) + ' more than your best' : 'Your best is ' + thousands(props.best) + '. It will keep.'}",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.best > 0 && props.jumps > props.best) ? theme.colors.onAccent : theme.colors.onHero}"
+   }
+  },
+  "gapC": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 18
+   }
+  },
+  "cells": {
+   "type": "row",
+   "children": [
+    "cellA",
+    "cellB",
+    "cellC"
+   ],
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "cellA": {
+   "type": "column",
+   "children": [
+    "roundsValue",
+    "roundsLabel"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     12,
+     8,
+     11
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "roundsValue": {
+   "type": "text",
+   "props": {
+    "text": "${= props.of > 0 ? text(props.rounds) + '/' + text(props.of) : text(props.rounds)}",
+    "style": {
+     "from": "numberSmall",
+     "color": "onHero"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "roundsLabel": {
+   "type": "text",
+   "props": {
+    "text": "rounds",
+    "style": {
+     "from": "meta",
+     "fontSize": 12,
+     "color": "onHeroSoft"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "cellB": {
+   "type": "column",
+   "children": [
+    "timeValue",
+    "timeLabel"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     12,
+     8,
+     11
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "timeValue": {
+   "type": "text",
+   "props": {
+    "text": "${= text(floor((props.seconds) / 60)) + ':' + padLeft(floor((props.seconds) % 60), 2)}",
+    "style": {
+     "from": "numberSmall",
+     "color": "onHero"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "timeLabel": {
+   "type": "text",
+   "props": {
+    "text": "moving time",
+    "style": {
+     "from": "meta",
+     "fontSize": 12,
+     "color": "onHeroSoft"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "cellC": {
+   "type": "column",
+   "children": [
+    "streakRow",
+    "streakLabel"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     12,
+     8,
+     11
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${= min(18, theme.radii.tile)}"
+   }
+  },
+  "streakRow": {
+   "type": "row",
+   "children": [
+    "streakIcon",
+    "streakValue"
+   ],
+   "props": {
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "streakIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "local_fire_department_rounded",
+    "size": 20,
+    "color": "onHero"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "streakValue": {
+   "type": "text",
+   "props": {
+    "text": "${props.streak}",
+    "style": {
+     "from": "numberSmall",
+     "color": "onHero"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "streakLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.streakLabel}",
+    "style": {
+     "from": "meta",
+     "fontSize": 12,
+     "color": "onHeroSoft"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "gapD": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": {
+     "from": "lead",
+     "fontSize": 14.5,
+     "color": "onHeroSoft"
+    },
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  }
+ }
+}

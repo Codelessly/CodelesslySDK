@@ -1,0 +1,229 @@
+{
+ "schema": 3,
+ "id": "BigButton",
+ "roots": [
+  "btn"
+ ],
+ "widget": {
+  "type": "BigButton",
+  "doc": "A full-width, thumb-sized button for a screen's main action below its focal block (Start, Done): the label with icon in a round mark, firing onPressed; tone:\"quiet\" is the soft second action.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Start",
+    "doc": "The button's label.",
+    "required": true
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "play_arrow_rounded",
+    "doc": "The icon in the round mark at the left."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "primary",
+      "quiet"
+     ]
+    },
+    "default": "primary",
+    "doc": "primary (filled with the brand, the one main action) or quiet (a soft second action)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The button was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Start",
+   "size": [
+    350,
+    64
+   ],
+   "props": {
+    "label": "Start"
+   }
+  },
+  {
+   "name": "Quiet",
+   "size": [
+    350,
+    64
+   ],
+   "props": {
+    "label": "See your progress",
+    "tone": "quiet",
+    "icon": "bar_chart_rounded"
+   }
+  }
+ ],
+ "nodes": {
+  "btn": {
+   "type": "row",
+   "children": [
+    "mark",
+    "label",
+    "arrow"
+   ],
+   "props": {
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64,
+    "padding": [
+     10,
+     0,
+     22,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "brand"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cta}",
+    "decoration.effects": "${= props.tone == 'quiet' ? [] : theme.shadows.cta}",
+    "decoration.fills[0].color": "${= props.tone == 'quiet' ? theme.colors.track : theme.colors.brand}"
+   },
+   "states": {
+    "pressed": {
+     "btn": {
+      "opacity": 0.86
+     }
+    }
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 520,
+     "delay": 210,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 22,
+       "to": 0
+      }
+     ]
+    }
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "mark": {
+   "type": "row",
+   "children": [
+    "markIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 44,
+    "height": 44
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "onBrand"
+     }
+    ],
+    "radius": 22
+   },
+   "bind": {
+    "decoration.radius": "${= min(22, theme.radii.cta - 3)}",
+    "decoration.fills[0].color": "${= props.tone == 'quiet' ? theme.colors.card : theme.colors.onBrand}"
+   }
+  },
+  "markIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "play_arrow_rounded",
+    "size": 26,
+    "color": "brand"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26
+   },
+   "bind": {
+    "props.icon": "${props.icon}",
+    "props.color": "${= props.tone == 'quiet' ? theme.colors.ink : theme.colors.brand}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "cta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.tone == 'quiet' ? theme.colors.ink : theme.colors.onBrand}"
+   }
+  },
+  "arrow": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_forward_rounded",
+    "size": 22,
+    "color": "onBrand"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "bind": {
+    "props.color": "${= props.tone == 'quiet' ? theme.colors.inkSoft : theme.colors.onBrand}"
+   }
+  }
+ }
+}

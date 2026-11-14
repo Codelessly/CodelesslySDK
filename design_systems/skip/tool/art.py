@@ -165,6 +165,97 @@ def hero_kid():
     return ops
 
 
+# --- cheer: the jumper after the last round, arms up ------------------------------------------------------
+
+def _confetti(kid=False):
+    k = 1.25 if kid else 1
+    return [
+        star4(34, 52, 9 * k, 'artSpark'),
+        star4(210, 74, 7 * k, 'artRope'),
+        star4(24, 150, 5 * k, 'artRope'),
+        star4(218, 160, 6 * k, 'artSpark'),
+        circle(52, 104, 3.5 * k, fill('flameLight')),
+        circle(196, 30, 3 * k, fill('artSpark')),
+        circle(226, 118, 3 * k, fill('flameLight')),
+        circle(16, 96, 2.5 * k, fill('artSpark')),
+        group([{'op': 'rrect', 'rect': [-4.5, -4.5, 9, 9], 'radius': 2, 'paint': fill('flameLight')}], translate=[204, 116], rotate=0.5),
+        group([{'op': 'rrect', 'rect': [-4, -4, 8, 8], 'radius': 2, 'paint': fill('artRope')}], translate=[44, 24], rotate=-0.4),
+        group([{'op': 'rrect', 'rect': [-5, -2.5, 10, 5], 'radius': 2, 'paint': fill('artSpark')}], translate=[186, 196], rotate=0.7),
+        group([{'op': 'rrect', 'rect': [-5, -2.5, 10, 5], 'radius': 2, 'paint': fill('flameLight')}], translate=[40, 192], rotate=-0.6),
+    ]
+
+
+def cheer_adult():
+    """240 x 240. The jumper at the top of the last jump: both arms up, the rope a full loop passing underfoot."""
+    ops = []
+    # the rope: a loop from the raised handles down around and under the feet
+    ops.append(group([path('M64 30 C -22 64, 6 224, 120 224 C 234 224, 262 64, 176 30', stroke('artRope', 12))], opacity=0.16))
+    ops.append(oval(84, 231, 72, 8, fill('artShadow')))
+    ops.append(path('M64 30 C -22 64, 6 224, 120 224 C 234 224, 262 64, 176 30', stroke('artRope', 5)))
+    # ponytail, swung out
+    ops.append(path('M130 46 C 142 38, 152 42, 158 35 C 163 29, 170 28, 174 33 C 168 35, 167 43, 161 50 C 155 57, 143 59, 135 57 Z', fill('artHair')))
+    # legs, knees tucked
+    ops.append(limb([(111, 152), (99, 170), (110, 188)], 'artSkin', 12))
+    ops.append(limb([(129, 152), (143, 166), (131, 184)], 'artSkin', 12))
+    ops.append(group([path('M-13 -5 C -13 -9, 6 -10, 13 -2 C 16 2, 14 7, 9 7 L -10 7 C -14 7, -14 0, -13 -5 Z', fill('artShoe')),
+                      path('M-11 7 L10 7', stroke('artRope', 2.5))], translate=[111, 194], rotate=0.2))
+    ops.append(group([path('M-13 -5 C -13 -9, 6 -10, 13 -2 C 16 2, 14 7, 9 7 L -10 7 C -14 7, -14 0, -13 -5 Z', fill('artShoe')),
+                      path('M-11 7 L10 7', stroke('artRope', 2.5))], translate=[132, 190], rotate=0.5))
+    # shorts
+    ops.append(path('M102 136 L138 136 L142 162 C 136 166, 126 166, 122 162 L120 154 L118 162 C 114 166, 104 166, 98 162 Z',
+                    [fill('artBottom'), stroke('artBottom', 3)]))
+    # arms, raised in a V
+    ops.append(limb([(104, 97), (84, 78), (70, 52)], 'artSkin', 9.5))
+    ops.append(limb([(136, 97), (156, 78), (170, 52)], 'artSkin', 9.5))
+    # top
+    ops.append(limb([(105, 95), (95, 83)], 'artTop', 14))
+    ops.append(limb([(135, 95), (145, 83)], 'artTop', 14))
+    ops.append(path('M100 94 C 100 87, 106 84, 112 84 L128 84 C 134 84, 140 87, 140 94 L138 140 L102 140 Z',
+                    [fill('artTop'), stroke('artTop', 2)]))
+    # neck, head, hair
+    ops.append(limb([(120, 72), (120, 86)], 'artSkinShade', 10))
+    ops.append(circle(120, 57, 18, fill('artSkin')))
+    ops.append(path('M101 59 C 97 33, 143 31, 139 59 C 136 49, 128 45, 118 46 C 110 47, 104 52, 101 59 Z', fill('artHair')))
+    # handles in the fists
+    ops.append(limb([(71, 56), (63, 32)], 'artHandle', 7))
+    ops.append(limb([(169, 56), (177, 32)], 'artHandle', 7))
+    return ops + _confetti()
+
+
+def cheer_kid():
+    """240 x 240. The child's cheer: arms up, a wide smile, more confetti."""
+    ops = []
+    ops.append(group([path('M64 58 C -18 90, 8 226, 120 226 C 232 226, 258 90, 176 58', stroke('artRope', 14))], opacity=0.16))
+    ops.append(oval(86, 232, 68, 7, fill('artShadow')))
+    ops.append(path('M64 58 C -18 90, 8 226, 120 226 C 232 226, 258 90, 176 58', stroke('artRope', 6)))
+    ops.append(circle(94, 48, 12, fill('artHair')))
+    ops.append(circle(146, 48, 12, fill('artHair')))
+    ops.append(limb([(111, 166), (101, 182), (106, 196)], 'artSkin', 13))
+    ops.append(limb([(129, 166), (141, 180), (136, 192)], 'artSkin', 13))
+    ops.append(group([path('M-15 -6 C -15 -11, 6 -12, 14 -3 C 18 2, 16 8, 10 8 L -11 8 C -16 8, -16 0, -15 -6 Z', fill('artShoe')),
+                      path('M-12 8 L11 8', stroke('artRope', 3))], translate=[106, 203], rotate=0.05))
+    ops.append(group([path('M-15 -6 C -15 -11, 6 -12, 14 -3 C 18 2, 16 8, 10 8 L -11 8 C -16 8, -16 0, -15 -6 Z', fill('artShoe')),
+                      path('M-12 8 L11 8', stroke('artRope', 3))], translate=[138, 199], rotate=0.35))
+    ops.append(path('M101 152 L139 152 L143 174 C 137 178, 127 178, 122 174 L120 168 L118 174 C 113 178, 103 178, 97 174 Z',
+                    [fill('artBottom'), stroke('artBottom', 3)]))
+    ops.append(limb([(103, 119), (86, 104), (72, 80)], 'artSkin', 10.5))
+    ops.append(limb([(137, 119), (154, 104), (168, 80)], 'artSkin', 10.5))
+    ops.append(limb([(104, 117), (94, 108)], 'artTop', 15))
+    ops.append(limb([(136, 117), (146, 108)], 'artTop', 15))
+    ops.append(path('M98 116 C 98 108, 105 105, 112 105 L128 105 C 135 105, 142 108, 142 116 L140 156 L100 156 Z',
+                    [fill('artTop'), stroke('artTop', 2)]))
+    ops.append(star4(120, 132, 9, 'artBottom'))
+    ops.append(circle(120, 68, 30, fill('artSkin')))
+    ops.append(path('M90 68 C 84 24, 156 24, 150 68 C 146 52, 134 44, 120 46 C 106 44, 94 52, 90 68 Z', fill('artHair')))
+    ops.append(circle(109, 73, 3, fill('artHair')))
+    ops.append(circle(131, 73, 3, fill('artHair')))
+    ops.append(path('M108 82 Q120 97 132 82 Z', fill('artHair')))
+    ops.append(group([circle(100, 82, 5, fill('flame')), circle(140, 82, 5, fill('flame'))], opacity=0.35))
+    ops.append(limb([(73, 84), (65, 60)], 'artHandle', 8))
+    ops.append(limb([(167, 84), (175, 60)], 'artHandle', 8))
+    return ops + _confetti(kid=True)
+
+
 # --- streak: a flame -------------------------------------------------------------------------------------
 
 FLAME_OUT = ('M52 6 C 60 30, 90 44, 90 78 C 90 102, 73 118, 50 118 C 27 118, 10 102, 10 78 '
@@ -271,6 +362,7 @@ ART = {
     'streak': {'adult': ([100, 124], streak_adult), 'kid': ([100, 124], streak_kid)},
     'empty': {'adult': ([200, 160], empty_adult), 'kid': ([200, 160], empty_kid)},
     'record': {'adult': ([100, 120], record_any), 'kid': ([100, 120], record_any)},
+    'cheer': {'adult': ([240, 240], cheer_adult), 'kid': ([240, 240], cheer_kid)},
 }
 
 

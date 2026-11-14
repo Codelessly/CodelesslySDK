@@ -1342,7 +1342,9 @@
     "record_medal_empty_adult",
     "record_medal_empty_kid",
     "record_medal_record_adult",
-    "record_medal_record_kid"
+    "record_medal_record_kid",
+    "record_medal_cheer_adult",
+    "record_medal_cheer_kid"
    ],
    "layout": {
     "width": 60,
@@ -2868,6 +2870,874 @@
       "op": "path",
       "d": "M10 51.5 Q10.99 55.01 14.5 56 Q10.99 56.99 10 60.5 Q9.01 56.99 5.5 56 Q9.01 55.01 10 51.5 Z",
       "paint": "${theme.colors.goldDeep}"
+     }
+    ]
+   }
+  },
+  "record_medal_cheer_adult": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'cheer' && 'adult' == 'adult'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     240,
+     240
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M64 30 C -22 64, 6 224, 120 224 C 234 224, 262 64, 176 30",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 12,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "opacity": 0.16
+     },
+     {
+      "op": "oval",
+      "rect": [
+       84,
+       231,
+       72,
+       8
+      ],
+      "paint": "${theme.colors.artShadow}"
+     },
+     {
+      "op": "path",
+      "d": "M64 30 C -22 64, 6 224, 120 224 C 234 224, 262 64, 176 30",
+      "paint": {
+       "color": "${theme.colors.artRope}",
+       "style": "stroke",
+       "strokeWidth": 5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M130 46 C 142 38, 152 42, 158 35 C 163 29, 170 28, 174 33 C 168 35, 167 43, 161 50 C 155 57, 143 59, 135 57 Z",
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "path",
+      "d": "M111 152 L99 170 L110 188",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 12,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M129 152 L143 166 L131 184",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 12,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M-13 -5 C -13 -9, 6 -10, 13 -2 C 16 2, 14 7, 9 7 L -10 7 C -14 7, -14 0, -13 -5 Z",
+        "paint": "${theme.colors.artShoe}"
+       },
+       {
+        "op": "path",
+        "d": "M-11 7 L10 7",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 2.5,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "translate": [
+       111,
+       194
+      ],
+      "rotate": 0.2
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M-13 -5 C -13 -9, 6 -10, 13 -2 C 16 2, 14 7, 9 7 L -10 7 C -14 7, -14 0, -13 -5 Z",
+        "paint": "${theme.colors.artShoe}"
+       },
+       {
+        "op": "path",
+        "d": "M-11 7 L10 7",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 2.5,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "translate": [
+       132,
+       190
+      ],
+      "rotate": 0.5
+     },
+     {
+      "op": "path",
+      "d": "M102 136 L138 136 L142 162 C 136 166, 126 166, 122 162 L120 154 L118 162 C 114 166, 104 166, 98 162 Z",
+      "paint": [
+       "${theme.colors.artBottom}",
+       {
+        "color": "${theme.colors.artBottom}",
+        "style": "stroke",
+        "strokeWidth": 3,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M104 97 L84 78 L70 52",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 9.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M136 97 L156 78 L170 52",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 9.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M105 95 L95 83",
+      "paint": {
+       "color": "${theme.colors.artTop}",
+       "style": "stroke",
+       "strokeWidth": 14,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M135 95 L145 83",
+      "paint": {
+       "color": "${theme.colors.artTop}",
+       "style": "stroke",
+       "strokeWidth": 14,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M100 94 C 100 87, 106 84, 112 84 L128 84 C 134 84, 140 87, 140 94 L138 140 L102 140 Z",
+      "paint": [
+       "${theme.colors.artTop}",
+       {
+        "color": "${theme.colors.artTop}",
+        "style": "stroke",
+        "strokeWidth": 2,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M120 72 L120 86",
+      "paint": {
+       "color": "${theme.colors.artSkinShade}",
+       "style": "stroke",
+       "strokeWidth": 10,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       120,
+       57
+      ],
+      "radius": 18,
+      "paint": "${theme.colors.artSkin}"
+     },
+     {
+      "op": "path",
+      "d": "M101 59 C 97 33, 143 31, 139 59 C 136 49, 128 45, 118 46 C 110 47, 104 52, 101 59 Z",
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "path",
+      "d": "M71 56 L63 32",
+      "paint": {
+       "color": "${theme.colors.artHandle}",
+       "style": "stroke",
+       "strokeWidth": 7,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M169 56 L177 32",
+      "paint": {
+       "color": "${theme.colors.artHandle}",
+       "style": "stroke",
+       "strokeWidth": 7,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M34 43 Q35.98 50.02 43 52 Q35.98 53.98 34 61 Q32.02 53.98 25 52 Q32.02 50.02 34 43 Z",
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "path",
+      "d": "M210 67 Q211.54 72.46 217 74 Q211.54 75.54 210 81 Q208.46 75.54 203 74 Q208.46 72.46 210 67 Z",
+      "paint": "${theme.colors.artRope}"
+     },
+     {
+      "op": "path",
+      "d": "M24 145 Q25.1 148.9 29 150 Q25.1 151.1 24 155 Q22.9 151.1 19 150 Q22.9 148.9 24 145 Z",
+      "paint": "${theme.colors.artRope}"
+     },
+     {
+      "op": "path",
+      "d": "M218 154 Q219.32 158.68 224 160 Q219.32 161.32 218 166 Q216.68 161.32 212 160 Q216.68 158.68 218 154 Z",
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       52,
+       104
+      ],
+      "radius": 3.5,
+      "paint": "${theme.colors.flameLight}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       196,
+       30
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       226,
+       118
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.flameLight}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       16,
+       96
+      ],
+      "radius": 2.5,
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -4.5,
+         -4.5,
+         9,
+         9
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.flameLight}"
+       }
+      ],
+      "translate": [
+       204,
+       116
+      ],
+      "rotate": 0.5
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -4,
+         -4,
+         8,
+         8
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.artRope}"
+       }
+      ],
+      "translate": [
+       44,
+       24
+      ],
+      "rotate": -0.4
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -5,
+         -2.5,
+         10,
+         5
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.artSpark}"
+       }
+      ],
+      "translate": [
+       186,
+       196
+      ],
+      "rotate": 0.7
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -5,
+         -2.5,
+         10,
+         5
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.flameLight}"
+       }
+      ],
+      "translate": [
+       40,
+       192
+      ],
+      "rotate": -0.6
+     }
+    ]
+   }
+  },
+  "record_medal_cheer_kid": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= 'record' == 'cheer' && 'adult' == 'kid'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     240,
+     240
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M64 58 C -18 90, 8 226, 120 226 C 232 226, 258 90, 176 58",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 14,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "opacity": 0.16
+     },
+     {
+      "op": "oval",
+      "rect": [
+       86,
+       232,
+       68,
+       7
+      ],
+      "paint": "${theme.colors.artShadow}"
+     },
+     {
+      "op": "path",
+      "d": "M64 58 C -18 90, 8 226, 120 226 C 232 226, 258 90, 176 58",
+      "paint": {
+       "color": "${theme.colors.artRope}",
+       "style": "stroke",
+       "strokeWidth": 6,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       94,
+       48
+      ],
+      "radius": 12,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       146,
+       48
+      ],
+      "radius": 12,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "path",
+      "d": "M111 166 L101 182 L106 196",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 13,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M129 166 L141 180 L136 192",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 13,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M-15 -6 C -15 -11, 6 -12, 14 -3 C 18 2, 16 8, 10 8 L -11 8 C -16 8, -16 0, -15 -6 Z",
+        "paint": "${theme.colors.artShoe}"
+       },
+       {
+        "op": "path",
+        "d": "M-12 8 L11 8",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "translate": [
+       106,
+       203
+      ],
+      "rotate": 0.05
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M-15 -6 C -15 -11, 6 -12, 14 -3 C 18 2, 16 8, 10 8 L -11 8 C -16 8, -16 0, -15 -6 Z",
+        "paint": "${theme.colors.artShoe}"
+       },
+       {
+        "op": "path",
+        "d": "M-12 8 L11 8",
+        "paint": {
+         "color": "${theme.colors.artRope}",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ],
+      "translate": [
+       138,
+       199
+      ],
+      "rotate": 0.35
+     },
+     {
+      "op": "path",
+      "d": "M101 152 L139 152 L143 174 C 137 178, 127 178, 122 174 L120 168 L118 174 C 113 178, 103 178, 97 174 Z",
+      "paint": [
+       "${theme.colors.artBottom}",
+       {
+        "color": "${theme.colors.artBottom}",
+        "style": "stroke",
+        "strokeWidth": 3,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M103 119 L86 104 L72 80",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 10.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M137 119 L154 104 L168 80",
+      "paint": {
+       "color": "${theme.colors.artSkin}",
+       "style": "stroke",
+       "strokeWidth": 10.5,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M104 117 L94 108",
+      "paint": {
+       "color": "${theme.colors.artTop}",
+       "style": "stroke",
+       "strokeWidth": 15,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M136 117 L146 108",
+      "paint": {
+       "color": "${theme.colors.artTop}",
+       "style": "stroke",
+       "strokeWidth": 15,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M98 116 C 98 108, 105 105, 112 105 L128 105 C 135 105, 142 108, 142 116 L140 156 L100 156 Z",
+      "paint": [
+       "${theme.colors.artTop}",
+       {
+        "color": "${theme.colors.artTop}",
+        "style": "stroke",
+        "strokeWidth": 2,
+        "strokeCap": "round",
+        "strokeJoin": "round"
+       }
+      ]
+     },
+     {
+      "op": "path",
+      "d": "M120 123 Q121.98 130.02 129 132 Q121.98 133.98 120 141 Q118.02 133.98 111 132 Q118.02 130.02 120 123 Z",
+      "paint": "${theme.colors.artBottom}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       120,
+       68
+      ],
+      "radius": 30,
+      "paint": "${theme.colors.artSkin}"
+     },
+     {
+      "op": "path",
+      "d": "M90 68 C 84 24, 156 24, 150 68 C 146 52, 134 44, 120 46 C 106 44, 94 52, 90 68 Z",
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       109,
+       73
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       131,
+       73
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "path",
+      "d": "M108 82 Q120 97 132 82 Z",
+      "paint": "${theme.colors.artHair}"
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "circle",
+        "c": [
+         100,
+         82
+        ],
+        "radius": 5,
+        "paint": "${theme.colors.flame}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         140,
+         82
+        ],
+        "radius": 5,
+        "paint": "${theme.colors.flame}"
+       }
+      ],
+      "opacity": 0.35
+     },
+     {
+      "op": "path",
+      "d": "M73 84 L65 60",
+      "paint": {
+       "color": "${theme.colors.artHandle}",
+       "style": "stroke",
+       "strokeWidth": 8,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M167 84 L175 60",
+      "paint": {
+       "color": "${theme.colors.artHandle}",
+       "style": "stroke",
+       "strokeWidth": 8,
+       "strokeCap": "round",
+       "strokeJoin": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M34 40.75 Q36.475 49.525 45.25 52 Q36.475 54.475 34 63.25 Q31.525 54.475 22.75 52 Q31.525 49.525 34 40.75 Z",
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "path",
+      "d": "M210 65.25 Q211.925 72.075 218.75 74 Q211.925 75.925 210 82.75 Q208.075 75.925 201.25 74 Q208.075 72.075 210 65.25 Z",
+      "paint": "${theme.colors.artRope}"
+     },
+     {
+      "op": "path",
+      "d": "M24 143.75 Q25.375 148.625 30.25 150 Q25.375 151.375 24 156.25 Q22.625 151.375 17.75 150 Q22.625 148.625 24 143.75 Z",
+      "paint": "${theme.colors.artRope}"
+     },
+     {
+      "op": "path",
+      "d": "M218 152.5 Q219.65 158.35 225.5 160 Q219.65 161.65 218 167.5 Q216.35 161.65 210.5 160 Q216.35 158.35 218 152.5 Z",
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       52,
+       104
+      ],
+      "radius": 4.375,
+      "paint": "${theme.colors.flameLight}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       196,
+       30
+      ],
+      "radius": 3.75,
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       226,
+       118
+      ],
+      "radius": 3.75,
+      "paint": "${theme.colors.flameLight}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       16,
+       96
+      ],
+      "radius": 3.125,
+      "paint": "${theme.colors.artSpark}"
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -4.5,
+         -4.5,
+         9,
+         9
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.flameLight}"
+       }
+      ],
+      "translate": [
+       204,
+       116
+      ],
+      "rotate": 0.5
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -4,
+         -4,
+         8,
+         8
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.artRope}"
+       }
+      ],
+      "translate": [
+       44,
+       24
+      ],
+      "rotate": -0.4
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -5,
+         -2.5,
+         10,
+         5
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.artSpark}"
+       }
+      ],
+      "translate": [
+       186,
+       196
+      ],
+      "rotate": 0.7
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "rrect",
+        "rect": [
+         -5,
+         -2.5,
+         10,
+         5
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.flameLight}"
+       }
+      ],
+      "translate": [
+       40,
+       192
+      ],
+      "rotate": -0.6
      }
     ]
    }
