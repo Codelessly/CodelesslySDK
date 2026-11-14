@@ -1,0 +1,430 @@
+{
+ "schema": 3,
+ "id": "VariableContractHover",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "VariableContractHover",
+  "doc": "A card describing a variable: its name, kind and type, what it is for, and a few labeled facts.",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "customer_id",
+    "doc": "The variable's name.",
+    "required": true
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "input",
+    "doc": "input, output or variable."
+   },
+   {
+    "key": "type",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "string",
+    "doc": "Its type."
+   },
+   {
+    "key": "description",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What it is for."
+   },
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The facts' labels (Validation, Provided by...)."
+   },
+   {
+    "key": "values",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One value per label."
+   },
+   {
+    "key": "required",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A red \"required\" chip in the header."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    320,
+    150
+   ],
+   "props": {
+    "description": "Who the invoice is for.",
+    "labels": [
+     "Validation",
+     "Provided by"
+    ],
+    "values": [
+     "Must match an existing customer.",
+     "The parent workflow"
+    ],
+    "required": true
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "column",
+   "children": [
+    "header",
+    "about",
+    "facts"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 150
+    },
+    "padding": 1,
+    "constraints": {
+     "maxWidth": 360
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 15,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "name",
+    "kind",
+    "type",
+    "required"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 318
+    },
+    "height": {
+     "hug": 34
+    },
+    "padding": [
+     12,
+     9,
+     12,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${props.name}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "kind": {
+   "type": "Badge",
+   "props": {
+    "label": "input"
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.label": "${props.kind}",
+    "visible": "${= props.kind != ''}"
+   }
+  },
+  "type": {
+   "type": "Badge",
+   "props": {
+    "label": "string",
+    "tone": "info"
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.label": "${props.type}",
+    "visible": "${= props.type != ''}"
+   }
+  },
+  "required": {
+   "type": "Badge",
+   "props": {
+    "label": "required",
+    "tone": "error"
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "visible": "${props.required}"
+   }
+  },
+  "about": {
+   "type": "row",
+   "children": [
+    "description"
+   ],
+   "layout": {
+    "width": {
+     "fill": 318
+    },
+    "height": {
+     "hug": 34
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "visible": "${= props.description != ''}"
+   }
+  },
+  "description": {
+   "type": "text",
+   "props": {
+    "text": "${props.description}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.45,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 298
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "facts": {
+   "type": "listView",
+   "children": [
+    "fact"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 318
+    },
+    "height": {
+     "hug": 60
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     12
+    ]
+   },
+   "bind": {
+    "data": "${props.labels}",
+    "visible": "${= length(props.labels) > 0}"
+   }
+  },
+  "fact": {
+   "type": "column",
+   "children": [
+    "factLabel",
+    "factValue"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 298
+    },
+    "height": {
+     "hug": 30
+    }
+   }
+  },
+  "factLabel": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(item)}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": 0.4
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 298
+    },
+    "height": {
+     "hug": 12
+    }
+   }
+  },
+  "factValue": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.values) > index ? props.values[index] : ''}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.45,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 298
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

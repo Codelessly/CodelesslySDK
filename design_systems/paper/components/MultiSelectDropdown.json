@@ -1,0 +1,356 @@
+{
+ "schema": 3,
+ "id": "MultiSelectDropdown",
+ "roots": [
+  "panel"
+ ],
+ "widget": {
+  "type": "MultiSelectDropdown",
+  "doc": "A panel of choices to tick, several at once. The chosen labels are kept in your list variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Read",
+     "Write",
+     "Admin"
+    ],
+    "doc": "The choices.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "list",
+      "flutter": "List<String>",
+      "item": {
+       "kind": "string",
+       "flutter": "String"
+      }
+     }
+    },
+    "default": "",
+    "doc": "The name of your list variable holding the chosen labels."
+   },
+   {
+    "key": "emptyMessage",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "No options",
+    "doc": "Shown with no choices."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    220,
+    120
+   ],
+   "props": {
+    "value": [
+     "Read"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "panel": {
+   "type": "column",
+   "children": [
+    "list",
+    "none"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 120
+    },
+    "padding": [
+     1,
+     7,
+     1,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 16,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1F000000",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16,
+      "spreadRadius": -2
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 3
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level3}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "option"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 218
+    },
+    "height": {
+     "hug": 102
+    }
+   },
+   "bind": {
+    "data": "${props.options}"
+   }
+  },
+  "option": {
+   "type": "row",
+   "children": [
+    "box",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 218
+    },
+    "height": {
+     "hug": 34
+    },
+    "padding": [
+     12,
+     8,
+     12,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "selected": "${= contains(props.value, item)}"
+   },
+   "states": {
+    "hovered": {
+     "option": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "box": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primary"
+        }
+       ],
+       "strokes": [
+        {
+         "color": "primary"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= contains(props.value, item) ? without(props.value, item) : append(props.value, item)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "box": {
+   "type": "row",
+   "children": [
+    "tick"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 4
+   }
+  },
+  "tick": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "#FFFFFFFF",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "visible": "${= contains(props.value, item)}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "none": {
+   "type": "row",
+   "children": [
+    "noneText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 218
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": 16
+   },
+   "bind": {
+    "visible": "${= length(props.options) == 0}"
+   }
+  },
+  "noneText": {
+   "type": "text",
+   "props": {
+    "text": "${props.emptyMessage}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  }
+ }
+}

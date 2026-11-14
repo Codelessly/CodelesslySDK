@@ -1,0 +1,268 @@
+{
+ "schema": 3,
+ "id": "RichTextField",
+ "roots": [
+  "column"
+ ],
+ "widget": {
+  "type": "RichTextField",
+  "doc": "A box for several lines of text with a label and a helper line. Its text is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Words over the box (empty: none)."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Write something...",
+    "doc": "Shown while empty."
+   },
+   {
+    "key": "helper",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted line under the box."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What is wrong, in red, in place of the helper."
+   },
+   {
+    "key": "minLines",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 4,
+    "doc": "How many lines tall it starts."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Labeled",
+   "size": [
+    320,
+    140
+   ],
+   "props": {
+    "label": "Description",
+    "helper": "Markdown is supported."
+   }
+  }
+ ],
+ "nodes": {
+  "column": {
+   "type": "column",
+   "children": [
+    "label",
+    "box",
+    "helper"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 140
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != ''}"
+   }
+  },
+  "box": {
+   "type": "row",
+   "children": [
+    "field"
+   ],
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 100
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 7
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= props.error != '' ? theme.error : theme.colors.primaryBorder}"
+   },
+   "states": {
+    "focused": {
+     "box": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "focusBorder"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 13
+    },
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 13
+     }
+    },
+    "cursorColor": "primary",
+    "maxLines": 0,
+    "minLines": 4
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}",
+    "props.minLines": "${= max(1, props.minLines)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "helper": {
+   "type": "text",
+   "props": {
+    "text": "${= props.error != '' ? props.error : props.helper}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${= props.error != '' || props.helper != ''}",
+    "props.style.color": "${= props.error != '' ? theme.error : theme.colors.tertiaryText}"
+   }
+  }
+ }
+}

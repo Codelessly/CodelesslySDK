@@ -572,7 +572,15 @@
   "components/ImageGallery.json",
   "components/SuggestionReviewItem.json",
   "components/CompactSuggestionReviewItem.json",
-  "components/NestedTaskLedger.json"
+  "components/NestedTaskLedger.json",
+  "components/MultiSelectDropdown.json",
+  "components/AddContextMenu.json",
+  "components/FileTreeContextMenu.json",
+  "components/RichTextField.json",
+  "components/CanvasShell.json",
+  "components/SidebarTogglePattern.json",
+  "components/ResizableRow.json",
+  "components/VariableContractHover.json"
  ],
  "replaces": [
   "filledButton",

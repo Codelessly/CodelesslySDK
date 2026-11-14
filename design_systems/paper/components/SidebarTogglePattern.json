@@ -1,0 +1,255 @@
+{
+ "schema": 3,
+ "id": "SidebarTogglePattern",
+ "roots": [
+  "shell"
+ ],
+ "widget": {
+  "type": "SidebarTogglePattern",
+  "doc": "A main pane beside a side pane that a button opens and closes. The call fills the two panes. Fires onToggle with whether the side pane is now open.",
+  "props": [
+   {
+    "key": "open",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "Whether the side pane shows at first."
+   },
+   {
+    "key": "sideWidth",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 310,
+    "doc": "The side pane's width."
+   }
+  ],
+  "events": [
+   {
+    "key": "onToggle",
+    "payload": {
+     "kind": "boolean",
+     "flutter": "bool"
+    }
+   }
+  ],
+  "slots": [
+   "side"
+  ],
+  "children": "list"
+ },
+ "variables": {
+  "shell": [
+   {
+    "name": "toggled",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Open",
+   "size": [
+    520,
+    200
+   ],
+   "props": {
+    "sideWidth": 200
+   }
+  }
+ ],
+ "nodes": {
+  "shell": {
+   "type": "row",
+   "children": [
+    "main",
+    "pane"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 520
+    },
+    "height": {
+     "fill": 200
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 10,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#140F172A",
+      "offset": [
+       0,
+       12
+      ],
+      "blurRadius": 32
+     }
+    ]
+   }
+  },
+  "main": {
+   "type": "stack",
+   "children": [
+    "body",
+    "toggle"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "fill": 198
+    }
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "fill": 198
+    }
+   }
+  },
+  "content": {
+   "type": "slot"
+  },
+  "toggle": {
+   "type": "row",
+   "children": [
+    "toggleIcon"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28,
+    "x": {
+     "end": 6
+    },
+    "y": {
+     "start": 4
+    }
+   },
+   "decoration": {
+    "radius": 2
+   },
+   "tooltip": "${= (props.open != toggled) ? 'Hide panel' : 'Show panel'}",
+   "states": {
+    "hovered": {
+     "toggle": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "toggled",
+       "value": "${= !toggled}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onToggle",
+       "value": "${= props.open != toggled}"
+      }
+     ]
+    }
+   ]
+  },
+  "toggleIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "props.icon": "${= (props.open != toggled) ? 'chevron_right' : 'chevron_left'}"
+   }
+  },
+  "pane": {
+   "type": "column",
+   "children": [
+    "side"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "layout": {
+    "width": 310,
+    "height": {
+     "fill": 198
+    },
+    "padding": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "bind": {
+    "visible": "${= props.open != toggled}",
+    "layout.width": "${props.sideWidth}"
+   }
+  },
+  "side": {
+   "type": "slot",
+   "props": {
+    "name": "side"
+   }
+  }
+ }
+}

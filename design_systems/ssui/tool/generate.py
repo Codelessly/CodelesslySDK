@@ -5393,6 +5393,276 @@ add(component(
     },
 ))
 
+# MultiSelectDropdown (MultiSelectDropdown.tsx, its panel): several choices as a panel, radius 16, bordered,
+# with a shadow: each row 8 x 12, 10 px between an 18 px box, radius 4 (a 1.2 px border; the brand color with
+# a 14 px white check when chosen) and the label 12/500; with no options, a centered line 14, padding 16.
+add(component(
+    'MultiSelectDropdown',
+    'A panel of choices to tick, several at once. The chosen labels are kept in your list variable. Fires onChanged.',
+    'panel',
+    props=[prop('options', STRINGS, ['Read', 'Write', 'Admin'], 'The choices.', required=True),
+           prop('value', var(STRINGS), '', 'The name of your list variable holding the chosen labels.'),
+           prop('emptyMessage', STRING, 'No options', 'Shown with no choices.')],
+    events=[{'key': 'onChanged', 'payload': STRINGS}],
+    previews=[preview('Default', 220, 120, value=['Read'])],
+    nodes={
+        'panel': {'type': 'column', 'children': ['list', 'none'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 220}, 'height': {'hug': 120}, 'padding': [1, 7, 1, 7]},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 16,
+                                 'clip': 'antiAlias', 'effects': SHADOWS_LIGHT['level3']},
+                  'bind': {'decoration.effects': '${theme.shadows.level3}'}},
+        'list': {'type': 'listView', 'children': ['option'], 'props': {'scrollable': False},
+                 'layout': {'width': {'fill': 218}, 'height': {'hug': 102}}, 'bind': {'data': '${props.options}'}},
+        'option': {'type': 'row', 'children': ['box', 'label'], 'props': {'crossAxisAlignment': 'center', 'spacing': 10},
+                   'layout': {'width': {'fill': 218}, 'height': {'hug': 34}, 'padding': [12, 8, 12, 8]},
+                   'decoration': {'fills': [{'color': '#00000000'}]},
+                   'bind': {'selected': '${= contains(props.value, item)}'},
+                   'states': {'hovered': {'option': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}},
+                              'selected': {'box': {'decoration': {'fills': [{'color': 'primary'}], 'strokes': [{'color': 'primary'}]}}}},
+                   'actions': [{'trigger': 'click', 'actions': [
+                       {'type': 'setVariable', 'variable': 'props.value',
+                        'value': '${= contains(props.value, item) ? without(props.value, item) : append(props.value, item)}'},
+                       {'type': 'componentEvent', 'event': 'onChanged', 'value': '${props.value}'}]}]},
+        'box': {'type': 'row', 'children': ['tick'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                'layout': {'width': 18, 'height': 18},
+                'decoration': {'fills': [{'color': '#00000000'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeWidth': 1.2, 'radius': 4}},
+        'tick': {**icon('check', '#FFFFFFFF', 14), 'bind': {'visible': '${= contains(props.value, item)}'}},
+        'label': _one_line('${item}', style(12, 500, 'primaryText', 1.4), {'fill': 160}, {'hug': 17}),
+        'none': {'type': 'row', 'children': ['noneText'], 'props': {'mainAxisAlignment': 'center'},
+                 'layout': {'width': {'fill': 218}, 'height': {'hug': 52}, 'padding': 16}, 'bind': {'visible': '${= length(props.options) == 0}'}},
+        'noneText': text('${props.emptyMessage}', style(14, 400, 'tertiaryText', 1.4), {'hug': 80}, {'hug': 20}),
+    },
+))
+
+def _simple_menu(name, doc, comment_props, width, font, items_default, icons_default, extra_props=(), danger="false"):
+    """A MenuPopover of rows made from lists: what AddContextMenu and FileTreeContextMenu are."""
+    return component(
+        name, doc, 'menu',
+        props=[prop('items', STRINGS, items_default, 'The rows\' titles.', required=True),
+               prop('icons', STRINGS, icons_default, 'One icon per row (empty: none).'),
+               *extra_props],
+        events=[{'key': 'onSelected', 'payload': STRING}],
+        previews=[preview('Default', width, 30 * len(items_default))],
+        nodes={
+            'menu': {'type': 'column', 'children': ['list'], 'props': {'crossAxisAlignment': 'stretch'},
+                     'layout': {'width': {'fill': width}, 'height': {'hug': 90}, 'padding': 1},
+                     'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8,
+                                    'clip': 'antiAlias', 'effects': SHADOWS_LIGHT['level3']},
+                     'bind': {'decoration.effects': '${theme.shadows.level3}'}},
+            'list': {'type': 'listView', 'children': ['row'], 'props': {'scrollable': False},
+                     'layout': {'width': {'fill': width - 2}, 'height': {'hug': 88}}, 'bind': {'data': '${props.items}'}},
+            'row': {'type': 'row', 'children': ['glyph', 'texts'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                    'layout': {'width': {'fill': width - 2}, 'height': {'hug': 28}, 'padding': [8, 6, 8, 6]},
+                    'decoration': {'fills': [{'color': '#00000000'}], 'strokes': [{'color': 'primaryBorder', 'visible': False}], 'strokeSides': 'top'},
+                    'bind': {'decoration.strokes[0].visible': '${= %s && index > 0}' % danger},
+                    'states': {'hovered': {'row': {'decoration': {'fills': [{'color': 'secondaryBackground'}]}}}},
+                    'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onSelected', 'value': '${item}'}]}]},
+            'glyph': {**icon('circle', 'secondaryText', 13 if font == 11.5 else 11),
+                      'bind': {'visible': "${= length(props.icons) > index && props.icons[index] != ''}",
+                               'props.icon': "${= length(props.icons) > index && props.icons[index] != '' ? props.icons[index] : 'circle'}",
+                               'props.color': '${= %s ? theme.error : theme.colors.secondaryText}' % danger}},
+            'texts': {'type': 'column', 'children': ['title', 'subtitle'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 1},
+                      'layout': {'width': {'fill': 120}, 'height': {'hug': 15}}},
+            'title': {**_one_line('${item}', style(11, 500, 'primaryText', 1.35), {'fill': 120}, {'hug': 15}),
+                      'bind': {'props.style.color': '${= %s ? theme.error : theme.colors.primaryText}' % danger}},
+            'subtitle': {**_one_line(comment_props, style(10, 400, 'tertiaryText', 1.3), {'fill': 120}, {'hug': 13}),
+                         'bind': {'visible': "${= %s != ''}" % comment_props[2:-1].replace('= ', '', 1)}},
+        },
+    )
+
+# AddContextMenu (AddContextMenu.tsx): the small menu that adds context to a prompt: a MenuPopover, 176 px,
+# of compact rows: an icon, a title 11, an optional subtitle 10 in tertiary.
+add(_simple_menu(
+    'AddContextMenu',
+    'The small menu that adds something to a prompt: a file, a link, a note. Fires onSelected with the row\'s title.',
+    "${= length(props.subtitles) > index ? props.subtitles[index] : ''}", 176, 11.5,
+    ['File', 'Link', 'Note'], ['attach_file', 'link', 'sticky_note_2'],
+    extra_props=[prop('subtitles', STRINGS, [], 'One muted line per row (empty: none).')]))
+
+# FileTreeContextMenu (FileTreeContextMenu.tsx): the menu of a file in a tree: rows 6 x 8 at 11 with 11 px
+# icons: Rename, then, over a hairline, Delete in red.
+add(_simple_menu(
+    'FileTreeContextMenu',
+    'The menu of a file in a tree: Rename and, past a hairline, Delete in red. Fires onSelected with the row\'s title.',
+    "${= ''}", 150, 11,
+    ['Rename', 'Delete'], ['edit', 'delete_outline'],
+    danger="(item == 'Delete')"))
+
+# RichTextField (RichTextField.tsx): several lines of text with a label: the label 14/500 6 px over a box
+# with a 1.5 px border (the focus color while typed in, red on an error), radius 7, 10 x 12, the text 13 on
+# a 1.5 line; a helper or the error 12 under it.
+add(component(
+    'RichTextField',
+    'A box for several lines of text with a label and a helper line. Its text is kept in your variable. Fires onChanged.',
+    'column',
+    props=[prop('value', var(STRING), '', 'The name of your text variable.'),
+           prop('label', STRING, '', 'Words over the box (empty: none).'),
+           prop('placeholder', STRING, 'Write something...', 'Shown while empty.'),
+           prop('helper', STRING, '', 'A muted line under the box.'),
+           prop('error', STRING, '', 'What is wrong, in red, in place of the helper.'),
+           prop('minLines', NUMBER, 4, 'How many lines tall it starts.')],
+    events=[{'key': 'onChanged', 'payload': STRING}],
+    previews=[preview('Labeled', 320, 140, label='Description', helper='Markdown is supported.')],
+    nodes={
+        'column': {'type': 'column', 'children': ['label', 'box', 'helper'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 6},
+                   'layout': {'width': {'fill': 320}, 'height': {'hug': 140}}},
+        'label': {**text('${props.label}', style(14, 500, 'primaryText', 1.4), {'fill': 320}, {'hug': 20}),
+                  'bind': {'visible': "${= props.label != ''}"}},
+        'box': {'type': 'row', 'children': ['field'], 'layout': {'width': {'fill': 320}, 'height': {'hug': 100}, 'padding': [12, 10, 12, 10]},
+                'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeWidth': 1.5, 'radius': 7},
+                'bind': {'decoration.strokes[0].color': "${= props.error != '' ? theme.error : theme.colors.primaryBorder}"},
+                'states': {'focused': {'box': {'decoration': {'strokes': [{'color': 'focusBorder'}]}}}}},
+        'field': {**_bare_field(13, maxLines=0, minLines=4),
+                  'bind': {'props.initialValue': '${props.value}', 'props.decoration.hintText': '${props.placeholder}',
+                           'props.minLines': '${= max(1, props.minLines)}'},
+                  'actions': [{'trigger': {'type': 'changed'}, 'actions': [
+                      {'type': 'setVariable', 'variable': 'props.value', 'value': '${result}'},
+                      {'type': 'componentEvent', 'event': 'onChanged', 'value': '${result}'}]}]},
+        'helper': {**text("${= props.error != '' ? props.error : props.helper}", style(12, 400, 'tertiaryText', 1.4), {'fill': 320}, {'hug': 17}),
+                   'bind': {'visible': "${= props.error != '' || props.helper != ''}",
+                            'props.style.color': "${= props.error != '' ? theme.error : theme.colors.tertiaryText}"}},
+    },
+))
+
+# CanvasShell (CanvasShell.tsx): the working area of an editor: what the call puts in its toolbar slot, over
+# a surface on the secondary background, padded 20, that scrolls what it holds.
+add(component(
+    'CanvasShell',
+    'The working area of an editor or a viewer: a toolbar from the call over a soft, padded surface that scrolls the call\'s children.',
+    'shell',
+    props=[prop('padding', NUMBER, 20, 'The room round the content.')],
+    slots=['toolbar'],
+    children='list',
+    previews=[preview('Default', 320, 160)],
+    nodes={
+        'shell': {'type': 'column', 'children': ['toolbar', 'canvas'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 320}, 'height': {'fill': 160}}},
+        'toolbar': {'type': 'slot', 'props': {'name': 'toolbar'}},
+        'canvas': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch', 'scrollable': True},
+                   'layout': {'width': {'fill': 320}, 'height': {'fill': 120}, 'padding': 20},
+                   'decoration': {'fills': [{'color': 'secondaryBackground'}]},
+                   'bind': {'layout.padding': '${props.padding}'}},
+        'content': {'type': 'slot'},
+    },
+))
+
+# SidebarTogglePattern (SidebarTogglePattern.tsx): a document beside a side pane that opens and closes: a
+# shell, radius 10, bordered, a soft shadow; the main pane with what the call puts there, then, past a
+# hairline, a pane 310 px wide on the secondary background, padded 8; a toggle button in the main pane's
+# corner shows or hides it.
+add(component(
+    'SidebarTogglePattern',
+    'A main pane beside a side pane that a button opens and closes. The call fills the two panes. Fires onToggle with whether the side pane is now open.',
+    'shell',
+    props=[prop('open', BOOL, True, 'Whether the side pane shows at first.'),
+           prop('sideWidth', NUMBER, 310, 'The side pane\'s width.')],
+    events=[{'key': 'onToggle', 'payload': BOOL}],
+    slots=['side'],
+    children='list',
+    variables=[{'name': 'toggled', 'type': 'boolean', 'value': False}],
+    previews=[preview('Open', 520, 200, sideWidth=200)],
+    nodes={
+        'shell': {'type': 'row', 'children': ['main', 'pane'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 520}, 'height': {'fill': 200}, 'padding': 1},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 10,
+                                 'clip': 'antiAlias', 'effects': [shadow('#140F172A', 12, 32)]}},
+        'main': {'type': 'stack', 'children': ['body', 'toggle'], 'layout': {'width': {'fill': 300}, 'height': {'fill': 198}}},
+        'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 300}, 'height': {'fill': 198}}},
+        'content': {'type': 'slot'},
+        'toggle': {'type': 'row', 'children': ['toggleIcon'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                   'layout': {'width': 28, 'height': 28, 'x': {'end': 6}, 'y': {'start': 4}}, 'decoration': {'radius': 6},
+                   'tooltip': "${= (props.open != toggled) ? 'Hide panel' : 'Show panel'}",
+                   'states': {'hovered': {'toggle': HOVER}},
+                   'actions': [{'trigger': 'click', 'actions': [
+                       {'type': 'setVariable', 'variable': 'toggled', 'value': '${= !toggled}'},
+                       {'type': 'componentEvent', 'event': 'onToggle', 'value': '${= props.open != toggled}'}]}]},
+        'toggleIcon': {**icon('chevron_right', 'secondaryText', 16),
+                       'bind': {'props.icon': "${= (props.open != toggled) ? 'chevron_right' : 'chevron_left'}"}},
+        'pane': {'type': 'column', 'children': ['side'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 8},
+                 'layout': {'width': 310, 'height': {'fill': 198}, 'padding': 8},
+                 'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'left'},
+                 'bind': {'visible': '${= props.open != toggled}', 'layout.width': '${props.sideWidth}'}},
+        'side': {'type': 'slot', 'props': {'name': 'side'}},
+    },
+))
+
+# ResizableRow (ResizableRow.tsx): two panes side by side with a grip between them: the first as wide as it
+# is told, a 1 px hairline with a small grip of three 1.5 px dots at its middle, the second taking the rest.
+# Here the first pane's width comes from your number variable, so your own reactions can move it.
+add(component(
+    'ResizableRow',
+    'Two panes side by side with a grip between them. The first pane\'s width is your number variable: change it to resize.',
+    'row',
+    props=[prop('leftWidth', NUMBER, 240, 'The first pane\'s width.')],
+    slots=['left', 'right'],
+    previews=[preview('Default', 480, 120)],
+    nodes={
+        'row': {'type': 'row', 'children': ['first', 'grip', 'second'], 'props': {'crossAxisAlignment': 'stretch'},
+                'layout': {'width': {'fill': 480}, 'height': {'fill': 120}}},
+        'first': {'type': 'column', 'children': ['left'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': 240, 'height': {'fill': 120}}, 'bind': {'layout.width': '${= max(0, props.leftWidth)}'}},
+        'left': {'type': 'slot', 'props': {'name': 'left'}},
+        'grip': {'type': 'column', 'children': ['dot1', 'dot2', 'dot3'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center', 'spacing': 3},
+                 'layout': {'width': 9, 'height': {'fill': 120}},
+                 'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'left'},
+                 'states': {'hovered': {'grip': HOVER}}},
+        **{'dot%d' % i: {'type': 'box', 'layout': {'width': 3, 'height': 3}, 'decoration': {'fills': [{'color': 'tertiaryText'}], 'radius': 9999}}
+           for i in (1, 2, 3)},
+        'second': {'type': 'column', 'children': ['right'], 'props': {'crossAxisAlignment': 'stretch'},
+                   'layout': {'width': {'fill': 230}, 'height': {'fill': 120}}},
+        'right': {'type': 'slot', 'props': {'name': 'right'}},
+    },
+))
+
+# VariableContractHover (VariableContractHover.tsx): what a variable is, as a card at most 360 px wide,
+# radius 8, bordered, the menu shadow: a header on the secondary background over a hairline, 8 x 10, with its
+# name in monospace 12/600 and its kind and type on small chips; its description 11 on a 1.45 line in
+# secondary over a hairline, 9 x 10; then label and value rows, 9 px apart, 9 10 10: a label 9/700 in
+# tertiary, upper case, over its value 11.
+add(component(
+    'VariableContractHover',
+    'A card describing a variable: its name, kind and type, what it is for, and a few labeled facts.',
+    'card',
+    props=[prop('name', STRING, 'customer_id', 'The variable\'s name.', required=True),
+           prop('kind', STRING, 'input', 'input, output or variable.'),
+           prop('type', STRING, 'string', 'Its type.'),
+           prop('description', STRING, '', 'What it is for.'),
+           prop('labels', STRINGS, [], 'The facts\' labels (Validation, Provided by...).'),
+           prop('values', STRINGS, [], 'One value per label.'),
+           prop('required', BOOL, False, 'A red "required" chip in the header.')],
+    previews=[preview('Default', 320, 150, description='Who the invoice is for.', labels=['Validation', 'Provided by'],
+                      values=['Must match an existing customer.', 'The parent workflow'], required=True)],
+    nodes={
+        'card': {'type': 'column', 'children': ['header', 'about', 'facts'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 320}, 'height': {'hug': 150}, 'padding': 1, 'constraints': {'maxWidth': 360}},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 8,
+                                'clip': 'antiAlias', 'effects': SHADOWS_LIGHT['level3']},
+                 'bind': {'decoration.effects': '${theme.shadows.level3}'}},
+        'header': {'type': 'row', 'children': ['name', 'kind', 'type', 'required'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                   'layout': {'width': {'fill': 318}, 'height': {'hug': 34}, 'padding': [10, 8, 10, 8]},
+                   'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'name': _one_line('${props.name}', style(12, 600, 'primaryText', 1.4, fontFamily='monospace'), {'fill': 140}, {'hug': 17}),
+        'kind': {'type': 'Badge', 'props': {'label': 'input'}, 'layout': {'width': {'hug': 40}, 'height': {'hug': 20}},
+                 'bind': {'props.label': '${props.kind}', 'visible': "${= props.kind != ''}"}},
+        'type': {'type': 'Badge', 'props': {'label': 'string', 'tone': 'info'}, 'layout': {'width': {'hug': 40}, 'height': {'hug': 20}},
+                 'bind': {'props.label': '${props.type}', 'visible': "${= props.type != ''}"}},
+        'required': {'type': 'Badge', 'props': {'label': 'required', 'tone': 'error'}, 'layout': {'width': {'hug': 50}, 'height': {'hug': 20}},
+                     'bind': {'visible': '${props.required}'}},
+        'about': {'type': 'row', 'children': ['description'], 'layout': {'width': {'fill': 318}, 'height': {'hug': 34}, 'padding': [10, 9, 10, 9]},
+                  'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'},
+                  'bind': {'visible': "${= props.description != ''}"}},
+        'description': text('${props.description}', style(11, 400, 'secondaryText', 1.45), {'fill': 298}, {'hug': 16}),
+        'facts': {'type': 'listView', 'children': ['fact'], 'props': {'scrollable': False, 'spacing': 9},
+                  'layout': {'width': {'fill': 318}, 'height': {'hug': 60}, 'padding': [10, 9, 10, 10]},
+                  'bind': {'data': '${props.labels}', 'visible': '${= length(props.labels) > 0}'}},
+        'fact': {'type': 'column', 'children': ['factLabel', 'factValue'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 2},
+                 'layout': {'width': {'fill': 298}, 'height': {'hug': 30}}},
+        'factLabel': text('${= upper(item)}', style(9, 700, 'tertiaryText', 1.3, letterSpacing=0.4), {'fill': 298}, {'hug': 12}),
+        'factValue': text("${= length(props.values) > index ? props.values[index] : ''}", style(11, 400, 'primaryText', 1.45), {'fill': 298}, {'hug': 16}),
+    },
+))
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:
