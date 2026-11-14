@@ -1,0 +1,175 @@
+{"meta":{"ui":"dashboard","kind":"card","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agent","scripts":false,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["inbox.jsonl"],"source":"live","outputTokens":1454,"usage":{"inputTokens":10663,"outputTokens":1454,"cacheReadInputTokens":46839,"cacheCreationInputTokens":0,"ttftMs":1836,"firstToolDeltaMs":1840,"totalMs":8563,"stopReason":"StopReason.toolUse"},"text":"I'll resend the nine pending nodes with fixed width objects and `openModal` using `to`, and patch the insert index to a string.","ttftMs":1836,"check":{"ops":10,"opsApplied":10,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":62,"scripts":0,"scriptChars":0,"designSystemComponents":27,"replacedControls":0},"assets":null}}
+{"tMs":1840,"delta":"{\"ops\": [{\"op\": \"set"}
+{"tMs":1874,"delta":"\", \"id\": \"newBt"}
+{"tMs":1909,"delta":"n\", \"node\": {\"type"}
+{"tMs":1943,"delta":"\": \"Button\", \"props\":"}
+{"tMs":1977,"delta":" {\"label\": \"New tic"}
+{"tMs":2011,"delta":"ket\", \"icon\": \"add"}
+{"tMs":2044,"delta":"\"}, \"layout\": {"}
+{"tMs":2078,"delta":"\"width\": {\"hug\":"}
+{"tMs":2283,"delta":" 100}, \"height\": {"}
+{"tMs":2743,"delta":"\"hug\": 28}}"}
+{"tMs":2743,"delta":", \"actions\": [{\""}
+{"tMs":2743,"delta":"trigger\": {\"type\":"}
+{"tMs":2743,"delta":" \"event\", \"event\": \"on"}
+{"tMs":2743,"delta":"Pressed\"}, \"act"}
+{"tMs":2743,"delta":"ions\": [{\"type\": \""}
+{"tMs":2743,"delta":"openModal\", \"to\": \""}
+{"tMs":2743,"delta":"newDlg\"}]}"}
+{"tMs":2743,"delta":"]}}, {\"op\":"}
+{"tMs":2743,"delta":" \"set\", \"id\": \"h"}
+{"tMs":2743,"delta":"1\", \"node\": {\"type"}
+{"tMs":2743,"delta":"\": \"text\", \"layout\":"}
+{"tMs":3202,"delta":" {\"width\": {\"fill"}
+{"tMs":3202,"delta":"\": 200}"}
+{"tMs":3202,"delta":", \"height"}
+{"tMs":3202,"delta":"\": {"}
+{"tMs":3202,"delta":"\"hug\": 14},"}
+{"tMs":3202,"delta":" \"flex\": 4},"}
+{"tMs":3202,"delta":" \"props\": {\"text\": \""}
+{"tMs":3202,"delta":"Subject\", \"style\": {"}
+{"tMs":3202,"delta":"\"from\": \"fieldL"}
+{"tMs":3202,"delta":"abel\", \"color\": \"sec"}
+{"tMs":3202,"delta":"ondaryText\"}}}"}
+{"tMs":3202,"delta":"}, {\"op\": \"set"}
+{"tMs":3636,"delta":"\", \"id\": \"h2\","}
+{"tMs":3636,"delta":" \"node\": {\"type\": \""}
+{"tMs":3636,"delta":"text\", \"layout\": {\""}
+{"tMs":3636,"delta":"width\": {\"fill\": "}
+{"tMs":3636,"delta":"100}, \"height\": {\""}
+{"tMs":3636,"delta":"hug\": 14}, \""}
+{"tMs":3636,"delta":"flex\": 3}, \""}
+{"tMs":3636,"delta":"props\": {\"text\": \""}
+{"tMs":3636,"delta":"Customer\", \"style\": {\""}
+{"tMs":3636,"delta":"from\": \"fieldLab"}
+{"tMs":3636,"delta":"el\", \"color\": \"second"}
+{"tMs":3636,"delta":"aryText\"}}}}"}
+{"tMs":4175,"delta":", {\"op\": \"set\","}
+{"tMs":4175,"delta":" \"id\": \"h3\", \""}
+{"tMs":4175,"delta":"node\": {\"type\": \"text"}
+{"tMs":4175,"delta":"\", \"layout\": {\"width"}
+{"tMs":4175,"delta":"\": {\"fill\": 60"}
+{"tMs":4175,"delta":"}, \"height\": {\"h"}
+{"tMs":4175,"delta":"ug\": 14}, \"fl"}
+{"tMs":4175,"delta":"ex\": 2}, \"props"}
+{"tMs":4175,"delta":"\": {\"text\": \"Pri"}
+{"tMs":4175,"delta":"ority\", \"style\": {\"from"}
+{"tMs":4175,"delta":"\": \"fieldLabel"}
+{"tMs":4175,"delta":"\", \"color\": \"seconda"}
+{"tMs":4623,"delta":"ryText\"}}}},"}
+{"tMs":4623,"delta":" {\"op\": \"set\", \""}
+{"tMs":4623,"delta":"id\": \"h4\", \"node"}
+{"tMs":4623,"delta":"\": {\"type\": \"text\","}
+{"tMs":4623,"delta":" \"layout\": {\"width\":"}
+{"tMs":4623,"delta":" {\"fill\": 60}"}
+{"tMs":4623,"delta":", \"height\": {\"hug"}
+{"tMs":4623,"delta":"\": 14}, \"flex"}
+{"tMs":4623,"delta":"\": 2}, \"props\":"}
+{"tMs":4623,"delta":" {\"text\": \"Status\","}
+{"tMs":4623,"delta":" \"style\": {\"from\": \""}
+{"tMs":4623,"delta":"fieldLabel\", \""}
+{"tMs":5074,"delta":"color\": \"secondaryText"}
+{"tMs":5074,"delta":"\"}}}}, {\""}
+{"tMs":5074,"delta":"op\": \"set\", \"id\":"}
+{"tMs":5074,"delta":" \"rSubj\", \"node"}
+{"tMs":5074,"delta":"\": {\"type\": \"text\","}
+{"tMs":5074,"delta":" \"layout\": {\"width\":"}
+{"tMs":5074,"delta":" {\"fill\": 200}"}
+{"tMs":5074,"delta":", \"height\": {\"hug"}
+{"tMs":5074,"delta":"\": 16}, \"flex"}
+{"tMs":5074,"delta":"\": 4}, \"props\":"}
+{"tMs":5074,"delta":" {\"text\": \"${item."}
+{"tMs":5074,"delta":"subject}\", \"maxL"}
+{"tMs":5542,"delta":"ines\": 1, \"overfl"}
+{"tMs":5542,"delta":"ow\": \"ellipsis"}
+{"tMs":5542,"delta":"\", \"style\": {\"from\":"}
+{"tMs":5542,"delta":" \"body\", \"color\": \"prim"}
+{"tMs":5542,"delta":"aryText\", \"fontW"}
+{"tMs":5542,"delta":"eight\": 500}}}"}
+{"tMs":5542,"delta":"}, {\"op\": \"set"}
+{"tMs":5542,"delta":"\", \"id\": \"rCust"}
+{"tMs":5542,"delta":"\", \"node\": {\"type\":"}
+{"tMs":5542,"delta":" \"text\", \"layout\": {"}
+{"tMs":5542,"delta":"\"width\": {\"fill\":"}
+{"tMs":5542,"delta":" 100}, \"height\": {"}
+{"tMs":5981,"delta":"\"hug\": 16},"}
+{"tMs":5981,"delta":" \"flex\": 3},"}
+{"tMs":5981,"delta":" \"props\": {\"text\": \""}
+{"tMs":5981,"delta":"${item.customer}\", \""}
+{"tMs":5981,"delta":"maxLines\": 1,"}
+{"tMs":5981,"delta":" \"overflow\": \"ell"}
+{"tMs":5981,"delta":"ipsis\", \"style\": {"}
+{"tMs":5981,"delta":"\"from\": \"bodySec"}
+{"tMs":5981,"delta":"ondary\", \"color\": \"sec"}
+{"tMs":5981,"delta":"ondaryText\"}}}"}
+{"tMs":5981,"delta":"}, {\"op\": \"set"}
+{"tMs":5981,"delta":"\", \"id\": \"rPr"}
+{"tMs":6529,"delta":"io\", \"node\": {\"type"}
+{"tMs":6529,"delta":"\": \"Badge\", \"props"}
+{"tMs":6529,"delta":"\": {\"label\": \"x\""}
+{"tMs":6529,"delta":"}, \"bind\": {\""}
+{"tMs":6529,"delta":"props.label\": \"${item."}
+{"tMs":6529,"delta":"priority}\", \"props.t"}
+{"tMs":6529,"delta":"one\": \"${= item.pri"}
+{"tMs":6529,"delta":"ority == 'High' ?"}
+{"tMs":6529,"delta":" 'error' : (item."}
+{"tMs":6529,"delta":"priority == 'Medium"}
+{"tMs":6530,"delta":"' ? 'warning'"}
+{"tMs":6530,"delta":" : 'neutral')}"}
+{"tMs":7001,"delta":"\"}, \"layout\": {"}
+{"tMs":7001,"delta":"\"width\": {\"fill\":"}
+{"tMs":7001,"delta":" 60}, \"height\": {"}
+{"tMs":7001,"delta":"\"hug\": 20},"}
+{"tMs":7001,"delta":" \"flex\": 2}}"}
+{"tMs":7001,"delta":"}, {\"op\": \"set"}
+{"tMs":7001,"delta":"\", \"id\": \"rStat"}
+{"tMs":7001,"delta":"\", \"node\": {\"type\":"}
+{"tMs":7001,"delta":" \"Badge\", \"props\":"}
+{"tMs":7001,"delta":" {\"label\": \"x\"}"}
+{"tMs":7001,"delta":", \"bind\": {\"props"}
+{"tMs":7001,"delta":".label\": \"${item.status"}
+{"tMs":7461,"delta":"}\", \"props.tone\":"}
+{"tMs":7461,"delta":" \"${= item.status == "}
+{"tMs":7461,"delta":"'Open' ? '"}
+{"tMs":7461,"delta":"primary' : (item.status"}
+{"tMs":7461,"delta":" == 'Waiting'"}
+{"tMs":7461,"delta":" ? 'warning' :"}
+{"tMs":7461,"delta":" 'success')}\"},"}
+{"tMs":7461,"delta":" \"layout\": {\"width\":"}
+{"tMs":7461,"delta":" {\"fill\": 60}"}
+{"tMs":7461,"delta":", \"height\": {\"hug"}
+{"tMs":7461,"delta":"\": 20}, \"flex"}
+{"tMs":7461,"delta":"\": 2}}}, {"}
+{"tMs":7917,"delta":"\"op\": \"patch\", \""}
+{"tMs":7917,"delta":"id\": \"dCreate\","}
+{"tMs":7917,"delta":" \"patch\": {\"actions"}
+{"tMs":7917,"delta":"\": [{\"trigger\":"}
+{"tMs":7917,"delta":" {\"type\": \"event\", \""}
+{"tMs":7917,"delta":"event\": \"onPressed\""}
+{"tMs":7917,"delta":"}, \"actions\": [{"}
+{"tMs":7917,"delta":"\"type\": \"setVariable"}
+{"tMs":7917,"delta":"\", \"variable\": \"tick"}
+{"tMs":7917,"delta":"ets\", \"op\": \"insert"}
+{"tMs":7917,"delta":"\", \"index\": \"0\", \""}
+{"tMs":7917,"delta":"value\": \"${= {'sub"}
+{"tMs":8554,"delta":"ject': nSubject, "}
+{"tMs":8555,"delta":"'customer': nCustom"}
+{"tMs":8555,"delta":"er, 'priority': n"}
+{"tMs":8555,"delta":"Priority, 'status':"}
+{"tMs":8555,"delta":" 'Open', 'summ"}
+{"tMs":8555,"delta":"ary': 'New ticket"}
+{"tMs":8555,"delta":" created from the inbox.'"}
+{"tMs":8555,"delta":"}}\"}, {\"type"}
+{"tMs":8555,"delta":"\": \"setVariable\", \""}
+{"tMs":8555,"delta":"variable\": \"nSubject"}
+{"tMs":8555,"delta":"\", \"value\": \"''\"}"}
+{"tMs":8555,"delta":", {\"type\": \"setV"}
+{"tMs":8555,"delta":"ariable\", \"variable\": \""}
+{"tMs":8555,"delta":"nCustomer\", \"value"}
+{"tMs":8555,"delta":"\": \"''\"}, {\""}
+{"tMs":8555,"delta":"type\": \"closeModal\""}
+{"tMs":8555,"delta":"}, {\"type\": \"show"}
+{"tMs":8555,"delta":"Toast\", \"message\": \""}
+{"tMs":8555,"delta":"Ticket created\"}]}"}
+{"tMs":8555,"delta":"]}}]"}
+{"tMs":8561,"delta":"}"}
