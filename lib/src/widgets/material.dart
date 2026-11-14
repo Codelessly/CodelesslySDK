@@ -10,7 +10,7 @@ import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show DividerProps, Node;
 import 'package:flutter/rendering.dart';
 
-import '../render/control_theme.dart' show backdropOf, onColor, themeDataOf;
+import '../render/surface_roles.dart' show onColor;
 import '../render/convert.dart';
 import '../render/node_tree.dart';
 import '../render/controls/tokens.dart' show ControlTokens;

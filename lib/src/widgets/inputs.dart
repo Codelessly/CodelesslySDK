@@ -22,6 +22,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../render/controls/dropdown.dart' show dropdownRecipe;
+import '../render/control_theme.dart' show rolesOfScheme;
 import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
 import '../render/paint/icon_glyph.dart';
@@ -564,7 +565,7 @@ class _SignatureIslandState extends State<_SignatureIsland> {
   @override
   Widget build(BuildContext context) {
     // Its unset colors (ink, pad, border, placeholder) are the theme's.
-    final n = withThemeColors(widget.node, Theme.of(context).colorScheme);
+    final n = withThemeColors(widget.node, rolesOfScheme(Theme.of(context).colorScheme));
     final error = n.prop(SignatureProps.error);
     final radius = n.prop(SignatureProps.borderRadius).flutter;
     final borderWidth = error ? n.prop(SignatureProps.errorBorderWidth) : n.prop(SignatureProps.borderWidth);

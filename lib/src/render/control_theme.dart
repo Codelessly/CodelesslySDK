@@ -7,23 +7,11 @@
 // purple seed, tints, ripples, elevation, Roboto) and nothing comes from the
 // app the layout is shown in.
 import 'package:codelessly_api/core.dart' as api;
-import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/material.dart';
 
-/// [c] as a Flutter color.
-Color? colorOf(api.Color? c) => c == null ? null : Color(c.value);
+import 'surface_roles.dart';
 
-/// Text and marks on light surfaces without a theme: near-black.
-const Color kInk = Color(0xFF111111);
-
-/// Text and marks on dark surfaces without a theme: near-white.
-const Color kInkOnDark = Color(0xFFF2F2F2);
-
-/// The surface of a light layout without a theme.
-const Color kPaper = Color(0xFFFFFFFF);
-
-/// The surface of a dark layout without a theme.
-const Color kPaperDark = Color(0xFF121212);
+export 'surface_roles.dart';
 
 /// The corner radius of buttons, chips, fields, dropdowns and segmented
 /// buttons without a theme's `buttonRadius`: a small radius, not
@@ -33,22 +21,6 @@ const double kControlRadius = 6;
 /// The corner radius of dialogs, menus, pickers and cards without a
 /// theme's `radius`.
 const double kSurfaceRadius = 8;
-
-/// The contrast ratio of [a] and [b] (WCAG: 1 to 21).
-double contrastRatio(Color a, Color b) {
-  final la = a.computeLuminance(), lb = b.computeLuminance();
-  return la > lb ? (la + .05) / (lb + .05) : (lb + .05) / (la + .05);
-}
-
-/// Text that reads on [background]: the first of [preferred] that does
-/// (3:1, so a theme's own choice is kept), else ink or near-white,
-/// whichever contrasts more.
-Color onColor(Color background, {Iterable<Color?> preferred = const []}) {
-  for (final c in preferred) {
-    if (c != null && c.a > .9 && contrastRatio(c, background) >= 3) return c;
-  }
-  return contrastRatio(kInk, background) >= contrastRatio(kInkOnDark, background) ? kInk : kInkOnDark;
-}
 
 /// The project's theme tokens a [ThemeData] was made from
 /// ([themeDataOf]), so the islands under it can make the same theme again
@@ -154,25 +126,19 @@ TextTheme _colorOnly(Color color) {
 ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdrop) {
   // A role that names a theme color (`"primary": "forest"`) is that color.
   tokens = tokens.resolvedRoles();
-  final surface = backdrop ?? colorOf(tokens.surface) ?? (requested == Brightness.dark ? kPaperDark : kPaper);
-  final brightness = ThemeData.estimateBrightnessForColor(surface);
-  final onSurface = onColor(surface, preferred: [colorOf(tokens.onSurface)]);
+  final roles = surfaceRoles(tokens, dark: requested == Brightness.dark, surface: backdrop);
+  final surface = roles.surface, onSurface = roles.onSurface, accent = roles.primary, error = roles.error;
+  final brightness = roles.dark ? Brightness.dark : Brightness.light;
   Color mix(double t) => Color.lerp(surface, onSurface, t)!;
   final brand = colorOf(tokens.primary);
   final onBrand = colorOf(tokens.onPrimary);
-  // What controls draw straight on the surface: the brand color where it
-  // reads there, else the surface's ink.
-  final accent = brand != null && brand.a > .9 && contrastRatio(brand, surface) >= 3 ? brand : onSurface;
   final onAccent = onColor(accent, preferred: [if (accent == brand) onBrand, surface]);
   // What fills a filled button: the brand color as it is.
   final fill = brand != null && brand.a > .9 ? brand : onSurface;
   final onFill = onColor(fill, preferred: [onBrand, surface]);
   final selected = Color.lerp(surface, accent, brightness == Brightness.dark ? .24 : .12)!;
   final selectedDim = Color.lerp(surface, accent, brightness == Brightness.dark ? .36 : .24)!;
-  final error = colorOf(tokens.error) ?? (brightness == Brightness.dark ? const Color(0xFFF28B82) : const Color(0xFFC4302B));
-  final onSurfaceVariant = mix(.68);
-  final outline = mix(.45);
-  final outlineVariant = mix(.18);
+  final onSurfaceVariant = roles.muted, outline = roles.outline, outlineVariant = roles.hairline;
   final disabledFill = mix(.12);
   final disabledInk = mix(.45);
   const shadow = Color(0xFF000000);
@@ -568,55 +534,15 @@ class ControlTheme extends StatelessWidget {
   }
 }
 
-/// The color a control at node [id] is drawn on, as its document says: the
-/// visible fills of the node and then of its ancestors, top down, until an
-/// opaque one (translucent ones over it composited; a gradient counts as
-/// the average of its stops). Null when an image or noise paint is in the
-/// way, or nothing opaque is found: the theme's surface, then.
-Color? backdropOf(Node? Function(String id) nodeOf, String? Function(String id) parentOf, String id) {
-  final layers = <Color>[];
-  String? at = id;
-  for (var depth = 0; at != null && depth < 128; depth++) {
-    final node = nodeOf(at);
-    if (node != null && node.visible) {
-      for (final p in node.decoration.fills.reversed) {
-        if (!p.visible || p.opacity <= 0) continue;
-        final c = _paintColor(p);
-        if (c == null) return null;
-        if (c.a >= .99) {
-          var out = c.withValues(alpha: 1);
-          for (final top in layers.reversed) {
-            out = Color.alphaBlend(top, out);
-          }
-          return out;
-        }
-        if (c.a > 0) layers.add(c);
-      }
-    }
-    at = parentOf(at);
-  }
-  return null;
-}
-
-Color? _paintColor(api.Paint p) {
-  switch (p.type) {
-    case api.PaintType.solid:
-      final c = p.color;
-      if (c == null) return const Color(0x00000000);
-      return Color(c.value).withValues(alpha: (c.alpha / 255) * p.opacity.clamp(0, 1));
-    case api.PaintType.linear || api.PaintType.radial || api.PaintType.sweep || api.PaintType.diamond:
-      if (p.stops.isEmpty) return const Color(0x00000000);
-      double a = 0, r = 0, g = 0, b = 0;
-      for (final s in p.stops) {
-        final c = Color(s.color.value);
-        a += c.a;
-        r += c.r;
-        g += c.g;
-        b += c.b;
-      }
-      final n = p.stops.length;
-      return Color.from(alpha: (a / n) * p.opacity.clamp(0, 1), red: r / n, green: g / n, blue: b / n);
-    case api.PaintType.image || api.PaintType.noise:
-      return null;
-  }
-}
+/// The roles a Material [scheme] made by [themeDataOf] carries, for what
+/// still reads its theme from a widget's context.
+SurfaceRoles rolesOfScheme(ColorScheme scheme) => (
+      dark: scheme.brightness == Brightness.dark,
+      surface: scheme.surface,
+      onSurface: scheme.onSurface,
+      primary: scheme.primary,
+      muted: scheme.onSurfaceVariant,
+      outline: scheme.outline,
+      hairline: scheme.outlineVariant,
+      error: scheme.error,
+    );

@@ -13,17 +13,19 @@ import 'package:codelessly_api/core.dart'
         PlotChartProps,
         RadialGaugeProps,
         SignatureProps;
-import 'package:flutter/material.dart' show Color, ColorScheme;
+import 'dart:ui' show Color;
 
-typedef _Role = Color Function(ColorScheme s);
+import '../render/surface_roles.dart';
 
-Color _primary(ColorScheme s) => s.primary;
-Color _onSurface(ColorScheme s) => s.onSurface;
-Color _surface(ColorScheme s) => s.surface;
-Color _muted(ColorScheme s) => s.onSurfaceVariant;
-Color _outline(ColorScheme s) => s.outline;
-Color _hairline(ColorScheme s) => s.outlineVariant;
-Color _error(ColorScheme s) => s.error;
+typedef _Role = Color Function(SurfaceRoles s);
+
+Color _primary(SurfaceRoles s) => s.primary;
+Color _onSurface(SurfaceRoles s) => s.onSurface;
+Color _surface(SurfaceRoles s) => s.surface;
+Color _muted(SurfaceRoles s) => s.muted;
+Color _outline(SurfaceRoles s) => s.outline;
+Color _hairline(SurfaceRoles s) => s.hairline;
+Color _error(SurfaceRoles s) => s.error;
 _Role _alpha(_Role role, double a) => (s) => role(s).withValues(alpha: a);
 
 /// By node type: each color prop whose unset value is a theme role.
@@ -91,8 +93,8 @@ final Map<String, List<(api.PropDef<api.Color?>, _Role)>> themedIndicatorColors 
   ],
 };
 
-/// [n] with every themed color it leaves unset set from [scheme].
-Node withThemeColors(Node n, ColorScheme scheme) {
+/// [n] with every themed color it leaves unset set from [roles].
+Node withThemeColors(Node n, SurfaceRoles scheme) {
   final themed = themedIndicatorColors[n.type];
   if (themed == null) return n;
   var out = n;

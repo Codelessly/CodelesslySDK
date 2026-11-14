@@ -23,7 +23,7 @@ import 'package:codelessly_api/core.dart'
         RadialGaugeProps;
 import 'package:flutter/rendering.dart';
 
-import '../render/control_theme.dart' show backdropOf, themeDataOf;
+import '../render/surface_roles.dart';
 import '../render/controls/spinner.dart';
 import '../render/controls/tokens.dart';
 import '../render/convert.dart';
@@ -72,10 +72,7 @@ RenderBox _indicatorFit(NodeBuilder b, Node n) {
 Node _themed(NodeBuilder b, Node n) {
   b.tree.dependOnTheme(b);
   return withThemeColors(
-      n,
-      themeDataOf(b.tree.components?.theme ?? api.ThemeTokens.none,
-              surface: backdropOf(b.source.node, b.source.parentOf, b.id))
-          .colorScheme);
+      n, surfaceRoles(b.tree.components?.theme ?? api.ThemeTokens.none, surface: backdropOf(b.source.node, b.source.parentOf, b.id)));
 }
 
 void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painter) {
