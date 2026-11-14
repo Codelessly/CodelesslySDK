@@ -94,7 +94,7 @@ Map<String, Object?> _expansionTile(List<String> children, {Map<String, Object?>
 
 void main() {
   group('list tile', () {
-    testWidgets('with nothing styled it is SSUI\'s ListRow: 36 high, 12 in, 10 apart, a hairline under it', (tester) async {
+    testWidgets('with nothing styled it is SSUI\'s ListRow: 36 high, 12 in, 10 apart, and no divider of its own', (tester) async {
       final (tree, _) = await _show(tester, {
         'row': _listTile({'leading': 'icon', 'title': 'title', 'trailing': 'end'}),
         'icon': _box(16, 16),
@@ -113,7 +113,6 @@ void main() {
         expect(rectOf(tree, id).center.dy, closeTo(row.center.dy, .01), reason: '$id centred on the row');
       }
       final tile = _tile(tree, 'row');
-      expect(tile.dividerColor, const Color(0xFFE5E7EB), reason: 'SSUI\'s primaryBorder');
       expect(tile.fillColor, isNull);
       expect(rectOf(tree, 'dense').height, 28, reason: 'SSUI\'s dense row');
     });

@@ -115,7 +115,7 @@ and matching no item). The formula engine is right; nothing told the model.
   `listTile` is `RenderListTile`, `accordion` and `expansionTile` are `RenderExpansion`
   (`lib/src/render/controls/{tile,expansion}.dart`); the `ListTile`, `ExpansionTile` and the accordion's Material
   toggle button are gone. With nothing styled a list tile is SSUI's ListRow (36 high, 28 dense, 12 × 6 padding, 10
-  between its slots, a `primaryBorder` hairline under it, `activeTint` when selected) and an accordion is SSUI's
+  between its slots, no divider of its own (a list draws them: `separator`), `activeTint` when selected) and an accordion is SSUI's
   Accordion (a `tertiaryBackground` header panel, 1 px `primaryBorder`, radius 8, SSUI's chevron turning down as it
   opens, the content in a `primaryBackground` panel); an expansion tile's header is its `tile` slot's slots laid out
   as a list tile, with the chevron and `primaryBorder` hairlines while open. The slots and content are nodes laid out

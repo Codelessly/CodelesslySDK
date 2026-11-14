@@ -134,7 +134,8 @@ Map<String, Object?> _listRowPage({required bool dark}) {
     nodes['row$i'] = {
       'type': 'ListRow',
       'layout': {'width': 320, 'height': {'hug': 36}},
-      'props': {'title': title, 'subtitle': sub, 'icon': icon},
+      // No hairline: a core list tile has none (a list draws its dividers).
+      'props': {'title': title, 'subtitle': sub, 'icon': icon, 'divider': false},
     };
   }
   return _rowPage(nodes, [for (var i = 0; i < _rows.length; i++) 'row$i'], dark: dark);

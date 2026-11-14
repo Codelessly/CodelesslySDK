@@ -9,7 +9,7 @@
 // | height | 36 (`sizes.tableRow`), dense 28 (`tableRowDense`) | `minTileHeight`, `visualDensity` |
 // | padding | 12 × 6 | `contentPadding` (else the node's padding) |
 // | gap | 10 between leading, text and trailing | `horizontalTitleGap` |
-// | divider | a `primaryBorder` hairline under the row | none when the tile has a `shape` |
+// | divider | none: a list draws the dividers between its rows (`listView` `separator`) | the list's `separator` props |
 // | hover / press | `hoverOverlay` / `pressedOverlay` | `hoverColor` |
 // | selected | `activeTint` | `selectedTileColor` |
 //
@@ -456,8 +456,6 @@ class RenderListTile extends RenderControl
     return null;
   }
 
-  /// SSUI's hairline under the row (none for a shaped tile).
-  Color? get dividerColor => spec.shape == null ? spec.tokens.primaryBorder : null;
 
   final LayerHandle<OpacityLayer> _opacity = LayerHandle<OpacityLayer>();
 
@@ -483,7 +481,6 @@ class RenderListTile extends RenderControl
     if (fillColor case final Color c when c.a > 0) fill(c);
     if (stateOverlay case final Color c when c.a > 0) fill(c);
     if (shape != null) shape.paint(canvas, rect);
-    if (dividerColor case final Color c) canvas.drawRect(Rect.fromLTWH(rect.left, rect.bottom - 1, rect.width, 1), Paint()..color = c);
     defaultPaint(context, offset);
     if (focusHighlight) paintInsetFocusRing(canvas, rect, shape, spec.tokens.focusBorder);
   }
