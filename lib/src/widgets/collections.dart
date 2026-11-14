@@ -21,7 +21,6 @@ import '../render/source.dart' show NodeSource;
 import '../render/recipe.dart';
 import '../runtime/expressions/bindings.dart' show ProvidedItem, RenderTreeBinder;
 import 'collections_data_list.dart';
-import 'collections_islands.dart';
 import 'collections_list_runtime.dart';
 import 'collections_layout.dart';
 import 'collections_pagination.dart';
@@ -34,8 +33,6 @@ final Map<String, WidgetRecipe> collectionsRecipes = {
   'listView': _listView,
   'gridView': _gridView,
   'pageView': _pageView,
-  'accordion': accordionRecipe,
-  'expansionTile': expansionTileRecipe,
   'pagination': paginationRecipe,
   'tableView': _tableView,
 };

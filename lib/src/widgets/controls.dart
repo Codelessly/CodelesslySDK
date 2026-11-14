@@ -7,13 +7,16 @@
 import 'package:codelessly_api/core.dart'
     show
         BadgeProps,
+        AccordionProps,
         ButtonProps,
         ChipProps,
         DatePickerProps,
         DateTimeInputProps,
         DropdownProps,
+        ExpansionTileProps,
         FloatingActionButtonProps,
         IconButtonProps,
+        ListTileProps,
         TextFieldProps,
         TimePickerProps;
 
@@ -21,10 +24,15 @@ import '../render/controls/app_bar.dart';
 import '../render/controls/buttons.dart';
 import '../render/controls/chips.dart';
 import '../render/controls/dropdown.dart';
+import '../render/controls/expansion.dart';
 import '../render/controls/navigation_bar.dart';
 import '../render/controls/pickers.dart';
+import '../render/controls/segmented.dart';
+import '../render/controls/slider.dart';
 import '../render/controls/tab_bar.dart';
 import '../render/controls/text_field.dart';
+import '../render/controls/tile.dart';
+import '../render/controls/toggles.dart';
 import '../render/recipe.dart';
 import '../runtime/actions/text_fields.dart' show textFieldServices;
 import 'picker_locale.dart';
@@ -64,6 +72,23 @@ final Map<String, WidgetRecipe> textFieldRecipes = {
   TextFieldProps.spec.type: (b, n, chain) => textFieldRecipe(b, n, chain, services: textFieldServices),
 };
 
+/// List tiles, accordions and expansion tiles (render/controls/{tile,expansion}.dart).
+final Map<String, WidgetRecipe> tileRecipes = {
+  ListTileProps.spec.type: listTileRecipe,
+  AccordionProps.spec.type: accordionRecipe,
+  ExpansionTileProps.spec.type: expansionTileRecipe,
+};
+
+/// Toggles, slider and segmented button (render/controls/{toggles,slider,
+/// segmented}.dart).
+final Map<String, WidgetRecipe> toggleRecipes = {
+  'checkbox': checkboxRecipe,
+  'switch': switchRecipe,
+  'radio': radioRecipe,
+  'slider': sliderRecipe,
+  'segmentedButton': segmentedRecipe,
+};
+
 /// Chips and badges (render/controls/chips.dart).
 final Map<String, WidgetRecipe> chipRecipes = {
   ChipProps.chip.type: chipRecipe,
@@ -82,4 +107,6 @@ final Map<String, WidgetRecipe> controlRecipes = {
   ...pickerRecipes,
   ...dropdownRecipes,
   ...textFieldRecipes,
+  ...tileRecipes,
+  ...toggleRecipes,
 };

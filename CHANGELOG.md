@@ -93,6 +93,21 @@ and matching no item). The formula engine is right; nothing told the model.
   take the same path (`test/session/session_indicator_theme_test.dart`). With no theme they are the neutral ink and
   greys, as before.
 
+- **Toggles, slider and segmented button are render objects** (Milestone 3, WS-E). `checkbox`, `switch`, `radio`
+  (`render/controls/toggles.dart`), `slider` (`slider.dart`) and `segmentedButton` (`segmented.dart`) draw with no
+  Material widget; their islands (`widgets/inputs.dart`, `inputs_toggle.dart`, `slider_paint.dart`, the slider
+  shapes in `inputs_shapes.dart`) are gone. With nothing styled each is SSUI's control: a 16 px checkbox and radio,
+  a 36 × 20 switch whose thumb eases over 150 ms, a 200 × 28 slider with a 6 px rail and a ringed 14 px thumb (no
+  shadow), and SSUI's segmented well with each label measured centred in its segment. Values write back through
+  `changed` and follow their bindings; tristate checkboxes; radio groups with arrow keys; slider drag, tap, arrows,
+  Page Up/Down and Home/End, its value indicator in the root's overlay and its custom paint between its parts;
+  segmented tap and arrow keys, single and multi select; checked, toggled, slider (increase/decrease) and
+  per-segment semantics. Size changes: hugging toggles and segmented buttons were 0 × 0 or Material-sized and are
+  now SSUI's; a sized one keeps the islands' proportions (checkbox box 18/40, radio ring 18/32, switch track 52/59
+  of the node). Looks dropped as Material-only: the off thumb shrinking on a plain switch, the segmented check mark
+  (a set `selectedIcon` still shows), the slider thumb's shadow and default tick dots. Matched against
+  soft_saas_ui's own controls (`ssui-toggles-*.png`) within 0.6 % (toggles), 0.1 % (sliders), 0 % (segmented).
+
 - **Milestone 3 begins: buttons are render objects** (codelessly_api `docs/design/11-no-widgets.md`).
   `filledButton`, `elevatedButton`, `outlinedButton`, `textButton`, `iconButton` and `floatingActionButton` are drawn
   by `RenderButton` (`lib/src/render/controls/buttons.dart`) with no Material widget in their path. With nothing
@@ -104,6 +119,26 @@ and matching no item). The formula engine is right; nothing told the model.
   field, the node's padding and its `states` patches still apply. The zero-prop page matches SSUI's own widgets to
   0.06 % of the pixels (`test/controls/ssui_reference_test.dart`; renders in
   `design_systems/ssui/examples/renders/m3`).
+- **List tiles, accordions and expansion tiles are render objects** (Milestone 3, workstream D).
+  `listTile` is `RenderListTile`, `accordion` and `expansionTile` are `RenderExpansion`
+  (`lib/src/render/controls/{tile,expansion}.dart`); the `ListTile`, `ExpansionTile` and the accordion's Material
+  toggle button are gone. With nothing styled a list tile is SSUI's ListRow (36 high, 28 dense, 12 × 6 padding, 10
+  between its slots, a `primaryBorder` hairline under it, `activeTint` when selected) and an accordion is SSUI's
+  Accordion (a `tertiaryBackground` header panel, 1 px `primaryBorder`, radius 8, SSUI's chevron turning down as it
+  opens, the content in a `primaryBackground` panel); an expansion tile's header is its `tile` slot's slots laid out
+  as a list tile, with the chevron and `primaryBorder` hairlines while open. The slots and content are nodes laid out
+  by the tree. The whole header is the tap target (it was a 48 px button over the header's end); Tab focuses it with
+  SSUI's ring, Enter and Space toggle it; the content opens and closes over SSUI's 150 ms ease on the tree's ticker,
+  clipped while it moves; screen readers hear a button, expanded or collapsed. A toggle fires the node's `click`, then
+  `changed` with the new state; a list tile with a `click` reaction takes focus and the hand cursor. On a design
+  canvas an expansion tile is drawn as it is (it was a placeholder). Zero-prop pages match SSUI's own Accordion and
+  its ListRow to 0.00 % of the pixels (`test/controls/tile_reference_test.dart`). Size changes: a hugging list tile
+  takes its content's size (it was its design size, often 0 × 0); a hugging accordion's header is 46 px high (SSUI's). Parity goldens re-pinned
+  (`samples-collections/controls`, the accordion page): the header child sits 16 px inside SSUI's 1 px border and is
+  as wide as the room beside the chevron (row `rc17` 300×64 at (20, 38) → 238×64 at (37, 33), its text `t18` with
+  it), the content starts under the 46 px header in a 16 px panel (`r20` y 102 → 127), and the collapsed one's header
+  child moves the same way (`r22` (20, 303) → (37, 273)). The `listTile` layout test now expects its slots centred on
+  the tile (36 in a 72 px tile), not on Material's 56 px row.
 - **Size changes of buttons** (parity goldens): a hugging button is 28 high (Material's was 40); the icon beside a
   label is SSUI's (14–18) with a 6 px gap (Material's 18 and 8), so labelled buttons with an icon are 2 px narrower.
   `samples-material/buttons`: `elev_hug` 186×39 → 184×38.6, `filled_hug` 184 → 182 wide, `text_icon` 118 → 116
