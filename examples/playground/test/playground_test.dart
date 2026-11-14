@@ -3,10 +3,11 @@
 // shown, and another design system redraws the same text.
 import 'dart:io';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:playground/main.dart';
+import 'package:soft_saas_ui/soft_saas_ui.dart';
 
 /// Every text painted under [root], render objects included (the SDK draws
 /// text without a Text widget).
@@ -18,7 +19,7 @@ String _painted(WidgetTester tester) {
     o.visitChildren(visit);
   }
 
-  visit(tester.renderObject(find.byType(MaterialApp)));
+  visit(tester.renderObject(find.byType(SoftSaaSApp)));
   return out.toString();
 }
 
@@ -38,12 +39,12 @@ void main() {
     await tester.pump();
     expect(tester.takeException(), isNull);
     expect(_painted(tester), contains('Start here'));
-    expect(find.text('Every line was read.'), findsOneWidget);
+    expect(_painted(tester), contains('Every line was read'));
     expect(tester.widget<Text>(find.byKey(const Key('stats'))).data, matches(r'^\d+ nodes · \d+ characters written · \d+ as a document$'));
 
     // An edit redraws after the pause.
     final editor = find.byKey(const Key('editor'));
-    final text = tester.widget<TextField>(editor).controller!;
+    final text = tester.widget<SoftSaaSCodeField>(editor).controller!;
     text.text = text.text.replaceFirst('"Start here"', '"Edited title"');
     await tester.pump(const Duration(milliseconds: 300));
     expect(_painted(tester), contains('Edited title'));
@@ -51,7 +52,7 @@ void main() {
     // A line that cannot be read is said; the rest is still shown.
     text.text = '${text.text}\n  Button.nope "Odd"\n';
     await tester.pump(const Duration(milliseconds: 300));
-    expect(find.text('1 not read:'), findsOneWidget);
+    expect(_painted(tester), contains('1 not read'));
     expect(_painted(tester), contains('No Button.nope'));
     expect(_painted(tester), contains('Edited title'));
 
@@ -62,7 +63,7 @@ void main() {
     expect(_painted(tester), contains('Edited title'));
 
     // The document it expands to.
-    await tester.tap(find.byKey(const Key('json')));
+    await tester.tap(find.text('Document'));
     await tester.pump();
     expect(_painted(tester), contains('"schema": 3'));
   });
