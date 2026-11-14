@@ -140,6 +140,16 @@ count down for nine seconds with three taps on the pad, and finished.
   (`audience` on a `TopBar`, a bare word on `Illustration`); the kid's screen writes the dial and controls once
   per phase, which works but repeats.
 
+## Running as an app
+
+![A run in the shell: Home, a session, finish, Home again, then another person](renders/shell-run.png)
+
+`shell/` shows the generated screens as one running app: one store for the contract's data, navigation by the
+screens' own events, and a switch between the three people. In the run above (web build, driven by clicks),
+finishing a session with 12 jumps fired `finish_session 12`; the shell added it to the store, and Home, a
+different generated screen, then showed a streak of 5 and 4 of 5 this week. The data outlives the screens,
+which is what lets a screen be regenerated or swapped per person.
+
 ## The polish pass (render, critique, rewrite)
 
 ![The session timer before and after the polish pass, for three people](renders/skip-session-polish-pass.png)
@@ -171,9 +181,7 @@ is not the route to a designed screen.
 
 ## Not done
 
-- Nothing here runs as an app: the screens are generated ahead and drawn as images. No navigation between them,
-  no caching, no generating on demand (step 4 of the design).
-- The buttons' actions (`emit start_session`) are not wired to anything.
+- Screens are generated ahead, not when first opened; there is no cache by memory version.
 - The look differs by a whole design system per person. Changing only theme tokens (pink or black) with the
   document untouched, and illustration sets, are not shown.
 - The improvement loop (events, a review agent, a changed screen) is not started.

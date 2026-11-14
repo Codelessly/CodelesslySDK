@@ -1,0 +1,710 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "Screen1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= (phase==\"set\"||phase==\"work\"||phase==\"rest\") && !paused}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= elapsed+(phase==\"set\"?0:1)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "${= left>1?phase:(phase!=\"work\"?\"work\":(round<today.rounds?\"rest\":\"done\"))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "round",
+       "value": "${= (left<=1&&phase==\"work\")?round+1:round}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "left",
+       "value": "${= left>1?left-1:(phase==\"work\"?today.work:today.rest)}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= phase==\"done\" && !saved}"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "finish_session",
+       "value": "${count}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Screen1": {
+   "type": "Screen",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "children": [
+    "TopBar1",
+    "HeroSession1",
+    "StreakFlame1",
+    "SessionBar1",
+    "SessionDial1",
+    "SessionControls1",
+    "SessionBar2",
+    "SessionDial2",
+    "TapPad1",
+    "SessionControls2",
+    "SessionBar3",
+    "SessionDial3",
+    "TapPad2",
+    "SessionControls3",
+    "SessionSummary1",
+    "BigButton1",
+    "BigButton2"
+   ]
+  },
+  "TopBar1": {
+   "type": "TopBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Let's jump!",
+    "back": true
+   },
+   "bind": {
+    "props.subtitle": "Today: ${today.name}",
+    "visible": "${= phase==\"ready\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_home"
+      }
+     ]
+    }
+   ]
+  },
+  "HeroSession1": {
+   "type": "HeroSession",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cta": "Start",
+    "audience": "kid"
+   },
+   "bind": {
+    "props.title": "${today.name}",
+    "props.detail": "${today.rounds} rounds. Jump ${today.work}, rest ${today.rest}.",
+    "props.minutes": "${today.minutes}",
+    "visible": "${= phase==\"ready\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "set"
+      },
+      {
+       "type": "setVariable",
+       "variable": "left",
+       "value": "${= 3}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "round",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "count",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "paused",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "StreakFlame1": {
+   "type": "StreakFlame",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176.0
+   },
+   "props": {
+    "label": "days in a row",
+    "note": "Keep it going!"
+   },
+   "bind": {
+    "props.count": "${streak}",
+    "visible": "${= phase==\"ready\"}"
+   }
+  },
+  "SessionBar1": {
+   "type": "SessionBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48.0
+   },
+   "props": {
+    "title": "Get ready!"
+   },
+   "bind": {
+    "props.detail": "${today.name}",
+    "visible": "${= phase==\"set\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "ready"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionDial1": {
+   "type": "SessionDial",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 428.0
+   },
+   "props": {
+    "note": "Here we go!",
+    "phase": "set",
+    "audience": "kid"
+   },
+   "bind": {
+    "props.left": "${left}",
+    "props.round": "${round}",
+    "props.rounds": "${today.rounds}",
+    "props.work": "${today.work}",
+    "props.rest": "${today.rest}",
+    "props.paused": "${paused}",
+    "visible": "${= phase==\"set\"}"
+   }
+  },
+  "SessionControls1": {
+   "type": "SessionControls",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "paused": "paused"
+   },
+   "bind": {
+    "visible": "${= phase==\"set\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionBar2": {
+   "type": "SessionBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48.0
+   },
+   "props": {
+    "title": "Jump!"
+   },
+   "bind": {
+    "props.detail": "${today.name}",
+    "visible": "${= phase==\"work\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionDial2": {
+   "type": "SessionDial",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 428.0
+   },
+   "props": {
+    "note": "Jump jump jump!",
+    "phase": "work",
+    "audience": "kid"
+   },
+   "bind": {
+    "props.left": "${left}",
+    "props.round": "${round}",
+    "props.rounds": "${today.rounds}",
+    "props.work": "${today.work}",
+    "props.rest": "${today.rest}",
+    "props.paused": "${paused}",
+    "visible": "${= phase==\"work\"}"
+   }
+  },
+  "TapPad1": {
+   "type": "TapPad",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 172.0
+   },
+   "props": {
+    "label": "Tap each jump",
+    "count": "count"
+   },
+   "bind": {
+    "visible": "${= phase==\"work\"}"
+   }
+  },
+  "SessionControls2": {
+   "type": "SessionControls",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "paused": "paused"
+   },
+   "bind": {
+    "visible": "${= phase==\"work\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionBar3": {
+   "type": "SessionBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48.0
+   },
+   "props": {
+    "title": "Rest"
+   },
+   "bind": {
+    "props.detail": "${today.name}",
+    "visible": "${= phase==\"rest\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionDial3": {
+   "type": "SessionDial",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 428.0
+   },
+   "props": {
+    "note": "Breathe. Shake it out!",
+    "phase": "rest",
+    "audience": "kid"
+   },
+   "bind": {
+    "props.left": "${left}",
+    "props.round": "${round}",
+    "props.rounds": "${today.rounds}",
+    "props.work": "${today.work}",
+    "props.rest": "${today.rest}",
+    "props.paused": "${paused}",
+    "visible": "${= phase==\"rest\"}"
+   }
+  },
+  "TapPad2": {
+   "type": "TapPad",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 172.0
+   },
+   "props": {
+    "label": "Missed some? Add them",
+    "count": "count"
+   },
+   "bind": {
+    "visible": "${= phase==\"rest\"}"
+   }
+  },
+  "SessionControls3": {
+   "type": "SessionControls",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "paused": "paused"
+   },
+   "bind": {
+    "visible": "${= phase==\"rest\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionSummary1": {
+   "type": "SessionSummary",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "You did it!",
+    "detail": "Great job. See you next time!",
+    "streakLabel": "days in a row",
+    "audience": "kid"
+   },
+   "bind": {
+    "props.jumps": "${count}",
+    "props.best": "${= 0}",
+    "props.rounds": "${round}",
+    "props.of": "${today.rounds}",
+    "props.seconds": "${elapsed}",
+    "props.streak": "${streak}",
+    "visible": "${= phase==\"done\"}"
+   }
+  },
+  "BigButton1": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "Home",
+    "icon": "home"
+   },
+   "bind": {
+    "visible": "${= phase==\"done\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_home"
+      }
+     ]
+    }
+   ]
+  },
+  "BigButton2": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "See my jumps",
+    "icon": "star",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= phase==\"done\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_history"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "streak",
+    "type": "integer",
+    "value": 4
+   },
+   {
+    "name": "weeklyGoal",
+    "type": "integer",
+    "value": 5
+   },
+   {
+    "name": "sessionsThisWeek",
+    "type": "integer",
+    "value": 3
+   },
+   {
+    "name": "today",
+    "type": "map",
+    "value": {
+     "name": "Intervals",
+     "rounds": 8,
+     "work": 40,
+     "rest": 20,
+     "minutes": 8
+    }
+   },
+   {
+    "name": "weeks",
+    "type": "list",
+    "value": [
+     {
+      "label": "W39",
+      "jumps": 2100
+     },
+     {
+      "label": "W40",
+      "jumps": 2650
+     },
+     {
+      "label": "W41",
+      "jumps": 2400
+     },
+     {
+      "label": "W42",
+      "jumps": 3180
+     }
+    ]
+   },
+   {
+    "name": "sessions",
+    "type": "list",
+    "value": [
+     {
+      "date": "Fri 13 Nov",
+      "name": "Intervals",
+      "minutes": 8,
+      "jumps": 912,
+      "best": 148
+     },
+     {
+      "date": "Wed 11 Nov",
+      "name": "Endurance",
+      "minutes": 12,
+      "jumps": 1304,
+      "best": 210
+     },
+     {
+      "date": "Mon 9 Nov",
+      "name": "Footwork",
+      "minutes": 6,
+      "jumps": 640,
+      "best": 96
+     },
+     {
+      "date": "Sat 7 Nov",
+      "name": "Intervals",
+      "minutes": 8,
+      "jumps": 880,
+      "best": 131
+     }
+    ]
+   },
+   {
+    "name": "phase",
+    "type": "text",
+    "value": "ready"
+   },
+   {
+    "name": "left",
+    "type": "integer",
+    "value": 3
+   },
+   {
+    "name": "round",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "count",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "paused",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "elapsed",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "saved",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

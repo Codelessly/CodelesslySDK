@@ -1,0 +1,845 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "Screen1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= (phase==\"set\"||phase==\"work\"||phase==\"rest\") && !paused}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= elapsed+(phase==\"set\"?0:1)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "${= left>1?phase:(phase!=\"work\"?\"work\":(round<today.rounds?\"rest\":\"done\"))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "round",
+       "value": "${= (left<=1&&phase==\"work\")?round+1:round}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "left",
+       "value": "${= left>1?left-1:(phase==\"work\"?today.work:today.rest)}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= phase==\"done\" && !saved}"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "finish_session",
+       "value": "${count}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Screen1": {
+   "type": "Screen",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "children": [
+    "SessionBar1",
+    "column1",
+    "row5",
+    "BigButton1",
+    "SessionBar2",
+    "SessionDial1",
+    "TapPad1",
+    "SessionControls1",
+    "SessionSummary1",
+    "BigButton2",
+    "BigButton3"
+   ]
+  },
+  "SessionBar1": {
+   "type": "SessionBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48.0
+   },
+   "bind": {
+    "props.title": "${today.name}",
+    "props.detail": "${today.rounds} x ${today.work}s / ${today.rest}s",
+    "visible": "${= phase==\"ready\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_home"
+      }
+     ]
+    }
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE3E3E6"
+     }
+    ],
+    "radius": 17
+   },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
+   },
+   "children": [
+    "row1",
+    "row2",
+    "row3",
+    "divider1",
+    "row4"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#B815122E"
+    },
+    "text": "Rounds"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 40,
+     "fontWeight": 900,
+     "letterSpacing": -1.2,
+     "height": 1.0,
+     "color": "#FF15122E"
+    },
+    "text": "${today.rounds}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "text4"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#B815122E"
+    },
+    "text": "Work"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 40,
+     "fontWeight": 900,
+     "letterSpacing": -1.2,
+     "height": 1.0,
+     "color": "#FF15122E"
+    },
+    "text": "${today.work}s"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text5",
+    "text6"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#B815122E"
+    },
+    "text": "Rest"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 40,
+     "fontWeight": 900,
+     "letterSpacing": -1.2,
+     "height": 1.0,
+     "color": "#FF15122E"
+    },
+    "text": "${today.rest}s"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text7",
+    "text8"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 15,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#B815122E"
+    },
+    "text": "Total"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 40,
+     "fontWeight": 900,
+     "letterSpacing": -1.2,
+     "height": 1.0,
+     "color": "#FF15122E"
+    },
+    "text": "${today.minutes} min"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
+   },
+   "children": [
+    "StreakFlame1",
+    "ProgressGoal1"
+   ]
+  },
+  "StreakFlame1": {
+   "type": "StreakFlame",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176.0
+   },
+   "props": {
+    "label": "days",
+    "note": "streak"
+   },
+   "bind": {
+    "props.count": "${streak}"
+   }
+  },
+  "ProgressGoal1": {
+   "type": "ProgressGoal",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 176.0
+   },
+   "props": {
+    "title": "sessions",
+    "note": "this week"
+   },
+   "bind": {
+    "props.done": "${sessionsThisWeek}",
+    "props.goal": "${weeklyGoal}"
+   }
+  },
+  "BigButton1": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "Start",
+    "icon": "play_arrow"
+   },
+   "bind": {
+    "visible": "${= phase==\"ready\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "set"
+      },
+      {
+       "type": "setVariable",
+       "variable": "left",
+       "value": "${= 3}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "round",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "count",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "paused",
+       "value": "${= false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= false}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "start_session"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionBar2": {
+   "type": "SessionBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48.0
+   },
+   "bind": {
+    "props.title": "${today.name}",
+    "props.detail": "Round ${= round<1?1:round}/${today.rounds} · ${elapsed}s",
+    "visible": "${= phase==\"set\"||phase==\"work\"||phase==\"rest\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionDial1": {
+   "type": "SessionDial",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 428.0
+   },
+   "bind": {
+    "props.note": "${count} jumps",
+    "props.left": "${left}",
+    "props.phase": "${phase}",
+    "props.round": "${= round<1?1:round}",
+    "props.rounds": "${today.rounds}",
+    "props.work": "${today.work}",
+    "props.rest": "${today.rest}",
+    "props.paused": "${paused}",
+    "visible": "${= phase==\"set\"||phase==\"work\"||phase==\"rest\"}"
+   }
+  },
+  "TapPad1": {
+   "type": "TapPad",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 172.0
+   },
+   "props": {
+    "label": "Jumps",
+    "count": "count"
+   },
+   "bind": {
+    "visible": "${= (phase==\"set\"||phase==\"work\"||phase==\"rest\") && (phase==\"work\")}"
+   }
+  },
+  "SessionControls1": {
+   "type": "SessionControls",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "paused": "paused"
+   },
+   "bind": {
+    "visible": "${= phase==\"set\"||phase==\"work\"||phase==\"rest\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "phase",
+       "value": "done"
+      }
+     ]
+    }
+   ]
+  },
+  "SessionSummary1": {
+   "type": "SessionSummary",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${today.rounds} x ${today.work}s / ${today.rest}s",
+    "props.jumps": "${count}",
+    "props.best": "${= sessions[0].best}",
+    "props.rounds": "${round}",
+    "props.of": "${today.rounds}",
+    "props.seconds": "${elapsed}",
+    "props.streak": "${streak}",
+    "visible": "${= phase==\"done\"}"
+   }
+  },
+  "BigButton2": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "History",
+    "icon": "bar_chart"
+   },
+   "bind": {
+    "visible": "${= phase==\"done\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_history"
+      }
+     ]
+    }
+   ]
+  },
+  "BigButton3": {
+   "type": "BigButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 64.0
+   },
+   "props": {
+    "label": "Home",
+    "icon": "home",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= phase==\"done\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "open_home"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "streak",
+    "type": "integer",
+    "value": 4
+   },
+   {
+    "name": "weeklyGoal",
+    "type": "integer",
+    "value": 5
+   },
+   {
+    "name": "sessionsThisWeek",
+    "type": "integer",
+    "value": 3
+   },
+   {
+    "name": "today",
+    "type": "map",
+    "value": {
+     "name": "Intervals",
+     "rounds": 8,
+     "work": 40,
+     "rest": 20,
+     "minutes": 8
+    }
+   },
+   {
+    "name": "weeks",
+    "type": "list",
+    "value": [
+     {
+      "label": "W39",
+      "jumps": 2100
+     },
+     {
+      "label": "W40",
+      "jumps": 2650
+     },
+     {
+      "label": "W41",
+      "jumps": 2400
+     },
+     {
+      "label": "W42",
+      "jumps": 3180
+     }
+    ]
+   },
+   {
+    "name": "sessions",
+    "type": "list",
+    "value": [
+     {
+      "date": "Fri 13 Nov",
+      "name": "Intervals",
+      "minutes": 8,
+      "jumps": 912,
+      "best": 148
+     },
+     {
+      "date": "Wed 11 Nov",
+      "name": "Endurance",
+      "minutes": 12,
+      "jumps": 1304,
+      "best": 210
+     },
+     {
+      "date": "Mon 9 Nov",
+      "name": "Footwork",
+      "minutes": 6,
+      "jumps": 640,
+      "best": 96
+     },
+     {
+      "date": "Sat 7 Nov",
+      "name": "Intervals",
+      "minutes": 8,
+      "jumps": 880,
+      "best": 131
+     }
+    ]
+   },
+   {
+    "name": "phase",
+    "type": "text",
+    "value": "ready"
+   },
+   {
+    "name": "left",
+    "type": "integer",
+    "value": 3
+   },
+   {
+    "name": "round",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "count",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "paused",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "elapsed",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "saved",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}
