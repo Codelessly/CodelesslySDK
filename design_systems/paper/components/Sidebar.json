@@ -1,0 +1,529 @@
+{
+ "schema": 3,
+ "id": "Sidebar",
+ "roots": [
+  "sidebar"
+ ],
+ "widget": {
+  "type": "Sidebar",
+  "doc": "An app's side column: a brand, a list of places with icons and counts, and a footer for what the call puts there. The chosen place is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "brand",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Workspace",
+    "doc": "The name at the top."
+   },
+   {
+    "key": "sectionLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small heading over the places (empty: none)."
+   },
+   {
+    "key": "items",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Home",
+     "Projects",
+     "Settings"
+    ],
+    "doc": "The places' labels.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "home",
+     "folder",
+     "settings"
+    ],
+    "doc": "One icon per place."
+   },
+   {
+    "key": "badges",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One count per place (empty: none)."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen label."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ],
+  "slots": [
+   "footer"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    256,
+    300
+   ],
+   "props": {
+    "sectionLabel": "Workspace",
+    "badges": [
+     "",
+     "12",
+     ""
+    ],
+    "value": "Home"
+   }
+  }
+ ],
+ "nodes": {
+  "sidebar": {
+   "type": "column",
+   "children": [
+    "header",
+    "nav",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": 256,
+    "height": {
+     "fill": 300
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "right"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "brand"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 256
+    },
+    "height": {
+     "hug": 68
+    },
+    "padding": 12,
+    "constraints": {
+     "minHeight": 68
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "brand": {
+   "type": "text",
+   "props": {
+    "text": "${props.brand}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "nav": {
+   "type": "column",
+   "children": [
+    "section",
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 256
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     8,
+     12,
+     8,
+     12
+    ]
+   }
+  },
+  "section": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.sectionLabel)}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": 0.7
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 216
+    },
+    "height": {
+     "hug": 13
+    },
+    "margin": [
+     12,
+     4,
+     12,
+     6
+    ]
+   },
+   "bind": {
+    "visible": "${= props.sectionLabel != ''}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "entry"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 106
+    }
+   },
+   "bind": {
+    "data": "${props.items}"
+   }
+  },
+  "entry": {
+   "type": "row",
+   "children": [
+    "strut",
+    "entryContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 34
+    },
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "hovered": {
+     "entry": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "tertiaryBackground"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "entry": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "glyph": {
+      "props": {
+       "color": "primary"
+      }
+     },
+     "label": {
+      "props": {
+       "style": {
+        "color": "primary",
+        "fontWeight": 600
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 34
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index}",
+    "props.icon": "${= length(props.icons) > index ? props.icons[index] : 'circle'}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "badgeText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 18
+    },
+    "height": {
+     "hug": 17
+    },
+    "padding": [
+     5,
+     2,
+     5,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= length(props.badges) > index && props.badges[index] != ''}"
+   }
+  },
+  "badgeText": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.badges) > index ? props.badges[index] : ''}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "foot": {
+   "type": "column",
+   "children": [
+    "footer"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 256
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     8,
+     10,
+     8,
+     10
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "footer": {
+   "type": "slot",
+   "props": {
+    "name": "footer"
+   }
+  },
+  "entryContent": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label",
+    "badge"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

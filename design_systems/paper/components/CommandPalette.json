@@ -1,0 +1,478 @@
+{
+ "schema": 3,
+ "id": "CommandPalette",
+ "roots": [
+  "palette"
+ ],
+ "widget": {
+  "type": "CommandPalette",
+  "doc": "The surface that finds a command by typing: a search row over the commands that match. The typed text is kept in your variable. Fires onSelected with the command.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding what is typed."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Type a command or search...",
+    "doc": "Shown while empty."
+   },
+   {
+    "key": "commands",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "New file",
+     "Open settings",
+     "Toggle theme"
+    ],
+    "doc": "The commands.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One icon per command (empty: none)."
+   },
+   {
+    "key": "shortcuts",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One shortcut per command (empty: none)."
+   },
+   {
+    "key": "emptyMessage",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "No results found",
+    "doc": "Shown when nothing matches."
+   }
+  ],
+  "events": [
+   {
+    "key": "onSelected",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    420,
+    200
+   ],
+   "props": {
+    "icons": [
+     "note_add",
+     "settings",
+     "dark_mode"
+    ],
+    "shortcuts": [
+     "Ctrl+N",
+     "Ctrl+,",
+     ""
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "palette": {
+   "type": "column",
+   "children": [
+    "search",
+    "list",
+    "empty"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 420
+    },
+    "height": {
+     "hug": 200
+    },
+    "padding": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 3,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#40000000",
+      "offset": [
+       0,
+       20
+      ],
+      "blurRadius": 50,
+      "spreadRadius": -12
+     }
+    ]
+   }
+  },
+  "search": {
+   "type": "row",
+   "children": [
+    "searchIcon",
+    "field"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 418
+    },
+    "height": {
+     "hug": 56
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "searchIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "search",
+    "color": "secondaryText",
+    "size": 20
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 16
+    },
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 16
+     }
+    },
+    "cursorColor": "primary",
+    "autofocus": true
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "command"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 418
+    },
+    "height": {
+     "hug": 132
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     4
+    ]
+   },
+   "bind": {
+    "data": "${props.commands}"
+   }
+  },
+  "command": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label",
+    "chip"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 418
+    },
+    "height": {
+     "hug": 44
+    },
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= props.value == '' || contains(lower(item), lower(props.value))}"
+   },
+   "states": {
+    "hovered": {
+     "command": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "color": "secondaryText",
+    "size": 18
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index && props.icons[index] != ''}",
+    "props.icon": "${= length(props.icons) > index && props.icons[index] != '' ? props.icons[index] : 'circle'}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "chip": {
+   "type": "row",
+   "children": [
+    "shortcut"
+   ],
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 23
+    },
+    "padding": [
+     8,
+     4,
+     8,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "visible": "${= length(props.shortcuts) > index && props.shortcuts[index] != ''}"
+   }
+  },
+  "shortcut": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.shortcuts) > index ? props.shortcuts[index] : ''}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "empty": {
+   "type": "row",
+   "children": [
+    "emptyText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 418
+    },
+    "height": {
+     "hug": 84
+    },
+    "padding": 32
+   },
+   "bind": {
+    "visible": "${= props.value != '' && !any(props.commands, c => contains(lower(c), lower(props.value)))}"
+   }
+  },
+  "emptyText": {
+   "type": "text",
+   "props": {
+    "text": "${props.emptyMessage}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  }
+ }
+}

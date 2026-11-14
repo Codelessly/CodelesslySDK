@@ -542,7 +542,13 @@
   "components/RunHistoryList.json",
   "components/StatsCarousel.json",
   "components/HistoryTimeline.json",
-  "components/Terminal.json"
+  "components/Terminal.json",
+  "components/DiffViewer.json",
+  "components/FileUploader.json",
+  "components/CommandPalette.json",
+  "components/NavigationMenu.json",
+  "components/Sidebar.json",
+  "components/PromptInput.json"
  ],
  "replaces": [
   "filledButton",

@@ -1,0 +1,463 @@
+{
+ "schema": 3,
+ "id": "PromptInput",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "PromptInput",
+  "doc": "Where a prompt is written: a growing text box with an attach button and a send button. Its text is kept in your variable. Fires onSubmitted with the text and onAttach.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Ask anything...",
+    "doc": "Shown while empty."
+   },
+   {
+    "key": "hint",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted line under the text (empty: none)."
+   },
+   {
+    "key": "attachable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The paperclip button."
+   },
+   {
+    "key": "busy",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Working: the send button shows a spinner and stops."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSubmitted",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onAttach"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    360,
+    66
+   ],
+   "props": {}
+  },
+  {
+   "name": "Hint",
+   "size": [
+    360,
+    92
+   ],
+   "props": {
+    "value": "Summarize the launch plan",
+    "hint": "Enter to send, Shift+Enter for a new line"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "column",
+   "children": [
+    "row",
+    "hint"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 66
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 16,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1A000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 4,
+      "spreadRadius": -1
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level2}"
+   },
+   "states": {
+    "focused": {
+     "box": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "focusBorder"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "row": {
+   "type": "row",
+   "children": [
+    "attach",
+    "field",
+    "send"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 64
+    },
+    "padding": 16
+   }
+  },
+  "attach": {
+   "type": "row",
+   "children": [
+    "clip"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": [
+     4,
+     6,
+     4,
+     6
+    ]
+   },
+   "decoration": {
+    "radius": 6
+   },
+   "bind": {
+    "visible": "${props.attachable}"
+   },
+   "tooltip": "Attach",
+   "states": {
+    "hovered": {
+     "attach": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     },
+     "clip": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAttach"
+      }
+     ]
+    }
+   ]
+  },
+  "clip": {
+   "type": "icon",
+   "props": {
+    "icon": "attach_file",
+    "color": "tertiaryText",
+    "size": 20
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 20
+    },
+    "margin": [
+     0,
+     0,
+     0,
+     6
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 14
+    },
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 14
+     }
+    },
+    "cursorColor": "primary",
+    "maxLines": 6,
+    "minLines": 1,
+    "textInputAction": "send"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSubmitted",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "send": {
+   "type": "row",
+   "children": [
+    "spin",
+    "bolt"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value != '' && !props.busy ? theme.primary : theme.colors.tertiaryBackground}"
+   },
+   "tooltip": "Send",
+   "states": {
+    "hovered": {
+     "send": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "send": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.value != '' && !props.busy"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSubmitted",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "spin": {
+   "type": "circularProgressIndicator",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "color": "tertiaryText",
+    "strokeWidth": 2
+   },
+   "bind": {
+    "visible": "${props.busy}"
+   }
+  },
+  "bolt": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_upward",
+    "color": "#FFFFFFFF",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= !props.busy}",
+    "props.color": "${= props.value != '' ? '#FFFFFFFF' : theme.colors.tertiaryText}"
+   }
+  },
+  "hint": {
+   "type": "text",
+   "props": {
+    "text": "${props.hint}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 328
+    },
+    "height": {
+     "hug": 17
+    },
+    "margin": [
+     16,
+     0,
+     16,
+     12
+    ]
+   },
+   "bind": {
+    "visible": "${= props.hint != ''}"
+   }
+  }
+ }
+}

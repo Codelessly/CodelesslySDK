@@ -1,0 +1,330 @@
+{
+ "schema": 3,
+ "id": "NavigationMenu",
+ "roots": [
+  "menu"
+ ],
+ "widget": {
+  "type": "NavigationMenu",
+  "doc": "A panel of places to go: icons and labels, with badges for news. The chosen one is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "items",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Dashboard",
+     "Projects",
+     "Team"
+    ],
+    "doc": "The places' labels.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "dashboard",
+     "folder",
+     "group"
+    ],
+    "doc": "One icon per place."
+   },
+   {
+    "key": "badges",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One badge per place: a count, a word, or empty."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen label."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    240,
+    180
+   ],
+   "props": {
+    "badges": [
+     "",
+     "4",
+     "New"
+    ],
+    "value": "Dashboard"
+   }
+  }
+ ],
+ "nodes": {
+  "menu": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 180
+    },
+    "padding": 18
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 21
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "entry"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 208
+    },
+    "height": {
+     "hug": 150
+    }
+   },
+   "bind": {
+    "data": "${props.items}"
+   }
+  },
+  "entry": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label",
+    "badge"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 208
+    },
+    "height": {
+     "hug": 44
+    },
+    "padding": 14
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 15
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "hovered": {
+     "entry": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "entry": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "glyph": {
+      "props": {
+       "color": "primary"
+      }
+     },
+     "label": {
+      "props": {
+       "style": {
+        "color": "primary"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "color": "secondaryText",
+    "size": 20
+   },
+   "layout": {
+    "width": 20,
+    "height": 23
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index}",
+    "props.icon": "${= length(props.icons) > index ? props.icons[index] : 'circle'}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 15.5,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "badgeText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     7,
+     2,
+     7,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEF4444"
+     }
+    ],
+    "radius": 9999
+   },
+   "bind": {
+    "visible": "${= length(props.badges) > index && props.badges[index] != ''}",
+    "decoration.fills[0].color": "${= length(props.badges) > index && matches(props.badges[index], '^[0-9+]+$') ? '#FFEF4444' : '#FF3B82F6'}"
+   }
+  },
+  "badgeText": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.badges) > index ? props.badges[index] : ''}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "#FFFFFFFF",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

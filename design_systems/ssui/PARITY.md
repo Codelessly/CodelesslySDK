@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 115. Still to rebuild: 49.**
+**Here: 121. Still to rebuild: 43.**
 
 ## Here
 
@@ -35,6 +35,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | CloudSyncIndicator | CloudSyncIndicator |  |
 | CodeBlock | CodeBlock |  |
 | ColorInput | ColorInput |  |
+| CommandPalette | CommandPalette |  |
 | CompactAppBar | CompactAppBar |  |
 | ConnectionStatus | ConnectionStatus |  |
 | ContextMenu | ContextMenu |  |
@@ -43,6 +44,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | DatePicker |  | datePicker |
 | Dialog | Dialog | confirm action / modal |
 | DiffStatsBadge | DiffStatsBadge |  |
+| DiffViewer | DiffViewer |  |
 | DocumentItem | DocumentItem |  |
 | DownloadButton | DownloadButton |  |
 | Dropdown |  | dropdown |
@@ -52,6 +54,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Field | Field |  |
 | FileListItem | FileListItem |  |
 | FileMetadataCard | FileMetadataCard |  |
+| FileUploader | FileUploader |  |
 | FilterLegend | FilterLegend |  |
 | FloatingActionButton |  | floatingActionButton |
 | FullWidthSearchInput | FullWidthSearchInput |  |
@@ -67,6 +70,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | MenuPopover | MenuPopover (with MenuItem) |  |
 | MetaInfo | MetaInfo |  |
 | ModelAvatarStack | ModelAvatarStack |  |
+| NavigationMenu | NavigationMenu |  |
 | NotificationBadge | NotificationBadge |  |
 | NumberInput | NumberInput |  |
 | OnboardingBanner | OnboardingBanner |  |
@@ -78,6 +82,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | PersonChip | PersonChip |  |
 | ProgressIndicator | ProgressBar | progressBar |
 | PromptBanner | PromptBanner |  |
+| PromptInput | PromptInput |  |
 | ProviderCard | ProviderCard |  |
 | ProviderIcon | ProviderIcon |  |
 | ProviderPill | ProviderPill |  |
@@ -96,6 +101,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | SegmentedControl | SegmentedControl | segmentedButton |
 | Select | Select | dropdown |
 | SelectableListRow | SelectableListRow |  |
+| Sidebar | Sidebar |  |
 | Skeleton | Skeleton |  |
 | Slider | Slider | slider |
 | SortMenu | SortMenu |  |
@@ -145,18 +151,18 @@ CodePreview
 
 FolderCard, ResourceCard
 
-### Inputs (14)
+### Inputs (12)
 
-Combobox, NumberPresetInput, ExtensionChipsInput, FileUploader, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInput, PromptInputWithBanner
+Combobox, NumberPresetInput, ExtensionChipsInput, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInputWithBanner
 
-### Navigation and chrome (10)
+### Navigation and chrome (8)
 
-BrowserTabs, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, NavigationMenu, Toolbar, CollapsibleSection, CanvasShell, ResizableRow
+BrowserTabs, TabOverflowScroll, SplitPaneTabs, SidebarTogglePattern, Toolbar, CollapsibleSection, CanvasShell, ResizableRow
 
-### Menus and overlays (10)
+### Menus and overlays (9)
 
-AddContextMenu, FileTreeContextMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, CommandPalette, NotePopover, SlidingPanel, ViewerDialog, VariableContractHover
+AddContextMenu, FileTreeContextMenu, ModelSelectMenu, ProjectSelector, WorkspaceSwitcher, NotePopover, SlidingPanel, ViewerDialog, VariableContractHover
 
-### Data and specialized (12)
+### Data and specialized (11)
 
-Tree, FileTree, DiffViewer, DateTimelineAxis, ImageGallery, NestedTaskLedger, ReorderableList, ReorderGhost, SuggestionReviewItem, CompactSuggestionReviewItem, SuggestionActionObject, VariableContractList
+Tree, FileTree, DateTimelineAxis, ImageGallery, NestedTaskLedger, ReorderableList, ReorderGhost, SuggestionReviewItem, CompactSuggestionReviewItem, SuggestionActionObject, VariableContractList
