@@ -101,6 +101,9 @@ void _labelStyles(WidgetSpec spec, Json props, String family) {
       props[def.key] = {'textStyle': {'fontFamily': family}};
     } else if (def.type.name == 'TextStyle' && spec.type != TextProps.spec.type && def.key != 'style') {
       props[def.key] = {'fontFamily': family};
+    } else if (def.key.endsWith('FontFamily') && def.type.kind == PropKind.string) {
+      // A chart's axis labels, a gauge's label: a family of their own.
+      props[def.key] = family;
     }
   }
 }
