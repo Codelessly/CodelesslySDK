@@ -124,7 +124,6 @@ const widgetImportRatchet = {
   'src/render/node_view.dart',
   'src/render/recipe.dart',
   'src/render/reveal.dart',
-  'src/render/typewriter.dart',
   'src/render/view_scroll.dart',
   'src/runtime/actions/capture.dart',
   'src/runtime/actions/confirm_dialog.dart',
