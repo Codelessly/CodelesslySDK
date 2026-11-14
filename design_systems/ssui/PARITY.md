@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 99. Still to rebuild: 65.**
+**Here: 106. Still to rebuild: 58.**
 
 ## Here
 
@@ -35,6 +35,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | CloudSyncIndicator | CloudSyncIndicator |  |
 | CodeBlock | CodeBlock |  |
 | ColorInput | ColorInput |  |
+| CompactAppBar | CompactAppBar |  |
 | ConnectionStatus | ConnectionStatus |  |
 | CopyButton | CopyButton |  |
 | CountBadge | CountBadge |  |
@@ -70,6 +71,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | PageControl | PageControl |  |
 | Pagination |  | pagination |
 | Panel | Panel |  |
+| PaneToolbar | PaneToolbar |  |
 | PersonChip | PersonChip |  |
 | ProgressIndicator | ProgressBar | progressBar |
 | PromptBanner | PromptBanner |  |
@@ -82,8 +84,11 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | ResourceChip | ResourceChip |  |
 | RunningIndicator | RunningIndicator |  |
 | RunRecordRow | RunRecordRow |  |
+| ScrollToBottomFAB | ScrollToBottomFAB |  |
 | SearchBar | SearchBar |  |
 | SectionCard | SectionCard |  |
+| SectionCategoryHeaderFull | SectionCategoryHeaderFull |  |
+| SectionToolbar | SectionToolbar |  |
 | SegmentedControl | SegmentedControl | segmentedButton |
 | Select | Select | dropdown |
 | SelectableListRow | SelectableListRow |  |
@@ -93,11 +98,13 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | StackedProgressBar | StackedProgressBar |  |
 | StatsRow | StatTile (dashboard density), InlineStat (compact) |  |
 | StatusBadge | StatusBadge |  |
+| StatusCategoryHeader | StatusCategoryHeader |  |
 | StatusDot | StatusDot |  |
 | StatusIndicator | StatusIndicator |  |
 | StepIndicator | StepIndicator |  |
 | Stepper | Stepper |  |
 | Switch | Switch | switch |
+| TabBarWithBadges | TabBarWithBadges |  |
 | Table |  | tableView |
 | TabToggle | TabToggle |  |
 | TextArea | TextArea | textField (maxLines) |
@@ -133,9 +140,9 @@ FolderCard, ResourceCard, RunHistoryList, StatusCardList, StatsCarousel
 
 Combobox, NumberPresetInput, ExtensionChipsInput, FileUploader, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInput, PromptInputWithBanner
 
-### Navigation and chrome (17)
+### Navigation and chrome (10)
 
-BrowserTabs, TabBarWithBadges, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, NavigationMenu, CompactAppBar, SectionToolbar, PaneToolbar, Toolbar, SectionCategoryHeaderFull, StatusCategoryHeader, CollapsibleSection, ScrollToBottomFAB, CanvasShell, ResizableRow
+BrowserTabs, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, NavigationMenu, Toolbar, CollapsibleSection, CanvasShell, ResizableRow
 
 ### Menus and overlays (14)
 

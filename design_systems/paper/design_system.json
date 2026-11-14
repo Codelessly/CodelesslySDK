@@ -524,7 +524,14 @@
   "components/AuthInput.json",
   "components/NumberInput.json",
   "components/ColorInput.json",
-  "components/ModelAvatarStack.json"
+  "components/ModelAvatarStack.json",
+  "components/SectionToolbar.json",
+  "components/PaneToolbar.json",
+  "components/CompactAppBar.json",
+  "components/StatusCategoryHeader.json",
+  "components/SectionCategoryHeaderFull.json",
+  "components/ScrollToBottomFAB.json",
+  "components/TabBarWithBadges.json"
  ],
  "replaces": [
   "filledButton",

@@ -1,0 +1,400 @@
+{
+ "schema": 3,
+ "id": "TabBarWithBadges",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "TabBarWithBadges",
+  "doc": "The tab bar at the foot of an app: icons over labels, with a badge on a tab that has news. The chosen tab is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "tabs",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Home",
+     "Inbox",
+     "Profile"
+    ],
+    "doc": "The tabs' labels.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "home",
+     "inbox",
+     "person"
+    ],
+    "doc": "One icon per tab.",
+    "required": true
+   },
+   {
+    "key": "badges",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One badge per tab: a count, a word, or empty for none."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen tab's label."
+   },
+   {
+    "key": "variant",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "default",
+      "floating"
+     ]
+    },
+    "default": "default",
+    "doc": "default: edge to edge under a hairline. floating: a rounded bar with a shadow."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    320,
+    62
+   ],
+   "props": {
+    "tabs": [
+     "Home",
+     "Inbox",
+     "Profile"
+    ],
+    "icons": [
+     "home",
+     "inbox",
+     "person"
+    ],
+    "badges": [
+     "",
+     "3",
+     ""
+    ],
+    "value": "Home"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 62
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "top",
+    "radius": 0,
+    "effects": []
+   },
+   "bind": {
+    "decoration.radius": "${= props.variant == 'floating' ? 14 : 0}",
+    "decoration.strokeSides": "${= props.variant == 'floating' ? 'all' : 'top'}",
+    "decoration.effects": "${= props.variant == 'floating' ? theme.shadows.level3 : []}"
+   }
+  },
+  "list": {
+   "type": "gridView",
+   "children": [
+    "tab"
+   ],
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisExtent": 62,
+    "physics": "never",
+    "alwaysScroll": false
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": 71
+   },
+   "bind": {
+    "data": "${props.tabs}",
+    "props.crossAxisCount": "${= max(1, length(props.tabs))}"
+   }
+  },
+  "tab": {
+   "type": "column",
+   "children": [
+    "plate",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "fill": 62
+    },
+    "padding": [
+     5,
+     0,
+     5,
+     0
+    ]
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "selected": {
+     "plate": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryTint"
+        }
+       ]
+      }
+     },
+     "glyph": {
+      "props": {
+       "color": "primary"
+      }
+     },
+     "label": {
+      "props": {
+       "style": {
+        "color": "primary",
+        "fontWeight": 600
+       }
+      }
+     }
+    },
+    "hovered": {
+     "plate": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "plate": {
+   "type": "stack",
+   "children": [
+    "glyphBox",
+    "badge"
+   ],
+   "layout": {
+    "width": 40,
+    "height": 37
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 15
+   }
+  },
+  "glyphBox": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 40,
+    "height": 37
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "color": "tertiaryText",
+    "size": 20
+   },
+   "layout": {
+    "width": 20,
+    "height": 23
+   },
+   "bind": {
+    "props.icon": "${= length(props.icons) > index ? props.icons[index] : 'circle'}"
+   }
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "badgeText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": 16,
+    "padding": [
+     5,
+     0,
+     5,
+     0
+    ],
+    "constraints": {
+     "minWidth": 16
+    },
+    "x": {
+     "end": -4
+    },
+    "y": {
+     "start": -2
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.badges) > index && props.badges[index] != ''}",
+    "decoration.fills[0].color": "${= length(props.badges) > index && matches(props.badges[index], '^[0-9+]+$') ? '#FFEF4444' : '#FF3B82F6'}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEF4444"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "badgeText": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.badges) > index ? props.badges[index] : ''}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 700,
+     "height": 1.0,
+     "color": "#FFFFFFFF",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 6
+    },
+    "height": {
+     "hug": 9
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.2,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 12
+    }
+   }
+  }
+ }
+}

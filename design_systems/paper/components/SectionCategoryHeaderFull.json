@@ -1,0 +1,108 @@
+{
+ "schema": 3,
+ "id": "SectionCategoryHeaderFull",
+ "roots": [
+  "band"
+ ],
+ "widget": {
+  "type": "SectionCategoryHeaderFull",
+  "doc": "The full-width label over a group in a list: small upper-case letters on a soft band.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Recent",
+    "doc": "The group's name.",
+    "required": true
+   }
+  ],
+  "slots": [
+   "trailing"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    26
+   ],
+   "props": {
+    "title": "Recent"
+   }
+  }
+ ],
+ "nodes": {
+  "band": {
+   "type": "row",
+   "children": [
+    "title",
+    "trailing"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 26
+    },
+    "padding": [
+     10,
+     6,
+     10,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.title)}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": 0.6
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "trailing": {
+   "type": "slot",
+   "props": {
+    "name": "trailing"
+   }
+  }
+ }
+}
