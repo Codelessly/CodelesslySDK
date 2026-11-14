@@ -23,6 +23,7 @@ import 'hero.dart';
 import 'play.dart';
 import 'contracts.dart';
 import 'control_theme.dart' show ControlTheme, backdropOf;
+import 'controls/tokens.dart' show ControlTokens;
 import 'convert.dart';
 import 'custom_paint.dart' show customPaintLayers;
 import 'layout/margin_box.dart';
@@ -2363,10 +2364,21 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   void _icon(Node n, List<RenderBox> chain) {
     chain.add(_fitBox('iconFit', n.hFit, n.vFit, n.designSize));
+    // An icon that hugs and writes no `size` has nothing to hug: it is its
+    // design size when it has one, else the default icon size, not nothing.
+    // One with no color on a dark surface is drawn in that surface's ink.
+    final written = n.prop(IconProps.size);
+    final unsized = written == null && n.hFit == SizeFit.hug && n.vFit == SizeFit.hug;
+    final natural = n.designSize.isEmpty ? kDefaultIconSize : n.designSize.shortestSide;
+    var color = n.prop(IconProps.color)?.flutter;
+    if (color == null) {
+      final tokens = ControlTokens.of(this);
+      if (tokens.dark) color = tokens.onSurface;
+    }
     final glyph = _obtain<RenderIconGlyph>('glyph', RenderIconGlyph.new)
       ..icon = n.prop(IconProps.icon)
-      ..color = n.prop(IconProps.color)?.flutter
-      ..glyphSize = n.prop(IconProps.size)
+      ..color = color
+      ..glyphSize = unsized ? natural : written
       ..designSize = n.designSize;
     chain.add(glyph);
   }

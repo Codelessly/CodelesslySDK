@@ -87,6 +87,10 @@ class RenderFitBox extends RenderProxyBox {
     if (factor != null && max.isFinite) return math.max(0, max * factor);
     if (fill && max.isFinite) return max;
     if (fill && contentWhenUnbounded) return null;
+    // A fill with no design number ({"fill": 0}: what an agent writes) and
+    // no room to fill is as big as its content, as its intrinsic size says.
+    // A design number is kept: a document drawn at a size holds it.
+    if (fill && design != null && design <= 0) return null;
     if (design == null || !design.isFinite) return null;
     return math.max(0, design);
   }
@@ -173,11 +177,11 @@ class RenderFitBox extends RenderProxyBox {
 
   void _noteDesignFallback(BoxConstraints constraints) {
     if (_fillWidth && !constraints.maxWidth.isFinite && _widthFactor == null &&
-        measureContentAlong != Axis.horizontal && _width != null && _width!.isFinite) {
+        measureContentAlong != Axis.horizontal && _width != null && _width!.isFinite && _width! > 0) {
       designWidthUsed = true;
     }
     if (_fillHeight && !constraints.maxHeight.isFinite && _heightFactor == null &&
-        measureContentAlong != Axis.vertical && _height != null && _height!.isFinite) {
+        measureContentAlong != Axis.vertical && _height != null && _height!.isFinite && _height! > 0) {
       designHeightUsed = true;
     }
   }

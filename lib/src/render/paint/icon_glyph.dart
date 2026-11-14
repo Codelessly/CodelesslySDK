@@ -124,6 +124,9 @@ abstract final class IconSources {
 }
 
 /// Paints an icon to fill its box (contained, centered).
+/// The size of an icon that writes none and hugs: SSUI's icon beside body text.
+const double kDefaultIconSize = 16;
+
 class RenderIconGlyph extends RenderBox with ImageClient {
   /// An icon's color where none is set: a light Material theme's
   /// `IconTheme` color (black87).

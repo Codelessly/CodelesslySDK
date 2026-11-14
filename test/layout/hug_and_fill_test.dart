@@ -203,6 +203,30 @@ void main() {
       expect(r['line']!.height, r['r']!.height);
     });
 
+    testWidgets('items across a list that hugs: a column that fills a height nobody gives is as tall as its content', (tester) async {
+      // What the notation writes for `each` in a Row: {"fill": 0} with no room to fill.
+      final r = await _rectsOf(tester, {
+        'r': {'type': 'row', 'children': ['list'], 'layout': {'width': 300, 'height': {'hug': 0}}},
+        'list': {
+          'type': 'listView',
+          'children': ['item'],
+          'layout': {'width': {'hug': 0}, 'height': {'hug': 0}},
+          'props': {'scrollDirection': 'horizontal', 'scrollable': false, 'itemCount': 3, 'spacing': 8},
+        },
+        'item': {
+          'type': 'column',
+          'children': ['a', 'b'],
+          'layout': {'width': {'hug': 0}, 'height': {'fill': 0}},
+        },
+        'a': {'type': 'box', 'layout': {'width': 30, 'height': 20}},
+        'b': {'type': 'box', 'layout': {'width': 30, 'height': 25}},
+      });
+      // Also when the page does give the row room (here the screen's 600): the list hugs.
+      expect(r['r']!.height, 45);
+      expect(r['list']!.height, 45);
+      expect(r['item']!.height, 45);
+    });
+
     testWidgets('fill-width children of a hugging column are as wide as its widest other child', (tester) async {
       final r = await _rectsOf(tester, {
         'r': {
