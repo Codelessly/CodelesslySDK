@@ -1,0 +1,203 @@
+{
+ "schema": 3,
+ "id": "IconButton",
+ "roots": [
+  "button"
+ ],
+ "widget": {
+  "type": "IconButton",
+  "doc": "A square icon-only button on the control scale: ghost (the default), outline or primary. Fires onPressed.",
+  "props": [
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "more_horiz",
+    "doc": "A Material icon name.",
+    "required": true
+   },
+   {
+    "key": "variant",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "ghost",
+      "outline",
+      "primary"
+     ]
+    },
+    "default": "ghost",
+    "doc": "ghost: nothing until hovered; outline: a hairline; primary: the brand fill."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "xs",
+      "compact",
+      "small",
+      "medium",
+      "large"
+     ]
+    },
+    "default": "compact",
+    "doc": "The control scale: xs 24 (rows, dense panels), compact 28 (the default), small 32, medium 36, large 44."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: 50 % opacity, not pressable."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Ghost",
+   "size": [
+    28,
+    28
+   ],
+   "props": {
+    "icon": "more_horiz"
+   }
+  },
+  {
+   "name": "Outline",
+   "size": [
+    28,
+    28
+   ],
+   "props": {
+    "icon": "add",
+    "variant": "outline"
+   }
+  }
+ ],
+ "nodes": {
+  "button": {
+   "type": "row",
+   "children": [
+    "strut",
+    "glyph"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 7
+   },
+   "bind": {
+    "layout.padding": "${= props.size == 'xs' ? [6.0, 0, 6.0, 0] : (props.size == 'compact' ? [7.0, 0, 7.0, 0] : (props.size == 'small' ? [9.0, 0, 9.0, 0] : (props.size == 'medium' ? [10.0, 0, 10.0, 0] : ([13.0, 0, 13.0, 0]))))}",
+    "decoration.radius": "${= props.size == 'xs' ? 5 : (props.size == 'compact' ? 7 : (props.size == 'small' ? 7 : (props.size == 'medium' ? 7 : (7))))}",
+    "decoration.fills[0].color": "${= props.variant == 'primary' ? theme.primary : '#00000000'}",
+    "decoration.strokes[0].color": "${= props.variant == 'outline' ? theme.colors.primaryBorder : '#00000000'}",
+    "disabled": "${= !props.enabled}"
+   },
+   "states": {
+    "hovered": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "disabled": {
+     "button": {
+      "opacity": 0.5
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 28
+   },
+   "bind": {
+    "layout.height": "${= props.size == 'xs' ? 24 : (props.size == 'compact' ? 28 : (props.size == 'small' ? 32 : (props.size == 'medium' ? 36 : (44))))}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "more_horiz",
+    "color": "primaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "props.icon": "${props.icon}",
+    "props.size": "${= props.size == 'xs' ? 12 : (props.size == 'compact' ? 14 : (props.size == 'small' ? 14 : (props.size == 'medium' ? 16 : (18))))}",
+    "layout.width": "${= props.size == 'xs' ? 12 : (props.size == 'compact' ? 14 : (props.size == 'small' ? 14 : (props.size == 'medium' ? 16 : (18))))}",
+    "layout.height": "${= props.size == 'xs' ? 12 : (props.size == 'compact' ? 14 : (props.size == 'small' ? 14 : (props.size == 'medium' ? 16 : (18))))}",
+    "props.color": "${= props.variant == 'primary' ? theme.colors.onAccent : theme.colors.secondaryText}"
+   }
+  }
+ }
+}

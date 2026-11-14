@@ -1,0 +1,387 @@
+{
+ "schema": 3,
+ "id": "order_summary",
+ "roots": [
+  "c"
+ ],
+ "variables": {
+  "c": [
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": "bananas",
+      "name": "Organic bananas",
+      "price": 1.99,
+      "qty": 2
+     },
+     {
+      "id": "milk",
+      "name": "Whole milk 1L",
+      "price": 1.35,
+      "qty": 1
+     },
+     {
+      "id": "loaf",
+      "name": "Sourdough loaf",
+      "price": 4.2,
+      "qty": 1
+     },
+     {
+      "id": "eggs",
+      "name": "Free-range eggs x12",
+      "price": 3.8,
+      "qty": 1
+     }
+    ]
+   },
+   {
+    "name": "promo",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ },
+ "nodes": {
+  "c": {
+   "type": "canvas",
+   "name": "order_summary",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 600
+    }
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "card"
+   ],
+   "layout": {
+    "width": {
+     "fill": 390
+    },
+    "height": {
+     "hug": 600
+    },
+    "padding": 16
+   }
+  },
+  "card": {
+   "type": "column",
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 358
+    },
+    "height": {
+     "hug": 400
+    },
+    "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE0E0E0"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "title",
+    "list",
+    "promoIn",
+    "totRow",
+    "foot"
+   ]
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "Review your order",
+    "style": {
+     "fontSize": 18,
+     "fontWeight": 600,
+     "color": "#FF111111"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 334
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "line"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": {
+     "hug": 200
+    }
+   },
+   "bind": {
+    "data": "${items}"
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "lname",
+    "minus",
+    "qty",
+    "plus"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": 48
+   }
+  },
+  "lname": {
+   "type": "text",
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "minus": {
+   "type": "iconButton",
+   "props": {
+    "icon": {
+     "name": "remove"
+    }
+   },
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= set(items, index, set(item, 'qty', max(0, item.qty - 1)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "qty": {
+   "type": "text",
+   "props": {
+    "text": "${item.qty}",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "plus": {
+   "type": "iconButton",
+   "props": {
+    "icon": {
+     "name": "add"
+    }
+   },
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= set(items, index, set(item, 'qty', item.qty + 1))}"
+      }
+     ]
+    }
+   ]
+  },
+  "promoIn": {
+   "type": "textField",
+   "props": {
+    "decoration": {
+     "labelText": "Promo code"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": 56
+   },
+   "bind": {
+    "props.initialValue": "${promo}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "promo",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "totRow": {
+   "type": "row",
+   "children": [
+    "totL",
+    "totV"
+   ],
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "totL": {
+   "type": "text",
+   "props": {
+    "text": "Total",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "totV": {
+   "type": "text",
+   "props": {
+    "text": "",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "bind": {
+    "props.text": "${= formatCurrency(sum(items, i => i.price * i.qty) + (sum(items, i => i.price * i.qty) >= 20 || sum(items, i => i.price * i.qty) == 0 ? 0 : 3.5), 'GBP', 'en_GB')}"
+   }
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "cancel",
+    "place"
+   ],
+   "props": {
+    "mainAxisAlignment": "end",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 326
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "cancel": {
+   "type": "outlinedButton",
+   "props": {
+    "label": "Cancel"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": 40
+   }
+  },
+  "place": {
+   "type": "filledButton",
+   "props": {
+    "label": "Place order"
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": 40
+   }
+  }
+ }
+}

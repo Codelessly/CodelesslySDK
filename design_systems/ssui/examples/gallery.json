@@ -1,0 +1,2476 @@
+{
+ "schema": 3,
+ "id": "gallery",
+ "roots": [
+  "gallery"
+ ],
+ "variables": {
+  "gallery": [
+   {
+    "name": "name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "email",
+    "type": "text",
+    "value": "ada@example.com"
+   },
+   {
+    "name": "note",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "plan",
+    "type": "text",
+    "value": "Monthly"
+   },
+   {
+    "name": "planEmpty",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "agree",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "news",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "ship",
+    "type": "text",
+    "value": "standard"
+   },
+   {
+    "name": "notify",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "dark",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "volume",
+    "type": "decimal",
+    "value": 40
+   },
+   {
+    "name": "period",
+    "type": "text",
+    "value": "Week"
+   },
+   {
+    "name": "tab",
+    "type": "text",
+    "value": "Overview"
+   }
+  ]
+ },
+ "nodes": {
+  "btn_primary_xs": {
+   "type": "Button",
+   "props": {
+    "label": "Primary xs",
+    "variant": "primary",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "btn_primary_compact": {
+   "type": "Button",
+   "props": {
+    "label": "Primary compact",
+    "variant": "primary",
+    "size": "compact"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_primary_small": {
+   "type": "Button",
+   "props": {
+    "label": "Primary small",
+    "variant": "primary",
+    "size": "small"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "btn_primary_medium": {
+   "type": "Button",
+   "props": {
+    "label": "Primary medium",
+    "variant": "primary",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "btn_primary_large": {
+   "type": "Button",
+   "props": {
+    "label": "Primary large",
+    "variant": "primary",
+    "size": "large"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "btn_secondary_xs": {
+   "type": "Button",
+   "props": {
+    "label": "Secondary xs",
+    "variant": "secondary",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "btn_secondary_compact": {
+   "type": "Button",
+   "props": {
+    "label": "Secondary compact",
+    "variant": "secondary",
+    "size": "compact"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_secondary_small": {
+   "type": "Button",
+   "props": {
+    "label": "Secondary small",
+    "variant": "secondary",
+    "size": "small"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "btn_secondary_medium": {
+   "type": "Button",
+   "props": {
+    "label": "Secondary medium",
+    "variant": "secondary",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "btn_secondary_large": {
+   "type": "Button",
+   "props": {
+    "label": "Secondary large",
+    "variant": "secondary",
+    "size": "large"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "btn_outline_xs": {
+   "type": "Button",
+   "props": {
+    "label": "Outline xs",
+    "variant": "outline",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "btn_outline_compact": {
+   "type": "Button",
+   "props": {
+    "label": "Outline compact",
+    "variant": "outline",
+    "size": "compact"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_outline_small": {
+   "type": "Button",
+   "props": {
+    "label": "Outline small",
+    "variant": "outline",
+    "size": "small"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "btn_outline_medium": {
+   "type": "Button",
+   "props": {
+    "label": "Outline medium",
+    "variant": "outline",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "btn_outline_large": {
+   "type": "Button",
+   "props": {
+    "label": "Outline large",
+    "variant": "outline",
+    "size": "large"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "btn_ghost_xs": {
+   "type": "Button",
+   "props": {
+    "label": "Ghost xs",
+    "variant": "ghost",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "btn_ghost_compact": {
+   "type": "Button",
+   "props": {
+    "label": "Ghost compact",
+    "variant": "ghost",
+    "size": "compact"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_ghost_small": {
+   "type": "Button",
+   "props": {
+    "label": "Ghost small",
+    "variant": "ghost",
+    "size": "small"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "btn_ghost_medium": {
+   "type": "Button",
+   "props": {
+    "label": "Ghost medium",
+    "variant": "ghost",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "btn_ghost_large": {
+   "type": "Button",
+   "props": {
+    "label": "Ghost large",
+    "variant": "ghost",
+    "size": "large"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "btn_destructive_xs": {
+   "type": "Button",
+   "props": {
+    "label": "Destructive xs",
+    "variant": "destructive",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "btn_destructive_compact": {
+   "type": "Button",
+   "props": {
+    "label": "Destructive compact",
+    "variant": "destructive",
+    "size": "compact"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_destructive_small": {
+   "type": "Button",
+   "props": {
+    "label": "Destructive small",
+    "variant": "destructive",
+    "size": "small"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "btn_destructive_medium": {
+   "type": "Button",
+   "props": {
+    "label": "Destructive medium",
+    "variant": "destructive",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "btn_destructive_large": {
+   "type": "Button",
+   "props": {
+    "label": "Destructive large",
+    "variant": "destructive",
+    "size": "large"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "btn_icon": {
+   "type": "Button",
+   "props": {
+    "label": "New file",
+    "icon": "add"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_icon_out": {
+   "type": "Button",
+   "props": {
+    "label": "Export",
+    "icon": "download",
+    "variant": "outline"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_dis": {
+   "type": "Button",
+   "props": {
+    "label": "Disabled",
+    "enabled": false
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_dis_out": {
+   "type": "Button",
+   "props": {
+    "label": "Disabled",
+    "variant": "outline",
+    "enabled": false
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_hover": {
+   "type": "Button",
+   "props": {
+    "label": "Hover me",
+    "variant": "outline"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "btn_press": {
+   "type": "Button",
+   "props": {
+    "label": "Press me",
+    "variant": "secondary"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "ib_ghost_xs": {
+   "type": "IconButton",
+   "props": {
+    "icon": "more_horiz",
+    "variant": "ghost",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "ib_ghost_compact": {
+   "type": "IconButton",
+   "props": {
+    "icon": "more_horiz",
+    "variant": "ghost",
+    "size": "compact"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "ib_ghost_medium": {
+   "type": "IconButton",
+   "props": {
+    "icon": "more_horiz",
+    "variant": "ghost",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "ib_outline_xs": {
+   "type": "IconButton",
+   "props": {
+    "icon": "add",
+    "variant": "outline",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "ib_outline_compact": {
+   "type": "IconButton",
+   "props": {
+    "icon": "add",
+    "variant": "outline",
+    "size": "compact"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "ib_outline_medium": {
+   "type": "IconButton",
+   "props": {
+    "icon": "add",
+    "variant": "outline",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "ib_primary_xs": {
+   "type": "IconButton",
+   "props": {
+    "icon": "send",
+    "variant": "primary",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "ib_primary_compact": {
+   "type": "IconButton",
+   "props": {
+    "icon": "send",
+    "variant": "primary",
+    "size": "compact"
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "ib_primary_medium": {
+   "type": "IconButton",
+   "props": {
+    "icon": "send",
+    "variant": "primary",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "ib_dis": {
+   "type": "IconButton",
+   "props": {
+    "icon": "delete",
+    "enabled": false
+   },
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "s0t": {
+   "type": "text",
+   "props": {
+    "text": "Buttons and icon buttons (sizes xs 24, compact 28, small 32, medium 36, large 44)",
+    "style": "sectionTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "s0r0": {
+   "type": "row",
+   "children": [
+    "btn_primary_xs",
+    "btn_primary_compact",
+    "btn_primary_small",
+    "btn_primary_medium",
+    "btn_primary_large"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s0r1": {
+   "type": "row",
+   "children": [
+    "btn_secondary_xs",
+    "btn_secondary_compact",
+    "btn_secondary_small",
+    "btn_secondary_medium",
+    "btn_secondary_large"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s0r2": {
+   "type": "row",
+   "children": [
+    "btn_outline_xs",
+    "btn_outline_compact",
+    "btn_outline_small",
+    "btn_outline_medium",
+    "btn_outline_large"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s0r3": {
+   "type": "row",
+   "children": [
+    "btn_ghost_xs",
+    "btn_ghost_compact",
+    "btn_ghost_small",
+    "btn_ghost_medium",
+    "btn_ghost_large"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s0r4": {
+   "type": "row",
+   "children": [
+    "btn_destructive_xs",
+    "btn_destructive_compact",
+    "btn_destructive_small",
+    "btn_destructive_medium",
+    "btn_destructive_large"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s0r5": {
+   "type": "row",
+   "children": [
+    "btn_icon",
+    "btn_icon_out",
+    "btn_dis",
+    "btn_dis_out",
+    "btn_hover",
+    "btn_press"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s0r6": {
+   "type": "row",
+   "children": [
+    "ib_ghost_xs",
+    "ib_ghost_compact",
+    "ib_ghost_medium",
+    "ib_outline_xs",
+    "ib_outline_compact",
+    "ib_outline_medium",
+    "ib_primary_xs",
+    "ib_primary_compact",
+    "ib_primary_medium",
+    "ib_dis"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s0": {
+   "type": "column",
+   "children": [
+    "s0t",
+    "s0r0",
+    "s0r1",
+    "s0r2",
+    "s0r3",
+    "s0r4",
+    "s0r5",
+    "s0r6"
+   ],
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "ti_empty": {
+   "type": "TextInput",
+   "props": {
+    "value": "name",
+    "placeholder": "Full name"
+   },
+   "layout": {
+    "width": 220,
+    "height": 28
+   }
+  },
+  "ti_filled": {
+   "type": "TextInput",
+   "props": {
+    "value": "email",
+    "placeholder": "Email"
+   },
+   "layout": {
+    "width": 220,
+    "height": 28
+   }
+  },
+  "ti_error": {
+   "type": "TextInput",
+   "props": {
+    "value": "email",
+    "error": true
+   },
+   "layout": {
+    "width": 220,
+    "height": 28
+   }
+  },
+  "ti_dis": {
+   "type": "TextInput",
+   "props": {
+    "value": "email",
+    "enabled": false
+   },
+   "layout": {
+    "width": 220,
+    "height": 28
+   }
+  },
+  "ta": {
+   "type": "TextArea",
+   "props": {
+    "value": "note",
+    "placeholder": "Add a note…"
+   },
+   "layout": {
+    "width": 300,
+    "height": 88
+   }
+  },
+  "sel": {
+   "type": "Select",
+   "props": {
+    "value": "plan",
+    "options": [
+     "Weekly",
+     "Monthly",
+     "Yearly"
+    ]
+   },
+   "layout": {
+    "width": 200,
+    "height": 28
+   }
+  },
+  "sel_empty": {
+   "type": "Select",
+   "props": {
+    "value": "planEmpty",
+    "options": [
+     "Weekly",
+     "Monthly"
+    ],
+    "placeholder": "Choose a plan"
+   },
+   "layout": {
+    "width": 200,
+    "height": 28
+   }
+  },
+  "sel_err": {
+   "type": "Select",
+   "props": {
+    "value": "planEmpty",
+    "options": [
+     "Weekly"
+    ],
+    "error": true
+   },
+   "layout": {
+    "width": 200,
+    "height": 28
+   }
+  },
+  "sel_dis": {
+   "type": "Select",
+   "props": {
+    "value": "plan",
+    "options": [
+     "Weekly",
+     "Monthly",
+     "Yearly"
+    ],
+    "enabled": false
+   },
+   "layout": {
+    "width": 200,
+    "height": 28
+   }
+  },
+  "fieldAin": {
+   "type": "TextInput",
+   "props": {
+    "value": "email"
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": 28
+   }
+  },
+  "fieldA": {
+   "type": "Field",
+   "props": {
+    "label": "Email",
+    "help": "We never share it.",
+    "required": true
+   },
+   "children": [
+    "fieldAin"
+   ],
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 70
+    }
+   }
+  },
+  "fieldBin": {
+   "type": "TextInput",
+   "props": {
+    "value": "name",
+    "error": true
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": 28
+   }
+  },
+  "fieldB": {
+   "type": "Field",
+   "props": {
+    "label": "Name",
+    "error": "Enter your name.",
+    "required": true
+   },
+   "children": [
+    "fieldBin"
+   ],
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 70
+    }
+   }
+  },
+  "s1t": {
+   "type": "text",
+   "props": {
+    "text": "Text input, text area, select",
+    "style": "sectionTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "s1r0": {
+   "type": "row",
+   "children": [
+    "ti_empty",
+    "ti_filled",
+    "ti_error",
+    "ti_dis"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s1r1": {
+   "type": "row",
+   "children": [
+    "ta",
+    "sel",
+    "sel_empty",
+    "sel_err",
+    "sel_dis"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s1r2": {
+   "type": "row",
+   "children": [
+    "fieldA",
+    "fieldB"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s1": {
+   "type": "column",
+   "children": [
+    "s1t",
+    "s1r0",
+    "s1r1",
+    "s1r2"
+   ],
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "cb_on": {
+   "type": "Checkbox",
+   "props": {
+    "value": "agree",
+    "label": "I agree"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "cb_off": {
+   "type": "Checkbox",
+   "props": {
+    "value": "news",
+    "label": "Send me news"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "cb_dis": {
+   "type": "Checkbox",
+   "props": {
+    "value": "agree",
+    "label": "Disabled",
+    "enabled": false
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "rd_a": {
+   "type": "Radio",
+   "props": {
+    "value": "standard",
+    "group": "ship",
+    "label": "Standard"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "rd_b": {
+   "type": "Radio",
+   "props": {
+    "value": "express",
+    "group": "ship",
+    "label": "Express"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "rd_dis": {
+   "type": "Radio",
+   "props": {
+    "value": "x",
+    "group": "ship",
+    "label": "Disabled",
+    "enabled": false
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "sw_on": {
+   "type": "Switch",
+   "props": {
+    "value": "notify",
+    "label": "Notifications"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "sw_off": {
+   "type": "Switch",
+   "props": {
+    "value": "dark",
+    "label": "Dark mode"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "sw_dis": {
+   "type": "Switch",
+   "props": {
+    "value": "notify",
+    "label": "Disabled",
+    "enabled": false
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "sl": {
+   "type": "Slider",
+   "props": {
+    "value": "volume",
+    "min": 0,
+    "max": 100
+   },
+   "layout": {
+    "width": 240,
+    "height": 28
+   }
+  },
+  "sl_steps": {
+   "type": "Slider",
+   "props": {
+    "value": "volume",
+    "min": 0,
+    "max": 100,
+    "divisions": 5
+   },
+   "layout": {
+    "width": 240,
+    "height": 28
+   }
+  },
+  "sl_dis": {
+   "type": "Slider",
+   "props": {
+    "value": "volume",
+    "min": 0,
+    "max": 100,
+    "enabled": false
+   },
+   "layout": {
+    "width": 240,
+    "height": 28
+   }
+  },
+  "s2t": {
+   "type": "text",
+   "props": {
+    "text": "Checkbox, radio, switch, slider",
+    "style": "sectionTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "s2r0": {
+   "type": "row",
+   "children": [
+    "cb_on",
+    "cb_off",
+    "cb_dis",
+    "rd_a",
+    "rd_b",
+    "rd_dis",
+    "sw_on",
+    "sw_off",
+    "sw_dis"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s2r1": {
+   "type": "row",
+   "children": [
+    "sl",
+    "sl_steps",
+    "sl_dis"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s2": {
+   "type": "column",
+   "children": [
+    "s2t",
+    "s2r0",
+    "s2r1"
+   ],
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "seg_xs": {
+   "type": "SegmentedControl",
+   "props": {
+    "value": "period",
+    "options": [
+     "Day",
+     "Week",
+     "Month"
+    ],
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "seg_compact": {
+   "type": "SegmentedControl",
+   "props": {
+    "value": "period",
+    "options": [
+     "Day",
+     "Week",
+     "Month"
+    ],
+    "size": "compact"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "seg_medium": {
+   "type": "SegmentedControl",
+   "props": {
+    "value": "period",
+    "options": [
+     "Day",
+     "Week",
+     "Month"
+    ],
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "tabs": {
+   "type": "Tabs",
+   "props": {
+    "value": "tab",
+    "tabs": [
+     "Overview",
+     "Activity",
+     "Settings"
+    ]
+   },
+   "layout": {
+    "width": 420,
+    "height": 36
+   }
+  },
+  "s3t": {
+   "type": "text",
+   "props": {
+    "text": "Segmented control and tabs",
+    "style": "sectionTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "s3r0": {
+   "type": "row",
+   "children": [
+    "seg_xs",
+    "seg_compact",
+    "seg_medium"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s3r1": {
+   "type": "row",
+   "children": [
+    "tabs"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s3": {
+   "type": "column",
+   "children": [
+    "s3t",
+    "s3r0",
+    "s3r1"
+   ],
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "chip": {
+   "type": "Chip",
+   "props": {
+    "label": "Design"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "chip_sel": {
+   "type": "Chip",
+   "props": {
+    "label": "Selected",
+    "selected": true
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "chip_icon": {
+   "type": "Chip",
+   "props": {
+    "label": "Tagged",
+    "icon": "sell"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "chip_rm": {
+   "type": "Chip",
+   "props": {
+    "label": "Removable",
+    "removable": true
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "badge_neutral": {
+   "type": "Badge",
+   "props": {
+    "label": "Neutral",
+    "tone": "neutral",
+    "dot": false
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "badge_primary": {
+   "type": "Badge",
+   "props": {
+    "label": "Primary",
+    "tone": "primary",
+    "dot": false
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "badge_success": {
+   "type": "Badge",
+   "props": {
+    "label": "Success",
+    "tone": "success",
+    "dot": true
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "badge_warning": {
+   "type": "Badge",
+   "props": {
+    "label": "Warning",
+    "tone": "warning",
+    "dot": false
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "badge_error": {
+   "type": "Badge",
+   "props": {
+    "label": "Error",
+    "tone": "error",
+    "dot": true
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "badge_info": {
+   "type": "Badge",
+   "props": {
+    "label": "Info",
+    "tone": "info",
+    "dot": false
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "av_xs": {
+   "type": "Avatar",
+   "props": {
+    "name": "Ada Lovelace",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "av_small": {
+   "type": "Avatar",
+   "props": {
+    "name": "Ada Lovelace",
+    "size": "small"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "av_medium": {
+   "type": "Avatar",
+   "props": {
+    "name": "Ada Lovelace",
+    "size": "medium"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "av_large": {
+   "type": "Avatar",
+   "props": {
+    "name": "Ada Lovelace",
+    "size": "large"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "tip": {
+   "type": "Tooltip",
+   "props": {
+    "text": "Search",
+    "shortcut": "Ctrl K"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "pb": {
+   "type": "ProgressBar",
+   "props": {
+    "value": 0.62
+   },
+   "layout": {
+    "width": 200,
+    "height": 4
+   }
+  },
+  "pb_ok": {
+   "type": "ProgressBar",
+   "props": {
+    "value": 1,
+    "tone": "success"
+   },
+   "layout": {
+    "width": 200,
+    "height": 4
+   }
+  },
+  "s4t": {
+   "type": "text",
+   "props": {
+    "text": "Chips, badges, avatars, tooltip, progress",
+    "style": "sectionTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "s4r0": {
+   "type": "row",
+   "children": [
+    "chip",
+    "chip_sel",
+    "chip_icon",
+    "chip_rm",
+    "badge_neutral",
+    "badge_primary",
+    "badge_success",
+    "badge_warning",
+    "badge_error",
+    "badge_info"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s4r1": {
+   "type": "row",
+   "children": [
+    "av_xs",
+    "av_small",
+    "av_medium",
+    "av_large",
+    "tip",
+    "pb",
+    "pb_ok"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s4": {
+   "type": "column",
+   "children": [
+    "s4t",
+    "s4r0",
+    "s4r1"
+   ],
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "cardAct": {
+   "type": "Button",
+   "props": {
+    "label": "Manage",
+    "variant": "outline",
+    "size": "xs"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "cardBody": {
+   "type": "text",
+   "props": {
+    "text": "Team plan, 12 seats, renews on 1 December.",
+    "style": "body"
+   },
+   "layout": {
+    "width": {
+     "fill": 316
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "card": {
+   "type": "Card",
+   "props": {
+    "title": "Billing",
+    "subtitle": "Your plan and invoices"
+   },
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 160
+    }
+   },
+   "slots": {
+    "actions": "cardAct"
+   },
+   "children": [
+    "cardBody"
+   ]
+  },
+  "lh": {
+   "type": "SectionHeader",
+   "props": {
+    "title": "Files",
+    "count": "3"
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": 36
+   }
+  },
+  "lr1": {
+   "type": "ListRow",
+   "props": {
+    "title": "Q3 report.pdf",
+    "icon": "description"
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "lr2": {
+   "type": "ListRow",
+   "props": {
+    "title": "Roadmap.key",
+    "icon": "slideshow",
+    "selected": true
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 36
+    }
+   }
+  },
+  "lr3": {
+   "type": "ListRow",
+   "props": {
+    "title": "Ada Lovelace",
+    "subtitle": "ada@example.com",
+    "icon": "person_outline",
+    "divider": false
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 52
+    }
+   }
+  },
+  "list": {
+   "type": "column",
+   "children": [
+    "lh",
+    "lr1",
+    "lr2",
+    "lr3"
+   ],
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 160
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8,
+    "clip": "antiAlias"
+   }
+  },
+  "bn_info": {
+   "type": "Banner",
+   "props": {
+    "message": "A new version is available.",
+    "tone": "info",
+    "title": ""
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "bn_success": {
+   "type": "Banner",
+   "props": {
+    "message": "Your changes are live.",
+    "tone": "success",
+    "title": "Saved"
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "bn_warning": {
+   "type": "Banner",
+   "props": {
+    "message": "Update your card to keep your plan.",
+    "tone": "warning",
+    "title": "Payment failed"
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "bn_error": {
+   "type": "Banner",
+   "props": {
+    "message": "Could not reach the server.",
+    "tone": "error",
+    "title": ""
+   },
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "banners": {
+   "type": "column",
+   "props": {
+    "spacing": 8
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 200
+    }
+   },
+   "children": [
+    "bn_info",
+    "bn_success",
+    "bn_warning",
+    "bn_error"
+   ]
+  },
+  "emptyAct": {
+   "type": "Button",
+   "props": {
+    "label": "Create invoice",
+    "icon": "add"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "empty": {
+   "type": "EmptyState",
+   "props": {
+    "title": "No invoices yet",
+    "message": "Invoices appear here once you bill a customer.",
+    "icon": "receipt_long"
+   },
+   "slots": {
+    "actions": "emptyAct"
+   },
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 200
+    }
+   }
+  },
+  "emptyBox": {
+   "type": "column",
+   "children": [
+    "empty"
+   ],
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 200
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 8
+   }
+  },
+  "dlgField": {
+   "type": "TextInput",
+   "props": {
+    "value": "name",
+    "placeholder": "Type the project name"
+   },
+   "layout": {
+    "width": {
+     "fill": 376
+    },
+    "height": 28
+   }
+  },
+  "dlgCancel": {
+   "type": "Button",
+   "props": {
+    "label": "Cancel",
+    "variant": "ghost"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "dlgDelete": {
+   "type": "Button",
+   "props": {
+    "label": "Delete",
+    "variant": "destructive"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 28
+    }
+   }
+  },
+  "dlgActs": {
+   "type": "row",
+   "props": {
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "children": [
+    "dlgCancel",
+    "dlgDelete"
+   ]
+  },
+  "dialog": {
+   "type": "Dialog",
+   "props": {
+    "title": "Delete project?",
+    "description": "This removes 14 files. It cannot be undone."
+   },
+   "layout": {
+    "width": 400,
+    "height": {
+     "hug": 160
+    }
+   },
+   "children": [
+    "dlgField"
+   ],
+   "slots": {
+    "actions": "dlgActs"
+   }
+  },
+  "s5t": {
+   "type": "text",
+   "props": {
+    "text": "Card, list rows, section header, banners, empty state",
+    "style": "sectionTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "s5r0": {
+   "type": "row",
+   "children": [
+    "card",
+    "list",
+    "banners"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s5r1": {
+   "type": "row",
+   "children": [
+    "emptyBox",
+    "dialog"
+   ],
+   "props": {
+    "wrap": true,
+    "spacing": 12,
+    "runSpacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "s5": {
+   "type": "column",
+   "children": [
+    "s5t",
+    "s5r0",
+    "s5r1"
+   ],
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 120
+    }
+   }
+  },
+  "gallery": {
+   "type": "canvas",
+   "name": "Gallery",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 1200,
+    "height": 1600
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ]
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "heading",
+    "s0",
+    "s1",
+    "s2",
+    "s3",
+    "s4",
+    "s5"
+   ],
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start",
+    "scrollable": true
+   },
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "fill": 1600
+    },
+    "padding": [
+     48,
+     40,
+     48,
+     40
+    ]
+   }
+  },
+  "heading": {
+   "type": "text",
+   "props": {
+    "text": "Soft SaaS UI: every component",
+    "style": "pageTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 1100
+    },
+    "height": {
+     "hug": 26
+    }
+   }
+  }
+ }
+}
