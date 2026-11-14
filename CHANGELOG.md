@@ -1,3 +1,35 @@
+## Unreleased
+
+The render command (`tool/render`), from nine agents' reports of building multi-page sites:
+
+- **Full-page captures draw what a reader sees once, once.** A `sticky` node is drawn in its place in the page,
+  not pinned at the top of every window; an open modal, dialog or sheet and its backdrop are drawn in the first
+  window only, the page below undimmed; after `--navigate` or a tap that navigates, the page navigated to is
+  captured at its own height (routes a navigator keeps offstage are skipped by steps, checks and captures).
+- **`--navigate` takes a query string** (`speaker?id=ada`, `/project?id=7`: a leading slash no longer opened the
+  entry screen), reports a screen it cannot find with the list, and later steps (`--set`) act on the screen
+  navigated to.
+- **`--drag <id>=<dx>,<dy>`** (or `=<other id>`): press, move and release; held first where a drag starts on a long
+  press.
+- **Runs take turns** on one SDK checkout (a lock around `flutter test`, which rewrites `build/` as it starts), so
+  concurrent runs no longer race on `build/native_assets` or `NativeAssetsManifest.json`.
+- **`render.sh` finds Flutter** in `FLUTTER`, `FLUTTER_ROOT`, the `PATH`, then `/opt/flutter`; runs `flutter pub get`
+  when the dependencies are missing or stale; and uses a sibling `CodelesslyAPI` checkout through a
+  `pubspec_overrides.yaml` it writes (never touching one of your own), else the published package.
+- **`downloadFile` succeeds headless**: the file is saved under `<out>/downloads/<capture>/`; `copyToClipboard`
+  copies in memory and the chain after it runs. Both are printed and listed in the diagnostics (`downloads`,
+  `clipboard`).
+- **`--now <ISO time>`** pins `now()`; a `--set` holds against a timer or `load` reaction that writes the variable
+  later (`set_overwritten` says so).
+- **Steps**: a step on a node hidden at one size is skipped there with a note, not an error; an id two shown nodes
+  share (a page's and a component's) is an error naming each by path (`page/saved`, `footer/saved`);
+  `evCard#0/evReserve` reaches a node inside a list's copy; a tap, a drag or a navigation first unfocuses a text
+  field elsewhere (typing and then tapping a button that removes the form no longer ends in a detached
+  render-object assertion from the tool's side).
+- **`--compare`** matches a reference by its exact screen, state and size (`saved` no longer takes
+  `saved-empty`), and `--compare-map home=index` renames.
+- **`unknown_screen`** is reported once per missing screen with how many links name it, not once per link.
+
 ## 30.1.0
 
 Requires codelessly_api 30.1.0. **The schema stays 3**: every loader reads `"schema": 2` and `3`, migrating 2 in
