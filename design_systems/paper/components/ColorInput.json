@@ -1,0 +1,361 @@
+{
+ "schema": 3,
+ "id": "ColorInput",
+ "roots": [
+  "column"
+ ],
+ "widget": {
+  "type": "ColorInput",
+  "doc": "A color as its hex code, with a swatch of it. The code is kept in your variable. Fires onChanged, and onSwatch when the swatch is pressed.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the color (#RRGGBB)."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Words over the field (empty: none)."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What is wrong (empty: nothing)."
+   },
+   {
+    "key": "showSwatch",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The swatch before the code."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "small",
+      "medium",
+      "large"
+     ]
+    },
+    "default": "medium",
+    "doc": "small (32), medium (36) or large (44)."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False dims it and stops input."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSwatch"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Blue",
+   "size": [
+    160,
+    36
+   ],
+   "props": {
+    "value": "#2563EB"
+   }
+  },
+  {
+   "name": "Labeled",
+   "size": [
+    160,
+    62
+   ],
+   "props": {
+    "value": "#16A34A",
+    "label": "Accent"
+   }
+  }
+ ],
+ "nodes": {
+  "column": {
+   "type": "column",
+   "children": [
+    "label",
+    "box",
+    "error"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "bind": {
+    "opacity": "${= props.enabled ? 1 : 0.5}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != ''}"
+   }
+  },
+  "box": {
+   "type": "row",
+   "children": [
+    "strut",
+    "boxContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     5,
+     0,
+     10,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 2
+   },
+   "bind": {
+    "layout.padding": "${= props.size == 'small' ? [4, 0, 8, 0] : (props.size == 'medium' ? [5, 0, 10, 0] : ([6, 0, 12, 0]))}",
+    "decoration.strokes[0].color": "${= props.error != '' ? theme.error : theme.colors.primaryBorder}"
+   },
+   "states": {
+    "focused": {
+     "box": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "focusBorder"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 33
+   },
+   "bind": {
+    "layout.height": "${= props.size == 'small' ? 29 : (props.size == 'medium' ? 33 : (41))}"
+   }
+  },
+  "swatch": {
+   "type": "box",
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "visible": "${props.showSwatch}",
+    "decoration.fills[0].color": "${= matches(props.value, '^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$') ? props.value : '#00000000'}",
+    "layout.width": "${= props.size == 'small' ? 22 : (props.size == 'medium' ? 24 : (32))}",
+    "layout.height": "${= props.size == 'small' ? 22 : (props.size == 'medium' ? 24 : (32))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSwatch"
+      }
+     ]
+    }
+   ]
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 13
+    },
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 13
+     }
+    },
+    "cursorColor": "primary"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.enabled": "${props.enabled}",
+    "props.style.fontSize": "${= props.size == 'small' ? 13 : (props.size == 'medium' ? 13 : (15))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= upper(result)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= upper(result)}"
+      }
+     ]
+    }
+   ]
+  },
+  "error": {
+   "type": "text",
+   "props": {
+    "text": "${props.error}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.35,
+     "color": "error",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "visible": "${= props.error != ''}"
+   }
+  },
+  "boxContent": {
+   "type": "row",
+   "children": [
+    "swatch",
+    "field"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

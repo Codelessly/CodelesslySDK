@@ -534,6 +534,8 @@ void main() {
       final (tree, _) = await _show(tester, {'pw': hugging('textField', {'obscureText': true, 'initialValue': 'secret'})});
       final f = _field(tree, 'pw');
       expect(f.editable.obscureText, isTrue);
+      // What is drawn is the dots, never the text.
+      expect(f.editable.text!.toPlainText(), '••••••');
       final data = f.debugSemantics!.getSemanticsData();
       expect(data.value, '••••••');
       expect(data.flagsCollection.isObscured, isTrue);

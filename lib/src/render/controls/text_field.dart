@@ -629,9 +629,13 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     final c = _config;
     if (c == null) return;
     final v = editor.value;
+    // Hidden text is drawn as its obscuring character, one per code unit
+    // (so the selection's offsets stay the text's): `RenderEditable` only
+    // hides it from screen readers, as `EditableText` does the drawing.
+    final shown = c.obscureText ? c.obscuringCharacter * v.text.length : v.text;
     _editable
-      ..text = fieldTextSpan(v.text, c.valueStyle,
-          composing: focusNode.hasFocus ? v.composing : TextRange.empty, runs: c.runs)
+      ..text = fieldTextSpan(shown, c.valueStyle,
+          composing: focusNode.hasFocus ? v.composing : TextRange.empty, runs: c.obscureText ? const [] : c.runs)
       ..selection = v.selection;
   }
 

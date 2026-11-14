@@ -1,0 +1,237 @@
+{
+ "schema": 3,
+ "id": "AuthInput",
+ "roots": [
+  "column"
+ ],
+ "widget": {
+  "type": "AuthInput",
+  "doc": "A sign-in form field: email, password or a code. Its text is kept in your variable; an error turns it red with the reason under it. Fires onChanged and onSubmitted.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Email",
+    "doc": "Shown while empty."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "text",
+      "email",
+      "password"
+     ]
+    },
+    "default": "text",
+    "doc": "email: the email keyboard. password: hidden text."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What is wrong (empty: nothing)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSubmitted",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Email",
+   "size": [
+    260,
+    32
+   ],
+   "props": {
+    "placeholder": "you@company.com",
+    "kind": "email"
+   }
+  },
+  {
+   "name": "Error",
+   "size": [
+    260,
+    50
+   ],
+   "props": {
+    "value": "nope",
+    "error": "Enter a valid email address."
+   }
+  }
+ ],
+ "nodes": {
+  "column": {
+   "type": "column",
+   "children": [
+    "field",
+    "error"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": 32
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 13
+    },
+    "decoration": {
+     "isDense": true,
+     "filled": true,
+     "fillColor": "primaryBackground",
+     "contentPadding": [
+      10,
+      7,
+      10,
+      7
+     ],
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 13
+     },
+     "hoverColor": "#00000000",
+     "border": {
+      "type": "outline",
+      "borderRadius": 2,
+      "borderSide": {
+       "color": "secondaryBorder",
+       "width": 1
+      }
+     },
+     "enabledBorder": {
+      "type": "outline",
+      "borderRadius": 2,
+      "borderSide": {
+       "color": "secondaryBorder",
+       "width": 1
+      }
+     },
+     "focusedBorder": {
+      "type": "outline",
+      "borderRadius": 2,
+      "borderSide": {
+       "color": "primary",
+       "width": 1
+      }
+     }
+    },
+    "cursorColor": "primary"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}",
+    "props.obscureText": "${= props.kind == 'password'}",
+    "props.keyboardType": "${= props.kind == 'email' ? 'emailAddress' : 'text'}",
+    "props.decoration.enabledBorder.borderSide.color": "${= props.error != '' ? theme.error : theme.colors.secondaryBorder}",
+    "props.decoration.focusedBorder.borderSide.color": "${= props.error != '' ? theme.error : theme.primary}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSubmitted",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "error": {
+   "type": "text",
+   "props": {
+    "text": "${props.error}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.35,
+     "color": "error",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "visible": "${= props.error != ''}"
+   }
+  }
+ }
+}

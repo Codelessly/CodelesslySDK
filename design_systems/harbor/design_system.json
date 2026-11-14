@@ -518,7 +518,13 @@
   "components/FileMetadataCard.json",
   "components/RunRecordRow.json",
   "components/TrialBanner.json",
-  "components/AuthPromptBanner.json"
+  "components/AuthPromptBanner.json",
+  "components/FullWidthSearchInput.json",
+  "components/HeaderSearchInput.json",
+  "components/AuthInput.json",
+  "components/NumberInput.json",
+  "components/ColorInput.json",
+  "components/ModelAvatarStack.json"
  ],
  "replaces": [
   "filledButton",
