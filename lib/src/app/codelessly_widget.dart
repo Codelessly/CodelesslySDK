@@ -828,12 +828,13 @@ class _LayoutViewState extends State<_LayoutView> {
     theme = theme.forBrightness(dark: _dark);
     // The controls the tree draws itself take the mode (and the theme from
     // the component registry). A theme that sets colours but no dark ones
-    // keeps them light, as it was designed (the islands' rule); with no
-    // colours of its own they are SSUI's, light or dark.
+    // keeps them light, as it was designed, unless it says its mode is dark
+    // (then its colours are the dark design); with no colours of its own
+    // they are SSUI's, light or dark.
     final t = _tokens;
     final coloured = t.primary != null || t.onPrimary != null || t.surface != null || t.onSurface != null ||
         t.error != null || t.colors.isNotEmpty;
-    _pageTree?.dark = _dark && (t.hasDark || !coloured);
+    _pageTree?.dark = _dark && (t.hasDark || !coloured || t.mode == api.ThemeMode.dark);
     final doc = widget.layout.document;
     if (identical(doc, _resolvedFrom) && theme == _resolvedWith) return;
     _resolvedFrom = doc;
@@ -1306,7 +1307,7 @@ class _LayoutViewState extends State<_LayoutView> {
     // has none; never the app's. A theme with dark colors is a dark theme in
     // dark mode; one without stays light, as it was designed.
     final theme = _tokens;
-    final dark = theme.hasDark && _dark;
+    final dark = _dark && (theme.hasDark || theme.mode == api.ThemeMode.dark);
     content = FeedbackThemeScope(theme: _feedbackTheme(dark), child: KeyedSubtree(key: _chromeKey, child: content));
     // What a captureScreenshot action of this screen captures.
     CaptureRegistry.bindLayout(_screen.tree, _captureKey);
