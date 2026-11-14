@@ -311,6 +311,20 @@ class UiSession implements NodeSource {
       if (d.error && d.op >= 0) rejected.add(d.op);
     }
     diagnostics.addAll(endOfStream(_document));
+    // What was accepted while the stream ran because it might arrive later
+    // (a variable, a node, a screen) and never did: errors now, in place of
+    // those warnings.
+    final check = this.check;
+    if (check != null) {
+      final unresolved = unresolvedReferences(_document, check,
+          catalog: catalog,
+          nodes: [for (final id in _document.nodes.keys) if (before[id] != _document[id]) id],
+          variables: changedVariables(before, _document));
+      final late = {for (final d in unresolved) (d.code, d.path)};
+      diagnostics
+        ..removeWhere((d) => !d.error && late.contains((d.code, d.path)))
+        ..addAll(unresolved);
+    }
     // What the finished UI gets wrong that no declaration catches.
     diagnostics.addAll(renderDiagnostics(ids: {..._document.nodes.keys.where((id) => before[id] != _document[id])}));
     lastStreamEnd = end;

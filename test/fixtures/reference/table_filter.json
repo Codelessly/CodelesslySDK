@@ -1,0 +1,39 @@
+{"schema": 3, "roots": ["home"],
+ "nodes": {
+  "home": {"type": "canvas", "slots": {"body": "col"}, "layout": {"width": 390, "height": 360}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+  "col": {"type": "column", "children": ["tools", "head", "list", "pager"], "props": {"spacing": 8}, "layout": {"width": {"fill": 390}, "height": {"hug": 320}, "padding": 16}},
+  "tools": {"type": "row", "children": ["search", "pick"], "props": {"spacing": 8}, "layout": {"width": {"fill": 358}, "height": {"hug": 48}}},
+  "search": {"type": "textField", "props": {"decoration": {"hintText": "Search customer"}}, "bind": {"props.initialValue": "${search}"}, "layout": {"width": {"fill": 220}, "height": 48},
+    "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "search", "value": "${result}"}, {"type": "setVariable", "variable": "page", "value": "0"}]}]},
+  "pick": {"type": "dropdown", "props": {"items": ["All", "Paid", "Overdue"], "isExpanded": true}, "bind": {"props.value": "${statusFilter}"}, "layout": {"width": 130, "height": 48},
+    "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "statusFilter", "value": "${result}"}, {"type": "setVariable", "variable": "page", "value": "0"}]}]},
+  "head": {"type": "row", "children": ["hCust", "hAmt"], "layout": {"width": {"fill": 358}, "height": {"hug": 20}}},
+  "hCust": {"type": "text", "props": {"text": "Customer", "style": {"fontSize": 13, "color": "#FF6B7280"}}, "bind": {"props.text": "Customer${= sortKey == 'cust' ? (desc ? ' ↓' : ' ↑') : ''}"}, "layout": {"width": {"fill": 270}, "height": {"hug": 18}},
+    "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "desc", "value": "${= sortKey == 'cust' && !desc}"}, {"type": "setVariable", "variable": "sortKey", "value": "cust"}]}]},
+  "hAmt": {"type": "text", "props": {"text": "Amount", "style": {"fontSize": 13, "color": "#FF6B7280"}}, "bind": {"props.text": "Amount${= sortKey == 'amt' ? (desc ? ' ↓' : ' ↑') : ''}"}, "layout": {"width": {"hug": 80}, "height": {"hug": 18}},
+    "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "desc", "value": "${= sortKey == 'amt' && !desc}"}, {"type": "setVariable", "variable": "sortKey", "value": "amt"}]}]},
+  "list": {"type": "listView", "children": ["row"], "bind": {"data": "${paged}"}, "props": {"scrollable": false}, "layout": {"width": {"fill": 358}, "height": {"hug": 108}}},
+  "row": {"type": "text", "props": {"text": "${item.num}  ${item.cust}  ${item.status}  ${item.amt}", "style": {"fontSize": 15, "color": "#FF111827"}}, "layout": {"width": {"fill": 358}, "height": 36}},
+  "pager": {"type": "row", "children": ["count", "prev", "next"], "props": {"crossAxisAlignment": "center"}, "layout": {"width": {"fill": 358}, "height": {"hug": 40}}},
+  "count": {"type": "text", "props": {"text": "", "style": {"fontSize": 13, "color": "#FF6B7280"}}, "layout": {"width": {"fill": 198}, "height": {"hug": 18}},
+    "bind": {"props.text": "${= length(shown) == 0 ? 'No invoices match' : (page * 3 + 1) + '–' + min(page * 3 + 3, length(shown)) + ' of ' + length(shown)}"}},
+  "prev": {"type": "textButton", "props": {"label": "Prev"}, "layout": {"width": 80, "height": 40},
+    "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "page", "value": "${= max(0, page - 1)}"}]}]},
+  "next": {"type": "textButton", "props": {"label": "Next"}, "layout": {"width": 80, "height": 40},
+    "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "page", "value": "${= min(pages - 1, page + 1)}"}]}]}
+ },
+ "variables": {"home": [
+  {"name": "invoices", "type": "list", "value": [
+    {"num": "INV-1", "cust": "Acme", "amt": 1200, "status": "Paid"}, {"num": "INV-2", "cust": "Globex", "amt": 850, "status": "Overdue"},
+    {"num": "INV-3", "cust": "Initech", "amt": 430, "status": "Paid"}, {"num": "INV-4", "cust": "Hooli", "amt": 675, "status": "Overdue"},
+    {"num": "INV-5", "cust": "Wonka", "amt": 520, "status": "Paid"}]},
+  {"name": "search", "type": "text", "value": ""},
+  {"name": "statusFilter", "type": "text", "value": "All"},
+  {"name": "sortKey", "type": "text", "value": "num"},
+  {"name": "desc", "type": "boolean", "value": false},
+  {"name": "page", "type": "integer", "value": 0},
+  {"name": "shown", "type": "list", "formula": "sortBy(filter(invoices, r => (statusFilter == 'All' || r.status == statusFilter) && contains(lower(r.cust), lower(search))), sortKey, desc ? 'desc' : 'asc')"},
+  {"name": "paged", "type": "list", "formula": "slice(shown, page * 3, page * 3 + 3)"},
+  {"name": "pages", "type": "integer", "formula": "max(1, ceil(length(shown) / 3))"}
+ ]}
+}

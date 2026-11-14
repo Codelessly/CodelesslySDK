@@ -1,5 +1,19 @@
 ## Unreleased
 
+**A list that filtered to nothing, explained.** A recorded SSUI data table (data_table@claude-sonnet-5-5) showed
+"No results" over twelve defined invoices: its `filtered` variable was `filter(invoices, (statusF == 'All' || status ==
+statusF) && contains(lower(cust), lower(search)))`, a condition without its item (computed once, outside the list,
+and matching no item). The formula engine is right; nothing told the model.
+
+- `UiSession.applyStream` reports, when the stream ends, the references it accepted as warnings while the stream ran
+  and that never arrived (codelessly_api's `unresolvedReferences`): an `unknown_name` in a computed variable's
+  formula or a binding is an error in the result, with the lambda to write when the name is a field of a list's
+  records. The warnings it replaces are dropped.
+- `tool/stream/replay.sh --dump-document` writes `document.json` (the document when the stream ended) and
+  `state.json` (`UiSession.values`).
+- Tests: the reference's filter, sort and page example works as it says (`test/lists/filter_sort_page_example_test.dart`);
+  the recording's end-of-stream errors (`test/session/ui_session_list_formula_test.dart`).
+
 **Generative UI with a design system, recorded and replayed.**
 
 - `UiSession(designSystem:)` allows the design system's components under the session's trust profile
