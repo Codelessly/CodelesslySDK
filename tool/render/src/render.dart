@@ -1599,6 +1599,23 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
 
       visit(found.box!);
       if (control == null) {
+        // A component drawn from nodes (a design system's segmented control,
+        // its tabs): its parts are the copies of the node it repeats.
+        final within = [for (final b in _boxes(binding)) if (!identical(b, found.box) && _isInside(b, found.box!) && b.attached && b.hasSize) b];
+        final byId = <String, List<NodeBox>>{};
+        for (final b in within) {
+          (byId[b.id] ??= []).add(b);
+        }
+        final parts = byId.values.where((l) => l.length > 1).firstOrNull;
+        if (parts != null) {
+          if (n >= parts.length) {
+            return (null, '--$verb $target: "$id" has ${parts.length} parts (@0 to @${parts.length - 1}).');
+          }
+          await centerInView(parts[n]);
+          return (reachable(parts[n]) ?? _rectOf(parts[n]).center, null);
+        }
+      }
+      if (control == null) {
         return (null, '--$verb $target: "$id" has no parts to name with @: that is for a segmented button, a tab bar and a navigation bar. Tap it with --$verb $id.');
       }
       if (n >= rects.length) {
