@@ -1,5 +1,6 @@
 // Every widget recipe beyond the core layout types (node_tree.dart builds
 // canvas, stack, box, row, column, text, icon, spacer and variance itself).
+import '../render/controls/registry.dart';
 import '../render/recipe.dart';
 import 'collections.dart';
 import 'indicators.dart';
@@ -13,4 +14,6 @@ final Map<String, WidgetRecipe> widgetRecipes = {
   ...materialRecipes,
   ...indicatorsRecipes,
   ...mediaRecipes,
+  // Last: the render-object controls replace the islands of their types.
+  ...controlRecipes,
 };

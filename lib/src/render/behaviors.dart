@@ -18,6 +18,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'animations.dart';
+import 'controls/overlay.dart' show RenderTooltipRegion;
+import 'controls/tokens.dart' show ControlTokens;
 import 'convert.dart';
 import 'drag_track.dart';
 import 'flip_card.dart';
@@ -121,6 +123,13 @@ void loopLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool ani
         ..onPointerUp = ((_) => press(false))
         ..onPointerCancel = ((_) => press(false)),
     );
+  }
+  // A tooltip (Flutter's `Tooltip`): a bubble in the root's overlay layer
+  // after hovering (render/controls/overlay.dart).
+  if (animates && be.tooltip.isNotEmpty) {
+    chain.add(b.obtain<RenderTooltipRegion>('tooltip', RenderTooltipRegion.new)
+      ..message = be.tooltip
+      ..tokens = ControlTokens.of(b));
   }
   final hasMotion = _hasMotionLayer(b, n, animates);
   animationLayers(b, n, chain,
