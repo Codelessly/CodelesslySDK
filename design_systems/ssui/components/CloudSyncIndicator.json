@@ -1,0 +1,169 @@
+{
+ "schema": 3,
+ "id": "CloudSyncIndicator",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "CloudSyncIndicator",
+  "doc": "Whether something is saved to the cloud: a small cloud with a mark for synced, syncing, pending, failed or unavailable. Fires onPressed.",
+  "props": [
+   {
+    "key": "state",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "checking",
+      "synced",
+      "syncing",
+      "pending",
+      "failed",
+      "unavailable"
+     ]
+    },
+    "default": "synced",
+    "doc": "checking, synced, syncing, pending, failed or unavailable."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Synced",
+   "size": [
+    20,
+    18
+   ],
+   "props": {}
+  },
+  {
+   "name": "Failed",
+   "size": [
+    20,
+    18
+   ],
+   "props": {
+    "state": "failed"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "stack",
+   "children": [
+    "cloud",
+    "badge"
+   ],
+   "layout": {
+    "width": 20,
+    "height": 18
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.state != 'unavailable'"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed",
+       "value": "${props.state}"
+      }
+     ]
+    }
+   ]
+  },
+  "cloud": {
+   "type": "icon",
+   "props": {
+    "icon": "cloud",
+    "color": "secondaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14,
+    "x": {
+     "start": 0
+    },
+    "y": {
+     "start": 1
+    }
+   },
+   "bind": {
+    "props.icon": "${= props.state == 'unavailable' ? 'cloud_off' : 'cloud'}",
+    "props.color": "${= props.state == 'unavailable' ? theme.colors.tertiaryText : theme.colors.secondaryText}"
+   }
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "spinner",
+    "mark"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": {
+     "end": 0
+    },
+    "y": {
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "radius": 5
+   },
+   "bind": {
+    "visible": "${= props.state != 'unavailable'}"
+   }
+  },
+  "spinner": {
+   "type": "circularProgressIndicator",
+   "props": {
+    "color": "primary",
+    "strokeWidth": 1.2,
+    "strokeCap": "round"
+   },
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "bind": {
+    "visible": "${= (props.state == 'checking' || props.state == 'syncing')}"
+   }
+  },
+  "mark": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "success",
+    "size": 8
+   },
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "bind": {
+    "visible": "${= !(props.state == 'checking' || props.state == 'syncing')}",
+    "props.icon": "${= props.state == 'failed' ? 'priority_high' : (props.state == 'pending' ? 'schedule' : 'check')}",
+    "props.color": "${= props.state == 'synced' ? theme.success : (props.state == 'failed' ? theme.error : (props.state == 'pending' ? theme.warning : (props.state == 'unavailable' ? theme.colors.tertiaryText : theme.primary)))}"
+   }
+  }
+ }
+}
