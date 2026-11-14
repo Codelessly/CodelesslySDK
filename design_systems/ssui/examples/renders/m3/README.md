@@ -75,3 +75,24 @@ from zero-prop `textField` nodes (only the texts set), Roboto, light and dark, c
 
 Measured against the reference over the field row (x 24–712, y 344–396): 0.00 % of the pixels differ in light and
 in dark (a channel more than 40 apart); the test holds it under 1 %.
+
+# Tiles as render objects (Milestone 3, workstream D): before and after
+
+`accordion`, `expansionTile` and `listTile` drawn by `render/controls/{tile,expansion}.dart`. Made by
+`test/controls/tile_reference_test.dart` with `CODELESSLY_M3_RENDERS=<dir>`; the before renders are the same pages
+through the Material islands they replace (`ExpansionTile`, the accordion's `TextButton` toggle, `ListTile`), Roboto,
+1×.
+
+| File | What |
+|---|---|
+| `tile-accordion-before-{light,dark}.png` | the island accordion: a Material chevron button over the header, centred text, no panel |
+| `tile-accordion-{light,dark}.png` | zero-prop `accordion` nodes (the header and content texts styled as SSUI's Accordion styles its own) |
+| `tile-listtile-before-{light,dark}.png` | the island `ListTile` with hugging nodes: nothing (0 × 0, its design size) |
+| `tile-listtile-{light,dark}.png` | zero-prop `listTile` nodes with an icon, a title and a subtitle in their slots |
+| `tile-{accordion,listtile}-compare-{light,dark}.png` | before, after and the reference, stacked |
+
+References: the accordion against soft_saas_ui's own `SoftSaaSAccordion` (`../ssui-reference/ssui-accordion-*.png`,
+rendered by `tool/ssui_golden/test/ssui_tiles_golden_test.dart`), the list tile against SSUI's `ListRow` component
+rendered from `components/ListRow.json` in the same test. Both match to 0.00 % of the pixels (a channel more than 40
+apart) in light and dark; the test holds them under 0.5 %. (The rows' named Material icons draw in neither render:
+the test font set has no ligatures, the same on both sides.)

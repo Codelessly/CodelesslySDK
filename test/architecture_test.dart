@@ -144,7 +144,6 @@ const widgetImportRatchet = {
   'src/session/view.dart',
   'src/widgets/collections.dart',
   'src/widgets/collections_data_list.dart',
-  'src/widgets/collections_islands.dart',
   'src/widgets/collections_list_runtime.dart',
   'src/widgets/collections_page_runtime.dart',
   'src/widgets/collections_pagination.dart',
