@@ -1,3 +1,23 @@
+## Unreleased
+
+**Generative UI with a design system, recorded and replayed.**
+
+- `UiSession(designSystem:)` allows the design system's components under the session's trust profile
+  (`TrustProfile.withComponents`): with the default `TrustProfile.agent` every call to one was
+  `capability_not_allowed`, so a model's design-system UI never applied.
+- A session's theme names (`"color": "primaryBackground"`, `"style": "sectionTitle"`) resolve in its own nodes in
+  light mode: `ThemedSource` started with no names and was only given the theme when the mode changed, so they
+  resolved in dark only (components' names did resolve).
+- A component call that streams in after its parent shows (a pending child that arrives as a call, or a set that
+  changes a node's type to one) renders as its definition: its parent places its children again
+  (`NodeBox._becameCall`). It drew as the empty box of an unknown type.
+- The stream replay (`tool/stream/replay.sh`) replays a recording with the design system its meta names (or
+  `--design-system`), in light or `--theme dark`, and reports `designSystem` (component calls rendered and not,
+  core controls the design system replaces) in `metrics.json`. `examples/stream_chat/tool/record.dart
+  --design-system ssui` records with one (prompt, `ui_docs`, per-op validation and retries), `record_all.sh` gains
+  `--design-system <id>` and `--only ssui`, and the live summary has the design system per cell and its components
+  against the raw controls it replaces.
+
 ## 30.1.0
 
 **No special cases left** (with codelessly_api's unreleased removal of the last 21 one-look fields, each now a

@@ -1246,6 +1246,27 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   // --- reconciliation ---------------------------------------------------------
 
+  /// Whether this box's node is now a call to a registered component (a
+  /// pending child that streamed in as one, or a set that changed its type):
+  /// a call renders as its definition's root, in a box of its own, so its
+  /// parent places its children again and this box is let go.
+  bool _becameCall() {
+    final registry = tree.components;
+    if (registry == null) return false;
+    final type = source.node(id)?.type;
+    if (type == null || registry[type] == null) return false;
+    final (rid, rinstance) = tree._rendersAt(id, instance);
+    if (rid == id && identical(rinstance, instance)) return false;
+    for (RenderObject? p = parent; p != null; p = p.parent) {
+      if (p is NodeBox) {
+        p._applied = null;
+        p._apply();
+        return true;
+      }
+    }
+    return false;
+  }
+
   void _subscribe() {
     _listenable = source.watch(id)..addListener(_apply);
     // An instance's root is also its call: an edit to the call re-applies it.
@@ -1344,6 +1365,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       return;
     }
     if (debugCountApplies) debugApplyCounts.update(id, (v) => v + 1, ifAbsent: () => 1);
+    if (_becameCall()) return;
     final bound = given != null ? given.$1 : tree.resolveBound(id, instance: instance);
     final resolved = _withTextDefault(bound?.node);
     // Bindings give a new node each time: the same one keeps its identity,
