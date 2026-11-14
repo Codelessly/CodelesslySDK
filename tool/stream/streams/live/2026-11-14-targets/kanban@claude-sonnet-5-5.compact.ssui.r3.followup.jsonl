@@ -1,0 +1,147 @@
+{"meta":{"ui":"kanban","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"followup","followup":"Let me drag a card and drop it on another column to move it there (real drag and drop), and highlight the column I am over. Keep everything else.","base":["kanban@claude-sonnet-5-5.compact.ssui.r3.jsonl","kanban@claude-sonnet-5-5.compact.ssui.r3.retry.jsonl"],"source":"live","outputTokens":1258,"usage":{"inputTokens":9415,"outputTokens":1258,"cacheReadInputTokens":27792,"cacheCreationInputTokens":0,"ttftMs":2858,"firstToolDeltaMs":2860,"totalMs":7480,"stopReason":"StopReason.toolUse"},"text":"","ttftMs":2858,"check":{"ops":4,"opsApplied":4,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":28,"scripts":0,"scriptChars":0,"designSystemComponents":5,"replacedControls":0},"assets":null}}
+{"tMs":2861,"delta":"{\"ops\": ["}
+{"tMs":2861,"delta":"{\"op\": \"vars\","}
+{"tMs":2861,"delta":" \"scope\": \"app\", \""}
+{"tMs":2861,"delta":"set\": {\"overCol\":"}
+{"tMs":2861,"delta":" {\"type\": \"text\", \""}
+{"tMs":2861,"delta":"value\": \"\"}}},"}
+{"tMs":2861,"delta":" {\"op\": \"patch\","}
+{"tMs":2861,"delta":" \"id\": \"colTodo"}
+{"tMs":2861,"delta":"\", \"pat"}
+{"tMs":2861,"delta":"ch\": {\"b"}
+{"tMs":2861,"delta":"ind\": {\"decoration."}
+{"tMs":2861,"delta":"fills[0].color\": \""}
+{"tMs":2861,"delta":"${= overCol == '"}
+{"tMs":3218,"delta":"todo' ? 'prim"}
+{"tMs":3218,"delta":"aryTint' : '"}
+{"tMs":3218,"delta":"tertiaryBackground"}
+{"tMs":3218,"delta":"'}\", \"decoration."}
+{"tMs":3218,"delta":"strokes[0].color\":"}
+{"tMs":3218,"delta":" \"${= overCol == "}
+{"tMs":3218,"delta":"'todo' ? '"}
+{"tMs":3218,"delta":"primary' : 'prima"}
+{"tMs":3218,"delta":"ryBorder'}\"}"}
+{"tMs":3218,"delta":", \"actions\": [{\""}
+{"tMs":3218,"delta":"trigger\": {\"type\":"}
+{"tMs":3218,"delta":" \"dragEnter\"}"}
+{"tMs":3637,"delta":", \"actions\": [{\""}
+{"tMs":3637,"delta":"type\": \"setVariable\","}
+{"tMs":3637,"delta":" \"variable\": \"overCol"}
+{"tMs":3637,"delta":"\", \"value\": \"${"}
+{"tMs":3637,"delta":"= 'todo'}\""}
+{"tMs":3637,"delta":"}]}, {\"trig"}
+{"tMs":3637,"delta":"ger\": {\"type\": \"d"}
+{"tMs":3637,"delta":"ragExit\"}, \"act"}
+{"tMs":3637,"delta":"ions\": [{\"type\": \""}
+{"tMs":3637,"delta":"setVariable\", \"variable"}
+{"tMs":3637,"delta":"\": \"overCol\", \"value"}
+{"tMs":3637,"delta":"\": \"${= ''}\""}
+{"tMs":4149,"delta":"}]}, {\"trig"}
+{"tMs":4149,"delta":"ger\": {\"type\": \"dr"}
+{"tMs":4149,"delta":"op\"}, \"actions\":"}
+{"tMs":4149,"delta":" [{\"type\": \"setV"}
+{"tMs":4150,"delta":"ariable\", \"variable\": \""}
+{"tMs":4150,"delta":"overCol\", \"value\": \""}
+{"tMs":4150,"delta":"${= ''}\"},"}
+{"tMs":4150,"delta":" {\"type\": \"setVari"}
+{"tMs":4150,"delta":"able\", \"variable\": \"c"}
+{"tMs":4150,"delta":"ards\", \"value\": \"${="}
+{"tMs":4150,"delta":" map(cards, c => c"}
+{"tMs":4150,"delta":".id == result.data ?"}
+{"tMs":4572,"delta":" {id: c.id, title"}
+{"tMs":4572,"delta":": c.title, col: "}
+{"tMs":4572,"delta":"'todo'} : c)"}
+{"tMs":4572,"delta":"}\"}]}]"}
+{"tMs":4572,"delta":"}}, {\"op\": \""}
+{"tMs":4572,"delta":"patch\", \"id\": \"col"}
+{"tMs":4572,"delta":"Doing\", \"patch\":"}
+{"tMs":4572,"delta":" {\"bind\": {\"dec"}
+{"tMs":4572,"delta":"oration.fills[0]."}
+{"tMs":4572,"delta":"color\": \"${= overCol"}
+{"tMs":4572,"delta":" == 'doing' ?"}
+{"tMs":4572,"delta":" 'primaryTint'"}
+{"tMs":5002,"delta":" : 'tertiary"}
+{"tMs":5002,"delta":"Background'}\", \"dec"}
+{"tMs":5002,"delta":"oration.strokes[0"}
+{"tMs":5002,"delta":"].color\": \"${= overC"}
+{"tMs":5002,"delta":"ol == 'doing' "}
+{"tMs":5002,"delta":"? 'primary' : "}
+{"tMs":5002,"delta":"'primaryBorder'"}
+{"tMs":5002,"delta":"}\"}, \"actions\":"}
+{"tMs":5002,"delta":" [{\"trigger\": {"}
+{"tMs":5002,"delta":"\"type\": \"dragEn"}
+{"tMs":5002,"delta":"ter\"}, \"actions\":"}
+{"tMs":5002,"delta":" [{\"type\": \"setV"}
+{"tMs":5437,"delta":"ariable\", \"variable\": \""}
+{"tMs":5437,"delta":"overCol\", \"value\": \""}
+{"tMs":5437,"delta":"${= 'doing'}"}
+{"tMs":5437,"delta":"\"}]}, {\"tr"}
+{"tMs":5437,"delta":"igger\": {\"type\": \""}
+{"tMs":5437,"delta":"dragExit\"}, \""}
+{"tMs":5437,"delta":"actions\": [{\"type\":"}
+{"tMs":5437,"delta":" \"setVariable\", \"vari"}
+{"tMs":5437,"delta":"able\": \"overCol\", \""}
+{"tMs":5437,"delta":"value\": \"${= ''}"}
+{"tMs":5437,"delta":"\"}]}, {\"tr"}
+{"tMs":5437,"delta":"igger\": {\"type\": \""}
+{"tMs":5843,"delta":"drop\"}, \"actions"}
+{"tMs":5844,"delta":"\": [{\"type\": \"set"}
+{"tMs":5844,"delta":"Variable\", \"variable\":"}
+{"tMs":5844,"delta":" \"overCol\", \"value\":"}
+{"tMs":5844,"delta":" \"${= ''}\"}"}
+{"tMs":5844,"delta":", {\"type\": \"setV"}
+{"tMs":5844,"delta":"ariable\", \"variable\": \""}
+{"tMs":5844,"delta":"cards\", \"value\": \"${"}
+{"tMs":5844,"delta":"= map(cards, c =>"}
+{"tMs":5844,"delta":" c.id == result.data "}
+{"tMs":5844,"delta":"? {id: c.id,"}
+{"tMs":5844,"delta":" title: c.title, col:"}
+{"tMs":6348,"delta":" 'doing'} : c"}
+{"tMs":6348,"delta":")}\"}]}]"}
+{"tMs":6348,"delta":"}}, {\"op\": \""}
+{"tMs":6348,"delta":"patch\", \"id\": \"col"}
+{"tMs":6348,"delta":"Done\", \"patch\": {"}
+{"tMs":6348,"delta":"\"bind\": {\"deco"}
+{"tMs":6348,"delta":"ration.fills[0].color"}
+{"tMs":6348,"delta":"\": \"${= overCol =="}
+{"tMs":6348,"delta":" 'done' ? '"}
+{"tMs":6348,"delta":"primaryTint' : "}
+{"tMs":6348,"delta":"'tertiaryBack"}
+{"tMs":6348,"delta":"ground'}\", \"decoration"}
+{"tMs":6763,"delta":".strokes[0].color"}
+{"tMs":6763,"delta":"\": \"${= overCol =="}
+{"tMs":6763,"delta":" 'done' ? '"}
+{"tMs":6763,"delta":"primary' : 'prima"}
+{"tMs":6763,"delta":"ryBorder'}\"}"}
+{"tMs":6763,"delta":", \"actions\": [{\""}
+{"tMs":6763,"delta":"trigger\": {\"type\":"}
+{"tMs":6763,"delta":" \"dragEnter\"}"}
+{"tMs":6763,"delta":", \"actions\": [{\""}
+{"tMs":6763,"delta":"type\": \"setVariable\","}
+{"tMs":6763,"delta":" \"variable\": \"overCol"}
+{"tMs":6763,"delta":"\", \"value\": \"${= "}
+{"tMs":7189,"delta":"'done'}\"}]}"}
+{"tMs":7189,"delta":", {\"trigger\": {"}
+{"tMs":7189,"delta":"\"type\": \"dragExit"}
+{"tMs":7189,"delta":"\"}, \"actions\": ["}
+{"tMs":7189,"delta":"{\"type\": \"setVari"}
+{"tMs":7189,"delta":"able\", \"variable\": \"over"}
+{"tMs":7189,"delta":"Col\", \"value\": \"${"}
+{"tMs":7189,"delta":"= ''}\"}]}"}
+{"tMs":7189,"delta":", {\"trigger\": {"}
+{"tMs":7189,"delta":"\"type\": \"drop\"}"}
+{"tMs":7189,"delta":", \"actions\": [{\""}
+{"tMs":7189,"delta":"type\": \"setVariable\","}
+{"tMs":7470,"delta":" \"variable\": \"overCol"}
+{"tMs":7470,"delta":"\", \"value\": \"${= "}
+{"tMs":7470,"delta":"''}\"}, {\"type"}
+{"tMs":7470,"delta":"\": \"setVariable\", \""}
+{"tMs":7470,"delta":"variable\": \"cards\", \""}
+{"tMs":7470,"delta":"value\": \"${= map(c"}
+{"tMs":7470,"delta":"ards, c => c.id =="}
+{"tMs":7470,"delta":" result.data ? {id:"}
+{"tMs":7470,"delta":" c.id, title: c."}
+{"tMs":7470,"delta":"title, col: 'done'"}
+{"tMs":7470,"delta":"} : c)}\"}]"}
+{"tMs":7470,"delta":"}]}}]"}
+{"tMs":7478,"delta":"}"}
