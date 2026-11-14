@@ -1,4 +1,4 @@
-import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/core.dart' as api;
 
 export '../render/control_theme.dart' show colorOf, kControlRadius, kInk, kInkOnDark, kPaper, kPaperDark, kSurfaceRadius, themeDataOf;
 
