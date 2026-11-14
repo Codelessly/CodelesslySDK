@@ -147,7 +147,8 @@ Text that names no family is drawn in Roboto, the default family of a Flutter ap
 an app it is the platform's font). A family the command does not have is drawn in Roboto and reported as
 `font_fallback`, whose message names the family, weight and style asked for, the weights the family has, the
 directories searched and any file of that family found but not read; a missing weight next to one the family has
-(600 when there are 500 and 700) is drawn with the nearest and not reported.
+(600 when there are 500 and 700) is drawn with the nearest and not reported. A variable font (a file with a `wght` axis) has every weight of
+its axis, whether declared once in `site.json` or found under `--fonts`.
 
 Web fonts: a `.woff` file is decoded by the command (its tables are zlib streams) and read as the TrueType or
 OpenType file it wraps. A `.woff2` file (Brotli-compressed) is not read: it is reported, and an npm
