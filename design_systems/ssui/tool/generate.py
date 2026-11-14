@@ -1251,6 +1251,124 @@ add(component(
 ))
 
 
+# --- batch 3: loading, error, list and section pieces ---------------------------------------------------------
+
+# Skeleton (Skeleton.tsx): a neutral block (#E5E5E5, #383838 in dark) standing in for content: text radius 4,
+# rectangular 8, circular a full round; it pulses to half opacity over 2 s.
+add(component(
+    'Skeleton',
+    'A grey placeholder for content still loading: a line of text, a block or a circle, gently pulsing.',
+    'block',
+    props=[prop('variant', enum('text', 'rectangular', 'circular'), 'text', 'text (radius 4), rectangular (radius 8) or circular.'),
+           ],
+    previews=[preview('Line', 200, 20), preview('Circle', 48, 48, variant='circular')],
+    nodes={
+        'block': {'type': 'box', 'layout': {'width': {'fill': 200}, 'height': 20},
+                  'decoration': {'fills': [{'color': 'track'}], 'radius': 4},
+                  'bind': {'decoration.radius': by('variant', {'text': 4, 'rectangular': 8, 'circular': 9999})},
+                  'animations': [{'id': 'pulse', 'duration': 1000, 'curve': 'easeInOut', 'repeat': {'reverse': True},
+                                  'tracks': [{'path': 'opacity', 'from': 1, 'to': 0.5}]}]},
+    },
+))
+
+# ErrorBar (ErrorBar.tsx): a 4 px error rule, 6 px, then a 12 px alert icon and the message 11/500 (-0.1) in
+# secondary text with a dotted underline; pressing it opens the details.
+add(component(
+    'ErrorBar',
+    'A failure under a card or row: a red rule over a one-line message with an alert icon. Fires onPressed.',
+    'bar',
+    props=[prop('message', STRING, 'Sync failed: connection lost', 'What went wrong, one line.', required=True)],
+    events=['onPressed'],
+    previews=[preview('Failed', 260, 26, message='Sync failed: connection lost')],
+    nodes={
+        'bar': {'type': 'column', 'children': ['rule', 'line'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 6},
+                'layout': {'width': {'fill': 260}, 'height': {'hug': 26}},
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed'}]}]},
+        'rule': {'type': 'box', 'layout': {'width': {'fill': 260}, 'height': 4}, 'decoration': {'fills': [{'color': 'error'}], 'radius': 2}},
+        'line': {'type': 'row', 'children': ['glyph', 'message'], 'props': {'crossAxisAlignment': 'center', 'spacing': 7},
+                 'layout': {'width': {'fill': 260}, 'height': {'hug': 16}}},
+        'glyph': icon('error_outline', 'error', 12),
+        'message': {**text('${props.message}', style(11, 500, 'secondaryText', 1.4, letterSpacing=-0.1, decoration='underline',
+                                                      decorationStyle='dotted'), {'fill': 240}, {'hug': 16}),
+                    'props': {'text': '${props.message}', 'maxLines': 1, 'overflow': 'ellipsis',
+                              'style': style(11, 500, 'secondaryText', 1.4, letterSpacing=-0.1, decoration='underline', decorationStyle='dotted')}},
+    },
+))
+
+# FeatureBulletItem (FeatureBulletItem.tsx): a 13 px secondary icon 2 px down, 10 px, then a sentence 12.5 at 1.4 (-0.1).
+add(component(
+    'FeatureBulletItem',
+    'One line of a feature list: a muted icon and a sentence.',
+    'row',
+    props=[prop('icon', STRING, 'check', 'The icon\'s name.'),
+           prop('text', STRING, 'Indexes your files as they change.', 'The sentence.', required=True)],
+    previews=[preview('Feature', 280, 18, text='Indexes your files as they change.')],
+    nodes={
+        'row': {'type': 'row', 'children': ['glyphBox', 'text'], 'props': {'crossAxisAlignment': 'start', 'spacing': 10},
+                'layout': {'width': {'fill': 280}, 'height': {'hug': 18}}},
+        'glyphBox': {'type': 'column', 'children': ['glyph'], 'layout': {'width': 13, 'height': {'hug': 15}, 'padding': [0, 2, 0, 0]}},
+        'glyph': {**icon('check', 'secondaryText', 13), 'bind': {'props.icon': '${props.icon}'}},
+        'text': text('${props.text}', style(12.5, 400, 'secondaryText', 1.4, letterSpacing=-0.1), {'fill': 250}, {'hug': 18}),
+    },
+))
+
+# SectionCard (SectionCard.tsx): a bordered card, radius 6, 10 px padding, the small shadow; an optional header
+# row 10 px above the body: the title 11/700 uppercase with 0.06 em tracking in secondary text, actions at the end.
+add(component(
+    'SectionCard',
+    'A small titled section: an uppercase 11 px label over its content (the call\'s children), actions at the end of the header.',
+    'card',
+    props=[prop('title', STRING, 'Details', 'The label (empty: no header).')],
+    slots=['actions'],
+    children='list',
+    previews=[preview('Titled', 280, 80, title='Details')],
+    nodes={
+        'card': {'type': 'column', 'children': ['header', 'body'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 10},
+                 'layout': {'width': {'fill': 280}, 'height': {'hug': 80}, 'padding': 10},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 6,
+                                'effects': SHADOWS_LIGHT['level1']},
+                 'bind': {'decoration.effects': '${theme.shadows.level1}'}},
+        'header': {'type': 'row', 'children': ['title', 'actions'],
+                   'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'spaceBetween', 'spacing': 8},
+                   'layout': {'width': {'fill': 260}, 'height': {'hug': 15}},
+                   'bind': {'visible': "${= props.title != ''}"}},
+        'title': {'type': 'text', 'props': {'text': '${= upper(props.title)}', 'maxLines': 1, 'overflow': 'ellipsis',
+                                             'style': style(11, 700, 'secondaryText', 1.3, letterSpacing=0.66)},
+                  'layout': {'width': {'fill': 200}, 'height': {'hug': 15}}},
+        'actions': {'type': 'slot', 'props': {'name': 'actions'}},
+        'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 8},
+                 'layout': {'width': {'fill': 260}, 'height': {'hug': 40}}},
+        'content': {'type': 'slot'},
+    },
+))
+
+# MetaInfo (MetaInfo.tsx): a tertiary 11 px line: a clock and an age, a middle dot 8 px either side, a branch icon
+# (green when accented) and a monospace commit.
+add(component(
+    'MetaInfo',
+    'When and which revision, in one muted line: a clock with an age, then a branch icon with a commit.',
+    'row',
+    props=[prop('age', STRING, '2h ago', 'How long ago (empty: none).'),
+           prop('commit', STRING, 'a1b2c3d', 'The short commit (empty: none).'),
+           prop('accent', BOOL, False, 'The branch icon in the success colour.')],
+    previews=[preview('Both', 200, 14, age='2h ago', commit='a1b2c3d')],
+    nodes={
+        'row': {'type': 'row', 'children': ['clock', 'age', 'dot', 'branch', 'commit'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                'layout': {'width': {'hug': 160}, 'height': {'hug': 14}, 'constraints': {'minHeight': 13}}},
+        'clock': {**icon('schedule', 'tertiaryText', 11), 'bind': {'visible': "${= props.age != ''}"}},
+        'age': {**text('${props.age}', style(11, 400, 'tertiaryText', 1.2, letterSpacing=-0.1), {'hug': 40}, {'hug': 14}),
+                'bind': {'visible': "${= props.age != ''}"}},
+        'dot': {**text('·', style(11, 400, 'tertiaryText', 1.2), {'hug': 4}, {'hug': 14}),
+                'layout': {'width': {'hug': 4}, 'height': {'hug': 14}, 'margin': [4, 0, 4, 0]},
+                'bind': {'visible': "${= props.age != '' && props.commit != ''}"}},
+        'branch': {**icon('account_tree', 'tertiaryText', 11),
+                   'bind': {'visible': "${= props.commit != ''}", 'props.color': "${= props.accent ? theme.success : theme.colors.tertiaryText}"}},
+        'commit': {**text('${props.commit}', style(11, 400, 'tertiaryText', 1.2, letterSpacing=-0.1, fontFamily='monospace'), {'hug': 50}, {'hug': 14}),
+                   'bind': {'visible': "${= props.commit != ''}"}},
+    },
+))
+
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:
