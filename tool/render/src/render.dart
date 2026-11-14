@@ -77,7 +77,7 @@ const runtimeCodes = <(String, String, String)>[
   ('offscreen', 'warning', 'A node extends past the screen edge where nothing scrolls: on a device it is cut off.'),
   ('text_clipped', 'warning', 'A text does not fit its box: its lines are taller than the box, or a word is wider.'),
   ('text_truncated', 'warning', 'A text was cut at maxLines with overflow "clip" (an ellipsis or fade is taken as meant).'),
-  ('text_no_color', 'warning', 'A text has no color: the engine paints it white (invisible on a light background). Set props.style.color.'),
+  ('text_no_color', 'warning', 'A text has no color (the engine paints it white: invisible on a light background), or a transparent one. Set props.style.color.'),
   ('font_fallback', 'warning', 'A font family (or weight/style) a text style names is neither declared in site.json\'s "fonts" nor in a --fonts directory: the text is drawn in another font. The message names the family and the nodes that use it.'),
   ('font_missing', 'error', 'A font file site.json\'s "fonts" declares is not there (the path is relative to the site), or is not a font file it can read.'),
   ('design_system_missing', 'error', 'The design system site.json names ("designSystem": a folder relative to it) has no readable design_system.json.'),
@@ -2019,11 +2019,9 @@ List<RuntimeIssue> _check(
       final text = p.text.toPlainText();
       if (text.trim().isEmpty) continue;
       final short = text.length > 30 ? '${text.substring(0, 30)}...' : text;
-      if (text.contains(r'${')) {
-        out.add(RuntimeIssue('expression_not_evaluated', 'warning',
-            'Text "${nameOf(b)}" shows "$short" on screen: its expression did not evaluate. Check the formula (names, functions, quotes); '
-            'a binding of "props.text" or "props.runs" must not also be written as text, and a "\${...}" inside a formula is not read.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+      // The checks a session runs on what it shows (shared: paragraphIssues).
+      for (final i in paragraphIssues(p, nameOf(b))) {
+        out.add(RuntimeIssue(i.code, 'warning', i.message, nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       final missing = <String>{};
       p.text.visitChildren((span) {
@@ -2041,18 +2039,6 @@ List<RuntimeIssue> _check(
         out.add(RuntimeIssue('missing_glyph', 'warning',
             'Text "${nameOf(b)}" has ${missing.map((c) => '"$c" (U+${c.runes.first.toRadixString(16).toUpperCase().padLeft(4, '0')})').join(', ')}, which its font has no glyph for: drawn as an empty box. '
             'Use a character the font has, an icon node, or a box with a "path" for a small mark.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
-      }
-      var colorless = false;
-      p.text.visitChildren((span) {
-        if (span is TextSpan && (span.text?.trim().isNotEmpty ?? false) && span.style?.color == null && span.style?.foreground == null) {
-          colorless = true;
-        }
-        return !colorless;
-      });
-      final rootStyle = p.text.style;
-      if (colorless && (rootStyle?.color == null && rootStyle?.foreground == null)) {
-        out.add(RuntimeIssue('text_no_color', 'warning', 'Text "${nameOf(b)}" ("$short") has no color, so it is painted white: set props.style.color.',
             nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       final cut = node.prop(api.TextProps.overflow) != api.TextOverflow.clip;
