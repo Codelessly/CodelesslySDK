@@ -223,7 +223,22 @@ List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics, {List<String
       'count': group.length,
     });
   }
-  return out;
+  // While a listed page is still to be written, a screen no written page
+  // has may be one of its canvases (a modal it defines): a warning until
+  // every page is there, then the error it is.
+  if (unwritten.isEmpty) return out;
+  return [
+    for (final d in out)
+      if (d['code'] == 'unknown_screen' && '${d['message']}'.startsWith('No screen "'))
+        {
+          ...d,
+          'severity': 'warning',
+          'message': '${d['message']} It may be a canvas of a page listed and not written yet (${unwritten.join(', ')}): '
+              'this is an error once every listed page is written.',
+        }
+      else
+        d,
+  ];
 }
 
 String _jsonError(Object e, String text) {
