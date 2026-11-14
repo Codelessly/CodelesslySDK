@@ -9,6 +9,7 @@
 // The runtime's side (the `focus` and `editText` actions, forms and their
 // `validate` action) is reached through [TextFieldServices], which the
 // widgets layer passes to [textFieldRecipe] (render can't import runtime).
+import 'dart:async' show scheduleMicrotask;
 import 'dart:ui' as ui show BoxHeightStyle, BoxWidthStyle;
 
 import 'package:codelessly_api/core.dart' as api;
@@ -686,7 +687,7 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
       editor.openConnection();
       if (_showsCaret) _caret.start();
       _scheduleGeometry();
-      onEvent?.call('focusGained', editor.text);
+      _focusEvent('focusGained');
     } else {
       editor.closeConnection();
       _caret.stop();
@@ -695,15 +696,24 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         _error = null;
         showError(check());
       }
-      onEvent?.call('focusLost', editor.text);
+      _focusEvent('focusLost');
       if (_edited) {
         _edited = false;
-        onEvent?.call('editingComplete', editor.text);
+        _focusEvent('editingComplete');
       }
     }
     _editable.selectionColor = on ? config.tokens.primary.withValues(alpha: .25) : null;
     _syncText();
     markNeedsLayout();
+  }
+
+  /// Fires a focus trigger once the focus has settled, unless the field
+  /// left the screen meanwhile (a root that detaches drops its focus).
+  void _focusEvent(String trigger) {
+    final text = editor.text;
+    scheduleMicrotask(() {
+      if (attached) onEvent?.call(trigger, text);
+    });
   }
 
   bool get _showsCaret => _config != null && (config.showCursor ?? !config.readOnly);
@@ -831,7 +841,11 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
 
   void _revealNow(TextPosition position) {
     if (!_editable.hasSize) return;
-    final caret = _editable.getLocalRectForCaret(position);
+    // Not getLocalRectForCaret: it snaps to the screen's pixels, which
+    // can't be asked during layout.
+    final end = _editable.getEndpointsForSelection(TextSelection.fromPosition(position)).first.point;
+    final line = _editable.preferredLineHeight;
+    final caret = Rect.fromLTWH(end.dx, end.dy - line, _editable.cursorWidth + 1, line);
     final view = Offset.zero & _editable.size;
     final multi = contentMultiline;
     final before = multi ? caret.top - view.top : caret.left - view.left;
