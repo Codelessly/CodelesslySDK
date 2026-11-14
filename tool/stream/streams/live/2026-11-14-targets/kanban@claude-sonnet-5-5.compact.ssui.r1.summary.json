@@ -1,0 +1,119 @@
+{
+ "ui": "kanban",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "designSystem": {
+  "id": "ssui",
+  "name": "Soft SaaS UI",
+  "version": "1.0.0"
+ },
+ "systemPromptChars": 64465,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 27871,
+ "generate": {
+  "inputTokens": 164,
+  "outputTokens": 3999,
+  "cacheReadInputTokens": 27792,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1319,
+  "firstToolDeltaMs": 2192,
+  "totalMs": 22220,
+  "stopReason": "StopReason.toolUse",
+  "ops": 37,
+  "opsApplied": 29,
+  "opsRejected": 8,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 8,
+  "errors": [
+   "wrong_type /nodes/addInput/layout/width",
+   "invalid_enum /nodes/addBtn/actions/0/actions/0/condition/op",
+   "wrong_type /nodes/c0/layout/width",
+   "expression_syntax /nodes/h0n/bind/props.count",
+   "wrong_type /nodes/c1/layout/width",
+   "expression_syntax /nodes/h1n/bind/props.count",
+   "wrong_type /nodes/c2/layout/width",
+   "expression_syntax /nodes/h2n/bind/props.count",
+   "dangling_child /nodes/addRow/children/0",
+   "dangling_child /nodes/addRow/children/1",
+   "dangling_child /nodes/cols/children/0",
+   "dangling_child /nodes/cols/children/1",
+   "dangling_child /nodes/cols/children/2",
+   "dangling_child /nodes/h0/children/1",
+   "dangling_child /nodes/h1/children/1",
+   "dangling_child /nodes/h2/children/1"
+  ],
+  "lints": [],
+  "warnings": 6,
+  "nodes": 27,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 4,
+  "replacedControls": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 24976,
+   "outputTokens": 1339,
+   "cacheReadInputTokens": 83376,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 1617,
+   "firstToolDeltaMs": 5856,
+   "totalMs": 10507,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_docs",
+     "input": {
+      "topic": "state-formula-functions"
+     },
+     "ms": 1730,
+     "outputTokens": 76,
+     "resultChars": 3017
+    },
+    {
+     "tool": "ui_docs",
+     "input": {
+      "topic": "state-a-streak-and-other-counts-from-data"
+     },
+     "ms": 2089,
+     "outputTokens": 115,
+     "resultChars": 1087
+    }
+   ],
+   "ops": 8,
+   "opsApplied": 8,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 35,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 9,
+   "replacedControls": 0
+  }
+ ],
+ "final": {
+  "ops": 8,
+  "opsApplied": 8,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 35,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 9,
+  "replacedControls": 0
+ }
+}
