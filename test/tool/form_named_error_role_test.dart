@@ -27,5 +27,5 @@ void main() {
       if ((p.rgba[i] - 0xAE).abs() < 24 && (p.rgba[i + 1] - 0x55).abs() < 24 && (p.rgba[i + 2] - 0x3D).abs() < 24) clay++;
     }
     expect(clay, greaterThan(200), reason: 'the invalid field is drawn in the error color');
-  }, skip: true); // controls engineer: theme roles naming a theme color (see the comment above) // controls engineer: theme roles naming a theme color (see the comment above)
+  });
 }
