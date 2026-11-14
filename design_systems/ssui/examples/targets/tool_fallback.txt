@@ -1,0 +1,10 @@
+state choice=""
+Card gap:10
+  Banner "Search is not available" "The search tool timed out twice. I can still answer from the files you shared." tone:warning
+  if choice==""
+    Row gap:8
+      Button.outline "Use the files only" -> choice="files"; emit fallback choice
+      Button.outline "Try search again" -> choice="retry"; emit fallback choice
+      Button.ghost "Stop" -> choice="stop"; emit fallback choice
+  if choice!=""
+    Text.muted "{choice=="files"?"Answering from the 3 files you shared.":(choice=="retry"?"Trying search once more.":"Stopped.")}"

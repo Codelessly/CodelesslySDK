@@ -1,0 +1,20 @@
+state done=false
+Card gap:10
+  Row gap:8
+    IconBox "auto_awesome"
+    Column gap:1 grow
+      Text.sectionTitle "A harbor at dawn, soft light"
+      Text.caption "{done?"4 images · 12 s":"Generating 4 images"}"
+    StatusIndicator status:=done?"completion":"running"
+  if !done
+    RunningIndicator "Rendering" progress:0.6
+    Row gap:8
+      Skeleton variant:rectangular grow h:80
+      Skeleton variant:rectangular grow h:80
+      Skeleton variant:rectangular grow h:80
+  if done
+    ImageGallery images:["https://picsum.photos/seed/a/300","https://picsum.photos/seed/b/300","https://picsum.photos/seed/c/300"] -> emit pick result
+  Row end gap:8
+    Button.ghost "Change prompt" -> emit edit
+    Button "Show result" visible:=!done -> done=true
+    Button.outline "Generate again" visible:=done -> done=false; emit again

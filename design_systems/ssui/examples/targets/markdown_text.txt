@@ -1,0 +1,12 @@
+Column gap:10
+  Text.heading3 "Moving to the Business plan"
+  Text "It is the only plan with audit logs, which the brief lists as required."
+  Column gap:4
+    FeatureBulletItem "SSO and audit logs are included."
+    FeatureBulletItem "Seats can be added at any time, prorated."
+    FeatureBulletItem "Yearly billing saves 15%."
+  CodeBlock code:"plan: business\nseats: 40\nbilling: yearly" embedded:true
+  Row gap:10
+    Box w:3 h:fill radius:2 fill:#FFD1D5DB
+    Text.muted "Prices are before tax and change at renewal." grow
+  Hyperlink "Read the full pricing" url:"https://example.com/pricing"

@@ -1,0 +1,9 @@
+state playing=true
+state pos=30
+state speed="1x"
+Row gap:8
+  IconButton "{playing?"pause":"volume_up"}" -> playing=!playing; emit toggle
+  Slider =pos min:0 max:100 grow
+  Text.caption "0:14 / 0:46"
+  SegmentedControl =speed options:["1x","1.5x"]
+  IconButton "close" -> emit stop

@@ -1,0 +1,9 @@
+state lang="Dart"
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Sum the prices" grow
+    TabToggle options:["Dart","TypeScript"] =lang size:sm
+  if lang=="Dart"
+    CodeBlock code:"final total = items\n    .map((i) => i.price)\n    .fold(0, (a, b) => a + b);" title:"total.dart" language:"dart"
+  if lang=="TypeScript"
+    CodeBlock code:"const total = items\n  .map((i) => i.price)\n  .reduce((a, b) => a + b, 0);" title:"total.ts" language:"ts"

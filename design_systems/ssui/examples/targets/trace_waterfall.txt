@@ -1,0 +1,24 @@
+Card gap:8
+  Row gap:8
+    Text.sectionTitle "Trace" grow
+    Text.caption "1.84 s total"
+  Row gap:8
+    Text.small "plan" w:76
+    Box w:26 h:10 radius:3 fill:#FF2563EB
+    Text.caption "0.21 s"
+  Row gap:8
+    Text.small "search_docs" w:76
+    Spacer w:26
+    Box w:70 h:10 radius:3 fill:#FF9333EA
+    Text.caption "0.58 s"
+  Row gap:8
+    Text.small "read_file" w:76
+    Spacer w:96
+    Box w:32 h:10 radius:3 fill:#FF9333EA
+    Text.caption "0.26 s"
+  Row gap:8
+    Text.small "write answer" w:76
+    Spacer w:128
+    Box w:96 h:10 radius:3 fill:#FF16A34A
+    Text.caption "0.79 s"
+  FilterLegend labels:["Model","Tools","Output"] values:["0.21 s","0.84 s","0.79 s"] colors:["#FF2563EB","#FF9333EA","#FF16A34A"]
