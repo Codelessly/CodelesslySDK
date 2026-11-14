@@ -17,3 +17,21 @@ Measured against the reference over the button rows (x 24–700, y 24–332): 0.
 SSUI variant → core node: primary `filledButton`; secondary and destructive `filledButton` with that
 `style.backgroundColor`; outline `outlinedButton`; ghost `textButton`. Size → the node's height (24/28/32/36/44); 28
 (compact) is a button with no size: it hugs.
+
+## Toggles, sliders and segmented buttons (WS-E)
+
+SSUI's toggles reference (`../ssui-reference/ssui-toggles-{light,dark}.png`, soft_saas_ui's own checkboxes,
+radios, switches, sliders and segmented controls rendered by `tool/ssui_golden/test/ssui_toggles_test.dart`) rebuilt
+from core nodes that set only their values (`test/controls/ssui_toggles_page.dart`), 600 × 240 at 1×, Roboto.
+
+| File | What |
+|---|---|
+| `toggles-before-{light,dark}.png` | the same page through the Material islands (before this change): hugging toggles were 0 × 0, the segmented button Material's, overflowing |
+| `toggles-{light,dark}.png` | render-object toggles, slider and segmented button, SSUI defaults |
+| `toggles-compare-{light,dark}.png` | before, after and the SSUI reference, stacked |
+
+Pixels differing by more than 40 in a channel: toggles row 0.57 % light / 0.54 % dark (anti-aliasing of the check
+mark, drawn as a path where SSUI uses Lucide's font glyph), sliders 0.09 % / 0.00 % (SSUI's thumb casts a shadow;
+ours has a 1 px hairline in light and nothing in dark), segmented 0.00 % / 0.00 %. The reference's segment labels
+carry Material's 0.25 letter spacing (SSUI's Flutter widget inherits it from ThemeData's typography; the design
+system's control text styles have none, nor do the SDK's segments), so the page sets it on its segments.

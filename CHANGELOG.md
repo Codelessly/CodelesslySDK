@@ -20,6 +20,21 @@ and matching no item). The formula engine is right; nothing told the model.
   take the same path (`test/session/session_indicator_theme_test.dart`). With no theme they are the neutral ink and
   greys, as before.
 
+- **Toggles, slider and segmented button are render objects** (Milestone 3, WS-E). `checkbox`, `switch`, `radio`
+  (`render/controls/toggles.dart`), `slider` (`slider.dart`) and `segmentedButton` (`segmented.dart`) draw with no
+  Material widget; their islands (`widgets/inputs.dart`, `inputs_toggle.dart`, `slider_paint.dart`, the slider
+  shapes in `inputs_shapes.dart`) are gone. With nothing styled each is SSUI's control: a 16 px checkbox and radio,
+  a 36 × 20 switch whose thumb eases over 150 ms, a 200 × 28 slider with a 6 px rail and a ringed 14 px thumb (no
+  shadow), and SSUI's segmented well with each label measured centred in its segment. Values write back through
+  `changed` and follow their bindings; tristate checkboxes; radio groups with arrow keys; slider drag, tap, arrows,
+  Page Up/Down and Home/End, its value indicator in the root's overlay and its custom paint between its parts;
+  segmented tap and arrow keys, single and multi select; checked, toggled, slider (increase/decrease) and
+  per-segment semantics. Size changes: hugging toggles and segmented buttons were 0 × 0 or Material-sized and are
+  now SSUI's; a sized one keeps the islands' proportions (checkbox box 18/40, radio ring 18/32, switch track 52/59
+  of the node). Looks dropped as Material-only: the off thumb shrinking on a plain switch, the segmented check mark
+  (a set `selectedIcon` still shows), the slider thumb's shadow and default tick dots. Matched against
+  soft_saas_ui's own controls (`ssui-toggles-*.png`) within 0.6 % (toggles), 0.1 % (sliders), 0 % (segmented).
+
 - **Milestone 3 begins: buttons are render objects** (codelessly_api `docs/design/11-no-widgets.md`).
   `filledButton`, `elevatedButton`, `outlinedButton`, `textButton`, `iconButton` and `floatingActionButton` are drawn
   by `RenderButton` (`lib/src/render/controls/buttons.dart`) with no Material widget in their path. With nothing
