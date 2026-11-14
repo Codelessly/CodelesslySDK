@@ -387,4 +387,11 @@ void main() {
     final bars = boxes.where((b) => b['id'] == 'qtyBar').map((b) => b['w']).toList();
     expect(bars, [20, 80], reason: 'the second line went from 2 to 4; the first is as it was');
   });
+
+  testWidgets('an image path is relative to the site folder in components too; one written from the component\'s file is named with the fix', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/compimage'], out: out.path, sizes: const [Size(390, 200)]));
+    final failed = report.diagnostics.where((d) => d['code'] == 'image_failed').toList();
+    expect(failed, hasLength(1), reason: '${report.diagnostics}');
+    expect(failed.single['message'], allOf(contains('relative to the site folder'), contains('"images/dot.svg"')));
+  });
 }

@@ -378,7 +378,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   for (final e in docs.entries) {
     // Relative image paths start from the site's folder (as at run time),
     // else from the document's.
-    final p = prepare(e.value, dir: siteDir ?? dirs[e.key]!, defaultFamily: 'Roboto', codepoints: codepoints);
+    final p = prepare(e.value, dir: siteDir ?? dirs[e.key]!, docDir: dirs[e.key], defaultFamily: 'Roboto', codepoints: codepoints);
     for (final img in p.images) {
       if (_valueAt(p.json, img.path) case final String v when v.startsWith('data:image/svg')) svgSources[v] = img.url;
     }

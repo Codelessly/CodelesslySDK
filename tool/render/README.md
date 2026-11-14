@@ -157,8 +157,12 @@ node_modules/@fontsource/<family>` works as it is. `--fonts system` adds the sys
 
 ## Images
 
-The SDK draws `https://` and `data:image/...` URLs. Offline, the command also reads an image path relative to
-the document (`"url": "assets/photo.png"`, or `file://...`) and inlines the file as a `data:` URL. Network images
+The SDK draws `https://` and `data:image/...` URLs. Offline, the command also reads an image path (`"url":
+"images/photo.png"`, or `file://...`) and inlines the file as a `data:` URL. In a site the path is relative to the
+site's folder (the one with `site.json`) in every document, components included (`images/bowl.svg` from
+`components/ProductCard.json` too, never `../images/bowl.svg`), as a published site reads it: its files are served
+from the site's root. A document rendered on its own (no `site.json`) reads paths relative to its own folder. A
+path written from a component's folder is reported (`image_failed`) with the site-relative path to write. Network images
 are not fetched: they are reported (`image_network`) and stay blank. Material icons named without a codepoint
 (an app fetches their SVG) are drawn from the Material Icons font.
 
