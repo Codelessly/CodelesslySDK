@@ -119,9 +119,9 @@
      "hug": 28
     },
     "padding": [
-     8,
+     10,
      0,
-     8,
+     10,
      0
     ]
    },
@@ -139,7 +139,7 @@
     "radius": 7
    },
    "bind": {
-    "layout.padding": "${= props.size == 'xs' ? [6, 0, 6, 0] : (props.size == 'compact' ? [8, 0, 8, 0] : (props.size == 'small' ? [10, 0, 10, 0] : (props.size == 'medium' ? [10, 0, 10, 0] : ([12, 0, 12, 0]))))}",
+    "layout.padding": "${= props.size == 'xs' ? [8, 0, 8, 0] : (props.size == 'compact' ? [10, 0, 10, 0] : (props.size == 'small' ? [12, 0, 12, 0] : (props.size == 'medium' ? [12, 0, 12, 0] : ([14, 0, 14, 0]))))}",
     "props.spacing": "${= props.size == 'xs' ? 6 : (props.size == 'compact' ? 6 : (props.size == 'small' ? 6 : (props.size == 'medium' ? 6 : (8))))}",
     "decoration.radius": "${= props.size == 'xs' ? 5 : (props.size == 'compact' ? 7 : (props.size == 'small' ? 7 : (props.size == 'medium' ? 7 : (7))))}",
     "decoration.fills[0].color": "${= props.variant == 'primary' ? theme.primary : (props.variant == 'secondary' ? theme.colors.neutralFill : (props.variant == 'destructive' ? theme.error : '#00000000'))}",

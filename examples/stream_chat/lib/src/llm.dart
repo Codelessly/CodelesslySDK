@@ -526,12 +526,19 @@ List<Map<String, Object?>> uiToolsForAgent() => uiToolsFor(PromptVariant.full);
 
 /// The system prompt for [variant]: the base set generated now, or [full]
 /// (assets/system_prompt.md).
+///
+/// With a [designSystem] the base is generated from it too: its principles,
+/// tokens, components and patterns, without the base controls it replaces.
 String systemPromptFor(
   PromptVariant variant, {
   required String full,
   String kind = 'card',
   api.TrustProfile? profile,
-}) => variant == PromptVariant.full ? full : api.runtimeStarter(profile: profile, kind: kind);
+  api.DesignSystem? designSystem,
+}) =>
+    variant == PromptVariant.full
+        ? full
+        : api.runtimeStarter(profile: profile, kind: kind, designSystem: designSystem);
 
 /// The answer to a lookup tool call, from the document the session holds.
 Object? answerLookup(
@@ -540,11 +547,13 @@ Object? answerLookup(
   required api.LayoutDocument document,
   int rev = 0,
   api.TrustProfile? profile,
+  api.DesignSystem? designSystem,
 }) {
   final p = profile ?? api.TrustProfile.agent;
+  final catalog = designSystem?.catalogOver(api.Catalog.core) ?? api.Catalog.core;
   return switch (tool) {
-    'ui_docs' => api.docsTopic('${input['topic'] ?? ''}', profile: p),
-    'ui_read' => api.readUi(document, input, rev: rev, catalog: p.restrict(api.Catalog.core)),
+    'ui_docs' => api.docsTopic('${input['topic'] ?? ''}', profile: p, designSystem: designSystem),
+    'ui_read' => api.readUi(document, input, rev: rev, catalog: p.restrict(catalog)),
     _ => {'error': 'No tool "$tool".'},
   };
 }

@@ -127,15 +127,25 @@ class LlmStreamSource implements StreamSource {
   /// [systemPrompt]: the full prompt (assets/system_prompt.md), sent with
   /// [variant] full; the compact variant (the default) generates the base
   /// set and offers ui_docs.
+  ///
+  /// With a [designSystem], the compact prompt is generated from it too and
+  /// ui_docs answers its documents and components.
   LlmStreamSource(
-      {required String apiKey, String model = kDefaultModel, required String systemPrompt, PromptVariant variant = PromptVariant.compact})
+      {required String apiKey,
+      String model = kDefaultModel,
+      required String systemPrompt,
+      PromptVariant variant = PromptVariant.compact,
+      this.designSystem})
       : _model = UiModel(
             apiKey: apiKey,
             model: model,
-            systemPrompt: systemPromptFor(variant, full: systemPrompt),
+            systemPrompt: systemPromptFor(variant, full: systemPrompt, designSystem: designSystem),
             tools: uiToolsFor(variant));
 
   final UiModel _model;
+
+  /// The design system the UIs are made with (null: none).
+  final DesignSystem? designSystem;
   String? _lastToolUseId;
 
   @override
@@ -156,7 +166,7 @@ class LlmStreamSource implements StreamSource {
               toolResult: _lastToolUseId == null ? null : const {'ok': true},
               toolUseId: _lastToolUseId,
               onToolDelta: deltas.add,
-              lookup: (tool, input) => answerLookup(tool, input, document: LayoutDocument()),
+              lookup: (tool, input) => answerLookup(tool, input, document: LayoutDocument(), designSystem: designSystem),
             );
           case EditTurn(:final text, :final session, :final lastResult):
             t = await _model.turn(
@@ -164,7 +174,7 @@ class LlmStreamSource implements StreamSource {
               toolUseId: _lastToolUseId,
               user: text,
               onToolDelta: deltas.add,
-              lookup: (tool, input) => answerLookup(tool, input, document: session.document, rev: session.rev),
+              lookup: (tool, input) => answerLookup(tool, input, document: session.document, rev: session.rev, designSystem: designSystem),
             );
           case ActionTurn(:final event, :final session):
             t = await _model.turn(
@@ -172,7 +182,7 @@ class LlmStreamSource implements StreamSource {
               toolUseId: _lastToolUseId,
               user: event.toModelMessage(),
               onToolDelta: deltas.add,
-              lookup: (tool, input) => answerLookup(tool, input, document: session.document, rev: session.rev),
+              lookup: (tool, input) => answerLookup(tool, input, document: session.document, rev: session.rev, designSystem: designSystem),
             );
         }
         // The next turn answers this one's tool call, if it made one.
