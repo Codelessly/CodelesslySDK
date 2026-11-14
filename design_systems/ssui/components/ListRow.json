@@ -103,13 +103,11 @@
    "type": "row",
    "children": [
     "strut",
-    "glyph",
-    "texts",
-    "trailing"
+    "rowContent"
    ],
    "props": {
     "crossAxisAlignment": "center",
-    "spacing": 10
+    "spacing": 0
    },
    "layout": {
     "width": {
@@ -278,6 +276,26 @@
    "type": "slot",
    "props": {
     "name": "trailing"
+   }
+  },
+  "rowContent": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "texts",
+    "trailing"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
    }
   }
  }

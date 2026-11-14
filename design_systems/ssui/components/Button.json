@@ -103,13 +103,12 @@
    "type": "row",
    "children": [
     "strut",
-    "icon",
-    "label"
+    "buttonContent"
    ],
    "props": {
     "mainAxisAlignment": "center",
     "crossAxisAlignment": "center",
-    "spacing": 6
+    "spacing": 0
    },
    "layout": {
     "width": {
@@ -140,7 +139,6 @@
    },
    "bind": {
     "layout.padding": "${= props.size == 'xs' ? [8, 0, 8, 0] : (props.size == 'compact' ? [10, 0, 10, 0] : (props.size == 'small' ? [12, 0, 12, 0] : (props.size == 'medium' ? [12, 0, 12, 0] : ([14, 0, 14, 0]))))}",
-    "props.spacing": "${= props.size == 'xs' ? 6 : (props.size == 'compact' ? 6 : (props.size == 'small' ? 6 : (props.size == 'medium' ? 6 : (8))))}",
     "decoration.radius": "${= props.size == 'xs' ? 5 : (props.size == 'compact' ? 7 : (props.size == 'small' ? 7 : (props.size == 'medium' ? 7 : (7))))}",
     "decoration.fills[0].color": "${= props.variant == 'primary' ? theme.primary : (props.variant == 'secondary' ? theme.colors.neutralFill : (props.variant == 'destructive' ? theme.error : '#00000000'))}",
     "decoration.strokes[0].color": "${= props.variant == 'outline' ? theme.colors.primaryBorder : '#00000000'}",
@@ -239,6 +237,29 @@
    "bind": {
     "props.style.fontSize": "${= props.size == 'xs' ? 11.5 : (props.size == 'compact' ? 12 : (props.size == 'small' ? 12.5 : (props.size == 'medium' ? 13 : (15))))}",
     "props.style.color": "${= props.variant == 'primary' || props.variant == 'secondary' || props.variant == 'destructive' ? theme.colors.onAccent : theme.colors.primaryText}"
+   }
+  },
+  "buttonContent": {
+   "type": "row",
+   "children": [
+    "icon",
+    "label"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.spacing": "${= props.size == 'xs' ? 6 : (props.size == 'compact' ? 6 : (props.size == 'small' ? 6 : (props.size == 'medium' ? 6 : (8))))}"
    }
   }
  }

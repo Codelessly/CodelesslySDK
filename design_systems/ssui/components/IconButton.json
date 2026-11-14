@@ -92,11 +92,12 @@
    "type": "row",
    "children": [
     "strut",
-    "glyph"
+    "buttonContent"
    ],
    "props": {
     "mainAxisAlignment": "center",
-    "crossAxisAlignment": "center"
+    "crossAxisAlignment": "center",
+    "spacing": 0
    },
    "layout": {
     "width": {
@@ -197,6 +198,24 @@
     "layout.width": "${= props.size == 'xs' ? 12 : (props.size == 'compact' ? 14 : (props.size == 'small' ? 14 : (props.size == 'medium' ? 16 : (18))))}",
     "layout.height": "${= props.size == 'xs' ? 12 : (props.size == 'compact' ? 14 : (props.size == 'small' ? 14 : (props.size == 'medium' ? 16 : (18))))}",
     "props.color": "${= props.variant == 'primary' ? theme.colors.onAccent : theme.colors.secondaryText}"
+   }
+  },
+  "buttonContent": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
    }
   }
  }

@@ -194,8 +194,39 @@ def component(type_, doc, root, nodes, props=(), events=(), slots=(), children=N
         doc_['variables'] = {root: variables}
     if previews:
         doc_['previews'] = list(previews)
-    doc_['nodes'] = nodes
+    doc_['nodes'] = _struts_out_of_spacing(nodes)
     return doc_
+
+
+def _struts_out_of_spacing(nodes):
+    """A row that starts with its height strut keeps its spacing between its content only.
+
+    The strut is zero wide, but as a sibling of the content the row's spacing put one gap
+    after it: every button, badge and chip had that much extra room on its left. The
+    content moves into an inner row that carries the spacing; the outer row holds the
+    strut and that inner row with no spacing.
+    """
+    out = dict(nodes)
+    for nid, n in nodes.items():
+        kids = n.get('children') or []
+        if n.get('type') != 'row' or len(kids) < 2 or kids[0] != 'strut':
+            continue
+        outer = {**n, 'props': dict(n.get('props') or {}), 'layout': dict(n.get('layout') or {})}
+        inner_id = nid + 'Content'
+        assert inner_id not in nodes, inner_id
+        fills = isinstance(outer['layout'].get('width'), dict) and 'fill' in outer['layout']['width']
+        inner = {'type': 'row', 'children': kids[1:],
+                 'props': {k: v for k, v in outer['props'].items() if k in ('spacing', 'crossAxisAlignment', 'mainAxisAlignment')},
+                 'layout': {'width': {'fill': 100} if fills else {'hug': 40}, 'height': {'hug': 16}}}
+        outer['props']['spacing'] = 0
+        outer['children'] = ['strut', inner_id]
+        bind = dict(outer.get('bind') or {})
+        if 'props.spacing' in bind:
+            inner['bind'] = {'props.spacing': bind.pop('props.spacing')}
+            outer['bind'] = bind
+        out[nid] = outer
+        out[inner_id] = inner
+    return out
 
 
 def preview(_name, _w, _h, **props):
