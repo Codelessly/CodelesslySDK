@@ -810,8 +810,6 @@ void _tableViewInner(NodeBuilder b, Node n, List<RenderBox> chain) {
         : BorderSide(color: n.prop(TableViewProps.headerBorderColor)!.flutter, width: n.prop(TableViewProps.headerBorderWidth))
     ..selectedRow = n.prop(TableViewProps.selectedRow)
     ..selectedColor = n.prop(TableViewProps.selectedRowColor)?.flutter
-    ..selectedEdgeColor = n.prop(TableViewProps.selectedRowEdgeColor)?.flutter
-    ..selectedEdgeWidth = n.prop(TableViewProps.selectedRowEdgeWidth)
     ..changed();
   b.syncChildren(view as _Container, ids, Slot(SlotKind.root, n), instances: instances);
   chain.add(view);

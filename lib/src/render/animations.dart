@@ -53,6 +53,14 @@ Set<String> replacedMotionProperties(Node n) => {
               if (motionTrackProperties.contains(t.path.substring(7))) t.path.substring(7),
     };
 
+/// Whether binding path [path] of node [n] is a text prop (`props.text`):
+/// a number in it counts in a track or a transition.
+bool isTextPath(Node? n, String path) {
+  if (n == null || !path.startsWith('props.')) return false;
+  final codec = n.spec?.prop(path.substring(6))?.codec;
+  return codec is api.StringCodec || codec is api.OptionalStringCodec;
+}
+
 /// Whether [n]'s animations replace its own opacity, or a transition eases
 /// it: its player draws it (the node has no opacity layer of its own).
 bool animatesOpacity(Node n) =>
@@ -767,9 +775,14 @@ class RenderAnimations extends RenderPose {
   /// The values last drawn, by path (motion numbers and opacity).
   Map<String, double> _lastDrawn = const {};
 
+  /// How the text at each path a transition counts writes its number (a
+  /// text's `props.text`): the tween's value is drawn written so.
+  final Map<String, api.NumberInText> _textEnds = {};
+
   /// The numbers [n] has at the paths its transitions ease: its motion's,
-  /// its opacity, and the single paths they name.
-  Map<String, double> _eased(Node n) {
+  /// its opacity, and the single paths they name (a text's: the number in
+  /// it, how it is written recorded in [texts]).
+  Map<String, double> _eased(Node n, {Map<String, api.NumberInText>? texts}) {
     final out = <String, double>{};
     final list = n.behaviors.transitions;
     final motion = n.behaviors.motion ?? api.Motion.none;
@@ -780,7 +793,15 @@ class RenderAnimations extends RenderPose {
     for (final t in list) {
       final path = t.property;
       if (path == '*' || path == 'opacity' || path.startsWith('motion') || out.containsKey(path)) continue;
-      if (api.readDouble(_ownValue(n.id, path, node: n)) case final double v) out[path] = v;
+      final own = _ownValue(n.id, path, node: n);
+      if (own is String && isTextPath(n, path)) {
+        if (api.NumberInText.parse(own) case final number?) {
+          out[path] = number.value;
+          texts?[path] = number;
+        }
+      } else if (api.readDouble(own) case final double v) {
+        out[path] = v;
+      }
     }
     return out;
   }
@@ -794,7 +815,7 @@ class RenderAnimations extends RenderPose {
       _tweens.clear();
       return;
     }
-    final before = _eased(previous), after = _eased(next);
+    final before = _eased(previous), after = _eased(next, texts: _textEnds);
     final list = next.behaviors.transitions;
     final started = <api.Transition>{};
     for (final e in after.entries) {
@@ -953,7 +974,7 @@ class RenderAnimations extends RenderPose {
       } else if (e.key == 'opacity') {
         opacityOverride = e.value.value.clamp(0.0, 1.0);
       } else {
-        (patches[n.id] ??= {})[e.key] = e.value.value;
+        (patches[n.id] ??= {})[e.key] = _textEnds[e.key]?.format(e.value.value) ?? e.value.value;
       }
     }
     double? shimmerAt;
@@ -1015,7 +1036,10 @@ class RenderAnimations extends RenderPose {
         if (t.node.isEmpty && eased(path)) continue;
         // Any other path: a patch of the node (or of node [t.node]).
         final target = t.node.isEmpty ? n.id : t.node;
-        final value = t.valueAt(v, own: _resolved(_ownValue(target, path)), begin: _resolved(t.from), end: _resolved(t.to));
+        final own = _resolved(_ownValue(target, path));
+        // A text's number counts (a track on `props.text`).
+        final text = own is String && isTextPath(t.node.isEmpty ? n : _box?.nodeOf(target), path);
+        final value = t.valueAt(v, own: own, begin: _resolved(t.from), end: _resolved(t.to), text: text);
         if (value != null) (patches[target] ??= {})[path] = value;
       }
       if (dx != 0 || dy != 0 || sc != 1 || sx != 1 || sy != 1 || rot != 0) {

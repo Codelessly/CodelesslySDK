@@ -24,7 +24,6 @@ import 'play.dart';
 import 'contracts.dart';
 import 'control_theme.dart' show ControlTheme, backdropOf;
 import 'convert.dart';
-import 'count_up.dart';
 import 'custom_paint.dart' show customPaintLayers;
 import 'layout/margin_box.dart';
 import 'layout/scaffold_slots.dart';
@@ -1099,14 +1098,16 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   bool _retextOnly(Node old, Node n) {
     if (n.type != 'text' || old.type != 'text') return false;
     if (old.copyWith(props: n.props) != n) return false;
+    // Its animations or transitions may play the text (a number counting):
+    // its player sees the change when the recipe re-applies it.
+    if (n.behaviors.transitions.isNotEmpty || n.behaviors.animations.isNotEmpty) return false;
     final sameOtherwise = old.props
         .set<Object?>(TextProps.text, n.prop(TextProps.text))
         .set<Object?>(TextProps.runs, n.prop(TextProps.runs))
         .set<Object?>(TextProps.style, n.prop(TextProps.style));
     if (sameOtherwise != n.props) return false;
     final paragraph = _objects['paragraph'];
-    // A count-up text counts to its new value: the recipe re-applies it.
-    if (paragraph is! RenderParagraph || paragraph is RenderCountUpParagraph) return false;
+    if (paragraph is! RenderParagraph) return false;
     paragraph.text = _textSpan(n);
     _node = n;
     _applied = n;
@@ -2180,28 +2181,9 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       chain.add(_obtain<RenderPadding>('textPad', () => RenderPadding(padding: padding, textDirection: TextDirection.ltr))
         ..padding = padding);
     }
-    final countUp = n.prop(TextProps.countUp);
-    final RenderParagraph paragraph;
     final span = _textSpan(n);
-    if (countUp) {
-      paragraph = _obtain<RenderCountUpParagraph>('paragraph', RenderCountUpParagraph.new);
-    } else {
-      paragraph = _obtain<RenderParagraph>('paragraph', () => RenderParagraph(span, textDirection: TextDirection.ltr))
-        ..text = span;
-    }
-    if (paragraph is RenderCountUpParagraph) {
-      // Counts in a running app; a design canvas (or TickerMode off) and a
-      // text without countUp show the final text.
-      paragraph.count(
-        n.prop(TextProps.text),
-        (text) => _textSpan(n.withProp(TextProps.text, text)),
-        animates: countUp && tree.animates && tree.runtimeVisible,
-        durationMs: n.prop(TextProps.countUpDuration),
-        curve: n.prop(TextProps.countUpCurve),
-        onShow: n.prop(TextProps.countUpOnShow),
-        visible: () => tree.runtimeVisible,
-      );
-    }
+    final paragraph = _obtain<RenderParagraph>('paragraph', () => RenderParagraph(span, textDirection: TextDirection.ltr))
+      ..text = span;
     paragraph
       ..textAlign = flutterTextAlign(textAlign)
       ..maxLines = n.prop(TextProps.maxLines)

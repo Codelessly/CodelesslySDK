@@ -172,13 +172,11 @@ class RectSliderThumbShape extends SliderComponentShape {
     required this.radius,
     required this.borderColor,
     required this.borderWidth,
-    required this.gripColor,
   });
 
   final double width, height, radius;
   final Color borderColor;
   final double borderWidth;
-  final Color gripColor;
 
   @override
   Size getPreferredSize(bool isEnabled, bool isDiscrete) => Size(width, height);
@@ -210,30 +208,18 @@ class RectSliderThumbShape extends SliderComponentShape {
             ..strokeWidth = borderWidth
             ..color = borderColor);
     }
-    if (gripColor.a > 0) {
-      canvas.drawRect(Rect.fromCenter(center: center, width: width * 0.43, height: 2), Paint()..color = gripColor);
-    }
   }
 }
 
-/// A track that can fill from the end, fade its active part in and draw a
-/// marker across itself.
+/// A track that fills from the end.
 class MarkedSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape {
   const MarkedSliderTrackShape({
     required this.fillFromEnd,
-    this.activeStartOpacity = 1,
-    required this.markerFraction,
-    required this.markerColor,
-    required this.markerWidth,
-    required this.markerHeight,
     required this.radius,
   });
 
   final bool fillFromEnd;
-  final double activeStartOpacity;
-  final double? markerFraction;
-  final Color markerColor;
-  final double markerWidth, markerHeight, radius;
+  final double radius;
 
   @override
   void paint(
@@ -258,22 +244,7 @@ class MarkedSliderTrackShape extends SliderTrackShape with BaseSliderTrackShape 
         ? Rect.fromLTRB(thumbCenter.dx, track.top, track.right, track.bottom)
         : Rect.fromLTRB(track.left, track.top, thumbCenter.dx, track.bottom);
     if (active.width > 0) {
-      final color = sliderTheme.activeTrackColor ?? Colors.black;
-      final paint = Paint()..color = color;
-      if (activeStartOpacity < 1) {
-        final faint = color.withValues(alpha: color.a * activeStartOpacity.clamp(0.0, 1.0));
-        paint.shader = LinearGradient(
-          begin: activeOnRight ? Alignment.centerRight : Alignment.centerLeft,
-          end: activeOnRight ? Alignment.centerLeft : Alignment.centerRight,
-          colors: [faint, color],
-        ).createShader(active);
-      }
-      canvas.drawRRect(RRect.fromRectAndRadius(active, r), paint);
-    }
-    if (markerFraction case final double f) {
-      final x = track.left + track.width * f;
-      canvas.drawRect(Rect.fromCenter(center: Offset(x, track.center.dy), width: markerWidth, height: markerHeight),
-          Paint()..color = markerColor);
+      canvas.drawRRect(RRect.fromRectAndRadius(active, r), Paint()..color = sliderTheme.activeTrackColor ?? Colors.black);
     }
   }
 }
@@ -611,20 +582,11 @@ class SignaturePainter extends CustomPainter {
 }
 
 /// A drafting ruler as a slider track: a strip in the inactive track color
-/// across the slider's whole width, a baseline with [ticks] ticks (every
-/// [majorEvery]th long), and the active color filled from zero (or the
-/// minimum) to the value just under the baseline.
+/// across the slider's whole width, and the active color filled from zero
+/// (or the minimum) to the value under it. Its baseline and ticks are the
+/// node's custom paint (drawn over the track).
 class RulerSliderTrackShape extends SliderTrackShape {
-  const RulerSliderTrackShape({
-    required this.ticks,
-    required this.majorEvery,
-    required this.tickColor,
-    required this.minorTickColor,
-    required this.zeroFraction,
-  });
-
-  final int ticks, majorEvery;
-  final Color tickColor, minorTickColor;
+  const RulerSliderTrackShape({required this.zeroFraction});
 
   /// Where zero sits along the track (0 when the range doesn't include it).
   final double zeroFraction;
@@ -660,21 +622,9 @@ class RulerSliderTrackShape extends SliderTrackShape {
     final cy = rect.center.dy;
     final base = cy + 1;
     canvas.drawRect(Rect.fromLTRB(rect.left, cy - 9, rect.right, base), Paint()..color = sliderTheme.inactiveTrackColor ?? const Color(0x00000000));
-    final major = Paint()
-      ..color = tickColor
-      ..strokeWidth = 1;
-    final minor = Paint()
-      ..color = minorTickColor
-      ..strokeWidth = 1;
-    canvas.drawLine(Offset(rect.left, base), Offset(rect.right, base), major);
-    for (var i = 0; i <= ticks; i++) {
-      final x = rect.left + (rect.width - 1) * i / ticks + 0.5;
-      final long = i % majorEvery == 0;
-      canvas.drawLine(Offset(x, base), Offset(x, base - (long ? 8 : 4)), long ? major : minor);
-    }
     final zero = rect.left + rect.width * zeroFraction;
     final a = math.min(zero, thumbCenter.dx), b = math.max(zero, thumbCenter.dx);
-    canvas.drawRect(Rect.fromLTRB(a, base + 1, b, base + 4), Paint()..color = sliderTheme.activeTrackColor ?? tickColor);
+    canvas.drawRect(Rect.fromLTRB(a, base + 1, b, base + 4), Paint()..color = sliderTheme.activeTrackColor ?? const Color(0xFF000000));
   }
 }
 

@@ -1526,10 +1526,9 @@ class RenderTableItems extends RenderCollection {
   /// The line under the header row, or null (then [gridLine]).
   BorderSide? headerBorder;
 
-  /// The selected body row (-1: none): its fill and the bar at its start.
+  /// The selected body row (-1: none): its fill.
   int selectedRow = -1;
-  Color? selectedColor, selectedEdgeColor;
-  double selectedEdgeWidth = 4;
+  Color? selectedColor;
 
   void changed() {
     markNeedsLayout();
@@ -1602,9 +1601,6 @@ class RenderTableItems extends RenderCollection {
     if (selectedRow >= 0 && selected < rowHeights.length) {
       final band = Offset(offset.dx, offset.dy + _start(rowHeights, selected)) & Size(width, rowHeights[selected]);
       if (selectedColor case final Color color) canvas.drawRect(band, Paint()..color = color);
-      if (selectedEdgeColor case final Color color) {
-        canvas.drawRect(band.topLeft & Size(selectedEdgeWidth, band.height), Paint()..color = color);
-      }
     }
   }
 

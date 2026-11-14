@@ -580,18 +580,38 @@ void main() {
       expect(tester.widget<TextField>(find.byType(TextField)).controller!.text, 'a = 2');
     });
 
-    testWidgets('a highlighted range of the text is drawn in its style', (tester) async {
+    testWidgets('a run of the text (a bound range) is drawn in its style', (tester) async {
       await show(tester, {
         'type': 'textField', 'layout': {'width': 200, 'height': 40},
-        'props': {'initialValue': 'y = sin(x*x', 'highlightStart': 7, 'highlightEnd': 8,
-          'highlightStyle': {'color': '#FFB3261E', 'backgroundColor': '#FFF7E3DC'}},
-        'bind': {'props.highlightStart': r'${col}', 'props.highlightEnd': r'${= col + 1}'},
+        'props': {'initialValue': 'y = sin(x*x'},
+        'bind': {'props.runs': "\${= [{'start': col, 'end': col + 1, 'style': {'color': '#FFB3261E', 'backgroundColor': '#FFF7E3DC'}}]}"},
       }, [harness.v('col', 7, api.VariableType.integer)]);
       final controller = tester.widget<TextField>(find.byType(TextField)).controller! as HighlightTextController;
       final span = controller.buildTextSpan(context: tester.element(find.byType(TextField)), withComposing: false);
       final parts = span.children!.cast<TextSpan>();
       expect(parts.map((p) => p.text), ['y = sin', '(', 'x*x']);
       expect(parts[1].style!.color, const Color(0xFFB3261E));
+    });
+
+    testWidgets('runs that overlap merge their styles in order; a run past the end is cut at it', (tester) async {
+      await show(tester, {
+        'type': 'textField', 'layout': {'width': 200, 'height': 40},
+        'props': {
+          'initialValue': 'abcdef',
+          'runs': [
+            {'start': 1, 'end': 4, 'style': {'color': '#FFB3261E'}},
+            {'start': 3, 'end': 40, 'style': {'fontWeight': 700}},
+          ],
+        },
+      }, const []);
+      final controller = tester.widget<TextField>(find.byType(TextField)).controller! as HighlightTextController;
+      final span = controller.buildTextSpan(context: tester.element(find.byType(TextField)), withComposing: false);
+      final parts = span.children!.cast<TextSpan>();
+      expect(parts.map((p) => p.text), ['a', 'bc', 'd', 'ef']);
+      expect(parts[0].style, isNull);
+      expect(parts[2].style!.color, const Color(0xFFB3261E));
+      expect(parts[2].style!.fontWeight, FontWeight.w700);
+      expect(parts[3].style!.color, isNull);
     });
   });
 

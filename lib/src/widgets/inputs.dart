@@ -33,6 +33,7 @@ import 'package:codelessly_api/core.dart'
         SwitchProps,
         TextFieldProps,
         TimePickerProps;
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -41,7 +42,6 @@ import 'package:intl/intl.dart' show DateFormat;
 
 import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
-import '../runtime/expressions/formula.dart' show FormulaEvaluator;
 import '../runtime/actions/text_fields.dart';
 import '../runtime/actions/form_fields.dart';
 import '../render/contracts.dart' show ExpressionValues;
@@ -51,6 +51,8 @@ import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
 import 'inputs_shapes.dart';
 import 'inputs_toggle.dart';
+import 'slider_paint.dart';
+import '../render/custom_paint.dart' show RenderCustomPaintLayer;
 import '../runtime/http_image_loader.dart';
 
 // Pickers follow the same app tokens and inferred styling as runtime dialogs.
@@ -130,16 +132,31 @@ void _sized(NodeBuilder b, Node n, List<RenderBox> chain, WidgetBuilder build) {
 }
 
 /// A fill slider reflows its native track to the available axis; hugging
-/// sliders retain their historical design size.
+/// sliders retain their historical design size. Its custom paint is drawn
+/// between its parts (slider_paint.dart).
 void _slider(NodeBuilder b, Node n, List<RenderBox> chain) {
   final vertical = n.prop(SliderProps.orientation) == api.Axis.vertical;
   final fit = vertical ? n.layout.height.fit : n.layout.width.fit;
+  final paint = chain.whereType<RenderCustomPaintLayer>().lastOrNull?..drawnByContent = true;
   if (fit == SizeFit.fill) {
-    _fitted(b, n, chain, (context) => _SliderIsland(node: n));
+    _fitted(b, n, chain, (context) => _SliderIsland(node: n, paint: paint));
   } else {
-    _sized(b, n, chain, (context) => _SliderIsland(node: n));
+    _sized(b, n, chain, (context) => _SliderIsland(node: n, paint: paint));
   }
 }
+
+/// [slider] drawing [paint]'s lists between its parts (the slider shows
+/// [value] between [min] and [max]).
+Widget _paintedSlider(RenderCustomPaintLayer? paint, Widget slider,
+        {required double value, required double min, required double max}) =>
+    paint == null
+        ? slider
+        : Builder(
+            builder: (context) => SliderTheme(
+              data: paintedSliderTheme(SliderTheme.of(context), paint, value: value, min: min, max: max),
+              child: slider,
+            ),
+          );
 
 void _segmentedButton(NodeBuilder b, Node n, List<RenderBox> chain) {
   // SegmentedButton needs a segment: without one, only its box.
@@ -463,7 +480,7 @@ class _TextFieldIsland extends StatefulWidget {
 
 class _TextFieldIslandState extends State<_TextFieldIsland> {
   late final HighlightTextController controller = HighlightTextController(text: widget.node.prop(TextFieldProps.initialValue))
-    ..highlight = _highlight(widget.node);
+    ..runs = _runs(widget.node);
   late final FocusNode focusNode = FocusNode()..addListener(_focusChanged);
 
   /// The texts this field reported as changed, newest last: a value bound
@@ -472,16 +489,13 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
   /// echo, not a new value, and must not overwrite what was typed since.
   final List<String> _sent = [];
 
-  static (int, int, TextStyle?)? _highlight(Node n) {
-    final start = n.prop(TextFieldProps.highlightStart), end = n.prop(TextFieldProps.highlightEnd);
-    if (start == null || end == null || end <= start) return null;
-    return (start, end, _styleOrNull(n.prop(TextFieldProps.highlightStyle), n.behaviors.defaultTextStyle));
-  }
+  /// [n]'s runs, with the text style its runs inherit.
+  static (List<api.TextRun>, api.TextStyle?) _runs(Node n) => (n.prop(TextFieldProps.runs), n.behaviors.defaultTextStyle);
 
   @override
   void didUpdateWidget(covariant _TextFieldIsland oldWidget) {
     super.didUpdateWidget(oldWidget);
-    controller.highlight = _highlight(widget.node);
+    controller.runs = _runs(widget.node);
     final initial = widget.node.prop(TextFieldProps.initialValue);
     if (initial != oldWidget.node.prop(TextFieldProps.initialValue) && controller.text != initial) {
       final echo = _sent.indexOf(initial);
@@ -1111,8 +1125,11 @@ String? sliderLabel(Node n, double value) {
 }
 
 class _SliderIsland extends StatefulWidget {
-  const _SliderIsland({required this.node});
+  const _SliderIsland({required this.node, this.paint});
   final Node node;
+
+  /// The node's custom paint, drawn between the slider's parts.
+  final RenderCustomPaintLayer? paint;
 
   @override
   State<_SliderIsland> createState() => _SliderIslandState();
@@ -1135,12 +1152,9 @@ class _SliderIslandState extends State<_SliderIsland> {
     final max = math.max(min, n.prop(SliderProps.max));
     final vertical = n.prop(SliderProps.orientation) == api.Axis.vertical;
     final range = max - min;
-    final marker = n.prop(SliderProps.markerValue);
-    final markerFraction = marker == null || range == 0 ? null : ((marker - min) / range).clamp(0.0, 1.0);
     final trackHeight = n.prop(SliderProps.trackHeight);
     final trackShapeKind = n.prop(SliderProps.trackShape);
     final showThumb = n.prop(SliderProps.showThumb);
-    final startOpacity = n.prop(SliderProps.activeTrackStartOpacity);
     final fillFromEnd = n.prop(SliderProps.fillFromEnd);
     final SliderTrackShape? baseTrack = switch (trackShapeKind) {
       null => null,
@@ -1148,23 +1162,12 @@ class _SliderIslandState extends State<_SliderIsland> {
       api.SliderTrackShape.roundedRectangle => const RoundedRectSliderTrackShape(),
       api.SliderTrackShape.gapped => const GappedSliderTrackShape(),
       api.SliderTrackShape.ruler => RulerSliderTrackShape(
-          ticks: n.prop(SliderProps.rulerTicks),
-          majorEvery: n.prop(SliderProps.rulerMajorEvery),
-          tickColor: _color(n.prop(SliderProps.rulerTickColor)) ?? const Color(0xFF000000),
-          minorTickColor: _color(n.prop(SliderProps.rulerMinorTickColor)) ??
-              _color(n.prop(SliderProps.rulerTickColor)) ??
-              const Color(0xFF000000),
           zeroFraction: range <= 0 || min > 0 || max < 0 ? 0 : (0 - min) / range,
         ),
     };
-    final trackShape = trackShapeKind != api.SliderTrackShape.ruler && (fillFromEnd || markerFraction != null || startOpacity < 1
-) ? MarkedSliderTrackShape(
+    final trackShape = trackShapeKind != api.SliderTrackShape.ruler && fillFromEnd
+        ? MarkedSliderTrackShape(
             fillFromEnd: fillFromEnd,
-            activeStartOpacity: startOpacity,
-            markerFraction: markerFraction,
-            markerColor: n.prop(SliderProps.markerColor).flutter,
-            markerWidth: n.prop(SliderProps.markerWidth),
-            markerHeight: n.prop(SliderProps.markerHeight),
             radius: trackShapeKind == api.SliderTrackShape.rectangle ? 0 : (trackHeight ?? 4) / 2,
           )
         : baseTrack;
@@ -1179,7 +1182,6 @@ class _SliderIslandState extends State<_SliderIsland> {
           radius: thumbRadius,
           borderColor: _color(n.prop(SliderProps.thumbBorderColor)) ?? Colors.transparent,
           borderWidth: n.prop(SliderProps.thumbBorderWidth),
-          gripColor: _color(n.prop(SliderProps.thumbGripColor)) ?? Colors.transparent,
         ),
       api.SliderThumbShape.roundedRect => RoundedRectSliderThumbShape(
           size: Size(w, h),
@@ -1263,7 +1265,7 @@ class _SliderIslandState extends State<_SliderIsland> {
               ? null
               : RoundSliderOverlayShape(overlayRadius: showThumb ? overlayRadius! : 0),
         ),
-        child: Slider(
+        child: _paintedSlider(widget.paint, value: shown, min: min, max: max, Slider(
           value: shown,
           onChanged: (v) {
             final kept = selectable(v);
@@ -1279,7 +1281,7 @@ class _SliderIslandState extends State<_SliderIsland> {
           label: sliderLabel(n, value),
           secondaryTrackValue: n.prop(SliderProps.secondaryTrackValue)?.clamp(min, max),
           padding: n.prop(SliderProps.padding)?.flutter,
-        ),
+        )),
       ),
     );
     final direction = Directionality.maybeOf(context) ?? TextDirection.ltr;
@@ -1927,16 +1929,12 @@ class _DateTimeInputIslandState extends State<_DateTimeInputIsland> {
         },
     };
     final localizations = MaterialLocalizations.of(context);
-    // displayText wins; then the intl `format`, then its older name
-    // `displayFormat` (a formatDate pattern); else Material's own.
+    // displayText wins; then the intl `format`; else Material's own.
     final displayText = n.prop(DateTimeInputProps.displayText);
     final pattern = n.prop(DateTimeInputProps.format);
-    final displayFormat = n.prop(DateTimeInputProps.displayFormat);
     final formatted = pattern != null && pattern.isNotEmpty
         ? (date != null || time != null ? _formatPattern(pattern, mode, date, time) : null)
-        : displayFormat.isEmpty || raw.isEmpty
-            ? null
-            : FormulaEvaluator.formatDate(mode == DateTimeInputMode.time ? '2000-01-01T$raw' : raw, displayFormat);
+        : null;
     final display = displayText.isNotEmpty ? displayText : formatted ?? switch (mode) {
       DateTimeInputMode.date => date == null ? '' : localizations.formatMediumDate(date),
       DateTimeInputMode.time => time == null ? '' : time.format(context),
@@ -2466,30 +2464,44 @@ class _EagerPanGestureRecognizer extends PanGestureRecognizer {
 }
 
 
-/// A text field's controller that draws a range of its text in another
-/// style ([TextFieldProps.highlightStart] to `highlightEnd`).
+/// A text field's controller that draws its runs (TextFieldProps.runs:
+/// ranges of its text in their styles, merged in order over the field's
+/// style, as a text node's runs are), as Flutter's
+/// `TextEditingController.buildTextSpan` styles text. While a word is being
+/// composed the text is drawn plain.
 class HighlightTextController extends TextEditingController {
   HighlightTextController({super.text});
 
-  (int, int, TextStyle?)? _highlight;
-  (int, int, TextStyle?)? get highlight => _highlight;
-  set highlight((int, int, TextStyle?)? value) {
-    if (value == _highlight) return;
-    _highlight = value;
+  (List<api.TextRun>, api.TextStyle?) _runs = (const [], null);
+
+  /// The runs, and the text style they inherit.
+  (List<api.TextRun>, api.TextStyle?) get runs => _runs;
+  set runs((List<api.TextRun>, api.TextStyle?) value) {
+    if (listEquals(value.$1, _runs.$1) && value.$2 == _runs.$2) return;
+    _runs = value;
     notifyListeners();
   }
 
   @override
   TextSpan buildTextSpan({required BuildContext context, TextStyle? style, required bool withComposing}) {
-    final h = _highlight;
     final composing = withComposing && value.isComposingRangeValid;
-    if (h == null || composing) return super.buildTextSpan(context: context, style: style, withComposing: withComposing);
-    final start = h.$1.clamp(0, text.length), end = h.$2.clamp(0, text.length);
-    if (end <= start) return super.buildTextSpan(context: context, style: style, withComposing: withComposing);
+    final length = text.length;
+    final runs = [
+      for (final r in _runs.$1)
+        if (r.end.clamp(0, length) > r.start.clamp(0, length)) r,
+    ];
+    if (runs.isEmpty || composing) return super.buildTextSpan(context: context, style: style, withComposing: withComposing);
+    final bounds = <int>{0, length, for (final r in runs) ...[r.start.clamp(0, length), r.end.clamp(0, length)]}.toList()..sort();
     return TextSpan(style: style, children: [
-      TextSpan(text: text.substring(0, start)),
-      TextSpan(text: text.substring(start, end), style: h.$3),
-      TextSpan(text: text.substring(end)),
+      for (var i = 0; i + 1 < bounds.length; i++)
+        TextSpan(
+          text: text.substring(bounds[i], bounds[i + 1]),
+          style: _styleOrNull(
+              runs
+                  .where((r) => r.start <= bounds[i] && r.end >= bounds[i + 1])
+                  .fold(api.TextStyle.empty, (merged, r) => merged.merge(r.style)),
+              _runs.$2),
+        ),
     ]);
   }
 }

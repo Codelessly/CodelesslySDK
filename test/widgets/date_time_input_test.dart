@@ -57,7 +57,7 @@ void _ours() {
   testWidgets('shows its value in its pattern and follows a bound value', (tester) async {
     final s = await lists.show(
       tester,
-      _screen({'displayFormat': 'EEE, MMM d · h:mm a'}),
+      _screen({'format': 'EEE, MMM d · h:mm a'}),
       variables: [lists.v('arrival', '2026-11-12T09:05:00')],
     );
     await tester.pumpAndSettle();
