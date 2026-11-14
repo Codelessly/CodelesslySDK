@@ -24,11 +24,12 @@ DELIVERY = f"({SUBTOTAL} >= 20 || {SUBTOTAL} == 0 ? 0 : 3.5)"
 MONEY = "formatCurrency({}, 'GBP', 'en_GB')"
 
 
-def doc(id_, nodes, variables, root_children):
+def doc(id_, nodes, variables, root_children, page='secondaryBackground'):
     nodes = dict(nodes)
-    return {'schema': 3, 'id': id_, 'roots': ['c'], 'variables': {'c': variables}, 'nodes': {
-        'c': {'type': 'canvas', 'name': id_, 'slots': {'body': 'page'}, 'layout': {'width': 390, 'height': {'hug': 600}}},
-        'page': {'type': 'column', 'children': ['card'], 'layout': {'width': {'fill': 390}, 'height': {'hug': 600}, 'padding': 16}},
+    return {'schema': 3, 'id': id_, 'roots': [id_], 'variables': {id_: variables}, 'nodes': {
+        id_: {'type': 'canvas', 'name': id_, 'slots': {'body': 'page'}, 'layout': {'width': 390, 'height': {'hug': 600}}},
+        'page': {'type': 'column', 'children': ['card'], 'layout': {'width': {'fill': 390}, 'height': {'fill': 600}, 'padding': 16},
+                 'decoration': {'fills': [{'color': page}]}},
         **nodes,
         'card': {**nodes['card'], 'children': root_children},
     }}
@@ -57,7 +58,7 @@ def ssui_flight():
         'card': CARD,
         'head': {'type': 'column', 'children': ['title', 'sub'], 'props': {'spacing': 2}, 'layout': {'width': {'fill': 334}, 'height': {'hug': 40}}},
         'title': txt('Choose your flight', 'sectionTitle', h={'hug': 20}),
-        'sub': txt('London LHR → Lisbon LIS · Fri 21 Nov · 1 adult', 'bodySecondary'),
+        'sub': txt('London LHR to Lisbon LIS · Fri 21 Nov · 1 adult', 'bodySecondary'),
         'box': {'type': 'column', 'children': ['list'], 'layout': {'width': {'fill': 334}, 'height': {'hug': 150}},
                 'decoration': {'strokes': [{'color': 'primaryBorder'}], 'radius': 8, 'clip': 'antiAlias'}},
         'list': {'type': 'listView', 'children': ['flight'], 'props': {'scrollable': False},
@@ -199,7 +200,7 @@ SMALL = {'fontSize': 13, 'color': MUTED}
 
 
 def raw_btn(type_, label, **kw):
-    n = {'type': type_, 'props': {'label': label}, 'layout': {'width': {'hug': 90}, 'height': 40}}
+    n = {'type': type_, 'props': {'label': label}, 'layout': {'width': 140 if len(label) > 8 else 100, 'height': 40}}
     n.update(kw)
     return n
 
@@ -208,14 +209,19 @@ def raw_flight():
     nodes = {
         'card': RAW_CARD,
         'title': txt('Choose your flight', TITLE, h={'hug': 24}),
-        'sub': txt('London LHR → Lisbon LIS · Fri 21 Nov · 1 adult', SMALL),
+        'sub': txt('London LHR to Lisbon LIS · Fri 21 Nov · 1 adult', SMALL),
         'list': {'type': 'listView', 'children': ['flight'], 'props': {'scrollable': False, 'spacing': 8},
                  'layout': {'width': {'fill': 326}, 'height': {'hug': 200}}, 'bind': {'data': '${flights}'}},
-        'flight': {'type': 'listTile', 'props': {'title': 'Flight', 'leading': {'name': 'flight_takeoff'}},
-                   'layout': {'width': {'fill': 326}, 'height': 64},
-                   'bind': {'props.title': '${item.depart} – ${item.arrive}   ${item.price}', 'props.subtitle': '${item.airline} · ${item.duration} · ${item.stops}',
-                            'props.selected': '${= item.id == chosen}'},
+        'flight': {'type': 'row', 'children': ['pick', 'ftexts', 'fprice'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                   'layout': {'width': {'fill': 326}, 'height': 64, 'padding': [4, 0, 12, 0]},
+                   'decoration': {'strokes': [{'color': LINE}], 'radius': 8},
                    'actions': [{'trigger': 'click', 'actions': [{'type': 'setVariable', 'variable': 'chosen', 'value': '${item.id}'}]}]},
+        'pick': {'type': 'radio', 'props': {'value': 'x'}, 'layout': {'width': 40, 'height': 40},
+                 'bind': {'props.value': '${item.id}', 'props.groupValue': '${chosen}'}},
+        'ftexts': {'type': 'column', 'children': ['ftime', 'fdetail'], 'props': {'spacing': 2}, 'layout': {'width': {'fill': 200}, 'height': {'hug': 40}}},
+        'ftime': txt('${item.depart} – ${item.arrive}', {**BODY, 'fontWeight': 600}, {'fill': 200}),
+        'fdetail': txt('${item.airline} · ${item.duration} · ${item.stops}', SMALL, {'fill': 200}),
+        'fprice': txt('${item.price}', {**BODY, 'fontWeight': 600}, {'hug': 40}),
         'foot': {'type': 'row', 'children': ['cancel', 'confirm'], 'props': {'mainAxisAlignment': 'end', 'spacing': 8},
                  'layout': {'width': {'fill': 326}, 'height': {'hug': 40}}},
         'cancel': raw_btn('textButton', 'Cancel'),
@@ -223,7 +229,7 @@ def raw_flight():
                            actions=[{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'confirm', 'value': {'flight': '${chosen}'}}]}]),
     }
     variables = [{'name': 'flights', 'type': 'list', 'value': FLIGHTS}, {'name': 'chosen', 'type': 'text', 'value': ''}]
-    return doc('flight_picker', nodes, variables, ['title', 'sub', 'list', 'foot'])
+    return doc('flight_picker', nodes, variables, ['title', 'sub', 'list', 'foot'], page='#FFF1F5F9')
 
 
 def raw_order():
@@ -252,7 +258,7 @@ def raw_order():
         'place': raw_btn('filledButton', 'Place order'),
     }
     variables = [{'name': 'items', 'type': 'list', 'value': ITEMS}, {'name': 'promo', 'type': 'text', 'value': ''}]
-    return doc('order_summary', nodes, variables, ['title', 'list', 'promoIn', 'totRow', 'foot'])
+    return doc('order_summary', nodes, variables, ['title', 'list', 'promoIn', 'totRow', 'foot'], page='#FFF1F5F9')
 
 
 def raw_contact():
@@ -274,7 +280,7 @@ def raw_contact():
     }
     variables = [{'name': n, 'type': 'text', 'value': ''} for n in ['name', 'email', 'message', 'nameError', 'emailError', 'messageError']]
     variables += [{'name': 'topic', 'type': 'text', 'value': 'Billing'}, {'name': 'sent', 'type': 'boolean', 'value': False}]
-    return doc('contact_form', nodes, variables, ['title', 'sub', 'inName', 'inEmail', 'inTopic', 'inMsg', 'foot'])
+    return doc('contact_form', nodes, variables, ['title', 'sub', 'inName', 'inEmail', 'inTopic', 'inMsg', 'foot'], page='#FFF1F5F9')
 
 
 def write(folder, docs, manifest):

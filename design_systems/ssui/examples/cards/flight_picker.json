@@ -2,10 +2,10 @@
  "schema": 3,
  "id": "flight_picker",
  "roots": [
-  "c"
+  "flight_picker"
  ],
  "variables": {
-  "c": [
+  "flight_picker": [
    {
     "name": "flights",
     "type": "list",
@@ -52,7 +52,7 @@
   ]
  },
  "nodes": {
-  "c": {
+  "flight_picker": {
    "type": "canvas",
    "name": "flight_picker",
    "slots": {
@@ -75,9 +75,16 @@
      "fill": 390
     },
     "height": {
-     "hug": 600
+     "fill": 600
     },
     "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ]
    }
   },
   "card": {
@@ -151,7 +158,7 @@
   "sub": {
    "type": "text",
    "props": {
-    "text": "London LHR → Lisbon LIS · Fri 21 Nov · 1 adult",
+    "text": "London LHR to Lisbon LIS · Fri 21 Nov · 1 adult",
     "style": "bodySecondary"
    },
    "layout": {

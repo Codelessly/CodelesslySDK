@@ -2,10 +2,10 @@
  "schema": 3,
  "id": "flight_picker",
  "roots": [
-  "c"
+  "flight_picker"
  ],
  "variables": {
-  "c": [
+  "flight_picker": [
    {
     "name": "flights",
     "type": "list",
@@ -47,7 +47,7 @@
   ]
  },
  "nodes": {
-  "c": {
+  "flight_picker": {
    "type": "canvas",
    "name": "flight_picker",
    "slots": {
@@ -70,9 +70,16 @@
      "fill": 390
     },
     "height": {
-     "hug": 600
+     "fill": 600
     },
     "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ]
    }
   },
   "card": {
@@ -132,7 +139,7 @@
   "sub": {
    "type": "text",
    "props": {
-    "text": "London LHR → Lisbon LIS · Fri 21 Nov · 1 adult",
+    "text": "London LHR to Lisbon LIS · Fri 21 Nov · 1 adult",
     "style": {
      "fontSize": 13,
      "color": "#FF5F6368"
@@ -169,23 +176,35 @@
    }
   },
   "flight": {
-   "type": "listTile",
+   "type": "row",
+   "children": [
+    "pick",
+    "ftexts",
+    "fprice"
+   ],
    "props": {
-    "title": "Flight",
-    "leading": {
-     "name": "flight_takeoff"
-    }
+    "crossAxisAlignment": "center",
+    "spacing": 8
    },
    "layout": {
     "width": {
      "fill": 326
     },
-    "height": 64
+    "height": 64,
+    "padding": [
+     4,
+     0,
+     12,
+     0
+    ]
    },
-   "bind": {
-    "props.title": "${item.depart} – ${item.arrive}   ${item.price}",
-    "props.subtitle": "${item.airline} · ${item.duration} · ${item.stops}",
-    "props.selected": "${= item.id == chosen}"
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFE0E0E0"
+     }
+    ],
+    "radius": 8
    },
    "actions": [
     {
@@ -199,6 +218,94 @@
      ]
     }
    ]
+  },
+  "pick": {
+   "type": "radio",
+   "props": {
+    "value": "x"
+   },
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "bind": {
+    "props.value": "${item.id}",
+    "props.groupValue": "${chosen}"
+   }
+  },
+  "ftexts": {
+   "type": "column",
+   "children": [
+    "ftime",
+    "fdetail"
+   ],
+   "props": {
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "ftime": {
+   "type": "text",
+   "props": {
+    "text": "${item.depart} – ${item.arrive}",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "fdetail": {
+   "type": "text",
+   "props": {
+    "text": "${item.airline} · ${item.duration} · ${item.stops}",
+    "style": {
+     "fontSize": 13,
+     "color": "#FF5F6368"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "fprice": {
+   "type": "text",
+   "props": {
+    "text": "${item.price}",
+    "style": {
+     "fontSize": 14,
+     "color": "#FF111111",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 18
+    }
+   }
   },
   "foot": {
    "type": "row",
@@ -225,9 +332,7 @@
     "label": "Cancel"
    },
    "layout": {
-    "width": {
-     "hug": 90
-    },
+    "width": 100,
     "height": 40
    }
   },
@@ -237,9 +342,7 @@
     "label": "Confirm"
    },
    "layout": {
-    "width": {
-     "hug": 90
-    },
+    "width": 100,
     "height": 40
    },
    "bind": {
