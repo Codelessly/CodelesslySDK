@@ -67,7 +67,7 @@ Map<String, Json> screen({Json? pagination, Json extraList = const {}, Map<Strin
     };
 
 List<String> rows(WidgetTester tester) =>
-    lists.textsUnder(lists.listBox(tester)).where((t) => t.startsWith('P')).toList();
+    lists.textsUnder(tester.renderObject(find.byType(CustomScrollView))).where((t) => t.startsWith('P')).toList();
 
 String status(lists.Screen s) => lists.textsUnder(s.tree.boxOf('status')!).single;
 
@@ -118,7 +118,7 @@ Map<String, Json> footers() => {
       'end': {'type': 'text', 'layout': {'width': 300, 'height': 30}, 'props': {'text': 'The end'}},
     };
 
-List<String> texts(WidgetTester tester) => lists.textsUnder(lists.listBox(tester));
+List<String> texts(WidgetTester tester) => lists.textsUnder(tester.renderObject(find.byType(CustomScrollView)));
 
 void main() {
   group('slots', () {
@@ -149,13 +149,13 @@ void main() {
 
   testWidgets('a plain bound list scrolls without paging or sections', (tester) async {
     await lists.show(tester, screen(), variables: [Variable(name:'people',type:VariableType.list,value:people(30))]);
-    // Drawn by render objects alone: no sliver scroll view.
-    expect(find.byType(CustomScrollView), findsNothing);
-    final scroll = lists.listScroll(tester);
-    expect(scroll.maxScrollExtent, greaterThan(0));
-    await lists.dragList(tester, const Offset(0, -240));
+    final view=find.byType(CustomScrollView);
+    expect(view, findsOneWidget);
+    final state=tester.state<ScrollableState>(find.descendant(of:view,matching:find.byType(Scrollable)));
+    expect(state.position.maxScrollExtent,greaterThan(0));
+    await tester.drag(view,const Offset(0,-240));
     await tester.pumpAndSettle();
-    expect(scroll.pixels, greaterThan(0));
+    expect(state.position.pixels,greaterThan(0));
   });
 
   testWidgets('an endless list shows its first page and loads the next near the end', (tester) async {
@@ -166,7 +166,7 @@ void main() {
     // Built items near the end of the loaded ones load the next page.
     await tester.pumpAndSettle();
     expect(s['contacts.itemCount'], greaterThanOrEqualTo(20));
-    await lists.dragList(tester, const Offset(0, -2000));
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -2000));
     await tester.pumpAndSettle();
     expect(s['contacts.itemCount'], 25);
     expect(s['contacts.hasMore'], false);
@@ -247,7 +247,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(api.calls.first, {'api': 'people', 'offset': '0', 'limit': '10'});
     expect(s['contacts.totalCount'], 15);
-    await lists.dragList(tester, const Offset(0, -1000));
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -1000));
     await tester.pumpAndSettle();
     expect(rows(tester).last, 'P14');
     expect(texts(tester).last, 'The end');
@@ -263,7 +263,7 @@ void main() {
     expect(texts(tester).last, startsWith('Failed'));
     expect(s['contacts.error'], isNotNull);
     api.fail = false;
-    final scroll = lists.listRect(tester);
+    final scroll = tester.getRect(find.byType(CustomScrollView));
     await tester.tapAt(Offset(scroll.center.dx, scroll.bottom - 10));
     await tester.pumpAndSettle();
     expect(s['contacts.error'], isNull);
@@ -289,7 +289,7 @@ void main() {
     );
     await tester.pumpAndSettle();
     final before = api.calls.length;
-    await lists.flingList(tester, const Offset(0, 300), 1000);
+    await tester.fling(find.byType(CustomScrollView), const Offset(0, 300), 1000);
     await tester.pump();
     await tester.pump(const Duration(seconds: 1));
     await tester.pumpAndSettle();
@@ -317,7 +317,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(rows(tester), hasLength(5));
-      await lists.flingList(tester, const Offset(0, 300), 1000);
+      await tester.fling(find.byType(CustomScrollView), const Offset(0, 300), 1000);
       await tester.pump();
       await tester.pump(const Duration(seconds: 1));
       await tester.pumpAndSettle();
@@ -420,7 +420,7 @@ void main() {
     expect(s['contacts.itemCount'], greaterThanOrEqualTo(40));
     expect(at(82).dy, before);
     // Scrolling up shows the earlier rows.
-    await lists.dragList(tester, const Offset(0, 200));
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, 200));
     await tester.pumpAndSettle();
     expect(rows(tester), contains('P78'));
   });
@@ -458,7 +458,7 @@ void main() {
     await tester.tapAt(Offset(bar.center.dx, bar.bottom - 5));
     await tester.pumpAndSettle();
     final header = s.tree.boxOf('header', instance: const ProvidedItem('section', null, 'list', 'D'))!;
-    expect(header.localToGlobal(Offset.zero).dy, lists.listRect(tester).topLeft.dy);
+    expect(header.localToGlobal(Offset.zero).dy, tester.getTopLeft(find.byType(CustomScrollView)).dy);
   });
 
   testWidgets('a swipe action is offered only on the items its condition allows', (tester) async {
@@ -540,9 +540,9 @@ void main() {
     expect(find.byType(SliverGrid), findsOneWidget);
     final pager = PaginationRegistry.of(s.tree)['photoPages']!;
     expect(pager.items.length, 30);
-    expect(lists.textsUnder(lists.listBox(tester)).length, lessThan(40));
+    expect(lists.textsUnder(tester.renderObject(find.byType(CustomScrollView))).length, lessThan(40));
     // Scroll to the end of the first page's 10 rows.
-    await lists.dragList(tester, const Offset(0, -700));
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -700));
     await tester.pumpAndSettle();
     expect(pager.items.length, 60);
   });
