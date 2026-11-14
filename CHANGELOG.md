@@ -1,4 +1,4 @@
-## Unreleased
+## 30.1.0
 
 **No special cases left** (with codelessly_api's unreleased removal of the last 21 one-look fields, each now a
 general mechanism; its CHANGELOG has the table). The renderer no longer reads them:
@@ -145,7 +145,7 @@ Requires the codelessly_api changes of the same name (forms, grid placement, scr
   expression styles the text as shown, instead of printing the expression. The render command answers clipboard
   calls from memory, so a chain that copies runs on.
 
-## 30.1.0
+### Earlier in 30.1.0
 
 Requires codelessly_api 30.1.0. **The schema stays 3**: every loader reads `"schema": 2` and `3`, migrating 2 in
 memory (`migrate2to3`), never writing back (`kLoadableSchemas` is `{2, 3}`). 30.0.0's schema-3 documents keep
