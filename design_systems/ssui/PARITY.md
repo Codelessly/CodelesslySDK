@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colours by token), rendered, and looked at beside the source.
 
-**Here: 36. Still to rebuild: 128.**
+**Here: 41. Still to rebuild: 123.**
 
 ## Here
 
@@ -51,6 +51,11 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Toast |  | showToast action |
 | ToggleRow | ToggleRow |  |
 | Tooltip | Tooltip | tooltip behavior |
+| Skeleton | Skeleton |  |
+| ErrorBar | ErrorBar |  |
+| FeatureBulletItem | FeatureBulletItem |  |
+| SectionCard | SectionCard |  |
+| MetaInfo | MetaInfo |  |
 
 Also here with no source file of the same name: Card, ListRow, SectionHeader, Tabs.
 
@@ -58,17 +63,17 @@ Also here with no source file of the same name: Card, ListRow, SectionHeader, Ta
 
 In the order planned: what generated UI reaches for first, then the application chrome.
 
-### Status and feedback (13)
+### Status and feedback (11)
 
-StatusIndicator, RunningIndicator, PulsingDots, Skeleton, ErrorBar, NotificationBadge, RadialProgress, StackedProgressBar, BatchProgressBar, ConnectionStatus, CloudSyncIndicator, DiffStatsBadge, LoadMore
+StatusIndicator, RunningIndicator, PulsingDots, NotificationBadge, RadialProgress, StackedProgressBar, BatchProgressBar, ConnectionStatus, CloudSyncIndicator, DiffStatsBadge, LoadMore
 
-### Text and small content (17)
+### Text and small content (15)
 
-Hyperlink, MetaInfo, FeatureBulletItem, TextItem, TextExpandable, TextInputLabel, CodeBlock, CodePreview, CopyButton, DownloadButton, BackButton, AddButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
+Hyperlink, TextItem, TextExpandable, TextInputLabel, CodeBlock, CodePreview, CopyButton, DownloadButton, BackButton, AddButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
 
-### Cards and rows (26)
+### Cards and rows (25)
 
-SectionCard, Panel, CardActions, ProviderCard, ProviderIcon, ProviderPill, FolderCard, ResourceCard, ResourceChip, PersonChip, AgentChip, DocumentItem, FileListItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OptionIcon, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
+Panel, CardActions, ProviderCard, ProviderIcon, ProviderPill, FolderCard, ResourceCard, ResourceChip, PersonChip, AgentChip, DocumentItem, FileListItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OptionIcon, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
 
 ### Inputs (21)
 

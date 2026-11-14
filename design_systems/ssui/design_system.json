@@ -463,7 +463,12 @@
   "components/InlineStat.json",
   "components/StatTile.json",
   "components/IconBox.json",
-  "components/ToggleRow.json"
+  "components/ToggleRow.json",
+  "components/Skeleton.json",
+  "components/ErrorBar.json",
+  "components/FeatureBulletItem.json",
+  "components/SectionCard.json",
+  "components/MetaInfo.json"
  ],
  "replaces": [
   "filledButton",
