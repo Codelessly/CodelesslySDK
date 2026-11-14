@@ -13,6 +13,7 @@ import 'dart:ui' as ui;
 import 'package:codelessly_api/codelessly_api.dart' show Json, LayoutDocument, migrate2to3, readMap;
 import 'package:codelessly_api/src/core/migrate/steps_spellings.dart' show spellingMigrationSteps;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/pickers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -185,10 +186,21 @@ void main() {
         await tester.pumpWidget(
             MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'd', interactive: true))));
         await tester.pumpAndSettle();
-        final texts = tester.widgetList<Text>(find.byType(Text)).map((t) => t.data ?? t.textSpan?.toPlainText()).toList();
-        expect(texts.first, shown);
+        expect(_picker(tree, 'd').shown, shown);
         await tester.pumpWidget(const SizedBox());
       });
     }
   });
+}
+
+/// The picker field drawn for node [id] (render/controls/pickers.dart).
+RenderPickerField _picker(RenderTree tree, String id) {
+  RenderPickerField? found;
+  void visit(RenderObject o) {
+    if (o is RenderPickerField) found ??= o;
+    o.visitChildren(visit);
+  }
+
+  visit(tree.boxOf(id)!);
+  return found!;
 }

@@ -1,6 +1,9 @@
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/pickers.dart';
+import 'package:codelessly_sdk/src/render/controls/root.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../lists/support.dart' as lists;
@@ -12,6 +15,18 @@ LayoutDocument _doc(Map<String, Object?> nodes) => LayoutDocument.fromJson({
         ...nodes,
       },
     });
+
+/// The picker field drawn for node [id] (render/controls/pickers.dart).
+RenderPickerField _picker(RenderTree tree, String id) {
+  RenderPickerField? found;
+  void visit(RenderObject o) {
+    if (o is RenderPickerField) found ??= o;
+    o.visitChildren(visit);
+  }
+
+  visit(tree.boxOf(id)!);
+  return found!;
+}
 
 /// The center of node [id] on screen.
 Offset _center(WidgetTester tester, NodeTree tree, String id) =>
@@ -61,28 +76,28 @@ void _ours() {
       variables: [lists.v('arrival', '2026-11-12T09:05:00')],
     );
     await tester.pumpAndSettle();
-    expect(find.text('Thu, Nov 12 · 9:05 AM'), findsOneWidget);
+    expect(_picker(s.tree, 'dt').shown, 'Thu, Nov 12 · 9:05 AM');
     s.scope.set('arrival', '2026-11-12T13:20:00');
     await tester.pumpAndSettle();
-    expect(find.text('Thu, Nov 12 · 1:20 PM'), findsOneWidget);
-    expect(tester.getSize(find.byType(InputDecorator)).height, 60);
+    expect(_picker(s.tree, 'dt').shown, 'Thu, Nov 12 · 1:20 PM');
+    expect(s.tree.boxOf('dt')!.size.height, 60);
   });
 
   testWidgets('shows its display text instead, and with its own picker a tap opens no dialog', (tester) async {
-    await lists.show(
+    final s = await lists.show(
       tester,
       _screen({'displayText': 'Now · 1:20 PM', 'picker': 'none'}),
       variables: [lists.v('arrival', '2026-11-12T13:20:00')],
     );
     await tester.pumpAndSettle();
-    expect(find.text('Now · 1:20 PM'), findsOneWidget);
-    await tester.tap(find.byType(InputDecorator));
+    expect(_picker(s.tree, 'dt').shown, 'Now · 1:20 PM');
+    await tester.tapAt(s.center('dt'));
     await tester.pumpAndSettle();
-    expect(find.byType(DatePickerDialog), findsNothing);
+    expect(tester.renderObject<RenderControlRoot>(find.byType(NodeView)).overlayEntries, isEmpty);
   });
 }
 
-Future<void> _field(WidgetTester tester, Map<String, Object?> props) => lists.show(tester, {
+Future<lists.Screen> _field(WidgetTester tester, Map<String, Object?> props) => lists.show(tester, {
       'col': {'type': 'column', 'children': ['d'], 'layout': {'width': 300, 'height': 100}},
       'd': {
         'type': 'dateTimeInput',
@@ -104,22 +119,24 @@ void _master() {
       },
     }, variables: [lists.v('opened', false, VariableType.boolean)]);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Dec 1, 2026'));
+    expect(_picker(s.tree, 'd').shown, 'Dec 1, 2026');
+    await tester.tapAt(s.center('d'));
     await tester.pumpAndSettle();
     expect(s['opened'], isTrue);
-    expect(find.byType(DatePickerDialog), findsNothing);
+    expect(tester.renderObject<RenderControlRoot>(find.byType(NodeView)).overlayEntries, isEmpty);
   });
 
-  testWidgets('without a pattern it is Material\'s own field', (tester) async {
-    await _field(tester, {'mode': 'date', 'value': '2026-12-01'});
+  testWidgets('without a pattern it is SSUI\'s field, the date in words', (tester) async {
+    final s = await _field(tester, {'mode': 'date', 'value': '2026-12-01'});
     await tester.pumpAndSettle();
-    expect(find.byType(InputDecorator), findsOneWidget);
+    expect(_picker(s.tree, 'd').shown, 'Tue, Dec 1');
+    expect(find.byType(InputDecorator), findsNothing);
   });
 }
 
 void main() {
   _inWrappingRow();
-  testWidgets('a decorated date picker is a formatted field, and its dialog takes the picker theme', (tester) async {
+  testWidgets('a decorated date picker is a formatted field, and its picker takes the picker theme', (tester) async {
     const theme = {
       'backgroundColor': '#FFFFFFFF',
       'accentColor': '#FF2F4F46',
@@ -153,34 +170,41 @@ void main() {
         'props': {'value': '13:00', 'format': 'HH:mm', 'alwaysUse24HourFormat': true, 'decoration': field, 'pickerTheme': theme},
       },
     })));
+    addTearDown(tree.dispose);
     await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)))));
     await tester.pumpAndSettle();
-    // A field, not a button, showing the formatted value.
+    // A field drawn by the SDK, not a Material button or decorator.
     expect(find.byType(OutlinedButton), findsNothing);
-    expect(find.byType(InputDecorator), findsNWidgets(2));
-    expect(find.text('Mon 30 Nov 2026'), findsOneWidget);
-    expect(find.text('13:00'), findsOneWidget);
+    expect(find.byType(InputDecorator), findsNothing);
+    expect(_picker(tree, 'date').shown, 'Mon 30 Nov 2026');
+    expect(_picker(tree, 'date').border!.side.color, const Color(0xFFD3CDC0));
+    expect(_picker(tree, 'time').shown, '13:00');
 
     await tester.tapAt(_center(tester, tree, 'date'));
-    await tester.pumpAndSettle();
-    final dialog = tester.element(find.byType(DatePickerDialog));
-    final t = Theme.of(dialog);
-    expect(t.colorScheme.primary, const Color(0xFF2F4F46));
-    expect(t.colorScheme.surfaceContainerHigh, const Color(0xFFFFFFFF));
-    expect(t.datePickerTheme.shape, RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)));
-    expect(find.text('FIRST DAY OFF'), findsOneWidget);
-    Navigator.of(dialog).pop(DateTime(2026, 12, 4));
-    await tester.pumpAndSettle();
-    expect(find.text('Fri 4 Dec 2026'), findsOneWidget);
+    await tester.pump();
+    final panel = _picker(tree, 'date').panel!;
+    expect(panel.calendar!.lookOf(DateTime(2026, 11, 30)).fill, const Color(0xFF2F4F46));
+    expect(panel.outline.tlRadiusX, 14);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(_picker(tree, 'date').shown, 'Fri 4 Dec 2026');
 
     await tester.tapAt(_center(tester, tree, 'time'));
-    await tester.pumpAndSettle();
-    final timeDialog = tester.element(find.byType(TimePickerDialog));
-    expect(MediaQuery.of(timeDialog).alwaysUse24HourFormat, isTrue);
-    expect(Theme.of(timeDialog).timePickerTheme.dialHandColor, const Color(0xFF2F4F46));
-    Navigator.of(timeDialog).pop(const TimeOfDay(hour: 14, minute: 30));
-    await tester.pumpAndSettle();
-    expect(find.text('14:30'), findsOneWidget);
+    await tester.pump();
+    final time = _picker(tree, 'time').panel!.time!;
+    expect(time.use24h, isTrue);
+    expect(time.display, '13:00');
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit3);
+    await tester.sendKeyEvent(LogicalKeyboardKey.digit0);
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    await tester.pump();
+    expect(_picker(tree, 'time').shown, '14:30');
   });
 
   testWidgets('an empty date picker shows its hint', (tester) async {
@@ -194,10 +218,10 @@ void main() {
         },
       },
     })));
+    addTearDown(tree.dispose);
     await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)))));
     await tester.pumpAndSettle();
-    expect(find.text('—'), findsWidgets);
-    expect(find.text('00:00'), findsNothing);
+    expect(_picker(tree, 'time').shown, '—');
   });
 
   group('how the value is shown', () {

@@ -1,4 +1,5 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/pickers.dart';
 import 'package:codelessly_sdk/src/widgets/registry.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -220,7 +221,7 @@ void main() {
     await tester.pumpWidget(const SizedBox());
   });
 
-  testWidgets('date and time pickers open their dialogs', (tester) async {
+  testWidgets('date and time pickers open their pickers', (tester) async {
     final tree = NodeTree(DocumentSource(_doc({
       'date': _at(10, 20, {
         'type': 'datePicker',
@@ -233,21 +234,24 @@ void main() {
     })));
     addTearDown(tree.dispose);
     await tester.pumpWidget(_app(tree));
-    await tester.tap(find.text('2024-05-17'));
-    await tester.pumpAndSettle();
-    expect(find.byType(DatePickerDialog), findsOneWidget);
-    await tester.tap(find.text('20'));
-    await tester.tap(find.text('OK'));
-    await tester.pumpAndSettle();
-    expect(find.byType(DatePickerDialog), findsNothing);
-    expect(find.text('2024-05-20'), findsOneWidget);
+    Offset centre(String id) => tree.boxOf(id)!.localToGlobal(tree.boxOf(id)!.size.center(Offset.zero));
+    expect(_picker(tree, 'date').shown, '2024-05-17');
+    await tester.tapAt(centre('date'));
+    await tester.pump();
+    final calendar = _picker(tree, 'date').panel!.calendar!;
+    final cell = [for (var i = 0; i < 42; i++) i].firstWhere((i) => calendar.dayAt(i)?.day == 20);
+    await tester.tapAt(calendar.localToGlobal(calendar.cellRect(cell).center));
+    await tester.pump();
+    expect(_picker(tree, 'date').open, isFalse);
+    expect(_picker(tree, 'date').shown, '2024-05-20');
 
-    await tester.tap(find.text('09:30'));
-    await tester.pumpAndSettle();
-    expect(find.byType(TimePickerDialog), findsOneWidget);
-    await tester.tap(find.text('Cancel'));
-    await tester.pumpAndSettle();
-    expect(find.byType(TimePickerDialog), findsNothing);
+    await tester.tapAt(centre('time'));
+    await tester.pump();
+    final time = _picker(tree, 'time').panel!.time!;
+    await tester.tapAt(time.localToGlobal(time.footerRects.cancel.center));
+    await tester.pump();
+    expect(_picker(tree, 'time').open, isFalse);
+    expect(_picker(tree, 'time').shown, '09:30');
     expect(tester.takeException(), isNull);
     await tester.pumpWidget(const SizedBox());
   });
@@ -400,4 +404,16 @@ void main() {
       await tester.pumpWidget(const SizedBox());
     });
   });
+}
+
+/// The picker field drawn for node [id] (render/controls/pickers.dart).
+RenderPickerField _picker(RenderTree tree, String id) {
+  RenderPickerField? found;
+  void visit(RenderObject o) {
+    if (o is RenderPickerField) found ??= o;
+    o.visitChildren(visit);
+  }
+
+  visit(tree.boxOf(id)!);
+  return found!;
 }
