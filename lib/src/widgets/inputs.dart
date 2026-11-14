@@ -1069,6 +1069,73 @@ class _RadioIsland extends StatefulWidget {
 class _RadioIslandState extends State<_RadioIsland> {
   late String? groupValue = widget.node.prop(RadioProps.groupValue);
 
+  /// The radio's focus: arrow keys on it move the choice through its radio
+  /// group (each radio is its own island, so Flutter's RadioGroup sees one
+  /// radio and can't).
+  late final FocusNode _focus = FocusNode(debugLabel: 'radio')..onKeyEvent = _arrow;
+
+  /// The radios on screen, for a group's arrow keys.
+  static final Set<_RadioIslandState> _shown = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _shown.add(this);
+  }
+
+  @override
+  void dispose() {
+    _shown.remove(this);
+    _focus.dispose();
+    super.dispose();
+  }
+
+  /// The radio group node this radio is in (its tree, id and instance).
+  (Object, String, Object?)? _group() {
+    final b = _builderOf(context);
+    if (b == null) return null;
+    for (var id = b.source.parentOf(b.id); id != null; id = b.source.parentOf(id)) {
+      if (b.source.node(id)?.behaviors.radioGroup != null) return (b.tree, id, b.instance);
+    }
+    return null;
+  }
+
+  /// Chooses this radio, as a tap does.
+  void _choose() {
+    final v = widget.node.prop(RadioProps.value);
+    setState(() => groupValue = v);
+    _fire(context, 'changed', v);
+    _fireRadioGroup(context, v);
+  }
+
+  /// Flutter's RadioGroup keys: right and down choose the next radio of the
+  /// group in reading order, left and up the previous, wrapping at the ends;
+  /// the focus moves with the choice.
+  KeyEventResult _arrow(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent && event is! KeyRepeatEvent) return KeyEventResult.ignored;
+    final key = event.logicalKey;
+    final forward = key == LogicalKeyboardKey.arrowRight || key == LogicalKeyboardKey.arrowDown
+        ? true
+        : key == LogicalKeyboardKey.arrowLeft || key == LogicalKeyboardKey.arrowUp
+            ? false
+            : null;
+    final group = forward == null ? null : _group();
+    if (group == null) return KeyEventResult.ignored;
+    Offset at(_RadioIslandState r) => (r.context.findRenderObject() as RenderBox?)?.localToGlobal(Offset.zero) ?? Offset.zero;
+    final peers = [
+      for (final r in _shown)
+        if (r.mounted && r._group() == group) r,
+    ]..sort((a, b) {
+        final p = at(a), q = at(b);
+        return (p.dy - q.dy).abs() > 0.5 ? p.dy.compareTo(q.dy) : p.dx.compareTo(q.dx);
+      });
+    if (peers.length < 2) return KeyEventResult.ignored;
+    final next = peers[(peers.indexOf(this) + (forward! ? 1 : -1)) % peers.length];
+    next._choose();
+    next._focus.requestFocus();
+    return KeyEventResult.handled;
+  }
+
   @override
   void didUpdateWidget(covariant _RadioIsland oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -1095,6 +1162,7 @@ class _RadioIslandState extends State<_RadioIsland> {
           _fireRadioGroup(context, v);
         },
         child: Radio<String>(
+          focusNode: _focus,
           value: n.prop(RadioProps.value),
           autofocus: n.prop(RadioProps.autofocus),
           activeColor: active,

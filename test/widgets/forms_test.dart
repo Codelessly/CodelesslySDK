@@ -3,6 +3,7 @@
 // validate action, and the form's errors for a summary.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter/material.dart' hide Node;
+import 'package:flutter/services.dart' show LogicalKeyboardKey;
 import 'package:flutter_test/flutter_test.dart';
 
 import '../support/screen.dart' as harness;
@@ -154,6 +155,48 @@ void main() {
     await tester.pumpAndSettle();
     expect(s['budget'], 'large');
     expect(groupOf('small').groupValue, 'large', reason: 'every radio of the group follows its value');
+  });
+
+  testWidgets('arrow keys move the choice between the radios of a group, wrapping at the ends, as Flutter\'s RadioGroup does',
+      (tester) async {
+    Json radio(String value) => {'type': 'radio', 'layout': {'width': 24, 'height': 24}, 'props': {'value': value}};
+    final s = await harness.show(tester, {
+      'col': {
+        'type': 'column',
+        'children': ['small', 'medium', 'large'],
+        'layout': {'width': 100, 'height': {'hug': 90}},
+        'radioGroup': {'groupValue': ''},
+        'bind': {'radioGroup.groupValue': r'${budget}'},
+        'actions': [
+          harness.reaction('changed', [
+            {'type': 'setVariable', 'variable': 'budget', 'value': r'${result}'},
+          ]),
+        ],
+      },
+      'small': radio('small'),
+      'medium': radio('medium'),
+      'large': radio('large'),
+    }, variables: [harness.v('budget', 'small')]);
+    // Tab to the first radio.
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pumpAndSettle();
+    expect(Focus.of(tester.element(find.byType(Radio<String>).first)).hasFocus, isTrue);
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(s['budget'], 'medium');
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowRight);
+    await tester.pumpAndSettle();
+    expect(s['budget'], 'large');
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pumpAndSettle();
+    expect(s['budget'], 'small', reason: 'past the last it wraps to the first');
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+    await tester.pumpAndSettle();
+    expect(s['budget'], 'large', reason: 'before the first it wraps to the last');
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowLeft);
+    await tester.pumpAndSettle();
+    expect(s['budget'], 'medium');
+    expect(Focus.of(tester.element(find.byType(Radio<String>).at(1))).hasFocus, isTrue, reason: 'the focus moves with the choice');
   });
 
   testWidgets('an outlined field that sets no padding keeps its text off the border, as Flutter does', (tester) async {
