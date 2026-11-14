@@ -186,6 +186,14 @@ Map<String, Object?> _page({required Object? canvasFill}) {
     }
     if (off.length != base.length) add('$type-disabled', off);
   }
+  // A chip narrower than its selected content: its check mark must not cut
+  // the label.
+  nodes['chip-narrow'] = {
+    'type': 'filterChip',
+    'layout': {'width': 72, 'height': 40},
+    'props': {'label': 'Engineering', 'selected': true},
+  };
+  ids.add('chip-narrow');
   nodes['canvas'] = {
     'type': 'canvas',
     'slots': {'body': 'body'},
@@ -430,6 +438,70 @@ void main() {
       expect(texts, isNotEmpty);
       final wrong = [for (final (text, family) in texts) if (family != c.family) '"$text" in $family'];
       expect(wrong, isEmpty, reason: 'every control text in the theme\'s font (${c.family ?? 'no family'})');
+    });
+
+    testWidgets('unstyled controls are not Material-shaped: ${c.name}', (tester) async {
+      addTearDown(tester.view.reset);
+      addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+      final (controller, app) = await _show(tester, c);
+      addTearDown(() {
+        controller.dispose();
+        app.dispose();
+      });
+
+      // Buttons: a rounded rectangle of a small radius, never a stadium.
+      for (final type in ['filledButton', 'elevatedButton', 'outlinedButton', 'textButton']) {
+        final node = controller.tree!.boxOf(type)!;
+        final area = node.localToGlobal(Offset.zero) & node.size;
+        final shapes = [
+          for (final e in find.byType(Material).evaluate())
+            if ((e.widget as Material).shape != null &&
+                e.renderObject is RenderBox &&
+                area.inflate(1).contains((e.renderObject! as RenderBox).localToGlobal(Offset.zero)))
+              (e.widget as Material).shape,
+        ];
+        expect(shapes, isNotEmpty, reason: '$type on the page');
+        for (final shape in shapes) {
+          expect(shape, isNot(isA<StadiumBorder>()), reason: '$type is a stadium');
+          expect(shape, isA<RoundedRectangleBorder>(), reason: '$type shape');
+          final radius = (shape! as RoundedRectangleBorder).borderRadius.resolve(TextDirection.ltr).topLeft.x;
+          expect(radius, inInclusiveRange(1, 12), reason: '$type radius');
+        }
+      }
+
+      // Fields: no underline-only border. A field's border is what its
+      // decorator draws (its decoration over the theme's) or the box a
+      // fixed-height field paints.
+      final borders = <String>[];
+      for (final e in find.byType(InputDecorator).evaluate()) {
+        final d = (e.widget as InputDecorator).decoration.applyDefaults(Theme.of(e).inputDecorationTheme);
+        final b = d.enabledBorder ?? d.border;
+        if (b != null && b.isOutline == false && b != InputBorder.none) borders.add('decorator: ${b.runtimeType}');
+        if (b == null) borders.add('decorator: no border (Material underline)');
+      }
+      for (final e in find.byType(DecoratedBox).evaluate()) {
+        final d = (e.widget as DecoratedBox).decoration;
+        if (d is ShapeDecoration && d.shape is UnderlineInputBorder) borders.add('field box: underline');
+      }
+      expect(borders.where((b) => !b.contains('none')), isEmpty, reason: 'fields drawn with an underline only');
+
+      // Chips: the label is laid out whole (no check mark eating into it).
+      for (final id in ['filterChip-on', 'chip-narrow']) {
+        final box = controller.tree!.boxOf(id)!;
+        final labels = <RenderParagraph>[];
+        void visit(RenderObject o) {
+          if (o is RenderParagraph && o.text.toPlainText().trim().length > 1) labels.add(o);
+          o.visitChildren(visit);
+        }
+
+        visit(box);
+        expect(labels, isNotEmpty, reason: '$id has a label');
+        for (final label in labels) {
+          final whole = label.getMaxIntrinsicWidth(double.infinity);
+          expect(label.size.width, greaterThanOrEqualTo(whole - .5), reason: '$id label "${label.text.toPlainText()}" cut');
+          expect(label.didExceedMaxLines, isFalse, reason: '$id label wraps or is cut');
+        }
+      }
     });
 
     testWidgets('pressing, hovering and focusing a button shows no ripple or purple: ${c.name}', (tester) async {

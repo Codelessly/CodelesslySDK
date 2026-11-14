@@ -49,6 +49,7 @@ import '../runtime/actions/wiring.dart' show iconTapPrefix, iconTapSuffix;
 import '../runtime/actions/feedback_theme.dart';
 import '../render/paint/icon_glyph.dart';
 import '../render/recipe.dart';
+import 'indicator_theme.dart';
 import 'inputs_shapes.dart';
 import 'inputs_toggle.dart';
 import '../runtime/http_image_loader.dart';
@@ -2363,7 +2364,8 @@ class _SignatureIslandState extends State<_SignatureIsland> {
 
   @override
   Widget build(BuildContext context) {
-    final n = widget.node;
+    // Its unset colors (ink, pad, border, placeholder) are the theme's.
+    final n = withThemeColors(widget.node, Theme.of(context).colorScheme);
     final error = n.prop(SignatureProps.error);
     final radius = n.prop(SignatureProps.borderRadius).flutter;
     final borderWidth = error ? n.prop(SignatureProps.errorBorderWidth) : n.prop(SignatureProps.borderWidth);
@@ -2380,16 +2382,16 @@ class _SignatureIslandState extends State<_SignatureIsland> {
     final captionStyle = n.prop(SignatureProps.captionStyle);
     final painter = SignaturePainter(
       strokes: [...strokes, ?current],
-      inkColor: n.prop(SignatureProps.inkColor).flutter,
+      inkColor: themedColor(n, SignatureProps.inkColor),
       inkWidth: n.prop(SignatureProps.inkWidth),
       placeholder: n.prop(SignatureProps.placeholder),
-      placeholderColor: n.prop(SignatureProps.placeholderColor).flutter,
+      placeholderColor: themedColor(n, SignatureProps.placeholderColor),
       placeholderFontSize: placeholderFontSize,
       placeholderStyle: placeholderStyle.isEmpty
           ? null
           : _signatureStyle(placeholderStyle,
               textDefault: _textDefault(context, n),
-              color: n.prop(SignatureProps.placeholderColor).flutter,
+              color: themedColor(n, SignatureProps.placeholderColor),
               fontSize: placeholderFontSize,
               fontWeight: FontWeight.values[((n.prop(SignatureProps.placeholderFontWeight) ~/ 100) - 1).clamp(0, 8)],
               letterSpacing: n.prop(SignatureProps.placeholderLetterSpacing) ??
@@ -2428,12 +2430,12 @@ class _SignatureIslandState extends State<_SignatureIsland> {
         : null;
     final pad = DecoratedBox(
       decoration: BoxDecoration(
-        color: n.prop(SignatureProps.backgroundColor).flutter,
+        color: themedColor(n, SignatureProps.backgroundColor),
         borderRadius: radius,
         border: borderWidth <= 0
             ? null
             : Border.all(
-                color: (error ? n.prop(SignatureProps.errorBorderColor) : n.prop(SignatureProps.borderColor)).flutter,
+                color: themedColor(n, error ? SignatureProps.errorBorderColor : SignatureProps.borderColor),
                 width: borderWidth,
               ),
       ),

@@ -24,6 +24,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter/rendering.dart' show CustomPainter;
 
 import '../render/convert.dart';
+import 'indicator_theme.dart';
 
 /// Paints one node; repaints when the node changes.
 abstract class NodePainter extends CustomPainter {
@@ -32,6 +33,9 @@ abstract class NodePainter extends CustomPainter {
   final Node n;
 
   T p<T>(api.PropDef<T> def) => n.prop(def);
+
+  /// A color prop whose unset value is the theme's ([withThemeColors]).
+  Color c(api.PropDef<api.Color?> def) => themedColor(n, def);
 
   @override
   bool shouldRepaint(covariant NodePainter oldDelegate) => oldDelegate.n != n || oldDelegate.runtimeType != runtimeType;
@@ -299,7 +303,7 @@ class RadialGaugePainter extends NodePainter {
       }
       if (zones.isNotEmpty && value >= zones.last.to) return zones.last.color.flutter;
     }
-    return p(RadialGaugeProps.valueColor).flutter;
+    return c(RadialGaugeProps.valueColor);
   }
 
   @override
@@ -315,7 +319,7 @@ class RadialGaugePainter extends NodePainter {
     final start = _rad(p(RadialGaugeProps.startAngle));
     final sweep = _rad(p(RadialGaugeProps.sweepAngle));
     final rect = Rect.fromCircle(center: center, radius: radius);
-    final track = p(RadialGaugeProps.trackColor).flutter;
+    final track = c(RadialGaugeProps.trackColor);
     final min = p(RadialGaugeProps.min), max = p(RadialGaugeProps.max);
     final fill = _colorFor(min + (max - min) * fraction);
     final stroke = math.max(0.0, thickness);
@@ -372,7 +376,7 @@ class RadialGaugePainter extends NodePainter {
           at(radius - stroke / 2 - 3, angle),
           at(radius - stroke / 2 - (major ? 15 : 9), angle),
           Paint()
-            ..color = p(RadialGaugeProps.tickColor).flutter
+            ..color = c(RadialGaugeProps.tickColor)
             ..strokeWidth = major ? 2 : 1,
         );
       }
@@ -385,7 +389,7 @@ class RadialGaugePainter extends NodePainter {
           text: TextSpan(
             text: _numberText(label),
             style: TextStyle(
-              color: p(RadialGaugeProps.labelColor).flutter,
+              color: c(RadialGaugeProps.labelColor),
               fontSize: labelFontSize,
               fontFamily: p(RadialGaugeProps.labelFontFamily),
             ),
@@ -402,7 +406,7 @@ class RadialGaugePainter extends NodePainter {
             at(radius + stroke / 2 + 2, angle),
             at(radius + stroke / 2 + 6, angle),
             Paint()
-              ..color = p(RadialGaugeProps.tickColor).flutter
+              ..color = c(RadialGaugeProps.tickColor)
               ..strokeWidth = 1,
           );
         }
@@ -416,7 +420,7 @@ class RadialGaugePainter extends NodePainter {
         at(across ? radius - stroke / 2 - 4 : radius + stroke / 2 + 2, angle),
         at(across ? radius + stroke / 2 + 4 : radius + stroke / 2 + 11, angle),
         Paint()
-          ..color = p(RadialGaugeProps.targetColor).flutter
+          ..color = c(RadialGaugeProps.targetColor)
           ..strokeWidth = across ? 2.5 : 3,
       );
     }
@@ -427,7 +431,7 @@ class RadialGaugePainter extends NodePainter {
         at(radius * clearance, angle),
         at(radius - stroke / 2 - 2, angle),
         Paint()
-          ..color = p(RadialGaugeProps.needleColor).flutter
+          ..color = c(RadialGaugeProps.needleColor)
           ..strokeWidth = 2
           ..strokeCap = StrokeCap.round,
       );
@@ -453,7 +457,7 @@ class GaugeMeterPainter extends NodePainter {
 
   double get fraction => _fraction(p(GaugeMeterProps.value));
   double? get limit => switch (p(GaugeMeterProps.limit)) { final double l => _fraction(l), null => null };
-  Color get color => p(GaugeMeterProps.color).flutter;
+  Color get color => c(GaugeMeterProps.color);
   Color get limitColor => p(GaugeMeterProps.limitColor).flutter;
 
   @override
@@ -476,7 +480,7 @@ class GaugeMeterPainter extends NodePainter {
     final rect = Rect.fromCircle(center: center, radius: r);
     final start = _rad(p(GaugeMeterProps.startAngle));
     final sweep = _rad(p(GaugeMeterProps.sweepAngle));
-    final track = p(GaugeMeterProps.trackColor).flutter;
+    final track = c(GaugeMeterProps.trackColor);
     final fraction = this.fraction;
 
     final segments = p(GaugeMeterProps.segments);
@@ -507,7 +511,7 @@ class GaugeMeterPainter extends NodePainter {
     final ticks = p(GaugeMeterProps.ticks);
     final majorEvery = p(GaugeMeterProps.majorTickEvery);
     if (ticks > 0) {
-      final tick = Paint()..color = p(GaugeMeterProps.tickColor).flutter;
+      final tick = Paint()..color = c(GaugeMeterProps.tickColor);
       for (var i = 0; i <= ticks; i++) {
         final a = start + sweep * i / ticks;
         final major = majorEvery > 0 && i % majorEvery == 0;
@@ -547,7 +551,7 @@ class GaugeMeterPainter extends NodePainter {
     final inset = p(GaugeMeterProps.inset);
     final inner = Rect.fromLTRB(inset, inset, size.width - inset, size.height - inset);
     final length = vertical ? inner.height : inner.width;
-    final track = p(GaugeMeterProps.trackColor).flutter;
+    final track = c(GaugeMeterProps.trackColor);
     final fraction = this.fraction;
 
     Rect span(double from, double to) => vertical
@@ -599,7 +603,7 @@ class GaugeMeterPainter extends NodePainter {
     final majorEvery = p(GaugeMeterProps.majorTickEvery);
     if (ticks > 1) {
       final tick = Paint()
-        ..color = p(GaugeMeterProps.tickColor).flutter
+        ..color = c(GaugeMeterProps.tickColor)
         ..strokeWidth = 1;
       final across = vertical ? inner.width : inner.height;
       for (var i = 1; i < ticks; i++) {
@@ -678,7 +682,7 @@ class BarChartPainter extends NodePainter {
     final values = p(BarChartProps.values);
     final labels = p(BarChartProps.labels);
     final highlight = p(BarChartProps.highlight);
-    final color = p(BarChartProps.color).flutter;
+    final color = c(BarChartProps.color);
     final palette = p(BarChartProps.colors);
     var max = p(BarChartProps.max);
     if (max <= 0) max = values.whereType<double>().fold(0, (a, b) => b > a ? b : a);
@@ -719,7 +723,7 @@ class BarChartPainter extends NodePainter {
 
     // Grid lines and their labels.
     final gridLines = p(BarChartProps.gridLines);
-    final gridPaint = Paint()..color = p(BarChartProps.gridColor).flutter;
+    final gridPaint = Paint()..color = c(BarChartProps.gridColor);
     // One label more than the grid lines labels the baseline first.
     final labelsBaseline = gridLabels.length > gridLines;
     for (var g = labelsBaseline ? 0 : 1; g <= gridLines; g++) {
@@ -752,7 +756,7 @@ class BarChartPainter extends NodePainter {
       final value = values[i];
       if (value == null) {
         canvas.drawRect(Rect.fromLTWH(left, height - emptyHeight, bar, emptyHeight),
-            Paint()..color = p(BarChartProps.emptyColor).flutter);
+            Paint()..color = c(BarChartProps.emptyColor));
         continue;
       }
       final h = max <= 0 ? 0.0 : (barScale * (value / max).clamp(0.0, 1.0)).clamp(emptyHeight, height).toDouble();
@@ -772,7 +776,7 @@ class BarChartPainter extends NodePainter {
             style: style.copyWith(
                 fontSize: valueFontSize,
                 fontWeight: FontWeight.w600,
-                color: i == highlight ? p(BarChartProps.highlightLabelColor).flutter : null),
+                color: i == highlight ? c(BarChartProps.highlightLabelColor) : null),
           ),
           textDirection: TextDirection.ltr,
           maxLines: 1,
@@ -783,7 +787,7 @@ class BarChartPainter extends NodePainter {
     }
 
     // Baseline.
-    canvas.drawRect(Rect.fromLTWH(0, height, width, 1), Paint()..color = p(BarChartProps.baselineColor).flutter);
+    canvas.drawRect(Rect.fromLTWH(0, height, width, 1), Paint()..color = c(BarChartProps.baselineColor));
 
     // Labels under the bars.
     if (hasLabels) {
@@ -797,7 +801,7 @@ class BarChartPainter extends NodePainter {
           text: TextSpan(
             text: text,
             style: i == highlight && p(BarChartProps.highlightLabels)
-                ? labelStyle.copyWith(color: p(BarChartProps.highlightLabelColor).flutter)
+                ? labelStyle.copyWith(color: c(BarChartProps.highlightLabelColor))
                 : labelStyle,
           ),
           textDirection: TextDirection.ltr,
@@ -833,7 +837,7 @@ class BarcodePainter extends NodePainter {
 
   String get data => p(BarcodeProps.data);
   BarcodeSymbology get symbology => p(BarcodeProps.symbology);
-  Color get color => p(BarcodeProps.color).flutter;
+  Color get color => c(BarcodeProps.color);
 
   /// How far each dark bar reaches past its right and bottom edge.
   double get overlap => p(BarcodeProps.overlap);
