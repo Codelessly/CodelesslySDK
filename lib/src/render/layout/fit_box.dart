@@ -119,8 +119,10 @@ class RenderFitBox extends RenderProxyBox {
 
   /// The size a box of [ratio] (width / height) takes from its preferred
   /// width [w] and height [h] (null where it hugs) within [constraints].
-  /// The width leads unless it hugs or only the height fills. Null when
-  /// both axes hug.
+  /// The width leads unless it hugs or only the height fills. When both
+  /// axes hug it sizes as Flutter's `AspectRatio` does: the widest it may
+  /// be, else the tallest (as its intrinsic height reports, so a row sized
+  /// by it leaves it the room); null when neither is bounded.
   @visibleForTesting
   static Size? keepAspectRatio(
     double? w,
@@ -129,6 +131,15 @@ class RenderFitBox extends RenderProxyBox {
     BoxConstraints constraints,
     ({bool fillWidth, bool fillHeight}) fills,
   ) {
+    if (w == null && h == null) {
+      if (constraints.maxWidth.isFinite) {
+        w = constraints.maxWidth;
+      } else if (constraints.maxHeight.isFinite) {
+        h = constraints.maxHeight;
+      } else {
+        return null;
+      }
+    }
     final bool heightLeads =
         h != null && (w == null || (fills.fillHeight && !fills.fillWidth));
     if (!heightLeads && w != null) {

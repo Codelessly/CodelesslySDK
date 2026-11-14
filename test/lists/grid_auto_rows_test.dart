@@ -109,4 +109,41 @@ void main() {
     await tester.pumpAndSettle();
     expect(s.tree.boxesOf('card').map((b) => b.size.height).toList(), [110.0, 110.0, 110.0, 140.0], reason: 'and shrinks again');
   });
+
+  for (final cross in ['stretch', 'start']) {
+    testWidgets('a childless box that hugs and keeps an aspect ratio in a card ($cross) is drawn at the ratio its row made room for',
+        (tester) async {
+      // The row measures the card's content (its intrinsic height: the box
+      // at the card's width over its ratio, and a caption); the box then
+      // takes that height, as Flutter's AspectRatio takes the width it may
+      // have. It took none, and drew nothing in the room left for it.
+      tester.view.physicalSize = const Size(1000, 1400);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final s = await show(tester, {
+        'col': {'type': 'column', 'children': ['grid'], 'layout': {'width': 600, 'height': {'hug': 600}}},
+        'grid': {
+          'type': 'gridView',
+          'children': ['card'],
+          'layout': {'width': {'fill': 600}, 'height': {'hug': 400}},
+          'props': {'shrinkWrapRows': true, 'crossAxisCount': 2, 'physics': 'never', 'crossAxisSpacing': 20},
+          'bind': {'data': r'${= [1, 2, 3]}'},
+        },
+        'card': {
+          'type': 'column',
+          'children': ['photo'],
+          'layout': {'width': {'fill': 290}, 'height': {'hug': 10}},
+          'props': {'crossAxisAlignment': cross},
+        },
+        'photo': {
+          'type': 'box',
+          'layout': {'width': {'hug': 100}, 'height': {'hug': 50}, 'aspectRatio': 2},
+          'decoration': {'fills': [{'color': '#FF0057FF'}]},
+        },
+      });
+      await tester.pumpAndSettle();
+      expect(s.tree.boxesOf('photo').map((b) => b.size).toList(), List.filled(3, const Size(290, 145)));
+      expect(s.tree.boxesOf('card').map((b) => b.size.height).toList(), List.filled(3, 145.0));
+    });
+  }
 }
