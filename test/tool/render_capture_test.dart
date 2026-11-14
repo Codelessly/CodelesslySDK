@@ -344,4 +344,15 @@ void main() {
     expect(unknown.first['count'], 3);
     expect(unknown.last['message'], startsWith('No screen "contact": "to" is a canvas id'));
   });
+
+  testWidgets('pages listed in site.json but not written yet are one warning per file, not unknown_screen errors per link', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/unwritten'], out: out.path, validateOnly: true));
+    final notWritten = report.diagnostics.where((d) => d['code'] == 'page_not_written').toList();
+    expect(notWritten.map((d) => d['file']), ['about.json', 'team.json'], reason: '${report.diagnostics}');
+    expect(notWritten.map((d) => d['severity']).toSet(), {'warning'});
+    expect(notWritten.first['message'], allOf(contains('listed in site.json, file not written yet'), contains('3 links')));
+    // A link to a screen no listed file would be is still an error.
+    final unknown = report.diagnostics.where((d) => d['code'] == 'unknown_screen').toList();
+    expect(unknown.map((d) => d['message']), [startsWith('No screen "contact"')]);
+  });
 }

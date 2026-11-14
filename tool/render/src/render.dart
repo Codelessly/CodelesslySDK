@@ -59,6 +59,7 @@ final class RuntimeIssue {
 /// severity and meaning (for the README and the reference).
 const runtimeCodes = <(String, String, String)>[
   ('invalid_json', 'error', 'A file is not valid JSON (the message gives the line and column).'),
+  ('page_not_written', 'warning', 'A page site.json lists has no file yet: one note per file, with the links that name its screen (checked once it is written).'),
   ('no_documents', 'error', 'No .json documents were found at the paths given.'),
   ('unknown_screen_arg', 'error', '--screen names no canvas, screen or layout.'),
   ('render_exception', 'error', 'Flutter threw while building, laying out or painting the screen.'),
@@ -164,17 +165,42 @@ List<({String name, String path, String text})> loadInputs(List<String> inputs) 
 /// One `unknown_screen` per screen that is missing, not one per link to
 /// it: a site whose pages are written before its manifest lists them all
 /// has dozens of links to each page still to come.
-List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics) {
+List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics, {List<String> unwritten = const []}) {
   final byScreen = <String, List<api.Json>>{};
   for (final d in diagnostics) {
     if (d['code'] != 'unknown_screen') continue;
     final to = RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}')?[1];
     if (to != null) (byScreen[to] ??= []).add(d);
   }
+  // A listed page not written yet is the screen its file is named after
+  // (`about.json`: "about"), as its canvas id usually is.
+  String key(String s) => s.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+  final fileOfScreen = <String, String>{};
   final out = <api.Json>[];
+  for (final file in unwritten) {
+    final stem = file.split('/').last.replaceFirst(RegExp(r'\.json$'), '');
+    final links = [
+      for (final e in byScreen.entries)
+        if (key(e.key) == key(stem)) ...e.value,
+    ];
+    for (final e in byScreen.keys) {
+      if (key(e) == key(stem)) fileOfScreen[e] = file;
+    }
+    final where = [for (final g in links) '${g['file'] == null ? '' : '${g['file']} '}${g['path']}'];
+    out.add({
+      'code': 'page_not_written',
+      'severity': 'warning',
+      'file': file,
+      'message': '$file is listed in site.json, file not written yet'
+          '${links.isEmpty ? '' : ': ${links.length} link${links.length == 1 ? '' : 's'} name${links.length == 1 ? 's' : ''} its screen "$stem" (${where.take(6).join('; ')}${where.length > 6 ? '; and ${where.length - 6} more' : ''})'}. '
+          'Links to it are checked once it is written; its canvas id is the screen they name.',
+      if (links.isNotEmpty) 'count': links.length,
+    });
+  }
   for (final d in diagnostics) {
     final match = d['code'] == 'unknown_screen' ? RegExp(r'^No screen "([^"]*)"').firstMatch('${d['message']}') : null;
     final to = match?[1];
+    if (to != null && fileOfScreen.containsKey(to)) continue;
     final group = to == null ? null : byScreen[to];
     if (group == null || group.length == 1) {
       out.add(d);
@@ -250,7 +276,16 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
   final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
   // Notes (a schema-2 document, migrated as it loads) are not findings.
-  report.diagnostics.addAll(_summarizeUnknownScreens(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()).toList()));
+  // Pages site.json lists whose files are not there yet (a site written
+  // page by page): one note per file, with the links that name its screen.
+  final unwritten = <String>[
+    for (final i in args.inputs)
+      if (File('$i/${api.SiteManifest.fileName}').existsSync())
+        for (final p in api.SiteManifest.fromJson(site.manifest).pages)
+          if (!File('$i/$p').existsSync()) p,
+  ];
+  report.diagnostics.addAll(_summarizeUnknownScreens(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()).toList(),
+      unwritten: unwritten));
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
   report.diagnostics.addAll(validateTheme(themeJson,
