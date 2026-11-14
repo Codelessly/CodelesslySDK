@@ -3,10 +3,10 @@
 // paragraph, with a blinking block caret after the last one. The layout never
 // moves as it types.
 import 'dart:math' as math;
+import 'dart:ui' show ParagraphBuilder;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart' show SizedBox, WidgetSpan;
 import 'package:flutter/scheduler.dart';
 
 import 'convert.dart';
@@ -246,7 +246,7 @@ class RenderTypewriter extends RenderProxyBox {
     final color = given ?? textColor.withValues(alpha: textColor.a * 0.8);
     final Rect rect;
     if (tw.caretHeight > 0) {
-      // Where a middle-aligned WidgetSpan after the typed text would be (the
+      // Where a middle-aligned inline box after the typed text would be (the
       // typed text and that span laid out together, as a reference built
       // with Text.rich draws its caret).
       final box = _typed(p, n, tw).inlinePlaceholderBoxes!.first;
@@ -273,7 +273,7 @@ class RenderTypewriter extends RenderProxyBox {
     final text = _firstCharacters(p.text, n);
     final align = tw.caretAlignStyle.isEmpty ? _styleAt(p.text, n) : textStyle(tw.caretAlignStyle, _textDefault);
     final painter = TextPainter(
-      text: withCaret ? TextSpan(style: align, children: [text, const WidgetSpan(alignment: PlaceholderAlignment.middle, child: SizedBox())]) : text,
+      text: withCaret ? TextSpan(style: align, children: [text, const _CaretSpan()]) : text,
       textAlign: p.textAlign,
       textDirection: p.textDirection,
       textScaler: p.textScaler,
@@ -320,3 +320,42 @@ class RenderTypewriter extends RenderProxyBox {
 
 /// The plain text of a span (for the typewriter's length).
 String plainText(InlineSpan span) => span.toPlainText(includeSemanticsLabels: false);
+
+/// The room the caret takes after the typed text: one middle-aligned inline
+/// placeholder, measured with the text (what a widget tree writes as a
+/// `WidgetSpan` holding an empty box).
+class _CaretSpan extends PlaceholderSpan {
+  const _CaretSpan() : super(alignment: PlaceholderAlignment.middle);
+
+  @override
+  void build(ParagraphBuilder builder, {TextScaler textScaler = TextScaler.noScaling, List<PlaceholderDimensions>? dimensions}) {
+    final d = dimensions![builder.placeholderCount];
+    builder.addPlaceholder(d.size.width, d.size.height, alignment, baseline: d.baseline, baselineOffset: d.baselineOffset);
+  }
+
+  @override
+  bool visitChildren(InlineSpanVisitor visitor) => visitor(this);
+
+  @override
+  bool visitDirectChildren(InlineSpanVisitor visitor) => true;
+
+  @override
+  InlineSpan? getSpanForPositionVisitor(TextPosition position, Accumulator offset) {
+    if (position.offset == offset.value) return this;
+    offset.increment(1);
+    return null;
+  }
+
+  @override
+  int? codeUnitAtVisitor(int index, Accumulator offset) {
+    final local = index - offset.value;
+    offset.increment(1);
+    return local == 0 ? PlaceholderSpan.placeholderCodeUnit : null;
+  }
+
+  @override
+  bool debugAssertIsValid() => true;
+
+  @override
+  RenderComparison compareTo(InlineSpan other) => other is _CaretSpan ? RenderComparison.identical : RenderComparison.layout;
+}
