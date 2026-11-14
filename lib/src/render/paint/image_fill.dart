@@ -18,6 +18,7 @@ import '../contracts.dart';
 import '../convert.dart';
 import '../node_tree.dart' show NodeBox;
 import 'noise.dart' show noiseTileUrl;
+import 'svg_fonts.dart';
 
 /// Loads the image at [url] into Flutter's image cache (where image fills
 /// find it), completing with whether it loaded. SVGs and data URLs aren't
@@ -187,7 +188,27 @@ class LoadedImage {
         _svgBytes.remove(_svgBytes.keys.first);
       }
     }
-    return vg.loadPicture(SvgBytesLoader(bytes), null);
+    // Its text in the site's fonts (SvgFonts): the families it names are
+    // asked for and waited on, so the picture isn't recorded in a fallback.
+    final resolved = SvgFonts.resolveBytes(bytes, defaultFamily: _textFamily(), url: url);
+    if (!identical(resolved, bytes)) {
+      await FontDemand.settled().timeout(const Duration(seconds: 5), onTimeout: () {});
+    }
+    return vg.loadPicture(SvgBytesLoader(Uint8List.fromList(resolved)), null);
+  }
+
+  /// The default font family of the trees that show this image (the
+  /// theme's `fontFamily`): what an SVG's text is drawn in.
+  String? _textFamily() {
+    for (final c in _clients) {
+      for (RenderObject? p = c; p != null; p = p.parent) {
+        if (p is NodeBox) {
+          if (p.tree.textDefault?.fontFamily case final String f) return f;
+          break;
+        }
+      }
+    }
+    return null;
   }
 
   // Delivered after the current frame's work: an image already in the

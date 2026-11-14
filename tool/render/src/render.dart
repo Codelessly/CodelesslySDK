@@ -18,6 +18,7 @@ import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey, Meth
 import 'package:flutter_test/flutter_test.dart';
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
+import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
 
 import 'args.dart';
@@ -331,10 +332,18 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     docs[a.name] = a.page;
     dirs[a.name] = Directory.current.path;
   }
+  // SVG images by the data: URL they are inlined as, to name the ones
+  // whose text asks for a family the run has no font for.
+  final svgSources = <String, String>{};
+  final svgUsers = <String, Set<String>>{};
+  SvgFonts.onFamily = (family, url) => svgUsers.putIfAbsent(family.toLowerCase(), () => {}).add(svgSources[url] ?? url);
   for (final e in docs.entries) {
     // Relative image paths start from the site's folder (as at run time),
     // else from the document's.
     final p = prepare(e.value, dir: siteDir ?? dirs[e.key]!, defaultFamily: 'Roboto', codepoints: codepoints);
+    for (final img in p.images) {
+      if (_valueAt(p.json, img.path) case final String v when v.startsWith('data:image/svg')) svgSources[v] = img.url;
+    }
     if (isComponentJson(e.value)) {
       components.define(api.LayoutDocument.fromJson(p.json));
     } else if (alone.isEmpty || alone.any((a) => a.name == e.key)) {
@@ -407,13 +416,13 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   try {
     if (alone.isEmpty) {
       await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report,
-          components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), siteDir: siteDir);
+          components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir);
     }
     for (final a in alone) {
       // A preview renders at its own size; ad-hoc parameters at each size.
       final sizes = a.width != null && a.height != null ? [ui.Size(a.width!, a.height!)] : args.sizes;
       await _renderAll(tester, args.copyWith(sizes: sizes, screens: [a.name]), faces, published, docs, fileOfNode, fetcher, issue,
-          report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), siteDir: siteDir);
+          report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir);
     }
     for (final e in components.missing.entries) {
       for (final path in e.value) {
@@ -446,6 +455,7 @@ Future<void> _renderAll(
   RenderReport report, {
   ComponentRegistry? components,
   Map<String, List<String>> fontUsers = const {},
+  Map<String, Set<String>> svgUsers = const {},
   String? siteDir,
 }) async {
   // 3. Which screens.
@@ -657,7 +667,11 @@ Future<void> _renderAll(
           if (fontUsers.isNotEmpty) 'site.json\'s fonts',
           if (args.fontDirs.isNotEmpty) fontDirsOf(args.fontDirs).join(', ') else 'no --fonts directory',
         ].join('; ');
-        final users = fontUsers[m.family.toLowerCase()] ?? const <String>[];
+        final users = [
+          ...?fontUsers[m.family.toLowerCase()],
+          // An SVG image whose <text> names the family.
+          for (final svg in svgUsers[m.family.toLowerCase()] ?? const <String>{}) 'the text of $svg',
+        ];
         issue(RuntimeIssue('font_fallback', 'warning',
             'Font "${m.family}" $style (fontFamily "${m.family}", fontWeight ${m.weight}, fontStyle ${m.italic ? 'italic' : 'normal'}) was asked for'
             '${users.isEmpty ? '' : ' by ${users.take(8).map((u) => '"$u"').join(', ')}${users.length > 8 ? ' and ${users.length - 8} more' : ''}'}; '
@@ -667,7 +681,7 @@ Future<void> _renderAll(
             ' Declare it in site.json: "fonts": [{"family": "${m.family}", "fonts": [{"asset": "fonts/<file>.ttf", "weight": ${m.weight}${m.italic ? ', "style": "italic"' : ''}}]}] '
             '(.ttf, .otf or .woff beside site.json), or pass --fonts <dir> (a font package folder such as node_modules/@fontsource/<family>, '
             'or `--fonts system` for the system\'s fonts).',
-            nodeId: users.isEmpty ? null : users.first));
+            nodeId: fontUsers[m.family.toLowerCase()]?.firstOrNull));
       }
       final name = '${_fileSafe(label)}@$sizeName${args.theme == null ? '' : '-${args.theme}'}${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
       final file = '${args.out}/$name';

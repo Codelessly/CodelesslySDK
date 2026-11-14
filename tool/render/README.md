@@ -159,6 +159,12 @@ the document (`"url": "assets/photo.png"`, or `file://...`) and inlines the file
 are not fetched: they are reported (`image_network`) and stay blank. Material icons named without a codepoint
 (an app fetches their SVG) are drawn from the Material Icons font.
 
+Text inside an SVG (`<text>`) is drawn in the site's fonts, as a text node's is: a generic family (`sans-serif`,
+`serif`, `monospace`, `system-ui`) and text naming no family take the theme's `fontFamily`; a named family is
+used when the site declares it (or `--fonts` has it), else drawn in the theme's font and reported as
+`font_fallback` naming the SVG (`by "the text of images/map.svg"`). Declare the family in `site.json` to draw
+it as designed.
+
 ## How it runs, and how fast
 
 It is a `flutter test` harness (`render_harness.dart`, run by `render.sh`): headless, no device, no network,
