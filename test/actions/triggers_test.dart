@@ -1,12 +1,14 @@
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/segmented.dart' show RenderSegmentedButton;
 import 'package:codelessly_sdk/src/runtime/actions/text_fields.dart' show TextFieldHandle;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../controls/toggles_support.dart';
 import '../support/screen.dart' as harness;
 import '../support/fields.dart';
 
@@ -430,29 +432,28 @@ void main() {
         },
         variables: [harness.v('filter', 'all')],
       );
-      expect(find.byType(SegmentedButton<String>), findsNothing);
+      final seg = controlIn<RenderSegmentedButton>(s.tree, 'seg');
       // Hugging, every label fits on one line; a narrower share ellipsizes.
-      for (final label in ['All', 'Live', 'Draft', 'Closed']) {
-        final p = tester.renderObject<RenderParagraph>(find.text(label));
-        if (width is! int) expect(p.didExceedMaxLines, isFalse);
-        expect(p.maxLines, 1);
+      expect(seg.labels.map((l) => l.text), ['All', 'Live', 'Draft', 'Closed']);
+      if (width is! int) {
+        for (var i = 0; i < 4; i++) {
+          expect(seg.labelFits(i), isTrue);
+        }
       }
-      final widths = [for (final l in ['All', 'Closed']) tester.getSize(find.ancestor(of: find.text(l), matching: find.byType(AnimatedContainer)).first).width];
+      final widths = [for (final i in [0, 3]) seg.segmentRects[i].width];
       if (width is int) {
         // A filling track shares its width: 320 less the 3px inset each side, by 4.
         expect(widths, everyElement(closeTo((320 - 6) / 4, 0.5)));
       } else {
         expect(widths[0], lessThan(widths[1]));
       }
-      BoxDecoration deco(String l) => tester.widget<AnimatedContainer>(
-          find.ancestor(of: find.text(l), matching: find.byType(AnimatedContainer)).first).decoration! as BoxDecoration;
-      expect(deco('All').boxShadow, hasLength(1));
-      expect(deco('Draft').boxShadow, isNull);
-      await tester.tap(find.text('Draft'));
+      expect(seg.selectedShadows, hasLength(1));
+      expect(seg.raised, ['all']);
+      final draft = seg.segmentRects[2].center;
+      await tester.tapAt(seg.localToGlobal(draft));
       await tester.pumpAndSettle();
       expect(s['filter'], 'draft');
-      expect(deco('Draft').boxShadow, hasLength(1));
-      expect(deco('All').boxShadow, isNull);
+      expect(seg.raised, ['draft']);
     });
 
     testWidgets('a focus action reaches the field in the same list item, even one the same tap reveals', (tester) async {
@@ -558,7 +559,7 @@ void main() {
         },
         variables: [harness.v('on', false, VariableType.boolean), harness.v('count', 0, VariableType.integer)],
       );
-      await tester.tap(find.byType(Checkbox));
+      await tester.tapAt(s.center('check'));
       await tester.pump();
       expect(s['on'], true);
       await tester.tapAt(s.center('button'));
