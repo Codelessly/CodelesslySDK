@@ -76,8 +76,24 @@ class RenderControlRoot extends RenderProxyBox {
   /// Takes [entry] away.
   void hideOverlay(RenderOverlayEntry entry) {
     if (!_overlay.remove(entry)) return;
+    // A control closing its popup as its screen goes away finds the root
+    // already disposed: the entry went with it.
+    if (_disposed) return;
     dropChild(entry);
     markNeedsLayout();
+  }
+
+  bool _disposed = false;
+
+  @override
+  void dispose() {
+    _disposed = true;
+    // What is still shown goes with the root.
+    for (final e in [..._overlay]) {
+      dropChild(e);
+    }
+    _overlay.clear();
+    super.dispose();
   }
 
   @override
