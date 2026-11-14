@@ -140,7 +140,14 @@ class ChartSeriesPainter extends NodePainter {
   int get selectedIndex => p(ChartProps.selectedIndex);
   ChartType get chartType => p(ChartProps.chartType);
 
-  TextStyle _labelStyle(String? family) => TextStyle(
+  TextStyle _labelStyle(String? family) {
+    // The family's 500 is asked for like a text node's (a web font loads;
+    // the render tool registers it), so labels never draw in a fallback.
+    if (family != null) FontDemand.need(family, 500, false);
+    return _plainLabelStyle(family);
+  }
+
+  TextStyle _plainLabelStyle(String? family) => TextStyle(
         fontFamily: family,
         fontSize: p(ChartProps.axisFontSize),
         color: c(ChartProps.axisLabelColor),
