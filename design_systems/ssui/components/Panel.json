@@ -122,7 +122,8 @@
     },
     "height": {
      "hug": 90
-    }
+    },
+    "padding": 1
    },
    "decoration": {
     "fills": [

@@ -1774,7 +1774,8 @@ add(component(
               preview('Expandable', 280, 40, title='Advanced', variant='expandable')],
     nodes={
         'panel': {'type': 'column', 'children': ['header', 'body'], 'props': {'crossAxisAlignment': 'stretch'},
-                  'layout': {'width': {'fill': 280}, 'height': {'hug': 90}},
+                  # 1 px of padding: the border takes room, as in the source, so a filled child never covers it.
+                  'layout': {'width': {'fill': 280}, 'height': {'hug': 90}, 'padding': 1},
                   'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 10,
                                  'clip': 'antiAlias', 'effects': []},
                   'bind': {'decoration.effects': "${= props.variant == 'elevated' ? theme.shadows.level2 : []}"}},
@@ -1877,6 +1878,139 @@ add(component(
                    'layout': {'width': 18, 'height': 18}},
         'number': {**text('${= round(max(0, min(100, props.value)))}', style(6.5, 800, 'secondaryText', 1, letterSpacing=-0.39), {'hug': 8}, {'hug': 7}),
                    'bind': {'props.style.color': "${= props.muted ? theme.colors.tertiaryText : theme.colors.secondaryText}"}},
+    },
+))
+
+# --- batch 8: provider rows, option icons and card actions -----------------------------------------------------
+
+def _plate(root, size, pad, radius, letter_size, url, letter, color):
+    """A bordered square holding a logo, or a letter when there is none."""
+    return {
+        root: {'type': 'row', 'children': [root + 'Letter'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+               'layout': {'width': size, 'height': size},
+               'decoration': {'fills': [{'color': 'primaryBackground'},
+                                        {'type': 'image', 'image': {'url': '', 'fit': 'contain'}, 'visible': False}],
+                              'strokes': [{'color': 'primaryBorder'}], 'radius': radius, 'clip': 'antiAlias'},
+               'bind': {'decoration.fills[1].image.url': '${%s}' % url, 'decoration.fills[1].visible': "${= %s != ''}" % url}},
+        root + 'Letter': {**text(letter, style(letter_size, 700, 'primary', 1), {'hug': 10}, {'hug': letter_size}),
+                          'bind': {'visible': "${= %s == ''}" % url, 'props.style.color': color}},
+    }
+
+
+LETTER_COLOR = "${= props.color != '' ? props.color : theme.primary}"
+
+# ProviderIcon (ProviderIcon.tsx): a 34 px plate, radius 8, bordered on the primary background, holding the
+# provider's logo contained with 5 px around it, or a letter 14/700 in its color.
+add(component(
+    'ProviderIcon',
+    'A provider\'s logo on a small bordered plate, or its letter when there is no logo.',
+    'plate',
+    props=[prop('image', STRING, '', 'The logo\'s URL (empty: the letter).'),
+           prop('letter', STRING, '?', 'The letter shown without a logo.'),
+           prop('color', STRING, '', 'The letter\'s color (empty: the brand color).')],
+    previews=[preview('Letter', 34, 34, letter='S')],
+    nodes=_plate('plate', 34, 5, 8, 14, 'props.image', '${props.letter}', LETTER_COLOR),
+))
+
+# OptionIcon (OptionIcon.tsx): an 18 px square, radius 5: a bordered logo that covers it, a letter 9/700 when
+# there is none, or an 11 px icon on the subtle fill.
+add(component(
+    'OptionIcon',
+    'The small square before an option in a menu or list: a logo, a letter or an icon.',
+    'box',
+    props=[prop('image', STRING, '', 'A logo\'s URL (empty: the icon, else the letter).'),
+           prop('icon', STRING, '', 'An icon on a subtle square (empty: the letter).'),
+           prop('letter', STRING, '', 'A letter, when there is neither.'),
+           prop('color', STRING, '', 'The letter\'s color (empty: the brand color).')],
+    previews=[preview('Icon', 18, 18, icon='bolt'), preview('Letter', 18, 18, letter='G')],
+    nodes={
+        'box': {'type': 'row', 'children': ['glyph', 'letter'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                'layout': {'width': 18, 'height': 18},
+                'decoration': {'fills': [{'color': 'tertiaryBackground'}, {'type': 'image', 'image': {'url': '', 'fit': 'cover'}, 'visible': False}],
+                               'strokes': [{'color': 'primaryBorder', 'visible': False}], 'radius': 5, 'clip': 'antiAlias'},
+                'bind': {'decoration.fills[0].color': "${= props.icon != '' && props.image == '' ? theme.colors.tertiaryBackground : theme.colors.primaryBackground}",
+                         'decoration.fills[1].image.url': '${props.image}', 'decoration.fills[1].visible': "${= props.image != ''}",
+                         'decoration.strokes[0].visible': "${= props.image != '' || props.icon == ''}"}},
+        'glyph': {**icon('bolt', 'secondaryText', 11), 'bind': {'visible': "${= props.image == '' && props.icon != ''}", 'props.icon': '${props.icon}'}},
+        'letter': {**text('${props.letter}', style(9, 700, 'primary', 1), {'hug': 8}, {'hug': 9}),
+                   'bind': {'visible': "${= props.image == '' && props.icon == ''}", 'props.style.color': LETTER_COLOR}},
+    },
+))
+
+# ProviderCard (ProviderCard.tsx): a provider in a settings list, 8 px above and below: the 34 px plate, 12 px,
+# the name 13/600 (-0.2) with a 6 px dot (success with a glow when connected, else secondary text) and a subtitle
+# 11.5 on a 1.4 line 2 px under it, 8 px, then the action pill (a 10 px link icon and 11/500 words).
+add(component(
+    'ProviderCard',
+    'A service you connect to, as a row: its logo or letter, name and a dot for connected, a subtitle, and an action pill. Fires onAction.',
+    'row',
+    props=[prop('label', STRING, 'GitHub', 'The provider\'s name.', required=True),
+           prop('subtitle', STRING, '', 'A line under the name.'),
+           prop('connected', BOOL, True, 'A green dot (else a gray one).'),
+           prop('image', STRING, '', 'The logo\'s URL (empty: the name\'s first letter).'),
+           prop('color', STRING, '', 'The letter\'s color (empty: primary text).'),
+           prop('actionLabel', STRING, 'Connected', 'The pill\'s words.')],
+    events=['onAction'],
+    previews=[preview('Connected', 300, 50, label='GitHub', subtitle='acme-inc · 14 repositories'),
+              preview('Not connected', 300, 50, label='Linear', connected=False, actionLabel='Connect')],
+    nodes={
+        'row': {'type': 'row', 'children': ['plate', 'words', 'pill'], 'props': {'crossAxisAlignment': 'center'},
+                'layout': {'width': {'fill': 300}, 'height': {'hug': 50}, 'padding': [0, 8, 0, 8]}},
+        **_plate('plate', 34, 5, 8, 14, 'props.image', '${= upper(substring(props.label, 0, 1))}',
+                 "${= props.color != '' ? props.color : theme.colors.primaryText}"),
+        'words': {'type': 'column', 'children': ['line', 'subtitle'], 'props': {'crossAxisAlignment': 'start', 'spacing': 2},
+                  'layout': {'width': {'fill': 200}, 'height': {'hug': 30}, 'margin': [12, 0, 8, 0]}},
+        'line': {'type': 'row', 'children': ['label', 'dot'], 'props': {'crossAxisAlignment': 'center', 'spacing': 6},
+                 'layout': {'width': {'hug': 80}, 'height': {'hug': 14}}},
+        'label': text('${props.label}', style(13, 600, 'primaryText', 1.1, letterSpacing=-0.2), {'hug': 60}, {'hug': 14}),
+        'dot': {'type': 'box', 'layout': {'width': 6, 'height': 6},
+                'decoration': {'fills': [{'color': 'success'}], 'radius': 3, 'effects': [shadow('#6616A34A', 0, 4, 1)]},
+                'bind': {'decoration.fills[0].color': '${= props.connected ? theme.success : theme.colors.secondaryText}',
+                         'decoration.effects[0].visible': '${props.connected}'}},
+        'subtitle': {'type': 'text', 'props': {'text': '${props.subtitle}', 'maxLines': 1, 'overflow': 'ellipsis',
+                                                'style': style(11.5, 400, 'secondaryText', 1.4)},
+                     'layout': {'width': {'fill': 200}, 'height': {'hug': 16}},
+                     'bind': {'visible': "${= props.subtitle != ''}"}},
+        'pill': {'type': 'row', 'children': ['pillIcon', 'pillLabel'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                 'layout': {'width': {'hug': 80}, 'height': {'hug': 22}, 'padding': [7, 2, 7, 2]},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 6},
+                 'states': {'hovered': {'pill': HOVER}, 'pressed': {'pill': PRESS}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onAction', 'value': '${props.label}'}]}]},
+        'pillIcon': {**icon('link', 'success', 10),
+                     'bind': {'props.color': '${= props.connected ? theme.success : theme.colors.secondaryText}'}},
+        'pillLabel': text('${props.actionLabel}', style(11, 500, 'secondaryText', 16 / 11), {'hug': 56}, {'hug': 16}),
+    },
+))
+
+# CardActions (CardActions.tsx): the action strip closing a card: 34 px, a hairline above, the secondary
+# background, the bottom corners rounded 10; equal actions split by 1 px rules, each an 11 px icon, 5 px, and its
+# label 11/600 (-0.1) in secondary text.
+add(component(
+    'CardActions',
+    'The strip of actions at the foot of a card: equal buttons split by hairlines. Fires onAction with the label.',
+    'strip',
+    props=[prop('actions', STRINGS, ['Open', 'Share'], 'The labels, in order.', required=True),
+           prop('icons', STRINGS, [], 'An icon for each (same order; none: no icons).')],
+    events=[{'key': 'onAction', 'payload': STRING}],
+    previews=[preview('Two', 280, 34, actions=['Open', 'Share'], icons=['open_in_new', 'ios_share'])],
+    nodes={
+        'strip': {'type': 'row', 'children': ['list'], 'layout': {'width': {'fill': 280}, 'height': 34},
+                  'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'top',
+                                 'radius': [0, 0, 10, 10], 'clip': 'antiAlias'}},
+        'list': {'type': 'gridView', 'children': ['action'],
+                 'props': {'crossAxisCount': 2, 'mainAxisExtent': 34, 'physics': 'never', 'alwaysScroll': False},
+                 'layout': {'width': {'fill': 280}, 'height': 34},
+                 'bind': {'data': '${props.actions}', 'props.crossAxisCount': '${= max(1, length(props.actions))}'}},
+        'action': {'type': 'row', 'children': ['actionIcon', 'actionLabel'],
+                   'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center', 'spacing': 5},
+                   'layout': {'width': {'fill': 140}, 'height': {'fill': 34}},
+                   'decoration': {'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'left'},
+                   'bind': {'decoration.strokes[0].visible': '${= index > 0}'},
+                   'states': {'hovered': {'action': HOVER}, 'pressed': {'action': PRESS}},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onAction', 'value': '${item}'}]}]},
+        'actionIcon': {**icon('open_in_new', 'secondaryText', 11),
+                       'bind': {'visible': '${= length(props.icons) > index}', 'props.icon': "${= length(props.icons) > index ? props.icons[index] : 'circle'}"}},
+        'actionLabel': text('${item}', style(11, 600, 'secondaryText', 1.3, letterSpacing=-0.1), {'hug': 40}, {'hug': 14}),
     },
 ))
 

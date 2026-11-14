@@ -1,0 +1,158 @@
+{
+ "schema": 3,
+ "id": "OptionIcon",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "OptionIcon",
+  "doc": "The small square before an option in a menu or list: a logo, a letter or an icon.",
+  "props": [
+   {
+    "key": "image",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A logo's URL (empty: the icon, else the letter)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "An icon on a subtle square (empty: the letter)."
+   },
+   {
+    "key": "letter",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A letter, when there is neither."
+   },
+   {
+    "key": "color",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The letter's color (empty: the brand color)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Icon",
+   "size": [
+    18,
+    18
+   ],
+   "props": {
+    "icon": "bolt"
+   }
+  },
+  {
+   "name": "Letter",
+   "size": [
+    18,
+    18
+   ],
+   "props": {
+    "letter": "G"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "letter"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "",
+       "fit": "cover"
+      },
+      "visible": false
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder",
+      "visible": false
+     }
+    ],
+    "radius": 5,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.icon != '' && props.image == '' ? theme.colors.tertiaryBackground : theme.colors.primaryBackground}",
+    "decoration.fills[1].image.url": "${props.image}",
+    "decoration.fills[1].visible": "${= props.image != ''}",
+    "decoration.strokes[0].visible": "${= props.image != '' || props.icon == ''}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "bolt",
+    "color": "secondaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "visible": "${= props.image == '' && props.icon != ''}",
+    "props.icon": "${props.icon}"
+   }
+  },
+  "letter": {
+   "type": "text",
+   "props": {
+    "text": "${props.letter}",
+    "style": {
+     "fontSize": 9,
+     "fontWeight": 700,
+     "height": 1,
+     "color": "primary",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 9
+    }
+   },
+   "bind": {
+    "visible": "${= props.image == '' && props.icon == ''}",
+    "props.style.color": "${= props.color != '' ? props.color : theme.primary}"
+   }
+  }
+ }
+}
