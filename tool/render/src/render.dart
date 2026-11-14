@@ -995,8 +995,10 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
     if (theaters.contains(p)) break;
     if (p is RenderRepaintBoundary) route = p;
   }
-  // Only when something is open over the page; else the window is the route.
-  final covered = route != null && _boxes(binding).any((b) => !_isInside(b, route!) && !over.contains(b) && all.indexOf(b) > pageIndex);
+  // The slices are of the page's route alone: whatever is open over it (a
+  // modal, a dialog, a dropdown's menu, a toast: node boxes or not) shows
+  // once, in the first window, not again in every slice.
+  final covered = route != null;
   final layer = covered ? route : ro;
   final layerAt = covered ? route.localToGlobal(Offset.zero) - ro.localToGlobal(Offset.zero) : Offset.zero;
   Future<ui.Image> shot(RenderRepaintBoundary b) async => (await tester.runAsync(() => b.toImage(pixelRatio: 1)))!;
@@ -1006,25 +1008,45 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   for (final b in over) {
     b.capturePaintShift = hidden;
   }
+  // A page whose content changes height once it scrolls (a header that
+  // shrinks on a scroll reaction) is laid out shorter or taller below the
+  // first window than in it: each slice is placed by that difference
+  // ([shift], what changed above it), so the page below the first window
+  // follows on from it with no rows lost or drawn twice at a seam.
+  Future<void> scrollTo(double offset) async {
+    page.jumpTo(offset.clamp(0.0, page.maxScrollExtent));
+    await _settle(tester);
+    // Sticky nodes in place, as the page lays them out.
+    var unpinned = false;
+    for (final s in _descendants(page).whereType<RenderSticky>()) {
+      if (s.shift == 0) continue;
+      s.shift = 0;
+      s.markNeedsPaint();
+      unpinned = true;
+    }
+    if (unpinned) {
+      page.markNeedsPaint();
+      await tester.pump();
+    }
+  }
+
   try {
-    for (var o = view.height; ; o += view.height) {
-      final at = math.min(o, max);
-      page.jumpTo(at);
-      await _settle(tester);
-      // Sticky nodes in place, as the page lays them out.
-      var unpinned = false;
-      for (final s in _descendants(page).whereType<RenderSticky>()) {
-        if (s.shift == 0) continue;
-        s.shift = 0;
-        s.markNeedsPaint();
-        unpinned = true;
+    var target = view.height;
+    for (var guard = 0; guard < 1000; guard++) {
+      await scrollTo(target);
+      final shift = max - page.maxScrollExtent;
+      final at = page.pixels;
+      // The first slice starts where the first window ends.
+      if (slices.isEmpty && shift.abs() > 0.5 && (at + shift - view.height).abs() > 0.5 && at < page.maxScrollExtent) {
+        final again = view.height - shift;
+        if ((again - at).abs() > 0.5 && guard < 3) {
+          target = again;
+          continue;
+        }
       }
-      if (unpinned) {
-        page.markNeedsPaint();
-        await tester.pump();
-      }
-      slices.add((await shot(layer), at));
-      if (at >= max) break;
+      slices.add((await shot(layer), at + shift));
+      if (at >= page.maxScrollExtent - 0.5) break;
+      target = at + view.height;
     }
   } finally {
     for (final b in over) {
