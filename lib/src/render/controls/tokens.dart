@@ -78,6 +78,12 @@ class ControlTokens {
     return ControlTokens._(merged, dark: dark, backdrop: backdrop, buttonRadius: theme.buttonRadius);
   }
 
+  /// [t] with no `onSurface`, so the ink is chosen for the surface.
+  static api.ThemeTokens _withoutOnSurface(api.ThemeTokens t) {
+    final j = t.toJson()..remove('onSurface');
+    return api.ThemeTokens.fromJson(j);
+  }
+
   /// SSUI's neutral names follow the document's roles: a theme that gives
   /// its own `surface`, `onSurface` or `primary` and not SSUI's names (a
   /// field's `primaryBackground`, a border, a tint) gets those names made
@@ -135,8 +141,16 @@ class ControlTokens {
   factory ControlTokens.of(NodeBuilder b) {
     b.tree.dependOnTheme(b);
     final parent = b.source.parentOf(b.id);
-    return ControlTokens.resolve(b.tree.theme, dark: b.tree.dark,
-        backdrop: parent == null ? null : backdropOf(b.source.node, b.source.parentOf, parent));
+    final backdrop = parent == null ? null : backdropOf(b.source.node, b.source.parentOf, parent);
+    // On a band whose brightness is not the screen's (a dark hero on a light
+    // page, a light card on a dark one), the control is drawn for the band:
+    // its neutral colours are made from what it sits on.
+    if (backdrop != null && backdrop.a > .9 && (backdrop.computeLuminance() < .18) != b.tree.dark) {
+      final onBand = b.tree.theme.mergedWith(api.ThemeTokens(surface: api.Color(backdrop.toARGB32()), colors: const {}));
+      final t = ControlTokens.resolve(_withoutOnSurface(onBand), dark: backdrop.computeLuminance() < .18, backdrop: backdrop);
+      return t;
+    }
+    return ControlTokens.resolve(b.tree.theme, dark: b.tree.dark, backdrop: backdrop);
   }
 
   /// The merged tokens.
