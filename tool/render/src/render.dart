@@ -16,6 +16,7 @@ import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_me
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart' show FontLoader, LogicalKeyboardKey, MethodCall, SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:codelessly_sdk/src/runtime/gestures/drag_and_drop.dart' show RenderDragSource;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:codelessly_sdk/src/render/controls/buttons.dart' show RenderButton;
 import 'package:codelessly_sdk/src/render/controls/kit.dart' show RenderControl;
@@ -1747,8 +1748,17 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
               .byWidgetPredicate((w) => w is LongPressDraggable || w is ReorderableDelayedDragStartListener)
               .evaluate()
               .any((e) => e.renderObject != null && (_isInside(source, e.renderObject!) || _isInside(e.renderObject!, source)));
+      // The tree's own draggable (a render object) holds too on touch.
+      bool holds(RenderObject o) => o is RenderDragSource && o.startsOnLongPress;
+      var ownHeld = false;
+      if (source != null) {
+        for (RenderObject? p = source; p != null && !ownHeld; p = p.parent) {
+          ownHeld = holds(p);
+        }
+        ownHeld = ownHeld || _descendants(source).any(holds);
+      }
       final g = await tester.startGesture(from);
-      if (held) await tester.pump(const Duration(milliseconds: 700));
+      if (held || ownHeld) await tester.pump(const Duration(milliseconds: 700));
       const moves = 12;
       for (var i = 1; i <= moves; i++) {
         await g.moveTo(ui.Offset.lerp(from, to, i / moves)!);

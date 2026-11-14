@@ -967,6 +967,10 @@ class RenderDragSource extends RenderProxyBox implements MouseTrackerAnnotation 
   _SourceDrag? _drag;
   bool _disposed = false;
 
+  /// Whether the drag starts after a hold (touch platforms, or `start:
+  /// longPress`), not at once.
+  bool get startsOnLongPress => _longPress;
+
   bool get _longPress => switch (_model.start) {
     api.DragStart.press => false,
     api.DragStart.longPress => true,
