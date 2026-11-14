@@ -263,7 +263,7 @@ class UiSession implements NodeSource {
     void Function(StreamProgress progress)? onOp,
   }) {
     final ds = designSystem;
-    final used = options ?? (ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds));
+    final used = options ?? (ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds, named: true));
     final notation = Catalog.run(catalog, () => NotationStream(catalog: catalog, options: used));
     Stream<String> ops() async* {
       yield '{"ops":[';
