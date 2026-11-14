@@ -126,9 +126,22 @@ class LoadedImage {
         _fail();
         return;
       }
+    } else if (!_hasScheme(url)) {
+      // A path with no scheme (a site's `images/7.jpg`, often built by a
+      // binding) is read by the tree's loader, which knows the site's files.
+      _fetch(url).then((bytes) {
+        if (!_released) _resolve(MemoryImage(bytes));
+      }, onError: (Object _) => _fail());
+      return;
     } else {
       provider = NetworkImage(url);
     }
+    _resolve(provider);
+  }
+
+  static bool _hasScheme(String url) => Uri.tryParse(url.trim())?.hasScheme ?? true;
+
+  void _resolve(ImageProvider provider) {
     final stream = provider.resolve(ImageConfiguration.empty);
     final listener = ImageStreamListener((info, _) {
       image?.dispose();

@@ -27,6 +27,10 @@
   old mode's colours.
 - The render command with no `--screen` no longer renders a canvas only ever opened as a modal as a screen of its
   own, whether the `openModal` is on a page or inside a component (the site's or its design system's).
+- An image whose path a binding builds (`"bind": {"decoration.fills[0].image.url": "images/${id}.jpg"}`), relative
+  to the site, is read from the site's files when it is drawn: the app's tree reads site images through
+  `SiteImageLoader` (the loader's file URL, else its bytes), and a raster image whose URL has no scheme is fetched by
+  the tree's loader instead of `NetworkImage`. Literal paths were already resolved when the layout loads.
 
 ## 30.1.0
 
