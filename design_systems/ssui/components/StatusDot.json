@@ -1,0 +1,154 @@
+{
+ "schema": 3,
+ "id": "StatusDot",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "StatusDot",
+  "doc": "A live state at a glance: a glowing dot (success, warning, error, info, neutral) with an optional label.",
+  "props": [
+   {
+    "key": "status",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "neutral",
+      "success",
+      "warning",
+      "error",
+      "info"
+     ]
+    },
+    "default": "success",
+    "doc": "success (green), error (red), warning and info (blue), neutral (grey)."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Text after the dot (empty: none)."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "sm",
+      "md",
+      "lg"
+     ]
+    },
+    "default": "md",
+    "doc": "The dot: sm 8, md 12, lg 16."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Online",
+   "size": [
+    90,
+    20
+   ],
+   "props": {
+    "status": "success",
+    "label": "Online"
+   }
+  },
+  {
+   "name": "Error",
+   "size": [
+    90,
+    20
+   ],
+   "props": {
+    "status": "error",
+    "label": "Offline"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "dot",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF22C55E"
+     }
+    ],
+    "radius": 9999,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#4D22C55E",
+      "offset": [
+       0,
+       0
+      ],
+      "blurRadius": 4,
+      "spreadRadius": 2
+     }
+    ]
+   },
+   "bind": {
+    "layout.width": "${= props.size == 'sm' ? 8 : (props.size == 'md' ? 12 : (16))}",
+    "layout.height": "${= props.size == 'sm' ? 8 : (props.size == 'md' ? 12 : (16))}",
+    "decoration.fills[0].color": "${= props.status == 'success' ? '#FF22C55E' : (props.status == 'error' ? '#FFEF4444' : (props.status == 'neutral' ? '#FFA3A3A3' : '#FF3B82F6'))}",
+    "decoration.effects[0].color": "${= props.status == 'success' ? '#4D22C55E' : (props.status == 'error' ? '#4DEF4444' : (props.status == 'neutral' ? '#4D6B7280' : '#4D3B82F6'))}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != ''}"
+   }
+  }
+ }
+}

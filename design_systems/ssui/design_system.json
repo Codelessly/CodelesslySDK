@@ -456,7 +456,14 @@
   "components/Field.json",
   "components/SectionHeader.json",
   "components/EmptyState.json",
-  "components/Tooltip.json"
+  "components/Tooltip.json",
+  "components/StatusDot.json",
+  "components/CountBadge.json",
+  "components/StatusBadge.json",
+  "components/InlineStat.json",
+  "components/StatTile.json",
+  "components/IconBox.json",
+  "components/ToggleRow.json"
  ],
  "replaces": [
   "filledButton",

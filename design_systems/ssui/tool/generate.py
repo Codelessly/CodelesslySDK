@@ -1099,6 +1099,158 @@ add(component(
 ))
 
 
+# --- batch 2 (Researchy/soft_saas_ui/src/components): small status and stat pieces ---------------------------
+
+STATUS = ['neutral', 'success', 'warning', 'error', 'info']
+# StatusDot.tsx: green 500, red 500, blue 500 (warning and info share it), neutral 400; a 4 px glow at 30 %.
+DOT = "${= props.status == 'success' ? '#FF22C55E' : (props.status == 'error' ? '#FFEF4444' : (props.status == 'neutral' ? '#FFA3A3A3' : '#FF3B82F6'))}"
+DOT_GLOW = "${= props.status == 'success' ? '#4D22C55E' : (props.status == 'error' ? '#4DEF4444' : (props.status == 'neutral' ? '#4D6B7280' : '#4D3B82F6'))}"
+
+# StatusDot (StatusDot.tsx): a round dot 8 / 12 / 16 with a soft glow of its colour, an optional 14/500 label 8 px after.
+add(component(
+    'StatusDot',
+    'A live state at a glance: a glowing dot (success, warning, error, info, neutral) with an optional label.',
+    'row',
+    props=[prop('status', enum(*STATUS), 'success', 'success (green), error (red), warning and info (blue), neutral (grey).'),
+           prop('label', STRING, '', 'Text after the dot (empty: none).'),
+           prop('size', enum('sm', 'md', 'lg'), 'md', 'The dot: sm 8, md 12, lg 16.')],
+    previews=[preview('Online', 90, 20, status='success', label='Online'), preview('Error', 90, 20, status='error', label='Offline')],
+    nodes={
+        'row': {'type': 'row', 'children': ['dot', 'label'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                'layout': {'width': {'hug': 80}, 'height': {'hug': 20}}},
+        'dot': {'type': 'box', 'layout': {'width': 12, 'height': 12},
+                'decoration': {'fills': [{'color': '#FF22C55E'}], 'radius': 9999,
+                               'effects': [{'type': 'dropShadow', 'color': '#4D22C55E', 'offset': [0, 0], 'blurRadius': 4, 'spreadRadius': 2}]},
+                'bind': {'layout.width': by('size', {'sm': 8, 'md': 12, 'lg': 16}), 'layout.height': by('size', {'sm': 8, 'md': 12, 'lg': 16}),
+                         'decoration.fills[0].color': DOT, 'decoration.effects[0].color': DOT_GLOW}},
+        'label': {**text('${props.label}', style(14, 500, 'primaryText', 1.4), {'hug': 60}, {'hug': 20}),
+                  'bind': {'visible': "${= props.label != ''}"}},
+    },
+))
+
+# CountBadge (CountBadge.tsx): 16 high, at least 18 wide, a full pill on the tertiary fill, 10/600 secondary text.
+add(component(
+    'CountBadge',
+    'A count beside a title or tab: a 16 px grey pill, 10/600. Above max it reads "max+".',
+    'badge',
+    props=[prop('count', NUMBER, 3, 'The number.', required=True),
+           prop('max', NUMBER, 999, 'Above this it shows "max+".'),
+           prop('showZero', BOOL, False, 'False hides it at 0.')],
+    previews=[preview('Three', 24, 16, count=3), preview('Over', 40, 16, count=1200)],
+    nodes={
+        'badge': {'type': 'row', 'children': ['label'],
+                  'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': {'hug': 18}, 'height': 16, 'padding': [6, 0, 6, 0], 'constraints': {'minWidth': 18}},
+                  'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'radius': 9999},
+                  'bind': {'visible': '${= props.showZero || props.count != 0}'}},
+        'label': text("${= min(props.count, props.max)}${= props.count > props.max ? '+' : ''}",
+                      style(10, 600, 'secondaryText', 1, fontFeatures=['tnum']), {'hug': 8}, {'hug': 10}),
+    },
+))
+
+# StatusBadge (StatusBadge.tsx): a full pill, 1 px tone border on its 10 % tint, 10.5/700 in the tone, 1 x 7 padding,
+# 16 line height (18 high).
+add(component(
+    'StatusBadge',
+    'A run or sync state as a small pill in its tone: neutral, success, warning, error or info.',
+    'badge',
+    props=[prop('label', STRING, 'synced', 'The state\'s text.', required=True),
+           prop('tone', enum('neutral', 'success', 'warning', 'error', 'info'), 'neutral',
+                'neutral (unknown, skipped), success (done, synced), warning (pending, stale), error (failed, blocked), info (active, generated).')],
+    previews=[preview('Synced', 60, 18, label='synced', tone='success'), preview('Failed', 60, 18, label='failed', tone='error')],
+    nodes={
+        'badge': {'type': 'row', 'children': ['label'], 'props': {'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'hug': 50}, 'height': {'hug': 18}, 'padding': [7, 1, 7, 1]},
+                  'decoration': {'fills': [{'color': 'neutralTint'}], 'strokes': [{'color': 'neutralTintBorder'}], 'radius': 999},
+                  'bind': {'decoration.fills[0].color': TINT, 'decoration.strokes[0].color': TINT_BORDER}},
+        'label': {**text('${props.label}', style(10.5, 700, 'secondaryText', 16 / 10.5), {'hug': 36}, {'hug': 16}),
+                  'bind': {'props.style.color': INK}},
+    },
+))
+
+# InlineStat (InlineStat.tsx): an 11 px tertiary icon, 4 px, the value 10.5/600 with -0.1 tracking.
+add(component(
+    'InlineStat',
+    'One small figure with its icon (files, lines, stars): a muted 11 px icon and a bold 10.5 px value.',
+    'stat',
+    props=[prop('icon', STRING, 'description', 'The icon\'s name.'),
+           prop('value', STRING, '128', 'The figure, already formatted.', required=True)],
+    previews=[preview('Files', 50, 14, icon='description', value='128')],
+    nodes={
+        'stat': {'type': 'row', 'children': ['glyph', 'value'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                 'layout': {'width': {'hug': 40}, 'height': {'hug': 14}}},
+        'glyph': {**icon('description', 'tertiaryText', 11), 'bind': {'props.icon': '${props.icon}'}},
+        'value': text('${props.value}', style(10.5, 600, 'primaryText', 1.3, letterSpacing=-0.1), {'hug': 24}, {'hug': 14}),
+    },
+))
+
+# StatTile (StatsRow.tsx, density dashboard): a bordered tile on the secondary fill, radius 7, 12 x 14 padding; an
+# 11 px secondary label with a 14 px icon 7 px before it, then the value 21/650 at 1.1.
+add(component(
+    'StatTile',
+    'A dashboard figure: a small labelled icon line over a large value, in a bordered tile.',
+    'tile',
+    props=[prop('label', STRING, 'Revenue', 'What is counted.', required=True),
+           prop('value', STRING, '$48,200', 'The figure, already formatted.', required=True),
+           prop('icon', STRING, 'trending_up', 'The icon before the label.')],
+    previews=[preview('Revenue', 170, 72, label='Revenue', value='$48,200')],
+    nodes={
+        'tile': {'type': 'column', 'children': ['head', 'value'], 'props': {'crossAxisAlignment': 'start', 'spacing': 6},
+                 'layout': {'width': {'fill': 170}, 'height': {'hug': 72}, 'padding': [14, 12, 14, 12], 'constraints': {'minWidth': 0}},
+                 'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 7}},
+        'head': {'type': 'row', 'children': ['glyph', 'label'], 'props': {'crossAxisAlignment': 'center', 'spacing': 7},
+                 'layout': {'width': {'fill': 140}, 'height': {'hug': 16}}},
+        'glyph': {**icon('trending_up', 'secondaryText', 14), 'bind': {'props.icon': '${props.icon}'}},
+        'label': text('${props.label}', style(11, 400, 'secondaryText', 1.4), {'hug': 60}, {'hug': 16}),
+        'value': text('${props.value}', style(21, 600, 'primaryText', 1.1), {'fill': 140}, {'hug': 24}),
+    },
+))
+
+# IconBox (IconBox.tsx): 30 x 30, radius 7, a 10 % tint of the primary under a 15 px primary icon.
+add(component(
+    'IconBox',
+    'A tinted square holding an icon, for a dialog or card header: 30 px, radius 7, the brand colour at 10 %.',
+    'box',
+    props=[prop('icon', STRING, 'settings', 'The icon\'s name.', required=True)],
+    previews=[preview('Settings', 30, 30, icon='settings')],
+    nodes={
+        'box': {'type': 'row', 'children': ['glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                'layout': {'width': 30, 'height': 30}, 'decoration': {'fills': [{'color': 'primaryTint'}], 'radius': 7}},
+        'glyph': {**icon('settings', 'primary', 15), 'bind': {'props.icon': '${props.icon}'}},
+    },
+))
+
+# ToggleRow (ToggleRow.tsx): a settings row with no box: the title 12.5/600 (-0.2), an optional description 11 at 1.4
+# two pixels under it, and a switch 12 px after; 60 % when disabled.
+add(component(
+    'ToggleRow',
+    'A setting with its switch: a bold title, an optional muted description, the switch at the end. Fires onChanged.',
+    'row',
+    props=[prop('label', STRING, 'Watch for changes', 'The setting\'s name.', required=True),
+           prop('description', STRING, '', 'A line under it (empty: none).'),
+           prop('value', var(BOOL), '', 'The name of your boolean variable.'),
+           prop('enabled', BOOL, True, 'False: 60 % opacity, no toggling.')],
+    events=[{'key': 'onChanged', 'payload': BOOL}],
+    previews=[preview('With description', 320, 40, label='Watch for changes', description='Re-index when a file is saved.', value=True)],
+    nodes={
+        'row': {'type': 'row', 'children': ['texts', 'toggle'], 'props': {'crossAxisAlignment': 'center', 'spacing': 12},
+                'layout': {'width': {'fill': 320}, 'height': {'hug': 40}},
+                'bind': {'opacity': '${= props.enabled ? 1 : 0.6}'}},
+        'texts': {'type': 'column', 'children': ['label', 'description'], 'props': {'crossAxisAlignment': 'start', 'spacing': 2},
+                  'layout': {'width': {'fill': 240}, 'height': {'hug': 34}}},
+        'label': text('${props.label}', style(12.5, 600, 'primaryText', 1.3, letterSpacing=-0.2), {'fill': 240}, {'hug': 16}),
+        'description': {**text('${props.description}', style(11, 400, 'secondaryText', 1.4), {'fill': 240}, {'hug': 15}),
+                        'bind': {'visible': "${= props.description != ''}"}},
+        # The control the tree draws (SSUI's own switch, 28 x 16 at this size).
+        'toggle': {'type': 'switch', 'layout': {'width': {'hug': 28}, 'height': {'hug': 16}},
+                   'bind': {'props.value': '${= props.value == true}', 'props.enabled': '${props.enabled}'},
+                   'actions': [{'trigger': {'type': 'changed'}, 'actions': [
+                       {'type': 'setVariable', 'variable': 'props.value', 'value': '${result}'},
+                       {'type': 'componentEvent', 'event': 'onChanged', 'value': '${result}'}]}]},
+    },
+))
+
+
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
     for c in COMPONENTS:
