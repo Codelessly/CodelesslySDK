@@ -71,6 +71,32 @@ void main() {
       expect(_toggle(tree, 'sw').trackColor, const Color(0xFF4A4A4A), reason: 'SSUI\'s dark secondaryBorder');
     });
 
+    testWidgets('a label sits beside the mark, 8 px away and centred on it; the control hugs both, and a tap on the label toggles', (tester) async {
+      final (tree, recorded) = await _show(tester, {
+        'box': hugging('checkbox', {'label': 'Remember me'}),
+        'ring': hugging('radio', {'value': 'a', 'label': 'Monthly'}),
+        'sw': hugging('switch', {'label': 'Notifications'}),
+      });
+      for (final id in ['box', 'ring', 'sw']) {
+        final t = _toggle(tree, id);
+        final mark = t.markRect, glyphs = t.labels.single.glyphs;
+        final text = glyphs.reduce((a, b) => a.expandToInclude(b));
+        expect(mark.left, 0, reason: '$id mark at the start');
+        expect(text.left, mark.right + RenderToggle.labelGap, reason: '$id gap');
+        expect(text.center.dy, closeTo(mark.center.dy, .5), reason: '$id label centred on its mark');
+        expect(t.size.width, greaterThan(mark.width + 40), reason: '$id hugs its label too');
+        expect(t.size.height, greaterThanOrEqualTo(mark.height));
+      }
+      expect(_toggle(tree, 'sw').markRect.size, const Size(36, 20));
+      expect(_toggle(tree, 'box').semanticsName, 'Remember me');
+      // The label is part of the control: a tap on it toggles.
+      final box = _toggle(tree, 'box');
+      await tester.tapAt(box.localToGlobal(Offset(box.size.width - 4, box.size.height / 2)));
+      await tester.pump();
+      expect(box.value, true);
+      expect(recorded.fired, contains('box changed'));
+    });
+
     testWidgets('a node with a size keeps the islands\' proportions; compact and fillTrack fill it', (tester) async {
       final (tree, _) = await _show(tester, {
         'box': {'type': 'checkbox', 'layout': {'width': 40, 'height': 40}},
