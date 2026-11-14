@@ -93,6 +93,32 @@ void main() {
       }
     });
 
+    test('without a theme, controls have small radii: no stadium buttons, outlined fields, hairline dialogs', () {
+      final theme = themeDataOf(ThemeTokens.none);
+      const control = RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(kControlRadius)));
+      for (final style in [
+        theme.filledButtonTheme.style!,
+        theme.elevatedButtonTheme.style!,
+        theme.textButtonTheme.style!,
+        theme.outlinedButtonTheme.style!,
+        theme.segmentedButtonTheme.style!,
+      ]) {
+        expect(style.shape?.resolve({}), control);
+      }
+      expect(theme.chipTheme.shape, control);
+      final field = theme.inputDecorationTheme.border;
+      expect(field, isA<OutlineInputBorder>());
+      expect((field! as OutlineInputBorder).borderRadius, BorderRadius.circular(kControlRadius));
+      for (final shape in [theme.dialogTheme.shape, theme.popupMenuTheme.shape, theme.datePickerTheme.shape]) {
+        final r = shape! as RoundedRectangleBorder;
+        expect(r.borderRadius, BorderRadius.circular(kSurfaceRadius));
+        expect(r.side.width, 1, reason: 'a hairline border');
+      }
+      // A plain toggle: one thumb size, no outline around the track.
+      expect(theme.switchTheme.thumbIcon?.resolve({}), isNotNull);
+      expect(theme.switchTheme.trackOutlineColor?.resolve({})?.a, 0);
+    });
+
     test('text has no font family: never Roboto', () {
       final text = themeDataOf(ThemeTokens.none).textTheme;
       for (final s in [text.bodyMedium, text.labelLarge, text.titleLarge, text.displaySmall]) {
@@ -144,7 +170,11 @@ void main() {
       }
       expect(theme.chipTheme.shape, button);
       expect(theme.floatingActionButtonTheme.shape, button);
-      expect(theme.dialogTheme.shape, const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))));
+      // Dialogs: the radius, and a hairline border (not Material's shadow).
+      final dialog = theme.dialogTheme.shape! as RoundedRectangleBorder;
+      expect(dialog.borderRadius, const BorderRadius.all(Radius.circular(12)));
+      expect(dialog.side.width, 1);
+      expect(dialog.side.color, theme.colorScheme.outlineVariant);
       expect((theme.inputDecorationTheme.border as OutlineInputBorder?)?.borderRadius, BorderRadius.circular(12));
     });
 

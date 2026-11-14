@@ -80,8 +80,9 @@ final Map<String, WidgetRecipe> inputsRecipes = {
   'radio': (b, n, chain) => _sized(b, n, chain, (context) => _RadioIsland(node: n)),
   'slider': _slider,
   'dropdown': (b, n, chain) => _fitted(b, n, chain, (context) => _DropdownIsland(node: n)),
-  'datePicker': (b, n, chain) => chain.add(_island(b, (context) => _DatePickerIsland(node: n, interactive: _interactive(b)))),
-  'timePicker': (b, n, chain) => chain.add(_island(b, (context) => _TimePickerIsland(node: n, interactive: _interactive(b)))),
+  // A picker's face is a field of the node's size, as a text field's is.
+  'datePicker': (b, n, chain) => _fitted(b, n, chain, (context) => _DatePickerIsland(node: n, interactive: _interactive(b))),
+  'timePicker': (b, n, chain) => _fitted(b, n, chain, (context) => _TimePickerIsland(node: n, interactive: _interactive(b))),
   'dateTimeInput': (b, n, chain) =>
       chain.add(_island(b, (context) => _DateTimeInputIsland(node: n, interactive: _interactive(b)))),
   'segmentedButton': _segmentedButton,
