@@ -19,7 +19,8 @@ void main() {
       expect(scroll.position.maxScrollExtent, greaterThan(2000));
       tick.value = 7;
       await tester.pump();
-      if (side == 'flutter') expect(find.text('Tick 7'), findsOneWidget);
+      // The SDK draws text without a Text widget, so look at the render tree.
+      expect(tester.binding.renderViews.first.toStringDeep(), contains('"Tick 7"'));
       // ignore: avoid_print
       print('$side: scroll extent ${scroll.position.maxScrollExtent.round()}');
     });

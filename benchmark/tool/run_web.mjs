@@ -22,6 +22,7 @@ const done = new Promise((resolve) => {
 });
 page.on('pageerror', (e) => console.error('pageerror', e.message));
 await page.goto(`${base}?${query}`);
-const line = await Promise.race([done, new Promise((r) => setTimeout(() => r('[bench-result] timeout'), 90000))]);
+const line = await Promise.race([done, new Promise((r) => setTimeout(() => r("[bench-result] timeout"), Number(process.env.BENCH_TIMEOUT ?? 90000)))]);
 console.log(line);
 await browser.close();
+process.exit(0);

@@ -1,15 +1,19 @@
 // The same screen twice, timed: once as a document shown by the SDK, once
 // written by hand in Flutter's Material widgets. Per run, one side:
 //
-//   flutter build web --release -t lib/compare.dart && (serve build/web)
+//   flutter build web --release --no-web-resources-cdn -t lib/compare.dart && (serve build/web)
 //   open /?side=sdk&groups=150   or   /?side=flutter&groups=150
 //   →  the console prints "[bench-result] {...}"
 //
 // The screen is [groups] sections of a title, a switch, a slider, a text
 // field and a button in one scrolling column, none of it built lazily, and
-// a line at the top that shows a counter. Timed: the first frame (from
-// runApp to rasterized), 120 frames in which only the counter changes, and
-// 240 frames of scrolling.
+// a line at the top that shows a counter. Timed, on the UI thread: the
+// first frame (runAppToFirstFrameMs from runApp to the end of the frame,
+// which is inflating the widgets and the frame; firstFrameBuildMs the frame
+// alone, which is layout, paint and scene building), 120 frames in which
+// only the counter changes, and 240 frames of scrolling. Both sides run the
+// same phases and the same number of frames.
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
@@ -128,6 +132,23 @@ Map<String, Object?> _stats(List<double> xs) => {
       'max': double.parse(_pct(xs, 1).toStringAsFixed(2)),
     };
 
+/// One frame, timed on the UI thread: from the start of its begin-frame
+/// callbacks to its post-frame callbacks, which is the build, layout, paint
+/// and scene building. [before] runs first and is not timed. Returns the
+/// milliseconds; the frame's number is added to [numbers].
+Future<double> _timedFrame(Stopwatch sw, Set<int> numbers, {void Function()? before, bool schedule = true}) {
+  final binding = SchedulerBinding.instance;
+  final done = Completer<double>();
+  var t0 = 0;
+  before?.call();
+  binding.scheduleFrameCallback((_) {
+    t0 = sw.elapsedMicroseconds;
+    numbers.add(binding.platformDispatcher.frameData.frameNumber);
+  }, scheduleNewFrame: schedule);
+  binding.addPostFrameCallback((_) => done.complete((sw.elapsedMicroseconds - t0) / 1000));
+  return done.future;
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final q = Uri.base.queryParameters;
@@ -135,64 +156,77 @@ Future<void> main() async {
   final groups = int.tryParse(q['groups'] ?? '') ?? 150;
   final tick = ValueNotifier(0);
   final scroll = ScrollController();
+  final sw = Stopwatch()..start();
 
-  final build = <double>[], raster = <double>[];
+  // The engine's own timings, by frame number. On the web they arrive in
+  // batches, and only when a later frame is drawn at least 100 ms after the
+  // last batch, so they are matched to the timed frames by number at the
+  // end. The engine does not time the first (warm-up) frame's build.
+  final engine = <int, FrameTiming>{};
   SchedulerBinding.instance.addTimingsCallback((timings) {
     for (final t in timings) {
-      build.add(t.buildDuration.inMicroseconds / 1000);
-      raster.add(t.rasterDuration.inMicroseconds / 1000);
+      engine[t.frameNumber] = t;
     }
   });
-  Future<void> frames(int n, void Function(int i) each) async {
+
+  /// [n] frames, one after another, each timed.
+  Future<(List<double>, Set<int>)> frames(int n, void Function(int i) each) async {
+    final ms = <double>[], numbers = <int>{};
     for (var i = 0; i < n; i++) {
-      each(i);
-      SchedulerBinding.instance.scheduleFrame();
-      await SchedulerBinding.instance.endOfFrame;
+      ms.add(await _timedFrame(sw, numbers, before: () => each(i)));
     }
-    // The timings of the last frames are reported in batches.
-    await Future<void>.delayed(const Duration(milliseconds: 1200));
+    return (ms, numbers);
   }
 
-  final sw = Stopwatch()..start();
+  final start = sw.elapsedMicroseconds;
   double? made;
   final Widget screen;
   if (side == 'sdk') {
     final session = UiSession(document: documentOf(groups));
-    made = sw.elapsedMicroseconds / 1000;
+    made = (sw.elapsedMicroseconds - start) / 1000;
     screen = SdkScreen(session: session, tick: tick);
   } else {
     screen = FlutterScreen(groups: groups, tick: tick);
   }
+  // runApp inflates the widgets in one timer and draws the first frame (the
+  // warm-up frame) in the next ones; the callbacks below are that frame's.
+  final t0 = sw.elapsedMicroseconds;
   runApp(MaterialApp(
     debugShowCheckedModeBanner: false,
     home: Scaffold(body: SingleChildScrollView(controller: scroll, child: screen)),
   ));
-  await WidgetsBinding.instance.waitUntilFirstFrameRasterized;
-  final first = sw.elapsedMicroseconds / 1000;
+  final firstBuild = await _timedFrame(sw, {}, schedule: false);
+  final first = (sw.elapsedMicroseconds - t0) / 1000;
   await Future<void>.delayed(const Duration(milliseconds: 1500));
-  final firstBuild = build.isEmpty ? null : build.first, firstRaster = raster.isEmpty ? null : raster.first;
 
-  build.clear();
-  raster.clear();
-  await frames(120, (i) => tick.value = i + 1);
-  final updateBuild = [...build], updateRaster = [...raster];
+  final (updateBuild, updateFrames) = await frames(120, (i) => tick.value = i + 1);
+  await Future<void>.delayed(const Duration(milliseconds: 1500));
 
-  build.clear();
-  raster.clear();
   final extent = scroll.position.maxScrollExtent;
-  await frames(240, (i) => scroll.jumpTo(extent * (i + 1) / 240));
+  final (scrollBuild, scrollFrames) = await frames(240, (i) => scroll.jumpTo(extent * (i + 1) / 240));
+
+  // Two more frames, each over 100 ms after the last, bring in the engine's
+  // timings of the frames above.
+  for (var i = 0; i < 2; i++) {
+    await Future<void>.delayed(const Duration(milliseconds: 300));
+    await _timedFrame(sw, {});
+  }
+  List<double> of(Set<int> numbers, Duration Function(FrameTiming t) get) =>
+      [for (final n in numbers) if (engine[n] case final t?) get(t).inMicroseconds / 1000];
+
   final result = {
     'side': side,
     'groups': groups,
     if (made != null) 'notationToDocumentMs': double.parse(made.toStringAsFixed(1)),
     'runAppToFirstFrameMs': double.parse(first.toStringAsFixed(1)),
-    'firstFrameBuildMs': firstBuild,
-    'firstFrameRasterMs': firstRaster,
+    'firstFrameBuildMs': double.parse(firstBuild.toStringAsFixed(1)),
     'scrollExtent': extent.round(),
     'updateBuildMs': _stats(updateBuild),
-    'updateRasterMs': _stats(updateRaster),
-    'scrollBuildMs': _stats(build),
-    'scrollRasterMs': _stats(raster),
+    'scrollBuildMs': _stats(scrollBuild),
+    'engineUpdateBuildMs': _stats(of(updateFrames, (t) => t.buildDuration)),
+    'engineScrollBuildMs': _stats(of(scrollFrames, (t) => t.buildDuration)),
+    'updateRasterMs': _stats(of(updateFrames, (t) => t.rasterDuration)),
+    'scrollRasterMs': _stats(of(scrollFrames, (t) => t.rasterDuration)),
   };
   // ignore: avoid_print
   print('[bench-result] ${jsonEncode(result)}');
