@@ -171,7 +171,7 @@
       "color": "secondaryBorder"
      }
     ],
-    "radius": 10
+    "radius": 9999
    }
   },
   "thumb": {
@@ -186,7 +186,6 @@
       "color": "#FFFFFFFF"
      }
     ],
-    "radius": 3,
     "effects": [
      {
       "type": "dropShadow",
@@ -197,7 +196,8 @@
       ],
       "blurRadius": 2
      }
-    ]
+    ],
+    "radius": 9999
    }
   },
   "label": {

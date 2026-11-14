@@ -1,0 +1,193 @@
+{
+ "schema": 3,
+ "id": "NotificationBadge",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "NotificationBadge",
+  "doc": "A count or a dot on the corner of what it wraps (an icon button, an avatar): red by default, hidden at zero.",
+  "props": [
+   {
+    "key": "count",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 3,
+    "doc": "The number (0 hides it unless showZero)."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 99,
+    "doc": "Above this it shows \"max+\"."
+   },
+   {
+    "key": "dot",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A plain 8 px dot instead of the number."
+   },
+   {
+    "key": "showZero",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Shows at 0 too."
+   },
+   {
+    "key": "variant",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "danger",
+      "primary",
+      "success"
+     ]
+    },
+    "default": "danger",
+    "doc": "The color."
+   }
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Count",
+   "size": [
+    40,
+    40
+   ],
+   "props": {
+    "count": 3
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "stack",
+   "children": [
+    "content",
+    "badge"
+   ],
+   "layout": {
+    "width": {
+     "hug": 36
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     0,
+     5,
+     5,
+     0
+    ]
+   }
+  },
+  "content": {
+   "type": "slot"
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 18
+    },
+    "height": 18,
+    "padding": [
+     5,
+     0,
+     5,
+     0
+    ],
+    "constraints": {
+     "minWidth": 18
+    },
+    "x": {
+     "end": 0
+    },
+    "y": {
+     "start": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.showZero || props.count > 0}",
+    "layout.height": "${= props.dot ? 8 : 18}",
+    "layout.constraints": "${= props.dot ? {minWidth: 8} : {minWidth: 18}}",
+    "layout.padding": "${= props.dot ? [0, 0, 0, 0] : [4, 0, 4, 0]}",
+    "decoration.fills[0].color": "${= props.variant == 'primary' ? theme.primary : (props.variant == 'success' ? theme.success : theme.error)}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "error"
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1A000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 4,
+      "spreadRadius": -1
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${= min(props.count, props.max)}${= props.count > props.max ? '+' : ''}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 700,
+     "height": 1.3333333333333333,
+     "color": "onPrimary",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "visible": "${= !props.dot}"
+   }
+  }
+ }
+}

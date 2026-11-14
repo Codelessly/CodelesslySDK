@@ -33,6 +33,30 @@ void main() {
     expect(validateTheme(paper.tokens.toJson()), isEmpty);
   });
 
+  test('density and type scale are brand choices: Harbor is SSUI roomier and a tenth larger, and still validates', () async {
+    final problems = <String>[];
+    final harbor = await _load('design_systems/harbor', problems);
+    final ssui = await _load('design_systems/ssui', []);
+    expect(problems, isEmpty);
+    // The theme: control sizes at 1.15, type at 1.1.
+    expect(harbor.tokens.sizes['compact'], (ssui.tokens.sizes['compact']! * 1.15).round());
+    expect(harbor.tokens.textStyles['body']!.fontSize, 14.5);
+    expect(ssui.tokens.textStyles['body']!.fontSize, 13);
+    // The components: a literal font size, a padding, and a size picked by a prop.
+    final panel = _json('design_systems/harbor/components/Panel.json')['nodes'] as Map;
+    expect((((panel['title'] as Map)['props'] as Map)['style'] as Map)['fontSize'], 13);
+    expect(((panel['header'] as Map)['layout'] as Map)['padding'], [16, 12, 16, 12]);
+    final search = _json('design_systems/harbor/components/SearchBar.json')['nodes'] as Map;
+    expect(((search['strut'] as Map)['bind'] as Map)['layout.height'], contains("'sm' ? 37"));
+    // A dot or a marker stays round whatever the corners.
+    final steps = _json('design_systems/paper/components/StepIndicator.json')['nodes'] as Map;
+    expect(((steps['marker'] as Map)['decoration'] as Map)['radius'], 9999);
+    final docs = {
+      for (final f in Directory('design_systems/harbor/components').listSync().whereType<File>()) 'components/${f.uri.pathSegments.last}': _json(f.path),
+    };
+    expect(validateProject(docs, options: ValidateOptions(theme: harbor.tokens)).where((d) => d.severity != Severity.info).map((d) => '$d'), isEmpty);
+  });
+
   test('every component validates against Paper, and SSUI\'s cards validate with it unchanged', () async {
     final paper = await _load('design_systems/paper', []);
     final docs = {

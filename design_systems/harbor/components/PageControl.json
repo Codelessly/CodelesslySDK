@@ -1,0 +1,137 @@
+{
+ "schema": 3,
+ "id": "PageControl",
+ "roots": [
+  "dots"
+ ],
+ "widget": {
+  "type": "PageControl",
+  "doc": "Which page of several: small dots, the current one a wider brand bar. Fires onPageTapped with the index.",
+  "props": [
+   {
+    "key": "currentPage",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "The current page, from 0.",
+    "required": true
+   },
+   {
+    "key": "totalPages",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 3,
+    "doc": "How many pages.",
+    "required": true
+   }
+  ],
+  "events": [
+   {
+    "key": "onPageTapped",
+    "payload": {
+     "kind": "number",
+     "flutter": "double"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Second of five",
+   "size": [
+    48,
+    4
+   ],
+   "props": {
+    "currentPage": 1,
+    "totalPages": 5
+   }
+  }
+ ],
+ "nodes": {
+  "dots": {
+   "type": "row",
+   "children": [
+    "list"
+   ],
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 4
+    }
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "dot"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": 4,
+    "padding": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "bind": {
+    "data": "${= range(max(0, props.totalPages))}"
+   }
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": {
+     "fill": 4
+    }
+   },
+   "bind": {
+    "layout.width": "${= item == props.currentPage ? 12 : 4}",
+    "decoration.fills[0].color": "${= item == props.currentPage ? theme.primary : theme.colors.tertiaryBackground}"
+   },
+   "transitions": [
+    {
+     "property": "layout.width",
+     "duration": 200,
+     "curve": "easeInOut"
+    }
+   ],
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPageTapped",
+       "value": "${item}"
+      }
+     ]
+    }
+   ],
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 9999
+   }
+  }
+ }
+}

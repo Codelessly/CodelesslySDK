@@ -1,0 +1,145 @@
+{
+ "schema": 3,
+ "id": "Avatar",
+ "roots": [
+  "avatar"
+ ],
+ "widget": {
+  "type": "Avatar",
+  "doc": "A person or workspace: initials in a circle, or a photo.",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Ada Lovelace",
+    "doc": "Whose: its initials are shown.",
+    "required": true
+   },
+   {
+    "key": "image",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A photo URL (empty: initials)."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "xs",
+      "small",
+      "medium",
+      "large"
+     ]
+    },
+    "default": "small",
+    "doc": "xs 20, small 24, medium 32, large 40."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Initials",
+   "size": [
+    32,
+    32
+   ],
+   "props": {
+    "name": "Ada Lovelace",
+    "size": "medium"
+   }
+  }
+ ],
+ "nodes": {
+  "avatar": {
+   "type": "row",
+   "children": [
+    "circle"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 24
+    }
+   }
+  },
+  "circle": {
+   "type": "row",
+   "children": [
+    "initials"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 24,
+    "height": 28
+   },
+   "bind": {
+    "layout.width": "${= props.size == 'xs' ? 20 : (props.size == 'small' ? 24 : (props.size == 'medium' ? 32 : (40)))}",
+    "layout.height": "${= props.size == 'xs' ? 23 : (props.size == 'small' ? 28 : (props.size == 'medium' ? 37 : (46)))}",
+    "decoration.fills[1].image.url": "${props.image}",
+    "decoration.fills[1].visible": "${= props.image != ''}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     },
+     {
+      "type": "image",
+      "image": {
+       "url": "",
+       "fit": "cover"
+      },
+      "visible": false
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "clip": "antiAlias",
+    "radius": 9999
+   }
+  },
+  "initials": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(substring(props.name, 0, 1)) + (contains(props.name, ' ') ? upper(substring(split(props.name, ' ')[1], 0, 1)) : '')}",
+    "style": {
+     "from": "controlXs",
+     "color": "secondaryText",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "props.style.fontSize": "${= props.size == 'xs' ? 10 : (props.size == 'small' ? 11 : (props.size == 'medium' ? 13 : (15.5)))}",
+    "visible": "${= props.image == ''}"
+   }
+  }
+ }
+}

@@ -1,0 +1,135 @@
+{
+ "schema": 3,
+ "id": "AddButton",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "AddButton",
+  "doc": "A quiet \"add another\" under a list: a small muted icon and label, centered. Fires onPressed.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Add folder",
+    "doc": "The words.",
+    "required": true
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "add",
+    "doc": "The icon before them."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Add",
+   "size": [
+    280,
+    20
+   ],
+   "props": {
+    "label": "Add folder"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "states": {
+    "hovered": {
+     "label": {
+      "props": {
+       "style": {
+        "color": "secondaryText"
+       }
+      }
+     },
+     "glyph": {
+      "props": {
+       "color": "secondaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "add",
+    "color": "tertiaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,183 @@
+{
+ "schema": 3,
+ "id": "Field",
+ "roots": [
+  "field"
+ ],
+ "widget": {
+  "type": "Field",
+  "doc": "A form field's frame: a label above the control (the call's child), and a help or error line under it.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Label",
+    "doc": "The label.",
+    "required": true
+   },
+   {
+    "key": "help",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A hint under the control (empty: none)."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "An error under the control, instead of the help (empty: none); pass error: true to the control too."
+   },
+   {
+    "key": "required",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A required mark after the label."
+   }
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "With help",
+   "size": [
+    280,
+    72
+   ],
+   "props": {
+    "label": "Email",
+    "help": "We never share it."
+   }
+  }
+ ],
+ "nodes": {
+  "field": {
+   "type": "column",
+   "children": [
+    "labelRow",
+    "control",
+    "help",
+    "error"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 72
+    }
+   }
+  },
+  "labelRow": {
+   "type": "row",
+   "children": [
+    "label",
+    "mark"
+   ],
+   "props": {
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "fieldLabel"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "mark": {
+   "type": "text",
+   "props": {
+    "text": "*",
+    "style": {
+     "from": "fieldLabel",
+     "color": "error"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 6
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "visible": "${props.required}"
+   }
+  },
+  "control": {
+   "type": "slot"
+  },
+  "help": {
+   "type": "text",
+   "props": {
+    "text": "${props.help}",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "visible": "${= props.help != '' && props.error == ''}"
+   }
+  },
+  "error": {
+   "type": "text",
+   "props": {
+    "text": "${props.error}",
+    "style": {
+     "from": "caption",
+     "color": "error"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "visible": "${= props.error != ''}"
+   }
+  }
+ }
+}

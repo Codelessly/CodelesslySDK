@@ -45,14 +45,6 @@
     "width": 4,
     "height": 4
    },
-   "decoration": {
-    "fills": [
-     {
-      "color": "primary"
-     }
-    ],
-    "radius": 2
-   },
    "animations": [
     {
      "id": "pulse",
@@ -70,21 +62,21 @@
       }
      ]
     }
-   ]
-  },
-  "d2": {
-   "type": "box",
-   "layout": {
-    "width": 4,
-    "height": 4
-   },
+   ],
    "decoration": {
     "fills": [
      {
       "color": "primary"
      }
     ],
-    "radius": 2
+    "radius": 9999
+   }
+  },
+  "d2": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
    },
    "animations": [
     {
@@ -103,21 +95,21 @@
       }
      ]
     }
-   ]
-  },
-  "d3": {
-   "type": "box",
-   "layout": {
-    "width": 4,
-    "height": 4
-   },
+   ],
    "decoration": {
     "fills": [
      {
       "color": "primary"
      }
     ],
-    "radius": 2
+    "radius": 9999
+   }
+  },
+  "d3": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
    },
    "animations": [
     {
@@ -136,7 +128,15 @@
       }
      ]
     }
-   ]
+   ],
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 9999
+   }
   }
  }
 }

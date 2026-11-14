@@ -1,0 +1,120 @@
+{
+ "schema": 3,
+ "id": "FeatureBulletItem",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "FeatureBulletItem",
+  "doc": "One line of a feature list: a muted icon and a sentence.",
+  "props": [
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "check",
+    "doc": "The icon's name."
+   },
+   {
+    "key": "text",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Indexes your files as they change.",
+    "doc": "The sentence.",
+    "required": true
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Feature",
+   "size": [
+    280,
+    18
+   ],
+   "props": {
+    "text": "Indexes your files as they change."
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "glyphBox",
+    "text"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "glyphBox": {
+   "type": "column",
+   "children": [
+    "glyph"
+   ],
+   "layout": {
+    "width": 13,
+    "height": {
+     "hug": 15
+    },
+    "padding": [
+     0,
+     2,
+     0,
+     0
+    ]
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "secondaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "text": {
+   "type": "text",
+   "props": {
+    "text": "${props.text}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 250
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  }
+ }
+}

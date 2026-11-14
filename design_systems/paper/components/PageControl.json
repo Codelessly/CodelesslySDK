@@ -101,14 +101,6 @@
      "fill": 4
     }
    },
-   "decoration": {
-    "fills": [
-     {
-      "color": "tertiaryBackground"
-     }
-    ],
-    "radius": 2
-   },
    "bind": {
     "layout.width": "${= item == props.currentPage ? 12 : 4}",
     "decoration.fills[0].color": "${= item == props.currentPage ? theme.primary : theme.colors.tertiaryBackground}"
@@ -131,7 +123,15 @@
       }
      ]
     }
-   ]
+   ],
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 9999
+   }
   }
  }
 }

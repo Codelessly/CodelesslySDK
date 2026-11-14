@@ -1,0 +1,345 @@
+{
+ "schema": 3,
+ "id": "StepIndicator",
+ "roots": [
+  "steps"
+ ],
+ "widget": {
+  "type": "StepIndicator",
+  "doc": "Progress through named steps: done steps checked, the current one ringed, the rest to come. Fires onStepPressed with the index.",
+  "props": [
+   {
+    "key": "steps",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Details",
+     "Review",
+     "Confirm"
+    ],
+    "doc": "The steps' names, in order.",
+    "required": true
+   },
+   {
+    "key": "current",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "The current step, from 0 (the count: all done).",
+    "required": true
+   },
+   {
+    "key": "details",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A muted line under each name (same order; none: no lines)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onStepPressed",
+    "payload": {
+     "kind": "number",
+     "flutter": "double"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Second of three",
+   "size": [
+    380,
+    44
+   ],
+   "props": {
+    "steps": [
+     "Details",
+     "Review",
+     "Confirm"
+    ],
+    "current": 1
+   }
+  }
+ ],
+ "nodes": {
+  "steps": {
+   "type": "row",
+   "children": [
+    "list"
+   ],
+   "layout": {
+    "width": {
+     "hug": 380
+    },
+    "height": {
+     "hug": 44
+    }
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "step"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "hug": 380
+    },
+    "height": 51,
+    "padding": [
+     0,
+     3,
+     0,
+     3
+    ]
+   },
+   "bind": {
+    "data": "${props.steps}",
+    "layout.height": "${= length(props.details) > 0 ? 67 : 51}"
+   }
+  },
+  "step": {
+   "type": "column",
+   "children": [
+    "rail",
+    "name",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": 120,
+    "height": {
+     "fill": 38
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onStepPressed",
+       "value": "${index}"
+      }
+     ]
+    }
+   ]
+  },
+  "rail": {
+   "type": "row",
+   "children": [
+    "marker",
+    "line"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": 16,
+    "padding": [
+     3,
+     0,
+     0,
+     0
+    ]
+   }
+  },
+  "marker": {
+   "type": "row",
+   "children": [
+    "check",
+    "pip"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= index < props.current ? theme.primary : theme.colors.primaryBackground}",
+    "decoration.strokes[0].color": "${= index <= props.current ? theme.primary : theme.colors.primaryBorder}",
+    "decoration.effects[0].visible": "${= index == props.current}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "primaryTint",
+      "offset": [
+       0,
+       0
+      ],
+      "blurRadius": 0,
+      "spreadRadius": 3,
+      "visible": false
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "check": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "onAccent",
+    "size": 10
+   },
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "bind": {
+    "visible": "${= index < props.current}"
+   }
+  },
+  "pip": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "bind": {
+    "visible": "${= index == props.current}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "line": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 80
+    },
+    "height": 1.5,
+    "margin": [
+     6,
+     0,
+     6,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= index < length(props.steps) - 1}",
+    "decoration.fills[0].color": "${= index < props.current ? theme.primary : theme.colors.primaryBorder}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 500,
+     "height": 1.391304347826087,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 108
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     6,
+     12,
+     0
+    ]
+   },
+   "bind": {
+    "props.style.color": "${= index <= props.current ? theme.colors.primaryText : theme.colors.tertiaryText}",
+    "props.style.fontWeight": "${= index <= props.current ? 600 : 500}"
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.details) > index ? props.details[index] : ''}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.3333333333333333,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 108
+    },
+    "height": {
+     "hug": 14
+    },
+    "margin": [
+     0,
+     0,
+     12,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.details) > index}"
+   }
+  }
+ }
+}

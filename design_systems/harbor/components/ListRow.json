@@ -1,0 +1,302 @@
+{
+ "schema": 3,
+ "id": "ListRow",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "ListRow",
+  "doc": "One row of a list or table-like list: icon, title, optional subtitle and trailing content (the trailing slot). Fires onPressed.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Title",
+    "doc": "The main text.",
+    "required": true
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A second line (empty: none)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name before the text (empty: none)."
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The active tint (the current item)."
+   },
+   {
+    "key": "dense",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "28 px instead of 36 (inspectors, menus)."
+   },
+   {
+    "key": "divider",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A hairline under the row."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ],
+  "slots": [
+   "trailing"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Row",
+   "size": [
+    320,
+    36
+   ],
+   "props": {
+    "title": "Invoice #1042",
+    "icon": "description"
+   }
+  },
+  {
+   "name": "Two lines",
+   "size": [
+    320,
+    52
+   ],
+   "props": {
+    "title": "Ada Lovelace",
+    "subtitle": "ada@example.com",
+    "icon": "person_outline"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "strut",
+    "rowContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     14,
+     7,
+     14,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "selected": "${props.selected}",
+    "decoration.strokes[0].color": "${= props.divider ? theme.colors.primaryBorder : '#00000000'}"
+   },
+   "states": {
+    "hovered": {
+     "row": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "row": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "row": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "activeTint"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": ""
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 28
+   },
+   "bind": {
+    "layout.height": "${= props.dense ? 16 : 28}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "description",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "props.icon": "${props.icon}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "subtitle"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 19
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "body",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 19
+    }
+   }
+  },
+  "subtitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.subtitle}",
+    "style": "bodySecondary",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "bind": {
+    "visible": "${= props.subtitle != ''}"
+   }
+  },
+  "trailing": {
+   "type": "slot",
+   "props": {
+    "name": "trailing"
+   }
+  },
+  "rowContent": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "texts",
+    "trailing"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

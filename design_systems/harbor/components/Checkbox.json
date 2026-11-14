@@ -1,0 +1,218 @@
+{
+ "schema": 3,
+ "id": "Checkbox",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "Checkbox",
+  "doc": "A check box with an optional label, its value kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "boolean",
+      "flutter": "bool"
+     }
+    },
+    "default": "",
+    "doc": "The name of your boolean variable."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Text beside the box (empty: none)."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: 50 % opacity, not toggled."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "boolean",
+     "flutter": "bool"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Checked",
+   "size": [
+    160,
+    28
+   ],
+   "props": {
+    "label": "Remember me",
+    "value": true
+   }
+  },
+  {
+   "name": "Unchecked",
+   "size": [
+    160,
+    28
+   ],
+   "props": {
+    "label": "Remember me"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "box",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 28
+    },
+    "constraints": {
+     "minHeight": 24
+    }
+   },
+   "bind": {
+    "selected": "${= props.value == true}",
+    "disabled": "${= !props.enabled}"
+   },
+   "states": {
+    "selected": {
+     "box": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primary"
+        }
+       ],
+       "strokes": [
+        {
+         "color": "primary"
+        }
+       ]
+      }
+     },
+     "check": {
+      "visible": true
+     }
+    },
+    "hovered": {
+     "box": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "tertiaryText"
+        }
+       ]
+      }
+     }
+    },
+    "disabled": {
+     "row": {
+      "opacity": 0.5
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= !(props.value == true)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= props.value == true}"
+      }
+     ]
+    }
+   ]
+  },
+  "box": {
+   "type": "row",
+   "children": [
+    "check"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "radius": 4
+   }
+  },
+  "check": {
+   "type": "icon",
+   "props": {
+    "icon": "check",
+    "color": "onAccent",
+    "size": 12
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "visible": false
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "body"
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 19
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != ''}"
+   }
+  }
+ }
+}

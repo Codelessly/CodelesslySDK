@@ -82,7 +82,7 @@
       "color": "error"
      }
     ],
-    "radius": 2
+    "radius": 9999
    }
   },
   "line": {

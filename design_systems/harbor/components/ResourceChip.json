@@ -1,0 +1,226 @@
+{
+ "schema": 3,
+ "id": "ResourceChip",
+ "roots": [
+  "chip"
+ ],
+ "widget": {
+  "type": "ResourceChip",
+  "doc": "A document, file, image, video, audio or link as a small bordered chip. Fires onPressed.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Launch plan",
+    "doc": "Its name.",
+    "required": true
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "document",
+      "file",
+      "image",
+      "video",
+      "audio",
+      "link"
+     ]
+    },
+    "default": "document",
+    "doc": "Which icon."
+   },
+   {
+    "key": "inline",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Shorter (3 px above and below) and at most 190 wide, to sit in a line of text."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "Off: dimmed, no press."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Document",
+   "size": [
+    110,
+    26
+   ],
+   "props": {
+    "label": "Launch plan"
+   }
+  },
+  {
+   "name": "Link",
+   "size": [
+    110,
+    26
+   ],
+   "props": {
+    "label": "docs.example.com",
+    "kind": "link"
+   }
+  }
+ ],
+ "nodes": {
+  "chip": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 26
+    },
+    "padding": [
+     9,
+     6,
+     9,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 9,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level1}",
+    "layout.padding": "${= props.inline ? [8, 3, 8, 3] : [8, 5, 8, 5]}",
+    "opacity": "${= props.enabled ? 1 : 0.58}"
+   },
+   "states": {
+    "hovered": {
+     "chip": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "chip": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed",
+       "value": "${props.label}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "description",
+    "color": "primaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "props.icon": "${= props.kind == 'file' ? 'insert_drive_file' : (props.kind == 'image' ? 'image' : (props.kind == 'video' ? 'videocam' : (props.kind == 'audio' ? 'music_note' : (props.kind == 'link' ? 'link' : 'description'))))}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 500,
+     "height": 1.25,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": 0.11
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 14
+    },
+    "constraints": {
+     "maxWidth": 400
+    }
+   },
+   "bind": {
+    "layout.constraints": "${= props.inline ? {'maxWidth': 155} : {'maxWidth': 400}}"
+   }
+  }
+ }
+}

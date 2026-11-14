@@ -1,0 +1,119 @@
+{
+ "schema": 3,
+ "id": "Tooltip",
+ "roots": [
+  "bubble"
+ ],
+ "widget": {
+  "type": "Tooltip",
+  "doc": "The tooltip bubble: inverted surface, radius 5, 11.5 px text and an optional shortcut; for a hover hint on a node use its tooltip behavior.",
+  "props": [
+   {
+    "key": "text",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Tooltip",
+    "doc": "The text.",
+    "required": true
+   },
+   {
+    "key": "shortcut",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A key hint after the text (empty: none)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "With shortcut",
+   "size": [
+    120,
+    24
+   ],
+   "props": {
+    "text": "Search",
+    "shortcut": "Ctrl K"
+   }
+  }
+ ],
+ "nodes": {
+  "bubble": {
+   "type": "row",
+   "children": [
+    "label",
+    "shortcut"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     9,
+     5,
+     9,
+     5
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tooltipBackground"
+     }
+    ],
+    "radius": 9
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.text}",
+    "style": {
+     "from": "controlXs",
+     "color": "tooltipText"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "shortcut": {
+   "type": "text",
+   "props": {
+    "text": "${props.shortcut}",
+    "style": {
+     "from": "controlXs",
+     "color": "tooltipMuted"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.shortcut != ''}"
+   }
+  }
+ }
+}

@@ -65,8 +65,8 @@
       "color": "track"
      }
     ],
-    "radius": 2,
-    "clip": "antiAlias"
+    "clip": "antiAlias",
+    "radius": 9999
    }
   },
   "fill": {
