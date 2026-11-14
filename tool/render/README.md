@@ -32,6 +32,9 @@ list repeats: `--tap faq/fq#1`); `--dump-layout` writes each such node's `path`.
 
 The manifest's `theme` (named colors and text styles, codelessly_api guide "the theme") is validated, published as
 the project's theme and resolved as an app resolves it: at each size its media rules, the fonts its styles name.
+A manifest that names a design system (`"designSystem": "../design_systems/ssui"`, its folder relative to
+`site.json`) gets its components (callable by type, validated and rendered as the site's own; `--components-all`
+renders them too), its tokens as the base theme the site's `theme` is merged over, and its fonts.
 
 A directory is every `.json` file in it (not those starting with `_`, nor `diagnostics*.json`), as the pages of one
 site: navigation may name a canvas of another page.
@@ -100,6 +103,7 @@ once per screen (`unknown_screen`, with how many links name it and where), not o
 | Code | Severity | Meaning |
 |---|---|---|
 | `invalid_json` | error | A file is not valid JSON (with line and column). |
+| `design_system_missing` | error | The design system `site.json` names (`"designSystem"`, a folder relative to it) has no readable `design_system.json`. |
 | `no_documents` | error | No `.json` documents at the paths given. |
 | `unknown_screen_arg` | error | `--screen` names no canvas, screen or layout. |
 | `render_exception` | error | Flutter threw while building, laying out or painting; the message names the node (`Node "price-row" (row): ...`). A flex overflow under 0.01 px (rounding) is not reported. |

@@ -25,6 +25,15 @@ const Color kPaper = Color(0xFFFFFFFF);
 /// The surface of a dark layout without a theme.
 const Color kPaperDark = Color(0xFF121212);
 
+/// The corner radius of buttons, chips, fields, dropdowns and segmented
+/// buttons without a theme's `buttonRadius`: a small radius, not
+/// Material's stadium.
+const double kControlRadius = 6;
+
+/// The corner radius of dialogs, menus, pickers and cards without a
+/// theme's `radius`.
+const double kSurfaceRadius = 8;
+
 /// The contrast ratio of [a] and [b] (WCAG: 1 to 21).
 double contrastRatio(Color a, Color b) {
   final la = a.computeLuminance(), lb = b.computeLuminance();
@@ -233,12 +242,19 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
         );
   final typography = Typography.material2021(black: colors, white: colors);
 
-  final buttonRadius = tokens.buttonRadius;
-  final radius = tokens.radius;
-  final OutlinedBorder? buttonShape =
-      buttonRadius == null ? null : RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonRadius));
-  final OutlinedBorder? surfaceShape =
-      radius == null ? null : RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
+  // Shapes: the tokens' radii, else small ones (never Material's stadium
+  // buttons, pill indicators or 28 px dialogs). Surfaces that float (dialogs,
+  // menus, pickers) have a hairline border.
+  final buttonRadius = tokens.buttonRadius ?? kControlRadius;
+  final radius = tokens.radius ?? kSurfaceRadius;
+  final OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonRadius));
+  final OutlinedBorder cardShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
+  final OutlinedBorder surfaceShape =
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius), side: BorderSide(color: outlineVariant));
+  // Fields: an outline of the theme's radius, else the control radius (a
+  // hairline at rest, the accent when focused), the label inside as a hint,
+  // never floating into a notch; no underline.
+  final fieldRadius = BorderRadius.circular(tokens.radius ?? kControlRadius);
 
   // Buttons: no elevation unless a node sets one (then a black shadow), no
   // tint, no splash; a faint state layer of the label's color.
@@ -254,7 +270,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
             ? null
             : WidgetStateProperty.resolveWith(
                 (s) => s.contains(WidgetState.disabled) ? side.copyWith(color: outlineVariant) : side),
-        shape: buttonShape == null ? null : WidgetStatePropertyAll(buttonShape),
+        shape: WidgetStatePropertyAll(buttonShape),
         splashFactory: NoSplash.splashFactory,
       );
   final filled = button(background: fill, foreground: onFill);
@@ -266,11 +282,17 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     shadowColor: const WidgetStatePropertyAll(shadow),
     elevation: const WidgetStatePropertyAll(0),
     side: WidgetStatePropertyAll(BorderSide(color: outlineVariant)),
-    shape: surfaceShape == null ? null : WidgetStatePropertyAll(surfaceShape),
+    shape: WidgetStatePropertyAll(surfaceShape),
   );
 
   return ThemeData(
     useMaterial3: true,
+    // A control fits the node it is drawn in: no 48 px tap-target margin
+    // around it and no platform density, so a 28 or 32 px node shows the
+    // whole control with its label centred, never a taller control cut or
+    // shifted.
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    visualDensity: VisualDensity.standard,
     colorScheme: scheme,
     typography: typography,
     fontFamily: body,
@@ -303,7 +325,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       style: ButtonStyle(
         overlayColor: stateLayer(onSurface),
         side: WidgetStatePropertyAll(BorderSide(color: outline)),
-        shape: buttonShape == null ? null : WidgetStatePropertyAll(buttonShape),
+        shape: WidgetStatePropertyAll(buttonShape),
         splashFactory: NoSplash.splashFactory,
       ),
     ),
@@ -329,13 +351,38 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       checkmarkColor: onSurface,
       shape: buttonShape,
     ),
+    // A square box of a small radius and a hairline-weight border.
     checkboxTheme: CheckboxThemeData(
       splashRadius: 0,
       overlayColor: stateLayer(onSurface),
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))),
+      side: WidgetStateBorderSide.resolveWith((s) => s.contains(WidgetState.selected)
+          ? BorderSide(color: s.contains(WidgetState.disabled) ? disabledFill : accent, width: 1.5)
+          : BorderSide(color: s.contains(WidgetState.disabled) ? outlineVariant : outline, width: 1.5)),
     ),
     radioTheme: RadioThemeData(overlayColor: stateLayer(onSurface)),
-    switchTheme: SwitchThemeData(overlayColor: stateLayer(onSurface)),
+    // A plain toggle: no track outline, one thumb size on and off (no icon
+    // in it), the thumb in the surface's color.
+    switchTheme: SwitchThemeData(
+      overlayColor: stateLayer(onSurface),
+      thumbIcon: const WidgetStatePropertyAll<Icon?>(Icon(null)),
+      trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
+      trackOutlineWidth: const WidgetStatePropertyAll(0),
+      thumbColor: WidgetStateProperty.resolveWith((s) {
+        final on = s.contains(WidgetState.selected);
+        if (s.contains(WidgetState.disabled)) return on ? surface : mix(.30);
+        return on ? onAccent : surface;
+      }),
+      trackColor: WidgetStateProperty.resolveWith((s) {
+        final on = s.contains(WidgetState.selected);
+        if (s.contains(WidgetState.disabled)) return on ? mix(.30) : disabledFill;
+        return on ? accent : mix(.24);
+      }),
+    ),
     sliderTheme: SliderThemeData(
+      trackHeight: 4,
+      thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 8, elevation: 0, pressedElevation: 0),
+      overlayShape: const RoundSliderOverlayShape(overlayRadius: 16),
       overlayColor: accent.withValues(alpha: .10),
       inactiveTrackColor: mix(.16),
       disabledActiveTrackColor: disabledInk,
@@ -348,8 +395,13 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       linearTrackColor: mix(.12),
       circularTrackColor: Colors.transparent,
     ),
+    // A square underline of the tab's width, not Material's rounded pill.
     tabBarTheme: TabBarThemeData(
       indicatorColor: accent,
+      indicator: UnderlineTabIndicator(borderSide: BorderSide(color: accent, width: 2)),
+      indicatorSize: TabBarIndicatorSize.tab,
+      labelColor: onSurface,
+      unselectedLabelColor: onSurfaceVariant,
       dividerColor: outlineVariant,
       overlayColor: stateLayer(onSurface),
       splashFactory: NoSplash.splashFactory,
@@ -360,9 +412,11 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       shadowColor: shadow,
       elevation: 0,
       indicatorColor: selected,
+      indicatorShape: buttonShape,
       overlayColor: stateLayer(onSurface),
     ),
-    navigationRailTheme: NavigationRailThemeData(backgroundColor: surface, elevation: 0, indicatorColor: selected),
+    navigationRailTheme: NavigationRailThemeData(
+        backgroundColor: surface, elevation: 0, indicatorColor: selected, indicatorShape: buttonShape),
     bottomNavigationBarTheme: BottomNavigationBarThemeData(
       backgroundColor: surface,
       elevation: 0,
@@ -383,7 +437,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       surfaceTintColor: Colors.transparent,
       shadowColor: shadow,
       elevation: 0,
-      shape: surfaceShape,
+      shape: cardShape,
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: surface,
@@ -414,8 +468,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       surfaceTintColor: Colors.transparent,
       shadowColor: shadow,
       elevation: 0,
-      shape: (surfaceShape ?? const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(4))))
-          .copyWith(side: BorderSide(color: outlineVariant)),
+      shape: surfaceShape,
     ),
     menuTheme: MenuThemeData(style: menuStyle),
     dropdownMenuTheme: DropdownMenuThemeData(menuStyle: menuStyle),
@@ -428,6 +481,8 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       headerForegroundColor: onSurface,
       dividerColor: outlineVariant,
       shape: surfaceShape,
+      dayShape: WidgetStatePropertyAll(buttonShape),
+      todayBorder: BorderSide(color: outline),
       cancelButtonStyle: plain,
       confirmButtonStyle: plain,
     ),
@@ -470,10 +525,11 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       fillColor: mix(.04),
       hoverColor: onSurface.withValues(alpha: .04),
       focusColor: onSurface.withValues(alpha: .10),
-      // A radius token makes the default border an outline of that radius.
-      border: radius == null
-          ? null
-          : OutlineInputBorder(borderRadius: BorderRadius.circular(radius), borderSide: BorderSide(color: outline)),
+      // The shape only: Flutter draws its side by state (outline at rest,
+      // primary when focused, error, faint when disabled). A field without
+      // a border of its own shows its label as its placeholder
+      // (`inputDecoration`), so nothing floats into a notch.
+      border: OutlineInputBorder(borderRadius: fieldRadius),
     ),
   );
 }

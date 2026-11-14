@@ -138,6 +138,10 @@ Future<Map<String, Object?>> _replayAt(WidgetTester tester, RecordedStream strea
     profile: apps ? api.TrustProfile.agentApps : api.TrustProfile.agent,
     check: strictEditCheck(ValidateOptions(formulas: (f) => (error: FormulaEvaluator.errorOf(f), paths: FormulaEvaluator.referencedPaths(f)))),
     glyphCoverage: glyphs,
+    // As the render command does (prepareTheme): the default family is the
+    // theme's, so the controls' text is in the family the prepared text
+    // nodes name, not the test font's boxes.
+    theme: const api.ThemeTokens(fontFamily: 'Roboto'),
   );
   final baseRetries = <Map<String, Object?>>[];
   for (final b in bases) {

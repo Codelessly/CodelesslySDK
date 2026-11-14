@@ -635,11 +635,13 @@ void main() {
       expect(b.expandedInsets, EdgeInsets.zero);
     });
 
-    testWidgets('by default is Flutter\'s segmented button', (tester) async {
-      await _showSegmented(tester, {}, width: 200, height: 48);
+    testWidgets('by default is Flutter\'s segmented button, its segments the node\'s height', (tester) async {
+      await _showSegmented(tester, {}, width: 200, height: 32);
+      expect(tester.takeException(), isNull);
       final b = tester.widget<SegmentedButton<String>>(find.byType(SegmentedButton<String>));
       expect(b.expandedInsets, isNull);
-      expect(b.style?.minimumSize, isNull);
+      expect(tester.getSize(find.byType(SegmentedButton<String>)).height, closeTo(32, 0.5));
+      expect(b.style?.tapTargetSize, MaterialTapTargetSize.shrinkWrap);
     });
   });
 

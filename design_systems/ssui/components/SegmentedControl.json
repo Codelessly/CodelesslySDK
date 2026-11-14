@@ -1,0 +1,248 @@
+{
+ "schema": 3,
+ "id": "SegmentedControl",
+ "roots": [
+  "track"
+ ],
+ "widget": {
+  "type": "SegmentedControl",
+  "doc": "Two to five mutually exclusive options in one control (a view switch, a period), the choice in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Day",
+     "Week",
+     "Month"
+    ],
+    "doc": "The options, as shown.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the chosen option."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "xs",
+      "compact",
+      "small",
+      "medium",
+      "large"
+     ]
+    },
+    "default": "compact",
+    "doc": "The control scale: xs 24 (rows, dense panels), compact 28 (the default), small 32, medium 36, large 44."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Week",
+   "size": [
+    240,
+    28
+   ],
+   "props": {
+    "options": [
+     "Day",
+     "Week",
+     "Month"
+    ],
+    "value": "Week"
+   }
+  }
+ ],
+ "nodes": {
+  "track": {
+   "type": "row",
+   "children": [
+    "segments"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": 2
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ],
+    "radius": 7
+   }
+  },
+  "segments": {
+   "type": "listView",
+   "children": [
+    "segment"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "hug": 196
+    },
+    "height": 24
+   },
+   "bind": {
+    "data": "${props.options}",
+    "layout.height": "${= props.size == 'xs' ? 20 : (props.size == 'compact' ? 24 : (props.size == 'small' ? 28 : (props.size == 'medium' ? 32 : (40))))}"
+   }
+  },
+  "segment": {
+   "type": "row",
+   "children": [
+    "segmentLabel"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "fill": 24
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 5
+   },
+   "bind": {
+    "selected": "${= item == props.value}",
+    "layout.padding": "${= props.size == 'xs' ? [8, 0, 8, 0] : (props.size == 'compact' ? [10, 0, 10, 0] : (props.size == 'small' ? [12, 0, 12, 0] : (props.size == 'medium' ? [12, 0, 12, 0] : ([14, 0, 14, 0]))))}"
+   },
+   "states": {
+    "selected": {
+     "segment": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "raisedBackground"
+        }
+       ],
+       "effects": [
+        {
+         "type": "dropShadow",
+         "color": "#0D000000",
+         "offset": [
+          0,
+          1
+         ],
+         "blurRadius": 2
+        }
+       ]
+      }
+     },
+     "segmentLabel": {
+      "props": {
+       "style": {
+        "color": "primaryText"
+       }
+      }
+     }
+    },
+    "hovered": {
+     "segmentLabel": {
+      "props": {
+       "style": {
+        "color": "primaryText"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "segmentLabel": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "controlCompact",
+     "color": "secondaryText"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "props.style.fontSize": "${= props.size == 'xs' ? 11.5 : (props.size == 'compact' ? 12 : (props.size == 'small' ? 12.5 : (props.size == 'medium' ? 13 : (15))))}"
+   }
+  }
+ }
+}

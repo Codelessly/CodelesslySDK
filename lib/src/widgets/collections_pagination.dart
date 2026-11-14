@@ -7,6 +7,7 @@ import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Node, PaginationProps, TriggerType;
 import 'package:flutter/material.dart';
 
+import '../render/control_theme.dart' show onColor;
 import '../render/convert.dart';
 import '../render/node_tree.dart';
 import '../render/recipe.dart';
@@ -120,7 +121,7 @@ class PaginationControls extends StatelessWidget {
     final style = TextStyle(
       fontSize: n.prop(PaginationProps.fontSize),
       fontWeight: FontWeight.values[(n.prop(PaginationProps.fontWeight) ~/ 100 - 1).clamp(0, 8)],
-      color: n.prop(PaginationProps.textColor).flutter,
+      color: n.prop(PaginationProps.textColor)?.flutter ?? Theme.of(context).colorScheme.onSurface,
     );
     Widget button(String label, {required bool canPress, bool active = false, String? semantics, PaginationMove? move}) =>
         PaginationButton(
@@ -173,9 +174,7 @@ class PaginationControls extends StatelessWidget {
         .replaceAll('{page}', '${s.page}')
         .replaceAll('{pageCount}', pageCount == null ? '?' : '$pageCount');
     final options = {...s.pageSizeOptions, s.pageSize}.toList()..sort();
-    return Padding(
-      padding: n.layout.padding.flutter,
-      child: Wrap(
+    final Widget parts = Wrap(
         alignment: _wrapAlignment(n.prop(PaginationProps.alignment)),
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: spacing * 3,
@@ -201,7 +200,14 @@ class PaginationControls extends StatelessWidget {
               ),
             ]),
         ],
-      ),
+      );
+    return Padding(
+      padding: n.layout.padding.flutter,
+      // Centred down the node's box (a 48 px node and 32 px buttons): a
+      // row whose cross axis is the box's height.
+      child: n.layout.width.fit == api.SizeFit.hug
+          ? parts
+          : Row(crossAxisAlignment: CrossAxisAlignment.center, children: [Expanded(child: parts)]),
     );
   }
 }
@@ -230,8 +236,12 @@ class PaginationButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final n = node;
     final radius = BorderRadius.circular(n.prop(PaginationProps.cornerRadius));
-    final background = active ? n.prop(PaginationProps.activeColor).flutter : n.prop(PaginationProps.buttonColor)?.flutter;
-    final borderColor = n.prop(PaginationProps.borderColor);
+    // Unset colors are the theme's: the current page in its primary, the
+    // others outlined in its hairline.
+    final scheme = Theme.of(context).colorScheme;
+    final activeFill = n.prop(PaginationProps.activeColor)?.flutter ?? scheme.primary;
+    final background = active ? activeFill : n.prop(PaginationProps.buttonColor)?.flutter;
+    final borderColor = n.prop(PaginationProps.borderColor)?.flutter ?? scheme.outlineVariant;
     final borderWidth = n.prop(PaginationProps.borderWidth);
     final size = n.prop(PaginationProps.buttonSize);
     return Semantics(
@@ -246,9 +256,9 @@ class PaginationButton extends StatelessWidget {
           color: background ?? Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: radius,
-            side: active || borderColor.alpha == 0 || borderWidth <= 0
+            side: active || borderColor.a == 0 || borderWidth <= 0
                 ? BorderSide.none
-                : BorderSide(color: borderColor.flutter, width: borderWidth),
+                : BorderSide(color: borderColor, width: borderWidth),
           ),
           child: InkWell(
             borderRadius: radius,
@@ -262,7 +272,10 @@ class PaginationButton extends StatelessWidget {
                   child: Text(
                     label,
                     style: active
-                        ? style.copyWith(color: n.prop(PaginationProps.activeTextColor).flutter, fontWeight: FontWeight.w600)
+                        ? style.copyWith(
+                            color: n.prop(PaginationProps.activeTextColor)?.flutter ??
+                                onColor(activeFill, preferred: [if (activeFill == scheme.primary) scheme.onPrimary]),
+                            fontWeight: FontWeight.w600)
                         : style,
                   ),
                 ),

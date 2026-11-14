@@ -140,7 +140,9 @@ class _TabBarIslandState extends State<_TabBarIsland> with TickerProviderStateMi
   }
 
   Decoration? _indicator(Node n) {
-    final color = n.prop(TabBarProps.indicatorColor).flutter;
+    final color = n.prop(TabBarProps.indicatorColor)?.flutter ??
+        Theme.of(context).tabBarTheme.indicatorColor ??
+        Theme.of(context).colorScheme.primary;
     final radius = n.prop(TabBarProps.indicatorRadius);
     final weight = n.prop(TabBarProps.indicatorWeight);
     final style = n.prop(TabBarProps.indicatorStyle);
@@ -150,13 +152,11 @@ class _TabBarIslandState extends State<_TabBarIsland> with TickerProviderStateMi
       side: borderWidth > 0 ? BorderSide(color: color, width: borderWidth) : BorderSide.none,
     );
     return switch (style) {
-      api.TabIndicatorStyle.underline =>
-        radius.isZero
-            ? null
-            : UnderlineTabIndicator(
-                borderRadius: radius.flutter,
-                borderSide: BorderSide(color: color, width: weight),
-              ),
+      // Square ends unless a radius is set (not Material's rounded pill).
+      api.TabIndicatorStyle.underline => UnderlineTabIndicator(
+          borderRadius: radius.isZero ? null : radius.flutter,
+          borderSide: BorderSide(color: color, width: weight),
+        ),
       api.TabIndicatorStyle.filled => ShapeDecoration(color: color, shape: shape()),
       api.TabIndicatorStyle.border => ShapeDecoration(shape: shape(borderWidth: weight)),
       api.TabIndicatorStyle.none => const BoxDecoration(),
@@ -216,11 +216,13 @@ class _TabBarIslandState extends State<_TabBarIsland> with TickerProviderStateMi
         api.TabAlignment.start || api.TabAlignment.startOffset when !isScrollable => TabAlignment.fill,
         final a => TabAlignment.values.byName(a.name),
       },
-      indicatorColor: n.prop(TabBarProps.indicatorColor).flutter,
+      indicatorColor: n.prop(TabBarProps.indicatorColor)?.flutter,
       indicatorPadding: n.prop(TabBarProps.indicatorPadding).flutter,
       indicatorSize: TabBarIndicatorSize.values.byName(n.prop(TabBarProps.indicatorSize).name),
       isScrollable: isScrollable,
-      indicatorWeight: indicator != null ? 0 : n.prop(TabBarProps.indicatorWeight),
+      indicatorWeight: indicator != null && n.prop(TabBarProps.indicatorStyle) != api.TabIndicatorStyle.underline
+          ? 0
+          : n.prop(TabBarProps.indicatorWeight),
       labelStyle: themeFont(context, textStyle(n.prop(TabBarProps.labelStyle), n.behaviors.defaultTextStyle)),
       unselectedLabelStyle: themeFont(context, textStyle(n.prop(TabBarProps.unselectedLabelStyle), n.behaviors.defaultTextStyle)),
       indicator: indicator,
@@ -228,7 +230,11 @@ class _TabBarIslandState extends State<_TabBarIsland> with TickerProviderStateMi
       splashFactory: NoSplash.splashFactory,
       labelColor: n.prop(TabBarProps.labelColor)?.flutter,
       unselectedLabelColor: n.prop(TabBarProps.unselectedLabelColor)?.flutter,
-      labelPadding: n.prop(TabBarProps.labelPadding).flutter,
+      // The bar keeps the indicator's weight free under the labels; as much
+      // above centres them in the bar.
+      labelPadding: n.prop(TabBarProps.labelPadding).flutter +
+          EdgeInsets.only(
+              top: n.prop(TabBarProps.indicatorStyle) == api.TabIndicatorStyle.underline ? n.prop(TabBarProps.indicatorWeight) : 0),
       tabs: [for (final t in n.prop(TabBarProps.tabs)) _tab(n, t)],
     );
   }

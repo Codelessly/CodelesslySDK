@@ -1,0 +1,112 @@
+{
+ "schema": 3,
+ "id": "ProgressBar",
+ "roots": [
+  "track"
+ ],
+ "widget": {
+  "type": "ProgressBar",
+  "doc": "How far something has got: a 4 px bar, value from 0 to 1, in the brand colour or a tone.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0.5,
+    "doc": "From 0 to 1."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "primary",
+      "success",
+      "warning",
+      "error"
+     ]
+    },
+    "default": "primary",
+    "doc": "The fill's colour."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Half",
+   "size": [
+    240,
+    4
+   ],
+   "props": {
+    "value": 0.5
+   }
+  }
+ ],
+ "nodes": {
+  "track": {
+   "type": "row",
+   "children": [
+    "fill",
+    "rest"
+   ],
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 2,
+    "clip": "antiAlias"
+   }
+  },
+  "fill": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "fill": 4
+    },
+    "flex": 500
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "layout.flex": "${= round(max(0, min(1, props.value)) * 1000)}",
+    "decoration.fills[0].color": "${= props.tone == 'success' ? theme.success : (props.tone == 'warning' ? theme.warning : (props.tone == 'error' ? theme.error : theme.primary))}"
+   }
+  },
+  "rest": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "fill": 4
+    },
+    "flex": 500
+   },
+   "bind": {
+    "layout.flex": "${= 1000 - round(max(0, min(1, props.value)) * 1000)}"
+   }
+  }
+ }
+}
