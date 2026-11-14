@@ -1,0 +1,44 @@
+{
+ "skip_history@claude-sonnet-5-5": {
+  "errors": [],
+  "surface": true,
+  "height": 651,
+  "text": 464,
+  "elements": 152,
+  "asWrittenErrors": [],
+  "asWrittenElements": 152,
+  "renamed": [],
+  "messages": 1,
+  "badLines": 0,
+  "console": [],
+  "source": "skip_history@claude-sonnet-5-5.a2ui.jsonl"
+ },
+ "skip_home@claude-sonnet-5-5": {
+  "errors": [],
+  "surface": true,
+  "height": 688,
+  "text": 377,
+  "elements": 81,
+  "asWrittenErrors": [],
+  "asWrittenElements": 81,
+  "renamed": [],
+  "messages": 1,
+  "badLines": 0,
+  "console": [],
+  "source": "skip_home@claude-sonnet-5-5.a2ui.jsonl"
+ },
+ "skip_session@claude-sonnet-5-5": {
+  "errors": [],
+  "surface": true,
+  "height": 839,
+  "text": 492,
+  "elements": 146,
+  "asWrittenErrors": [],
+  "asWrittenElements": 146,
+  "renamed": [],
+  "messages": 1,
+  "badLines": 0,
+  "console": [],
+  "source": "skip_session@claude-sonnet-5-5.a2ui.jsonl"
+ }
+}

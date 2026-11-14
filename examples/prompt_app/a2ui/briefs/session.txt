@@ -1,0 +1,16 @@
+APP: Skip. A jump rope training app. People use it to plan and time rope sessions, count jumps, and see their progress over weeks.
+
+SCREEN TO BUILD: Session timer: runs today's session. Before starting: what is about to happen and one way to start. While running: the countdown, the round, a way to count jumps, pause and finish. When done: a summary and where to go next.
+
+DATA the screen shows (use exactly these values):
+  streak = 4
+  weeklyGoal = 5
+  sessionsThisWeek = 3
+  today = {"name":"Intervals","rounds":8,"work":40,"rest":20,"minutes":8}
+  weeks = [{"label":"W39","jumps":2100},{"label":"W40","jumps":2650},{"label":"W41","jumps":2400},{"label":"W42","jumps":3180}]
+  sessions = [{"date":"Fri 13 Nov","name":"Intervals","minutes":8,"jumps":912,"best":148},{"date":"Wed 11 Nov","name":"Endurance","minutes":12,"jumps":1304,"best":210},{"date":"Mon 9 Nov","name":"Footwork","minutes":6,"jumps":640,"best":96},{"date":"Sat 7 Nov","name":"Intervals","minutes":8,"jumps":880,"best":131}]
+
+ACTIONS the screen can trigger: start_session (Begin today's session); open_history (Go to the training history page); open_home (Go to the home screen); open_session (Open one past session (pass its date)); finish_session (End the session (pass the jump count))
+
+THE PERSON IT IS FOR: goal: get fitter, three short sessions a week; experience: started two weeks ago; tone: encouraging and plain, no jargon.
+One phone screen, the most important thing first. Make it look like a polished consumer fitness app.
