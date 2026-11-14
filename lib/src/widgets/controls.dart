@@ -6,8 +6,10 @@
 // editing the island files. A family adds one line here.
 import 'package:codelessly_api/core.dart'
     show
+        BadgeProps,
         AccordionProps,
         ButtonProps,
+        ChipProps,
         DatePickerProps,
         DateTimeInputProps,
         DropdownProps,
@@ -20,6 +22,7 @@ import 'package:codelessly_api/core.dart'
 
 import '../render/controls/app_bar.dart';
 import '../render/controls/buttons.dart';
+import '../render/controls/chips.dart';
 import '../render/controls/dropdown.dart';
 import '../render/controls/expansion.dart';
 import '../render/controls/navigation_bar.dart';
@@ -86,9 +89,20 @@ final Map<String, WidgetRecipe> toggleRecipes = {
   'segmentedButton': segmentedRecipe,
 };
 
+/// Chips and badges (render/controls/chips.dart).
+final Map<String, WidgetRecipe> chipRecipes = {
+  ChipProps.chip.type: chipRecipe,
+  ChipProps.action.type: chipRecipe,
+  ChipProps.choice.type: chipRecipe,
+  ChipProps.filter.type: chipRecipe,
+  ChipProps.input.type: chipRecipe,
+  BadgeProps.spec.type: badgeRecipe,
+};
+
 /// The render-object controls, by node type.
 final Map<String, WidgetRecipe> controlRecipes = {
   ...buttonRecipes,
+  ...chipRecipes,
   ...barRecipes,
   ...pickerRecipes,
   ...dropdownRecipes,

@@ -11,13 +11,16 @@
 // | [paintFocusRing]: SSUI's focus ring | (none in Material) |
 // | [ControlLabel]: one line, optically centred | `Text` in a `DefaultTextStyle` |
 // | the control's one child: an icon glyph (render/paint/icon_glyph.dart) | `Icon` |
+// | [RenderControl.stateValue]: each state eased in and out (SSUI: 150 ms, ease-out) on a `Ticker` | `AnimatedContainer` / `ButtonStyle.animationDuration` |
 import 'dart:async' show scheduleMicrotask;
 import 'dart:ui' show BoxHeightStyle;
 
 import 'package:codelessly_api/core.dart' as api show WidgetState;
+import 'package:flutter/animation.dart' show Curve, Curves;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter/services.dart';
 
 import 'focus.dart';
@@ -30,6 +33,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
   RenderControl() {
     focusNode = ControlFocusNode(this, onActivate: activate, onFocusChange: (on) {
       _notify(api.WidgetState.focused, on);
+      _statesChanged();
       markNeedsPaint();
       markNeedsSemanticsUpdate();
     });
@@ -85,6 +89,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
       focusNode.unfocus();
       _hovered = _pressed = false;
     }
+    _statesChanged();
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
@@ -97,11 +102,31 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
   set selected(bool v) {
     if (v == _selected) return;
     _selected = v;
+    _statesChanged();
     markNeedsPaint();
     markNeedsSemanticsUpdate();
   }
 
   set autofocus(bool v) => focusNode.autofocus = v;
+
+  bool _busy = false;
+  bool get busy => _busy;
+
+  /// Whether it takes taps, focus and screen readers' actions at all (a
+  /// chip that is only a label does not).
+  bool get takesInput => true;
+
+  /// Busy (a loading button): it keeps its focus but takes no press, shows
+  /// the arrow cursor, and tells screen readers it is busy (Flutter's
+  /// semantics has no busy flag: the value "Busy" in a live region, with no
+  /// tap action).
+  set busy(bool v) {
+    if (v == _busy) return;
+    _busy = v;
+    if (v) _setPressed(false);
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
 
   String? _semanticsLabel;
 
@@ -135,6 +160,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
     _hovered = v;
     if (!v) _setPressed(false);
     _notify(api.WidgetState.hovered, v);
+    _statesChanged();
     markNeedsPaint();
   }
 
@@ -142,7 +168,109 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
     if (v == _pressed) return;
     _pressed = v;
     _notify(api.WidgetState.pressed, v);
+    _statesChanged();
     markNeedsPaint();
+  }
+
+  // --- state transitions -------------------------------------------------------
+
+  /// The states whose look eases in and out.
+  static const transitionStates = [
+    api.WidgetState.hovered,
+    api.WidgetState.focused,
+    api.WidgetState.pressed,
+    api.WidgetState.selected,
+    api.WidgetState.disabled,
+  ];
+
+  /// How long a state takes to come or go (SSUI's `durations.control`,
+  /// 150 ms; a subclass sets it from its tokens). Zero: at once.
+  Duration transitionDuration = const Duration(milliseconds: 150);
+
+  /// The curve of a state's look (SSUI's buttons: ease-out).
+  Curve transitionCurve = Curves.easeOut;
+
+  /// Whether its states ease at all: a design canvas, or a platform that
+  /// asks for no animation, shows each state at once.
+  bool get animatesStates => true;
+
+  /// Whether [s] is on now (what [stateValue] is heading for). The focused
+  /// look is the keyboard's ring ([focusHighlight]).
+  bool stateTarget(api.WidgetState s) => switch (s) {
+        api.WidgetState.hovered => hovered,
+        api.WidgetState.focused => focusHighlight,
+        api.WidgetState.pressed => pressed,
+        api.WidgetState.selected => _selected,
+        api.WidgetState.disabled => !_enabled,
+        _ => false,
+      };
+
+  // Linear progress of each state (0 off, 1 on), before the curve.
+  final Map<api.WidgetState, double> _progress = {};
+  Ticker? _ticker;
+  Duration _lastTick = Duration.zero;
+
+  /// How far [s]'s look has come, eased: 0 off, 1 on, in between while it
+  /// changes. Paint with it; read [stateTarget] (or [states]) for the state
+  /// itself.
+  double stateValue(api.WidgetState s) {
+    final t = _progress[s] ?? (stateTarget(s) ? 1.0 : 0.0);
+    if (t <= 0 || t >= 1) return t.clamp(0, 1).toDouble();
+    return transitionCurve.transform(t);
+  }
+
+  /// Whether a state is still easing.
+  bool get transitioning => _ticker?.isActive ?? false;
+
+  bool get _snaps =>
+      !animatesStates ||
+      !attached ||
+      !hasSize ||
+      transitionDuration <= Duration.zero ||
+      RendererBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations;
+
+  /// A state changed: ease towards it (or show it at once before the
+  /// control is first laid out, on a design canvas and with animations off).
+  void _statesChanged() {
+    if (_snaps) {
+      _settle();
+      return;
+    }
+    var moving = false;
+    for (final s in transitionStates) {
+      final target = stateTarget(s) ? 1.0 : 0.0;
+      if ((_progress[s] ?? target) != target) moving = true;
+    }
+    if (!moving) return;
+    final ticker = _ticker ??= Ticker(_tick, debugLabel: 'control states');
+    if (!ticker.isActive) {
+      _lastTick = Duration.zero;
+      ticker.start();
+    }
+  }
+
+  /// Every state at its target, the ticker stopped.
+  void _settle() {
+    _ticker?.stop();
+    for (final s in transitionStates) {
+      _progress[s] = stateTarget(s) ? 1.0 : 0.0;
+    }
+  }
+
+  void _tick(Duration elapsed) {
+    final dt = elapsed - _lastTick;
+    _lastTick = elapsed;
+    final step = dt.inMicroseconds / transitionDuration.inMicroseconds;
+    var moving = false;
+    for (final s in transitionStates) {
+      final target = stateTarget(s) ? 1.0 : 0.0;
+      final from = _progress[s] ?? target;
+      final next = target > from ? (from + step).clamp(0.0, target) : (from - step).clamp(target, 1.0);
+      _progress[s] = next.toDouble();
+      if (next != target) moving = true;
+    }
+    if (!moving) _ticker?.stop();
+    if (attached) markNeedsPaint();
   }
 
   void _notify(api.WidgetState s, bool on) {
@@ -155,7 +283,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
 
   /// Presses the control (a tap, Enter or Space, a screen reader).
   void activate() {
-    if (!_enabled) return;
+    if (!_enabled || _busy) return;
     onPressed?.call();
   }
 
@@ -169,7 +297,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
 
   @override
   void handleEvent(PointerEvent event, covariant BoxHitTestEntry entry) {
-    if (event is PointerDownEvent && _enabled) _tap.addPointer(event);
+    if (event is PointerDownEvent && _enabled && !_busy) _tap.addPointer(event);
   }
 
   /// The smallest box a touch may land in (SSUI: 44 × 44 on touch
@@ -203,7 +331,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
   // --- hover -------------------------------------------------------------------
 
   @override
-  MouseCursor get cursor => _enabled ? SystemMouseCursors.click : SystemMouseCursors.basic;
+  MouseCursor get cursor => _enabled && !_busy ? SystemMouseCursors.click : SystemMouseCursors.basic;
 
   @override
   PointerEnterEventListener? get onEnter => (_) => _setHovered(true);
@@ -222,12 +350,14 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
     _icon?.attach(owner);
     final root = RenderControlRoot.of(this);
     if (root != null) focusNode.join(root.focus);
+    _settle();
   }
 
   @override
   void detach() {
     focusNode.leave();
     _hovered = _pressed = false;
+    _settle();
     super.detach();
     _icon?.detach();
   }
@@ -235,6 +365,8 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
   @override
   void dispose() {
     _tap.dispose();
+    _ticker?.dispose();
+    _ticker = null;
     super.dispose();
   }
 
@@ -254,8 +386,13 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
       ..isFocused = focusNode.hasFocus
       ..textDirection = TextDirection.ltr;
     if (_selected) config.isSelected = true;
-    if (_enabled) {
-      config.onTap = activate;
+    if (_busy) {
+      config
+        ..value = 'Busy'
+        ..liveRegion = true;
+    }
+    if (_enabled && takesInput) {
+      if (!_busy) config.onTap = activate;
       config.onFocus = () => focusNode.requestFocus();
     }
   }
@@ -377,4 +514,68 @@ class ControlLabel {
   }
 
   void dispose() => _painter.dispose();
+}
+
+/// One eased 0–1 value on its own ticker, for what is not a control's state
+/// (a popup's or picker's open and close): SSUI's 150 ms ease-out by
+/// default. [onTick] runs every frame it moves (repaint or relayout there).
+class ControlTransition {
+  ControlTransition({
+    required this.onTick,
+    this.duration = const Duration(milliseconds: 150),
+    this.curve = Curves.easeOut,
+    double value = 0,
+  }) : _t = value;
+
+  final VoidCallback onTick;
+  Duration duration;
+  Curve curve;
+
+  double _t, _target = 0;
+  Ticker? _ticker;
+  Duration _last = Duration.zero;
+
+  /// The eased value now.
+  double get value => _t <= 0 || _t >= 1 ? _t.clamp(0, 1).toDouble() : curve.transform(_t);
+
+  /// Where it is heading.
+  double get target => _target;
+
+  bool get isAnimating => _ticker?.isActive ?? false;
+
+  /// Eases to [target] (0 or 1, or between), or jumps there when [animate]
+  /// is false, the duration is 0 or the platform asks for no animation.
+  void animateTo(double target, {bool animate = true}) {
+    _target = target.clamp(0, 1).toDouble();
+    if (!animate ||
+        duration <= Duration.zero ||
+        RendererBinding.instance.platformDispatcher.accessibilityFeatures.disableAnimations) {
+      _ticker?.stop();
+      _t = _target;
+      onTick();
+      return;
+    }
+    if (_t == _target) return;
+    final t = _ticker ??= Ticker(_tick, debugLabel: 'control transition');
+    if (!t.isActive) {
+      _last = Duration.zero;
+      t.start();
+    }
+  }
+
+  void _tick(Duration elapsed) {
+    final step = (elapsed - _last).inMicroseconds / duration.inMicroseconds;
+    _last = elapsed;
+    _t = _target > _t ? (_t + step).clamp(0.0, _target).toDouble() : (_t - step).clamp(_target, 1.0).toDouble();
+    if (_t == _target) _ticker?.stop();
+    onTick();
+  }
+
+  /// Stops where it is (a detached owner).
+  void stop() => _ticker?.stop();
+
+  void dispose() {
+    _ticker?.dispose();
+    _ticker = null;
+  }
 }

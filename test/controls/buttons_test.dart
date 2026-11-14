@@ -5,8 +5,10 @@
 import 'dart:ui' show Tristate;
 
 import 'package:codelessly_api/codelessly_api.dart' as api show WidgetState;
+import 'package:codelessly_api/validate.dart' show validateDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/buttons.dart';
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show ControlTransition;
 import 'package:codelessly_sdk/src/render/controls/overlay.dart';
 import 'package:codelessly_sdk/src/render/controls/root.dart';
 import 'package:flutter/gestures.dart' show PointerDeviceKind;
@@ -28,8 +30,8 @@ RenderButton _button(RenderTree tree, String id) {
 }
 
 Future<(NodeTree, RecordedInteractions)> _show(WidgetTester tester, Map<String, Map<String, Object?>> buttons,
-    {Map<String, Object?>? theme, bool dark = false, Object? fill}) async {
-  final (tree, recorded) = runningTree(columnDoc(buttons, fill: fill),
+    {Map<String, Object?>? theme, bool dark = false, Object? fill, double height = 300}) async {
+  final (tree, recorded) = runningTree(columnDoc(buttons, fill: fill, height: height),
       theme: theme == null ? null : ThemeTokens.fromJson(theme), dark: dark);
   addTearDown(tree.dispose);
   await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
@@ -88,6 +90,48 @@ void main() {
       expect(_button(tree, 'outlined').labelColor, const Color(0xFFFFFFFF));
       expect(_button(tree, 'outlined').borderSide?.color, const Color(0xFF383838));
     });
+  });
+
+  testWidgets('a column of four buttons with no props and no layout: each hugs its content on the scale, none 0 × 0',
+      (tester) async {
+    final (tree, _) = await _show(tester, {
+      'filled': {'type': 'filledButton'},
+      'outlined': {'type': 'outlinedButton'},
+      'text': {'type': 'textButton', 'props': {'label': 'Skip'}},
+      'icon': {'type': 'iconButton'},
+    });
+    final rects = [for (final id in ['filled', 'outlined', 'text', 'icon']) rectOf(tree, id)];
+    for (final r in rects) {
+      expect(r.height, 28);
+      expect(r.width, greaterThanOrEqualTo(20));
+    }
+    expect(rects[3].width, 28, reason: 'an icon button is a square');
+    expect(rects[2].width, greaterThan(rects[0].width), reason: 'a label widens it');
+    for (var i = 1; i < rects.length; i++) {
+      expect(rects[i].top, rects[i - 1].bottom + 12, reason: 'stacked by the column\'s spacing');
+    }
+    final validation = validateDocument(columnDoc({'b': {'type': 'filledButton'}}));
+    expect(validation.where((d) => d.code.name == 'zero_size'), isEmpty);
+  });
+
+  testWidgets('a floating action button is primary, radius 12 (8 small, 18 large), SSUI\'s floating shadow; it hugs to its type\'s size',
+      (tester) async {
+    final (tree, _) = await _show(tester, {
+      'fab': {'type': 'floatingActionButton', 'props': {'icon': 'add'}},
+      'small': {'type': 'floatingActionButton', 'props': {'icon': 'add', 'type': 'small'}},
+      'large': {'type': 'floatingActionButton', 'props': {'icon': 'add', 'type': 'large'}},
+      'sized': {'type': 'floatingActionButton', 'layout': {'width': 64, 'height': 64}, 'props': {'icon': 'add'}},
+    }, height: 500);
+    double radius(String id) => (_button(tree, id).shape as RoundedRectangleBorder).borderRadius.resolve(TextDirection.ltr).topLeft.x;
+    expect(_button(tree, 'fab').fillColor, _ssuiPrimary);
+    expect(_button(tree, 'fab').labelColor, const Color(0xFFFFFFFF));
+    expect([radius('fab'), radius('small'), radius('large')], [12, 8, 18]);
+    expect(_button(tree, 'fab').shadows, isNotEmpty);
+    expect(_button(tree, 'fab').shadows.first.offset.dy, greaterThan(0));
+    expect(rectOf(tree, 'fab').size, const Size(56, 56));
+    expect(rectOf(tree, 'small').size, const Size(40, 40));
+    expect(rectOf(tree, 'large').size, const Size(96, 96));
+    expect(rectOf(tree, 'sized').size, const Size(64, 64), reason: 'a set size is kept');
   });
 
   group('the document\'s theme', () {
@@ -167,6 +211,44 @@ void main() {
       expect(outlined.hovered, isFalse);
     });
 
+    testWidgets('a state comes and goes over SSUI\'s 150 ms, eased on the tree\'s ticker', (tester) async {
+      final (tree, _) = await _show(tester, {'outlined': hugging('outlinedButton', {'label': 'Cancel'})});
+      final b = _button(tree, 'outlined');
+      final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
+      await mouse.addPointer(location: Offset.zero);
+      addTearDown(mouse.removePointer);
+      await mouse.moveTo(centreOf(tree, 'outlined'));
+      await tester.pump();
+      expect(b.stateOverlay, const Color(0x0A000000), reason: 'the state itself is at once');
+      expect(b.transitioning, isTrue);
+      await tester.pump(const Duration(milliseconds: 50));
+      final part = b.paintedOverlay!.a;
+      expect(part, greaterThan(0));
+      expect(part, lessThan(const Color(0x0A000000).a));
+      expect(b.stateValue(api.WidgetState.hovered), greaterThan(50 / 150), reason: 'ease-out: ahead of linear');
+      await tester.pump(const Duration(milliseconds: 100));
+      await tester.pump();
+      expect(b.paintedOverlay, const Color(0x0A000000));
+      expect(b.transitioning, isFalse);
+      await mouse.moveTo(const Offset(390, 290));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 75));
+      expect(b.paintedOverlay!.a, greaterThan(0), reason: 'and eases out');
+      await tester.pump(const Duration(milliseconds: 80));
+      expect(b.paintedOverlay, isNull);
+    });
+
+    testWidgets('a theme\'s durations.control sets the ease; 0 shows each state at once', (tester) async {
+      final (tree, _) = await _show(tester, {'go': hugging('textButton', {'label': 'Go'})}, theme: {
+        'durations': {'control': 0},
+      });
+      final b = _button(tree, 'go');
+      tree.setState('go', api.WidgetState.selected, true);
+      await tester.pump();
+      expect(_button(tree, 'go').stateValue(api.WidgetState.selected), 1);
+      expect(b.transitioning, isFalse);
+    });
+
     testWidgets('a disabled button draws at half opacity, takes no tap and no Tab stop, and says so to screen readers',
         (tester) async {
       final handle = tester.ensureSemantics();
@@ -242,6 +324,75 @@ void main() {
       expect(week.borderSide?.color, const Color(0x472563EB), reason: 'SSUI\'s primaryTintBorder');
       expect(day.debugSemantics!.getSemanticsData().flagsCollection.isSelected, Tristate.isTrue);
     });
+  });
+
+  testWidgets('a loading button: a spinner in place of the icon turning on the ticker, taps and keys ignored, busy to screen readers',
+      (tester) async {
+    final handle = tester.ensureSemantics();
+    final (tree, recorded) = await _show(tester, {
+      'save': hugging('filledButton', {'label': 'Save', 'loading': true, 'autofocus': true}),
+      'plain': hugging('filledButton', {'label': 'Save'}),
+      'icon': hugging('iconButton', {'icon': 'close', 'loading': true}),
+    });
+    final save = _button(tree, 'save');
+    final spinner = save.spinner!;
+    expect(save.icon, same(spinner));
+    expect(spinner.color, const Color(0xFFFFFFFF), reason: 'the label\'s ink');
+    expect(spinner.size, const Size(14, 14), reason: 'the icon\'s size at 28');
+    expect(rectOf(tree, 'save').width, greaterThan(rectOf(tree, 'plain').width), reason: 'room for the spinner');
+    final label = save.labels.single.glyphs.first;
+    expect(spinner.localToGlobal(Offset.zero).dx, lessThan(rectOf(tree, 'save').left + label.left));
+    expect(save.paintedAlpha, 128, reason: 'drawn as disabled, as SSUI\'s');
+    final before = spinner.turns;
+    await tester.pump(const Duration(milliseconds: 250));
+    expect(spinner.turns, isNot(before), reason: 'it turns');
+    await tester.tapAt(centreOf(tree, 'save'));
+    await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+    expect(recorded.fired, isEmpty);
+    expect(save.focusNode.hasFocus, isTrue, reason: 'it keeps the focus');
+    final data = save.debugSemantics!.getSemanticsData();
+    expect(data.value, 'Busy');
+    expect(data.flagsCollection.isLiveRegion, isTrue);
+    expect(data.hasAction(SemanticsAction.tap), isFalse);
+    expect(_button(tree, 'icon').spinner, isNotNull);
+    handle.dispose();
+  });
+
+  testWidgets('when loading ends the spinner goes, its own icon is back, and it takes presses again', (tester) async {
+    Map<String, Object?> doc(bool loading) =>
+        columnDoc({'save': hugging('filledButton', {'label': 'Save', 'icon': 'check', 'loading': loading})});
+    final source = DocumentSource(LayoutDocument.fromJson(doc(true)));
+    final recorded = RecordedInteractions();
+    final tree = NodeTree(source, environment: const IslandEnvironment(interactive: true), interactions: recorded);
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
+    expect(_button(tree, 'save').spinner, isNotNull);
+    source.document = LayoutDocument.fromJson(doc(false));
+    await tester.pump();
+    expect(_button(tree, 'save').spinner, isNull);
+    expect(_button(tree, 'save').icon, isNotNull, reason: 'its own icon is back');
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(_button(tree, 'save').paintedAlpha, 255);
+    await tester.tapAt(centreOf(tree, 'save'));
+    expect(recorded.fired, ['save click']);
+  });
+
+  testWidgets('ControlTransition: an eased 0-1 value on a ticker for popups and pickers to open and close with',
+      (tester) async {
+    var ticks = 0;
+    final t = ControlTransition(onTick: () => ticks++);
+    addTearDown(t.dispose);
+    t.animateTo(1);
+    expect(t.isAnimating, isTrue);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 75));
+    expect(t.value, inExclusiveRange(.5, 1), reason: 'ease-out: past half at half time');
+    await tester.pump(const Duration(milliseconds: 80));
+    expect(t.value, 1);
+    expect(t.isAnimating, isFalse);
+    t.animateTo(0, animate: false);
+    expect(t.value, 0);
+    expect(ticks, greaterThan(2));
   });
 
   testWidgets('screen readers see a button named by its label, which a tap and focus act on', (tester) async {

@@ -25,6 +25,7 @@ import '../convert.dart' as convert show textAlign;
 import '../node_tree.dart' show fireTrigger;
 import '../recipe.dart';
 import 'editable.dart';
+import 'focus.dart' show ControlKeyResult;
 import 'field_frame.dart';
 import 'tokens.dart';
 
@@ -379,7 +380,7 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     final focusChanged = focusNode.onFocusChange;
     focusNode
       ..onActivate = null
-      ..onKey = _key
+      ..onKeyResult = _key
       ..onFocusChange = (on) {
         focusChanged?.call(on);
         _focusChanged(on);
@@ -726,8 +727,8 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
 
   bool get _showsCaret => _config != null && (config.showCursor ?? !config.readOnly);
 
-  bool _key(KeyEvent event) {
-    if (!_interactive || !enabled) return false;
+  ControlKeyResult _key(KeyEvent event) {
+    if (!_interactive || !enabled) return ControlKeyResult.ignored;
     return editor.handleKey(event);
   }
 

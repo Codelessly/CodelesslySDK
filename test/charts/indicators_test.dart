@@ -1,4 +1,5 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/spinner.dart';
 import 'package:codelessly_sdk/src/widgets/indicators_paint.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -38,9 +39,16 @@ void main() {
     await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 's'))));
     await tester.pump(const Duration(milliseconds: 16));
     await tester.pump(const Duration(milliseconds: 16));
-    IslandHost host(String id) => _descendants(tree.boxOf(id)!).whereType<IslandHost>().single;
-    expect(host('spin').isRepaintBoundary, isTrue);
-    expect(host('still').isRepaintBoundary, isFalse);
+    // Render objects on their own tickers, no Material or Cupertino widget.
+    RenderSpinner spinner(String id) => _descendants(tree.boxOf(id)!).whereType<RenderSpinner>().single;
+    expect(spinner('spin').spinning, isTrue);
+    expect(spinner('spin').color, const Color(0xFF2D6CDF));
+    expect(spinner('still').spinning, isFalse, reason: 'a value is a ring, not a spinner');
+    expect(spinner('ios').style, SpinnerStyle.ticks);
+    expect(spinner('ios').spinning, isTrue);
+    final turns = spinner('spin').turns;
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(spinner('spin').turns, isNot(turns), reason: 'indeterminate: it turns on the ticker');
     expect(tester.binding.hasScheduledFrame, isTrue);
     final view = tester.renderObject(find.byType(NodeView));
     // Fixed in a freeform parent: the node's size; the indicator a square.
@@ -62,9 +70,11 @@ void main() {
     final tree = NodeTree(DocumentSource(doc));
     await tester.pumpWidget(MaterialApp(home: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: 'r'))));
     final view = tester.renderObject(find.byType(NodeView));
-    // Center(SizedBox.square(13.5)) takes the row's height.
+    // A square of its design size less padding (13.5), centred: the node
+    // takes the row's height.
     expect(tree.boxOf('spin')!.rectIn(view), const Rect.fromLTWH(0, 0, 13.5, 48));
     expect(tree.boxOf('ios')!.rectIn(view), const Rect.fromLTWH(13.5, 14, 20, 20));
+    expect(_descendants(tree.boxOf('spin')!).whereType<RenderSpinner>().single.size, const Size(13.5, 13.5));
     await tester.pumpWidget(const SizedBox());
     tree.dispose();
   });

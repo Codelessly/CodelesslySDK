@@ -48,9 +48,25 @@ class HardwareKeyboardInput implements ControlKeyboard {
   void yieldHostFocus() {}
 }
 
+/// What a control did with a key ([ControlFocusNode.onKeyResult]):
+/// Flutter's `KeyEventResult`.
+enum ControlKeyResult {
+  /// Its key: the scope does nothing more, the host never sees it.
+  handled,
+
+  /// Not its key: the scope goes on (Tab moves, Enter and Space press).
+  ignored,
+
+  /// Not its key and not the scope's either: nothing presses or moves, and
+  /// the key goes back to the host unhandled, so the platform's text input
+  /// gets it (a text field's Space and Enter, which an IME may compose with;
+  /// Flutter's `KeyEventResult.skipRemainingHandlers`).
+  passThrough,
+}
+
 /// A control's place in its root's focus order (Flutter's `FocusNode`).
 class ControlFocusNode {
-  ControlFocusNode(this.owner, {this.onActivate, this.onKey, this.onFocusChange});
+  ControlFocusNode(this.owner, {this.onActivate, this.onKey, this.onKeyResult, this.onFocusChange});
 
   /// The control's render box: where it is on screen, for the order.
   final RenderBox owner;
@@ -59,8 +75,20 @@ class ControlFocusNode {
   VoidCallback? onActivate;
 
   /// The control's own keys while focused (a slider's arrows); true when
-  /// handled. Asked before Tab, Enter and Space.
+  /// handled. Asked before Tab, Enter and Space. [onKeyResult], when set,
+  /// is asked instead.
   bool Function(KeyEvent event)? onKey;
+
+  /// The control's own keys, with a [ControlKeyResult]: what [onKey] says,
+  /// plus [ControlKeyResult.passThrough] for a key that must reach the
+  /// platform untouched.
+  ControlKeyResult Function(KeyEvent event)? onKeyResult;
+
+  /// What the control does with [event].
+  ControlKeyResult keyResult(KeyEvent event) {
+    if (onKeyResult case final f?) return f(event);
+    return (onKey?.call(event) ?? false) ? ControlKeyResult.handled : ControlKeyResult.ignored;
+  }
 
   /// The focus came ([focused]) or went.
   void Function(bool focused)? onFocusChange;
@@ -215,7 +243,14 @@ class ControlFocusScope {
       if (keyboard?.hostHasFocus ?? false) return false;
       return next(backward: HardwareKeyboard.instance.isShiftPressed);
     }
-    if (focused.onKey?.call(event) ?? false) return true;
+    switch (focused.keyResult(event)) {
+      case ControlKeyResult.handled:
+        return true;
+      case ControlKeyResult.passThrough:
+        return false;
+      case ControlKeyResult.ignored:
+        break;
+    }
     if (key == LogicalKeyboardKey.tab) return next(backward: HardwareKeyboard.instance.isShiftPressed);
     if (key == LogicalKeyboardKey.escape) {
       _focus(null);

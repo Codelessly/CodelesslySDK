@@ -21,6 +21,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart' show SchedulerBinding;
 import 'package:flutter/services.dart';
 
+import 'focus.dart' show ControlKeyResult;
+
 /// A field's edits, newest last, for undo and redo (Flutter's `UndoHistory`
 /// logic): changes of the text within [coalesce] of the previous one are
 /// one step; at most [limit] steps are kept.
@@ -520,11 +522,19 @@ class FieldEditor with TextInputClient, TextSelectionDelegate implements Autofil
   static bool get _apple =>
       defaultTargetPlatform == TargetPlatform.macOS || defaultTargetPlatform == TargetPlatform.iOS;
 
-  /// A key while the field has the focus; true when it was the field's.
+  /// A key while the field has the focus: handled when it was the field's.
   /// Characters are not: they come from the platform's text input
-  /// (`updateEditingValue`). Tab and Escape are the focus scope's.
-  bool handleKey(KeyEvent event) {
-    if (event is KeyUpEvent) return false;
+  /// (`updateEditingValue`), and so do Space and Enter while it is
+  /// connected (passed through, never pressing the field, so an IME can
+  /// compose with them). Tab and Escape are the focus scope's.
+  ControlKeyResult handleKey(KeyEvent event) {
+    if (event is KeyUpEvent) return ControlKeyResult.ignored;
+    final r = _handleKey(event);
+    if (r != null) return r;
+    return ControlKeyResult.ignored;
+  }
+
+  ControlKeyResult? _handleKey(KeyEvent event) {
     final key = event.logicalKey;
     final kb = HardwareKeyboard.instance;
     final shift = kb.isShiftPressed;
@@ -536,22 +546,22 @@ class FieldEditor with TextInputClient, TextSelectionDelegate implements Autofil
       switch (key) {
         case LogicalKeyboardKey.keyA:
           selectAll(SelectionChangedCause.keyboard);
-          return true;
+          return ControlKeyResult.handled;
         case LogicalKeyboardKey.keyC:
           copySelection(SelectionChangedCause.keyboard);
-          return true;
+          return ControlKeyResult.handled;
         case LogicalKeyboardKey.keyX:
           cutSelection(SelectionChangedCause.keyboard);
-          return true;
+          return ControlKeyResult.handled;
         case LogicalKeyboardKey.keyV:
           pasteText(SelectionChangedCause.keyboard);
-          return true;
+          return ControlKeyResult.handled;
         case LogicalKeyboardKey.keyZ:
           shift ? redo() : undo();
-          return true;
+          return ControlKeyResult.handled;
         case LogicalKeyboardKey.keyY when !_apple:
           redo();
-          return true;
+          return ControlKeyResult.handled;
       }
     }
 
@@ -607,14 +617,14 @@ class FieldEditor with TextInputClient, TextSelectionDelegate implements Autofil
         } else {
           moveTo(lineMod ? lineStart(ext) : word ? wordBack(ext) : charBack(ext));
         }
-        return true;
+        return ControlKeyResult.handled;
       case LogicalKeyboardKey.arrowRight:
         if (!shift && !sel.isCollapsed && !word && !lineMod) {
           moveTo(sel.end);
         } else {
           moveTo(lineMod ? lineEnd(ext) : word ? wordForward(ext) : charForward(ext));
         }
-        return true;
+        return ControlKeyResult.handled;
       case LogicalKeyboardKey.arrowUp:
       case LogicalKeyboardKey.arrowDown:
         final down = key == LogicalKeyboardKey.arrowDown;
@@ -626,44 +636,49 @@ class FieldEditor with TextInputClient, TextSelectionDelegate implements Autofil
           final to = down ? e.getTextPositionBelow(from) : e.getTextPositionAbove(from);
           moveTo(to.offset == ext ? (down ? text.length : 0) : to.offset);
         }
-        return true;
+        return ControlKeyResult.handled;
       case LogicalKeyboardKey.home:
         moveTo(kb.isControlPressed ? 0 : lineStart(ext));
-        return true;
+        return ControlKeyResult.handled;
       case LogicalKeyboardKey.end:
         moveTo(kb.isControlPressed ? text.length : lineEnd(ext));
-        return true;
+        return ControlKeyResult.handled;
       case LogicalKeyboardKey.backspace:
-        if (readOnly) return true;
+        if (readOnly) return ControlKeyResult.handled;
         if (!sel.isCollapsed) {
           _replaceSelection('');
         } else {
           _deleteRange(lineMod ? lineStart(ext) : word ? wordBack(ext) : charBack(ext), ext);
         }
-        return true;
+        return ControlKeyResult.handled;
       case LogicalKeyboardKey.delete:
-        if (readOnly) return true;
+        if (readOnly) return ControlKeyResult.handled;
         if (!sel.isCollapsed) {
           _replaceSelection('');
         } else {
           _deleteRange(ext, lineMod ? lineEnd(ext) : word ? wordForward(ext) : charForward(ext));
         }
-        return true;
+        return ControlKeyResult.handled;
       case LogicalKeyboardKey.enter:
       case LogicalKeyboardKey.numpadEnter:
+        // Connected, the platform's text input types the new line or sends
+        // the action key (an IME may be composing with Enter).
+        if (hasConnection && !primary) return ControlKeyResult.passThrough;
         if (multiline && (inputAction == null || inputAction == TextInputAction.newline || shift)) {
           if (!readOnly) _replaceSelection('\n');
         } else {
           _commitComposing();
           host.performAction(inputAction ?? TextInputAction.done);
         }
-        return true;
+        return ControlKeyResult.handled;
       case LogicalKeyboardKey.space:
-        // The focus scope would press the field; a space is typed instead.
+        // Never the scope's press: the platform's text input types it (an
+        // IME may be composing with Space); with no connection, typed here.
+        if (hasConnection && !primary) return ControlKeyResult.passThrough;
         if (!readOnly && !primary) _replaceSelection(' ');
-        return true;
+        return ControlKeyResult.handled;
     }
-    return false;
+    return null;
   }
 
   void _commitComposing() {

@@ -3,7 +3,9 @@
 // no MaterialApp, WidgetsApp, Theme, Overlay or Navigator above it).
 // direct_attach_test.dart attaches it to the view with no widget at all.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/focus.dart';
 import 'package:codelessly_sdk/src/render/controls/root.dart';
+import 'package:flutter/rendering.dart' show RenderConstrainedBox, BoxConstraints;
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,6 +18,35 @@ final _doc = columnDoc({
 });
 
 void main() {
+  test('a control\'s key result: handled stops there, ignored lets the scope press, passThrough goes back to the host unpressed',
+      () {
+    final scope = ControlFocusScope();
+    var pressed = 0;
+    var result = ControlKeyResult.ignored;
+    final node = ControlFocusNode(RenderConstrainedBox(additionalConstraints: const BoxConstraints()),
+        onActivate: () => pressed++, onKeyResult: (_) => result)
+      ..join(scope);
+    expect(node.requestFocus(), isTrue);
+    const space = KeyDownEvent(physicalKey: PhysicalKeyboardKey.space, logicalKey: LogicalKeyboardKey.space, timeStamp: Duration.zero);
+    const enter = KeyDownEvent(physicalKey: PhysicalKeyboardKey.enter, logicalKey: LogicalKeyboardKey.enter, timeStamp: Duration.zero);
+    expect(scope.handleKeyEvent(space), isTrue);
+    expect(pressed, 1, reason: 'ignored: the scope presses');
+    result = ControlKeyResult.passThrough;
+    expect(scope.handleKeyEvent(space), isFalse, reason: 'unhandled: the host (the platform\'s text input) gets it');
+    expect(scope.handleKeyEvent(enter), isFalse);
+    expect(pressed, 1, reason: 'nothing pressed');
+    result = ControlKeyResult.handled;
+    expect(scope.handleKeyEvent(enter), isTrue);
+    expect(pressed, 1);
+    // The bool onKey still works: false is ignored.
+    node
+      ..onKeyResult = null
+      ..onKey = (_) => false;
+    expect(scope.handleKeyEvent(enter), isTrue);
+    expect(pressed, 2);
+    node.leave();
+  });
+
   testWidgets('a document lays out, paints, hit-tests and takes the keyboard under the adapter alone, with no app above it',
       (tester) async {
     final (tree, recorded) = runningTree(_doc);
