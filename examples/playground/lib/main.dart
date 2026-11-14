@@ -4,6 +4,10 @@
 // line), what the UI told the app (emit, toast), and the document the
 // notation expands to.
 //
+// Its own frame is soft_saas_ui, the design system CodelesslyEditor is built
+// with (the app, the split view, pane toolbars, the code field, selects and
+// segmented controls), so [Playground] can be placed in the Editor as it is.
+//
 //   flutter run -d chrome        (or any device)
 import 'dart:async';
 import 'dart:convert';
@@ -11,8 +15,9 @@ import 'dart:convert';
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/notation.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart' show CodelesslyView, UiSession;
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:soft_saas_ui/soft_saas_ui.dart';
 
 /// The design systems bundled as assets (tool/bundle.sh).
 const designSystems = ['ssui', 'paper', 'harbor'];
@@ -39,12 +44,12 @@ class PlaygroundApp extends StatelessWidget {
   final Future<String> Function(String key)? loadAsset;
 
   @override
-  Widget build(BuildContext context) => MaterialApp(
-        title: 'Codelessly playground',
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(colorSchemeSeed: const Color(0xFF2563EB), useMaterial3: true),
-        home: Playground(loadAsset: loadAsset ?? rootBundle.loadString),
-      );
+  Widget build(BuildContext context) => SoftSaaSApp(
+    title: 'Codelessly playground',
+    debugShowCheckedModeBanner: false,
+    themeMode: SoftSaaSThemeMode.light,
+    home: SoftSaaSScaffold(body: Playground(loadAsset: loadAsset ?? rootBundle.loadString)),
+  );
 }
 
 /// What one reading of the editor's text gave.
@@ -91,8 +96,8 @@ class _PlaygroundState extends State<Playground> {
   Reading? _reading;
   StreamSubscription<Object?>? _events;
   Timer? _debounce;
-  bool _showJson = false;
-  double _width = 420;
+  String _view = 'preview';
+  String _width = '420';
 
   @override
   void initState() {
@@ -157,132 +162,197 @@ class _PlaygroundState extends State<Playground> {
 
   @override
   Widget build(BuildContext context) {
+    final b = SoftSaaSTheme.brightnessOf(context);
     final r = _reading;
-    return Scaffold(
-      backgroundColor: const Color(0xFFF3F4F6),
-      body: SafeArea(
-        child: Column(children: [
-          _toolbar(r),
-          Expanded(
-            child: LayoutBuilder(builder: (context, box) {
-              final editor = _editor();
-              final preview = _preview(r);
-              return box.maxWidth < 760
-                  ? Column(children: [Expanded(child: editor), const Divider(height: 1), Expanded(child: preview)])
-                  : Row(children: [Expanded(child: editor), const VerticalDivider(width: 1), Expanded(child: preview)]);
-            }),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        _header(b, r),
+        Expanded(
+          child: LayoutBuilder(
+            builder: (context, box) => SoftSaaSSplitView(
+              axis: box.maxWidth < 760 ? Axis.vertical : Axis.horizontal,
+              panes: [
+                SoftSaaSSplitPane(minSize: 240, child: _editor(b)),
+                SoftSaaSSplitPane(minSize: 280, child: _output(b, r)),
+              ],
+            ),
           ),
-        ]),
-      ),
+        ),
+      ],
     );
   }
 
-  Widget _toolbar(Reading? r) => Material(
-        color: Colors.white,
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-          child: Wrap(spacing: 12, runSpacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
-            const Text('Playground', style: TextStyle(fontWeight: FontWeight.w600)),
-            DropdownButton<String>(
-              key: const Key('sample'),
-              value: _sample,
-              isDense: true,
-              underline: const SizedBox.shrink(),
-              items: [for (final s in samples) DropdownMenuItem(value: s, child: Text(s.replaceAll('_', ' ')))],
-              onChanged: (s) => s == null ? null : _pick(s),
-            ),
-            SegmentedButton<String>(
-              key: const Key('system'),
-              showSelectedIcon: false,
-              style: const ButtonStyle(visualDensity: VisualDensity.compact),
-              segments: [for (final s in designSystems) ButtonSegment(value: s, label: Text(_systems[s]?.name ?? s))],
-              selected: {_system},
-              onSelectionChanged: (s) {
-                _system = s.first;
-                _render();
-              },
-            ),
-            SegmentedButton<double>(
-              showSelectedIcon: false,
-              style: const ButtonStyle(visualDensity: VisualDensity.compact),
-              segments: const [
-                ButtonSegment(value: 320, label: Text('320')),
-                ButtonSegment(value: 420, label: Text('420')),
-                ButtonSegment(value: 720, label: Text('720')),
-              ],
-              selected: {_width},
-              onSelectionChanged: (s) => setState(() => _width = s.first),
-            ),
-            if (r != null)
-              Text(
-                '${r.nodes} nodes · ${r.notationChars} characters written · ${r.jsonChars} as a document',
-                key: const Key('stats'),
-                style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
-              ),
-          ]),
+  /// The page's bar: its title, the sample, and what the text became.
+  Widget _header(Brightness b, Reading? r) => Container(
+    height: 44,
+    padding: const EdgeInsets.symmetric(horizontal: SoftSaaSTokens.pageGutter),
+    decoration: BoxDecoration(
+      color: SoftSaaSTokens.primaryBackground(b),
+      border: Border(bottom: BorderSide(color: SoftSaaSTokens.primaryBorder(b))),
+    ),
+    child: Row(
+      children: [
+        Text('Playground', style: SoftSaaSTypography.sectionTitle(b)),
+        const SizedBox(width: 12),
+        SoftSaaSDropdown(
+          key: const Key('sample'),
+          width: 190,
+          value: _sample,
+          options: [for (final s in samples) SelectOption(value: s, label: _title(s))],
+          onChanged: _pick,
         ),
-      );
-
-  Widget _editor() => ColoredBox(
-        color: Colors.white,
-        child: TextField(
-          key: const Key('editor'),
-          controller: _text,
-          maxLines: null,
-          expands: true,
-          textAlignVertical: TextAlignVertical.top,
-          autocorrect: false,
-          enableSuggestions: false,
-          style: const TextStyle(fontFamily: 'monospace', fontSize: 13, height: 1.45),
-          decoration: const InputDecoration(border: InputBorder.none, contentPadding: EdgeInsets.all(12)),
+        const SizedBox(width: 12),
+        SoftSaaSSegmentedControl<String>(
+          key: const Key('system'),
+          size: SegmentedControlSize.compact,
+          options: [for (final s in designSystems) SegmentedControlOption(value: s, label: _systems[s]?.name ?? s)],
+          value: _system,
+          onChanged: (s) {
+            _system = s;
+            _render();
+          },
         ),
-      );
+        const SizedBox(width: 8),
+        SoftSaaSSegmentedControl<String>(
+          size: SegmentedControlSize.compact,
+          options: const [
+            SegmentedControlOption(value: '320', label: '320'),
+            SegmentedControlOption(value: '420', label: '420'),
+            SegmentedControlOption(value: '720', label: '720'),
+          ],
+          value: _width,
+          onChanged: (w) => setState(() => _width = w),
+        ),
+        const Spacer(),
+        if (r != null)
+          Flexible(
+            child: Text(
+              '${r.nodes} nodes · ${r.notationChars} characters written · ${r.jsonChars} as a document',
+              key: const Key('stats'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: SoftSaaSTypography.caption(b),
+            ),
+          ),
+      ],
+    ),
+  );
 
-  Widget _preview(Reading? r) {
-    if (r == null) return const Center(child: CircularProgressIndicator());
-    return Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-      Expanded(
-        child: _showJson
-            ? SingleChildScrollView(
-                padding: const EdgeInsets.all(12),
-                child: SelectableText(r.json, style: const TextStyle(fontFamily: 'monospace', fontSize: 12)),
-              )
-            : SingleChildScrollView(
-                padding: const EdgeInsets.all(16),
-                child: Align(
-                  alignment: Alignment.topCenter,
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: _width),
-                    child: CodelesslyView(key: ObjectKey(r.session), session: r.session),
+  static String _title(String id) => id.isEmpty ? id : '${id[0].toUpperCase()}${id.substring(1).replaceAll('_', ' ')}';
+
+  Widget _pane(Brightness b, {required Widget bar, required Widget child, Color? color}) => ColoredBox(
+    color: color ?? SoftSaaSTokens.primaryBackground(b),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        bar,
+        Expanded(child: child),
+      ],
+    ),
+  );
+
+  Widget _editor(Brightness b) => _pane(
+    b,
+    bar: const SoftSaaSPaneToolbar(title: 'Notation'),
+    child: SingleChildScrollView(
+      child: SoftSaaSCodeField(
+        key: const Key('editor'),
+        controller: _text,
+        lineNumbers: true,
+        minLines: 30,
+        maxLines: null,
+        fontSize: 12.5,
+        fillColor: SoftSaaSTokens.primaryBackground(b),
+      ),
+    ),
+  );
+
+  Widget _output(Brightness b, Reading? r) {
+    if (r == null) {
+      return _pane(
+        b,
+        bar: const SoftSaaSPaneToolbar(title: 'Preview', loading: true),
+        child: const Center(child: SoftSaaSSpinner()),
+      );
+    }
+    return SoftSaaSSplitView(
+      axis: Axis.vertical,
+      panes: [
+        SoftSaaSSplitPane(
+          minSize: 160,
+          child: _pane(
+            b,
+            color: SoftSaaSTokens.secondaryBackground(b),
+            bar: SoftSaaSPaneToolbar(
+              title: _view == 'preview' ? 'Preview' : 'Document',
+              actions: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SoftSaaSSegmentedControl<String>(
+                    key: const Key('view'),
+                    size: SegmentedControlSize.xs,
+                    options: const [
+                      SegmentedControlOption(value: 'preview', label: 'Preview'),
+                      SegmentedControlOption(value: 'document', label: 'Document'),
+                    ],
+                    value: _view,
+                    onChanged: (v) => setState(() => _view = v),
                   ),
-                ),
+                ],
               ),
-      ),
-      const Divider(height: 1),
-      ColoredBox(
-        color: Colors.white,
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxHeight: 150),
-          child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(8), children: [
-            Row(children: [
-              Text(
-                r.issues.isEmpty ? 'Every line was read.' : '${r.issues.length} not read:',
-                key: const Key('issues'),
-                style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: r.issues.isEmpty ? const Color(0xFF16A34A) : const Color(0xFFDC2626)),
-              ),
-              const Spacer(),
-              TextButton(
-                key: const Key('json'),
-                onPressed: () => setState(() => _showJson = !_showJson),
-                child: Text(_showJson ? 'Show preview' : 'Show document'),
-              ),
-            ]),
-            for (final i in r.issues) Text('$i', style: const TextStyle(fontSize: 12, color: Color(0xFFDC2626))),
-            for (final l in _log) Text(l, style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280))),
-          ]),
+            ),
+            child: _view == 'document'
+                ? SingleChildScrollView(
+                    padding: const EdgeInsets.all(SoftSaaSTokens.cardPadding),
+                    child: SoftSaaSSelectableText(r.json, style: SoftSaaSTypography.mono(b)),
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.all(SoftSaaSTokens.pageGutter),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: double.parse(_width)),
+                        child: CodelesslyView(key: ObjectKey(r.session), session: r.session),
+                      ),
+                    ),
+                  ),
+          ),
         ),
-      ),
-    ]);
+        SoftSaaSSplitPane(
+          size: 150,
+          minSize: 64,
+          child: _pane(
+            b,
+            bar: SoftSaaSPaneToolbar(
+              title: 'Problems',
+              titleMeta: SoftSaaSBadge(
+                key: const Key('issues'),
+                label: r.issues.isEmpty ? 'Every line was read' : '${r.issues.length} not read',
+                variant: r.issues.isEmpty ? SoftSaaSBadgeVariant.success : SoftSaaSBadgeVariant.error,
+                size: SoftSaaSBadgeSize.small,
+              ),
+            ),
+            child: ListView(
+              padding: const EdgeInsets.all(SoftSaaSTokens.cardPadding),
+              children: [
+                for (final i in r.issues)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text('$i', style: SoftSaaSTypography.bodySecondary(b).copyWith(color: SoftSaaSTokens.errorColor(b))),
+                  ),
+                for (final l in _log)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 4),
+                    child: Text(l, style: SoftSaaSTypography.caption(b)),
+                  ),
+                if (r.issues.isEmpty && _log.isEmpty)
+                  Text('What the UI tells the app (emit, toast) is listed here.', style: SoftSaaSTypography.caption(b)),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }

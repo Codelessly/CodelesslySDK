@@ -7,11 +7,17 @@ as you type.
 flutter run -d chrome
 ```
 
+Its own frame is `soft_saas_ui`, the design system CodelesslyEditor is built with: `SoftSaaSApp`, a
+`SoftSaaSSplitView` of panes each under a `SoftSaaSPaneToolbar`, `SoftSaaSCodeField` for the notation, and SSUI's
+select, segmented controls and badge. No Material widget is used, so the `Playground` widget can be placed in the
+Editor as it is. The package is read from a checkout of OverlookV2 beside this repository
+(`../../../OverlookV2/packages/soft_saas_ui`), as the Editor reads it.
+
 - **Samples**: a starting card and a few of the targets from `design_systems/ssui/examples/targets`.
 - **Design system**: Soft SaaS UI, Paper or Harbor. The text does not change; the controls and components do.
 - **Width**: 320, 420 or 720, to see how a card holds up.
 - **Under the preview**: each line the parser could not read, with its line and column; what the UI told the app
-  (`emit`, `toast`); and "Show document", the layout document the notation expands to.
+  (`emit`, `toast`); and "Document", the layout document the notation expands to.
 - **Counts**: nodes, characters written, and characters of the document they became.
 - A link can open on a sample and a look: `?sample=approval_card&system=harbor`.
 
