@@ -12,6 +12,7 @@
     settled track eases;
   - a node its animations patch re-applies when a binding changes even if the node as shown did not (a top-level
     node, or a binding change that left it equal), so its player sees the change.
+- **A time picker's `use24h` is `alwaysUse24HourFormat`** (codelessly_api; `TimePickerProps.alwaysUse24HourFormat`).
 - **State patches on `self` and `@<key>`** in schema-2 documents are migrated to the node's id (codelessly_api), so
   those hover, press and selection styles now apply.
 
