@@ -224,6 +224,15 @@ void main() {
       expect(await flag(tester, report.images.firstWhere((i) => i.contains('390x844')), 'fMenu'), 0x00FF00);
     });
 
+    testWidgets('a step on a component\'s node (by its path) hidden at one width is skipped there with a note, not failed', (tester) async {
+      final report = await runRender(tester, steps(const [Step('tap', 'footer/narrowOnly')], sizes: const [Size(390, 844), Size(1440, 900)]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final note = report.diagnostics.single;
+      expect(note['size'], '1440x900');
+      expect(note['code'], 'step_skipped', reason: 'a skip, not a failed interaction');
+      expect(note['message'], contains('--tap footer/narrowOnly (hidden at this width)'));
+    });
+
     testWidgets('typing into a field and then tapping a button that removes the form leaves no exception', (tester) async {
       final report = await runRender(tester, steps(const [Step('type', 'email', 'a@b.co'), Step('tap', 'send')]));
       expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
