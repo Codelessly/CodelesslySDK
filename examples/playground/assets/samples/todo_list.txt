@@ -1,0 +1,14 @@
+state items=[{"id":"a","text":"Rename the env var in CI","done":true},{"id":"b","text":"Rotate the staging key","done":false},{"id":"c","text":"Update the runbook","done":false},{"id":"d","text":"Tell the on-call channel","done":false}]
+state draft=""
+Card gap:10
+  Row between
+    Text.sectionTitle "Before the deploy"
+    Text.caption "{length(filter(items, i => i.done))} of {length(items)} done"
+  Column gap:2
+    each i in items
+      Row gap:8 pad:[4,5,4,5] radius:6 -> items=map(items, x => x.id==i.id ? set(x,"done",!x.done) : x)
+        Checkbox checked:=i.done
+        Text "{i.text}" grow color:=i.done?"#FF9CA3AF":"#FF111827" {"bind": {"props.style.decoration": "${= item.done ? 'lineThrough' : 'none'}"}}
+  Row gap:8
+    Input "Add a step" =draft grow
+    Button.outline "Add" enabled:=draft!="" -> items=append(items,{"id":draft,"text":draft,"done":false}); draft=""
