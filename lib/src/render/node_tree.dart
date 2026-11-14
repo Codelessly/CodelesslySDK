@@ -1966,6 +1966,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..userScrollable = n.prop(ScrollProps.physics) != api.ScrollPhysicsType.never
       ..onScroll = (event) { tree.interactions?.fire(this, 'scroll', event: event); }
       ..onScrollEnd = (event) { tree.interactions?.fire(this, 'scrollEnd', event: event); }
+      ..itemSnapping = n.prop(ScrollProps.itemSnapping)
       ..axis = axis
       ..reverse = n.prop(ScrollProps.reverse)
       ..clipBehavior = clip(n.prop(ScrollProps.clipBehavior));

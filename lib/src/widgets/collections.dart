@@ -421,6 +421,11 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     chain.add(b.obtain<RenderDesignScroll>('listScroll', () => RenderDesignScroll(axis: n.axis))
       ..interactive = true
       ..userScrollable = n.prop(CollectionScrollProps.physics) != api.ScrollPhysicsType.never
+      ..itemSnapping = n.prop(CollectionScrollProps.itemSnapping)
+      // The list's scroll reactions, as a scrolling row's: offset, max,
+      // fraction, and the item at the start of the view (index, count).
+      ..onScroll = ((event) => fireTrigger(b, 'scroll', event: event))
+      ..onScrollEnd = ((event) => fireTrigger(b, 'scrollEnd', event: event))
       ..axis = n.axis
       ..reverse = n.prop(CollectionScrollProps.reverse)
       ..clipBehavior = _clip(n));
