@@ -11,7 +11,11 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart' hide NavigationMode;
 
 import '../app/viewport.dart' show CanvasSizing, CanvasViewport, CanvasViewportBox;
-import '../render/components.dart' show componentInstanceOf;
+import 'package:flutter/material.dart' show Theme;
+
+import '../app/theme.dart' show themeDataOf, themeValues;
+import '../render/components.dart' show ComponentRegistry, componentInstanceOf;
+import '../render/source.dart' show NodeSource;
 import '../render/contracts.dart' show ImageBytesLoader;
 import '../render/node_tree.dart' show NodeBox, ResponsiveWidth;
 import '../runtime/contracts.dart' show CodelesslyServices;
@@ -76,6 +80,9 @@ class _CodelesslyViewState extends State<CodelesslyView> {
   late ValuesScope _values;
   late VariableScope _scope;
   late SessionValues _nodeValues;
+  late ThemedSource _themed;
+  ComponentRegistry? _components;
+  bool? _dark;
   late NodeBinder _binder;
   late NodeTree _tree;
   late CoreActionContext _context;
@@ -96,10 +103,15 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _session = widget.session;
     _values = ValuesScope({if (widget.data.isNotEmpty) 'data': widget.data});
     _scope = VariableScope(const [], parent: _values);
-    _nodeValues = SessionValues(_session);
+    _themed = ThemedSource(_session, _session.theme);
+    _nodeValues = SessionValues(_themed);
+    _components = _session.designSystem == null
+        ? null
+        : (ComponentRegistry(_session.designSystem!.components.definitions.values)..theme = _session.theme);
     _binder = NodeBinder(scope: _scope, logic: LayoutLogic.fromJson(_session.document.extra), engine: const Expressions());
     _logicExtra = _session.document.extra;
-    _tree = NodeTree(_nodeValues, binder: _binder, imageLoader: widget.imageLoader ?? const HttpImageLoader());
+    _tree = NodeTree(_nodeValues,
+        binder: _binder, imageLoader: widget.imageLoader ?? const HttpImageLoader(), components: _components);
     _context = CoreActionContext(
       scope: _scope,
       services: widget.services,
@@ -248,6 +260,8 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _nodeValues.dispose();
     _scope.dispose();
     _values.dispose();
+    _themed.dispose();
+    _components?.dispose();
   }
 
   @override
@@ -263,7 +277,21 @@ class _CodelesslyViewState extends State<CodelesslyView> {
       final screen = screenValues(mq.size.width, mq.size.height, dark: mq.platformBrightness == Brightness.dark);
       if (!jsonEquality.equals(screen, _values['screen'])) _values.set('screen', screen);
     }
-    return LayoutBuilder(builder: (context, constraints) {
+    // The session's theme for the screen's mode: named colours and text
+    // styles resolved in its nodes and its components', read as
+    // `${theme.*}`, and the theme of its controls.
+    final tokens = _session.theme;
+    final dark = tokens.mode.isDark(platformDark: mq?.platformBrightness == Brightness.dark);
+    final shown = tokens.forBrightness(dark: dark);
+    if (dark != _dark) {
+      _dark = dark;
+      _themed.theme = shown;
+      _components?.theme = shown;
+      _values.set('theme', themeValues(tokens, dark: dark));
+    }
+    return Theme(
+        data: themeDataOf(shown, brightness: dark ? Brightness.dark : Brightness.light),
+        child: LayoutBuilder(builder: (context, constraints) {
       final id = _canvasId();
       _shown = id;
       final canvas = id == null ? null : _session.document[id];
@@ -285,7 +313,80 @@ class _CodelesslyViewState extends State<CodelesslyView> {
           );
         },
       );
-    });
+    }));
+  }
+}
+
+/// A node source whose nodes have [theme]'s names resolved (`"color":
+/// "primary"`, `"style": "body"`), as a published site's are; the same
+/// nodes when the theme names nothing they use.
+class ThemedSource implements NodeSource {
+  ThemedSource(this.base, ThemeTokens theme) : _theme = theme;
+
+  final NodeSource base;
+  ThemeTokens _theme;
+  final Map<String, _ThemedNode> _watched = {};
+  final Expando<Node> _resolved = Expando();
+  ThemeRefs _refs = ThemeRefs(ThemeTokens.none);
+
+  ThemeTokens get theme => _theme;
+  set theme(ThemeTokens value) {
+    if (value == _theme) return;
+    _theme = value;
+    _refs = ThemeRefs(value);
+    for (final w in _watched.values.toList()) {
+      w.refresh();
+    }
+  }
+
+  Node? _resolve(Node? n) {
+    if (n == null || _theme.isEmpty) return n;
+    final hit = _resolved[n];
+    if (hit != null) return hit;
+    final json = n.toJson();
+    final r = _refs.node(json, n.spec, specOf: (id) => base.node(id)?.spec);
+    final out = identical(r, json) ? n : (Node.fromJson(r, id: n.id, catalog: Catalog.current) ?? n);
+    _resolved[n] = out;
+    return out;
+  }
+
+  @override
+  Node? node(String id) => _resolve(base.node(id));
+
+  @override
+  String? parentOf(String id) => base.parentOf(id);
+
+  @override
+  ValueListenable<Node?> watch(String id) => _watched[id] ??= _ThemedNode(this, base.watch(id));
+
+  void dispose() {
+    for (final w in _watched.values) {
+      w.dispose();
+    }
+    _watched.clear();
+  }
+}
+
+class _ThemedNode extends ChangeNotifier implements ValueListenable<Node?> {
+  _ThemedNode(this.owner, this.source) : _value = owner._resolve(source.value) {
+    source.addListener(refresh);
+  }
+  final ThemedSource owner;
+  final ValueListenable<Node?> source;
+  Node? _value;
+
+  @override
+  Node? get value => _value;
+
+  void refresh() {
+    _value = owner._resolve(source.value);
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    source.removeListener(refresh);
+    super.dispose();
   }
 }
 
@@ -313,7 +414,7 @@ class _SessionUi extends NavigatorActionUi {
 /// [NodeValues] over a [UiSession] that passes on a notification with no
 /// change too (a parent whose pending child arrived re-lists its children).
 class SessionValues extends NodeValues {
-  SessionValues(UiSession super.base);
+  SessionValues(super.base);
 
   final Map<String, _Forward> _forward = {};
 

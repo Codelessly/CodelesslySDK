@@ -422,7 +422,13 @@ Map<String, Object?> _labelPage() {
   for (final type in _labelled) {
     final spec = Catalog.current.widget(type)!;
     // Pagination as one line of page buttons (its summary is a second line).
-    final base = {..._props(type, spec), if (type == 'pagination') 'showSummary': false};
+    // A field's own text and hint (its label is drawn above it: see
+    // field_label_test.dart); pagination as one line of page buttons.
+    final base = {
+      ..._props(type, spec),
+      if (type == 'pagination') 'showSummary': false,
+      if (type == 'textField') 'decoration': {'hintText': 'Hint'},
+    };
     final (w, h) = _sizes[type] ?? (160.0, 48.0);
     for (final (id, height, props) in [
       ('$type@default', h, base),

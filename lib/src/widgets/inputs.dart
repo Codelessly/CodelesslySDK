@@ -39,6 +39,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart' show DateFormat;
 
+import '../render/control_theme.dart' show themeFont;
 import '../render/convert.dart';
 import '../render/node_tree.dart' show fireTrigger;
 import '../runtime/expressions/formula.dart' show FormulaEvaluator;
@@ -308,7 +309,11 @@ Widget _affix(Widget? icon, Widget text, {required bool before}) {
 /// when the decoration sets none. [focused] and [error] pick the border a
 /// padding that includes it grows by.
 InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
-    {bool focused = false, bool? error, void Function(bool prefix)? onIconTap, api.TextStyle? textDefault}) {
+    {bool focused = false,
+    bool? error,
+    void Function(bool prefix)? onIconTap,
+    api.TextStyle? textDefault,
+    bool labelAbove = false}) {
   Widget? affixIcon(api.InputIcon? icon, api.EdgeInsets? iconPadding) {
     var glyph = _icon(icon);
     if (glyph == null) return null;
@@ -335,9 +340,13 @@ InputDecoration inputDecoration(api.InputDecoration d, api.EdgeInsets padding,
   final themed = d.floatingLabelBehavior == null &&
       [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder]
           .every((b) => b == null);
+  // With [labelAbove] the caller draws the label above the field
+  // ([labelAboveField]); otherwise it is the placeholder.
   if (themed && label != null && label.isNotEmpty) {
-    hint = label;
-    if (!d.labelStyle.isEmpty) hintStyle = d.labelStyle;
+    if (!labelAbove) {
+      hint = label;
+      if (!d.labelStyle.isEmpty) hintStyle = d.labelStyle;
+    }
     label = null;
   }
   final prefix = previewText(d.prefixText), suffix = previewText(d.suffixText);
@@ -664,7 +673,10 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
     final expands = fillsHeight && !oneLine;
     final (maxLines, minLines) =
         textFieldLines(maxLines: maxLinesProp == 0 ? null : maxLinesProp, minLines: minLinesProp, expands: expands);
-    final decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), focused: focusNode.hasFocus, onIconTap: (prefix) {
+    // A field with a label and no border of its own shows the label above
+    // it, always (the value never hides what the field is).
+    final above = labelAboveText(d);
+    final decoration = inputDecoration(d, n.layout.padding, textDefault: _textDefault(context, n), focused: focusNode.hasFocus, labelAbove: above != null, onIconTap: (prefix) {
       final b = _builderOf(context);
       if (b != null) fireTrigger(b, prefix ? iconTapPrefix : iconTapSuffix);
     });
@@ -750,10 +762,11 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
             }
             // A fixed height is known without layout (a design board may
             // lay islands out loosely); a filling one takes the room given.
-            final double? height = vFit == SizeFit.fixed
+            var height = vFit == SizeFit.fixed
                 ? n.layout.height.value
                 : (constraints.hasBoundedHeight ? constraints.maxHeight : null);
             if (height == null) return field(decoration);
+            if (above != null) height = math.max(0.0, height - kLabelAboveExtent);
             return fullHeightField(
               context,
               decoration,
@@ -763,6 +776,7 @@ class _TextFieldIslandState extends State<_TextFieldIsland> {
             );
           })
         : field(decoration);
+    if (above != null) result = labelAboveField(context, above, d.labelStyle, _textDefault(context, n), result, fills: fillsHeight);
     if (hFit == SizeFit.hug) result = IntrinsicWidth(child: result);
     // A collapsed field sizes to its line on its own; under IntrinsicHeight
     // Flutter's TextField reports the 48 px interactive minimum instead.
@@ -861,6 +875,38 @@ EdgeInsetsGeometry? centredPadding(BuildContext context, InputDecoration decorat
   if (p == null || decoration.label != null || decoration.labelText != null) return p;
   final r = p.resolve(Directionality.of(context));
   return EdgeInsets.fromLTRB(r.left, 0, r.right, 0);
+}
+
+/// The height a label above a field takes: a 16 px line and a 4 px gap.
+const double kLabelAboveExtent = 20;
+
+/// The label [d] shows above its field: its label text when it has one and
+/// no border or label behavior of its own (the theme's outlined field, whose
+/// label never floats into a notch); else null.
+String? labelAboveText(api.InputDecoration d) {
+  final label = previewText(d.labelText);
+  if (label == null || label.isEmpty || d.floatingLabelBehavior != null) return null;
+  final borders = [d.border, d.enabledBorder, d.focusedBorder, d.errorBorder, d.focusedErrorBorder, d.disabledBorder];
+  return borders.every((b) => b == null) ? label : null;
+}
+
+/// [field] under its [label]: 12 px in the theme's secondary ink (or the
+/// decoration's label style), a 16 px line, 4 px above the field, which
+/// takes the rest of the height when it [fills].
+Widget labelAboveField(BuildContext context, String label, api.TextStyle labelStyle, api.TextStyle? textDefault, Widget field,
+    {required bool fills}) {
+  final scheme = Theme.of(context).colorScheme;
+  final base = TextStyle(fontSize: 12, height: 16 / 12, color: scheme.onSurfaceVariant, leadingDistribution: TextLeadingDistribution.even);
+  final own = labelStyle.isEmpty && textDefault == null ? null : textStyle(labelStyle, textDefault);
+  final text = SizedBox(
+    height: 16,
+    child: Text(label, maxLines: 1, overflow: TextOverflow.ellipsis, style: themeFont(context, base.merge(own))),
+  );
+  return Column(
+    mainAxisSize: fills ? MainAxisSize.max : MainAxisSize.min,
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [text, const SizedBox(height: 4), if (fills) Expanded(child: field) else field],
+  );
 }
 
 /// The border of a field that sets none: the theme's field shape (an
