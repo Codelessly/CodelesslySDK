@@ -5,6 +5,13 @@
 statusF) && contains(lower(cust), lower(search)))`, a condition without its item (computed once, outside the list,
 and matching no item). The formula engine is right; nothing told the model.
 
+- `textField` is a render object (Milestone 3, WS-A): SSUI's field frame (`render/controls/field_frame.dart`: label
+  above, never floating; hint in the text's metrics; helper and error below in the theme's `error`, a named role
+  included; border, focus and disabled from tokens; 240 × 28 when it hugs) around `RenderEditable`, edited without
+  `EditableText` (`render/controls/editable.dart`: text input connection with IME composition, keyboard and pointer
+  selection, clipboard, undo/redo, obscuring, `maxLength`, autofill per form, semantics). Tab reaches it from
+  render-object controls. `TextFieldHandle.controller` is now the field's `FieldEditor` and `focusNode` its
+  `ControlFocusNode`; the text field island is gone from `widgets/inputs.dart`.
 - `UiSession.applyStream` reports, when the stream ends, the references it accepted as warnings while the stream ran
   and that never arrived (codelessly_api's `unresolvedReferences`): an `unknown_name` in a computed variable's
   formula or a binding is an error in the result, with the lambda to write when the name is a field of a list's

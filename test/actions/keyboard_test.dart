@@ -1,10 +1,10 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/runtime/actions/key_matching.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../lists/support.dart' as lists;
+import '../support/fields.dart';
 
 // A screen's key shortcuts don't take keys that type into a focused text
 // field.
@@ -138,7 +138,7 @@ void main() {
       await tester.pumpAndSettle();
       expect(s['hits'], 1);
       // Typing into the field: the letter is the field's.
-      await tester.tap(find.byType(EditableText));
+      await tapField(tester, textField(tester));
       await tester.pumpAndSettle();
       await tester.sendKeyEvent(LogicalKeyboardKey.keyC);
       await tester.pumpAndSettle();

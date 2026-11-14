@@ -394,6 +394,10 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     _affixTap = TapGestureRecognizer(debugOwner: this)..onTap = _affixTapped;
   }
 
+  /// The field that has the keyboard focus now, of every root (someone is
+  /// typing: letter shortcuts wait).
+  static RenderTextField? focused;
+
   late final FieldEditor editor;
   late final RenderEditable _editable;
   final FieldScrollOffset _scroll = FieldScrollOffset();
@@ -676,6 +680,11 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
   // --- focus -------------------------------------------------------------------------------------
 
   void _focusChanged(bool on) {
+    if (on) {
+      focused = this;
+    } else if (identical(focused, this)) {
+      focused = null;
+    }
     _editable.hasFocus = on;
     if (on) {
       final v = editor.value;
@@ -693,7 +702,6 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
       _caret.stop();
       final v = validation;
       if (v != null && v.validates && v.modes.contains(api.AutovalidateMode.onUnfocus)) {
-        _error = null;
         showError(check());
       }
       _focusEvent('focusLost');
@@ -888,6 +896,22 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
       if (r != null) connection.setComposingRect(r);
     }
     if (v.selection.isValid) connection.setCaretRect(_editable.getLocalRectForCaret(v.selection.extent));
+  }
+
+  /// The frame's texts and the typed text (unless obscured), with their
+  /// glyph boxes in the field's coordinates: what the label guard measures.
+  @override
+  List<({String text, String? fontFamily, List<Rect> glyphs})> get labels {
+    final own = super.labels;
+    final c = _config;
+    if (c == null || c.obscureText || editor.text.trim().isEmpty || !_editable.hasSize) return own;
+    final at = (_editable.parentData! as BoxParentData).offset;
+    final view = Offset.zero & _editable.size;
+    final glyphs = [
+      for (final b in _editable.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: editor.text.length)))
+        if (b.toRect().overlaps(view)) b.toRect().shift(at),
+    ];
+    return [...own, (text: editor.text, fontFamily: c.valueStyle.fontFamily, glyphs: glyphs)];
   }
 
   // --- semantics ------------------------------------------------------------------------------------
