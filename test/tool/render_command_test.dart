@@ -237,6 +237,14 @@ void main() {
       }
     });
 
+    testWidgets('a click reaction written on a component call runs in the page\'s scope: it reads and sets the page\'s variables (the generated Sudoku\'s number pad)', (tester) async {
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/test4/call_click'], out: out.path, sizes: const [Size(390, 300)],
+          steps: const [Step('tap', 'tap')], label: 'call', dumpLayout: true));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      final boxes = jsonDecode(File('${out.path}/s@390x300-call.layout.json').readAsStringSync()) as List;
+      expect(boxes.any((b) => (b as Map)['id'] == 'shown'), isTrue, reason: 'count became 1');
+    });
+
     testWidgets('a tap on a covered node names what covers it', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
           steps: const [Step('tap', 'last')]));

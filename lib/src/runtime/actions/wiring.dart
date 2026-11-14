@@ -32,6 +32,7 @@ import 'context.dart';
 import 'route_transition.dart' show RevealAnchor;
 import 'runner.dart';
 import 'key_matching.dart';
+import '../../render/components.dart' show componentInstanceOf;
 
 export '../../render/visible_share.dart' show visibleShare;
 
@@ -155,7 +156,26 @@ class TreeReactions implements NodeInteractions {
     final state = _boxes[box];
     final r = runner;
     if (r is CoreActions) {
-      await r.run(node, trigger, ctx, event: event, cancellation: state?.cancellation, instance: box.instance);
+      // The root of a component instance carries its definition's reactions
+      // and then its call's (`seamCall`). The call's were written by the
+      // caller: they run in the caller's scope, as its event reactions do,
+      // so a script or an expression there reads the page's variables.
+      final ci = componentInstanceOf(box.instance);
+      final own = ci != null && box.tree.isInstanceRoot(box.id, box.instance) ? box.tree.sourceOf(box.instance).node(box.id) : null;
+      final split = own == null ? -1 : own.actions.length;
+      if (ci != null && split >= 0 && split < node.actions.length) {
+        final callSource = box.tree.sourceOf(ci.outer);
+        final scope = box.tree.binder?.scopeFor(callSource, ci.call, ci.outer);
+        final caller = scope == null || ctx is! ActionHost ? ctx : ctx.withScope(scope);
+        if (split > 0) {
+          await r.run(node.copyWith(actions: node.actions.sublist(0, split)), trigger, ctx,
+              event: event, cancellation: state?.cancellation, instance: box.instance);
+        }
+        await r.run(node.copyWith(actions: node.actions.sublist(split)), trigger, caller,
+            event: event, cancellation: state?.cancellation, instance: ci.outer);
+      } else {
+        await r.run(node, trigger, ctx, event: event, cancellation: state?.cancellation, instance: box.instance);
+      }
     } else {
       await r.trigger(node, trigger, ctx, event: event).catchError((Object e, StackTrace s) {
         if (ctx is ActionHost) ctx.reportError(e, s, action: trigger);

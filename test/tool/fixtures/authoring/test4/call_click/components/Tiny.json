@@ -1,0 +1,1 @@
+{"schema":3,"id":"Tiny","roots":["root"],"widget":{"type":"Tiny","events":[{"key":"onPressed"}]},"nodes":{"root":{"type":"box","layout":{"width":80,"height":40},"decoration":{"fills":[{"color":"#FF2563EB"}]},"actions":[{"trigger":{"type":"click"},"actions":[{"type":"componentEvent","event":"onPressed"}]}]}}}
