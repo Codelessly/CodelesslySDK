@@ -44,7 +44,19 @@ it reads as finished beside theirs: alignment, spacing, color, every state.
 | `memory.txt` | one | What was saved to memory, each with its state. Uses `TextItem`, `IconBox`. |
 | `artifact_card.txt` | one | A document made in the chat: what it is, a preview, copy, download, open. Uses `TextExpandable`, `CopyButton`, `DownloadButton`. |
 | `handoff.txt` | offered, taken | Passing the conversation to a person, with what they will see. Uses `ModelAvatarStack`, `StatusDot`. |
-
+| `chart.txt` | one | A line chart with a range switch and its peak, average and low. Uses `SegmentedControl`, `InlineStat`. |
+| `number_ticker.txt` | one | Four figures as tiles. Uses `StatTile`. |
+| `context_display.txt` | one | What fills the context window, by kind. Uses `StackedProgressBar`, `FilterLegend`. |
+| `confidence.txt` | one | How sure an answer is, and why. Uses `RadialProgress`. |
+| `link_preview.txt` | one | A page's picture, title, summary and site. Uses `ResourceCard`, `ProviderIcon`, `CopyButton`. |
+| `retrieval_chunks.txt` | one | The passages an answer used, with file and lines. Uses `TextItem`, `CountBadge`. |
+| `research_report.txt` | one | A finished piece of research: tabs, findings, download. Uses `ChipTabs`, `FeatureBulletItem`, `StatusBadge`. |
+| `tool_timeline.txt` | an event picked | What an agent did, newest first. Uses `HistoryTimeline`. |
+| `agent_card.txt` | on, paused | An agent: what it does, a few figures, a switch. Uses `Avatar`, `StatusIndicator`, `ToggleRow`. |
+| `quote.txt` | one | A quoted passage with its source. Uses `ProviderIcon`, `CopyButton`. |
+| `prompt_library.txt` | none picked, one picked | Saved prompts to search and pick. Uses `FullWidthSearchInput`, `SelectableListRow`, `AddButton`. |
+| `speaker_identity.txt` | one | Who is speaking, and their role. Uses `Avatar`, `PersonChip`. |
+| `computer_use.txt` | one | An agent driving a browser: the step, a view of the screen, take over or stop. Uses `StepIndicator`, `StatusIndicator`. |
 The first nineteen are written with core nodes only. The rest call SSUI's components by name, which the notation
 reads when it is given the design system; expand one with
 
@@ -54,8 +66,6 @@ dart run tool/notation/expand.dart design_systems/ssui/examples/targets/handoff.
 
 and render the document with `tool/render/render.sh` from a site whose `site.json` names the design system.
 
-Still to write: from the data group, chart, number ticker, heat and activity graphs, trace waterfall, flow graph,
-context display; link preview, inline citation, retrieval chunks, confidence, research report and maps; code runner's
-siblings (syntax highlighter, diagrams, reviewable diff); image, image generation, media player, web preview and
-computer use; tool fallback and timeline, agent card and status; and the other message parts (markdown and streaming
-text, quote, speaker identity, prompt library, read aloud).
+Still to write: heat and activity graphs, trace waterfall, flow graph; inline citation and maps; syntax highlighter,
+diagrams and reviewable diff; image, image generation, media player and web preview; tool fallback and agent status;
+markdown and streaming text, and read aloud.

@@ -1,0 +1,11 @@
+Column gap:8
+  Row gap:10
+    Box w:3 h:fill radius:2 fill:#FF2563EB
+    Column gap:4 grow
+      Text "Constraints go down. Sizes go up. Parent sets position."
+      Row gap:6
+        ProviderIcon letter:"F"
+        Text.caption "Understanding constraints, docs.flutter.dev"
+  Row gap:8
+    Button.ghost "Reply to this" -> emit reply
+    CopyButton text:"Constraints go down. Sizes go up. Parent sets position."

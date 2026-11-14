@@ -1,0 +1,12 @@
+state q=""
+state picked=""
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Prompts" grow
+    AddButton "New prompt" -> emit new
+  FullWidthSearchInput =q placeholder:"Search prompts"
+  SelectableListRow "Summarize a thread" subtitle:"Three bullets and the open questions" trailing:"Used 42x" selected:=picked=="a" -> picked="a"
+  SelectableListRow "Draft a reply" subtitle:"Polite, short, with next steps" trailing:"Used 18x" selected:=picked=="b" -> picked="b"
+  SelectableListRow "Explain this code" subtitle:"prompts/explain.md" subtitleMono:true trailing:"Used 9x" selected:=picked=="c" -> picked="c"
+  Row end
+    Button "Use prompt" enabled:=picked!="" -> emit use picked

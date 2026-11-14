@@ -1,0 +1,16 @@
+state step="Findings"
+Card gap:10
+  Row gap:10
+    IconBox "science"
+    Column gap:1 grow
+      Text.sectionTitle "Seat pricing across five vendors"
+      Text.caption "12 sources · 4 min · finished"
+    StatusBadge "Done" tone:success
+  ChipTabs tabs:["Summary","Findings","Sources"] =step
+  Column gap:6
+    FeatureBulletItem "Per-seat pricing is the norm; two vendors add a platform fee."
+    FeatureBulletItem "Yearly billing saves 15 to 20% everywhere."
+    FeatureBulletItem "Only one vendor lets seats be removed mid-cycle."
+  Row end gap:8
+    DownloadButton -> emit download
+    Button "Open report" -> emit open

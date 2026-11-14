@@ -1,0 +1,10 @@
+Card gap:8
+  ResourceCard "Inside Flutter" kind:link deletable:false -> emit open
+  Column gap:2
+    Text.sectionTitle "Inside Flutter"
+    Text.small "How layout, painting and compositing fit together, and why constraints go down and sizes go up."
+  Row gap:6
+    ProviderIcon letter:"F"
+    Text.caption "docs.flutter.dev" grow
+    CopyButton text:"https://docs.flutter.dev/resources/inside-flutter"
+    Button.outline "Open" -> link https://docs.flutter.dev/resources/inside-flutter

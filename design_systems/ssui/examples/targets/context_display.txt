@@ -1,0 +1,9 @@
+Card gap:10
+  Row gap:8
+    Text.sectionTitle "Context window" grow
+    Text.caption "128k tokens"
+  StackedProgressBar counts:[38,22,9] colors:["#FF2563EB","#FF9333EA","#FF16A34A"] total:128
+  FilterLegend labels:["Conversation","Files","Tools"] values:["38k","22k","9k"] colors:["#FF2563EB","#FF9333EA","#FF16A34A"]
+  Row gap:8
+    Text.small "69k used, 59k free" grow
+    Button.ghost "Compact" -> emit compact

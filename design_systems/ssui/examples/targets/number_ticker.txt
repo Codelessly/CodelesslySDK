@@ -1,0 +1,8 @@
+Card gap:10
+  Row gap:12
+    StatTile "Revenue" value:"$48,210" icon:"payments"
+    StatTile "Sign-ups" value:"1,284" icon:"person_add"
+  Row gap:12
+    StatTile "Churn" value:"2.4%" icon:"trending_down"
+    StatTile "Active" value:"9,431" icon:"group"
+  Text.caption "Updated a minute ago"

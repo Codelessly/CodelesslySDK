@@ -1,0 +1,8 @@
+Row gap:8
+  Avatar name:"Mira Okafor"
+  Column gap:1 grow
+    Row gap:6
+      Text.strong "Mira Okafor"
+      Badge.primary "Support"
+    Text.caption "Joined the conversation · 2:14 pm"
+  PersonChip name:"You"
