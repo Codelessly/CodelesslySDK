@@ -1,0 +1,458 @@
+{
+ "schema": 3,
+ "id": "NumberInput",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "NumberInput",
+  "doc": "A number you type or step: a field with small up and down buttons, an optional prefix and suffix. The number is kept in your variable. Fires onChanged.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable."
+   },
+   {
+    "key": "min",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "The least it goes."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1000000,
+    "doc": "The most it goes."
+   },
+   {
+    "key": "step",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "How much a step button changes it."
+   },
+   {
+    "key": "prefix",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Before the value ($)."
+   },
+   {
+    "key": "suffix",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "After the value (px, %)."
+   },
+   {
+    "key": "showStepper",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The up and down buttons."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "small",
+      "medium",
+      "large"
+     ]
+    },
+    "default": "medium",
+    "doc": "small, medium or large."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False dims it and stops input."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "number",
+     "flutter": "double"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Plain",
+   "size": [
+    140,
+    32
+   ],
+   "props": {
+    "value": 12
+   }
+  },
+  {
+   "name": "With units",
+   "size": [
+    140,
+    32
+   ],
+   "props": {
+    "value": 24,
+    "suffix": "px"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "row",
+   "children": [
+    "prefix",
+    "field",
+    "suffix",
+    "steps"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": [
+     10,
+     7,
+     4,
+     7
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 7
+   },
+   "bind": {
+    "layout.padding": "${= props.size == 'small' ? [10, 5, 4, 5] : (props.size == 'medium' ? [10, 7, 4, 7] : ([12, 11, 4, 11]))}",
+    "opacity": "${= props.enabled ? 1 : 0.5}"
+   },
+   "states": {
+    "focused": {
+     "box": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "focusBorder"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "prefix": {
+   "type": "text",
+   "props": {
+    "text": "${props.prefix}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 500,
+     "height": 1.0,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 10
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= props.prefix != ''}",
+    "props.style.fontSize": "${= props.size == 'small' ? 13 : (props.size == 'medium' ? 13 : (15))}"
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 13
+    },
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 13
+     }
+    },
+    "cursorColor": "primary",
+    "keyboardType": "number"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.enabled": "${props.enabled}",
+    "props.style.fontSize": "${= props.size == 'small' ? 13 : (props.size == 'medium' ? 13 : (15))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= clamp(number(result), props.min, props.max)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= clamp(number(result), props.min, props.max)}"
+      }
+     ]
+    }
+   ]
+  },
+  "suffix": {
+   "type": "text",
+   "props": {
+    "text": "${props.suffix}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 500,
+     "height": 1.0,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "visible": "${= props.suffix != ''}",
+    "props.style.fontSize": "${= props.size == 'small' ? 13 : (props.size == 'medium' ? 13 : (15))}"
+   }
+  },
+  "steps": {
+   "type": "column",
+   "children": [
+    "up",
+    "down"
+   ],
+   "layout": {
+    "width": {
+     "hug": 15
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "bind": {
+    "visible": "${props.showStepper}"
+   }
+  },
+  "up": {
+   "type": "row",
+   "children": [
+    "upGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 15,
+    "height": 9
+   },
+   "decoration": {
+    "radius": 3
+   },
+   "bind": {
+    "layout.width": "${= props.size == 'small' ? 14 : (props.size == 'medium' ? 15 : (17))}",
+    "layout.height": "${= props.size == 'small' ? 9 : (props.size == 'medium' ? 9 : (11))}"
+   },
+   "states": {
+    "hovered": {
+     "up": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     },
+     "upGlyph": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= clamp(props.value + props.step, props.min, props.max)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "down": {
+   "type": "row",
+   "children": [
+    "downGlyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 15,
+    "height": 9
+   },
+   "decoration": {
+    "radius": 3
+   },
+   "bind": {
+    "layout.width": "${= props.size == 'small' ? 14 : (props.size == 'medium' ? 15 : (17))}",
+    "layout.height": "${= props.size == 'small' ? 9 : (props.size == 'medium' ? 9 : (11))}"
+   },
+   "states": {
+    "hovered": {
+     "down": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     },
+     "downGlyph": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= clamp(props.value - props.step, props.min, props.max)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "upGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "expand_less",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  },
+  "downGlyph": {
+   "type": "icon",
+   "props": {
+    "icon": "expand_more",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  }
+ }
+}

@@ -1,0 +1,248 @@
+{
+ "schema": 3,
+ "id": "ModelAvatarStack",
+ "roots": [
+  "stack"
+ ],
+ "widget": {
+  "type": "ModelAvatarStack",
+  "doc": "Several people or models as small overlapping round plates with their first letters, and +n for the rest.",
+  "props": [
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Ada",
+     "Ben",
+     "Cy"
+    ],
+    "doc": "Their names: each plate shows a first letter.",
+    "required": true
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 4,
+    "doc": "How many plates at most; the rest become +n."
+   },
+   {
+    "key": "size",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "small",
+      "medium",
+      "large"
+     ]
+    },
+    "default": "medium",
+    "doc": "small (16), medium (18) or large (22)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Three",
+   "size": [
+    50,
+    18
+   ],
+   "props": {}
+  },
+  {
+   "name": "Many",
+   "size": [
+    80,
+    22
+   ],
+   "props": {
+    "labels": [
+     "Ada",
+     "Ben",
+     "Cy",
+     "Di",
+     "Eve",
+     "Flo"
+    ],
+    "max": 3,
+    "size": "large"
+   }
+  }
+ ],
+ "nodes": {
+  "stack": {
+   "type": "row",
+   "children": [
+    "list",
+    "more"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "plate"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": 18
+   },
+   "bind": {
+    "data": "${= take(props.labels, props.max)}",
+    "layout.height": "${= props.size == 'small' ? 16 : (props.size == 'medium' ? 18 : (25))}",
+    "props.spacing": "${= props.size == 'small' ? -6 : (props.size == 'medium' ? -7 : (-8))}"
+   }
+  },
+  "plate": {
+   "type": "row",
+   "children": [
+    "letter"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 18,
+    "height": {
+     "fill": 18
+    }
+   },
+   "tooltip": "${item}",
+   "bind": {
+    "layout.width": "${= props.size == 'small' ? 16 : (props.size == 'medium' ? 18 : (22))}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "letter": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(left(item, 1))}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 700,
+     "height": 1.0,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 9
+    }
+   },
+   "bind": {
+    "props.style.fontSize": "${= props.size == 'small' ? 9 : (props.size == 'medium' ? 10 : (12))}"
+   }
+  },
+  "more": {
+   "type": "row",
+   "children": [
+    "count"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": 18,
+    "padding": [
+     5,
+     0,
+     5,
+     0
+    ]
+   },
+   "motion": {
+    "translateX": -5
+   },
+   "bind": {
+    "visible": "${= length(props.labels) > props.max}",
+    "layout.height": "${= props.size == 'small' ? 16 : (props.size == 'medium' ? 18 : (25))}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "count": {
+   "type": "text",
+   "props": {
+    "text": "+${= length(props.labels) - props.max}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 700,
+     "height": 1.0,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 12
+    },
+    "height": {
+     "hug": 9
+    }
+   },
+   "bind": {
+    "props.style.fontSize": "${= props.size == 'small' ? 9 : (props.size == 'medium' ? 10 : (12))}"
+   }
+  }
+ }
+}

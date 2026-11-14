@@ -228,7 +228,7 @@
   "status": {
    "type": "text",
    "props": {
-    "text": "${props.status}",
+    "text": "${= titleCase(props.status)}",
     "style": {
      "fontSize": 9.5,
      "fontWeight": 600,

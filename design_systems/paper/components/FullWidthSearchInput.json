@@ -1,0 +1,213 @@
+{
+ "schema": 3,
+ "id": "FullWidthSearchInput",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "FullWidthSearchInput",
+  "doc": "The search row at the top of a list or a pane: edge to edge over a hairline. Its text is kept in your variable. Fires onChanged and onSubmitted.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Search",
+    "doc": "Shown while empty."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSubmitted",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    300,
+    36
+   ],
+   "props": {}
+  },
+  {
+   "name": "Typed",
+   "size": [
+    300,
+    36
+   ],
+   "props": {
+    "value": "invoices"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "strut",
+    "barContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 35
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "search",
+    "color": "tertiaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  },
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 12
+    },
+    "decoration": {
+     "isDense": true,
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     },
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 12
+     }
+    },
+    "cursorColor": "primary",
+    "textInputAction": "search"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSubmitted",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "barContent": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "field"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

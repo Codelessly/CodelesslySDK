@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 93. Still to rebuild: 71.**
+**Here: 99. Still to rebuild: 65.**
 
 ## Here
 
@@ -18,6 +18,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | ActionListItem | ActionListItem |  |
 | AddButton | AddButton |  |
 | AgentChip | AgentChip |  |
+| AuthInput | AuthInput |  |
 | AuthPromptBanner | AuthPromptBanner |  |
 | Avatar | Avatar |  |
 | BackButton | BackButton |  |
@@ -33,6 +34,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | ChipTabs | ChipTabs |  |
 | CloudSyncIndicator | CloudSyncIndicator |  |
 | CodeBlock | CodeBlock |  |
+| ColorInput | ColorInput |  |
 | ConnectionStatus | ConnectionStatus |  |
 | CopyButton | CopyButton |  |
 | CountBadge | CountBadge |  |
@@ -50,6 +52,8 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | FileMetadataCard | FileMetadataCard |  |
 | FilterLegend | FilterLegend |  |
 | FloatingActionButton |  | floatingActionButton |
+| FullWidthSearchInput | FullWidthSearchInput |  |
+| HeaderSearchInput | HeaderSearchInput |  |
 | Hyperlink | Hyperlink |  |
 | IconBox | IconBox |  |
 | IconButton | IconButton | iconButton |
@@ -58,7 +62,9 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | LoadMore | LoadMore |  |
 | MenuButton | MenuButton |  |
 | MetaInfo | MetaInfo |  |
+| ModelAvatarStack | ModelAvatarStack |  |
 | NotificationBadge | NotificationBadge |  |
+| NumberInput | NumberInput |  |
 | OnboardingBanner | OnboardingBanner |  |
 | OptionIcon | OptionIcon |  |
 | PageControl | PageControl |  |
@@ -119,13 +125,13 @@ In the order planned: what generated UI reaches for first, then the application 
 
 CodePreview
 
-### Cards and rows (6)
+### Cards and rows (5)
 
-FolderCard, ResourceCard, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack
+FolderCard, ResourceCard, RunHistoryList, StatusCardList, StatsCarousel
 
-### Inputs (19)
+### Inputs (14)
 
-FullWidthSearchInput, HeaderSearchInput, Combobox, NumberInput, NumberPresetInput, ColorInput, AuthInput, ExtensionChipsInput, FileUploader, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInput, PromptInputWithBanner
+Combobox, NumberPresetInput, ExtensionChipsInput, FileUploader, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInput, PromptInputWithBanner
 
 ### Navigation and chrome (17)
 

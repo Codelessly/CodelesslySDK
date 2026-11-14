@@ -1,0 +1,164 @@
+{
+ "schema": 3,
+ "id": "HeaderSearchInput",
+ "roots": [
+  "field"
+ ],
+ "widget": {
+  "type": "HeaderSearchInput",
+  "doc": "A small search field for a header or a toolbar. Its text is kept in your variable. Fires onChanged and onSubmitted.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Search",
+    "doc": "Shown while empty."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSubmitted",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    200,
+    26
+   ],
+   "props": {}
+  },
+  {
+   "name": "Typed",
+   "size": [
+    200,
+    26
+   ],
+   "props": {
+    "value": "roadmap"
+   }
+  }
+ ],
+ "nodes": {
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": 26
+   },
+   "props": {
+    "style": {
+     "from": "inputText",
+     "fontSize": 12
+    },
+    "decoration": {
+     "isDense": true,
+     "filled": true,
+     "fillColor": "primaryBackground",
+     "contentPadding": [
+      8,
+      5,
+      8,
+      5
+     ],
+     "hintStyle": {
+      "from": "placeholder",
+      "fontSize": 12
+     },
+     "hoverColor": "#00000000",
+     "border": {
+      "type": "outline",
+      "borderRadius": 4,
+      "borderSide": {
+       "color": "primaryBorder",
+       "width": 1
+      }
+     },
+     "enabledBorder": {
+      "type": "outline",
+      "borderRadius": 4,
+      "borderSide": {
+       "color": "primaryBorder",
+       "width": 1
+      }
+     },
+     "focusedBorder": {
+      "type": "outline",
+      "borderRadius": 4,
+      "borderSide": {
+       "color": "primary",
+       "width": 1
+      }
+     }
+    },
+    "cursorColor": "primary",
+    "textInputAction": "search"
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSubmitted",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -2832,7 +2832,7 @@ add(component(
                  'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'radius': 9999},
                  'bind': {'visible': "${= props.status != '' && props.date == ''}",
                           'decoration.fills[0].color': "${= %s ? theme.colors.warningTint : (%s ? theme.colors.successTint : (props.status == 'rejected' ? theme.colors.errorTint : theme.colors.tertiaryBackground))}" % (TI_AMBER, TI_GREEN)}},
-        'status': {**text('${props.status}', style(9.5, 600, 'secondaryText', 1.2), {'hug': 30}, {'hug': 12}),
+        'status': {**text('${= titleCase(props.status)}', style(9.5, 600, 'secondaryText', 1.2), {'hug': 30}, {'hug': 12}),
                    'bind': {'props.style.color': "${= %s ? theme.warning : (%s ? theme.success : (props.status == 'rejected' ? theme.error : theme.colors.secondaryText))}" % (TI_AMBER, TI_GREEN)}},
         'dot': {**text('·', style(9.5, 400, 'secondaryBorder', 1.2), {'hug': 4}, {'hug': 12}),
                 'bind': {'visible': "${= props.kind != '' && (props.date != '' || props.status != '')}"}},
@@ -3242,6 +3242,239 @@ add(component(
                     'states': {'hovered': {'dismiss': {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}, 'x': {'props': {'color': 'primaryText'}}}},
                     'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onDismiss'}]}]},
         'x': icon('close', 'tertiaryText', 13),
+    },
+))
+
+def _typed(event='onChanged', more=()):
+    """A text field's reactions: its text into the call's variable, then the event."""
+    return [{'trigger': {'type': 'changed'}, 'actions': [
+                {'type': 'setVariable', 'variable': 'props.value', 'value': '${result}'},
+                {'type': 'componentEvent', 'event': event, 'value': '${result}'}]},
+            {'trigger': {'type': 'submitted'}, 'actions': [{'type': 'componentEvent', 'event': 'onSubmitted', 'value': '${result}'}]},
+            *more]
+
+
+def _bare_field(size, hint="${props.placeholder}", **props):
+    """A text field with no frame of its own: the box around it draws the border."""
+    return {'type': 'textField', 'layout': {'width': {'fill': 200}, 'height': {'hug': 20}},
+            'props': {'style': {'from': 'inputText', 'fontSize': size},
+                      'decoration': {'isDense': True, 'isCollapsed': True, 'border': {'type': 'none'},
+                                     'hintStyle': {'from': 'placeholder', 'fontSize': size}},
+                      'cursorColor': 'primary', **props},
+            'bind': {'props.initialValue': '${props.value}', 'props.decoration.hintText': hint}}
+
+
+# FullWidthSearchInput (FullWidthSearchInput.tsx): the search row at the top of a list or a pane: 36 px on the
+# secondary background over a hairline, 10 px either side, a 13 px search icon in tertiary, 8 px, the text 12.
+add(component(
+    'FullWidthSearchInput',
+    'The search row at the top of a list or a pane: edge to edge over a hairline. Its text is kept in your variable. Fires onChanged and onSubmitted.',
+    'bar',
+    props=[prop('value', var(STRING), '', 'The name of your text variable.'),
+           prop('placeholder', STRING, 'Search', 'Shown while empty.')],
+    events=[{'key': 'onChanged', 'payload': STRING}, {'key': 'onSubmitted', 'payload': STRING}],
+    previews=[preview('Empty', 300, 36), preview('Typed', 300, 36, value='invoices')],
+    nodes={
+        'bar': {'type': 'row', 'children': ['strut', 'glyph', 'field'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                'layout': {'width': {'fill': 300}, 'height': {'hug': 36}, 'padding': [10, 0, 10, 0]},
+                'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'strut': {'type': 'box', 'layout': {'width': 0, 'height': 35}},
+        'glyph': icon('search', 'tertiaryText', 13),
+        'field': {**_bare_field(12, textInputAction='search'), 'actions': _typed()},
+    },
+))
+
+# HeaderSearchInput (HeaderSearchInput.tsx): a small search field for a header: 26 px, a 1 px border (the
+# brand color when focused), radius 4, 8 px either side, the text 12.
+add(component(
+    'HeaderSearchInput',
+    'A small search field for a header or a toolbar. Its text is kept in your variable. Fires onChanged and onSubmitted.',
+    'field',
+    props=[prop('value', var(STRING), '', 'The name of your text variable.'),
+           prop('placeholder', STRING, 'Search', 'Shown while empty.')],
+    events=[{'key': 'onChanged', 'payload': STRING}, {'key': 'onSubmitted', 'payload': STRING}],
+    previews=[preview('Empty', 200, 26), preview('Typed', 200, 26, value='roadmap')],
+    nodes={
+        'field': {
+            'type': 'textField', 'layout': {'width': {'fill': 200}, 'height': 26},
+            'props': {'style': {'from': 'inputText', 'fontSize': 12},
+                      'decoration': {'isDense': True, 'filled': True, 'fillColor': 'primaryBackground', 'contentPadding': [8, 5, 8, 5],
+                                     'hintStyle': {'from': 'placeholder', 'fontSize': 12}, 'hoverColor': '#00000000',
+                                     **{k: {'type': 'outline', 'borderRadius': 4, 'borderSide': {'color': c, 'width': 1}}
+                                        for k, c in (('border', 'primaryBorder'), ('enabledBorder', 'primaryBorder'), ('focusedBorder', 'primary'))}},
+                      'cursorColor': 'primary', 'textInputAction': 'search'},
+            'bind': {'props.initialValue': '${props.value}', 'props.decoration.hintText': '${props.placeholder}'},
+            'actions': _typed(),
+        },
+    },
+))
+
+# AuthInput (AuthInput.tsx): the field of a sign-in form: 32 px, a 1 px strong border (red on an error),
+# radius 7, 10 px either side, the text 13; the error's words 11 in red 4 px under it.
+add(component(
+    'AuthInput',
+    'A sign-in form field: email, password or a code. Its text is kept in your variable; an error turns it red with the reason under it. Fires onChanged and onSubmitted.',
+    'column',
+    props=[prop('value', var(STRING), '', 'The name of your text variable.'),
+           prop('placeholder', STRING, 'Email', 'Shown while empty.'),
+           prop('kind', enum('text', 'email', 'password'), 'text', 'email: the email keyboard. password: hidden text.'),
+           prop('error', STRING, '', 'What is wrong (empty: nothing).')],
+    events=[{'key': 'onChanged', 'payload': STRING}, {'key': 'onSubmitted', 'payload': STRING}],
+    previews=[preview('Email', 260, 32, placeholder='you@company.com', kind='email'),
+              preview('Error', 260, 50, value='nope', error='Enter a valid email address.')],
+    nodes={
+        'column': {'type': 'column', 'children': ['field', 'error'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 4},
+                   'layout': {'width': {'fill': 260}, 'height': {'hug': 32}}},
+        'field': {
+            'type': 'textField', 'layout': {'width': {'fill': 260}, 'height': 32},
+            'props': {'style': {'from': 'inputText', 'fontSize': 13},
+                      'decoration': {'isDense': True, 'filled': True, 'fillColor': 'primaryBackground', 'contentPadding': [10, 7, 10, 7],
+                                     'hintStyle': {'from': 'placeholder', 'fontSize': 13}, 'hoverColor': '#00000000',
+                                     'border': outline('secondaryBorder'), 'enabledBorder': outline('secondaryBorder'),
+                                     'focusedBorder': outline('primary')},
+                      'cursorColor': 'primary'},
+            'bind': {'props.initialValue': '${props.value}', 'props.decoration.hintText': '${props.placeholder}',
+                     'props.obscureText': "${= props.kind == 'password'}",
+                     'props.keyboardType': "${= props.kind == 'email' ? 'emailAddress' : 'text'}",
+                     'props.decoration.enabledBorder.borderSide.color': "${= props.error != '' ? theme.error : theme.colors.secondaryBorder}",
+                     'props.decoration.focusedBorder.borderSide.color': "${= props.error != '' ? theme.error : theme.primary}"},
+            'actions': _typed(),
+        },
+        'error': {**text('${props.error}', style(11, 400, 'error', 1.35), {'fill': 260}, {'hug': 15}),
+                  'bind': {'visible': "${= props.error != ''}"}},
+    },
+))
+
+# NumberInput (NumberInput.tsx): a number in a field with a 1.5 px border, radius 7 (the focus ring's color
+# while it is typed in): an optional prefix and suffix 13/500 in tertiary, the value 13 (15 large), and at its
+# end two stacked step buttons (15 px wide, an 11 px chevron each). Small pads 5 x 10, medium 7 x 10, large 11 x 12.
+NI = ['small', 'medium', 'large']
+add(component(
+    'NumberInput',
+    'A number you type or step: a field with small up and down buttons, an optional prefix and suffix. The number is kept in your variable. Fires onChanged.',
+    'box',
+    props=[prop('value', var(NUMBER), '', 'The name of your number variable.'),
+           prop('min', NUMBER, 0, 'The least it goes.'),
+           prop('max', NUMBER, 1000000, 'The most it goes.'),
+           prop('step', NUMBER, 1, 'How much a step button changes it.'),
+           prop('prefix', STRING, '', 'Before the value ($).'),
+           prop('suffix', STRING, '', 'After the value (px, %).'),
+           prop('showStepper', BOOL, True, 'The up and down buttons.'),
+           prop('size', enum(*NI), 'medium', 'small, medium or large.'),
+           prop('enabled', BOOL, True, 'False dims it and stops input.')],
+    events=[{'key': 'onChanged', 'payload': NUMBER}],
+    previews=[preview('Plain', 140, 32, value=12), preview('With units', 140, 32, value=24, suffix='px')],
+    nodes={
+        'box': {'type': 'row', 'children': ['prefix', 'field', 'suffix', 'steps'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                'layout': {'width': {'fill': 140}, 'height': {'hug': 32}, 'padding': [10, 7, 4, 7]},
+                'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeWidth': 1.5, 'radius': 7},
+                'bind': {'layout.padding': by('size', {'small': [10, 5, 4, 5], 'medium': [10, 7, 4, 7], 'large': [12, 11, 4, 11]}),
+                         'opacity': '${= props.enabled ? 1 : 0.5}'},
+                'states': {'focused': {'box': {'decoration': {'strokes': [{'color': 'focusBorder'}]}}}}},
+        'prefix': {**text('${props.prefix}', style(13, 500, 'tertiaryText', 1.0), {'hug': 10}, {'hug': 13}),
+                   'bind': {'visible': "${= props.prefix != ''}", 'props.style.fontSize': by('size', {'small': 13, 'medium': 13, 'large': 15})}},
+        'field': {**_bare_field(13, hint='0', keyboardType='number'),
+                  'bind': {'props.initialValue': '${props.value}', 'props.enabled': '${props.enabled}',
+                           'props.style.fontSize': by('size', {'small': 13, 'medium': 13, 'large': 15})},
+                  'actions': [{'trigger': {'type': 'changed'}, 'actions': [
+                      {'type': 'setVariable', 'variable': 'props.value', 'value': '${= clamp(number(result), props.min, props.max)}'},
+                      {'type': 'componentEvent', 'event': 'onChanged', 'value': '${= clamp(number(result), props.min, props.max)}'}]}]},
+        'suffix': {**text('${props.suffix}', style(13, 500, 'tertiaryText', 1.0), {'hug': 14}, {'hug': 13}),
+                   'bind': {'visible': "${= props.suffix != ''}", 'props.style.fontSize': by('size', {'small': 13, 'medium': 13, 'large': 15})}},
+        'steps': {'type': 'column', 'children': ['up', 'down'], 'layout': {'width': {'hug': 15}, 'height': {'hug': 18}},
+                  'bind': {'visible': '${props.showStepper}'}},
+        **{id_: {'type': 'row', 'children': [id_ + 'Glyph'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                 'layout': {'width': 15, 'height': 9}, 'decoration': {'radius': 3},
+                 'bind': {'layout.width': by('size', {'small': 14, 'medium': 15, 'large': 17}),
+                          'layout.height': by('size', {'small': 9, 'medium': 9, 'large': 11})},
+                 'states': {'hovered': {id_: {'decoration': {'fills': [{'color': 'hoverOverlay'}]}}, id_ + 'Glyph': {'props': {'color': 'primaryText'}}}},
+                 'actions': [{'trigger': {'type': 'click', 'when': 'props.enabled'}, 'actions': [
+                     {'type': 'setVariable', 'variable': 'props.value', 'value': '${= clamp(props.value %s props.step, props.min, props.max)}' % op},
+                     {'type': 'componentEvent', 'event': 'onChanged', 'value': '${props.value}'}]}]}
+           for id_, op in (('up', '+'), ('down', '-'))},
+        'upGlyph': icon('expand_less', 'tertiaryText', 11),
+        'downGlyph': icon('expand_more', 'tertiaryText', 11),
+    },
+))
+
+# ColorInput (ColorInput.tsx): a color as its hex code in a field: 32, 36 or 44 px high, a 1.5 px border
+# (red on an error), radius 7; a swatch of the color first (22, 24 or 32 px, radius 7, a 1 px border), 5 px,
+# then the code 13 (15 large). A label 14/500 over it; the error's words under it.
+CI = {'small': 32, 'medium': 36, 'large': 44}
+add(component(
+    'ColorInput',
+    'A color as its hex code, with a swatch of it. The code is kept in your variable. Fires onChanged, and onSwatch when the swatch is pressed.',
+    'column',
+    props=[prop('value', var(STRING), '', 'The name of your text variable holding the color (#RRGGBB).'),
+           prop('label', STRING, '', 'Words over the field (empty: none).'),
+           prop('error', STRING, '', 'What is wrong (empty: nothing).'),
+           prop('showSwatch', BOOL, True, 'The swatch before the code.'),
+           prop('size', enum(*CI), 'medium', 'small (32), medium (36) or large (44).'),
+           prop('enabled', BOOL, True, 'False dims it and stops input.')],
+    events=[{'key': 'onChanged', 'payload': STRING}, 'onSwatch'],
+    previews=[preview('Blue', 160, 36, value='#2563EB'), preview('Labeled', 160, 62, value='#16A34A', label='Accent')],
+    nodes={
+        'column': {'type': 'column', 'children': ['label', 'box', 'error'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 6},
+                   'layout': {'width': {'fill': 160}, 'height': {'hug': 36}}, 'bind': {'opacity': '${= props.enabled ? 1 : 0.5}'}},
+        'label': {**text('${props.label}', style(14, 500, 'primaryText', 1.4), {'fill': 160}, {'hug': 20}),
+                  'bind': {'visible': "${= props.label != ''}"}},
+        'box': {'type': 'row', 'children': ['strut', 'swatch', 'field'], 'props': {'crossAxisAlignment': 'center', 'spacing': 5},
+                'layout': {'width': {'fill': 160}, 'height': {'hug': 36}, 'padding': [5, 0, 10, 0]},
+                'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeWidth': 1.5, 'radius': 7},
+                'bind': {'layout.padding': by('size', {'small': [4, 0, 8, 0], 'medium': [5, 0, 10, 0], 'large': [6, 0, 12, 0]}),
+                         'decoration.strokes[0].color': "${= props.error != '' ? theme.error : theme.colors.primaryBorder}"},
+                'states': {'focused': {'box': {'decoration': {'strokes': [{'color': 'focusBorder'}]}}}}},
+        'strut': strut(by('size', {k: v - 3 for k, v in CI.items()}), 33),
+        'swatch': {'type': 'box', 'layout': {'width': 24, 'height': 24},
+                   'decoration': {'fills': [{'color': '#FF2563EB'}], 'strokes': [{'color': 'secondaryBorder'}], 'radius': 7},
+                   'bind': {'visible': '${props.showSwatch}',
+                            'decoration.fills[0].color': "${= matches(props.value, '^#[0-9a-fA-F]{6}([0-9a-fA-F]{2})?$') ? props.value : '#00000000'}",
+                            'layout.width': by('size', {'small': 22, 'medium': 24, 'large': 32}),
+                            'layout.height': by('size', {'small': 22, 'medium': 24, 'large': 32})},
+                   'actions': [{'trigger': {'type': 'click', 'when': 'props.enabled'}, 'actions': [{'type': 'componentEvent', 'event': 'onSwatch'}]}]},
+        'field': {**_bare_field(13, hint='#000000'),
+                  'bind': {'props.initialValue': '${props.value}', 'props.enabled': '${props.enabled}',
+                           'props.style.fontSize': by('size', {'small': 13, 'medium': 13, 'large': 15})},
+                  'actions': [{'trigger': {'type': 'changed'}, 'actions': [
+                      {'type': 'setVariable', 'variable': 'props.value', 'value': '${= upper(result)}'},
+                      {'type': 'componentEvent', 'event': 'onChanged', 'value': '${= upper(result)}'}]}]},
+        'error': {**text('${props.error}', style(12, 400, 'error', 1.35), {'fill': 160}, {'hug': 16}),
+                  'bind': {'visible': "${= props.error != ''}"}},
+    },
+))
+
+# ModelAvatarStack (ModelAvatarStack.tsx): who or what took part, as small round plates that overlap by a
+# third: 16, 18 or 22 px, on the page color with a 1 px ring, each holding a first letter at half its size,
+# weight 700; past the most it shows, a +n pill of the same height in secondary.
+MAS = {'small': 16, 'medium': 18, 'large': 22}
+add(component(
+    'ModelAvatarStack',
+    'Several people or models as small overlapping round plates with their first letters, and +n for the rest.',
+    'stack',
+    props=[prop('labels', STRINGS, ['Ada', 'Ben', 'Cy'], 'Their names: each plate shows a first letter.', required=True),
+           prop('max', NUMBER, 4, 'How many plates at most; the rest become +n.'),
+           prop('size', enum(*MAS), 'medium', 'small (16), medium (18) or large (22).')],
+    previews=[preview('Three', 50, 18), preview('Many', 80, 22, labels=['Ada', 'Ben', 'Cy', 'Di', 'Eve', 'Flo'], max=3, size='large')],
+    nodes={
+        'stack': {'type': 'row', 'children': ['list', 'more'], 'props': {'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'hug': 50}, 'height': {'hug': 18}}},
+        'list': {'type': 'listView', 'children': ['plate'], 'props': {'scrollDirection': 'horizontal', 'scrollable': False, 'spacing': -6},
+                 'layout': {'width': {'hug': 44}, 'height': 18},
+                 'bind': {'data': '${= take(props.labels, props.max)}', 'layout.height': by('size', MAS),
+                          'props.spacing': by('size', {'small': -5, 'medium': -6, 'large': -7})}},
+        'plate': {'type': 'row', 'children': ['letter'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                  'layout': {'width': 18, 'height': {'fill': 18}},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 9999},
+                  'tooltip': '${item}',
+                  'bind': {'layout.width': by('size', MAS)}},
+        'letter': {**text('${= upper(left(item, 1))}', style(9, 700, 'primaryText', 1.0), {'hug': 8}, {'hug': 9}),
+                   'bind': {'props.style.fontSize': by('size', {'small': 8, 'medium': 9, 'large': 11})}},
+        'more': {'type': 'row', 'children': ['count'], 'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'},
+                 'layout': {'width': {'hug': 20}, 'height': 18, 'padding': [4, 0, 4, 0]}, 'motion': {'translateX': -5},
+                 'decoration': {'fills': [{'color': 'primaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 9999},
+                 'bind': {'visible': '${= length(props.labels) > props.max}', 'layout.height': by('size', MAS)}},
+        'count': {**text('+${= length(props.labels) - props.max}', style(9, 700, 'secondaryText', 1.0), {'hug': 12}, {'hug': 9}),
+                  'bind': {'props.style.fontSize': by('size', {'small': 8, 'medium': 9, 'large': 11})}},
     },
 ))
 
