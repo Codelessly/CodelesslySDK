@@ -109,6 +109,21 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
 
   set autofocus(bool v) => focusNode.autofocus = v;
 
+  bool _busy = false;
+  bool get busy => _busy;
+
+  /// Busy (a loading button): it keeps its focus but takes no press, shows
+  /// the arrow cursor, and tells screen readers it is busy (Flutter's
+  /// semantics has no busy flag: the value "Busy" in a live region, with no
+  /// tap action).
+  set busy(bool v) {
+    if (v == _busy) return;
+    _busy = v;
+    if (v) _setPressed(false);
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+  }
+
   String? _semanticsLabel;
 
   /// What a screen reader says (else the control's label).
@@ -264,7 +279,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
 
   /// Presses the control (a tap, Enter or Space, a screen reader).
   void activate() {
-    if (!_enabled) return;
+    if (!_enabled || _busy) return;
     onPressed?.call();
   }
 
@@ -278,7 +293,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
 
   @override
   void handleEvent(PointerEvent event, covariant BoxHitTestEntry entry) {
-    if (event is PointerDownEvent && _enabled) _tap.addPointer(event);
+    if (event is PointerDownEvent && _enabled && !_busy) _tap.addPointer(event);
   }
 
   /// The smallest box a touch may land in (SSUI: 44 × 44 on touch
@@ -312,7 +327,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
   // --- hover -------------------------------------------------------------------
 
   @override
-  MouseCursor get cursor => _enabled ? SystemMouseCursors.click : SystemMouseCursors.basic;
+  MouseCursor get cursor => _enabled && !_busy ? SystemMouseCursors.click : SystemMouseCursors.basic;
 
   @override
   PointerEnterEventListener? get onEnter => (_) => _setHovered(true);
@@ -367,8 +382,13 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
       ..isFocused = focusNode.hasFocus
       ..textDirection = TextDirection.ltr;
     if (_selected) config.isSelected = true;
+    if (_busy) {
+      config
+        ..value = 'Busy'
+        ..liveRegion = true;
+    }
     if (_enabled) {
-      config.onTap = activate;
+      if (!_busy) config.onTap = activate;
       config.onFocus = () => focusNode.requestFocus();
     }
   }
