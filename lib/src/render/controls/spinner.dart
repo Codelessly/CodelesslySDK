@@ -72,9 +72,15 @@ class RenderSpinner extends RenderBox {
     markNeedsPaint();
   }
 
+  double _strokeAlign = -1;
+
   /// -1 inside the box, 0 centred on its edge, 1 outside (Flutter's
   /// `strokeAlign`); SSUI's arc is inside.
-  double strokeAlign = -1;
+  set strokeAlign(double v) {
+    if (v == _strokeAlign) return;
+    _strokeAlign = v;
+    markNeedsPaint();
+  }
 
   StrokeCap _cap = StrokeCap.round;
   set strokeCap(StrokeCap v) {
@@ -83,8 +89,14 @@ class RenderSpinner extends RenderBox {
     markNeedsPaint();
   }
 
+  double _trackGap = 0;
+
   /// A gap between the arc and the track (Flutter's `trackGap`), in pixels.
-  double trackGap = 0;
+  set trackGap(double v) {
+    if (v == _trackGap) return;
+    _trackGap = v;
+    markNeedsPaint();
+  }
 
   double _diameter = 16;
 
@@ -192,12 +204,12 @@ class RenderSpinner extends RenderBox {
         color: _color,
         track: _track,
         strokeWidth: _strokeWidth ?? math.max(2.0, side / 8),
-        strokeAlign: strokeAlign,
+        strokeAlign: _strokeAlign,
         cap: _cap,
         value: _value,
         turns: _turns,
         sweep: sweep,
-        trackGap: trackGap);
+        trackGap: _trackGap);
   }
 
   @override
