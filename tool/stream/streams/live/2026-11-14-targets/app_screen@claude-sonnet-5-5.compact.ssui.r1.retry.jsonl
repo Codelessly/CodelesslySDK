@@ -1,0 +1,68 @@
+{"meta":{"ui":"habits","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["app_screen@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":607,"usage":{"inputTokens":9980,"outputTokens":607,"cacheReadInputTokens":27792,"cacheCreationInputTokens":0,"ttftMs":1751,"firstToolDeltaMs":1818,"totalMs":4197,"stopReason":"StopReason.toolUse"},"text":"I'll re-send the New task button with the right action key, and fix the other warnings (bell reaction, string index).","ttftMs":1751,"check":{"ops":4,"opsApplied":4,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":66,"scripts":0,"scriptChars":0,"designSystemComponents":25,"replacedControls":0},"assets":null}}
+{"tMs":1818,"delta":"{\"ops\": [{\"op\": \"set"}
+{"tMs":1852,"delta":"\", \"id\": \"newBt"}
+{"tMs":1884,"delta":"n\", \"node\": {\"type"}
+{"tMs":1918,"delta":"\": \"Button\", \"props\":"}
+{"tMs":1955,"delta":" {\"label\": \"New task\","}
+{"tMs":1985,"delta":" \"icon\": \"add\"}"}
+{"tMs":2019,"delta":", \"layout\": {\"width"}
+{"tMs":2157,"delta":"\": {\"hug\": 96"}
+{"tMs":2580,"delta":"}, \"height\": {\"h"}
+{"tMs":2580,"delta":"ug\": 28}}, \""}
+{"tMs":2580,"delta":"actions\": [{\"trig"}
+{"tMs":2580,"delta":"ger\": {\"type\": \"event"}
+{"tMs":2580,"delta":"\", \"event\": \"onPress"}
+{"tMs":2580,"delta":"ed\"}, \"actions\":"}
+{"tMs":2580,"delta":" [{\"type\": \"openMod"}
+{"tMs":2580,"delta":"al\", \"to\": \"newT"}
+{"tMs":2580,"delta":"askModal\"}]}"}
+{"tMs":2580,"delta":"]}}, {\"op\":"}
+{"tMs":2580,"delta":" \"patch\", \"id\": \""}
+{"tMs":2580,"delta":"bell\", \"patch\": {"}
+{"tMs":3042,"delta":"\"actions\": [{\"tr"}
+{"tMs":3042,"delta":"igger\": {\"type\": \""}
+{"tMs":3042,"delta":"event\", \"event\": \"onP"}
+{"tMs":3042,"delta":"ressed\"}, \"actions"}
+{"tMs":3042,"delta":"\": [{\"type\": \"show"}
+{"tMs":3042,"delta":"Toast\", \"message\": \"No"}
+{"tMs":3042,"delta":" new notifications\"}]}"}
+{"tMs":3042,"delta":"]}}, {\"op\":"}
+{"tMs":3042,"delta":" \"patch\", \"id\": \""}
+{"tMs":3042,"delta":"addBtn\", \"patch"}
+{"tMs":3042,"delta":"\": {\"actions\": [{"}
+{"tMs":3042,"delta":"\"trigger\": {\"type"}
+{"tMs":3435,"delta":"\": \"event\", \"event\": \""}
+{"tMs":3435,"delta":"onPressed\"}, \""}
+{"tMs":3435,"delta":"actions\": [{\"type\":"}
+{"tMs":3435,"delta":" \"if\", \"condition\": {"}
+{"tMs":3435,"delta":"\"left\": \"${nTit"}
+{"tMs":3435,"delta":"le}\", \"op\": \"is"}
+{"tMs":3435,"delta":"NotEmpty\"}"}
+{"tMs":3435,"delta":", \"then\": [{\"type"}
+{"tMs":3435,"delta":"\": \"setVariable\", \""}
+{"tMs":3435,"delta":"variable\": \"tasks\","}
+{"tMs":3435,"delta":" \"op\": \"insert\", \""}
+{"tMs":3435,"delta":"index\": \"0\", \"value\":"}
+{"tMs":4192,"delta":" \"${= {'t': n"}
+{"tMs":4192,"delta":"Title, 'a':"}
+{"tMs":4192,"delta":" nAssignee, '"}
+{"tMs":4192,"delta":"d': nDue, '"}
+{"tMs":4192,"delta":"p': nPriority, "}
+{"tMs":4192,"delta":"'s': 'In progress'"}
+{"tMs":4192,"delta":"}}\"}, {\"type"}
+{"tMs":4192,"delta":"\": \"setVariable\", \""}
+{"tMs":4192,"delta":"variable\": \"nTitle"}
+{"tMs":4192,"delta":"\", \"value\": \"\"},"}
+{"tMs":4192,"delta":" {\"type\": \"closeMod"}
+{"tMs":4192,"delta":"al\"}]}]}]"}
+{"tMs":4192,"delta":"}}, {\"op\": \""}
+{"tMs":4192,"delta":"patch\", \"id\": \"c"}
+{"tMs":4192,"delta":"ancelBtn\", \"pat"}
+{"tMs":4192,"delta":"ch\": {\"actions\": ["}
+{"tMs":4192,"delta":"{\"trigger\": {\""}
+{"tMs":4192,"delta":"type\": \"event\", \"event\":"}
+{"tMs":4192,"delta":" \"onPressed\"},"}
+{"tMs":4192,"delta":" \"actions\": [{\"type"}
+{"tMs":4192,"delta":"\": \"closeModal\"}"}
+{"tMs":4192,"delta":"]}]}}]"}
+{"tMs":4195,"delta":"}"}
