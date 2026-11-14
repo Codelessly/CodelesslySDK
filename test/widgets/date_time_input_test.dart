@@ -149,7 +149,7 @@ void main() {
       'time': {
         'type': 'timePicker',
         'layout': {'width': 160, 'height': 42, 'y': {'start': 80}},
-        'props': {'value': '13:00', 'format': 'HH:mm', 'use24h': true, 'decoration': field, 'pickerTheme': theme},
+        'props': {'value': '13:00', 'format': 'HH:mm', 'alwaysUse24HourFormat': true, 'decoration': field, 'pickerTheme': theme},
       },
     })));
     await tester.pumpWidget(MaterialApp(home: Material(child: Center(child: NodeView(tree: tree, rootId: 's', interactive: true)))));

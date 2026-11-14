@@ -247,9 +247,9 @@ void main() {
     expect(tree.boxOf('p')!.rectIn(view), const Rect.fromLTWH(50, 0, 100, 50));
   });
 
-  testWidgets('a drawn path with a draw-on time shows at its progress at once in a running app', (tester) async {
-    // Since 30.1.0 there is no draw-on animation: the migration keeps it as
-    // `legacy.strokePath.draw` and draws the line as a custom paint path op.
+  testWidgets('a drawn path with a draw-on time draws itself on in a running app', (tester) async {
+    // The migration writes the draw-on as an animation of the custom paint
+    // path op's trimEnd (frame by frame: test/custom_paint/stroke_draw_on_test.dart).
     final (tree, _) = await show(
         tester,
         page({
@@ -264,15 +264,24 @@ void main() {
               'xUnit': 'pixels',
               'progress': 0.5,
               'drawMs': 400,
+              'drawCurve': 'linear',
               'drawKey': 'a',
             },
           },
         }),
         interactive: true);
     final node = (tree.source as DocumentSource).document.nodes['p']!;
-    expect(node.extra['legacy.strokePath.draw'], {'drawMs': 400, 'drawKey': 'a'});
+    expect(node.extra, isEmpty);
     final op = node.behaviors.customPaint!.painter.single as api.PathOp;
     expect(op.trimEnd.value, 0.5);
+    expect(node.behaviors.animations.single.tracks.single.path, 'customPaint.painter.strokePath.trimEnd');
+    double shown() => (tree.resolve('p')!.behaviors.customPaint!.painter.single as api.PathOp).trimEnd.value!;
+    await tester.pump();
+    expect(shown(), 0);
+    await tester.pump(const Duration(milliseconds: 200));
+    expect(shown(), closeTo(0.25, 1e-9));
+    await tester.pump(const Duration(milliseconds: 300));
+    expect(shown(), 0.5);
     expect(find.byType(NodeView), paints..something((m, _) => m == #drawPicture));
   });
 
