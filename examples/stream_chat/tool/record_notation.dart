@@ -8,6 +8,10 @@
 //   ANTHROPIC_API_KEY=... dart run tool/record_notation.dart --ui approval \
 //       --model claude-haiku-5-5 --out recordings/approval@claude-haiku-5-5.notation.jsonl
 //
+// With --design-system <folder> (a folder holding design_system.json), the
+// prompt also lists that design system's components and the answer may call
+// them by name; --components A,B,C narrows the list.
+//
 // The key is read from the environment only and never written anywhere.
 import 'dart:async';
 import 'dart:convert';
@@ -38,18 +42,42 @@ Future<void> main(List<String> args) async {
   final model = opt('--model') ?? 'claude-haiku-5-5';
   final out = opt('--out') ?? 'recordings/$ui@$model.notation.jsonl';
   final retries = int.tryParse(opt('--retries') ?? '') ?? 1;
-  final system = Catalog.run(standardCatalog, () => notationPrompt(catalog: standardCatalog));
+  final dsDir = opt('--design-system');
+  DesignSystem? ds;
+  if (dsDir != null) {
+    final problems = <String>[];
+    ds = await DesignSystem.load((ref) async {
+      final f = File('$dsDir/$ref');
+      return f.existsSync() ? f.readAsStringSync() : null;
+    }, problems: problems);
+    if (problems.isNotEmpty) {
+      stderr.writeln('The design system at $dsDir does not load cleanly: ${problems.join('; ')}');
+      exit(2);
+    }
+  }
+  final catalog = ds?.catalogOver(standardCatalog) ?? standardCatalog;
+  final options = ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds);
+  final only = opt('--components')?.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toSet();
+  final system = Catalog.run(catalog, () => notationPrompt(catalog: catalog, options: options, designSystem: ds, only: only));
   final user = '${brief.prompt}\n\n(Answer with the notation only: an inline card 390 wide.)';
   final messages = <Map<String, Object?>>[
     {'role': 'user', 'content': user},
   ];
-  final summary = <String, Object?>{'ui': ui, 'kind': brief.kind, 'model': model, 'form': 'notation', 'systemPromptChars': system.length};
+  final summary = <String, Object?>{
+    'ui': ui,
+    'kind': brief.kind,
+    'model': model,
+    'form': 'notation',
+    if (ds != null) 'designSystem': ds.id,
+    'systemPromptChars': system.length,
+  };
   final turns = <Object?>[];
   try {
     for (var n = 0; n <= retries; n++) {
       final turn = await _turn(key, model, system, messages);
-      final r = Catalog.run(standardCatalog, () => parseNotation(turn.text, catalog: standardCatalog));
-      final problems = Catalog.run(standardCatalog, () => validateDocument(r.document))
+      final r = Catalog.run(catalog, () => parseNotation(turn.text, catalog: catalog, options: options));
+      final problems = Catalog.run(
+              catalog, () => validateDocument(r.document, options: ValidateOptions(components: ds?.components, theme: ds?.tokens)))
           .where((d) => d.severity == Severity.error)
           .map((d) => '${d.code.name} ${d.path}: ${d.message}')
           .toList();
@@ -59,7 +87,7 @@ Future<void> main(List<String> args) async {
       File(file).parent.createSync(recursive: true);
       File(file).writeAsStringSync([
         jsonEncode({
-          'meta': {'ui': ui, 'model': model, 'form': 'notation', 'turn': n == 0 ? 'generate' : 'retry', 'prompt': brief.prompt, 'text': turn.text, 'usage': turn.usage, 'ttftMs': turn.ttftMs, 'totalMs': turn.totalMs},
+          'meta': {'ui': ui, 'model': model, 'form': 'notation', if (ds != null) 'designSystem': ds.id, 'turn': n == 0 ? 'generate' : 'retry', 'prompt': brief.prompt, 'text': turn.text, 'usage': turn.usage, 'ttftMs': turn.ttftMs, 'totalMs': turn.totalMs},
         }),
         for (final d in turn.deltas) jsonEncode({'tMs': d.$1, 'delta': d.$2}),
       ].join('\n'));
