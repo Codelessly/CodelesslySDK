@@ -14,6 +14,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
+import 'package:codelessly_sdk/src/app/site_files.dart' show isImageKey;
 
 /// An image a document refers to, and what became of it.
 typedef ImageRef = ({String nodeId, String path, String url, String status, String? detail});
@@ -55,10 +56,12 @@ Prepared prepare(Json doc, {required String dir, String? docDir, required String
     }
     final spec = Widgets.of(readString(raw['type']) ?? '');
     String at = '/nodes/${e.key}';
-    Object? strings(Object? v, String path) {
-      if (v is String) return _image(v, path, e.key, dir, images, docDir: docDir);
-      if (v is List) return [for (var i = 0; i < v.length; i++) strings(v[i], '$path/$i')];
-      if (v is Map) return {for (final x in v.entries) '${x.key}': strings(x.value, '$path/${x.key}')};
+    // Only under a key that holds images (`url`, `image`, `poster`...): a
+    // label reading `hero.png` is words.
+    Object? strings(Object? v, String path, {bool held = false}) {
+      if (v is String) return held ? _image(v, path, e.key, dir, images, docDir: docDir) : v;
+      if (v is List) return [for (var i = 0; i < v.length; i++) strings(v[i], '$path/$i', held: held)];
+      if (v is Map) return {for (final x in v.entries) '${x.key}': strings(x.value, '$path/${x.key}', held: isImageKey('${x.key}'))};
       return v;
     }
 

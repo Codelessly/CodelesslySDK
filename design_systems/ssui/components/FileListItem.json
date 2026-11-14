@@ -1,0 +1,169 @@
+{
+ "schema": 3,
+ "id": "FileListItem",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "FileListItem",
+  "doc": "A file in a list: icon, name, then meta and actions at the end. Fires onPressed with the path.",
+  "props": [
+   {
+    "key": "path",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "docs/launch-plan.md",
+    "doc": "The file's path.",
+    "required": true
+   },
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "What to show (empty: the path's last part)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "description",
+    "doc": "The icon."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ],
+  "slots": [
+   "meta",
+   "actions"
+  ]
+ },
+ "previews": [
+  {
+   "name": "File",
+   "size": [
+    260,
+    26
+   ],
+   "props": {
+    "path": "docs/launch-plan.md"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "name",
+    "meta",
+    "actions"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 25
+    },
+    "padding": [
+     6,
+     5,
+     6,
+     5
+    ]
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "states": {
+    "hovered": {
+     "row": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "secondaryBackground"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed",
+       "value": "${props.path}"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "description",
+    "color": "tertiaryText",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${= props.name != '' ? props.name : last(split(props.path, '/'))}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.25,
+     "color": "primaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "meta": {
+   "type": "slot",
+   "props": {
+    "name": "meta"
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  }
+ }
+}

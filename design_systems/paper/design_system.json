@@ -473,7 +473,13 @@
   "components/AddButton.json",
   "components/ProviderPill.json",
   "components/CopyButton.json",
-  "components/BackButton.json"
+  "components/BackButton.json",
+  "components/TextInputLabel.json",
+  "components/PersonChip.json",
+  "components/ResourceChip.json",
+  "components/FileListItem.json",
+  "components/StatusIndicator.json",
+  "components/DiffStatsBadge.json"
  ],
  "replaces": [
   "filledButton",

@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 48. Still to rebuild: 116.**
+**Here: 54. Still to rebuild: 110.**
 
 ## Here
 
@@ -28,11 +28,13 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | CountBadge | CountBadge |  |
 | DatePicker |  | datePicker |
 | Dialog | Dialog | confirm action / modal |
+| DiffStatsBadge | DiffStatsBadge |  |
 | Dropdown |  | dropdown |
 | EmptyState | EmptyState |  |
 | ErrorBar | ErrorBar |  |
 | FeatureBulletItem | FeatureBulletItem |  |
 | Field | Field |  |
+| FileListItem | FileListItem |  |
 | FloatingActionButton |  | floatingActionButton |
 | Hyperlink | Hyperlink |  |
 | IconBox | IconBox |  |
@@ -42,10 +44,12 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | MetaInfo | MetaInfo |  |
 | NotificationBadge | NotificationBadge |  |
 | Pagination |  | pagination |
+| PersonChip | PersonChip |  |
 | ProgressIndicator | ProgressBar | progressBar |
 | ProviderPill | ProviderPill |  |
 | PulsingDots | PulsingDots |  |
 | RadioButton | Radio | radio |
+| ResourceChip | ResourceChip |  |
 | SectionCard | SectionCard |  |
 | SegmentedControl | SegmentedControl | segmentedButton |
 | Select | Select | dropdown |
@@ -54,11 +58,13 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | StatsRow | StatTile (dashboard density), InlineStat (compact) |  |
 | StatusBadge | StatusBadge |  |
 | StatusDot | StatusDot |  |
+| StatusIndicator | StatusIndicator |  |
 | Switch | Switch | switch |
 | Table |  | tableView |
 | TextArea | TextArea | textField (maxLines) |
 | TextField | TextInput | textField |
 | TextInput | TextInput | textField |
+| TextInputLabel | TextInputLabel |  |
 | TimePicker |  | timePicker |
 | Toast |  | showToast action |
 | ToggleRow | ToggleRow |  |
@@ -70,17 +76,17 @@ Also here with no source file of the same name: Card, ListRow, SectionHeader, Ta
 
 In the order planned: what generated UI reaches for first, then the application chrome.
 
-### Status and feedback (9)
+### Status and feedback (7)
 
-StatusIndicator, RunningIndicator, RadialProgress, StackedProgressBar, BatchProgressBar, ConnectionStatus, CloudSyncIndicator, DiffStatsBadge, LoadMore
+RunningIndicator, RadialProgress, StackedProgressBar, BatchProgressBar, ConnectionStatus, CloudSyncIndicator, LoadMore
 
-### Text and small content (14)
+### Text and small content (10)
 
-TextItem, TextExpandable, TextInputLabel, CodeBlock, CodePreview, DownloadButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
+TextItem, TextExpandable, CodeBlock, CodePreview, DownloadButton, UpgradeButton, SplitButton, MenuButton, ThemeToggle, TabToggle
 
-### Cards and rows (25)
+### Cards and rows (21)
 
-Panel, CardActions, ProviderCard, ProviderIcon, FolderCard, ResourceCard, ResourceChip, PersonChip, AgentChip, DocumentItem, FileListItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OptionIcon, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
+Panel, CardActions, ProviderCard, ProviderIcon, FolderCard, ResourceCard, AgentChip, DocumentItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OptionIcon, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
 
 ### Inputs (21)
 

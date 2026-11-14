@@ -1,0 +1,328 @@
+{
+ "schema": 3,
+ "id": "DiffStatsBadge",
+ "roots": [
+  "badge"
+ ],
+ "widget": {
+  "type": "DiffStatsBadge",
+  "doc": "What a change did to files: +created, ~modified and -deleted counts as small colored chips after a file icon.",
+  "props": [
+   {
+    "key": "created",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "Files created."
+   },
+   {
+    "key": "modified",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "Files modified."
+   },
+   {
+    "key": "deleted",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "Files deleted."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Mixed",
+   "size": [
+    110,
+    16
+   ],
+   "props": {
+    "created": 3,
+    "modified": 12,
+    "deleted": 1
+   }
+  },
+  {
+   "name": "None",
+   "size": [
+    40,
+    16
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "badge": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "chips"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "insert_drive_file",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  },
+  "chips": {
+   "type": "row",
+   "children": [
+    "created",
+    "modified",
+    "deleted",
+    "zero"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "created": {
+   "type": "row",
+   "children": [
+    "createdText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 16
+    },
+    "padding": [
+     5,
+     1,
+     5,
+     1
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "successTint"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= props.created > 0}"
+   }
+  },
+  "createdText": {
+   "type": "text",
+   "props": {
+    "text": "+${props.created}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "success",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "modified": {
+   "type": "row",
+   "children": [
+    "modifiedText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 16
+    },
+    "padding": [
+     5,
+     1,
+     5,
+     1
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "warningTint"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= props.modified > 0}"
+   }
+  },
+  "modifiedText": {
+   "type": "text",
+   "props": {
+    "text": "~${props.modified}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "warning",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "deleted": {
+   "type": "row",
+   "children": [
+    "deletedText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 16
+    },
+    "padding": [
+     5,
+     1,
+     5,
+     1
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "errorTint"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= props.deleted > 0}"
+   }
+  },
+  "deletedText": {
+   "type": "text",
+   "props": {
+    "text": "-${props.deleted}",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "error",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "zero": {
+   "type": "row",
+   "children": [
+    "zeroText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 16
+    },
+    "padding": [
+     5,
+     1,
+     5,
+     1
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= props.created <= 0 && props.modified <= 0 && props.deleted <= 0}"
+   }
+  },
+  "zeroText": {
+   "type": "text",
+   "props": {
+    "text": "0",
+    "style": {
+     "fontSize": 10,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  }
+ }
+}
