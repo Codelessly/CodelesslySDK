@@ -78,6 +78,10 @@ it reads as finished beside theirs: alignment, spacing, color, every state.
 | `connection_state.txt` | reconnecting, offline, online | The connection with what happens to the draft in each state. |
 | `background_runs.txt` | one | Runs with their state, a bar for the running ones and an action each. |
 | `voice_conversation.txt` | live, muted, ended | A level meter whose bars follow data, the last line heard, Mute and End. |
+| `heat_graph.txt` | one, a day picked | Twelve weeks of days as a grid whose fills follow data; a tapped day is named. |
+| `flow_graph.txt` | each step current | Steps as boxes placed in a stack with thin boxes as the lines between them; a tapped step is the current one. |
+| `diagram.txt` | one | A process as boxes and arrows in rows. |
+| `orb.txt` | listening, thinking, speaking | A voice orb from two radial gradients written as whole nodes, with its state. |
 The first nineteen are written with core nodes only. The rest call SSUI's components by name, which the notation
 reads when it is given the design system; expand one with
 
@@ -87,5 +91,5 @@ dart run tool/notation/expand.dart design_systems/ssui/examples/targets/handoff.
 
 and render the document with `tool/render/render.sh` from a site whose `site.json` names the design system.
 
-Still to write: heat graph and flow graph; math; maps; diagrams (Mermaid and others); the orb. Each needs
-drawing the notation has no words for yet.
+Still to write: math; the two maps; a Mermaid diagram read from its source. Each needs something the document
+model does not have (typeset formulas, map tiles, a Mermaid parser), not only a word.
