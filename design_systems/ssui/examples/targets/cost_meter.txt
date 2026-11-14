@@ -1,0 +1,22 @@
+state used=18.42
+state budget=25
+state items=[{"name":"Input tokens","count":"2.41M","cost":7.23},{"name":"Output tokens","count":"612K","cost":9.18},{"name":"Cached reads","count":"5.8M","cost":1.74},{"name":"Tool calls","count":"184","cost":0.27}]
+Card gap:12
+  Row between
+    Column gap:2
+      Text.fieldLabel "Spend this session"
+      Row gap:6
+        Text.heading1 "{formatCurrency(used,"USD")}"
+        Text.bodySecondary "of {formatCurrency(budget,"USD","en_US",0)}"
+    Badge.warning "{round(used/budget*100)}% used" visible:=used/budget>=0.7
+    Badge.success "{round(used/budget*100)}% used" visible:=used/budget<0.7
+  Progress =used/budget {"props": {"color": "${= used/budget>=0.9?'#FFDC2626':(used/budget>=0.7?'#FFEA580C':'#FF2563EB')}"}}
+  Column gap:0
+    each i in items
+      Row gap:8 pad:[0,6,0,6] border:#FFF3F4F6
+        Text.body "{i.name}" grow:3
+        Text.mono "{i.count}" grow:2 {"props": {"textAlign": "right", "style": {"color": "#FF9CA3AF"}}}
+        Text.mono "{formatCurrency(i.cost,"USD")}" grow:2 {"props": {"textAlign": "right"}}
+  Row between
+    Text.caption "About {formatCurrency(budget-used,"USD")} left at this rate: 40 more minutes."
+    Button.ghost "Raise limit" -> emit raise_limit
