@@ -174,9 +174,7 @@ class PaginationControls extends StatelessWidget {
         .replaceAll('{page}', '${s.page}')
         .replaceAll('{pageCount}', pageCount == null ? '?' : '$pageCount');
     final options = {...s.pageSizeOptions, s.pageSize}.toList()..sort();
-    return Padding(
-      padding: n.layout.padding.flutter,
-      child: Wrap(
+    final Widget parts = Wrap(
         alignment: _wrapAlignment(n.prop(PaginationProps.alignment)),
         crossAxisAlignment: WrapCrossAlignment.center,
         spacing: spacing * 3,
@@ -202,7 +200,14 @@ class PaginationControls extends StatelessWidget {
               ),
             ]),
         ],
-      ),
+      );
+    return Padding(
+      padding: n.layout.padding.flutter,
+      // Centred down the node's box (a 48 px node and 32 px buttons): a
+      // row whose cross axis is the box's height.
+      child: n.layout.width.fit == api.SizeFit.hug
+          ? parts
+          : Row(crossAxisAlignment: CrossAxisAlignment.center, children: [Expanded(child: parts)]),
     );
   }
 }

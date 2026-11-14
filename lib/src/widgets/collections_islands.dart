@@ -230,7 +230,11 @@ class _TabBarIslandState extends State<_TabBarIsland> with TickerProviderStateMi
       splashFactory: NoSplash.splashFactory,
       labelColor: n.prop(TabBarProps.labelColor)?.flutter,
       unselectedLabelColor: n.prop(TabBarProps.unselectedLabelColor)?.flutter,
-      labelPadding: n.prop(TabBarProps.labelPadding).flutter,
+      // The bar keeps the indicator's weight free under the labels; as much
+      // above centres them in the bar.
+      labelPadding: n.prop(TabBarProps.labelPadding).flutter +
+          EdgeInsets.only(
+              top: n.prop(TabBarProps.indicatorStyle) == api.TabIndicatorStyle.underline ? n.prop(TabBarProps.indicatorWeight) : 0),
       tabs: [for (final t in n.prop(TabBarProps.tabs)) _tab(n, t)],
     );
   }

@@ -407,8 +407,154 @@ String? _inherited(InlineSpan root, InlineSpan target) {
   return found;
 }
 
+/// The labelled controls whose label must sit centred in their box.
+const _labelled = [
+  'filledButton', 'elevatedButton', 'outlinedButton', 'textButton', 'segmentedButton', //
+  'chip', 'actionChip', 'choiceChip', 'filterChip', 'inputChip', 'tabBar', 'dropdown', 'textField', 'datePicker',
+  'timePicker', 'dateTimeInput', 'pagination',
+];
+
+/// Each labelled control twice: at its default height and 32 px high, with a
+/// value (text field: typed text) and once more with only a hint.
+Map<String, Object?> _labelPage() {
+  final nodes = <String, Object?>{};
+  final ids = <String>[];
+  for (final type in _labelled) {
+    final spec = Catalog.current.widget(type)!;
+    // Pagination as one line of page buttons (its summary is a second line).
+    final base = {..._props(type, spec), if (type == 'pagination') 'showSummary': false};
+    final (w, h) = _sizes[type] ?? (160.0, 48.0);
+    for (final (id, height, props) in [
+      ('$type@default', h, base),
+      ('$type@32', 32.0, base),
+      if (type == 'textField') ...[
+        ('$type@default-text', h, {'initialValue': 'Typed'}),
+        ('$type@32-text', 32.0, {'initialValue': 'Typed'}),
+      ],
+    ]) {
+      nodes[id] = {
+        'type': type,
+        'layout': {'width': w, 'height': height},
+        'props': props,
+      };
+      ids.add(id);
+    }
+  }
+  nodes['canvas'] = {
+    'type': 'canvas',
+    'slots': {'body': 'body'},
+    'layout': {'width': _view.width, 'height': _view.height},
+    'decoration': {
+      'fills': [
+        {'color': '#FFFFFFFF'},
+      ],
+    },
+  };
+  nodes['body'] = {
+    'type': 'row',
+    'layout': {
+      'width': {'fill': _view.width},
+      'height': {'fill': _view.height},
+      'padding': {'left': 16, 'top': 16, 'right': 16, 'bottom': 16},
+    },
+    'props': {'wrap': true, 'spacing': 24, 'runSpacing': 24},
+    'children': ids,
+  };
+  return {'schema': 3, 'id': 'labels', 'roots': ['canvas'], 'nodes': nodes};
+}
+
+/// The vertical centre of the glyph box of every non-blank text drawn in
+/// [box] (its paragraphs' and editable texts' lines, `BoxHeightStyle.tight`:
+/// the font's ascent to descent, as Flutter's Text lays a line out without
+/// its leading), in global coordinates.
+List<(String, double)> _labelCentres(RenderBox box) {
+  final out = <(String, double)>[];
+  final area = box.localToGlobal(Offset.zero) & box.size;
+  void visit(RenderObject o) {
+    List<TextBox>? lines;
+    String? text;
+    if (o is RenderParagraph) {
+      text = o.text.toPlainText();
+      if (text.trim().isNotEmpty && !_isGlyph(text.trim())) {
+        lines = o.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: text.length),
+            boxHeightStyle: ui.BoxHeightStyle.tight);
+      }
+    } else if (o is RenderEditable) {
+      text = o.text?.toPlainText() ?? '';
+      if (text.trim().isNotEmpty) {
+        lines = [
+          for (final p in o.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: text.length)))
+            p,
+        ];
+      }
+    }
+    if (lines != null && lines.isNotEmpty && o is RenderBox && o.attached) {
+      final top = lines.map((b) => b.top).reduce((a, b) => a < b ? a : b);
+      final bottom = lines.map((b) => b.bottom).reduce((a, b) => a > b ? a : b);
+      final g = o.localToGlobal(Offset(0, (top + bottom) / 2));
+      if (area.inflate(1).contains(Offset(area.center.dx, g.dy))) out.add((text!.trim(), g.dy));
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(box);
+  return out;
+}
+
 void main() {
   setUpAll(_loadFonts);
+
+  // Real fonts (Barlow, Roboto), so text is measured by a real ascent and
+  // descent, not drawn as test boxes.
+  for (final (name, family) in [('Barlow', 'Barlow'), ('Roboto', 'Roboto')]) {
+    for (final dark in [false, true]) {
+      testWidgets('every labelled control centres its label in its box, default and 32 px high: $name ${dark ? 'dark' : 'light'}',
+          (tester) async {
+        addTearDown(tester.view.reset);
+        addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
+        tester.view.physicalSize = _view;
+        tester.view.devicePixelRatio = 1;
+        tester.platformDispatcher.platformBrightnessTestValue = dark ? Brightness.dark : Brightness.light;
+        final theme = ThemeTokens.fromJson({
+          'fontFamily': family,
+          'surface': '#FFFFFFFF',
+          'dark': {'surface': '#FF121212'},
+        });
+        final app = Codelessly.fromBundle(_bundle(_labelPage(), theme), fonts: const NoFontFetcher());
+        final controller = CodelesslyWidgetController();
+        addTearDown(() {
+          controller.dispose();
+          app.dispose();
+        });
+        await tester.pumpWidget(MaterialApp(
+          debugShowCheckedModeBanner: false,
+          home: RepaintBoundary(key: _boundary, child: CodelesslyWidget(codelessly: app, controller: controller)),
+        ));
+        await tester.pump(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(seconds: 1));
+        final dir = Platform.environment['CODELESSLY_THEME_RENDERS'];
+        if (dir != null && dir.isNotEmpty) {
+          await _save(tester, await _capture(tester), 'labels-$name-${dark ? 'dark' : 'light'}');
+        }
+        final off = <String>[];
+        for (final type in _labelled) {
+          for (final id in ['$type@default', '$type@32', if (type == 'textField') ...['$type@default-text', '$type@32-text']]) {
+            final box = controller.tree!.boxOf(id)!;
+            final centre = (box.localToGlobal(Offset.zero) & box.size).center.dy;
+            final labels = _labelCentres(box);
+            if (labels.isEmpty) {
+              off.add('$id: no label found');
+              continue;
+            }
+            for (final (text, y) in labels) {
+              if ((y - centre).abs() > 1) off.add('$id "$text": ${(y - centre).toStringAsFixed(1)} px from the box centre');
+            }
+          }
+        }
+        expect(off, isEmpty, reason: 'labels off centre');
+      });
+    }
+  }
 
   for (final c in _conditions) {
     testWidgets('unstyled controls show no Material default color or font: ${c.name}', (tester) async {

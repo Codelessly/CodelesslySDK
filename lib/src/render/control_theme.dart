@@ -287,6 +287,12 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
 
   return ThemeData(
     useMaterial3: true,
+    // A control fits the node it is drawn in: no 48 px tap-target margin
+    // around it and no platform density, so a 28 or 32 px node shows the
+    // whole control with its label centred, never a taller control cut or
+    // shifted.
+    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    visualDensity: VisualDensity.standard,
     colorScheme: scheme,
     typography: typography,
     fontFamily: body,

@@ -819,11 +819,17 @@ Widget fullHeightField(
   final InputBorder border = own ?? themeFieldBorder(context, error: error, focused: focused, enabled: decoration.enabled);
   final fill = decoration.filled == true ? (decoration.fillColor ?? Colors.transparent) : Colors.transparent;
   final padEnd = (decoration.contentPadding ?? EdgeInsets.zero).resolve(Directionality.of(context)).right;
+  // Without a floating label, the line is centred in the box at its own
+  // (dense) height, whatever the box's height: a 28 px field is not laid out
+  // for Material's 48 px and cut.
+  final centre = decoration.label == null && decoration.labelText == null;
   final spacer = decoration.prefixIcon == null && decoration.suffixIcon == null;
   return DecoratedBox(
     decoration: ShapeDecoration(color: fill, shape: border),
-    child: build(
+    child: _centred(centre, build(
       decoration.copyWith(
+        contentPadding: centredPadding(context, decoration),
+        isDense: centre ? true : null,
         filled: false,
         border: InputBorder.none,
         enabledBorder: InputBorder.none,
@@ -831,7 +837,7 @@ Widget fullHeightField(
         disabledBorder: InputBorder.none,
         errorBorder: InputBorder.none,
         focusedErrorBorder: InputBorder.none,
-        constraints: BoxConstraints.tightFor(height: height),
+        constraints: centre ? null : BoxConstraints.tightFor(height: height),
         prefixIconConstraints:
             decoration.prefixIcon == null ? null : _tallIcon(decoration.prefixIconConstraints, height),
         suffixIcon: spacer ? SizedBox(width: padEnd, height: height) : decoration.suffixIcon,
@@ -841,8 +847,20 @@ Widget fullHeightField(
                 ? null
                 : _tallIcon(decoration.suffixIconConstraints, height),
       ),
-    ),
+    )),
   );
+}
+
+/// [decoration]'s content padding for a field of a set height whose line
+/// is centred (TextAlignVertical.center): its horizontal padding only, so a
+/// 28 or 32 px field is not laid out for a taller line box and its text and
+/// hint sit on its centre. A field whose label floats keeps its padding (the
+/// label needs the room above the line).
+EdgeInsetsGeometry? centredPadding(BuildContext context, InputDecoration decoration) {
+  final p = decoration.contentPadding;
+  if (p == null || decoration.label != null || decoration.labelText != null) return p;
+  final r = p.resolve(Directionality.of(context));
+  return EdgeInsets.fromLTRB(r.left, 0, r.right, 0);
 }
 
 /// The border of a field that sets none: the theme's field shape (an
@@ -861,6 +879,8 @@ InputBorder themeFieldBorder(BuildContext context, {bool error = false, bool foc
               : scheme.outline;
   return shape.copyWith(borderSide: BorderSide(color: color, width: focused && enabled ? 2 : 1));
 }
+
+Widget _centred(bool centre, Widget field) => centre ? Center(child: field) : field;
 
 /// An icon box as tall as a fixed-height field.
 BoxConstraints _tallIcon(BoxConstraints? c, double height) =>
@@ -1830,6 +1850,9 @@ class _HoverDecoratorState extends State<_HoverDecorator> {
               decoration: widget.decoration.copyWith(
                 enabled: widget.enabled,
                 visualDensity: fills ? VisualDensity.standard : null,
+                // A field of a set height centres its line: no vertical
+                // padding to push it off centre when the height is short.
+                contentPadding: fills ? centredPadding(context, widget.decoration) : null,
               ),
               isHovering: hover && widget.enabled,
               isEmpty: false,
@@ -2166,6 +2189,11 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
     if (n.prop(SegmentedButtonProps.variant) == SegmentedVariant.track) {
       return _track(context, n, selection, multi);
     }
+    // Without a segment height of its own, the segments are the node's
+    // height (Material's are 40 px, laid out past a shorter node with the
+    // labels off centre).
+    final fixed = n.layout.height.fit == SizeFit.fixed ? n.layout.height.value : null;
+    final height = segmentHeight ?? fixed;
     final button = SegmentedButton<String>(
       segments: segments,
       selected: selection,
@@ -2189,11 +2217,17 @@ class _SegmentedButtonIslandState extends State<_SegmentedButtonIsland> {
         selectedForegroundColor: _color(n.prop(SegmentedButtonProps.selectedForegroundColor)),
         side: side == null ? null : _side(side),
         shape: radius == null ? null : RoundedRectangleBorder(borderRadius: radius.flutter),
-        padding: n.prop(SegmentedButtonProps.padding)?.flutter,
-        minimumSize: segmentHeight == null ? null : Size(0, segmentHeight),
-        maximumSize: segmentHeight == null ? null : Size(double.infinity, segmentHeight),
-        tapTargetSize: n.prop(SegmentedButtonProps.shrinkTapTarget) ? MaterialTapTargetSize.shrinkWrap : null,
-        visualDensity: segmentHeight == null ? null : VisualDensity.standard,
+        padding: n.prop(SegmentedButtonProps.padding)?.flutter ??
+            (height == null ? null : const EdgeInsets.symmetric(horizontal: 12)),
+        minimumSize: height == null ? null : Size(0, height),
+        maximumSize: height == null ? null : Size(double.infinity, height),
+        tapTargetSize: n.prop(SegmentedButtonProps.shrinkTapTarget) || height != null ? MaterialTapTargetSize.shrinkWrap : null,
+        // Its segments are TextButtons 40 px high plus the density's
+        // adjustment (minimumSize does not reach them): a shorter height is
+        // a vertical density of (height - 40) / 4.
+        visualDensity: height == null
+            ? null
+            : VisualDensity(vertical: ((height - 40) / 4).clamp(VisualDensity.minimumDensity, 0).toDouble()),
       ),
       expandedInsets: n.prop(SegmentedButtonProps.expanded) ? EdgeInsets.zero : null,
     );
