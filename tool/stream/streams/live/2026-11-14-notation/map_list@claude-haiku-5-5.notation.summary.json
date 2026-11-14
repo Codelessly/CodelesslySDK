@@ -1,0 +1,94 @@
+{
+ "ui": "map_list",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1543,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 948,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 571,
+   "totalMs": 4212,
+   "chars": 1566,
+   "lines": 41,
+   "jsonTails": 0,
+   "nodes": 36,
+   "outputTokensPerNode": "26.3",
+   "notationIssues": [
+    "line 5:1: A listTile has no text of its own.",
+    "line 5:1: A listTile has no text of its own.",
+    "line 6:1: A listTile has no text of its own.",
+    "line 6:1: A listTile has no text of its own.",
+    "line 7:1: A listTile has no text of its own.",
+    "line 7:1: A listTile has no text of its own.",
+    "line 8:1: A listTile has no text of its own.",
+    "line 8:1: A listTile has no text of its own.",
+    "line 9:1: A listTile has no text of its own.",
+    "line 9:1: A listTile has no text of its own."
+   ],
+   "errors": [
+    "children_not_allowed /nodes/box1/children: A box takes no children. Wrap it and its neighbours in a row, column or stack instead.",
+    "unknown_prop /nodes/badge1/props/variant: A badge has no prop \"variant\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_prop /nodes/badge1/props/pos: A badge has no prop \"pos\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_prop /nodes/badge2/props/variant: A badge has no prop \"variant\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_prop /nodes/badge2/props/pos: A badge has no prop \"pos\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_prop /nodes/badge3/props/variant: A badge has no prop \"variant\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_prop /nodes/badge3/props/pos: A badge has no prop \"pos\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_prop /nodes/badge4/props/variant: A badge has no prop \"variant\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_prop /nodes/badge4/props/pos: A badge has no prop \"pos\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_prop /nodes/badge5/props/variant: A badge has no prop \"variant\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_prop /nodes/badge5/props/pos: A badge has no prop \"pos\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset."
+   ]
+  },
+  {
+   "input_tokens": 3655,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1019,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 452,
+   "totalMs": 3244,
+   "chars": 1733,
+   "lines": 41,
+   "jsonTails": 0,
+   "nodes": 36,
+   "outputTokensPerNode": "28.3",
+   "notationIssues": [
+    "line 5:1: A listTile has no text of its own.",
+    "line 6:1: A listTile has no text of its own.",
+    "line 7:1: A listTile has no text of its own.",
+    "line 8:1: A listTile has no text of its own.",
+    "line 9:1: A listTile has no text of its own."
+   ],
+   "errors": [
+    "unknown_prop /nodes/listTile1/props/subtitle: A listTile has no prop \"subtitle\". Its props: dense, isThreeLine, visualDensity, shape, selected, enabled, autofocus, enableFeedback, tileColor, selectedTileColor, selectedColor, iconColor, textColor, hoverColor, focusColor, contentPadding, horizontalTitleGap, minVerticalPadding, minLeadingWidth, minTileHeight, titleAlignment.",
+    "unknown_prop /nodes/listTile2/props/subtitle: A listTile has no prop \"subtitle\". Its props: dense, isThreeLine, visualDensity, shape, selected, enabled, autofocus, enableFeedback, tileColor, selectedTileColor, selectedColor, iconColor, textColor, hoverColor, focusColor, contentPadding, horizontalTitleGap, minVerticalPadding, minLeadingWidth, minTileHeight, titleAlignment.",
+    "unknown_prop /nodes/listTile3/props/subtitle: A listTile has no prop \"subtitle\". Its props: dense, isThreeLine, visualDensity, shape, selected, enabled, autofocus, enableFeedback, tileColor, selectedTileColor, selectedColor, iconColor, textColor, hoverColor, focusColor, contentPadding, horizontalTitleGap, minVerticalPadding, minLeadingWidth, minTileHeight, titleAlignment.",
+    "unknown_prop /nodes/listTile4/props/subtitle: A listTile has no prop \"subtitle\". Its props: dense, isThreeLine, visualDensity, shape, selected, enabled, autofocus, enableFeedback, tileColor, selectedTileColor, selectedColor, iconColor, textColor, hoverColor, focusColor, contentPadding, horizontalTitleGap, minVerticalPadding, minLeadingWidth, minTileHeight, titleAlignment.",
+    "unknown_prop /nodes/listTile5/props/subtitle: A listTile has no prop \"subtitle\". Its props: dense, isThreeLine, visualDensity, shape, selected, enabled, autofocus, enableFeedback, tileColor, selectedTileColor, selectedColor, iconColor, textColor, hoverColor, focusColor, contentPadding, horizontalTitleGap, minVerticalPadding, minLeadingWidth, minTileHeight, titleAlignment."
+   ]
+  }
+ ]
+}

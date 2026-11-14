@@ -1,0 +1,125 @@
+{"meta":{"ui":"dashboard","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.","text":"state range=\"30\"\nstate revenue=\"$48,210\"\nstate signups=\"1,284\"\nstate churn=\"3.1%\"\nstate active=\"9,402\"\nstate revenue_change=\"+8.4%\"\nstate signups_change=\"+12.0%\"\nstate churn_change=\"-0.6%\"\nstate active_change=\"+5.2%\"\nstate organic_pct=0.42\nstate paid_pct=0.28\nstate referral_pct=0.18\nstate social_pct=0.12\nstate sort_col=\"revenue\"\nCard w:390 gap:12 pad:16\n  Row between middle\n    Text.heading \"Monthly overview\"\n    SegmentedButton =range items:[\"7\",\"30\",\"90\"]\n  Row gap:8\n    Card grow gap:4 pad:12\n      Text.caption \"Revenue\"\n      Text.title \"{revenue}\"\n      Text.success \"{revenue_change}\"\n    Card grow gap:4 pad:12\n      Text.caption \"Sign-ups\"\n      Text.title \"{signups}\"\n      Text.success \"{signups_change}\"\n  Row gap:8\n    Card grow gap:4 pad:12\n      Text.caption \"Churn\"\n      Text.title \"{churn}\"\n      Text.success \"{churn_change}\"\n    Card grow gap:4 pad:12\n      Text.caption \"Active users\"\n      Text.title \"{active}\"\n      Text.success \"{active_change}\"\n  Column gap:6\n    Text.strong \"Revenue trend\"\n    Image \"https://charts.example.com/revenue-line?range={range}\" h:160\n  Column gap:6\n    Text.strong \"Sign-ups by channel\"\n    Row gap:8 middle\n      Text.small \"Organic\"\n      Progress grow =organic_pct\n      Text.small \"42%\"\n    Row gap:8 middle\n      Text.small \"Paid\"\n      Progress grow =paid_pct\n      Text.small \"28%\"\n    Row gap:8 middle\n      Text.small \"Referral\"\n      Progress grow =referral_pct\n      Text.small \"18%\"\n    Row gap:8 middle\n      Text.small \"Social\"\n      Progress grow =social_pct\n      Text.small \"12%\"\n  Column gap:6\n    Text.strong \"Top 5 plans\"\n    TableView =sort_col items:[\"Plan\",\"Revenue\",\"Sign-ups\",\"Churn\"] sortable:true\n      Row\n        Text \"Team Annual\"\n        Text \"$12,400\"\n        Text \"212\"\n        Text \"1.2%\"\n      Row\n        Text \"Pro Monthly\"\n        Text \"$9,870\"\n        Text \"486\"\n        Text \"2.9%\"\n      Row\n        Text \"Starter Monthly\"\n        Text \"$7,215\"\n        Text \"510\"\n        Text \"4.6%\"\n      Row\n        Text \"Pro Annual\"\n        Text \"$6,980\"\n        Text \"74\"\n        Text \"0.8%\"\n      Row\n        Text \"Enterprise\"\n        Text \"$5,745\"\n        Text \"2\"\n        Text \"0.0%\"","usage":{"input_tokens":4228,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":979,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":576,"totalMs":3131}}
+{"tMs":576,"delta":"```"}
+{"tMs":611,"delta":"\nstate range=\"30"}
+{"tMs":719,"delta":"\"\nstate revenue=\"$"}
+{"tMs":719,"delta":"48,210\"\nstate signups"}
+{"tMs":719,"delta":"=\"1,284\"\nstate chur"}
+{"tMs":719,"delta":"n=\"3.1%\""}
+{"tMs":719,"delta":"\nstate active=\"9,402\""}
+{"tMs":736,"delta":"\nstate revenue_change=\"+"}
+{"tMs":756,"delta":"8.4%\"\nstate sign"}
+{"tMs":777,"delta":"ups_change=\"+"}
+{"tMs":797,"delta":"12.0%\"\nstate chur"}
+{"tMs":818,"delta":"n_change=\"-0.6"}
+{"tMs":838,"delta":"%\"\nstate active_change=\""}
+{"tMs":858,"delta":"+5.2%\"\nstate"}
+{"tMs":879,"delta":" organic_pct=0."}
+{"tMs":902,"delta":"42\nstate paid_pct"}
+{"tMs":920,"delta":"=0.28\nstate referral"}
+{"tMs":940,"delta":"_pct=0.18"}
+{"tMs":961,"delta":"\nstate social_pct=0."}
+{"tMs":981,"delta":"12\nstate sort_col=\""}
+{"tMs":1002,"delta":"revenue\"\nCard w"}
+{"tMs":1022,"delta":":390 gap:12 "}
+{"tMs":1043,"delta":"pad:16\n  Row"}
+{"tMs":1063,"delta":" between middle\n    Text."}
+{"tMs":1083,"delta":"heading \"Monthly over"}
+{"tMs":1104,"delta":"view\"\n    Segment"}
+{"tMs":1124,"delta":"edButton =range items:[\""}
+{"tMs":1145,"delta":"7\",\"30\",\"90\"]"}
+{"tMs":1166,"delta":"\n  Row gap:8"}
+{"tMs":1186,"delta":"\n    Card grow gap:"}
+{"tMs":1206,"delta":"4 pad:12\n      "}
+{"tMs":1227,"delta":"Text.caption \"Rev"}
+{"tMs":1247,"delta":"enue\"\n      Text."}
+{"tMs":1267,"delta":"title \"{revenue}\""}
+{"tMs":1288,"delta":"\n      Text.success \"{"}
+{"tMs":1309,"delta":"revenue_change}\""}
+{"tMs":1328,"delta":"\n    Card grow gap:"}
+{"tMs":1349,"delta":"4 pad:12\n      "}
+{"tMs":1371,"delta":"Text.caption \"S"}
+{"tMs":1390,"delta":"ign-ups\"\n      "}
+{"tMs":1411,"delta":"Text.title \"{signups}"}
+{"tMs":1430,"delta":"\"\n      Text.success \""}
+{"tMs":1451,"delta":"{signups_change}\""}
+{"tMs":1471,"delta":"\n  Row gap:8"}
+{"tMs":1491,"delta":"\n    Card grow gap:"}
+{"tMs":1512,"delta":"4 pad:12\n      "}
+{"tMs":1532,"delta":"Text.caption \"Chur"}
+{"tMs":1553,"delta":"n\"\n      Text.title"}
+{"tMs":1573,"delta":" \"{churn}\"\n      "}
+{"tMs":1593,"delta":"Text.success \"{churn"}
+{"tMs":1614,"delta":"_change}\"\n    Card"}
+{"tMs":1635,"delta":" grow gap:4 p"}
+{"tMs":1655,"delta":"ad:12\n      Text."}
+{"tMs":1675,"delta":"caption \"Active users\""}
+{"tMs":1696,"delta":"\n      Text.title \"{active"}
+{"tMs":1716,"delta":"}\"\n      Text.success"}
+{"tMs":1737,"delta":" \"{active_change}\""}
+{"tMs":1757,"delta":"\n  Column gap:6"}
+{"tMs":1777,"delta":"\n    Text.strong \""}
+{"tMs":1798,"delta":"Revenue trend\"\n    "}
+{"tMs":1818,"delta":"Image \"https://charts."}
+{"tMs":1838,"delta":"example.com/revenue-"}
+{"tMs":1859,"delta":"line?range={range}\" h"}
+{"tMs":1880,"delta":":160\n  Column gap"}
+{"tMs":1900,"delta":":6\n    Text.str"}
+{"tMs":1920,"delta":"ong \"Sign-ups"}
+{"tMs":1941,"delta":" by channel\"\n    Row"}
+{"tMs":1961,"delta":" gap:8 middle"}
+{"tMs":1983,"delta":"\n      Text.small \"Organ"}
+{"tMs":2002,"delta":"ic\"\n      Progress gr"}
+{"tMs":2023,"delta":"ow =organic_pct"}
+{"tMs":2043,"delta":"\n      Text.small \"42%"}
+{"tMs":2063,"delta":"\"\n    Row gap:"}
+{"tMs":2083,"delta":"8 middle\n      Text"}
+{"tMs":2104,"delta":".small \"Paid\""}
+{"tMs":2124,"delta":"\n      Progress grow =pa"}
+{"tMs":2145,"delta":"id_pct\n      Text"}
+{"tMs":2165,"delta":".small \"28%\"\n    "}
+{"tMs":2186,"delta":"Row gap:8 midd"}
+{"tMs":2206,"delta":"le\n      Text.small \""}
+{"tMs":2227,"delta":"Referral\"\n      Prog"}
+{"tMs":2247,"delta":"ress grow =referral_p"}
+{"tMs":2267,"delta":"ct\n      Text.small \""}
+{"tMs":2288,"delta":"18%\"\n    Row g"}
+{"tMs":2309,"delta":"ap:8 middle\n      "}
+{"tMs":2328,"delta":"Text.small \"Social\""}
+{"tMs":2349,"delta":"\n      Progress grow ="}
+{"tMs":2370,"delta":"social_pct\n      Text"}
+{"tMs":2390,"delta":".small \"12%\"\n  "}
+{"tMs":2410,"delta":"Column gap:6\n    "}
+{"tMs":2431,"delta":"Text.strong \"Top"}
+{"tMs":2451,"delta":" 5 plans\"\n    "}
+{"tMs":2471,"delta":"TableView =sort_col"}
+{"tMs":2492,"delta":" items:[\"Plan\",\""}
+{"tMs":2512,"delta":"Revenue\",\"Sign-"}
+{"tMs":2533,"delta":"ups\",\"Churn\"]"}
+{"tMs":2553,"delta":" sortable:true\n      "}
+{"tMs":2573,"delta":"Row\n        Text \"Team"}
+{"tMs":2594,"delta":" Annual\"\n        Text"}
+{"tMs":2614,"delta":" \"$12,400\"\n        "}
+{"tMs":2635,"delta":"Text \"212\"\n        "}
+{"tMs":2655,"delta":"Text \"1.2%\""}
+{"tMs":2676,"delta":"\n      Row\n        Text \""}
+{"tMs":2696,"delta":"Pro Monthly\""}
+{"tMs":2717,"delta":"\n        Text \"$9,"}
+{"tMs":2737,"delta":"870\"\n        Text \"486"}
+{"tMs":2757,"delta":"\"\n        Text \"2."}
+{"tMs":2777,"delta":"9%\"\n      Row"}
+{"tMs":2798,"delta":"\n        Text \"Starter"}
+{"tMs":2819,"delta":" Monthly\"\n        Text"}
+{"tMs":2839,"delta":" \"$7,215\"\n        "}
+{"tMs":2859,"delta":"Text \"510\"\n        "}
+{"tMs":2880,"delta":"Text \"4.6%\""}
+{"tMs":2901,"delta":"\n      Row\n        Text \""}
+{"tMs":2921,"delta":"Pro Annual\""}
+{"tMs":2942,"delta":"\n        Text \"$6,980"}
+{"tMs":2961,"delta":"\"\n        Text \"74"}
+{"tMs":2982,"delta":"\"\n        Text \"0"}
+{"tMs":3003,"delta":".8%\"\n      Row"}
+{"tMs":3023,"delta":"\n        Text \"Enter"}
+{"tMs":3043,"delta":"prise\"\n        Text \""}
+{"tMs":3063,"delta":"$5,745\"\n        "}
+{"tMs":3083,"delta":"Text \"2\"\n        Text"}
+{"tMs":3105,"delta":" \"0.0%\"\n```"}

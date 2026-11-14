@@ -1,0 +1,67 @@
+{"meta":{"ui":"approval","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","text":"Card w:390 gap:12 pad:16\n  Text.heading \"Approve deletion?\"\n  Text.body \"This will permanently delete 214 old files from the shared drive folder \\\"Archive 2019\\\", freeing about 3.8 GB.\"\n  Text.danger \"This cannot be undone. Deleted files will not be recoverable.\"\n  Button.ghost \"Preview first 5 file names\" -> toast \"Preview: report_2019_01.pdf, notes_old.docx, invoice_0412.xlsx, photo_0007.jpg, backup_v1.zip (+209 more)\"\n  state decided=\"\"\n  if decided==\"\"\n    Row gap:8\n      Button.destructive \"Approve delete\" -> decided=\"approved\"; emit approveDelete\n      Button.outline \"Deny\" -> decided=\"denied\"; emit denyDelete\n  if decided==\"approved\"\n    Text.success \"Decision: Approved. The 214 files are being deleted.\"\n  if decided==\"denied\"\n    Text.muted \"Decision: Denied. No files were deleted.\"","usage":{"input_tokens":1543,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":345,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":442,"totalMs":1778}}
+{"tMs":442,"delta":"Card"}
+{"tMs":543,"delta":" w"}
+{"tMs":543,"delta":":390 gap:12"}
+{"tMs":543,"delta":" pad:16"}
+{"tMs":544,"delta":"\n  Text.heading \""}
+{"tMs":549,"delta":"Approve deletion?"}
+{"tMs":569,"delta":"\"\n  Text.body"}
+{"tMs":590,"delta":" \"This will perm"}
+{"tMs":610,"delta":"anently delete 214 old"}
+{"tMs":634,"delta":" files from the shared drive fol"}
+{"tMs":651,"delta":"der \\"}
+{"tMs":671,"delta":"\"Arch"}
+{"tMs":691,"delta":"ive "}
+{"tMs":711,"delta":"2019"}
+{"tMs":733,"delta":"\\\", freeing about 3"}
+{"tMs":753,"delta":".8 GB.\"\n  "}
+{"tMs":774,"delta":"Text.danger \"This c"}
+{"tMs":794,"delta":"annot be undone."}
+{"tMs":815,"delta":" Deleted files will not"}
+{"tMs":836,"delta":" be reco"}
+{"tMs":856,"delta":"verable.\"\n  "}
+{"tMs":876,"delta":"Button."}
+{"tMs":896,"delta":"ghost \""}
+{"tMs":916,"delta":"Preview first"}
+{"tMs":937,"delta":" 5 file names\" ->"}
+{"tMs":957,"delta":" toast \"Pre"}
+{"tMs":977,"delta":"view: report"}
+{"tMs":997,"delta":"_2019_01"}
+{"tMs":1018,"delta":".pdf, not"}
+{"tMs":1038,"delta":"es_old"}
+{"tMs":1060,"delta":".doc"}
+{"tMs":1079,"delta":"x, invoice_0"}
+{"tMs":1099,"delta":"412"}
+{"tMs":1120,"delta":".x"}
+{"tMs":1140,"delta":"lsx, photo_0"}
+{"tMs":1161,"delta":"007"}
+{"tMs":1181,"delta":".jpg, backup_"}
+{"tMs":1201,"delta":"v"}
+{"tMs":1222,"delta":"1"}
+{"tMs":1242,"delta":".z"}
+{"tMs":1262,"delta":"ip ("}
+{"tMs":1282,"delta":"+209"}
+{"tMs":1303,"delta":" more)\"\n  state dec"}
+{"tMs":1323,"delta":"ided=\"\"\n  if decided"}
+{"tMs":1344,"delta":"=="}
+{"tMs":1364,"delta":"\"\"\n    Row gap:"}
+{"tMs":1385,"delta":"8"}
+{"tMs":1405,"delta":"\n      Button.destructive \""}
+{"tMs":1426,"delta":"Approve del"}
+{"tMs":1446,"delta":"ete\" -> dec"}
+{"tMs":1467,"delta":"ided=\"approved"}
+{"tMs":1487,"delta":"\"; emit appro"}
+{"tMs":1507,"delta":"veDelete\n      Button"}
+{"tMs":1528,"delta":".outline \"Deny\""}
+{"tMs":1549,"delta":" -> decided=\"denied\""}
+{"tMs":1569,"delta":"; emit den"}
+{"tMs":1590,"delta":"yDelete\n  if dec"}
+{"tMs":1610,"delta":"ided==\"approved\"\n    "}
+{"tMs":1631,"delta":"Text.success \"Dec"}
+{"tMs":1651,"delta":"ision: Approved. The"}
+{"tMs":1671,"delta":" 214 files are"}
+{"tMs":1692,"delta":" being deleted.\"\n  if"}
+{"tMs":1713,"delta":" decided==\"denied\""}
+{"tMs":1732,"delta":"\n    Text.muted \""}
+{"tMs":1754,"delta":"Decision: Denied. No"}
+{"tMs":1773,"delta":" files were deleted.\""}

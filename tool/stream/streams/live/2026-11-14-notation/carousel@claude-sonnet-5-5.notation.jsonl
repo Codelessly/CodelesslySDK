@@ -1,0 +1,217 @@
+{"meta":{"ui":"carousel","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"state view=0\nstate page=0\nstate size=\"\"\nCard w:390 gap:12\n  if view==0\n    Row middle gap:8\n      IconButton \"chevron_left\" -> page=max(0,page-1)\n      PageView grow h:300 =page\n        Column gap:8 pad:8 center\n          Image \"https://placehold.co/240x160?text=Aero+Run\" w:240 h:160 radius:12\n          Text.heading \"Aero Run\"\n          Text.strong \"$120\"\n          Row gap:4 center\n            Icon \"star\"\n            Text.muted \"4.8\"\n          Button.outline \"View details\" -> view=1\n        Column gap:8 pad:8 center\n          Image \"https://placehold.co/240x160?text=Trail+Blazer\" w:240 h:160 radius:12\n          Text.heading \"Trail Blazer\"\n          Text.strong \"$135\"\n          Row gap:4 center\n            Icon \"star\"\n            Text.muted \"4.6\"\n          Button.outline \"View details\" -> view=2\n        Column gap:8 pad:8 center\n          Image \"https://placehold.co/240x160?text=Swift+Pace\" w:240 h:160 radius:12\n          Text.heading \"Swift Pace\"\n          Text.strong \"$98\"\n          Row gap:4 center\n            Icon \"star\"\n            Text.muted \"4.4\"\n          Button.outline \"View details\" -> view=3\n        Column gap:8 pad:8 center\n          Image \"https://placehold.co/240x160?text=Cloud+Stride\" w:240 h:160 radius:12\n          Text.heading \"Cloud Stride\"\n          Text.strong \"$150\"\n          Row gap:4 center\n            Icon \"star\"\n            Text.muted \"4.9\"\n          Button.outline \"View details\" -> view=4\n        Column gap:8 pad:8 center\n          Image \"https://placehold.co/240x160?text=Road+Racer\" w:240 h:160 radius:12\n          Text.heading \"Road Racer\"\n          Text.strong \"$110\"\n          Row gap:4 center\n            Icon \"star\"\n            Text.muted \"4.5\"\n          Button.outline \"View details\" -> view=5\n        Column gap:8 pad:8 center\n          Image \"https://placehold.co/240x160?text=Tempo+Lite\" w:240 h:160 radius:12\n          Text.heading \"Tempo Lite\"\n          Text.strong \"$89\"\n          Row gap:4 center\n            Icon \"star\"\n            Text.muted \"4.3\"\n          Button.outline \"View details\" -> view=6\n      IconButton \"chevron_right\" -> page=min(5,page+1)\n    Row center gap:8\n      Icon \"circle\" visible:=page==0\n      Icon \"circle_outlined\" visible:=page!=0\n      Icon \"circle\" visible:=page==1\n      Icon \"circle_outlined\" visible:=page!=1\n      Icon \"circle\" visible:=page==2\n      Icon \"circle_outlined\" visible:=page!=2\n      Icon \"circle\" visible:=page==3\n      Icon \"circle_outlined\" visible:=page!=3\n      Icon \"circle\" visible:=page==4\n      Icon \"circle_outlined\" visible:=page!=4\n      Icon \"circle\" visible:=page==5\n      Icon \"circle_outlined\" visible:=page!=5\n  if view>0\n    Button.ghost \"Back to carousel\" -> view=0; size=\"\"\n    Image \"https://placehold.co/340x180?text=Shoe\" h:180 radius:12\n    if view==1\n      Text.title \"Aero Run - $120\"\n    if view==2\n      Text.title \"Trail Blazer - $135\"\n    if view==3\n      Text.title \"Swift Pace - $98\"\n    if view==4\n      Text.title \"Cloud Stride - $150\"\n    if view==5\n      Text.title \"Road Racer - $110\"\n    if view==6\n      Text.title \"Tempo Lite - $89\"\n    Text.muted \"A lightweight, cushioned running shoe with a breathable upper and a responsive sole for daily miles.\"\n    Text.strong \"Select size\"\n    Row gap:8\n      ChoiceChip \"8\" -> size=\"8\"\n      ChoiceChip \"9\" -> size=\"9\"\n      ChoiceChip \"10\" -> size=\"10\"\n      ChoiceChip \"11\" -> size=\"11\"\n    Button \"Add to bag\" -> emit addToBag size; toast \"Added to bag\"","usage":{"input_tokens":1538,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1461,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":647,"totalMs":7852}}
+{"tMs":647,"delta":"state view=0"}
+{"tMs":963,"delta":"\nstate page"}
+{"tMs":963,"delta":"=0\nstate size=\"\""}
+{"tMs":963,"delta":"\nCard"}
+{"tMs":964,"delta":" w:390 g"}
+{"tMs":964,"delta":"ap:12"}
+{"tMs":964,"delta":"\n  if view==0\n    "}
+{"tMs":964,"delta":"Row"}
+{"tMs":964,"delta":" midd"}
+{"tMs":964,"delta":"le g"}
+{"tMs":968,"delta":"ap:8\n      IconBut"}
+{"tMs":1001,"delta":"ton \"ch"}
+{"tMs":1037,"delta":"evron_left\" -> page"}
+{"tMs":1295,"delta":"=max(0,page-1"}
+{"tMs":1295,"delta":")\n      PageView gr"}
+{"tMs":1295,"delta":"ow h"}
+{"tMs":1295,"delta":":300"}
+{"tMs":1295,"delta":" =page\n        Column g"}
+{"tMs":1295,"delta":"ap:8 pad:8"}
+{"tMs":1295,"delta":" center\n          Image"}
+{"tMs":1306,"delta":" \"https://plac"}
+{"tMs":1340,"delta":"ehold.co/240"}
+{"tMs":1372,"delta":"x160"}
+{"tMs":1407,"delta":"?text=Aero+"}
+{"tMs":1440,"delta":"Run\" w"}
+{"tMs":1625,"delta":":240 h:160 "}
+{"tMs":1625,"delta":"radius:12\n          Text"}
+{"tMs":1625,"delta":".he"}
+{"tMs":1625,"delta":"ading \"Aero Run\""}
+{"tMs":1625,"delta":"\n          Text.strong \""}
+{"tMs":1640,"delta":"$120"}
+{"tMs":1675,"delta":"\"\n          Row"}
+{"tMs":1706,"delta":" g"}
+{"tMs":1740,"delta":"ap:4 center\n            "}
+{"tMs":1774,"delta":"Icon \"star\"\n            "}
+{"tMs":1807,"delta":"Text."}
+{"tMs":1841,"delta":"muted \"4.8"}
+{"tMs":1959,"delta":"\"\n          Button."}
+{"tMs":1959,"delta":"outline \"View"}
+{"tMs":1959,"delta":" details\" -> view"}
+{"tMs":1974,"delta":"=1"}
+{"tMs":2009,"delta":"\n        Column gap:8 "}
+{"tMs":2042,"delta":"pad:8 center\n          "}
+{"tMs":2075,"delta":"Image \"https://placehold"}
+{"tMs":2109,"delta":".co/240x160?text"}
+{"tMs":2142,"delta":"=Tr"}
+{"tMs":2176,"delta":"ail+Bl"}
+{"tMs":2208,"delta":"az"}
+{"tMs":2241,"delta":"er\" w:240 h:"}
+{"tMs":2291,"delta":"160 radius:12\n          "}
+{"tMs":2309,"delta":"Text.heading \"Tr"}
+{"tMs":2342,"delta":"ail Blazer\"\n          "}
+{"tMs":2376,"delta":"Text.strong \"$135"}
+{"tMs":2409,"delta":"\"\n          Row gap:"}
+{"tMs":2443,"delta":"4 center\n            Icon"}
+{"tMs":2477,"delta":" \"star\"\n            Text."}
+{"tMs":2510,"delta":"muted \"4.6"}
+{"tMs":2544,"delta":"\"\n          Button.outline"}
+{"tMs":2577,"delta":" \"View details\" -> view="}
+{"tMs":2610,"delta":"2\n        Column gap:"}
+{"tMs":2644,"delta":"8 pad:8 center"}
+{"tMs":2677,"delta":"\n          Image \"https://plac"}
+{"tMs":2711,"delta":"ehold.co/240x160"}
+{"tMs":2744,"delta":"?text=Sw"}
+{"tMs":2777,"delta":"ift+P"}
+{"tMs":2810,"delta":"ace"}
+{"tMs":2844,"delta":"\" w:240 h:160"}
+{"tMs":2878,"delta":" radius:12\n          "}
+{"tMs":2911,"delta":"Text.heading \"Swift"}
+{"tMs":2947,"delta":" Pace\"\n          Text"}
+{"tMs":2978,"delta":".strong \"$98"}
+{"tMs":3012,"delta":"\"\n          Row gap:"}
+{"tMs":3045,"delta":"4 center\n            Icon"}
+{"tMs":3078,"delta":" \"star\"\n            Text."}
+{"tMs":3111,"delta":"muted \"4.4"}
+{"tMs":3145,"delta":"\"\n          Button.outline"}
+{"tMs":3185,"delta":" \"View details\" -> view="}
+{"tMs":3211,"delta":"3\n        Column gap:"}
+{"tMs":3245,"delta":"8 pad:8 center"}
+{"tMs":3278,"delta":"\n          Image \"https://plac"}
+{"tMs":3312,"delta":"ehold.co/240x160"}
+{"tMs":3346,"delta":"?text=Cloud+"}
+{"tMs":3379,"delta":"St"}
+{"tMs":3412,"delta":"ride\" w:240 h:"}
+{"tMs":3445,"delta":"160 radius:12\n          "}
+{"tMs":3479,"delta":"Text.heading \"C"}
+{"tMs":3512,"delta":"loud Stride\"\n          "}
+{"tMs":3545,"delta":"Text.strong \"$150"}
+{"tMs":3579,"delta":"\"\n          Row gap:"}
+{"tMs":3612,"delta":"4 center\n            Icon"}
+{"tMs":3646,"delta":" \"star\"\n            Text."}
+{"tMs":3682,"delta":"muted \"4.9\""}
+{"tMs":3712,"delta":"\n          Button.outline \"View"}
+{"tMs":3746,"delta":" details\" -> view=4"}
+{"tMs":3779,"delta":"\n        Column gap:8 "}
+{"tMs":3813,"delta":"pad:8 center\n          "}
+{"tMs":3846,"delta":"Image \"https://placehold"}
+{"tMs":3879,"delta":".co/240x160?text"}
+{"tMs":3913,"delta":"=Road"}
+{"tMs":3946,"delta":"+Rac"}
+{"tMs":3979,"delta":"er\" w:240 h:"}
+{"tMs":4013,"delta":"160 radius:12\n          "}
+{"tMs":4046,"delta":"Text.heading \"Road"}
+{"tMs":4080,"delta":" Racer\"\n          Text"}
+{"tMs":4113,"delta":".strong \"$110"}
+{"tMs":4147,"delta":"\"\n          Row gap:"}
+{"tMs":4181,"delta":"4 center\n            Icon"}
+{"tMs":4213,"delta":" \"star\"\n            Text."}
+{"tMs":4247,"delta":"muted \"4.5\""}
+{"tMs":4280,"delta":"\n          Button.outline \"View"}
+{"tMs":4314,"delta":" details\" -> view=5"}
+{"tMs":4347,"delta":"\n        Column gap:8 "}
+{"tMs":4380,"delta":"pad:8 center\n          "}
+{"tMs":4414,"delta":"Image \"https://placehold"}
+{"tMs":4446,"delta":".co/240x160?text"}
+{"tMs":4480,"delta":"=Tempo+L"}
+{"tMs":4513,"delta":"ite\" w:240 h:"}
+{"tMs":4547,"delta":"160 radius:12\n          "}
+{"tMs":4581,"delta":"Text.heading \"T"}
+{"tMs":4614,"delta":"empo Lite\"\n          "}
+{"tMs":4647,"delta":"Text.strong \"$89"}
+{"tMs":4680,"delta":"\"\n          Row gap:"}
+{"tMs":4714,"delta":"4 center\n            Icon"}
+{"tMs":4747,"delta":" \"star\"\n            Text."}
+{"tMs":4781,"delta":"muted \"4.3\""}
+{"tMs":4814,"delta":"\n          Button.outline \"View"}
+{"tMs":4847,"delta":" details\" -> view=6"}
+{"tMs":4881,"delta":"\n      IconButton \"chev"}
+{"tMs":4914,"delta":"ron_right\" -> page="}
+{"tMs":4947,"delta":"min(5,page+1)"}
+{"tMs":4980,"delta":"\n    Row center g"}
+{"tMs":5014,"delta":"ap:8"}
+{"tMs":5047,"delta":"\n      Ic"}
+{"tMs":5080,"delta":"on \"circle\" vis"}
+{"tMs":5113,"delta":"ible:=page==0\n      "}
+{"tMs":5147,"delta":"Icon \"circle_"}
+{"tMs":5180,"delta":"outl"}
+{"tMs":5234,"delta":"ined\" visible:=page!"}
+{"tMs":5247,"delta":"=0\n      Icon \""}
+{"tMs":5280,"delta":"circle\" visible:=page"}
+{"tMs":5314,"delta":"==1\n      Icon \""}
+{"tMs":5348,"delta":"circle_outlined\" vis"}
+{"tMs":5381,"delta":"ible:=page!=1"}
+{"tMs":5414,"delta":"\n      Icon \"circle\""}
+{"tMs":5448,"delta":" visible:=page==2"}
+{"tMs":5480,"delta":"\n      Icon \"circle_"}
+{"tMs":5514,"delta":"outlined\" visible:="}
+{"tMs":5547,"delta":"page!=2\n      Ic"}
+{"tMs":5581,"delta":"on \"circle\" visible:"}
+{"tMs":5614,"delta":"=page==3\n      Ic"}
+{"tMs":5647,"delta":"on \"circle_outlined"}
+{"tMs":5681,"delta":"\" visible:=page!="}
+{"tMs":5714,"delta":"3\n      Icon \"circ"}
+{"tMs":5748,"delta":"le\" visible:=page=="}
+{"tMs":5781,"delta":"4\n      Icon \"circ"}
+{"tMs":5815,"delta":"le_outlined\" visible"}
+{"tMs":5847,"delta":":=page!=4\n      "}
+{"tMs":5881,"delta":"Icon \"circle\" vis"}
+{"tMs":5914,"delta":"ible:=page==5\n      "}
+{"tMs":5948,"delta":"Icon \"circle_out"}
+{"tMs":5981,"delta":"lined\" visible:=page"}
+{"tMs":6015,"delta":"!=5\n  if view>"}
+{"tMs":6048,"delta":"0\n    Button.gh"}
+{"tMs":6081,"delta":"ost \""}
+{"tMs":6115,"delta":"Back to carousel\" ->"}
+{"tMs":6148,"delta":" view"}
+{"tMs":6181,"delta":"=0; size=\"\""}
+{"tMs":6214,"delta":"\n    Image \"https://plac"}
+{"tMs":6247,"delta":"ehold.co/340"}
+{"tMs":6281,"delta":"x180"}
+{"tMs":6314,"delta":"?text=Sh"}
+{"tMs":6347,"delta":"oe\" h"}
+{"tMs":6381,"delta":":180 radius:12"}
+{"tMs":6414,"delta":"\n    if view==1\n      "}
+{"tMs":6448,"delta":"Text.title"}
+{"tMs":6480,"delta":" \"Aero Run -"}
+{"tMs":6514,"delta":" $120\"\n    if view=="}
+{"tMs":6547,"delta":"2\n      Text.title \""}
+{"tMs":6580,"delta":"Trail Blazer -"}
+{"tMs":6614,"delta":" $135\"\n    if view=="}
+{"tMs":6648,"delta":"3\n      Text.title \""}
+{"tMs":6681,"delta":"Swift Pace - $"}
+{"tMs":6714,"delta":"98\"\n    if view==4"}
+{"tMs":6748,"delta":"\n      Text.title \""}
+{"tMs":6780,"delta":"Cloud Stride - $"}
+{"tMs":6814,"delta":"150\"\n    if view==5"}
+{"tMs":6847,"delta":"\n      Text.title \""}
+{"tMs":6882,"delta":"Road Racer - $110\""}
+{"tMs":6914,"delta":"\n    if view==6\n      "}
+{"tMs":6947,"delta":"Text.title \"Temp"}
+{"tMs":6981,"delta":"o Lite - $89\""}
+{"tMs":7014,"delta":"\n    Text.muted \""}
+{"tMs":7047,"delta":"A"}
+{"tMs":7080,"delta":" lightweight, cushio"}
+{"tMs":7114,"delta":"ned running shoe with a"}
+{"tMs":7148,"delta":" breathable up"}
+{"tMs":7181,"delta":"per and a responsive s"}
+{"tMs":7214,"delta":"ole for daily mi"}
+{"tMs":7247,"delta":"les.\"\n    Text.str"}
+{"tMs":7281,"delta":"ong \"Select"}
+{"tMs":7314,"delta":" size\"\n    Row gap"}
+{"tMs":7348,"delta":":8\n      Choi"}
+{"tMs":7381,"delta":"ceChip \"8\" ->"}
+{"tMs":7414,"delta":" size=\"8\"\n      Ch"}
+{"tMs":7448,"delta":"oiceChip \"9\""}
+{"tMs":7481,"delta":" -> size=\"9\"\n      "}
+{"tMs":7515,"delta":"ChoiceChip \""}
+{"tMs":7547,"delta":"10\" -> size=\"10\""}
+{"tMs":7581,"delta":"\n      ChoiceCh"}
+{"tMs":7614,"delta":"ip \"11\" -> size=\""}
+{"tMs":7648,"delta":"11\"\n    Button \""}
+{"tMs":7681,"delta":"Add to bag\" -> em"}
+{"tMs":7714,"delta":"it add"}
+{"tMs":7748,"delta":"ToBag size"}
+{"tMs":7782,"delta":"; toast \"Added to b"}
+{"tMs":7814,"delta":"ag\""}

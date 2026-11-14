@@ -1,0 +1,203 @@
+{"meta":{"ui":"map_list","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"Card w:390 gap:12\n  state sel=0\n  Text.title \"Coffee shops near you\"\n  Stack w:fill h:190 fill:#FFEFEBE4 radius:12\n    Box w:fill h:6 y:70 fill:#FFFFFFFF\n    Box w:fill h:6 y:135 fill:#FFFFFFFF\n    Box w:6 h:fill x:110 fill:#FFFFFFFF\n    Box w:6 h:fill x:235 fill:#FFFFFFFF\n    Box w:fill h:4 y:20 fill:#FFFFFFFF\n    Box w:fill h:3 y:100 x:0 fill:#FFFAF8F4\n    Box w:28 h:28 x:30 y:30 radius:14 center middle fill:=sel==1?\"#FF1E88E5\":\"#FF6D4C41\" -> sel=1\n      Text \"1\"\n    Box w:28 h:28 x:130 y:90 radius:14 center middle fill:=sel==2?\"#FF1E88E5\":\"#FF6D4C41\" -> sel=2\n      Text \"2\"\n    Box w:28 h:28 x:250 y:35 radius:14 center middle fill:=sel==3?\"#FF1E88E5\":\"#FF6D4C41\" -> sel=3\n      Text \"3\"\n    Box w:28 h:28 x:55 y:145 radius:14 center middle fill:=sel==4?\"#FF1E88E5\":\"#FF6D4C41\" -> sel=4\n      Text \"4\"\n    Box w:28 h:28 x:290 y:120 radius:14 center middle fill:=sel==5?\"#FF1E88E5\":\"#FF6D4C41\" -> sel=5\n      Text \"5\"\n  if sel==0\n    Text.muted \"Tap a shop or pin for details.\"\n  if sel==1\n    Card gap:4\n      Text.strong \"Bean There\"\n      Text \"Rating 4.6 · 0.2 km\"\n      Text.muted \"Open 7:00–18:00\"\n  if sel==2\n    Card gap:4\n      Text.strong \"Blue Cup\"\n      Text \"Rating 4.4 · 0.4 km\"\n      Text.muted \"Open 6:30–17:00\"\n  if sel==3\n    Card gap:4\n      Text.strong \"Roast & Co\"\n      Text \"Rating 4.8 · 0.6 km\"\n      Text.muted \"Open 8:00–20:00\"\n  if sel==4\n    Card gap:4\n      Text.strong \"Morning Ritual\"\n      Text \"Rating 4.2 · 0.9 km\"\n      Text.muted \"Open 7:00–15:00\"\n  if sel==5\n    Card gap:4\n      Text.strong \"Daily Grind\"\n      Text \"Rating 4.5 · 1.1 km\"\n      Text.muted \"Open 6:00–22:00\"\n  Column gap:6\n    Row gap:10 middle pad:10 radius:8 fill:=sel==1?\"#FFBBDEFB\":\"#00000000\" -> sel=1\n      Badge \"1\"\n      Text.strong \"Bean There\"\n      Spacer grow\n      Text.muted \"0.2 km\"\n    Row gap:10 middle pad:10 radius:8 fill:=sel==2?\"#FFBBDEFB\":\"#00000000\" -> sel=2\n      Badge \"2\"\n      Text.strong \"Blue Cup\"\n      Spacer grow\n      Text.muted \"0.4 km\"\n    Row gap:10 middle pad:10 radius:8 fill:=sel==3?\"#FFBBDEFB\":\"#00000000\" -> sel=3\n      Badge \"3\"\n      Text.strong \"Roast & Co\"\n      Spacer grow\n      Text.muted \"0.6 km\"\n    Row gap:10 middle pad:10 radius:8 fill:=sel==4?\"#FFBBDEFB\":\"#00000000\" -> sel=4\n      Badge \"4\"\n      Text.strong \"Morning Ritual\"\n      Spacer grow\n      Text.muted \"0.9 km\"\n    Row gap:10 middle pad:10 radius:8 fill:=sel==5?\"#FFBBDEFB\":\"#00000000\" -> sel=5\n      Badge \"5\"\n      Text.strong \"Daily Grind\"\n      Spacer grow\n      Text.muted \"1.1 km\"","usage":{"input_tokens":1544,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":2214,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":754}},"ttftMs":7672,"totalMs":14398}}
+{"tMs":7672,"delta":"Card w:390 gap:"}
+{"tMs":7703,"delta":"12"}
+{"tMs":7737,"delta":"\n  state sel=0\n  "}
+{"tMs":7771,"delta":"Text.title \"Coff"}
+{"tMs":7804,"delta":"ee shops near you"}
+{"tMs":7837,"delta":"\"\n  Stack w"}
+{"tMs":7871,"delta":":fill h:190"}
+{"tMs":7904,"delta":" fill:#FFE"}
+{"tMs":7938,"delta":"FEBE4 radius"}
+{"tMs":7971,"delta":":12\n    Box w:"}
+{"tMs":8005,"delta":"fill h:6 y"}
+{"tMs":8039,"delta":":70 fill:#F"}
+{"tMs":8072,"delta":"FFFFFFF"}
+{"tMs":8106,"delta":"\n    Box w:fill h"}
+{"tMs":8139,"delta":":6 y:135"}
+{"tMs":8172,"delta":" fill:#FFF"}
+{"tMs":8206,"delta":"FFFFF\n    "}
+{"tMs":8240,"delta":"Box w:6 h:f"}
+{"tMs":8274,"delta":"ill x:110 fill:"}
+{"tMs":8307,"delta":"#FFFFFFF"}
+{"tMs":8341,"delta":"F\n    Box w:6"}
+{"tMs":8375,"delta":" h:fill x:235"}
+{"tMs":8409,"delta":" fill:#FFF"}
+{"tMs":8441,"delta":"FFFFF\n    "}
+{"tMs":8475,"delta":"Box w:f"}
+{"tMs":8508,"delta":"ill h"}
+{"tMs":8541,"delta":":4 y:20 f"}
+{"tMs":8577,"delta":"ill:#FFFFF"}
+{"tMs":8615,"delta":"FFF\n    Box w"}
+{"tMs":8642,"delta":":f"}
+{"tMs":8675,"delta":"ill h:3"}
+{"tMs":8708,"delta":" y:100"}
+{"tMs":8741,"delta":" x"}
+{"tMs":8775,"delta":":0"}
+{"tMs":8809,"delta":" fill:#FFF"}
+{"tMs":8843,"delta":"A"}
+{"tMs":8875,"delta":"F"}
+{"tMs":8908,"delta":"8"}
+{"tMs":8941,"delta":"F4"}
+{"tMs":8975,"delta":"\n    Box w:28"}
+{"tMs":9008,"delta":" h:28 x:30"}
+{"tMs":9043,"delta":" y:30 radius:"}
+{"tMs":9075,"delta":"14 center middle fill:"}
+{"tMs":9109,"delta":"=sel==1?\"#"}
+{"tMs":9142,"delta":"FF1"}
+{"tMs":9175,"delta":"E88E5\":\"#F"}
+{"tMs":9209,"delta":"F6D4C41"}
+{"tMs":9243,"delta":"\" -> sel=1"}
+{"tMs":9277,"delta":"\n      Text \"1\""}
+{"tMs":9310,"delta":"\n    Box w:28 "}
+{"tMs":9343,"delta":"h:28 x:130 "}
+{"tMs":9377,"delta":"y:90"}
+{"tMs":9413,"delta":" radius:14 center midd"}
+{"tMs":9446,"delta":"le fill:=sel=="}
+{"tMs":9477,"delta":"2?\"#FF1E"}
+{"tMs":9510,"delta":"88E5\":\"#FF"}
+{"tMs":9543,"delta":"6D4C41\" ->"}
+{"tMs":9579,"delta":" sel=2\n      Text"}
+{"tMs":9611,"delta":" \"2\"\n    Box w"}
+{"tMs":9644,"delta":":28 h:28 x"}
+{"tMs":9678,"delta":":250 y:35"}
+{"tMs":9711,"delta":" radius:14 center midd"}
+{"tMs":9744,"delta":"le fill:=sel=="}
+{"tMs":9779,"delta":"3?\"#FF1E"}
+{"tMs":9811,"delta":"88E5\":\"#FF"}
+{"tMs":9845,"delta":"6D4C41\" ->"}
+{"tMs":9879,"delta":" sel=3\n      Text"}
+{"tMs":9912,"delta":" \"3\"\n    Box w"}
+{"tMs":9946,"delta":":28 h:28 x"}
+{"tMs":9979,"delta":":55"}
+{"tMs":10012,"delta":" y:145 radius:"}
+{"tMs":10045,"delta":"14 center middle fill:"}
+{"tMs":10079,"delta":"=sel==4?\"#"}
+{"tMs":10112,"delta":"FF1E88E5\":"}
+{"tMs":10150,"delta":"\"#FF6D4C"}
+{"tMs":10179,"delta":"41\" -> sel=4"}
+{"tMs":10213,"delta":"\n      Text \"4\""}
+{"tMs":10246,"delta":"\n    Box w:28 h"}
+{"tMs":10280,"delta":":28 x:290"}
+{"tMs":10314,"delta":" y:120"}
+{"tMs":10347,"delta":" radius:14 center midd"}
+{"tMs":10380,"delta":"le fill:=sel=="}
+{"tMs":10413,"delta":"5?\"#FF1E"}
+{"tMs":10447,"delta":"88E5\":\"#FF"}
+{"tMs":10481,"delta":"6D4C41\" ->"}
+{"tMs":10515,"delta":" sel=5\n      Text"}
+{"tMs":10547,"delta":" \"5\"\n  if sel"}
+{"tMs":10582,"delta":"==0\n    Text"}
+{"tMs":10614,"delta":".muted \"Tap a"}
+{"tMs":10648,"delta":" shop or pin for"}
+{"tMs":10682,"delta":" details.\"\n  if sel=="}
+{"tMs":10715,"delta":"1\n    Card gap:"}
+{"tMs":10748,"delta":"4\n      Text.strong"}
+{"tMs":10782,"delta":" \""}
+{"tMs":10814,"delta":"Bean There\"\n      Text"}
+{"tMs":10848,"delta":" \""}
+{"tMs":10881,"delta":"Rating "}
+{"tMs":10915,"delta":"4.6 ·"}
+{"tMs":10948,"delta":" 0.2 km\""}
+{"tMs":10981,"delta":"\n      Text.mu"}
+{"tMs":11015,"delta":"ted \"Open 7:00"}
+{"tMs":11049,"delta":"–18:00\"\n  if"}
+{"tMs":11082,"delta":" sel==2\n    Card"}
+{"tMs":11115,"delta":" gap:4\n      Text"}
+{"tMs":11149,"delta":".strong \"Blue"}
+{"tMs":11182,"delta":" Cup\"\n      Text \""}
+{"tMs":11216,"delta":"Rating 4.4 "}
+{"tMs":11249,"delta":"· 0.4 km\""}
+{"tMs":11282,"delta":"\n      Text.muted \""}
+{"tMs":11316,"delta":"Open 6:30–17"}
+{"tMs":11349,"delta":":00\"\n  if sel"}
+{"tMs":11382,"delta":"==3\n    Card gap"}
+{"tMs":11416,"delta":":4\n      Text.str"}
+{"tMs":11450,"delta":"ong \"Roast & Co"}
+{"tMs":11483,"delta":"\"\n      Text \"R"}
+{"tMs":11516,"delta":"ating 4.8 · "}
+{"tMs":11549,"delta":"0.6 km\"\n      "}
+{"tMs":11584,"delta":"Text.muted \"Open"}
+{"tMs":11616,"delta":" 8:00–20:00"}
+{"tMs":11652,"delta":"\"\n  if sel==4"}
+{"tMs":11685,"delta":"\n    Card gap:4"}
+{"tMs":11717,"delta":"\n      Text.strong \""}
+{"tMs":11751,"delta":"Morning Ritual\""}
+{"tMs":11787,"delta":"\n      Text \"Rating"}
+{"tMs":11820,"delta":" 4.2 · 0"}
+{"tMs":11850,"delta":".9 km\"\n      "}
+{"tMs":11883,"delta":"Text.muted \"Open "}
+{"tMs":11917,"delta":"7:00–15:00\""}
+{"tMs":11951,"delta":"\n  if sel==5"}
+{"tMs":11984,"delta":"\n    Card gap:4"}
+{"tMs":12017,"delta":"\n      Text.strong \""}
+{"tMs":12051,"delta":"Daily Grind\"\n      "}
+{"tMs":12084,"delta":"Text \"Rating 4"}
+{"tMs":12118,"delta":".5 · 1.1"}
+{"tMs":12151,"delta":" km\"\n      Text."}
+{"tMs":12184,"delta":"muted \"Open 6:"}
+{"tMs":12217,"delta":"00–22:00\"\n  "}
+{"tMs":12251,"delta":"Column gap:6"}
+{"tMs":12284,"delta":"\n    Row gap:10"}
+{"tMs":12323,"delta":" middle pad:10"}
+{"tMs":12355,"delta":" radius:8 fill"}
+{"tMs":12389,"delta":":=sel==1?\""}
+{"tMs":12418,"delta":"#FFB"}
+{"tMs":12451,"delta":"BDEF"}
+{"tMs":12485,"delta":"B\":\"#00"}
+{"tMs":12518,"delta":"000000\" -> sel="}
+{"tMs":12552,"delta":"1\n      Bad"}
+{"tMs":12585,"delta":"ge \"1\""}
+{"tMs":12618,"delta":"\n      Text.strong \""}
+{"tMs":12651,"delta":"Bean There\"\n      "}
+{"tMs":12685,"delta":"Spacer grow\n      "}
+{"tMs":12727,"delta":"Text.muted \"0.2"}
+{"tMs":12751,"delta":" km\"\n    Row g"}
+{"tMs":12785,"delta":"ap:10 middle pad"}
+{"tMs":12819,"delta":":10 radius:8 "}
+{"tMs":12852,"delta":"fill:=sel==2"}
+{"tMs":12885,"delta":"?\"#FFBBD"}
+{"tMs":12922,"delta":"EFB\":\"#00000"}
+{"tMs":12952,"delta":"000\" -> sel=2"}
+{"tMs":12985,"delta":"\n      Badge \"2\""}
+{"tMs":13019,"delta":"\n      Text.strong \""}
+{"tMs":13052,"delta":"Blue Cup\""}
+{"tMs":13086,"delta":"\n      Spacer grow"}
+{"tMs":13126,"delta":"\n      Text.muted \"0"}
+{"tMs":13157,"delta":".4 km\"\n    "}
+{"tMs":13191,"delta":"Row gap:10 middle"}
+{"tMs":13221,"delta":" pad:10 radius:"}
+{"tMs":13256,"delta":"8 fill:=sel"}
+{"tMs":13289,"delta":"==3?\"#FFB"}
+{"tMs":13324,"delta":"BDEFB\":\"#"}
+{"tMs":13356,"delta":"00000000\" -> sel"}
+{"tMs":13389,"delta":"=3\n      Badge \""}
+{"tMs":13421,"delta":"3\"\n      Text.str"}
+{"tMs":13454,"delta":"ong \"Roast & Co"}
+{"tMs":13491,"delta":"\"\n      Spacer gr"}
+{"tMs":13520,"delta":"ow\n      Text.muted"}
+{"tMs":13553,"delta":" \"0.6 km\""}
+{"tMs":13587,"delta":"\n    Row gap:10 "}
+{"tMs":13620,"delta":"middle pad:10 rad"}
+{"tMs":13655,"delta":"ius:8 fill:="}
+{"tMs":13686,"delta":"sel==4?\"#F"}
+{"tMs":13720,"delta":"FBBDEFB\":"}
+{"tMs":13753,"delta":"\"#00000000\" ->"}
+{"tMs":13787,"delta":" sel=4\n      Bad"}
+{"tMs":13820,"delta":"ge \"4\"\n      Text"}
+{"tMs":13855,"delta":".strong \"Morning"}
+{"tMs":13887,"delta":" Ritual\"\n      Sp"}
+{"tMs":13920,"delta":"acer grow\n      Text"}
+{"tMs":13953,"delta":".muted \"0.9 "}
+{"tMs":13987,"delta":"km\"\n    Row gap"}
+{"tMs":14020,"delta":":10 middle pad:"}
+{"tMs":14054,"delta":"10 radius:8 f"}
+{"tMs":14087,"delta":"ill:=sel==5?"}
+{"tMs":14120,"delta":"\"#FFBBDE"}
+{"tMs":14158,"delta":"FB\":\"#00000000"}
+{"tMs":14187,"delta":"\" -> sel=5"}
+{"tMs":14221,"delta":"\n      Badge \"5\""}
+{"tMs":14264,"delta":"\n      Text.strong \""}
+{"tMs":14287,"delta":"Daily Grind\"\n      "}
+{"tMs":14320,"delta":"Spacer grow\n      "}
+{"tMs":14354,"delta":"Text.muted \"1."}
+{"tMs":14387,"delta":"1 km\""}

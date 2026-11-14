@@ -1,0 +1,137 @@
+{"meta":{"ui":"code_diff","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"state h1=0\nstate h2=0\nstate h3=0\nCard w:390 gap:12\n  Text.title \"Review config changes\"\n  Text.muted \"{(h1==1?1:0)+(h2==1?1:0)+(h3==1?1:0)} of 3 hunks kept\"\n  Card gap:8\n    Row between middle\n      Text.strong \"Hunk 1 · lines 4-6\"\n      Badge.success \"Kept\" visible:=h1==1\n      Badge.danger \"Discarded\" visible:=h1==2\n    Box gap:2 pad:8 fill:#FFF5F5F5 radius:4\n      Text font:mono \"4     port = 8080\"\n      Box fill:#FFFFE5E5 pad:[4,2,4,2]\n        Text.danger font:mono \"5  -  host = 'localhost'\"\n      Box fill:#FFE3F6E5 pad:[4,2,4,2]\n        Text.success font:mono \"5  +  host = '0.0.0.0'\"\n      Text font:mono \"6     debug = false\"\n    Row gap:8\n      Button.primary \"Keep\" -> h1=1\n      Button.outline \"Discard\" -> h1=2\n  Card gap:8\n    Row between middle\n      Text.strong \"Hunk 2 · lines 12-14\"\n      Badge.success \"Kept\" visible:=h2==1\n      Badge.danger \"Discarded\" visible:=h2==2\n    Box gap:2 pad:8 fill:#FFF5F5F5 radius:4\n      Text font:mono \"12    [database]\"\n      Box fill:#FFFFE5E5 pad:[4,2,4,2]\n        Text.danger font:mono \"13 -  pool = 5\"\n      Box fill:#FFE3F6E5 pad:[4,2,4,2]\n        Text.success font:mono \"13 +  pool = 20\"\n      Box fill:#FFE3F6E5 pad:[4,2,4,2]\n        Text.success font:mono \"14 +  timeout = 30\"\n    Row gap:8\n      Button.primary \"Keep\" -> h2=1\n      Button.outline \"Discard\" -> h2=2\n  Card gap:8\n    Row between middle\n      Text.strong \"Hunk 3 · lines 21-23\"\n      Badge.success \"Kept\" visible:=h3==1\n      Badge.danger \"Discarded\" visible:=h3==2\n    Box gap:2 pad:8 fill:#FFF5F5F5 radius:4\n      Text font:mono \"21    [logging]\"\n      Box fill:#FFFFE5E5 pad:[4,2,4,2]\n        Text.danger font:mono \"22 -  level = 'debug'\"\n      Box fill:#FFE3F6E5 pad:[4,2,4,2]\n        Text.success font:mono \"22 +  level = 'warn'\"\n      Text font:mono \"23    file = 'app.log'\"\n    Row gap:8\n      Button.primary \"Keep\" -> h3=1\n      Button.outline \"Discard\" -> h3=2\n  Button \"Apply changes\" enabled:=h1>0&&h2>0&&h3>0 -> emit apply; toast \"Changes applied\"","usage":{"input_tokens":2754,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1681,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":621}},"ttftMs":6042,"totalMs":10564}}
+{"tMs":6042,"delta":"state"}
+{"tMs":6075,"delta":" h1=0"}
+{"tMs":6109,"delta":"\nstate h2=0\nstate"}
+{"tMs":6143,"delta":" h3=0\nCard w"}
+{"tMs":6176,"delta":":390 gap:12"}
+{"tMs":6211,"delta":"\n  Text.title \"Review"}
+{"tMs":6255,"delta":" config changes\"\n  Text"}
+{"tMs":6284,"delta":".muted \"{(h1"}
+{"tMs":6310,"delta":"==1?1:0)+"}
+{"tMs":6344,"delta":"(h2==1?1:"}
+{"tMs":6377,"delta":"0)+(h3==1"}
+{"tMs":6411,"delta":"?1:0)} of "}
+{"tMs":6445,"delta":"3 hunks kept\""}
+{"tMs":6478,"delta":"\n  Card gap:8"}
+{"tMs":6512,"delta":"\n    Row between middle"}
+{"tMs":6546,"delta":"\n      Text.strong \""}
+{"tMs":6579,"delta":"Hunk 1 · l"}
+{"tMs":6613,"delta":"ines 4-6\"\n      "}
+{"tMs":6646,"delta":"Badge.success \"K"}
+{"tMs":6680,"delta":"ept\" visible:=h1"}
+{"tMs":6713,"delta":"==1\n      Badge."}
+{"tMs":6747,"delta":"danger \"Discarded\""}
+{"tMs":6780,"delta":" visible:=h1"}
+{"tMs":6814,"delta":"==2\n    Box g"}
+{"tMs":6847,"delta":"ap:2 p"}
+{"tMs":6881,"delta":"ad:8 fill:#"}
+{"tMs":6915,"delta":"FFF5F5F5"}
+{"tMs":6948,"delta":" radius:4\n      "}
+{"tMs":6982,"delta":"Text font:mono \"4     "}
+{"tMs":7015,"delta":"port = 8080\"\n      "}
+{"tMs":7049,"delta":"Box fill:#FF"}
+{"tMs":7082,"delta":"FFE5E5 p"}
+{"tMs":7116,"delta":"ad:[4,2,4"}
+{"tMs":7150,"delta":",2]\n        Text."}
+{"tMs":7183,"delta":"danger font:mono \"5"}
+{"tMs":7216,"delta":"  -"}
+{"tMs":7249,"delta":"  host = 'localhost"}
+{"tMs":7283,"delta":"'\"\n      Box fill"}
+{"tMs":7316,"delta":":#FFE3F6"}
+{"tMs":7350,"delta":"E5 pad:[4"}
+{"tMs":7383,"delta":",2,4,2]"}
+{"tMs":7417,"delta":"\n        Text.success font:m"}
+{"tMs":7453,"delta":"ono \"5  +  host ="}
+{"tMs":7484,"delta":" '0.0.0.0"}
+{"tMs":7518,"delta":"'\"\n      Text font:"}
+{"tMs":7552,"delta":"mono \"6     debug ="}
+{"tMs":7585,"delta":" false\"\n    Row gap"}
+{"tMs":7618,"delta":":8\n      Button.prim"}
+{"tMs":7651,"delta":"ary \"Keep\" ->"}
+{"tMs":7685,"delta":" h1=1\n      Button"}
+{"tMs":7719,"delta":".outline \"Discard\""}
+{"tMs":7752,"delta":" -> h1=2\n  "}
+{"tMs":7786,"delta":"Card gap:8\n    "}
+{"tMs":7820,"delta":"Row between middle\n      "}
+{"tMs":7852,"delta":"Text.strong \"Hun"}
+{"tMs":7886,"delta":"k 2 · lines "}
+{"tMs":7919,"delta":"12-14\"\n      Bad"}
+{"tMs":7953,"delta":"ge.success \"Kept\""}
+{"tMs":7986,"delta":" visible:=h2==1"}
+{"tMs":8020,"delta":"\n      Badge.danger"}
+{"tMs":8053,"delta":" \"Discarded\" visible"}
+{"tMs":8086,"delta":":=h2==2\n    "}
+{"tMs":8122,"delta":"Box gap:2 p"}
+{"tMs":8153,"delta":"ad:8 fill:#"}
+{"tMs":8187,"delta":"FFF5F5F5"}
+{"tMs":8221,"delta":" radius:4\n      "}
+{"tMs":8254,"delta":"Text font:mono \"12    "}
+{"tMs":8290,"delta":"[database]\"\n      Box"}
+{"tMs":8321,"delta":" fill:#FFFF"}
+{"tMs":8353,"delta":"E5E5 pad:"}
+{"tMs":8387,"delta":"[4,2,4,2"}
+{"tMs":8421,"delta":"]\n        Text.danger"}
+{"tMs":8454,"delta":" font:mono \"13 "}
+{"tMs":8487,"delta":"-  pool = 5\""}
+{"tMs":8521,"delta":"\n      Box fill:#"}
+{"tMs":8554,"delta":"FFE3F6E5"}
+{"tMs":8588,"delta":" pad:[4,2"}
+{"tMs":8622,"delta":",4,2]\n        "}
+{"tMs":8655,"delta":"Text.success font:mono \""}
+{"tMs":8688,"delta":"13 +  pool = "}
+{"tMs":8722,"delta":"20\"\n      Box fill"}
+{"tMs":8755,"delta":":#FFE3F6"}
+{"tMs":8788,"delta":"E5 pad:[4"}
+{"tMs":8822,"delta":",2,4,2]"}
+{"tMs":8856,"delta":"\n        Text.success font:m"}
+{"tMs":8890,"delta":"ono \"14 +  time"}
+{"tMs":8922,"delta":"out = 30\"\n    "}
+{"tMs":8959,"delta":"Row gap:8\n      "}
+{"tMs":8989,"delta":"Button.primary \"Keep"}
+{"tMs":9022,"delta":"\" -> h2=1"}
+{"tMs":9056,"delta":"\n      Button.outline \""}
+{"tMs":9089,"delta":"Discard\" -> h2="}
+{"tMs":9125,"delta":"2\n  Card gap:"}
+{"tMs":9156,"delta":"8\n    Row between middle"}
+{"tMs":9190,"delta":"\n      Text.strong \""}
+{"tMs":9224,"delta":"Hunk 3 ·"}
+{"tMs":9256,"delta":" lines 21-23\""}
+{"tMs":9290,"delta":"\n      Badge.success \""}
+{"tMs":9323,"delta":"Kept\" visible:=h"}
+{"tMs":9357,"delta":"3==1\n      Badge"}
+{"tMs":9390,"delta":".danger \"Discarded"}
+{"tMs":9424,"delta":"\" visible:=h3=="}
+{"tMs":9457,"delta":"2\n    Box gap:"}
+{"tMs":9493,"delta":"2 pad:8 f"}
+{"tMs":9524,"delta":"ill:#FFF5F"}
+{"tMs":9557,"delta":"5F5 radius:4"}
+{"tMs":9590,"delta":"\n      Text font:mono"}
+{"tMs":9623,"delta":" \"21    [logging]\""}
+{"tMs":9658,"delta":"\n      Box fill:#"}
+{"tMs":9691,"delta":"FFFFE5E5"}
+{"tMs":9724,"delta":" pad:[4,2"}
+{"tMs":9757,"delta":",4,2]\n        "}
+{"tMs":9791,"delta":"Text.danger font:mono"}
+{"tMs":9824,"delta":" \"22 -  level = "}
+{"tMs":9858,"delta":"'debug'\"\n      "}
+{"tMs":9891,"delta":"Box fill:#FFE"}
+{"tMs":9925,"delta":"3F6E5 pad"}
+{"tMs":9961,"delta":":[4,2,4,"}
+{"tMs":9991,"delta":"2]\n        Text.success"}
+{"tMs":10024,"delta":" font:mono \"22 +"}
+{"tMs":10060,"delta":"  level = 'warn'"}
+{"tMs":10091,"delta":"\"\n      Text font:m"}
+{"tMs":10125,"delta":"ono \"23    file = '"}
+{"tMs":10158,"delta":"app.log'\"\n    "}
+{"tMs":10192,"delta":"Row gap:8\n      "}
+{"tMs":10225,"delta":"Button.primary \"Keep"}
+{"tMs":10259,"delta":"\" -> h3=1"}
+{"tMs":10291,"delta":"\n      Button.outline \""}
+{"tMs":10325,"delta":"Discard\" -> h3="}
+{"tMs":10358,"delta":"2\n  Button \"Ap"}
+{"tMs":10392,"delta":"ply changes\" enabled:"}
+{"tMs":10425,"delta":"=h1>0&&h"}
+{"tMs":10459,"delta":"2>0&&h3>"}
+{"tMs":10492,"delta":"0 -> emit apply"}
+{"tMs":10525,"delta":"; toast \"Changes appl"}
+{"tMs":10559,"delta":"ied\""}

@@ -1,0 +1,72 @@
+{
+ "ui": "plan_progress",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3959,
+ "turns": [
+  {
+   "input_tokens": 1702,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 701,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 473,
+   "totalMs": 3003,
+   "chars": 1848,
+   "lines": 62,
+   "jsonTails": 0,
+   "nodes": 50,
+   "outputTokensPerNode": "14.0",
+   "notationIssues": [],
+   "errors": [
+    "children_not_allowed /nodes/listTile1/children: A listTile takes no \"children\": it takes slots (leading, title, subtitle, trailing). Put the child under \"slots\", e.g. {\"leading\": \"<id>\"}.",
+    "children_not_allowed /nodes/listTile2/children: A listTile takes no \"children\": it takes slots (leading, title, subtitle, trailing). Put the child under \"slots\", e.g. {\"leading\": \"<id>\"}.",
+    "children_not_allowed /nodes/listTile3/children: A listTile takes no \"children\": it takes slots (leading, title, subtitle, trailing). Put the child under \"slots\", e.g. {\"leading\": \"<id>\"}.",
+    "children_not_allowed /nodes/listTile4/children: A listTile takes no \"children\": it takes slots (leading, title, subtitle, trailing). Put the child under \"slots\", e.g. {\"leading\": \"<id>\"}.",
+    "children_not_allowed /nodes/listTile5/children: A listTile takes no \"children\": it takes slots (leading, title, subtitle, trailing). Put the child under \"slots\", e.g. {\"leading\": \"<id>\"}.",
+    "children_not_allowed /nodes/listTile6/children: A listTile takes no \"children\": it takes slots (leading, title, subtitle, trailing). Put the child under \"slots\", e.g. {\"leading\": \"<id>\"}.",
+    "unknown_name /nodes/text2/props/text: \"elapsed\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/progressBar1/bind/props.value: \"progress\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "unknown_name /nodes/text16/props/text: \"elapsed\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  },
+  {
+   "input_tokens": 3255,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 958,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 412,
+   "totalMs": 3554,
+   "chars": 2589,
+   "lines": 74,
+   "jsonTails": 0,
+   "nodes": 50,
+   "outputTokensPerNode": "19.2",
+   "notationIssues": [
+    "line 1:1: No node type \"I\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…).",
+    "line 3:1: No node type \"The\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": []
+  }
+ ]
+}

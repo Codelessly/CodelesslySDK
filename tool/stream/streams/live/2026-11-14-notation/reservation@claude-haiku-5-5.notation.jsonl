@@ -1,0 +1,68 @@
+{"meta":{"ui":"reservation","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"Card gap:12 pad:16 w:390\n  Text.title \"Book a table\"\n  Select =day items:[\"Mon 12 May\",\"Tue 13 May\",\"Wed 14 May\",\"Thu 15 May\",\"Fri 16 May\",\"Sat 17 May\",\"Sun 18 May\"] -> time=\"\"\n  Select =size items:[\"1\",\"2\",\"3\",\"4\",\"5\",\"6\",\"7\",\"8\"] -> time=\"\"\n  Text.strong \"Choose a time\"\n  Grid cols:3 gap:8\n    ChoiceChip \"18:00\" =time -> time=\"18:00\"\n    ChoiceChip \"18:30\" =time -> time=\"18:30\"\n    ChoiceChip \"19:00\" =time -> time=\"19:00\"\n    ChoiceChip \"19:30\" =time -> time=\"19:30\"\n    ChoiceChip \"20:00\" =time -> time=\"20:00\"\n    ChoiceChip \"20:30\" =time -> time=\"20:30\"\n    ChoiceChip \"21:00\" =time -> time=\"21:00\"\n    ChoiceChip \"21:30\" =time -> time=\"21:30\"\n  Text.muted \"Full slots are hidden for this day and party size.\"\n  Button \"Confirm booking\" -> emit book; toast \"Booked {size} for {day} at {time}\"","usage":{"input_tokens":1534,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":410,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":975,"totalMs":2350}}
+{"tMs":975,"delta":"Card g"}
+{"tMs":1150,"delta":"ap:12"}
+{"tMs":1150,"delta":" p"}
+{"tMs":1151,"delta":"ad:16 w:390"}
+{"tMs":1152,"delta":"\n  Text.title \"Book"}
+{"tMs":1152,"delta":" a table\"\n  Select ="}
+{"tMs":1152,"delta":"day"}
+{"tMs":1152,"delta":" items:[\"Mon "}
+{"tMs":1156,"delta":"12 "}
+{"tMs":1176,"delta":"May"}
+{"tMs":1197,"delta":"\",\"Tue 13 May"}
+{"tMs":1219,"delta":"\",\"Wed 14 May"}
+{"tMs":1239,"delta":"\",\"Thu 15 May"}
+{"tMs":1383,"delta":"\",\"Fri 16 May"}
+{"tMs":1383,"delta":"\",\"Sat 17 May"}
+{"tMs":1383,"delta":"\",\"Sun 18 May"}
+{"tMs":1383,"delta":"\"]"}
+{"tMs":1383,"delta":" -> time"}
+{"tMs":1383,"delta":"=\"\""}
+{"tMs":1384,"delta":"\n  Select =size"}
+{"tMs":1404,"delta":" items:[\"1\",\"2\",\"3"}
+{"tMs":1424,"delta":"\",\"4\",\"5\",\"6\",\"7"}
+{"tMs":1446,"delta":"\",\"8\"] -> time="}
+{"tMs":1465,"delta":"\"\"\n  Text.str"}
+{"tMs":1486,"delta":"ong \"Cho"}
+{"tMs":1555,"delta":"ose a time\"\n  Gr"}
+{"tMs":1555,"delta":"id c"}
+{"tMs":1555,"delta":"ols:3"}
+{"tMs":1568,"delta":" gap:8\n    "}
+{"tMs":1589,"delta":"ChoiceChip \"18"}
+{"tMs":1609,"delta":":00\" ="}
+{"tMs":1629,"delta":"time -"}
+{"tMs":1649,"delta":"> time=\""}
+{"tMs":1670,"delta":"18:00\"\n    Ch"}
+{"tMs":1690,"delta":"oiceChip \"18"}
+{"tMs":1711,"delta":":30\" =time -> time"}
+{"tMs":1731,"delta":"=\"18:30\"\n    "}
+{"tMs":1752,"delta":"ChoiceChip \"19"}
+{"tMs":1772,"delta":":00\" =time -> time"}
+{"tMs":1793,"delta":"=\"19:00\"\n    "}
+{"tMs":1814,"delta":"ChoiceChip \"19"}
+{"tMs":1834,"delta":":30\" =time -> time"}
+{"tMs":1854,"delta":"=\"19:30\""}
+{"tMs":1875,"delta":"\n    ChoiceCh"}
+{"tMs":1895,"delta":"ip \"20:00\" =time"}
+{"tMs":1916,"delta":" -> time=\"20:00\""}
+{"tMs":1936,"delta":"\n    ChoiceCh"}
+{"tMs":1957,"delta":"ip \"20:30\" =time"}
+{"tMs":1977,"delta":" -> time=\"20:30\""}
+{"tMs":1998,"delta":"\n    ChoiceCh"}
+{"tMs":2019,"delta":"ip \"21:00\" =time"}
+{"tMs":2038,"delta":" -> time=\"21:00\""}
+{"tMs":2059,"delta":"\n    ChoiceCh"}
+{"tMs":2079,"delta":"ip \"21:30\" =time"}
+{"tMs":2100,"delta":" -> time=\"21:30\""}
+{"tMs":2121,"delta":"\n  "}
+{"tMs":2141,"delta":"Text.mu"}
+{"tMs":2161,"delta":"ted \"Full slots are h"}
+{"tMs":2181,"delta":"idden for"}
+{"tMs":2202,"delta":" this"}
+{"tMs":2222,"delta":" day and party size.\"\n  "}
+{"tMs":2243,"delta":"Button \"Confirm boo"}
+{"tMs":2263,"delta":"king\" -> emit book"}
+{"tMs":2283,"delta":"; toast \"Booked {"}
+{"tMs":2304,"delta":"size"}
+{"tMs":2324,"delta":"} for {day"}
+{"tMs":2345,"delta":"} at {time}\""}

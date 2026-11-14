@@ -1,0 +1,96 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"Card gap:12 pad:16 w:390\n  Text.title \"Compare phone plans\"\n  Row gap:12 top\n    Column grow gap:8\n      Text.heading \"Plan A\"\n      Text.strong \"\\$30/mo\"\n      Text.body \"Data: 20 GB\"\n      Text.body \"Calls: Unlimited\"\n      Text.body \"Roaming: 500 MB included\"\n      Text.body \"Contract: 12 months\"\n      Text.body \"Extras: Hotspot\"\n      Badge.success \"Better value: data, roaming\"\n      Button.primary \"Choose Plan A\" -> emit pick \"A\"; toast \"You picked Plan A\"\n    Column grow gap:8\n      Text.heading \"Plan B\"\n      Text.strong \"\\$38/mo\"\n      Text.body \"Data: 50 GB\"\n      Text.body \"Calls: Unlimited\"\n      Text.body \"Roaming: 2 GB included\"\n      Text.body \"Contract: 24 months\"\n      Text.body \"Extras: Hotspot, streaming\"\n      Badge.success \"Better value: price, contract\"\n      Button.primary \"Choose Plan B\" -> emit pick \"B\"; toast \"You picked Plan B\"\n  Divider\n  Text.strong \"Recommendation\"\n  Text.body \"Plan B gives you far more data and roaming for \\$8 more a month, and its longer contract is worth it if you'll keep the same number for two years.\"","usage":{"input_tokens":1695,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":473,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":979,"totalMs":2892}}
+{"tMs":979,"delta":"Card"}
+{"tMs":1048,"delta":" gap:12 "}
+{"tMs":1048,"delta":"pad:16 "}
+{"tMs":1050,"delta":"w:390\n  Text."}
+{"tMs":1051,"delta":"title \"Comp"}
+{"tMs":1068,"delta":"are ph"}
+{"tMs":1090,"delta":"one plans\"\n  Row"}
+{"tMs":1110,"delta":" gap:12 "}
+{"tMs":1129,"delta":"top"}
+{"tMs":1150,"delta":"\n    Column gr"}
+{"tMs":1170,"delta":"ow g"}
+{"tMs":1190,"delta":"ap:8"}
+{"tMs":1212,"delta":"\n      Text.heading \""}
+{"tMs":1232,"delta":"Plan A\"\n      "}
+{"tMs":1252,"delta":"Text.str"}
+{"tMs":1273,"delta":"ong \"\\"}
+{"tMs":1292,"delta":"$30"}
+{"tMs":1313,"delta":"/m"}
+{"tMs":1334,"delta":"o\"\n      Text.body"}
+{"tMs":1355,"delta":" \"Data: 20"}
+{"tMs":1375,"delta":" GB\"\n      Text"}
+{"tMs":1395,"delta":".body \"Calls:"}
+{"tMs":1416,"delta":" Unlimited\"\n      "}
+{"tMs":1437,"delta":"Text.body \"Roaming"}
+{"tMs":1457,"delta":": 500"}
+{"tMs":1477,"delta":" M"}
+{"tMs":1497,"delta":"B included"}
+{"tMs":1518,"delta":"\"\n      Text.body \""}
+{"tMs":1538,"delta":"Contract: 12 months"}
+{"tMs":1559,"delta":"\"\n      Text"}
+{"tMs":1580,"delta":".body \"Extras:"}
+{"tMs":1600,"delta":" Hotspot\""}
+{"tMs":1620,"delta":"\n      Badge.success \""}
+{"tMs":1641,"delta":"Better value:"}
+{"tMs":1662,"delta":" data"}
+{"tMs":1681,"delta":","}
+{"tMs":1702,"delta":" ro"}
+{"tMs":1722,"delta":"aming\""}
+{"tMs":1742,"delta":"\n      Button."}
+{"tMs":1763,"delta":"primary \"Choose"}
+{"tMs":1784,"delta":" Plan A\" -> emit"}
+{"tMs":1804,"delta":" p"}
+{"tMs":1825,"delta":"ick \""}
+{"tMs":1845,"delta":"A\";"}
+{"tMs":1864,"delta":" toast \"You"}
+{"tMs":1886,"delta":" picked Plan A\""}
+{"tMs":1905,"delta":"\n    Column grow gap:"}
+{"tMs":1926,"delta":"8\n      Text.heading"}
+{"tMs":1947,"delta":" \"Plan B\"\n      "}
+{"tMs":1967,"delta":"Text.strong \"\\$"}
+{"tMs":1988,"delta":"38"}
+{"tMs":2008,"delta":"/mo\"\n      Text"}
+{"tMs":2028,"delta":".body \"Data: 50"}
+{"tMs":2049,"delta":" GB\"\n      Text"}
+{"tMs":2070,"delta":".body \"Calls:"}
+{"tMs":2090,"delta":" Unlimited\"\n      "}
+{"tMs":2110,"delta":"Text.body \"Roaming"}
+{"tMs":2131,"delta":": 2 GB included\""}
+{"tMs":2152,"delta":"\n      Text.body \""}
+{"tMs":2172,"delta":"Contract: 24 months\""}
+{"tMs":2192,"delta":"\n      Text.body \""}
+{"tMs":2213,"delta":"Extras:"}
+{"tMs":2233,"delta":" Hotspot, stre"}
+{"tMs":2253,"delta":"aming\"\n      Badge"}
+{"tMs":2274,"delta":".success \"Better value: price"}
+{"tMs":2294,"delta":", cont"}
+{"tMs":2315,"delta":"ract\"\n      Button.prim"}
+{"tMs":2335,"delta":"ary \"Choose Plan"}
+{"tMs":2356,"delta":" B\" -> emit pick"}
+{"tMs":2376,"delta":" \"B\"; toast \"You"}
+{"tMs":2397,"delta":" picked Plan B\""}
+{"tMs":2417,"delta":"\n  Divider"}
+{"tMs":2439,"delta":"\n  Text.strong \""}
+{"tMs":2457,"delta":"Recommendation\"\n  "}
+{"tMs":2479,"delta":"Text.body \"Plan B"}
+{"tMs":2499,"delta":" g"}
+{"tMs":2519,"delta":"ives you far"}
+{"tMs":2539,"delta":" more data and ro"}
+{"tMs":2560,"delta":"aming for"}
+{"tMs":2580,"delta":" \\"}
+{"tMs":2600,"delta":"$8 more"}
+{"tMs":2621,"delta":" a"}
+{"tMs":2641,"delta":" month, and"}
+{"tMs":2662,"delta":" its"}
+{"tMs":2682,"delta":" long"}
+{"tMs":2702,"delta":"er contract is"}
+{"tMs":2724,"delta":" wor"}
+{"tMs":2743,"delta":"th it if"}
+{"tMs":2764,"delta":" you'"}
+{"tMs":2784,"delta":"ll ke"}
+{"tMs":2804,"delta":"ep the same"}
+{"tMs":2825,"delta":" number"}
+{"tMs":2844,"delta":" for"}
+{"tMs":2866,"delta":" two"}
+{"tMs":2886,"delta":" years.\""}

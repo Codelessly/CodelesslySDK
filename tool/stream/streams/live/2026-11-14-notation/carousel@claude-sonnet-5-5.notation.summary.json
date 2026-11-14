@@ -1,0 +1,61 @@
+{
+ "ui": "carousel",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1538,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1461,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 647,
+   "totalMs": 7852,
+   "chars": 3449,
+   "lines": 93,
+   "jsonTails": 0,
+   "nodes": 83,
+   "outputTokensPerNode": "17.6",
+   "notationIssues": [],
+   "errors": [
+    "unknown_bind_path /nodes/pageView1/bind/props.text: A pageView has no prop \"text\". Its props: scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemCount, pageSnapping, padEnds, keepPage, initialPage, viewportFraction, allowImplicitScrolling, animationDuration, animationCurve, pageMotion, pageMotionBefore, paintOrder."
+   ]
+  },
+  {
+   "input_tokens": 3172,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1837,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 347
+   },
+   "ttftMs": 3942,
+   "totalMs": 10271,
+   "chars": 3645,
+   "lines": 99,
+   "jsonTails": 0,
+   "nodes": 83,
+   "outputTokensPerNode": "22.1",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

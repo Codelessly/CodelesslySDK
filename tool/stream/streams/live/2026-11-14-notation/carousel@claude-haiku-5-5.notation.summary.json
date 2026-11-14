@@ -1,0 +1,77 @@
+{
+ "ui": "carousel",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1537,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1078,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 487,
+   "totalMs": 4069,
+   "chars": 2438,
+   "lines": 78,
+   "jsonTails": 0,
+   "nodes": 75,
+   "outputTokensPerNode": "14.4",
+   "notationIssues": [],
+   "errors": [
+    "unknown_bind_path /nodes/pageView1/bind/props.text: A pageView has no prop \"text\". Its props: scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemCount, pageSnapping, padEnds, keepPage, initialPage, viewportFraction, allowImplicitScrolling, animationDuration, animationCurve, pageMotion, pageMotionBefore, paintOrder.",
+    "unknown_bind_path /nodes/badge1/bind/props.hidden: A badge has no prop \"hidden\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_bind_path /nodes/badge2/bind/props.hidden: A badge has no prop \"hidden\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_bind_path /nodes/badge3/bind/props.hidden: A badge has no prop \"hidden\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_bind_path /nodes/badge4/bind/props.hidden: A badge has no prop \"hidden\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_bind_path /nodes/badge5/bind/props.hidden: A badge has no prop \"hidden\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_bind_path /nodes/badge6/bind/props.hidden: A badge has no prop \"hidden\". Its props: label, count, maxCount, isLabelVisible, backgroundColor, textColor, textStyle, smallSize, largeSize, padding, alignment, offset.",
+    "unknown_bind_path /nodes/text20/bind/props.hidden: A text has no prop \"hidden\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_bind_path /nodes/text21/bind/props.hidden: A text has no prop \"hidden\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_bind_path /nodes/text22/bind/props.hidden: A text has no prop \"hidden\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_bind_path /nodes/text23/bind/props.hidden: A text has no prop \"hidden\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_bind_path /nodes/text24/bind/props.hidden: A text has no prop \"hidden\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_bind_path /nodes/text25/bind/props.hidden: A text has no prop \"hidden\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown."
+   ]
+  },
+  {
+   "input_tokens": 3777,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1140,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 415,
+   "totalMs": 3781,
+   "chars": 2761,
+   "lines": 91,
+   "jsonTails": 0,
+   "nodes": 75,
+   "outputTokensPerNode": "15.2",
+   "notationIssues": [
+    "line 1:1: No node type \"The\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": [
+    "unknown_bind_path /nodes/pageView1/bind/props.text: A pageView has no prop \"text\". Its props: scrollDirection, reverse, physics, alwaysScroll, clipBehavior, itemCount, pageSnapping, padEnds, keepPage, initialPage, viewportFraction, allowImplicitScrolling, animationDuration, animationCurve, pageMotion, pageMotionBefore, paintOrder."
+   ]
+  }
+ ]
+}

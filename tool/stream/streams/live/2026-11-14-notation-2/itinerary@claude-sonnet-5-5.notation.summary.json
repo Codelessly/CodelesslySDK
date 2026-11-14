@@ -1,0 +1,77 @@
+{
+ "ui": "itinerary",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3959,
+ "turns": [
+  {
+   "input_tokens": 1697,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1397,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 742,
+   "totalMs": 9541,
+   "chars": 2712,
+   "lines": 73,
+   "jsonTails": 0,
+   "nodes": 68,
+   "outputTokensPerNode": "20.5",
+   "notationIssues": [
+    "line 14:1: A accordion has no text of its own.",
+    "line 21:1: A accordion has no text of its own.",
+    "line 28:1: A accordion has no text of its own.",
+    "line 35:1: A accordion has no text of its own.",
+    "line 45:1: A accordion has no text of its own.",
+    "line 52:1: A accordion has no text of its own.",
+    "line 59:1: A accordion has no text of its own.",
+    "line 66:1: A accordion has no text of its own."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 3270,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1604,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 198
+   },
+   "ttftMs": 2956,
+   "totalMs": 8864,
+   "chars": 2747,
+   "lines": 73,
+   "jsonTails": 0,
+   "nodes": 68,
+   "outputTokensPerNode": "23.6",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/accordion1/props/title: A accordion has no prop \"title\". Its props: expanded, mainAxisAlignment, crossAxisAlignment.",
+    "unknown_prop /nodes/accordion2/props/title: A accordion has no prop \"title\". Its props: expanded, mainAxisAlignment, crossAxisAlignment.",
+    "unknown_prop /nodes/accordion3/props/title: A accordion has no prop \"title\". Its props: expanded, mainAxisAlignment, crossAxisAlignment.",
+    "unknown_prop /nodes/accordion4/props/title: A accordion has no prop \"title\". Its props: expanded, mainAxisAlignment, crossAxisAlignment.",
+    "unknown_prop /nodes/accordion5/props/title: A accordion has no prop \"title\". Its props: expanded, mainAxisAlignment, crossAxisAlignment.",
+    "unknown_prop /nodes/accordion6/props/title: A accordion has no prop \"title\". Its props: expanded, mainAxisAlignment, crossAxisAlignment.",
+    "unknown_prop /nodes/accordion7/props/title: A accordion has no prop \"title\". Its props: expanded, mainAxisAlignment, crossAxisAlignment.",
+    "unknown_prop /nodes/accordion8/props/title: A accordion has no prop \"title\". Its props: expanded, mainAxisAlignment, crossAxisAlignment."
+   ]
+  }
+ ]
+}

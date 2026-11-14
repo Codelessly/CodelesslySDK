@@ -1,0 +1,174 @@
+{"meta":{"ui":"order_summary","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show my grocery order as an inline card before you place it: five line items with a picture placeholder, price and a quantity I can raise or lower (removing at zero), a promo code field that takes SAVE10, the subtotal, delivery and total kept up to date, and confirm and cancel buttons that tell you what I decided.","text":"Card w:390 gap:12\n  state q1=1\n  state q2=2\n  state q3=1\n  state q4=3\n  state q5=1\n  state promo=\"\"\n  state applied=false\n  Text.title \"Your grocery order\"\n  if q1>0\n    Row gap:10 middle\n      Icon \"image\"\n      Column grow\n        Text.strong \"Whole milk 1 L\"\n        Text.muted \"\\$1.50 each\"\n      Row gap:6 middle\n        Button.outline \"-\" -> q1=q1-1\n        Text.strong \"{q1}\"\n        Button.outline \"+\" -> q1=q1+1\n      Text.strong \"\\${q1*1.5}\"\n  if q2>0\n    Row gap:10 middle\n      Icon \"image\"\n      Column grow\n        Text.strong \"Sourdough bread\"\n        Text.muted \"\\$4.00 each\"\n      Row gap:6 middle\n        Button.outline \"-\" -> q2=q2-1\n        Text.strong \"{q2}\"\n        Button.outline \"+\" -> q2=q2+1\n      Text.strong \"\\${q2*4}\"\n  if q3>0\n    Row gap:10 middle\n      Icon \"image\"\n      Column grow\n        Text.strong \"Free-range eggs\"\n        Text.muted \"\\$3.20 each\"\n      Row gap:6 middle\n        Button.outline \"-\" -> q3=q3-1\n        Text.strong \"{q3}\"\n        Button.outline \"+\" -> q3=q3+1\n      Text.strong \"\\${q3*3.2}\"\n  if q4>0\n    Row gap:10 middle\n      Icon \"image\"\n      Column grow\n        Text.strong \"Bananas\"\n        Text.muted \"\\$0.60 each\"\n      Row gap:6 middle\n        Button.outline \"-\" -> q4=q4-1\n        Text.strong \"{q4}\"\n        Button.outline \"+\" -> q4=q4+1\n      Text.strong \"\\${q4*0.6}\"\n  if q5>0\n    Row gap:10 middle\n      Icon \"image\"\n      Column grow\n        Text.strong \"Cheddar cheese\"\n        Text.muted \"\\$5.50 each\"\n      Row gap:6 middle\n        Button.outline \"-\" -> q5=q5-1\n        Text.strong \"{q5}\"\n        Button.outline \"+\" -> q5=q5+1\n      Text.strong \"\\${q5*5.5}\"\n  Divider\n  Row gap:8 middle\n    Input \"Promo code\" \"Enter code\" =promo grow\n    Button.secondary \"Apply\" -> applied=promo==\"SAVE10\"\n  if applied\n    Text.success \"SAVE10 applied: 10% off\"\n  if promo!=\"\" && !applied\n    Text.muted \"Tap Apply to check your code\"\n  Divider\n  Row between\n    Text \"Subtotal\"\n    Text \"\\${q1*1.5+q2*4+q3*3.2+q4*0.6+q5*5.5}\"\n  if applied\n    Row between\n      Text.success \"Discount (10%)\"\n      Text.success \"-\\${(q1*1.5+q2*4+q3*3.2+q4*0.6+q5*5.5)*0.1}\"\n  Row between\n    Text \"Delivery\"\n    Text \"\\$3.99\"\n  Row between\n    Text.heading \"Total\"\n    Text.heading \"\\${(q1*1.5+q2*4+q3*3.2+q4*0.6+q5*5.5)*(applied?0.9:1)+3.99}\"\n  Row gap:8 end\n    Button.outline \"Cancel\" -> emit cancel\n    Button \"Confirm order\" -> emit confirm","usage":{"input_tokens":1553,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1203,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":603,"totalMs":6416}}
+{"tMs":603,"delta":"Card w:"}
+{"tMs":910,"delta":"390 gap:12"}
+{"tMs":910,"delta":"\n  state"}
+{"tMs":910,"delta":" q1=1"}
+{"tMs":911,"delta":"\n  state q2=2"}
+{"tMs":911,"delta":"\n  state q3=1"}
+{"tMs":911,"delta":"\n  state q4=3\n  "}
+{"tMs":911,"delta":"state q5=1\n  state"}
+{"tMs":911,"delta":" promo=\"\"\n  state appl"}
+{"tMs":911,"delta":"ied=false\n  Text."}
+{"tMs":939,"delta":"title"}
+{"tMs":973,"delta":" \"Your grocery order\""}
+{"tMs":1006,"delta":"\n  if"}
+{"tMs":1218,"delta":" q1>0\n    Row"}
+{"tMs":1218,"delta":" gap:10"}
+{"tMs":1218,"delta":" middle\n      Icon"}
+{"tMs":1218,"delta":" \"image\""}
+{"tMs":1218,"delta":"\n      Column gr"}
+{"tMs":1218,"delta":"ow\n        Text.str"}
+{"tMs":1240,"delta":"ong \"Whole mil"}
+{"tMs":1271,"delta":"k "}
+{"tMs":1304,"delta":"1"}
+{"tMs":1336,"delta":" "}
+{"tMs":1370,"delta":"L\"\n        Text.mu"}
+{"tMs":1404,"delta":"ted \"\\$1.50"}
+{"tMs":1541,"delta":" "}
+{"tMs":1541,"delta":"each\"\n      Row gap"}
+{"tMs":1541,"delta":":6 middle\n        "}
+{"tMs":1541,"delta":"Button.outline \"-\" -"}
+{"tMs":1573,"delta":"> q1=q1-1"}
+{"tMs":1608,"delta":"\n        Text.strong \""}
+{"tMs":1639,"delta":"{q1}\"\n        "}
+{"tMs":1672,"delta":"Button.outline \"+\" -"}
+{"tMs":1707,"delta":"> q1=q1+1"}
+{"tMs":1741,"delta":"\n      Text.str"}
+{"tMs":1773,"delta":"ong \"\\${"}
+{"tMs":1807,"delta":"q1*1.5"}
+{"tMs":1868,"delta":"}\"\n  if q2>"}
+{"tMs":1873,"delta":"0\n    Row gap:"}
+{"tMs":1906,"delta":"10 middle\n      Ic"}
+{"tMs":1943,"delta":"on \"image\"\n      Column"}
+{"tMs":1973,"delta":" grow\n        Text.str"}
+{"tMs":2007,"delta":"ong \"Sour"}
+{"tMs":2040,"delta":"dough bread\"\n        "}
+{"tMs":2074,"delta":"Text.muted \"\\$4"}
+{"tMs":2107,"delta":".00 each\"\n      "}
+{"tMs":2141,"delta":"Row gap:6 middle"}
+{"tMs":2174,"delta":"\n        Button.outline \""}
+{"tMs":2208,"delta":"-\" -> q2=q"}
+{"tMs":2241,"delta":"2-1\n        Text."}
+{"tMs":2274,"delta":"strong \"{q2}\""}
+{"tMs":2307,"delta":"\n        Button.outline \""}
+{"tMs":2341,"delta":"+\" -> q2=q"}
+{"tMs":2374,"delta":"2+1\n      Text."}
+{"tMs":2408,"delta":"strong \"\\${q2*"}
+{"tMs":2442,"delta":"4}\"\n  if q3"}
+{"tMs":2475,"delta":">0\n    Row gap"}
+{"tMs":2508,"delta":":10 middle\n      "}
+{"tMs":2542,"delta":"Icon \"image\"\n      "}
+{"tMs":2575,"delta":"Column grow\n        Text."}
+{"tMs":2608,"delta":"strong \"Free-"}
+{"tMs":2642,"delta":"range eggs\"\n        "}
+{"tMs":2676,"delta":"Text.muted \"\\$3"}
+{"tMs":2710,"delta":".20 each\"\n      "}
+{"tMs":2743,"delta":"Row gap:6 middle"}
+{"tMs":2776,"delta":"\n        Button.outline \""}
+{"tMs":2808,"delta":"-\" -> q3=q"}
+{"tMs":2842,"delta":"3-1\n        Text."}
+{"tMs":2875,"delta":"strong \"{q3}\""}
+{"tMs":2909,"delta":"\n        Button.outline \""}
+{"tMs":2942,"delta":"+\" -> q3=q"}
+{"tMs":2976,"delta":"3+1\n      Text."}
+{"tMs":3009,"delta":"strong \"\\${q3*"}
+{"tMs":3042,"delta":"3.2}\"\n  if"}
+{"tMs":3076,"delta":" q4>0\n    Row"}
+{"tMs":3109,"delta":" gap:10 middle"}
+{"tMs":3142,"delta":"\n      Icon \"image\""}
+{"tMs":3176,"delta":"\n      Column grow\n        "}
+{"tMs":3209,"delta":"Text.strong \"Banan"}
+{"tMs":3243,"delta":"as\"\n        Text.mu"}
+{"tMs":3276,"delta":"ted \"\\$0.60"}
+{"tMs":3309,"delta":" each\"\n      Row g"}
+{"tMs":3343,"delta":"ap:6 middle\n        "}
+{"tMs":3376,"delta":"Button.outline \"-\""}
+{"tMs":3409,"delta":" -> q4=q4-"}
+{"tMs":3443,"delta":"1\n        Text.strong"}
+{"tMs":3477,"delta":" \"{q4}\"\n        "}
+{"tMs":3510,"delta":"Button.outline \"+\""}
+{"tMs":3543,"delta":" -> q4=q4+"}
+{"tMs":3576,"delta":"1\n      Text.strong"}
+{"tMs":3610,"delta":" \"\\${q4*0."}
+{"tMs":3644,"delta":"6}\"\n  if q5"}
+{"tMs":3676,"delta":">0\n    Row gap"}
+{"tMs":3709,"delta":":10 middle\n      "}
+{"tMs":3744,"delta":"Icon \"image\"\n      "}
+{"tMs":3777,"delta":"Column grow\n        Text."}
+{"tMs":3810,"delta":"strong \"Cheddar"}
+{"tMs":3845,"delta":" cheese\"\n        Text"}
+{"tMs":3876,"delta":".muted \"\\$5."}
+{"tMs":3910,"delta":"50 each\"\n      Row"}
+{"tMs":3943,"delta":" gap:6 middle"}
+{"tMs":3976,"delta":"\n        Button.outline \"-"}
+{"tMs":4010,"delta":"\" -> q5=q5"}
+{"tMs":4043,"delta":"-1\n        Text.str"}
+{"tMs":4077,"delta":"ong \"{q5}\""}
+{"tMs":4110,"delta":"\n        Button.outline \"+"}
+{"tMs":4144,"delta":"\" -> q5=q5"}
+{"tMs":4177,"delta":"+1\n      Text.str"}
+{"tMs":4210,"delta":"ong \"\\${q5*5"}
+{"tMs":4243,"delta":".5}\"\n  Div"}
+{"tMs":4277,"delta":"ider\n  Row gap:"}
+{"tMs":4310,"delta":"8 midd"}
+{"tMs":4343,"delta":"le\n    Input \"Prom"}
+{"tMs":4377,"delta":"o code\" \""}
+{"tMs":4410,"delta":"Enter code"}
+{"tMs":4443,"delta":"\" =promo gr"}
+{"tMs":4477,"delta":"ow\n    Button.sec"}
+{"tMs":4510,"delta":"ondary \"Apply\" -"}
+{"tMs":4543,"delta":"> applied=promo==\""}
+{"tMs":4577,"delta":"SAVE10\"\n  "}
+{"tMs":4610,"delta":"if applied\n    Text."}
+{"tMs":4643,"delta":"success \"S"}
+{"tMs":4676,"delta":"AVE10 applied:"}
+{"tMs":4711,"delta":" 10% off\"\n  if"}
+{"tMs":4743,"delta":" promo!=\"\""}
+{"tMs":4776,"delta":" &&"}
+{"tMs":4810,"delta":" !applied\n    Text."}
+{"tMs":4843,"delta":"muted \"T"}
+{"tMs":4876,"delta":"ap Apply to check"}
+{"tMs":4909,"delta":" your"}
+{"tMs":4943,"delta":" code\"\n  Divider"}
+{"tMs":4976,"delta":"\n  Row between\n    Text"}
+{"tMs":5010,"delta":" \""}
+{"tMs":5043,"delta":"Subtotal\"\n    "}
+{"tMs":5076,"delta":"Text \"\\${q1*"}
+{"tMs":5109,"delta":"1.5+q2*4"}
+{"tMs":5143,"delta":"+q3*3.2+"}
+{"tMs":5176,"delta":"q4*0.6+q"}
+{"tMs":5209,"delta":"5*5.5}\""}
+{"tMs":5243,"delta":"\n  if applied\n    Row"}
+{"tMs":5276,"delta":" between\n      Text.success \""}
+{"tMs":5310,"delta":"Discount ("}
+{"tMs":5343,"delta":"10%)\"\n      Text"}
+{"tMs":5376,"delta":".success \"-"}
+{"tMs":5410,"delta":"\\${("}
+{"tMs":5443,"delta":"q1*1.5+q"}
+{"tMs":5476,"delta":"2*4+q3*3"}
+{"tMs":5510,"delta":".2+q4*0."}
+{"tMs":5543,"delta":"6+q5*5.5"}
+{"tMs":5576,"delta":")*0.1}\""}
+{"tMs":5610,"delta":"\n  Row between\n    Text"}
+{"tMs":5643,"delta":" \"Delivery\"\n    "}
+{"tMs":5677,"delta":"Text \""}
+{"tMs":5709,"delta":"\\$"}
+{"tMs":5742,"delta":"3.99"}
+{"tMs":5776,"delta":"\"\n  Row between\n    "}
+{"tMs":5809,"delta":"Text.he"}
+{"tMs":5843,"delta":"ading \"Total\"\n    "}
+{"tMs":5876,"delta":"Text.heading \"\\${("}
+{"tMs":5909,"delta":"q1*1.5+q"}
+{"tMs":5943,"delta":"2*4+q3*3"}
+{"tMs":5976,"delta":".2+q4*0."}
+{"tMs":6009,"delta":"6+q5*5.5"}
+{"tMs":6043,"delta":")*(appl"}
+{"tMs":6076,"delta":"ied?0.9:1)"}
+{"tMs":6109,"delta":"+3.99}\"\n  "}
+{"tMs":6143,"delta":"Row gap:8 "}
+{"tMs":6176,"delta":"end\n    Button.out"}
+{"tMs":6209,"delta":"line \"Cancel\" -"}
+{"tMs":6243,"delta":"> emit cancel"}
+{"tMs":6277,"delta":"\n    Button \""}
+{"tMs":6309,"delta":"Confirm order"}
+{"tMs":6343,"delta":"\" -> emit confirm"}

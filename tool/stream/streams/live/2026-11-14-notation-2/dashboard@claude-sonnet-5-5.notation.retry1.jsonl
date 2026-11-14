@@ -1,0 +1,270 @@
+{"meta":{"ui":"dashboard","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.","text":"state range=30\nstate sortBy=\"revenue\"\nCard w:390 gap:16\n  Row between middle\n    Text.title \"Product performance\"\n    Badge.info \"{range} days\"\n  Row gap:8\n    ChoiceChip \"7 days\" selected:=range==7 -> range=7\n    ChoiceChip \"30 days\" selected:=range==30 -> range=30\n    ChoiceChip \"90 days\" selected:=range==90 -> range=90\n  Grid cols:2 gap:8\n    Card gap:4\n      Text.caption \"Revenue\"\n      if range==7\n        Text.heading \"\\$12.4k\"\n        Text.success \"+3.1%\"\n      if range==30\n        Text.heading \"\\$48.2k\"\n        Text.success \"+8.4%\"\n      if range==90\n        Text.heading \"\\$141k\"\n        Text.success \"+15.2%\"\n    Card gap:4\n      Text.caption \"Sign-ups\"\n      if range==7\n        Text.heading \"310\"\n        Text.success \"+2.0%\"\n      if range==30\n        Text.heading \"1,284\"\n        Text.success \"+5.7%\"\n      if range==90\n        Text.heading \"3,902\"\n        Text.success \"+11.3%\"\n    Card gap:4\n      Text.caption \"Churn\"\n      if range==7\n        Text.heading \"1.1%\"\n        Text.danger \"+0.1%\"\n      if range==30\n        Text.heading \"2.3%\"\n        Text.danger \"+0.2%\"\n      if range==90\n        Text.heading \"2.9%\"\n        Text.danger \"+0.5%\"\n    Card gap:4\n      Text.caption \"Active users\"\n      if range==7\n        Text.heading \"8,120\"\n        Text.success \"+1.2%\"\n      if range==30\n        Text.heading \"9,640\"\n        Text.success \"+4.6%\"\n      if range==90\n        Text.heading \"11,250\"\n        Text.success \"+9.8%\"\n  Text.strong \"Revenue trend\"\n  Box fill:#FFF5F5F5 radius:8 pad:8\n    Image \"https://quickchart.io/chart?w=340&h=160&c=%7Btype:'line',data:%7Blabels:['W1','W2','W3','W4'],datasets:[%7Blabel:'Revenue',data:[10,12,11,15],fill:false%7D]%7D%7D\" w:fill h:160\n  Text.strong \"Sign-ups by channel\"\n  Box fill:#FFF5F5F5 radius:8 pad:8\n    Image \"https://quickchart.io/chart?w=340&h=160&c=%7Btype:'bar',data:%7Blabels:['Organic','Paid','Referral','Social'],datasets:[%7Blabel:'Sign-ups',data:[520,360,240,164]%7D]%7D%7D\" w:fill h:160\n  Text.strong \"Top plans\"\n  Row gap:6\n    ChoiceChip \"Plan\" selected:=sortBy==\"plan\" -> sortBy=\"plan\"\n    ChoiceChip \"Revenue\" selected:=sortBy==\"revenue\" -> sortBy=\"revenue\"\n    ChoiceChip \"Users\" selected:=sortBy==\"users\" -> sortBy=\"users\"\n    ChoiceChip \"Churn\" selected:=sortBy==\"churn\" -> sortBy=\"churn\"\n  Row between\n    Text.caption \"Plan\"\n    Text.caption \"Revenue\"\n    Text.caption \"Users\"\n    Text.caption \"Churn\"\n  Divider\n  if sortBy==\"plan\"\n    Column gap:6\n      Row between\n        Text \"Business\"\n        Text \"\\$18.2k\"\n        Text \"420\"\n        Text \"1.8%\"\n      Row between\n        Text \"Enterprise\"\n        Text \"\\$2.2k\"\n        Text \"12\"\n        Text \"0.9%\"\n      Row between\n        Text \"Pro\"\n        Text \"\\$14.6k\"\n        Text \"910\"\n        Text \"2.4%\"\n      Row between\n        Text \"Starter\"\n        Text \"\\$4.3k\"\n        Text \"1,150\"\n        Text \"3.6%\"\n      Row between\n        Text \"Team\"\n        Text \"\\$8.9k\"\n        Text \"385\"\n        Text \"2.0%\"\n  if sortBy==\"revenue\"\n    Column gap:6\n      Row between\n        Text \"Business\"\n        Text \"\\$18.2k\"\n        Text \"420\"\n        Text \"1.8%\"\n      Row between\n        Text \"Pro\"\n        Text \"\\$14.6k\"\n        Text \"910\"\n        Text \"2.4%\"\n      Row between\n        Text \"Team\"\n        Text \"\\$8.9k\"\n        Text \"385\"\n        Text \"2.0%\"\n      Row between\n        Text \"Starter\"\n        Text \"\\$4.3k\"\n        Text \"1,150\"\n        Text \"3.6%\"\n      Row between\n        Text \"Enterprise\"\n        Text \"\\$2.2k\"\n        Text \"12\"\n        Text \"0.9%\"\n  if sortBy==\"users\"\n    Column gap:6\n      Row between\n        Text \"Starter\"\n        Text \"\\$4.3k\"\n        Text \"1,150\"\n        Text \"3.6%\"\n      Row between\n        Text \"Pro\"\n        Text \"\\$14.6k\"\n        Text \"910\"\n        Text \"2.4%\"\n      Row between\n        Text \"Business\"\n        Text \"\\$18.2k\"\n        Text \"420\"\n        Text \"1.8%\"\n      Row between\n        Text \"Team\"\n        Text \"\\$8.9k\"\n        Text \"385\"\n        Text \"2.0%\"\n      Row between\n        Text \"Enterprise\"\n        Text \"\\$2.2k\"\n        Text \"12\"\n        Text \"0.9%\"\n  if sortBy==\"churn\"\n    Column gap:6\n      Row between\n        Text \"Enterprise\"\n        Text \"\\$2.2k\"\n        Text \"12\"\n        Text \"0.9%\"\n      Row between\n        Text \"Business\"\n        Text \"\\$18.2k\"\n        Text \"420\"\n        Text \"1.8%\"\n      Row between\n        Text \"Team\"\n        Text \"\\$8.9k\"\n        Text \"385\"\n        Text \"2.0%\"\n      Row between\n        Text \"Pro\"\n        Text \"\\$14.6k\"\n        Text \"910\"\n        Text \"2.4%\"\n      Row between\n        Text \"Starter\"\n        Text \"\\$4.3k\"\n        Text \"1,150\"\n        Text \"3.6%\"","usage":{"input_tokens":4236,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":3091,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":979}},"ttftMs":9688,"totalMs":18713}}
+{"tMs":9688,"delta":"state"}
+{"tMs":9721,"delta":" range=30\nstate sortB"}
+{"tMs":9754,"delta":"y=\"revenue\""}
+{"tMs":9788,"delta":"\nCard w:390 gap:"}
+{"tMs":9821,"delta":"16\n  Row between middle"}
+{"tMs":9855,"delta":"\n    Text.title \""}
+{"tMs":9888,"delta":"Product performance\"\n    Bad"}
+{"tMs":9922,"delta":"ge.info \"{"}
+{"tMs":9955,"delta":"range}"}
+{"tMs":9989,"delta":" days\"\n  Row gap"}
+{"tMs":10022,"delta":":8\n    Choi"}
+{"tMs":10055,"delta":"ceChip \"7 "}
+{"tMs":10089,"delta":"days\" selected:=range"}
+{"tMs":10122,"delta":"==7 -> range=7"}
+{"tMs":10156,"delta":"\n    ChoiceCh"}
+{"tMs":10210,"delta":"ip \"30 days\" selected"}
+{"tMs":10223,"delta":":=range==30 ->"}
+{"tMs":10256,"delta":" range=30\n    Cho"}
+{"tMs":10290,"delta":"iceChip \"90 days"}
+{"tMs":10324,"delta":"\" selected:=range==90"}
+{"tMs":10357,"delta":" -> range=90\n  "}
+{"tMs":10391,"delta":"Grid cols:2 "}
+{"tMs":10424,"delta":"gap:8\n    Card"}
+{"tMs":10457,"delta":" gap:4\n      Text"}
+{"tMs":10491,"delta":".caption \"Revenue"}
+{"tMs":10525,"delta":"\"\n      if range==7"}
+{"tMs":10558,"delta":"\n        Text.heading \"\\"}
+{"tMs":10592,"delta":"$12.4k\"\n        "}
+{"tMs":10625,"delta":"Text.success \"+3."}
+{"tMs":10659,"delta":"1%\"\n      if range=="}
+{"tMs":10692,"delta":"30\n        Text.heading"}
+{"tMs":10726,"delta":" \"\\$48.2k\""}
+{"tMs":10759,"delta":"\n        Text.success \"+"}
+{"tMs":10793,"delta":"8.4%\"\n      if"}
+{"tMs":10826,"delta":" range==90\n        Text."}
+{"tMs":10859,"delta":"heading \"\\$141k\""}
+{"tMs":10893,"delta":"\n        Text.success \"+"}
+{"tMs":10926,"delta":"15.2%\"\n    "}
+{"tMs":10960,"delta":"Card gap:4\n      "}
+{"tMs":10993,"delta":"Text.caption \"Sign"}
+{"tMs":11027,"delta":"-ups\"\n      if range"}
+{"tMs":11060,"delta":"==7\n        Text.he"}
+{"tMs":11094,"delta":"ading \"310\"\n        Text"}
+{"tMs":11127,"delta":".success \"+2.0%"}
+{"tMs":11161,"delta":"\"\n      if range==30"}
+{"tMs":11195,"delta":"\n        Text.heading \"1"}
+{"tMs":11228,"delta":",284\"\n        Text."}
+{"tMs":11261,"delta":"success \"+5.7%\""}
+{"tMs":11295,"delta":"\n      if range==90\n        "}
+{"tMs":11328,"delta":"Text.heading \"3,"}
+{"tMs":11362,"delta":"902\"\n        Text.success"}
+{"tMs":11395,"delta":" \"+11.3%\""}
+{"tMs":11428,"delta":"\n    Card gap:4"}
+{"tMs":11462,"delta":"\n      Text.caption \""}
+{"tMs":11495,"delta":"Churn\"\n      if range=="}
+{"tMs":11529,"delta":"7\n        Text.heading"}
+{"tMs":11562,"delta":" \"1.1%\"\n        "}
+{"tMs":11595,"delta":"Text.danger \"+0"}
+{"tMs":11629,"delta":".1%\"\n      if range"}
+{"tMs":11662,"delta":"==30\n        Text.he"}
+{"tMs":11696,"delta":"ading \"2.3%\""}
+{"tMs":11729,"delta":"\n        Text.danger \"+"}
+{"tMs":11763,"delta":"0.2%\"\n      if"}
+{"tMs":11796,"delta":" range==90\n        Text."}
+{"tMs":11829,"delta":"heading \"2.9%\""}
+{"tMs":11863,"delta":"\n        Text.danger \""}
+{"tMs":11897,"delta":"+0.5%\"\n    "}
+{"tMs":11930,"delta":"Card gap:4\n      "}
+{"tMs":11963,"delta":"Text.caption \"Active"}
+{"tMs":11997,"delta":" users\"\n      if range==7"}
+{"tMs":12033,"delta":"\n        Text.heading \""}
+{"tMs":12063,"delta":"8,120\"\n        Text"}
+{"tMs":12097,"delta":".success \"+1.2%"}
+{"tMs":12130,"delta":"\"\n      if range==30"}
+{"tMs":12164,"delta":"\n        Text.heading \"9"}
+{"tMs":12199,"delta":",640\"\n        Text."}
+{"tMs":12231,"delta":"success \"+4.6%\""}
+{"tMs":12264,"delta":"\n      if range==90\n        "}
+{"tMs":12297,"delta":"Text.heading \"11,"}
+{"tMs":12331,"delta":"250\"\n        Text.success"}
+{"tMs":12364,"delta":" \"+9.8%\""}
+{"tMs":12398,"delta":"\n  Text.strong \""}
+{"tMs":12431,"delta":"Revenue trend\"\n  "}
+{"tMs":12465,"delta":"Box fill:#FF"}
+{"tMs":12499,"delta":"F5F5F5 rad"}
+{"tMs":12531,"delta":"ius:8 pad:8"}
+{"tMs":12565,"delta":"\n    Image \"https://qu"}
+{"tMs":12598,"delta":"ickchart.io/chart"}
+{"tMs":12632,"delta":"?w=340&h=160"}
+{"tMs":12665,"delta":"&c=%"}
+{"tMs":12699,"delta":"7Bt"}
+{"tMs":12732,"delta":"ype:'line',data:%"}
+{"tMs":12767,"delta":"7Bl"}
+{"tMs":12799,"delta":"abels:['W1','W"}
+{"tMs":12832,"delta":"2','W3','W4'"}
+{"tMs":12867,"delta":"],datasets:[%7"}
+{"tMs":12933,"delta":"Blabel:'Reven"}
+{"tMs":12965,"delta":"ue',data:[10,12"}
+{"tMs":12998,"delta":",11,15],fill:"}
+{"tMs":13032,"delta":"false%7D]"}
+{"tMs":13068,"delta":"%7D%7D\" w"}
+{"tMs":13099,"delta":":fill h:160\n  "}
+{"tMs":13132,"delta":"Text.strong \"S"}
+{"tMs":13167,"delta":"ign-ups by channel\""}
+{"tMs":13199,"delta":"\n  Box fill:#"}
+{"tMs":13232,"delta":"FFF5F5F5"}
+{"tMs":13266,"delta":" radius:8 pad"}
+{"tMs":13299,"delta":":8\n    Image \"https"}
+{"tMs":13333,"delta":"://quickchart.io/"}
+{"tMs":13366,"delta":"chart?w=340&h"}
+{"tMs":13399,"delta":"=160&c=%7"}
+{"tMs":13433,"delta":"Btype:'bar',data"}
+{"tMs":13468,"delta":":%7Blabels:"}
+{"tMs":13499,"delta":"['Organic','Paid"}
+{"tMs":13532,"delta":"','Referral','Social'"}
+{"tMs":13566,"delta":"],datasets:[%7"}
+{"tMs":13599,"delta":"Blabel:'S"}
+{"tMs":13633,"delta":"ign-ups',data:["}
+{"tMs":13666,"delta":"520,360,240,164]"}
+{"tMs":13700,"delta":"%7D]"}
+{"tMs":13733,"delta":"%7D%7D\" w"}
+{"tMs":13766,"delta":":fill h:160\n  "}
+{"tMs":13800,"delta":"Text.strong \"Top"}
+{"tMs":13834,"delta":" plans\"\n  Row g"}
+{"tMs":13867,"delta":"ap:6\n    Cho"}
+{"tMs":13900,"delta":"iceChip \"Plan"}
+{"tMs":13933,"delta":"\" selected:=sortB"}
+{"tMs":13967,"delta":"y==\"plan\" ->"}
+{"tMs":14001,"delta":" sortBy=\"plan\""}
+{"tMs":14034,"delta":"\n    ChoiceCh"}
+{"tMs":14067,"delta":"ip \"Revenue\" sel"}
+{"tMs":14100,"delta":"ected:=sortBy="}
+{"tMs":14134,"delta":"=\"revenue\" -> s"}
+{"tMs":14168,"delta":"ortBy=\"revenue\""}
+{"tMs":14201,"delta":"\n    ChoiceCh"}
+{"tMs":14234,"delta":"ip \"Users\" selected:"}
+{"tMs":14269,"delta":"=sortBy==\"users"}
+{"tMs":14301,"delta":"\" -> sortBy=\""}
+{"tMs":14335,"delta":"users\"\n    Choi"}
+{"tMs":14368,"delta":"ceChip \"Churn\""}
+{"tMs":14401,"delta":" selected:=sortBy"}
+{"tMs":14434,"delta":"==\"churn\" -> s"}
+{"tMs":14468,"delta":"ortBy=\"churn\""}
+{"tMs":14501,"delta":"\n  Row between\n    Text"}
+{"tMs":14534,"delta":".caption \"Plan\""}
+{"tMs":14568,"delta":"\n    Text.caption \""}
+{"tMs":14601,"delta":"Revenue\"\n    "}
+{"tMs":14634,"delta":"Text.caption \"Users\""}
+{"tMs":14668,"delta":"\n    Text.caption \""}
+{"tMs":14701,"delta":"Churn\"\n  Div"}
+{"tMs":14738,"delta":"ider\n  if sortBy"}
+{"tMs":14768,"delta":"==\"plan\"\n    "}
+{"tMs":14801,"delta":"Column gap:6"}
+{"tMs":14835,"delta":"\n      Row between\n        "}
+{"tMs":14868,"delta":"Text \"Business\"\n        "}
+{"tMs":14902,"delta":"Text \"\\$18.2k"}
+{"tMs":14935,"delta":"\"\n        Text \"420\""}
+{"tMs":14969,"delta":"\n        Text \"1.8"}
+{"tMs":15002,"delta":"%\"\n      Row between"}
+{"tMs":15035,"delta":"\n        Text \"Enterpr"}
+{"tMs":15068,"delta":"ise\"\n        Text \"\\"}
+{"tMs":15102,"delta":"$2.2k\"\n        "}
+{"tMs":15135,"delta":"Text \"12\"\n        "}
+{"tMs":15169,"delta":"Text \"0.9%\""}
+{"tMs":15202,"delta":"\n      Row between\n        Text"}
+{"tMs":15235,"delta":" \"Pro\"\n        "}
+{"tMs":15270,"delta":"Text \"\\$14.6k"}
+{"tMs":15302,"delta":"\"\n        Text \"910\""}
+{"tMs":15336,"delta":"\n        Text \"2.4"}
+{"tMs":15369,"delta":"%\"\n      Row between"}
+{"tMs":15402,"delta":"\n        Text \"Starter\""}
+{"tMs":15435,"delta":"\n        Text \"\\$4"}
+{"tMs":15470,"delta":".3k\"\n        Text"}
+{"tMs":15503,"delta":" \"1,150\"\n        "}
+{"tMs":15536,"delta":"Text \"3.6%\""}
+{"tMs":15569,"delta":"\n      Row between\n        Text"}
+{"tMs":15602,"delta":" \"Team\"\n        Text"}
+{"tMs":15636,"delta":" \"\\$8.9k\""}
+{"tMs":15669,"delta":"\n        Text \"385\""}
+{"tMs":15703,"delta":"\n        Text \"2.0%"}
+{"tMs":15740,"delta":"\"\n  if sortBy"}
+{"tMs":15769,"delta":"==\"revenue\"\n    "}
+{"tMs":15803,"delta":"Column gap:6\n      "}
+{"tMs":15837,"delta":"Row between\n        Text \""}
+{"tMs":15870,"delta":"Business\"\n        Text \""}
+{"tMs":15903,"delta":"\\$18.2k\""}
+{"tMs":15938,"delta":"\n        Text \"420\"\n        "}
+{"tMs":15971,"delta":"Text \"1.8%\""}
+{"tMs":16017,"delta":"\n      Row between\n        "}
+{"tMs":16037,"delta":"Text \"Pro\"\n        "}
+{"tMs":16071,"delta":"Text \"\\$14.6"}
+{"tMs":16103,"delta":"k\"\n        Text \"910"}
+{"tMs":16137,"delta":"\"\n        Text \"2."}
+{"tMs":16171,"delta":"4%\"\n      Row between"}
+{"tMs":16205,"delta":"\n        Text \"Team\""}
+{"tMs":16237,"delta":"\n        Text \"\\$8"}
+{"tMs":16270,"delta":".9k\"\n        Text"}
+{"tMs":16304,"delta":" \"385\"\n        Text \""}
+{"tMs":16337,"delta":"2.0%\"\n      "}
+{"tMs":16371,"delta":"Row between\n        Text \""}
+{"tMs":16403,"delta":"Starter\"\n        Text \""}
+{"tMs":16437,"delta":"\\$4.3k\""}
+{"tMs":16471,"delta":"\n        Text \"1,150\""}
+{"tMs":16504,"delta":"\n        Text \"3.6"}
+{"tMs":16537,"delta":"%\"\n      Row between"}
+{"tMs":16571,"delta":"\n        Text \"Enterpr"}
+{"tMs":16604,"delta":"ise\"\n        Text \"\\"}
+{"tMs":16637,"delta":"$2.2k\"\n        "}
+{"tMs":16671,"delta":"Text \"12\"\n        "}
+{"tMs":16705,"delta":"Text \"0.9%\""}
+{"tMs":16738,"delta":"\n  if sortBy==\""}
+{"tMs":16771,"delta":"users\"\n    Column gap"}
+{"tMs":16804,"delta":":6\n      Row between"}
+{"tMs":16838,"delta":"\n        Text \"Starter\""}
+{"tMs":16871,"delta":"\n        Text \"\\$4"}
+{"tMs":16904,"delta":".3k\"\n        Text"}
+{"tMs":16939,"delta":" \"1,150\"\n        "}
+{"tMs":16971,"delta":"Text \"3.6%\""}
+{"tMs":17004,"delta":"\n      Row between\n        Text"}
+{"tMs":17038,"delta":" \"Pro\"\n        "}
+{"tMs":17071,"delta":"Text \"\\$14.6k"}
+{"tMs":17104,"delta":"\"\n        Text \"910\""}
+{"tMs":17138,"delta":"\n        Text \"2.4"}
+{"tMs":17171,"delta":"%\"\n      Row between"}
+{"tMs":17205,"delta":"\n        Text \"Business\""}
+{"tMs":17238,"delta":"\n        Text \"\\$18."}
+{"tMs":17271,"delta":"2k\"\n        Text \""}
+{"tMs":17304,"delta":"420\"\n        Text \"1"}
+{"tMs":17338,"delta":".8%\"\n      Row"}
+{"tMs":17373,"delta":" between\n        Text \"Team"}
+{"tMs":17416,"delta":"\"\n        Text \"\\$"}
+{"tMs":17438,"delta":"8.9k\"\n        "}
+{"tMs":17471,"delta":"Text \"385\"\n        Text"}
+{"tMs":17505,"delta":" \"2.0%\"\n      "}
+{"tMs":17538,"delta":"Row between\n        Text \""}
+{"tMs":17571,"delta":"Enterprise\"\n        "}
+{"tMs":17604,"delta":"Text \"\\$2.2"}
+{"tMs":17638,"delta":"k\"\n        Text \"12"}
+{"tMs":17672,"delta":"\"\n        Text \"0."}
+{"tMs":17705,"delta":"9%\"\n  if sort"}
+{"tMs":17738,"delta":"By==\"churn\""}
+{"tMs":17772,"delta":"\n    Column gap:6"}
+{"tMs":17806,"delta":"\n      Row between\n        Text"}
+{"tMs":17838,"delta":" \"Enterprise\""}
+{"tMs":17875,"delta":"\n        Text \"\\$2."}
+{"tMs":17904,"delta":"2k\"\n        Text \""}
+{"tMs":17938,"delta":"12\"\n        Text \"0"}
+{"tMs":17972,"delta":".9%\"\n      Row"}
+{"tMs":18005,"delta":" between\n        Text \"Business"}
+{"tMs":18038,"delta":"\"\n        Text \"\\$"}
+{"tMs":18072,"delta":"18.2k\"\n        "}
+{"tMs":18105,"delta":"Text \"420\"\n        Text"}
+{"tMs":18138,"delta":" \"1.8%\"\n      "}
+{"tMs":18171,"delta":"Row between\n        Text \""}
+{"tMs":18205,"delta":"Team\"\n        Text \""}
+{"tMs":18238,"delta":"\\$8.9k\""}
+{"tMs":18271,"delta":"\n        Text \"385\"\n        "}
+{"tMs":18305,"delta":"Text \"2.0%\""}
+{"tMs":18338,"delta":"\n      Row between\n        "}
+{"tMs":18372,"delta":"Text \"Pro\"\n        "}
+{"tMs":18405,"delta":"Text \"\\$14.6"}
+{"tMs":18438,"delta":"k\"\n        Text \"910"}
+{"tMs":18472,"delta":"\"\n        Text \"2."}
+{"tMs":18505,"delta":"4%\"\n      Row between"}
+{"tMs":18547,"delta":"\n        Text \"Starter"}
+{"tMs":18572,"delta":"\"\n        Text \"\\$"}
+{"tMs":18605,"delta":"4.3k\"\n        "}
+{"tMs":18638,"delta":"Text \"1,150\"\n        "}
+{"tMs":18672,"delta":"Text \"3.6%\""}

@@ -1,0 +1,78 @@
+{
+ "ui": "code_diff",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "systemPromptChars": 3959,
+ "turns": [
+  {
+   "input_tokens": 1708,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 864,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 812,
+   "totalMs": 5603,
+   "chars": 1645,
+   "lines": 47,
+   "jsonTails": 0,
+   "nodes": 41,
+   "outputTokensPerNode": "21.1",
+   "notationIssues": [
+    "line 7:22: Unknown word \"keep\" on a Text. Props are written key:value.",
+    "line 7:39: Unknown word \"keep\" on a Text. Props are written key:value.",
+    "line 7:56: Unknown word \"keep\" on a Text. Props are written key:value.",
+    "line 47:41: Unknown word \"&&h2!=\" on a Button. Props are written key:value.",
+    "line 47:49: Unknown word \"&&h3!=\" on a Button. Props are written key:value."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 2754,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1681,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 621
+   },
+   "ttftMs": 6042,
+   "totalMs": 10564,
+   "chars": 1989,
+   "lines": 53,
+   "jsonTails": 0,
+   "nodes": 51,
+   "outputTokensPerNode": "33.0",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/text4/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text5/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text6/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text7/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text9/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text10/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text11/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text12/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text14/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text15/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text16/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown.",
+    "unknown_prop /nodes/text17/props/font: A text has no prop \"font\". Its props: text, style, runs, textAlign, textAlignVertical, maxLines, overflow, selectable, scaleDown."
+   ]
+  }
+ ]
+}

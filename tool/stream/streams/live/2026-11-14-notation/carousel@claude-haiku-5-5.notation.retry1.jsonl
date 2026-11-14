@@ -1,0 +1,156 @@
+{"meta":{"ui":"carousel","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"The errors come from binding `hidden:=` on Badge and Text, and from giving PageView a text. The fix is to use `if` blocks for conditional content and to drive the carousel with a PageView bound to `index`, with no text prop. The shoe details are shown in separate `if` blocks per shoe.\n\nColumn gap:12 pad:16 w:390\n  state index=0\n  state shoe=-1\n  if shoe<0\n    Row between\n      IconButton \"chevron-left\" -> index=max(0,index-1)\n      Text.strong \"{index+1} / 6\"\n      IconButton \"chevron-right\" -> index=min(5,index+1)\n    PageView =index\n      Card gap:8\n        Image \"placeholder\"\n        Text.heading \"Stride Runner\"\n        Text.body \"\\$89\"\n        Row gap:4\n          Icon \"star\"\n          Text.small \"4.6 rating\"\n        Button \"View details\" -> shoe=0\n      Card gap:8\n        Image \"placeholder\"\n        Text.heading \"Trail Blaze GTX\"\n        Text.body \"\\$129\"\n        Row gap:4\n          Icon \"star\"\n          Text.small \"4.8 rating\"\n        Button \"View details\" -> shoe=1\n      Card gap:8\n        Image \"placeholder\"\n        Text.heading \"Velocity Pro\"\n        Text.body \"\\$159\"\n        Row gap:4\n          Icon \"star\"\n          Text.small \"4.7 rating\"\n        Button \"View details\" -> shoe=2\n      Card gap:8\n        Image \"placeholder\"\n        Text.heading \"Cloud Glide\"\n        Text.body \"\\$99\"\n        Row gap:4\n          Icon \"star\"\n          Text.small \"4.5 rating\"\n        Button \"View details\" -> shoe=3\n      Card gap:8\n        Image \"placeholder\"\n        Text.heading \"Sprint Lite\"\n        Text.body \"\\$74\"\n        Row gap:4\n          Icon \"star\"\n          Text.small \"4.4 rating\"\n        Button \"View details\" -> shoe=4\n      Card gap:8\n        Image \"placeholder\"\n        Text.heading \"Summit Grip\"\n        Text.body \"\\$139\"\n        Row gap:4\n          Icon \"star\"\n          Text.small \"4.9 rating\"\n        Button \"View details\" -> shoe=5\n    Row center gap:6\n      if index==0\n        Badge \"1\"\n      if index==1\n        Badge \"2\"\n      if index==2\n        Badge \"3\"\n      if index==3\n        Badge \"4\"\n      if index==4\n        Badge \"5\"\n      if index==5\n        Badge \"6\"\n  if shoe>=0\n    Button.ghost \"Back to carousel\" -> shoe=-1\n    Card gap:10\n      Image \"placeholder\"\n      if shoe==0\n        Text.title \"Stride Runner\"\n      if shoe==1\n        Text.title \"Trail Blaze GTX\"\n      if shoe==2\n        Text.title \"Velocity Pro\"\n      if shoe==3\n        Text.title \"Cloud Glide\"\n      if shoe==4\n        Text.title \"Sprint Lite\"\n      if shoe==5\n        Text.title \"Summit Grip\"\n      Text.body \"A lightweight, cushioned daily trainer built for comfortable miles on any road.\"\n      Text.strong \"Choose a size\"\n      Select =size items:[\"7\",\"8\",\"9\",\"10\",\"11\",\"12\"]\n      Button \"Add to bag\" -> emit addToBag; toast \"Added to bag\"","usage":{"input_tokens":3777,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1140,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":415,"totalMs":3781}}
+{"tMs":415,"delta":"The"}
+{"tMs":640,"delta":" err"}
+{"tMs":640,"delta":"ors come"}
+{"tMs":640,"delta":" from bin"}
+{"tMs":640,"delta":"ding `hidden:"}
+{"tMs":640,"delta":"="}
+{"tMs":640,"delta":"` on"}
+{"tMs":640,"delta":" Badge and"}
+{"tMs":640,"delta":" Text, and from gi"}
+{"tMs":641,"delta":"ving PageView a text"}
+{"tMs":663,"delta":"."}
+{"tMs":686,"delta":" The fix is to use `if"}
+{"tMs":707,"delta":"` bl"}
+{"tMs":849,"delta":"ocks for conditional content"}
+{"tMs":849,"delta":" and to drive"}
+{"tMs":849,"delta":" the carousel with"}
+{"tMs":849,"delta":" a PageView b"}
+{"tMs":849,"delta":"ound to `"}
+{"tMs":849,"delta":"index`, with no text"}
+{"tMs":858,"delta":" prop."}
+{"tMs":880,"delta":" The sh"}
+{"tMs":901,"delta":"oe details are sh"}
+{"tMs":923,"delta":"own in separate `if` bl"}
+{"tMs":944,"delta":"ocks per"}
+{"tMs":966,"delta":" shoe.\n\nColumn g"}
+{"tMs":1056,"delta":"ap:12 pad:16"}
+{"tMs":1056,"delta":" w:390\n  state index"}
+{"tMs":1056,"delta":"=0\n  state shoe"}
+{"tMs":1056,"delta":"=-1\n  if sho"}
+{"tMs":1075,"delta":"e<0\n    Row between"}
+{"tMs":1096,"delta":"\n      IconButton \"ch"}
+{"tMs":1118,"delta":"evron-left\" -> index"}
+{"tMs":1139,"delta":"=max(0,index-1"}
+{"tMs":1160,"delta":")\n      Text.strong"}
+{"tMs":1182,"delta":" \"{index+1} / "}
+{"tMs":1204,"delta":"6\"\n      IconButton"}
+{"tMs":1225,"delta":" \"chevron-right\" -"}
+{"tMs":1268,"delta":"> index=min(5,index"}
+{"tMs":1268,"delta":"+1)\n    PageView"}
+{"tMs":1290,"delta":" =index\n      Card gap"}
+{"tMs":1311,"delta":":8\n        Image \"plac"}
+{"tMs":1333,"delta":"eholder\"\n        Text"}
+{"tMs":1354,"delta":".heading \"Stride"}
+{"tMs":1377,"delta":" Runner\"\n        Text."}
+{"tMs":1397,"delta":"body \"\\$89\"\n        "}
+{"tMs":1419,"delta":"Row gap:4\n          "}
+{"tMs":1440,"delta":"Icon \"star\"\n          "}
+{"tMs":1462,"delta":"Text.small \"4.6"}
+{"tMs":1483,"delta":" rating\"\n        Button"}
+{"tMs":1505,"delta":" \"View details\" -> sho"}
+{"tMs":1526,"delta":"e=0\n      Card g"}
+{"tMs":1548,"delta":"ap:8\n        Image \""}
+{"tMs":1569,"delta":"placeholder\"\n        "}
+{"tMs":1591,"delta":"Text.heading \"Trail"}
+{"tMs":1612,"delta":" Blaze GTX\""}
+{"tMs":1633,"delta":"\n        Text.body \"\\"}
+{"tMs":1655,"delta":"$129\"\n        Row g"}
+{"tMs":1676,"delta":"ap:4\n          Icon"}
+{"tMs":1698,"delta":" \"star\"\n          Text."}
+{"tMs":1719,"delta":"small \"4.8 rating"}
+{"tMs":1741,"delta":"\"\n        Button \"View details"}
+{"tMs":1762,"delta":"\" -> shoe=1"}
+{"tMs":1783,"delta":"\n      Card gap:8"}
+{"tMs":1805,"delta":"\n        Image \"placehol"}
+{"tMs":1827,"delta":"der\"\n        Text.he"}
+{"tMs":1848,"delta":"ading \"Velocity P"}
+{"tMs":1870,"delta":"ro\"\n        Text.body"}
+{"tMs":1891,"delta":" \"\\$159\"\n        "}
+{"tMs":1913,"delta":"Row gap:4\n          "}
+{"tMs":1934,"delta":"Icon \"star\"\n          "}
+{"tMs":1955,"delta":"Text.small \"4.7 "}
+{"tMs":1977,"delta":"rating\"\n        Button \""}
+{"tMs":1998,"delta":"View details\" -> shoe"}
+{"tMs":2020,"delta":"=2\n      Card gap"}
+{"tMs":2041,"delta":":8\n        Image \"plac"}
+{"tMs":2063,"delta":"eholder\"\n        Text"}
+{"tMs":2084,"delta":".heading \"Cloud"}
+{"tMs":2106,"delta":" Glide\"\n        Text"}
+{"tMs":2128,"delta":".body \"\\$99\""}
+{"tMs":2148,"delta":"\n        Row gap:4"}
+{"tMs":2170,"delta":"\n          Icon \"star\""}
+{"tMs":2191,"delta":"\n          Text.small \"4."}
+{"tMs":2214,"delta":"5 rating\"\n        "}
+{"tMs":2234,"delta":"Button \"View details\" -> sh"}
+{"tMs":2255,"delta":"oe=3\n      Card"}
+{"tMs":2277,"delta":" gap:8\n        Image"}
+{"tMs":2299,"delta":" \"placeholder\"\n        "}
+{"tMs":2320,"delta":"Text.heading \"S"}
+{"tMs":2342,"delta":"print Lite\"\n        "}
+{"tMs":2363,"delta":"Text.body \"\\$74"}
+{"tMs":2385,"delta":"\"\n        Row gap:"}
+{"tMs":2406,"delta":"4\n          Icon \"star"}
+{"tMs":2427,"delta":"\"\n          Text.small \""}
+{"tMs":2449,"delta":"4.4 rating\""}
+{"tMs":2470,"delta":"\n        Button \"View details\" -"}
+{"tMs":2492,"delta":"> shoe=4\n      "}
+{"tMs":2513,"delta":"Card gap:8\n        "}
+{"tMs":2535,"delta":"Image \"placeholder\""}
+{"tMs":2556,"delta":"\n        Text.heading \""}
+{"tMs":2578,"delta":"Summit Grip\""}
+{"tMs":2599,"delta":"\n        Text.body \"\\$"}
+{"tMs":2621,"delta":"139\"\n        Row gap"}
+{"tMs":2642,"delta":":4\n          Icon \""}
+{"tMs":2664,"delta":"star\"\n          Text.small"}
+{"tMs":2685,"delta":" \"4.9 rating\""}
+{"tMs":2707,"delta":"\n        Button \"View details\""}
+{"tMs":2728,"delta":" -> shoe=5"}
+{"tMs":2752,"delta":"\n    Row center gap:6"}
+{"tMs":2771,"delta":"\n      if index==0\n        "}
+{"tMs":2793,"delta":"Badge \"1"}
+{"tMs":2814,"delta":"\"\n      if index==1"}
+{"tMs":2838,"delta":"\n        Badge \"2\""}
+{"tMs":2858,"delta":"\n      if index==2\n        "}
+{"tMs":2879,"delta":"Badge \"3\"\n      if"}
+{"tMs":2900,"delta":" index==3\n        Badge"}
+{"tMs":2923,"delta":" \"4\"\n      if index=="}
+{"tMs":2943,"delta":"4\n        Badge \"5"}
+{"tMs":2965,"delta":"\"\n      if index==5"}
+{"tMs":2986,"delta":"\n        Badge \"6\""}
+{"tMs":3007,"delta":"\n  if shoe>=0"}
+{"tMs":3029,"delta":"\n    Button.ghost"}
+{"tMs":3050,"delta":" \"Back to carousel\""}
+{"tMs":3072,"delta":" -> shoe=-1"}
+{"tMs":3093,"delta":"\n    Card gap:10"}
+{"tMs":3114,"delta":"\n      Image \"placehol"}
+{"tMs":3136,"delta":"der\"\n      if shoe"}
+{"tMs":3157,"delta":"==0\n        Text.title"}
+{"tMs":3179,"delta":" \"Stride Runner\""}
+{"tMs":3200,"delta":"\n      if shoe==1"}
+{"tMs":3222,"delta":"\n        Text.title \""}
+{"tMs":3243,"delta":"Trail Blaze GT"}
+{"tMs":3265,"delta":"X\"\n      if shoe"}
+{"tMs":3286,"delta":"==2\n        Text.title"}
+{"tMs":3308,"delta":" \"Velocity Pro"}
+{"tMs":3329,"delta":"\"\n      if shoe=="}
+{"tMs":3350,"delta":"3\n        Text.title \""}
+{"tMs":3372,"delta":"Cloud Glide\""}
+{"tMs":3393,"delta":"\n      if shoe==4"}
+{"tMs":3415,"delta":"\n        Text.title \""}
+{"tMs":3436,"delta":"Sprint Lite\""}
+{"tMs":3458,"delta":"\n      if shoe==5"}
+{"tMs":3479,"delta":"\n        Text.title \"Summ"}
+{"tMs":3501,"delta":"it Grip\"\n      "}
+{"tMs":3528,"delta":"Text.body \"A lightwe"}
+{"tMs":3544,"delta":"ight, cushioned daily"}
+{"tMs":3565,"delta":" trainer built for comfort"}
+{"tMs":3586,"delta":"able miles on any road.\""}
+{"tMs":3611,"delta":"\n      Text.strong \""}
+{"tMs":3630,"delta":"Choose a size\"\n      "}
+{"tMs":3651,"delta":"Select =size items:[\"7\",\""}
+{"tMs":3672,"delta":"8\",\"9\",\"10\",\"11\",\""}
+{"tMs":3694,"delta":"12\"]\n      Button \""}
+{"tMs":3716,"delta":"Add to bag\" ->"}
+{"tMs":3737,"delta":" emit addToBag; to"}
+{"tMs":3758,"delta":"ast \"Added to bag\""}

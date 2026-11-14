@@ -1,0 +1,74 @@
+{
+ "ui": "data_table",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3959,
+ "turns": [
+  {
+   "input_tokens": 1711,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 157,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 491,
+   "totalMs": 1396,
+   "chars": 501,
+   "lines": 2,
+   "jsonTails": 0,
+   "nodes": 1,
+   "outputTokensPerNode": "157.0",
+   "notationIssues": [
+    "line 1:1: No node type \"I\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…).",
+    "line 3:1: No node type \"If\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 1992,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 539,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 419,
+   "totalMs": 2856,
+   "chars": 1328,
+   "lines": 30,
+   "jsonTails": 0,
+   "nodes": 26,
+   "outputTokensPerNode": "20.7",
+   "notationIssues": [
+    "line 1:1: No node type \"The\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…).",
+    "line 18:1: A listTile has no text of its own.",
+    "line 18:1: A listTile has no text of its own.",
+    "line 19:1: A listTile has no text of its own.",
+    "line 19:1: A listTile has no text of its own.",
+    "line 20:1: A listTile has no text of its own.",
+    "line 20:1: A listTile has no text of its own.",
+    "line 21:1: A listTile has no text of its own.",
+    "line 21:1: A listTile has no text of its own.",
+    "line 22:1: A listTile has no text of its own.",
+    "line 22:1: A listTile has no text of its own."
+   ],
+   "errors": []
+  }
+ ]
+}

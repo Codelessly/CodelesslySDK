@@ -1,0 +1,73 @@
+{"meta":{"ui":"map_list","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"Column gap:0 pad:0\n  state sel=0\n  state hours=\"\"\n  Stack h:260 fill:#FFEFF3F6\n    Box\n      Text \"Map\"\n    Button.ghost \"1\" -> sel=1; hours=\"Open 7:00–19:00\"\n    Button.ghost \"2\" -> sel=2; hours=\"Open 8:00–17:00\"\n    Button.ghost \"3\" -> sel=3; hours=\"Open 6:30–20:00\"\n    Button.ghost \"4\" -> sel=4; hours=\"Open 9:00–16:00\"\n    Button.ghost \"5\" -> sel=5; hours=\"Open 7:30–18:00\"\n  List gap:8 pad:12\n    Button.ghost \"1. Ember & Oak Coffee, rating 4.8, 0.3 km\" -> sel=1; hours=\"Open 7:00–19:00\"\n    Button.ghost \"2. Northside Roasters, rating 4.6, 0.6 km\" -> sel=2; hours=\"Open 8:00–17:00\"\n    Button.ghost \"3. Little Bean Cafe, rating 4.5, 0.9 km\" -> sel=3; hours=\"Open 6:30–20:00\"\n    Button.ghost \"4. Brass Door Espresso, rating 4.3, 1.2 km\" -> sel=4; hours=\"Open 9:00–16:00\"\n    Button.ghost \"5. Corner Grind, rating 4.1, 1.5 km\" -> sel=5; hours=\"Open 7:30–18:00\"\n  if sel>0\n    Card pad:12 gap:4\n      Text.strong \"Selected shop {sel}\"\n      Text.muted \"{hours}\"","usage":{"input_tokens":2476,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":560,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":451,"totalMs":1998}}
+{"tMs":451,"delta":"Column gap:0 pad"}
+{"tMs":668,"delta":":0\n  state sel="}
+{"tMs":668,"delta":"0\n  state hours=\"\""}
+{"tMs":668,"delta":"\n  Stack h:260"}
+{"tMs":668,"delta":" fill:#FFE"}
+{"tMs":668,"delta":"FF3F6\n    "}
+{"tMs":668,"delta":"Box\n      Text \"Map"}
+{"tMs":668,"delta":"\"\n    Button.gh"}
+{"tMs":668,"delta":"ost \"1\" -> sel"}
+{"tMs":668,"delta":"=1; hours=\"Open"}
+{"tMs":681,"delta":" 7:00–19:00"}
+{"tMs":703,"delta":"\"\n    Button.gh"}
+{"tMs":725,"delta":"ost \"2\" -> sel"}
+{"tMs":889,"delta":"=2; hours=\"Open"}
+{"tMs":889,"delta":" 8:00–17:00"}
+{"tMs":890,"delta":"\"\n    Button.gh"}
+{"tMs":890,"delta":"ost \"3\" -> sel"}
+{"tMs":890,"delta":"=3; hours=\"Open"}
+{"tMs":890,"delta":" 6:30–20:00"}
+{"tMs":890,"delta":"\"\n    Button.gh"}
+{"tMs":898,"delta":"ost \"4\" -> sel"}
+{"tMs":918,"delta":"=4; hours=\"Open"}
+{"tMs":940,"delta":" 9:00–16:00"}
+{"tMs":962,"delta":"\"\n    Button.gh"}
+{"tMs":983,"delta":"ost \"5\" -> sel"}
+{"tMs":1112,"delta":"=5; hours=\"Open"}
+{"tMs":1112,"delta":" 7:30–18:00"}
+{"tMs":1112,"delta":"\"\n  List gap:8"}
+{"tMs":1112,"delta":" pad:12\n    "}
+{"tMs":1112,"delta":"Button."}
+{"tMs":1112,"delta":"ghost \"1. Ember"}
+{"tMs":1132,"delta":" & Oak Coffee"}
+{"tMs":1153,"delta":", r"}
+{"tMs":1175,"delta":"ating 4.8,"}
+{"tMs":1197,"delta":" 0.3 km\" -"}
+{"tMs":1219,"delta":"> sel=1; hours"}
+{"tMs":1240,"delta":"=\"Open 7:00–"}
+{"tMs":1334,"delta":"19:00\"\n    Button"}
+{"tMs":1334,"delta":".ghost \"2."}
+{"tMs":1334,"delta":" Northside Roasters, r"}
+{"tMs":1334,"delta":"ating 4.6, 0"}
+{"tMs":1347,"delta":".6 km\" -> s"}
+{"tMs":1369,"delta":"el=2; hours=\""}
+{"tMs":1390,"delta":"Open 8:00–17:"}
+{"tMs":1411,"delta":"00\"\n    Button."}
+{"tMs":1433,"delta":"ghost \"3. Little"}
+{"tMs":1455,"delta":" Bean Cafe, r"}
+{"tMs":1476,"delta":"ating 4.5, 0"}
+{"tMs":1498,"delta":".9 km\" -> s"}
+{"tMs":1556,"delta":"el=3; hours=\""}
+{"tMs":1556,"delta":"Open 6:30–20:"}
+{"tMs":1562,"delta":"00\"\n    Button."}
+{"tMs":1583,"delta":"ghost \"4. Brass"}
+{"tMs":1605,"delta":" Door Espresso, r"}
+{"tMs":1626,"delta":"ating 4.3, 1"}
+{"tMs":1648,"delta":".2 km\" -> s"}
+{"tMs":1669,"delta":"el=4; hours=\""}
+{"tMs":1691,"delta":"Open 9:00–16:"}
+{"tMs":1713,"delta":"00\"\n    Button."}
+{"tMs":1734,"delta":"ghost \"5. Corner"}
+{"tMs":1755,"delta":" Grind, rating 4"}
+{"tMs":1958,"delta":".1, 1.5 "}
+{"tMs":1958,"delta":"km\" -> sel=5"}
+{"tMs":1958,"delta":"; hours=\"Open 7"}
+{"tMs":1958,"delta":":30–18:00\""}
+{"tMs":1958,"delta":"\n  if sel>0\n    "}
+{"tMs":1958,"delta":"Card pad:12 g"}
+{"tMs":1958,"delta":"ap:4\n      Text."}
+{"tMs":1958,"delta":"strong \"Selected shop"}
+{"tMs":1958,"delta":" {sel}\"\n      "}
+{"tMs":1970,"delta":"Text.muted \"{hours"}
+{"tMs":1992,"delta":"}\""}

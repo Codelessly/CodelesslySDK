@@ -1,0 +1,99 @@
+{"meta":{"ui":"map_list","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"Column gap:0 pad:0\n  state sel=0\n  state hours=\"\"\n  Stack h:260 fill:#FFEFF3F6\n    Box\n      Text \"Map\"\n    Button.ghost \"1\" -> sel=1; hours=\"Open 7:00–19:00\"\n    Button.ghost \"2\" -> sel=2; hours=\"Open 8:00–17:00\"\n    Button.ghost \"3\" -> sel=3; hours=\"Open 6:30–20:00\"\n    Button.ghost \"4\" -> sel=4; hours=\"Open 9:00–16:00\"\n    Button.ghost \"5\" -> sel=5; hours=\"Open 7:30–18:00\"\n  List gap:8 pad:12\n    ListTile \"Ember & Oak Coffee\" \"Rating 4.8 · 0.3 km\" -> sel=1; hours=\"Open 7:00–19:00\"\n    ListTile \"Northside Roasters\" \"Rating 4.6 · 0.6 km\" -> sel=2; hours=\"Open 8:00–17:00\"\n    ListTile \"Little Bean Cafe\" \"Rating 4.5 · 0.9 km\" -> sel=3; hours=\"Open 6:30–20:00\"\n    ListTile \"Brass Door Espresso\" \"Rating 4.3 · 1.2 km\" -> sel=4; hours=\"Open 9:00–16:00\"\n    ListTile \"Corner Grind\" \"Rating 4.1 · 1.5 km\" -> sel=5; hours=\"Open 7:30–18:00\"\n  if sel>0\n    Card pad:12 gap:4\n      Text.strong \"Selected shop {sel}\"\n      Text.muted \"{hours}\"","usage":{"input_tokens":1705,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":555,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":502,"totalMs":2621}}
+{"tMs":502,"delta":"Column"}
+{"tMs":705,"delta":" gap:0"}
+{"tMs":705,"delta":" pad:0"}
+{"tMs":705,"delta":"\n  state s"}
+{"tMs":705,"delta":"el=0\n  state hours"}
+{"tMs":705,"delta":"=\"\"\n  St"}
+{"tMs":705,"delta":"ack h"}
+{"tMs":705,"delta":":260"}
+{"tMs":705,"delta":" "}
+{"tMs":718,"delta":"f"}
+{"tMs":740,"delta":"ill:#F"}
+{"tMs":760,"delta":"FE"}
+{"tMs":782,"delta":"F"}
+{"tMs":917,"delta":"F3"}
+{"tMs":917,"delta":"F"}
+{"tMs":917,"delta":"6"}
+{"tMs":917,"delta":"\n    Box"}
+{"tMs":917,"delta":"\n      Text \""}
+{"tMs":917,"delta":"Map"}
+{"tMs":931,"delta":"\"\n    Button"}
+{"tMs":952,"delta":"."}
+{"tMs":975,"delta":"ghost \"1\" -> s"}
+{"tMs":997,"delta":"el=1; hours=\""}
+{"tMs":1019,"delta":"Open 7:00"}
+{"tMs":1041,"delta":"–19"}
+{"tMs":1134,"delta":":00\"\n    Button."}
+{"tMs":1134,"delta":"ghost \"2\" ->"}
+{"tMs":1134,"delta":" sel=2; hours=\""}
+{"tMs":1134,"delta":"Open 8:00–17"}
+{"tMs":1150,"delta":":00\"\n    Button."}
+{"tMs":1171,"delta":"ghost \"3\" ->"}
+{"tMs":1194,"delta":" sel=3; hours=\""}
+{"tMs":1215,"delta":"Open 6"}
+{"tMs":1236,"delta":":30–20"}
+{"tMs":1258,"delta":":00\"\n    Button."}
+{"tMs":1280,"delta":"ghost \"4\" ->"}
+{"tMs":1301,"delta":" sel=4; hours=\""}
+{"tMs":1356,"delta":"Open 9:00–16"}
+{"tMs":1356,"delta":":00\"\n    Button."}
+{"tMs":1366,"delta":"ghost \"5\" ->"}
+{"tMs":1391,"delta":" sel=5; hours=\""}
+{"tMs":1409,"delta":"Open 7"}
+{"tMs":1432,"delta":":30–18:00\""}
+{"tMs":1452,"delta":"\n  List gap:8 p"}
+{"tMs":1474,"delta":"ad:12\n    ListT"}
+{"tMs":1495,"delta":"ile \"Ember"}
+{"tMs":1517,"delta":" &"}
+{"tMs":1538,"delta":" O"}
+{"tMs":1559,"delta":"ak"}
+{"tMs":1581,"delta":" Coffee\" \"R"}
+{"tMs":1602,"delta":"ating 4.8 · "}
+{"tMs":1625,"delta":"0.3"}
+{"tMs":1645,"delta":" km\""}
+{"tMs":1667,"delta":" -> sel=1;"}
+{"tMs":1689,"delta":" hours=\"Open 7:"}
+{"tMs":1710,"delta":"00–19:00\"\n    "}
+{"tMs":1731,"delta":"ListTile \"North"}
+{"tMs":1752,"delta":"side"}
+{"tMs":1774,"delta":" Roas"}
+{"tMs":1796,"delta":"ters\" \"Rating 4"}
+{"tMs":1817,"delta":".6 · 0.6"}
+{"tMs":1839,"delta":" km\" -> sel="}
+{"tMs":1860,"delta":"2; hours=\"Open "}
+{"tMs":1882,"delta":"8:00–17:00\""}
+{"tMs":1903,"delta":"\n    ListTile \""}
+{"tMs":1925,"delta":"Little"}
+{"tMs":1947,"delta":" Bean Cafe\""}
+{"tMs":1967,"delta":" \"Rating 4.5"}
+{"tMs":1989,"delta":" · 0.9 km"}
+{"tMs":2011,"delta":"\" -> sel=3;"}
+{"tMs":2032,"delta":" hours=\"Open 6:"}
+{"tMs":2054,"delta":"30–20:00\"\n    "}
+{"tMs":2076,"delta":"ListTile \"Brass"}
+{"tMs":2097,"delta":" Door Esp"}
+{"tMs":2118,"delta":"resso\" \"Rating "}
+{"tMs":2140,"delta":"4.3"}
+{"tMs":2161,"delta":" · 1.2"}
+{"tMs":2184,"delta":" km\" -> sel="}
+{"tMs":2204,"delta":"4; hours=\"Open "}
+{"tMs":2226,"delta":"9:00–16:00\""}
+{"tMs":2247,"delta":"\n    ListTile \""}
+{"tMs":2269,"delta":"Corner Grind"}
+{"tMs":2295,"delta":"\""}
+{"tMs":2311,"delta":" \"Rating 4.1"}
+{"tMs":2333,"delta":" · 1.5 km"}
+{"tMs":2354,"delta":"\" -> sel=5;"}
+{"tMs":2376,"delta":" hours=\"Open 7:"}
+{"tMs":2397,"delta":"30–18:00\"\n  "}
+{"tMs":2419,"delta":"if"}
+{"tMs":2440,"delta":" sel>"}
+{"tMs":2461,"delta":"0\n    Card pad:"}
+{"tMs":2483,"delta":"12 "}
+{"tMs":2505,"delta":"gap:4"}
+{"tMs":2526,"delta":"\n      Text.strong \""}
+{"tMs":2547,"delta":"Selected shop {"}
+{"tMs":2569,"delta":"sel}\"\n      Text"}
+{"tMs":2593,"delta":".muted \"{hours}"}
+{"tMs":2612,"delta":"\""}

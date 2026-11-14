@@ -1,0 +1,78 @@
+{
+ "ui": "itinerary",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1534,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1315,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 567,
+   "totalMs": 6582,
+   "chars": 2800,
+   "lines": 46,
+   "jsonTails": 0,
+   "nodes": 41,
+   "outputTokensPerNode": "32.1",
+   "notationIssues": [
+    "line 12:1: A expansionTile has no text of its own.",
+    "line 15:1: A expansionTile has no text of its own.",
+    "line 18:1: A expansionTile has no text of its own.",
+    "line 21:1: A expansionTile has no text of its own.",
+    "line 30:1: A expansionTile has no text of its own.",
+    "line 33:1: A expansionTile has no text of its own.",
+    "line 36:1: A expansionTile has no text of its own.",
+    "line 39:1: A expansionTile has no text of its own."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 3043,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1392,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 396,
+   "totalMs": 4344,
+   "chars": 3060,
+   "lines": 47,
+   "jsonTails": 0,
+   "nodes": 41,
+   "outputTokensPerNode": "34.0",
+   "notationIssues": [
+    "line 1:1: No node type \"The\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…).",
+    "line 14:1: A expansionTile has no text of its own.",
+    "line 17:1: A expansionTile has no text of its own.",
+    "line 20:1: A expansionTile has no text of its own.",
+    "line 23:1: A expansionTile has no text of its own.",
+    "line 32:1: A expansionTile has no text of its own.",
+    "line 35:1: A expansionTile has no text of its own.",
+    "line 38:1: A expansionTile has no text of its own.",
+    "line 41:1: A expansionTile has no text of its own."
+   ],
+   "errors": []
+  }
+ ]
+}

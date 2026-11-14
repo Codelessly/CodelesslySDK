@@ -1,0 +1,41 @@
+{"meta":{"ui":"data_table","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Show the twelve invoices you found as a table: number, customer, date, amount and status. I can sort by any column, filter by status, type to search the customer, page through five at a time, tick rows (and a tick-all for the page), and a bar appears with the count and total of what I ticked and a button to send reminders for them.","text":"I don't have any invoices to show: no data came through with your message, so I can't list twelve invoices or their numbers, customers, dates, amounts and statuses. I'd be inventing them if I went ahead.\n\nIf you paste the invoice data (number, customer, date, amount, status for each of the twelve), I'll build the table in the notation with sorting, status filter, customer search, five-per-page paging, row ticking with a tick-all, and a selection bar showing count and total with a reminder button.","usage":{"input_tokens":1711,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":157,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":491,"totalMs":1396}}
+{"tMs":491,"delta":"I don't have any"}
+{"tMs":698,"delta":" invoices to show:"}
+{"tMs":698,"delta":" no"}
+{"tMs":698,"delta":" data came"}
+{"tMs":698,"delta":" through"}
+{"tMs":698,"delta":" with"}
+{"tMs":698,"delta":" your"}
+{"tMs":698,"delta":" message"}
+{"tMs":698,"delta":", so I can't list"}
+{"tMs":698,"delta":" twelve invoices or"}
+{"tMs":698,"delta":" their numbers, customers,"}
+{"tMs":713,"delta":" dates, amounts and stat"}
+{"tMs":735,"delta":"uses. I'd"}
+{"tMs":914,"delta":" be"}
+{"tMs":914,"delta":" in"}
+{"tMs":914,"delta":"venting them if"}
+{"tMs":914,"delta":" I"}
+{"tMs":914,"delta":" went ahead."}
+{"tMs":915,"delta":"\n\nIf"}
+{"tMs":915,"delta":" you paste the"}
+{"tMs":915,"delta":" invoice"}
+{"tMs":927,"delta":" data (number"}
+{"tMs":947,"delta":", customer, date, amount"}
+{"tMs":969,"delta":", status for"}
+{"tMs":989,"delta":" each of"}
+{"tMs":1136,"delta":" the twelve),"}
+{"tMs":1136,"delta":" I'"}
+{"tMs":1136,"delta":"ll build"}
+{"tMs":1136,"delta":" the table"}
+{"tMs":1136,"delta":" in the notation with"}
+{"tMs":1136,"delta":" sorting, status filter"}
+{"tMs":1141,"delta":", customer search, five-per"}
+{"tMs":1163,"delta":"-page pa"}
+{"tMs":1184,"delta":"ging, row "}
+{"tMs":1206,"delta":"ticking"}
+{"tMs":1226,"delta":" with"}
+{"tMs":1261,"delta":" a tick-all, and"}
+{"tMs":1390,"delta":" a selection bar show"}
+{"tMs":1390,"delta":"ing count and total with a remin"}
+{"tMs":1390,"delta":"der button."}

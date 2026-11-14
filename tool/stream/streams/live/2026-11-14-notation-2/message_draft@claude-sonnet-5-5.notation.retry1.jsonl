@@ -1,0 +1,101 @@
+{"meta":{"ui":"message_draft","model":"claude-sonnet-5-5","form":"notation","turn":"retry","prompt":"Draft an email to my landlord about the broken heating and show it as an inline card I can edit before it goes: to, subject and body fields filled in, a tone switch between polite and firm that rewrites the body, and send and discard buttons. Sending needs a recipient and a subject, and afterwards the card shows it as sent.","text":"state to=\"landlord@example.com\"\nstate subject=\"Heating not working in my flat\"\nstate tone=\"polite\"\nstate body=\"Hi,\\n\\nI hope you're well. The heating in my flat has stopped working, and with the colder weather it's becoming difficult to stay comfortable. Could you please arrange for someone to take a look as soon as possible?\\n\\nI'm happy to give access at a time that suits. Thank you for your help.\\n\\nKind regards\"\nstate status=\"draft\"\nCard w:390 gap:12\n  if status==\"draft\"\n    Row between middle\n      Text.heading \"Email draft\"\n      Badge.info \"Draft\"\n    SegmentedButton =tone items:[\"polite\",\"firm\"] -> body=tone==\"polite\"?\"Hi,\\n\\nI hope you're well. The heating in my flat has stopped working, and with the colder weather it's becoming difficult to stay comfortable. Could you please arrange for someone to take a look as soon as possible?\\n\\nI'm happy to give access at a time that suits. Thank you for your help.\\n\\nKind regards\":\"Hello,\\n\\nThe heating in my flat is broken and has not been working. This is a repair you are responsible for, and it needs to be fixed urgently. Please confirm within 48 hours when an engineer will attend.\\n\\nIf I don't hear back, I will have to consider my options and escalate the matter.\\n\\nRegards\"\n    Input \"To\" \"landlord@example.com\" =to\n    Input \"Subject\" =subject\n    Input \"Body\" =body lines:8\n    if to==\"\"||subject==\"\"\n      Text.danger \"Add a recipient and a subject to send.\"\n    Row gap:8 end\n      Button.ghost \"Discard\" -> status=\"discarded\"; emit discard\n      Button \"Send\" enabled:=to!=\"\"&&subject!=\"\" -> status=\"sent\"; emit send; toast \"Email sent\"\n  if status==\"sent\"\n    Row gap:8 middle\n      Icon \"check_circle\"\n      Text.heading \"Sent\"\n      Badge.success \"Sent\"\n    Text.strong \"{subject}\"\n    Text.muted \"To: {to}\"\n    Text.body \"{body}\"\n  if status==\"discarded\"\n    Row between middle\n      Text.heading \"Draft discarded\"\n      Badge.neutral \"Discarded\"\n    Button.outline \"Restore draft\" -> status=\"draft\"","usage":{"input_tokens":2549,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":775,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":541,"totalMs":4053}}
+{"tMs":541,"delta":"state"}
+{"tMs":1261,"delta":" to=\""}
+{"tMs":1261,"delta":"landlord@example.com\""}
+{"tMs":1261,"delta":"\nstate subject=\"Heating"}
+{"tMs":1261,"delta":" not working in my flat\""}
+{"tMs":1261,"delta":"\nstate tone=\"polite\""}
+{"tMs":1261,"delta":"\nstate body=\"Hi,\\"}
+{"tMs":1261,"delta":"n\\nI hope you're"}
+{"tMs":1261,"delta":" well. The heating in my fl"}
+{"tMs":1261,"delta":"at has stopped working, and"}
+{"tMs":1261,"delta":" with the colder weather it's"}
+{"tMs":1261,"delta":" becoming difficult to st"}
+{"tMs":1261,"delta":"ay comfortable. Could"}
+{"tMs":1627,"delta":" you please arrange for someone"}
+{"tMs":1627,"delta":" to take a look as soon as"}
+{"tMs":1627,"delta":" possible?\\n\\nI"}
+{"tMs":1627,"delta":"'m happy to give access at"}
+{"tMs":1627,"delta":" a time that suits. Th"}
+{"tMs":1627,"delta":"ank you for your help.\\n"}
+{"tMs":1627,"delta":"\\nKind regards\""}
+{"tMs":1627,"delta":"\nstate status=\"draft\""}
+{"tMs":1627,"delta":"\nCard w:390 gap:"}
+{"tMs":1627,"delta":"12\n  if status==\"dra"}
+{"tMs":1627,"delta":"ft\"\n    Row between midd"}
+{"tMs":1627,"delta":"le\n      Text.heading"}
+{"tMs":1989,"delta":" \"Email draft\"\n      "}
+{"tMs":1990,"delta":"Badge.info \"Dra"}
+{"tMs":1990,"delta":"ft\"\n    S"}
+{"tMs":1990,"delta":"egmentedButton ="}
+{"tMs":1990,"delta":"tone items:[\"polite\",\""}
+{"tMs":1990,"delta":"firm\"] -> body="}
+{"tMs":1990,"delta":"tone==\"polite\"?"}
+{"tMs":1990,"delta":"\"Hi,\\n\\"}
+{"tMs":1990,"delta":"nI hope you're well."}
+{"tMs":1990,"delta":" The heating in my flat has"}
+{"tMs":1990,"delta":" stopped working, and with the"}
+{"tMs":1990,"delta":" colder weather it's beco"}
+{"tMs":2352,"delta":"ming difficult to stay com"}
+{"tMs":2352,"delta":"fortable. Could you please"}
+{"tMs":2353,"delta":" arrange for someone to take"}
+{"tMs":2353,"delta":" a look as soon as possible"}
+{"tMs":2353,"delta":"?\\n\\nI'm"}
+{"tMs":2353,"delta":" happy to give access at a time"}
+{"tMs":2353,"delta":" that suits. Thank you"}
+{"tMs":2353,"delta":" for your help.\\n\\n"}
+{"tMs":2353,"delta":"Kind regards\":\"H"}
+{"tMs":2353,"delta":"ello,\\n\\nThe"}
+{"tMs":2353,"delta":" heating in my flat is bro"}
+{"tMs":2353,"delta":"ken and has not been working. This"}
+{"tMs":2712,"delta":" is a repair you are respons"}
+{"tMs":2712,"delta":"ible for, and it needs to"}
+{"tMs":2712,"delta":" be fixed urgently."}
+{"tMs":2712,"delta":" Please confirm within 48"}
+{"tMs":2712,"delta":" hours when an engineer"}
+{"tMs":2712,"delta":" will attend.\\n\\n"}
+{"tMs":2712,"delta":"If I don't hear back"}
+{"tMs":2712,"delta":", I will have to consider my"}
+{"tMs":2712,"delta":" options and escalate the matter"}
+{"tMs":2712,"delta":".\\n\\nRegards"}
+{"tMs":2712,"delta":"\"\n    Input \"To\""}
+{"tMs":2712,"delta":" \"landlord@example.com"}
+{"tMs":3109,"delta":"\" =to\n    Input \""}
+{"tMs":3109,"delta":"Subject\" =subject"}
+{"tMs":3109,"delta":"\n    Input \"Body\" ="}
+{"tMs":3109,"delta":"body lines:8\n    if"}
+{"tMs":3109,"delta":" to==\"\"||subject==\"\""}
+{"tMs":3109,"delta":"\n      Text.danger \""}
+{"tMs":3109,"delta":"Add a recipient and a"}
+{"tMs":3109,"delta":" subject to send.\"\n    "}
+{"tMs":3109,"delta":"Row gap:8 end"}
+{"tMs":3109,"delta":"\n      Button.ghost \""}
+{"tMs":3109,"delta":"Discard\" -> status=\""}
+{"tMs":3109,"delta":"discarded\"; emit disc"}
+{"tMs":3477,"delta":"ard\n      Button \"Send"}
+{"tMs":3477,"delta":"\" enabled:=to!"}
+{"tMs":3477,"delta":"="}
+{"tMs":3477,"delta":"\"\"&&subject!=\"\""}
+{"tMs":3477,"delta":" -> status=\"sent\";"}
+{"tMs":3477,"delta":" emit send; toast \""}
+{"tMs":3477,"delta":"Email sent\""}
+{"tMs":3477,"delta":"\n  if status==\"sent\""}
+{"tMs":3477,"delta":"\n    Row gap:8"}
+{"tMs":3477,"delta":" middle\n      Icon"}
+{"tMs":3477,"delta":" \"check_circle\"\n      "}
+{"tMs":3477,"delta":"Text.heading \"S"}
+{"tMs":4050,"delta":"ent\"\n      Badge."}
+{"tMs":4050,"delta":"success \"Sent\"\n    "}
+{"tMs":4051,"delta":"Text.strong \"{sub"}
+{"tMs":4051,"delta":"ject}\"\n    Text."}
+{"tMs":4051,"delta":"muted \"To: {to}"}
+{"tMs":4051,"delta":"\"\n    Text.body \""}
+{"tMs":4051,"delta":"{body}\"\n  if status"}
+{"tMs":4051,"delta":"==\"discarded\"\n    "}
+{"tMs":4051,"delta":"Row between middle\n      "}
+{"tMs":4051,"delta":"Text.heading \"Draft"}
+{"tMs":4051,"delta":" discarded\"\n      Bad"}
+{"tMs":4051,"delta":"ge.neutral \"Disc"}
+{"tMs":4051,"delta":"arded\"\n    Button."}
+{"tMs":4051,"delta":"outline \"Restore draft"}
+{"tMs":4051,"delta":"\" -> status=\"draft\""}

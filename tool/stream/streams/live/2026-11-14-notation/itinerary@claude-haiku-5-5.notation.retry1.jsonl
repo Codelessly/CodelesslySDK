@@ -1,0 +1,185 @@
+{"meta":{"ui":"itinerary","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Plan two days in Kyoto as an inline itinerary: a timeline per day with times, places, how to get between them and how long it takes. Each stop expands for details, each day has a checklist of things to book that I can tick off, and a line at the top says how many are left.","text":"The error is about ExpansionTile: the title has to be written as `text` with a label, and the spelling must match the type name exactly. I'll keep the same structure, use the correct type name, and fix the checklist counter so it uses the variables properly.\n\nCard gap:12 pad:16 w:390\n  Text.title \"Kyoto: two days\"\n  state booked=0\n  state todo1=false\n  state todo2=false\n  state todo3=false\n  state todo4=false\n  state todo5=false\n  Text.muted \"Things to book left: {5-booked}\"\n  Text.heading \"Day 1: Higashiyama\"\n  Column gap:8\n    ExpansionTile \"08:30  Fushimi Inari Taisha\"\n      Text.body \"Walk through the torii gates up Mount Inari, about 2 hours round trip. Arrive early to avoid crowds.\"\n      Text.small \"Getting there: JR Nara Line to Inari Station, 5 min walk from Kyoto Station (about 5 min).\"\n    ExpansionTile \"11:00  Kiyomizu-dera\"\n      Text.body \"Hillside temple with a wooden stage over the valley. Allow 90 minutes.\"\n      Text.small \"Getting there: bus 206 from Inari area to Kiyomizu-michi, then 10 min uphill walk (about 35 min).\"\n    ExpansionTile \"13:30  Ninenzaka and Sannenzaka\"\n      Text.body \"Preserved stone lanes lined with teahouses and craft shops, leading down from Kiyomizu.\"\n      Text.small \"Getting there: 10 min downhill walk from Kiyomizu-dera (about 10 min).\"\n    ExpansionTile \"16:00  Gion district\"\n      Text.body \"Traditional wooden machiya streets. Best in the early evening for a chance to glimpse geiko and maiko.\"\n      Text.small \"Getting there: 15 min walk along Shirakawa canal (about 15 min).\"\n  Text.strong \"Day 1 checklist\"\n  Column gap:6\n    Checkbox \"Book Kiyomizu-dera evening illumination (seasonal)\" =todo1 -> booked=booked+(todo1?1:-1)\n    Checkbox \"Reserve a kaiseki dinner in Gion\" =todo2 -> booked=booked+(todo2?1:-1)\n  Text.heading \"Day 2: Arashiyama and north\"\n  Column gap:8\n    ExpansionTile \"08:00  Arashiyama Bamboo Grove\"\n      Text.body \"Walk the towering bamboo path early before tour groups arrive. Allow 45 minutes.\"\n      Text.small \"Getting there: JR Sagano Line from Kyoto Station to Saga-Arashiyama (about 15 min).\"\n    ExpansionTile \"09:30  Tenryu-ji\"\n      Text.body \"UNESCO temple with a famous garden of borrowed scenery. Allow 60 minutes.\"\n      Text.small \"Getting there: 5 min walk from the bamboo grove (about 5 min).\"\n    ExpansionTile \"11:30  Kinkaku-ji (Golden Pavilion)\"\n      Text.body \"Gold-leafed pavilion reflected in a pond. Allow 60 minutes.\"\n      Text.small \"Getting there: bus 205 or 101 from Arashiyama, about 30 min.\"\n    ExpansionTile \"14:00  Nishiki Market\"\n      Text.body \"Narrow covered market for street food and local snacks. Allow 90 minutes.\"\n      Text.small \"Getting there: bus 205 to Shijo Karasuma, then 5 min walk (about 35 min).\"\n  Text.strong \"Day 2 checklist\"\n  Column gap:6\n    Checkbox \"Book Kinkaku-ji entry time slot\" =todo3 -> booked=booked+(todo3?1:-1)\n    Checkbox \"Reserve Arashiyama train tickets (IC card works)\" =todo4 -> booked=booked+(todo4?1:-1)\n    Checkbox \"Book Tenryu-ji garden entry\" =todo5 -> booked=booked+(todo5?1:-1)","usage":{"input_tokens":3043,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1392,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":396,"totalMs":4344}}
+{"tMs":396,"delta":"The error"}
+{"tMs":614,"delta":" is about"}
+{"tMs":614,"delta":" ExpansionTile:"}
+{"tMs":614,"delta":" the title has"}
+{"tMs":614,"delta":" to be written as `text"}
+{"tMs":614,"delta":"` with a label,"}
+{"tMs":614,"delta":" and the sp"}
+{"tMs":614,"delta":"elling must match the"}
+{"tMs":614,"delta":" type name exactly. I'"}
+{"tMs":614,"delta":"ll ke"}
+{"tMs":622,"delta":"ep the same"}
+{"tMs":643,"delta":" structure,"}
+{"tMs":664,"delta":" use"}
+{"tMs":838,"delta":" the corre"}
+{"tMs":838,"delta":"ct type name, and fix the"}
+{"tMs":838,"delta":" chec"}
+{"tMs":838,"delta":"klist counter so it uses"}
+{"tMs":838,"delta":" the vari"}
+{"tMs":838,"delta":"ables properly.\n\nCard g"}
+{"tMs":838,"delta":"ap:12 pad:16"}
+{"tMs":838,"delta":" w:390\n  Text"}
+{"tMs":859,"delta":".title \"Kyoto"}
+{"tMs":881,"delta":": two days\"\n  state boo"}
+{"tMs":903,"delta":"ked=0\n  state todo"}
+{"tMs":924,"delta":"1=false\n  state todo"}
+{"tMs":1056,"delta":"2=false\n  state todo"}
+{"tMs":1056,"delta":"3=false\n  state todo"}
+{"tMs":1056,"delta":"4=false\n  state todo"}
+{"tMs":1056,"delta":"5=false\n  Text."}
+{"tMs":1056,"delta":"muted \"Things to book left"}
+{"tMs":1056,"delta":": {5-booked}\""}
+{"tMs":1075,"delta":"\n  Text.heading \""}
+{"tMs":1098,"delta":"Day 1: Higash"}
+{"tMs":1118,"delta":"iyama\"\n  Column"}
+{"tMs":1140,"delta":" gap:8\n    Ex"}
+{"tMs":1163,"delta":"pansionTile \"08:"}
+{"tMs":1183,"delta":"30  Fushimi"}
+{"tMs":1275,"delta":" Inari Taisha\""}
+{"tMs":1275,"delta":"\n      Text.body \"Wal"}
+{"tMs":1275,"delta":"k through the torii gates up"}
+{"tMs":1275,"delta":" Mount Inari, about"}
+{"tMs":1291,"delta":" 2 hours round trip"}
+{"tMs":1312,"delta":". Arrive early to av"}
+{"tMs":1333,"delta":"oid crowds.\"\n      "}
+{"tMs":1355,"delta":"Text.small \"Getting"}
+{"tMs":1377,"delta":" there: JR Nara"}
+{"tMs":1398,"delta":" Line to Inari Station,"}
+{"tMs":1420,"delta":" 5 min walk from"}
+{"tMs":1441,"delta":" Kyoto Station (about"}
+{"tMs":1495,"delta":" 5 min).\"\n    "}
+{"tMs":1495,"delta":"ExpansionTile \""}
+{"tMs":1505,"delta":"11:00  Kiy"}
+{"tMs":1527,"delta":"omizu-dera\""}
+{"tMs":1549,"delta":"\n      Text.body \"H"}
+{"tMs":1570,"delta":"illside temple with a woo"}
+{"tMs":1592,"delta":"den stage over the valley."}
+{"tMs":1613,"delta":" Allow 90 minut"}
+{"tMs":1635,"delta":"es.\"\n      Text.small"}
+{"tMs":1657,"delta":" \"Getting there: bus"}
+{"tMs":1679,"delta":" 206 from Inari area"}
+{"tMs":1699,"delta":" to Kiyomizu"}
+{"tMs":1720,"delta":"-michi, then 10 "}
+{"tMs":1742,"delta":"min uphill walk (about"}
+{"tMs":1765,"delta":" 35 min).\"\n    "}
+{"tMs":1785,"delta":"ExpansionTile \""}
+{"tMs":1806,"delta":"13:30  Ninen"}
+{"tMs":1828,"delta":"zaka and Sannen"}
+{"tMs":1849,"delta":"zaka\"\n      Text"}
+{"tMs":1870,"delta":".body \"Preserved st"}
+{"tMs":1898,"delta":"one lanes lined with te"}
+{"tMs":1915,"delta":"ahouses and craft shops"}
+{"tMs":1936,"delta":", leading down from Ki"}
+{"tMs":1957,"delta":"yomizu.\"\n      "}
+{"tMs":1978,"delta":"Text.small \"Getting there"}
+{"tMs":2002,"delta":": 10 min downhill"}
+{"tMs":2021,"delta":" walk from Kiyom"}
+{"tMs":2042,"delta":"izu-dera (about "}
+{"tMs":2064,"delta":"10 min).\"\n    "}
+{"tMs":2085,"delta":"ExpansionTile \"16"}
+{"tMs":2106,"delta":":00  Gion district\""}
+{"tMs":2129,"delta":"\n      Text.body \""}
+{"tMs":2150,"delta":"Traditional wooden machi"}
+{"tMs":2171,"delta":"ya streets. Best in the"}
+{"tMs":2193,"delta":" early evening for a chance to"}
+{"tMs":2214,"delta":" glimpse geiko and"}
+{"tMs":2235,"delta":" maiko.\"\n      Text"}
+{"tMs":2257,"delta":".small \"Getting there:"}
+{"tMs":2278,"delta":" 15 min walk along"}
+{"tMs":2300,"delta":" Shirakawa canal ("}
+{"tMs":2322,"delta":"about 15 min).\""}
+{"tMs":2343,"delta":"\n  Text.strong \""}
+{"tMs":2365,"delta":"Day 1 checklist\""}
+{"tMs":2386,"delta":"\n  Column gap:6"}
+{"tMs":2408,"delta":"\n    Checkbox \""}
+{"tMs":2428,"delta":"Book Kiyomiz"}
+{"tMs":2450,"delta":"u-dera evening illum"}
+{"tMs":2481,"delta":"ination (seasonal)\""}
+{"tMs":2500,"delta":" =todo1 -> boo"}
+{"tMs":2518,"delta":"ked=booked+(todo"}
+{"tMs":2540,"delta":"1?1:-1)"}
+{"tMs":2563,"delta":"\n    Checkbox \""}
+{"tMs":2580,"delta":"Reserve a kaise"}
+{"tMs":2600,"delta":"ki dinner in Gion"}
+{"tMs":2622,"delta":"\" =todo2 ->"}
+{"tMs":2644,"delta":" booked=booked+(tod"}
+{"tMs":2665,"delta":"o2?1:-1)"}
+{"tMs":2686,"delta":"\n  Text.heading \""}
+{"tMs":2708,"delta":"Day 2: Arash"}
+{"tMs":2729,"delta":"i"}
+{"tMs":2751,"delta":"yama and north\"\n  "}
+{"tMs":2772,"delta":"Column gap:8\n    "}
+{"tMs":2794,"delta":"ExpansionTile \"08"}
+{"tMs":2815,"delta":":00  Arashiy"}
+{"tMs":2836,"delta":"ama Bamboo Gr"}
+{"tMs":2858,"delta":"ove\"\n      Text.body"}
+{"tMs":2879,"delta":" \"Walk the towering b"}
+{"tMs":2901,"delta":"amboo path early before tour"}
+{"tMs":2922,"delta":" groups arrive. All"}
+{"tMs":2944,"delta":"ow 45 minutes.\""}
+{"tMs":2966,"delta":"\n      Text.small \""}
+{"tMs":2987,"delta":"Getting there: JR S"}
+{"tMs":3009,"delta":"agano Line from Ky"}
+{"tMs":3030,"delta":"oto Station to Saga"}
+{"tMs":3051,"delta":"-Arashiyama ("}
+{"tMs":3073,"delta":"about 15 min).\""}
+{"tMs":3095,"delta":"\n    ExpansionTile"}
+{"tMs":3116,"delta":" \"09:30  Ten"}
+{"tMs":3137,"delta":"ryu-ji\"\n      "}
+{"tMs":3159,"delta":"Text.body \"UNES"}
+{"tMs":3180,"delta":"CO temple with a famous"}
+{"tMs":3203,"delta":" garden of borrowed sc"}
+{"tMs":3223,"delta":"enery. Allow 60"}
+{"tMs":3244,"delta":" minutes.\"\n      "}
+{"tMs":3266,"delta":"Text.small \"Getting there"}
+{"tMs":3287,"delta":": 5 min walk from"}
+{"tMs":3309,"delta":" the bamboo grove ("}
+{"tMs":3330,"delta":"about 5 min).\""}
+{"tMs":3352,"delta":"\n    ExpansionTile"}
+{"tMs":3374,"delta":" \"11:30  Kin"}
+{"tMs":3394,"delta":"kaku-ji ("}
+{"tMs":3416,"delta":"Golden Pavilion)"}
+{"tMs":3437,"delta":"\"\n      Text.body \""}
+{"tMs":3459,"delta":"Gold-leafed p"}
+{"tMs":3481,"delta":"avilion reflected in a"}
+{"tMs":3502,"delta":" pond. Allow 60"}
+{"tMs":3523,"delta":" minutes.\"\n      "}
+{"tMs":3545,"delta":"Text.small \"Getting there"}
+{"tMs":3566,"delta":": bus 205 or "}
+{"tMs":3588,"delta":"101 from Arashi"}
+{"tMs":3610,"delta":"yama, about 30 min"}
+{"tMs":3633,"delta":".\"\n    Expansion"}
+{"tMs":3652,"delta":"Tile \"14:00  "}
+{"tMs":3673,"delta":"Nishiki Market\""}
+{"tMs":3694,"delta":"\n      Text.body \"Nar"}
+{"tMs":3716,"delta":"row covered market for street food"}
+{"tMs":3738,"delta":" and local snacks. All"}
+{"tMs":3759,"delta":"ow 90 minutes.\""}
+{"tMs":3780,"delta":"\n      Text.small \""}
+{"tMs":3802,"delta":"Getting there: bus 205"}
+{"tMs":3824,"delta":" to Shijo Kar"}
+{"tMs":3845,"delta":"asuma, then 5 "}
+{"tMs":3867,"delta":"min walk (about 35 "}
+{"tMs":3888,"delta":"min).\"\n  Text."}
+{"tMs":3911,"delta":"strong \"Day 2 "}
+{"tMs":3931,"delta":"checklist\"\n  Column"}
+{"tMs":3952,"delta":" gap:6\n    Chec"}
+{"tMs":3974,"delta":"kbox \"Book K"}
+{"tMs":3996,"delta":"inkaku-ji ent"}
+{"tMs":4017,"delta":"ry time slot\" =todo"}
+{"tMs":4038,"delta":"3 -> booked=boo"}
+{"tMs":4059,"delta":"ked+(todo3?1"}
+{"tMs":4081,"delta":":-1)\n    Chec"}
+{"tMs":4102,"delta":"kbox \"Reserve"}
+{"tMs":4125,"delta":" Arashiyama train t"}
+{"tMs":4145,"delta":"ickets (IC card works)"}
+{"tMs":4167,"delta":"\" =todo4 ->"}
+{"tMs":4188,"delta":" booked=booked+(tod"}
+{"tMs":4210,"delta":"o4?1:-1)"}
+{"tMs":4231,"delta":"\n    Checkbox \""}
+{"tMs":4253,"delta":"Book Tenryu-"}
+{"tMs":4274,"delta":"ji garden entry\" ="}
+{"tMs":4295,"delta":"todo5 -> booked"}
+{"tMs":4317,"delta":"=booked+(todo5"}
+{"tMs":4339,"delta":"?1:-1)"}

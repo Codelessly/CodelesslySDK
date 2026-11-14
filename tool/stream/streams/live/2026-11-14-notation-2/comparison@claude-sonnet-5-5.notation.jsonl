@@ -1,0 +1,127 @@
+{"meta":{"ui":"comparison","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"Card w:390 gap:12\n  Text.title \"Compare phone plans\"\n  Row gap:8\n    Spacer grow\n    Text.strong \"Lite\" w:110\n    Text.strong \"Max\" w:110\n  Divider\n  Row gap:8 middle\n    Text.muted \"Price\" grow\n    Row w:110 gap:4 middle\n      Text \"\\$20/mo\"\n      Icon \"check_circle\"\n    Text w:110 \"\\$35/mo\"\n  Row gap:8 middle\n    Text.muted \"Data\" grow\n    Text w:110 \"5 GB\"\n    Row w:110 gap:4 middle\n      Text \"Unlimited\"\n      Icon \"check_circle\"\n  Row gap:8 middle\n    Text.muted \"Calls\" grow\n    Text w:110 \"300 min\"\n    Row w:110 gap:4 middle\n      Text \"Unlimited\"\n      Icon \"check_circle\"\n  Row gap:8 middle\n    Text.muted \"Roaming\" grow\n    Text w:110 \"None\"\n    Row w:110 gap:4 middle\n      Text \"EU included\"\n      Icon \"check_circle\"\n  Row gap:8 middle\n    Text.muted \"Contract\" grow\n    Row w:110 gap:4 middle\n      Text \"Monthly\"\n      Icon \"check_circle\"\n    Text w:110 \"24 months\"\n  Row gap:8 middle\n    Text.muted \"Extras\" grow\n    Text w:110 \"None\"\n    Row w:110 gap:4 middle\n      Text \"Streaming\"\n      Icon \"check_circle\"\n  Row gap:4 middle\n    Icon \"check_circle\"\n    Text.caption \"Better value on that row\"\n  Divider\n  Box fill:#FFEEF4FF radius:8 pad:12 gap:4\n    Text.strong \"Recommendation\"\n    Text \"Max wins on four of six rows, so if you use data or travel, the extra \\$15 a month is worth it.\"\n  state picked=\"\"\n  Row gap:8\n    Spacer grow\n    Button.outline \"Choose Lite\" w:110 -> picked=\"Lite\"; emit choose \"Lite\"\n    Button \"Choose Max\" w:110 -> picked=\"Max\"; emit choose \"Max\"\n  if picked!=\"\"\n    Text.success \"You picked the {picked} plan.\"","usage":{"input_tokens":1696,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":767,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":653,"totalMs":4865}}
+{"tMs":653,"delta":"Card w:"}
+{"tMs":965,"delta":"390 gap:12"}
+{"tMs":966,"delta":"\n  Text.title"}
+{"tMs":966,"delta":" \"Comp"}
+{"tMs":966,"delta":"are ph"}
+{"tMs":966,"delta":"one plans\"\n  Row"}
+{"tMs":966,"delta":" gap:8"}
+{"tMs":966,"delta":"\n    Sp"}
+{"tMs":966,"delta":"acer grow\n    Text"}
+{"tMs":966,"delta":".strong \"L"}
+{"tMs":984,"delta":"ite\""}
+{"tMs":1018,"delta":" w:110"}
+{"tMs":1051,"delta":"\n    Text.strong \""}
+{"tMs":1304,"delta":"Max"}
+{"tMs":1304,"delta":"\" w:110\n  Div"}
+{"tMs":1305,"delta":"ider\n  Row g"}
+{"tMs":1305,"delta":"ap:8 middle\n    "}
+{"tMs":1305,"delta":"Text.mu"}
+{"tMs":1305,"delta":"ted \"Price\" gr"}
+{"tMs":1305,"delta":"ow\n    Row"}
+{"tMs":1318,"delta":" w"}
+{"tMs":1352,"delta":":110 gap:4 "}
+{"tMs":1385,"delta":"middle\n      Text \""}
+{"tMs":1418,"delta":"\\$20"}
+{"tMs":1452,"delta":"/mo\"\n      Ic"}
+{"tMs":1641,"delta":"on \"check_"}
+{"tMs":1641,"delta":"circle\""}
+{"tMs":1641,"delta":"\n    Text"}
+{"tMs":1641,"delta":" w"}
+{"tMs":1642,"delta":":110 "}
+{"tMs":1650,"delta":"\"\\$35"}
+{"tMs":1685,"delta":"/mo\"\n  Row"}
+{"tMs":1723,"delta":" gap:8 middle"}
+{"tMs":1762,"delta":"\n    Text.muted \""}
+{"tMs":1792,"delta":"Data\" grow\n    Text"}
+{"tMs":1839,"delta":" w:110 \"5 G"}
+{"tMs":1859,"delta":"B\"\n    Row"}
+{"tMs":1972,"delta":" w:110 gap:4"}
+{"tMs":1972,"delta":" middle\n      Text \""}
+{"tMs":1972,"delta":"Unlimited\"\n      "}
+{"tMs":1987,"delta":"Icon \"check_circle"}
+{"tMs":2021,"delta":"\"\n  Row gap:"}
+{"tMs":2054,"delta":"8 middle\n    Text"}
+{"tMs":2088,"delta":".muted \"Calls\""}
+{"tMs":2121,"delta":" grow\n    Text"}
+{"tMs":2155,"delta":" w:110 \"300"}
+{"tMs":2188,"delta":" min"}
+{"tMs":2221,"delta":"\"\n    Row w:110"}
+{"tMs":2254,"delta":" gap:4 middle"}
+{"tMs":2312,"delta":"\n      Text \"Unl"}
+{"tMs":2321,"delta":"imited\"\n      Icon"}
+{"tMs":2357,"delta":" \"check_circle\"\n  "}
+{"tMs":2388,"delta":"Row gap:8 midd"}
+{"tMs":2422,"delta":"le\n    Text.muted"}
+{"tMs":2455,"delta":" \"Roaming\" grow"}
+{"tMs":2489,"delta":"\n    Text w:110 "}
+{"tMs":2522,"delta":"\"None"}
+{"tMs":2556,"delta":"\"\n    Row w:110"}
+{"tMs":2589,"delta":" gap:4 middle"}
+{"tMs":2623,"delta":"\n      Text \"EU included"}
+{"tMs":2656,"delta":"\"\n      Icon \"check"}
+{"tMs":2689,"delta":"_circle\"\n  Row"}
+{"tMs":2723,"delta":" gap:8 middle"}
+{"tMs":2756,"delta":"\n    Text.muted \""}
+{"tMs":2790,"delta":"Contract\" grow\n    "}
+{"tMs":2823,"delta":"Row w:110 gap:"}
+{"tMs":2858,"delta":"4 middle\n      Text"}
+{"tMs":2890,"delta":" \""}
+{"tMs":2923,"delta":"Monthly\"\n      Ic"}
+{"tMs":2957,"delta":"on \"check_circle\""}
+{"tMs":2990,"delta":"\n    Text w:110 \""}
+{"tMs":3024,"delta":"24"}
+{"tMs":3058,"delta":" months\"\n  Row g"}
+{"tMs":3090,"delta":"ap:8 middle\n    "}
+{"tMs":3123,"delta":"Text.muted \"Ext"}
+{"tMs":3159,"delta":"ras\" grow\n    Text"}
+{"tMs":3190,"delta":" w:110 \"None\""}
+{"tMs":3223,"delta":"\n    Row w"}
+{"tMs":3256,"delta":":110 gap:4 "}
+{"tMs":3290,"delta":"middle\n      Text \""}
+{"tMs":3324,"delta":"Streaming\"\n      Ic"}
+{"tMs":3357,"delta":"on \"check_circle\""}
+{"tMs":3390,"delta":"\n  Row"}
+{"tMs":3423,"delta":" gap:4 middle"}
+{"tMs":3457,"delta":"\n    Ic"}
+{"tMs":3490,"delta":"on \"check_circle\""}
+{"tMs":3523,"delta":"\n    Text.ca"}
+{"tMs":3558,"delta":"ption \"Better"}
+{"tMs":3590,"delta":" value on that"}
+{"tMs":3624,"delta":" row\"\n  Divider"}
+{"tMs":3657,"delta":"\n  Box f"}
+{"tMs":3690,"delta":"ill:#F"}
+{"tMs":3723,"delta":"FEEF4"}
+{"tMs":3756,"delta":"FF radius:8"}
+{"tMs":3789,"delta":" pad:12 "}
+{"tMs":3823,"delta":"gap:4\n    Text"}
+{"tMs":3856,"delta":".strong \"Recommend"}
+{"tMs":3890,"delta":"ation\"\n    Text \""}
+{"tMs":3923,"delta":"Max wins on four"}
+{"tMs":3956,"delta":" of six"}
+{"tMs":3990,"delta":" rows, so if you use data"}
+{"tMs":4022,"delta":" or"}
+{"tMs":4056,"delta":" trav"}
+{"tMs":4089,"delta":"el, the ext"}
+{"tMs":4122,"delta":"ra \\$15"}
+{"tMs":4156,"delta":" a"}
+{"tMs":4191,"delta":" month is wor"}
+{"tMs":4224,"delta":"th it.\"\n  state"}
+{"tMs":4255,"delta":" pic"}
+{"tMs":4289,"delta":"ked=\"\"\n  Row g"}
+{"tMs":4322,"delta":"ap:8\n    Spac"}
+{"tMs":4362,"delta":"er grow\n    Button."}
+{"tMs":4394,"delta":"outline \"Cho"}
+{"tMs":4426,"delta":"ose Lite\" w:110"}
+{"tMs":4455,"delta":" -> picked=\"L"}
+{"tMs":4489,"delta":"ite\"; emit cho"}
+{"tMs":4522,"delta":"ose \""}
+{"tMs":4556,"delta":"Lite\"\n    Button"}
+{"tMs":4589,"delta":" \""}
+{"tMs":4626,"delta":"Choose Max\" w:"}
+{"tMs":4659,"delta":"110 -> picked=\""}
+{"tMs":4689,"delta":"Max\"; emit choose \""}
+{"tMs":4722,"delta":"Max\"\n  if picked"}
+{"tMs":4756,"delta":"!=\"\"\n    Text."}
+{"tMs":4789,"delta":"success \"You picked the"}
+{"tMs":4823,"delta":" {picked} plan.\""}

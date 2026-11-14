@@ -1,0 +1,84 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","turn":"generate","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"Card gap:12 pad:16 w:390\n  Text.title \"Compare phone plans\"\n  Row gap:12 top\n    Column grow gap:6\n      Text.heading \"Plan A\"\n      Text.strong \"\\$25/mo\"\n      Text.body \"Data: 20 GB\"\n      Text.body \"Calls: Unlimited\"\n      Text.body \"Roaming: Extra charge\"\n      Text.body \"Contract: 24 months\"\n      Text.body \"Extras: None\"\n      Badge.success \"Better value: Data\"\n      Button.primary \"Choose Plan A\" -> pick=\"A\"; toast \"You chose Plan A\"\n    Column grow gap:6\n      Text.heading \"Plan B\"\n      Text.strong \"\\$30/mo\"\n      Text.body \"Data: 50 GB\"\n      Text.body \"Calls: Unlimited\"\n      Text.body \"Roaming: Included\"\n      Text.body \"Contract: 12 months\"\n      Text.body \"Extras: Streaming bundle\"\n      Badge.success \"Better value: Roaming, contract, extras\"\n      Button.primary \"Choose Plan B\" -> pick=\"B\"; toast \"You chose Plan B\"\n  Divider\n  Text.strong \"Recommendation\"\n  Text.body \"Plan B is the better overall value: it costs \\$5 more but gives you 2.5 times the data, included roaming, a shorter contract and a streaming bundle.\"\n  if pick!=\"\"\n    Text.success \"You chose Plan {pick}.\"","usage":{"input_tokens":1695,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":493,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":543,"totalMs":2277}}
+{"tMs":543,"delta":"Card"}
+{"tMs":742,"delta":" gap:12"}
+{"tMs":742,"delta":" pad:16 "}
+{"tMs":742,"delta":"w:390\n  Text."}
+{"tMs":743,"delta":"title \"Comp"}
+{"tMs":743,"delta":"are phone plans\"\n  "}
+{"tMs":743,"delta":"Row gap:12 "}
+{"tMs":743,"delta":"top"}
+{"tMs":743,"delta":"\n    Column gr"}
+{"tMs":750,"delta":"ow g"}
+{"tMs":773,"delta":"ap:6"}
+{"tMs":811,"delta":"\n      Text.heading \""}
+{"tMs":833,"delta":"Plan A\"\n      Text"}
+{"tMs":852,"delta":".str"}
+{"tMs":873,"delta":"ong \"\\"}
+{"tMs":893,"delta":"$25/mo\"\n      "}
+{"tMs":915,"delta":"Text.body \"Data:"}
+{"tMs":935,"delta":" 20 GB\"\n      "}
+{"tMs":956,"delta":"Text.body \"Calls"}
+{"tMs":976,"delta":": Unlimited\""}
+{"tMs":999,"delta":"\n      Text.body \"Ro"}
+{"tMs":1017,"delta":"aming: Ext"}
+{"tMs":1038,"delta":"ra char"}
+{"tMs":1059,"delta":"ge\"\n      Text.body"}
+{"tMs":1078,"delta":" \"Contract: 24"}
+{"tMs":1100,"delta":" months\"\n      Text."}
+{"tMs":1120,"delta":"body \"Extras: None"}
+{"tMs":1141,"delta":"\"\n      Badge.success"}
+{"tMs":1163,"delta":" \"Better value:"}
+{"tMs":1181,"delta":" Data\"\n      Button."}
+{"tMs":1203,"delta":"primary \"Choose"}
+{"tMs":1222,"delta":" Plan A\" -> p"}
+{"tMs":1243,"delta":"ick=\""}
+{"tMs":1263,"delta":"A\";"}
+{"tMs":1283,"delta":" toast \"You"}
+{"tMs":1303,"delta":" ch"}
+{"tMs":1324,"delta":"ose Plan A\"\n    "}
+{"tMs":1344,"delta":"Column grow gap:6"}
+{"tMs":1365,"delta":"\n      Text.heading \""}
+{"tMs":1386,"delta":"Plan B\"\n      "}
+{"tMs":1406,"delta":"Text.strong \"\\$30"}
+{"tMs":1427,"delta":"/mo\"\n      Text"}
+{"tMs":1447,"delta":".body \"Data: 50"}
+{"tMs":1468,"delta":" GB\"\n      Text"}
+{"tMs":1488,"delta":".body \"Calls:"}
+{"tMs":1509,"delta":" Unlimited\"\n      "}
+{"tMs":1529,"delta":"Text.body \"Roaming"}
+{"tMs":1550,"delta":": Included\"\n      Text"}
+{"tMs":1570,"delta":".body \"Contract: "}
+{"tMs":1590,"delta":"12 months\"\n      Text"}
+{"tMs":1611,"delta":".body \"Extras:"}
+{"tMs":1631,"delta":" Streaming b"}
+{"tMs":1653,"delta":"undle\"\n      Badge"}
+{"tMs":1672,"delta":".success \"Better value:"}
+{"tMs":1693,"delta":" Roaming, cont"}
+{"tMs":1713,"delta":"ract, extras\"\n      "}
+{"tMs":1733,"delta":"Button.primary \"Choose"}
+{"tMs":1753,"delta":" Plan B\" -> p"}
+{"tMs":1775,"delta":"ick=\"B\"; toast \""}
+{"tMs":1795,"delta":"You chose Plan B\""}
+{"tMs":1815,"delta":"\n  Divider\n  "}
+{"tMs":1836,"delta":"Text.strong \"Rec"}
+{"tMs":1857,"delta":"ommendation\"\n  Text"}
+{"tMs":1877,"delta":".body \"Plan B is"}
+{"tMs":1896,"delta":" the better over"}
+{"tMs":1916,"delta":"all value"}
+{"tMs":1937,"delta":":"}
+{"tMs":1958,"delta":" it cost"}
+{"tMs":1978,"delta":"s \\"}
+{"tMs":1998,"delta":"$5 more but"}
+{"tMs":2018,"delta":" gives you "}
+{"tMs":2039,"delta":"2.5 times the"}
+{"tMs":2059,"delta":" data, included roaming, a"}
+{"tMs":2080,"delta":" shorter contract and"}
+{"tMs":2100,"delta":" a"}
+{"tMs":2121,"delta":" streaming bundle.\""}
+{"tMs":2141,"delta":"\n  if"}
+{"tMs":2162,"delta":" pick!"}
+{"tMs":2182,"delta":"=\"\"\n    Text.success"}
+{"tMs":2203,"delta":" \"You"}
+{"tMs":2223,"delta":" ch"}
+{"tMs":2243,"delta":"ose Plan {pick}"}
+{"tMs":2264,"delta":".\""}

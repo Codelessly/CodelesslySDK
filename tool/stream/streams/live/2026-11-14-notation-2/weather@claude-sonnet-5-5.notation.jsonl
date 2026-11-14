@@ -1,0 +1,121 @@
+{"meta":{"ui":"weather","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show the weather in Lisbon as an inline card: now (temperature, conditions, high and low), the next five hours, the next three days with a temperature range bar, and a button to alert me before it rains.","text":"Card w:390 gap:16\n  Row between middle\n    Column gap:2\n      Text.heading \"Lisbon\"\n      Text.muted \"Portugal\"\n    Icon \"wb_sunny\"\n  Row gap:16 middle\n    Text.title \"22°\"\n    Column gap:2\n      Text.strong \"Mostly sunny\"\n      Text.small \"H: 25°  L: 16°\"\n  Divider\n  Text.strong \"Next 5 hours\"\n  Row between\n    Column gap:4 center\n      Text.caption \"2 PM\"\n      Icon \"wb_sunny\"\n      Text.strong \"23°\"\n    Column gap:4 center\n      Text.caption \"3 PM\"\n      Icon \"wb_sunny\"\n      Text.strong \"24°\"\n    Column gap:4 center\n      Text.caption \"4 PM\"\n      Icon \"wb_cloudy\"\n      Text.strong \"24°\"\n    Column gap:4 center\n      Text.caption \"5 PM\"\n      Icon \"wb_cloudy\"\n      Text.strong \"22°\"\n    Column gap:4 center\n      Text.caption \"6 PM\"\n      Icon \"water_drop\"\n      Text.strong \"20°\"\n  Divider\n  Text.strong \"Next 3 days\"\n  Row gap:8 middle\n    Text \"Thu\" w:40\n    Icon \"wb_cloudy\"\n    Text.muted \"15°\" w:32\n    Progress 0.55 grow\n    Text.strong \"21°\" w:32\n  Row gap:8 middle\n    Text \"Fri\" w:40\n    Icon \"water_drop\"\n    Text.muted \"14°\" w:32\n    Progress 0.4 grow\n    Text.strong \"19°\" w:32\n  Row gap:8 middle\n    Text \"Sat\" w:40\n    Icon \"wb_sunny\"\n    Text.muted \"16°\" w:32\n    Progress 0.75 grow\n    Text.strong \"24°\" w:32\n  Divider\n  state alert=false\n  if alert\n    Button.secondary \"Rain alert on\" -> alert=false; toast \"Rain alert turned off\"\n  if !alert\n    Button \"Alert me before it rains\" -> alert=true; emit rainAlert; toast \"We'll warn you before rain\"","usage":{"input_tokens":1677,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":739,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":566,"totalMs":4541}}
+{"tMs":566,"delta":"Card w:"}
+{"tMs":879,"delta":"390 gap:16"}
+{"tMs":880,"delta":"\n  Row"}
+{"tMs":880,"delta":" between"}
+{"tMs":880,"delta":" midd"}
+{"tMs":880,"delta":"le\n    Column"}
+{"tMs":880,"delta":" gap:2"}
+{"tMs":880,"delta":"\n      Text.heading \""}
+{"tMs":880,"delta":"Lisbon\"\n      "}
+{"tMs":880,"delta":"Text.mu"}
+{"tMs":892,"delta":"ted \"Port"}
+{"tMs":925,"delta":"ugal\"\n    Ic"}
+{"tMs":957,"delta":"on \"w"}
+{"tMs":1208,"delta":"b_sunny\"\n  "}
+{"tMs":1208,"delta":"Row gap:16"}
+{"tMs":1208,"delta":" middle\n    Text"}
+{"tMs":1208,"delta":".title \"22°\""}
+{"tMs":1208,"delta":"\n    Column gap:2"}
+{"tMs":1208,"delta":"\n      Text.strong \""}
+{"tMs":1208,"delta":"M"}
+{"tMs":1228,"delta":"ostly sunny\"\n      "}
+{"tMs":1262,"delta":"Text.small \"H:"}
+{"tMs":1295,"delta":" 25"}
+{"tMs":1329,"delta":"°  "}
+{"tMs":1361,"delta":"L: 16"}
+{"tMs":1546,"delta":"°\"\n  Divider"}
+{"tMs":1546,"delta":"\n  Text.str"}
+{"tMs":1546,"delta":"ong \"Next "}
+{"tMs":1546,"delta":"5 hours\"\n  "}
+{"tMs":1546,"delta":"Row between\n    Column gap"}
+{"tMs":1562,"delta":":4 center\n      Text"}
+{"tMs":1596,"delta":".ca"}
+{"tMs":1628,"delta":"ption \"2"}
+{"tMs":1661,"delta":" "}
+{"tMs":1694,"delta":"PM\"\n      Icon"}
+{"tMs":1728,"delta":" \"w"}
+{"tMs":1762,"delta":"b_sunny\"\n      "}
+{"tMs":1876,"delta":"Text.str"}
+{"tMs":1876,"delta":"ong \"23°\"\n    "}
+{"tMs":1876,"delta":"Column gap:4 center"}
+{"tMs":1895,"delta":"\n      Text.caption \"3"}
+{"tMs":1929,"delta":" PM\"\n      Ic"}
+{"tMs":1963,"delta":"on \"wb_sunny"}
+{"tMs":1996,"delta":"\"\n      Text.strong"}
+{"tMs":2030,"delta":" \"24°\"\n    Column"}
+{"tMs":2063,"delta":" gap:4 center\n      "}
+{"tMs":2097,"delta":"Text.caption \"4 "}
+{"tMs":2130,"delta":"PM\"\n      Icon"}
+{"tMs":2164,"delta":" \"wb_cloudy"}
+{"tMs":2209,"delta":"\"\n      Text.strong"}
+{"tMs":2230,"delta":" \"24"}
+{"tMs":2264,"delta":"°\"\n    Column gap"}
+{"tMs":2297,"delta":":4 center\n      Text"}
+{"tMs":2331,"delta":".caption \"5 PM"}
+{"tMs":2365,"delta":"\"\n      Icon \"w"}
+{"tMs":2398,"delta":"b_cloudy\""}
+{"tMs":2431,"delta":"\n      Text.strong \"22"}
+{"tMs":2465,"delta":"°\"\n    Column gap"}
+{"tMs":2498,"delta":":4 center\n      Text"}
+{"tMs":2532,"delta":".caption \"6 PM"}
+{"tMs":2566,"delta":"\"\n      Icon \"water"}
+{"tMs":2599,"delta":"_dr"}
+{"tMs":2632,"delta":"op\"\n      Text.str"}
+{"tMs":2665,"delta":"ong \"20°\"\n  "}
+{"tMs":2698,"delta":"Divider\n  Text.str"}
+{"tMs":2732,"delta":"ong \"Next 3 days"}
+{"tMs":2766,"delta":"\"\n  Row gap:"}
+{"tMs":2798,"delta":"8"}
+{"tMs":2832,"delta":" middle\n    Text \""}
+{"tMs":2865,"delta":"Th"}
+{"tMs":2898,"delta":"u\" w:40"}
+{"tMs":2932,"delta":"\n    Icon \"wb"}
+{"tMs":2965,"delta":"_cloudy\"\n    "}
+{"tMs":2998,"delta":"Text.mu"}
+{"tMs":3031,"delta":"ted \"15"}
+{"tMs":3065,"delta":"°\" w:32"}
+{"tMs":3099,"delta":"\n    Progress 0."}
+{"tMs":3134,"delta":"55 grow"}
+{"tMs":3165,"delta":"\n    Text.str"}
+{"tMs":3198,"delta":"ong \"21"}
+{"tMs":3235,"delta":"°\" w:32\n  "}
+{"tMs":3265,"delta":"Row gap:8 middle"}
+{"tMs":3298,"delta":"\n    Text \"Fri"}
+{"tMs":3333,"delta":"\" w:40\n    Ic"}
+{"tMs":3366,"delta":"on \"water_drop\""}
+{"tMs":3399,"delta":"\n    Text.muted \"14"}
+{"tMs":3432,"delta":"°\" w:32\n    "}
+{"tMs":3465,"delta":"Progress 0.4"}
+{"tMs":3498,"delta":" grow\n    Text."}
+{"tMs":3531,"delta":"strong \"19"}
+{"tMs":3566,"delta":"°\" w:32\n  "}
+{"tMs":3599,"delta":"Row gap:8 middle"}
+{"tMs":3634,"delta":"\n    Text \"Sat"}
+{"tMs":3665,"delta":"\" w:40\n    Ic"}
+{"tMs":3699,"delta":"on \"wb_sunny"}
+{"tMs":3732,"delta":"\"\n    Text.muted"}
+{"tMs":3765,"delta":" \"16"}
+{"tMs":3803,"delta":"°\" w:32\n    "}
+{"tMs":3832,"delta":"Progress 0.75 gr"}
+{"tMs":3866,"delta":"ow\n    Text.strong"}
+{"tMs":3899,"delta":" \"24"}
+{"tMs":3932,"delta":"°\" w:32\n  "}
+{"tMs":3965,"delta":"Divider\n  state al"}
+{"tMs":3998,"delta":"ert"}
+{"tMs":4032,"delta":"=false\n  if"}
+{"tMs":4066,"delta":" al"}
+{"tMs":4098,"delta":"ert\n    Button.sec"}
+{"tMs":4133,"delta":"ondary \"Rain alert"}
+{"tMs":4165,"delta":" on\" -> alert=false"}
+{"tMs":4287,"delta":"; toast \"Rain al"}
+{"tMs":4287,"delta":"ert tur"}
+{"tMs":4287,"delta":"ned off\"\n  if"}
+{"tMs":4298,"delta":" !alert\n    Button \""}
+{"tMs":4331,"delta":"Al"}
+{"tMs":4365,"delta":"ert me before it rains\" -"}
+{"tMs":4400,"delta":"> alert=true; emit"}
+{"tMs":4432,"delta":" rainAlert; toast"}
+{"tMs":4466,"delta":" \"We"}
+{"tMs":4498,"delta":"'ll war"}
+{"tMs":4532,"delta":"n you before rain\""}

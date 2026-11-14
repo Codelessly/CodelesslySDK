@@ -1,0 +1,63 @@
+{
+ "ui": "question_flow",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "systemPromptChars": 3514,
+ "turns": [
+  {
+   "input_tokens": 1525,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 847,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 492,
+   "totalMs": 3588,
+   "chars": 2102,
+   "lines": 51,
+   "jsonTails": 0,
+   "nodes": 40,
+   "outputTokensPerNode": "21.2",
+   "notationIssues": [],
+   "errors": [
+    "unknown_bind_path /nodes/progressBar1/bind/props.text: A progressBar has no prop \"text\". Its props: exactFill, clipFill, value, max, color, backgroundColor, direction, borderRadius, animate, animationDuration, shape, arcStartAngle, arcSweepAngle, arcStrokeWidth, needleColor, tickCount, tickColor, bands, arcFit, arcRoundCaps, progressEndColor, arcGlow, arcHeadDot."
+   ]
+  },
+  {
+   "input_tokens": 2566,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 904,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 443,
+   "totalMs": 2892,
+   "chars": 2294,
+   "lines": 51,
+   "jsonTails": 0,
+   "nodes": 39,
+   "outputTokensPerNode": "23.2",
+   "notationIssues": [
+    "line 1:1: No node type \"The\". Write a type of the catalog (Column, Row, Text, Button, Input, Toggle, Slider…)."
+   ],
+   "errors": []
+  }
+ ]
+}

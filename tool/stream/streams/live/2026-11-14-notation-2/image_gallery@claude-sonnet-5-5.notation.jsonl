@@ -1,0 +1,158 @@
+{"meta":{"ui":"image_gallery","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"Card w:390 pad:16\n  state current=0\n  Stack\n    Column gap:12\n      Text.title \"Trip photos\"\n      Grid cols:3 gap:8\n        Column gap:4\n          Box h:90 radius:8 fill:#FFFF9966 -> current=1\n          Text.caption \"Beach\"\n        Column gap:4\n          Box h:90 radius:8 fill:#FF4FACFE -> current=2\n          Text.caption \"Harbor\"\n        Column gap:4\n          Box h:90 radius:8 fill:#FFB993D6 -> current=3\n          Text.caption \"Old Town\"\n        Column gap:4\n          Box h:90 radius:8 fill:#FFF7B733 -> current=4\n          Text.caption \"Market\"\n        Column gap:4\n          Box h:90 radius:8 fill:#FF56AB2F -> current=5\n          Text.caption \"Mountain trail\"\n        Column gap:4\n          Box h:90 radius:8 fill:#FFFF5E62 -> current=6\n          Text.caption \"Sunset\"\n        Column gap:4\n          Box h:90 radius:8 fill:#FF8D6E63 -> current=7\n          Text.caption \"Café\"\n        Column gap:4\n          Box h:90 radius:8 fill:#FF00C6FF -> current=8\n          Text.caption \"Lake\"\n        Column gap:4\n          Box h:90 radius:8 fill:#FF283E51 -> current=9\n          Text.caption \"Night lights\"\n    if current>0\n      Box fill:#F2000000 w:fill h:fill pad:16 gap:12 radius:12 center middle\n        Row end\n          IconButton \"close\" -> current=0\n        if current==1\n          Box h:240 w:fill radius:8 fill:#FFFF9966\n          Text.strong \"Beach\"\n        if current==2\n          Box h:240 w:fill radius:8 fill:#FF4FACFE\n          Text.strong \"Harbor\"\n        if current==3\n          Box h:240 w:fill radius:8 fill:#FFB993D6\n          Text.strong \"Old Town\"\n        if current==4\n          Box h:240 w:fill radius:8 fill:#FFF7B733\n          Text.strong \"Market\"\n        if current==5\n          Box h:240 w:fill radius:8 fill:#FF56AB2F\n          Text.strong \"Mountain trail\"\n        if current==6\n          Box h:240 w:fill radius:8 fill:#FFFF5E62\n          Text.strong \"Sunset\"\n        if current==7\n          Box h:240 w:fill radius:8 fill:#FF8D6E63\n          Text.strong \"Café\"\n        if current==8\n          Box h:240 w:fill radius:8 fill:#FF00C6FF\n          Text.strong \"Lake\"\n        if current==9\n          Box h:240 w:fill radius:8 fill:#FF283E51\n          Text.strong \"Night lights\"\n        Row between middle\n          IconButton \"chevron_left\" -> current=current==1?9:current-1\n          Text.caption \"{current} of 9\"\n          IconButton \"chevron_right\" -> current=current==9?1:current+1","usage":{"input_tokens":1703,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1768,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":711}},"ttftMs":7050,"totalMs":12336}}
+{"tMs":7050,"delta":"Card w:390 p"}
+{"tMs":7082,"delta":"ad:16"}
+{"tMs":7118,"delta":"\n  state"}
+{"tMs":7149,"delta":" current=0\n  Stack"}
+{"tMs":7215,"delta":"\n    Column"}
+{"tMs":7249,"delta":" gap:12\n      Text"}
+{"tMs":7282,"delta":".title \"Tr"}
+{"tMs":7315,"delta":"ip phot"}
+{"tMs":7349,"delta":"os\"\n      Grid c"}
+{"tMs":7383,"delta":"ols:3 gap:8"}
+{"tMs":7416,"delta":"\n        Column"}
+{"tMs":7449,"delta":" gap:4\n          Box"}
+{"tMs":7482,"delta":" h:90"}
+{"tMs":7515,"delta":" rad"}
+{"tMs":7549,"delta":"ius:8 fill:#"}
+{"tMs":7582,"delta":"FF"}
+{"tMs":7616,"delta":"F"}
+{"tMs":7649,"delta":"F9"}
+{"tMs":7682,"delta":"966"}
+{"tMs":7716,"delta":" -> current=1\n          "}
+{"tMs":7750,"delta":"Text.caption \"Be"}
+{"tMs":7783,"delta":"ach\"\n        Column gap"}
+{"tMs":7817,"delta":":4\n          Box h:"}
+{"tMs":7850,"delta":"90 radius:8 f"}
+{"tMs":7884,"delta":"ill:#FF4F"}
+{"tMs":7920,"delta":"AC"}
+{"tMs":7951,"delta":"F"}
+{"tMs":7984,"delta":"E -> current=2\n          "}
+{"tMs":8028,"delta":"Text.caption \"Har"}
+{"tMs":8051,"delta":"bor\"\n        Column g"}
+{"tMs":8084,"delta":"ap:4\n          Box h"}
+{"tMs":8118,"delta":":90 radius:8 "}
+{"tMs":8151,"delta":"fill:#FFB993"}
+{"tMs":8185,"delta":"D"}
+{"tMs":8218,"delta":"6"}
+{"tMs":8252,"delta":" -> current=3\n          "}
+{"tMs":8288,"delta":"Text.caption \"Old"}
+{"tMs":8320,"delta":" Town\"\n        Column g"}
+{"tMs":8353,"delta":"ap:4\n          Box h"}
+{"tMs":8386,"delta":":90 radius:8 "}
+{"tMs":8419,"delta":"fill:#FFF"}
+{"tMs":8453,"delta":"7B"}
+{"tMs":8489,"delta":"733"}
+{"tMs":8519,"delta":" -> current=4\n          "}
+{"tMs":8553,"delta":"Text.caption \"Market"}
+{"tMs":8587,"delta":"\"\n        Column gap:"}
+{"tMs":8620,"delta":"4\n          Box h:90"}
+{"tMs":8654,"delta":" radius:8 fill"}
+{"tMs":8686,"delta":":#FF56"}
+{"tMs":8720,"delta":"A"}
+{"tMs":8753,"delta":"B2"}
+{"tMs":8786,"delta":"F -> current=5\n          "}
+{"tMs":8821,"delta":"Text.caption \"M"}
+{"tMs":8853,"delta":"ountain tr"}
+{"tMs":8887,"delta":"ail\"\n        Column gap"}
+{"tMs":8921,"delta":":4\n          Box h:"}
+{"tMs":8954,"delta":"90 radius:8 f"}
+{"tMs":8988,"delta":"ill:#FF"}
+{"tMs":9022,"delta":"FF5"}
+{"tMs":9054,"delta":"E62"}
+{"tMs":9087,"delta":" -> current=6\n          "}
+{"tMs":9122,"delta":"Text.caption \"S"}
+{"tMs":9154,"delta":"unset\"\n        Column g"}
+{"tMs":9188,"delta":"ap:4\n          Box h"}
+{"tMs":9222,"delta":":90 radius:8 "}
+{"tMs":9255,"delta":"fill:#FF8D"}
+{"tMs":9292,"delta":"6E"}
+{"tMs":9321,"delta":"63"}
+{"tMs":9355,"delta":" -> current=7\n          "}
+{"tMs":9389,"delta":"Text.caption \"Café"}
+{"tMs":9429,"delta":"\"\n        Column gap:"}
+{"tMs":9457,"delta":"4\n          Box h:90"}
+{"tMs":9492,"delta":" radius:8 fill"}
+{"tMs":9524,"delta":":#FF00"}
+{"tMs":9555,"delta":"C"}
+{"tMs":9596,"delta":"6F"}
+{"tMs":9623,"delta":"F -> current=8\n          "}
+{"tMs":9658,"delta":"Text.caption \"L"}
+{"tMs":9689,"delta":"ake\"\n        Column gap"}
+{"tMs":9723,"delta":":4\n          Box h:"}
+{"tMs":9756,"delta":"90 radius:8 f"}
+{"tMs":9789,"delta":"ill:#FF283"}
+{"tMs":9824,"delta":"E"}
+{"tMs":9856,"delta":"51"}
+{"tMs":9889,"delta":" -> current=9\n          "}
+{"tMs":9925,"delta":"Text.caption \"Night"}
+{"tMs":9956,"delta":" lights\"\n    if current>"}
+{"tMs":9991,"delta":"0\n      Box fill:"}
+{"tMs":10024,"delta":"#F2000000 w:"}
+{"tMs":10057,"delta":"fill h:fill p"}
+{"tMs":10094,"delta":"ad:16 gap:12"}
+{"tMs":10124,"delta":" radius:12 center midd"}
+{"tMs":10157,"delta":"le\n        Row end\n          "}
+{"tMs":10191,"delta":"IconButton \"close\" -"}
+{"tMs":10243,"delta":"> current=0\n        if"}
+{"tMs":10257,"delta":" current==1\n          Box h"}
+{"tMs":10291,"delta":":240"}
+{"tMs":10324,"delta":" w:fill rad"}
+{"tMs":10360,"delta":"ius:8 fill:#"}
+{"tMs":10391,"delta":"FFFF9966\n          "}
+{"tMs":10424,"delta":"Text.strong \"Be"}
+{"tMs":10458,"delta":"ach\"\n        if current==2"}
+{"tMs":10493,"delta":"\n          Box h:240 "}
+{"tMs":10525,"delta":"w:fill radius:8"}
+{"tMs":10558,"delta":" fill:#FF4"}
+{"tMs":10593,"delta":"FACFE\n          Text"}
+{"tMs":10625,"delta":".strong \"Harbor"}
+{"tMs":10660,"delta":"\"\n        if current==3"}
+{"tMs":10692,"delta":"\n          Box h:240 w"}
+{"tMs":10726,"delta":":fill radius:8 "}
+{"tMs":10759,"delta":"fill:#FFB993"}
+{"tMs":10793,"delta":"D6\n          Text.str"}
+{"tMs":10826,"delta":"ong \"Old Town\""}
+{"tMs":10860,"delta":"\n        if current==4\n          "}
+{"tMs":10894,"delta":"Box h:240 w:f"}
+{"tMs":10926,"delta":"ill radius:8 fill"}
+{"tMs":10961,"delta":":#FFF7B733"}
+{"tMs":10993,"delta":"\n          Text.strong \""}
+{"tMs":11027,"delta":"Market\"\n        if current=="}
+{"tMs":11060,"delta":"5\n          Box h:240"}
+{"tMs":11093,"delta":" w:fill radius:"}
+{"tMs":11127,"delta":"8 fill:#FF"}
+{"tMs":11162,"delta":"56AB2F\n          "}
+{"tMs":11193,"delta":"Text.strong \"Mount"}
+{"tMs":11227,"delta":"ain trail\"\n        if current"}
+{"tMs":11260,"delta":"==6\n          Box h:"}
+{"tMs":11294,"delta":"240 w:fill radius"}
+{"tMs":11327,"delta":":8 fill:#F"}
+{"tMs":11364,"delta":"FFF5E62\n          "}
+{"tMs":11394,"delta":"Text.strong \"S"}
+{"tMs":11437,"delta":"unset\"\n        if current=="}
+{"tMs":11461,"delta":"7\n          Box h:240"}
+{"tMs":11494,"delta":" w:fill radius:"}
+{"tMs":11530,"delta":"8 fill:#FF"}
+{"tMs":11561,"delta":"8D6E63\n          "}
+{"tMs":11595,"delta":"Text.strong \"Café\""}
+{"tMs":11628,"delta":"\n        if current==8\n          "}
+{"tMs":11662,"delta":"Box h:240 w:"}
+{"tMs":11695,"delta":"fill radius:8 f"}
+{"tMs":11728,"delta":"ill:#FF00C6"}
+{"tMs":11762,"delta":"FF\n          Text.str"}
+{"tMs":11795,"delta":"ong \"Lake\"\n        "}
+{"tMs":11828,"delta":"if current==9\n          Box"}
+{"tMs":11861,"delta":" h:240 w:fill"}
+{"tMs":11895,"delta":" radius:8 fill:"}
+{"tMs":11929,"delta":"#FF283E51"}
+{"tMs":11962,"delta":"\n          Text.strong \""}
+{"tMs":11996,"delta":"Night lights\"\n        "}
+{"tMs":12030,"delta":"Row between middle\n          Icon"}
+{"tMs":12062,"delta":"Button \"chevron_left"}
+{"tMs":12096,"delta":"\" -> current=current=="}
+{"tMs":12129,"delta":"1?9:current-1"}
+{"tMs":12163,"delta":"\n          Text.caption \"{"}
+{"tMs":12197,"delta":"current} of 9\"\n          "}
+{"tMs":12236,"delta":"IconButton \"chevron"}
+{"tMs":12264,"delta":"_right\" -> current=current"}
+{"tMs":12296,"delta":"==9?1:current+1"}

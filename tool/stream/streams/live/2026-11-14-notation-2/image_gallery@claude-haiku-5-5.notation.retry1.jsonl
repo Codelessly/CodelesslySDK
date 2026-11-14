@@ -1,0 +1,64 @@
+{"meta":{"ui":"image_gallery","model":"claude-haiku-5-5","form":"notation","turn":"retry","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"Column w:390 gap:12 pad:16\n  Text.title \"Trip photos\"\n  Grid cols:3 gap:8\n    Box h:100 radius:8 fill:#FF4F7BD9 -> idx=1; open=1; caption=\"Sunrise over the harbour\"\n    Box h:100 radius:8 fill:#FF7B5FC9 -> idx=2; open=1; caption=\"Old town market\"\n    Box h:100 radius:8 fill:#FFE8905A -> idx=3; open=1; caption=\"Mountain trail\"\n    Box h:100 radius:8 fill:#FF5AB08A -> idx=4; open=1; caption=\"Night ferry\"\n    Box h:100 radius:8 fill:#FF3E8FC4 -> idx=5; open=1; caption=\"Coastal road\"\n    Box h:100 radius:8 fill:#FFD9775A -> idx=6; open=1; caption=\"Cafe terrace\"\n    Box h:100 radius:8 fill:#FF8A6BD0 -> idx=7; open=1; caption=\"Lavender fields\"\n    Box h:100 radius:8 fill:#FF4AA3A0 -> idx=8; open=1; caption=\"Fishing boats\"\n    Box h:100 radius:8 fill:#FFC26AA8 -> idx=9; open=1; caption=\"Last evening\"","usage":{"input_tokens":2642,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":457,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":512,"totalMs":1795}}
+{"tMs":512,"delta":"Column"}
+{"tMs":685,"delta":" w"}
+{"tMs":685,"delta":":390"}
+{"tMs":685,"delta":" g"}
+{"tMs":685,"delta":"ap:12 pad:16"}
+{"tMs":685,"delta":"\n  Text.title \""}
+{"tMs":685,"delta":"Trip photos\"\n  "}
+{"tMs":685,"delta":"Grid cols:3 g"}
+{"tMs":687,"delta":"ap:8\n    Box h"}
+{"tMs":707,"delta":":100 rad"}
+{"tMs":729,"delta":"ius:8 fill:#"}
+{"tMs":749,"delta":"FF4F7BD9"}
+{"tMs":770,"delta":" -> idx=1;"}
+{"tMs":846,"delta":" open=1; caption=\""}
+{"tMs":846,"delta":"Sunrise over the harb"}
+{"tMs":846,"delta":"our\"\n    Box h:"}
+{"tMs":851,"delta":"100 radius:8 f"}
+{"tMs":872,"delta":"ill:#FF7B5"}
+{"tMs":893,"delta":"FC9 -> idx"}
+{"tMs":915,"delta":"=2; open=1; ca"}
+{"tMs":934,"delta":"ption=\"Old town market\""}
+{"tMs":956,"delta":"\n    Box h:100 rad"}
+{"tMs":975,"delta":"ius:8 fill:#"}
+{"tMs":1003,"delta":"FF"}
+{"tMs":1015,"delta":"E8905A -> idx"}
+{"tMs":1069,"delta":"=3; open=1; ca"}
+{"tMs":1069,"delta":"ption=\"Mountain trail"}
+{"tMs":1076,"delta":"\"\n    Box h:100"}
+{"tMs":1097,"delta":" radius:8 fill"}
+{"tMs":1118,"delta":":#FF5AB08"}
+{"tMs":1138,"delta":"A -> idx=4;"}
+{"tMs":1159,"delta":" open=1; caption=\""}
+{"tMs":1179,"delta":"Night ferry\"\n    "}
+{"tMs":1199,"delta":"Box h:100 radius:"}
+{"tMs":1220,"delta":"8 fill:#FF"}
+{"tMs":1240,"delta":"3E8FC4"}
+{"tMs":1261,"delta":" -> idx=5;"}
+{"tMs":1281,"delta":" open=1; caption=\""}
+{"tMs":1301,"delta":"Coastal road\"\n    "}
+{"tMs":1322,"delta":"Box h:100 radius:"}
+{"tMs":1342,"delta":"8 fill:#FF"}
+{"tMs":1363,"delta":"D9775A -> idx"}
+{"tMs":1383,"delta":"=6; open=1; ca"}
+{"tMs":1404,"delta":"ption=\"Cafe terr"}
+{"tMs":1424,"delta":"ace\"\n    Box h:"}
+{"tMs":1445,"delta":"100 radius:8 f"}
+{"tMs":1465,"delta":"ill:#FF8A6"}
+{"tMs":1485,"delta":"BD0 -> idx"}
+{"tMs":1506,"delta":"=7; open=1; ca"}
+{"tMs":1526,"delta":"ption=\"Lavender fields"}
+{"tMs":1547,"delta":"\"\n    Box h:100"}
+{"tMs":1567,"delta":" radius:8 fill"}
+{"tMs":1587,"delta":":#FF4AA3"}
+{"tMs":1608,"delta":"A0 -> idx="}
+{"tMs":1628,"delta":"8; open=1; caption"}
+{"tMs":1649,"delta":"=\"Fishing boats\""}
+{"tMs":1670,"delta":"\n    Box h:100 "}
+{"tMs":1690,"delta":"radius:8 fill:"}
+{"tMs":1710,"delta":"#FF"}
+{"tMs":1730,"delta":"C26AA8 ->"}
+{"tMs":1751,"delta":" idx=9; open=1"}
+{"tMs":1771,"delta":"; caption=\"Last evening"}
+{"tMs":1792,"delta":"\""}
