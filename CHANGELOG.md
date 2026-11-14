@@ -1,3 +1,25 @@
+## Unreleased
+
+Requires the codelessly_api changes of the same name (forms, grid placement, scroll control).
+
+- **Forms work.** A text field's `validator` runs: the field shows its error as its own and its form's
+  `autovalidateMode` say (`always`, `onUserInteraction`, `onUnfocus`, `onUserInteractionIfError`) and when its form
+  is validated. `validate` checks a form, focuses the first invalid field on screen and gives whether all are valid;
+  a `form` node publishes `${form.valid}` and `${form.errors}`. A radio inside a `radioGroup` takes the group's value
+  and runs the group's `changed`. An outlined or filled field with no `contentPadding` takes `InputDecorator`'s
+  default (12 px at the sides) instead of none.
+- **Grid spans.** A `gridView` places items by their `columnSpan`, `rowSpan`, `columnStart` and `rowStart` as CSS
+  grid's sparse auto-placement does; a span is at most the grid's columns. Grids whose items set none lay out as
+  before.
+- **Scroll control.** Scroll reactions give `${result.index}` and `${result.count}`; `itemSnapping` comes to rest with
+  an item at the start (render-object scroll views, and `ItemSnapPhysics` in data-bound lists). Data-bound and
+  counted lists now run their `scroll` and `scrollEnd` reactions.
+- **Fixes.** A focused field hidden or removed by a tap's actions lets the focus go, instead of asserting
+  `attached` from its keyboard connection (type, then tap). An icon chosen by a binding on a button draws its glyph
+  (it drew nothing offline: codepoint 0 was taken for a codepoint). A text run that starts or ends inside an
+  expression styles the text as shown, instead of printing the expression. The render command answers clipboard
+  calls from memory, so a chain that copies runs on.
+
 ## 30.1.0
 
 Requires codelessly_api 30.1.0. **The schema stays 3**: every loader reads `"schema": 2` and `3`, migrating 2 in
