@@ -68,11 +68,20 @@ class RenderTooltipBubble extends RenderOverlayEntry {
     size = constraints.constrain(Size(_text.width + _padding.horizontal, _text.height + _padding.vertical));
   }
 
-  @override
-  Offset placeIn(RenderControlRoot root, Size rootSize) {
-    final a = anchor.attached && anchor.hasSize
+  /// Where [anchor] is in the root, measured when the bubble is shown (a
+  /// root may not read another box's size while it lays out).
+  Rect anchorRect = Rect.zero;
+
+  /// Measures [anchor] in [root] (outside layout).
+  void measureAnchor(RenderControlRoot root) {
+    anchorRect = anchor.attached && anchor.hasSize
         ? MatrixUtils.transformRect(anchor.getTransformTo(root), Offset.zero & anchor.size)
         : Rect.zero;
+  }
+
+  @override
+  Offset placeIn(RenderControlRoot root, Size rootSize) {
+    final a = anchorRect;
     var top = a.top - _gap - size.height;
     if (top < 8) top = a.bottom + _gap;
     final left = (a.center.dx - size.width / 2).clamp(8.0, math.max(8.0, rootSize.width - size.width - 8)).toDouble();
@@ -93,6 +102,7 @@ class RenderTooltipBubble extends RenderOverlayEntry {
     config.isSemanticBoundary = true;
     config.liveRegion = true;
     config.label = _message;
+    config.textDirection = TextDirection.ltr;
   }
 
   @override
@@ -146,6 +156,7 @@ class RenderTooltipRegion extends RenderMouseRegion {
     final root = RenderControlRoot.of(this);
     if (root == null) return;
     final bubble = RenderTooltipBubble(anchor: this, message: _message, tokens: _tokens ?? ControlTokens.resolve(api.ThemeTokens.none, dark: false));
+    bubble.measureAnchor(root);
     _root = root..showOverlay(bubble);
     _bubble = bubble;
   }
@@ -171,7 +182,10 @@ class RenderTooltipRegion extends RenderMouseRegion {
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
-    if (_message.isNotEmpty) config.tooltip = _message;
+    if (_message.isNotEmpty) {
+      config.tooltip = _message;
+      config.textDirection = TextDirection.ltr;
+    }
   }
 
   @override

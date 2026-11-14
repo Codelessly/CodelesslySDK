@@ -142,12 +142,6 @@ class RenderControlRoot extends RenderProxyBox {
     }
     super.applyPaintTransform(child, transform);
   }
-
-  @override
-  void visitChildrenForSemantics(RenderObjectVisitor visitor) {
-    super.visitChildrenForSemantics(visitor);
-    _overlay.forEach(visitor);
-  }
 }
 
 /// A root attached to a view with no widget ([attachRoot]).
