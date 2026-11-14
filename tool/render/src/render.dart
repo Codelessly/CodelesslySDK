@@ -631,7 +631,10 @@ Future<void> _renderAll(
             screen: label, size: sizeName));
       }
 
-      // 6. Runtime checks, then the PNG.
+      // 6. Runtime checks, then the PNG. A font asked for by name late (by
+      // a text that appeared after the screen settled) is waited for first:
+      // its text is measured, checked and drawn in it, not in the fallback.
+      await _fontsSettled(tester, fetcher);
       for (final i in _check(binding, published, docs, fileOfNode, label, sizeName, faces)) {
         issue(i);
       }
@@ -758,6 +761,22 @@ Future<void> _settle(WidgetTester tester) async {
   for (var i = 0; i < 4; i++) {
     await tester.pump(const Duration(milliseconds: 100));
   }
+}
+
+/// Waits (bounded, 10 s) until none of this run's font fetches is in flight
+/// and what they fetched is registered, pumping so the text that asked for
+/// one lays out again in it. Nothing to wait for: returns at once.
+Future<void> _fontsSettled(WidgetTester tester, DirectoryFontFetcher fetcher) async {
+  if (!fetcher.fetching) return;
+  // Real time passes in runAsync (the file read); a pump (no time on the
+  // screen's clock) delivers what completed to the app's zone.
+  for (var i = 0; i < 200 && fetcher.fetching; i++) {
+    await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 50)));
+    await tester.pump();
+  }
+  await tester.runAsync(() => CodelesslyFonts.settled.timeout(const Duration(milliseconds: 500), onTimeout: () {}));
+  await tester.pump();
+  await tester.pump();
 }
 
 /// What a screen is called in file names and reports: its canvases'
