@@ -10,107 +10,19 @@ import 'dart:math' as math;
 
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart'
-    show CollectionScrollProps, CollectionSlots, ListApply, ListSections, ListViewProps, Node, Pagination,
-        PaginationMode, PaginationSource, SwipeAction, SwipeActions, TriggerType;
+    show CollectionScrollProps, CollectionSlots, Node, Pagination, PaginationMode, SwipeAction;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderAbstractViewport, ScrollCacheExtent;
 import 'package:flutter/scheduler.dart';
 
 import '../render/convert.dart';
 import '../render/recipe.dart';
-import '../runtime/expressions/bindings.dart';
-import '../runtime/lists/page_fetchers.dart';
 import '../runtime/lists/pagination.dart';
+import 'collections_data_list_model.dart';
 import 'collections_list_runtime.dart';
 import 'collections_swipe.dart';
 
-/// A section of a data list: consecutive items with the same key.
-@immutable
-class ListSection {
-  const ListSection(this.key, this.start, this.count);
-
-  final Object? key;
-
-  /// The index of the section's first item.
-  final int start;
-  final int count;
-
-  /// What its header reads as `${item}`.
-  Map<String, Object?> toItem(int index) => {'key': key, 'count': count, 'index': index, 'start': start};
-
-  @override
-  bool operator ==(Object other) => other is ListSection && other.key == key && other.start == start && other.count == count;
-
-  @override
-  int get hashCode => Object.hash(key, start, count);
-
-  @override
-  String toString() => 'ListSection($key, $start, $count)';
-}
-
-/// [items] grouped into sections of consecutive items with the same
-/// [keyOf].
-List<ListSection> groupIntoSections(List<Object?> items, Object? Function(int index, Object? item) keyOf) {
-  final sections = <ListSection>[];
-  Object? current;
-  var start = 0;
-  for (var i = 0; i < items.length; i++) {
-    final key = keyOf(i, items[i]);
-    if (i == 0) {
-      current = key;
-      continue;
-    }
-    if (key != current) {
-      sections.add(ListSection(current, start, i - start));
-      current = key;
-      start = i;
-    }
-  }
-  if (items.isNotEmpty) sections.add(ListSection(current, start, items.length - start));
-  return sections;
-}
-
-/// The scroll offset of the start of section [index] in a list whose items
-/// are [itemExtent] long, with [separator] between items of a section and
-/// between sections, and headers [headerExtent] long; null when items
-/// aren't of one extent.
-double? sectionOffset(List<ListSection> sections, int index,
-    {required double? itemExtent, required double headerExtent, double separator = 0}) {
-  if (itemExtent == null) return null;
-  var offset = 0.0;
-  for (var i = 0; i < index && i < sections.length; i++) {
-    final count = sections[i].count;
-    offset += headerExtent + count * itemExtent + math.max(0, count - 1) * separator + separator;
-  }
-  return offset;
-}
-
-extension ListFeatures on Node {
-  Pagination? get pagination => type == 'listView' || type == 'gridView' ? prop(ListViewProps.pagination) : null;
-  ListSections? get sections => type == 'listView' ? prop(ListViewProps.sections) : null;
-  SwipeActions? get swipeActions => type == 'listView' ? prop(ListViewProps.swipeActions) : null;
-
-  /// A sections setting that groups (a key and a header).
-  bool get sectioned => (sections?.groupBy.trim().isNotEmpty ?? false) && slots[CollectionSlots.sectionHeader] != null;
-  bool get swipes => swipeActions != null && (swipeActions!.startActions.isNotEmpty || swipeActions!.endActions.isNotEmpty);
-
-  /// A list pulled to refresh without pagination: its `pullToRefresh`, or
-  /// a `refresh` reaction.
-  bool get pullsToRefresh =>
-      type == 'listView' &&
-      (prop(ListViewProps.pullToRefresh) || actions.any((r) => r.trigger.type == TriggerType.refresh));
-
-  /// A list that opens at its end and keeps its place ([ListViewProps.stickToEnd]).
-  bool get sticksToEnd => type == 'listView' && prop(ListViewProps.stickToEnd);
-}
-
-/// Whether a running list [n] is a [DataListView]: it pages, groups into
-/// sections, has swipe actions or pulls to refresh, and lays its items in a
-/// line.
-bool usesDataList(Node n) =>
-    (n.pagination != null || n.sectioned || n.swipes || n.pullsToRefresh || n.sticksToEnd) &&
-    !n.prop(ListViewProps.wrap) &&
-    n.prop(ListViewProps.layout) == api.ListLayout.list;
+export 'collections_data_list_model.dart';
 
 /// A running list [n] built as a [DataListView] island in [chain] (after
 /// its viewport box). [itemMain] sizes its items along it; [separator]
@@ -306,26 +218,13 @@ class DataListViewState extends State<DataListView> {
   /// The key of the sliver that anchors a list loading both ways.
   final Key _centerKey = UniqueKey();
 
-  PaginationController? _controller;
-  bool _loadScheduled = false;
-  bool _previousScheduled = false;
-  bool _started = false;
+  /// What the list knows and decides apart from how it is drawn.
+  late final DataListModel _m = DataListModel(widget.runtime, widget.data)..addListener(_changed);
 
-  /// The keys of items swiped away, waiting for their Undo bar to go.
-  final Set<Object?> _removed = {};
-  final List<_PendingSwipe> _pending = [];
-
-  List<ListSection>? _sections;
-  List<Object?>? _sectionedItems;
-  String? _sectionedBy;
-
-  /// The repeats given an item scope.
-  final Set<ProvidedItem> _provided = {};
-
-  /// The cloud or API page source, and what it was made for.
-  (Object?, PageFetcher)? _fetcher;
-
-  PaginationController? get controller => _controller;
+  PaginationController? get controller => _m.controller;
+  PaginationController? get _controller => _m.controller;
+  List<PendingSwipe> get _pending => _m.pending;
+  List<ListSection>? get _sections => _m.sections;
 
   // A list that sticks to its end: the item the list is anchored at (items
   // before it grow up from it, so putting some there moves nothing), the
@@ -344,70 +243,13 @@ class DataListViewState extends State<DataListView> {
   @override
   void initState() {
     super.initState();
-    _attach();
+    _m;
   }
 
   @override
   void didUpdateWidget(covariant DataListView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _attach();
-  }
-
-  void _attach() {
-    final model = _model;
-    if (model == null) {
-      _controller?.removeListener(_changed);
-      _controller = null;
-      return;
-    }
-    final registry = PaginationRegistry.of(_r.tree);
-    final controller = registry.ensure(model, scope: _r.scope);
-    if (!identical(controller, _controller)) {
-      _controller?.removeListener(_changed);
-      controller.addListener(_changed);
-      _controller = controller;
-      _started = false;
-    }
-    switch (model.source) {
-      case PaginationSource.data:
-        final changed = controller.setLocalItems(widget.data ?? const [], notify: false);
-        if (changed) registry.localItemsChanged(model.name);
-        registry.publish(model.name);
-      case PaginationSource.cloud || PaginationSource.api:
-        final f = _sourceFetcher(model);
-        if (f != null) controller.fetcher = f;
-    }
-    if (!_started) {
-      _started = true;
-      SchedulerBinding.instance.addPostFrameCallback((_) {
-        if (mounted) controller.start();
-      });
-    }
-  }
-
-  /// The page source of a cloud or API pagination, made again when what it
-  /// reads changes.
-  PageFetcher? _sourceFetcher(Pagination model) {
-    final scope = _r.scope;
-    if (model.source == PaginationSource.api) {
-      final services = _r.services;
-      if (services == null || scope == null) return null;
-      final key = ('api', model);
-      if (_fetcher?.$1 == key) return _fetcher!.$2;
-      final f = apiPageFetcher(model, (id, params) => services.callApi(id, params: params),
-          resolve: resolverIn(_r.engine, scope));
-      _fetcher = (key, f);
-      return f;
-    }
-    final database = _r.database, def = _r.cloudQuery;
-    if (database == null || def == null || scope == null) return null;
-    final path = _r.collectionPath;
-    final pages = database.pages(path, def, _r.engine, scope);
-    final key = pages.key;
-    if (_fetcher?.$1 == key) return _fetcher!.$2;
-    final f = pages.fetcher();
-    _fetcher = (key, f);
-    return f;
+    _m.update(widget.runtime, widget.data);
   }
 
   void _changed() {
@@ -475,89 +317,29 @@ class DataListViewState extends State<DataListView> {
 
   @override
   void dispose() {
-    _controller?.removeListener(_changed);
-    for (final pending in [..._pending]) {
-      pending.commit();
-    }
-    final binder = _r.binder;
-    for (final p in _provided) {
-      binder?.forgetItem(p);
-    }
+    _m
+      ..removeListener(_changed)
+      ..dispose();
     scrollController.dispose();
     super.dispose();
   }
 
-  /// The items to show, without the ones swiped away.
-  List<Object?> get _items {
-    final items = _controller?.items ?? widget.data ?? const <Object?>[];
-    if (_removed.isEmpty) return items;
-    return [
-      for (final item in items)
-        if (!_removed.contains(_keyOf(item))) item,
-    ];
-  }
-
-  Object? _keyOf(Object? item) {
-    final path = _model?.keyPath ?? 'id';
-    return (path.isEmpty ? null : PaginationController.keyOf(item, path)) ?? item;
-  }
-
-  /// Loads the next page after this frame, once.
-  void _requestMore() {
-    final c = _controller;
-    if (c == null || _loadScheduled) return;
-    if (c.model.mode == PaginationMode.pages) return;
-    if (!c.hasMore || c.error != null || c.isLoadingMore) return;
-    _loadScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _loadScheduled = false;
-      if (mounted) c.loadMore();
-    });
-  }
-
-  /// Loads the page before the first one shown after this frame, once.
-  void _requestPrevious() {
-    final c = _controller;
-    if (c == null || _previousScheduled) return;
-    if (c.model.mode != PaginationMode.bidirectional) return;
-    if (!c.hasPrevious || c.error != null || c.isLoadingMore) return;
-    _previousScheduled = true;
-    SchedulerBinding.instance.addPostFrameCallback((_) {
-      _previousScheduled = false;
-      if (mounted) c.loadPrevious();
-    });
-  }
+  List<Object?> get _items => _m.items;
+  Object? _keyOf(Object? item) => _m.keyOf(item);
+  void _requestPrevious() => _m.requestPrevious();
+  void _onItemBuilt(int index, int count) => _m.onItemBuilt(index, count);
+  Future<void> _refresh() => _m.refresh();
 
   bool _onScroll(ScrollNotification notification) {
     if (notification.depth != 0) return false;
-    final pixels = _model?.thresholdPixels ?? 0;
-    if (pixels <= 0) return false;
-    final metrics = notification.metrics;
-    if (metrics.extentAfter <= pixels) _requestMore();
-    if (metrics.extentBefore <= pixels) _requestPrevious();
+    _m.onScrollExtents(notification.metrics.extentBefore, notification.metrics.extentAfter);
     return false;
-  }
-
-  /// Item [index] of [count] was built: near the end, the next page loads.
-  void _onItemBuilt(int index, int count) {
-    final threshold = math.max(0, _model?.thresholdItems ?? 0);
-    if (index >= count - 1 - threshold) _requestMore();
-  }
-
-  Future<void> _refresh() async {
-    await Future.wait([
-      if (_controller != null) _controller!.refresh(),
-      _r.fire(TriggerType.refresh.name),
-    ]);
   }
 
   /// The node box of repeat [key] of node [id], in the scope of [item] at
   /// [index].
   Widget _node$(String tag, String id, Object? key, int index, Object? item) {
-    final instance = ProvidedItem(tag, _r.b.instance, _node.id, key);
-    _provided.add(instance);
-    _r.binder?.provideItem(_r.b.source, instance, index: index, item: item);
-    return NodeChild(tree: _r.tree, id: id, instance: instance);
+    return NodeChild(tree: _r.tree, id: id, instance: _m.provide(tag, key, index, item));
   }
 
   /// A slot node of the list (a footer), in the list's scope.
@@ -586,138 +368,23 @@ class DataListViewState extends State<DataListView> {
     return child;
   }
 
-  void _onSwipe(SwipeAction action, int index, Object? item) {
-    final swipe = _node.swipeActions!;
-    final result = <String, Object?>{'action': action.id, 'label': action.label, 'item': item, 'index': index};
-    Future<void> run() async {
-      if (!mounted) return;
-      if (action.removes) await _applyRemoval(swipe.apply, item);
-      if (!mounted) return;
-      await _r.fire(TriggerType.swipeAction.name, event: result);
-    }
-
-    if (!action.removes || !swipe.undo) {
-      if (action.removes) setState(() => _removed.add(_keyOf(item)));
-      run();
-      return;
-    }
-    late final _PendingSwipe pending;
-    pending = _PendingSwipe(
-      result: result,
-      commit: () {
-        _pending.remove(pending);
-        run();
-      },
-    );
-    setState(() {
-      _removed.add(_keyOf(item));
-      _pending.add(pending);
-    });
-    Future<void>.delayed(Duration(milliseconds: swipe.undoMs), () {
-      if (_pending.contains(pending)) {
-        if (mounted) setState(() {});
-        pending.commit();
-      }
-    });
-  }
-
-  void _undo(_PendingSwipe pending) {
-    setState(() {
-      _pending.remove(pending);
-      _removed.remove(_keyOf(pending.result['item']));
-    });
-  }
-
-  /// Removes [item] from the list's data on its own, as [apply] says.
-  Future<void> _applyRemoval(ListApply apply, Object? item) async {
-    switch (apply) {
-      case ListApply.none:
-        return;
-      case ListApply.variable:
-        final name = _r.boundVariable;
-        if (name == null) return;
-        final list = _r.listVariable(name);
-        final key = _keyOf(item);
-        list.removeWhere((candidate) => _keyOf(candidate) == key);
-        _r.setVariable(name, list);
-      case ListApply.cloud:
-        final id = item is Map ? item['id'] : null;
-        if (id is! String) return;
-        await _r.database?.removeDocument(_r.collectionPath, id);
-    }
-  }
-
-  List<ListSection>? _sectionsFor(List<Object?> items) {
-    final model = _node.sections;
-    if (model == null || !_node.sectioned) return null;
-    if (identical(items, _sectionedItems) && _sectionedBy == model.groupBy) return _sections;
-    final groupBy = model.groupBy.trim();
-    final binding = groupBy.contains(r'${');
-    _sections = groupIntoSections(items, (index, item) {
-      if (!binding) return PaginationController.keyOf(item, groupBy);
-      return _r.text(groupBy, index: index, item: item);
-    });
-    _sectionedItems = items;
-    _sectionedBy = model.groupBy;
-    return _sections;
-  }
-
-  List<Object?>? _keyedData;
-  String? _keyedBy;
-  Map<String, int> _firstIndexOfKey = const {};
-
-  /// The section key of every item of the list's data, by its first index:
-  /// with a data-paged list all of its data counts, not only the loaded
-  /// pages, so the index bar offers sections still to load.
-  Map<String, int> _dataKeys() {
-    final model = _node.sections;
-    final data = widget.data;
-    if (model == null || data == null || _model?.source != PaginationSource.data) return const {};
-    if (identical(data, _keyedData) && _keyedBy == model.groupBy) return _firstIndexOfKey;
-    final groupBy = model.groupBy.trim();
-    final binding = groupBy.contains(r'${');
-    final out = <String, int>{};
-    for (var i = 0; i < data.length; i++) {
-      final key = binding ? _r.text(groupBy, index: i, item: data[i]) : PaginationController.keyOf(data[i], groupBy);
-      out.putIfAbsent('$key', () => i);
-    }
-    _keyedData = data;
-    _keyedBy = model.groupBy;
-    return _firstIndexOfKey = out;
-  }
-
-  /// The keys the index bar shows: its own, else the sections'.
-  List<Object?> _indexKeys(List<ListSection> sections) {
-    final own = _node.sections?.indexKeys ?? const [];
-    if (own.isNotEmpty) return own;
-    final keys = <Object?>[for (final s in sections) s.key];
-    for (final k in _dataKeys().keys) {
-      if (!keys.any((x) => '$x' == k)) keys.add(k);
-    }
-    return keys;
-  }
-
-  /// Keys some item has (the rest show muted and do nothing).
-  Set<String> _presentKeys(List<ListSection> sections) =>
-      {for (final s in sections) '${s.key}', ..._dataKeys().keys};
+  void _onSwipe(SwipeAction action, int index, Object? item) => _m.onSwipe(action, index, item);
+  void _undo(PendingSwipe pending) => _m.undo(pending);
+  List<ListSection>? _sectionsFor(List<Object?> items) => _m.sectionsFor(items);
+  List<Object?> _indexKeys(List<ListSection> sections) => _m.indexKeys(sections);
+  Set<String> _presentKeys(List<ListSection> sections) => _m.presentKeys(sections);
 
   /// Jumps to the section with [key]. With a data-paged list whose pages
   /// don't reach it yet, loads them first.
   Future<void> jumpToKey(Object? key) async {
-    int find() => (_sections ?? const <ListSection>[]).indexWhere((s) => '${s.key}' == '$key');
-    var i = find();
-    final c = _controller;
-    final target = _dataKeys()['$key'];
-    if (i < 0 && c != null && target != null) {
-      while (mounted && c.items.length <= target && c.hasMore) {
-        await c.loadMore();
-      }
+    var i = _m.sectionIndexOf(key);
+    if (i < 0 && await _m.loadUntilKey(key)) {
       if (!mounted) return;
       setState(() {});
       await SchedulerBinding.instance.endOfFrame;
       if (!mounted) return;
       _sectionsFor(_items);
-      i = find();
+      i = _m.sectionIndexOf(key);
     }
     if (i >= 0) jumpToSection(i);
   }
@@ -776,32 +443,22 @@ class DataListViewState extends State<DataListView> {
   }
 
   Widget? _footer(BuildContext context) {
-    final c = _controller, model = _model;
-    if (c == null || model == null) return null;
-    final slots = _node.slots;
-    String? slot(String name) => slots[name]?.let((id) => _r.b.nodeOf(id) == null ? null : id);
-    if (c.error != null) {
-      final error = slot(CollectionSlots.error);
-      return GestureDetector(
-        key: const ValueKey('pagination-error'),
-        behavior: HitTestBehavior.opaque,
-        onTap: c.retry,
-        child: error != null ? _slot(error) : _DefaultErrorFooter(error: c.error),
-      );
-    }
-    if (c.isLoading || c.isLoadingMore) {
-      if (model.mode == PaginationMode.pages && !c.isLoading) return null;
-      final loading = slot(CollectionSlots.loading);
-      return KeyedSubtree(
-        key: const ValueKey('pagination-loading'),
-        child: loading != null ? _slot(loading) : const _DefaultLoadingFooter(),
-      );
-    }
-    final end = slot(CollectionSlots.end);
-    if (model.mode != PaginationMode.pages && !c.hasMore && end != null && c.items.isNotEmpty) {
-      return KeyedSubtree(key: const ValueKey('pagination-end'), child: _slot(end));
-    }
-    return null;
+    final footer = _m.footer;
+    if (footer == null) return null;
+    final (kind, slot) = footer;
+    return switch (kind) {
+      DataListFooter.error => GestureDetector(
+          key: const ValueKey('pagination-error'),
+          behavior: HitTestBehavior.opaque,
+          onTap: _controller!.retry,
+          child: slot != null ? _slot(slot) : _DefaultErrorFooter(error: _controller!.error),
+        ),
+      DataListFooter.loading => KeyedSubtree(
+          key: const ValueKey('pagination-loading'),
+          child: slot != null ? _slot(slot) : const _DefaultLoadingFooter(),
+        ),
+      DataListFooter.end => KeyedSubtree(key: const ValueKey('pagination-end'), child: _slot(slot!)),
+    };
   }
 
   List<Widget> _sectionSlivers(BuildContext context, List<Object?> items, List<ListSection> sections) {
@@ -847,26 +504,7 @@ class DataListViewState extends State<DataListView> {
     final c = _controller;
     if (c != null) _r.reportStatus(c.status);
     final out = _build(context);
-    // Repeats no longer in the list let go of their scopes.
-    final keep = {
-      for (final item in _items) ('row', _keyOf(item)),
-      for (final s in _sections ?? const <ListSection>[]) ('section', s.key),
-    };
-    final gone = [
-      for (final p in _provided)
-        if (!keep.contains((p.tag, p.key))) p,
-    ];
-    final binder = _r.binder;
-    if (gone.isNotEmpty) {
-      _provided.removeAll(gone);
-      if (binder != null) {
-        SchedulerBinding.instance.addPostFrameCallback((_) {
-          for (final p in gone) {
-            if (!_provided.contains(p)) binder.forgetItem(p);
-          }
-        });
-      }
-    }
+    _m.forgetGone();
     return out;
   }
 
@@ -888,11 +526,11 @@ class DataListViewState extends State<DataListView> {
       final anchored = _controller!.anchoredItems;
       final before = [
         for (final item in anchored.before)
-          if (!_removed.contains(_keyOf(item))) item,
+          if (!_m.isRemoved(_keyOf(item))) item,
       ];
       final after = [
         for (final item in anchored.after)
-          if (!_removed.contains(_keyOf(item))) item,
+          if (!_m.isRemoved(_keyOf(item))) item,
       ];
       center = _centerKey;
       slivers = [
@@ -919,9 +557,7 @@ class DataListViewState extends State<DataListView> {
       slivers = [_sliverList(_delegate(items, onBuilt: (index) => _onItemBuilt(index, items.length)))];
     }
 
-    final refreshable = model?.pullToRefresh == true ||
-        _node.pullsToRefresh ||
-        _node.actions.any((r) => r.trigger.type == TriggerType.refresh);
+    final refreshable = _m.refreshable;
     final padding = _node.layout.padding.flutter;
     final cache = _node.prop(CollectionScrollProps.cacheExtent);
 
@@ -1006,20 +642,12 @@ class DataListViewState extends State<DataListView> {
             left: 8,
             right: 8,
             bottom: 8,
-            child: UndoBar(message: _undoMessage(pending), onUndo: () => _undo(pending)),
+            child: UndoBar(message: _m.undoMessage(pending), onUndo: () => _undo(pending)),
           ),
         ],
       );
     }
     return list;
-  }
-
-  String _undoMessage(_PendingSwipe pending) {
-    final template = _node.swipeActions?.undoMessage ?? '';
-    return template.replaceAllMapped(
-      RegExp(r'\$\{\s*result\.(\w+)\s*\}'),
-      (m) => '${pending.result[m.group(1)] ?? ''}',
-    );
   }
 
   /// The list's padding goes before the first sliver and after the last.
@@ -1030,12 +658,6 @@ class DataListViewState extends State<DataListView> {
     }
     return padding.copyWith(left: first ? padding.left : 0, right: last ? padding.right : 0);
   }
-}
-
-class _PendingSwipe {
-  _PendingSwipe({required this.result, required this.commit});
-  final Map<String, Object?> result;
-  final VoidCallback commit;
 }
 
 class _HeaderDelegate extends SliverPersistentHeaderDelegate {
