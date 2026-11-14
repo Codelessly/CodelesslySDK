@@ -233,6 +233,13 @@ void main() {
       expect(note['message'], contains('--tap footer/narrowOnly (hidden at this width)'));
     });
 
+    testWidgets('a hover step at several sizes moves one mouse per size and captures each', (tester) async {
+      final report = await runRender(tester,
+          steps(const [Step('hover', 'slider'), Step('hover', 'footer/saved')], sizes: const [Size(390, 844), Size(834, 1112), Size(1440, 900)]));
+      expect(report.errors, 0, reason: '${report.diagnostics}');
+      expect(report.images, hasLength(3));
+    });
+
     testWidgets('typing into a field and then tapping a button that removes the form leaves no exception', (tester) async {
       final report = await runRender(tester, steps(const [Step('type', 'email', 'a@b.co'), Step('tap', 'send')]));
       expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
