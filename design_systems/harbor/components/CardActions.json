@@ -1,0 +1,232 @@
+{
+ "schema": 3,
+ "id": "CardActions",
+ "roots": [
+  "strip"
+ ],
+ "widget": {
+  "type": "CardActions",
+  "doc": "The strip of actions at the foot of a card: equal buttons split by hairlines. Fires onAction with the label.",
+  "props": [
+   {
+    "key": "actions",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Open",
+     "Share"
+    ],
+    "doc": "The labels, in order.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "An icon for each (same order; none: no icons)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onAction",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Two",
+   "size": [
+    280,
+    34
+   ],
+   "props": {
+    "actions": [
+     "Open",
+     "Share"
+    ],
+    "icons": [
+     "open_in_new",
+     "ios_share"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "strip": {
+   "type": "row",
+   "children": [
+    "list"
+   ],
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": 39
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "top",
+    "radius": [
+     0,
+     0,
+     10,
+     10
+    ],
+    "clip": "antiAlias"
+   }
+  },
+  "list": {
+   "type": "gridView",
+   "children": [
+    "action"
+   ],
+   "props": {
+    "crossAxisCount": 2,
+    "mainAxisExtent": 34,
+    "physics": "never",
+    "alwaysScroll": false
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": 39
+   },
+   "bind": {
+    "data": "${props.actions}",
+    "props.crossAxisCount": "${= max(1, length(props.actions))}"
+   }
+  },
+  "action": {
+   "type": "row",
+   "children": [
+    "actionIcon",
+    "actionLabel"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "fill": 34
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "bind": {
+    "decoration.strokes[0].visible": "${= index > 0}"
+   },
+   "states": {
+    "hovered": {
+     "action": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "action": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onAction",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "actionIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "open_in_new",
+    "color": "secondaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index}",
+    "props.icon": "${= length(props.icons) > index ? props.icons[index] : 'circle'}"
+   }
+  },
+  "actionLabel": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  }
+ }
+}

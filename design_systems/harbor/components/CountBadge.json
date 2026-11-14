@@ -1,0 +1,125 @@
+{
+ "schema": 3,
+ "id": "CountBadge",
+ "roots": [
+  "badge"
+ ],
+ "widget": {
+  "type": "CountBadge",
+  "doc": "A count beside a title or tab: a 16 px grey pill, 10/600. Above max it reads \"max+\".",
+  "props": [
+   {
+    "key": "count",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 3,
+    "doc": "The number.",
+    "required": true
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 999,
+    "doc": "Above this it shows \"max+\"."
+   },
+   {
+    "key": "showZero",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "False hides it at 0."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Three",
+   "size": [
+    24,
+    16
+   ],
+   "props": {
+    "count": 3
+   }
+  },
+  {
+   "name": "Over",
+   "size": [
+    40,
+    16
+   ],
+   "props": {
+    "count": 1200
+   }
+  }
+ ],
+ "nodes": {
+  "badge": {
+   "type": "row",
+   "children": [
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 18
+    },
+    "height": 16,
+    "padding": [
+     7,
+     0,
+     7,
+     0
+    ],
+    "constraints": {
+     "minWidth": 18
+    }
+   },
+   "bind": {
+    "visible": "${= props.showZero || props.count != 0}"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 9999
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${= min(props.count, props.max)}${= props.count > props.max ? '+' : ''}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 600,
+     "height": 1,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "fontFeatures": [
+      "tnum"
+     ]
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 10
+    }
+   }
+  }
+ }
+}

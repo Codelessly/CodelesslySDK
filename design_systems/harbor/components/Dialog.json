@@ -1,0 +1,304 @@
+{
+ "schema": 3,
+ "id": "Dialog",
+ "roots": [
+  "dialog"
+ ],
+ "widget": {
+  "type": "Dialog",
+  "doc": "A dialog's frame for a modal canvas: title, optional description, body (the call's children) and footer actions. Fires onClose.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Dialog",
+    "doc": "The title.",
+    "required": true
+   },
+   {
+    "key": "description",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the title."
+   },
+   {
+    "key": "closable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A close button in the header (fires onClose)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onClose"
+   }
+  ],
+  "slots": [
+   "actions"
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Confirm",
+   "size": [
+    400,
+    200
+   ],
+   "props": {
+    "title": "Delete project?",
+    "description": "This cannot be undone."
+   }
+  }
+ ],
+ "nodes": {
+  "dialog": {
+   "type": "column",
+   "children": [
+    "head",
+    "body",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 200
+    },
+    "constraints": {
+     "maxWidth": 520
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 21,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#24000000",
+      "offset": [
+       0,
+       12
+      ],
+      "blurRadius": 32,
+      "spreadRadius": -6
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0F000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ],
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level4}"
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "heading",
+    "close"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 48
+    },
+    "padding": [
+     14,
+     12,
+     12,
+     12
+    ],
+    "constraints": {
+     "minHeight": 48
+    }
+   }
+  },
+  "heading": {
+   "type": "column",
+   "children": [
+    "title",
+    "description"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 330
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     0,
+     6,
+     0,
+     0
+    ]
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "dialogTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 330
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "description": {
+   "type": "text",
+   "props": {
+    "text": "${props.description}",
+    "style": "bodySecondary"
+   },
+   "layout": {
+    "width": {
+     "fill": 330
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "bind": {
+    "visible": "${= props.description != ''}"
+   }
+  },
+  "close": {
+   "type": "IconButton",
+   "props": {
+    "icon": "close"
+   },
+   "layout": {
+    "width": 28,
+    "height": 32
+   },
+   "bind": {
+    "visible": "${props.closable}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onClose"
+      }
+     ]
+    }
+   ]
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 60
+    },
+    "padding": [
+     14,
+     0,
+     14,
+     14
+    ]
+   }
+  },
+  "content": {
+   "type": "slot"
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "actions"
+   ],
+   "props": {
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 49
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     12
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  }
+ }
+}

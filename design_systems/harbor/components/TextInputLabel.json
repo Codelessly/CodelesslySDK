@@ -1,0 +1,131 @@
+{
+ "schema": 3,
+ "id": "TextInputLabel",
+ "roots": [
+  "group"
+ ],
+ "widget": {
+  "type": "TextInputLabel",
+  "doc": "A label over a field: the label, an optional description under it, then the call's children.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Name",
+    "doc": "The label.",
+    "required": true
+   },
+   {
+    "key": "description",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A muted line under the label (empty: none)."
+   }
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Label",
+   "size": [
+    240,
+    40
+   ],
+   "props": {
+    "label": "Workspace name",
+    "description": "Shown in the sidebar."
+   }
+  }
+ ],
+ "nodes": {
+  "group": {
+   "type": "column",
+   "children": [
+    "label",
+    "description",
+    "gap",
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 600,
+     "height": 1.35,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "description": {
+   "type": "text",
+   "props": {
+    "text": "${props.description}",
+    "style": {
+     "fontSize": 11.5,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 15
+    },
+    "margin": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.description != ''}"
+   }
+  },
+  "gap": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 6
+   }
+  },
+  "content": {
+   "type": "slot"
+  }
+ }
+}

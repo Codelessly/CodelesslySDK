@@ -1,0 +1,213 @@
+{
+ "schema": 3,
+ "id": "Card",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "Card",
+  "doc": "A bordered panel: an optional header (title, subtitle, trailing actions) over its body (the call's children).",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The header's title (empty: no header)."
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under the title."
+   },
+   {
+    "key": "elevated",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Floats over content: shadow level 1 (cards are flat by default)."
+   }
+  ],
+  "slots": [
+   "actions"
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "With header",
+   "size": [
+    320,
+    140
+   ],
+   "props": {
+    "title": "Billing",
+    "subtitle": "Your plan and invoices"
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "column",
+   "children": [
+    "header",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 140
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 15,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.effects": "${= props.elevated ? theme.shadows.level1 : []}"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "titles",
+    "actions"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     14,
+     10,
+     12,
+     10
+    ],
+    "constraints": {
+     "minHeight": 36
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "visible": "${= props.title != ''}"
+   }
+  },
+  "titles": {
+   "type": "column",
+   "children": [
+    "title",
+    "subtitle"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "panelTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "subtitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.subtitle}",
+    "style": "caption"
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "visible": "${= props.subtitle != ''}"
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 80
+    },
+    "padding": 14
+   }
+  },
+  "content": {
+   "type": "slot"
+  }
+ }
+}

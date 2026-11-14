@@ -1,0 +1,188 @@
+{
+ "schema": 3,
+ "id": "Hyperlink",
+ "roots": [
+  "link"
+ ],
+ "widget": {
+  "type": "Hyperlink",
+  "doc": "A text link in the brand color, underlined; it opens its URL. Fires onPressed.",
+  "props": [
+   {
+    "key": "text",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Open the docs",
+    "doc": "The words.",
+    "required": true
+   },
+   {
+    "key": "url",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Where it goes (empty: only onPressed fires)."
+   },
+   {
+    "key": "showIcon",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "An \"open in new\" icon after the text."
+   },
+   {
+    "key": "underline",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False underlines only while hovered."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Link",
+   "size": [
+    110,
+    24
+   ],
+   "props": {
+    "text": "Open the docs"
+   }
+  },
+  {
+   "name": "With icon",
+   "size": [
+    130,
+    24
+   ],
+   "props": {
+    "text": "Open the docs",
+    "showIcon": true
+   }
+  }
+ ],
+ "nodes": {
+  "link": {
+   "type": "row",
+   "children": [
+    "label",
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     0,
+     2,
+     0,
+     2
+    ]
+   },
+   "states": {
+    "hovered": {
+     "label": {
+      "props": {
+       "style": {
+        "fontWeight": 600,
+        "decoration": "underline"
+       }
+      }
+     }
+    },
+    "pressed": {
+     "label": {
+      "props": {
+       "style": {
+        "color": "#FF1E4FBC"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed",
+       "value": "${props.url}"
+      },
+      {
+       "type": "openLink",
+       "url": "${props.url}",
+       "when": {
+        "left": "${= props.url != ''}",
+        "op": "isTrue"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.text}",
+    "style": {
+     "fontSize": 15.5,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primary",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.14,
+     "decoration": "underline",
+     "decorationColor": "primary"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.style.decoration": "${= props.underline ? 'underline' : 'none'}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "open_in_new",
+    "color": "primary",
+    "size": 14
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "visible": "${props.showIcon}"
+   }
+  }
+ }
+}

@@ -89,6 +89,12 @@
     "width": 24,
     "height": 24
    },
+   "bind": {
+    "layout.width": "${= props.size == 'xs' ? 20 : (props.size == 'small' ? 24 : (props.size == 'medium' ? 32 : (40)))}",
+    "layout.height": "${= props.size == 'xs' ? 20 : (props.size == 'small' ? 24 : (props.size == 'medium' ? 32 : (40)))}",
+    "decoration.fills[1].image.url": "${props.image}",
+    "decoration.fills[1].visible": "${= props.image != ''}"
+   },
    "decoration": {
     "fills": [
      {
@@ -108,14 +114,8 @@
       "color": "primaryBorder"
      }
     ],
-    "radius": 9999,
-    "clip": "antiAlias"
-   },
-   "bind": {
-    "layout.width": "${= props.size == 'xs' ? 20 : (props.size == 'small' ? 24 : (props.size == 'medium' ? 32 : (40)))}",
-    "layout.height": "${= props.size == 'xs' ? 20 : (props.size == 'small' ? 24 : (props.size == 'medium' ? 32 : (40)))}",
-    "decoration.fills[1].image.url": "${props.image}",
-    "decoration.fills[1].visible": "${= props.image != ''}"
+    "clip": "antiAlias",
+    "radius": 9999
    }
   },
   "initials": {

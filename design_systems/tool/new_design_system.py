@@ -16,14 +16,18 @@ The brand file:
      "inkDark": "#FAFAF9", "surfaceDark": "#1C1917",      # and dark mode
      "radius": 2,                                         # the control radius; panels and dialogs scale from it
      "fontFamily": null,                                  # null: the platform's
+     "density": "regular",                                # compact (0.875), regular (1), comfortable (1.15), or a number
+     "typeScale": 1,                                      # every font size times this (1.1: a tenth larger)
      "success": "#15803D", "warning": "#B45309", "error": "#B91C1C", "info": "#0E7490"}
 
 Everything else is worked out: the neutral scale is the surface mixed toward the ink, tints are the role at 10 %
-with a 28 % border (16 % and 36 % in dark), text styles keep SSUI's sizes and weights. Edit the written
+with a 28 % border (16 % and 36 % in dark), text styles keep SSUI's weights at its sizes times the type scale, and
+control heights, paddings and gaps are SSUI's times the density (in the theme and in every component). Edit the written
 design_system.json afterwards for anything a brand wants different; the components are plain documents too.
 """
 import json
 import os
+import re
 import sys
 
 HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -78,6 +82,65 @@ def names(surface, ink, primary, roles, dark):
     return out
 
 
+DENSITIES = {'compact': 0.875, 'regular': 1, 'comfortable': 1.15}
+
+# A size chosen by a prop is written as a formula (props.size == 'xs' ? 24 : (...)): its numbers scale too.
+_TABLE = re.compile(r"^\$\{= props\.\w+ == '")
+_NUMBER = re.compile(r"(?<![\w.'#])(\d+(?:\.\d+)?)(?![\w.'])")
+
+
+def half(v):
+    """Rounded to half a pixel, an integer when whole."""
+    r = round(v * 2) / 2
+    return int(r) if r == int(r) else r
+
+
+def rescale(doc, density, type_scale):
+    """SSUI's component with its type at type_scale and its control heights, paddings and gaps at density."""
+    if density == 1 and type_scale == 1:
+        return doc
+    space = lambda v: v if isinstance(v, bool) or not isinstance(v, (int, float)) else (0 if v == 0 else max(1, round(v * density)))
+
+    tall = lambda v: max(1, round(v * max(density, type_scale)))
+
+    def formula(text, f):
+        return _NUMBER.sub(lambda m: '%g' % f(float(m.group(1))), text)
+
+    def walk(v, key=None):
+        if isinstance(v, dict):
+            out = {}
+            for k, x in v.items():
+                if k == 'fontSize' and isinstance(x, (int, float)) and not isinstance(x, bool):
+                    out[k] = half(x * type_scale)
+                elif k == 'padding' and key == 'layout':
+                    out[k] = [space(i) for i in x] if isinstance(x, list) else space(x)
+                elif k in ('spacing', 'runSpacing') and key == 'props':
+                    out[k] = space(x)
+                elif k == 'height' and key == 'layout' and isinstance(x, (int, float)) and not isinstance(x, bool) and x >= 20:
+                    # A control's or a bar's fixed height; dots, rules and icons (under 20) stay. It holds text, so
+                    # it grows with the type when that grows more than the density.
+                    out[k] = tall(x)
+                elif k == 'bind' and isinstance(x, dict):
+                    out[k] = {}
+                    for path, f in x.items():
+                        if isinstance(f, str) and path == 'layout.height':
+                            f = formula(f, lambda n: n if n < 20 else tall(n))
+                        elif isinstance(f, str) and _TABLE.match(f):
+                            if path.endswith('fontSize'):
+                                f = formula(f, lambda n: half(n * type_scale))
+                            elif path in ('layout.padding', 'props.spacing'):
+                                f = formula(f, space)
+                        out[k][path] = f
+                else:
+                    out[k] = walk(x, k)
+            return out
+        if isinstance(v, list):
+            return [walk(x, key) for x in v]
+        return v
+
+    return walk(doc)
+
+
 def main(path):
     brand = json.load(open(path))
     base = json.load(open(f'{HERE}/ssui/design_system.json'))
@@ -105,6 +168,13 @@ def main(path):
     }
     if brand.get('fontFamily'):
         theme['fontFamily'] = brand['fontFamily']
+    density = brand.get('density', 1)
+    density = DENSITIES[density] if isinstance(density, str) else density
+    type_scale = brand.get('typeScale', 1)
+    theme['textStyles'] = {k: {**v, **({'fontSize': half(v['fontSize'] * type_scale)} if 'fontSize' in v else {})}
+                           for k, v in theme['textStyles'].items()}
+    theme['sizes'] = {k: round(v * density) for k, v in theme['sizes'].items()}
+    theme['spacing'] = {k: max(1, round(v * density)) for k, v in theme['spacing'].items()}
     out = f"{HERE}/{brand['id']}"
     os.makedirs(f'{out}/components', exist_ok=True)
     # SSUI's components write its radii as numbers (5 inner, 6 and 7 control, 8 panel, 12 dialog): each becomes
@@ -112,8 +182,21 @@ def main(path):
     role = {5: theme['radii']['inner'], 6: theme['radii']['control'], 7: theme['radii']['control'],
             8: theme['radii']['panel'], 12: theme['radii']['dialog']}
 
+    def round_all(node):
+        """Whether the node is a circle or a pill: its radius is half its fixed size or more."""
+        layout, decoration = node.get('layout'), node.get('decoration')
+        r = decoration.get('radius') if isinstance(decoration, dict) else None
+        if not isinstance(layout, dict) or not isinstance(r, (int, float)) or isinstance(r, bool):
+            return False
+        sides = [x for x in (layout.get('width'), layout.get('height')) if isinstance(x, (int, float)) and not isinstance(x, bool)]
+        return bool(sides) and min(sides) <= 2 * r
+
     def reradius(v, key=None):
         if isinstance(v, dict):
+            if round_all(v):
+                # A dot or a marker stays round whatever the brand's corners.
+                return {**{k: reradius(x, k) for k, x in v.items() if k != 'decoration'},
+                        'decoration': {**{k: reradius(x, k) for k, x in v['decoration'].items() if k != 'radius'}, 'radius': 9999}}
             return {k: reradius(x, k) for k, x in v.items()}
         if isinstance(v, list):
             return [reradius(x, key) for x in v]
@@ -123,7 +206,7 @@ def main(path):
 
     for c in base['components']:
         with open(f'{HERE}/ssui/{c}') as f:
-            doc = reradius(json.load(f))
+            doc = rescale(reradius(json.load(f)), density, type_scale)
         with open(f'{out}/{c}', 'w') as f:
             json.dump(doc, f, indent=1, ensure_ascii=False)
             f.write('\n')

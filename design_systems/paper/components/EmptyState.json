@@ -108,7 +108,7 @@
       "color": "subtleFill"
      }
     ],
-    "radius": 20
+    "radius": 9999
    }
   },
   "glyph": {

@@ -258,13 +258,16 @@
     "width": 6,
     "height": 6
    },
+   "bind": {
+    "decoration.fills[0].color": "${= props.connected ? theme.success : theme.colors.secondaryText}",
+    "decoration.effects[0].visible": "${props.connected}"
+   },
    "decoration": {
     "fills": [
      {
       "color": "success"
      }
     ],
-    "radius": 3,
     "effects": [
      {
       "type": "dropShadow",
@@ -276,11 +279,8 @@
       "blurRadius": 4,
       "spreadRadius": 1
      }
-    ]
-   },
-   "bind": {
-    "decoration.fills[0].color": "${= props.connected ? theme.success : theme.colors.secondaryText}",
-    "decoration.effects[0].visible": "${props.connected}"
+    ],
+    "radius": 9999
    }
   },
   "subtitle": {

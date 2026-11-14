@@ -85,6 +85,9 @@
      "minWidth": 18
     }
    },
+   "bind": {
+    "visible": "${= props.showZero || props.count != 0}"
+   },
    "decoration": {
     "fills": [
      {
@@ -92,9 +95,6 @@
      }
     ],
     "radius": 9999
-   },
-   "bind": {
-    "visible": "${= props.showZero || props.count != 0}"
    }
   },
   "label": {

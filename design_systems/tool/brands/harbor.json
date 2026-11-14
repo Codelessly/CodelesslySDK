@@ -1,0 +1,18 @@
+{
+ "id": "harbor",
+ "name": "Harbor",
+ "description": "A roomy, friendly language: larger type, taller controls, round corners, a deep indigo accent on a cool gray page.",
+ "primary": "#4F46E5",
+ "primaryDark": "#818CF8",
+ "ink": "#0F172A",
+ "surface": "#FFFFFF",
+ "inkDark": "#F1F5F9",
+ "surfaceDark": "#0B1120",
+ "radius": 12,
+ "density": "comfortable",
+ "typeScale": 1.1,
+ "success": "#059669",
+ "warning": "#D97706",
+ "error": "#E11D48",
+ "info": "#0284C7"
+}

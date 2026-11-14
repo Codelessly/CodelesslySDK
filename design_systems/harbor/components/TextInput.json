@@ -1,0 +1,240 @@
+{
+ "schema": 3,
+ "id": "TextInput",
+ "roots": [
+  "field"
+ ],
+ "widget": {
+  "type": "TextInput",
+  "doc": "A one-line text field on the control scale (28 by default), its value kept in your variable. Fires onChanged and onSubmitted.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable: the field shows it and writes it as the user types."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Shown while empty."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Draws the error border (the message goes under it: a Field's error)."
+   },
+   {
+    "key": "obscure",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Hides the text (passwords)."
+   },
+   {
+    "key": "keyboard",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "text",
+      "emailAddress",
+      "number",
+      "phone",
+      "url",
+      "visiblePassword"
+     ]
+    },
+    "default": "text",
+    "doc": "The keyboard a phone shows."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: 50 % opacity, not editable."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   },
+   {
+    "key": "onSubmitted",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    240,
+    28
+   ],
+   "props": {
+    "placeholder": "name@company.com"
+   }
+  },
+  {
+   "name": "Filled",
+   "size": [
+    240,
+    28
+   ],
+   "props": {
+    "value": "Ada Lovelace"
+   }
+  }
+ ],
+ "nodes": {
+  "field": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": 32
+   },
+   "props": {
+    "style": "inputText",
+    "decoration": {
+     "isDense": true,
+     "filled": true,
+     "fillColor": "primaryBackground",
+     "contentPadding": [
+      8,
+      6,
+      8,
+      6
+     ],
+     "hintStyle": "placeholder",
+     "border": {
+      "type": "outline",
+      "borderRadius": 12,
+      "borderSide": {
+       "color": "primaryBorder",
+       "width": 1
+      }
+     },
+     "enabledBorder": {
+      "type": "outline",
+      "borderRadius": 12,
+      "borderSide": {
+       "color": "primaryBorder",
+       "width": 1
+      }
+     },
+     "focusedBorder": {
+      "type": "outline",
+      "borderRadius": 12,
+      "borderSide": {
+       "color": "focusBorder",
+       "width": 1.5
+      }
+     },
+     "errorBorder": {
+      "type": "outline",
+      "borderRadius": 12,
+      "borderSide": {
+       "color": "error",
+       "width": 1
+      }
+     },
+     "focusedErrorBorder": {
+      "type": "outline",
+      "borderRadius": 12,
+      "borderSide": {
+       "color": "error",
+       "width": 1.5
+      }
+     },
+     "disabledBorder": {
+      "type": "outline",
+      "borderRadius": 12,
+      "borderSide": {
+       "color": "primaryBorder",
+       "width": 1
+      }
+     },
+     "hoverColor": "#00000000"
+    },
+    "cursorColor": "primary",
+    "cursorHeight": 14
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}",
+    "props.decoration.errorText": "${= props.error ? '​' : ''}",
+    "props.obscureText": "${props.obscure}",
+    "props.keyboardType": "${props.keyboard}",
+    "props.enabled": "${props.enabled}",
+    "disabled": "${= !props.enabled}"
+   },
+   "states": {
+    "disabled": {
+     "field": {
+      "opacity": 0.5
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSubmitted",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

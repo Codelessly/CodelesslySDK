@@ -128,13 +128,19 @@
      "start": 0
     }
    },
+   "bind": {
+    "visible": "${= props.showZero || props.count > 0}",
+    "layout.height": "${= props.dot ? 8 : 18}",
+    "layout.constraints": "${= props.dot ? {minWidth: 8} : {minWidth: 18}}",
+    "layout.padding": "${= props.dot ? [0, 0, 0, 0] : [4, 0, 4, 0]}",
+    "decoration.fills[0].color": "${= props.variant == 'primary' ? theme.primary : (props.variant == 'success' ? theme.success : theme.error)}"
+   },
    "decoration": {
     "fills": [
      {
       "color": "error"
      }
     ],
-    "radius": 9999,
     "effects": [
      {
       "type": "dropShadow",
@@ -155,14 +161,8 @@
       ],
       "blurRadius": 2
      }
-    ]
-   },
-   "bind": {
-    "visible": "${= props.showZero || props.count > 0}",
-    "layout.height": "${= props.dot ? 8 : 18}",
-    "layout.constraints": "${= props.dot ? {minWidth: 8} : {minWidth: 18}}",
-    "layout.padding": "${= props.dot ? [0, 0, 0, 0] : [4, 0, 4, 0]}",
-    "decoration.fills[0].color": "${= props.variant == 'primary' ? theme.primary : (props.variant == 'success' ? theme.success : theme.error)}"
+    ],
+    "radius": 9999
    }
   },
   "label": {

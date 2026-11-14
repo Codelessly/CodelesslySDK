@@ -135,17 +135,17 @@
     "width": 6,
     "height": 6
    },
+   "bind": {
+    "visible": "${props.dot}",
+    "decoration.fills[0].color": "${= props.tone == 'neutral' ? theme.colors.secondaryText : (props.tone == 'primary' ? theme.primary : (props.tone == 'success' ? theme.success : (props.tone == 'warning' ? theme.warning : (props.tone == 'error' ? theme.error : theme.colors.info))))}"
+   },
    "decoration": {
     "fills": [
      {
       "color": "secondaryText"
      }
     ],
-    "radius": 3
-   },
-   "bind": {
-    "visible": "${props.dot}",
-    "decoration.fills[0].color": "${= props.tone == 'neutral' ? theme.colors.secondaryText : (props.tone == 'primary' ? theme.primary : (props.tone == 'success' ? theme.success : (props.tone == 'warning' ? theme.warning : (props.tone == 'error' ? theme.error : theme.colors.info))))}"
+    "radius": 9999
    }
   },
   "label": {

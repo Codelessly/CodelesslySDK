@@ -1,0 +1,192 @@
+{
+ "schema": 3,
+ "id": "MetaInfo",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "MetaInfo",
+  "doc": "When and which revision, in one muted line: a clock with an age, then a branch icon with a commit.",
+  "props": [
+   {
+    "key": "age",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "2h ago",
+    "doc": "How long ago (empty: none)."
+   },
+   {
+    "key": "commit",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "a1b2c3d",
+    "doc": "The short commit (empty: none)."
+   },
+   {
+    "key": "accent",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "The branch icon in the success color."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Both",
+   "size": [
+    200,
+    14
+   ],
+   "props": {
+    "age": "2h ago",
+    "commit": "a1b2c3d"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "clock",
+    "age",
+    "dot",
+    "branch",
+    "commit"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 14
+    },
+    "constraints": {
+     "minHeight": 13
+    }
+   }
+  },
+  "clock": {
+   "type": "icon",
+   "props": {
+    "icon": "schedule",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "visible": "${= props.age != ''}"
+   }
+  },
+  "age": {
+   "type": "text",
+   "props": {
+    "text": "${props.age}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.2,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.age != ''}"
+   }
+  },
+  "dot": {
+   "type": "text",
+   "props": {
+    "text": "·",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.2,
+     "color": "tertiaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 4
+    },
+    "height": {
+     "hug": 14
+    },
+    "margin": [
+     4,
+     0,
+     4,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.age != '' && props.commit != ''}"
+   }
+  },
+  "branch": {
+   "type": "icon",
+   "props": {
+    "icon": "account_tree",
+    "color": "tertiaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   },
+   "bind": {
+    "visible": "${= props.commit != ''}",
+    "props.color": "${= props.accent ? theme.success : theme.colors.tertiaryText}"
+   }
+  },
+  "commit": {
+   "type": "text",
+   "props": {
+    "text": "${props.commit}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.2,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1,
+     "fontFamily": "monospace"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "visible": "${= props.commit != ''}"
+   }
+  }
+ }
+}

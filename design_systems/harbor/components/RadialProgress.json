@@ -1,0 +1,138 @@
+{
+ "schema": 3,
+ "id": "RadialProgress",
+ "roots": [
+  "ring"
+ ],
+ "widget": {
+  "type": "RadialProgress",
+  "doc": "A percent as a tiny ring with the number inside: red under 20, amber under 60, green above.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 60,
+    "doc": "From 0 to 100.",
+    "required": true
+   },
+   {
+    "key": "muted",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Not counted yet: gray and dimmed."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Sixty",
+   "size": [
+    18,
+    18
+   ],
+   "props": {
+    "value": 60
+   }
+  },
+  {
+   "name": "Low",
+   "size": [
+    18,
+    18
+   ],
+   "props": {
+    "value": 12
+   }
+  },
+  {
+   "name": "Muted",
+   "size": [
+    18,
+    18
+   ],
+   "props": {
+    "value": 40,
+    "muted": true
+   }
+  }
+ ],
+ "nodes": {
+  "ring": {
+   "type": "stack",
+   "children": [
+    "arc",
+    "center"
+   ],
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "opacity": "${= props.muted ? 0.55 : 1}"
+   }
+  },
+  "arc": {
+   "type": "circularProgressIndicator",
+   "props": {
+    "value": 0.6,
+    "color": "success",
+    "backgroundColor": "track",
+    "strokeWidth": 3,
+    "strokeAlign": -1
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.value": "${= max(0, min(100, props.value)) / 100}",
+    "props.color": "${= props.muted ? theme.colors.tertiaryText : (props.value < 20 ? theme.error : (props.value < 60 ? theme.warning : theme.success))}"
+   }
+  },
+  "center": {
+   "type": "row",
+   "children": [
+    "number"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   }
+  },
+  "number": {
+   "type": "text",
+   "props": {
+    "text": "${= round(max(0, min(100, props.value)))}",
+    "style": {
+     "fontSize": 7,
+     "fontWeight": 800,
+     "height": 1,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.39
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 7
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.muted ? theme.colors.tertiaryText : theme.colors.secondaryText}"
+   }
+  }
+ }
+}

@@ -1,0 +1,231 @@
+{
+ "schema": 3,
+ "id": "DownloadButton",
+ "roots": [
+  "button"
+ ],
+ "widget": {
+  "type": "DownloadButton",
+  "doc": "Starts a download: a download icon with a label, or the icon alone. Fires onPressed.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Download",
+    "doc": "The words (empty: the icon alone, on a ghost button)."
+   },
+   {
+    "key": "loading",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A spinner in the icon's place; no presses."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: dimmed, no presses."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Labeled",
+   "size": [
+    110,
+    36
+   ],
+   "props": {}
+  },
+  {
+   "name": "Icon",
+   "size": [
+    36,
+    36
+   ],
+   "props": {
+    "label": ""
+   }
+  }
+ ],
+ "nodes": {
+  "button": {
+   "type": "row",
+   "children": [
+    "strut",
+    "buttonContent"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ],
+    "constraints": {
+     "minWidth": 36
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.label == '' ? '#00000000' : theme.primary}",
+    "decoration.radius": "${theme.radii.control}",
+    "opacity": "${= props.enabled ? 1 : 0.5}"
+   },
+   "states": {
+    "hovered": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "button": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled && !props.loading"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 41
+   },
+   "bind": {
+    "layout.height": "${theme.sizes.medium}"
+   }
+  },
+  "spinner": {
+   "type": "circularProgressIndicator",
+   "props": {
+    "color": "onAccent",
+    "strokeWidth": 1.5,
+    "strokeCap": "round"
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "visible": "${props.loading}",
+    "props.color": "${= props.label == '' ? theme.colors.secondaryText : theme.colors.onAccent}"
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "download",
+    "color": "onAccent",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= !props.loading}",
+    "props.color": "${= props.label == '' ? theme.colors.secondaryText : theme.colors.onAccent}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "controlMedium",
+     "color": "onAccent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != ''}"
+   }
+  },
+  "buttonContent": {
+   "type": "row",
+   "children": [
+    "spinner",
+    "glyph",
+    "label"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,199 @@
+{
+ "schema": 3,
+ "id": "ToggleRow",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "ToggleRow",
+  "doc": "A setting with its switch: a bold title, an optional muted description, the switch at the end. Fires onChanged.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Watch for changes",
+    "doc": "The setting's name.",
+    "required": true
+   },
+   {
+    "key": "description",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A line under it (empty: none)."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "boolean",
+      "flutter": "bool"
+     }
+    },
+    "default": "",
+    "doc": "The name of your boolean variable."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: 60 % opacity, no toggling."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "boolean",
+     "flutter": "bool"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "With description",
+   "size": [
+    320,
+    40
+   ],
+   "props": {
+    "label": "Watch for changes",
+    "description": "Re-index when a file is saved.",
+    "value": true
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "texts",
+    "toggle"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "bind": {
+    "opacity": "${= props.enabled ? 1 : 0.6}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "label",
+    "description"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 34
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.2
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "description": {
+   "type": "text",
+   "props": {
+    "text": "${props.description}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "visible": "${= props.description != ''}"
+   }
+  },
+  "toggle": {
+   "type": "switch",
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.value": "${= props.value == true}",
+    "props.enabled": "${props.enabled}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -99,13 +99,18 @@
     "width": 12,
     "height": 12
    },
+   "bind": {
+    "layout.width": "${= props.size == 'sm' ? 8 : (props.size == 'md' ? 12 : (16))}",
+    "layout.height": "${= props.size == 'sm' ? 8 : (props.size == 'md' ? 12 : (16))}",
+    "decoration.fills[0].color": "${= props.status == 'success' ? '#FF22C55E' : (props.status == 'error' ? '#FFEF4444' : (props.status == 'neutral' ? '#FFA3A3A3' : '#FF3B82F6'))}",
+    "decoration.effects[0].color": "${= props.status == 'success' ? '#4D22C55E' : (props.status == 'error' ? '#4DEF4444' : (props.status == 'neutral' ? '#4D6B7280' : '#4D3B82F6'))}"
+   },
    "decoration": {
     "fills": [
      {
       "color": "#FF22C55E"
      }
     ],
-    "radius": 9999,
     "effects": [
      {
       "type": "dropShadow",
@@ -117,13 +122,8 @@
       "blurRadius": 4,
       "spreadRadius": 2
      }
-    ]
-   },
-   "bind": {
-    "layout.width": "${= props.size == 'sm' ? 8 : (props.size == 'md' ? 12 : (16))}",
-    "layout.height": "${= props.size == 'sm' ? 8 : (props.size == 'md' ? 12 : (16))}",
-    "decoration.fills[0].color": "${= props.status == 'success' ? '#FF22C55E' : (props.status == 'error' ? '#FFEF4444' : (props.status == 'neutral' ? '#FFA3A3A3' : '#FF3B82F6'))}",
-    "decoration.effects[0].color": "${= props.status == 'success' ? '#4D22C55E' : (props.status == 'error' ? '#4DEF4444' : (props.status == 'neutral' ? '#4D6B7280' : '#4D3B82F6'))}"
+    ],
+    "radius": 9999
    }
   },
   "label": {
