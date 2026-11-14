@@ -500,7 +500,11 @@
   "components/UpgradeButton.json",
   "components/FilterLegend.json",
   "components/OnboardingBanner.json",
-  "components/PromptBanner.json"
+  "components/PromptBanner.json",
+  "components/RunningIndicator.json",
+  "components/CloudSyncIndicator.json",
+  "components/TextExpandable.json",
+  "components/StackedProgressBar.json"
  ],
  "replaces": [
   "filledButton",

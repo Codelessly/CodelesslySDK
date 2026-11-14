@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 73. Still to rebuild: 91.**
+**Here: 77. Still to rebuild: 87.**
 
 ## Here
 
@@ -26,6 +26,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Carousel |  | pageView |
 | Checkbox | Checkbox | checkbox |
 | Chip | Chip | chip family |
+| CloudSyncIndicator | CloudSyncIndicator |  |
 | ConnectionStatus | ConnectionStatus |  |
 | CopyButton | CopyButton |  |
 | CountBadge | CountBadge |  |
@@ -64,12 +65,14 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | RadialProgress | RadialProgress |  |
 | RadioButton | Radio | radio |
 | ResourceChip | ResourceChip |  |
+| RunningIndicator | RunningIndicator |  |
 | SearchBar | SearchBar |  |
 | SectionCard | SectionCard |  |
 | SegmentedControl | SegmentedControl | segmentedButton |
 | Select | Select | dropdown |
 | Skeleton | Skeleton |  |
 | Slider | Slider | slider |
+| StackedProgressBar | StackedProgressBar |  |
 | StatsRow | StatTile (dashboard density), InlineStat (compact) |  |
 | StatusBadge | StatusBadge |  |
 | StatusDot | StatusDot |  |
@@ -79,6 +82,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Switch | Switch | switch |
 | Table |  | tableView |
 | TextArea | TextArea | textField (maxLines) |
+| TextExpandable | TextExpandable |  |
 | TextField | TextInput | textField |
 | TextInput | TextInput | textField |
 | TextInputLabel | TextInputLabel |  |
@@ -95,13 +99,13 @@ Also here with no source file of the same name: Card, ListRow, SectionHeader, Ta
 
 In the order planned: what generated UI reaches for first, then the application chrome.
 
-### Status and feedback (4)
+### Status and feedback (1)
 
-RunningIndicator, StackedProgressBar, BatchProgressBar, CloudSyncIndicator
+BatchProgressBar
 
-### Text and small content (7)
+### Text and small content (6)
 
-TextItem, TextExpandable, CodeBlock, CodePreview, SplitButton, MenuButton, TabToggle
+TextItem, CodeBlock, CodePreview, SplitButton, MenuButton, TabToggle
 
 ### Cards and rows (14)
 

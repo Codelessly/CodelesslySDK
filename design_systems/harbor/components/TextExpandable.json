@@ -1,0 +1,185 @@
+{
+ "schema": 3,
+ "id": "TextExpandable",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "TextExpandable",
+  "doc": "A small heading that opens and closes what is under it (the call's children). Fires onToggle.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Details",
+    "doc": "The heading.",
+    "required": true
+   },
+   {
+    "key": "open",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Whether it starts open."
+   }
+  ],
+  "events": [
+   {
+    "key": "onToggle",
+    "payload": {
+     "kind": "boolean",
+     "flutter": "bool"
+    }
+   }
+  ],
+  "children": "list"
+ },
+ "variables": {
+  "box": [
+   {
+    "name": "toggled",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Closed",
+   "size": [
+    200,
+    16
+   ],
+   "props": {
+    "title": "Advanced options"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "column",
+   "children": [
+    "head",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "chevron",
+    "title"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "toggled",
+       "value": "${= !toggled}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onToggle",
+       "value": "${= props.open != toggled}"
+      }
+     ]
+    }
+   ]
+  },
+  "chevron": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right",
+    "color": "secondaryText",
+    "size": 13
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   },
+   "bind": {
+    "props.icon": "${= (props.open != toggled) ? 'expand_more' : 'chevron_right'}"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 600,
+     "height": 1.35,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": 0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     14,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.open != toggled}"
+   }
+  },
+  "content": {
+   "type": "slot"
+  }
+ }
+}

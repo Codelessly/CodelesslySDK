@@ -1,0 +1,335 @@
+{
+ "schema": 3,
+ "id": "StackedProgressBar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "StackedProgressBar",
+  "doc": "Progress made of parts: a bar with a colored segment per part, as wide as its count of the total, and the percent done.",
+  "props": [
+   {
+    "key": "counts",
+    "type": {
+     "kind": "list",
+     "flutter": "List<double>",
+     "item": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": [
+     6,
+     3,
+     1
+    ],
+    "doc": "How many in each part (up to six parts).",
+    "required": true
+   },
+   {
+    "key": "colors",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "#FF16A34A",
+     "#FF2563EB",
+     "#FFDC2626"
+    ],
+    "doc": "A color for each part (same order).",
+    "required": true
+   },
+   {
+    "key": "total",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 20,
+    "doc": "The whole (what is not in a part is the empty track).",
+    "required": true
+   },
+   {
+    "key": "showPercent",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The percent done after the bar."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Half",
+   "size": [
+    260,
+    18
+   ],
+   "props": {
+    "counts": [
+     6,
+     3,
+     1
+    ],
+    "colors": [
+     "#FF16A34A",
+     "#FF2563EB",
+     "#FFDC2626"
+    ],
+    "total": 20
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "track",
+    "percent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "track": {
+   "type": "row",
+   "children": [
+    "seg0",
+    "seg1",
+    "seg2",
+    "seg3",
+    "seg4",
+    "seg5",
+    "rest"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "hoverOverlay"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "secondaryBorder"
+     }
+    ],
+    "strokeWidth": 0.5,
+    "clip": "antiAlias",
+    "radius": 9999
+   }
+  },
+  "seg0": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 30
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= length(props.counts) > 0 && props.counts[0] > 0}",
+    "layout.flex": "${= length(props.counts) > 0 ? max(1, round(props.counts[0] * 1000 / max(1, props.total))) : 1}",
+    "decoration.fills[0].color": "${= length(props.colors) > 0 ? props.colors[0] : theme.primary}"
+   }
+  },
+  "seg1": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 30
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= length(props.counts) > 1 && props.counts[1] > 0}",
+    "layout.flex": "${= length(props.counts) > 1 ? max(1, round(props.counts[1] * 1000 / max(1, props.total))) : 1}",
+    "decoration.fills[0].color": "${= length(props.colors) > 1 ? props.colors[1] : theme.primary}"
+   }
+  },
+  "seg2": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 30
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= length(props.counts) > 2 && props.counts[2] > 0}",
+    "layout.flex": "${= length(props.counts) > 2 ? max(1, round(props.counts[2] * 1000 / max(1, props.total))) : 1}",
+    "decoration.fills[0].color": "${= length(props.colors) > 2 ? props.colors[2] : theme.primary}"
+   }
+  },
+  "seg3": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 30
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= length(props.counts) > 3 && props.counts[3] > 0}",
+    "layout.flex": "${= length(props.counts) > 3 ? max(1, round(props.counts[3] * 1000 / max(1, props.total))) : 1}",
+    "decoration.fills[0].color": "${= length(props.colors) > 3 ? props.colors[3] : theme.primary}"
+   }
+  },
+  "seg4": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 30
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= length(props.counts) > 4 && props.counts[4] > 0}",
+    "layout.flex": "${= length(props.counts) > 4 ? max(1, round(props.counts[4] * 1000 / max(1, props.total))) : 1}",
+    "decoration.fills[0].color": "${= length(props.colors) > 4 ? props.colors[4] : theme.primary}"
+   }
+  },
+  "seg5": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 30
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "visible": "${= length(props.counts) > 5 && props.counts[5] > 0}",
+    "layout.flex": "${= length(props.counts) > 5 ? max(1, round(props.counts[5] * 1000 / max(1, props.total))) : 1}",
+    "decoration.fills[0].color": "${= length(props.colors) > 5 ? props.colors[5] : theme.primary}"
+   }
+  },
+  "rest": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 500
+   },
+   "bind": {
+    "layout.flex": "${= max(1, round((props.total - sum(props.counts)) * 1000 / max(1, props.total)))}",
+    "visible": "${= sum(props.counts) < props.total}"
+   }
+  },
+  "percent": {
+   "type": "text",
+   "props": {
+    "text": "${= round(sum(props.counts) / max(1, props.total) * 100)}%",
+    "style": {
+     "fontSize": 14.5,
+     "fontWeight": 600,
+     "height": 1.3,
+     "color": "primary",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 34
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "bind": {
+    "visible": "${props.showPercent}",
+    "props.style.color": "${= sum(props.counts) / max(1, props.total) >= 0.9 ? theme.success : (sum(props.counts) / max(1, props.total) >= 0.5 ? theme.primary : (sum(props.counts) / max(1, props.total) >= 0.25 ? theme.warning : theme.error))}"
+   }
+  }
+ }
+}

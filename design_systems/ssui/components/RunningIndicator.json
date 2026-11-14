@@ -1,0 +1,316 @@
+{
+ "schema": 3,
+ "id": "RunningIndicator",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "RunningIndicator",
+  "doc": "A job under way: a thin progress bar over pulsing dots, what it is doing and the percent.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Indexing files",
+    "doc": "What it is doing.",
+    "required": true
+   },
+   {
+    "key": "progress",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0.4,
+    "doc": "From 0 to 1.",
+    "required": true
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Forty",
+   "size": [
+    260,
+    26
+   ],
+   "props": {
+    "label": "Indexing files",
+    "progress": 0.4
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "column",
+   "children": [
+    "track",
+    "line"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "track": {
+   "type": "row",
+   "children": [
+    "fill",
+    "rest"
+   ],
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tertiaryBackground"
+     }
+    ],
+    "radius": 2,
+    "clip": "antiAlias"
+   }
+  },
+  "fill": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "fill": 4
+    },
+    "flex": 400
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "layout.flex": "${= round(max(0, min(1, props.progress)) * 1000)}",
+    "visible": "${= props.progress > 0}"
+   }
+  },
+  "rest": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "fill": 4
+    },
+    "flex": 600
+   },
+   "bind": {
+    "layout.flex": "${= 1000 - round(max(0, min(1, props.progress)) * 1000)}",
+    "visible": "${= props.progress < 1}"
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "dots",
+    "label",
+    "percent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "dots": {
+   "type": "row",
+   "children": [
+    "d1",
+    "d2",
+    "d3"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 4
+    }
+   }
+  },
+  "d1": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 2
+   },
+   "animations": [
+    {
+     "id": "pulse",
+     "duration": 450,
+     "delay": 0,
+     "curve": "linear",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0.2,
+       "to": 1
+      }
+     ]
+    }
+   ]
+  },
+  "d2": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 2
+   },
+   "animations": [
+    {
+     "id": "pulse",
+     "duration": 450,
+     "delay": 300,
+     "curve": "linear",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0.2,
+       "to": 1
+      }
+     ]
+    }
+   ]
+  },
+  "d3": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": 2
+   },
+   "animations": [
+    {
+     "id": "pulse",
+     "duration": 450,
+     "delay": 600,
+     "curve": "linear",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0.2,
+       "to": 1
+      }
+     ]
+    }
+   ]
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1,
+     "decoration": "underline",
+     "decorationStyle": "dotted"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "percent": {
+   "type": "text",
+   "props": {
+    "text": "${= round(max(0, min(1, props.progress)) * 100)}%",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "tertiaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 26
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  }
+ }
+}

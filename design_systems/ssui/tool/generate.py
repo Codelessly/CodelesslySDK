@@ -2447,6 +2447,139 @@ add(component(
     },
 ))
 
+# --- batch 12: running, cloud sync, expandable text, stacked progress ---------------------------------------------
+
+# RunningIndicator (RunningIndicator.tsx): a job under way: a 4 px bar (radius 2, the brand on the tertiary
+# background), 6 px, then three pulsing 4 px brand dots, 7 px, the label 11/500 (-0.1) in secondary text with a
+# dotted underline, and the percent in tertiary text at the end.
+add(component(
+    'RunningIndicator',
+    'A job under way: a thin progress bar over pulsing dots, what it is doing and the percent.',
+    'box',
+    props=[prop('label', STRING, 'Indexing files', 'What it is doing.', required=True),
+           prop('progress', NUMBER, 0.4, 'From 0 to 1.', required=True)],
+    previews=[preview('Forty', 260, 26, label='Indexing files', progress=0.4)],
+    nodes={
+        'box': {'type': 'column', 'children': ['track', 'line'], 'props': {'crossAxisAlignment': 'stretch', 'spacing': 6},
+                'layout': {'width': {'fill': 260}, 'height': {'hug': 26}}},
+        'track': {'type': 'row', 'children': ['fill', 'rest'], 'layout': {'width': {'fill': 260}, 'height': 4},
+                  'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'radius': 2, 'clip': 'antiAlias'}},
+        'fill': {'type': 'box', 'layout': {'width': {'fill': 100}, 'height': {'fill': 4}, 'flex': 400},
+                 'decoration': {'fills': [{'color': 'primary'}], 'radius': 2},
+                 'bind': {'layout.flex': '${= round(max(0, min(1, props.progress)) * 1000)}', 'visible': '${= props.progress > 0}'}},
+        'rest': {'type': 'box', 'layout': {'width': {'fill': 160}, 'height': {'fill': 4}, 'flex': 600},
+                 'bind': {'layout.flex': '${= 1000 - round(max(0, min(1, props.progress)) * 1000)}', 'visible': '${= props.progress < 1}'}},
+        'line': {'type': 'row', 'children': ['dots', 'label', 'percent'], 'props': {'crossAxisAlignment': 'center', 'spacing': 7},
+                 'layout': {'width': {'fill': 260}, 'height': {'hug': 15}}},
+        'dots': {'type': 'row', 'children': ['d1', 'd2', 'd3'], 'props': {'crossAxisAlignment': 'center', 'spacing': 2},
+                 'layout': {'width': {'hug': 16}, 'height': {'hug': 4}}},
+        'd1': {'type': 'box', 'layout': {'width': 4, 'height': 4}, 'decoration': {'fills': [{'color': 'primary'}], 'radius': 2}, 'animations': _pulse(0)},
+        'd2': {'type': 'box', 'layout': {'width': 4, 'height': 4}, 'decoration': {'fills': [{'color': 'primary'}], 'radius': 2}, 'animations': _pulse(300)},
+        'd3': {'type': 'box', 'layout': {'width': 4, 'height': 4}, 'decoration': {'fills': [{'color': 'primary'}], 'radius': 2}, 'animations': _pulse(600)},
+        'label': {'type': 'text', 'props': {'text': '${props.label}', 'maxLines': 1, 'overflow': 'ellipsis',
+                                             'style': style(11, 500, 'secondaryText', 1.3, letterSpacing=-0.1, decoration='underline', decorationStyle='dotted')},
+                  'layout': {'width': {'fill': 180}, 'height': {'hug': 15}}},
+        'percent': text('${= round(max(0, min(1, props.progress)) * 100)}%', style(11, 500, 'tertiaryText', 1.3, letterSpacing=-0.1), {'hug': 26}, {'hug': 15}),
+    },
+))
+
+# CloudSyncIndicator (CloudSyncIndicator.tsx): whether something is in the cloud: a 14 px cloud with a small badge
+# at its lower right saying how: a check (synced, success), a spinner (checking, syncing), a clock (pending,
+# warning), an alert (failed, error), a struck cloud (unavailable, tertiary). Pressing it asks for a sync.
+SYNC_STATES = ['checking', 'synced', 'syncing', 'pending', 'failed', 'unavailable']
+SYNC_BUSY = "(props.state == 'checking' || props.state == 'syncing')"
+SYNC_INK = "${= props.state == 'synced' ? theme.success : (props.state == 'failed' ? theme.error : (props.state == 'pending' ? theme.warning : (props.state == 'unavailable' ? theme.colors.tertiaryText : theme.primary)))}"
+add(component(
+    'CloudSyncIndicator',
+    'Whether something is saved to the cloud: a small cloud with a mark for synced, syncing, pending, failed or unavailable. Fires onPressed.',
+    'box',
+    props=[prop('state', enum(*SYNC_STATES), 'synced', 'checking, synced, syncing, pending, failed or unavailable.')],
+    events=['onPressed'],
+    previews=[preview('Synced', 20, 18), preview('Failed', 20, 18, state='failed')],
+    nodes={
+        'box': {'type': 'stack', 'children': ['cloud', 'badge'], 'layout': {'width': 20, 'height': 18},
+                'actions': [{'trigger': {'type': 'click', 'when': "props.state != 'unavailable'"},
+                             'actions': [{'type': 'componentEvent', 'event': 'onPressed', 'value': '${props.state}'}]}]},
+        'cloud': {**icon('cloud', 'secondaryText', 14), 'layout': {'width': 14, 'height': 14, 'x': {'start': 0}, 'y': {'start': 1}},
+                  'bind': {'props.icon': "${= props.state == 'unavailable' ? 'cloud_off' : 'cloud'}",
+                           'props.color': "${= props.state == 'unavailable' ? theme.colors.tertiaryText : theme.colors.secondaryText}"}},
+        'badge': {'type': 'row', 'children': ['spinner', 'mark'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                  'layout': {'width': 10, 'height': 10, 'x': {'end': 0}, 'y': {'end': 0}},
+                  'decoration': {'fills': [{'color': 'primaryBackground'}], 'radius': 5},
+                  'bind': {'visible': "${= props.state != 'unavailable'}"}},
+        'spinner': {'type': 'circularProgressIndicator', 'props': {'color': 'primary', 'strokeWidth': 1.2, 'strokeCap': 'round'},
+                    'layout': {'width': 6, 'height': 6}, 'bind': {'visible': '${= %s}' % SYNC_BUSY}},
+        'mark': {**icon('check', 'success', 8),
+                 'bind': {'visible': '${= !%s}' % SYNC_BUSY,
+                          'props.icon': "${= props.state == 'failed' ? 'priority_high' : (props.state == 'pending' ? 'schedule' : 'check')}",
+                          'props.color': SYNC_INK}},
+    },
+))
+
+# TextExpandable (TextExpandable.tsx): a line that opens what is under it: a 13 px chevron (turned when open),
+# 5 px, the title 11.5/650 (+0.1) in secondary text; the call's children 12 px below when open.
+add(component(
+    'TextExpandable',
+    'A small heading that opens and closes what is under it (the call\'s children). Fires onToggle.',
+    'box',
+    props=[prop('title', STRING, 'Details', 'The heading.', required=True),
+           prop('open', BOOL, False, 'Whether it starts open.')],
+    events=[{'key': 'onToggle', 'payload': BOOL}],
+    children='list',
+    variables=[{'name': 'toggled', 'type': 'boolean', 'value': False}],
+    previews=[preview('Closed', 200, 16, title='Advanced options')],
+    nodes={
+        'box': {'type': 'column', 'children': ['head', 'body'], 'props': {'crossAxisAlignment': 'stretch'},
+                'layout': {'width': {'fill': 200}, 'height': {'hug': 16}}},
+        'head': {'type': 'row', 'children': ['chevron', 'title'], 'props': {'crossAxisAlignment': 'center', 'spacing': 5},
+                 'layout': {'width': {'fill': 200}, 'height': {'hug': 16}},
+                 'actions': [{'trigger': 'click', 'actions': [
+                     {'type': 'setVariable', 'variable': 'toggled', 'value': '${= !toggled}'},
+                     {'type': 'componentEvent', 'event': 'onToggle', 'value': '${= props.open != toggled}'}]}]},
+        'chevron': {**icon('chevron_right', 'secondaryText', 13), 'bind': {'props.icon': "${= (props.open != toggled) ? 'expand_more' : 'chevron_right'}"}},
+        'title': text('${props.title}', style(11.5, 600, 'secondaryText', 1.35, letterSpacing=0.1), {'hug': 100}, {'hug': 16}),
+        'body': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch'},
+                 'layout': {'width': {'fill': 200}, 'height': {'hug': 0}, 'padding': [0, 12, 0, 0]},
+                 'bind': {'visible': '${= props.open != toggled}'}},
+        'content': {'type': 'slot'},
+    },
+))
+
+# StackedProgressBar (StackedProgressBar.tsx): what a whole is made of: an 8 px track (radius 4, a faint fill and
+# hairline) holding a segment per part in its color, as wide as its count out of the total, then the percent
+# 13/600, 12 px after the track, in the color of how far it is (error under 25, warning under 50, brand under 90,
+# success from there).
+add(component(
+    'StackedProgressBar',
+    'Progress made of parts: a bar with a colored segment per part, as wide as its count of the total, and the percent done.',
+    'bar',
+    props=[prop('counts', {'kind': 'list', 'flutter': 'List<double>', 'item': NUMBER}, [6, 3, 1], 'How many in each part (up to six parts).', required=True),
+           prop('colors', STRINGS, ['#FF16A34A', '#FF2563EB', '#FFDC2626'], 'A color for each part (same order).', required=True),
+           prop('total', NUMBER, 20, 'The whole (what is not in a part is the empty track).', required=True),
+           prop('showPercent', BOOL, True, 'The percent done after the bar.')],
+    previews=[preview('Half', 260, 18, counts=[6, 3, 1], colors=['#FF16A34A', '#FF2563EB', '#FFDC2626'], total=20)],
+    nodes={
+        'bar': {'type': 'row', 'children': ['track', 'percent'], 'props': {'crossAxisAlignment': 'center', 'spacing': 12},
+                'layout': {'width': {'fill': 260}, 'height': {'hug': 18}}},
+        'track': {'type': 'row', 'children': [*['seg%d' % i for i in range(6)], 'rest'], 'layout': {'width': {'fill': 200}, 'height': 8},
+                  'decoration': {'fills': [{'color': 'hoverOverlay'}], 'strokes': [{'color': 'secondaryBorder'}], 'strokeWidth': 0.5,
+                                 'radius': 4, 'clip': 'antiAlias'}},
+        # Up to six parts, each as wide as its count (a row shares its width by flex; a list cannot).
+        **{'seg%d' % i: {'type': 'box', 'layout': {'width': {'fill': 30}, 'height': {'fill': 8}, 'flex': 1},
+                         'decoration': {'fills': [{'color': 'primary'}], 'radius': 4},
+                         'bind': {'visible': '${= length(props.counts) > %d && props.counts[%d] > 0}' % (i, i),
+                                  'layout.flex': '${= length(props.counts) > %d ? max(1, round(props.counts[%d] * 1000 / max(1, props.total))) : 1}' % (i, i),
+                                  'decoration.fills[0].color': '${= length(props.colors) > %d ? props.colors[%d] : theme.primary}' % (i, i)}}
+           for i in range(6)},
+        'rest': {'type': 'box', 'layout': {'width': {'fill': 100}, 'height': {'fill': 8}, 'flex': 500},
+                 'bind': {'layout.flex': '${= max(1, round((props.total - sum(props.counts)) * 1000 / max(1, props.total)))}',
+                          'visible': '${= sum(props.counts) < props.total}'}},
+        'percent': {**text('${= round(sum(props.counts) / max(1, props.total) * 100)}%', style(13, 600, 'primary', 1.3), {'hug': 34}, {'hug': 17}),
+                    'bind': {'visible': '${props.showPercent}',
+                             'props.style.color': "${= sum(props.counts) / max(1, props.total) >= 0.9 ? theme.success : (sum(props.counts) / max(1, props.total) >= 0.5 ? theme.primary : (sum(props.counts) / max(1, props.total) >= 0.25 ? theme.warning : theme.error))}"}},
+    },
+))
+
 
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)
