@@ -66,8 +66,8 @@ void main() {
       final (tree, _) = await _show(tester, {
         'box': hugging('checkbox', {'value': true}),
         'sw': hugging('switch'),
-      }, theme: {'primary': '#FF1F6F4A'}, dark: true, fill: '#FF1C1C1C');
-      expect(_toggle(tree, 'box').markFill, const Color(0xFF1F6F4A));
+      }, theme: {'primary': '#FF1F6F4A', 'dark': {'primary': '#FF7FD1A6'}}, dark: true, fill: '#FF1C1C1C');
+      expect(_toggle(tree, 'box').markFill, const Color(0xFF7FD1A6));
       expect(_toggle(tree, 'sw').trackColor, const Color(0xFF4A4A4A), reason: 'SSUI\'s dark secondaryBorder');
     });
 

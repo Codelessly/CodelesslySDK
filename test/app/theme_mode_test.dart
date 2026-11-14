@@ -5,9 +5,11 @@
 // without dark colours stays as it was designed.
 import 'package:codelessly_api/codelessly_api.dart' as api show Color, ThemeMode;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/toggles.dart' show RenderToggle;
 import 'package:flutter/material.dart' hide TextStyle;
 import 'package:flutter_test/flutter_test.dart';
 
+import '../controls/toggles_support.dart';
 import 'support.dart';
 
 const _darkTheme = {
@@ -106,14 +108,13 @@ Future<CodelesslyWidgetController> _pump(WidgetTester tester, Codelessly app) as
   final tree = tester.widgetList<NodeView>(find.byType(NodeView)).map((v) => v.tree).lastWhere((t) => t.boxOf('$id-label') != null);
   final label = tree.boxOf('$id-label')!.node!;
   final style = label.prop(TextProps.style);
-  final island = find.byWidgetPredicate((w) => w.runtimeType.toString() == '_CheckboxIsland').last;
-  final theme = Theme.of(tester.element(island));
+  final check = controlIn<RenderToggle>(tree, '$id-check');
   return (
     text: label.prop(TextProps.text),
     ink: style.color,
     paper: tree.boxOf('$id-body')!.node!.decoration.fills.single.color,
-    control: theme.brightness,
-    surface: theme.colorScheme.surface,
+    control: check.tokens.dark ? Brightness.dark : Brightness.light,
+    surface: check.tokens.surface,
   );
 }
 

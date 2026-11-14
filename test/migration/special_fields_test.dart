@@ -6,9 +6,11 @@
 // an animation of its text. Each case draws what the migration makes of a
 // node that used them and matches what 30.1.0's renderer drew: the goldens
 // (goldens/special-*.png) and the recorded texts were taken with it, from
-// the same nodes (special_fields_cases.dart).
-import 'dart:io';
-import 'dart:ui' as ui;
+// the same nodes (special_fields_cases.dart). The slider cases' goldens
+// (ruler-defaults, marker, grip, fade) were taken again when the slider
+// became a render object with SSUI's look (Milestone 3): their custom paint
+// is still drawn between its parts (test/controls/slider_test.dart), over
+// SSUI's track and thumb instead of Material's.
 
 import 'package:codelessly_api/codelessly_api.dart' show Json, LayoutDocument, migrate2to3, readMap;
 import 'package:codelessly_api/src/core/migrate/steps_spellings.dart' show spellingMigrationSteps;
@@ -55,52 +57,15 @@ const _counted = {
   ],
 };
 
-/// How [rgba] differs from golden [name]: the pixels more than one level
-/// apart in a channel, and the largest difference.
-Future<(int, int)> _differs(WidgetTester tester, List<int> rgba, String name) async {
-  final bytes = File('test/migration/goldens/$name.png').readAsBytesSync();
-  final data = (await tester.runAsync(() async {
-    final frame = await (await ui.instantiateImageCodec(bytes)).getNextFrame();
-    final d = await frame.image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    frame.image.dispose();
-    return d;
-  }))!;
-  final want = data.buffer.asUint8List();
-  expect(want.length, rgba.length);
-  var count = 0, most = 0;
-  for (var i = 0; i < want.length; i += 4) {
-    var d = 0;
-    for (var c = 0; c < 4; c++) {
-      final x = (want[i + c] - rgba[i + c]).abs();
-      if (x > d) d = x;
-    }
-    if (d > 1) count++;
-    if (d > most) most = d;
-  }
-  return (count, most);
-}
-
 void main() {
   group('a migrated node draws what the special-case field drew', () {
     for (final e in specialCases.entries) {
-      if (e.key == 'fade') continue;
       testWidgets('${e.key}: the same pixels', (tester) async {
         final migrated = _migrated(e.value.$1);
         expect(migrated, isNot(e.value.$1), reason: 'the migration rewrote it');
         await drawCase(tester, migrated, e.value.$2, golden: 'special-${e.key}');
       });
     }
-
-    testWidgets('fade: within one level, but for the anti-aliased pixels of the track\'s rounded end', (tester) async {
-      // The fade was the active track drawn faint; it is now the inactive
-      // color laid over it, fading out. Where the rounded end's edge covers
-      // a pixel in part, the two blends differ.
-      final (nodes, size) = specialCases['fade']!;
-      final drawn = await drawCase(tester, _migrated(nodes), size);
-      final (count, most) = await _differs(tester, drawn, 'special-fade');
-      expect(count, lessThanOrEqualTo(12));
-      expect(most, lessThanOrEqualTo(51));
-    });
   });
 
   group('a text that counted up counts the same frames as a transition and an animation', () {
