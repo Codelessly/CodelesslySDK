@@ -2,10 +2,10 @@
  "schema": 3,
  "id": "contact_form",
  "roots": [
-  "c"
+  "contact_form"
  ],
  "variables": {
-  "c": [
+  "contact_form": [
    {
     "name": "name",
     "type": "text",
@@ -49,7 +49,7 @@
   ]
  },
  "nodes": {
-  "c": {
+  "contact_form": {
    "type": "canvas",
    "name": "contact_form",
    "slots": {
@@ -72,9 +72,16 @@
      "fill": 390
     },
     "height": {
-     "hug": 600
+     "fill": 600
     },
     "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ]
    }
   },
   "card": {
@@ -292,9 +299,7 @@
     "label": "Send message"
    },
    "layout": {
-    "width": {
-     "hug": 90
-    },
+    "width": 140,
     "height": 40
    },
    "actions": [

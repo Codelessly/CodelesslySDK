@@ -2,10 +2,10 @@
  "schema": 3,
  "id": "order_summary",
  "roots": [
-  "c"
+  "order_summary"
  ],
  "variables": {
-  "c": [
+  "order_summary": [
    {
     "name": "items",
     "type": "list",
@@ -44,7 +44,7 @@
   ]
  },
  "nodes": {
-  "c": {
+  "order_summary": {
    "type": "canvas",
    "name": "order_summary",
    "slots": {
@@ -67,9 +67,16 @@
      "fill": 390
     },
     "height": {
-     "hug": 600
+     "fill": 600
     },
     "padding": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ]
    }
   },
   "card": {
@@ -365,9 +372,7 @@
     "label": "Cancel"
    },
    "layout": {
-    "width": {
-     "hug": 90
-    },
+    "width": 100,
     "height": 40
    }
   },
@@ -377,9 +382,7 @@
     "label": "Place order"
    },
    "layout": {
-    "width": {
-     "hug": 90
-    },
+    "width": 140,
     "height": 40
    }
   }
