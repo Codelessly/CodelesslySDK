@@ -6,7 +6,10 @@
 // editing the island files. A family adds one line here.
 import 'package:codelessly_api/core.dart' show ButtonProps, FloatingActionButtonProps, IconButtonProps;
 
+import '../render/controls/app_bar.dart';
 import '../render/controls/buttons.dart';
+import '../render/controls/navigation_bar.dart';
+import '../render/controls/tab_bar.dart';
 import '../render/recipe.dart';
 
 /// Buttons (render/controls/buttons.dart).
@@ -19,7 +22,18 @@ final Map<String, WidgetRecipe> buttonRecipes = {
   FloatingActionButtonProps.spec.type: buttonRecipe,
 };
 
+/// Bars: tab bars, navigation bars, the app bar
+/// (render/controls/{tab_bar,navigation_bar,app_bar}.dart).
+final Map<String, WidgetRecipe> barRecipes = {
+  'tabBar': tabBarRecipe,
+  'tabs': tabsRecipe,
+  'navigationBar': navigationBarRecipe,
+  'bottomNavigationBar': navigationBarRecipe,
+  'appBar': appBarRecipe,
+};
+
 /// The render-object controls, by node type.
 final Map<String, WidgetRecipe> controlRecipes = {
   ...buttonRecipes,
+  ...barRecipes,
 };
