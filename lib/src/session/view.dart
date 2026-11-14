@@ -321,13 +321,15 @@ class _CodelesslyViewState extends State<CodelesslyView> {
 /// "primary"`, `"style": "body"`), as a published site's are; the same
 /// nodes when the theme names nothing they use.
 class ThemedSource implements NodeSource {
-  ThemedSource(this.base, ThemeTokens theme) : _theme = theme;
+  ThemedSource(this.base, ThemeTokens theme)
+      : _theme = theme,
+        _refs = ThemeRefs(theme);
 
   final NodeSource base;
   ThemeTokens _theme;
   final Map<String, _ThemedNode> _watched = {};
   final Expando<Node> _resolved = Expando();
-  ThemeRefs _refs = ThemeRefs(ThemeTokens.none);
+  ThemeRefs _refs;
 
   ThemeTokens get theme => _theme;
   set theme(ThemeTokens value) {
