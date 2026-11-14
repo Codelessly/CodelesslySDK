@@ -2276,6 +2276,175 @@ add(component(
     },
 ))
 
+# --- batch 11: upgrade button, filter legend, banners ------------------------------------------------------------
+
+# UpgradeButton (UpgradeButton.tsx): the call to upgrade: an orange to pink gradient (or solid orange), radius 8,
+# white 600 text with an icon 8 px before it; 6 x 12 at 14 (16 px icon), 8 x 16 at 16 (20), 12 x 24 at 18 (24);
+# an orange glow under it.
+add(component(
+    'UpgradeButton',
+    'The call to upgrade a plan: a warm gradient button with a crown or sparkles. Fires onPressed.',
+    'button',
+    props=[prop('label', STRING, 'Upgrade to Pro', 'The words.'),
+           prop('variant', enum('gradient', 'primary'), 'gradient', 'gradient: orange to pink. primary: solid orange.'),
+           prop('size', enum('sm', 'md', 'lg'), 'md', 'sm, md or lg.'),
+           prop('icon', enum('crown', 'sparkles'), 'crown', 'Which icon.')],
+    events=['onPressed'],
+    previews=[preview('Gradient', 180, 40), preview('Small solid', 150, 32, variant='primary', size='sm', icon='sparkles')],
+    nodes={
+        'button': {'type': 'row', 'children': ['glyph', 'label'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                   'layout': {'width': {'hug': 170}, 'height': {'hug': 40}, 'padding': [16, 8, 16, 8]},
+                   'decoration': {'fills': [{'color': '#FFF97316'},
+                                            {'type': 'linear', 'begin': [-1, 0], 'end': [1, 0],
+                                             'stops': [{'color': '#FFF97316', 'position': 0}, {'color': '#FFDB2777', 'position': 1}]}],
+                                  'radius': 8, 'effects': [shadow('#66FB923C', 4, 12, -2)]},
+                   'bind': {'layout.padding': by('size', {'sm': [12, 6, 12, 6], 'md': [16, 8, 16, 8], 'lg': [24, 12, 24, 12]}),
+                            'decoration.fills[1].visible': "${= props.variant == 'gradient'}"},
+                   'states': {'hovered': {'button': HOVER}, 'pressed': {'button': PRESS}},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed'}]}]},
+        'glyph': {**icon('workspace_premium', '#FFFFFFFF', 20),
+                  'bind': {'props.icon': "${= props.icon == 'crown' ? 'workspace_premium' : 'auto_awesome'}",
+                           'props.size': by('size', {'sm': 16, 'md': 20, 'lg': 24}),
+                           'layout.width': by('size', {'sm': 16, 'md': 20, 'lg': 24}),
+                           'layout.height': by('size', {'sm': 16, 'md': 20, 'lg': 24})}},
+        'label': {**text('${props.label}', style(16, 600, '#FFFFFFFF', 1.5), {'hug': 110}, {'hug': 24}),
+                  'bind': {'props.style.fontSize': by('size', {'sm': 14, 'md': 16, 'lg': 18})}},
+    },
+))
+
+# FilterLegend (FilterLegend.tsx): the strip of counts over a list that filters it: at least 28 high on the
+# secondary background with a hairline under it, padding 7 x 12 (8 at the end); items 16 px apart, each a label
+# 10 px in secondary text, a colon and its value 600 in the item's color; the active one underlined.
+add(component(
+    'FilterLegend',
+    'A strip of labeled counts that filter the list under it; the active one is underlined. Fires onSelected with the label.',
+    'strip',
+    props=[prop('labels', STRINGS, ['All', 'Open', 'Closed'], 'The filters\' names.', required=True),
+           prop('values', STRINGS, [], 'A value after each name (same order).'),
+           prop('colors', STRINGS, [], 'A color for each value (same order; none: tertiary text).'),
+           prop('active', STRING, '', 'The label of the filter in use.')],
+    events=[{'key': 'onSelected', 'payload': STRING}],
+    previews=[preview('Three', 320, 28, labels=['All', 'Open', 'Closed'], values=['42', '12', '30'], active='Open')],
+    nodes={
+        'strip': {'type': 'row', 'children': ['items'], 'props': {'crossAxisAlignment': 'center'},
+                  'layout': {'width': {'fill': 320}, 'height': {'hug': 28}, 'padding': [12, 7, 8, 7], 'constraints': {'minHeight': 28}},
+                  'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'strokeSides': 'bottom'}},
+        'items': {'type': 'listView', 'children': ['item'], 'props': {'scrollDirection': 'horizontal', 'scrollable': False, 'spacing': 16},
+                  'layout': {'width': {'hug': 280}, 'height': 14}, 'bind': {'data': '${props.labels}'}},
+        'item': {'type': 'row', 'children': ['label', 'value'], 'props': {'crossAxisAlignment': 'center'},
+                 'layout': {'width': {'hug': 50}, 'height': {'fill': 14}},
+                 'states': {'hovered': {'item': {'opacity': 0.75}}},
+                 'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onSelected', 'value': '${item}'}]}]},
+        'label': {**text("${= length(props.values) > index ? item + ': ' : item}", style(10, 400, 'secondaryText', 1.4), {'hug': 30}, {'hug': 14}),
+                  'bind': {'props.style.decoration': "${= item == props.active ? 'underline' : 'none'}"}},
+        'value': {**text("${= length(props.values) > index ? props.values[index] : ''}", style(10, 600, 'tertiaryText', 1.4), {'hug': 16}, {'hug': 14}),
+                  'bind': {'visible': '${= length(props.values) > index}',
+                           'props.style.color': "${= length(props.colors) > index ? props.colors[index] : theme.colors.tertiaryText}"}},
+    },
+))
+
+# OnboardingBanner (OnboardingBanner.tsx): the first-run panel, padding 20 x 16: a 64 px hero tile (radius 16,
+# the brand at 10 % with a 20 % border, a 28 px brand icon), 16 px, the title 16/700 (-0.3) centered, 8 px, the
+# subtitle 13 at 1.55 in secondary text centered, 20 px, the features in a tertiary box (radius 10, padding
+# 12 x 14, 10 px apart: a 13 px icon and 12.5 text), the call's children, 20 px, a 40 px brand button (radius 10,
+# 13/600) and a footer hint 11 in tertiary text 12 px under it.
+add(component(
+    'OnboardingBanner',
+    'The first-run panel: a hero icon, a title and subtitle, what you get as bullets, and one button. Fires onCta.',
+    'banner',
+    props=[prop('icon', STRING, 'rocket_launch', 'The hero icon.'),
+           prop('title', STRING, 'Welcome', 'The title.', required=True),
+           prop('subtitle', STRING, '', 'A sentence under it.'),
+           prop('features', STRINGS, [], 'What you get, one line each.'),
+           prop('featureIcons', STRINGS, [], 'An icon for each line (same order; none: a check).'),
+           prop('ctaLabel', STRING, 'Get started', 'The button\'s words.', required=True),
+           prop('ctaIcon', STRING, '', 'An icon in the button (empty: none).'),
+           prop('footerHint', STRING, '', 'A muted line under the button (empty: none).')],
+    events=['onCta'],
+    children='list',
+    previews=[preview('Welcome', 320, 380, title='Set up your workspace', subtitle='Connect a provider to start running agents.',
+                      features=['Runs on your machine', 'Bring your own keys', 'Nothing leaves your network'], ctaLabel='Connect a provider')],
+    nodes={
+        'banner': {'type': 'column', 'children': ['hero', 'title', 'subtitle', 'features', 'extra', 'cta', 'hint'],
+                   'props': {'crossAxisAlignment': 'center'},
+                   'layout': {'width': {'fill': 320}, 'height': {'hug': 380}, 'padding': [16, 20, 16, 20]}},
+        'hero': {'type': 'row', 'children': ['heroIcon'], 'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center'},
+                 'layout': {'width': 64, 'height': 64},
+                 'decoration': {'fills': [{'color': 'primaryTint'}], 'strokes': [{'color': 'primaryTintBorder'}], 'radius': 16}},
+        'heroIcon': {**icon('rocket_launch', 'primary', 28), 'bind': {'props.icon': '${props.icon}'}},
+        'title': {'type': 'text', 'props': {'text': '${props.title}', 'textAlign': 'center', 'style': style(16, 700, 'primaryText', 1.3, letterSpacing=-0.3)},
+                  'layout': {'width': {'fill': 288}, 'height': {'hug': 21}, 'margin': [0, 16, 0, 0]}},
+        'subtitle': {'type': 'text', 'props': {'text': '${props.subtitle}', 'textAlign': 'center', 'style': style(13, 400, 'secondaryText', 1.55, letterSpacing=-0.1)},
+                     'layout': {'width': {'fill': 288}, 'height': {'hug': 40}, 'margin': [0, 8, 0, 0]},
+                     'bind': {'visible': "${= props.subtitle != ''}"}},
+        'features': {'type': 'column', 'children': ['featureList'], 'props': {'crossAxisAlignment': 'stretch'},
+                     'layout': {'width': {'fill': 288}, 'height': {'hug': 80}, 'padding': [14, 12, 14, 12], 'margin': [0, 20, 0, 0]},
+                     'decoration': {'fills': [{'color': 'tertiaryBackground'}], 'strokes': [{'color': 'primaryBorder'}], 'radius': 10},
+                     'bind': {'visible': '${= length(props.features) > 0}'}},
+        'featureList': {'type': 'listView', 'children': ['feature'], 'props': {'scrollable': False, 'spacing': 10},
+                        'layout': {'width': {'fill': 260}, 'height': {'hug': 60}}, 'bind': {'data': '${props.features}'}},
+        'feature': {'type': 'row', 'children': ['featureIcon', 'featureText'], 'props': {'crossAxisAlignment': 'start', 'spacing': 10},
+                    'layout': {'width': {'fill': 260}, 'height': {'hug': 18}}},
+        'featureIcon': {**icon('check', 'secondaryText', 13),
+                        'layout': {'width': 13, 'height': 13, 'margin': [0, 2, 0, 0]},
+                        'bind': {'props.icon': "${= length(props.featureIcons) > index ? props.featureIcons[index] : 'check'}"}},
+        'featureText': text('${item}', style(12.5, 400, 'secondaryText', 1.4, letterSpacing=-0.1), {'fill': 230}, {'hug': 18}),
+        'extra': {'type': 'column', 'children': ['content'], 'props': {'crossAxisAlignment': 'stretch'},
+                  'layout': {'width': {'fill': 288}, 'height': {'hug': 0}, 'margin': [0, 16, 0, 0]}},
+        'content': {'type': 'slot'},
+        'cta': {'type': 'row', 'children': ['ctaIcon', 'ctaLabel'],
+                'props': {'mainAxisAlignment': 'center', 'crossAxisAlignment': 'center', 'spacing': 8},
+                'layout': {'width': {'fill': 288}, 'height': 40, 'margin': [0, 4, 0, 0]},
+                'decoration': {'fills': [{'color': 'primary'}], 'radius': 10},
+                'states': {'hovered': {'cta': HOVER}, 'pressed': {'cta': PRESS}},
+                'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onCta'}]}]},
+        'ctaIcon': {**icon('arrow_forward', 'onAccent', 15), 'bind': {'visible': "${= props.ctaIcon != ''}", 'props.icon': '${props.ctaIcon}'}},
+        'ctaLabel': text('${props.ctaLabel}', style(13, 600, 'onAccent', 1.3, letterSpacing=-0.1), {'hug': 120}, {'hug': 17}),
+        'hint': {'type': 'text', 'props': {'text': '${props.footerHint}', 'textAlign': 'center', 'style': style(11, 400, 'tertiaryText', 1.3, letterSpacing=-0.1)},
+                 'layout': {'width': {'fill': 288}, 'height': {'hug': 14}, 'margin': [0, 12, 0, 0]},
+                 'bind': {'visible': "${= props.footerHint != ''}"}},
+    },
+))
+
+# PromptBanner (PromptBanner.tsx): the 32 px notice that sits on top of a prompt box: rounded 12 at the top only,
+# bordered (its lower edge meets the box under it), 16 px either side: a 14 px icon and a message 12/500 in the tone's color, and at the
+# end a link in the same color. Neutral and info on the secondary background; warning and critical tinted.
+BANNER_TONES = ['info', 'neutral', 'warning', 'critical']
+BANNER_INK = "${= props.tone == 'critical' ? theme.error : (props.tone == 'warning' ? theme.warning : (props.tone == 'neutral' ? theme.colors.primaryText : theme.colors.secondaryText))}"
+add(component(
+    'PromptBanner',
+    'A one-line notice attached to the top of a prompt box: credits left, a limit reached, read-only. Fires onPressed and onAction.',
+    'banner',
+    props=[prop('message', STRING, 'You have 3 runs left today', 'The notice.', required=True),
+           prop('tone', enum(*BANNER_TONES), 'info', 'info and neutral: plain. warning and critical: tinted.'),
+           prop('icon', STRING, '', 'An icon before the message (empty: none).'),
+           prop('actionLabel', STRING, '', 'A link at the end ("Upgrade"); empty: none.')],
+    events=['onPressed', 'onAction'],
+    previews=[preview('Info', 320, 32, message='You have 3 runs left today', icon='bolt', actionLabel='Upgrade'),
+              preview('Critical', 320, 32, message='Out of credits', tone='critical', icon='error_outline', actionLabel='Add credits')],
+    nodes={
+        'banner': {'type': 'row', 'children': ['left', 'action'],
+                   'props': {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'spaceBetween', 'spacing': 8},
+                   'layout': {'width': {'fill': 320}, 'height': 32, 'padding': [16, 0, 16, 0]},
+                   'decoration': {'fills': [{'color': 'secondaryBackground'}], 'strokes': [{'color': 'primaryBorder'}],
+                                  'radius': [12, 12, 0, 0]},
+                   'bind': {'decoration.fills[0].color': "${= props.tone == 'critical' ? theme.colors.errorTint : (props.tone == 'warning' ? theme.colors.warningTint : theme.colors.secondaryBackground)}",
+                            'decoration.strokes[0].color': "${= props.tone == 'critical' ? theme.colors.errorTintBorder : (props.tone == 'warning' ? theme.colors.warningTintBorder : theme.colors.primaryBorder)}"},
+                   'states': {'hovered': {'banner': HOVER}},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onPressed'}]}]},
+        'left': {'type': 'row', 'children': ['glyph', 'message'], 'props': {'crossAxisAlignment': 'center', 'spacing': 8},
+                 'layout': {'width': {'fill': 200}, 'height': {'hug': 16}}},
+        'glyph': {**icon('bolt', 'secondaryText', 14), 'bind': {'visible': "${= props.icon != ''}", 'props.icon': '${props.icon}', 'props.color': BANNER_INK}},
+        'message': {'type': 'text', 'props': {'text': '${props.message}', 'maxLines': 1, 'overflow': 'ellipsis', 'style': style(12, 500, 'secondaryText', 1.3)},
+                    'layout': {'width': {'fill': 180}, 'height': {'hug': 16}}, 'bind': {'props.style.color': BANNER_INK}},
+        'action': {'type': 'row', 'children': ['actionLabel', 'chevron'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
+                   'layout': {'width': {'hug': 70}, 'height': {'hug': 16}}, 'bind': {'visible': "${= props.actionLabel != ''}"},
+                   'actions': [{'trigger': 'click', 'actions': [{'type': 'componentEvent', 'event': 'onAction'}]}]},
+        'actionLabel': {**text('${props.actionLabel}', style(12, 600, 'secondaryText', 1.3), {'hug': 50}, {'hug': 16}), 'bind': {'props.style.color': BANNER_INK}},
+        'chevron': {**icon('chevron_right', 'secondaryText', 14), 'bind': {'props.color': BANNER_INK}},
+    },
+))
+
 
 def write():
     os.makedirs(f'{HERE}/components', exist_ok=True)

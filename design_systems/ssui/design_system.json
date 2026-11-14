@@ -496,7 +496,11 @@
   "components/Stepper.json",
   "components/SearchBar.json",
   "components/ThemeToggle.json",
-  "components/DownloadButton.json"
+  "components/DownloadButton.json",
+  "components/UpgradeButton.json",
+  "components/FilterLegend.json",
+  "components/OnboardingBanner.json",
+  "components/PromptBanner.json"
  ],
  "replaces": [
   "filledButton",

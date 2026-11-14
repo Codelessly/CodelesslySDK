@@ -1,0 +1,4 @@
+node_modules/
+bundle.js
+shots/
+package-lock.json

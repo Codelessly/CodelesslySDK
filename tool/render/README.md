@@ -119,7 +119,7 @@ screen, the file's name), not an error: write the site page by page. The render 
 | `expression_not_evaluated` | warning | A text shows `${` on screen: an expression that did not evaluate. |
 | `path_overflow` | warning | A `path` (or a box's `path`) draws outside its box; it is not clipped to it, as Flutter's `CustomPaint` is not. |
 | `layout_overflow` | warning | A node extends past its parent's box where the parent does not scroll that way. A node of a component instance is named by its path, and its parent is the one in its own document. |
-| `fill_fallback` | warning | A node fills an axis its parent measures with no limit (a column that hugs its height, a wrapping row's line, a grid row sized to its content): it takes the design number of its `{"fill": n}`. The message names the parent and the fix. |
+| `fill_fallback` | warning | A node fills an axis its parent measures with no limit (a column that hugs its height, a wrapping row's line, a grid row sized to its content): it takes the design number of its `{"fill": n}` (with no number, `{"fill": 0}`, it is as big as its content and nothing is reported). The message names the parent and the fix. |
 | `set_overwritten` | warning | A timer or `load` reaction wrote a variable a `--set` step set, after it: the capture shows the `--set` value. `--now` pins a clock. |
 | `compare_failed` | warning | `--compare` found no reference for a capture, or could not read it: the message lists the candidates. |
 | `offscreen` | warning | A node extends past the screen's edge where nothing scrolls: on a device it is cut off. |

@@ -1,0 +1,13 @@
+{
+  "name": "a2ui-own-renderer",
+  "private": true,
+  "description": "Draws recorded A2UI v1.0 answers with A2UI's own web renderer, for the comparison in CodelesslyAPI docs/design/13-compact-notation.md.",
+  "scripts": {
+    "bundle": "esbuild app.js --bundle --format=iife --outfile=bundle.js"
+  },
+  "dependencies": {
+    "@a2ui/lit": "0.15.0",
+    "esbuild": "^0.25.0",
+    "lit": "^3.3.3"
+  }
+}

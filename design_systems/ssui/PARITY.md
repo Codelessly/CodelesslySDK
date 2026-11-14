@@ -9,7 +9,7 @@ The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSU
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
 (sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
-**Here: 69. Still to rebuild: 95.**
+**Here: 73. Still to rebuild: 91.**
 
 ## Here
 
@@ -39,6 +39,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | FeatureBulletItem | FeatureBulletItem |  |
 | Field | Field |  |
 | FileListItem | FileListItem |  |
+| FilterLegend | FilterLegend |  |
 | FloatingActionButton |  | floatingActionButton |
 | Hyperlink | Hyperlink |  |
 | IconBox | IconBox |  |
@@ -48,12 +49,14 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | LoadMore | LoadMore |  |
 | MetaInfo | MetaInfo |  |
 | NotificationBadge | NotificationBadge |  |
+| OnboardingBanner | OnboardingBanner |  |
 | OptionIcon | OptionIcon |  |
 | PageControl | PageControl |  |
 | Pagination |  | pagination |
 | Panel | Panel |  |
 | PersonChip | PersonChip |  |
 | ProgressIndicator | ProgressBar | progressBar |
+| PromptBanner | PromptBanner |  |
 | ProviderCard | ProviderCard |  |
 | ProviderIcon | ProviderIcon |  |
 | ProviderPill | ProviderPill |  |
@@ -84,6 +87,7 @@ document in `components/` written by `tool/generate.py`. Each new one is built f
 | Toast |  | showToast action |
 | ToggleRow | ToggleRow |  |
 | Tooltip | Tooltip | tooltip behavior |
+| UpgradeButton | UpgradeButton |  |
 
 Also here with no source file of the same name: Card, ListRow, SectionHeader, Tabs.
 
@@ -95,21 +99,21 @@ In the order planned: what generated UI reaches for first, then the application 
 
 RunningIndicator, StackedProgressBar, BatchProgressBar, CloudSyncIndicator
 
-### Text and small content (8)
+### Text and small content (7)
 
-TextItem, TextExpandable, CodeBlock, CodePreview, UpgradeButton, SplitButton, MenuButton, TabToggle
+TextItem, TextExpandable, CodeBlock, CodePreview, SplitButton, MenuButton, TabToggle
 
-### Cards and rows (16)
+### Cards and rows (14)
 
-FolderCard, ResourceCard, AgentChip, DocumentItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, OnboardingBanner, TrialBanner, PromptBanner, AuthPromptBanner
+FolderCard, ResourceCard, AgentChip, DocumentItem, FileMetadataCard, ActionListItem, SelectableListRow, RunRecordRow, RunHistoryList, StatusCardList, StatsCarousel, ModelAvatarStack, TrialBanner, AuthPromptBanner
 
 ### Inputs (19)
 
 FullWidthSearchInput, HeaderSearchInput, Combobox, NumberInput, NumberPresetInput, ColorInput, AuthInput, ExtensionChipsInput, FileUploader, ImageUpload, IconSelect, IconSegmentedControl, DropdownMultiselect, MultiSelectDropdown, HierarchicalPicker, RichTextField, RichTextToolbar, PromptInput, PromptInputWithBanner
 
-### Navigation and chrome (20)
+### Navigation and chrome (19)
 
-BrowserTabs, ChipTabs, TabBarWithBadges, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, NavigationMenu, CompactAppBar, WindowToolbar, SectionToolbar, PaneToolbar, Toolbar, SectionCategoryHeaderFull, StatusCategoryHeader, FilterLegend, CollapsibleSection, ScrollToBottomFAB, CanvasShell, ResizableRow
+BrowserTabs, ChipTabs, TabBarWithBadges, TabOverflowScroll, SplitPaneTabs, Sidebar, SidebarTogglePattern, NavigationMenu, CompactAppBar, WindowToolbar, SectionToolbar, PaneToolbar, Toolbar, SectionCategoryHeaderFull, StatusCategoryHeader, CollapsibleSection, ScrollToBottomFAB, CanvasShell, ResizableRow
 
 ### Menus and overlays (14)
 
