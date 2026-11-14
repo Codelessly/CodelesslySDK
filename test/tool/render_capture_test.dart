@@ -355,4 +355,12 @@ void main() {
     final unknown = report.diagnostics.where((d) => d['code'] == 'unknown_screen').toList();
     expect(unknown.map((d) => d['message']), [startsWith('No screen "contact"')]);
   });
+
+  testWidgets('a navigate whose "to" is built by a binding goes to the screen it names', (tester) async {
+    final report = await runRender(tester, RenderArgs(inputs: ['test/tool/fixtures/navexpr'], out: out.path, screens: const ['home'],
+        sizes: const [Size(390, 400)], steps: const [Step('tap', 'result#1')], dumpLayout: true));
+    expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
+    final boxes = jsonDecode(File(report.images.single.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
+    expect(boxes.cast<Map>().map((b) => b['id']), contains('changelogTitle'), reason: 'the second result names changelog');
+  });
 }
