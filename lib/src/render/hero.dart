@@ -9,7 +9,7 @@
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_api/core.dart' show Node;
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 import 'convert.dart';
 import 'node_tree.dart';
@@ -172,23 +172,8 @@ void paintFitted(PaintingContext context, Offset offset, Size size, RenderHeroMa
   context.pushTransform(true, Offset.zero, transform, (context, offset) => context.paintChild(child, offset));
 }
 
-/// Draws [mark]'s node stretched over the box it's given (the flight's box
-/// in between), repainting with [repaint].
-class HeroMarkPaint extends LeafRenderObjectWidget {
-  const HeroMarkPaint({super.key, required this.mark, this.repaint});
-
-  final RenderHeroMark mark;
-  final Listenable? repaint;
-
-  @override
-  RenderHeroMarkPaint createRenderObject(BuildContext context) => RenderHeroMarkPaint(mark, repaint);
-
-  @override
-  void updateRenderObject(BuildContext context, RenderHeroMarkPaint renderObject) => renderObject
-    ..mark = mark
-    ..repaint = repaint;
-}
-
+/// Draws a mark's node stretched over the box it's given (the flight's box
+/// in between), repainting with a listenable.
 class RenderHeroMarkPaint extends RenderBox {
   RenderHeroMarkPaint(this._mark, this._repaint);
 

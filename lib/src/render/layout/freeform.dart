@@ -1,7 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
+import 'package:flutter/foundation.dart';
 
 /// How a child of a freeform container is placed along one axis.
 ///
@@ -344,7 +344,7 @@ class FreeformAxisPlacement {
       'parent: $parentExtent, size: $size)';
 }
 
-/// The placement of one child of a [FreeformLayout] on both axes.
+/// The placement of one child of a [RenderFreeformLayout] on both axes.
 @immutable
 class FreeformPlacement {
   final FreeformAxisPlacement horizontal;
@@ -367,90 +367,7 @@ class FreeformParentData extends ContainerBoxParentData<RenderBox> {
   FreeformPlacement? placement;
 }
 
-/// Gives a child of a [FreeformLayout] its [placement].
-class FreeformChild extends ParentDataWidget<FreeformParentData> {
-  final FreeformPlacement placement;
-
-  const FreeformChild({
-    super.key,
-    required this.placement,
-    required super.child,
-  });
-
-  @override
-  void applyParentData(RenderObject renderObject) {
-    final FreeformParentData data =
-        renderObject.parentData! as FreeformParentData;
-    if (data.placement != placement) {
-      data.placement = placement;
-      renderObject.parent?.markNeedsLayout();
-    }
-  }
-
-  @override
-  Type get debugTypicalAncestorWidgetClass => FreeformLayout;
-}
-
-/// Lays out the children of a freeform container (frame, stack, freeform
-/// placeholder) the way the editor's solver does, at whatever size the
-/// container gets at runtime.
-///
-/// On an axis the container does not shrink-wrap and gets a bounded size, the
-/// layout takes the full size, like a [Stack] of positioned children. On an
-/// axis it shrink-wraps, it is as large as its largest child and keeps every
-/// child inside it, like the editor's solved wrapping freeform model. On an unbounded axis it does not
-/// shrink-wrap, it keeps at least its design extent.
-class FreeformLayout extends MultiChildRenderObjectWidget {
-  /// Whether the container shrink-wraps horizontally.
-  final bool wrapsWidth;
-
-  /// Whether the container shrink-wraps vertically.
-  final bool wrapsHeight;
-
-  /// The container's inner size at design size.
-  final Size designSize;
-
-  /// The direction children are placed in. Null takes the ambient
-  /// [Directionality]: right to left, every child is mirrored across the
-  /// container, so a design made left to right reads from the right edge.
-  final TextDirection? textDirection;
-
-  const FreeformLayout({
-    super.key,
-    required this.wrapsWidth,
-    required this.wrapsHeight,
-    required this.designSize,
-    this.textDirection,
-    super.children,
-  });
-
-  @override
-  RenderFreeformLayout createRenderObject(BuildContext context) =>
-      RenderFreeformLayout(
-        wrapsWidth: wrapsWidth,
-        wrapsHeight: wrapsHeight,
-        designSize: designSize,
-        textDirection:
-            textDirection ??
-            Directionality.maybeOf(context) ??
-            TextDirection.ltr,
-      );
-
-  @override
-  void updateRenderObject(
-    BuildContext context,
-    RenderFreeformLayout renderObject,
-  ) {
-    renderObject
-      ..wrapsWidth = wrapsWidth
-      ..wrapsHeight = wrapsHeight
-      ..designSize = designSize
-      ..textDirection =
-          textDirection ?? Directionality.maybeOf(context) ?? TextDirection.ltr;
-  }
-}
-
-/// The render object of [FreeformLayout].
+/// Lays its children out freely: each where its [FreeformPlacement] says.
 class RenderFreeformLayout extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, FreeformParentData>,
