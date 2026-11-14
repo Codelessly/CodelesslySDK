@@ -66,6 +66,11 @@ class TreeReactions implements NodeInteractions {
     'timePicker': 'props.value',
     'dateTimeInput': 'props.value',
     'signature': 'props.value',
+    // Bars: the picked index (render/controls/{tab_bar,navigation_bar}.dart).
+    'tabBar': 'props.initialIndex',
+    'tabs': 'props.initialIndex',
+    'navigationBar': 'props.selectedIndex',
+    'bottomNavigationBar': 'props.selectedIndex',
   };
 
   @override
