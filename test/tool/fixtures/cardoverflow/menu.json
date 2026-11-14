@@ -1,0 +1,14 @@
+{
+  "schema": 3,
+  "id": "menu",
+  "roots": ["menu"],
+  "variables": {"menu": [{"name": "dishes", "type": "list", "value": [{"name": "Carrots"}, {"name": "A smoked chicken sandwich with pickled cabbage"}]}]},
+  "nodes": {
+    "menu": {"type": "canvas", "slots": {"body": "list"}, "layout": {"width": 390, "height": 400}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "list": {"type": "listView", "children": ["dish"], "layout": {"width": {"fill": 390}, "height": {"fill": 400}}, "props": {"spacing": 8}, "bind": {"data": "${dishes}"}},
+    "dish": {"type": "column", "children": ["dishName", "dishPrice"], "layout": {"width": {"fill": 200}, "height": 60, "padding": 8}, "props": {"spacing": 4},
+      "decoration": {"fills": [{"color": "#FFF1F1F1"}]}},
+    "dishName": {"type": "text", "layout": {"width": {"fill": 184}, "height": {"hug": 20}}, "props": {"text": "${item.name}", "style": {"fontSize": 24, "color": "#FF000000"}}},
+    "dishPrice": {"type": "text", "layout": {"width": {"fill": 184}, "height": {"hug": 18}}, "props": {"text": "$14", "style": {"fontSize": 14, "color": "#FF000000"}}}
+  }
+}

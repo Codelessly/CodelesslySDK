@@ -894,6 +894,10 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
   double mainAxisSpacing = 0, crossAxisSpacing = 0, childAspectRatio = 1;
   double? mainAxisExtent;
   bool shrinkWrapRows = false;
+
+  /// CSS `grid-auto-flow: dense`: automatically placed items take the
+  /// first cells they fit from the top, filling holes spans left.
+  bool fillGaps = false;
   bool masonry = false;
 
   /// With [masonry]: each item in the shortest lane so far instead of in
@@ -1123,7 +1127,7 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
   /// CSS grid placement of the items (`grid-column: span n`,
   /// `grid-column-start`...): items with both starts first, then items
   /// locked to a row, then the rest in order, each in the next cells where
-  /// it fits (CSS's sparse auto-placement). Null when no item spans or
+  /// it fits (CSS's sparse auto-placement; dense with [fillGaps]). Null when no item spans or
   /// starts anywhere: the plain row-by-row layout applies.
   List<GridCell>? _placements(int cols) {
     final vertical = axis == Axis.vertical;
@@ -1178,10 +1182,12 @@ class RenderGridItems extends RenderCollection implements MeasuresContent {
       take(w.main!, c, w.mainSpan, w.crossSpan);
       out[i] = (main: w.main!, cross: c, mainSpan: w.mainSpan, crossSpan: w.crossSpan);
     }
-    // 3. The rest, in order, from a cursor that only moves forward.
+    // 3. The rest, in order, from a cursor that only moves forward (CSS's
+    // sparse flow), or from the top each time with [fillGaps] (dense).
     var r = 0, col = 0;
     for (final (i, w) in wants.indexed) {
       if (out[i] != null) continue;
+      if (fillGaps) r = col = 0;
       if (w.cross != null) {
         final c = clampCross(w.cross!, w.crossSpan);
         if (c < col) r++;

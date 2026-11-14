@@ -1,0 +1,13 @@
+{
+  "schema": 3,
+  "id": "home",
+  "roots": ["home", "search"],
+  "nodes": {
+    "home": {"type": "canvas", "slots": {"body": "open"}, "layout": {"width": 390, "height": 844}, "decoration": {"fills": [{"color": "#FFFFFFFF"}]}},
+    "open": {"type": "box", "layout": {"width": 120, "height": 48}, "decoration": {"fills": [{"color": "#FF2255FF"}]},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "openModal", "to": "search", "presentation": "dialog"}]}]},
+    "search": {"type": "canvas", "slots": {"body": "searchBox"}, "layout": {"width": 620, "height": 650}, "decoration": {"fills": [{"color": "#FFF5F5F5"}]},
+      "media": [{"maxWidth": 599, "patch": {"layout": {"width": 360, "height": 780}}}]},
+    "searchBox": {"type": "box", "layout": {"width": {"fill": 620}, "height": {"fill": 650}}, "decoration": {"fills": [{"color": "#FFDDDDDD"}]}}
+  }
+}

@@ -146,7 +146,7 @@ void main() {
   testWidgets('steps for another breakpoint\'s canvas are summarised in one warning', (tester) async {
     final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/site'], out: out.path, sizes: const [Size(390, 844)], screens: const ['home'],
         steps: const [Step('tap', 'd-go'), Step('hover', 'd-go')]));
-    final skipped = [for (final d in report.diagnostics) if (d['code'] == 'interaction_failed') d];
+    final skipped = [for (final d in report.diagnostics) if (d['code'] == 'step_skipped') d];
     expect(skipped, hasLength(1), reason: '${report.diagnostics}');
     expect(skipped.single['severity'], 'warning');
     expect(skipped.single['message'], allOf(contains('--tap d-go'), contains('--hover d-go')));
@@ -155,7 +155,7 @@ void main() {
   testWidgets('a step may name a node by its name: the same name on each breakpoint canvas', (tester) async {
     final report = await runRender(tester, RenderArgs(inputs: ['$a0/named.json'], out: out.path, sizes: const [Size(390, 844), Size(1440, 900)],
         steps: const [Step('tap', 'go-button')], dumpLayout: true));
-    expect(report.diagnostics.where((d) => d['severity'] == 'error' || d['code'] == 'interaction_failed'), isEmpty, reason: '${report.diagnostics}');
+    expect(report.diagnostics.where((d) => d['severity'] == 'error' || d['code'] == 'step_skipped'), isEmpty, reason: '${report.diagnostics}');
   });
 
   group('authoring fixes', () {

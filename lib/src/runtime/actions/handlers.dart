@@ -60,7 +60,27 @@ Future<void> handleAction(ActionDef a, ActionRun run) async {
 Future<void> _handleCore(CoreAction a, ActionRun run) async {
   switch (a) {
     case NavigateAction():
-      await run.host.ui.navigate(a, params: run.json(a.params), baseParams: run.json(a.baseParams));
+      // A destination built by a binding (`"to": "${item.to}"`, a search
+      // result's page) is the screen it names when the action runs.
+      final to = a.to.contains(r'${') ? run.text(a.to).trim() : a.to;
+      final base = a.base.contains(r'${') ? run.text(a.base).trim() : a.base;
+      final action = identical(to, a.to) && identical(base, a.base)
+          ? a
+          : NavigateAction(
+              mode: a.mode,
+              to: to,
+              params: a.params,
+              base: base,
+              baseParams: a.baseParams,
+              transition: a.transition,
+              transitionMs: a.transitionMs,
+              reverseTransitionMs: a.reverseTransitionMs,
+              routeTransition: a.routeTransition,
+              enabled: a.enabled,
+              nonBlocking: a.nonBlocking,
+              when: a.when,
+            );
+      await run.host.ui.navigate(action, params: run.json(a.params), baseParams: run.json(a.baseParams));
     case OpenModalAction():
       if (a.anchor == ModalAnchor.node) RevealAnchor.named = await _namedAnchor(a, run);
       final result = await run.host.ui.openModal(a, params: run.json(a.params));
