@@ -33,7 +33,7 @@ void main() {
     final root = RenderNodeView(tree, 'col');
     // The test binding's own render view of the implicit view (a whole app
     // gets one made by attachRoot).
-    final attachment = attachRoot(root, view: tester.view, existing: tester.binding.renderView);
+    final attachment = attachRoot(root, view: tester.view, existing: tester.binding.renderViews.first);
     await tester.pump();
     // The view's child is the root itself: no element made or holds it.
     expect(attachment.renderView.child, same(root));

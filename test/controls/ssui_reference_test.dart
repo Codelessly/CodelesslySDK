@@ -50,7 +50,7 @@ Map<String, Object?> _page({required bool dark}) {
   final rows = <String>[];
   Map<String, Object?> button(String type, String label, double? height, {String? fill, bool enabled = true, Map<String, Object?>? icon}) => {
         'type': type,
-        'layout': {'width': {'hug': 0}, 'height': height == null ? {'hug': 0} : height},
+        'layout': {'width': {'hug': 0}, 'height': height ?? {'hug': 0}},
         'props': {
           'label': label,
           if (!enabled) 'enabled': false,
