@@ -9,7 +9,7 @@
 // | [RenderControl]: states, tap, hover and cursor, focus, activation, semantics, tap target | `ButtonStyleButton`'s `InkWell` + `FocusableActionDetector` + `Semantics` |
 // | [paintStateLayer]: the overlay of the current state | `ButtonStyle.overlayColor` |
 // | [paintFocusRing]: SSUI's focus ring | (none in Material) |
-// | [ControlLabel]: one line, optically centred | `Text` in a `DefaultTextStyle` |
+// | [ControlLabel]: one line, optically centered | `Text` in a `DefaultTextStyle` |
 // | the control's one child: an icon glyph (render/paint/icon_glyph.dart) | `Icon` |
 // | [RenderControl.stateValue]: each state eased in and out (SSUI: 150 ms, ease-out) on a `Ticker` | `AnimatedContainer` / `ButtonStyle.animationDuration` |
 import 'dart:async' show scheduleMicrotask;
@@ -407,7 +407,7 @@ extension on Rect {
 
 /// A control that draws text itself (no RenderParagraph): what the label
 /// guard (test/app/no_material_look_test.dart) and tools measure.
-abstract interface class LabelledControl implements RenderBox {
+abstract interface class LabeledControl implements RenderBox {
   /// Each label: its text, font family, and glyph boxes in local
   /// coordinates.
   List<({String text, String? fontFamily, List<Rect> glyphs})> get labels;
@@ -432,7 +432,7 @@ void paintFocusRing(Canvas canvas, RRect shape, Color color, {double width = 1.5
 }
 
 /// One line of text, ellipsised to its width, placed so the glyphs (ascent
-/// to descent: what the eye sees, not the line's leading) sit centred on a
+/// to descent: what the eye sees, not the line's leading) sit centered on a
 /// line: what the guard test measures.
 class ControlLabel {
   final TextPainter _painter = TextPainter(textDirection: TextDirection.ltr, maxLines: 1, ellipsis: '…');
@@ -457,7 +457,7 @@ class ControlLabel {
   }
 
   double? _laidOutFor;
-  double _glyphCentre = 0;
+  double _glyphCenter = 0;
 
   /// Lays it out at most [maxWidth] wide.
   void layout(double maxWidth) {
@@ -465,13 +465,13 @@ class ControlLabel {
     _laidOutFor = maxWidth;
     _painter.layout(maxWidth: maxWidth.isFinite ? maxWidth : double.infinity);
     if (_text.isEmpty) {
-      _glyphCentre = _painter.height / 2;
+      _glyphCenter = _painter.height / 2;
       return;
     }
     final boxes = _painter.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: _painter.plainText.length),
         boxHeightStyle: BoxHeightStyle.tight);
     if (boxes.isEmpty) {
-      _glyphCentre = _painter.height / 2;
+      _glyphCenter = _painter.height / 2;
       return;
     }
     var top = double.infinity, bottom = -double.infinity;
@@ -479,7 +479,7 @@ class ControlLabel {
       if (b.top < top) top = b.top;
       if (b.bottom > bottom) bottom = b.bottom;
     }
-    _glyphCentre = (top + bottom) / 2;
+    _glyphCenter = (top + bottom) / 2;
   }
 
   /// Its width on one line, uncut.
@@ -493,10 +493,10 @@ class ControlLabel {
   Size get size => _painter.size;
 
   /// Where its glyphs are (ascent to descent of each line's text) when it
-  /// is painted from [left] centred on [centreY].
-  List<Rect> glyphBoxes(double left, double centreY) {
+  /// is painted from [left] centered on [centerY].
+  List<Rect> glyphBoxes(double left, double centerY) {
     if (_text.isEmpty) return const [];
-    final top = centreY - _glyphCentre;
+    final top = centerY - _glyphCenter;
     return [
       for (final b in _painter.getBoxesForSelection(TextSelection(baseOffset: 0, extentOffset: _painter.plainText.length),
           boxHeightStyle: BoxHeightStyle.tight))
@@ -507,10 +507,10 @@ class ControlLabel {
   /// The family it is set in (null: the platform's).
   String? get fontFamily => _style?.fontFamily;
 
-  /// Paints it with its glyphs centred on [centreY], from [left].
-  void paint(Canvas canvas, double left, double centreY) {
+  /// Paints it with its glyphs centered on [centerY], from [left].
+  void paint(Canvas canvas, double left, double centerY) {
     if (_text.isEmpty) return;
-    _painter.paint(canvas, Offset(left, centreY - _glyphCentre));
+    _painter.paint(canvas, Offset(left, centerY - _glyphCenter));
   }
 
   void dispose() => _painter.dispose();

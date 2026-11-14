@@ -189,7 +189,7 @@ void main() {
       expect(f.currentBorder.kind, FieldBorderKind.outline);
       expect(f.currentBorder.side, const BorderSide(color: _ssuiPrimaryBorder));
       expect(f.boxShape.tlRadiusX, 7);
-      // The content's line is centred in the box, 8 px in from the sides.
+      // The content's line is centered in the box, 8 px in from the sides.
       expect(f.contentRect.left, 8);
       expect(f.contentRect.right, 232);
       expect(f.contentRect.center.dy, closeTo(14, .01));
@@ -215,7 +215,7 @@ void main() {
       expect(f.currentBorder.side.color, isNot(_materialError));
       expect(f.belowColor, _ssuiError);
       expect(f.belowRect.top, closeTo(f.boxRect.bottom + kFieldBelowGap, .01));
-      // A document's own error colour.
+      // A document's own error color.
       final themed = await _frame(tester, _decoration({'errorText': 'x'}, theme: {'error': '#FFAA0011'}));
       expect(themed.currentBorder.side.color, const Color(0xFFAA0011));
     });
@@ -235,7 +235,7 @@ void main() {
       expect(error.labels.single.text, 'Required');
     });
 
-    testWidgets('the hint has the typed text\'s metrics: only its colour differs', (tester) async {
+    testWidgets('the hint has the typed text\'s metrics: only its color differs', (tester) async {
       final f = await _frame(tester, _decoration({'hintText': 'Hint'}));
       final value = f.decoration.valueStyle, hint = f.hintStyle;
       expect(hint.fontSize, value.fontSize);
@@ -648,7 +648,7 @@ void main() {
     testWidgets('disabled: half opacity, no focus by tap or Tab', (tester) async {
       final (tree, _) = await _show(tester, {'name': hugging('textField', {'enabled': false})});
       final f = _field(tree, 'name');
-      await tester.tapAt(centreOf(tree, 'name'));
+      await tester.tapAt(centerOf(tree, 'name'));
       await _key(tester, LogicalKeyboardKey.tab);
       expect(f.focusNode.hasFocus, isFalse);
       expect(f.paintedAlpha, 128);
@@ -661,7 +661,7 @@ void main() {
       final f = _field(tree, 'name');
       expect(f.interactive, isFalse);
       expect(f.editor.text, 'Ada');
-      await tester.tapAt(centreOf(tree, 'name'));
+      await tester.tapAt(centerOf(tree, 'name'));
       await tester.pump();
       expect(f.focusNode.hasFocus, isFalse);
     });

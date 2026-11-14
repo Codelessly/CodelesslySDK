@@ -6,14 +6,14 @@
 // | Part | SSUI |
 // |---|---|
 // | surface | a pill 24 high (20 at a height of 20 or less), `tertiaryBackground`, 1 px `primaryBorder` |
-// | label | 12/500 (11 at 20), line height 1.2, `onSurface`, centred |
+// | label | 12/500 (11 at 20), line height 1.2, `onSurface`, centered |
 // | avatar, check mark | 12, 6 before the label |
 // | delete icon (inputChip) | an x, 12, 6 after the label |
 // | selected | `activeTint`, `primaryTintBorder`, `primary` ink |
 // | hover, press, focus, disabled | the kit's overlays, ring and 50 % |
 //
 // A selectable chip always keeps the check mark's room, so selecting never
-// resizes it; unselected, its label is centred in that width. A badge over a
+// resizes it; unselected, its label is centered in that width. A badge over a
 // child is Flutter's (a dot or a count at its alignment, in `error`); with no
 // child it is SSUI's Badge: a tinted label 20 high, a pill for a count.
 import 'dart:math' as math;
@@ -131,7 +131,7 @@ class ChipSpec {
   final ControlTokens tokens;
   final String label;
 
-  /// The node's label fields (size, weight, family, colour).
+  /// The node's label fields (size, weight, family, color).
   final TextStyle labelStyle;
   final Json avatar;
   final double? avatarSize;
@@ -295,7 +295,7 @@ _ChipLook _lerpChipLook(_ChipLook a, _ChipLook b, double t) => (
 
 /// A chip: its pill, avatar or check mark, label and delete icon, in the
 /// states [RenderControl] resolves.
-class RenderChip extends RenderControl implements LabelledControl {
+class RenderChip extends RenderControl implements LabeledControl {
   RenderChip() {
     _deleteTap = TapGestureRecognizer(debugOwner: this)..onTap = _delete;
     focusNode.onKey = _key;
@@ -579,7 +579,7 @@ class RenderChip extends RenderControl implements LabelledControl {
     final inner = _pill.width - m.padding.horizontal;
     _labelSlot = math.max(0, inner - lead - del - labelPad.horizontal);
     _label.layout(_labelSlot);
-    // What shows, centred: the check (or avatar) and the label when it is
+    // What shows, centered: the check (or avatar) and the label when it is
     // there, else the label alone in the room kept for both.
     final shownLead = spec.hasAvatar || _showsCheck ? lead : 0.0;
     final shown = shownLead + labelPad.horizontal + _label.size.width + del;
@@ -599,8 +599,8 @@ class RenderChip extends RenderControl implements LabelledControl {
     }
   }
 
-  /// Its centre line, where the label's glyphs are centred.
-  double get _centreY => _m.padding.top + (size.height - _m.padding.vertical) / 2;
+  /// Its center line, where the label's glyphs are centered.
+  double get _centerY => _m.padding.top + (size.height - _m.padding.vertical) / 2;
 
   // --- look ----------------------------------------------------------------------
 
@@ -637,7 +637,7 @@ class RenderChip extends RenderControl implements LabelledControl {
   /// The fill now (null: none), before the state layer.
   Color? get fillColor => _look().fill;
 
-  /// The label's colour now.
+  /// The label's color now.
   Color get labelColor => _look().ink;
 
   /// The border now.
@@ -680,7 +680,7 @@ class RenderChip extends RenderControl implements LabelledControl {
   @override
   List<({String text, String? fontFamily, List<Rect> glyphs})> get labels => spec.label.isEmpty || !hasSize
       ? const []
-      : [(text: spec.label, fontFamily: _label.fontFamily, glyphs: _label.glyphBoxes(_labelLeft, _centreY))];
+      : [(text: spec.label, fontFamily: _label.fontFamily, glyphs: _label.glyphBoxes(_labelLeft, _centerY))];
 
   /// The label's laid-out width and its whole width on one line: equal
   /// when nothing cuts it.
@@ -727,7 +727,7 @@ class RenderChip extends RenderControl implements LabelledControl {
     }
     _label.update(spec.label, _textStyle(_m, look.ink));
     _label.layout(_labelSlot);
-    _label.paint(canvas, offset.dx + _labelLeft, offset.dy + _centreY);
+    _label.paint(canvas, offset.dx + _labelLeft, offset.dy + _centerY);
     // The check mark over (in place of) the avatar while selected.
     final lead = _showsCheck ? _checkGlyph : _avatar;
     if (lead != null) context.paintChild(lead, offset + _leadRect.topLeft);
@@ -777,7 +777,7 @@ void badgeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   final s = inherited == null ? own : inherited.merge(own);
   final standalone = child == null && label != null;
   final background = n.prop(BadgeProps.backgroundColor)?.flutter;
-  // Over a child: Flutter's badge in the error colour; alone: SSUI's
+  // Over a child: Flutter's badge in the error color; alone: SSUI's
   // neutral tint with its hairline (a fill of its own: no hairline).
   final fill = background ?? (standalone ? t.tertiaryBackground : t.error);
   final ink = n.prop(BadgeProps.textColor)?.flutter ??
@@ -811,8 +811,8 @@ void badgeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
 
 /// Flutter's `Badge`: [label] in a stadium (or, without a label, a dot)
 /// over its child at [badgeAlignment] + [offset]; without a child, SSUI's
-/// badge alone, centred in the box.
-class RenderBadge extends RenderStack implements LabelledControl {
+/// badge alone, centered in the box.
+class RenderBadge extends RenderStack implements LabeledControl {
   RenderBadge() : super(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none);
 
   final ControlLabel _text = ControlLabel();

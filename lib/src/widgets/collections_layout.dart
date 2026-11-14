@@ -583,7 +583,7 @@ class RenderListItems extends RenderCollection {
       (it.parentData! as CollectionParentData).offset = RenderCollection.offsetOf(mainPos, crossPos, axis);
     }
     if (inGap) {
-      // Centred in the gap before item [gapBefore]: between the item
+      // Centered in the gap before item [gapBefore]: between the item
       // before it and it, in the leading padding before the first, after
       // the last one gap on.
       double startOf(int i) {
@@ -591,19 +591,19 @@ class RenderListItems extends RenderCollection {
         return axis == Axis.vertical ? o.dy : o.dx;
       }
       double endOf(int i) => startOf(i) + RenderCollection.main(items[i].size, axis);
-      final double centre;
+      final double center;
       if (items.isEmpty) {
-        centre = _leading(_padMainStart, mainSize) / 2;
+        center = _leading(_padMainStart, mainSize) / 2;
       } else if (gapBefore == 0) {
-        centre = startOf(0) / 2;
+        center = startOf(0) / 2;
       } else if (gapBefore >= items.length) {
-        centre = endOf(items.length - 1) + gap / 2;
+        center = endOf(items.length - 1) + gap / 2;
       } else {
-        centre = (endOf(gapBefore - 1) + startOf(gapBefore)) / 2;
+        center = (endOf(gapBefore - 1) + startOf(gapBefore)) / 2;
       }
       final extent = RenderCollection.main(slotBox.size, axis);
       final crossPos = _padCrossStart + (crossInner - RenderCollection.cross(slotBox.size, axis)) / 2;
-      (slotBox.parentData! as CollectionParentData).offset = RenderCollection.offsetOf(centre - extent / 2, crossPos, axis);
+      (slotBox.parentData! as CollectionParentData).offset = RenderCollection.offsetOf(center - extent / 2, crossPos, axis);
     } else if (slotBox != null) {
       final mainPos = reverse && anchorEnd
           ? mainSize - _leading(_padMainEnd, mainSize) - slotLogical - slotExtent
@@ -1572,7 +1572,7 @@ class RenderTableItems extends RenderCollection {
       final (r, col) = cells[i++];
       final lead = col == 0 ? edge : 0.0, trail = col == columnWidths.length - 1 ? edge : 0.0;
       // The header's line takes room under its cells, as a bordered box's
-      // does: they centre in the height above it.
+      // does: they center in the height above it.
       final line = r == 0 && headerRow && headerBorder != null ? headerBorder!.width : 0.0;
       final w = math.max(0.0, columnWidths[col] - lead - trail), h = math.max(0.0, rowHeights[r] - line);
       it.layout(BoxConstraints.loose(Size(w, h)), parentUsesSize: true);

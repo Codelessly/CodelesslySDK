@@ -219,7 +219,7 @@ class TabBarSpec {
 
 /// A tab bar: its tabs, the selection indicator and the hairline below, in
 /// the states [RenderItemBar] resolves.
-class RenderTabBar extends RenderItemBar implements LabelledControl {
+class RenderTabBar extends RenderItemBar implements LabeledControl {
   RenderTabBar();
 
   final List<ControlLabel> _labels = [];
@@ -308,7 +308,7 @@ class RenderTabBar extends RenderItemBar implements LabelledControl {
     return base.merge(own).copyWith(color: color, leadingDistribution: TextLeadingDistribution.even);
   }
 
-  /// Tab [i]'s label colour now.
+  /// Tab [i]'s label color now.
   Color labelColorOf(int i) {
     final s = spec;
     if (i == selectedIndex) return s.labelStyle.color ?? s.labelColor ?? _t.onSurface;
@@ -458,8 +458,8 @@ class RenderTabBar extends RenderItemBar implements LabelledControl {
     _labelLefts = lefts;
   }
 
-  /// The vertical centre of tab [i]'s label line.
-  double _labelCentre(int i) {
+  /// The vertical center of tab [i]'s label line.
+  double _labelCenter(int i) {
     final c = _contents[i];
     if (spec.iconAbove && spec.showsIcon(i)) {
       final stack = _iconSize(i) + _gap + _lineHeight(i);
@@ -476,7 +476,7 @@ class RenderTabBar extends RenderItemBar implements LabelledControl {
   @override
   List<Rect> get itemRects => [for (final t in _tabs) t.shift(_shift)];
 
-  /// The label boxes ([LabelledControl]: the guard measures them).
+  /// The label boxes ([LabeledControl]: the guard measures them).
   @override
   List<({String text, String? fontFamily, List<Rect> glyphs})> get labels => !hasSize
       ? const []
@@ -486,7 +486,7 @@ class RenderTabBar extends RenderItemBar implements LabelledControl {
               (
                 text: spec.labels[i],
                 fontFamily: _labels[i].fontFamily,
-                glyphs: _labels[i].glyphBoxes(_labelLefts[i] - _scroll, _labelCentre(i)),
+                glyphs: _labels[i].glyphBoxes(_labelLefts[i] - _scroll, _labelCenter(i)),
               ),
         ];
 
@@ -637,7 +637,7 @@ class RenderTabBar extends RenderItemBar implements LabelledControl {
       if (s.showsLabel(i)) {
         _labels[i].update(s.labels[i], _style(i, color));
         _labels[i].layout(_labels[i].size.width < 1 ? double.infinity : _laidOut(i));
-        _labels[i].paint(canvas, shift.dx + _labelLefts[i], offset.dy + _labelCentre(i));
+        _labels[i].paint(canvas, shift.dx + _labelLefts[i], offset.dy + _labelCenter(i));
       }
     }
     glyphs.paint(context, offset, shift: _shift);

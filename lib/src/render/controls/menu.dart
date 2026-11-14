@@ -10,9 +10,9 @@
 // | [ControlPopup] | shows one render box in the root's overlay layer (render/controls/overlay.dart), placed by a [PopupPosition] against an anchor it keeps following; a barrier that takes every pointer outside the box and dismisses on a press; Escape dismisses; `onDismiss` lets the owner return the focus | `ModalRoute` + `ModalBarrier` + `CompositedTransformFollower` |
 // | [RenderPopupLayer] | the overlay entry itself: full root size, the barrier, the box | `_ModalScope` |
 // | [AnchoredPlacement] | under the anchor, flipping above when there is no room, at least the anchor's width, kept 8 px inside the root | `_DropdownMenuRouteLayout`, `SoftSaaSPopover`'s delegate |
-// | [CenteredPlacement] | centred in the root (a dialog) | `Dialog`'s `Align` |
+// | [CenteredPlacement] | centered in the root (a dialog) | `Dialog`'s `Align` |
 // | [RenderMenu] | SSUI's menu surface (radius 7, `level3` shadow, hairline border, 4 px inset) and its rows, scrolling when long, with the keyboard: arrows, Home/End, Page Up/Down, type-ahead, Enter/Space | `SoftSaaSMenuList`, `_DropdownMenu` |
-// | [RenderMenuRow] | one row: label (optically centred), selected tint and check, hover, press, image | `SoftSaaSMenuRow`, `DropdownMenuItem` + `InkWell` |
+// | [RenderMenuRow] | one row: label (optically centered), selected tint and check, hover, press, image | `SoftSaaSMenuRow`, `DropdownMenuItem` + `InkWell` |
 //
 // A dropdown (render/controls/dropdown.dart) opens a [RenderMenu] in a
 // [ControlPopup] anchored to its field's box.
@@ -129,7 +129,7 @@ class AnchoredPlacement implements PopupPosition {
   int get hashCode => Object.hash(gap, margin, preferAbove, matchAnchorWidth, width, minWidth, maxHeight, alignEnd);
 }
 
-/// Centred in the root, at most [maxWidth] wide and kept [margin] inside it
+/// Centered in the root, at most [maxWidth] wide and kept [margin] inside it
 /// (a dialog; the anchor is ignored).
 @immutable
 class CenteredPlacement implements PopupPosition {
@@ -185,7 +185,7 @@ class RenderPopupLayer extends RenderOverlayEntry with RenderObjectWithChildMixi
     markNeedsLayout();
   }
 
-  /// The barrier's colour (null: clear).
+  /// The barrier's color (null: clear).
   Color? barrierColor;
   bool barrierDismissible;
 
@@ -402,7 +402,7 @@ class MenuItem {
 
 /// How a menu looks: its surface and its rows. [MenuLook.new]'s defaults
 /// are SSUI's (soft_saas_ui's `SoftSaaSMenuList` in a `SoftSaaSPopover`)
-/// but for the colours and text, which come from tokens.
+/// but for the colors and text, which come from tokens.
 @immutable
 class MenuLook {
   const MenuLook({
@@ -455,13 +455,13 @@ class MenuLook {
   final TextStyle textStyle, selectedTextStyle;
 
   /// The selected row's check mark: shown, before the label, its size and
-  /// colour (null: the selected text's).
+  /// color (null: the selected text's).
   final bool showCheck;
   final bool checkLeading;
   final double checkSize;
   final Color? checkColor;
 
-  /// The label's place in its row: -1 start, 0 centre, 1 end.
+  /// The label's place in its row: -1 start, 0 center, 1 end.
   final double alignX;
 
   /// Between a row's image and its label.
@@ -680,14 +680,14 @@ class RenderMenu extends RenderBox
   }
 
   int? _reveal;
-  bool _revealCentred = false;
+  bool _revealCentered = false;
 
   /// Scrolls row [i] into view (to the middle when [center]); done at the
   /// next layout when the menu has none yet.
   void reveal(int i, {bool center = false}) {
     if (!hasSize || debugNeedsLayout) {
       _reveal = i;
-      _revealCentred = center;
+      _revealCentered = center;
       markNeedsLayout();
       return;
     }
@@ -749,7 +749,7 @@ class RenderMenu extends RenderBox
     _scroll = _scroll.clamp(0.0, _maxScroll).toDouble();
     final pending = _reveal;
     _reveal = null;
-    if (pending != null && pending >= 0 && pending < _items.length) _revealNow(pending, _revealCentred);
+    if (pending != null && pending >= 0 && pending < _items.length) _revealNow(pending, _revealCentered);
     _placeRows();
   }
 
@@ -842,7 +842,7 @@ class RenderMenu extends RenderBox
 /// One row of a [RenderMenu].
 class RenderMenuRow extends RenderBox
     with RenderObjectWithChildMixin<RenderIconGlyph>
-    implements MouseTrackerAnnotation, LabelledControl {
+    implements MouseTrackerAnnotation, LabeledControl {
   RenderMenuRow(this.index) {
     _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = ((_) => _setPressed(true))

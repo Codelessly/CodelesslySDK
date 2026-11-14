@@ -172,7 +172,7 @@ class RenderIconGlyph extends RenderBox with ImageClient {
     markNeedsLayout();
   }
 
-  /// Flutter's `Icon.size`: the glyph's extent, centred in the box (at
+  /// Flutter's `Icon.size`: the glyph's extent, centered in the box (at
   /// most the box); null: the glyph fills the box.
   double? _glyphSize;
   set glyphSize(double? v) {

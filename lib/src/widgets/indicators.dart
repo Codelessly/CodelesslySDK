@@ -93,7 +93,7 @@ void _transitioned(NodeBuilder b, Node n, List<RenderBox> chain, IndicatorPainte
 }
 
 /// A `CircularProgressIndicator`: SSUI's spinner (a 2 px arc in the
-/// primary colour, 16 px when it hugs) or a ring filled to its value, in a
+/// primary color, 16 px when it hugs) or a ring filled to its value, in a
 /// square of the box's shortest side; an arc painter when it has its own
 /// start or sweep.
 void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
@@ -107,7 +107,7 @@ void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
     }
   } else {
     // As it always laid out: a square of its design size (less padding),
-    // centred in what its parent gives it.
+    // centered in what its parent gives it.
     final inner = Size(
       (l.width.value - l.padding.horizontal).clamp(0, double.infinity),
       (l.height.value - l.padding.vertical).clamp(0, double.infinity),
@@ -144,7 +144,7 @@ void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
 
 /// An activity indicator (Flutter's `CupertinoActivityIndicator`): eight
 /// ticks stepping round, a square of twice its radius, in the secondary
-/// text colour unless it says.
+/// text color unless it says.
 void _activityIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
   final radius = n.prop(ActivityIndicatorProps.radius);
   if (radius <= 0) {

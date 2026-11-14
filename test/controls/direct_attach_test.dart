@@ -46,7 +46,7 @@ void main() {
     final pixel = await _pixel(tester, layer, const Size(400, 300), rectOf(tree, 'save').topLeft + const Offset(4, 14));
     expect(pixel, const Color(0xFF2563EB));
 
-    await tester.tapAt(centreOf(tree, 'cancel'));
+    await tester.tapAt(centerOf(tree, 'cancel'));
     await tester.pump();
     expect(recorded.fired, ['cancel click']);
 

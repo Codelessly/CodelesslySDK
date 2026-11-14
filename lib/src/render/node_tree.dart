@@ -437,7 +437,7 @@ class RenderTree {
   }
 
   /// Whether the screen is dark (the site's theme mode, the device's
-  /// setting): the controls take the theme's dark colours. A change
+  /// setting): the controls take the theme's dark colors. A change
   /// re-applies the boxes that drew with the theme.
   bool get dark => _dark;
   bool _dark = false;
@@ -447,13 +447,13 @@ class RenderTree {
     _themeChanged();
   }
 
-  /// Boxes that drew with [ComponentRegistry.theme] itself (colours a node
+  /// Boxes that drew with [ComponentRegistry.theme] itself (colors a node
   /// leaves unset that come from the theme's roles: an indicator's), noted
   /// by [dependOnTheme]: a change of theme (its mode) re-applies them. A
   /// node whose own values name the theme re-applies through its source.
   final Set<NodeBox> _themeDependents = {};
 
-  /// Notes that [builder]'s node is drawn with the theme's colours: it is
+  /// Notes that [builder]'s node is drawn with the theme's colors: it is
   /// drawn again when the theme changes.
   void dependOnTheme(NodeBuilder builder) {
     if (builder is NodeBox) _themeDependents.add(builder);
@@ -505,7 +505,7 @@ class RenderTree {
   }
 
   /// Whether a binding of [path] may give a value that names the theme
-  /// (a colour, a text style): not a text, the visibility or a list's data.
+  /// (a color, a text style): not a text, the visibility or a list's data.
   static bool _mayNameTheme(String path) =>
       path != api.BindPaths.visible && path != api.BindPaths.data && path != 'props.text' && !path.startsWith('state');
 
@@ -1092,7 +1092,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   static final Map<String, int> debugApplyCounts = {};
 
   /// Nodes whose bound change was drawn in place, without a re-apply (a
-  /// text's new text, a fill's new colour), while [debugCountApplies].
+  /// text's new text, a fill's new color), while [debugCountApplies].
   static final Map<String, int> debugInPlaceCounts = {};
   static bool debugCountApplies = false;
 

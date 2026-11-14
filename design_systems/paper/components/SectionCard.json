@@ -1,0 +1,161 @@
+{
+ "schema": 3,
+ "id": "SectionCard",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "SectionCard",
+  "doc": "A small titled section: an uppercase 11 px label over its content (the call's children), actions at the end of the header.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Details",
+    "doc": "The label (empty: no header)."
+   }
+  ],
+  "slots": [
+   "actions"
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Titled",
+   "size": [
+    280,
+    80
+   ],
+   "props": {
+    "title": "Details"
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "column",
+   "children": [
+    "header",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 80
+    },
+    "padding": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 2,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ]
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.level1}"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "title",
+    "actions"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "visible": "${= props.title != ''}"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.title)}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 700,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": 0.66
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "content": {
+   "type": "slot"
+  }
+ }
+}

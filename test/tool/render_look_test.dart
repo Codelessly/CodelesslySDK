@@ -18,7 +18,7 @@ void main() {
   setUp(() => out = Directory.systemTemp.createTempSync('render_look_test'));
   tearDown(() => out.deleteSync(recursive: true));
 
-  /// The background (paper) colour at the page's bottom left, as 0xRRGGBB.
+  /// The background (paper) color at the page's bottom left, as 0xRRGGBB.
   Future<int> paper(WidgetTester tester, String png) async => (await tester.runAsync(() async {
         final img = await decodePng(File('${out.path}/$png').readAsBytesSync());
         final i = ((img.height - 20) * img.width + 10) * 4;

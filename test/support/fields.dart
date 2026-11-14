@@ -34,7 +34,7 @@ Future<void> typeInto(WidgetTester tester, String text, {RenderTextField? field}
   await tester.pump();
 }
 
-/// Taps [field] at its text (its global centre).
+/// Taps [field] at its text (its global center).
 Future<void> tapField(WidgetTester tester, RenderTextField field) async {
   await tester.tapAt(field.localToGlobal(field.contentRect.center));
   await tester.pump();

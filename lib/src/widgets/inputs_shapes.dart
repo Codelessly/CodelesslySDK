@@ -26,7 +26,7 @@ class SignLineGeometry {
   final double markWidth, markHeight;
   final double markGap;
 
-  /// The mark is before the line, centred on it; else over its start.
+  /// The mark is before the line, centered on it; else over its start.
   final bool leadingMark;
   final bool showMark;
 

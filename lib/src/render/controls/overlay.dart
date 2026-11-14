@@ -22,7 +22,7 @@ abstract class RenderOverlayEntry extends RenderBox {
 }
 
 /// A tooltip's bubble: [message] in a pill above [anchor] (below when there
-/// is no room), centred on it and kept 8 px inside the root.
+/// is no room), centered on it and kept 8 px inside the root.
 class RenderTooltipBubble extends RenderOverlayEntry {
   RenderTooltipBubble({required this.anchor, required String message, required ControlTokens tokens})
       : _message = message, // ignore: prefer_initializing_formals

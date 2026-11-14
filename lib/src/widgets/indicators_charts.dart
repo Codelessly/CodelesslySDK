@@ -117,14 +117,14 @@ class ChartSeriesPainter extends NodePainter {
 
   double get _xAxisHeight => p(ChartProps.xAxisHeight);
 
-  /// The y of an x label's centre below a plot (or band) ending at [bottom]:
-  /// its top [ChartProps.xLabelGap] below, else centred in the band.
+  /// The y of an x label's center below a plot (or band) ending at [bottom]:
+  /// its top [ChartProps.xLabelGap] below, else centered in the band.
   double _xLabelY(double bottom, double textHeight) => switch (p(ChartProps.xLabelGap)) {
         final double gap => bottom + gap + textHeight / 2,
         null => bottom + _xAxisHeight / 2 + 2,
       };
 
-  /// The centre y of a horizontal line [width] thick for the value at [y]
+  /// The center y of a horizontal line [width] thick for the value at [y]
   /// ([ChartProps.gridLineMode]); [bottom] marks the plot's bottom line.
   double _lineY(double y, double width, {bool bottom = false}) => switch (p(ChartProps.gridLineMode)) {
         ChartGridLineMode.centered => y.roundToDouble() - (bottom ? 0.5 : 0),
@@ -233,7 +233,7 @@ class ChartSeriesPainter extends NodePainter {
     return (lo, lo + top, step);
   }
 
-  /// Paints [text] centred vertically on [anchor] (or, with [xAxisBottom],
+  /// Paints [text] centered vertically on [anchor] (or, with [xAxisBottom],
   /// as an x label below a plot ending there: see [_xLabelY]).
   void _label(Canvas canvas, String text, Offset anchor,
       {TextAlign align = TextAlign.center, TextStyle? style, double? xAxisBottom, double? bottomAt}) {
@@ -874,7 +874,7 @@ class PlotChartPainter extends NodePainter {
     void paintLabel(String label, double dx) {
       if (labelHeight <= 0 || label.isEmpty) return;
       final text = _text(label, labelStyle);
-      // Centred on its x, kept inside the chart (the last label sits at
+      // Centered on its x, kept inside the chart (the last label sits at
       // the right edge).
       final left = (dx - text.width / 2).clamp(0.0, math.max(0.0, size.width - text.width)).toDouble();
       text.paint(canvas, Offset(left, chartHeight + 3));
@@ -1186,7 +1186,7 @@ class PlotChartPainter extends NodePainter {
       if (marker.label.isEmpty) continue;
       final color = marker.color.flutter;
       final text = _text(marker.label, _style(markerStyle, color: color, weight: 700));
-      // Centred on the marker, kept over the plot (clear of the y-axis
+      // Centered on the marker, kept over the plot (clear of the y-axis
       // gutter's labels).
       final dx = (dot.dx - text.width / 2).clamp(gutter, math.max(gutter, size.width - text.width)).toDouble();
       final dy = switch (marker.position) {
@@ -1604,8 +1604,8 @@ class LineChartPainter extends NodePainter {
 
     final lineColor = c(LineChartProps.lineColor);
     final axisColor = c(LineChartProps.axisColor);
-    // Labels with no colour of their own (none set, none inherited) are in
-    // the axis colour: without one the engine drew them white, unseen.
+    // Labels with no color of their own (none set, none inherited) are in
+    // the axis color: without one the engine drew them white, unseen.
     TextStyle inked(TextStyle s) => s.color == null && s.foreground == null ? s.copyWith(color: axisColor) : s;
     final axisLabelStyle = inked(textStyle(p(LineChartProps.axisLabelStyle), n.behaviors.defaultTextStyle));
 

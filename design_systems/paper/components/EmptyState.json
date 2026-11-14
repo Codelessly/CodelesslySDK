@@ -1,0 +1,171 @@
+{
+ "schema": 3,
+ "id": "EmptyState",
+ "roots": [
+  "empty"
+ ],
+ "widget": {
+  "type": "EmptyState",
+  "doc": "What a list or page shows when there is nothing yet (or nothing found): icon, title, message and an action (the actions slot).",
+  "props": [
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "inbox",
+    "doc": "A Material icon name."
+   },
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Nothing here yet",
+    "doc": "The title.",
+    "required": true
+   },
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One or two sentences: what to do next."
+   }
+  ],
+  "slots": [
+   "actions"
+  ]
+ },
+ "previews": [
+  {
+   "name": "Empty",
+   "size": [
+    320,
+    200
+   ],
+   "props": {
+    "title": "No invoices yet",
+    "message": "Invoices appear here once you bill a customer."
+   }
+  }
+ ],
+ "nodes": {
+  "empty": {
+   "type": "column",
+   "children": [
+    "badge",
+    "title",
+    "message",
+    "actions"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 200
+    },
+    "padding": [
+     24,
+     32,
+     24,
+     32
+    ]
+   }
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "glyph"
+   ],
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 40,
+    "height": 40,
+    "margin": [
+     0,
+     0,
+     0,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ],
+    "radius": 20
+   }
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "inbox",
+    "color": "secondaryText",
+    "size": 20
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "sectionTitle",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${props.message}",
+    "style": "bodySecondary",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "bind": {
+    "visible": "${= props.message != ''}"
+   }
+  },
+  "actions": {
+   "type": "slot",
+   "props": {
+    "name": "actions"
+   }
+  }
+ }
+}

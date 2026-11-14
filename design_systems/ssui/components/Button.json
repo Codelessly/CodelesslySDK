@@ -32,7 +32,7 @@
      ]
     },
     "default": "primary",
-    "doc": "primary fills with the brand colour; secondary a strong neutral; outline a hairline; ghost nothing; destructive red."
+    "doc": "primary fills with the brand color; secondary a strong neutral; outline a hairline; ghost nothing; destructive red."
    },
    {
     "key": "size",
@@ -139,7 +139,7 @@
    },
    "bind": {
     "layout.padding": "${= props.size == 'xs' ? [8, 0, 8, 0] : (props.size == 'compact' ? [10, 0, 10, 0] : (props.size == 'small' ? [12, 0, 12, 0] : (props.size == 'medium' ? [12, 0, 12, 0] : ([14, 0, 14, 0]))))}",
-    "decoration.radius": "${= props.size == 'xs' ? 5 : (props.size == 'compact' ? 7 : (props.size == 'small' ? 7 : (props.size == 'medium' ? 7 : (7))))}",
+    "decoration.radius": "${= props.size == 'xs' ? theme.radii.inner : theme.radii.control}",
     "decoration.fills[0].color": "${= props.variant == 'primary' ? theme.primary : (props.variant == 'secondary' ? theme.colors.neutralFill : (props.variant == 'destructive' ? theme.error : '#00000000'))}",
     "decoration.strokes[0].color": "${= props.variant == 'outline' ? theme.colors.primaryBorder : '#00000000'}",
     "disabled": "${= !props.enabled}"

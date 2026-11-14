@@ -54,7 +54,7 @@ List<(_RowKey, Json)> _keyed(
 }
 
 Object? _category(Json row, String field, int index) =>
-    row.containsKey(field) ? '${row[field]}' : ('unlabelled', index);
+    row.containsKey(field) ? '${row[field]}' : ('unlabeled', index);
 
 Set<String> _seriesFields(Node n) {
   if (n.prop(ChartProps.chartType) == ChartType.timeline) {
@@ -140,7 +140,7 @@ bool _sameModel(Node from, Node to) =>
       _ => false,
     };
 
-/// Only changes to plotted numeric values start a timeline. Labels, colours,
+/// Only changes to plotted numeric values start a timeline. Labels, colors,
 /// bounds, cursor positions and overlays' cosmetics apply immediately.
 bool chartDataChanges(Node from, Node to) {
   if (!_sameModel(from, to)) return false;

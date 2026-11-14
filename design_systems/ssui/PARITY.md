@@ -7,7 +7,7 @@ library."
 The source is `Researchy/soft_saas_ui/src/components` (164 components) with `SSUI_PATTERNS.md`. A component is
 **here** when the SDK draws it from SSUI's own values: as a control the tree draws (a render object) or as a
 document in `components/` written by `tool/generate.py`. Each new one is built from the source file's numbers
-(sizes, radii, paddings, type, colours by token), rendered, and looked at beside the source.
+(sizes, radii, paddings, type, colors by token), rendered, and looked at beside the source.
 
 **Here: 44. Still to rebuild: 120.**
 

@@ -40,7 +40,7 @@ void main() {
     expect(s.size, const Size(200, 28));
     expect(s.trackRect, const Rect.fromLTWH(0, 11, 200, 6));
     expect(s.thumbSize, const Size(14, 14));
-    expect(s.thumbCentre, const Offset(100, 14));
+    expect(s.thumbCenter, const Offset(100, 14));
     expect(s.activeTrackColor, const Color(0xFF2563EB));
     expect(s.inactiveTrackColor, const Color(0xFFD1D5DB));
     expect(s.thumbShadows, isEmpty, reason: 'no thumb shadow');
@@ -56,7 +56,7 @@ void main() {
   testWidgets('a drag moves the value with the pointer, snapping to divisions; changed then changeEnd', (tester) async {
     final (tree, recorded) = await _show(tester, {'s': _node({'value': 0, 'max': 10, 'divisions': 10})});
     final s = _slider(tree);
-    final start = s.localToGlobal(s.thumbCentre);
+    final start = s.localToGlobal(s.thumbCenter);
     // The thumb travels 186 px for 10: 18.6 px a division.
     await tester.dragFrom(start, const Offset(60, 0));
     await tester.pump();
@@ -115,7 +115,7 @@ void main() {
     await tester.tapAt(v.localToGlobal(const Offset(14, 7 + 186 * .25)));
     await tester.pump();
     expect(v.value, closeTo(.75, .01), reason: 'a quarter down is three quarters up');
-    expect(i.thumbCentre.dx, closeTo(7 + 186 * .75, .01));
+    expect(i.thumbCenter.dx, closeTo(7 + 186 * .75, .01));
   });
 
   testWidgets('hovering shows SSUI\'s primary halo round the thumb', (tester) async {
@@ -124,7 +124,7 @@ void main() {
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset.zero);
     addTearDown(mouse.removePointer);
-    await mouse.moveTo(s.localToGlobal(s.thumbCentre));
+    await mouse.moveTo(s.localToGlobal(s.thumbCenter));
     await tester.pump();
     expect(s.haloShown, isTrue);
     expect(s, paints..rrect()..rrect()..circle(radius: 12, color: const Color(0x1F2563EB)));
@@ -137,7 +137,7 @@ void main() {
     });
     final s = _slider(tree);
     final root = tester.renderObject<RenderControlRoot>(find.byType(NodeView));
-    final gesture = await tester.startGesture(s.localToGlobal(s.thumbCentre));
+    final gesture = await tester.startGesture(s.localToGlobal(s.thumbCenter));
     await gesture.moveBy(const Offset(40, 0));
     await tester.pump();
     await tester.pump();
@@ -173,7 +173,7 @@ void main() {
     tree.setState('s', api.WidgetState.disabled, true);
     await tester.pump();
     final s = _slider(tree);
-    await tester.dragFrom(s.localToGlobal(s.thumbCentre), const Offset(40, 0));
+    await tester.dragFrom(s.localToGlobal(s.thumbCenter), const Offset(40, 0));
     await tester.pump();
     expect(recorded.fired, isEmpty);
     expect(s.paintedAlpha, 128);

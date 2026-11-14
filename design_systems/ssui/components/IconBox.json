@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "IconBox",
-  "doc": "A tinted square holding an icon, for a dialog or card header: 30 px, radius 7, the brand colour at 10 %.",
+  "doc": "A tinted square holding an icon, for a dialog or card header: 30 px, radius 7, the brand color at 10 %.",
   "props": [
    {
     "key": "icon",

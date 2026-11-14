@@ -78,7 +78,7 @@ void _master() {
 
 // A state style may replace a node's binding (`bind` in the patch): a card
 // whose border is bound to its selection keeps that rule while hovered,
-// with the hover colour as the fallback, as Flutter code writes
+// with the hover color as the fallback, as Flutter code writes
 // `selected ? accent : (hover ? strong : line)`.
 
 Map<String, Json> nodes({bool dragged = false}) => {

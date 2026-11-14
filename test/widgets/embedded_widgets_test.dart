@@ -256,9 +256,9 @@ void main() {
     })));
     addTearDown(tree.dispose);
     await tester.pumpWidget(_app(tree));
-    Offset centre(String id) => tree.boxOf(id)!.localToGlobal(tree.boxOf(id)!.size.center(Offset.zero));
+    Offset center(String id) => tree.boxOf(id)!.localToGlobal(tree.boxOf(id)!.size.center(Offset.zero));
     expect(_picker(tree, 'date').shown, '2024-05-17');
-    await tester.tapAt(centre('date'));
+    await tester.tapAt(center('date'));
     await tester.pump();
     final calendar = _picker(tree, 'date').panel!.calendar!;
     final cell = [for (var i = 0; i < 42; i++) i].firstWhere((i) => calendar.dayAt(i)?.day == 20);
@@ -267,7 +267,7 @@ void main() {
     expect(_picker(tree, 'date').open, isFalse);
     expect(_picker(tree, 'date').shown, '2024-05-20');
 
-    await tester.tapAt(centre('time'));
+    await tester.tapAt(center('time'));
     await tester.pump();
     final time = _picker(tree, 'time').panel!.time!;
     await tester.tapAt(time.localToGlobal(time.footerRects.cancel.center));

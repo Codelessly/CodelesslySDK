@@ -104,7 +104,7 @@ class NavigationBarSpec {
   final ControlTokens tokens;
   final List<NavItem> items;
 
-  /// A `bottomNavigationBar` (no indicator colour of its own).
+  /// A `bottomNavigationBar` (no indicator color of its own).
   final bool bottom;
   final bool shifting;
   final Color? background;
@@ -173,7 +173,7 @@ class NavigationBarSpec {
 
 /// A navigation bar: its items, the selected one on SSUI's tint, in the
 /// states [RenderItemBar] resolves.
-class RenderNavigationBar extends RenderItemBar implements LabelledControl {
+class RenderNavigationBar extends RenderItemBar implements LabeledControl {
   RenderNavigationBar();
 
   final List<ControlLabel> _labels = [];
@@ -360,7 +360,7 @@ class RenderNavigationBar extends RenderItemBar implements LabelledControl {
 
   bool _labelShown(int i) => spec.showsLabel(i == selectedIndex) && spec.items[i].label.isNotEmpty;
 
-  double _labelCentre(int i) => _labelTops[i] + _lineHeight(i) / 2;
+  double _labelCenter(int i) => _labelTops[i] + _lineHeight(i) / 2;
 
   double _labelLeft(int i) => _items[i].center.dx - _labels[i].size.width / 2;
 
@@ -370,10 +370,10 @@ class RenderNavigationBar extends RenderItemBar implements LabelledControl {
       : [
           for (var i = 0; i < itemCount && i < _items.length; i++)
             if (_labelShown(i))
-              (text: spec.items[i].label, fontFamily: _labels[i].fontFamily, glyphs: _labels[i].glyphBoxes(_labelLeft(i), _labelCentre(i))),
+              (text: spec.items[i].label, fontFamily: _labels[i].fontFamily, glyphs: _labels[i].glyphBoxes(_labelLeft(i), _labelCenter(i))),
         ];
 
-  // --- colours ---------------------------------------------------------------------------
+  // --- colors ---------------------------------------------------------------------------
 
   /// The bar's fill now.
   Color get backgroundColor {
@@ -399,7 +399,7 @@ class RenderNavigationBar extends RenderItemBar implements LabelledControl {
     return item.iconColor ?? s.iconColor ?? labelColorOf(i);
   }
 
-  /// The selected item's pill colour.
+  /// The selected item's pill color.
   Color get indicatorColor => spec.indicatorColor ?? _t.activeTint;
 
   @override
@@ -436,7 +436,7 @@ class RenderNavigationBar extends RenderItemBar implements LabelledControl {
       if (_labelShown(i)) {
         _labels[i].update(spec.items[i].label, _style(i, labelColorOf(i)));
         _labels[i].layout(math.max(0, _items[i].width - _itemPadding.horizontal));
-        _labels[i].paint(canvas, offset.dx + _labelLeft(i), offset.dy + _labelCentre(i));
+        _labels[i].paint(canvas, offset.dx + _labelLeft(i), offset.dy + _labelCenter(i));
       }
     }
     glyphs.paint(context, offset);

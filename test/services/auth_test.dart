@@ -16,12 +16,12 @@ void main() {
 
     test('a guest is not signed in but has an id, a profile and a role', () {
       const guest = AppUser(uid: 'g1', isAnonymous: true, isGuest: true);
-      final value = authValue(guest, profile: {'favourites': ['a']});
+      final value = authValue(guest, profile: {'favorites': ['a']});
       expect(value['isSignedIn'], false);
       expect(value['isGuest'], true);
       expect(value['uid'], 'g1');
       expect(value['role'], 'guest');
-      expect(value['profile'], {'favourites': ['a']});
+      expect(value['profile'], {'favorites': ['a']});
       expect(authValue(const AppUser(uid: 'anon', isAnonymous: true))['isGuest'], false);
       expect(AuthProfiles.hasProfile(guest), isTrue);
       expect(AuthProfiles.hasProfile(const AppUser(uid: 'anon', isAnonymous: true)), isFalse);

@@ -4,7 +4,7 @@
 // no tools, and the answer drawn by this renderer through
 // package:codelessly_api's A2UI front end. The answer's
 // text is saved delta by delta with its timing, then expanded, validated
-// and summarised (prompt and output tokens, time to first token and to the
+// and summarized (prompt and output tokens, time to first token and to the
 // end, nodes, what the notation could not read, validation errors).
 //
 //   ANTHROPIC_API_KEY=... dart run tool/record_a2ui.dart --ui approval \

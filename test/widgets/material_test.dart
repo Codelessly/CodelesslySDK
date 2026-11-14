@@ -83,7 +83,7 @@ void main() {
     expect(r['lead']!.size, const Size(24, 24));
     expect(r['lead']!.left, 16);
     expect(r['title']!.left, greaterThan(r['lead']!.right));
-    // The slots are centred on the tile (render/controls/tile.dart), not on
+    // The slots are centered on the tile (render/controls/tile.dart), not on
     // Material's own 56 px row.
     expect(r['title']!.center.dy, closeTo(36, 1));
     expect(r['lead']!.center.dy, closeTo(36, 1));

@@ -1,7 +1,7 @@
 // Chips and badges as render objects (render/controls/chips.dart): SSUI's
 // look with nothing styled, the check mark's room kept so selecting never
 // resizes a chip, the delete icon, selection by prop and by tap (written
-// back), the label centred, the keyboard, screen readers, and the badge
+// back), the label centered, the keyboard, screen readers, and the badge
 // alone and over a child.
 import 'dart:ui' show Tristate;
 
@@ -41,8 +41,8 @@ Future<(NodeTree, RecordedInteractions)> _show(WidgetTester tester, Map<String, 
   return (tree, recorded);
 }
 
-/// Each label glyph's centre, minus the chip's centre (x, y).
-Offset _labelOffCentre(RenderTree tree, String id) {
+/// Each label glyph's center, minus the chip's center (x, y).
+Offset _labelOffCenter(RenderTree tree, String id) {
   final c = _chip(tree, id);
   final glyphs = c.labels.single.glyphs;
   final left = glyphs.map((g) => g.left).reduce((a, b) => a < b ? a : b);
@@ -54,7 +54,7 @@ Offset _labelOffCentre(RenderTree tree, String id) {
 
 void main() {
   group('with nothing styled', () {
-    testWidgets('each chip is SSUI\'s: a 24 px pill as wide as its content, tinted fill, hairline, label centred',
+    testWidgets('each chip is SSUI\'s: a 24 px pill as wide as its content, tinted fill, hairline, label centered',
         (tester) async {
       final (tree, _) = await _show(tester, {
         for (final type in ['chip', 'actionChip', 'choiceChip', 'filterChip', 'inputChip']) type: {'type': type, 'props': {'label': 'Design'}},
@@ -66,9 +66,9 @@ void main() {
         expect(c.fillColor, const Color(0xFFF3F4F6), reason: '$type: SSUI\'s tertiaryBackground');
         expect(c.borderSide.color, const Color(0xFFE5E7EB), reason: '$type: SSUI\'s primaryBorder');
         expect(c.labelColor, const Color(0xFF111827));
-        // An input chip centres its label and x together.
-        expect(_labelOffCentre(tree, type).dx.abs(), lessThan(type == 'inputChip' ? 9.5 : .75), reason: '$type: label centred');
-        expect(_labelOffCentre(tree, type).dy.abs(), lessThan(.75), reason: '$type: label centred');
+        // An input chip centers its label and x together.
+        expect(_labelOffCenter(tree, type).dx.abs(), lessThan(type == 'inputChip' ? 9.5 : .75), reason: '$type: label centered');
+        expect(_labelOffCenter(tree, type).dy.abs(), lessThan(.75), reason: '$type: label centered');
       }
       // A plain chip and an action chip are the label in SSUI's padding.
       final plain = rectOf(tree, 'chip').width;
@@ -90,7 +90,7 @@ void main() {
     });
   });
 
-  testWidgets('selecting never resizes a chip: the check mark\'s room is kept, and what shows stays centred', (tester) async {
+  testWidgets('selecting never resizes a chip: the check mark\'s room is kept, and what shows stays centered', (tester) async {
     final (tree, _) = await _show(tester, {
       'off': {'type': 'filterChip', 'props': {'label': 'Engineering'}},
       'on': {'type': 'filterChip', 'props': {'label': 'Engineering', 'selected': true}},
@@ -101,8 +101,8 @@ void main() {
     final on = _chip(tree, 'on'), off = _chip(tree, 'off');
     expect(on.showsCheck, isTrue);
     expect(off.showsCheck, isFalse);
-    expect(_labelOffCentre(tree, 'off').dx.abs(), lessThan(.75), reason: 'unselected: the label alone, centred');
-    // Selected: the check and the label together, centred.
+    expect(_labelOffCenter(tree, 'off').dx.abs(), lessThan(.75), reason: 'unselected: the label alone, centered');
+    // Selected: the check and the label together, centered.
     final glyphs = on.labels.single.glyphs;
     final right = glyphs.map((g) => g.right).reduce((a, b) => a > b ? a : b);
     final left = on.leadRect.left;
@@ -128,14 +128,14 @@ void main() {
       'f': {'type': 'filterChip', 'props': {'label': 'North'}},
     });
     final c = _chip(tree, 'f');
-    await tester.tapAt(centreOf(tree, 'f'));
+    await tester.tapAt(centerOf(tree, 'f'));
     await tester.pump();
     expect(c.selected, isTrue, reason: 'an unbound chip toggles itself');
     expect(recorded.fired, ['f changed', 'f click']);
     expect(c.stateValue(api.WidgetState.selected), lessThan(1), reason: 'easing in');
     await tester.pump(const Duration(milliseconds: 200));
     expect(c.stateValue(api.WidgetState.selected), 1);
-    await tester.tapAt(centreOf(tree, 'f'));
+    await tester.tapAt(centerOf(tree, 'f'));
     await tester.pump();
     expect(c.selected, isFalse);
   });
@@ -145,8 +145,8 @@ void main() {
       'label': {'type': 'chip', 'props': {'label': 'Tag'}},
       'act': {'type': 'actionChip', 'props': {'label': 'Run'}},
     });
-    await tester.tapAt(centreOf(tree, 'label'));
-    await tester.tapAt(centreOf(tree, 'act'));
+    await tester.tapAt(centerOf(tree, 'label'));
+    await tester.tapAt(centerOf(tree, 'act'));
     expect(recorded.fired, ['act click']);
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
@@ -177,7 +177,7 @@ void main() {
     final (tree, recorded) = await _show(tester, {
       'f': {'type': 'filterChip', 'props': {'label': 'Off', 'isEnabled': false}},
     });
-    await tester.tapAt(centreOf(tree, 'f'));
+    await tester.tapAt(centerOf(tree, 'f'));
     expect(recorded.fired, isEmpty);
     expect(_chip(tree, 'f').paintedAlpha, 128);
   });
@@ -190,13 +190,13 @@ void main() {
     final mouse = await tester.createGesture(kind: PointerDeviceKind.mouse);
     await mouse.addPointer(location: Offset.zero);
     addTearDown(mouse.removePointer);
-    await mouse.moveTo(centreOf(tree, 'a'));
+    await mouse.moveTo(centerOf(tree, 'a'));
     await tester.pump();
     expect(_chip(tree, 'a').stateOverlay, const Color(0x0A000000));
     expect(rectOf(tree, 'a'), before);
   });
 
-  testWidgets('own colours, side and shape apply over SSUI\'s', (tester) async {
+  testWidgets('own colors, side and shape apply over SSUI\'s', (tester) async {
     final (tree, _) = await _show(tester, {
       'c': {
         'type': 'choiceChip',
@@ -244,10 +244,10 @@ void main() {
       expect(_find<RenderBadge>(tree, 'count').label, '999+');
       final glyphs = b.labels.single.glyphs;
       final mid = (glyphs.first.left + glyphs.last.right) / 2;
-      expect((mid - b.size.width / 2).abs(), lessThan(.75), reason: 'label centred');
+      expect((mid - b.size.width / 2).abs(), lessThan(.75), reason: 'label centered');
     });
 
-    testWidgets('over a child it is Flutter\'s: a count or a dot in the error colour at the corner', (tester) async {
+    testWidgets('over a child it is Flutter\'s: a count or a dot in the error color at the corner', (tester) async {
       final (tree, _) = await _show(tester, {
         'b': {'type': 'badge', 'slots': {'child': 'box'}, 'props': {'count': 3}},
         'box': {'type': 'box', 'layout': {'width': 32, 'height': 24}},

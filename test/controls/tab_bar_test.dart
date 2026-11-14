@@ -1,7 +1,7 @@
 // Tab bars as render objects (render/controls/tab_bar.dart): SSUI's Tabs
 // with nothing styled, the selected indicator moving between tabs on the
 // bar's ticker, the keyboard (Left/Right, Home/End, Enter/Space, the focus
-// ring), labels centred, scrolling when the tabs overflow, screen readers
+// ring), labels centered, scrolling when the tabs overflow, screen readers
 // (a tab bar of tabs, each selected or not), `changed` and its write-back,
 // `tabs` switching its child, and a pixel match to SSUI's own Tabs.
 import 'dart:io';
@@ -92,7 +92,7 @@ void main() {
       expect(bar.indicatorColor, const Color(0xFF3B82F6));
     });
 
-    testWidgets('every label is centred in the bar, at 36 and at 48 high, with icons too', (tester) async {
+    testWidgets('every label is centered in the bar, at 36 and at 48 high, with icons too', (tester) async {
       final (tree, _) = await _show(tester, {
         'a': _tabBar({'tabs': _three}),
         'b': {
@@ -114,7 +114,7 @@ void main() {
           expect((top + bottom) / 2, closeTo(bar.size.height / 2, .75), reason: '$id ${l.text}');
         }
       }
-      // An icon beside its label, the pair centred in the tab.
+      // An icon beside its label, the pair centered in the tab.
       final b = _bar(tree, 'b');
       final glyph = b.glyphs.glyphs.first;
       final icon = glyph.localToGlobal(Offset.zero) - b.localToGlobal(Offset.zero) & glyph.size;
@@ -253,7 +253,7 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('the node\'s props are over SSUI\'s: colours, a filled indicator, a tab-wide one, fill alignment', (tester) async {
+  testWidgets('the node\'s props are over SSUI\'s: colors, a filled indicator, a tab-wide one, fill alignment', (tester) async {
     final (tree, _) = await _show(tester, {
       'bar': _tabBar({
         'tabs': _three,
@@ -352,7 +352,7 @@ void main() {
           final frame = await codec.getNextFrame();
           return (await frame.image.toByteData(format: ui.ImageByteFormat.rawStraightRgba))!.buffer.asUint8List();
         }))!;
-        // Both on the same page colour (SSUI's component has no fill).
+        // Both on the same page color (SSUI's component has no fill).
         final page = dark ? const [0x1C, 0x1C, 0x1C] : const [0xF9, 0xFA, 0xFB];
         int over(List<int> px, int i, int c) => ((px[i + c] * px[i + 3] + page[c] * (255 - px[i + 3])) / 255).round();
         var differing = 0;

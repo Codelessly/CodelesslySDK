@@ -99,7 +99,7 @@ final Map<(api.ThemeTokens, Brightness, Color?), ThemeData> _made = {};
 /// | `error` | `tokens.error`, else a neutral red |
 ///
 /// Filled buttons and floating action buttons fill with `tokens.primary` as
-/// it is (ink without one), labelled in `onPrimary` (else ink or paper,
+/// it is (ink without one), labeled in `onPrimary` (else ink or paper,
 /// whichever reads). No splashes, no elevation unless a node sets one, no
 /// tints. Text takes `tokens.fontFamily` (titles `tokens.titleFontFamily`),
 /// else no family at all, as text nodes do.
@@ -152,7 +152,7 @@ TextTheme _colorOnly(Color color) {
 }
 
 ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdrop) {
-  // A role that names a theme colour (`"primary": "forest"`) is that colour.
+  // A role that names a theme color (`"primary": "forest"`) is that color.
   tokens = tokens.resolvedRoles();
   final surface = backdrop ?? colorOf(tokens.surface) ?? (requested == Brightness.dark ? kPaperDark : kPaper);
   final brightness = ThemeData.estimateBrightnessForColor(surface);
@@ -291,7 +291,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     useMaterial3: true,
     // A control fits the node it is drawn in: no 48 px tap-target margin
     // around it and no platform density, so a 28 or 32 px node shows the
-    // whole control with its label centred, never a taller control cut or
+    // whole control with its label centered, never a taller control cut or
     // shifted.
     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     visualDensity: VisualDensity.standard,

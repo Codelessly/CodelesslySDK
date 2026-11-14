@@ -25,7 +25,7 @@ class ControlScale {
   final String name;
   final double height;
 
-  /// Horizontal padding of a labelled control (SSUI's `paddingX + 2`).
+  /// Horizontal padding of a labeled control (SSUI's `paddingX + 2`).
   final double paddingX;
   final double fontSize;
   final double iconSize;
@@ -144,7 +144,7 @@ class ControlTokens {
     final backdrop = parent == null ? null : backdropOf(b.source.node, b.source.parentOf, parent);
     // On a band whose brightness is not the screen's (a dark hero on a light
     // page, a light card on a dark one), the control is drawn for the band:
-    // its neutral colours are made from what it sits on.
+    // its neutral colors are made from what it sits on.
     if (backdrop != null && backdrop.a > .9 && (backdrop.computeLuminance() < .18) != b.tree.dark) {
       final onBand = b.tree.theme.mergedWith(api.ThemeTokens(surface: api.Color(backdrop.toARGB32()), colors: const {}));
       final t = ControlTokens.resolve(_withoutOnSurface(onBand), dark: backdrop.computeLuminance() < .18, backdrop: backdrop);
@@ -242,7 +242,7 @@ class ControlTokens {
   /// A radius from the theme's `radii`, else [fallback].
   double radius(String name, double fallback) => theme.radii[name] ?? fallback;
 
-  /// A label colour that reads on [fill] when the theme's choice does not.
+  /// A label color that reads on [fill] when the theme's choice does not.
   Color readableOn(Color fill, Color preferred) =>
       fill.a < .9 || contrastRatio(preferred, fill) >= 3 ? preferred : onColor(fill, preferred: [preferred]);
 

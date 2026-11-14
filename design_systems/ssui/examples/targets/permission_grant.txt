@@ -1,0 +1,39 @@
+state status="request"
+state scope="folder"
+Card gap:10
+  Row gap:10 top
+    Box w:30 h:30 radius:7 fill:#1AEA580C center middle
+      Icon "key" {"props": {"size": 15, "color": "#FFEA580C"}}
+    Column gap:1 grow
+      Text.sectionTitle "Allow the assistant to read your files?"
+      Text.bodySecondary "Needed to answer questions about your reports"
+  Text.fieldLabel "IT WILL BE ABLE TO"
+  Column gap:6
+    Row gap:8 top
+      Icon "check" {"props": {"size": 14, "color": "#FF16A34A"}}
+      Text "Read files and their names"
+    Row gap:8 top
+      Icon "check" {"props": {"size": 14, "color": "#FF16A34A"}}
+      Text "Search inside documents"
+    Row gap:8 top
+      Icon "close" {"props": {"size": 14, "color": "#FFDC2626"}}
+      Text.muted "Change, move or delete anything"
+  Text.fieldLabel "WHERE"
+  SegmentedButton items:["folder","drive"] =scope
+  Text.bodySecondary "{scope=="folder" ? "Only Reports / 2026 (214 files)" : "Everything in your drive (about 12,400 files)"}"
+  Divider
+  if status=="request"
+    Row end gap:6
+      Button.ghost "Deny" -> status="denied"; emit deny
+      Button "Allow" -> status="granted"; emit allow scope
+  if status=="granted"
+    Row gap:8
+      Icon "check_circle" {"props": {"size": 16, "color": "#FF16A34A"}}
+      Text.strong "Read access granted"
+      Text.bodySecondary "{scope=="folder" ? "Reports / 2026" : "Whole drive"}"
+      Spacer grow
+      Button.ghost "Revoke" -> status="request"; emit revoke
+  if status=="denied"
+    Row gap:8
+      Icon "block" {"props": {"size": 16, "color": "#FF9CA3AF"}}
+      Text.bodySecondary "Access denied. The assistant cannot see your files."

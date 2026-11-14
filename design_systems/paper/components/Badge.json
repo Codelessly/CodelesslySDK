@@ -1,0 +1,189 @@
+{
+ "schema": 3,
+ "id": "Badge",
+ "roots": [
+  "badge"
+ ],
+ "widget": {
+  "type": "Badge",
+  "doc": "A small status or count label: tinted, 20 px high, radius 5 (a pill for counts), as wide as its text.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Badge",
+    "doc": "The text.",
+    "required": true
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "neutral",
+      "primary",
+      "success",
+      "warning",
+      "error",
+      "info"
+     ]
+    },
+    "default": "neutral",
+    "doc": "neutral, primary, success, warning, error or info: a 10 % tint, a matching hairline, the tone's ink."
+   },
+   {
+    "key": "dot",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A 6 px dot of the tone before the text (a status)."
+   },
+   {
+    "key": "pill",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Fully rounded (a count); rounded corners (radius 5) otherwise."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Success",
+   "size": [
+    80,
+    20
+   ],
+   "props": {
+    "label": "Paid",
+    "tone": "success"
+   }
+  },
+  {
+   "name": "Neutral",
+   "size": [
+    80,
+    20
+   ],
+   "props": {
+    "label": "Draft"
+   }
+  }
+ ],
+ "nodes": {
+  "badge": {
+   "type": "row",
+   "children": [
+    "strut",
+    "badgeContent"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 48
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "neutralTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "neutralTintBorder"
+     }
+    ],
+    "radius": 1
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.tone == 'neutral' ? theme.colors.neutralTint : (props.tone == 'primary' ? theme.colors.primaryTint : (props.tone == 'success' ? theme.colors.successTint : (props.tone == 'warning' ? theme.colors.warningTint : (props.tone == 'error' ? theme.colors.errorTint : theme.colors.infoTint))))}",
+    "decoration.strokes[0].color": "${= props.tone == 'neutral' ? theme.colors.neutralTintBorder : (props.tone == 'primary' ? theme.colors.primaryTintBorder : (props.tone == 'success' ? theme.colors.successTintBorder : (props.tone == 'warning' ? theme.colors.warningTintBorder : (props.tone == 'error' ? theme.colors.errorTintBorder : theme.colors.infoTintBorder))))}",
+    "decoration.radius": "${= props.pill ? 10 : 5}"
+   }
+  },
+  "strut": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 20
+   }
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "secondaryText"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "visible": "${props.dot}",
+    "decoration.fills[0].color": "${= props.tone == 'neutral' ? theme.colors.secondaryText : (props.tone == 'primary' ? theme.primary : (props.tone == 'success' ? theme.success : (props.tone == 'warning' ? theme.warning : (props.tone == 'error' ? theme.error : theme.colors.info))))}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "badge"
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.tone == 'neutral' ? theme.colors.secondaryText : (props.tone == 'primary' ? theme.primary : (props.tone == 'success' ? theme.success : (props.tone == 'warning' ? theme.warning : (props.tone == 'error' ? theme.error : theme.colors.info))))}"
+   }
+  },
+  "badgeContent": {
+   "type": "row",
+   "children": [
+    "dot",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

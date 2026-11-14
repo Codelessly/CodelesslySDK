@@ -219,7 +219,7 @@ class TileMetrics {
   final EdgeInsets padding;
   final double gap, minHeight, minVerticalPadding, minLeadingWidth, subtitleGap;
 
-  /// The slots sit at the top (bottom) of a taller row, not centred.
+  /// The slots sit at the top (bottom) of a taller row, not centered.
   final bool top, bottom;
 }
 
@@ -229,7 +229,7 @@ typedef TileHeader = ({Size size, Rect? chevron});
 
 /// Lays out a tile's [slots] (by name: leading, title, subtitle, trailing)
 /// as Flutter's `ListTile` places them, in SSUI's metrics: leading, then the
-/// title over the subtitle taking what is left, then trailing; each centred
+/// title over the subtitle taking what is left, then trailing; each centered
 /// on the row (or at its top or bottom). A [chevron] square of that side
 /// goes first ([chevronLeading]) or last, [m]'s gap from the slots. The
 /// children's offsets are set relative to [origin]; the width is
@@ -446,7 +446,7 @@ class RenderListTile extends RenderControl
     return fill;
   }
 
-  /// The overlay of its state now (hover, press, a focus colour), if any.
+  /// The overlay of its state now (hover, press, a focus color), if any.
   Color? get stateOverlay {
     if (!_interactive) return null;
     final s = spec, t = s.tokens;

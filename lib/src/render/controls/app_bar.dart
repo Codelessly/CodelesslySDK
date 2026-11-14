@@ -3,7 +3,7 @@
 // `appBar` slot (render/layout/scaffold_slots.dart: across the top at its
 // own height, the body below); the bar lays out its own slots as
 // Flutter's `NavigationToolbar` does: the leading icon at the start, the
-// actions at the end, the title after the leading icon (or centred).
+// actions at the end, the title after the leading icon (or centered).
 // Unstyled it is SSUI's top bar:
 //
 // | Part | SSUI | Prop over it |
@@ -125,7 +125,7 @@ class AppBarSpec {
 }
 
 /// An app bar: its fill, its leading icon, title and actions.
-class RenderAppBar extends RenderBox implements LabelledControl {
+class RenderAppBar extends RenderBox implements LabeledControl {
   RenderAppBar();
 
   final ControlLabel _title = ControlLabel();
@@ -259,7 +259,7 @@ class RenderAppBar extends RenderBox implements LabelledControl {
     _title.update(spec.title, _titleStyle(const Color(0xFF000000)));
     _title.layout(math.max(0, titleEnd - start));
     if (spec.centerTitle) {
-      // Centred on the bar, kept between the leading icon and the actions.
+      // Centered on the bar, kept between the leading icon and the actions.
       final w = _title.size.width;
       _titleLeft = (width / 2 - w / 2).clamp(start, math.max(start, titleEnd - w));
     } else {

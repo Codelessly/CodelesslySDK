@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "StatTile",
-  "doc": "A dashboard figure: a small labelled icon line over a large value, in a bordered tile.",
+  "doc": "A dashboard figure: a small labeled icon line over a large value, in a bordered tile.",
   "props": [
    {
     "key": "label",

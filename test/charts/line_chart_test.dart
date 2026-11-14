@@ -324,8 +324,8 @@ void main() {
     testWidgets('a reference line can carry a label', (tester) async {
       final plain = await _referencePaintOf(tester, {'y': 63.4, 'color': '#FFC0392B'});
       expect(plain, paintsExactlyCountTimes(#drawParagraph, 0));
-      final labelled = await _referencePaintOf(tester, {'y': 63.4, 'color': '#FFC0392B', 'label': '2022 63.4%'});
-      expect(labelled, paintsExactlyCountTimes(#drawParagraph, 1));
+      final labeled = await _referencePaintOf(tester, {'y': 63.4, 'color': '#FFC0392B', 'label': '2022 63.4%'});
+      expect(labeled, paintsExactlyCountTimes(#drawParagraph, 1));
     });
   });
 
@@ -369,7 +369,7 @@ void main() {
       });
       final (w, px) = await _render(tester, chart);
       expect(tester.takeException(), isNull);
-      // The lines stop at the last point (02:20): no series colour further right
+      // The lines stop at the last point (02:20): no series color further right
       // than the end labels.
       bool blue(int x) {
         for (var y = 5; y < 150; y++) {

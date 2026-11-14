@@ -25,7 +25,7 @@ void main() {
     return (report, pixels, boxes);
   }
 
-  testWidgets('a line chart with no axisLabelStyle draws its tick labels in a visible colour', (tester) async {
+  testWidgets('a line chart with no axisLabelStyle draws its tick labels in a visible color', (tester) async {
     final (_, p, boxes) = await render(tester);
     final chart = boxes.firstWhere((b) => b['id'] == 'lineChart');
     // Left of the plot (the y labels) and under it (the x labels): ink.

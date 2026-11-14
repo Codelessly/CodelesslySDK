@@ -123,7 +123,7 @@ class ButtonSpec {
   /// disabled (SSUI's `isLoading`).
   final bool loading;
 
-  /// The node's own colours (`style`), over the variant's.
+  /// The node's own colors (`style`), over the variant's.
   final Color? background, foreground, iconColor;
   final double? iconSize;
 
@@ -183,7 +183,7 @@ class ButtonSpec {
       kind: kind,
       tokens: tokens,
       label: icon ? '' : n.prop(ButtonProps.label),
-      // A button centres its label, however wide it is (Flutter's does); a
+      // A button centers its label, however wide it is (Flutter's does); a
       // textAlign the node sets moves it.
       align: icon || !n.props.has(ButtonProps.textAlign) ? TextAlign.center : textAlign(n.prop(ButtonProps.textAlign)),
       icon: _glyph(n.prop(icon ? IconButtonProps.icon : ButtonProps.icon)),
@@ -308,7 +308,7 @@ class _Metrics {
 
 /// A button: its surface, label and icon, in the states [RenderControl]
 /// resolves.
-class RenderButton extends RenderControl implements LabelledControl {
+class RenderButton extends RenderControl implements LabeledControl {
   RenderButton();
 
   final ControlLabel _label = ControlLabel();
@@ -368,7 +368,7 @@ class RenderButton extends RenderControl implements LabelledControl {
     g.color = _look(eased: true).iconInk;
   }
 
-  /// The icon's colour follows the states: set whenever the button is to
+  /// The icon's color follows the states: set whenever the button is to
   /// be painted again (never while painting).
   @override
   void markNeedsPaint() {
@@ -523,7 +523,7 @@ class RenderButton extends RenderControl implements LabelledControl {
       final iconW = spec.hasIconSlot ? m.iconSize + (spec.label.isEmpty ? 0 : m.gap) : 0.0;
       _label.layout(math.max(0, inner.width - iconW));
       final content = iconW + _label.size.width;
-      // The label and icon together, centred (or as the label's alignment
+      // The label and icon together, centered (or as the label's alignment
       // puts them when the button is wider than they are).
       final free = math.max(0.0, inner.width - content);
       final start = inner.left +
@@ -600,7 +600,7 @@ class RenderButton extends RenderControl implements LabelledControl {
     return (fill: fill, ink: ink, iconInk: s.iconColor ?? ink, side: side, filled: filled);
   }
 
-  /// The state layer as far as each state has eased in: the focus colour
+  /// The state layer as far as each state has eased in: the focus color
   /// (when the node sets one), then hover, then press over it.
   Color? _easedOverlay(bool filled) {
     final s = spec, t = spec.tokens;
@@ -619,7 +619,7 @@ class RenderButton extends RenderControl implements LabelledControl {
       ? const []
       : [(text: spec.label, fontFamily: _label.fontFamily, glyphs: _label.glyphBoxes(_labelLeft, size.height / 2))];
 
-  /// The label's colour now (its states included).
+  /// The label's color now (its states included).
   Color get labelColor => _look().ink;
 
   /// The fill now (null: none), before the state layer.

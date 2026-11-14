@@ -57,8 +57,8 @@ Map<String, Object?> hugging(String type, [Map<String, Object?> props = const {}
   return (tree, interactions);
 }
 
-/// The centre of node [id]'s box, globally.
-Offset centreOf(RenderTree tree, String id) {
+/// The center of node [id]'s box, globally.
+Offset centerOf(RenderTree tree, String id) {
   final box = tree.boxOf(id)!;
   return box.localToGlobal(box.size.center(Offset.zero));
 }

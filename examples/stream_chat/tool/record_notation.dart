@@ -2,7 +2,7 @@
 // (package:codelessly_api/notation.dart), for the comparison with ui_apply:
 // the same briefs, the notation's own small prompt, no tools. The answer's
 // text is saved delta by delta with its timing, then expanded, validated
-// and summarised (prompt and output tokens, time to first token and to the
+// and summarized (prompt and output tokens, time to first token and to the
 // end, nodes, what the notation could not read, validation errors).
 //
 //   ANTHROPIC_API_KEY=... dart run tool/record_notation.dart --ui approval \

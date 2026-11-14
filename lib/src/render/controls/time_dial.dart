@@ -1,7 +1,7 @@
 // A time of day as one render object: SSUI has no dial (its time picker is
 // a select of times), so the time is picked in columns, hour and minute (and
 // AM / PM in 12-hour time), each showing the chosen value in the middle row
-// on the accent and its neighbours around it, the time it makes in the
+// on the accent and its neighbors around it, the time it makes in the
 // header, Cancel and Done below. A tap on a row, the mouse wheel, or the
 // keyboard picks; Done (or Enter) sets it.
 //
@@ -357,7 +357,7 @@ class RenderTimeColumns extends RenderBox implements MouseTrackerAnnotation {
     final header = Rect.fromLTWH(0, 0, size.width, headerHeight);
     final line = title == null || title!.isEmpty ? display : '$title · $display';
     final h = pickerText(line, c.style(13, weight: FontWeight.w600).merge(c.headline?.copyWith(fontSize: 13)), maxWidth: size.width);
-    paintCentred(canvas, h, header);
+    paintCentered(canvas, h, header);
     h.dispose();
     for (var col = 0; col < columns; col++) {
       for (final k in _rows(col)) {
@@ -380,7 +380,7 @@ class RenderTimeColumns extends RenderBox implements MouseTrackerAnnotation {
         // Rows fade away from the middle.
         final ink = chosen ? c.onAccent : (k.abs() == 2 ? c.muted : c.text);
         final p = pickerText(_label(col, k), c.style(12.5, weight: chosen ? FontWeight.w600 : FontWeight.w400, color: ink));
-        paintCentred(canvas, p, r);
+        paintCentered(canvas, p, r);
         p.dispose();
       }
     }
@@ -388,13 +388,13 @@ class RenderTimeColumns extends RenderBox implements MouseTrackerAnnotation {
     final cancel = RRect.fromRectAndRadius(f.cancel, Radius.circular(c.radius));
     if (_hovered == 'cancel') canvas.drawRRect(cancel, Paint()..color = c.hover);
     final cp = pickerText('Cancel', c.style(12, weight: FontWeight.w500));
-    paintCentred(canvas, cp, f.cancel);
+    paintCentered(canvas, cp, f.cancel);
     cp.dispose();
     final done = RRect.fromRectAndRadius(f.done, Radius.circular(c.radius));
     canvas.drawRRect(done, Paint()..color = c.accent);
     if (_hovered == 'done') canvas.drawRRect(done, Paint()..color = const Color(0x14000000));
     final dp = pickerText('Done', c.style(12, weight: FontWeight.w500, color: c.onAccent));
-    paintCentred(canvas, dp, f.done);
+    paintCentered(canvas, dp, f.done);
     dp.dispose();
     canvas.restore();
   }

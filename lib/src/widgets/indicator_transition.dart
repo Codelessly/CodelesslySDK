@@ -80,7 +80,7 @@ class RenderIndicatorTransition extends RenderCustomPaint implements MouseTracke
       _ticker.stop();
       if (attached) _ticker.start();
     } else {
-      // A label, colour or another unrelated prop can change while values
+      // A label, color or another unrelated prop can change while values
       // glide. Use its new style without restarting the data transition.
       _target = node;
       if (_from != null && isDataChart(node)) {

@@ -842,9 +842,9 @@ class BarcodePainter extends NodePainter {
   /// How far each dark bar reaches past its right and bottom edge.
   double get overlap => p(BarcodeProps.overlap);
 
-  /// The dark bars: without overlap one path, so neighbours leave no
+  /// The dark bars: without overlap one path, so neighbors leave no
   /// anti-aliasing seams; with it each bar on its own, overlapping its
-  /// neighbour (as code drawn rect by rect does), which covers the seams.
+  /// neighbor (as code drawn rect by rect does), which covers the seams.
   void _drawBars(Canvas canvas, List<Rect> bars) {
     final paint = Paint()..color = color;
     if (overlap > 0) {

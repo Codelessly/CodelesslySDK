@@ -411,7 +411,7 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
     if (_hovered == -3) canvas.drawRRect(RRect.fromRectAndRadius(titleRect, Radius.circular(c.dayRadius)), Paint()..color = c.hover);
     final titleStyle = c.style(13, weight: FontWeight.w600).merge(c.headline?.copyWith(fontSize: c.headline?.fontSize == null ? null : math.min(c.headline!.fontSize!, 16)));
     final t = pickerText(title, titleStyle, maxWidth: titleRect.width);
-    paintCentred(canvas, t, titleRect);
+    paintCentered(canvas, t, titleRect);
     t.dispose();
     if (_years) {
       _paintYears(canvas);
@@ -427,7 +427,7 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
     for (var i = 0; i < 7; i++) {
       final r = Rect.fromLTWH(i * (_cellWidth + gap), _bodyTop, _cellWidth, weekdayHeight);
       final p = pickerText(initials[i], c.style(11, weight: FontWeight.w500, color: c.muted));
-      paintCentred(canvas, p, r);
+      paintCentered(canvas, p, r);
       p.dispose();
     }
     for (var i = 0; i < rows * 7; i++) {
@@ -456,7 +456,7 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
       final selected = sameDay(d, _value);
       final p = pickerText('${d.day}',
           c.style(12, weight: selected ? FontWeight.w600 : FontWeight.w400, color: look.ink.withValues(alpha: look.ink.a * alpha)));
-      paintCentred(canvas, p, r);
+      paintCentered(canvas, p, r);
       p.dispose();
     }
   }
@@ -485,7 +485,7 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
       }
       final ink = selected ? c.onAccent : c.text;
       final p = pickerText('$y', c.style(12, weight: selected ? FontWeight.w600 : FontWeight.w400, color: ink.withValues(alpha: ink.a * alpha)));
-      paintCentred(canvas, p, r);
+      paintCentered(canvas, p, r);
       p.dispose();
     }
   }

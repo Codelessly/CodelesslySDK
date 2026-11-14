@@ -108,7 +108,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _themed = ThemedSource(_session, _session.theme);
     _nodeValues = SessionValues(_themed);
     // The registry is also what the tree reads the theme from (an
-    // indicator's unset colours), as a site's: every session has one, empty
+    // indicator's unset colors), as a site's: every session has one, empty
     // without a design system.
     _components = ComponentRegistry(_session.designSystem?.components.definitions.values ?? const [])..theme = _session.theme;
     _binder = NodeBinder(scope: _scope, logic: LayoutLogic.fromJson(_session.document.extra), engine: const Expressions());
@@ -285,7 +285,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
       final screen = screenValues(mq.size.width, mq.size.height, dark: mq.platformBrightness == Brightness.dark);
       if (!jsonEquality.equals(screen, _values['screen'])) _values.set('screen', screen);
     }
-    // The session's theme for the screen's mode: named colours and text
+    // The session's theme for the screen's mode: named colors and text
     // styles resolved in its nodes and its components', read as
     // `${theme.*}`, and the theme of its controls.
     final tokens = _session.theme;

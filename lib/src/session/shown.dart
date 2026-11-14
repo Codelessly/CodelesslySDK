@@ -11,7 +11,7 @@
 //   has no item template, or is empty while the list it reads is not;
 // * `empty_label`: a control or component whose label resolved to nothing;
 // * `expression_not_evaluated`: a text that shows `${` on screen;
-// * `text_no_color`: a text with no colour, or a transparent one;
+// * `text_no_color`: a text with no color, or a transparent one;
 // * `component_empty`: a component call that rendered nothing.
 //
 // The text checks are shared with the render command (tool/render), which
@@ -26,8 +26,8 @@ import '../runtime/expressions/formula.dart' show FormulaEvaluator;
 
 /// What a text paragraph shows wrong, with the text's [name] (a node id or
 /// an instance path) in the message: `expression_not_evaluated` (it shows
-/// `${`) and `text_no_color` (no colour, or a transparent one). [noColor]
-/// says what a text with no colour looks like where it renders.
+/// `${`) and `text_no_color` (no color, or a transparent one). [noColor]
+/// says what a text with no color looks like where it renders.
 List<({String code, String message})> paragraphIssues(RenderParagraph p, String name,
     {String noColor = 'it is painted white (invisible on a light background)'}) {
   final text = p.text.toPlainText();
@@ -60,8 +60,8 @@ List<({String code, String message})> paragraphIssues(RenderParagraph p, String 
   } else if (any && transparent) {
     out.add((
       code: EditCodes.textNoColor.name,
-      message: 'Text "$name" ("$short") is drawn in a transparent colour: nothing of it shows. A colour with alpha 0, or a name the '
-          'theme does not have: write a colour the theme names, or "#FF111827".',
+      message: 'Text "$name" ("$short") is drawn in a transparent color: nothing of it shows. A color with alpha 0, or a name the '
+          'theme does not have: write a color the theme names, or "#FF111827".',
     ));
   }
   return out;

@@ -1,0 +1,23 @@
+Card gap:10
+  Row gap:10 top
+    Box w:30 h:30 radius:7 fill:#FFF3F4F6 center middle
+      Icon "shield" {"props": {"size": 15, "color": "#FF4B5563"}}
+    Column gap:1 grow
+      Text.sectionTitle "I can't delete another person's account"
+      Text.bodySecondary "Only an organization owner can remove members."
+  Column fill:#FFF9FAFB radius:6 pad:10 gap:8 border:#FFE5E7EB
+    Text.fieldLabel "WHAT I CAN DO INSTEAD"
+    Row gap:8
+      Column gap:1 grow
+        Text.strong "Ask an owner to remove Sam Rivera"
+        Text.bodySecondary "Sends a request to Dana Okafor and Lee Park"
+      Button "Send request" -> emit requestRemoval
+    Divider
+    Row gap:8
+      Column gap:1 grow
+        Text.strong "Suspend sign-in for 7 days"
+        Text.bodySecondary "You have permission to do this yourself"
+      Button.outline "Suspend" -> emit suspend
+  Row gap:6
+    Icon "info" {"props": {"size": 13, "color": "#FF9CA3AF"}}
+    Text.caption "Why: account deletion is limited to owners by your workspace policy."

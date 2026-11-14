@@ -1,6 +1,6 @@
 // A generative-UI session without a design system draws its gauges and
 // charts in the session's theme, as a site and a session with a design
-// system do: the colours a gauge or chart leaves unset come from the
+// system do: the colors a gauge or chart leaves unset come from the
 // theme's roles (indicator_theme.dart). With no theme they are the neutral
 // set (ink and greys), never a palette of their own.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -26,7 +26,7 @@ final _document = LayoutDocument.fromJson({
   },
 });
 
-/// Pixels of the view by ARGB colour.
+/// Pixels of the view by ARGB color.
 Future<Map<int, int>> _pixels(WidgetTester tester, GlobalKey key) async => (await tester.runAsync(() async {
       final boundary = key.currentContext!.findRenderObject()! as RenderRepaintBoundary;
       final image = await boundary.toImage();
@@ -93,8 +93,8 @@ void main() {
     final pixels = await _render(tester, session);
     final primary = themeDataOf(ThemeTokens.none).colorScheme.primary.toARGB32();
     expect(_count(pixels, primary), greaterThan(800), reason: 'the neutral primary (ink)');
-    final coloured = {for (final e in pixels.entries) if (e.value > 20 && !_neutral(e.key)) e.key.toRadixString(16): e.value};
-    expect(coloured, isEmpty, reason: 'every colour drawn is a grey or ink');
+    final colored = {for (final e in pixels.entries) if (e.value > 20 && !_neutral(e.key)) e.key.toRadixString(16): e.value};
+    expect(colored, isEmpty, reason: 'every color drawn is a grey or ink');
   });
 
   testWidgets('a session with a design system and one with that design system\'s tokens as its theme draw them alike',

@@ -69,7 +69,7 @@ Future<Uint8List> _pixels(WidgetTester tester, GlobalKey key) async {
   }))!;
 }
 
-// A text style's background colour (a highlighted search match) reaches
+// A text style's background color (a highlighted search match) reaches
 // Flutter's TextStyle, and round-trips through the API's JSON.
 
 // Runtime of the widgets area's features.

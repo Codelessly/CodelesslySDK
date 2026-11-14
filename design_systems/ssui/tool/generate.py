@@ -134,6 +134,8 @@ FONT = {'xs': 11.5, 'compact': 12, 'small': 12.5, 'medium': 13, 'large': 15}
 ICON = {'xs': 12, 'compact': 14, 'small': 14, 'medium': 16, 'large': 18}
 GAP = {'xs': 6, 'compact': 6, 'small': 6, 'medium': 6, 'large': 8}
 RADIUS = {'xs': 5, 'compact': 7, 'small': 7, 'medium': 7, 'large': 7}
+# Read from the theme, so the same components take another design system's corners.
+RADIUS_BY_SIZE = "${= props.size == 'xs' ? theme.radii.inner : theme.radii.control}"
 
 
 def by(prop, table, default=None):
@@ -289,7 +291,7 @@ add(component(
     props=[
         prop('label', STRING, 'Button', 'The text.', required=True),
         prop('variant', enum('primary', 'secondary', 'outline', 'ghost', 'destructive'), 'primary',
-             'primary fills with the brand colour; secondary a strong neutral; outline a hairline; ghost nothing; destructive red.'),
+             'primary fills with the brand color; secondary a strong neutral; outline a hairline; ghost nothing; destructive red.'),
         SIZE_PROP,
         prop('icon', STRING, '', 'A Material icon name shown before the label (empty: none).'),
         prop('enabled', BOOL, True, 'False: 50 % opacity, not pressable.'),
@@ -306,7 +308,7 @@ add(component(
                 # button.dart: the control's paddingX + 2 (8 / 10 / 12 / 12 / 14).
                 'layout.padding': sized({s: [PX[s] + 2, 0, PX[s] + 2, 0] for s in SIZES}),
                 'props.spacing': sized(GAP),
-                'decoration.radius': sized(RADIUS),
+                'decoration.radius': RADIUS_BY_SIZE,
                 'decoration.fills[0].color': "${= props.variant == 'primary' ? theme.primary : (props.variant == 'secondary' ? theme.colors.neutralFill : (props.variant == 'destructive' ? theme.error : '#00000000'))}",
                 'decoration.strokes[0].color': "${= props.variant == 'outline' ? theme.colors.primaryBorder : '#00000000'}",
                 'disabled': '${= !props.enabled}',
@@ -348,7 +350,7 @@ add(component(
             'decoration': {'fills': [{'color': '#00000000'}], 'strokes': [{'color': '#00000000'}], 'radius': 7},
             'bind': {
                 'layout.padding': sized({s: [(H[s] - ICON[s]) / 2, 0, (H[s] - ICON[s]) / 2, 0] for s in SIZES}),
-                'decoration.radius': sized(RADIUS),
+                'decoration.radius': RADIUS_BY_SIZE,
                 'decoration.fills[0].color': "${= props.variant == 'primary' ? theme.primary : '#00000000'}",
                 'decoration.strokes[0].color': "${= props.variant == 'outline' ? theme.colors.primaryBorder : '#00000000'}",
                 'disabled': '${= !props.enabled}',
@@ -379,7 +381,7 @@ FIELD_DECORATION = {
 }
 
 # TextInput (text_input.dart / SoftSaaSControlShell): the platform text field, every part styled: hairline at
-# rest, the focus border (primary at 50 %, 1.5) when focused, the error colour on error, 50 % when disabled.
+# rest, the focus border (primary at 50 %, 1.5) when focused, the error color on error, 50 % when disabled.
 add(component(
     'TextInput',
     'A one-line text field on the control scale (28 by default), its value kept in your variable. Fires onChanged and onSubmitted.',
@@ -616,7 +618,7 @@ add(component(
 ))
 
 # Slider (slider.dart): the platform slider (dragging, keys), every part styled: a 4 px track in the track
-# colour, the brand fill, a 14 px white thumb with a hairline.
+# color, the brand fill, a 14 px white thumb with a hairline.
 add(component(
     'Slider',
     'A value between min and max, dragged, kept in your variable. Fires onChanged.',
@@ -896,7 +898,7 @@ add(component(
     'banner',
     props=[prop('title', STRING, '', 'A bold first line (empty: none).'),
            prop('message', STRING, 'Message', 'The text.', required=True),
-           prop('tone', enum('info', 'success', 'warning', 'error', 'neutral'), 'info', 'The colour and icon.'),
+           prop('tone', enum('info', 'success', 'warning', 'error', 'neutral'), 'info', 'The color and icon.'),
            prop('dismissible', BOOL, False, 'An x that fires onDismiss.')],
     slots=['actions'], events=['onDismiss'],
     previews=[preview('Warning', 360, 56, title='Payment failed', message='Update your card to keep your plan.', tone='warning')],
@@ -951,13 +953,13 @@ add(component(
     },
 ))
 
-# ProgressBar (progress_bar.dart): a 4 px track in the track colour, the brand fill (or a tone's).
+# ProgressBar (progress_bar.dart): a 4 px track in the track color, the brand fill (or a tone's).
 add(component(
     'ProgressBar',
-    'How far something has got: a 4 px bar, value from 0 to 1, in the brand colour or a tone.',
+    'How far something has got: a 4 px bar, value from 0 to 1, in the brand color or a tone.',
     'track',
     props=[prop('value', NUMBER, 0.5, 'From 0 to 1.'),
-           prop('tone', enum('primary', 'success', 'warning', 'error'), 'primary', 'The fill\'s colour.')],
+           prop('tone', enum('primary', 'success', 'warning', 'error'), 'primary', 'The fill\'s color.')],
     previews=[preview('Half', 240, 4, value=0.5)],
     nodes={
         'track': {'type': 'row', 'children': ['fill', 'rest'], 'layout': {'width': {'fill': 240}, 'height': 4},
@@ -1106,7 +1108,7 @@ STATUS = ['neutral', 'success', 'warning', 'error', 'info']
 DOT = "${= props.status == 'success' ? '#FF22C55E' : (props.status == 'error' ? '#FFEF4444' : (props.status == 'neutral' ? '#FFA3A3A3' : '#FF3B82F6'))}"
 DOT_GLOW = "${= props.status == 'success' ? '#4D22C55E' : (props.status == 'error' ? '#4DEF4444' : (props.status == 'neutral' ? '#4D6B7280' : '#4D3B82F6'))}"
 
-# StatusDot (StatusDot.tsx): a round dot 8 / 12 / 16 with a soft glow of its colour, an optional 14/500 label 8 px after.
+# StatusDot (StatusDot.tsx): a round dot 8 / 12 / 16 with a soft glow of its color, an optional 14/500 label 8 px after.
 add(component(
     'StatusDot',
     'A live state at a glance: a glowing dot (success, warning, error, info, neutral) with an optional label.',
@@ -1188,7 +1190,7 @@ add(component(
 # 11 px secondary label with a 14 px icon 7 px before it, then the value 21/650 at 1.1.
 add(component(
     'StatTile',
-    'A dashboard figure: a small labelled icon line over a large value, in a bordered tile.',
+    'A dashboard figure: a small labeled icon line over a large value, in a bordered tile.',
     'tile',
     props=[prop('label', STRING, 'Revenue', 'What is counted.', required=True),
            prop('value', STRING, '$48,200', 'The figure, already formatted.', required=True),
@@ -1209,7 +1211,7 @@ add(component(
 # IconBox (IconBox.tsx): 30 x 30, radius 7, a 10 % tint of the primary under a 15 px primary icon.
 add(component(
     'IconBox',
-    'A tinted square holding an icon, for a dialog or card header: 30 px, radius 7, the brand colour at 10 %.',
+    'A tinted square holding an icon, for a dialog or card header: 30 px, radius 7, the brand color at 10 %.',
     'box',
     props=[prop('icon', STRING, 'settings', 'The icon\'s name.', required=True)],
     previews=[preview('Settings', 30, 30, icon='settings')],
@@ -1350,7 +1352,7 @@ add(component(
     'row',
     props=[prop('age', STRING, '2h ago', 'How long ago (empty: none).'),
            prop('commit', STRING, 'a1b2c3d', 'The short commit (empty: none).'),
-           prop('accent', BOOL, False, 'The branch icon in the success colour.')],
+           prop('accent', BOOL, False, 'The branch icon in the success color.')],
     previews=[preview('Both', 200, 14, age='2h ago', commit='a1b2c3d')],
     nodes={
         'row': {'type': 'row', 'children': ['clock', 'age', 'dot', 'branch', 'commit'], 'props': {'crossAxisAlignment': 'center', 'spacing': 4},
@@ -1371,11 +1373,11 @@ add(component(
 
 # --- batch 4: links, counts on icons, work in progress --------------------------------------------------------
 
-# Hyperlink (Hyperlink.tsx): 14/500 in the primary colour, underlined, 2 px above and below, an optional 14 px
+# Hyperlink (Hyperlink.tsx): 14/500 in the primary color, underlined, 2 px above and below, an optional 14 px
 # "open in new" icon 4 px after; hovered it is 600, pressed 20 % darker. Opens its url.
 add(component(
     'Hyperlink',
-    'A text link in the brand colour, underlined; it opens its URL. Fires onPressed.',
+    'A text link in the brand color, underlined; it opens its URL. Fires onPressed.',
     'link',
     props=[prop('text', STRING, 'Open the docs', 'The words.', required=True),
            prop('url', STRING, '', 'Where it goes (empty: only onPressed fires).'),
@@ -1399,7 +1401,7 @@ add(component(
 ))
 
 # NotificationBadge (NotificationBadge.tsx): a count pill 18 high (at least 18 wide, 4 px sides, 12/700 white) or an
-# 8 px dot, in the danger colour by default, on the top right corner of what it wraps (4 px out), with a small shadow.
+# 8 px dot, in the danger color by default, on the top right corner of what it wraps (4 px out), with a small shadow.
 add(component(
     'NotificationBadge',
     'A count or a dot on the corner of what it wraps (an icon button, an avatar): red by default, hidden at zero.',
@@ -1408,7 +1410,7 @@ add(component(
            prop('max', NUMBER, 99, 'Above this it shows "max+".'),
            prop('dot', BOOL, False, 'A plain 8 px dot instead of the number.'),
            prop('showZero', BOOL, False, 'Shows at 0 too.'),
-           prop('variant', enum('danger', 'primary', 'success'), 'danger', 'The colour.')],
+           prop('variant', enum('danger', 'primary', 'success'), 'danger', 'The color.')],
     children='list',
     previews=[preview('Count', 40, 40, count=3)],
     nodes={
@@ -1428,7 +1430,7 @@ add(component(
     },
 ))
 
-# PulsingDots (PulsingDots.tsx): three 4 px dots 2 px apart in the primary colour, each fading 0.2 to 1 and back over
+# PulsingDots (PulsingDots.tsx): three 4 px dots 2 px apart in the primary color, each fading 0.2 to 1 and back over
 # 0.9 s, a third of the cycle apart.
 def _pulse(delay):
     return [{'id': 'pulse', 'duration': 450, 'delay': delay, 'curve': 'linear', 'repeat': {'reverse': True},

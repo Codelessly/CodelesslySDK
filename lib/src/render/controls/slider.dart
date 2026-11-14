@@ -6,12 +6,12 @@
 // Material's did), and a 24 px `primary` halo at 12 % while hovered, dragged or
 // focused. A hugging slider is 200 × 28 (its design size when it has one).
 //
-// The thumb travels inside the rail (its centre half a thumb in from each
+// The thumb travels inside the rail (its center half a thumb in from each
 // end), except on a ruler, whose pointer travels the whole width. Drag and
 // tap set the value (snapped to `divisions`, kept within `selectableMin` /
 // `selectableMax`); the keys move it: arrows a step (a division, else 1 %
 // of the range), Page Up / Page Down ten steps, Home / End the ends. Every
-// track, thumb, tick, value indicator and colour prop of the old island
+// track, thumb, tick, value indicator and color prop of the old island
 // applies; the node's `customPaint` is drawn between the parts as before
 // (render/custom_paint.dart: `painter` over the track, `foregroundPainter`
 // over the thumb, reading `slider.value`, `min`, `max`, `trackRect` and
@@ -332,7 +332,7 @@ class RenderSlider extends RenderControl {
   /// A round thumb's radius: SSUI's 7 unless the node sets one.
   double get _thumbRadius => node.props.has(SliderProps.thumbRadius) ? node.prop(SliderProps.thumbRadius) : 7;
 
-  /// Where the thumb's centre runs: inside the track by half the thumb (a
+  /// Where the thumb's center runs: inside the track by half the thumb (a
   /// ruler's pointer: the whole track).
   ({double start, double end}) get _travel {
     final r = trackRect;
@@ -347,8 +347,8 @@ class RenderSlider extends RenderControl {
     return start + along * (end - start);
   }
 
-  /// The thumb's centre in the frame.
-  Offset get thumbCentre => Offset(_x(fraction), trackRect.center.dy);
+  /// The thumb's center in the frame.
+  Offset get thumbCenter => Offset(_x(fraction), trackRect.center.dy);
 
   // --- look ------------------------------------------------------------------------------
 
@@ -392,7 +392,7 @@ class RenderSlider extends RenderControl {
       canvas.rotate(-math.pi / 2);
     }
     final track = trackRect;
-    final thumb = thumbCentre;
+    final thumb = thumbCenter;
     _paintTrack(canvas, track, thumb);
     _paintTicks(canvas, track);
     final locals = <String, Object?>{
@@ -416,7 +416,7 @@ class RenderSlider extends RenderControl {
     final inactive = Paint()..color = inactiveTrackColor;
     final active = Paint()..color = activeTrackColor;
     if (kind == api.SliderTrackShape.ruler) {
-      // A strip across the whole width, the active colour from zero (or the
+      // A strip across the whole width, the active color from zero (or the
       // minimum) to the value under it.
       final cy = track.center.dy, base = cy + 1;
       canvas.drawRect(Rect.fromLTRB(track.left, cy - 9, track.right, base), inactive);
@@ -518,7 +518,7 @@ class RenderSlider extends RenderControl {
         if (r <= 0) return;
         canvas.drawCircle(c, r, Paint()..color = thumbColor);
         // A ring of the node's stroke, else SSUI's hairline round its white
-        // thumb on a light page (not round a thumb colour of the node's).
+        // thumb on a light page (not round a thumb color of the node's).
         final own = _c(n.prop(SliderProps.thumbStrokeColor));
         final width = own != null ? math.min(n.prop(SliderProps.thumbStrokeWidth), r) : (n.prop(SliderProps.thumbColor) == null && !_tokens.dark ? 1.0 : 0.0);
         final color = own ?? _tokens.secondaryBorder;
@@ -564,7 +564,7 @@ class RenderSlider extends RenderControl {
         }
       case api.SliderThumbShape.pointer:
         // A ruler's index: a hairline down across the track and a triangle
-        // under it pointing up, outlined in the stroke colour.
+        // under it pointing up, outlined in the stroke color.
         final stroke = _c(n.prop(SliderProps.thumbStrokeColor)) ?? const Color(0xFF000000);
         final color = _c(n.prop(SliderProps.thumbColor)) ?? stroke;
         final x = c.dx, cy = c.dy;
@@ -631,7 +631,7 @@ class RenderSlider extends RenderControl {
       ..textStyle = node.prop(SliderProps.valueIndicatorTextStyle)
       ..shape = node.prop(SliderProps.valueIndicatorShape);
     // The thumb, in the root.
-    final c = thumbCentre;
+    final c = thumbCenter;
     final local = _vertical ? Offset(c.dy, size.height - c.dx) : c;
     final half = math.max(thumbSize.height, thumbSize.width) / 2;
     b.anchorRect = MatrixUtils.transformRect(getTransformTo(root), Rect.fromCenter(center: local, width: 2 * half, height: 2 * half));
@@ -720,10 +720,10 @@ class RenderSliderValueIndicator extends RenderOverlayEntry {
 
   ControlTokens? tokens;
 
-  /// The node's colour (else SSUI's tooltip background).
+  /// The node's color (else SSUI's tooltip background).
   Color? fill;
 
-  /// The node's `valueIndicatorTextStyle` (its colour and size).
+  /// The node's `valueIndicatorTextStyle` (its color and size).
   api.TextStyle textStyle = api.TextStyle.empty;
 
   /// Flutter's shape name: a rectangle has square corners, the others SSUI's

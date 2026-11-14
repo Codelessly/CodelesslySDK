@@ -5,7 +5,7 @@
 // | Part | SSUI | From the node |
 // |---|---|---|
 // | field | the field frame (field_frame.dart): 28 high when it hugs, `primaryBackground`, 1 px `primaryBorder`, `secondaryBorder` hovered, 1.5 px `focusBorder` while keyboard-focused or open, radius 7, 50 % disabled | `underline` (false: no border, fill or padding), `focusColor`, `enabled` |
-// | value | `inputText`: the scale's size, 400, `primaryText`, optically centred | `selectedItemStyle`, `alignment`, the default text style's font |
+// | value | `inputText`: the scale's size, 400, `primaryText`, optically centered | `selectedItemStyle`, `alignment`, the default text style's font |
 // | placeholder | the value's metrics in `tertiaryText` | `hint`, `hintStyle` |
 // | chevron | Lucide `chevron-down` at the scale's icon size in `tertiaryText`, turned over while open | `icon` (a glyph instead), `iconSize`, `iconEnabledColor`, `iconDisabledColor` |
 // | menu | render/controls/menu.dart: under the field (above when there is no room), its width (120 at least), 240 high at most, rows 28 high, the selected row tinted with a check | `items`, `style`, `itemAlignment`, `dropdownColor`, `borderRadius`, `elevation`, `hoverColor`, `splashColor`, `menuStyle` |
@@ -114,7 +114,7 @@ class DropdownSpec {
   /// The value's style, resolved.
   final TextStyle valueStyle;
 
-  /// The value's place in the field: -1 start, 0 centre, 1 end.
+  /// The value's place in the field: -1 start, 0 center, 1 end.
   final double alignX;
 
   /// The field's box (false: no border, fill or padding).
@@ -569,7 +569,7 @@ class RenderDropdown extends RenderFieldFrame {
     _chevron = spec.icon != null ? Rect.zero : Rect.fromLTWH(boxRect.right - padRight - size, boxRect.center.dy - size / 2, size, size);
   }
 
-  /// The chevron's colour now.
+  /// The chevron's color now.
   Color get chevronColor {
     final s = spec;
     final on = enabled && s.enabled;

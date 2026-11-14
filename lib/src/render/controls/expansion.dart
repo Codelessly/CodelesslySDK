@@ -537,7 +537,7 @@ class RenderExpansion extends RenderControl
     return null;
   }
 
-  /// The chevron's colour now.
+  /// The chevron's color now.
   Color get chevronColor {
     final s = spec, t = s.tokens;
     final closed = s.collapsedIconColor ?? t.tertiaryText, open = s.iconColor ?? t.tertiaryText;

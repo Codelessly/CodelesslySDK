@@ -9,7 +9,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabelledControl;
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -33,7 +33,7 @@ List<String> _texts(WidgetTester tester) {
   void visit(RenderObject o) {
     if (o is RenderParagraph && o.attached && o.hasSize) out.add((o.localToGlobal(Offset.zero).dy, o.text.toPlainText()));
     // A button draws its own label (no RenderParagraph).
-    if (o is LabelledControl && o.attached && o.hasSize) {
+    if (o is LabeledControl && o.attached && o.hasSize) {
       for (final l in o.labels) {
         out.add((o.localToGlobal(Offset.zero).dy, l.text));
       }
@@ -59,7 +59,7 @@ Future<void> _tap(WidgetTester tester, String text) async {
   RenderBox? hit;
   void visit(RenderObject o) {
     if (o is RenderParagraph && o.attached && o.text.toPlainText() == text) hit = o;
-    if (o is LabelledControl && o.attached && o.labels.any((l) => l.text == text)) hit = o;
+    if (o is LabeledControl && o.attached && o.labels.any((l) => l.text == text)) hit = o;
     o.visitChildren(visit);
   }
 

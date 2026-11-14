@@ -6,7 +6,7 @@
 // state): a field on the control scale (28 high when it hugs), a calendar
 // or clock icon before the value, a chevron after it, the 1 px hairline
 // that darkens under the pointer and turns into the 1.5 px focus border
-// while focused or open, the error colour in error, 50 % when disabled.
+// while focused or open, the error color in error, 50 % when disabled.
 // The field is drawn here until workstream A's field frame
 // (render/controls/field_frame.dart) lands, which it should then use.
 //
@@ -133,11 +133,11 @@ class PickerSpec {
   final bool readable;
 
   /// The node's value style (its own fields over the default text style it
-  /// is under), and its own colour.
+  /// is under), and its own color.
   final TextStyle style;
   final Color? ownColor;
 
-  /// Shown while empty, in [hintStyle] (else SSUI's placeholder colour).
+  /// Shown while empty, in [hintStyle] (else SSUI's placeholder color).
   final String? hint;
   final TextStyle? hintStyle;
 
@@ -326,7 +326,7 @@ class PickerSpec {
 }
 
 /// The node's own text fields over the default text style it is under (its
-/// colour is the node's own only: [PickerSpec.ownColor]).
+/// color is the node's own only: [PickerSpec.ownColor]).
 TextStyle _style(api.TextStyle own, api.TextStyle? inherited) {
   final s = inherited == null ? own : inherited.merge(own);
   final w = s.fontWeight;
@@ -353,7 +353,7 @@ Json _glyph(Json glyph) {
 // --- the field --------------------------------------------------------------------
 
 /// A picker's face: SSUI's select trigger, which opens the picker.
-class RenderPickerField extends RenderControl implements LabelledControl {
+class RenderPickerField extends RenderControl implements LabeledControl {
   RenderPickerField() {
     focusNode.onKey = _key;
   }
@@ -553,7 +553,7 @@ class RenderPickerField extends RenderControl implements LabelledControl {
     (_suffix?.parentData as BoxParentData?)?.offset = _suffixRect.topLeft;
   }
 
-  double get _centreY {
+  double get _centerY {
     final pad = _padding(_scale);
     return pad.top + (size.height - pad.vertical) / 2;
   }
@@ -571,7 +571,7 @@ class RenderPickerField extends RenderControl implements LabelledControl {
   Color get _tertiaryText => spec.tokens.theme.color('tertiaryText')?.flutter ?? _primaryText.withValues(alpha: .45);
   Color get _iconInk => spec.bare ? (spec.ownColor ?? _primaryText) : _tertiaryText;
 
-  /// The value's colour now (the hint's while empty).
+  /// The value's color now (the hint's while empty).
   Color get labelColor => _empty ? (spec.hintStyle?.color ?? _tertiaryText) : (spec.ownColor ?? _primaryText);
 
   /// The fill now (null: none).
@@ -602,8 +602,8 @@ class RenderPickerField extends RenderControl implements LabelledControl {
         d.border;
     if (own == null) return (type: api.InputBorderType.outline, side: BorderSide(color: ssuiColor, width: ssuiWidth), radius: radius);
     final s = own.borderSide;
-    // A border of the node's own colour keeps it; one without takes SSUI's
-    // state colour.
+    // A border of the node's own color keeps it; one without takes SSUI's
+    // state color.
     final color = s.color?.flutter ?? ssuiColor;
     return (type: own.type, side: BorderSide(color: color, width: _focusedLook && s.color == null ? 1.5 : s.width), radius: own.borderRadius.flutter);
   }
@@ -611,7 +611,7 @@ class RenderPickerField extends RenderControl implements LabelledControl {
   @override
   List<({String text, String? fontFamily, List<Rect> glyphs})> get labels => !hasSize || shown.isEmpty
       ? const []
-      : [(text: shown, fontFamily: _label.fontFamily, glyphs: _label.glyphBoxes(_labelLeft, _centreY))];
+      : [(text: shown, fontFamily: _label.fontFamily, glyphs: _label.glyphBoxes(_labelLeft, _centerY))];
 
   final LayerHandle<OpacityLayer> _opacity = LayerHandle<OpacityLayer>();
 
@@ -622,7 +622,7 @@ class RenderPickerField extends RenderControl implements LabelledControl {
   void markNeedsPaint() {
     super.markNeedsPaint();
     if (_spec == null) return;
-    // The icons' colour follows the states (set outside paint).
+    // The icons' color follows the states (set outside paint).
     if (spec.decoration.prefixIcon?.color == null) _prefix?.color = _iconInk;
     if (spec.icon?.color == null) _suffix?.color = _iconInk;
   }
@@ -694,7 +694,7 @@ class RenderPickerField extends RenderControl implements LabelledControl {
     }
     _label.update(shown, _textStyle(scale, labelColor), align: TextAlign.left);
     _label.layout(_labelWidth);
-    _label.paint(canvas, offset.dx + _labelLeft, offset.dy + _centreY);
+    _label.paint(canvas, offset.dx + _labelLeft, offset.dy + _centerY);
   }
 
   @override

@@ -1,0 +1,48 @@
+state step=0
+state use=""
+state budget=""
+state weight=""
+Card gap:10
+  Row between
+    Text.sectionTitle "Find the right laptop"
+    Text.caption "{step<3 ? "Question " : "Done"}{step<3 ? step+1 : ""}{step<3 ? " of 3" : ""}"
+  Progress =step/3
+  if step==0
+    Column gap:6
+      Text.strong "What will you mostly use it for?"
+      each o in ["School or study","Work and office","Gaming","Creative projects"]
+        Row pad:10 radius:7 border:#FFE5E7EB fill:=use==o?"#1A2563EB":"#FFFFFFFF" -> use=o
+          Text "{o}" grow
+          Icon "check" {"props": {"size": 14, "color": "#FF2563EB"}, "bind": {"visible": "${= use == item}"}}
+  if step==1
+    Column gap:6
+      Text.strong "What is your budget?"
+      each o in ["Under $800","$800 to $1,500","Over $1,500"]
+        Row pad:10 radius:7 border:#FFE5E7EB fill:=budget==o?"#1A2563EB":"#FFFFFFFF" -> budget=o
+          Text "{o}" grow
+          Icon "check" {"props": {"size": 14, "color": "#FF2563EB"}, "bind": {"visible": "${= budget == item}"}}
+  if step==2
+    Column gap:6
+      Text.strong "How much does weight matter?"
+      each o in ["I carry it every day","Sometimes","It stays on a desk"]
+        Row pad:10 radius:7 border:#FFE5E7EB fill:=weight==o?"#1A2563EB":"#FFFFFFFF" -> weight=o
+          Text "{o}" grow
+          Icon "check" {"props": {"size": 14, "color": "#FF2563EB"}, "bind": {"visible": "${= weight == item}"}}
+  if step==3
+    Column fill:#FFF9FAFB radius:6 pad:10 gap:4 border:#FFE5E7EB
+      Row between
+        Text.bodySecondary "Use"
+        Text.strong "{use}"
+      Row between
+        Text.bodySecondary "Budget"
+        Text.strong "{budget}"
+      Row between
+        Text.bodySecondary "Weight"
+        Text.strong "{weight}"
+  Divider
+  Row between
+    Button.ghost "Back" enabled:=step>0 -> step=step-1
+    if step<3
+      Button "{step==2 ? "See my answers" : "Next"}" enabled:=(step==0&&use!="")||(step==1&&budget!="")||(step==2&&weight!="") -> step=step+1; emit answered
+    if step==3
+      Button "Find laptops" -> emit submit

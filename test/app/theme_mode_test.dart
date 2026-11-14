@@ -1,8 +1,8 @@
 // The site's theme mode (Flutter's ThemeMode): a setThemeMode action on any
-// screen switches every named colour, named text style and unstyled control
+// screen switches every named color, named text style and unstyled control
 // of every screen at once, `${theme.mode}` and `${theme.isDark}` follow it,
 // the choice survives navigation and (persisted) a reload, and a site
-// without dark colours stays as it was designed.
+// without dark colors stays as it was designed.
 import 'package:codelessly_api/codelessly_api.dart' as api show Color, ThemeMode;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/toggles.dart' show RenderToggle;
@@ -101,8 +101,8 @@ Future<CodelesslyWidgetController> _pump(WidgetTester tester, Codelessly app) as
   return controller;
 }
 
-/// What a screen shows in its current mode: the label's text and colour,
-/// the background's colour, and the brightness and surface of the theme
+/// What a screen shows in its current mode: the label's text and color,
+/// the background's color, and the brightness and surface of the theme
 /// its unstyled checkbox draws with.
 ({String text, api.Color? ink, api.Color? paper, Brightness control, Color surface}) _look(WidgetTester tester, String id) {
   final tree = tester.widgetList<NodeView>(find.byType(NodeView)).map((v) => v.tree).lastWhere((t) => t.boxOf('$id-label') != null);
@@ -127,7 +127,7 @@ Future<void> _tap(WidgetTester tester, String id) async {
 void main() {
   setUp(() => ignoreOverflows());
 
-  testWidgets('a toggle switches every named colour, the named text style and an unstyled control to dark and back',
+  testWidgets('a toggle switches every named color, the named text style and an unstyled control to dark and back',
       (tester) async {
     setScreen(tester, const Size(390, 844));
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
@@ -146,7 +146,7 @@ void main() {
     await _tap(tester, 'home-toggle');
     look = _look(tester, 'home');
     expect(look.text, 'dark true');
-    expect(look.ink, const api.Color(0xFFEEEEEE), reason: 'the named text style resolves its colour in dark mode');
+    expect(look.ink, const api.Color(0xFFEEEEEE), reason: 'the named text style resolves its color in dark mode');
     expect(look.paper, const api.Color(0xFF0A0A0A));
     expect(look.control, Brightness.dark, reason: 'the control theme follows the mode');
     expect(look.surface.computeLuminance(), lessThan(.1), reason: 'and on a dark one');
@@ -232,7 +232,7 @@ void main() {
     expect(storage.containsKey(Codelessly.themeModeStorageKey), isFalse);
   });
 
-  testWidgets('a site without dark colours keeps its colours and controls in dark mode, and can still read the mode',
+  testWidgets('a site without dark colors keeps its colors and controls in dark mode, and can still read the mode',
       (tester) async {
     setScreen(tester, const Size(390, 844));
     addTearDown(tester.platformDispatcher.clearPlatformBrightnessTestValue);
@@ -243,7 +243,7 @@ void main() {
     final controller = await _pump(tester, app);
     await _tap(tester, 'home-toggle');
     final look = _look(tester, 'home');
-    expect(look.text, 'dark true', reason: 'a document can still choose its own colours by theme.isDark');
+    expect(look.text, 'dark true', reason: 'a document can still choose its own colors by theme.isDark');
     expect(look.ink, const api.Color(0xFF111111));
     expect(look.paper, const api.Color(0xFFFAFAFA));
     expect(look.control, Brightness.light, reason: 'controls stay as the light design that has no dark variant');

@@ -203,7 +203,7 @@ class PaginationControls extends StatelessWidget {
       );
     return Padding(
       padding: n.layout.padding.flutter,
-      // Centred down the node's box (a 48 px node and 32 px buttons): a
+      // Centered down the node's box (a 48 px node and 32 px buttons): a
       // row whose cross axis is the box's height.
       child: n.layout.width.fit == api.SizeFit.hug
           ? parts

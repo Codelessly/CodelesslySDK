@@ -177,7 +177,7 @@ class _RuntimeTableViewState extends State<RuntimeTableView> {
                         ? hoverColor
                         : (stripe != null && body.isOdd ? stripe : null);
             // The header's line takes room under its cells, as a bordered
-            // box's does: they centre in the height above it.
+            // box's does: they center in the height above it.
             final headerLine = header && headerBorder != null ? headerBorder.width : 0.0;
             return TableSpan(
               extent: FixedTableSpanExtent(header

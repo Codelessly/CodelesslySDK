@@ -25,7 +25,7 @@ List<String> codes(RenderReport r, [String? severity]) => [
 Future<Pixels> pixelsOf(WidgetTester tester, String png) async =>
     (await tester.runAsync(() => decodePng(File(png).readAsBytesSync())))!;
 
-/// The colour (0xRRGGBB) at [x], [y].
+/// The color (0xRRGGBB) at [x], [y].
 int rgbAt(Pixels p, int x, int y) {
   final i = (y * p.width + x) * 4;
   return (p.rgba[i] << 16) | (p.rgba[i + 1] << 8) | p.rgba[i + 2];
@@ -210,7 +210,7 @@ void main() {
     RenderArgs steps(List<Step> steps, {List<Size> sizes = const [Size(390, 844)]}) =>
         RenderArgs(inputs: [stepsSite], out: out.path, sizes: sizes, steps: steps, dumpLayout: true);
 
-    // The colour of flag [id] (green: what it watches happened) in [png].
+    // The color of flag [id] (green: what it watches happened) in [png].
     Future<int> flag(WidgetTester tester, String png, String id) async {
       final boxes = jsonDecode(File(png.replaceFirst('.png', '.layout.json')).readAsStringSync()) as List;
       final b = boxes.cast<Map>().firstWhere((b) => b['id'] == id);

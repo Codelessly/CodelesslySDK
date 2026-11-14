@@ -9,12 +9,12 @@
 // segments the scale's padding and font); a sized one takes its box, the
 // metrics of the nearest step and its width shared between the segments.
 //
-// Each label is measured and centred in its segment, across and down (the
+// Each label is measured and centered in its segment, across and down (the
 // glyphs, not the line: render/controls/kit.dart's ControlLabel). Tap a
 // segment to choose it (multi-select toggles it, as Flutter's
 // `SegmentedButton`); the arrow keys move the choice (multi-select: a
 // cursor that Enter or Space toggles). `variant: track` keeps its
-// `trackPadding`, `selectedShadows` and `slidingThumb`; every colour, side,
+// `trackPadding`, `selectedShadows` and `slidingThumb`; every color, side,
 // radius, padding and text style prop applies over SSUI's.
 import 'dart:math' as math;
 
@@ -85,7 +85,7 @@ double _fontSize(ControlScale s) => switch (s.name) {
     };
 
 /// A segmented button: its well, its segments and the selection.
-class RenderSegmentedButton extends RenderControl implements LabelledControl {
+class RenderSegmentedButton extends RenderControl implements LabeledControl {
   RenderSegmentedButton() {
     onPressed = _pressed;
     focusNode.onKey = _key;
@@ -398,7 +398,7 @@ class RenderSegmentedButton extends RenderControl implements LabelledControl {
     final widths = [for (final seg in _segments) _segmentWidth(seg, s, segH)];
     final total = widths.fold<double>(0, (a, b) => a + b);
     // Expanded (or a well wider than its segments): the room shared out
-    // equally, so each label stays centred in its own segment.
+    // equally, so each label stays centered in its own segment.
     final equal = node.prop(SegmentedButtonProps.expanded) || _track && node.layout.width.fit != SizeFit.hug;
     final extra = (inner - total) / n;
     var x = inset;
@@ -420,7 +420,7 @@ class RenderSegmentedButton extends RenderControl implements LabelledControl {
     seg.text.update(seg.label, _style(s, const Color(0xFF000000)));
     seg.text.layout(math.max(0, rect.width - padL - padR - iconW));
     final content = iconW + (iconOnly ? 0 : seg.text.size.width);
-    // The icon and label together, centred in the segment.
+    // The icon and label together, centered in the segment.
     final start = rect.left + padL + math.max(0.0, (rect.width - padL - padR - content) / 2);
     seg.iconRect = Rect.fromLTWH(start, rect.center.dy - s.iconSize / 2, hasIcon ? s.iconSize : 0, hasIcon ? s.iconSize : 0);
     seg.labelLeft = start + iconW;
@@ -466,7 +466,7 @@ class RenderSegmentedButton extends RenderControl implements LabelledControl {
   BorderSide? get _selectedSide =>
       _tokens.dark || node.prop(SegmentedButtonProps.selectedBackgroundColor) != null ? null : BorderSide(color: _tokens.primaryBorder);
 
-  /// The label colour of segment [i] now.
+  /// The label color of segment [i] now.
   Color labelColorOf(int i) {
     final on = _selected.contains(_segments[i].value);
     if (on) return _c(node.prop(SegmentedButtonProps.selectedForegroundColor)) ?? _tokens.onSurface;
@@ -560,7 +560,7 @@ class RenderSegmentedButton extends RenderControl implements LabelledControl {
             ..color = side.color);
     }
     if (focusHighlight) {
-      // SSUI: the well's edge in the focus colour; multi-select also rings
+      // SSUI: the well's edge in the focus color; multi-select also rings
       // the segment the keyboard is on.
       canvas.drawRRect(
           well.deflate(.75),
@@ -579,7 +579,7 @@ class RenderSegmentedButton extends RenderControl implements LabelledControl {
     }
   }
 
-  /// The icons' colours follow the states: set whenever it is to be
+  /// The icons' colors follow the states: set whenever it is to be
   /// painted again (never while painting).
   @override
   void markNeedsPaint() {

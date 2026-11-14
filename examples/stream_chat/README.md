@@ -80,7 +80,7 @@ ANTHROPIC_API_KEY=<key> dart run tool/record.dart --ui flights --model claude-ha
 It saves the exact `ui_apply` input deltas with their arrival times (`{"tMs", "delta"}` lines after a `{"meta"}`
 line with usage, the lookups made first, and how the ops fared). Then **the retry protocol**: the ops are applied
 as a session applies them (strict validation, the end of the stream, the lints of a finished UI: a button with no
-label, text in its background's colour, characters Roboto cannot draw); while anything is rejected, pending or
+label, text in its background's color, characters Roboto cannot draw); while anything is rejected, pending or
 linted, the tool result (`EditResult.toModelJson()`: rev, the ids that applied, every rejected op with code, path,
 expected and suggestion, pending ids, and `next`: fix by patching the document as it is, same ids, never start
 over) goes back and the retry is recorded (`.retry.jsonl`, `.retry2.jsonl`...), at most `--retries` times (2;
@@ -100,7 +100,7 @@ ANTHROPIC_API_KEY=<key> dart run tool/record.dart --ui flights --model claude-ha
 design system folder; or a bundle `.json`; compact prompt only) records the UI as `DESIGN_SYSTEM` makes it in the
 app: the system prompt is generated from the design system, `ui_docs` answers its documents and components, and each
 op of the generation, its retries and its follow-up is validated as `UiSession(designSystem:)` applies it (its
-components are node types the agent may call, its token names are the theme's colours and text styles), so the
+components are node types the agent may call, its token names are the theme's colors and text styles), so the
 retry protocol sends back what is wrong with the design system in view. Each recording's meta has `designSystem`
 (`id`, `name`, `version`); the summary counts `designSystemComponents` (nodes that call its components) and
 `replacedControls` (nodes of a core control it replaces: a raw `filledButton` where its `Button` was meant). The

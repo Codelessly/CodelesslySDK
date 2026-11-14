@@ -58,7 +58,7 @@ void main() {
       expect(_toggle(tree, 'box').markSide, isNull);
       expect(_toggle(tree, 'ring').markFill, _primary);
       expect(_toggle(tree, 'sw').trackColor, _primary);
-      expect(_toggle(tree, 'sw').thumb.centre.dx, 26, reason: 'at the end of the track');
+      expect(_toggle(tree, 'sw').thumb.center.dx, 26, reason: 'at the end of the track');
       expect(_toggle(tree, 'box'), paints..rrect(color: _primary)..path(color: const Color(0xFFFFFFFF)));
     });
 
@@ -71,7 +71,7 @@ void main() {
       expect(_toggle(tree, 'sw').trackColor, const Color(0xFF4A4A4A), reason: 'SSUI\'s dark secondaryBorder');
     });
 
-    testWidgets('a label sits beside the mark, 8 px away and centred on it; the control hugs both, and a tap on the label toggles', (tester) async {
+    testWidgets('a label sits beside the mark, 8 px away and centered on it; the control hugs both, and a tap on the label toggles', (tester) async {
       final (tree, recorded) = await _show(tester, {
         'box': hugging('checkbox', {'label': 'Remember me'}),
         'ring': hugging('radio', {'value': 'a', 'label': 'Monthly'}),
@@ -83,7 +83,7 @@ void main() {
         final text = glyphs.reduce((a, b) => a.expandToInclude(b));
         expect(mark.left, 0, reason: '$id mark at the start');
         expect(text.left, mark.right + RenderToggle.labelGap, reason: '$id gap');
-        expect(text.center.dy, closeTo(mark.center.dy, .5), reason: '$id label centred on its mark');
+        expect(text.center.dy, closeTo(mark.center.dy, .5), reason: '$id label centered on its mark');
         expect(t.size.width, greaterThan(mark.width + 40), reason: '$id hugs its label too');
         expect(t.size.height, greaterThanOrEqualTo(mark.height));
       }
@@ -121,7 +121,7 @@ void main() {
         'sw': hugging('switch'),
       });
       for (final id in ['box', 'ring', 'sw', 'ring']) {
-        await tester.tapAt(centreOf(tree, id));
+        await tester.tapAt(centerOf(tree, id));
         await tester.pump();
       }
       expect(recorded.fired, ['box changed', 'ring changed', 'sw changed']);
@@ -132,7 +132,7 @@ void main() {
 
     testWidgets('a toggleable radio lets go when tapped again', (tester) async {
       final (tree, recorded) = await _show(tester, {'ring': hugging('radio', {'value': 'a', 'groupValue': 'a', 'toggleable': true})});
-      await tester.tapAt(centreOf(tree, 'ring'));
+      await tester.tapAt(centerOf(tree, 'ring'));
       await tester.pump();
       expect(_toggle(tree, 'ring').value, isNull);
       expect(_toggle(tree, 'ring').checked, isFalse);
@@ -145,7 +145,7 @@ void main() {
       final box = _toggle(tree, 'box');
       final seen = <Object?>[];
       for (var i = 0; i < 3; i++) {
-        await tester.tapAt(centreOf(tree, 'box'));
+        await tester.tapAt(centerOf(tree, 'box'));
         await tester.pumpAndSettle();
         seen.add(box.value);
         if (box.value == null) {
@@ -171,14 +171,14 @@ void main() {
   testWidgets('a switch\'s thumb eases over SSUI\'s 150 ms on the tree\'s ticker', (tester) async {
     final (tree, _) = await _show(tester, {'sw': hugging('switch')});
     final sw = _toggle(tree, 'sw');
-    await tester.tapAt(centreOf(tree, 'sw'));
+    await tester.tapAt(centerOf(tree, 'sw'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 60));
     expect(sw.position, inExclusiveRange(0.2, 0.95));
-    expect(sw.thumb.centre.dx, inExclusiveRange(10, 26));
+    expect(sw.thumb.center.dx, inExclusiveRange(10, 26));
     await tester.pump(const Duration(milliseconds: 100));
     expect(sw.position, 1);
-    expect(sw.thumb.centre.dx, 26);
+    expect(sw.thumb.center.dx, 26);
   });
 
   testWidgets('Tab focuses with SSUI\'s ring, Space and Enter toggle; disabled draws at half and takes nothing', (tester) async {
@@ -186,7 +186,7 @@ void main() {
       'off': hugging('switch', {'enabled': false}),
       'box': hugging('checkbox'),
     });
-    await tester.tapAt(centreOf(tree, 'off'));
+    await tester.tapAt(centerOf(tree, 'off'));
     await tester.sendKeyEvent(LogicalKeyboardKey.tab);
     await tester.pump();
     final box = _toggle(tree, 'box');
@@ -205,7 +205,7 @@ void main() {
     final (tree, recorded) = await _show(tester, {'box': hugging('checkbox')});
     tree.setState('box', api.WidgetState.disabled, true);
     await tester.pump();
-    await tester.tapAt(centreOf(tree, 'box'));
+    await tester.tapAt(centerOf(tree, 'box'));
     await tester.pump();
     expect(recorded.fired, isEmpty);
     expect(_toggle(tree, 'box').paintedAlpha, 128);
@@ -247,7 +247,7 @@ void main() {
     await tester.pumpWidget(NodeView(tree: tree, rootId: 'col'));
     final box = _toggle(tree, 'box');
     expect(box.position, 1);
-    await tester.tapAt(centreOf(tree, 'box'));
+    await tester.tapAt(centerOf(tree, 'box'));
     await tester.pump();
     expect(box.value, isTrue);
   });
