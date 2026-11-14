@@ -946,7 +946,6 @@ class RenderMenuRow extends RenderBox
     if (_item.selected) fill = l.selectedFill;
     if (enabled && active && !_item.selected) fill = l.hoverFill;
     if (fill != null && fill.a > 0) canvas.drawRRect(shape, Paint()..color = fill);
-    if (enabled && active && _item.selected && l.hoverFill != null) canvas.drawRRect(shape, Paint()..color = l.hoverFill!);
     if (enabled && _pressed && l.pressedFill != null) canvas.drawRRect(shape, Paint()..color = l.pressedFill!);
     void content(PaintingContext context, Offset offset) {
       final img = child;
