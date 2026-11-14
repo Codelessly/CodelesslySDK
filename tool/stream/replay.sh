@@ -10,6 +10,12 @@
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 sdk="$(cd "$here/../.." && pwd)"
+# Scripts run on the QuickJS library tool/build_quickjs.sh builds, when it is there and none is named.
+if [ -z "${CODELESSLY_QUICKJS_LIBRARY:-}" ]; then
+  for lib in "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.so" "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.dylib"; do
+    if [ -f "$lib" ]; then export CODELESSLY_QUICKJS_LIBRARY="$lib"; break; fi
+  done
+fi
 [ $# -ge 1 ] || { echo "usage: replay.sh <stream.jsonl> --out <dir> [--sizes WxH,...] [--fonts dir] [--frame-ms n] [--frames n] [--no-video] [--design-system id|folder] [--theme light|dark] [--dump-document]" >&2; exit 2; }
 stream="$1"; shift
 case "$stream" in /*) ;; *) stream="$PWD/$stream" ;; esac

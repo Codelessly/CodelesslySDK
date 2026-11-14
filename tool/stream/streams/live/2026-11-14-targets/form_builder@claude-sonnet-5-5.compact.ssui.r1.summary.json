@@ -1,0 +1,98 @@
+{
+ "ui": "form_builder",
+ "kind": "app",
+ "model": "claude-sonnet-5-5",
+ "promptVariant": "compact",
+ "profile": "agentApps",
+ "scripts": true,
+ "designSystem": {
+  "id": "ssui",
+  "name": "Soft SaaS UI",
+  "version": "1.0.0"
+ },
+ "systemPromptChars": 64465,
+ "toolsChars": 2126,
+ "systemPromptAndToolsTokens": 27871,
+ "generate": {
+  "inputTokens": 203,
+  "outputTokens": 5220,
+  "cacheReadInputTokens": 27792,
+  "cacheCreationInputTokens": 0,
+  "ttftMs": 1161,
+  "firstToolDeltaMs": 1993,
+  "totalMs": 27922,
+  "stopReason": "StopReason.toolUse",
+  "ops": 39,
+  "opsApplied": 37,
+  "opsRejected": 2,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 2,
+  "errors": [
+   "unknown_bind_path /nodes/fLabel/bind/props.initialValue",
+   "unknown_bind_path /nodes/fOpts/bind/props.initialValue",
+   "dangling_child /nodes/fcard/children/1",
+   "dangling_child /nodes/fcard/children/2"
+  ],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 35,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 21,
+  "replacedControls": 0
+ },
+ "retries": [
+  {
+   "inputTokens": 14700,
+   "outputTokens": 571,
+   "cacheReadInputTokens": 55584,
+   "cacheCreationInputTokens": 0,
+   "ttftMs": 2339,
+   "firstToolDeltaMs": 3952,
+   "totalMs": 5769,
+   "stopReason": "StopReason.toolUse",
+   "lookups": [
+    {
+     "tool": "ui_docs",
+     "input": {
+      "topic": "node-textField"
+     },
+     "ms": 2345,
+     "outputTokens": 119,
+     "resultChars": 2302
+    }
+   ],
+   "ops": 2,
+   "opsApplied": 2,
+   "opsRejected": 0,
+   "opsRecoveredFromMalformed": 0,
+   "jsonRepairs": 0,
+   "pending": 0,
+   "errors": [],
+   "lints": [],
+   "warnings": 0,
+   "nodes": 37,
+   "scripts": 0,
+   "scriptChars": 0,
+   "designSystemComponents": 21,
+   "replacedControls": 2
+  }
+ ],
+ "final": {
+  "ops": 2,
+  "opsApplied": 2,
+  "opsRejected": 0,
+  "opsRecoveredFromMalformed": 0,
+  "jsonRepairs": 0,
+  "pending": 0,
+  "errors": [],
+  "lints": [],
+  "warnings": 0,
+  "nodes": 37,
+  "scripts": 0,
+  "scriptChars": 0,
+  "designSystemComponents": 21,
+  "replacedControls": 2
+ }
+}

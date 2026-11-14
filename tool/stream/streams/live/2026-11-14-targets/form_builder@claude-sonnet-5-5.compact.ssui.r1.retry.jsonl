@@ -1,0 +1,52 @@
+{"meta":{"ui":"form_builder","kind":"app","model":"claude-sonnet-5-5","promptVariant":"compact","profile":"agentApps","scripts":true,"designSystem":{"id":"ssui","name":"Soft SaaS UI","version":"1.0.0"},"turn":"retry","retry":1,"followup":"Fix the problems the tool result lists.","base":["form_builder@claude-sonnet-5-5.compact.ssui.r1.jsonl"],"source":"live","outputTokens":571,"usage":{"inputTokens":14700,"outputTokens":571,"cacheReadInputTokens":55584,"cacheCreationInputTokens":0,"ttftMs":2339,"firstToolDeltaMs":3952,"totalMs":5769,"stopReason":"StopReason.toolUse","lookups":[{"tool":"ui_docs","input":{"topic":"node-textField"},"ms":2345,"outputTokens":119,"resultChars":2302}]},"text":"The core `textField` takes `initialValue`, so I'll use it for the two per-item fields.","ttftMs":2339,"check":{"ops":2,"opsApplied":2,"opsRejected":0,"opsRecoveredFromMalformed":0,"jsonRepairs":0,"pending":0,"errors":[],"lints":[],"warnings":0,"nodes":37,"scripts":0,"scriptChars":0,"designSystemComponents":21,"replacedControls":2},"assets":null}}
+{"tMs":3952,"delta":"{\"ops\": ["}
+{"tMs":4400,"delta":"{\"op\":"}
+{"tMs":4400,"delta":"\"set\",\"id\":\"fL"}
+{"tMs":4400,"delta":"abel\",\"par"}
+{"tMs":4400,"delta":"ent\":\"fcard\",\"index"}
+{"tMs":4400,"delta":"\":1,\"node\":{\""}
+{"tMs":4400,"delta":"type\":\"textField\",\"props"}
+{"tMs":4400,"delta":"\":{\"decoration\":{"}
+{"tMs":4400,"delta":"\"hintText\":\"Label"}
+{"tMs":4400,"delta":"\"},\"style\":\""}
+{"tMs":4400,"delta":"in"}
+{"tMs":4834,"delta":"putText\"},\"layout\":"}
+{"tMs":4834,"delta":"{\"width\":{\"fill"}
+{"tMs":4834,"delta":"\":346},\"height\":{"}
+{"tMs":4834,"delta":"\"hug\":28}},\""}
+{"tMs":4834,"delta":"bind\":{\"props.init"}
+{"tMs":4834,"delta":"ialValue\":\"${item."}
+{"tMs":4834,"delta":"label}\"},\"actions\":"}
+{"tMs":4834,"delta":"[{\"trigger\":{"}
+{"tMs":4834,"delta":"\"type\":\"changed\"},"}
+{"tMs":4834,"delta":"\"actions\":[{\"type"}
+{"tMs":4834,"delta":"\":\"setVariable\",\"vari"}
+{"tMs":4834,"delta":"able\":\"fields[index]."}
+{"tMs":5260,"delta":"label\",\"value\":\"${result}"}
+{"tMs":5260,"delta":"\"}]}]}},{"}
+{"tMs":5260,"delta":"\"op\":\"set\",\"id\":"}
+{"tMs":5260,"delta":"\"fOpts\",\"parent"}
+{"tMs":5260,"delta":"\":\"fcard\",\"index\":"}
+{"tMs":5260,"delta":"2,\"node\":{\"type"}
+{"tMs":5260,"delta":"\":\"textField\",\"props\":{"}
+{"tMs":5260,"delta":"\"decoration\":{\"h"}
+{"tMs":5260,"delta":"intText\":\"Options, com"}
+{"tMs":5260,"delta":"ma separated\"},\"style\":"}
+{"tMs":5260,"delta":"\"inputText\"},\"lay"}
+{"tMs":5260,"delta":"out\":{\"width\":{\""}
+{"tMs":5747,"delta":"fill\":346},\"height\":"}
+{"tMs":5747,"delta":"{\"hug\":28}},"}
+{"tMs":5747,"delta":"\"bind\":{\"visible"}
+{"tMs":5747,"delta":"\":\"${= item.kind"}
+{"tMs":5747,"delta":" == 'Dropdown"}
+{"tMs":5747,"delta":"'}\",\"props.initialVal"}
+{"tMs":5747,"delta":"ue\":\"${item.opts"}
+{"tMs":5747,"delta":"}\"},\"actions\":["}
+{"tMs":5747,"delta":"{\"trigger\":{\""}
+{"tMs":5748,"delta":"type\":\"changed\"},\""}
+{"tMs":5748,"delta":"actions\":[{\"type\":"}
+{"tMs":5748,"delta":"\"setVariable\",\"variable"}
+{"tMs":5748,"delta":"\":\"fields[index].op"}
+{"tMs":5748,"delta":"ts\",\"value\":\"${result}"}
+{"tMs":5748,"delta":"\"}]}]}}]"}
+{"tMs":5763,"delta":"}"}

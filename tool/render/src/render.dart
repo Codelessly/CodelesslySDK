@@ -576,9 +576,11 @@ Future<void> _renderAll(
         ];
         for (final (err, details) in errors) {
           final text = _firstLine('$err');
-          // A flex "overflowed by 1.04e-7 pixels" is rounding, not a problem.
+          // A flex "overflowed by 1.04e-7 pixels" is rounding, and under
+          // half a pixel (a label a fraction wider than a fifth of a row)
+          // nothing shows: neither is a problem.
           final by = RegExp(r'overflowed by ([0-9.eE+-]+) pixels').firstMatch(text);
-          if (by != null && (double.tryParse(by[1]!) ?? 1) < 0.01) continue;
+          if (by != null && (double.tryParse(by[1]!) ?? 1) < 0.5) continue;
           final node = _nodeOfError(details ?? _errorDetails[err]);
           _errorDetails.remove(err);
           final advice = node == null || by == null ? null : _overflowAdvice(binding, node, double.parse(by[1]!), text);

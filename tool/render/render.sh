@@ -9,6 +9,12 @@
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 sdk="$(cd "$here/../.." && pwd)"
+# Scripts run on the QuickJS library tool/build_quickjs.sh builds, when it is there and none is named.
+if [ -z "${CODELESSLY_QUICKJS_LIBRARY:-}" ]; then
+  for lib in "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.so" "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.dylib"; do
+    if [ -f "$lib" ]; then export CODELESSLY_QUICKJS_LIBRARY="$lib"; break; fi
+  done
+fi
 
 # Paths are taken relative to where the command is run; make them absolute.
 args=()
