@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Pager",
-  "doc": "Paging for a list: \"Page 1 of 3\" with previous and next buttons; Pager =page count:=ceil(length(rows)/5) keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5).",
+  "doc": "Paging for a list or for pages of content: \"Page 1 of 3\" with previous and next buttons; Pager =page count:=ceil(length(rows)/5) keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5), or give it the variable of Pages or a Carousel to turn their pages.",
   "props": [
    {
     "key": "value",
@@ -37,7 +37,7 @@
      "flutter": "String"
     },
     "default": "Page",
-    "doc": "The word before \"1 of 3\"."
+    "doc": "The word before \"1 of 3\" (empty: the count alone, as under a carousel)."
    }
   ],
   "events": [
@@ -83,7 +83,7 @@
   "label": {
    "type": "text",
    "props": {
-    "text": "${props.label} ${= props.value + 1} of ${= max(1, props.count)}",
+    "text": "${= trim(props.label + ' ' + text(props.value + 1) + ' of ' + text(max(1, props.count)))}",
     "style": "meta"
    },
    "layout": {

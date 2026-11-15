@@ -23,7 +23,7 @@
      "1,340",
      "$38.9k"
     ],
-    "doc": "The cell texts, in column order (up to five).",
+    "doc": "The cell texts, in column order (up to seven).",
     "required": true
    },
    {
@@ -96,6 +96,8 @@
     "c2",
     "c3",
     "c4",
+    "c5",
+    "c6",
     "badge"
    ],
    "props": {
@@ -429,6 +431,60 @@
     "visible": "${= length(props.cells) > 4}",
     "layout.flex": "${= length(props.widths) > 4 ? at(props.widths, 4) : 2}",
     "props.textAlign": "${= (4 == length(props.cells) - 1 && 4 > 0 && props.badge == '') ? 'right' : 'left'}",
+    "props.style.color": "${= theme.colors.inkSoft}"
+   }
+  },
+  "c5": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.cells) > 5 ? at(props.cells, 5) : \"\"}",
+    "style": {
+     "from": "figure",
+     "fontSize": 13
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 2
+   },
+   "bind": {
+    "visible": "${= length(props.cells) > 5}",
+    "layout.flex": "${= length(props.widths) > 5 ? at(props.widths, 5) : 2}",
+    "props.textAlign": "${= (5 == length(props.cells) - 1 && 5 > 0 && props.badge == '') ? 'right' : 'left'}",
+    "props.style.color": "${= theme.colors.inkSoft}"
+   }
+  },
+  "c6": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.cells) > 6 ? at(props.cells, 6) : \"\"}",
+    "style": {
+     "from": "figure",
+     "fontSize": 13
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 2
+   },
+   "bind": {
+    "visible": "${= length(props.cells) > 6}",
+    "layout.flex": "${= length(props.widths) > 6 ? at(props.widths, 6) : 2}",
+    "props.textAlign": "${= (6 == length(props.cells) - 1 && 6 > 0 && props.badge == '') ? 'right' : 'left'}",
     "props.style.color": "${= theme.colors.inkSoft}"
    }
   }

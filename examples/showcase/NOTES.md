@@ -10,7 +10,7 @@ Rebuild everything: `python3 design_systems/cards/tool/build.py` (the design sys
 `python3 examples/showcase/tool/build.py [--only a,b] [--theme dark] [--sheet name.png]` for the cards alone.
 All 17 cards and their 23 extra states render with 0 errors and 0 warnings; the 17 also do on the dark set.
 
-## The blocks (41), as the notation prompt lists them
+## The blocks (43), as the notation prompt lists them
 
 ```
 ChatCard "title" "subtitle" icon status tone (children)
@@ -32,16 +32,18 @@ DayPicker =value days! -> onChanged
 Counter "label" "detail" =value min max step icon -> onChanged
 FlightOption "name" depart! arrive! origin destination duration stops price tag selected -> onPressed
 ProductTile "name" "detail" price rating kind tone badge cta height -> onPressed
-Carousel =value count! thumbs kind -> onChanged (children)
+Carousel =value items! kind peek dots arrows counter thumbs cta height -> onPressed
+PageDots =value count! -> onChanged
 Pager "label" =value count! -> onChanged
+WideScroll width! fade (children)
 CartLine "title" "detail" price qty! kind tone -> onChanged
 DiffHunk "title" "detail" =value start! lines! -> onChanged
-ComparisonTable names! prices notes rows! pick pickLabel cta corner -> onChoose
+ComparisonTable names! prices notes rows! pick pickLabel cta corner columnWidth -> onChoose
 StatTile "label" "note" value! delta invert icon
 ChartCard "title" value values! labels kind delta
 TableHeader =value desc columns! keys widths selectable checked -> onToggleAll
 TableRow cells! badge widths selectable checked -> onPressed
-PhotoGallery =value photos! columns -> onChanged
+PhotoGallery =value photos! layout dots columns -> onChanged
 DayHeader "title" "subtitle" kind tone tag (children)
 ItineraryStop "title" "detail" time! travel last open
 Checklist "title" =value items! -> onChanged
@@ -56,11 +58,11 @@ Media kind! tone round
 WeatherGlyph kind!
 ```
 
-For a prompt's component list (the block lines cost about 12,000 characters, roughly 3,000 tokens; with SSUI's 159
+For a prompt's component list (the block lines cost about 13,200 characters, roughly 3,300 tokens; with SSUI's 159
 base controls the whole prompt is 41,900 characters, so list only these):
 
 ```
-ChatCard,SectionLabel,Paragraph,ActionButton,TotalBar,Details,Callout,Disclosure,Receipt,Recommendation,Steps,Segments,InputField,OptionList,ChoiceChips,DayPicker,Counter,FlightOption,ProductTile,Carousel,Pager,CartLine,DiffHunk,ComparisonTable,StatTile,ChartCard,TableHeader,TableRow,PhotoGallery,DayHeader,ItineraryStop,Checklist,MapPanel,PlaceRow,PlanStep,ProgressLine,WeatherNow,WeatherHours,WeatherDay,Media,WeatherGlyph
+ChatCard,SectionLabel,Paragraph,ActionButton,TotalBar,Details,Callout,Disclosure,Receipt,Recommendation,Steps,Segments,InputField,OptionList,ChoiceChips,DayPicker,Counter,FlightOption,ProductTile,Carousel,PageDots,Pager,WideScroll,CartLine,DiffHunk,ComparisonTable,StatTile,ChartCard,TableHeader,TableRow,PhotoGallery,DayHeader,ItineraryStop,Checklist,MapPanel,PlaceRow,PlanStep,ProgressLine,WeatherNow,WeatherHours,WeatherDay,Media,WeatherGlyph
 ```
 
 `Media` kinds: shoe, mug, tote, box, beans, laptop, banana, milk, bread, eggs, cheese, apple (products; tones sand,
@@ -73,21 +75,26 @@ bamboo (scenes; tones dawn, day, dusk, night). `WeatherGlyph` kinds: sun, partly
 | Brief | Lines | Blocks |
 |---|---|---|
 | approval | 14 | ChatCard, Paragraph, ActionButton, Details, Callout, Disclosure, Receipt |
-| carousel | 14 | ChatCard, SectionLabel, Paragraph, ActionButton, ChoiceChips, ProductTile, Carousel |
+| carousel | 13 | ChatCard, SectionLabel, Paragraph, ActionButton, ChoiceChips, ProductTile, Carousel |
 | checkout | 30 | ChatCard, ActionButton, TotalBar, Details, Receipt, Steps, InputField, OptionList, CartLine |
 | code_diff | 5 | ChatCard, TotalBar, DiffHunk |
 | comparison | 4 | ChatCard, Recommendation, ComparisonTable |
+| comparison_wide | 4 | ChatCard, Recommendation, ComparisonTable |
 | dashboard | 19 | ChatCard, SectionLabel, Segments, StatTile, ChartCard, TableHeader, TableRow |
 | data_table | 17 | ChatCard, TotalBar, Segments, InputField, Pager, TableHeader, TableRow |
 | flights | 7 | ChatCard, TotalBar, FlightOption |
+| gallery_pages | 3 | ChatCard, PhotoGallery |
+| gallery_strip | 3 | ChatCard, PhotoGallery |
 | image_gallery | 3 | ChatCard, PhotoGallery |
 | itinerary | 13 | ChatCard, DayHeader, ItineraryStop, Checklist |
 | map_list | 5 | ChatCard, MapPanel, PlaceRow |
 | message_draft | 18 | ChatCard, ActionButton, Receipt, Segments, InputField |
 | order_summary | 17 | ChatCard, ActionButton, TotalBar, Details, Receipt, InputField, CartLine |
+| pages_content | 10 | ChatCard, Paragraph, PageDots, Pager, Media |
 | plan_progress | 13 | ChatCard, ActionButton, Receipt, PlanStep, ProgressLine |
 | question_flow | 18 | ChatCard, ActionButton, Recommendation, Steps, OptionList |
 | reservation | 16 | ChatCard, SectionLabel, TotalBar, Receipt, ChoiceChips, DayPicker, Counter |
+| table_wide | 8 | ChatCard, WideScroll, TableHeader, TableRow |
 | weather | 10 | ChatCard, SectionLabel, ActionButton, WeatherNow, WeatherHours, WeatherDay |
 
 Lines include `state` lines (the data). Checkout is the only one over 25: three steps, a five-field form with
@@ -98,6 +105,11 @@ shoe; checkout, a quantity raised; code_diff, one hunk kept and one discarded; d
 data_table, sorted by amount and two rows ticked; itinerary, a stop opened and a booking ticked; map_list, pin 2;
 order_summary, a quantity raised and SAVE10 typed; plan_progress, started and left three seconds; question_flow,
 the first answer given; reservation, a day, a party of three and a time.
+
+Five more cards show the sliding and wide blocks: `comparison_wide` (four plans, columns scroll, labels stay),
+`gallery_strip`, `gallery_pages`, `pages_content` (the notation's `Pages` with `PageDots` and `Pager`) and
+`table_wide` (seven columns in a `WideScroll`). Their states under `renders/states/` are reached by dragging
+(`--drag car/pages=-250,0`) and by tapping a dot.
 
 ## Rounds
 
@@ -143,6 +155,17 @@ the first answer given; reservation, a day, a party of three and a time.
 15. One copied SSUI control's preview frame (`ResourceChip`, 110 px) was too narrow for Inter; the build widens it.
     The copied controls' `"monospace"` family is replaced with the shipped mono family.
 
+16. **A sideways-scrolling row needs `scrollDirection: horizontal`** beside `scrollable: true`; without it the row
+    overflows (`render_exception ... its content overflows its right by 234 px`). The notation's `Row scroll` writes
+    only `scrollable`, so it may not scroll: worth a check.
+17. **A slot inside a page view cannot read the page's item**, so `Carousel` takes its items as records and draws
+    the `ProductTile` itself instead of taking a child line.
+18. **A bound width is a number**, so `ComparisonTable`'s two-column form uses 140 px columns (it fills a 420 card
+    exactly; a wider card leaves room at the right). Its rows have a fixed height (two lines of text at most) so
+    the pinned labels and the scrolling columns line up.
+19. **The edge fade is constant**: it does not go away at the end of the scroll (no scroll position to read).
+    A wide table's first column is not pinned; only `ComparisonTable` keeps its labels in place.
+
 ## Honest self-critique
 
 Strongest: **flights** (the path, the tags, the closing bar), **dashboard** (tiles, the smooth line, the lit bar,
@@ -151,8 +174,7 @@ the sortable table), **order_summary** and **checkout** (drawn thumbnails, stepp
 All 17 beat the plain versions clearly; where they still fall short:
 
 - **approval**: correct and calm, but it is a list of facts; nothing in it is memorable.
-- **carousel**: one item at a time with arrows, dots, thumbnails and swipe, not a sliding strip with a peek of the
-  next item; six shoes are one drawing in six tones.
+- **carousel**: now a real sliding strip with a peek; the six shoes are still one drawing in six tones.
 - **comparison**: the recommended column is a neutral tint, quieter than before the palette correction; with
   long values the columns would crowd at 420.
 - **data_table**: five columns, a tick box and a status pill fit at 420 only because ids and dates are short; a

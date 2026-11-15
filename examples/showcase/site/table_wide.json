@@ -1,0 +1,234 @@
+{
+ "schema": 3,
+ "roots": [
+  "table_wide"
+ ],
+ "nodes": {
+  "table_wide": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Plans in detail",
+    "subtitle": "Seven columns · scroll sideways",
+    "icon": "table_chart_rounded",
+    "status": "5 plans"
+   },
+   "children": [
+    "wide"
+   ]
+  },
+  "wide": {
+   "type": "WideScroll",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "width": 620
+   },
+   "children": [
+    "head",
+    "listView1"
+   ]
+  },
+  "head": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "desc": "desc",
+    "columns": [
+     "Plan",
+     "Subs",
+     "Revenue",
+     "ARPU",
+     "Churn",
+     "Trials",
+     "Status"
+    ],
+    "keys": [
+     "plan",
+     "subs",
+     "revenue",
+     "arpu",
+     "churn",
+     "trials",
+     "status"
+    ],
+    "widths": [
+     3,
+     2,
+     3,
+     2,
+     2,
+     2,
+     3
+    ]
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= desc?sortByDesc(plans,sort):sortBy(plans,sort)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "widths": [
+     3,
+     2,
+     3,
+     2,
+     2,
+     2,
+     3
+    ]
+   },
+   "bind": {
+    "props.cells": "${= [item.plan,thousands(item.subs),money(item.revenue,\"$\",0),money(item.arpu,\"$\",2),item.churn+\"%\",thousands(item.trials)]}",
+    "props.badge": "${item.status}"
+   }
+  }
+ },
+ "variables": {
+  "table_wide": [
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "revenue"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "plans",
+    "type": "list",
+    "value": [
+     {
+      "plan": "Pro",
+      "subs": 1340,
+      "revenue": 38900,
+      "arpu": 29,
+      "churn": 2.1,
+      "trials": 212,
+      "status": "Active"
+     },
+     {
+      "plan": "Team",
+      "subs": 412,
+      "revenue": 24700,
+      "arpu": 60,
+      "churn": 1.4,
+      "trials": 64,
+      "status": "Active"
+     },
+     {
+      "plan": "Starter",
+      "subs": 2980,
+      "revenue": 8900,
+      "arpu": 3,
+      "churn": 5.2,
+      "trials": 930,
+      "status": "Trial"
+     },
+     {
+      "plan": "Business",
+      "subs": 96,
+      "revenue": 4800,
+      "arpu": 50,
+      "churn": 0.9,
+      "trials": 11,
+      "status": "Active"
+     },
+     {
+      "plan": "Student",
+      "subs": 640,
+      "revenue": 1600,
+      "arpu": 2.5,
+      "churn": 6.8,
+      "trials": 140,
+      "status": "Pending"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "PhotoGallery",
-  "doc": "A photo grid with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; optional tone: dawn, day, dusk, night) with its caption; tapping one opens it large over the grid with its caption, a \"3 of 9\" counter, previous and next arrows and a close button, keeping the open photo's number (0: closed) in your variable.",
+  "doc": "A photo gallery with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next; your variable holds the photo in view (0: none open).",
   "props": [
    {
     "key": "value",
@@ -18,7 +18,7 @@
      }
     },
     "default": "",
-    "doc": "The name of your number variable: 0 while the grid shows, else the number of the photo open (from 1)."
+    "doc": "The name of your number variable: 0 while the grid or strip shows, else the number of the photo in view (from 1)."
    },
    {
     "key": "photos",
@@ -48,13 +48,36 @@
     "required": true
    },
    {
+    "key": "layout",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "grid",
+      "strip",
+      "pages"
+     ]
+    },
+    "default": "grid",
+    "doc": "grid (rows of thumbnails), strip (one row that scrolls sideways) or pages (one full-width photo at a time, swiped, with dots)."
+   },
+   {
+    "key": "dots",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "Pagination dots under the paged and the large view."
+   },
+   {
     "key": "columns",
     "type": {
      "kind": "integer",
      "flutter": "int"
     },
     "default": 3,
-    "doc": "Thumbnails per row."
+    "doc": "Thumbnails per row of the grid."
    }
   ],
   "events": [
@@ -72,15 +95,41 @@
     130
    ],
    "props": {}
+  },
+  {
+   "name": "Strip",
+   "size": [
+    360,
+    150
+   ],
+   "props": {
+    "layout": "strip"
+   }
+  },
+  {
+   "name": "Pages",
+   "size": [
+    360,
+    290
+   ],
+   "props": {
+    "layout": "pages"
+   }
   }
  ],
  "nodes": {
   "gallery": {
-   "type": "stack",
+   "type": "column",
    "children": [
     "grid",
+    "strip",
+    "paged",
     "veil"
    ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
    "layout": {
     "width": {
      "fill": 0
@@ -112,7 +161,8 @@
    },
    "bind": {
     "data": "${props.photos}",
-    "props.crossAxisCount": "${props.columns}"
+    "props.crossAxisCount": "${props.columns}",
+    "visible": "${= props.layout == 'grid' && props.value <= 0}"
    }
   },
   "cell": {
@@ -198,16 +248,191 @@
     }
    }
   },
-  "veil": {
+  "strip": {
+   "type": "listView",
+   "children": [
+    "tile"
+   ],
+   "props": {
+    "scrollable": true,
+    "spacing": 10,
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 150
+   },
+   "bind": {
+    "data": "${props.photos}",
+    "visible": "${= props.layout == 'strip' && props.value <= 0}"
+   }
+  },
+  "tile": {
    "type": "column",
    "children": [
-    "bar",
-    "stage",
-    "foot"
+    "tileArt",
+    "tileCaption"
    ],
    "props": {
     "crossAxisAlignment": "stretch",
-    "spacing": 12
+    "spacing": 6
+   },
+   "layout": {
+    "width": 168,
+    "height": {
+     "fill": 0
+    }
+   },
+   "states": {
+    "pressed": {
+     "tile": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= index + 1}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= index + 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "tileArt": {
+   "type": "Media",
+   "props": {
+    "kind": "mountain"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 124
+   },
+   "bind": {
+    "props.kind": "${item.kind}",
+    "props.tone": "${= coalesce(item.tone, 'auto')}"
+   }
+  },
+  "tileCaption": {
+   "type": "text",
+   "props": {
+    "text": "${= coalesce(item.caption, '')}",
+    "style": {
+     "from": "meta",
+     "fontSize": 11.5,
+     "height": 1.25,
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "paged": {
+   "type": "column",
+   "children": [
+    "pages",
+    "pagedFoot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.layout == 'pages'}"
+   }
+  },
+  "pages": {
+   "type": "pageView",
+   "children": [
+    "pg"
+   ],
+   "props": {
+    "viewportFraction": 1,
+    "scrollDirection": "horizontal",
+    "padEnds": false
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 250
+   },
+   "bind": {
+    "props.initialPage": "${= clamp(props.value - 1, 0, max(0, length(props.photos) - 1))}",
+    "data": "${props.photos}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= result.index + 1}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= result.index + 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "pg": {
+   "type": "stack",
+   "children": [
+    "pgArt",
+    "pgShade",
+    "pgCaption",
+    "pgCount"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "pgArt": {
+   "type": "Media",
+   "props": {
+    "kind": "mountain"
    },
    "layout": {
     "width": {
@@ -223,12 +448,278 @@
     "y": {
      "start": 0,
      "end": 0
+    }
+   },
+   "bind": {
+    "props.kind": "${item.kind}",
+    "props.tone": "${= coalesce(item.tone, 'auto')}"
+   }
+  },
+  "pgShade": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 84,
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "end": 0
+    }
+   },
+   "decoration": {
+    "radius": [
+     0,
+     0,
+     14,
+     14
+    ],
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topCenter",
+      "end": "bottomCenter",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#00000000"
+       },
+       {
+        "position": 1,
+        "color": "#A6000000"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "pgCaption": {
+   "type": "text",
+   "props": {
+    "text": "${= coalesce(item.caption, '')}",
+    "style": {
+     "from": "blockTitle",
+     "color": "#FFFFFFFF"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "x": {
+     "start": 14,
+     "end": 14
+    },
+    "y": {
+     "end": 12
+    }
+   }
+  },
+  "pgCount": {
+   "type": "row",
+   "children": [
+    "pgCountText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     9,
+     5,
+     9,
+     5
+    ],
+    "x": {
+     "end": 12
+    },
+    "y": {
+     "start": 12
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#8C000000"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "pgCountText": {
+   "type": "text",
+   "props": {
+    "text": "${= index + 1} of ${= length(props.photos)}",
+    "style": {
+     "from": "chip",
+     "color": "#FFFFFFFF"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "pagedFoot": {
+   "type": "column",
+   "children": [
+    "pdots"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${props.dots}"
+   }
+  },
+  "pdots": {
+   "type": "row",
+   "children": [
+    "pdotsList"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 22
+   }
+  },
+  "pdotsList": {
+   "type": "listView",
+   "children": [
+    "pdotsHit"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 0,
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22
+   },
+   "bind": {
+    "data": "${= range(max(1, length(props.photos)))}"
+   }
+  },
+  "pdotsHit": {
+   "type": "row",
+   "children": [
+    "pdotsDot"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     3,
+     0,
+     3,
+     0
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= index + 1}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= index + 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "pdotsDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "layout.width": "${= index == clamp(props.value - 1, 0, max(0, length(props.photos) - 1)) ? 20 : 6}",
+    "decoration.fills[0].color": "${= index == clamp(props.value - 1, 0, max(0, length(props.photos) - 1)) ? theme.colors.accent : theme.colors.lineStrong}"
+   }
+  },
+  "veil": {
+   "type": "column",
+   "children": [
+    "bar",
+    "stage",
+    "foot",
+    "vdots"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
     },
     "padding": [
      12,
      12,
      12,
-     14
+     12
     ]
    },
    "decoration": {
@@ -240,7 +731,7 @@
     "radius": 14
    },
    "bind": {
-    "visible": "${= props.value > 0}",
+    "visible": "${= props.layout != 'pages' && props.value > 0}",
     "decoration.radius": "${theme.radii.tile}"
    }
   },
@@ -299,7 +790,7 @@
   "countText": {
    "type": "text",
    "props": {
-    "text": "${props.value} of ${= length(props.photos)}",
+    "text": "${= clamp(props.value - 1, 0, max(0, length(props.photos) - 1)) + 1} of ${= length(props.photos)}",
     "style": {
      "from": "chip",
      "color": "onBar"
@@ -384,16 +875,18 @@
     "width": {
      "fill": 0
     },
-    "height": {
-     "fill": 0
-    },
-    "flex": 1
+    "height": 252
    }
   },
   "big": {
-   "type": "Media",
+   "type": "pageView",
+   "children": [
+    "bigArt"
+   ],
    "props": {
-    "kind": "mountain"
+    "viewportFraction": 1,
+    "scrollDirection": "horizontal",
+    "padEnds": false
    },
    "layout": {
     "width": {
@@ -412,8 +905,45 @@
     }
    },
    "bind": {
-    "props.kind": "${= at(props.photos, clamp(props.value - 1, 0, max(0, length(props.photos) - 1))).kind}",
-    "props.tone": "${= coalesce(at(props.photos, clamp(props.value - 1, 0, max(0, length(props.photos) - 1))).tone, 'auto')}"
+    "props.initialPage": "${= clamp(props.value - 1, 0, max(0, length(props.photos) - 1))}",
+    "data": "${props.photos}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= result.index + 1}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= result.index + 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "bigArt": {
+   "type": "Media",
+   "props": {
+    "kind": "mountain"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "bind": {
+    "props.kind": "${item.kind}",
+    "props.tone": "${= coalesce(item.tone, 'auto')}"
    }
   },
   "prev": {
@@ -571,6 +1101,105 @@
     "height": {
      "hug": 0
     }
+   }
+  },
+  "vdots": {
+   "type": "row",
+   "children": [
+    "vdotsList"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 22
+   },
+   "bind": {
+    "visible": "${props.dots}"
+   }
+  },
+  "vdotsList": {
+   "type": "listView",
+   "children": [
+    "vdotsHit"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 0,
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22
+   },
+   "bind": {
+    "data": "${= range(max(1, length(props.photos)))}"
+   }
+  },
+  "vdotsHit": {
+   "type": "row",
+   "children": [
+    "vdotsDot"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     3,
+     0,
+     3,
+     0
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= index + 1}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= index + 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "vdotsDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "layout.width": "${= index == clamp(props.value - 1, 0, max(0, length(props.photos) - 1)) ? 20 : 6}",
+    "decoration.fills[0].color": "${= index == clamp(props.value - 1, 0, max(0, length(props.photos) - 1)) ? theme.colors.onBar : theme.colors.onBarSoft}"
    }
   }
  }

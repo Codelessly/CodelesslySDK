@@ -1,0 +1,152 @@
+{
+ "schema": 3,
+ "id": "PageDots",
+ "roots": [
+  "dots"
+ ],
+ "widget": {
+  "type": "PageDots",
+  "doc": "Pagination dots for Pages, a Carousel or any paged content: PageDots =page count:=length(items) draws one dot per page, the current one long and in the accent, and a tap on a dot sets your variable to that page (from 0).",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable: the page shown, from 0 (the same one Pages or Carousel keeps)."
+   },
+   {
+    "key": "count",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 3,
+    "doc": "How many pages there are.",
+    "required": true
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "A dot was tapped; the value is its page."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Dots",
+   "size": [
+    200,
+    22
+   ],
+   "props": {
+    "value": 1,
+    "count": 5
+   }
+  }
+ ],
+ "nodes": {
+  "dots": {
+   "type": "row",
+   "children": [
+    "dotsList"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 22
+   }
+  },
+  "dotsList": {
+   "type": "listView",
+   "children": [
+    "dotsHit"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 0,
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22
+   },
+   "bind": {
+    "data": "${= range(max(1, props.count))}"
+   }
+  },
+  "dotsHit": {
+   "type": "row",
+   "children": [
+    "dotsDot"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     3,
+     0,
+     3,
+     0
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= index}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${index}"
+      }
+     ]
+    }
+   ]
+  },
+  "dotsDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "layout.width": "${= index == props.value ? 20 : 6}",
+    "decoration.fills[0].color": "${= index == props.value ? theme.colors.accent : theme.colors.lineStrong}"
+   }
+  }
+ }
+}
