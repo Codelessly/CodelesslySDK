@@ -1,0 +1,139 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Apartment photos",
+    "subtitle": "4 images",
+    "icon": "apartment",
+    "status": "Saved"
+   },
+   "children": [
+    "PhotoGallery1",
+    "text1",
+    "ActionButton1"
+   ]
+  },
+  "PhotoGallery1": {
+   "type": "PhotoGallery",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "open",
+    "layout": "grid",
+    "photos": [
+     {
+      "kind": "skyline",
+      "caption": "Living room"
+     },
+     {
+      "kind": "dunes",
+      "caption": "Bedroom"
+     },
+     {
+      "kind": "harbor",
+      "caption": "Kitchen"
+     },
+     {
+      "kind": "forest",
+      "caption": "Balcony"
+     }
+    ]
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "4 photos in this listing"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Save",
+    "tone": "primary",
+    "icon": "bookmark"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "saveApartment"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "open",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

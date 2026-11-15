@@ -1,0 +1,103 @@
+{"meta":{"ui":"missing_boarding","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a scannable airline boarding pass chat card with passenger, flight, gate, seat, boarding group and time, plus a large QR code and tear-off ticket layout.","text":"ChatCard \"Boarding pass\" \"Flight LH 742 · Frankfurt to Tokyo\" icon:\"flight\" status:\"Boarding\"\n  Row between\n    Column gap:2\n      Text.caption \"PASSENGER\"\n      Text.strong \"Mara Okafor\"\n    Column gap:2\n      Text.caption \"FLIGHT\"\n      Text.strong \"LH 742\"\n  Row between\n    Column gap:2\n      Text.caption \"FROM\"\n      Text.heading \"FRA\"\n    Icon \"flight_takeoff\"\n    Column gap:2\n      Text.caption \"TO\"\n      Text.heading \"NRT\"\n  Divider\n  Row between\n    Column gap:2\n      Text.caption \"GATE\"\n      Text.heading \"B24\"\n    Column gap:2\n      Text.caption \"SEAT\"\n      Text.heading \"14C\"\n    Column gap:2\n      Text.caption \"GROUP\"\n      Text.heading \"2\"\n    Column gap:2\n      Text.caption \"BOARDS\"\n      Text.heading \"09:25\"\n  Divider dashed\n  Box fill:#FFFFFFFF pad:16 radius:12\n    Row center gap:12\n      Column gap:6 center\n        Text.caption \"SCAN AT GATE\"\n        Box w:200 h:200 fill:#FF111111 radius:8\n          Text.caption \"QR\" color:#FFFFFFFF\n      Column gap:4\n        Text.caption \"BOARDING PASS\"\n        Text.mono \"LH742 FRANKFURT TOKYO 14C\"\n        Text.caption \"Keep this ticket until landing\"","usage":{"input_tokens":9317,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":542,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":614,"totalMs":2774}}
+{"tMs":614,"delta":"ChatCard \"Bo"}
+{"tMs":694,"delta":"arding pass\" \"Fl"}
+{"tMs":694,"delta":"ight L"}
+{"tMs":694,"delta":"H"}
+{"tMs":694,"delta":" "}
+{"tMs":700,"delta":"742 · Fr"}
+{"tMs":722,"delta":"ankfurt to"}
+{"tMs":740,"delta":" T"}
+{"tMs":766,"delta":"okyo\" icon:\""}
+{"tMs":789,"delta":"flight\" status:\"Bo"}
+{"tMs":813,"delta":"arding\"\n  Row between"}
+{"tMs":850,"delta":"\n    Column"}
+{"tMs":870,"delta":" gap:2"}
+{"tMs":892,"delta":"\n      Text.ca"}
+{"tMs":912,"delta":"ption \"P"}
+{"tMs":936,"delta":"ASSENGER\"\n      "}
+{"tMs":959,"delta":"Text.strong \""}
+{"tMs":975,"delta":"M"}
+{"tMs":993,"delta":"ara"}
+{"tMs":1013,"delta":" Ok"}
+{"tMs":1035,"delta":"afor\"\n    Column"}
+{"tMs":1056,"delta":" gap:2\n      Text"}
+{"tMs":1077,"delta":".caption \"FLIG"}
+{"tMs":1099,"delta":"HT\"\n      Text."}
+{"tMs":1129,"delta":"strong \"LH 742\""}
+{"tMs":1140,"delta":"\n  Row"}
+{"tMs":1163,"delta":" between"}
+{"tMs":1181,"delta":"\n    Column gap:2"}
+{"tMs":1202,"delta":"\n      Text.caption \""}
+{"tMs":1227,"delta":"FROM\"\n      Text"}
+{"tMs":1243,"delta":".he"}
+{"tMs":1263,"delta":"ading \""}
+{"tMs":1284,"delta":"FRA\"\n    Ic"}
+{"tMs":1304,"delta":"on \""}
+{"tMs":1324,"delta":"flight_"}
+{"tMs":1345,"delta":"takeoff\"\n    "}
+{"tMs":1365,"delta":"Column gap:2\n      "}
+{"tMs":1477,"delta":"Text.caption \"TO\""}
+{"tMs":1478,"delta":"\n      Text.heading \""}
+{"tMs":1478,"delta":"NRT"}
+{"tMs":1478,"delta":"\"\n  Div"}
+{"tMs":1478,"delta":"ider\n  Row between"}
+{"tMs":1490,"delta":"\n    Column gap:2"}
+{"tMs":1551,"delta":"\n      Text.caption \""}
+{"tMs":1551,"delta":"GATE\"\n      Text"}
+{"tMs":1554,"delta":".heading \"B24"}
+{"tMs":1572,"delta":"\"\n    Column gap:"}
+{"tMs":1593,"delta":"2\n      Text.caption"}
+{"tMs":1614,"delta":" \"SEAT\"\n      "}
+{"tMs":1638,"delta":"Text.heading \"14C"}
+{"tMs":1655,"delta":"\"\n    Column gap:"}
+{"tMs":1677,"delta":"2\n      Text.caption"}
+{"tMs":1697,"delta":" \"G"}
+{"tMs":1716,"delta":"ROUP\"\n      Text"}
+{"tMs":1739,"delta":".heading \"2\"\n    "}
+{"tMs":1758,"delta":"Column gap:2\n      "}
+{"tMs":1781,"delta":"Text.caption \"BO"}
+{"tMs":1800,"delta":"ARDS"}
+{"tMs":1819,"delta":"\"\n      Text.heading"}
+{"tMs":1839,"delta":" \"09"}
+{"tMs":2009,"delta":":25\"\n  Divider"}
+{"tMs":2009,"delta":" d"}
+{"tMs":2009,"delta":"ash"}
+{"tMs":2009,"delta":"ed\n  Box fill:"}
+{"tMs":2010,"delta":"#FFFFFFF"}
+{"tMs":2010,"delta":"F p"}
+{"tMs":2010,"delta":"ad:16 radius:12"}
+{"tMs":2010,"delta":"\n    Row center g"}
+{"tMs":2184,"delta":"ap:12\n      Column"}
+{"tMs":2184,"delta":" gap:6"}
+{"tMs":2185,"delta":" center"}
+{"tMs":2185,"delta":"\n        Text.caption \""}
+{"tMs":2185,"delta":"S"}
+{"tMs":2185,"delta":"CA"}
+{"tMs":2185,"delta":"N A"}
+{"tMs":2185,"delta":"T G"}
+{"tMs":2187,"delta":"ATE\"\n        Box"}
+{"tMs":2205,"delta":" w"}
+{"tMs":2225,"delta":":200 h:200 f"}
+{"tMs":2382,"delta":"ill:#FF"}
+{"tMs":2383,"delta":"111"}
+{"tMs":2383,"delta":"111 radius:8\n          "}
+{"tMs":2383,"delta":"Text.ca"}
+{"tMs":2383,"delta":"ption \"Q"}
+{"tMs":2383,"delta":"R\" color:#FFF"}
+{"tMs":2383,"delta":"FFFFF\n      "}
+{"tMs":2390,"delta":"Column gap:4"}
+{"tMs":2430,"delta":"\n        Text.caption \"B"}
+{"tMs":2449,"delta":"OARDING P"}
+{"tMs":2470,"delta":"ASS\"\n        Text."}
+{"tMs":2491,"delta":"mono \"LH742"}
+{"tMs":2768,"delta":" F"}
+{"tMs":2768,"delta":"RAN"}
+{"tMs":2768,"delta":"KFURT T"}
+{"tMs":2768,"delta":"OKYO 14"}
+{"tMs":2768,"delta":"C\""}
+{"tMs":2768,"delta":"\n        Text.caption \""}
+{"tMs":2769,"delta":"Ke"}
+{"tMs":2769,"delta":"ep this"}
+{"tMs":2769,"delta":" ticket until"}
+{"tMs":2769,"delta":" land"}
+{"tMs":2770,"delta":"ing\""}

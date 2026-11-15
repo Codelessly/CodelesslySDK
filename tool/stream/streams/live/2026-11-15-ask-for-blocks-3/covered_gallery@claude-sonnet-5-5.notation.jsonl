@@ -1,0 +1,65 @@
+{"meta":{"ui":"covered_gallery","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a chat card with a photo gallery of four apartment images, a title, image count, and a save action.","text":"ChatCard \"Sunny 2-bed apartment\" \"Old Town, Lisbon\" icon:\"apartment\" status:\"4 photos\" tone:accent w:390\n  state open=0\n  state saved=false\n  PhotoGallery =open layout:\"grid\" columns:2 photos:[{\"kind\":\"skyline\",\"caption\":\"Living room view\",\"tone\":\"day\"},{\"kind\":\"market\",\"caption\":\"Neighbourhood market\",\"tone\":\"dawn\"},{\"kind\":\"harbor\",\"caption\":\"Harbour nearby\",\"tone\":\"dusk\"},{\"kind\":\"forest\",\"caption\":\"Park across the street\",\"tone\":\"day\"}]\n  SectionLabel \"Gallery\" \"{length([1,2,3,4])} images\"\n  Paragraph \"Bright two-bedroom flat with a balcony, close to cafés and the tram.\"\n  ActionButton \"{saved ? 'Saved' : 'Save apartment'}\" tone:primary icon:\"bookmark\" -> saved=!saved; toast \"Saved to favourites\"","usage":{"input_tokens":9294,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":339,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":832,"totalMs":3094}}
+{"tMs":832,"delta":"ChatCard \"S"}
+{"tMs":1167,"delta":"unny"}
+{"tMs":1167,"delta":" "}
+{"tMs":1167,"delta":"2-bed"}
+{"tMs":1167,"delta":" ap"}
+{"tMs":1167,"delta":"artment\" \"Old"}
+{"tMs":1167,"delta":" Town"}
+{"tMs":1167,"delta":","}
+{"tMs":1167,"delta":" Lisbon\" icon:"}
+{"tMs":1167,"delta":"\"ap"}
+{"tMs":1167,"delta":"artment\" status:\"4"}
+{"tMs":1167,"delta":" phot"}
+{"tMs":1187,"delta":"os\" t"}
+{"tMs":1498,"delta":"one:acc"}
+{"tMs":1498,"delta":"ent w:390\n  state open"}
+{"tMs":1498,"delta":"=0\n  state saved="}
+{"tMs":1498,"delta":"false\n  PhotoG"}
+{"tMs":1498,"delta":"allery =open lay"}
+{"tMs":1498,"delta":"out:\"grid\" colum"}
+{"tMs":1498,"delta":"ns:2 photos:["}
+{"tMs":1498,"delta":"{\"kind\":\"sk"}
+{"tMs":1506,"delta":"yline\",\"caption\":\""}
+{"tMs":1538,"delta":"Living room view"}
+{"tMs":1573,"delta":"\",\"tone\":\"day\"},"}
+{"tMs":1607,"delta":"{\"kind\":\"market"}
+{"tMs":1844,"delta":"\",\"caption\":\"Ne"}
+{"tMs":1844,"delta":"ighbourhood market"}
+{"tMs":1844,"delta":"\",\"tone\":\"d"}
+{"tMs":1844,"delta":"awn\"},{\"kind"}
+{"tMs":1844,"delta":"\":\"harbor\",\"caption"}
+{"tMs":1844,"delta":"\":\"Har"}
+{"tMs":1844,"delta":"bour n"}
+{"tMs":1876,"delta":"earby\",\"tone\":\"d"}
+{"tMs":1911,"delta":"usk\"},{\"kind"}
+{"tMs":1945,"delta":"\":\"forest\",\"caption\":"}
+{"tMs":1978,"delta":"\"Park across"}
+{"tMs":2011,"delta":" the street\",\"tone\":\"day"}
+{"tMs":2187,"delta":"\"}]\n  Section"}
+{"tMs":2187,"delta":"Label \"G"}
+{"tMs":2187,"delta":"allery\" \"{"}
+{"tMs":2187,"delta":"length(["}
+{"tMs":2187,"delta":"1"}
+{"tMs":2210,"delta":",2,3,4])}"}
+{"tMs":2244,"delta":" images\"\n  Pa"}
+{"tMs":2277,"delta":"ragraph \"B"}
+{"tMs":2310,"delta":"right two"}
+{"tMs":2343,"delta":"-bedroom fl"}
+{"tMs":2378,"delta":"at with a balcony, close"}
+{"tMs":2410,"delta":" to c"}
+{"tMs":2534,"delta":"afés"}
+{"tMs":2534,"delta":" and the"}
+{"tMs":2534,"delta":" tram.\"\n  Action"}
+{"tMs":2542,"delta":"Button \"{"}
+{"tMs":2576,"delta":"saved ? "}
+{"tMs":2609,"delta":"'Saved' : '"}
+{"tMs":2643,"delta":"Save apartment'}\""}
+{"tMs":2676,"delta":" tone:primary icon:"}
+{"tMs":2710,"delta":"\"b"}
+{"tMs":2744,"delta":"ookmark\" -> saved"}
+{"tMs":2777,"delta":"=!saved; toast \""}
+{"tMs":2810,"delta":"Saved to"}
+{"tMs":3081,"delta":" fav"}
+{"tMs":3081,"delta":"our"}
+{"tMs":3081,"delta":"ites\""}

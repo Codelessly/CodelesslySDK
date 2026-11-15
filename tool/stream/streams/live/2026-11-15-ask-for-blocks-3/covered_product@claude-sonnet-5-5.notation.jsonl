@@ -1,0 +1,54 @@
+{"meta":{"ui":"covered_product","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a chat card with a featured coffee maker product, its image, price, short details, and add-to-cart button.","text":"ChatCard \"Featured pick\" \"Today's top coffee maker\" icon:\"coffee_rounded\" status:\"Featured\" tone:accent w:390\n  Media kind:\"mug\" tone:\"sand\" h:180\n  Row between middle\n    Text.cardTitle \"Brewmaster 12-Cup Coffee Maker\"\n    Text.strong \"$89.99\"\n  Paragraph \"Programmable drip brewer with a thermal carafe, adjustable brew strength and a 24-hour timer.\"\n  Details rows:[[\"Capacity\",\"12 cups\"],[\"Carafe\",\"Thermal, stainless steel\"],[\"Rating\",\"4.7 of 5\"]]\n  Row gap:10\n    ActionButton \"Add to cart\" tone:primary icon:\"shopping_cart\" -> emit addToCart; toast \"Added to cart\"","usage":{"input_tokens":9297,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":277,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":933,"totalMs":2829}}
+{"tMs":933,"delta":"ChatCard \"Feat"}
+{"tMs":1260,"delta":"ured p"}
+{"tMs":1260,"delta":"ick\" \"Today"}
+{"tMs":1260,"delta":"'s top"}
+{"tMs":1260,"delta":" co"}
+{"tMs":1260,"delta":"ffee maker\" icon:"}
+{"tMs":1260,"delta":"\"coffee_"}
+{"tMs":1260,"delta":"r"}
+{"tMs":1260,"delta":"ounded\" status"}
+{"tMs":1260,"delta":":\"Featured\" t"}
+{"tMs":1260,"delta":"one:accent w:390"}
+{"tMs":1276,"delta":"\n  Media kind:\"m"}
+{"tMs":1311,"delta":"ug\" tone:\"sand"}
+{"tMs":1589,"delta":"\" h:180"}
+{"tMs":1589,"delta":"\n  "}
+{"tMs":1590,"delta":"Row between"}
+{"tMs":1590,"delta":" midd"}
+{"tMs":1590,"delta":"le\n    Text.card"}
+{"tMs":1590,"delta":"Title \"Brewm"}
+{"tMs":1590,"delta":"aster 12"}
+{"tMs":1590,"delta":"-Cup Coffee"}
+{"tMs":1610,"delta":" Maker\"\n    Text"}
+{"tMs":1643,"delta":".strong \"$89"}
+{"tMs":1678,"delta":".99\"\n  Parag"}
+{"tMs":1712,"delta":"raph \"Programmable dr"}
+{"tMs":1935,"delta":"ip br"}
+{"tMs":1935,"delta":"ewer with a"}
+{"tMs":1935,"delta":" th"}
+{"tMs":1935,"delta":"ermal car"}
+{"tMs":1935,"delta":"afe, ad"}
+{"tMs":1936,"delta":"justable brew strength and"}
+{"tMs":1943,"delta":" a 24-hour tim"}
+{"tMs":1977,"delta":"er.\"\n  Details r"}
+{"tMs":2011,"delta":"ows:[[\"Cap"}
+{"tMs":2044,"delta":"acity\",\"12 cups\""}
+{"tMs":2078,"delta":"],[\"Car"}
+{"tMs":2112,"delta":"afe\",\"Thermal,"}
+{"tMs":2270,"delta":" stainless ste"}
+{"tMs":2270,"delta":"el\"],[\"R"}
+{"tMs":2270,"delta":"ating\",\"4.7"}
+{"tMs":2270,"delta":" of"}
+{"tMs":2277,"delta":" 5\""}
+{"tMs":2310,"delta":"]]\n  Row"}
+{"tMs":2343,"delta":" g"}
+{"tMs":2377,"delta":"ap:10\n    Action"}
+{"tMs":2410,"delta":"Button \"Add to cart"}
+{"tMs":2448,"delta":"\" tone:primary icon"}
+{"tMs":2479,"delta":":\"shopping_cart"}
+{"tMs":2512,"delta":"\""}
+{"tMs":2819,"delta":" -> em"}
+{"tMs":2819,"delta":"it add"}
+{"tMs":2819,"delta":"ToCart; toast \""}
+{"tMs":2819,"delta":"Added to cart\""}

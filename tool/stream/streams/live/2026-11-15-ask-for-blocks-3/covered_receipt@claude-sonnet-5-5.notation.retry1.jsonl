@@ -1,0 +1,59 @@
+{"meta":{"ui":"covered_receipt","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show a restaurant receipt chat card with three itemized purchases, subtotal, tax, tip, total, and a pay action.","text":"ChatCard \"Dinner at Marlow & Sons\" \"Table 12 · Fri 7:45 PM\" icon:\"receipt_long\" status:\"Unpaid\" tone:warn w:390\n  state tip=\"18%\"\n  SectionLabel \"Your order\" \"3 items\"\n  Details rows:=[[\"1 × Burrata & heirloom tomato\",\"$14.00\"],[\"1 × Pan-roasted halibut\",\"$32.00\"],[\"2 × Olive oil cake\",\"$18.00\"]]\n  SectionLabel \"Tip\" \"on subtotal\"\n  ChoiceChips =tip options:[\"15%\",\"18%\",\"20%\",\"25%\"] columns:4\n  Details rows:=[[\"Subtotal\",\"$64.00\"],[\"Tax (8.875%)\",\"$5.68\"],[\"Tip ({tip})\",money(64*(tip==\"15%\"?0.15:tip==\"18%\"?0.18:tip==\"20%\"?0.2:0.25),\"$\",2)]]\n  TotalBar \"Total\" \"Includes tax and tip\" amount:=money(64+5.68+64*(tip==\"15%\"?0.15:tip==\"18%\"?0.18:tip==\"20%\"?0.2:0.25),\"$\",2) cta:\"Pay now\" icon:\"payments\" -> emit pay; toast \"Payment sent\"","usage":{"input_tokens":9706,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":432,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":727,"totalMs":2798}}
+{"tMs":727,"delta":"Chat"}
+{"tMs":1046,"delta":"Card \"D"}
+{"tMs":1046,"delta":"inner at Marlow &"}
+{"tMs":1046,"delta":" Sons\" \"Table "}
+{"tMs":1046,"delta":"12 · Fri 7"}
+{"tMs":1046,"delta":":45 PM\" icon"}
+{"tMs":1046,"delta":":\"receipt_long\""}
+{"tMs":1046,"delta":" status:\"Unpaid"}
+{"tMs":1046,"delta":"\" tone:warn w:"}
+{"tMs":1046,"delta":"390\n  state tip=\"18"}
+{"tMs":1079,"delta":"%\"\n  S"}
+{"tMs":1113,"delta":"ectionLabel \"Your"}
+{"tMs":1146,"delta":" order\" \"3 items\""}
+{"tMs":1391,"delta":"\n  Details rows:=["}
+{"tMs":1391,"delta":"[\"1 × Burrata"}
+{"tMs":1391,"delta":" & heirloom tomato"}
+{"tMs":1391,"delta":"\",\"$14.00\"],[\""}
+{"tMs":1391,"delta":"1 × Pan-ro"}
+{"tMs":1391,"delta":"asted halibut\",\"$32"}
+{"tMs":1391,"delta":".00\"],[\"2 ×"}
+{"tMs":1413,"delta":" Olive oil cake\",\""}
+{"tMs":1446,"delta":"$18.00\"]]"}
+{"tMs":1480,"delta":"\n  SectionLabel \""}
+{"tMs":1513,"delta":"Tip\" \"on subt"}
+{"tMs":1547,"delta":"otal\"\n  Cho"}
+{"tMs":1732,"delta":"iceChips =tip options"}
+{"tMs":1732,"delta":":[\"15%\",\"18%\",\""}
+{"tMs":1732,"delta":"20%\",\"25%\"] colum"}
+{"tMs":1732,"delta":"ns:4\n  Details r"}
+{"tMs":1732,"delta":"ows:=[[\"Subt"}
+{"tMs":1747,"delta":"otal\",\"$64.00\""}
+{"tMs":1780,"delta":"],[\"Tax (8."}
+{"tMs":1813,"delta":"875%)\",\"$5.68"}
+{"tMs":1847,"delta":"\"],[\"Tip "}
+{"tMs":1880,"delta":"({tip})"}
+{"tMs":1913,"delta":"\","}
+{"tMs":1946,"delta":"money(64*"}
+{"tMs":2078,"delta":"(tip==\"15%\""}
+{"tMs":2078,"delta":"?0.15:tip="}
+{"tMs":2078,"delta":"=\"18%\"?0.18"}
+{"tMs":2079,"delta":":tip==\"20%\""}
+{"tMs":2113,"delta":"?0.2:0.25"}
+{"tMs":2146,"delta":"),\"$\",2)]]"}
+{"tMs":2179,"delta":"\n  TotalBar \""}
+{"tMs":2213,"delta":"Total\" \"Includes t"}
+{"tMs":2246,"delta":"ax and tip\" amount:"}
+{"tMs":2280,"delta":"=money(64+"}
+{"tMs":2313,"delta":"5.68+64*(t"}
+{"tMs":2347,"delta":"ip==\"15%\"?0"}
+{"tMs":2791,"delta":".15:tip==\"18"}
+{"tMs":2791,"delta":"%\"?0.18:t"}
+{"tMs":2791,"delta":"ip==\"20%\"?0"}
+{"tMs":2791,"delta":".2:0.25),\""}
+{"tMs":2791,"delta":"$\",2) cta:\""}
+{"tMs":2791,"delta":"Pay now\" icon:"}
+{"tMs":2791,"delta":"\"payments\" -> emit"}
+{"tMs":2791,"delta":" pay; toast \"Pay"}
+{"tMs":2791,"delta":"ment sent\""}

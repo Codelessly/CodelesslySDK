@@ -1,0 +1,35 @@
+{"meta":{"ui":"covered_gallery","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a chat card with a photo gallery of four apartment images, a title, image count, and a save action.","text":"ChatCard \"Apartment photos\" \"4 images\" icon:\"apartment\" status:\"Saved\"\n  PhotoGallery =open layout:grid photos:[{\"kind\":\"skyline\",\"caption\":\"Living room\"},{\"kind\":\"dunes\",\"caption\":\"Bedroom\"},{\"kind\":\"harbor\",\"caption\":\"Kitchen\"},{\"kind\":\"forest\",\"caption\":\"Balcony\"}]\n  Text.muted \"4 photos in this listing\"\n  ActionButton \"Save\" primary icon:\"bookmark\" -> emit saveApartment","usage":{"input_tokens":9293,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":184,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":707,"totalMs":1767}}
+{"tMs":707,"delta":"ChatCard \"Ap"}
+{"tMs":1139,"delta":"artment phot"}
+{"tMs":1139,"delta":"os\" \"4"}
+{"tMs":1139,"delta":" images\" icon:\"ap"}
+{"tMs":1139,"delta":"artment\""}
+{"tMs":1140,"delta":" status:\"Saved\""}
+{"tMs":1140,"delta":"\n  PhotoGallery"}
+{"tMs":1140,"delta":" =open lay"}
+{"tMs":1140,"delta":"out:gr"}
+{"tMs":1140,"delta":"id photos:[{\"k"}
+{"tMs":1140,"delta":"ind\":\"sk"}
+{"tMs":1140,"delta":"yline\",\"caption\":\""}
+{"tMs":1140,"delta":"Living room\"},{\"kind"}
+{"tMs":1274,"delta":"\":\"d"}
+{"tMs":1274,"delta":"unes\",\"caption\":\""}
+{"tMs":1274,"delta":"Bedroom\"},{\""}
+{"tMs":1274,"delta":"kind\":\"har"}
+{"tMs":1274,"delta":"bor\",\"caption\":\""}
+{"tMs":1274,"delta":"Kitchen\"},{\""}
+{"tMs":1274,"delta":"kind\":\"for"}
+{"tMs":1274,"delta":"est\",\"caption\":\"Bal"}
+{"tMs":1274,"delta":"cony\"}]\n  "}
+{"tMs":1274,"delta":"Text.mu"}
+{"tMs":1274,"delta":"ted \"4 phot"}
+{"tMs":1274,"delta":"os in"}
+{"tMs":1763,"delta":" this list"}
+{"tMs":1763,"delta":"ing\"\n  ActionBut"}
+{"tMs":1763,"delta":"ton \"Save\" prim"}
+{"tMs":1763,"delta":"ary ic"}
+{"tMs":1763,"delta":"on:\"b"}
+{"tMs":1763,"delta":"ookmark\" -> em"}
+{"tMs":1763,"delta":"it sa"}
+{"tMs":1763,"delta":"veAp"}
+{"tMs":1763,"delta":"artment"}

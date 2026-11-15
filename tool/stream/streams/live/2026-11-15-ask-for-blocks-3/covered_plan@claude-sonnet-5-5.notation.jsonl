@@ -1,0 +1,70 @@
+{"meta":{"ui":"covered_plan","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a chat card with a three-step project plan, progress through the plan, and a checklist of next actions.","text":"ChatCard \"Website relaunch\" \"Three-step project plan\" icon:\"checklist\" status:\"In progress\" tone:accent w:390\n  state done=1\n  state running=true\n  state next=[]\n  SectionLabel \"Plan\" \"{done} of 3 done\"\n  PlanStep \"Define scope\" \"Agree goals, pages and owners\" index:0 current:=done running:=running\n  PlanStep \"Design and build\" \"Wireframes, visuals and development\" index:1 current:=done running:=running\n  PlanStep \"Test and launch\" \"QA, fixes and go-live\" index:2 current:=done running:=running last:true\n  ProgressLine \"Progress\" \"{round(done/3*100,0)}%\" value:=done/3\n  SectionLabel \"Next actions\" \"{length(next)} ticked\"\n  Checklist \"This week\" =next items:[\"Confirm sitemap with stakeholders\",\"Share wireframes for review\",\"Book QA testers\",\"Draft launch announcement\"]\n  Row gap:10\n    ActionButton \"Advance step\" tone:primary enabled:=done<3 -> done=min(3,done+1)\n    ActionButton \"Reset\" tone:quiet -> done=0","usage":{"input_tokens":9295,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":391,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":889,"totalMs":3259}}
+{"tMs":889,"delta":"ChatCard \"Website"}
+{"tMs":1215,"delta":" rel"}
+{"tMs":1215,"delta":"aunch\" \"Three"}
+{"tMs":1215,"delta":"-step project"}
+{"tMs":1215,"delta":" plan\" icon:\"chec"}
+{"tMs":1215,"delta":"klist\" status:\"In"}
+{"tMs":1215,"delta":" progress\" tone:acc"}
+{"tMs":1215,"delta":"ent w:390"}
+{"tMs":1215,"delta":"\n  state done=1"}
+{"tMs":1215,"delta":"\n  state running=true"}
+{"tMs":1215,"delta":"\n  state next=[]"}
+{"tMs":1236,"delta":"\n  SectionLabel"}
+{"tMs":1270,"delta":" \"Plan\" \"{"}
+{"tMs":1561,"delta":"done} of "}
+{"tMs":1561,"delta":"3 done"}
+{"tMs":1561,"delta":"\"\n  P"}
+{"tMs":1561,"delta":"lanStep \"Define"}
+{"tMs":1561,"delta":" scope\" \"Ag"}
+{"tMs":1561,"delta":"ree goals,"}
+{"tMs":1561,"delta":" p"}
+{"tMs":1561,"delta":"ages and"}
+{"tMs":1561,"delta":" ow"}
+{"tMs":1595,"delta":"ners\" index:0 current:"}
+{"tMs":1630,"delta":"=done running:=running\n  "}
+{"tMs":1666,"delta":"PlanStep \"Design"}
+{"tMs":1916,"delta":" and build\" \"W"}
+{"tMs":1916,"delta":"ireframes,"}
+{"tMs":1916,"delta":" vis"}
+{"tMs":1916,"delta":"uals and development"}
+{"tMs":1916,"delta":"\" index:1 current:="}
+{"tMs":1916,"delta":"done running:=running\n  P"}
+{"tMs":1916,"delta":"lanStep \"Test"}
+{"tMs":1930,"delta":" and launch\" \"Q"}
+{"tMs":1963,"delta":"A, f"}
+{"tMs":1998,"delta":"ixes and go"}
+{"tMs":2031,"delta":"-live\" index:2 current"}
+{"tMs":2064,"delta":":=done running:=running last"}
+{"tMs":2261,"delta":":true\n  "}
+{"tMs":2261,"delta":"ProgressLine \""}
+{"tMs":2261,"delta":"Progress\" \"{round"}
+{"tMs":2261,"delta":"(done/"}
+{"tMs":2261,"delta":"3*100,0"}
+{"tMs":2264,"delta":")}%"}
+{"tMs":2298,"delta":"\" value:=done/3"}
+{"tMs":2331,"delta":"\n  SectionLabel \""}
+{"tMs":2365,"delta":"Next actions\" \"{length"}
+{"tMs":2401,"delta":"(next)}"}
+{"tMs":2432,"delta":" ticked\"\n  Chec"}
+{"tMs":2466,"delta":"klist \"This"}
+{"tMs":2601,"delta":" week\" =next items:[\""}
+{"tMs":2601,"delta":"Confirm s"}
+{"tMs":2601,"delta":"itemap with"}
+{"tMs":2601,"delta":" stakeholders\",\"Share"}
+{"tMs":2632,"delta":" wireframes for"}
+{"tMs":2665,"delta":" review\",\"Book"}
+{"tMs":2699,"delta":" Q"}
+{"tMs":2730,"delta":"A test"}
+{"tMs":2764,"delta":"ers\",\"Dra"}
+{"tMs":2797,"delta":"ft launch announ"}
+{"tMs":2831,"delta":"cement\"]\n  Row"}
+{"tMs":2865,"delta":" gap:10\n    Act"}
+{"tMs":3253,"delta":"ionButton \"Advance step"}
+{"tMs":3253,"delta":"\" tone:prim"}
+{"tMs":3253,"delta":"ary enabled:=done<"}
+{"tMs":3253,"delta":"3 -> done=min("}
+{"tMs":3253,"delta":"3,done+1)\n    "}
+{"tMs":3254,"delta":"ActionButton \"Re"}
+{"tMs":3254,"delta":"set\" tone:quiet"}
+{"tMs":3254,"delta":" -> done=0"}

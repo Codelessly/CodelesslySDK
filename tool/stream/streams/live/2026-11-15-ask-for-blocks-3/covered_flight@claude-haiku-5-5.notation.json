@@ -1,0 +1,210 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Chicago to Seattle",
+    "subtitle": "Compare two flights",
+    "icon": "flight",
+    "status": "Choose one"
+   },
+   "children": [
+    "SectionLabel1",
+    "listView1",
+    "TotalBar1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Options",
+    "note": "2 flights"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${flights}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "FlightOption1"
+   ]
+  },
+  "FlightOption1": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "origin": "ORD",
+    "destination": "SEA"
+   },
+   "bind": {
+    "props.name": "${item.name}",
+    "props.depart": "${item.depart}",
+    "props.arrive": "${item.arrive}",
+    "props.duration": "${item.duration}",
+    "props.stops": "${item.stops}",
+    "props.price": "${item.price}",
+    "props.selected": "${= pick==item.id}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Selected",
+    "cta": "Select",
+    "icon": "check"
+   },
+   "bind": {
+    "props.note": "${= pick!=\"\" ? \"Flight chosen\" : \"Pick a flight\"}",
+    "props.amount!": "${pick}",
+    "props.enabled": "${= pick!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "select",
+       "value": "${pick}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "flights",
+    "type": "list",
+    "value": [
+     {
+      "id": "ua",
+      "name": "United",
+      "depart": "7:05 AM",
+      "arrive": "9:20 AM",
+      "duration": "4h 15m",
+      "stops": "Nonstop",
+      "price": "$289"
+     },
+     {
+      "id": "dl",
+      "name": "Delta",
+      "depart": "11:40 AM",
+      "arrive": "4:10 PM",
+      "duration": "5h 30m",
+      "stops": "1 stop",
+      "price": "$241"
+     }
+    ]
+   }
+  ]
+ }
+}

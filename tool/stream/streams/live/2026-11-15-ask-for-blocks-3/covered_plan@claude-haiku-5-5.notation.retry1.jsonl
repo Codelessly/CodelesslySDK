@@ -1,0 +1,29 @@
+{"meta":{"ui":"covered_plan","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show a chat card with a three-step project plan, progress through the plan, and a checklist of next actions.","text":"state stage=1\nstate done=[]\nChatCard \"Project plan\" \"Website relaunch\" icon:\"assignment\" status:\"In progress\"\n  Steps steps:[\"Scope\",\"Build\",\"Launch\"] current:=stage\n  ProgressLine \"Progress\" value:=stage/3\n  SectionLabel \"Next actions\" \"2 open\"\n  Checklist \"Next actions\" =done items:[\"Confirm scope with client\",\"Draft launch checklist\",\"Schedule QA review\"]\n  TotalBar \"Stage\" \"Step {stage} of 3\" amount:=stage \"Advance\" -> stage=min(3,stage+1)","usage":{"input_tokens":9552,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":205,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":436,"totalMs":1035}}
+{"tMs":436,"delta":"state"}
+{"tMs":645,"delta":" stage=1\nstate"}
+{"tMs":645,"delta":" done=[]\nChat"}
+{"tMs":645,"delta":"Card \"Project plan\""}
+{"tMs":645,"delta":" \"Website relaunch\""}
+{"tMs":645,"delta":" icon:\"assignment\""}
+{"tMs":645,"delta":" status:\"In progress\""}
+{"tMs":645,"delta":"\n  Steps steps:[\""}
+{"tMs":645,"delta":"Scope\",\"Build\",\""}
+{"tMs":645,"delta":"Launch\"] current:=st"}
+{"tMs":657,"delta":"age\n  ProgressL"}
+{"tMs":679,"delta":"ine \"Progress\" value:"}
+{"tMs":709,"delta":"=stage/3\n  S"}
+{"tMs":721,"delta":"ectionLabel \"Next"}
+{"tMs":741,"delta":" actions\" \"2 open\""}
+{"tMs":762,"delta":"\n  Checklist \""}
+{"tMs":783,"delta":"Next actions\" =done items:"}
+{"tMs":801,"delta":"[\"Confirm scope with"}
+{"tMs":825,"delta":" client\",\"Draft launch chec"}
+{"tMs":841,"delta":"klist\",\"Schedule Q"}
+{"tMs":862,"delta":"A review\"]\n  Tot"}
+{"tMs":883,"delta":"alBar \"Stage\""}
+{"tMs":903,"delta":" \"Step {stage} of"}
+{"tMs":925,"delta":" 3\" amount:=st"}
+{"tMs":943,"delta":"age \""}
+{"tMs":1031,"delta":"Advance\" -> stage"}
+{"tMs":1031,"delta":"=min(3,stage+"}
+{"tMs":1031,"delta":"1)"}

@@ -1,0 +1,66 @@
+{
+ "ui": "covered_flight",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24414,
+ "turns": [
+  {
+   "input_tokens": 9308,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 397,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 468,
+   "totalMs": 1890,
+   "chars": 763,
+   "lines": 7,
+   "jsonTails": 0,
+   "nodes": 7,
+   "outputTokensPerNode": "56.7",
+   "notationIssues": [
+    "line 6:3: A TotalBar has no \"amount!\". It takes: label, amount, note, cta, icon, enabled.",
+    "line 6:3: A TotalBar needs amount: write amount:\"…\"."
+   ],
+   "errors": [
+    "unknown_bind_path /nodes/TotalBar1/bind/props.amount!: \"props.amount!\" is not a binding path.",
+    "missing_prop /nodes/TotalBar1/props: TotalBar needs \"amount\" (String): set \"props\": {\"amount\": ...} or bind \"props.amount\"."
+   ]
+  },
+  {
+   "input_tokens": 9900,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 413,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 452,
+   "totalMs": 1575,
+   "chars": 788,
+   "lines": 7,
+   "jsonTails": 0,
+   "nodes": 7,
+   "outputTokensPerNode": "59.0",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

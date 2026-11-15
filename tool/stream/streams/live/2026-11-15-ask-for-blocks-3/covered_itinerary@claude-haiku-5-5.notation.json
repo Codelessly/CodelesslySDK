@@ -1,0 +1,407 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Weekend in Kyoto",
+    "subtitle": "Sat 14 – Sun 15",
+    "icon": "map",
+    "status": "Planned"
+   },
+   "children": [
+    "DayHeader1",
+    "DayHeader2",
+    "MapPanel1",
+    "PlaceRow1",
+    "PlaceRow2",
+    "PlaceRow3",
+    "PlaceRow4"
+   ]
+  },
+  "DayHeader1": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 1",
+    "subtitle": "Gion and the old streets",
+    "kind": "temple",
+    "tone": "dusk",
+    "tag": "Sat 14"
+   },
+   "children": [
+    "ItineraryStop1",
+    "ItineraryStop2",
+    "ItineraryStop3",
+    "ItineraryStop4"
+   ]
+  },
+  "ItineraryStop1": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Fushimi Inari",
+    "detail": "Walk the torii gates up the mountain",
+    "time": "08:30",
+    "travel": "Taxi to Gion, 20 min"
+   }
+  },
+  "ItineraryStop2": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Nishiki Market",
+    "detail": "Street food and tea shops",
+    "time": "11:00",
+    "travel": "Walk, 10 min"
+   }
+  },
+  "ItineraryStop3": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kiyomizu-dera",
+    "detail": "Temple with a view over the city",
+    "time": "14:00",
+    "travel": "Walk to Gion, 25 min"
+   }
+  },
+  "ItineraryStop4": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Gion evening walk",
+    "detail": "Lantern-lit lanes and dinner",
+    "time": "18:30",
+    "last": true
+   }
+  },
+  "DayHeader2": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 2",
+    "subtitle": "Arashiyama and the bamboo",
+    "kind": "bamboo",
+    "tone": "day",
+    "tag": "Sun 15"
+   },
+   "children": [
+    "ItineraryStop5",
+    "ItineraryStop6",
+    "ItineraryStop7",
+    "ItineraryStop8"
+   ]
+  },
+  "ItineraryStop5": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Bamboo Grove",
+    "detail": "Early walk before the crowds",
+    "time": "08:00",
+    "travel": "Train to Arashiyama, 15 min"
+   }
+  },
+  "ItineraryStop6": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tenryu-ji",
+    "detail": "Garden temple by the river",
+    "time": "10:30",
+    "travel": "Walk, 5 min"
+   }
+  },
+  "ItineraryStop7": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Togetsukyo Bridge",
+    "detail": "Riverside lunch and photos",
+    "time": "12:30",
+    "travel": "Train to Kyoto, 20 min"
+   }
+  },
+  "ItineraryStop8": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pontocho",
+    "detail": "Last stroll along the river",
+    "time": "17:00",
+    "last": true
+   }
+  },
+  "MapPanel1": {
+   "type": "MapPanel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178.0
+   },
+   "props": {
+    "value": "pick",
+    "count": 4
+   }
+  },
+  "PlaceRow1": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Fushimi Inari",
+    "detail": "Torii gate trail",
+    "index": 1,
+    "rating": "4.8",
+    "distance": "4 km",
+    "hours": "Open 24 h"
+   },
+   "bind": {
+    "props.selected": "${= pick==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow2": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Nishiki Market",
+    "detail": "Food and snacks",
+    "index": 2,
+    "rating": "4.6",
+    "distance": "2 km",
+    "hours": "09:00–18:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow3": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Kiyomizu-dera",
+    "detail": "Hilltop temple",
+    "index": 3,
+    "rating": "4.7",
+    "distance": "3 km",
+    "hours": "06:00–18:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow4": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Arashiyama",
+    "detail": "Bamboo grove and river",
+    "index": 4,
+    "rating": "4.7",
+    "distance": "9 km",
+    "hours": "Open 24 h"
+   },
+   "bind": {
+    "props.selected": "${= pick==4}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

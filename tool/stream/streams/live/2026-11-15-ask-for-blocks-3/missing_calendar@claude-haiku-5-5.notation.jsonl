@@ -1,0 +1,133 @@
+{"meta":{"ui":"missing_calendar","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a month calendar chat card for November 2026 with a seven-column date grid, highlighted booked dates, selected date, and event dots.","text":"Wanted \"MonthCalendar\" \"a month grid of seven columns with weekday headers, booked dates highlighted, a selected date marked, and event dots under dates with events\"\n\nChatCard \"November 2026\" \"Calendar\" icon:\"calendar_month\" status:\"Booked\"\n  state sel=11\n  Grid cols:7 gap:4\n    each d in [\"Mo\",\"Tu\",\"We\",\"Th\",\"Fr\",\"Sa\",\"Su\"]\n      Text.caption \"{d}\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"1\" -> sel=1\n    Text.body \"2\" -> sel=2\n    Text.body \"3\" -> sel=3\n    Text.body \"4\" -> sel=4\n    Text.body \"5\" -> sel=5\n    Text.body \"6\" -> sel=6\n    Text.body \"7\" -> sel=7\n    Text.body \"8\" -> sel=8\n    Text.body \"9\" -> sel=9\n    Text.body \"10\" -> sel=10\n    Text.body \"11\" fill:=sel==11?#FF2563EB:#00000000 color:=sel==11?#FFFFFFFF:#FF111827 -> sel=11\n    Text.body \"12\" fill:#FFDBEAFE -> sel=12\n    Text.body \"13\" -> sel=13\n    Text.body \"14\" -> sel=14\n    Text.body \"15\" -> sel=15\n    Text.body \"16\" -> sel=16\n    Text.body \"17\" -> sel=17\n    Text.body \"18\" fill:#FFDBEAFE -> sel=18\n    Text.body \"19\" -> sel=19\n    Text.body \"20\" -> sel=20\n    Text.body \"21\" -> sel=21\n    Text.body \"22\" -> sel=22\n    Text.body \"23\" -> sel=23\n    Text.body \"24\" -> sel=24\n    Text.body \"25\" -> sel=25\n    Text.body \"26\" -> sel=26\n    Text.body \"27\" -> sel=27\n    Text.body \"28\" -> sel=28\n    Text.body \"29\" -> sel=29\n    Text.body \"30\" -> sel=30\n  Row gap:6\n    Badge.primary \"Booked\"\n    Text.caption \"Selected: Nov {sel}\"","usage":{"input_tokens":9306,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":775,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":631,"totalMs":4108}}
+{"tMs":631,"delta":"W"}
+{"tMs":901,"delta":"anted \"M"}
+{"tMs":901,"delta":"onthCalendar\" \""}
+{"tMs":901,"delta":"a month gr"}
+{"tMs":901,"delta":"id of se"}
+{"tMs":901,"delta":"ven columns with we"}
+{"tMs":901,"delta":"ekday headers, booked d"}
+{"tMs":901,"delta":"ates highlighted, a sel"}
+{"tMs":901,"delta":"ected date marked, and event d"}
+{"tMs":901,"delta":"ots under"}
+{"tMs":901,"delta":" d"}
+{"tMs":901,"delta":"ates with"}
+{"tMs":901,"delta":" events\""}
+{"tMs":1220,"delta":"\n\nChatCard \"November"}
+{"tMs":1220,"delta":" 2026\" \""}
+{"tMs":1220,"delta":"Cal"}
+{"tMs":1220,"delta":"endar\" icon:\"cal"}
+{"tMs":1220,"delta":"endar_"}
+{"tMs":1220,"delta":"month\" status:\"Boo"}
+{"tMs":1220,"delta":"ked\""}
+{"tMs":1220,"delta":"\n  state s"}
+{"tMs":1220,"delta":"el=11\n  "}
+{"tMs":1220,"delta":"Gr"}
+{"tMs":1220,"delta":"id cols:7"}
+{"tMs":1220,"delta":" gap:4"}
+{"tMs":1369,"delta":"\n    each"}
+{"tMs":1369,"delta":" d in "}
+{"tMs":1369,"delta":"[\"M"}
+{"tMs":1369,"delta":"o"}
+{"tMs":1369,"delta":"\",\"Tu\",\"We"}
+{"tMs":1369,"delta":"\",\"Th\",\"Fr"}
+{"tMs":1369,"delta":"\",\"Sa\",\"Su\""}
+{"tMs":1369,"delta":"]\n      Text.caption"}
+{"tMs":1369,"delta":" \""}
+{"tMs":1369,"delta":"{d}"}
+{"tMs":1369,"delta":"\"\n    "}
+{"tMs":1371,"delta":"Text.body"}
+{"tMs":2050,"delta":" "}
+{"tMs":2050,"delta":"\"\"\n    Text.body "}
+{"tMs":2050,"delta":"\"\"\n    Text.body "}
+{"tMs":2050,"delta":"\"\"\n    Text.body "}
+{"tMs":2050,"delta":"\"\"\n    Text.body "}
+{"tMs":2050,"delta":"\"\"\n    Text.body "}
+{"tMs":2050,"delta":"\"\"\n    Text.body "}
+{"tMs":2050,"delta":"\"\"\n    Text"}
+{"tMs":2050,"delta":".body \"1"}
+{"tMs":2050,"delta":"\""}
+{"tMs":2050,"delta":" -"}
+{"tMs":2050,"delta":"> s"}
+{"tMs":2187,"delta":"el=1\n    Text."}
+{"tMs":2187,"delta":"body \"2\" -> sel"}
+{"tMs":2187,"delta":"=2\n    Text.body"}
+{"tMs":2187,"delta":" \"3\" -> sel="}
+{"tMs":2187,"delta":"3\n    Text.body \""}
+{"tMs":2187,"delta":"4\" -> sel=4"}
+{"tMs":2187,"delta":"\n    Text.body \"5"}
+{"tMs":2187,"delta":"\" -> sel=5"}
+{"tMs":2187,"delta":"\n    Text.body \"6\""}
+{"tMs":2187,"delta":" -> sel=6\n    "}
+{"tMs":2187,"delta":"Text.body \"7\" -"}
+{"tMs":2187,"delta":"> sel=7\n    "}
+{"tMs":2315,"delta":"Text.body \"8\" ->"}
+{"tMs":2315,"delta":" sel=8\n    Text"}
+{"tMs":2315,"delta":".body \"9\" -> s"}
+{"tMs":2315,"delta":"el=9\n    Text."}
+{"tMs":2315,"delta":"body \"10\" -> sel"}
+{"tMs":2315,"delta":"=10\n    Text.body"}
+{"tMs":2316,"delta":" \"11\" f"}
+{"tMs":2316,"delta":"ill:="}
+{"tMs":2316,"delta":"s"}
+{"tMs":2316,"delta":"el==11?#"}
+{"tMs":2316,"delta":"FF2"}
+{"tMs":2316,"delta":"563"}
+{"tMs":2984,"delta":"EB:#"}
+{"tMs":2984,"delta":"00"}
+{"tMs":2984,"delta":"000000 color"}
+{"tMs":2984,"delta":":=sel==11?#"}
+{"tMs":2984,"delta":"FFFFFFFF"}
+{"tMs":2984,"delta":":#"}
+{"tMs":2984,"delta":"F"}
+{"tMs":2984,"delta":"F111"}
+{"tMs":2984,"delta":"827"}
+{"tMs":2984,"delta":" -> sel=11"}
+{"tMs":2984,"delta":"\n    Text.body \"12\""}
+{"tMs":2984,"delta":" f"}
+{"tMs":3139,"delta":"ill:#"}
+{"tMs":3139,"delta":"FFD"}
+{"tMs":3139,"delta":"BE"}
+{"tMs":3139,"delta":"AFE -"}
+{"tMs":3139,"delta":"> sel=12\n    "}
+{"tMs":3139,"delta":"Text.body \"13\" -"}
+{"tMs":3139,"delta":"> sel=13\n    "}
+{"tMs":3139,"delta":"Text.body \"14\" ->"}
+{"tMs":3139,"delta":" sel=14\n    Text"}
+{"tMs":3139,"delta":".body \"15\" -> s"}
+{"tMs":3139,"delta":"el=15\n    Text."}
+{"tMs":3139,"delta":"body \"16\" -> sel"}
+{"tMs":3275,"delta":"=16\n    Text.body"}
+{"tMs":3275,"delta":" \"17\" -> sel="}
+{"tMs":3275,"delta":"17\n    Text.body \""}
+{"tMs":3275,"delta":"18\" f"}
+{"tMs":3276,"delta":"ill:#FF"}
+{"tMs":3276,"delta":"DBEAFE ->"}
+{"tMs":3276,"delta":" sel=18\n    Text"}
+{"tMs":3276,"delta":".body \"19\" -> s"}
+{"tMs":3276,"delta":"el=19\n    Text."}
+{"tMs":3276,"delta":"body \"20\" -> sel"}
+{"tMs":3276,"delta":"=20\n    Text.body"}
+{"tMs":3276,"delta":" \"21\" -> sel="}
+{"tMs":3434,"delta":"21\n    Text.body \""}
+{"tMs":3435,"delta":"22\" -> sel=22"}
+{"tMs":3435,"delta":"\n    Text.body \"23"}
+{"tMs":3435,"delta":"\" -> sel=23"}
+{"tMs":3435,"delta":"\n    Text.body \"24\""}
+{"tMs":3435,"delta":" -> sel=24\n    "}
+{"tMs":3435,"delta":"Text.body \"25\" -"}
+{"tMs":3435,"delta":"> sel=25\n    "}
+{"tMs":3435,"delta":"Text.body \"26\" ->"}
+{"tMs":3435,"delta":" sel=26\n    Text"}
+{"tMs":3435,"delta":".body \"27\" -> s"}
+{"tMs":3435,"delta":"el=27\n    Text."}
+{"tMs":3903,"delta":"body \"28\" -> sel"}
+{"tMs":3904,"delta":"=28\n    Text.body"}
+{"tMs":3904,"delta":" \"29\" -> sel="}
+{"tMs":3904,"delta":"29\n    Text.body \""}
+{"tMs":3904,"delta":"30\" -> sel=30"}
+{"tMs":3904,"delta":"\n  Row gap:6"}
+{"tMs":3904,"delta":"\n    Badge.prim"}
+{"tMs":3904,"delta":"ary \"Booked\""}
+{"tMs":3904,"delta":"\n    Text"}
+{"tMs":3904,"delta":".caption \"Selected:"}
+{"tMs":3904,"delta":" Nov {sel}\""}

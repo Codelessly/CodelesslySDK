@@ -1,0 +1,183 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Chicago weather",
+    "subtitle": "Updated just now",
+    "icon": "wb_sunny",
+    "status": "Now",
+    "tone": "accent"
+   },
+   "children": [
+    "WeatherNow1",
+    "SectionLabel1",
+    "WeatherHours1",
+    "SectionLabel2",
+    "WeatherDay1",
+    "WeatherDay2",
+    "WeatherDay3"
+   ]
+  },
+  "WeatherNow1": {
+   "type": "WeatherNow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Chicago",
+    "detail": "Partly cloudy",
+    "temp": "68",
+    "high": "72",
+    "low": "58",
+    "kind": "partly"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next hours",
+    "note": "°F"
+   }
+  },
+  "WeatherHours1": {
+   "type": "WeatherHours",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "hours": [
+     "1 PM",
+     "2 PM",
+     "3 PM",
+     "4 PM"
+    ],
+    "temps": [
+     69,
+     71,
+     72,
+     70
+    ],
+    "kinds": [
+     "partly",
+     "sun",
+     "sun",
+     "cloud"
+    ]
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "3-day forecast",
+    "note": "°F"
+   }
+  },
+  "WeatherDay1": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Tomorrow",
+    "low": 57,
+    "high": 74,
+    "kind": "sun",
+    "min": 54,
+    "max": 74
+   }
+  },
+  "WeatherDay2": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Thursday",
+    "low": 54,
+    "high": 66,
+    "kind": "rain",
+    "min": 54,
+    "max": 74
+   }
+  },
+  "WeatherDay3": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Friday",
+    "low": 55,
+    "high": 70,
+    "kind": "cloud",
+    "min": 54,
+    "max": 74
+   }
+  }
+ }
+}

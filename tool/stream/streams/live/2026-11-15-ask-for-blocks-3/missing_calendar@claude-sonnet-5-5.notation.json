@@ -1,0 +1,723 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "November 2026",
+    "subtitle": "Tap a date to see its events",
+    "icon": "calendar_month",
+    "status": "3 booked",
+    "tone": "accent"
+   },
+   "children": [
+    "column1",
+    "row1",
+    "Details1",
+    "row4"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1"
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "gridView1",
+    "gridView2",
+    "grid1Row1",
+    "gridView3"
+   ]
+  },
+  "gridView1": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 7,
+    "mainAxisSpacing": 4,
+    "crossAxisSpacing": 4,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${= [\"Su\",\"Mo\",\"Tu\",\"We\",\"Th\",\"Fr\",\"Sa\"]}"
+   },
+   "children": [
+    "gridView1Item"
+   ]
+  },
+  "gridView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF6B7280"
+    },
+    "text": "${item}"
+   }
+  },
+  "gridView2": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 7,
+    "mainAxisSpacing": 4,
+    "crossAxisSpacing": 4,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${= range(0)}"
+   },
+   "children": [
+    "gridView2Item"
+   ]
+  },
+  "gridView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "spacer1"
+   ]
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "spacer2",
+    "spacer3",
+    "spacer4",
+    "spacer5",
+    "spacer6",
+    "spacer7",
+    "spacer8"
+   ]
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "gridView3": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 7,
+    "mainAxisSpacing": 4,
+    "crossAxisSpacing": 4,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${= range(30)}"
+   },
+   "children": [
+    "gridView3Item"
+   ]
+  },
+  "gridView3Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     0,
+     6,
+     0,
+     4
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==item+1?\"#FF4F46E5\":(contains(booked,item+1)?\"#FFE0E7FF\":\"#00FFFFFF\")}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item+1}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text2",
+    "text3"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= item+1}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= sel==item+1?\"#FFFFFFFF\":\"#FF111827\"}",
+    "props.style.fontWeight": "${= contains(booked,item+1)?700:400}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "${= contains(events,item+1)?'•':' '}"
+   },
+   "bind": {
+    "props.style.color": "${= sel==item+1?\"#FFFFFFFF\":\"#FFEF4444\"}"
+   }
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "spacer4": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "spacer5": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "spacer6": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "spacer7": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "spacer8": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row2",
+    "row3",
+    "text6"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1A2563EB"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#472563EB"
+     }
+    ],
+    "radius": 5
+   },
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Selected",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1A0891B2"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#470891B2"
+     }
+    ],
+    "radius": 5
+   },
+   "children": [
+    "text5"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Booked",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF0891B2"
+    }
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "• Event"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Selected\",(\"Nov \" + (sel) + \", 2026\")],[\"Status\",contains(booked,sel)?\"Booked\":\"Available\"],[\"Events\",contains(events,sel)?\"1 event\":\"None\"]]}"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Clear",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Book date",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= sel>0&&!contains(booked,sel)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "booked",
+       "value": "${= append(booked,sel)}"
+      },
+      {
+       "type": "showToast",
+       "message": "Booked"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 12
+   },
+   {
+    "name": "booked",
+    "type": "list",
+    "value": [
+     3,
+     4,
+     5,
+     18,
+     19,
+     24
+    ]
+   },
+   {
+    "name": "events",
+    "type": "list",
+    "value": [
+     2,
+     12,
+     17,
+     26,
+     30
+    ]
+   }
+  ]
+ }
+}

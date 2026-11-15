@@ -1,0 +1,16 @@
+name: on_demand_blocks
+description: A chat card whose missing block is designed while the session runs, then swapped in.
+publish_to: none
+environment:
+  sdk: ^3.12.0
+dependencies:
+  flutter:
+    sdk: flutter
+  codelessly_sdk:
+    path: ../..
+  codelessly_api: ^31.0.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true

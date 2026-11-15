@@ -1,0 +1,462 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "AAPL order book",
+    "subtitle": "Level 2 · top 5 levels",
+    "icon": "show_chart",
+    "status": "Live",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "listView1",
+    "divider1",
+    "SectionLabel2",
+    "listView2",
+    "Details1",
+    "TotalBar1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Bids",
+    "note": "size"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${bids}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "column1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF16A34A"
+    },
+    "text": "${item.price}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${item.size}"
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "height": 6,
+    "width": 0
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#2200C853"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "layout.width": "${= item.depth*3}"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Asks",
+    "note": "size"
+   }
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${asks}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "column2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "text4"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FFDC2626"
+    },
+    "text": "${item.price}"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${item.size}"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "height": 6,
+    "width": 0
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#22D50000"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "layout.width": "${= item.depth*3}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Spread\",fixed(spread,2)],[\"Last trade\",fixed(last,2)]]}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Last trade",
+    "cta": "Trade",
+    "icon": "bolt"
+   },
+   "bind": {
+    "props.amount": "${= fixed(last,2)}",
+    "props.note": "spread ${= fixed(spread,2)}",
+    "props.enabled": "${= true}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "trade"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "bids",
+    "type": "list",
+    "value": [
+     {
+      "price": "189.40",
+      "size": 1200,
+      "depth": 90
+     },
+     {
+      "price": "189.39",
+      "size": 800,
+      "depth": 60
+     },
+     {
+      "price": "189.38",
+      "size": 450,
+      "depth": 35
+     },
+     {
+      "price": "189.37",
+      "size": 300,
+      "depth": 22
+     },
+     {
+      "price": "189.36",
+      "size": 150,
+      "depth": 12
+     }
+    ]
+   },
+   {
+    "name": "asks",
+    "type": "list",
+    "value": [
+     {
+      "price": "189.42",
+      "size": 500,
+      "depth": 40
+     },
+     {
+      "price": "189.43",
+      "size": 700,
+      "depth": 55
+     },
+     {
+      "price": "189.44",
+      "size": 950,
+      "depth": 72
+     },
+     {
+      "price": "189.45",
+      "size": 1100,
+      "depth": 85
+     },
+     {
+      "price": "189.46",
+      "size": 400,
+      "depth": 30
+     }
+    ]
+   },
+   {
+    "name": "spread",
+    "type": "decimal",
+    "value": 0.02
+   },
+   {
+    "name": "last",
+    "type": "decimal",
+    "value": 189.41
+   }
+  ]
+ }
+}

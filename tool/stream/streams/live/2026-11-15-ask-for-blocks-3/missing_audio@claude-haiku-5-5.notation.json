@@ -1,0 +1,280 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Voice note",
+    "subtitle": "Ana · 0:42",
+    "icon": "mic_rounded",
+    "status": "Playing",
+    "tone": "accent"
+   },
+   "children": [
+    "row1",
+    "progressBar1",
+    "row2"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "iconButton1",
+    "text1",
+    "spacer1",
+    "text2"
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "play_arrow"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "playing",
+       "value": "${= !playing}"
+      }
+     ]
+    }
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= floor(pos/60)}:${= fixed(pos%60,0)}"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "${= floor(total/60)}:${= fixed(total%60,0)}"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   },
+   "bind": {
+    "props.value": "${pos}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "textButton1",
+    "spacer2",
+    "text3"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${speed}x"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "speed",
+       "value": "${= speed==1?1.5:(speed==1.5?2:1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "Waveform scrub"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "playing",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "pos",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "speed",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "total",
+    "type": "integer",
+    "value": 42
+   }
+  ]
+ }
+}

@@ -1,0 +1,89 @@
+{"meta":{"ui":"covered_cart","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a shopping cart chat card with two products, quantities, line totals, a total bar, and a checkout action.","text":"state items=[{\"id\":1,\"name\":\"Trail Runner\",\"detail\":\"Size 42 · Sand\",\"price\":89,\"qty\":1,\"kind\":\"shoe\",\"tone\":\"sand\"},{\"id\":2,\"name\":\"Ceramic Mug\",\"detail\":\"350 ml · Mint\",\"price\":18,\"qty\":2,\"kind\":\"mug\",\"tone\":\"mint\"}]\nstate done=false\nChatCard \"Your cart\" \"2 products\" icon:\"shopping_cart\" status:\"Open\" tone:accent w:390\n  if !done\n    SectionLabel \"Items\" \"{sum(items,i=>i.qty)} total\"\n    each i in items\n      CartLine \"{i.name}\" \"{i.detail} · Line total {money(i.price*i.qty,\"$\",2)}\" price:=money(i.price,\"$\",2) qty:=i.qty kind:=i.kind tone:=i.tone -> items=updateWhere(items,x=>x.id==i.id,x=>with(x,\"qty\",result))\n    Details rows:=[[\"Subtotal\",money(sum(items,i=>i.price*i.qty),\"$\",2)],[\"Delivery\",\"Free\"]]\n    TotalBar \"Total\" \"Free delivery\" amount:=money(sum(items,i=>i.price*i.qty),\"$\",2) cta:\"Checkout\" icon:\"lock\" enabled:=length(items)>0 -> done=true; emit checkout\n  if done\n    Receipt \"Order placed\" \"Thanks for your purchase.\" code:\"#48213\" codeLabel:\"Order number\" tone:good icon:\"check\"","usage":{"input_tokens":9298,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":520,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":796,"totalMs":3757}}
+{"tMs":796,"delta":"state"}
+{"tMs":1127,"delta":" items=[{\"id\":1"}
+{"tMs":1127,"delta":",\"name\":\"Tr"}
+{"tMs":1127,"delta":"ail Run"}
+{"tMs":1128,"delta":"ner\",\""}
+{"tMs":1128,"delta":"detail\":\"Size"}
+{"tMs":1128,"delta":" 42 "}
+{"tMs":1128,"delta":"· Sand\",\"price\":89"}
+{"tMs":1128,"delta":","}
+{"tMs":1128,"delta":"\"qty\":1,"}
+{"tMs":1150,"delta":"\"kind\":\"shoe"}
+{"tMs":1183,"delta":"\",\"tone\":\"sand\""}
+{"tMs":1217,"delta":"},{\"id\":2,\""}
+{"tMs":1469,"delta":"name\":\"Ceramic"}
+{"tMs":1469,"delta":" Mug\",\"detail\":\""}
+{"tMs":1469,"delta":"350"}
+{"tMs":1469,"delta":" "}
+{"tMs":1469,"delta":"ml · M"}
+{"tMs":1469,"delta":"int\",\"price\":18"}
+{"tMs":1469,"delta":",\"qty\":2,\""}
+{"tMs":1484,"delta":"kind\":\"mug\",\"t"}
+{"tMs":1517,"delta":"one\":\"mint\"}]"}
+{"tMs":1550,"delta":"\nstate done"}
+{"tMs":1584,"delta":"=false\nChatCard"}
+{"tMs":1618,"delta":" \"Your cart\" \"2"}
+{"tMs":1813,"delta":" products"}
+{"tMs":1813,"delta":"\" icon:\"sh"}
+{"tMs":1813,"delta":"opping_cart\" status:"}
+{"tMs":1813,"delta":"\""}
+{"tMs":1813,"delta":"Open"}
+{"tMs":1817,"delta":"\" t"}
+{"tMs":1850,"delta":"one:accent w:390"}
+{"tMs":1884,"delta":"\n  if !done\n    S"}
+{"tMs":1918,"delta":"ectionLabel \"Items"}
+{"tMs":1950,"delta":"\" \"{s"}
+{"tMs":1984,"delta":"um(items,i"}
+{"tMs":2017,"delta":"=>i.qty)}"}
+{"tMs":2159,"delta":" total"}
+{"tMs":2159,"delta":"\"\n    each i in items"}
+{"tMs":2160,"delta":"\n      CartLine \"{i"}
+{"tMs":2160,"delta":".name}\" \"{i."}
+{"tMs":2184,"delta":"detail} ·"}
+{"tMs":2218,"delta":" Line total {"}
+{"tMs":2251,"delta":"money(i.price*"}
+{"tMs":2284,"delta":"i.qty,\"$\","}
+{"tMs":2317,"delta":"2)}\" price"}
+{"tMs":2351,"delta":":="}
+{"tMs":2384,"delta":"money(i.price,"}
+{"tMs":2417,"delta":"\"$\",2) qty:"}
+{"tMs":2504,"delta":"=i.qty kind:"}
+{"tMs":2504,"delta":"=i.kind tone:"}
+{"tMs":2517,"delta":"=i.tone -> items"}
+{"tMs":2551,"delta":"=updateWhere(items"}
+{"tMs":2584,"delta":",x"}
+{"tMs":2617,"delta":"=>x.id==i."}
+{"tMs":2651,"delta":"id,x=>with(x"}
+{"tMs":2686,"delta":",\"qty\",result))"}
+{"tMs":2717,"delta":"\n    Details rows:=["}
+{"tMs":2751,"delta":"[\"Sub"}
+{"tMs":2786,"delta":"total\",money(sum"}
+{"tMs":2818,"delta":"(items,i=>i."}
+{"tMs":2859,"delta":"price*i.qty),\""}
+{"tMs":2884,"delta":"$\",2)],[\"Del"}
+{"tMs":2918,"delta":"ivery\",\"Free\"]]"}
+{"tMs":2951,"delta":"\n    TotalBar \""}
+{"tMs":2984,"delta":"Total\" \"Free"}
+{"tMs":3018,"delta":" delivery\" amount:="}
+{"tMs":3053,"delta":"money(sum(items,i"}
+{"tMs":3085,"delta":"=>i.price*i."}
+{"tMs":3119,"delta":"qty),\"$\","}
+{"tMs":3152,"delta":"2) cta:\"Chec"}
+{"tMs":3185,"delta":"kout\" ic"}
+{"tMs":3218,"delta":"on:\"l"}
+{"tMs":3282,"delta":"ock\" enabled:=length"}
+{"tMs":3284,"delta":"(items)>0 ->"}
+{"tMs":3318,"delta":" done=true; emit check"}
+{"tMs":3351,"delta":"out\n  if done\n    "}
+{"tMs":3384,"delta":"Receipt \"Order plac"}
+{"tMs":3419,"delta":"ed\" \""}
+{"tMs":3451,"delta":"Thanks for your"}
+{"tMs":3484,"delta":" purchase.\" code"}
+{"tMs":3520,"delta":":\"#"}
+{"tMs":3551,"delta":"48"}
+{"tMs":3584,"delta":"213"}
+{"tMs":3618,"delta":"\" cod"}
+{"tMs":3750,"delta":"eLabel:\"Order"}
+{"tMs":3750,"delta":" number\" tone:good ic"}
+{"tMs":3750,"delta":"on:\"check\""}

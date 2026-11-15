@@ -1,0 +1,85 @@
+{"meta":{"ui":"missing_transit","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a transit departure board chat card with three arriving trains, route badges, destinations, platform numbers, live delay status, and minutes until arrival.","text":"ChatCard \"Departures\" \"Central Station\" icon:\"train\" status:\"Live\" tone:good w:390\n  state trains=[{\"id\":1,\"route\":\"R12\",\"dest\":\"Harbor Point\",\"platform\":\"4\",\"status\":\"On time\",\"mins\":3,\"tone\":\"success\"},{\"id\":2,\"route\":\"S3\",\"dest\":\"Airport Terminal\",\"platform\":\"7\",\"status\":\"Delayed 5 min\",\"mins\":9,\"tone\":\"warning\"},{\"id\":3,\"route\":\"M1\",\"dest\":\"Northgate\",\"platform\":\"2\",\"status\":\"Delayed 12 min\",\"mins\":16,\"tone\":\"error\"}]\n  SectionLabel \"Next arrivals\" \"{length(trains)} trains\"\n  each t in trains\n    Card gap:8\n      Row between middle\n        Row gap:10 middle\n          Badge.primary \"{t.route}\"\n          Text.rowTitle \"{t.dest}\"\n        Column right\n          Text.numberSmall \"{t.mins}\"\n          Text.caption \"min\"\n      Row between middle\n        Row gap:8 middle\n          Icon \"directions_railway\"\n          Text.meta \"Platform {t.platform}\"\n        if t.tone==\"success\"\n          Badge.success \"{t.status}\"\n        if t.tone==\"warning\"\n          Badge.warning \"{t.status}\"\n        if t.tone==\"error\"\n          Badge.error \"{t.status}\"\n  Callout \"Service notice\" \"Delays on S3 and M1 due to signal checks.\" tone:warn","usage":{"input_tokens":9310,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":490,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":670,"totalMs":3487}}
+{"tMs":670,"delta":"ChatCard \"Depart"}
+{"tMs":995,"delta":"ures"}
+{"tMs":995,"delta":"\" \"Central"}
+{"tMs":995,"delta":" Station\" icon:\"train"}
+{"tMs":995,"delta":"\" status:\"Live\" t"}
+{"tMs":995,"delta":"one:good"}
+{"tMs":995,"delta":" w:390"}
+{"tMs":995,"delta":"\n  state trains=[{\""}
+{"tMs":995,"delta":"id\":1"}
+{"tMs":995,"delta":",\"route\":\"R12"}
+{"tMs":995,"delta":"\",\"dest\":\"Har"}
+{"tMs":1012,"delta":"bor"}
+{"tMs":1045,"delta":" Point"}
+{"tMs":1341,"delta":"\",\"plat"}
+{"tMs":1341,"delta":"form\":\"4"}
+{"tMs":1341,"delta":"\",\"status"}
+{"tMs":1341,"delta":"\":\"On time\",\"mins\":"}
+{"tMs":1341,"delta":"3"}
+{"tMs":1341,"delta":",\"tone\":\"success"}
+{"tMs":1341,"delta":"\"},{\"id\":2,"}
+{"tMs":1341,"delta":"\"route\":\"S"}
+{"tMs":1341,"delta":"3"}
+{"tMs":1375,"delta":"\",\"dest\":\"Air"}
+{"tMs":1410,"delta":"port Terminal\",\"platform"}
+{"tMs":1441,"delta":"\":\"7"}
+{"tMs":1676,"delta":"\",\"status\":\"Delayed"}
+{"tMs":1676,"delta":" 5"}
+{"tMs":1676,"delta":" min\",\"mins\":9,"}
+{"tMs":1676,"delta":"\"tone\":\"warning\""}
+{"tMs":1676,"delta":"},{\"id\":3,\""}
+{"tMs":1676,"delta":"route\":\"M1"}
+{"tMs":1678,"delta":"\",\"dest\":\"North"}
+{"tMs":1713,"delta":"gate\",\"platform\":\"2"}
+{"tMs":1747,"delta":"\",\"status\":\""}
+{"tMs":1779,"delta":"Del"}
+{"tMs":1812,"delta":"ayed 12"}
+{"tMs":1846,"delta":" min\",\"mins\":16"}
+{"tMs":2013,"delta":",\"tone\":\"error\""}
+{"tMs":2013,"delta":"}]\n  SectionL"}
+{"tMs":2013,"delta":"abel \"Next ar"}
+{"tMs":2013,"delta":"rivals\" \"{"}
+{"tMs":2014,"delta":"length(trains)} trains"}
+{"tMs":2047,"delta":"\"\n  each t"}
+{"tMs":2081,"delta":" in trains\n    Card g"}
+{"tMs":2115,"delta":"ap:8\n      Row between"}
+{"tMs":2149,"delta":" middle\n        Row"}
+{"tMs":2182,"delta":" gap:10"}
+{"tMs":2215,"delta":" middle\n          Badge"}
+{"tMs":2248,"delta":".primary \""}
+{"tMs":2349,"delta":"{t.route}\"\n          "}
+{"tMs":2349,"delta":"Text.r"}
+{"tMs":2349,"delta":"owTitle \"{t."}
+{"tMs":2383,"delta":"dest}\"\n        Column"}
+{"tMs":2415,"delta":" right"}
+{"tMs":2449,"delta":"\n          Text.num"}
+{"tMs":2482,"delta":"berS"}
+{"tMs":2538,"delta":"mall \"{t.mins"}
+{"tMs":2549,"delta":"}\"\n          Text.ca"}
+{"tMs":2584,"delta":"ption \"min\"\n      Row"}
+{"tMs":2617,"delta":" between midd"}
+{"tMs":2650,"delta":"le\n        Row gap:"}
+{"tMs":2688,"delta":"8 middle\n          Ic"}
+{"tMs":2716,"delta":"on \"direct"}
+{"tMs":2749,"delta":"ions_rail"}
+{"tMs":2782,"delta":"way\"\n          Text.me"}
+{"tMs":2816,"delta":"ta \"Platform {t."}
+{"tMs":2850,"delta":"platform}\"\n        if"}
+{"tMs":2885,"delta":" t.t"}
+{"tMs":2916,"delta":"one==\"success\"\n          "}
+{"tMs":2950,"delta":"Badge.success \"{"}
+{"tMs":2983,"delta":"t.status}\"\n        if"}
+{"tMs":3017,"delta":" t.tone==\"warning"}
+{"tMs":3052,"delta":"\"\n          Badge.war"}
+{"tMs":3480,"delta":"ning \"{t.status}\""}
+{"tMs":3480,"delta":"\n        if t.tone="}
+{"tMs":3480,"delta":"=\"error\"\n          Badge"}
+{"tMs":3480,"delta":".error \"{t.status}"}
+{"tMs":3480,"delta":"\"\n  Callout \""}
+{"tMs":3480,"delta":"Service not"}
+{"tMs":3480,"delta":"ice\" \"Delays on"}
+{"tMs":3480,"delta":" S3 and M1 due"}
+{"tMs":3480,"delta":" to signal chec"}
+{"tMs":3480,"delta":"ks.\" t"}
+{"tMs":3480,"delta":"one:warn"}

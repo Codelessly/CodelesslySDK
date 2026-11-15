@@ -1,0 +1,172 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Project plan",
+    "subtitle": "Website relaunch",
+    "icon": "assignment",
+    "status": "In progress"
+   },
+   "children": [
+    "Steps1",
+    "ProgressLine1",
+    "SectionLabel1",
+    "Checklist1",
+    "TotalBar1"
+   ]
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Scope",
+     "Build",
+     "Launch"
+    ]
+   },
+   "bind": {
+    "props.current": "${stage}"
+   }
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Progress"
+   },
+   "bind": {
+    "props.value": "${= stage/3}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next actions",
+    "note": "2 open"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Next actions",
+    "value": "done",
+    "items": [
+     "Confirm scope with client",
+     "Draft launch checklist",
+     "Schedule QA review"
+    ]
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Stage",
+    "cta": "Advance"
+   },
+   "bind": {
+    "props.note": "Step ${stage} of 3",
+    "props.amount": "${stage}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "stage",
+       "value": "${= min(3,stage+1)}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "stage",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "done",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

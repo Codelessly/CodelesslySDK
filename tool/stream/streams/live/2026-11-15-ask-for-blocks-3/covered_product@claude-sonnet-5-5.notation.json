@@ -1,0 +1,217 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Featured pick",
+    "subtitle": "Today's top coffee maker",
+    "icon": "coffee_rounded",
+    "status": "Featured",
+    "tone": "accent"
+   },
+   "children": [
+    "Media1",
+    "row1",
+    "Paragraph1",
+    "Details1",
+    "row2"
+   ]
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 180,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "kind": "mug",
+    "tone": "sand"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 19,
+     "fontWeight": 700,
+     "fontFamily": "Inter Display",
+     "letterSpacing": -0.3,
+     "height": 1.2,
+     "color": "#FF111827"
+    },
+    "text": "Brewmaster 12-Cup Coffee Maker"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "$89.99"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Programmable drip brewer with a thermal carafe, adjustable brew strength and a 24-hour timer."
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Capacity",
+      "12 cups"
+     ],
+     [
+      "Carafe",
+      "Thermal, stainless steel"
+     ],
+     [
+      "Rating",
+      "4.7 of 5"
+     ]
+    ]
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Add to cart",
+    "tone": "primary",
+    "icon": "shopping_cart"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addToCart"
+      },
+      {
+       "type": "showToast",
+       "message": "Added to cart"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

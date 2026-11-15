@@ -1,0 +1,404 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Team offsite poll",
+    "subtitle": "Live results",
+    "icon": "poll",
+    "status": "Live",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "column1",
+    "Callout1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Where should we go?"
+   },
+   "bind": {
+    "props.note": "${= sum(options,o=>o.votes)} votes"
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${options}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "progressBar1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row2",
+    "text4"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "row3",
+    "row4"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1A16A34A"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#4716A34A"
+     }
+    ],
+    "radius": 5
+   },
+   "bind": {
+    "visible": "${= item.votes==max(max(options[0].votes,options[1].votes),max(options[2].votes,options[3].votes))}"
+   },
+   "children": [
+    "text2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Leading",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF16A34A"
+    }
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1A2563EB"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#472563EB"
+     }
+    ],
+    "radius": 5
+   },
+   "bind": {
+    "visible": "${= mine==item.name}"
+   },
+   "children": [
+    "text3"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "My vote",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${item.votes} · ${= round(item.votes*100/sum(options,x=>x.votes),0)}%"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   },
+   "bind": {
+    "props.value": "${= item.votes/sum(options,x=>x.votes)}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your answer",
+    "tone": "accent",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.message": "You voted for ${mine}."
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "options",
+    "type": "list",
+    "value": [
+     {
+      "name": "Lisbon",
+      "votes": 42
+     },
+     {
+      "name": "Berlin",
+      "votes": 31
+     },
+     {
+      "name": "Prague",
+      "votes": 19
+     },
+     {
+      "name": "Vienna",
+      "votes": 8
+     }
+    ]
+   },
+   {
+    "name": "mine",
+    "type": "text",
+    "value": "Berlin"
+   }
+  ]
+ }
+}

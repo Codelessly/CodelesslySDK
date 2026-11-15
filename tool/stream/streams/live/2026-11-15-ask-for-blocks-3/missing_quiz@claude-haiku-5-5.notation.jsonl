@@ -1,0 +1,77 @@
+{"meta":{"ui":"missing_quiz","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a quiz question chat card with four answer choices, a submitted answer, correct and incorrect marking, explanation, and score earned.","text":"ChatCard \"Quiz question 3 of 5\" \"Geography\" icon:\"quiz\" status:\"2 pts\"\n  Paragraph \"Which river is the longest in Africa?\" strong\n  state answer=\"\" \n  state picked=\"\"\n  ChoiceChips =answer options:[\"Congo\",\"Niger\",\"Nile\",\"Zambezi\"]\n  if answer!=\"\"\n    Callout \"Correct\" \"You chose Nile, which is right.\" tone:good icon:\"check_circle\"\n    Callout \"Incorrect\" \"You chose Congo; the answer is Nile.\" tone:danger icon:\"cancel\"\n    Details rows:[[\"Your answer\",\"Nile\"],[\"Correct answer\",\"Nile\"],[\"Score earned\",\"2 of 2 pts\"]]\n    Paragraph \"The Nile flows about 6,650 km north through eleven countries to the Mediterranean, edging out the Amazon for the title of longest river depending on how the source is measured.\"\n  ActionButton \"Submit answer\" primary icon:\"send\" enabled:=answer!=\"\" -> emit submitAnswer answer","usage":{"input_tokens":9305,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":351,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":547,"totalMs":2082}}
+{"tMs":547,"delta":"ChatCard \"Qu"}
+{"tMs":553,"delta":"iz question "}
+{"tMs":755,"delta":"3 "}
+{"tMs":755,"delta":"of 5\" \"Ge"}
+{"tMs":755,"delta":"ography\" icon:\"qu"}
+{"tMs":755,"delta":"iz\" status:\"2"}
+{"tMs":755,"delta":" p"}
+{"tMs":755,"delta":"ts\"\n  "}
+{"tMs":755,"delta":"Pa"}
+{"tMs":755,"delta":"ragraph \"Which river"}
+{"tMs":755,"delta":" is the long"}
+{"tMs":755,"delta":"est in Africa?\" str"}
+{"tMs":771,"delta":"ong\n  state"}
+{"tMs":791,"delta":" answer=\""}
+{"tMs":810,"delta":"\" "}
+{"tMs":830,"delta":"\n  state"}
+{"tMs":848,"delta":" pic"}
+{"tMs":870,"delta":"ked=\"\"\n  Cho"}
+{"tMs":891,"delta":"iceChips ="}
+{"tMs":913,"delta":"answer options:[\"Cong"}
+{"tMs":933,"delta":"o\",\"Ni"}
+{"tMs":955,"delta":"ger\",\"Nile\",\"Z"}
+{"tMs":977,"delta":"ambezi\"]"}
+{"tMs":996,"delta":"\n  if answer!="}
+{"tMs":1017,"delta":"\"\"\n    "}
+{"tMs":1037,"delta":"Callout \"Correct\" \""}
+{"tMs":1057,"delta":"You"}
+{"tMs":1077,"delta":" chose"}
+{"tMs":1097,"delta":" Nile, which"}
+{"tMs":1117,"delta":" is right"}
+{"tMs":1137,"delta":".\" tone:good ic"}
+{"tMs":1158,"delta":"on:\"check_"}
+{"tMs":1179,"delta":"circle\"\n    Call"}
+{"tMs":1200,"delta":"out \"Inc"}
+{"tMs":1220,"delta":"orrect\" \"You chose"}
+{"tMs":1240,"delta":" Cong"}
+{"tMs":1259,"delta":"o;"}
+{"tMs":1279,"delta":" the answ"}
+{"tMs":1301,"delta":"er is Nile.\" tone"}
+{"tMs":1321,"delta":":danger icon:\"c"}
+{"tMs":1343,"delta":"ancel\"\n    Details"}
+{"tMs":1363,"delta":" r"}
+{"tMs":1381,"delta":"ows:"}
+{"tMs":1403,"delta":"[[\"Your"}
+{"tMs":1423,"delta":" answer\",\"Nile\"],"}
+{"tMs":1444,"delta":"[\"Correct answer\",\""}
+{"tMs":1465,"delta":"Nile\"],[\"Score ear"}
+{"tMs":1485,"delta":"ned\",\"2 of"}
+{"tMs":1506,"delta":" 2 p"}
+{"tMs":1526,"delta":"ts\"]]\n    "}
+{"tMs":1547,"delta":"Paragraph \"The"}
+{"tMs":1567,"delta":" Nile flows about"}
+{"tMs":1587,"delta":" 6,650"}
+{"tMs":1608,"delta":" km"}
+{"tMs":1628,"delta":" north through"}
+{"tMs":1648,"delta":" e"}
+{"tMs":1668,"delta":"leven countries to the"}
+{"tMs":1689,"delta":" Mediterranean, ed"}
+{"tMs":1709,"delta":"ging out"}
+{"tMs":1730,"delta":" the Amazon for"}
+{"tMs":1749,"delta":" the title"}
+{"tMs":1770,"delta":" of"}
+{"tMs":1790,"delta":" longest river"}
+{"tMs":1810,"delta":" dep"}
+{"tMs":1830,"delta":"ending on how"}
+{"tMs":1851,"delta":" the source is measured.\""}
+{"tMs":1896,"delta":"\n  ActionButton \""}
+{"tMs":1912,"delta":"Submit answ"}
+{"tMs":1934,"delta":"er\" primary icon:\""}
+{"tMs":1952,"delta":"send"}
+{"tMs":1974,"delta":"\" enabled:=answer"}
+{"tMs":1997,"delta":"!=\""}
+{"tMs":2014,"delta":"\" -> em"}
+{"tMs":2034,"delta":"it submit"}
+{"tMs":2054,"delta":"Answer answ"}
+{"tMs":2075,"delta":"er"}

@@ -1,0 +1,72 @@
+{"meta":{"ui":"missing_auction","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a live auction bid card with current price, countdown timer, bidder count, minimum next bid, bid history, and a prominent place-bid action.","text":"ChatCard \"Live auction\" \"Vintage Leica M3, body only\" icon:\"gavel\" status:\"Live\"\n  Row between\n    Text.caption \"Current bid\"\n    Text.caption \"Ends in\"\n  Row between\n    Text.numberLarge \"{bid}\"\n    Text.numberLarge \"{mins}:{secs}\"\n  Text.muted \"{bidders} bidders · minimum next bid {bid+5}\"\n  Progress =time\n  SectionLabel \"Bid history\" \"{length(history)} bids\"\n  each h in history\n    Row between\n      Text.body \"{h.name}\"\n      Text.strong \"{h.amount}\"\n  TotalBar \"Your bid\" \"Minimum {bid+5}\" amount:{bid+5} cta \"Place bid\" enabled:=time>0 -> emit placeBid\n\nstate bid=420\nstate bidders=12\nstate time=300\nstate mins=5\nstate secs=0\nstate history=[{\"name\":\"Marta\",\"amount\":420},{\"name\":\"Jon\",\"amount\":405},{\"name\":\"Priya\",\"amount\":390}]\nevery 1000 -> time=max(0,time-1); mins=floor(max(0,time-1)/60); secs=max(0,time-1)%60","usage":{"input_tokens":9308,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":399,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":488,"totalMs":2030}}
+{"tMs":488,"delta":"ChatCard \"Live"}
+{"tMs":688,"delta":" auction\" \"V"}
+{"tMs":688,"delta":"intage Le"}
+{"tMs":688,"delta":"ica M"}
+{"tMs":688,"delta":"3, body"}
+{"tMs":688,"delta":" only"}
+{"tMs":688,"delta":"\" icon:\"g"}
+{"tMs":688,"delta":"avel\" status:\"Live"}
+{"tMs":688,"delta":"\"\n  "}
+{"tMs":688,"delta":"Row between"}
+{"tMs":688,"delta":"\n    Text.ca"}
+{"tMs":702,"delta":"ption \"Current b"}
+{"tMs":726,"delta":"id\"\n    Text.ca"}
+{"tMs":890,"delta":"ption \""}
+{"tMs":890,"delta":"Ends in\"\n  Row"}
+{"tMs":890,"delta":" between\n    Text.num"}
+{"tMs":890,"delta":"berL"}
+{"tMs":890,"delta":"arge \"{"}
+{"tMs":890,"delta":"b"}
+{"tMs":890,"delta":"id}\""}
+{"tMs":896,"delta":"\n    Text.numberL"}
+{"tMs":918,"delta":"arge \"{m"}
+{"tMs":940,"delta":"ins}:{secs}\""}
+{"tMs":962,"delta":"\n  Text.mu"}
+{"tMs":985,"delta":"ted \"{bidders} b"}
+{"tMs":1100,"delta":"idders · min"}
+{"tMs":1100,"delta":"imum next bid {"}
+{"tMs":1100,"delta":"b"}
+{"tMs":1100,"delta":"id+5}\"\n  "}
+{"tMs":1100,"delta":"Progress =time"}
+{"tMs":1134,"delta":"\n  SectionLabel \""}
+{"tMs":1156,"delta":"Bid history\" \"{length"}
+{"tMs":1189,"delta":"(history)} bids\""}
+{"tMs":1200,"delta":"\n  each h in history\n    "}
+{"tMs":1222,"delta":"Row between\n      Text.body"}
+{"tMs":1243,"delta":" \"{h.name"}
+{"tMs":1296,"delta":"}\"\n      Text.str"}
+{"tMs":1296,"delta":"ong \"{h.am"}
+{"tMs":1309,"delta":"ount}\"\n  Total"}
+{"tMs":1330,"delta":"Bar \"Your"}
+{"tMs":1352,"delta":" bid\" \""}
+{"tMs":1373,"delta":"Minimum {"}
+{"tMs":1395,"delta":"bid+5}\" amount"}
+{"tMs":1416,"delta":":{"}
+{"tMs":1439,"delta":"bid+5} cta \""}
+{"tMs":1459,"delta":"Place bid\" en"}
+{"tMs":1480,"delta":"abled:=time"}
+{"tMs":1502,"delta":">0 -> em"}
+{"tMs":1523,"delta":"it plac"}
+{"tMs":1545,"delta":"eBid"}
+{"tMs":1566,"delta":"\n\nstate bid=420"}
+{"tMs":1587,"delta":"\nstate b"}
+{"tMs":1608,"delta":"idders=12\nstate time="}
+{"tMs":1629,"delta":"300"}
+{"tMs":1651,"delta":"\nstate mins=5"}
+{"tMs":1673,"delta":"\nstate secs=0\nstate"}
+{"tMs":1697,"delta":" history=[{\"name\":\""}
+{"tMs":1716,"delta":"Marta"}
+{"tMs":1737,"delta":"\",\"amount\":420"}
+{"tMs":1759,"delta":"},{\"name\":\"J"}
+{"tMs":1899,"delta":"on\",\"amount\":405},{"}
+{"tMs":1899,"delta":"\"name\":\"Pri"}
+{"tMs":1899,"delta":"ya\",\"amount\":390}]"}
+{"tMs":1899,"delta":"\nevery 1000 ->"}
+{"tMs":1899,"delta":" time=max"}
+{"tMs":1899,"delta":"(0,time-1); m"}
+{"tMs":1910,"delta":"ins=flo"}
+{"tMs":1931,"delta":"or(max"}
+{"tMs":1953,"delta":"(0,time-1)/"}
+{"tMs":1975,"delta":"60); secs=max(0"}
+{"tMs":1996,"delta":",time-1)%60"}

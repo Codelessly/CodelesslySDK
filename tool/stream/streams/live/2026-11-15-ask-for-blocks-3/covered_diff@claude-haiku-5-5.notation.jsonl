@@ -1,0 +1,26 @@
+{"meta":{"ui":"covered_diff","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a code review chat card with a small two-line before/after diff hunk and an approve action.","text":"ChatCard \"Code review\" \"auth.ts, line 42\" icon:\"code\" status:\"Needs review\"\n  DiffHunk \"Token expiry\" \"@@ -42,2 +42,2 @@\" =h1 start:42 lines:[\"-const ttl = 3600;\",\"+const ttl = 900;\"]\n  Row gap:10\n    ActionButton \"Request changes\" quiet\n    ActionButton \"Approve\" primary -> emit approve","usage":{"input_tokens":9290,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":147,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":557,"totalMs":1049}}
+{"tMs":557,"delta":"ChatCard \"Code"}
+{"tMs":656,"delta":" review\" \"au"}
+{"tMs":656,"delta":"th."}
+{"tMs":656,"delta":"ts, line 42"}
+{"tMs":656,"delta":"\" icon:\"code"}
+{"tMs":656,"delta":"\" status:\""}
+{"tMs":665,"delta":"Need"}
+{"tMs":689,"delta":"s review\"\n  Diff"}
+{"tMs":712,"delta":"Hunk \"Token"}
+{"tMs":735,"delta":" expiry\" \"@@"}
+{"tMs":756,"delta":" -42,2 +42,"}
+{"tMs":777,"delta":"2 @@\" ="}
+{"tMs":798,"delta":"h1 start:42 l"}
+{"tMs":856,"delta":"ines:[\"-const "}
+{"tMs":856,"delta":"ttl = 3600;\",\""}
+{"tMs":860,"delta":"+const ttl = 900"}
+{"tMs":885,"delta":";\"]\n  "}
+{"tMs":901,"delta":"Row gap:10"}
+{"tMs":923,"delta":"\n    ActionButton \""}
+{"tMs":942,"delta":"Request"}
+{"tMs":963,"delta":" changes\" qu"}
+{"tMs":981,"delta":"iet"}
+{"tMs":1002,"delta":"\n    ActionButton \""}
+{"tMs":1024,"delta":"Approve\" primary -> em"}
+{"tMs":1044,"delta":"it approve"}

@@ -1,0 +1,107 @@
+{
+ "ui": "missing_calendar",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24414,
+ "turns": [
+  {
+   "input_tokens": 9306,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 775,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 631,
+   "totalMs": 4108,
+   "chars": 1499,
+   "lines": 46,
+   "jsonTails": 0,
+   "nodes": 2,
+   "outputTokensPerNode": "387.5",
+   "notationIssues": [
+    "line 3:1: A second root: the first line is the root, everything else is indented under it.",
+    "line 5:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 6:5: An \"each\" needs a parent: indent it under a node.",
+    "line 7:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 8:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 9:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 10:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 11:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 12:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 13:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 14:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 15:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 16:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 17:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 18:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 19:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 20:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 21:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 22:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 23:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 24:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 25:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 26:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 27:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 28:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 29:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 30:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 31:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 32:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 33:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 34:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 35:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 36:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 37:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 38:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 39:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 40:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 41:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 42:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 43:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 44:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 45:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 46:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 47:5: A second root: the first line is the root, everything else is indented under it."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 11336,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 902,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 1144,
+   "totalMs": 4313,
+   "chars": 1879,
+   "lines": 51,
+   "jsonTails": 1,
+   "nodes": 64,
+   "outputTokensPerNode": "14.1",
+   "notationIssues": [],
+   "errors": [
+    "unknown_node_key /nodes/ChatCard1/width: A node has no \"width\"; it belongs in \"layout.width\"."
+   ]
+  }
+ ]
+}

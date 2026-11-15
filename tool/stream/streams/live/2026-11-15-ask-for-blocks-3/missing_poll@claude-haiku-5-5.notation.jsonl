@@ -1,0 +1,37 @@
+{"meta":{"ui":"missing_poll","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show results of a live poll in a chat card: four answers with vote-share bars, vote counts, the leading option marked, and my selected answer marked.","text":"ChatCard \"Team lunch poll\" \"Live results\" icon:\"poll\" status:\"Open\" tone:accent\n  state pick=\"\"\n  state votes=[{\"name\":\"Pizza\",\"n\":14},{\"name\":\"Sushi\",\"n\":9},{\"name\":\"Tacos\",\"n\":7},{\"name\":\"Salads\",\"n\":4}]\n  each o in votes\n    Row between\n      Text.strong \"{o.name}\"\n      Text.muted \"{o.n} votes\"\n    Progress =o.share\n  SectionLabel \"Results\" \"34 votes\"\n  Text.caption \"Your answer: {pick}\"","usage":{"input_tokens":9308,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":196,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":603,"totalMs":1367}}
+{"tMs":603,"delta":"ChatCard \"Team"}
+{"tMs":800,"delta":" lunch po"}
+{"tMs":800,"delta":"ll\" \"Live"}
+{"tMs":800,"delta":" results"}
+{"tMs":800,"delta":"\" icon:\"po"}
+{"tMs":800,"delta":"ll\" status:\"Open\""}
+{"tMs":800,"delta":" tone:acc"}
+{"tMs":800,"delta":"ent\n  state p"}
+{"tMs":800,"delta":"ick=\"\""}
+{"tMs":800,"delta":"\n  state"}
+{"tMs":800,"delta":" votes=[{"}
+{"tMs":810,"delta":"\"name\":\"Pizza"}
+{"tMs":828,"delta":"\",\"n"}
+{"tMs":940,"delta":"\":14"}
+{"tMs":940,"delta":"},{\"name\":\"S"}
+{"tMs":940,"delta":"ushi\",\"n\":9},{"}
+{"tMs":940,"delta":"\"name\":\"Tacos"}
+{"tMs":940,"delta":"\",\"n\":7"}
+{"tMs":954,"delta":"},{\"name\":\"Sal"}
+{"tMs":974,"delta":"ads\",\"n\":4"}
+{"tMs":995,"delta":"}]\n  each o in vot"}
+{"tMs":1016,"delta":"es\n    "}
+{"tMs":1035,"delta":"Row between"}
+{"tMs":1055,"delta":"\n      "}
+{"tMs":1075,"delta":"Text.strong \""}
+{"tMs":1364,"delta":"{o.name}\"\n      "}
+{"tMs":1364,"delta":"Text.mu"}
+{"tMs":1364,"delta":"ted \"{o.n} vot"}
+{"tMs":1364,"delta":"es\"\n    Progress ="}
+{"tMs":1364,"delta":"o.share"}
+{"tMs":1364,"delta":"\n  SectionLabel"}
+{"tMs":1364,"delta":" \"Results\" \"34"}
+{"tMs":1364,"delta":" votes\"\n  Text"}
+{"tMs":1364,"delta":".ca"}
+{"tMs":1364,"delta":"ption \"Your answ"}
+{"tMs":1364,"delta":"er: {pick}\""}

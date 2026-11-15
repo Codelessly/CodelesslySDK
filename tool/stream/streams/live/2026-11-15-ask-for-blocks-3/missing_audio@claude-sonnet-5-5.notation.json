@@ -1,0 +1,437 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= playing}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pos",
+       "value": "${= pos>=total?0:pos+1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "playing",
+       "value": "${= pos>=total-1?false:playing}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Voice note",
+    "subtitle": "From Maya · today 9:41",
+    "icon": "mic",
+    "status": "Unread",
+    "tone": "accent"
+   },
+   "children": [
+    "column1",
+    "SectionLabel1",
+    "Segments1",
+    "row3"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "row2"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "iconButton1",
+    "column2"
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.icon": "${= playing?'pause':'play_arrow'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "playing",
+       "value": "${= !playing}"
+      }
+     ]
+    }
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "barChart1",
+    "slider1"
+   ]
+  },
+  "barChart1": {
+   "type": "barChart",
+   "layout": {
+    "height": 56,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "values": [
+     3,
+     6,
+     4,
+     8,
+     5,
+     9,
+     6,
+     3,
+     7,
+     10,
+     6,
+     4,
+     8,
+     5,
+     9,
+     7,
+     3,
+     6,
+     8,
+     4,
+     7,
+     5,
+     9,
+     6,
+     3,
+     5,
+     8,
+     4
+    ],
+    "color": "#FF2563EB"
+   }
+  },
+  "slider1": {
+   "type": "slider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "min": 0,
+    "max": 72
+   },
+   "bind": {
+    "props.value": "${pos}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pos",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 500,
+     "fontFamily": "Inter",
+     "height": 1.35,
+     "color": "#FF6B7280"
+    },
+    "text": "${= floor(pos/60)}:${= pos%60<10?'0':''}${= pos%60}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 500,
+     "fontFamily": "Inter",
+     "height": 1.35,
+     "color": "#FF6B7280"
+    },
+    "text": "${= floor(total/60)}:${= total%60<10?'0':''}${= total%60}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Playback speed"
+   },
+   "bind": {
+    "props.note": "${speed}"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "speed",
+    "options": [
+     "0.5x",
+     "1x",
+     "1.5x",
+     "2x"
+    ]
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "tone": "primary"
+   },
+   "bind": {
+    "props.label": "${= playing?'Pause':'Play'}",
+    "props.icon": "${= playing?'pause':'play_arrow'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "playing",
+       "value": "${= !playing}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Restart",
+    "tone": "quiet",
+    "icon": "replay"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pos",
+       "value": "${= 0}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "playing",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "playing",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "pos",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "total",
+    "type": "integer",
+    "value": 72
+   },
+   {
+    "name": "speed",
+    "type": "text",
+    "value": "1x"
+   }
+  ]
+ }
+}

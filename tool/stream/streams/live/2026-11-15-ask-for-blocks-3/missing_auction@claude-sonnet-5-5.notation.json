@@ -1,0 +1,526 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= secs>0}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "secs",
+       "value": "${= secs-1}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Vintage Leica M3 Camera",
+    "subtitle": "Lot 214 · Live auction",
+    "icon": "gavel",
+    "status": "Live",
+    "tone": "warn"
+   },
+   "children": [
+    "Media1",
+    "row1",
+    "Details1",
+    "Callout1",
+    "SectionLabel1",
+    "listView1",
+    "ActionButton1"
+   ]
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "kind": "laptop",
+    "tone": "slate"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column1",
+    "column2"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 700,
+     "fontFamily": "Inter",
+     "letterSpacing": 0.9,
+     "height": 1.2,
+     "color": "#FF6B7280"
+    },
+    "text": "CURRENT BID"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 30,
+     "fontWeight": 800,
+     "fontFamily": "Inter Display",
+     "letterSpacing": -1,
+     "height": 1.05,
+     "color": "#FF111827"
+    },
+    "text": "${= money(price,'$',0)}"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text3",
+    "text4"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 700,
+     "fontFamily": "Inter",
+     "letterSpacing": 0.9,
+     "height": 1.2,
+     "color": "#FF6B7280"
+    },
+    "text": "ENDS IN"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 30,
+     "fontWeight": 800,
+     "fontFamily": "Inter Display",
+     "letterSpacing": -1,
+     "height": 1.05,
+     "color": "#FF111827"
+    },
+    "text": "${= duration(secs)}"
+   },
+   "bind": {
+    "props.style.color": "${= secs<60?\"#FFD32F2F\":\"#FF1B1B1B\"}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icons": [
+     "group",
+     "trending_up"
+    ]
+   },
+   "bind": {
+    "props.rows": "${= [[\"Bidders\",(\"\" + (bidders) + \" active\")],[\"Minimum next bid\",money(price+50,\"$\",0)]]}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "You're the highest bidder",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.message": "Your bid of ${= money(price,'$',0)} leads. We'll notify you if you're outbid.",
+    "visible": "${= placed}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Bid history"
+   },
+   "bind": {
+    "props.note": "${= length(history)} recent"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${history}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     0,
+     4,
+     0,
+     4
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column3",
+    "text7"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text5",
+    "text6"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${item.who}"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "${item.ago}"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= money(item.amt,'$',0)}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "tone": "primary",
+    "icon": "gavel"
+   },
+   "bind": {
+    "props.label": "Place bid · ${= money(price+50,'$',0)}",
+    "props.enabled": "${= secs>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "price",
+       "value": "${= price+50}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "bidders",
+       "value": "${= bidders+1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "history",
+       "value": "${= take(append([{\"who\":\"You\",\"amt\":price+50,\"ago\":\"just now\"}],history),4)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "placed",
+       "value": "${= true}"
+      },
+      {
+       "type": "showToast",
+       "message": "Bid placed"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "price",
+    "type": "integer",
+    "value": 1250
+   },
+   {
+    "name": "secs",
+    "type": "integer",
+    "value": 754
+   },
+   {
+    "name": "bidders",
+    "type": "integer",
+    "value": 9
+   },
+   {
+    "name": "history",
+    "type": "list",
+    "value": [
+     {
+      "who": "Maya R.",
+      "amt": 1250,
+      "ago": "1 min ago"
+     },
+     {
+      "who": "Daniel K.",
+      "amt": 1200,
+      "ago": "3 min ago"
+     },
+     {
+      "who": "Priya S.",
+      "amt": 1150,
+      "ago": "6 min ago"
+     }
+    ]
+   },
+   {
+    "name": "placed",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

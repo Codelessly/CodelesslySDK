@@ -1,0 +1,187 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Choose your plan",
+    "subtitle": "Compare Basic, Plus and Pro",
+    "icon": "workspace_premium",
+    "status": "3 plans",
+    "tone": "accent"
+   },
+   "children": [
+    "Recommendation1",
+    "SectionLabel1",
+    "ComparisonTable1",
+    "Callout1"
+   ]
+  },
+  "Recommendation1": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Plus is the best fit",
+    "why": "It covers most teams' needs at less than half the price of Pro.",
+    "reasons": [
+     "Unlimited projects",
+     "100 GB storage",
+     "Priority email support"
+    ],
+    "eyebrow": "Recommended"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Feature comparison",
+    "note": "per month"
+   }
+  },
+  "ComparisonTable1": {
+   "type": "ComparisonTable",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Basic",
+     "Plus",
+     "Pro"
+    ],
+    "prices": [
+     "$5",
+     "$12",
+     "$29"
+    ],
+    "pick": "Plus",
+    "pickLabel": "Best value",
+    "cta": "Choose",
+    "rows": [
+     [
+      "Projects",
+      "3",
+      "Unlimited",
+      "Unlimited",
+      2
+     ],
+     [
+      "Storage",
+      "10 GB",
+      "100 GB",
+      "1 TB",
+      3
+     ],
+     [
+      "Team members",
+      "1",
+      "5",
+      "25",
+      3
+     ],
+     [
+      "Priority support",
+      "No",
+      "Yes",
+      "Yes",
+      0
+     ],
+     [
+      "Analytics",
+      "Basic",
+      "Advanced",
+      "Advanced + export",
+      3
+     ],
+     [
+      "Custom domain",
+      "No",
+      "Yes",
+      "Yes",
+      0
+     ]
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChoose"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "choosePlan",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Try Plus free for 14 days",
+    "message": "Cancel anytime before the trial ends and you won't be charged.",
+    "tone": "good",
+    "icon": "redeem"
+   }
+  }
+ }
+}

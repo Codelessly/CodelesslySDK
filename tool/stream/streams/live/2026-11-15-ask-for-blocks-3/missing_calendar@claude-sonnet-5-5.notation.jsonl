@@ -1,0 +1,134 @@
+{"meta":{"ui":"missing_calendar","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a month calendar chat card for November 2026 with a seven-column date grid, highlighted booked dates, selected date, and event dots.","text":"ChatCard \"November 2026\" \"Tap a date to see its events\" icon:\"calendar_month\" status:\"3 booked\" tone:accent w:390\n  state sel=12\n  state booked=[3,4,5,18,19,24]\n  state events=[2,12,17,26,30]\n  Wanted \"MonthCalendar\" \"a month grid with weekday headers, booked dates highlighted, one selected date, and dots under dates that have events; takes month, booked dates, events, selected date; tapping a date selects it\"\n    Grid cols:7 gap:4\n      each d in [\"Su\",\"Mo\",\"Tu\",\"We\",\"Th\",\"Fr\",\"Sa\"]\n        Text.caption \"{d}\" color:#FF6B7280\n      each b in range(0)\n        Spacer\n      Spacer\n      each n in range(30)\n        Box gap:2 pad:[0,6,0,4] radius:10 fill:=sel==n+1?\"#FF4F46E5\":(contains(booked,n+1)?\"#FFE0E7FF\":\"#00FFFFFF\") -> sel=n+1\n          Text \"{n+1}\" color:=sel==n+1?\"#FFFFFFFF\":\"#FF111827\" weight:=contains(booked,n+1)?700:400\n          Text.caption \"{contains(events,n+1)?'•':' '}\" color:=sel==n+1?\"#FFFFFFFF\":\"#FFEF4444\"\n  Row gap:12\n    Badge.primary \"Selected\"\n    Badge.info \"Booked\"\n    Text.caption \"• Event\"\n  Details rows:=[[\"Selected\",\"Nov {sel}, 2026\"],[\"Status\",contains(booked,sel)?\"Booked\":\"Available\"],[\"Events\",contains(events,sel)?\"1 event\":\"None\"]]\n  Row gap:10\n    ActionButton \"Clear\" tone:quiet -> sel=0\n    ActionButton \"Book date\" tone:primary enabled:=sel>0&&!contains(booked,sel) -> booked=append(booked,sel); toast \"Booked\"","usage":{"input_tokens":9307,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":674,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":682,"totalMs":5127}}
+{"tMs":682,"delta":"ChatCard \"November "}
+{"tMs":1012,"delta":"2026\" \"T"}
+{"tMs":1012,"delta":"ap a"}
+{"tMs":1012,"delta":" date to see"}
+{"tMs":1012,"delta":" its events\" icon:\"cal"}
+{"tMs":1012,"delta":"endar_month\" status"}
+{"tMs":1012,"delta":":\"3"}
+{"tMs":1012,"delta":" booked\" t"}
+{"tMs":1012,"delta":"one:accent w:390"}
+{"tMs":1012,"delta":"\n  state"}
+{"tMs":1012,"delta":" s"}
+{"tMs":1019,"delta":"el=12"}
+{"tMs":1055,"delta":"\n  state booked=[3"}
+{"tMs":1356,"delta":",4,5,18"}
+{"tMs":1356,"delta":",19,24"}
+{"tMs":1356,"delta":"]\n  state events=[2"}
+{"tMs":1356,"delta":",12"}
+{"tMs":1356,"delta":",17"}
+{"tMs":1356,"delta":",26,30]\n  "}
+{"tMs":1356,"delta":"Wanted \"MonthC"}
+{"tMs":1356,"delta":"alendar\" \"a"}
+{"tMs":1357,"delta":" month gr"}
+{"tMs":1389,"delta":"id with we"}
+{"tMs":1423,"delta":"ekday headers, booked d"}
+{"tMs":1457,"delta":"ates highlighted, one"}
+{"tMs":1702,"delta":" selected date, and"}
+{"tMs":1702,"delta":" d"}
+{"tMs":1702,"delta":"ots under"}
+{"tMs":1702,"delta":" dates that have events; takes"}
+{"tMs":1702,"delta":" month"}
+{"tMs":1702,"delta":", boo"}
+{"tMs":1702,"delta":"ked d"}
+{"tMs":1718,"delta":"ates, events"}
+{"tMs":1750,"delta":","}
+{"tMs":1785,"delta":" selected date; tapping a"}
+{"tMs":1817,"delta":" date sel"}
+{"tMs":1852,"delta":"ects it\"\n    Gr"}
+{"tMs":2044,"delta":"id cols:7 gap"}
+{"tMs":2044,"delta":":4\n      each"}
+{"tMs":2044,"delta":" d in [\"Su"}
+{"tMs":2044,"delta":"\",\"Mo\",\"Tu"}
+{"tMs":2044,"delta":"\",\"We"}
+{"tMs":2054,"delta":"\",\"Th\",\"F"}
+{"tMs":2088,"delta":"r\",\"Sa\"]"}
+{"tMs":2122,"delta":"\n        Text.caption \"{"}
+{"tMs":2156,"delta":"d}\" color"}
+{"tMs":2189,"delta":":#FF6"}
+{"tMs":2221,"delta":"B7280"}
+{"tMs":2254,"delta":"\n      each b"}
+{"tMs":2382,"delta":" in range(0"}
+{"tMs":2382,"delta":")\n        Sp"}
+{"tMs":2382,"delta":"acer\n      "}
+{"tMs":2387,"delta":"Spacer"}
+{"tMs":2421,"delta":"\n      each"}
+{"tMs":2454,"delta":" n in range(30)\n        "}
+{"tMs":2488,"delta":"Box gap:2"}
+{"tMs":2521,"delta":" p"}
+{"tMs":2554,"delta":"ad:["}
+{"tMs":2586,"delta":"0,6"}
+{"tMs":2620,"delta":",0,4"}
+{"tMs":2653,"delta":"] rad"}
+{"tMs":2719,"delta":"ius:10"}
+{"tMs":2719,"delta":" fill:=s"}
+{"tMs":2753,"delta":"el==n+1?\""}
+{"tMs":2786,"delta":"#FF4F"}
+{"tMs":2820,"delta":"46E5\":("}
+{"tMs":2854,"delta":"contains(booked,n+"}
+{"tMs":2887,"delta":"1)?\"#FFE"}
+{"tMs":2920,"delta":"0"}
+{"tMs":2954,"delta":"E7FF\":\"#00"}
+{"tMs":2986,"delta":"F"}
+{"tMs":3020,"delta":"FFFFF"}
+{"tMs":3053,"delta":"\") -> s"}
+{"tMs":3091,"delta":"el=n+1\n          "}
+{"tMs":3120,"delta":"Text \""}
+{"tMs":3154,"delta":"{n+1}\" color"}
+{"tMs":3188,"delta":":=sel==n+1"}
+{"tMs":3221,"delta":"?\"#FF"}
+{"tMs":3255,"delta":"FFFFFF\":\""}
+{"tMs":3288,"delta":"#F"}
+{"tMs":3320,"delta":"F111"}
+{"tMs":3354,"delta":"827\" weight:="}
+{"tMs":3387,"delta":"cont"}
+{"tMs":3420,"delta":"ains(booked,n+1"}
+{"tMs":3454,"delta":")?700:400"}
+{"tMs":3487,"delta":"\n          Text.ca"}
+{"tMs":3520,"delta":"ption \"{"}
+{"tMs":3555,"delta":"cont"}
+{"tMs":3587,"delta":"ains(events,n+1)"}
+{"tMs":3621,"delta":"?'•"}
+{"tMs":3654,"delta":"':'"}
+{"tMs":3700,"delta":" '}\" color:=sel"}
+{"tMs":3721,"delta":"==n+1?\"#F"}
+{"tMs":3755,"delta":"FFFFFFF\":"}
+{"tMs":3788,"delta":"\"#FF"}
+{"tMs":3822,"delta":"EF"}
+{"tMs":3854,"delta":"4444\"\n  "}
+{"tMs":3887,"delta":"Row gap:12"}
+{"tMs":3921,"delta":"\n    Bad"}
+{"tMs":3954,"delta":"ge.prim"}
+{"tMs":3988,"delta":"ary \"Sel"}
+{"tMs":4021,"delta":"ected\"\n    Badge."}
+{"tMs":4055,"delta":"info \"Booked\"\n    "}
+{"tMs":4089,"delta":"Text.caption \"•"}
+{"tMs":4155,"delta":" Event\"\n  Details r"}
+{"tMs":4188,"delta":"ows:=[[\""}
+{"tMs":4222,"delta":"Selected\",\""}
+{"tMs":4288,"delta":"Nov {sel}"}
+{"tMs":4321,"delta":", 2026\"],[\""}
+{"tMs":4358,"delta":"Status"}
+{"tMs":4387,"delta":"\","}
+{"tMs":4421,"delta":"contains(booked,s"}
+{"tMs":4455,"delta":"el)?\"Booked\":"}
+{"tMs":4488,"delta":"\"Available"}
+{"tMs":4521,"delta":"\"],[\"Events\",contains"}
+{"tMs":4555,"delta":"(events,sel)?\""}
+{"tMs":4588,"delta":"1 event\":\"None\"]"}
+{"tMs":4622,"delta":"]\n  "}
+{"tMs":4655,"delta":"Row"}
+{"tMs":4688,"delta":" gap:10\n    Act"}
+{"tMs":4722,"delta":"ionButton \"Clear\""}
+{"tMs":4904,"delta":" tone:quiet ->"}
+{"tMs":4904,"delta":" sel=0"}
+{"tMs":4904,"delta":"\n    ActionButton \""}
+{"tMs":4904,"delta":"Book date"}
+{"tMs":4904,"delta":"\" tone:primary en"}
+{"tMs":4922,"delta":"abled:=s"}
+{"tMs":4956,"delta":"el>0&"}
+{"tMs":4989,"delta":"&!contains(booked,"}
+{"tMs":5023,"delta":"sel) -> booked="}
+{"tMs":5056,"delta":"append(booked,sel);"}
+{"tMs":5090,"delta":" toast \"Boo"}
+{"tMs":5123,"delta":"ked\""}

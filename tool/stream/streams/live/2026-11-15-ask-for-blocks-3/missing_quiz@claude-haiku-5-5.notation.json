@@ -1,0 +1,221 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Quiz question 3 of 5",
+    "subtitle": "Geography",
+    "icon": "quiz",
+    "status": "2 pts"
+   },
+   "children": [
+    "Paragraph1",
+    "ChoiceChips1",
+    "Callout1",
+    "Callout2",
+    "Details1",
+    "Paragraph2",
+    "ActionButton1"
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Which river is the longest in Africa?",
+    "strong": true
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "answer",
+    "options": [
+     "Congo",
+     "Niger",
+     "Nile",
+     "Zambezi"
+    ]
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Correct",
+    "message": "You chose Nile, which is right.",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "visible": "${= answer!=\"\"}"
+   }
+  },
+  "Callout2": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Incorrect",
+    "message": "You chose Congo; the answer is Nile.",
+    "tone": "danger",
+    "icon": "cancel"
+   },
+   "bind": {
+    "visible": "${= answer!=\"\"}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Your answer",
+      "Nile"
+     ],
+     [
+      "Correct answer",
+      "Nile"
+     ],
+     [
+      "Score earned",
+      "2 of 2 pts"
+     ]
+    ]
+   },
+   "bind": {
+    "visible": "${= answer!=\"\"}"
+   }
+  },
+  "Paragraph2": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "The Nile flows about 6,650 km north through eleven countries to the Mediterranean, edging out the Amazon for the title of longest river depending on how the source is measured."
+   },
+   "bind": {
+    "visible": "${= answer!=\"\"}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Submit answer",
+    "tone": "primary",
+    "icon": "send"
+   },
+   "bind": {
+    "props.enabled": "${= answer!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "submitAnswer",
+       "value": "${answer}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "answer",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "picked",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

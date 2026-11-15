@@ -1,0 +1,64 @@
+{
+ "ui": "missing_boarding",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24414,
+ "turns": [
+  {
+   "input_tokens": 9317,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 542,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 614,
+   "totalMs": 2774,
+   "chars": 1119,
+   "lines": 41,
+   "jsonTails": 0,
+   "nodes": 42,
+   "outputTokensPerNode": "12.9",
+   "notationIssues": [
+    "line 31:11: Unknown word \"dashed\" on a Divider. Props are written key:value."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 9917,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 544,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 525,
+   "totalMs": 1921,
+   "chars": 1125,
+   "lines": 41,
+   "jsonTails": 0,
+   "nodes": 42,
+   "outputTokensPerNode": "13.0",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/divider2/props/style: A divider has no prop \"style\". Its props: thickness, color, indent, endIndent."
+   ]
+  }
+ ]
+}

@@ -1,0 +1,86 @@
+{"meta":{"ui":"covered_itinerary","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a weekend trip itinerary chat card with day headings, four timed stops, and a compact map preview.","text":"ChatCard \"Weekend in Kyoto\" \"2 days · 4 stops\" icon:\"map\" status:\"Planned\" tone:accent w:390\n  DayHeader \"Day 1\" \"Higashiyama and Gion\" kind:\"temple\" tone:\"dawn\" tag:\"Sat\"\n    ItineraryStop \"Kiyomizu-dera\" \"Arrive early for soft light and fewer crowds.\" time:\"09:00\" travel:\"Walk to Gion, 20 min\"\n    ItineraryStop \"Gion evening stroll\" \"Wooden teahouses and lantern-lit lanes.\" time:\"17:30\" last:true\n  DayHeader \"Day 2\" \"Arashiyama\" kind:\"bamboo\" tone:\"day\" tag:\"Sun\"\n    ItineraryStop \"Bamboo Grove\" \"Walk the main path before the tour groups arrive.\" time:\"08:30\" travel:\"Walk to Tenryu-ji, 10 min\"\n    ItineraryStop \"Tenryu-ji garden\" \"Finish with a quiet pond garden and lunch nearby.\" time:\"11:00\" last:true\n  SectionLabel \"Map preview\" \"4 pins\"\n  MapPanel =pick count:4\n  Details rows:=[[\"Day 1\",\"Kiyomizu-dera, Gion\"],[\"Day 2\",\"Bamboo Grove, Tenryu-ji\"]]","usage":{"input_tokens":9297,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":462,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1014,"totalMs":3975}}
+{"tMs":1014,"delta":"ChatCard \"We"}
+{"tMs":1347,"delta":"ekend in"}
+{"tMs":1348,"delta":" Kyoto\" \"2"}
+{"tMs":1348,"delta":" days · 4 stops"}
+{"tMs":1348,"delta":"\" icon:\"map\""}
+{"tMs":1348,"delta":" status:\"Plan"}
+{"tMs":1348,"delta":"ned\" t"}
+{"tMs":1348,"delta":"one:accent w:390"}
+{"tMs":1348,"delta":"\n  D"}
+{"tMs":1348,"delta":"ayHeader \"Day "}
+{"tMs":1348,"delta":"1\" \"Hig"}
+{"tMs":1361,"delta":"ashiyama and"}
+{"tMs":1397,"delta":" Gion\" kind:\""}
+{"tMs":1687,"delta":"temple\" tone:\"d"}
+{"tMs":1687,"delta":"awn\" tag:\""}
+{"tMs":1687,"delta":"S"}
+{"tMs":1687,"delta":"at\"\n    Itinera"}
+{"tMs":1687,"delta":"ryStop \"K"}
+{"tMs":1687,"delta":"i"}
+{"tMs":1687,"delta":"yomizu-"}
+{"tMs":1687,"delta":"dera\" \"Ar"}
+{"tMs":1694,"delta":"rive early for so"}
+{"tMs":1726,"delta":"ft light and f"}
+{"tMs":1760,"delta":"ewer crowds.\" time:"}
+{"tMs":1795,"delta":"\"09:00\" travel:"}
+{"tMs":2038,"delta":"\"Walk to G"}
+{"tMs":2038,"delta":"ion, 20 min\""}
+{"tMs":2038,"delta":"\n    ItineraryStop"}
+{"tMs":2039,"delta":" \"Gion ev"}
+{"tMs":2039,"delta":"ening st"}
+{"tMs":2039,"delta":"roll\" \"W"}
+{"tMs":2039,"delta":"ooden te"}
+{"tMs":2061,"delta":"ahouses and l"}
+{"tMs":2092,"delta":"ant"}
+{"tMs":2125,"delta":"ern-"}
+{"tMs":2158,"delta":"lit l"}
+{"tMs":2192,"delta":"anes.\" time:\"17"}
+{"tMs":2389,"delta":":30"}
+{"tMs":2389,"delta":"\" last"}
+{"tMs":2389,"delta":":true"}
+{"tMs":2389,"delta":"\n  DayHeader \""}
+{"tMs":2389,"delta":"Day 2\" \"Arash"}
+{"tMs":2390,"delta":"iyama\""}
+{"tMs":2425,"delta":" kind:\"bamboo"}
+{"tMs":2458,"delta":"\" tone:\"day"}
+{"tMs":2491,"delta":"\" tag:\"Sun"}
+{"tMs":2525,"delta":"\"\n    Itinerary"}
+{"tMs":2559,"delta":"Stop \"Bamboo"}
+{"tMs":2593,"delta":" Grove\" \"Wal"}
+{"tMs":2738,"delta":"k the main"}
+{"tMs":2739,"delta":" path before the t"}
+{"tMs":2739,"delta":"our gro"}
+{"tMs":2739,"delta":"ups arrive.\" time:\""}
+{"tMs":2758,"delta":"08"}
+{"tMs":2791,"delta":":30"}
+{"tMs":2824,"delta":"\" travel:\"Wal"}
+{"tMs":2859,"delta":"k to"}
+{"tMs":2890,"delta":" Tenry"}
+{"tMs":2923,"delta":"u-"}
+{"tMs":2957,"delta":"ji, 10 min\""}
+{"tMs":2990,"delta":"\n    ItinerarySt"}
+{"tMs":3084,"delta":"op \"Tenryu-"}
+{"tMs":3084,"delta":"ji garden\" \"Fin"}
+{"tMs":3091,"delta":"ish with"}
+{"tMs":3124,"delta":" a quiet p"}
+{"tMs":3157,"delta":"ond gar"}
+{"tMs":3190,"delta":"den and"}
+{"tMs":3223,"delta":" lunch n"}
+{"tMs":3256,"delta":"earby.\" time:\"11"}
+{"tMs":3290,"delta":":00\" last:true\n  "}
+{"tMs":3330,"delta":"SectionLabel \""}
+{"tMs":3359,"delta":"Map preview\" \"4 p"}
+{"tMs":3393,"delta":"ins\"\n  "}
+{"tMs":3961,"delta":"MapPanel =pick"}
+{"tMs":3961,"delta":" count:4"}
+{"tMs":3961,"delta":"\n  "}
+{"tMs":3961,"delta":"Details rows:="}
+{"tMs":3961,"delta":"[[\"Day"}
+{"tMs":3961,"delta":" 1\",\"K"}
+{"tMs":3961,"delta":"iyomizu-"}
+{"tMs":3961,"delta":"dera, Gion\"],"}
+{"tMs":3961,"delta":"[\"Day 2\",\"B"}
+{"tMs":3961,"delta":"amboo Grove,"}
+{"tMs":3961,"delta":" Tenryu-ji\""}
+{"tMs":3961,"delta":"]]"}

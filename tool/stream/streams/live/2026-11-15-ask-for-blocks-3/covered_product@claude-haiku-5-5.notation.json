@@ -1,0 +1,112 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Coffee maker",
+    "subtitle": "Featured",
+    "icon": "coffee",
+    "status": "In stock"
+   },
+   "children": [
+    "ProductTile1",
+    "Paragraph1",
+    "ActionButton1"
+   ]
+  },
+  "ProductTile1": {
+   "type": "ProductTile",
+   "layout": {
+    "height": 200,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "name": "Pour-over coffee maker",
+    "detail": "Borosilicate glass, 6-cup carafe, stainless filter",
+    "price": "$48.00",
+    "rating": "4.7",
+    "kind": "mug",
+    "tone": "sand"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Brews a clean, bright cup in about four minutes. Dishwasher-safe carafe with a reusable steel filter."
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Add to cart",
+    "tone": "primary",
+    "icon": "shopping_cart"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addToCart"
+      },
+      {
+       "type": "showToast",
+       "message": "Added to cart"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

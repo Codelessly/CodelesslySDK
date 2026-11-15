@@ -1,0 +1,167 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Sunny 2-bed apartment",
+    "subtitle": "Old Town, Lisbon",
+    "icon": "apartment",
+    "status": "4 photos",
+    "tone": "accent"
+   },
+   "children": [
+    "PhotoGallery1",
+    "SectionLabel1",
+    "Paragraph1",
+    "ActionButton1"
+   ]
+  },
+  "PhotoGallery1": {
+   "type": "PhotoGallery",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "open",
+    "layout": "grid",
+    "columns": 2,
+    "photos": [
+     {
+      "kind": "skyline",
+      "caption": "Living room view",
+      "tone": "day"
+     },
+     {
+      "kind": "market",
+      "caption": "Neighbourhood market",
+      "tone": "dawn"
+     },
+     {
+      "kind": "harbor",
+      "caption": "Harbour nearby",
+      "tone": "dusk"
+     },
+     {
+      "kind": "forest",
+      "caption": "Park across the street",
+      "tone": "day"
+     }
+    ]
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Gallery"
+   },
+   "bind": {
+    "props.note": "${= length([1,2,3,4])} images"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Bright two-bedroom flat with a balcony, close to cafés and the tram."
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "tone": "primary",
+    "icon": "bookmark"
+   },
+   "bind": {
+    "props.label": "${= saved ? 'Saved' : 'Save apartment'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= !saved}"
+      },
+      {
+       "type": "showToast",
+       "message": "Saved to favourites"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "open",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "saved",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

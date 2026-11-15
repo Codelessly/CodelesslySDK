@@ -1,0 +1,53 @@
+{"meta":{"ui":"missing_audio","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a playable voice note in a chat card with an audio waveform scrubber, current time, total duration, playback speed, and a play/pause control.","text":"ChatCard \"Voice note\" \"Ana · 0:42\" icon:\"mic_rounded\" status:\"Playing\" tone:accent\n  state playing=false\n  state pos=0\n  state speed=1\n  state total=42\n  Row gap:10 center\n    IconButton \"play_arrow\" -> playing=!playing\n    Text.body \"{floor(pos/60)}:{fixed(pos%60,0)}\" \n    Spacer grow\n    Text.caption \"{floor(total/60)}:{fixed(total%60,0)}\"\n  Progress =pos\n  Row gap:8 center\n    Button.ghost \"{speed}x\" -> speed=speed==1?1.5:(speed==1.5?2:1)\n    Spacer grow\n    Text.caption \"Waveform scrub\"","usage":{"input_tokens":9307,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":259,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":517,"totalMs":1626}}
+{"tMs":517,"delta":"ChatCard \"Vo"}
+{"tMs":724,"delta":"ice note\" \""}
+{"tMs":724,"delta":"Ana"}
+{"tMs":724,"delta":" ·"}
+{"tMs":724,"delta":" 0"}
+{"tMs":724,"delta":":42"}
+{"tMs":724,"delta":"\" icon:\"m"}
+{"tMs":724,"delta":"ic_rounded\" status:"}
+{"tMs":724,"delta":"\"Playing\" t"}
+{"tMs":724,"delta":"one:accent\n  state play"}
+{"tMs":724,"delta":"ing=false\n  state pos"}
+{"tMs":746,"delta":"=0\n  state speed="}
+{"tMs":768,"delta":"1\n  state total=42"}
+{"tMs":932,"delta":"\n  "}
+{"tMs":932,"delta":"Row"}
+{"tMs":932,"delta":" gap:10 "}
+{"tMs":932,"delta":"center"}
+{"tMs":932,"delta":"\n    I"}
+{"tMs":932,"delta":"conButton \"play"}
+{"tMs":932,"delta":"_arrow\""}
+{"tMs":933,"delta":" -"}
+{"tMs":966,"delta":"> playing=!playing"}
+{"tMs":985,"delta":"\n    Text.body"}
+{"tMs":1005,"delta":" \"{flo"}
+{"tMs":1027,"delta":"or(pos/60"}
+{"tMs":1149,"delta":")}:{f"}
+{"tMs":1149,"delta":"ixed(pos%60,"}
+{"tMs":1149,"delta":"0)}\" "}
+{"tMs":1149,"delta":"\n    Sp"}
+{"tMs":1149,"delta":"acer grow\n    Text"}
+{"tMs":1151,"delta":".ca"}
+{"tMs":1172,"delta":"ption \"{"}
+{"tMs":1192,"delta":"flo"}
+{"tMs":1214,"delta":"or(total/60)}:"}
+{"tMs":1237,"delta":"{fixed(total%60"}
+{"tMs":1260,"delta":",0)}\"\n  "}
+{"tMs":1280,"delta":"Prog"}
+{"tMs":1366,"delta":"ress =pos"}
+{"tMs":1366,"delta":"\n  Row gap:8 "}
+{"tMs":1366,"delta":"center"}
+{"tMs":1366,"delta":"\n    Button.ghost"}
+{"tMs":1387,"delta":" \"{"}
+{"tMs":1409,"delta":"speed}x\" -> spe"}
+{"tMs":1431,"delta":"ed=speed==1?1"}
+{"tMs":1453,"delta":".5:("}
+{"tMs":1475,"delta":"speed==1.5?2"}
+{"tMs":1497,"delta":":1)\n    Spac"}
+{"tMs":1520,"delta":"er grow\n    Text."}
+{"tMs":1540,"delta":"caption \"Wa"}
+{"tMs":1618,"delta":"veform sc"}
+{"tMs":1618,"delta":"rub"}
+{"tMs":1618,"delta":"\""}
