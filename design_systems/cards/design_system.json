@@ -886,7 +886,8 @@
    "card": 18,
    "tile": 14,
    "badge": 9,
-   "bar": 10
+   "bar": 10,
+   "cardGap": 12
   },
   "radii": {
    "inner": 9,
@@ -905,7 +906,8 @@
    "controlCompact": 8,
    "controlSmall": 9,
    "controlMedium": 10,
-   "controlLarge": 12
+   "controlLarge": 12,
+   "progress": 999
   },
   "sizes": {
    "xs": 24,
@@ -926,7 +928,8 @@
    "dialogLarge": 720,
    "cta": 46,
    "badge": 22,
-   "bar": 28
+   "bar": 28,
+   "progress": 8
   },
   "shadows": {
    "level1": [
