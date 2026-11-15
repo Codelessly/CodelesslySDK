@@ -11,6 +11,8 @@
 //   has no item template, or is empty while the list it reads is not;
 // * `empty_label`: a control or component whose label resolved to nothing;
 // * `expression_not_evaluated`: a text that shows `${` on screen;
+// * `value_not_computed`: a text that shows NaN, Infinity, null or a `{name}`
+//   left as written;
 // * `text_no_color`: a text with no color, or a transparent one;
 // * `component_empty`: a component call that rendered nothing.
 //
@@ -23,6 +25,10 @@ import '../render/components.dart' show ComponentInstance, componentInstanceOf;
 import '../render/contracts.dart' show ExpressionValues;
 import '../render/node_tree.dart' show NodeBox;
 import '../runtime/expressions/formula.dart' show FormulaEvaluator;
+
+/// What a text shows when its value did not compute: `NaN`, `Infinity`, a
+/// bare `null` or `undefined`, or a `{name}` left as written.
+final _brokenValue = RegExp(r'\bNaN\b|\bInfinity\b|(?<![A-Za-z])(?:null|undefined)(?![A-Za-z])|\{[A-Za-z_][A-Za-z0-9_.]*\}');
 
 /// What a text paragraph shows wrong, with the text's [name] (a node id or
 /// an instance path) in the message: `expression_not_evaluated` (it shows
@@ -40,6 +46,18 @@ List<({String code, String message})> paragraphIssues(RenderParagraph p, String 
       message: 'Text "$name" shows "$short" on screen: its expression did not evaluate. Check the formula (names, functions, '
           'quotes); a binding of "props.text" or "props.runs" must not also be written as text, and a "\${...}" inside a formula '
           'is not read.',
+    ));
+  }
+  // A value that was computed and came out as nothing a person should see:
+  // a sum over a missing field (NaN), a division by zero, a name that was
+  // never filled in ({total}), a missing value written out (null).
+  final broken = _brokenValue.firstMatch(text)?[0];
+  if (broken != null && !text.contains(r'${')) {
+    out.add((
+      code: 'value_not_computed',
+      message: 'Text "$name" shows "$short" on screen: "$broken" is a value that did not compute. Check the formula behind it '
+          '(a field the data does not have, a number read from text, a name that is not a variable), and give the variable a '
+          'starting value.',
     ));
   }
   var colorless = false, transparent = true, any = false;
@@ -250,8 +268,54 @@ void _checkNode(NodeBox b, Node n, LayoutDocument document, void Function(EditCo
   }
   final written = b.source.node(b.id);
   if (written == null) return;
+  _checkTextValues(b.id, n, written, report, nodePath);
   _checkLabel(b.id, n, written, report, nodePath);
   if (_repeaters.contains(n.type)) _checkList(b, n, written, document, report, nodePath);
+}
+
+/// A text written with values in it (`Total: ${money(total)}`) one of which
+/// came out as nothing: the text shows a gap where a number should be. A
+/// value that chooses (`cond ? "…" : ""`) may be empty on purpose.
+void _checkTextValues(String id, Node shown, Node written, void Function(EditCode, String, String, {String? nodeId, bool? error}) report,
+    String Function(String, [String?]) nodePath) {
+  if (shown.type != 'text') return;
+  final w = readMap(written.toJson()['props'])?['text'] ?? readMap(written.toJson()['bind'])?['props.text'];
+  final value = readMap(shown.toJson()['props'])?['text'];
+  if (w is! String || value is! String || !w.contains(r'${') || value.contains(r'${')) return;
+  // The written text as literal parts and expressions (braces balanced).
+  final pattern = StringBuffer('^');
+  final expressions = <String>[];
+  var i = 0;
+  while (i < w.length) {
+    final at = w.indexOf(r'${', i);
+    if (at < 0) {
+      pattern.write(RegExp.escape(w.substring(i)));
+      break;
+    }
+    pattern.write(RegExp.escape(w.substring(i, at)));
+    var depth = 0, j = at + 1;
+    for (; j < w.length; j++) {
+      if (w[j] == '{') depth++;
+      if (w[j] == '}' && --depth == 0) break;
+    }
+    if (j >= w.length) return;
+    expressions.add(w.substring(at + 2, j));
+    pattern.write('([\\s\\S]*?)');
+    i = j + 1;
+  }
+  pattern.write(r'$');
+  final m = RegExp(pattern.toString()).firstMatch(value);
+  if (m == null) return;
+  for (var k = 0; k < expressions.length; k++) {
+    final e = expressions[k];
+    if ((m[k + 1] ?? '').trim().isNotEmpty || e.contains('?') || e.contains('coalesce') || e.contains('""') || e.contains("''")) continue;
+    report(const EditCode('value_not_computed', ''), nodePath(id, 'props/text'),
+        'Text "$id" shows "${value.length > 40 ? '${value.substring(0, 40)}...' : value}": "${e.replaceFirst(RegExp(r'^=\s*'), '')}" gave nothing, so there is a '
+        'gap where its value should be. Check the names it reads (a field the data does not have, a variable not declared) and '
+        'that numbers are numbers, not text.',
+        nodeId: id);
+    return;
+  }
 }
 
 void _checkLabel(String id, Node shown, Node written, void Function(EditCode, String, String, {String? nodeId, bool? error}) report,
