@@ -79,8 +79,8 @@ THE SYSTEM'S PRINCIPLES
 THEME NAMES
 colors: {', '.join([k for k in ('primary', 'onPrimary', 'surface', 'onSurface', 'error', 'success', 'warning') if k in theme] + list(theme['colors']))}
 text styles ({{"from": "name"}}): {', '.join(theme.get('textStyles', {}))}
-radii: {', '.join(theme.get('radii', {}))}
-shadows: {', '.join(theme.get('shadows', {}))}
+radii (bound, not written: "bind": {{"decoration.radius": "${{theme.radii.name}}"}}): {', '.join(theme.get('radii', {}))}
+shadows (bound the same way: "bind": {{"decoration.effects": "${{theme.shadows.name}}"}}; there is no "shadows" key): {', '.join(theme.get('shadows', {}))}
 A color is written as one of the names above, exactly, or as #AARRGGBB; prefer names, and write no name that is not listed.
 
 HOW NODES OF THIS SYSTEM ARE WRITTEN (one of its blocks, for the shape of layout, decoration and text style)

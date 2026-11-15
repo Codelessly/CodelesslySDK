@@ -1,0 +1,33 @@
+{
+ "model": "claude-opus-5-5",
+ "card": "tool/stream/streams/live/2026-11-14-notation-5/approval@claude-sonnet-5-5.notation.json",
+ "designSystem": "design_systems/cards",
+ "before": {
+  "problems": 2,
+  "texts": 12
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 27.5,
+   "checkAndRenderSeconds": 26.5,
+   "problems": 5,
+   "ops": 36,
+   "input_tokens": 12274,
+   "output_tokens": 3498
+  },
+  {
+   "round": 2,
+   "modelSeconds": 28.8,
+   "checkAndRenderSeconds": 26.7,
+   "problems": 0,
+   "ops": 36,
+   "input_tokens": 16100,
+   "output_tokens": 3608
+  }
+ ],
+ "final": 2,
+ "problems": 0,
+ "status": "passed",
+ "totalSeconds": 132.6
+}
