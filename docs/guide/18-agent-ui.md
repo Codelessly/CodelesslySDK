@@ -41,6 +41,51 @@ only its own box. Placing a node under a parent that did not list it changes the
 re-applies the parent and its children (each child's slot holds its parent node) — the streaming order (a node
 lists its children when it is set) avoids that.
 
+## A model that writes the notation, with a design system
+
+The shortest path from a model's answer to a designed card: the model writes the compact notation (a few lines of
+text, no tool call), and the session's design system supplies the look and the ready-made blocks.
+
+```dart
+import 'package:codelessly_api/codelessly_api.dart' show DesignSystem;
+import 'package:codelessly_sdk/codelessly_sdk.dart';
+
+// A design system is a folder (design_system.json, components/, DESIGN.md, PATTERNS.md). Load it through a
+// function that reads one of its files by its path in the folder: from disk, from assets, from a server.
+final cards = await DesignSystem.load((ref) => rootBundle.loadString('assets/design_systems/cards/$ref'));
+
+final session = UiSession(designSystem: cards);
+
+// 1. What the model is told: the notation, and the blocks it may call. Name the blocks to keep it short.
+final system = session.notationInstructions(blocks: {'ChatCard', 'Details', 'OptionList', 'ActionButton', 'Receipt'});
+
+// 2. The model's answer, as it streams (a Stream<String> of text deltas), is applied line by line.
+final result = await session.applyNotation(answerText);
+
+// 3. In the chat. No canvas is named: the view shows the session's first canvas.
+CodelesslyView(session: session);
+```
+
+| | |
+|---|---|
+| `UiSession(designSystem: ds, theme: ...)` | The session's blocks and looks are the design system's; `theme` is laid over its tokens. |
+| `notationInstructions({blocks})` | The system prompt: the notation's grammar, the design system's blocks (all of them, or the ones named), and how its pieces go together (its PATTERNS.md "In brief"). |
+| `applyNotation(text, {options, prelude, author, onOp})` | Applies a streamed answer: each line becomes nodes the moment it is complete, one revision and one undo step for the whole answer. Returns the `EditResult`. |
+| `prelude` | Notation the host puts before the answer: state that must be right and is not the model's to write (`state cart=[...]`, a clock). |
+| `notationIssues` | What the notation could not read in the last answer, by line and column: send these back to the model for a second try. |
+
+What to know:
+
+* The answer is drawn on a canvas named `screen`. A view with no `canvas` shows it; pass `canvas:` only when the
+  session holds several.
+* A block that takes children (a card frame) shows each child as its line arrives. The view is not rebuilt and
+  needs no key that changes.
+* Events a card emits (`-> emit confirm order`) arrive on `session.events`, as with any session.
+* Looks are written as the design system's token names, so the same answer shown under another design system
+  with the same names, or in dark mode, takes that look with nothing rewritten.
+* `applyStream` (below) is the other path: a model that calls the `ui_apply` tool with edit operations. It can
+  change a UI already on screen node by node; the notation writes a whole card.
+
 ## How a streaming UI renders
 
 * Nothing paints until a root canvas has content.
@@ -56,7 +101,8 @@ lists its children when it is set) avoids that.
 ## `CodelesslyView`
 
 `CodelesslyView(session: session, canvas: 'home', imageLoader: ..., data: {...}, handlers: {...})` shows the
-session's canvas and follows it as ops apply. A canvas whose height hugs its content (`"height": {"hug": 400}`)
+session's canvas and follows it as ops apply; with no `canvas`, or one the session does not have, it shows the
+session's first canvas. A canvas whose height hugs its content (`"height": {"hug": 400}`)
 is as tall as its content in an unbounded parent (a chat message in a list); otherwise it fills the space it is
 given. Media rules follow the width it is shown at.
 
