@@ -282,7 +282,9 @@ void main() {
       final painter = _under<RenderBox>(gradient).firstWhere((o) => o.runtimeType.toString() == 'RenderNodePaint');
       const corners = BorderRadius.only(topLeft: Radius.elliptical(30, 12), topRight: Radius.circular(4));
       final rect = Offset.zero & painter.size;
-      expect(painter, paints..rrect(rrect: corners.toRRect(rect))..path());
+      // The fill, then the border as Flutter's BoxBorder: the band between
+      // the box's rounded rect and the same one a stroke width in (inside).
+      expect(painter, paints..rrect(rrect: corners.toRRect(rect))..drrect(outer: corners.toRRect(rect), inner: corners.toRRect(rect).deflate(2)));
       expect(tester.takeException(), isNull);
     });
 

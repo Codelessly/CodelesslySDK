@@ -130,6 +130,20 @@ class RenderNodePaint extends RenderBox with ImageClient {
       }
       return;
     }
+    if (decoration.strokeSides == api.StrokeSides.all &&
+        !rrect.isRect &&
+        w > 0 &&
+        decoration.dashPattern.every((d) => d <= 0)) {
+      // A uniform rounded border as Flutter's BoxBorder paints it: the band
+      // between the outer and inner rounded rects, filled (drawDRRect). A
+      // stroked centre line covers the same band in theory but anti-aliases
+      // the inner corners differently.
+      final outer = rrect.deflate(inset - w / 2), inner = rrect.deflate(inset + w / 2);
+      for (final p in strokes) {
+        canvas.drawDRRect(outer, inner, paintFor(p, rect)..style = PaintingStyle.fill);
+      }
+      return;
+    }
     final path = Path();
     if (decoration.strokeSides == api.StrokeSides.all) {
       path.addRRect(rrect.deflate(inset));
