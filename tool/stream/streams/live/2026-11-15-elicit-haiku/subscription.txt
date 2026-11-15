@@ -1,0 +1,20 @@
+Card
+  Row between
+    Column
+      Text.cardTitle "Pro plan"
+      Text.caption "Renews in 3 days"
+    Badge.primary "Active"
+  Text.heading2 "{annual ? '$190/yr' : '$20/mo'}"
+  Text.blockTitle "Storage"
+  Text.caption "72 of 100 GB used"
+  Progress 0.72
+  Text.blockTitle "Seats"
+  Text.caption "8 of 10 seats used"
+  Progress 0.8
+  Row between middle
+    Column
+      Text.body "Annual billing"
+      Text.caption "{annual ? 'Saving $50 a year' : 'Save $50 a year with annual billing'}"
+    Toggle #annual "Annual billing" value:annual onChanged(event)
+  Button.outline "Manage plan" onPressed(event)
+  Button.destructive "Cancel renewal" onPressed(event)

@@ -1,0 +1,15 @@
+Card
+  Text.cardTitle "Schedule a 30-minute meeting"
+  Column {"hidden": "confirmed"}
+    SectionLabel "Day" "next week"
+    DayPicker =day days:["Mon 14","Tue 15","Wed 16","Thu 17","Fri 18"]
+    Text.muted "Pick a day to see free times" {"hidden": "day != null"}
+    Column {"hidden": "day == null"}
+      SectionLabel "Time" "30 min"
+      ChoiceChips =slot {"options": "slots[day]", "disabled": "taken[day]"}
+      Text.muted "Grey times are already booked" {"hidden": "slot != null"}
+    SectionLabel "Attendees" "3 colleagues"
+    each attendee in attendees
+      ListTile "{attendee.name}" "{attendee.team}"
+    ActionButton "Confirm meeting" primary check {"enabled": "day != null && slot != null", "onPressed": "confirmed = true"}
+  Receipt "Meeting booked" "30 minutes with 3 colleagues" "{day} at {slot}" "Booked time" tone:success check {"hidden": "!confirmed"}

@@ -1,0 +1,5 @@
+ChatCard "Team lunch vote" "Where should we eat Friday?" restaurant
+  OptionList "Where should we eat Friday?" value:choice options:["Pho","Tacos","Pizza","Salads"] votes:votes hidden:voted onChanged(event)
+  ActionButton "Cast vote" primary how_to_vote enabled:choice!=null hidden:voted onPressed(event) {"on": "voted = true; votes[choice] += 1"}
+  PollResults "Anonymous votes" options:["Pho","Tacos","Pizza","Salads"] votes:votes choice:choice hidden:!voted
+  Text "Total: {sum(votes)} votes" hidden:!voted

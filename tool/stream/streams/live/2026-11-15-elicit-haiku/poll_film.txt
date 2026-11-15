@@ -1,0 +1,22 @@
+Card
+  state choice = none
+  let films = [{"name":"Spirited Away","votes":11},{"name":"Arrival","votes":8},{"name":"Knives Out","votes":6}]
+  let total = sum(films.votes) + (choice != none ? 1 : 0)
+  SectionLabel "Movie night" "Pick one"
+  OptionList "Which film Saturday?" value:choice options:["Spirited Away","Arrival","Knives Out"] onChanged(event)=choice=event.value
+  Column show:choice!=none gap:12
+    each f in films
+      let count = f.votes + (choice==f.name ? 1 : 0)
+      let top = max(for g in films: g.votes + (choice==g.name ? 1 : 0))
+      Column gap:4
+        Row between
+          Row gap:6
+            Text.strong "{f.name}"
+            Badge.primary "Your vote" show:choice==f.name
+            Badge.success "Leading" show:count==top
+          Text.muted "{round(100*count/total)}% · {count}"
+        Progress value:{count/total}
+    Row between
+      Text.caption "Total votes"
+      Text.caption "{total}"
+  Text.eyebrow "Screening Saturday"

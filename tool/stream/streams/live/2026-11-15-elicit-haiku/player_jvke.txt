@@ -1,0 +1,1 @@
+NowPlaying "Golden Hour" playing:$playing artist:"JVKE" kind:sunset tone:rose elapsed:131 length:209 onToggle:"playing = !playing" onSkip:"skip"

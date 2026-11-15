@@ -1,0 +1,76 @@
+You describe a UI by writing it in this notation, one node per line, children indented two spaces under their parent. Write only the notation: no JSON, no prose, no code fence.
+
+LINE
+  Type[.variant][#id] ["text"] [key:value ...]
+
+- "text" is the node's main string: a Text's text, a Button's or Toggle's label, an Input's label (a second string is its hint), an Icon's name, an Image's URL. {name} inside a string shows a variable: "Total: {total}".
+- key:value sets a prop by its name. Common keys: gap (space between children), pad (padding: one number or [left,top,right,bottom]), w, h (a number, fill or hug), fill (background color #AARRGGBB), radius. Quote a value with spaces: hint:"you@example.com". Lists are JSON: items:["S","M","L"].
+- Words on a Row or Column: start, center, end, between (along it); top, middle, bottom, left, right, stretch (across it). grow on a child takes the remaining room. hidden hides a node.
+- #id only when something else needs to name the node.
+- Beyond these words: a {…} at the end of a line is merged into that node as JSON ({"props": {"size": 18}}). A whole node the notation has no word for is written as node {"type": "…", …} on its own line (its JSON may run over several lines); lines indented under it are its children, written as usual.
+- Sizes are worked out: in a Column a child is as wide as the column and as tall as its content; in a Row a child is as big as its content. Do not write sizes unless the design needs one.
+
+TYPES
+  Layout and content: Stack, Badge, Box, Text, Icon, Spacer, ListView, GridView, Divider, Box, Card, Image
+  Controls: Accordion, Input, Checkbox, Toggle, Radio, Slider, Select, DatePicker, TimePicker, SegmentedButton, Button, IconButton, Chip, ChoiceChip, FilterChip, Badge, ListTile, CircularProgressIndicator, Progress, BarChart, LineChart
+  Text variants: Text.pageTitle, Text.sectionTitle, Text.dialogTitle, Text.panelTitle, Text.body, Text.bodySecondary, Text.inputText, Text.placeholder, Text.fieldLabel, Text.caption, Text.mono, Text.badge, Text.controlXs, Text.controlCompact, Text.controlSmall, Text.controlMedium, Text.controlLarge, Text.heading1, Text.heading2, Text.heading3, Text.cardTitle, Text.blockTitle, Text.rowTitle, Text.lead, Text.meta, Text.eyebrow, Text.chip, Text.cta, Text.field, Text.numberHero, Text.numberLarge, Text.number, Text.numberSmall, Text.figure, Text.code, Text.title, Text.heading, Text.strong, Text.small, Text.muted, Text.danger, Text.success (plain Text is body text)
+  Button variants: Button.primary, Button.secondary, Button.tertiary, Button.outline, Button.ghost, Button.elevated, Button.destructive (plain Button is primary)
+  Badge variants: Badge.neutral, Badge.primary, Badge.info, Badge.success, Badge.warning, Badge.error, Badge.danger
+  Card is a padded, bordered Column; Box is a Column you style (fill, radius, pad). Every control already has the design system's look: write no colors or sizes on controls. A Text takes color:#FF…, size:32 and weight:700 (a big number is Text "{n}" size:64); a Box or Card takes fill:#FF… (on a dark fill, give its texts a light color). Column scroll lets a tall screen scroll.
+  Grid cols:3 gap:8 lays its children out in columns. Progress 0.6 shows a share from 0 to 1. Select and SegmentedButton take items:["A","B"]. Input takes type:number (or email, phone) for its keyboard. Icon "name" uses Material icon names (check, close, star, chevron_right).
+  Pages =page h:160 shows the lines under it one at a time, swiped across (under it, each item in items gives one page per element); =page is the page shown, from 0, and setting it turns the page. peek:0.86 shows the edge of the next page (a carousel, a gallery). Dots =page count:4 draws its pagination dots (a tap goes to that page); "{page+1} of {length(items)}" is its count. Content wider than the card (a wide table, a strip of tiles) goes in Row scroll, which scrolls sideways.
+  BarChart values:[3,5,4] labels:["Mon","Tue","Wed"] and LineChart values:[10,12,11,14] draw charts: never link to a chart image.
+  Only Row, Column, Stack, Box, Card, Grid, List, Accordion and ListTile take children.
+
+
+COMPONENTS (Cards: ready-made, already styled; prefer one of these to building its look from boxes)
+  ChatCard "title" "subtitle" icon status tone (children) : The card itself.
+  SectionLabel "label" "note" : A small caps heading over a group of blocks, with a quiet note at the right.
+  Paragraph "text" strong : A sentence or two of body text in the card's own type and color.
+  ActionButton "label" tone icon enabled onPressed(event) : A full-width button that fires onPressed.
+  TotalBar "label" "note" amount! cta icon enabled onPressed(event) : The card's closing bar on dark.
+  Details rows! icons : Labels and their values as rows in one quiet tile.
+  Callout "title" "message" tone icon : A tinted note inside a card.
+  Disclosure "label" "note" lines! icon : A link that opens and closes a short list by itself.
+  Receipt "title" "message" code codeLabel tone icon : The card's end state after a decision.
+  Recommendation "title" "why" reasons eyebrow kind : The one recommendation on the accent gradient.
+  Steps steps! current! : Progress through named steps as numbered dots joined by a line.
+  Segments value options! onChanged(event) : A switch between two to five options in one track.
+  InputField "label" "placeholder" value lines icon error success keyboard onChanged(event) : A labeled text field that keeps what is typed in your variable.
+  OptionList "title" value options! details icons prices onChanged(event) : A question and its answers as a list of rows with a radio.
+  ChoiceChips value options! disabled columns onChanged(event) : A single choice as a grid of chips.
+  DayPicker value days! onChanged(event) : A strip of days to pick one from.
+  Counter "label" "detail" value min max step icon onChanged(event) : A number raised and lowered with minus and plus.
+  FlightOption "name" depart! arrive! origin destination duration stops price tag selected onPressed(event) : One flight as a selectable option.
+  ProductTile "name" "detail" price rating kind tone badge cta height onPressed(event) : A product with a large drawn picture.
+  Carousel value items! kind peek dots arrows counter thumbs cta height fade onPressed(event) : A real carousel of products.
+  PageDots value count! onChanged(event) : Pagination dots for Pages, a Carousel or any paged content.
+  Pager "label" value count! onChanged(event) : Paging for a list or for pages of content.
+  WideScroll width! fade (children) : A frame that scrolls sideways for content wider than the card.
+  CartLine "title" "detail" price qty! kind tone onChanged(event) : One line of a cart or order with a drawn thumbnail and a quantity stepper.
+  DiffHunk "title" "detail" value start! lines! onChanged(event) : One hunk of a diff with its own Keep and Discard buttons.
+  ComparisonTable names! prices notes rows! pick pickLabel cta corner columnWidth fade onChoose(event) : Two to five options compared side by side.
+  StatTile "label" "note" value! delta invert icon : A dashboard figure with its change.
+  ChartCard "title" value values! labels kind delta : A designed chart in its own tile.
+  TableHeader value desc columns! keys widths selectable checked onToggleAll(event) : The header of a sortable table.
+  TableRow cells! badge widths selectable checked onPressed(event) : One row of a table under a TableHeader.
+  PhotoGallery value photos! layout dots columns fade onChanged(event) : A photo gallery with a built-in large view.
+  DayHeader "title" "subtitle" kind tone tag (children) : One day of a trip.
+  ItineraryStop "title" "detail" time! travel last open : One stop on a day's timeline.
+  Checklist "title" value items! onChanged(event) : A titled list of things to tick off.
+  MapPanel value count! onChanged(event) : A drawn map.
+  PlaceRow "name" "detail" index! rating distance hours selected onPressed(event) : A numbered place in a list beside a MapPanel.
+  PlanStep "title" "detail" index! current! running last : One step of a plan that runs.
+  ProgressLine "label" "detail" value! : A progress bar with its words.
+  WeatherNow "title" "detail" temp! high low kind : The weather now as the card's hero on a sky that follows the conditions.
+  WeatherHours hours! temps! kinds : The next hours as a strip of small forecasts.
+  WeatherDay "label" low! high! kind min max : One day of a forecast with a temperature range bar.
+  Media kind! tone round : A drawn picture where a photo would go.
+  WeatherGlyph kind! : A drawn weather glyph.
+  PollResults "note" options! votes! choice : A poll's results after the vote.
+  NowPlaying "title" playing artist kind tone elapsed! length! onSkip(event) : A music player with drawn album art.
+
+
+
+WHAT THIS NOTATION DOES NOT SAY YET
+It has no agreed way to write what changes: values a card remembers, a value worked out from others, what happens when something is tapped or chosen, a part shown only sometimes, a part repeated for each item of a list, something that happens as time passes. The request below needs some of these. Write them in whatever way reads most naturally to you, as if the notation already had it, and be consistent within your answer. Write only the card.

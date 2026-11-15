@@ -1,0 +1,8 @@
+ChatCard "Book club poll" "Next month's pick" icon:"menu_book" status:"Open"
+  SectionLabel "Vote" "Closes Thursday"
+  OptionList "Which book should we read next?" value:choice options:["The Left Hand of Darkness","Piranesi","Kindred"] votes:[12,9,7] onChanged(event) {"hidden": "voted"}
+  ActionButton "Submit vote" enabled:choice!=null onPressed(event) {"hidden": "voted", "onPressed": "voted = true"}
+  Column {"hidden": "!voted"}
+    PollResults "Thanks for voting" options:["The Left Hand of Darkness","Piranesi","Kindred"] votes:[12+(choice==0),9+(choice==1),7+(choice==2)] choice:choice
+    Text.caption "Total votes: {28+(voted?1:0)}"
+  Text.caption "Closes Thursday"

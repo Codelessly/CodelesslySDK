@@ -1,0 +1,5 @@
+ChatCard "Workshop poll" "Which session should we run?"
+  OptionList "Pick one session" value:choice options:["Prototyping","Accessibility","Animation"] details:["3 votes","10 votes","5 votes"] onChanged(event)
+  ActionButton "Confirm vote" tone:primary enabled:choice!="" onPressed(event) {"action": "submit", "sets": {"submitted": true}}
+  PollResults "Results update after voting" options:["Prototyping","Accessibility","Animation"] votes:[3+(choice=="Prototyping"),10+(choice=="Accessibility"),5+(choice=="Animation")] choice:choice hidden:!submitted
+  Text "{total} votes in total" caption hidden:!submitted {"props": {"total": "3+10+5+1"}}

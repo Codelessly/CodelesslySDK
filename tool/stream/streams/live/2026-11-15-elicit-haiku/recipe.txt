@@ -1,0 +1,16 @@
+Card
+  Text.eyebrow "WEEKNIGHT DINNER"
+  Text.pageTitle "Lemon chicken traybake"
+  Row gap:8
+    Badge.info "45 min total"
+    Badge.success "Easy"
+  Counter "Servings" "Scales the amounts below" value:servings min:1 max:8 step:1 icon:"group" onChanged(event)
+  SectionLabel "Ingredients" "tick as you go"
+  Checklist "Ingredients" value:checkedIngredients items:["{servings * 400} g chicken thighs, bone-in","{servings * 2} lemons, halved","{servings * 3} tbsp olive oil","{servings * 2} garlic cloves, crushed","{servings * 200} g baby potatoes, halved","{servings} tsp dried oregano","Salt and black pepper"] onChanged(event)
+  SectionLabel "Method" "4 steps"
+  Column gap:8
+    Paragraph "1. Heat the oven to 200°C. Toss the potatoes with half the oil, salt and oregano on a large tray."
+    Paragraph "2. Season the chicken, rub with garlic and the rest of the oil, and nestle it among the potatoes, skin side up."
+    Paragraph "3. Squeeze half the lemons over everything, tuck the rest in between, and roast for 35 to 40 minutes until the chicken is cooked through."
+    Paragraph "4. Rest for 5 minutes, then scatter with the pan juices and serve straight from the tray."
+  ActionButton "Start cooking" tone:primary icon:"play_arrow" enabled:true onPressed(event)
