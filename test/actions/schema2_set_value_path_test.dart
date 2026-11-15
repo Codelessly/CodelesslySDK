@@ -34,5 +34,7 @@ void main() {
     final notes = said.where((m) => m.contains('schema-2 path')).toList();
     expect(notes, hasLength(1));
     expect(notes.single, contains('motion.alignment'));
+    // Restored in the body: the binding checks debug variables before teardowns run.
+    debugPrint = before;
   });
 }
