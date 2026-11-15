@@ -1,3 +1,10 @@
+## 31.0.1
+
+- **A text field with a limit shows its count again.** A `textField` with `maxLength` draws how much of the limit
+  is used under the field ("0/280"), following the typing, as it did when the field was Flutter's `TextField`;
+  31.0.0 drew a counter only when the design wrote `decoration.counterText`, which still replaces it. A hugging
+  field with a limit is one caption line taller than in 31.0.0.
+
 ## 31.0.0
 
 **Breaking: the library an app imports is smaller.** Thirty-five types that are the SDK's own machinery (bound

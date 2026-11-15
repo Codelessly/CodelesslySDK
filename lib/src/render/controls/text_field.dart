@@ -581,6 +581,9 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     decoration = FieldDecoration.of(c.decoration, c.tokens,
         valueStyle: c.valueStyle,
         errorOverride: _error,
+        // A field with a limit shows how much of it is used (as a Flutter
+        // TextField with maxLength does), unless the design wrote a counter.
+        counterFallback: (c.maxLength ?? 0) > 0 ? '${editor.text.runes.length}/${c.maxLength}' : null,
         focusRingWidth: c.focusRingWidth,
         focusRingColor: c.focusRingColor,
         text: _interactive ? null : fieldPreviewText);
@@ -642,6 +645,8 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
   @override
   void valueChanged(TextEditingValue old, {required bool userChanged, SelectionChangedCause? cause}) {
     _syncText();
+    // The count against the limit follows the text.
+    if (old.text != editor.text && (_config?.maxLength ?? 0) > 0) _rebuildDecoration();
     markNeedsLayout();
     if (focusNode.hasFocus) _caret.restart();
     markNeedsSemanticsUpdate();
