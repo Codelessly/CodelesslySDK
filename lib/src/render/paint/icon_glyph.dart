@@ -9,6 +9,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'image_fill.dart';
+import 'material_icon_codepoints.dart';
 import 'material_icon_versions.dart';
 
 /// Where icon SVGs come from. Material icons and symbols load from Google's
@@ -91,6 +92,37 @@ abstract final class IconSources {
   /// none.
   static int? Function(String name, String style)? codepointOf;
 
+  /// Whether [icon] is drawn as its MaterialIcons font glyph, as Flutter's
+  /// `Icon` draws `Icons.*`, rather than from its SVG: `"render": "glyph"`
+  /// on a Material icon whose codepoint is known (its own, the host's
+  /// table, else Flutter's: [flutterCodepointOf]).
+  static bool drawsGlyph(Json icon) => readString(icon['render']) == 'glyph' && glyphCodepointOf(icon) != null;
+
+  /// [icon]'s codepoint for drawing it as a glyph: [glyphOf], else
+  /// Flutter's table by name and style.
+  static int? glyphCodepointOf(Json icon) {
+    final own = glyphOf(icon);
+    if (own != null) return own;
+    final type = readString(icon['type']);
+    if ((type != null && type != 'MATERIAL_ICON') || readString(icon['source']) == 'image') return null;
+    return flutterCodepointOf(readString(icon['name']) ?? '', readString(icon['style']));
+  }
+
+  /// The codepoint of Flutter's `Icons.<name>` in [style] (filled, rounded,
+  /// outlined, sharp): `lock` rounded is `Icons.lock_rounded`. A name that
+  /// already ends in its style's suffix is taken as it is.
+  static int? flutterCodepointOf(String name, String? style) {
+    final n = name.toLowerCase();
+    if (n.isEmpty) return null;
+    final suffix = switch (style) {
+      'rounded' => '_rounded',
+      'outlined' => '_outlined',
+      'sharp' => '_sharp',
+      _ => '',
+    };
+    return materialIconCodepoints[n.endsWith(suffix) ? n : '$n$suffix'] ?? materialIconCodepoints[n];
+  }
+
   /// Where a Material icon saved without its version (an icon named in
   /// node JSON, `{"name": "calendar_view_week"}`) is drawn from when its
   /// first SVG ([urlOf], `v1`) fails: icons added after Material's first
@@ -139,8 +171,10 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   set icon(Json v) {
     if (identical(v, _icon)) return;
     _icon = v;
-    _url = IconSources.urlOf(v);
-    _fallback = IconSources.fallbackUrlOf(v);
+    // A glyph icon loads nothing: the font has it.
+    final glyph = IconSources.drawsGlyph(v);
+    _url = glyph ? null : IconSources.urlOf(v);
+    _fallback = glyph ? null : IconSources.fallbackUrlOf(v);
     _fallbackShown = false;
     showImages([_url]);
     markNeedsPaint();
@@ -222,8 +256,12 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_icon['show'] == false) return;
-    final loaded = _loaded();
     final color = _color ?? defaultColor;
+    if (IconSources.drawsGlyph(_icon)) {
+      _paintGlyph(context.canvas, _glyphRect(offset), color);
+      return;
+    }
+    final loaded = _loaded();
     if (loaded == null) {
       // Its SVG is loading (or neither version loaded):
       // a Material icon with a codepoint draws that glyph of the bundled
@@ -248,7 +286,7 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   /// The font glyph of a Material icon with a `codepoint` (its SVG's
   /// stand-in), filling the box; nothing for other icons.
   void _paintGlyph(Canvas canvas, Rect rect, Color color) {
-    final codepoint = IconSources.glyphOf(_icon);
+    final codepoint = IconSources.drawsGlyph(_icon) ? IconSources.glyphCodepointOf(_icon) : IconSources.glyphOf(_icon);
     if (codepoint == null || rect.isEmpty) return;
     final extent = rect.shortestSide;
     final offset = rect.topLeft;
@@ -256,7 +294,15 @@ class RenderIconGlyph extends RenderBox with ImageClient {
     final painter = TextPainter(
       text: TextSpan(
         text: String.fromCharCode(codepoint),
-        style: TextStyle(fontFamily: 'MaterialIcons', fontSize: extent, height: 1, color: color, inherit: false),
+        // As Flutter's Icon: the font's body centred in the square.
+        style: TextStyle(
+          fontFamily: 'MaterialIcons',
+          fontSize: extent,
+          height: 1,
+          leadingDistribution: TextLeadingDistribution.even,
+          color: color,
+          inherit: false,
+        ),
       ),
       textDirection: TextDirection.ltr,
     )..layout();
