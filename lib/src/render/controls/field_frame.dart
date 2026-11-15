@@ -653,6 +653,26 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
 
   // --- texts --------------------------------------------------------------------------
 
+  /// The direction the field lays out in (its node's): under right to left
+  /// its text and hint start at the right, the prefix is on the right and
+  /// the suffix on the left, the label and helper sit at the right and the
+  /// counter at the left, as Flutter's InputDecorator.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection = TextDirection.ltr;
+  set textDirection(TextDirection v) {
+    if (v == _textDirection) return;
+    _textDirection = v;
+    for (final p in [_label, _hint, _below, _counter, _prefixText, _suffixText]) {
+      p.textDirection = v;
+    }
+    markNeedsLayout();
+  }
+
+  bool get _rtl => _textDirection == TextDirection.rtl;
+
+  /// [x] (with [width]) mirrored across the box under right to left.
+  double _across(double x, double width) => _rtl ? boxRect.left + boxRect.right - x - width : x;
+
   final TextPainter _label = TextPainter(textDirection: TextDirection.ltr, maxLines: 1, ellipsis: '…');
   final TextPainter _hint = TextPainter(textDirection: TextDirection.ltr, ellipsis: '…');
   final TextPainter _below = TextPainter(textDirection: TextDirection.ltr, ellipsis: '…');
@@ -968,9 +988,22 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
       }
       height = line;
     }
-    contentRect = Rect.fromLTWH(left, top, contentWidth, height);
-    _prefixTextAt = Offset(_prefixTextAt.dx, contentRect.top);
-    _suffixTextAt = Offset(_suffixTextAt.dx, contentRect.top);
+    contentRect = Rect.fromLTWH(_across(left, contentWidth), top, contentWidth, height);
+    // An affix's text width, when it has text (its painter is laid out).
+    final prefixTextWidth = d.prefix?.hasText ?? false ? _prefixText.width : 0.0;
+    final suffixTextWidth = d.suffix?.hasText ?? false ? _suffixText.width : 0.0;
+    _prefixTextAt = Offset(_across(_prefixTextAt.dx, prefixTextWidth), contentRect.top);
+    _suffixTextAt = Offset(_across(_suffixTextAt.dx, suffixTextWidth), contentRect.top);
+    if (_rtl) {
+      _prefixIconRect = _prefixIconRect.isEmpty
+          ? _prefixIconRect
+          : Rect.fromLTWH(_across(_prefixIconRect.left, _prefixIconRect.width), _prefixIconRect.top, _prefixIconRect.width,
+              _prefixIconRect.height);
+      _suffixIconRect = _suffixIconRect.isEmpty
+          ? _suffixIconRect
+          : Rect.fromLTWH(_across(_suffixIconRect.left, _suffixIconRect.width), _suffixIconRect.top, _suffixIconRect.width,
+              _suffixIconRect.height);
+    }
     // The hint, in the content's place.
     _hint
       ..text = TextSpan(text: d.hint, style: hintStyle)
@@ -1039,7 +1072,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
   bool get hintShown => contentEmpty && decoration.hint.isNotEmpty;
 
   /// Where the label's glyphs are (local).
-  Rect get labelRect => decoration.label.isEmpty ? Rect.zero : Offset(0, _labelTop) & _label.size;
+  Rect get labelRect => decoration.label.isEmpty ? Rect.zero : Offset(_rtl ? size.width - _label.width : 0, _labelTop) & _label.size;
 
   /// Where the line below is (local; empty when none).
   Rect get belowRect => belowText.isEmpty ? Rect.zero : Offset(0, _belowTop) & _below.size;
@@ -1063,7 +1096,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
   void _paintFrame(PaintingContext context, Offset offset) {
     final d = decoration;
     final canvas = context.canvas;
-    if (d.label.isNotEmpty) _label.paint(canvas, offset + Offset(0, _labelTop));
+    if (d.label.isNotEmpty) _label.paint(canvas, offset + Offset(_rtl ? size.width - _label.width : 0, _labelTop));
     final shape = boxShape.shift(offset);
     if (fillNow case final Color fill when fill.a > 0) canvas.drawRRect(shape, Paint()..color = fill);
     // The affixes.
@@ -1102,8 +1135,10 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
       paintFocusRing(over, shape, d.focusRingColor!, width: d.focusRingWidth);
     }
     final below = belowText;
-    if (below.isNotEmpty) _below.paint(over, offset + Offset(0, _belowTop));
-    if (d.counter.isNotEmpty) _counter.paint(over, offset + Offset(size.width - _counter.width, _belowTop));
+    if (below.isNotEmpty) _below.paint(over, offset + Offset(_rtl ? size.width - _below.width : 0, _belowTop));
+    if (d.counter.isNotEmpty) {
+      _counter.paint(over, offset + Offset(_rtl ? 0 : size.width - _counter.width, _belowTop));
+    }
   }
 
   // --- what tools and the guard read --------------------------------------------------------
