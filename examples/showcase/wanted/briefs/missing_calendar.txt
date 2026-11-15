@@ -1,0 +1,1 @@
+Show a month calendar chat card for November 2026 with a seven-column date grid, highlighted booked dates, selected date, and event dots.

@@ -1,0 +1,1 @@
+Show a chat card comparing two flight options from Chicago to Seattle, with departure and arrival times, stops, duration, price, and a select action.

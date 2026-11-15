@@ -1,0 +1,1 @@
+Show a chat card with a featured coffee maker product, its image, price, short details, and add-to-cart button.

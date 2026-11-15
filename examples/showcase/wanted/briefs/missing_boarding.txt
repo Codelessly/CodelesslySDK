@@ -1,0 +1,1 @@
+Show a scannable airline boarding pass chat card with passenger, flight, gate, seat, boarding group and time, plus a large QR code and tear-off ticket layout.

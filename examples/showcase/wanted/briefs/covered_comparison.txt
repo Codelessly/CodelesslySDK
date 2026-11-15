@@ -1,0 +1,1 @@
+Show a chat card comparing Basic, Plus, and Pro subscription plans in a feature comparison table with a highlighted recommendation.

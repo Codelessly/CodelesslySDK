@@ -1,0 +1,1 @@
+Show a live basketball score chat card with the two teams, scores, period, game clock, possession indicator, and a compact scoring timeline.

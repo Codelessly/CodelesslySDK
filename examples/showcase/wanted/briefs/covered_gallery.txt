@@ -1,0 +1,1 @@
+Show a chat card with a photo gallery of four apartment images, a title, image count, and a save action.

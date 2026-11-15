@@ -1,0 +1,1 @@
+Show a compact chat card with the current weather in Chicago, the next four hourly temperatures, and a three-day forecast.

@@ -1,0 +1,1 @@
+Show a medication schedule chat card with morning, afternoon and evening doses, pill images, dose instructions, and taken or missed status for each dose.

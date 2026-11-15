@@ -1,0 +1,1 @@
+Show a quiz question chat card with four answer choices, a submitted answer, correct and incorrect marking, explanation, and score earned.

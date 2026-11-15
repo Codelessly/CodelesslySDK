@@ -1,0 +1,1 @@
+Show a restaurant receipt chat card with three itemized purchases, subtotal, tax, tip, total, and a pay action.

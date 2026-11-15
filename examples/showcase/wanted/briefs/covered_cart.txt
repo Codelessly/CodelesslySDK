@@ -1,0 +1,1 @@
+Show a shopping cart chat card with two products, quantities, line totals, a total bar, and a checkout action.

@@ -1,0 +1,1 @@
+Show a transit departure board chat card with three arriving trains, route badges, destinations, platform numbers, live delay status, and minutes until arrival.
