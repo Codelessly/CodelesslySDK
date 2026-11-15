@@ -12,6 +12,10 @@ coverage/
 tool/
 docs/
 test/
+# Demos, recordings and measurements: read on GitHub. (`example/`, singular, is
+# the package's example and ships.)
+/examples/
+/benchmark/
 CONTRIBUTING.md
 PUBLISHING.md
 # The example ships as source: `flutter create .` makes its platform folders.
