@@ -1,0 +1,23 @@
+{
+ "name": "StockQuote",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 52.0,
+   "checkAndRenderSeconds": 34.8,
+   "problems": 0,
+   "input_tokens": 32715,
+   "output_tokens": 6567
+  },
+  {
+   "round": 2,
+   "modelSeconds": 52.3,
+   "checkAndRenderSeconds": 33.9,
+   "problems": 2,
+   "input_tokens": 39416,
+   "output_tokens": 6703
+  }
+ ],
+ "totalSeconds": 172.9
+}
