@@ -95,8 +95,8 @@ def brief_for(name, ds, manifest):
         types = ', '.join(sorted(ws) if isinstance(ws, dict) else sorted(w['type'] if isinstance(w, dict) else str(w) for w in ws))
     if os.path.exists(f'{api_ref}/charts.md'):
         page = open(f'{api_ref}/charts.md').read()
-        for name in ('barChart', 'lineChart', 'ChartSeries'):
-            m = re.search(r'^### `?' + name + r'`?\n[\s\S]*?(?=^### |\Z)', page, re.M)
+        for chart_name in ('barChart', 'lineChart', 'ChartSeries'):
+            m = re.search(r'^### `?' + chart_name + r'`?\n[\s\S]*?(?=^### |\Z)', page, re.M)
             if m:
                 charts += m.group(0).strip() + '\n\n'
     system = f"""You are the designer of the "{manifest['name']}" design system: {manifest['description']}
@@ -155,7 +155,10 @@ def check(name, ds, manifest, d, block, written):
 
     def reported(log):
         lines = log.splitlines()
-        return [l for i, l in enumerate(lines) if l.startswith(('ERROR', 'WARNING')) or (i and lines[i - 1].startswith(('ERROR', 'WARNING')))]
+        # One entry per problem (its line and the line under it, which says where), without the build's own chatter.
+        lines = [re.sub(r'^(Running build hooks\.\.\.)+', '', l) for l in lines]
+        return [l + ('\n' + lines[i + 1] if i + 1 < len(lines) and not lines[i + 1].startswith(('ERROR', 'WARNING')) else '')
+                for i, l in enumerate(lines) if l.startswith(('ERROR', 'WARNING'))]
 
     json.dump({'schema': 3, 'pages': ['card.json'], 'designSystem': os.path.relpath(ds, site)}, open(f'{site}/site.json', 'w'))
     for mode in ('light', 'dark'):
@@ -223,8 +226,19 @@ def main():
         back.append({'type': 'text', 'text': ('Problems reported:\n' + '\n'.join(problems) + '\n\n' if problems else 'No problems were reported.\n\n') +
                      'Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the other blocks, and whether anything is broken or empty. If nothing is reported and you would ship it as it is, answer with the one word SHIP and nothing else: a round that changes what was already right makes it worse. Otherwise fix every problem and answer again in the same format, block and card whole.'})
         messages += [{'role': 'assistant', 'content': text}, {'role': 'user', 'content': back}]
+    # The round kept is the one with the fewest problems (the later of equals), not simply the last: a further
+    # round has made a block worse (outside runs, 2026-11-15: 58, 4, then 38 problems, and the third shipped).
+    checked = [r for r in summary['rounds'] if 'problems' in r]
+    if checked:
+        best = min(checked, key=lambda r: (r['problems'], -r['round']))
+        summary['final'] = best['round']
+        summary['problems'] = best['problems']
+        summary['status'] = 'passed' if best['problems'] == 0 else 'failed'
     summary['totalSeconds'] = round(time.time() - t_all, 1)
     json.dump(summary, open(f'{out}/summary.json', 'w'), indent=1)
+    print(json.dumps({k: summary.get(k) for k in ('final', 'status', 'problems', 'totalSeconds')}))
+    if summary.get('status') == 'failed':
+        sys.exit(1)
 
 
 if __name__ == '__main__':
