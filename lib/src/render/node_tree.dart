@@ -13,7 +13,7 @@ import 'package:codelessly_api/core.dart' show Json, Node, SizeFit, FlexProps, S
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
-import 'package:flutter/widgets.dart' show Builder, WidgetBuilder;
+import 'package:flutter/widgets.dart' show Builder, Directionality, WidgetBuilder;
 
 import 'animations.dart' show RenderAnimations, animatesOpacity;
 import 'behaviors.dart';
@@ -1504,6 +1504,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final surface = backdropOf(source.node, source.parentOf, id);
     final themed = build;
     build = (context) => ControlTheme(surface: surface, child: Builder(builder: themed));
+    // Its widgets lay out in the node's direction (Flutter's Directionality:
+    // a ListView runs from the right, a text field types right to left).
+    if (_node?.behaviors.textDirection case final api.TextDirection dir) {
+      final inner = build;
+      final d = dir == api.TextDirection.rtl ? TextDirection.rtl : TextDirection.ltr;
+      build = (context) => Directionality(textDirection: d, child: Builder(builder: inner));
+    }
     final existing = _islands[key];
     if (existing != null && !existing.disposed) {
       existing.builder = build;

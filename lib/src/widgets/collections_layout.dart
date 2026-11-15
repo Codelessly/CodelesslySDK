@@ -78,9 +78,30 @@ abstract class RenderCollection extends RenderBox
   /// Lays out the children and sets [size]; returns whether they overflow.
   bool layoutItems();
 
+  /// Whether the items are mirrored left to right after they are laid out:
+  /// a list, wrap or grid under a right-to-left text direction whose items
+  /// run across (a horizontal list instead reverses, as Flutter's does, so
+  /// it scrolls from the right).
+  bool get mirrored => _mirrored;
+  bool _mirrored = false;
+  set mirrored(bool v) {
+    if (v == _mirrored) return;
+    _mirrored = v;
+    markNeedsLayout();
+  }
+
   @override
   void performLayout() {
     _overflows = layoutItems();
+    if (_mirrored) mirrorItems();
+  }
+
+  /// Mirrors every item's position across the box ([mirrored]).
+  void mirrorItems() {
+    for (final child in children) {
+      final pd = child.parentData! as CollectionParentData;
+      pd.offset = Offset(size.width - pd.offset.dx - child.size.width, pd.offset.dy);
+    }
   }
 
   final LayerHandle<ClipRectLayer> _clipLayer = LayerHandle();
@@ -332,6 +353,20 @@ class RenderListItems extends RenderCollection {
   void dispose() {
     _dropSlotNode();
     super.dispose();
+  }
+
+  @override
+  @override
+  void mirrorItems() {
+    super.mirrorItems();
+    for (var i = 0; i < _dividers.length; i++) {
+      final r = _dividers[i];
+      _dividers[i] = Rect.fromLTWH(size.width - r.right, r.top, r.width, r.height);
+    }
+    if (_slotNode?.box case final box? when box.hasSize) {
+      final pd = box.parentData! as CollectionParentData;
+      pd.offset = Offset(size.width - pd.offset.dx - box.size.width, pd.offset.dy);
+    }
   }
 
   @override
