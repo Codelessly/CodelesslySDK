@@ -93,6 +93,15 @@ abstract final class FontDemand {
   /// the first's empty glyph), so they are a family of their own.
   static String glyphFamily(String family) => '$family glyphs';
 
+  /// The fallback families of a style in [family] with its own [fallback]:
+  /// its glyph family first when [glyphFallback] (every text style built
+  /// from a document's, not only a text node's: a field's hint, a chart's
+  /// labels, a toast). Null when there are none.
+  static List<String>? fallbackOf(String? family, List<String> fallback) =>
+      glyphFallback && family != null && family.isNotEmpty
+          ? [glyphFamily(family), ...fallback]
+          : (fallback.isEmpty ? null : fallback);
+
   /// Completes once the fonts asked for so far have loaded (or failed):
   /// what something drawn once, as an SVG's text is, waits for. Installed
   /// by the app's font loader; at once without one.
@@ -116,9 +125,7 @@ TextStyle textStyle(api.TextStyle style, [api.TextStyle? inherited]) {
   }
   return kTextBase.merge(TextStyle(
     fontFamily: style.fontFamily,
-      fontFamilyFallback: FontDemand.glyphFallback && style.fontFamily != null
-          ? [FontDemand.glyphFamily(style.fontFamily!), ...style.fontFamilyFallback]
-          : style.fontFamilyFallback,
+      fontFamilyFallback: FontDemand.fallbackOf(style.fontFamily, style.fontFamilyFallback) ?? const <String>[],
     fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
     fontStyle: style.fontStyle == null ? null : FontStyle.values.byName(style.fontStyle!.name),
     fontSize: style.fontSize,
