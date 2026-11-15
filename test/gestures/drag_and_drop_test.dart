@@ -670,4 +670,54 @@ void main() {
       await tester.pumpAndSettle();
     });
   });
+
+  for (final edgeScroll in [true, false]) {
+    testWidgets('a drag held near a list\'s edge ${edgeScroll ? 'scrolls it' : 'leaves it (dragEdgeScroll: false)'}', (tester) async {
+      final s = await harness.show(
+        tester,
+        {
+          'col': {'type': 'column', 'children': ['card', 'tabs'], 'layout': {'width': 300, 'height': 300}},
+          'card': {
+            'type': 'text',
+            'layout': {'width': 300, 'height': 60},
+            'props': {'text': 'Drag me'},
+            'draggable': {'group': 'card', 'data': 'c1', 'start': 'press'},
+          },
+          // A strip of tabs, wider than the screen.
+          'tabs': {
+            'type': 'listView',
+            'children': ['tab'],
+            'layout': {'width': 300, 'height': 40},
+            'bind': {'data': r'${items}'},
+            'props': {'scrollDirection': 'horizontal', 'dragEdgeScroll': edgeScroll},
+          },
+          'tab': {'type': 'text', 'layout': {'width': 80, 'height': 40}, 'props': {'text': r'${item}'}},
+        },
+        variables: [harness.v('items', ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], VariableType.list)],
+      );
+      await tester.pumpAndSettle();
+      final g = await tester.startGesture(textRect(tester, 'Drag me').center);
+      await tester.pump(const Duration(milliseconds: 100));
+      await g.moveTo(const Offset(150, 40));
+      await tester.pump();
+      // Over the strip, 10 px from its right edge.
+      await g.moveTo(const Offset(290, 80));
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(DragAndDrop.of(s.tree).value['active'], isTrue);
+      double pixels() {
+        double p = 0;
+        void visit(RenderObject o) {
+          if (o is RenderViewportBase) p = (o.offset as ScrollPosition).pixels;
+          o.visitChildren(visit);
+        }
+        visit(s.tree.boxOf('tabs')!);
+        return p;
+      }
+      expect(pixels(), edgeScroll ? greaterThan(10) : 0);
+      await g.up();
+      await tester.pumpAndSettle();
+    });
+  }
 }
