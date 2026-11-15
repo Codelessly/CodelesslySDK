@@ -1,0 +1,180 @@
+page background:#FFFFFF font:Inter color:#14161A max-width:1200 align:center
+  header sticky:true height:72 background:#FFFFFF border-bottom:1px #E8EAEE shadow-on-scroll:subtle
+    logo "Northwind Studio" weight:700 link:/
+    nav gap:32
+      link "Work" href:/work
+      link "Services" href:/services
+      link "About" href:/about state:active underline:2px #2F5BEA
+      link "Journal" href:/journal
+      link "Contact" href:/contact
+    button "Start a project" style:primary size:md
+    menu-button icon:hamburger visible-below:768 action:open-drawer
+
+  hero padding-y:120 align:center background:gradient(#F5F8FF,#FFFFFF)
+    eyebrow "ABOUT US" size:13 letter-spacing:0.12em color:#2F5BEA
+    heading "We design tools people love to use" level:1 size:64 weight:800 max-width:820
+      motion enter:fade-up duration:700ms
+    text "A independent product design and engineering studio helping teams ship software that feels effortless." size:20 color:#5B6270 max-width:620
+      motion enter:fade-up delay:150ms
+    scroll-cue icon:chevron-down motion:bounce loop:true interval:2s action:scroll-to #stats
+
+  stats id:stats layout:row columns:4 gap:24 padding-y:64 divider:vertical between-items
+    motion trigger:in-view count-up duration:1400ms easing:ease-out once:true
+    stat
+      value "2014" size:48 weight:800 count-up:false
+      label "Founded"
+    stat
+      value "42" size:48 weight:800 count-from:0
+      label "People"
+    stat
+      value "9" size:48 weight:800 count-from:0
+      label "Countries"
+    stat
+      value "300+" size:48 weight:800 count-from:0
+      label "Projects shipped"
+    responsive below:640 columns:2
+
+  story layout:two-column gap:64 align-items:center padding-y:96
+    column width:50%
+      eyebrow "OUR STORY"
+      heading "Started in a spare room, grown by curiosity" level:2 size:36
+      text "Northwind began in 2014 when two designers and an engineer decided that good software shouldn't feel like work. We started with three clients and a shared desk in Gothenburg."
+      text "Today we're a team of 42 across 9 countries, working with startups and established companies to design, build and refine products used by millions. We still start every project the same way: by listening."
+      link "Read our full story" href:/story icon:arrow-right hover:arrow-shifts-right-4px
+    column width:50%
+      image "Northwind Studio office in Gothenburg with team working at long wooden desks" src:office.jpg radius:16 aspect-ratio:4/3 fit:cover shadow:medium
+        motion enter:fade-in-scale from:0.97 trigger:in-view duration:600ms
+        caption "Our Gothenburg studio, 2024" size:13 color:#7A8190
+    responsive below:900 stack:vertical image-order:first
+
+  team padding-y:96 background:#F7F8FA
+    header align:center margin-bottom:56
+      eyebrow "THE TEAM"
+      heading "The people behind the work" level:2 size:36
+      text "Designers, engineers and strategists who care about the details." color:#5B6270
+    grid columns:4 gap:32 responsive:{below:1024 columns:3, below:768 columns:2, below:480 columns:1}
+      motion enter:fade-up stagger:80ms trigger:in-view
+      person-card align:center padding:24 background:#FFFFFF radius:16
+        hover lift:4px shadow:medium transition:200ms
+        photo shape:circle size:120 fit:cover alt:"Portrait of Ava Lindqvist" src:ava.jpg
+          hover scale:1.04
+        name "Ava Lindqvist" weight:600 size:18
+        role "CEO" color:#5B6270
+        social-links gap:12 margin-top:12
+          icon-button icon:linkedin label:"Ava Lindqvist on LinkedIn" href:# target:new-tab hover-color:#0A66C2
+          icon-button icon:twitter label:"Ava Lindqvist on Twitter" href:# target:new-tab hover-color:#1D9BF0
+      person-card
+        photo shape:circle size:120 alt:"Portrait of Marcus Bell" src:marcus.jpg
+        name "Marcus Bell"
+        role "CTO"
+        social-links
+          icon-button icon:linkedin href:#
+          icon-button icon:twitter href:#
+      person-card
+        photo shape:circle size:120 alt:"Portrait of Priya Raman" src:priya.jpg
+        name "Priya Raman"
+        role "Head of Design"
+        social-links
+          icon-button icon:linkedin href:#
+          icon-button icon:twitter href:#
+      person-card
+        photo shape:circle size:120 alt:"Portrait of Tomás Herrera" src:tomas.jpg
+        name "Tomás Herrera"
+        role "Engineering Lead"
+        social-links
+          icon-button icon:linkedin href:#
+          icon-button icon:twitter href:#
+      person-card
+        photo shape:circle size:120 alt:"Portrait of Hana Okafor" src:hana.jpg
+        name "Hana Okafor"
+        role "Product Manager"
+        social-links
+          icon-button icon:linkedin href:#
+          icon-button icon:twitter href:#
+      person-card
+        photo shape:circle size:120 alt:"Portrait of Jonas Weber" src:jonas.jpg
+        name "Jonas Weber"
+        role "Senior Product Designer"
+        social-links
+          icon-button icon:linkedin href:#
+          icon-button icon:twitter href:#
+      person-card
+        photo shape:circle size:120 alt:"Portrait of Mei Tanaka" src:mei.jpg
+        name "Mei Tanaka"
+        role "Head of Operations"
+        social-links
+          icon-button icon:linkedin href:#
+          icon-button icon:twitter href:#
+      person-card
+        photo shape:circle size:120 alt:"Portrait of Sam Carter" src:sam.jpg
+        name "Sam Carter"
+        role "Brand Strategist"
+        social-links
+          icon-button icon:linkedin href:#
+          icon-button icon:twitter href:#
+
+  values padding-y:96
+    header align:center margin-bottom:56
+      eyebrow "WHAT WE BELIEVE"
+      heading "Our values" level:2 size:36
+    grid columns:4 gap:24 responsive:{below:1024 columns:2, below:600 columns:1}
+      motion enter:fade-up stagger:100ms trigger:in-view
+      value-card padding:28 border:1px #E8EAEE radius:16
+        hover border-color:#2F5BEA transition:200ms
+        icon name:users size:32 color:#2F5BEA
+        title "People first" weight:600 size:20
+        text "Great products come from people who feel trusted, heard and supported."
+      value-card
+        icon name:sparkles size:32 color:#2F5BEA
+        title "Craft in the details" weight:600 size:20
+        text "We sweat the small things because users feel them, even when they can't name them."
+      value-card
+        icon name:message-circle size:32 color:#2F5BEA
+        title "Radical honesty" weight:600 size:20
+        text "We give clear feedback early, kindly and often, to clients and to each other."
+      value-card
+        icon name:compass size:32 color:#2F5BEA
+        title "Always curious" weight:600 size:20
+        text "We keep learning, questioning defaults and exploring better ways to solve problems."
+
+  hiring-banner margin:0 24 padding:64 radius:24 background:#14161A color:#FFFFFF layout:row justify:space-between align-items:center
+    motion enter:fade-up trigger:in-view
+    content
+      badge "5 open roles" background:#2F5BEA color:#FFFFFF radius:999
+      heading "We're hiring" level:2 size:36
+      text "Join a friendly, remote-first team building thoughtful products. We'd love to meet you." color:#C5CAD3
+    button "See open roles" style:primary-inverted size:lg icon-right:arrow-right href:/careers
+      hover background:#EAF0FF icon-shift:4px
+      focus outline:2px #FFFFFF offset:3
+      pressed scale:0.98
+    responsive below:768 layout:column align:start gap:24
+
+  footer background:#0E1013 color:#9AA1AE padding-top:64 padding-bottom:32 margin-top:96
+    columns layout:row gap:48 responsive:{below:768 stack:vertical}
+      column width:30%
+        logo "Northwind Studio" color:#FFFFFF
+        text "Designing tools people love to use since 2014."
+        social-links gap:12
+          icon-button icon:linkedin label:"LinkedIn" href:#
+          icon-button icon:twitter label:"Twitter" href:#
+          icon-button icon:dribbble label:"Dribbble" href:#
+      column
+        title "Studio" color:#FFFFFF
+        link "About" href:/about
+        link "Work" href:/work
+        link "Careers" href:/careers
+      column
+        title "Services" color:#FFFFFF
+        link "Product design" href:/services/design
+        link "Engineering" href:/services/engineering
+        link "Research" href:/services/research
+      column
+        title "Get in touch" color:#FFFFFF
+        link "hello@northwind.studio" href:mailto:hello@northwind.studio
+        text "Kungsgatan 12, Gothenburg"
+    divider color:#23272E margin-y:32
+    row justify:space-between size:13
+      text "© 2025 Northwind Studio. All rights reserved."
+      links gap:20
+        link "Privacy" href:/privacy
+        link "Terms" href:/terms

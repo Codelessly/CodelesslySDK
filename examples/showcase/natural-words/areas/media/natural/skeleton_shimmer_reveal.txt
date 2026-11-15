@@ -1,0 +1,41 @@
+Screen "News Feed" initial-state:loading
+  AppBar "Top Stories"
+  State name:loading show-when:fetching timeout:10s on-timeout:error-retry
+    List gap:12 padding:16 accessibility-label:"Loading articles" busy:true
+      SkeletonCard repeat:3
+        Row gap:12
+          Placeholder role:thumbnail w:96 h:96 radius:8 fill:grey-200 shimmer:true
+          Column gap:8 flex:1
+            Placeholder role:headline w:90% h:18 radius:4 fill:grey-200 shimmer:true
+            Placeholder role:text-line w:100% h:12 radius:4 fill:grey-200 shimmer:true
+            Placeholder role:text-line w:65% h:12 radius:4 fill:grey-200 shimmer:true
+    Animation name:shimmer target:all-placeholders sync:true
+      gradient:grey-200 > grey-100 > grey-200 angle:20deg
+      direction:left-to-right duration:1.2s easing:linear repeat:infinite
+  Transition from:loading to:loaded trigger:data-received
+    Skeleton exit:fade-out duration:200ms
+    Articles enter:fade-in+slide-up distance:8 duration:300ms easing:ease-out stagger:80ms
+    Min-skeleton-display:400ms to-avoid-flicker
+  State name:loaded
+    List gap:12 padding:16
+      ArticleCard on-tap:open-article
+        Row gap:12
+          Image role:thumbnail w:96 h:96 radius:8 fit:cover alt:"Federal Reserve building" fade-in:150ms
+          Column gap:4 flex:1
+            Text role:source "Reuters" style:caption color:grey-600
+            Text role:headline "Fed holds rates steady" style:title weight:bold max-lines:2
+            Text role:meta "2h ago" style:caption color:grey-500
+      ArticleCard on-tap:open-article
+        Row gap:12
+          Image role:thumbnail w:96 h:96 radius:8 fit:cover alt:"Mars rover on red terrain" fade-in:150ms
+          Column gap:4 flex:1
+            Text role:source "Space News" style:caption color:grey-600
+            Text role:headline "Mars rover finds clay deposits" style:title weight:bold max-lines:2
+            Text role:meta "4h ago" style:caption color:grey-500
+      ArticleCard on-tap:open-article
+        Row gap:12
+          Image role:thumbnail w:96 h:96 radius:8 fit:cover alt:"Cyclists in a new bike lane" fade-in:150ms
+          Column gap:4 flex:1
+            Text role:source "City Herald" style:caption color:grey-600
+            Text role:headline "City opens new bike lanes" style:title weight:bold max-lines:2
+            Text role:meta "6h ago" style:caption color:grey-500

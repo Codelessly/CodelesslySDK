@@ -1,0 +1,92 @@
+Column scroll maxw:1280
+  Row between pad:[24,12,24,12] gap:16 fill:#FFFFFFFF
+    Text.heading1 "Stride"
+    Input "Search" "Search running shoes, brands..." grow
+    Row gap:8
+      IconButton "person" -> emit account
+      IconButton "shopping_cart" -> emit cart
+      Badge.primary "3"
+  Divider
+  Column gap:16 pad:24
+    Row gap:8
+      Text.caption "Home" -> emit nav home
+      Text.caption "/"
+      Text.caption "Men" -> emit nav men
+      Text.caption "/"
+      Text.strong "Running Shoes" size:12
+    Text.pageTitle "Running Shoes"
+    Row gap:24 top
+      Card w:260 gap:16
+        Text.panelTitle "Filters"
+        Divider
+        Text.sectionTitle "Brand"
+        Checkbox "Nike" =nike
+        Checkbox "Adidas" =adidas
+        Checkbox "Hoka" =hoka
+        Checkbox "Asics" =asics
+        Divider
+        Text.sectionTitle "Price"
+        Slider =maxPrice min:50 max:250
+        Row between
+          Text.caption "$50"
+          Text.strong "Up to ${maxPrice}"
+          Text.caption "$250"
+        Divider
+        Text.sectionTitle "Size"
+        Grid cols:3 gap:8
+          ChoiceChip "7" selected:=size==7 -> size=7
+          ChoiceChip "8" selected:=size==8 -> size=8
+          ChoiceChip "9" selected:=size==9 -> size=9
+          ChoiceChip "10" selected:=size==10 -> size=10
+          ChoiceChip "11" selected:=size==11 -> size=11
+          ChoiceChip "12" selected:=size==12 -> size=12
+        Divider
+        Text.sectionTitle "Color"
+        Row gap:10
+          Box w:28 h:28 radius:14 fill:#FF111111 border:=color=="black"?"#FF1565C0":"#FFDDDDDD" -> color="black"
+          Box w:28 h:28 radius:14 fill:#FFFFFFFF border:=color=="white"?"#FF1565C0":"#FFDDDDDD" -> color="white"
+          Box w:28 h:28 radius:14 fill:#FFD32F2F border:=color=="red"?"#FF1565C0":"#FFDDDDDD" -> color="red"
+          Box w:28 h:28 radius:14 fill:#FF1976D2 border:=color=="blue"?"#FF1565C0":"#FFDDDDDD" -> color="blue"
+          Box w:28 h:28 radius:14 fill:#FF43A047 border:=color=="green"?"#FF1565C0":"#FFDDDDDD" -> color="green"
+        Button.outline "Clear all" -> nike=false; adidas=false; hoka=false; asics=false; maxPrice=250; size=0; color=""
+      Column grow gap:16
+        Row between middle
+          Text.heading3 "128 results"
+          Row gap:8 middle
+            Text.bodySecondary "Sort by:"
+            Select =sort items:["Popular","Price: Low to High","Price: High to Low","Newest","Top Rated"]
+        Grid cols:4 gap:16
+          each p in products
+            Card gap:8
+              Stack
+                Image "{p.img}" h:160 w:fill radius:8
+                Badge.error "Sale" visible:=p.old>0
+              Text.caption "{p.brand}"
+              Text.strong "{p.name}"
+              Row gap:2 middle
+                each i in range(5)
+                  Icon "star" size:16 color:=i<floor(p.rating)?"#FFF5A623":"#FFDDDDDD"
+                Text.caption " {p.rating} ({p.reviews})"
+              Row gap:8 middle
+                Text.heading3 "${p.price}"
+                Text.muted "${p.old}" strike visible:=p.old>0
+              Button.outline "Add to cart" -> emit add p.id; toast "Added to cart"
+        Row center gap:8 middle
+          IconButton "chevron_left" -> page=max(1,page-1)
+          ChoiceChip "1" selected:=page==1 -> page=1
+          ChoiceChip "2" selected:=page==2 -> page=2
+          ChoiceChip "3" selected:=page==3 -> page=3
+          Text.muted "…"
+          ChoiceChip "16" selected:=page==16 -> page=16
+          IconButton "chevron_right" -> page=min(16,page+1)
+
+state nike=false
+state adidas=false
+state hoka=false
+state asics=false
+state maxPrice=180
+state size=9
+state color="black"
+state sort="Popular"
+state page=1
+state products=[{"id":1,"brand":"Nike","name":"Air Zoom Pegasus 40","price":120,"old":0,"rating":4.5,"reviews":312,"img":"https://picsum.photos/seed/stride1/400/400"},{"id":2,"brand":"Adidas","name":"Ultraboost Light","price":139,"old":180,"rating":4.7,"reviews":528,"img":"https://picsum.photos/seed/stride2/400/400"},{"id":3,"brand":"Hoka","name":"Clifton 9","price":145,"old":0,"rating":4.8,"reviews":764,"img":"https://picsum.photos/seed/stride3/400/400"},{"id":4,"brand":"Asics","name":"Gel-Kayano 30","price":160,"old":0,"rating":4.4,"reviews":201,"img":"https://picsum.photos/seed/stride4/400/400"},{"id":5,"brand":"Nike","name":"Invincible Run 3","price":99,"old":180,"rating":4.6,"reviews":417,"img":"https://picsum.photos/seed/stride5/400/400"},{"id":6,"brand":"Adidas","name":"Adizero Boston 12","price":110,"old":150,"rating":4.3,"reviews":156,"img":"https://picsum.photos/seed/stride6/400/400"},{"id":7,"brand":"Hoka","name":"Mach 5","price":135,"old":0,"rating":4.5,"reviews":289,"img":"https://picsum.photos/seed/stride7/400/400"},{"id":8,"brand":"Asics","name":"Novablast 4","price":85,"old":130,"rating":4.7,"reviews":390,"img":"https://picsum.photos/seed/stride8/400/400"}]

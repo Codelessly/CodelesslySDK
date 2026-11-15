@@ -1,0 +1,33 @@
+Screen "Checkout" background:#F7F8FA padding:24 layout:column gap:20 maxWidth:420 align:center
+  Header layout:row align:center justify:space-between
+    IconButton icon:arrow-left label:"Back" action:navigate-back
+    Text "Checkout" style:title weight:600
+    Spacer width:24
+  Card padding:20 radius:16 background:#FFFFFF shadow:soft layout:column gap:16
+    Row layout:row justify:space-between align:center
+      Column gap:4
+        Text "Pro plan" style:heading weight:600
+        Text "Billed monthly" style:caption color:#6B7280
+      Text "$12/month" style:heading weight:600
+    Divider color:#E5E7EB
+    Row id:serviceFeeRow layout:row justify:space-between align:center
+      Row layout:row align:center gap:6
+        Text "Service fee" style:body color:#374151
+        IconButton id:feeInfo icon:info size:16 color:#6B7280 label:"More info about service fee" hitArea:44 focusable:true
+          state hover color:#2563EB
+          state focus outline:2 color:#2563EB
+          state pressed color:#1D4ED8
+          Tooltip id:feeTooltip text:"Covers payment processing and support" placement:top align:center maxWidth:220 padding:8 radius:8 background:#111827 color:#FFFFFF fontSize:13 arrow:true role:tooltip
+            visible:false
+            show on:hover|focus|tap delay:150 animation:fade-in duration:150 ease:ease-out
+            hide on:mouseleave|blur|tap-outside|tap-icon delay:100 animation:fade-out duration:100
+            autoHide after:4000 on:touch
+      Text "$1.50" style:body color:#374151
+    Divider color:#E5E7EB
+    Row layout:row justify:space-between align:center
+      Text "Total today" style:body weight:600
+      Text "$13.50" style:heading weight:700
+  Button "Subscribe" style:primary fullWidth:true height:48 radius:12 background:#2563EB color:#FFFFFF action:submit-subscription
+    state pressed background:#1D4ED8
+    state loading spinner:true label:"Processing…" disabled:true
+  Text "Cancel anytime. Renews automatically each month." style:caption color:#6B7280 align:center

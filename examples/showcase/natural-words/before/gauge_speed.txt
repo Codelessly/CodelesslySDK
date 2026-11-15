@@ -1,0 +1,17 @@
+Column gap:12
+  Card gap:12
+    Row between middle
+      Text.title "Speed"
+      Badge.success "Under limit"
+    Row center gap:6 bottom
+      Text "72" size:56 weight:700
+      Text.muted "km/h"
+    Row h:14 gap:0
+      Box grow:72 fill:#FF1E88E5 radius:4
+      Box grow:28 fill:#FFE0E0E0
+      Box w:3 fill:#FFD32F2F
+      Box grow:80 fill:#FFE0E0E0 radius:4
+    Row between
+      Text.caption "0"
+      Text.caption "Limit 100"
+      Text.caption "180"

@@ -1,0 +1,28 @@
+ProfileCard width:360 radius:20 background:white shadow:soft clip:true
+  Hero height:120 background:gradient(linear, angle:135deg, #7C3AED → #EC4899)
+    Avatar image:"sofia-ramirez.jpg" alt:"Sofia Ramirez" shape:circle size:96 border:"4px white" align:center-bottom offset-y:48 z:2 overlap:hero-bottom
+  Body padding:"64 24 24" align:center gap:16
+    Identity gap:4
+      Name "Sofia Ramirez" size:22 weight:bold color:#111827
+      Title "Product Designer at Figment" size:15 color:#6B7280
+      Location "Austin, TX" icon:map-pin size:13 color:#9CA3AF
+    Divider color:#F3F4F6
+    Stats direction:row distribute:equal width:fill
+      Stat align:center
+        Value "128" size:18 weight:bold color:#111827
+        Label "Posts" size:12 color:#6B7280
+      Stat align:center
+        Value "4.2k" size:18 weight:bold color:#111827
+        Label "Followers" size:12 color:#6B7280
+      Stat align:center
+        Value "312" size:18 weight:bold color:#111827
+        Label "Following" size:12 color:#6B7280
+    Actions direction:row gap:12 width:fill
+      Button "Follow" variant:primary background:gradient(linear, angle:135deg, #7C3AED → #EC4899) color:white radius:12 height:44 grow:1 weight:semibold
+        state hover brightness:1.08 lift:1
+        state pressed scale:0.97
+        state active label:"Following" variant:secondary background:#F3F4F6 color:#111827
+        on tap toggle:active transition:"background 200ms ease"
+      Button "Message" variant:outline border:"1.5 #7C3AED" color:#7C3AED background:transparent radius:12 height:44 grow:1 weight:semibold
+        state hover background:#F5F3FF
+        state pressed scale:0.97

@@ -1,0 +1,52 @@
+Card gap:16 pad:16
+  Row between
+    Column gap:2
+      Text.title "October vs November 2026"
+      Text.muted "Online store performance"
+    Badge.neutral "Month over month"
+  Divider
+  Column gap:6
+    Row between
+      Text.strong "Revenue"
+      Badge.success "+28.5%"
+    Row between
+      Text.muted "Oct $92,400"
+      Text.strong "Nov $118,750"
+    BarChart values:[92400,118750] labels:["Oct","Nov"] h:100
+  Divider
+  Column gap:6
+    Row between
+      Text.strong "Orders"
+      Badge.success "+24.5%"
+    Row between
+      Text.muted "Oct 1,820"
+      Text.strong "Nov 2,265"
+    BarChart values:[1820,2265] labels:["Oct","Nov"] h:100
+  Divider
+  Column gap:6
+    Row between
+      Text.strong "Avg order value"
+      Badge.success "+3.3%"
+    Row between
+      Text.muted "Oct $50.77"
+      Text.strong "Nov $52.43"
+    BarChart values:[50.77,52.43] labels:["Oct","Nov"] h:100
+  Divider
+  Column gap:6
+    Row between
+      Text.strong "Return rate"
+      Badge.success "-0.7 pts"
+    Row between
+      Text.muted "Oct 6.1%"
+      Text.strong "Nov 5.4%"
+    BarChart values:[6.1,5.4] labels:["Oct","Nov"] h:100
+  Divider
+  Column gap:6
+    Row between
+      Text.strong "New customers"
+      Badge.success "+26.9%"
+    Row between
+      Text.muted "Oct 640"
+      Text.strong "Nov 812"
+    BarChart values:[640,812] labels:["Oct","Nov"] h:100
+  Text.caption "Green badges mean an improvement. A lower return rate is better."

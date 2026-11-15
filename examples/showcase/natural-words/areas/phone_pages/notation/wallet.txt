@@ -1,0 +1,62 @@
+Column h:fill
+  Column scroll grow gap:20 pad:16
+    Row between center
+      Text.pageTitle "Wallet"
+      IconButton "qr_code_scanner" -> emit scan
+    Column gap:8
+      Pages =page h:170 peek:0.88
+        each c in cards
+          Box fill:=c.fill radius:16 pad:16 gap:6 w:fill
+            Row between
+              Text "{c.name}" color:#FFFFFFFF weight:700
+              Icon "contactless" color:#FFFFFFFF
+            Text "•••• {c.last}" color:#CCFFFFFF
+            Spacer grow
+            Text "Balance" color:#B3FFFFFF size:12
+            Text "{c.balance}" color:#FFFFFFFF size:28 weight:700
+      Row center
+        Dots =page count:3
+    Row between
+      Column center gap:4
+        IconButton "send" -> emit send
+        Text.caption "Send"
+      Column center gap:4
+        IconButton "request_page" -> emit request
+        Text.caption "Request"
+      Column center gap:4
+        IconButton "add_card" -> emit topup
+        Text.caption "Top up"
+      Column center gap:4
+        IconButton "receipt_long" -> emit paybills
+        Text.caption "Pay bills"
+    Column gap:8
+      Row between center
+        Text.sectionTitle "Recent activity"
+        Button.ghost "See all" -> emit seeAll
+      each tx in activity
+        Row gap:12 center pad:[0,6,0,6]
+          Box fill:#FFEEF1F6 radius:20 w:40 h:40 center middle
+            Icon "{tx.icon}"
+          Column grow
+            Text.strong "{tx.name}"
+            Text.caption "{tx.date}"
+          Text.strong "{tx.text}" color:=tx.amt>0?"#FF2E7D32":"#FFC62828"
+  Divider
+  Row between pad:[16,8,16,8]
+    Column center gap:2
+      IconButton "account_balance_wallet" -> tab="wallet"
+      Text.caption "Wallet"
+    Column center gap:2
+      IconButton "swap_horiz" -> tab="transfers"
+      Text.caption "Transfers"
+    Column center gap:2
+      IconButton "bar_chart" -> tab="insights"
+      Text.caption "Insights"
+    Column center gap:2
+      IconButton "person" -> tab="profile"
+      Text.caption "Profile"
+
+state page=0
+state tab="wallet"
+state cards=[{"name":"Chase Sapphire","last":"8812","balance":"$2,480.15","fill":"#FF1A3A6B"},{"name":"Apple Card","last":"1290","balance":"$912.40","fill":"#FF3A3A3C"},{"name":"Amex Gold","last":"3005","balance":"$1,325.00","fill":"#FFB8860B"}]
+state activity=[{"name":"Starbucks","date":"Today, 8:42 AM","amt":-6.45,"text":"-$6.45","icon":"local_cafe"},{"name":"Salary","date":"Yesterday","amt":4250,"text":"+$4,250.00","icon":"payments"},{"name":"Uber","date":"Mar 12","amt":-18.2,"text":"-$18.20","icon":"directions_car"},{"name":"Netflix","date":"Mar 10","amt":-15.49,"text":"-$15.49","icon":"movie"},{"name":"Venmo from Alex","date":"Mar 9","amt":40,"text":"+$40.00","icon":"swap_horiz"}]

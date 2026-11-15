@@ -1,0 +1,1 @@
+Design a full phone screen at 390 px wide for a community garden volunteer's watering round. Show the date, a progress summary for three beds, the current bed's water amount and note, the next two beds, and controls to mark the current bed done or skip it. Include a visible completed count that updates when marked done.

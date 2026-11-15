@@ -1,0 +1,62 @@
+Screen "Book a ride" background:#FFFFFF
+  MapView height:50% anchor:top
+    Route from:pickup to:dropoff style:polyline color:#111 width:4 animate:draw-in duration:700ms
+    Pin id:pickup label:"221 Market St" kind:pickup color:#111 shape:circle
+      motion: drop-in from:above bounce delay:200ms
+    Pin id:dropoff label:"SFO Terminal 2" kind:dropoff color:#111 shape:square
+      motion: drop-in from:above bounce delay:400ms
+    Camera fit:route padding:48 animate:ease-out duration:600ms
+    IconButton icon:back position:top-left elevation:2 shape:circle
+    IconButton icon:locate position:bottom-right elevation:2 shape:circle
+      action: recenter-on-pickup
+  BottomSheet height:50% radius-top:24 elevation:8 draggable:true
+    snap-points: 50% 85%
+    on-drag: map camera re-fits to visible area
+    Handle width:40 height:4 color:#D0D0D0 align:center
+    Text "Choose a ride" style:title
+    List id:rides gap:8 selection:single default:uberx
+      RideOption id:uberx selected:true
+        highlight: border 2 #111, background:#F2F2F2
+        Icon car size:sm
+        Column
+          Text "UberX" style:bold
+          Row
+            Icon seat
+            Text "4"
+            Text "4 min away" color:#555
+        Text "$38.20" style:bold align:right
+      RideOption id:comfort selected:false
+        Icon car size:sm
+        Column
+          Text "Comfort" style:bold
+          Row
+            Icon seat
+            Text "4"
+            Text "6 min away" color:#555
+        Text "$46.75" style:bold align:right
+      RideOption id:xl selected:false
+        Icon car-large size:sm
+        Column
+          Text "XL" style:bold
+          Row
+            Icon seat
+            Text "6"
+            Text "8 min away" color:#555
+        Text "$61.10" style:bold align:right
+      on-select: highlight moves to tapped row, spring animation duration:200ms
+      on-select: button label updates to "Confirm {name}" with crossfade
+      on-select: haptic light
+      ETA text refreshes every 30s with fade
+    Divider
+    Row id:payment tappable:true height:56
+      Icon visa
+      Text "Visa •••• 4242" grow:1
+      Icon chevron-right
+      action: open payment-methods
+    Button id:confirm text:"Confirm UberX" style:primary size:large width:fill height:56 radius:12 background:#111 color:#FFF
+      state pressed: scale:0.98
+      state loading: text "Finding your driver…" spinner:left disabled:true
+      state error: text "Try again" background:#C62828 shake:true
+      action: request-ride
+      on-success: navigate to "Driver arriving"
+    SafeArea bottom:true

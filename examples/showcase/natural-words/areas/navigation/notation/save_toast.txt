@@ -1,0 +1,17 @@
+state name="Jordan Lee"
+state email=""
+state bio=""
+state left=0
+
+every 1s when left>0 -> left=left-1
+
+Column h:fill pad:16 gap:16
+  Text.pageTitle "Edit profile"
+  Input "Name" =name
+  Input "Email" "you@example.com" =email type:email
+  Input "Bio" "Tell us about yourself" =bio multiline
+  Button "Save" -> emit save; left=3
+  Spacer grow
+  if left>0
+    Box fill:#FF323232 radius:8 pad:12 animate:slide-up
+      Text "Profile saved" color:#FFFFFFFF center

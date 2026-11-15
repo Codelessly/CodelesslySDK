@@ -1,0 +1,34 @@
+Wizard "Account setup" state:step=1 total:3
+  Header
+    Text "Set up your account" style:title
+    Text "{step} of {total}" role:step-indicator align:right
+    ProgressBar value:{step}/{total} animate:width 250ms ease-out
+  Content transition:slide-left when:forward, slide-right when:back duration:250ms
+    Step id:1 visible-when:step==1
+      Text "Your details" style:heading
+      TextField label:"Name" bind:name required autofocus
+      TextField label:"Email" bind:email type:email required validate:email-format error:"Enter a valid email" validate-on:blur
+    Step id:2 visible-when:step==2
+      Text "What are you into?" style:heading
+      Text "Pick as many as you like" style:caption
+      ChipGroup bind:interests selection:multiple
+        Chip "Travel" icon:plane
+        Chip "Food" icon:utensils
+        Chip "Music" icon:music
+        Chip "Sports" icon:ball
+        # selected chip: filled accent, checkmark, scale 1.05 over 120ms
+    Step id:3 visible-when:step==3
+      Text "Review your details" style:heading
+      SummaryList
+        Row label:"Name" value:{name} action:"Edit" goto:1
+        Row label:"Email" value:{email} action:"Edit" goto:1
+        Row label:"Interests" value:{interests joined by ", "} empty:"None selected" action:"Edit" goto:2
+  Footer layout:row justify:space-between
+    Button "Back" style:secondary visible-when:step>1 action:step-=1
+    Button "Next" style:primary action:step+=1 enabled-when:step-valid
+      text-when:step==3 "Finish"
+      action-when:step==3 submit
+      enabled-when:step==1 name and email valid
+      enabled-when:step==2 always
+      on:submit state:loading show:spinner disable:true
+      on:success goto:confirmation

@@ -1,0 +1,46 @@
+Card "Key Metrics" padding:20 radius:12 elevation:1 background:surface width:fill
+  Header layout:row align:center justify:space-between margin-bottom:16
+    Column gap:2
+      Text "Key Metrics" style:title weight:600
+      Text "Last 30 days vs. previous period" style:caption color:muted
+    Dropdown value:"Last 30 days" size:small options:"Last 7 days, Last 30 days, Last 90 days, Year to date"
+  Grid columns:3 columns-tablet:2 columns-mobile:1 gap:12
+    Tile "MRR" layout:column gap:8 padding:16 radius:8 border:1 border-color:divider
+      Text "MRR" style:label color:muted
+      Text "$284,500" style:metric size:28 weight:700
+      Row align:center justify:space-between
+        Delta "+6.2%" direction:up color:positive icon:arrow-up weight:600
+        Sparkline trend:up color:positive width:80 height:24 points:"12,14,13,16,18,17,20,22,21,24" stroke:2 fill:none
+    Tile "Active users" layout:column gap:8 padding:16 radius:8 border:1 border-color:divider
+      Text "Active users" style:label color:muted
+      Text "18,420" style:metric size:28 weight:700
+      Row align:center justify:space-between
+        Delta "+3.1%" direction:up color:positive icon:arrow-up weight:600
+        Sparkline trend:up color:positive width:80 height:24 points:"15,15,16,17,16,18,18,19,20,20" stroke:2 fill:none
+    Tile "Churn rate" layout:column gap:8 padding:16 radius:8 border:1 border-color:divider
+      Text "Churn rate" style:label color:muted
+      Text "2.4%" style:metric size:28 weight:700
+      Row align:center justify:space-between
+        Delta "-0.3 pts" direction:down color:positive icon:arrow-down weight:600 note:"Lower is better"
+        Sparkline trend:down color:positive width:80 height:24 points:"3.1,3.0,2.9,2.9,2.7,2.7,2.6,2.5,2.5,2.4" stroke:2 fill:none
+    Tile "ARPU" layout:column gap:8 padding:16 radius:8 border:1 border-color:divider
+      Text "ARPU" style:label color:muted
+      Text "$15.44" style:metric size:28 weight:700
+      Row align:center justify:space-between
+        Delta "+2.9%" direction:up color:positive icon:arrow-up weight:600
+        Sparkline trend:up color:positive width:80 height:24 points:"14.8,14.9,14.9,15.0,15.1,15.1,15.2,15.3,15.4,15.44" stroke:2 fill:none
+    Tile "Trial conversion" layout:column gap:8 padding:16 radius:8 border:1 border-color:divider
+      Text "Trial conversion" style:label color:muted
+      Text "18.7%" style:metric size:28 weight:700
+      Row align:center justify:space-between
+        Delta "-1.2 pts" direction:down color:negative icon:arrow-down weight:600
+        Sparkline trend:down color:negative width:80 height:24 points:"20.4,20.1,19.9,20.0,19.6,19.4,19.2,19.0,18.9,18.7" stroke:2 fill:none
+    Tile "NPS" layout:column gap:8 padding:16 radius:8 border:1 border-color:divider
+      Text "NPS" style:label color:muted
+      Text "46" style:metric size:28 weight:700
+      Row align:center justify:space-between
+        Delta "+4" direction:up color:positive icon:arrow-up weight:600
+        Sparkline trend:up color:positive width:80 height:24 points:"40,41,41,42,43,43,44,45,45,46" stroke:2 fill:none
+  Footer margin-top:12 layout:row gap:16 align:center
+    Legend color:positive text:"Favorable"
+    Legend color:negative text:"Unfavorable"

@@ -1,0 +1,94 @@
+Screen "Smart Home Dashboard" background:#0F1115 padding:16 scroll:vertical
+  Header layout:row align:space-between align-items:center
+    Column
+      Text "Good evening, Sam" style:title size:24 weight:bold color:#FFFFFF
+      Text "Tuesday, 7:42 PM" style:caption color:#8A8F9C
+    Row gap:8 align-items:center padding:8 radius:16 background:#1B1F27
+      Icon "cloud-moon" color:#9CC7FF size:20
+      Text "18°C" weight:semibold color:#FFFFFF
+      Text "Clear" style:caption color:#8A8F9C
+
+  Tabs id:rooms selected:"Living Room" style:pill margin-top:16 scroll:horizontal
+    Tab "Living Room" active:true
+    Tab "Kitchen"
+    Tab "Bedroom"
+    Tab "Garage"
+    indicator animate:slide duration:250ms easing:ease-out
+
+  Section "Devices" margin-top:20
+    Text "Living Room · 6 devices" style:subtitle color:#8A8F9C
+    Grid columns:2 gap:12 margin-top:8
+
+      Tile id:ceiling-light state:on background:#2A2412 radius:20 padding:14 tappable:true
+        Row align:space-between
+          Icon "lightbulb" color:#FFC83D size:28
+          Switch value:on accent:#FFC83D
+        Text "Ceiling Light" weight:semibold color:#FFFFFF
+        Text "On · 80%" style:caption color:#FFC83D
+        Slider value:80 min:0 max:100 accent:#FFC83D label:"Brightness" on-change:set-brightness
+
+      Tile id:smart-tv state:off background:#1B1F27 radius:20 padding:14 tappable:true
+        Row align:space-between
+          Icon "tv" color:#6B7080 size:28
+          Switch value:off
+        Text "Smart TV" weight:semibold color:#FFFFFF
+        Text "Off" style:caption color:#8A8F9C
+
+      Tile id:air-purifier state:on background:#122421 radius:20 padding:14 tappable:true
+        Row align:space-between
+          Icon "wind" color:#4FD1B0 size:28 animate:spin duration:3s repeat:infinite
+          Switch value:on accent:#4FD1B0
+        Text "Air Purifier" weight:semibold color:#FFFFFF
+        Text "On · Auto" style:caption color:#4FD1B0
+
+      Tile id:thermostat state:heating background:#2A1A16 radius:20 padding:14 tappable:true
+        Row align:space-between
+          Icon "thermometer" color:#FF8A5B size:28
+          Text "Heat" style:badge color:#FF8A5B
+        Text "Thermostat" weight:semibold color:#FFFFFF
+        Row align-items:center gap:12
+          Button "−" style:round size:32 action:temp-down
+          Text "21.5°C" size:22 weight:bold color:#FFFFFF
+          Button "+" style:round size:32 action:temp-up
+        Text "Currently 20.1°C" style:caption color:#8A8F9C
+
+      Tile id:door-lock state:locked background:#14202E radius:20 padding:14 tappable:true
+        Row align:space-between
+          Icon "lock" color:#6EA8FF size:28 transition:morph duration:200ms
+          Switch value:on accent:#6EA8FF label:"Locked"
+        Text "Door Lock" weight:semibold color:#FFFFFF
+        Text "Locked" style:caption color:#6EA8FF
+
+      Tile id:speaker state:playing background:#221631 radius:20 padding:14 tappable:true
+        Row align:space-between
+          Icon "speaker" color:#B488FF size:28
+          Switch value:on accent:#B488FF
+        Text "Speaker" weight:semibold color:#FFFFFF
+        Text "Playing · Evening Jazz" style:caption color:#B488FF maxlines:1 overflow:marquee
+        Row align-items:center gap:12
+          Icon "skip-back" size:20 color:#FFFFFF
+          Icon "pause" size:24 color:#FFFFFF
+          Icon "skip-forward" size:20 color:#FFFFFF
+        Equalizer bars:4 color:#B488FF animate:bounce repeat:infinite
+
+  Card id:energy margin-top:20 padding:16 radius:20 background:#1B1F27
+    Row align:space-between align-items:center
+      Text "Energy Usage" weight:semibold color:#FFFFFF
+      Text "Today" style:caption color:#8A8F9C
+    Row align-items:baseline gap:6 margin-top:8
+      Text "12.4" size:36 weight:bold color:#FFFFFF animate:count-up duration:800ms
+      Text "kWh" color:#8A8F9C
+    Text "↓ 8% vs yesterday" style:caption color:#4FD1B0
+    BarChart height:80 margin-top:12 color:#4FD1B0 highlight:last animate:grow-up duration:600ms stagger:40ms
+      Bar "6a" value:0.8
+      Bar "9a" value:1.6
+      Bar "12p" value:2.1
+      Bar "3p" value:1.9
+      Bar "6p" value:3.2
+      Bar "9p" value:2.8
+
+  BottomNav position:fixed-bottom background:#161A21 height:64 selected:"Home"
+    NavItem "Home" icon:"home" active:true color:#FFC83D
+    NavItem "Rooms" icon:"grid"
+    NavItem "Automations" icon:"zap"
+    NavItem "Settings" icon:"settings"

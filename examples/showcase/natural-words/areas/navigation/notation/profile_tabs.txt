@@ -1,0 +1,38 @@
+Column scroll gap:16 pad:16 maxw:720
+  Row gap:16 center
+    Avatar "Maya Chen" size:72
+    Column gap:4 grow
+      Text.heading1 "Maya Chen"
+      Text.bodySecondary "Photographer · Light chaser · Portland, OR"
+  Row between
+    Column center gap:2
+      Text.strong "6"
+      Text.caption "Posts"
+    Column center gap:2
+      Text.strong "12.4K"
+      Text.caption "Followers"
+    Column center gap:2
+      Text.strong "380"
+      Text.caption "Following"
+  Row gap:8
+    Button "Follow" grow -> toast "Following Maya"
+    Button.outline "Message" grow -> emit message
+  state tab="Posts"
+  SegmentedButton =tab items:["Posts","Saved","Tagged"]
+  if tab=="Posts"
+    Grid cols:3 gap:4
+      Image "https://picsum.photos/seed/maya1/300" h:110 radius:4
+      Image "https://picsum.photos/seed/maya2/300" h:110 radius:4
+      Image "https://picsum.photos/seed/maya3/300" h:110 radius:4
+      Image "https://picsum.photos/seed/maya4/300" h:110 radius:4
+      Image "https://picsum.photos/seed/maya5/300" h:110 radius:4
+      Image "https://picsum.photos/seed/maya6/300" h:110 radius:4
+  if tab=="Saved"
+    Grid cols:3 gap:4
+      Image "https://picsum.photos/seed/saved1/300" h:110 radius:4
+      Image "https://picsum.photos/seed/saved2/300" h:110 radius:4
+      Image "https://picsum.photos/seed/saved3/300" h:110 radius:4
+  if tab=="Tagged"
+    Column center gap:8 pad:32
+      Icon "photo_camera"
+      Text.muted "No tagged photos yet" center

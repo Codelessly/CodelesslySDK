@@ -1,0 +1,58 @@
+{
+ "what": "The banking screen: a gray fill written on the page read as the theme's neutral fill, equal to the page (designed), and as colors.pageFill, the card's white (pagefill). The other seven app screens do not change.",
+ "judges": "judge.py (claude-opus-5-5 and claude-sonnet-5-5 by the API), versions shown together, unlabeled and shuffled.",
+ "judgments": [
+  {
+   "case": "banking",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "pagefill",
+    "designed"
+   ],
+   "scores": {
+    "pagefill": 8,
+    "designed": 7
+   },
+   "why": "B places the transaction icons in white circular containers, which echoes the quick-action circles and gives the list a clearer visual anchor. A's bare icons float loosely and feel less finished, even though the two screens are otherwise identical."
+  },
+  {
+   "case": "banking",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "pagefill",
+    "designed"
+   ],
+   "scores": {
+    "pagefill": 8,
+    "designed": 6
+   },
+   "why": "A's white circular icon containers give the transaction rows a consistent left anchor that echoes the quick-action circles, while B's bare small icons look sparse, less polished, and weaker as visual anchors."
+  },
+  {
+   "case": "banking",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "pagefill",
+    "designed"
+   ],
+   "scores": {
+    "pagefill": 8,
+    "designed": 7
+   },
+   "why": "B's circular containers for the transaction icons echo the quick-action buttons and give the list a stronger, more finished rhythm, while A's bare glyphs float and look unfinished; B's circles do sit a bit tightly stacked."
+  },
+  {
+   "case": "banking",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "pagefill",
+    "designed"
+   ],
+   "scores": {
+    "pagefill": 8,
+    "designed": 6
+   },
+   "why": "A's white circular icon containers anchor the transaction rows and echo the circular quick-action buttons, while B's bare tiny icons float without structure and look less polished and less consistent."
+  }
+ ]
+}

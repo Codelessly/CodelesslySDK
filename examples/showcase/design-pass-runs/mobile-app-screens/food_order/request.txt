@@ -1,0 +1,1 @@
+A food delivery restaurant page: a header image area with the restaurant name, rating, delivery time and fee, a row of category chips, a menu list of six dishes each with a name, description, price and an Add button, and a sticky cart bar at the bottom showing item count, total and View cart.

@@ -1,0 +1,57 @@
+approval-b	strict 13	with blocks 0
+approval-bp	strict 13	with blocks 0
+carousel-b	strict 4	with blocks 0
+checkout-b	strict 0	with blocks 0
+code_diff-b	strict 13	with blocks 13
+    Node "text4" (text) is gone and no block carries its "text" ("${= d1=='keep'?'Kept':'Discarded'}"). A block that takes a node's place must carry what it said and did.
+    Node "text7" (text) is gone and no block carries its "text" ("5    host: localhost"). A block that takes a node's place must carry what it said and did.
+    Node "outlinedButton1" (outlinedButton) is gone and no block carries its "label" ("Keep"), its actions. A block that takes a node's place must carry what it said and did.
+    Node "textButton1" (textButton) is gone and no block carries its "label" ("Discard"), its actions. A block that takes a node's place must carry what it said and did.
+comparison-b	strict 4	with blocks 0
+comparison-bp	strict 0	with blocks 0
+dashboard-b	strict 8	with blocks 0
+dashboard-bp	strict 9	with blocks 1
+    Node "segmentedButton1" (segmentedButton) is gone and no block carries its "segments" ([{"value":"7 days","label":"7 days"},{"value":"30 days","label":"30 days"},{"value":"90 days","label":"90 days"}]), its binding of props.selected (${= [range]}), its actions. A block that takes a node's place must carry what it said and did.
+data_table-b	strict 0	with blocks 0
+flights-b	strict 13	with blocks 0
+flights-bp	strict 13	with blocks 0
+image_gallery-b	strict 0	with blocks 0
+itinerary-b	strict 0	with blocks 0
+itinerary-bp	strict 13	with blocks 0
+map_list-b	strict 13	with blocks 5
+    Node "listView2" (listView) is gone and no block carries its binding of data (${shops}). A block that takes a node's place must carry what it said and did.
+    Node "text5" (text) is gone and no block carries its "text" ("${= find(shops,s=>s.id==sel).name}"). A block that takes a node's place must carry what it said and did.
+    Node "text6" (text) is gone and no block carries its "text" ("${= find(shops,s=>s.id==sel).rating}"). A block that takes a node's place must carry what it said and did.
+    Node "text7" (text) is gone and no block carries its "text" ("${= find(shops,s=>s.id==sel).dist}"). A block that takes a node's place must carry what it said and did.
+message_draft-b	strict 3	with blocks 0
+order_summary-b	strict 2	with blocks 0
+order_summary-bp	strict 10	with blocks 2
+    Node "iconButton1" (iconButton) is gone and no block carries its actions. A block that takes a node's place must carry what it said and did.
+    Node "iconButton2" (iconButton) is gone and no block carries its actions. A block that takes a node's place must carry what it said and did.
+plan_progress-b	strict 11	with blocks 0
+question_flow-b	strict 7	with blocks 0
+reservation-b	strict 1	with blocks 0
+reservation-bp	strict 1	with blocks 0
+weather-b	strict 13	with blocks 13
+    Node "text8" (text) is gone and no block carries its "text" ("23°"). A block that takes a node's place must carry what it said and did.
+    Node "text10" (text) is gone and no block carries its "text" ("24°"). A block that takes a node's place must carry what it said and did.
+    Node "text12" (text) is gone and no block carries its "text" ("24°"). A block that takes a node's place must carry what it said and did.
+    Node "text14" (text) is gone and no block carries its "text" ("23°"). A block that takes a node's place must carry what it said and did.
+weather-bp	strict 13	with blocks 13
+    Node "text3" (text) is gone and no block carries its "text" ("22°"). A block that takes a node's place must carry what it said and did.
+    Node "text4" (text) is gone and no block carries its "text" ("Mostly sunny"). A block that takes a node's place must carry what it said and did.
+    Node "text5" (text) is gone and no block carries its "text" ("H: 24°  L: 15°"). A block that takes a node's place must carry what it said and did.
+    Node "text8" (text) is gone and no block carries its "text" ("23°"). A block that takes a node's place must carry what it said and did.
+01-lab-pickup-b	strict 0	with blocks 0
+01-lab-pickup-bp	strict 1	with blocks 0
+02-parcel-locker-b	strict 2	with blocks 0
+02-parcel-locker-bp	strict 2	with blocks 0
+03-water-alert-b	strict 1	with blocks 0
+03-water-alert-bp	strict 1	with blocks 0
+04-library-holds-b	strict 1	with blocks 0
+04-library-holds-bp	strict 1	with blocks 0
+05-garden-rounds-b	strict 3	with blocks 1
+    The data bindings of node "progressBar1" changed. Keep every binding to a value as it is.
+05-garden-rounds-bp	strict 2	with blocks 0
+06-ferry-ticket-b	strict 2	with blocks 0
+06-ferry-ticket-bp	strict 2	with blocks 0

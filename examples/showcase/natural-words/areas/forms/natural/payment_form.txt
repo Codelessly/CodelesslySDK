@@ -1,0 +1,31 @@
+Screen "Checkout" background:white padding:24 maxWidth:420 align:center
+  Text "Payment details" style:heading size:22 weight:bold
+  Text "Order total: $48.99" style:subtitle color:gray margin-bottom:16
+
+  Form id:paymentForm gap:16
+    Field label:"Card number"
+      TextInput id:cardNumber placeholder:"1234 5678 9012 3456" keyboard:numeric autocomplete:cc-number inputmode:numeric format:"#### #### #### ####" maxLength:19
+        TrailingIcon "Visa" type:image src:visa-logo size:24x16 alt:"Visa" visible:when-card-starts-with-4 transition:fade duration:150ms
+    Field label:"Name on card"
+      TextInput id:cardName placeholder:"Jane Doe" autocomplete:cc-name capitalize:words
+
+    Row gap:12
+      Field label:"Expiry" flex:1 state:error
+        TextInput id:expiry placeholder:"MM/YY" keyboard:numeric autocomplete:cc-exp format:"##/##" maxLength:5 value:"04/22" border-color:red
+        HelperText "Card expired" color:red size:12 icon:error-circle role:alert
+          animation:shake-once duration:300ms
+      Field label:"CVC" flex:1
+        TextInput id:cvc placeholder:"123" keyboard:numeric autocomplete:cc-csc maxLength:4 secure:true
+          TrailingIcon "Info" type:icon name:help-circle tooltip:"3 or 4 digit code on the back of your card"
+
+    Field label:"Billing ZIP"
+      TextInput id:zip placeholder:"12345" keyboard:numeric autocomplete:postal-code maxLength:10
+
+    Button "Pay $48.99" id:payButton style:primary fullWidth:true height:48 radius:8 background:blue color:white
+      state:disabled when:expiry-invalid or any-field-empty
+      state:loading show:spinner label:"Processing…" on:press
+      on:press action:submit paymentForm
+
+  Row align:center gap:6 margin-top:12
+    Icon name:lock size:14 color:gray
+    Text "Payments are encrypted" size:12 color:gray

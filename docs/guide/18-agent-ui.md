@@ -102,7 +102,13 @@ final blocks = OnDemandBlocks(
   session,
   design: (wanted, session, notes) => myService.design(wanted.name, wanted.purpose, notes), // a component document, or null
   check: (wanted, definition) => myRenderCheck(definition), // your own gate: problems, none to pass
-  onAdded: (wanted, definition) => library.store(definition),
+  // Keeps the block for the sessions that follow: the files that hold it in the design system's folder (its
+  // definition, and the manifest that now lists it), written wherever you keep the design system.
+  store: (files) async {
+    for (final e in files.entries) {
+      await (File('$folder/${e.key}')..createSync(recursive: true)).writeAsString(e.value);
+    }
+  },
 );
 
 final system = session.notationInstructions(askForBlocks: true);
@@ -155,6 +161,12 @@ final outcome = await pass.run(request: 'three flights to choose from');
 * The session needs a design system with a `DESIGN.md` and a theme that names its colors, text styles, radii and
   shadows. It needs no blocks beyond one to show the agent how a node is written.
 * `pass.instructions()` returns the system message alone, to read or to send yourself.
+* `DesignPass(session, design: ..., blocks: ['ActionButton', 'TotalBar', 'Details'])` also tells the agent of
+  those blocks of the design system (each one's purpose, parameters, events and size, and the three closest to
+  the request as written) and lets it put a block in place of plain nodes that show the same thing. A node that
+  is gone is then accepted when a block carries what it said and did: its text or label as a prop, its binding,
+  its actions under the block's event. A block that drops any of them is refused and named in the next round's
+  `problems`.
 
 ## How a streaming UI renders
 

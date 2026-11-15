@@ -1,0 +1,74 @@
+state hidden=false
+state tab="home"
+state accounts=[{"name":"Everyday Checking","num":"•••• 4821","balance":8214.30,"fill":"#FF1F3A8A"},{"name":"High-Yield Savings","num":"•••• 9037","balance":4266.25,"fill":"#FF0F766E"}]
+state txs=[{"merchant":"Whole Foods Market","category":"Groceries","date":"Jun 12","amount":-86.42,"icon":"shopping_basket"},{"merchant":"Acme Corp Payroll","category":"Income","date":"Jun 10","amount":2450.00,"icon":"payments"},{"merchant":"Uber","category":"Transport","date":"Jun 9","amount":-18.75,"icon":"directions_car"},{"merchant":"Netflix","category":"Entertainment","date":"Jun 8","amount":-15.49,"icon":"movie"},{"merchant":"Blue Bottle Coffee","category":"Dining","date":"Jun 7","amount":-6.50,"icon":"local_cafe"},{"merchant":"City Power & Light","category":"Utilities","date":"Jun 5","amount":-92.18,"icon":"bolt"}]
+Column w:390 h:fill
+  Column scroll grow gap:20 pad:16
+    Column gap:4
+      Row between middle
+        Text.muted "Total balance"
+        Row gap:8 middle
+          Text.small "Hide"
+          Toggle =hidden
+      Text.pageTitle "{hidden ? '$ ••••••' : money(sum(accounts,a=>a.balance),'$',2)}" size:38 weight:700
+      Text.success "+$320.40 this month"
+    Row scroll gap:12
+      each a in accounts
+        Box w:240 gap:20 pad:16 radius:16 fill:=a.fill
+          Row between middle
+            Text.strong "{a.name}" color:#FFFFFFFF
+            Icon "account_balance" color:#FFFFFFFF
+          Text "{a.num}" color:#FFD1D5DB
+          Text "{hidden ? '$ ••••' : money(a.balance,'$',2)}" size:24 weight:700 color:#FFFFFFFF
+    Row between
+      Column center gap:6
+        Box w:56 h:56 radius:28 fill:#FFE8F0FE center middle -> emit send
+          Icon "send" color:#FF1F3A8A
+        Text.caption "Send"
+      Column center gap:6
+        Box w:56 h:56 radius:28 fill:#FFE8F0FE center middle -> emit request
+          Icon "request_quote" color:#FF1F3A8A
+        Text.caption "Request"
+      Column center gap:6
+        Box w:56 h:56 radius:28 fill:#FFE8F0FE center middle -> emit paybill
+          Icon "receipt_long" color:#FF1F3A8A
+        Text.caption "Pay bill"
+      Column center gap:6
+        Box w:56 h:56 radius:28 fill:#FFE8F0FE center middle -> emit topup
+          Icon "add_card" color:#FF1F3A8A
+        Text.caption "Top up"
+    Card gap:12
+      Row between middle
+        Text.heading3 "Spending this month"
+        Text.strong "$1,842"
+      BarChart values:[320,540,410,680,292] labels:["Wk 1","Wk 2","Wk 3","Wk 4","Wk 5"] h:160
+      Text.caption "Up 6% compared to May"
+    Column gap:8
+      Row between middle
+        Text.heading3 "Recent transactions"
+        Button.ghost "See all" -> emit seeAll
+      each row in txs
+        Row gap:12 middle
+          Box w:44 h:44 radius:22 fill:#FFF1F5F9 center middle
+            Icon "{row.icon}"
+          Column grow
+            Text.strong "{row.merchant}"
+            Text.caption "{row.category} · {row.date}"
+          Text.strong "{(row.amount>0?'+':'-')+money(abs(row.amount),'$',2)}" color:=row.amount>0?"#FF1B873F":"#FF111827"
+  Divider
+  Row between pad:[16,8,16,12]
+    Column center gap:2 -> tab="home"
+      Icon "home" color:=tab=="home"?"#FF1F3A8A":"#FF9CA3AF"
+      Text.caption "Home" color:=tab=="home"?"#FF1F3A8A":"#FF9CA3AF"
+    Column center gap:2 -> tab="cards"
+      Icon "credit_card" color:=tab=="cards"?"#FF1F3A8A":"#FF9CA3AF"
+      Text.caption "Cards" color:=tab=="cards"?"#FF1F3A8A":"#FF9CA3AF"
+    Column center gap:2 -> tab="payments"
+      Icon "swap_horiz" color:=tab=="payments"?"#FF1F3A8A":"#FF9CA3AF"
+      Text.caption "Payments" color:=tab=="payments"?"#FF1F3A8A":"#FF9CA3AF"
+    Column center gap:2 -> tab="insights"
+      Icon "insights" color:=tab=="insights"?"#FF1F3A8A":"#FF9CA3AF"
+      Text.caption "Insights" color:=tab=="insights"?"#FF1F3A8A":"#FF9CA3AF"
+    Column center gap:2 -> tab="profile"
+      Icon "person" color:=tab=="profile"?"#FF1F3A8A":"#FF9CA3AF"
+      Text.caption "Profile" color:=tab=="profile"?"#FF1F3A8A":"#FF9CA3AF"

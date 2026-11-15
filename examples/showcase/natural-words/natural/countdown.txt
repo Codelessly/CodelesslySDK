@@ -1,0 +1,22 @@
+card "Timer" layout:column align:center gap:16 padding:24 radius:16 elevation:1 width:fit-content
+  state duration:300s remaining:300s running:false
+  text "Countdown" style:caption color:muted
+  text "{remaining as mm:ss}" size:72 weight:bold font:tabular-digits role:timer live:polite
+    when remaining<=10s color:warning
+    when remaining=0 color:danger motion:pulse duration:600ms repeat:3
+  progress "" kind:bar value:{remaining/duration} width:fill height:6 motion:ease-linear 1s
+    when running:false motion:none
+  row gap:8 justify:center
+    button "Start" style:primary
+      enabled:{not running and remaining>0}
+      on:tap set running:true
+      when running label:"Running" 
+    button "Pause" style:secondary
+      enabled:{running}
+      on:tap set running:false
+    button "Reset" style:ghost
+      enabled:{running or remaining<duration}
+      on:tap set running:false, remaining:duration motion:fade-swap 150ms
+  timer every:1s active:{running}
+    on:tick set remaining:{remaining-1s}
+    when remaining=0 set running:false
