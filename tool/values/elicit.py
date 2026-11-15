@@ -3,7 +3,7 @@
 does not tell it how? The answers are the evidence for a grammar that reads the way models already write.
 
     ANTHROPIC_API_KEY=... python3 tool/values/elicit.py <briefs dir> --design-system <folder> --out <dir>
-        [--model claude-haiku-5-5] [--blocks A,B,C]
+        [--model claude-sonnet-5-5] [--blocks A,B,C]
 
 For each <briefs dir>/*.txt: the notation's instructions with every rule and example about state, bindings,
 formulas, actions, conditions and repetition taken out (layout, text, the blocks and their parameters stay), and
@@ -57,7 +57,7 @@ def stripped(prompt, blocks):
 
 def main():
     briefs, out = sys.argv[1], opt('--out')
-    ds, model = opt('--design-system'), opt('--model', 'claude-haiku-5-5')
+    ds, model = opt('--design-system'), opt('--model', 'claude-sonnet-5-5')
     blocks = set((opt('--blocks') or open(os.path.join(ds, 'BLOCKS.txt')).read().strip()).split(','))
     os.makedirs(out, exist_ok=True)
     prompt = subprocess.run(['tool/notation/notation.sh', 'prompt', '--design-system', ds], cwd=SDK, capture_output=True, text=True).stdout

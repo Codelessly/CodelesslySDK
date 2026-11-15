@@ -2,7 +2,7 @@
 """Expands recorded answers again with the notation as it is now, so a change to how the notation is read can
 be measured on the same answers (no model is called, so nothing varies but the reading).
 
-    python3 tool/values/reexpand.py <recordings dir> <out dir> --design-system <folder> [--model claude-haiku-5-5]
+    python3 tool/values/reexpand.py <recordings dir> <out dir> --design-system <folder> [--model claude-sonnet-5-5]
 
 For each `<id>@<model>.notation[.retryN].jsonl` in <recordings dir> (the last try of each id), the text the model
 wrote is expanded with tool/notation/notation.sh and written to <out dir>/<id>@<model>.notation.json, the name
@@ -19,7 +19,7 @@ def opt(name, default=None):
 
 def main():
     src, out, ds = sys.argv[1], os.path.abspath(sys.argv[2]), os.path.abspath(opt('--design-system'))
-    model = opt('--model', 'claude-haiku-5-5')
+    model = opt('--model', 'claude-sonnet-5-5')
     os.makedirs(out, exist_ok=True)
     last = {}
     for f in sorted(glob.glob(os.path.join(src, f'*@{model}.notation*.jsonl'))):

@@ -144,7 +144,7 @@ Future<Trial> runTrial(
   try {
     final firstSystem = session.notationInstructions(askForBlocks: true);
     trial.first = await ask(
-      'claude-haiku-5-5',
+      'claude-sonnet-5-5',
       firstSystem,
       '$user\nWrite one complete card in notation. If no existing block fits the central visual, write a Wanted line for a reusable $name block and draw its temporary plain-type replacement beneath it. Return notation only.',
     );
@@ -186,7 +186,7 @@ Future<Trial> runTrial(
     if (!outcome.added) return trial;
     final secondSystem = session.notationInstructions();
     trial.second = await ask(
-      'claude-haiku-5-5',
+      'claude-sonnet-5-5',
       secondSystem,
       '$user\nWrite the complete card again, now using the new $name block for the central visual. Return notation only.',
     );

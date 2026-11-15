@@ -15,7 +15,8 @@ import 'package:codelessly_api/core.dart' as api;
 /// The models the demo supports, newest family first. The default is the
 /// fast one, for inline answers.
 const List<String> kModels = ['claude-haiku-5-5', 'claude-sonnet-5-5', 'claude-opus-5-5', 'claude-fable-5-2'];
-const String kDefaultModel = 'claude-haiku-5-5';
+// Cards that hold state are right far more often from this tier than from the smaller model (design 15 §4.15).
+const String kDefaultModel = 'claude-sonnet-5-5';
 
 /// Which system prompt and tools a request sends.
 enum PromptVariant {
