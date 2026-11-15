@@ -1,0 +1,1 @@
+Show a live auction bid card with current price, countdown timer, bidder count, minimum next bid, bid history, and a prominent place-bid action.

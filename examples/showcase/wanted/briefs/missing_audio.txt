@@ -1,0 +1,1 @@
+Show a playable voice note in a chat card with an audio waveform scrubber, current time, total duration, playback speed, and a play/pause control.

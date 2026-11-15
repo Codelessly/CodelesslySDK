@@ -1,0 +1,1 @@
+Show a code review chat card with a small two-line before/after diff hunk and an approve action.

@@ -1,0 +1,1 @@
+Show a stock order book chat card with grouped bid and ask price levels, sizes, colored depth bars, spread, and last trade price.

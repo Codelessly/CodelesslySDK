@@ -1,0 +1,1 @@
+Show results of a live poll in a chat card: four answers with vote-share bars, vote counts, the leading option marked, and my selected answer marked.

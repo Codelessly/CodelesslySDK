@@ -1,0 +1,1 @@
+Show a weekend trip itinerary chat card with day headings, four timed stops, and a compact map preview.

@@ -30,19 +30,23 @@ A model that must draw every box writes slowly and the result looks generic. A m
 parts is fast and the result still looks generic. Here the model composes **blocks**: components a design system
 supplies as data, already designed, called by name. Three ways to write a screen, one renderer:
 
-| | The model writes | Speed | Look |
+| | The model writes | Time for a card | Look |
 |---|---|---|---|
-| Plain parts | `Column`, `Text`, `Button`, `Slider` | Fastest | Clean, plain |
-| Designed blocks | `PlanHeader`, `Carousel`, `ComparisonTable` | As fast | Designed |
-| Full vocabulary | Any node, every property | Slower | Anything |
+| Plain parts | `Column`, `Text`, `Button`, `Slider` | 8.9 s | Clean, plain |
+| Designed blocks | `ChatCard`, `Counter`, `ComparisonTable` | 5.9 s | Designed |
+| Full vocabulary | Any node, every property | About 15 s | Anything the engine draws |
 
-When a card needs a block the design system lacks, a stronger model designs it once (one to three rounds, looking at
-its own render), it joins the library, and the fast model uses it from then on.
+(Median time for one chat card with Sonnet, same briefs for the first two rows; the third is from a separate
+run of whole documents. Blocks are faster than plain parts because the model writes fewer lines.)
+
+When a card needs a block the design system lacks, a stronger model designs it once (two or three rounds and two to four
+minutes in our runs, looking at its own render and driving it), it joins the library, and the fast model uses it from then on.
 
 Measured on 17 chat-card briefs with the same model, scored by an independent judge on whether it would ship
 (1 to 5): A2UI in its own renderer 1.94, plain parts 2.53, designed blocks 3.88. On 8 briefs none of the blocks were
 written for: 2.50, 2.88, 3.38. Recordings and renders:
-[`examples/showcase`](https://github.com/Codelessly/CodelesslySDK/tree/master/examples/showcase).
+[`examples/showcase`](https://github.com/Codelessly/CodelesslySDK/tree/master/examples/showcase);
+the scores are in codelessly_api `docs/design/15-the-middle-and-generated-apps.md` §4.8 and §4.11.
 
 ## Three ways in
 
@@ -65,3 +69,9 @@ written for: 2.50, 2.88, 3.38. Recordings and renders:
 3. **The picture.** The card under the example is what those four lines draw with the Cards design system (rendered
    by `tool/render`). A second picture, the same brief in all three arms side by side, would carry the comparison;
    it would be composed from `examples/showcase/renders/head-to-head`.
+4. **What an outside reader found** (run 9, a developer reading only this draft): first rendered card in 2 minutes
+   22 seconds; the speed table was wrong as first drafted (corrected above from the recorded medians); the
+   judge's scores are means in a design note, with no itemized scores in the repository; "on every platform"
+   hides that loading by project token does not work on Linux desktop; and rendering the example needs a site
+   folder that names the design system, which the draft did not say (the render tool should take
+   `--design-system` for a single document).
