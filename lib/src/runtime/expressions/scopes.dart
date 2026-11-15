@@ -568,6 +568,38 @@ class LocalScope extends NamedScope {
       }();
 }
 
+/// The list item a reaction started on, for the length of its chain: the
+/// `item`, `index` and `parent` it read when the trigger fired. An
+/// [ItemScope] follows its list's data, so an action that changes what the
+/// list shows (a table that is no longer open leaves a list of open ones)
+/// would otherwise move `item` under the actions after it, as a Flutter
+/// `onTap: () { ... item ... }` closure never does. Every other name, and
+/// every write, goes to the scope it sits on.
+class ChainItemScope extends NamedScope {
+  ChainItemScope._(this._values, {required ValueScope super.parent});
+
+  final Map<String, Object?> _values;
+
+  /// [scope] with the item it reads now kept; [scope] itself when no list
+  /// item is around it.
+  static ValueScope over(ValueScope scope) {
+    for (ValueScope? s = scope; s != null; s = s.parent) {
+      if (s is ItemScope) {
+        return ChainItemScope._(
+            {'item': readPath(scope, 'item'), 'index': readPath(scope, 'index'), 'parent': readPath(scope, 'parent')},
+            parent: scope);
+      }
+    }
+    return scope;
+  }
+
+  @override
+  bool declares(String name) => _values.containsKey(name);
+
+  @override
+  Object? valueOf(String name, ValueScope reader) => _values[name];
+}
+
 /// One item of a repeating widget (a list, grid or page view built from
 /// data): `item`, `index`, and `parent` (the item around it: `parent.item`,
 /// `parent.index`).

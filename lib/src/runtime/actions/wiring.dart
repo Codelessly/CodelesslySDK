@@ -156,7 +156,7 @@ class TreeReactions implements NodeInteractions {
     // app inside a scaled preview), not only its origin.
     RevealAnchor.lastTrigger =
         box.attached && box.hasSize ? MatrixUtils.transformRect(box.getTransformTo(null), Offset.zero & box.size) : null;
-    final ctx = contextFor(box);
+    final ctx = chainContextFor(box);
     if (trigger == 'changed' && event.containsKey('value')) _writeBack(node, event['value'], ctx);
     final picked = trigger == 'changed' && (node.type == 'navigationBar' || node.type == 'bottomNavigationBar') && event['value'] is int;
     final state = _boxes[box];
@@ -195,7 +195,7 @@ class TreeReactions implements NodeInteractions {
   Future<void> fireAndWait(NodeBox box, String trigger, {Json event = const {}}) async {
     final node = box.node;
     if (node == null) return;
-    final ctx = contextFor(box);
+    final ctx = chainContextFor(box);
     final state = _boxes[box];
     final r = runner;
     try {
@@ -228,6 +228,15 @@ class TreeReactions implements NodeInteractions {
     if (c is! ActionHost || binder == null) return c;
     final scope = binder.scopeFor(box.source, box.id, box.instance);
     return scope == null || identical(scope, c.scope) ? c : c.withScope(scope);
+  }
+
+  /// [contextFor], for a chain of actions about to run: the list item it
+  /// starts on is kept while it runs ([ChainItemScope]).
+  ActionContext chainContextFor(NodeBox box) {
+    final c = contextFor(box);
+    if (c is! ActionHost) return c;
+    final kept = ChainItemScope.over(c.scope);
+    return identical(kept, c.scope) ? c : c.withScope(kept);
   }
 
   @override
