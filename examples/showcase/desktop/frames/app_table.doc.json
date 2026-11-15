@@ -1879,7 +1879,7 @@
   "row20": {
    "type": "row",
    "layout": {
-    "flex": 1,
+    "flex": 255.0,
     "width": {
      "fill": 0
     },
