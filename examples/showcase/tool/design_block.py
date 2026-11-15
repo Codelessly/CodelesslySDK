@@ -8,7 +8,8 @@ how it rendered, and revises it. The experiment for the gap between ready-made b
 
 Each round: the model answers with the block (a component document) and one card in the notation that uses
 it; both are checked and rendered at 420 wide, light and dark, the block alone from its own preview and the
-card as it first appears, and the card again in a 320-wide column; the pictures and every problem reported go
+card as it first appears, the card again in a 320-wide column, and, when the answer gives steps in a ```use fence, the card after them with
+its texts tested; the pictures and every problem reported go
 back for the next round. The round with the fewest problems is kept, and the script exits 1 when that round
 still has any. Writes
 <out>/round<n>/ (answer.txt, the block, card.txt, block-light.png, block-dark.png, light.png, dark.png,
@@ -20,7 +21,7 @@ Without a model (a person or an agent as the designer, given exactly what the mo
     python3 examples/showcase/tool/design_block.py brief --name PollResults --out <dir>
         writes <dir>/brief.txt: the instructions the model gets, word for word
     python3 examples/showcase/tool/design_block.py check --name PollResults --out <dir> \
-        --block <the block's JSON file> --card <the card's notation file>
+        --block <the block's JSON file> --card <the card's notation file> [--use <a JSON file of steps and texts>]
         one round of the same check: <dir>/round<n>/ with the four pictures and problems.txt
 """
 import base64, json, os, re, shutil, subprocess, sys, time, urllib.request
@@ -126,11 +127,11 @@ HOW A CARD IS WRITTEN WITH THE BLOCKS (the notation)
 {notation}
 
 ANSWER FORMAT
-First two or three sentences on the design decisions. Then the block, whole, in a ```json fence (its "id" and "widget.type" are {name}; keep the whole block under about 12,000 characters; keep its doc to one sentence that says how to call it, and give it a "previews" entry with realistic props and a size, as the examples have: that is how you will see it). Then one card that uses it, in a ```notation fence, written as the notation above (your block is called by its name like the others)."""
+First two or three sentences on the design decisions. Then the block, whole, in a ```json fence (its "id" and "widget.type" are {name}; keep the whole block under about 12,000 characters; keep its doc to one sentence that says how to call it, and give it a "previews" entry with realistic props and a size, as the examples have: that is how you will see it). Then one card that uses it, in a ```notation fence, written as the notation above (your block is called by its name like the others). If the block does anything when used (a tap, a drag, typing), end with a ```use fence holding JSON that proves it works: {{"steps": [...], "expect": [...], "forbid": [...]}}. A step is {{"tap": "<node>"}}, {{"type": "<node>", "text": "..."}}, {{"drag": "<node>", "by": [dx, dy]}} or {{"wait": ms}}. <node> is the id of a node inside your block, or a node of the card: a card's node is its type and its number among that type from 1 (ActionButton1, OptionList1), with a part inside it after a slash (ActionButton1/btn is the button, OptionList1/opt#1 its second option, ChoiceChips1/chip#0, Segments1/cell#2, InputField1/field, TotalBar1/cta); expect and forbid are regular expressions tested against the texts on the card after the steps (expect: each must match some text; forbid: none may). Choose steps and texts that would fail if the block only looked right: the value that must change, the state that must clear. A block that only shows data needs no use fence."""
     return system
 
 
-def check(name, ds, manifest, d, block, written):
+def check(name, ds, manifest, d, block, written, use=None):
     """Validates and renders a block and the card that uses it into <d>: the block alone from its first preview
     and the card as it first appears, light and dark. Returns the problems reported."""
     os.makedirs(d, exist_ok=True)
@@ -181,7 +182,53 @@ def check(name, ds, manifest, d, block, written):
     shots = sorted(f for f in os.listdir(f'{d}/raw-narrow') if f.endswith('.png')) if os.path.isdir(f'{d}/raw-narrow') else []
     if shots:
         crop(f'{d}/raw-narrow/{shots[0]}', f'{d}/narrow.png', dark=False)
+    problems += used(name, site, d, use)
     open(f'{d}/problems.txt', 'w').write('\n'.join(problems) + '\n')
+    return problems
+
+
+def used(name, site, d, use):
+    """Drives the card as the designer's ```use fence says and tests the texts on it afterwards: what a block
+    does, not only how it first looks. (Outside runs, 2026-11-15: six blocks passed the first-state check and
+    one was usable.) With no fence, the card as it first appears is still read for values that were not worked out."""
+    try:
+        case = json.loads(use) if use else {}
+        card = json.load(open(f'{site}/card.json'))
+    except (ValueError, OSError) as e:
+        return [f'The use fence is not valid JSON: {e}'] if use else []
+    at = next((k for k, n in card['nodes'].items() if n['type'] == name), None)
+    steps, problems = [], []
+    def node(ref):
+        # A node of the card as written (ActionButton1/btn), else a node inside the block.
+        return ref if ref.split('/')[0].split('#')[0] in card['nodes'] else f'{at}/{ref}'
+
+    for s in case.get('steps', []):
+        if at is None:
+            return [f'The card does not call {name}, so its use cannot be driven.']
+        if 'tap' in s:
+            steps += ['--tap', node(s['tap'])]
+        elif 'type' in s:
+            steps += ['--type', f"{node(s['type'])}={s.get('text', '')}"]
+        elif 'drag' in s:
+            steps += ['--drag', f"{node(s['drag'])}={s['by'][0]},{s['by'][1]}"]
+        elif 'wait' in s:
+            steps += ['--wait', str(s['wait'])]
+    code, log = run(['tool/render/render.sh', site, '--out', f'{d}/raw-used', '--sizes', '420x1400', '--dump-layout'] + steps)
+    problems += [f'After the steps: {l.strip()}' for l in log.splitlines() if l.startswith('ERROR') and 'interaction_failed' in l]
+    folder = f'{d}/raw-used'
+    dumps = [f for f in os.listdir(folder) if f.endswith('.layout.json')] if os.path.isdir(folder) else []
+    texts = [b['text'] for b in json.load(open(f'{folder}/{dumps[0]}')) if b.get('text')] if dumps else []
+    shots = sorted(f for f in os.listdir(folder) if f.endswith('.png')) if os.path.isdir(folder) else []
+    if shots and steps:
+        crop(f'{folder}/{shots[0]}', f'{d}/used.png', dark=False)
+    shown = ' | '.join(texts)[:600]
+    for e in case.get('expect', []):
+        if not any(re.search(e, t) for t in texts):
+            problems.append(f'After the steps no text on the card matches {e!r}. The card shows: {shown}')
+    for e in list(case.get('forbid', [])) + [r'\$\{', r'\{[a-z_][A-Za-z0-9_.]*\}', r'\bNaN\b', r'\bundefined\b']:
+        hit = next((t for t in texts if re.search(e, t)), None)
+        if hit is not None:
+            problems.append(f'After the steps a text on the card matches {e!r}, which must not show: "{hit[:120]}"')
     return problems
 
 
@@ -194,10 +241,11 @@ def main():
         ds = os.path.join(out, 'ds')
         manifest = json.load(open(f'{ds}/design_system.json')) if os.path.exists(ds) else setup(out, src)[1]
         n = len([x for x in os.listdir(out) if x.startswith('round')]) + 1
-        problems = check(name, ds, manifest, f'{out}/round{n}', open(opt('--block')).read(), open(opt('--card')).read())
+        problems = check(name, ds, manifest, f'{out}/round{n}', open(opt('--block')).read(), open(opt('--card')).read(),
+                         open(opt('--use')).read() if opt('--use') else None)
         print(f'round{n}: {len(problems)} problem(s)')
         print('\n'.join(problems))
-        print(f'look at: {out}/round{n}/block-light.png block-dark.png light.png dark.png narrow.png')
+        print(f'look at: {out}/round{n}/block-light.png block-dark.png light.png dark.png narrow.png used.png')
         return
     ds, manifest = setup(out, src)
     system = brief_for(name, ds, manifest)
@@ -224,14 +272,14 @@ def main():
             break
         summary['final'] = n
         t0 = time.time()
-        problems = check(name, ds, manifest, d, fenced(text, 'json'), fenced(text, 'notation'))
+        problems = check(name, ds, manifest, d, fenced(text, 'json'), fenced(text, 'notation'), fenced(text, 'use'))
         summary['rounds'].append({'round': n, 'modelSeconds': seconds, 'checkAndRenderSeconds': round(time.time() - t0, 1), 'problems': len(problems),
                                   'input_tokens': usage.get('input_tokens'), 'output_tokens': usage.get('output_tokens')})
         print(json.dumps(summary['rounds'][-1]))
         if n == rounds:
             break
-        back = [{'type': 'text', 'text': 'This is how it rendered: your block alone from its first preview (light, then dark), then the card as it first appears (light, then dark), then the card in a narrow column (320 wide).'}]
-        back += [image(f'{d}/{m}.png') for m in ('block-light', 'block-dark', 'light', 'dark', 'narrow') if os.path.exists(f'{d}/{m}.png')]
+        back = [{'type': 'text', 'text': 'This is how it rendered: your block alone from its first preview (light, then dark), then the card as it first appears (light, then dark), then the card in a narrow column (320 wide), then, when you gave steps, the card after them.'}]
+        back += [image(f'{d}/{m}.png') for m in ('block-light', 'block-dark', 'light', 'dark', 'narrow', 'used') if os.path.exists(f'{d}/{m}.png')]
         back.append({'type': 'text', 'text': ('Problems reported:\n' + '\n'.join(problems) + '\n\n' if problems else 'No problems were reported.\n\n') +
                      'Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the other blocks, and whether anything is broken or empty. If nothing is reported and you would ship it as it is, answer with the one word SHIP and nothing else: a round that changes what was already right makes it worse. Otherwise fix every problem and answer again in the same format, block and card whole.'})
         messages += [{'role': 'assistant', 'content': text}, {'role': 'user', 'content': back}]
