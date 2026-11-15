@@ -1,5 +1,6 @@
 // The app identity's screen titles.
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/internals.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 

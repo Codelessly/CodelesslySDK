@@ -1,4 +1,33 @@
-## Unreleased
+## 31.0.0
+
+**Breaking: the library an app imports is smaller.** Thirty-six types that are the SDK's own machinery (bound
+values and the tree's bindings, the viewport's boxes, route and transition internals, the session view's sources,
+the managed-component resolver) are no longer exported from `package:codelessly_sdk/codelessly_sdk.dart`. They are
+in `package:codelessly_sdk/internals.dart`, which promises no stability. None is named in the guide or used by the
+examples, the tools, CodelesslySite or CodelesslyEditor; an app that used one adds that import. Moved:
+`BackGuard`, `BoundNode`, `BoundSource`, `BoundValues`, `BoundVariable`, `CanvasBox`, `CanvasLocationMatch`,
+`CanvasSizingScope`, `CanvasViewport`, `CodelesslyPageTransitionRoute`, `CodelesslyRouteTransitionRoute`,
+`CodelesslyTranslucentRoute`, `ExpressionValues`, `FocusManagerKeyboard`, `FontRegistrationCache`,
+`HitTestedWhereDrawn`, `InstanceBindings`, `ManagedComponentResolver`, `ManagedComponentSource`, `MapValueScope`,
+`MemoryManagedComponentSource`, `NavigatorActionUi`, `NodeGestures`, `PopoverLayout`, `PublishAssetSource`,
+`RenderNodeView`, `RouteDragDismiss`, `ScreenActionContext`, `ScreenIdentity`,
+`SeeThroughZoomPageTransitionsBuilder`, `SessionValues`, `ThemedSource`, `TransitionPhysics`,
+`TransitionSideView`, `TreeBindings`.
+
+- **A model's answer in the notation, with a design system** (guide chapter 18): `UiSession(designSystem: ...)`,
+  `notationInstructions({blocks})`, `applyNotation(text, {prelude})` (looks written as the design system's token
+  names, so the same answer takes another theme or dark mode unchanged), and `addBlock(definition)`, which gives a
+  running session a block designed after it began.
+- **`edgeFade`** on scrolling containers and page views: content fades out at an edge it continues past, by
+  scroll position, on any background.
+- **A block's children show as they arrive** in a streamed answer (a card frame filled line by line stayed empty
+  until the view was rebuilt).
+- **`UiSession.shownDiagnostics()` reports `value_not_computed`**: a text with a gap where a computed value came
+  out as nothing.
+- The render tool's `--dump-layout` carries the text each node shows. `tool/values/check.py` uses it to test the
+  values a generated card shows after it is used.
+- The `cards` design system (43 blocks for inline chat cards), the showcase, and blocks designed on demand
+  (`examples/showcase/on-demand`).
 
 - **A checkbox, radio or switch draws its `label`** beside the mark (8 px away, centered on it, the control hugging
   both); a tap anywhere on it toggles. A list tile no longer draws a hairline of its own: a list draws the dividers
