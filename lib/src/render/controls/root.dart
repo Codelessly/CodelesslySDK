@@ -116,7 +116,7 @@ class RenderControlRoot extends RenderProxyBox {
   @override
   void detach() {
     focus.keyboard?.detach(handleKeyEvent);
-    focus.hostTookFocus();
+    focus.releaseOnDetach();
     super.detach();
     for (final e in _overlay) {
       e.detach();

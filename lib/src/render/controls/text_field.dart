@@ -721,6 +721,9 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
       }
     }
     _editable.selectionColor = on ? config.tokens.primary.withValues(alpha: .25) : null;
+    // A field losing the focus because its root is leaving the screen is
+    // not laid out again (the framework may be mid-layout).
+    if (focusNode.scope?.detaching ?? false) return;
     _syncText();
     markNeedsLayout();
   }
