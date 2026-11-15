@@ -94,7 +94,7 @@ class UiSession implements NodeSource {
     LayoutDocument? document,
     Catalog catalog = Catalog.core,
     TrustProfile? profile,
-    this.designSystem,
+    DesignSystem? designSystem,
     ThemeTokens? theme,
     this.check = catalogCheck,
     this.placeholderColor = 0x14808080,
@@ -102,8 +102,11 @@ class UiSession implements NodeSource {
     this.holdEmptyContainers = true,
     this.protectRoots = true,
     this.glyphCoverage,
-  })  : profile = designSystem == null ? profile ?? TrustProfile.agent : (profile ?? TrustProfile.agent).withComponents(designSystem.components),
-        catalog = designSystem?.catalogOver(catalog) ?? catalog,
+  })  : _designSystem = designSystem,
+        _baseCatalog = catalog,
+        _baseProfile = profile ?? TrustProfile.agent,
+        _profile = designSystem == null ? profile ?? TrustProfile.agent : (profile ?? TrustProfile.agent).withComponents(designSystem.components),
+        _catalog = designSystem?.catalogOver(catalog) ?? catalog,
         theme = designSystem?.themeUnder(theme ?? ThemeTokens.none) ?? theme ?? ThemeTokens.none,
         _document = document ?? LayoutDocument(catalog: designSystem?.catalogOver(catalog) ?? catalog);
 
@@ -112,7 +115,32 @@ class UiSession implements NodeSource {
   /// [theme], and a model's prompt is generated from it
   /// (`runtimeStarter(designSystem: ...)`). Null: none; the UI's controls are
   /// SSUI's, the bundled default.
-  final DesignSystem? designSystem;
+  DesignSystem? get designSystem => _designSystem;
+  DesignSystem? _designSystem;
+  final Catalog _baseCatalog;
+  final TrustProfile _baseProfile;
+
+  /// Counts the blocks added while the session runs ([addBlock]): a view
+  /// listens and makes each new one drawable.
+  final ValueNotifier<int> blocksAdded = ValueNotifier(0);
+
+  /// Adds a block to the session's design system while it runs, or replaces
+  /// the one of the same type: [definition] is a component document (its
+  /// `widget` declares the type and parameters). From the next answer on it
+  /// is called by name like the others ([notationInstructions] lists it),
+  /// and a view already showing the session draws it. This is how a block
+  /// designed after the session began (because no block fitted a request)
+  /// comes into use. Needs a [designSystem].
+  void addBlock(LayoutDocument definition) {
+    final ds = _designSystem;
+    if (ds == null) throw StateError('addBlock needs a session with a design system.');
+    final added = ComponentLibrary.of([definition]);
+    final library = ComponentLibrary({...ds.components.definitions, ...added.definitions});
+    _designSystem = DesignSystem(manifest: ds.manifest, design: ds.design, patterns: ds.patterns, components: library);
+    _catalog = _designSystem!.catalogOver(_baseCatalog);
+    _profile = _baseProfile.withComponents(library);
+    blocksAdded.value++;
+  }
 
   /// The theme the UI is shown in: the design system's tokens with the
   /// app's [theme] over them, else that theme, else none (the controls are
@@ -121,11 +149,13 @@ class UiSession implements NodeSource {
   final ThemeTokens theme;
 
   /// What node and action types decode with.
-  final Catalog catalog;
+  Catalog get catalog => _catalog;
+  Catalog _catalog;
 
   /// What the document may use ([TrustProfile.agent] by default), with the
   /// [designSystem]'s components allowed when there is one.
-  final TrustProfile profile;
+  TrustProfile get profile => _profile;
+  TrustProfile _profile;
 
   /// The check each op's nodes pass ([catalogCheck] by default;
   /// `strictEditCheck()` from `package:codelessly_api/validate.dart` runs the
@@ -680,6 +710,7 @@ class UiSession implements NodeSource {
     _disposed = true;
     _events.close();
     _changes.close();
+    blocksAdded.dispose();
     for (final w in _watched.values) {
       w.dispose();
     }

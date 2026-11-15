@@ -72,6 +72,7 @@ CodelesslyView(session: session);
 | `notationInstructions({blocks})` | The system prompt: the notation's grammar, the design system's blocks (all of them, or the ones named), and how its pieces go together (its PATTERNS.md "In brief"). |
 | `applyNotation(text, {options, prelude, author, onOp})` | Applies a streamed answer: each line becomes nodes the moment it is complete, one revision and one undo step for the whole answer. Returns the `EditResult`. |
 | `prelude` | Notation the host puts before the answer: state that must be right and is not the model's to write (`state cart=[...]`, a clock). |
+| `addBlock(definition)` | Adds a block (a component document) to the session's design system while it runs, or replaces the one of that type: the next `notationInstructions()` lists it, the next answer may call it, and a view already on screen draws it. For a block designed after the session began because none fitted a request. |
 | `notationIssues` | What the notation could not read in the last answer, by line and column: send these back to the model for a second try. |
 
 What to know:
