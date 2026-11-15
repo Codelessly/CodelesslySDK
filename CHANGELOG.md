@@ -11,6 +11,13 @@
   dialogs and chart series take its look, and a control's corner follows its height (`radii.controlXs` …
   `controlLarge`). The bundled look is unchanged.
 - A spinner holds still when the host's tickers are off (a design canvas) and paints in its own layer.
+- A text field holds its gesture recognizers only while it is attached: detaching releases them, with the double-tap
+  timer a tap leaves running, so a field removed from the tree (whose dispose may wait for a frame that never comes)
+  leaves no timer behind.
+- SVG text is drawn in one family: vector_graphics reads `font-family` as a single name, so the resolved list
+  (`"DejaVu Sans, Lora"`) named a font nothing has. A named family is drawn, or, where the caller knows its fonts
+  (`SvgFonts.isAvailable`, set by the render tool), the next family the list names or the site's font; a lacking
+  family is still reported.
 
 ## 31.0.1
 
