@@ -1,0 +1,125 @@
+{
+ "schema": 3,
+ "id": "WideScroll",
+ "roots": [
+  "frame"
+ ],
+ "widget": {
+  "type": "WideScroll",
+  "doc": "A frame that scrolls sideways for content wider than the card (a table with many columns): write WideScroll width:640 and the wide blocks indented under it (TableHeader, each row, TableRow) are laid out that wide and scroll together; a fade at the right edge shows there is more.",
+  "props": [
+   {
+    "key": "width",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 640,
+    "doc": "How wide the content inside is laid out, in pixels (wider than the card).",
+    "required": true
+   },
+   {
+    "key": "fade",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "A soft fade at the right edge that says there is more."
+   }
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Frame",
+   "size": [
+    340,
+    40
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "frame": {
+   "type": "column",
+   "children": [
+    "scroller"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "customPaint": {
+    "foregroundPainter": [
+     {
+      "op": "rect",
+      "rect": [
+       "${= size.width - 28}",
+       0,
+       28,
+       "${size.height}"
+      ],
+      "when": "${props.fade}",
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"
+     }
+    ]
+   }
+  },
+  "scroller": {
+   "type": "row",
+   "children": [
+    "inner"
+   ],
+   "props": {
+    "scrollable": true,
+    "scrollDirection": "horizontal",
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "inner": {
+   "type": "column",
+   "children": [
+    "slot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": 640,
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     20,
+     0
+    ]
+   },
+   "bind": {
+    "layout.width": "${props.width}"
+   }
+  },
+  "slot": {
+   "type": "slot"
+  }
+ }
+}

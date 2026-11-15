@@ -117,9 +117,29 @@ ChatCard "Blog migration plan" icon:"rocket_launch_rounded"
 
 A day is `DayHeader "Day 1" "Where" kind:"temple"` with its `ItineraryStop "Place" "details" time:"08:00" travel:"Walk, 15 min"`
 lines indented under it (the last with `last:true`), then `Checklist "Book ahead" =d1 items:[…]`; what is left is
-`total-length(d1)`. Photos are one line: `PhotoGallery =open photos:[{"kind":"harbor","caption":"…"},…]`. A carousel
-is `Carousel =i count:6 thumbs:=map(items,x=>x.tone)` with the one `ProductTile "{items[i].name}" … -> open=true`
-under it; the details view is an `if open` group ending in `ActionButton` lines.
+`total-length(d1)`. Photos are one line:
+`PhotoGallery =open photos:[{"kind":"harbor","caption":"…"},…]` (a grid; `layout:"strip"` is one row that scrolls
+sideways, `layout:"pages"` full-width photos swiped one at a time with dots); a tap opens the large view, which
+also pages by swipe. A carousel is one line too: `Carousel =i items:=shoes cta:"Details" -> open=true`, where each
+record has name, detail, price, rating and tone; it slides by swipe with a peek of the next item, and `dots`,
+`arrows`, `counter` and `thumbs` switch its controls. The details view is an `if open` group reading `shoes[i]`.
+
+## Pages of anything, and content wider than the card
+
+```
+Pages =tip h:186 peek:0.9 gap:10
+  each x in tips
+    Column gap:8
+      Media kind:"{x.k}" h:120
+      Paragraph "{x.d}"
+PageDots =tip count:4
+Pager "Tip" =tip count:4
+```
+
+`Pages` is the notation's own swiped page view; `PageDots` and `Pager` on the same variable show and turn its
+pages (they drive a `Carousel` the same way). A `ComparisonTable` with three to five names scrolls its columns
+sideways by itself while the labels stay in place. Any other wide content goes in `WideScroll width:620` with the
+blocks indented under it (`TableHeader`, the `each`, `TableRow`): it is laid out that wide and scrolls as one.
 
 ## Booking and weather
 

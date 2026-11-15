@@ -1,0 +1,236 @@
+{
+ "schema": 3,
+ "roots": [
+  "pages_content"
+ ],
+ "nodes": {
+  "pages_content": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Before you go",
+    "subtitle": "Four tips for Kyoto",
+    "icon": "tips_and_updates_rounded"
+   },
+   "bind": {
+    "props.status": "${= tip+1} of 4"
+   },
+   "children": [
+    "pages",
+    "dots",
+    "pager"
+   ]
+  },
+  "pages": {
+   "type": "pageView",
+   "layout": {
+    "height": 186,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "viewportFraction": 0.9,
+    "scrollDirection": "horizontal",
+    "padEnds": false
+   },
+   "bind": {
+    "props.initialPage": "${tip}",
+    "data": "${tips}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tip",
+       "value": "${result.index}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "pagesPage"
+   ]
+  },
+  "pagesPage": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     0,
+     10,
+     0
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Media1",
+    "Paragraph1",
+    "Paragraph2"
+   ]
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    }
+   },
+   "bind": {
+    "props.kind": "${item.k}"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "strong": true
+   },
+   "bind": {
+    "props.text": "${item.t}"
+   }
+  },
+  "Paragraph2": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.text": "${item.d}"
+   }
+  },
+  "dots": {
+   "type": "PageDots",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 22.0
+   },
+   "props": {
+    "value": "tip",
+    "count": 4
+   }
+  },
+  "pager": {
+   "type": "Pager",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Tip",
+    "value": "tip",
+    "count": 4
+   }
+  }
+ },
+ "variables": {
+  "pages_content": [
+   {
+    "name": "tips",
+    "type": "list",
+    "value": [
+     {
+      "t": "Pack light",
+      "d": "One carry-on each keeps every train change easy.",
+      "k": "train"
+     },
+     {
+      "t": "Book the gardens",
+      "d": "Timed tickets sell out a week ahead in spring.",
+      "k": "bamboo"
+     },
+     {
+      "t": "Carry some cash",
+      "d": "Small shrines and market stalls rarely take cards.",
+      "k": "market"
+     },
+     {
+      "t": "Start early",
+      "d": "The famous spots are quiet before nine.",
+      "k": "temple"
+     }
+    ]
+   },
+   {
+    "name": "tip",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

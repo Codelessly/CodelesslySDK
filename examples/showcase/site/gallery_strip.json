@@ -1,0 +1,106 @@
+{
+ "schema": 3,
+ "roots": [
+  "gallery_strip"
+ ],
+ "nodes": {
+  "gallery_strip": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Trip highlights",
+    "subtitle": "Scroll sideways · tap to open",
+    "icon": "photo_library_rounded"
+   },
+   "bind": {
+    "props.status": "${= open>0?open+\" of 6\":\"6 photos\"}"
+   },
+   "children": [
+    "g"
+   ]
+  },
+  "g": {
+   "type": "PhotoGallery",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "open",
+    "layout": "strip"
+   },
+   "bind": {
+    "props.photos": "${photos}"
+   }
+  }
+ },
+ "variables": {
+  "gallery_strip": [
+   {
+    "name": "photos",
+    "type": "list",
+    "value": [
+     {
+      "kind": "harbor",
+      "caption": "Harbour at sunrise"
+     },
+     {
+      "kind": "market",
+      "caption": "Old town market"
+     },
+     {
+      "kind": "forest",
+      "caption": "Forest trail"
+     },
+     {
+      "kind": "dunes",
+      "caption": "Desert dunes"
+     },
+     {
+      "kind": "skyline",
+      "caption": "Evening skyline"
+     },
+     {
+      "kind": "lagoon",
+      "caption": "Hidden lagoon"
+     }
+    ]
+   },
+   {
+    "name": "open",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

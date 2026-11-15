@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Carousel",
-  "doc": "A carousel frame: write Carousel =i count:6 and, indented under it, the one item at position i (ProductTile \"{items[i].name}\" ...); its arrows, its dots and a swipe move i (from 0, wrapping) in your number variable; thumbs:=map(items,x=>x.tone) with kind adds a strip of drawn thumbnails to tap.",
+  "doc": "A real carousel of products: Carousel =i items:=shoes slides one ProductTile per record (name, detail, price, rating, kind, tone) sideways by swipe, showing the edge of the next (peek), and keeps the position (from 0) in your number variable; dots, arrows, counter (\"2 of 6\") and thumbs are switches; a tap on an item fires onPressed with its position (-> open=true), and Pager or PageDots on the same variable drive it too.",
   "props": [
    {
     "key": "value",
@@ -18,30 +18,36 @@
      }
     },
     "default": "",
-    "doc": "The name of your number variable: the position, from 0."
+    "doc": "The name of your number variable: the item in view, from 0."
    },
    {
-    "key": "count",
-    "type": {
-     "kind": "integer",
-     "flutter": "int"
-    },
-    "default": 6,
-    "doc": "How many items there are.",
-    "required": true
-   },
-   {
-    "key": "thumbs",
+    "key": "items",
     "type": {
      "kind": "list",
-     "flutter": "List<String>",
+     "flutter": "List<dynamic>",
      "item": {
-      "kind": "string",
-      "flutter": "String"
+      "kind": "json",
+      "flutter": "dynamic"
      }
     },
-    "default": [],
-    "doc": "Optional: one Media tone per item (sand, rose, mint, sky, lilac, slate) to draw a strip of thumbnails to tap."
+    "default": [
+     {
+      "name": "Aero Runner",
+      "detail": "Road",
+      "price": "$120",
+      "rating": "4.8",
+      "tone": "lilac"
+     },
+     {
+      "name": "Trail Scout",
+      "detail": "Trail",
+      "price": "$135",
+      "rating": "4.6",
+      "tone": "mint"
+     }
+    ],
+    "doc": "The items: records with name, detail, price, rating (texts) and optionally kind, tone and badge (as ProductTile).",
+    "required": true
    },
    {
     "key": "kind",
@@ -50,26 +56,92 @@
      "flutter": "String"
     },
     "default": "shoe",
-    "doc": "The Media kind the thumbnails draw."
+    "doc": "The Media kind drawn for an item that names none."
+   },
+   {
+    "key": "peek",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0.86,
+    "doc": "The share of the width one item takes: under 1 shows the edge of the next (1: one full item)."
+   },
+   {
+    "key": "dots",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "Pagination dots under the strip."
+   },
+   {
+    "key": "arrows",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "Previous and next buttons."
+   },
+   {
+    "key": "counter",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A \"2 of 6\" count under the strip."
+   },
+   {
+    "key": "thumbs",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "A strip of small drawn thumbnails to tap."
+   },
+   {
+    "key": "cta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small pill on each picture that invites a tap, such as Details (empty: none)."
+   },
+   {
+    "key": "height",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 196,
+    "doc": "The pictures' height."
    }
   ],
   "events": [
    {
+    "key": "onPressed",
+    "doc": "An item was tapped; the value is its position."
+   },
+   {
     "key": "onChanged",
     "doc": "The position changed; the value is the new position."
    }
-  ],
-  "children": "list"
+  ]
  },
  "previews": [
   {
-   "name": "Bar",
+   "name": "Strip",
    "size": [
-    340,
-    50
+    360,
+    340
    ],
    "props": {
-    "value": 2
+    "value": 0
    }
   }
  ],
@@ -77,73 +149,13 @@
   "wrap": {
    "type": "column",
    "children": [
-    "slot",
+    "pages",
     "thumbs",
     "bar"
    ],
    "props": {
     "crossAxisAlignment": "stretch",
-    "spacing": 12
-   },
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "actions": [
-    {
-     "trigger": {
-      "type": "swipeLeft"
-     },
-     "actions": [
-      {
-       "type": "setVariable",
-       "variable": "props.value",
-       "value": "${= (props.value + 1) % props.count}"
-      },
-      {
-       "type": "componentEvent",
-       "event": "onChanged",
-       "value": "${props.value}"
-      }
-     ]
-    },
-    {
-     "trigger": {
-      "type": "swipeRight"
-     },
-     "actions": [
-      {
-       "type": "setVariable",
-       "variable": "props.value",
-       "value": "${= (props.value - 1 + props.count) % props.count}"
-      },
-      {
-       "type": "componentEvent",
-       "event": "onChanged",
-       "value": "${props.value}"
-      }
-     ]
-    }
-   ]
-  },
-  "slot": {
-   "type": "slot"
-  },
-  "bar": {
-   "type": "row",
-   "children": [
-    "prev",
-    "dots",
-    "next"
-   ],
-   "props": {
-    "crossAxisAlignment": "center",
-    "spacing": 10,
-    "mainAxisAlignment": "spaceBetween"
+    "spacing": 10
    },
    "layout": {
     "width": {
@@ -154,123 +166,113 @@
     }
    }
   },
-  "prev": {
-   "type": "row",
+  "pages": {
+   "type": "pageView",
    "children": [
-    "prevI"
+    "page"
    ],
    "props": {
-    "mainAxisAlignment": "center"
+    "viewportFraction": 0.86,
+    "scrollDirection": "horizontal",
+    "padEnds": false
    },
    "layout": {
-    "width": 38,
-    "height": 38
+    "width": {
+     "fill": 0
+    },
+    "height": 290
    },
-   "decoration": {
-    "fills": [
-     {
-      "color": "tile"
-     }
-    ],
-    "radius": 19.0
-   },
-   "states": {
-    "pressed": {
-     "prev": {
-      "opacity": 0.6
-     }
-    }
+   "bind": {
+    "props.initialPage": "${props.value}",
+    "data": "${props.items}",
+    "props.viewportFraction": "${props.peek}",
+    "layout.height": "${= props.height + 94}"
    },
    "actions": [
     {
      "trigger": {
-      "type": "click"
+      "type": "changed"
      },
      "actions": [
       {
        "type": "setVariable",
        "variable": "props.value",
-       "value": "${= (props.value - 1 + props.count) % props.count}"
+       "value": "${result.index}"
       },
       {
        "type": "componentEvent",
        "event": "onChanged",
-       "value": "${props.value}"
+       "value": "${result.index}"
       }
      ]
     }
    ]
   },
-  "prevI": {
-   "type": "icon",
-   "props": {
-    "icon": "arrow_back_rounded",
-    "size": 21,
-    "color": "ink"
-   },
-   "layout": {
-    "width": 21,
-    "height": 21
-   }
-  },
-  "next": {
-   "type": "row",
+  "page": {
+   "type": "column",
    "children": [
-    "nextI"
+    "tile"
    ],
    "props": {
-    "mainAxisAlignment": "center"
+    "crossAxisAlignment": "stretch"
    },
    "layout": {
-    "width": 38,
-    "height": 38
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     0,
+     0,
+     10,
+     0
+    ]
    },
-   "decoration": {
-    "fills": [
-     {
-      "color": "tile"
-     }
-    ],
-    "radius": 19.0
+   "bind": {
+    "layout.padding": "${= props.peek < 1 ? [0, 0, 10, 0] : [0, 0, 0, 0]}"
+   }
+  },
+  "tile": {
+   "type": "ProductTile",
+   "props": {
+    "name": ""
    },
-   "states": {
-    "pressed": {
-     "next": {
-      "opacity": 0.6
-     }
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
     }
+   },
+   "bind": {
+    "props.name": "${= coalesce(item.name, '')}",
+    "props.detail": "${= coalesce(item.detail, '')}",
+    "props.price": "${= coalesce(item.price, '')}",
+    "props.rating": "${= coalesce(item.rating, '')}",
+    "props.kind": "${= coalesce(item.kind, props.kind)}",
+    "props.tone": "${= coalesce(item.tone, 'auto')}",
+    "props.badge": "${= coalesce(item.badge, '')}",
+    "props.cta": "${props.cta}",
+    "props.height": "${props.height}"
    },
    "actions": [
     {
      "trigger": {
-      "type": "click"
+      "type": "event",
+      "event": "onPressed"
      },
      "actions": [
       {
-       "type": "setVariable",
-       "variable": "props.value",
-       "value": "${= (props.value + 1) % props.count}"
-      },
-      {
        "type": "componentEvent",
-       "event": "onChanged",
-       "value": "${props.value}"
+       "event": "onPressed",
+       "value": "${index}"
       }
      ]
     }
    ]
-  },
-  "nextI": {
-   "type": "icon",
-   "props": {
-    "icon": "arrow_forward_rounded",
-    "size": 21,
-    "color": "ink"
-   },
-   "layout": {
-    "width": 21,
-    "height": 21
-   }
   },
   "thumbs": {
    "type": "gridView",
@@ -293,9 +295,9 @@
     }
    },
    "bind": {
-    "data": "${props.thumbs}",
-    "props.crossAxisCount": "${= max(1, length(props.thumbs))}",
-    "visible": "${= length(props.thumbs) > 0}"
+    "data": "${props.items}",
+    "props.crossAxisCount": "${= max(1, length(props.items))}",
+    "visible": "${props.thumbs}"
    }
   },
   "thumb": {
@@ -337,7 +339,7 @@
       {
        "type": "componentEvent",
        "event": "onChanged",
-       "value": "${index}"
+       "value": "${props.value}"
       }
      ]
     }
@@ -365,14 +367,182 @@
     }
    },
    "bind": {
-    "props.kind": "${props.kind}",
-    "props.tone": "${item}"
+    "props.kind": "${= coalesce(item.kind, props.kind)}",
+    "props.tone": "${= coalesce(item.tone, 'auto')}"
+   }
+  },
+  "bar": {
+   "type": "row",
+   "children": [
+    "prev",
+    "mid",
+    "next"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.arrows || props.dots || props.counter}"
+   }
+  },
+  "prev": {
+   "type": "row",
+   "children": [
+    "prevI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 18.0
+   },
+   "bind": {
+    "visible": "${props.arrows}",
+    "opacity": "${= props.value > 0 ? 1 : 0.35}"
+   },
+   "states": {
+    "pressed": {
+     "prev": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= max(0, props.value - 1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "prevI": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_back_rounded",
+    "size": 20,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "next": {
+   "type": "row",
+   "children": [
+    "nextI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 18.0
+   },
+   "bind": {
+    "visible": "${props.arrows}",
+    "opacity": "${= props.value < length(props.items) - 1 ? 1 : 0.35}"
+   },
+   "states": {
+    "pressed": {
+     "next": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= min(length(props.items) - 1, props.value + 1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "nextI": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_forward_rounded",
+    "size": 20,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   }
+  },
+  "mid": {
+   "type": "column",
+   "children": [
+    "dots",
+    "count"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
    }
   },
   "dots": {
    "type": "row",
    "children": [
-    "dotList"
+    "dotsList"
    ],
    "props": {
     "mainAxisAlignment": "center"
@@ -381,36 +551,79 @@
     "width": {
      "fill": 0
     },
-    "height": 38
+    "height": 22
+   },
+   "bind": {
+    "visible": "${props.dots}"
    }
   },
-  "dotList": {
+  "dotsList": {
    "type": "listView",
    "children": [
-    "dot"
+    "dotsHit"
    ],
    "props": {
     "scrollable": false,
-    "spacing": 6,
+    "spacing": 0,
     "scrollDirection": "horizontal"
    },
    "layout": {
     "width": {
      "hug": 0
     },
-    "height": 6
+    "height": 22
    },
    "bind": {
-    "data": "${= range(props.count)}"
+    "data": "${= range(max(1, length(props.items)))}"
    }
   },
-  "dot": {
+  "dotsHit": {
+   "type": "row",
+   "children": [
+    "dotsDot"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     3,
+     0,
+     3,
+     0
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= index}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "dotsDot": {
    "type": "box",
    "layout": {
     "width": 6,
-    "height": {
-     "fill": 0
-    }
+    "height": 6
    },
    "decoration": {
     "fills": [
@@ -423,6 +636,27 @@
    "bind": {
     "layout.width": "${= index == props.value ? 20 : 6}",
     "decoration.fills[0].color": "${= index == props.value ? theme.colors.accent : theme.colors.lineStrong}"
+   }
+  },
+  "count": {
+   "type": "text",
+   "props": {
+    "text": "${= props.value + 1} of ${= length(props.items)}",
+    "style": {
+     "from": "meta",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${props.counter}"
    }
   }
  }

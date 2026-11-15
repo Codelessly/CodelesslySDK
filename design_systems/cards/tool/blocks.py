@@ -793,6 +793,46 @@ def cart_line():
                                                                            'qty': 2, 'kind': 'mug'}}])
 
 
+def dots_nodes(prefix, count, current, on_tap):
+    """Pagination dots: the current one long and in the accent; a tap runs on_tap(index expression)."""
+    return {
+        prefix: node('row', {'width': FILL, 'height': 22}, {'mainAxisAlignment': 'center'}, [prefix + 'List']),
+        prefix + 'List': node('listView', {'width': HUG, 'height': 22}, {'scrollable': False, 'spacing': 0, 'scrollDirection': 'horizontal'},
+                              [prefix + 'Hit'], bind={'data': '${= range(max(1, %s))}' % count}),
+        prefix + 'Hit': node('row', {'width': HUG, 'height': FILL, 'padding': [3, 0, 3, 0]}, {'mainAxisAlignment': 'center'}, [prefix + 'Dot'],
+                             actions=click(*on_tap('index'))),
+        prefix + 'Dot': box(6, 6, {'fills': [{'color': 'lineStrong'}], 'radius': 3},
+                            bind={'layout.width': '${= index == %s ? 20 : 6}' % current,
+                                  'decoration.fills[0].color': '${= index == %s ? theme.colors.accent : theme.colors.lineStrong}' % current}),
+    }
+
+
+def page_dots():
+    nodes = dots_nodes('dots', 'props.count', 'props.value', lambda i: [setv('props.value', i), fire('onChanged', '${index}')])
+    props = [P('value', var(NUM), '', 'The name of your number variable: the page shown, from 0 (the same one Pages or Carousel keeps).'),
+             P('count', INT, 3, 'How many pages there are.', True)]
+    return component('PageDots', "Pagination dots for Pages, a Carousel or any paged content: PageDots =page count:=length(items) draws one dot per page, the current one long and in the accent, and a tap on a dot sets your variable to that page (from 0).",
+                     props, nodes, 'dots', events=[('onChanged', 'A dot was tapped; the value is its page.')],
+                     previews=[{'name': 'Dots', 'size': [200, 22], 'props': {'value': 1, 'count': 5}}])
+
+
+def wide_scroll():
+    fade = {'foregroundPainter': [{'op': 'rect', 'rect': ['${= size.width - 28}', 0, 28, '${size.height}'], 'when': '${props.fade}',
+            'paint': "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"}]}
+    nodes = {
+        'frame': col(['scroller'], customPaint=fade),
+        'scroller': node('row', {'width': FILL, 'height': HUG}, {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start'}, ['inner']),
+        'inner': node('column', {'width': 640, 'height': HUG, 'padding': [0, 0, 20, 0]}, {'crossAxisAlignment': 'stretch', 'spacing': 0}, ['slot'],
+                      bind={'layout.width': '${props.width}'}),
+        'slot': {'type': 'slot'},
+    }
+    props = [P('width', NUM, 640, 'How wide the content inside is laid out, in pixels (wider than the card).', True),
+             P('fade', BOOL, True, 'A soft fade at the right edge that says there is more.')]
+    return component('WideScroll', "A frame that scrolls sideways for content wider than the card (a table with many columns): write WideScroll width:640 and the wide blocks indented under it (TableHeader, each row, TableRow) are laid out that wide and scroll together; a fade at the right edge shows there is more.",
+                     props, nodes, 'frame', children=True, previews=[{'name': 'Frame', 'size': [340, 40], 'props': {}}])
+
+
+
 # --- ProductTile, Carousel, Pager -------------------------------------------------------------------------
 
 def product_tile():
@@ -843,43 +883,63 @@ def product_tile():
 
 
 def carousel():
-    prev = [setv('props.value', '(props.value - 1 + props.count) % props.count'), fire('onChanged', '${props.value}')]
-    nxt = [setv('props.value', '(props.value + 1) % props.count'), fire('onChanged', '${props.value}')]
+    n = 'length(props.items)'
+    go = lambda expr: [setv('props.value', expr), fire('onChanged', '${props.value}')]
+    f = lambda key, fallback="''": "${= coalesce(item.%s, %s)}" % (key, fallback)
     nodes = {
-        'wrap': col(['slot', 'thumbs', 'bar'], 12, actions=[{'trigger': {'type': 'swipeLeft'}, 'actions': nxt}, {'trigger': {'type': 'swipeRight'}, 'actions': prev}]),
-        'slot': {'type': 'slot'},
-        'bar': row(['prev', 'dots', 'next'], 10, main='spaceBetween'),
-        **round_button('prev', 'arrow_back_rounded', 38, actions=click(*prev)),
-        **round_button('next', 'arrow_forward_rounded', 38, actions=click(*nxt)),
-        'thumbs': grid(['thumb'], E('max(1, length(props.thumbs))'), 8, '${props.thumbs}', bind={'visible': '${= length(props.thumbs) > 0}'}),
+        'wrap': col(['pages', 'thumbs', 'bar'], 10),
+        'pages': node('pageView', {'width': FILL, 'height': 290}, {'viewportFraction': 0.86, 'scrollDirection': 'horizontal', 'padEnds': False},
+                      ['page'], bind={'props.initialPage': '${props.value}', 'data': '${props.items}', 'props.viewportFraction': '${props.peek}',
+                                      'layout.height': '${= props.height + 94}'},
+                      actions=[{'trigger': {'type': 'changed'}, 'actions': [setv('props.value', '${result.index}'), fire('onChanged', '${result.index}')]}]),
+        'page': node('column', {'width': FILL, 'height': FILL, 'padding': [0, 0, 10, 0]}, {'crossAxisAlignment': 'stretch'}, ['tile'],
+                     bind={'layout.padding': '${= props.peek < 1 ? [0, 0, 10, 0] : [0, 0, 0, 0]}'}),
+        'tile': node('ProductTile', {'width': FILL, 'height': HUG}, {'name': ''},
+                     bind={'props.name': f('name'), 'props.detail': f('detail'), 'props.price': f('price'), 'props.rating': f('rating'),
+                           'props.kind': "${= coalesce(item.kind, props.kind)}", 'props.tone': f('tone', "'auto'"), 'props.badge': f('badge'),
+                           'props.cta': '${props.cta}', 'props.height': '${props.height}'},
+                     actions=[{'trigger': {'type': 'event', 'event': 'onPressed'}, 'actions': [fire('onPressed', '${index}')]}]),
+        'thumbs': grid(['thumb'], E('max(1, %s)' % n), 8, '${props.items}', bind={'visible': '${props.thumbs}'}),
         'thumb': node('stack', {'width': FILL, 'height': 48}, children=['thumbArt'],
                       decoration={'radius': 13, 'strokes': [{'color': 'accent'}], 'strokeWidth': 0, 'strokeAlign': 'outside'},
                       bind={'decoration.strokeWidth': '${= index == props.value ? 2.5 : 0}', 'opacity': '${= index == props.value ? 1 : 0.72}'},
-                      actions=click(setv('props.value', 'index'), fire('onChanged', '${index}'))),
+                      actions=click(*go('index'))),
         'thumbArt': node('Media', {'width': FILL, 'height': FILL, 'x': {'start': 0, 'end': 0}, 'y': {'start': 0, 'end': 0}}, {'kind': 'shoe'},
-                         bind={'props.kind': '${props.kind}', 'props.tone': '${item}'}),
-        'dots': node('row', {'width': FILL, 'height': 38}, {'mainAxisAlignment': 'center'}, ['dotList']),
-        'dotList': node('listView', {'width': HUG, 'height': 6}, {'scrollable': False, 'spacing': 6, 'scrollDirection': 'horizontal'}, ['dot'],
-                        bind={'data': '${= range(props.count)}'}),
-        'dot': box(6, FILL, {'fills': [{'color': 'lineStrong'}], 'radius': 3},
-                   bind={'layout.width': '${= index == props.value ? 20 : 6}',
-                         'decoration.fills[0].color': '${= index == props.value ? theme.colors.accent : theme.colors.lineStrong}'}),
+                         bind={'props.kind': "${= coalesce(item.kind, props.kind)}", 'props.tone': f('tone', "'auto'")}),
+        'bar': row(['prev', 'mid', 'next'], 10, bind={'visible': '${= props.arrows || props.dots || props.counter}'}),
+        **round_button('prev', 'arrow_back_rounded', 36, actions=click(*go('max(0, props.value - 1)')),
+                       bind={'visible': '${props.arrows}', 'opacity': '${= props.value > 0 ? 1 : 0.35}'}),
+        **round_button('next', 'arrow_forward_rounded', 36, actions=click(*go('min(%s - 1, props.value + 1)' % n)),
+                       bind={'visible': '${props.arrows}', 'opacity': '${= props.value < %s - 1 ? 1 : 0.35}' % n}),
+        'mid': node('column', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'center', 'spacing': 2}, ['dots', 'count']),
+        **dots_nodes('dots', n, 'props.value', lambda i: go(i)),
+        'count': text('${= props.value + 1} of ${= %s}' % n, {'from': 'meta', 'fontWeight': 600}, bind={'visible': '${props.counter}'}),
     }
+    nodes['dots']['bind'] = {'visible': '${props.dots}'}
     props = [
-        P('value', var(NUM), '', 'The name of your number variable: the position, from 0.'),
-        P('count', INT, 6, 'How many items there are.', True),
-        P('thumbs', STRINGS, [], 'Optional: one Media tone per item (sand, rose, mint, sky, lilac, slate) to draw a strip of thumbnails to tap.'),
-        P('kind', STRING, 'shoe', 'The Media kind the thumbnails draw.'),
+        P('value', var(NUM), '', 'The name of your number variable: the item in view, from 0.'),
+        P('items', ROWS, [{'name': 'Aero Runner', 'detail': 'Road', 'price': '$120', 'rating': '4.8', 'tone': 'lilac'},
+                          {'name': 'Trail Scout', 'detail': 'Trail', 'price': '$135', 'rating': '4.6', 'tone': 'mint'}],
+          'The items: records with name, detail, price, rating (texts) and optionally kind, tone and badge (as ProductTile).', True),
+        P('kind', STRING, 'shoe', 'The Media kind drawn for an item that names none.'),
+        P('peek', NUM, 0.86, 'The share of the width one item takes: under 1 shows the edge of the next (1: one full item).'),
+        P('dots', BOOL, True, 'Pagination dots under the strip.'),
+        P('arrows', BOOL, True, 'Previous and next buttons.'),
+        P('counter', BOOL, False, 'A "2 of 6" count under the strip.'),
+        P('thumbs', BOOL, False, 'A strip of small drawn thumbnails to tap.'),
+        P('cta', STRING, '', 'A small pill on each picture that invites a tap, such as Details (empty: none).'),
+        P('height', NUM, 196, "The pictures' height."),
     ]
-    return component('Carousel', "A carousel frame: write Carousel =i count:6 and, indented under it, the one item at position i (ProductTile \"{items[i].name}\" ...); its arrows, its dots and a swipe move i (from 0, wrapping) in your number variable; thumbs:=map(items,x=>x.tone) with kind adds a strip of drawn thumbnails to tap.",
-                     props, nodes, 'wrap', events=[('onChanged', 'The position changed; the value is the new position.')], children=True,
-                     previews=[{'name': 'Bar', 'size': [340, 50], 'props': {'value': 2}}])
+    return component('Carousel', "A real carousel of products: Carousel =i items:=shoes slides one ProductTile per record (name, detail, price, rating, kind, tone) sideways by swipe, showing the edge of the next (peek), and keeps the position (from 0) in your number variable; dots, arrows, counter (\"2 of 6\") and thumbs are switches; a tap on an item fires onPressed with its position (-> open=true), and Pager or PageDots on the same variable drive it too.",
+                     props, nodes, 'wrap', events=[('onPressed', 'An item was tapped; the value is its position.'),
+                                                   ('onChanged', 'The position changed; the value is the new position.')],
+                     previews=[{'name': 'Strip', 'size': [360, 340], 'props': {'value': 0}}])
 
 
 def pager():
     nodes = {
         'bar': row(['label', 'prev', 'next'], 8),
-        'label': text('${props.label} ${= props.value + 1} of ${= max(1, props.count)}', 'meta', FILL),
+        'label': text("${= trim(props.label + ' ' + text(props.value + 1) + ' of ' + text(max(1, props.count)))}", 'meta', FILL),
         **round_button('prev', 'chevron_left_rounded', 34, actions=click(setv('props.value', 'max(0, props.value - 1)'), fire('onChanged', '${props.value}')),
                        bind={'opacity': '${= props.value > 0 ? 1 : 0.35}'}),
         **round_button('next', 'chevron_right_rounded', 34,
@@ -889,9 +949,9 @@ def pager():
     props = [
         P('value', var(NUM), '', 'The name of your number variable: the page, from 0.'),
         P('count', INT, 1, 'How many pages there are (ceil(length(rows)/5)).', True),
-        P('label', STRING, 'Page', 'The word before "1 of 3".'),
+        P('label', STRING, 'Page', 'The word before "1 of 3" (empty: the count alone, as under a carousel).'),
     ]
-    return component('Pager', "Paging for a list: \"Page 1 of 3\" with previous and next buttons; Pager =page count:=ceil(length(rows)/5) keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5).",
+    return component('Pager', "Paging for a list or for pages of content: \"Page 1 of 3\" with previous and next buttons; Pager =page count:=ceil(length(rows)/5) keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5), or give it the variable of Pages or a Carousel to turn their pages.",
                      props, nodes, 'bar', events=[('onChanged', 'The page changed; the value is the new page.')],
                      previews=[{'name': 'Pages', 'size': [340, 36], 'props': {'count': 3}}])
 
@@ -959,49 +1019,64 @@ def diff_hunk():
 
 # --- ComparisonTable --------------------------------------------------------------------------------------
 
+COMPARE = 5
+
+
 def comparison_table():
     n = 'length(props.names)'
-    picked = lambda i: "at(props.names, %d) == props.pick" % i
+    wide = '(%s > 2)' % n
+    HEAD, CELL, FOOT, LABEL = 98, 46, 58, 84
+    colw = '(%s ? props.columnWidth : 140)' % wide
+    picked = lambda i: "(%s > %d && at(props.names, %d) == props.pick)" % (n, i, i)
+    fade = {'foregroundPainter': [{'op': 'rect', 'rect': ['${= size.width - 26}', 0, 26, '${size.height}'], 'when': E(wide),
+            'paint': "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"}]}
+    rule = {'strokes': [{'color': 'line'}], 'strokeWidth': 1, 'strokeSides': 'top'}
     nodes = {
-        'table': col(['head', 'rows', 'foot'], 0),
-        'head': row(['corner'] + ['h%d' % i for i in range(3)], 0, cross='stretch'),
-        'corner': node('column', {'width': FILL, 'height': HUG, 'flex': 5}, {'mainAxisAlignment': 'end', 'crossAxisAlignment': 'start'}, ['cornerText']),
-        'cornerText': text('${props.corner}', 'eyebrow', layout={'padding': [0, 0, 0, 12]}),
-        'rows': vlist(['r'], 0, '${props.rows}'),
-        'r': row(['rl'] + ['c%d' % i for i in range(3)], 0, cross='stretch',
-                 decoration={'strokes': [{'color': 'line'}], 'strokeWidth': 1, 'strokeSides': 'top'}),
-        'rl': node('row', {'width': FILL, 'height': HUG, 'flex': 5, 'padding': [0, 12, 6, 12]}, None, ['rlText']),
-        'rlText': text('${= at(item, 0)}', {'from': 'meta', 'fontWeight': 600}, FILL, color='inkSoft'),
-        'foot': row(['footGap'] + ['f%d' % i for i in range(3)], 0, cross='stretch'),
-        'footGap': node('spacer', {'width': FILL, 'height': 1, 'flex': 5}),
+        'table': row(['labels', 'scrollBox'], 0, cross='start'),
+        # the label column stays in place
+        'labels': node('column', {'width': LABEL, 'height': HUG}, {'crossAxisAlignment': 'stretch'}, ['corner', 'labelRows']),
+        'corner': node('column', {'width': FILL, 'height': HEAD, 'padding': [0, 0, 0, 12]}, {'mainAxisAlignment': 'end', 'crossAxisAlignment': 'start'},
+                       ['cornerText']),
+        'cornerText': text('${props.corner}', 'eyebrow'),
+        'labelRows': vlist(['rl'], 0, '${props.rows}'),
+        'rl': node('row', {'width': FILL, 'height': CELL, 'padding': [0, 0, 6, 0]}, None, ['rlText'], decoration=dict(rule)),
+        'rlText': text('${= at(item, 0)}', {'from': 'meta', 'fontWeight': 600}, FILL, color='inkSoft', maxLines=2, overflow='ellipsis'),
+        # the option columns scroll sideways when there are more than two
+        'scrollBox': node('column', {'width': FILL, 'height': HUG, 'flex': 1}, {'crossAxisAlignment': 'stretch'}, ['scroller'], customPaint=fade),
+        'scroller': node('row', {'width': FILL, 'height': HUG}, {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start'},
+                         ['k%d' % i for i in range(COMPARE)] + ['tail']),
+        'tail': node('spacer', {'width': 18, 'height': 1}, bind={'visible': E(wide)}),
     }
-    for i in range(3):
+    for i in range(COMPARE):
         vis = E('%s > %d' % (n, i))
         win = '(at(item, length(item) - 1) == %d)' % (i + 1)
-        tint = E("%s ? theme.colors.accentTint : '#00FFFFFF'" % picked(i))
-        nodes['h%d' % i] = node('column', {'width': FILL, 'height': HUG, 'flex': 6, 'padding': [10, 12, 10, 12]},
-                                {'crossAxisAlignment': 'start', 'spacing': 3}, ['hc%d' % i, 'hn%d' % i, 'hp%d' % i, 'hs%d' % i],
-                                decoration={'fills': [{'color': '#00FFFFFF'}], 'radius': [14, 14, 0, 0]},
-                                bind={'visible': vis, 'decoration.fills[0].color': tint})
+        nodes['k%d' % i] = node('column', {'width': 140, 'height': HUG}, {'crossAxisAlignment': 'stretch'},
+                                ['h%d' % i, 'cells%d' % i, 'f%d' % i],
+                                decoration={'fills': [{'color': '#00FFFFFF'}], 'radius': 14},
+                                bind={'visible': vis, 'layout.width': E(colw),
+                                      'decoration.fills[0].color': E("%s ? theme.colors.accentTint : '#00FFFFFF'" % picked(i)),
+                                      'decoration.radius': '${theme.radii.tile}'})
+        nodes['h%d' % i] = node('column', {'width': FILL, 'height': HEAD, 'padding': [10, 10, 8, 0]},
+                                {'crossAxisAlignment': 'start', 'spacing': 2}, ['hc%d' % i, 'hn%d' % i, 'hp%d' % i, 'hs%d' % i])
         nodes['hc%d' % i] = row(['hcT%d' % i], width=HUG, pad=[7, 3, 7, 3], decoration={'fills': [{'color': 'accent'}], 'radius': 999},
                                 bind={'opacity': E('%s ? 1 : 0' % picked(i))})
         nodes['hcT%d' % i] = text('${props.pickLabel}', {'from': 'eyebrow', 'fontSize': 9.5, 'letterSpacing': 0.5}, color='onAccent')
         nodes['hn%d' % i] = text('${= %s > %d ? at(props.names, %d) : ""}' % (n, i, i), 'blockTitle', FILL, maxLines=1, overflow='ellipsis',
                                  layout={'padding': [0, 3, 0, 0]})
-        nodes['hp%d' % i] = text('${= length(props.prices) > %d ? at(props.prices, %d) : ""}' % (i, i), 'number', FILL, maxLines=1,
+        nodes['hp%d' % i] = text('${= length(props.prices) > %d ? at(props.prices, %d) : ""}' % (i, i), {'from': 'number', 'fontSize': 20}, FILL,
+                                 maxLines=1, scaleDown=True,
                                  bind={'props.style.color': E('%s ? theme.colors.accent : theme.colors.ink' % picked(i))})
         nodes['hs%d' % i] = text('${= length(props.notes) > %d ? at(props.notes, %d) : ""}' % (i, i), 'meta', FILL, maxLines=1, overflow='ellipsis',
                                  bind={'visible': E('length(props.notes) > %d' % i)})
-        nodes['c%d' % i] = node('row', {'width': FILL, 'height': HUG, 'flex': 6, 'padding': [10, 11, 6, 11]}, {'spacing': 5, 'crossAxisAlignment': 'start'},
-                                ['ct%d' % i, 'cw%d' % i], decoration={'fills': [{'color': '#00FFFFFF'}]},
-                                bind={'visible': vis, 'decoration.fills[0].color': tint})
-        nodes['ct%d' % i] = text('${= length(item) > %d ? at(item, %d) : ""}' % (i + 2, i + 1), 'figure', FILL, bind={
+        nodes['cells%d' % i] = vlist(['c%d' % i], 0, '${props.rows}')
+        nodes['c%d' % i] = node('row', {'width': FILL, 'height': CELL, 'padding': [10, 0, 6, 0]}, {'spacing': 5}, ['ct%d' % i, 'cw%d' % i],
+                                decoration=dict(rule))
+        nodes['ct%d' % i] = text('${= length(item) > %d ? at(item, %d) : ""}' % (i + 2, i + 1), {'from': 'figure', 'fontSize': 13, 'height': 1.25},
+                                 FILL, maxLines=2, overflow='ellipsis', bind={
             'props.style.color': E('%s ? theme.colors.ink : theme.colors.inkSoft' % win),
             'props.style.fontWeight': E('%s ? 600 : 400' % win)})
         nodes['cw%d' % i] = icon('check_circle_rounded', 16, 'good', bind={'visible': E(win)})
-        nodes['f%d' % i] = node('column', {'width': FILL, 'height': HUG, 'flex': 6, 'padding': [8, 6, 8, 10]}, {'crossAxisAlignment': 'stretch'},
-                                ['fb%d' % i], decoration={'fills': [{'color': '#00FFFFFF'}], 'radius': [0, 0, 14, 14]},
-                                bind={'visible': vis, 'decoration.fills[0].color': tint})
+        nodes['f%d' % i] = node('column', {'width': FILL, 'height': FOOT, 'padding': [8, 6, 8, 10]}, {'crossAxisAlignment': 'stretch'}, ['fb%d' % i])
         nodes['fb%d' % i] = row(['fbT%d' % i], height=40, main='center', decoration={'fills': [{'color': 'card'}], 'strokes': [{'color': 'lineStrong'}],
                                                                                  'strokeWidth': 1.2, 'radius': 12},
                                 bind={'decoration.fills[0].color': E('%s ? theme.colors.accent : theme.colors.card' % picked(i)),
@@ -1013,18 +1088,19 @@ def comparison_table():
         nodes['fbT%d' % i] = text('${props.cta}', {'from': 'cta', 'fontSize': 13.5}, maxLines=1, bind={
             'props.style.color': E('%s ? theme.colors.onAccent : theme.colors.ink' % picked(i))})
     props = [
-        P('names', STRINGS, ['Lite', 'Max'], 'The two or three things compared, one column each.', True),
+        P('names', STRINGS, ['Lite', 'Max'], 'The two to five things compared, one column each.', True),
         P('prices', STRINGS, [], 'The headline figure under each name ($25/mo).'),
         P('notes', STRINGS, [], 'A quiet line under each figure (optional).'),
-        P('rows', ROWS, [['Data', '10 GB', 'Unlimited', 2]], 'One list per row: the label, a value per column, then the winning column (1, 2 or 3; 0 for a tie).', True),
+        P('rows', ROWS, [['Data', '10 GB', 'Unlimited', 2]], 'One list per row: the label, a value per column, then the winning column (1 to 5; 0 for a tie).', True),
         P('pick', STRING, '', 'The recommended name: its column is tinted and its button filled (empty: none).'),
         P('pickLabel', STRING, 'Best value', 'The small label over the recommended column.'),
         P('cta', STRING, 'Choose', 'The label of the button under each column.'),
         P('corner', STRING, '', 'A small caps label in the top-left corner (optional).'),
+        P('columnWidth', NUM, 124, 'The width of a column when there are more than two (they then scroll sideways).'),
     ]
-    return component('ComparisonTable', "Two or three options compared side by side: names and prices head the columns, rows is a list of [label, value per column..., winner] where winner is the winning column's number (1, 2, 3; 0 a tie) and gets a check; pick names the recommended column (tinted); the Choose button under each column fires onChoose with that name as result.",
+    return component('ComparisonTable', "Two to five options compared side by side: names and prices head the columns, rows is a list of [label, value per column..., winner] where winner is the winning column's number (1 to 5; 0 a tie) and gets a check; pick names the recommended column (tinted); with more than two options the columns scroll sideways while the labels stay in place; the Choose button under each column fires onChoose with that name as result.",
                      props, nodes, 'table', events=[('onChoose', "A column's button was tapped; the value is its name.")],
-                     previews=[{'name': 'Plans', 'size': [360, 220], 'props': {'prices': ['$25/mo', '$45/mo'], 'pick': 'Max',
+                     previews=[{'name': 'Plans', 'size': [384, 300], 'props': {'prices': ['$25/mo', '$45/mo'], 'pick': 'Max',
                                                                              'rows': [['Data', '10 GB', 'Unlimited', 2], ['Contract', 'Monthly', '24 months', 1]]}}])
 
 
@@ -1165,7 +1241,7 @@ def chart_card():
 
 # --- TableHeader and TableRow -----------------------------------------------------------------------------
 
-COLS = 5
+COLS = 7
 
 
 def _flex(i):
@@ -1205,7 +1281,7 @@ def table_header():
     props = [
         P('value', var(STRING), '', 'The name of your text variable: the key of the column sorted by (empty: none).'),
         P('desc', var(BOOL), '', 'The name of your boolean variable: true when the sort is high to low. Declare it (state desc=false) and write desc:desc.'),
-        P('columns', STRINGS, ['Plan', 'Subs', 'Revenue'], 'The column titles (up to five).', True),
+        P('columns', STRINGS, ['Plan', 'Subs', 'Revenue'], 'The column titles (up to seven).', True),
         P('keys', STRINGS, [], "The field each column sorts by, e.g. [\"plan\",\"subs\",\"revenue\"] (default: the title in lower case)."),
         P('widths', NUMBERS, [], 'Relative column widths, e.g. [3,2,2] (default: the first wider); give TableRow the same.'),
         P('selectable', BOOL, False, 'True shows a tick-all box before the titles.'),
@@ -1251,7 +1327,7 @@ def table_row():
             del nodes['c%d' % i]['bind']['props.style.fontWeight']
             nodes['c%d' % i]['props']['style'] = {'from': 'figure', 'fontSize': 13}
     props = [
-        P('cells', STRINGS, ['Pro', '1,340', '$38.9k'], 'The cell texts, in column order (up to five).', True),
+        P('cells', STRINGS, ['Pro', '1,340', '$38.9k'], 'The cell texts, in column order (up to seven).', True),
         P('badge', STRING, '', 'A status pill in one more column at the end (Paid is green, Due amber, Overdue red; empty: none).'),
         P('widths', NUMBERS, [], "Relative column widths, as the TableHeader's."),
         P('selectable', BOOL, False, 'True shows a tick box before the cells.'),
@@ -1269,48 +1345,85 @@ def _flex_at(expr):
 # --- PhotoGallery -----------------------------------------------------------------------------------------
 
 def photo_gallery():
-    cur = 'at(props.photos, clamp(props.value - 1, 0, max(0, length(props.photos) - 1)))'
     n = 'length(props.photos)'
+    shown = 'clamp(props.value - 1, 0, max(0, %s - 1))' % n
+    cur = 'at(props.photos, %s)' % shown
     whole = {'width': FILL, 'height': FILL, 'x': {'start': 0, 'end': 0}, 'y': {'start': 0, 'end': 0}}
+    kind = {'props.kind': '${item.kind}', 'props.tone': "${= coalesce(item.tone, 'auto')}"}
+    open_it = click(setv('props.value', 'index + 1'), fire('onChanged', '${= index + 1}'))
+    swiped = [{'trigger': {'type': 'changed'}, 'actions': [setv('props.value', '${= result.index + 1}'), fire('onChanged', '${= result.index + 1}')]}]
+    cap = lambda nid: text("${= coalesce(item.caption, '')}", {'from': 'meta', 'fontSize': 11.5, 'height': 1.25}, FILL, maxLines=1, overflow='ellipsis',
+                           color='inkSoft')
+    closed = "props.value <= 0"
     nodes = {
-        'gallery': node('stack', {'width': FILL, 'height': HUG}, children=['grid', 'veil']),
-        'grid': grid(['cell'], '${props.columns}', 8, '${props.photos}', run_gap=10),
-        'cell': col(['thumb', 'caption'], 6, states={'pressed': {'cell': PRESS}},
-                    actions=click(setv('props.value', 'index + 1'), fire('onChanged', '${= index + 1}'))),
-        'thumb': node('Media', {'width': FILL, 'height': 92}, {'kind': 'mountain'},
-                      bind={'props.kind': '${item.kind}', 'props.tone': "${= coalesce(item.tone, 'auto')}"}),
-        'caption': text("${= coalesce(item.caption, '')}", {'from': 'meta', 'fontSize': 11.5, 'height': 1.25}, FILL, maxLines=1, overflow='ellipsis',
-                        color='inkSoft'),
-        'veil': node('column', dict(whole, padding=[12, 12, 12, 14]), {'crossAxisAlignment': 'stretch', 'spacing': 12}, ['bar', 'stage', 'foot'],
-                     decoration={'fills': [{'color': 'bar'}], 'radius': 14}, bind={'visible': '${= props.value > 0}',
-                                                                                  'decoration.radius': '${theme.radii.tile}'}),
+        'gallery': col(['grid', 'strip', 'paged', 'veil'], 0),
+        # a grid of thumbnails
+        'grid': grid(['cell'], '${props.columns}', 8, '${props.photos}', run_gap=10,
+                     bind={'visible': "${= props.layout == 'grid' && %s}" % closed}),
+        'cell': col(['thumb', 'caption'], 6, states={'pressed': {'cell': PRESS}}, actions=open_it),
+        'thumb': node('Media', {'width': FILL, 'height': 92}, {'kind': 'mountain'}, bind=dict(kind)),
+        'caption': cap('caption'),
+        # a strip that scrolls sideways
+        'strip': node('listView', {'width': FILL, 'height': 150}, {'scrollable': True, 'spacing': 10, 'scrollDirection': 'horizontal'}, ['tile'],
+                      bind={'data': '${props.photos}', 'visible': "${= props.layout == 'strip' && %s}" % closed}),
+        'tile': col(['tileArt', 'tileCaption'], 6, width=168, height=FILL, states={'pressed': {'tile': PRESS}}, actions=open_it),
+        'tileArt': node('Media', {'width': FILL, 'height': 124}, {'kind': 'mountain'}, bind=dict(kind)),
+        'tileCaption': cap('tileCaption'),
+        # full-width pages with dots
+        'paged': col(['pages', 'pagedFoot'], 8, bind={'visible': "${= props.layout == 'pages'}"}),
+        'pages': node('pageView', {'width': FILL, 'height': 250}, {'viewportFraction': 1, 'scrollDirection': 'horizontal', 'padEnds': False},
+                      ['pg'], bind={'props.initialPage': E(shown), 'data': '${props.photos}'}, actions=swiped),
+        'pg': node('stack', {'width': FILL, 'height': FILL}, children=['pgArt', 'pgShade', 'pgCaption', 'pgCount']),
+        'pgArt': node('Media', dict(whole), {'kind': 'mountain'}, bind=dict(kind)),
+        'pgShade': node('box', {'width': FILL, 'height': 84, 'x': {'start': 0, 'end': 0}, 'y': {'end': 0}},
+                        decoration={'radius': [0, 0, 14, 14], 'fills': [{'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [
+                            {'position': 0, 'color': '#00000000'}, {'position': 1, 'color': '#A6000000'}]}]}),
+        'pgCaption': text("${= coalesce(item.caption, '')}", 'blockTitle', color='#FFFFFFFF', maxLines=1, overflow='ellipsis',
+                          layout={'x': {'start': 14, 'end': 14}, 'y': {'end': 12}}),
+        'pgCount': row(['pgCountText'], width=HUG, pad=[9, 5, 9, 5], decoration={'fills': [{'color': '#8C000000'}], 'radius': 999}),
+        'pgCountText': text('${= index + 1} of ${= %s}' % n, 'chip', color='#FFFFFFFF'),
+        'pagedFoot': col(['pdots'], bind={'visible': '${props.dots}'}),
+        **dots_nodes('pdots', n, shown, lambda i: [setv('props.value', '%s + 1' % i), fire('onChanged', '${= index + 1}')]),
+        # the large view, in place of the grid or strip, paged by swipe
+        'veil': col(['bar', 'stage', 'foot', 'vdots'], 10, pad=[12, 12, 12, 12],
+                    decoration={'fills': [{'color': 'bar'}], 'radius': 14},
+                    bind={'visible': "${= props.layout != 'pages' && props.value > 0}", 'decoration.radius': '${theme.radii.tile}'}),
         'bar': row(['count', 'close'], 8, main='spaceBetween'),
         'count': row(['countText'], width=HUG, pad=[10, 6, 10, 6], decoration={'fills': [{'color': 'barRaise'}], 'radius': 999}),
-        'countText': text('${props.value} of ${= %s}' % n, 'chip', color='onBar'),
+        'countText': text('${= %s + 1} of ${= %s}' % (shown, n), 'chip', color='onBar'),
         **round_button('close', 'close_rounded', 34, fill='barRaise', ink='onBar', actions=click(setv('props.value', '0'), fire('onChanged', '0'))),
-        'stage': node('stack', {'width': FILL, 'height': FILL, 'flex': 1}, children=['big', 'prev', 'next']),
-        'big': node('Media', dict(whole), {'kind': 'mountain'}, bind={'props.kind': '${= %s.kind}' % cur,
-                                                                     'props.tone': "${= coalesce(%s.tone, 'auto')}" % cur}),
+        'stage': node('stack', {'width': FILL, 'height': 252}, children=['big', 'prev', 'next']),
+        'big': node('pageView', dict(whole), {'viewportFraction': 1, 'scrollDirection': 'horizontal', 'padEnds': False}, ['bigArt'],
+                    bind={'props.initialPage': E(shown), 'data': '${props.photos}'}, actions=swiped),
+        'bigArt': node('Media', {'width': FILL, 'height': FILL}, {'kind': 'mountain'}, bind=dict(kind)),
         **round_button('prev', 'chevron_left_rounded', 38, fill='card', ink='ink',
                        actions=click(setv('props.value', '(props.value - 2 + %s) %% %s + 1' % (n, n)), fire('onChanged', '${props.value}'))),
         **round_button('next', 'chevron_right_rounded', 38, fill='card', ink='ink',
                        actions=click(setv('props.value', 'props.value %% %s + 1' % n), fire('onChanged', '${props.value}'))),
         'foot': text("${= coalesce(%s.caption, '')}" % cur, 'blockTitle', FILL, color='onBar', textAlign='center', maxLines=2, overflow='ellipsis'),
+        **dots_nodes('vdots', n, shown, lambda i: [setv('props.value', '%s + 1' % i), fire('onChanged', '${= index + 1}')]),
     }
+    nodes['pgCount']['layout'].update({'x': {'end': 12}, 'y': {'start': 12}})
     nodes['prev']['layout'].update({'x': {'start': 10}, 'y': {'align': 0}})
     nodes['next']['layout'].update({'x': {'end': 10}, 'y': {'align': 0}})
     for k in ('prev', 'next'):
         nodes[k]['bind'] = {'decoration.effects': '${theme.shadows.knob}'}
+    nodes['vdots']['bind'] = {'visible': '${props.dots}'}
+    nodes['vdotsDot']['bind']['decoration.fills[0].color'] = '${= index == %s ? theme.colors.onBar : theme.colors.onBarSoft}' % shown
+    scenes = ', '.join(art.SCENES)
     props = [
-        P('value', var(NUM), '', 'The name of your number variable: 0 while the grid shows, else the number of the photo open (from 1).'),
+        P('value', var(NUM), '', 'The name of your number variable: 0 while the grid or strip shows, else the number of the photo in view (from 1).'),
         P('photos', ROWS, [{'kind': 'harbor', 'caption': 'Harbour at sunrise'}, {'kind': 'mountain', 'caption': 'Mountain hut'},
                            {'kind': 'skyline', 'caption': 'Evening skyline'}],
-          'The photos: records with kind (a Media scene: %s), caption and optionally tone (dawn, day, dusk, night).' % ', '.join(art.SCENES), True),
-        P('columns', INT, 3, 'Thumbnails per row.'),
+          'The photos: records with kind (a Media scene: %s), caption and optionally tone (dawn, day, dusk, night).' % scenes, True),
+        P('layout', enum('grid', 'strip', 'pages'), 'grid', 'grid (rows of thumbnails), strip (one row that scrolls sideways) or pages (one full-width photo at a time, swiped, with dots).'),
+        P('dots', BOOL, True, 'Pagination dots under the paged and the large view.'),
+        P('columns', INT, 3, 'Thumbnails per row of the grid.'),
     ]
-    return component('PhotoGallery', "A photo grid with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: %s; optional tone: dawn, day, dusk, night) with its caption; tapping one opens it large over the grid with its caption, a \"3 of 9\" counter, previous and next arrows and a close button, keeping the open photo's number (0: closed) in your variable." % ', '.join(art.SCENES),
+    return component('PhotoGallery', "A photo gallery with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: %s; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next; your variable holds the photo in view (0: none open)." % scenes,
                      props, nodes, 'gallery', events=[('onChanged', 'A photo was opened, changed or closed; the value is its number (0: closed).')],
-                     previews=[{'name': 'Grid', 'size': [360, 130], 'props': {}}])
+                     previews=[{'name': 'Grid', 'size': [360, 130], 'props': {}}, {'name': 'Strip', 'size': [360, 150], 'props': {'layout': 'strip'}},
+                               {'name': 'Pages', 'size': [360, 290], 'props': {'layout': 'pages'}}])
 
 
 # --- DayHeader, ItineraryStop, Checklist ------------------------------------------------------------------
@@ -1693,7 +1806,7 @@ def weather_day():
 def all_components():
     return [chat_card(), section_label(), paragraph(), action_button(), total_bar(), details(), callout(), disclosure(), receipt(), recommendation(),
             steps(), segments(), input_field(), option_list(), choice_chips(), day_picker(), counter(),
-            flight_option(), product_tile(), carousel(), pager(), cart_line(),
+            flight_option(), product_tile(), carousel(), page_dots(), pager(), wide_scroll(), cart_line(),
             diff_hunk(), comparison_table(), stat_tile(), chart_card(), table_header(), table_row(),
             photo_gallery(), day_header(), itinerary_stop(), checklist(), map_panel(), place_row(),
             plan_step(), progress_line(), weather_now(), weather_hours(), weather_day(), media(), weather_glyph()]

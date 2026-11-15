@@ -47,7 +47,7 @@
      "Subs",
      "Revenue"
     ],
-    "doc": "The column titles (up to five).",
+    "doc": "The column titles (up to seven).",
     "required": true
    },
    {
@@ -128,7 +128,9 @@
     "h1",
     "h2",
     "h3",
-    "h4"
+    "h4",
+    "h5",
+    "h6"
    ],
    "props": {
     "crossAxisAlignment": "center",
@@ -639,6 +641,170 @@
    "bind": {
     "props.style.color": "${= (props.value == (length(props.keys) > 4 ? at(props.keys, 4) : lower(at(props.columns, 4)))) ? theme.colors.accent : theme.colors.inkFaint}",
     "props.textAlign": "${= (4 == length(props.columns) - 1 && 4 > 0) ? 'right' : 'left'}"
+   }
+  },
+  "h5": {
+   "type": "row",
+   "children": [
+    "ht5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36,
+    "flex": 2
+   },
+   "bind": {
+    "visible": "${= length(props.columns) > 5}",
+    "layout.flex": "${= length(props.widths) > 5 ? at(props.widths, 5) : 2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= (props.value == (length(props.keys) > 5 ? at(props.keys, 5) : lower(at(props.columns, 5))))}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "op": "toggle"
+        }
+       ],
+       "else": [
+        {
+         "type": "setVariable",
+         "variable": "props.value",
+         "value": "${= (length(props.keys) > 5 ? at(props.keys, 5) : lower(at(props.columns, 5)))}"
+        },
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "value": "${= false}"
+        }
+       ]
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSort",
+       "value": "${= (length(props.keys) > 5 ? at(props.keys, 5) : lower(at(props.columns, 5)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "ht5": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.columns) > 5 ? upper(at(props.columns, 5)) + ((props.value == (length(props.keys) > 5 ? at(props.keys, 5) : lower(at(props.columns, 5)))) ? (props.desc ? ' ↓' : ' ↑') : '') : ''}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.3
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.keys) > 5 ? at(props.keys, 5) : lower(at(props.columns, 5)))) ? theme.colors.accent : theme.colors.inkFaint}",
+    "props.textAlign": "${= (5 == length(props.columns) - 1 && 5 > 0) ? 'right' : 'left'}"
+   }
+  },
+  "h6": {
+   "type": "row",
+   "children": [
+    "ht6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36,
+    "flex": 2
+   },
+   "bind": {
+    "visible": "${= length(props.columns) > 6}",
+    "layout.flex": "${= length(props.widths) > 6 ? at(props.widths, 6) : 2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= (props.value == (length(props.keys) > 6 ? at(props.keys, 6) : lower(at(props.columns, 6))))}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "op": "toggle"
+        }
+       ],
+       "else": [
+        {
+         "type": "setVariable",
+         "variable": "props.value",
+         "value": "${= (length(props.keys) > 6 ? at(props.keys, 6) : lower(at(props.columns, 6)))}"
+        },
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "value": "${= false}"
+        }
+       ]
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSort",
+       "value": "${= (length(props.keys) > 6 ? at(props.keys, 6) : lower(at(props.columns, 6)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "ht6": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.columns) > 6 ? upper(at(props.columns, 6)) + ((props.value == (length(props.keys) > 6 ? at(props.keys, 6) : lower(at(props.columns, 6)))) ? (props.desc ? ' ↓' : ' ↑') : '') : ''}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.3
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.keys) > 6 ? at(props.keys, 6) : lower(at(props.columns, 6)))) ? theme.colors.accent : theme.colors.inkFaint}",
+    "props.textAlign": "${= (6 == length(props.columns) - 1 && 6 > 0) ? 'right' : 'left'}"
    }
   }
  }

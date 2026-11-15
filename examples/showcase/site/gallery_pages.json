@@ -1,0 +1,103 @@
+{
+ "schema": 3,
+ "roots": [
+  "gallery_pages"
+ ],
+ "nodes": {
+  "gallery_pages": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Photo of the day",
+    "subtitle": "Swipe through the week",
+    "icon": "collections_rounded"
+   },
+   "bind": {
+    "props.status": "${= max(1,shot)} of 5"
+   },
+   "children": [
+    "g"
+   ]
+  },
+  "g": {
+   "type": "PhotoGallery",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "shot",
+    "layout": "pages"
+   },
+   "bind": {
+    "props.photos": "${photos}"
+   }
+  }
+ },
+ "variables": {
+  "gallery_pages": [
+   {
+    "name": "photos",
+    "type": "list",
+    "value": [
+     {
+      "kind": "lagoon",
+      "caption": "Hidden lagoon"
+     },
+     {
+      "kind": "temple",
+      "caption": "Temple at dawn"
+     },
+     {
+      "kind": "skyline",
+      "caption": "Evening skyline"
+     },
+     {
+      "kind": "mountain",
+      "caption": "Mountain hut",
+      "tone": "night"
+     },
+     {
+      "kind": "festival",
+      "caption": "Street festival"
+     }
+    ]
+   },
+   {
+    "name": "shot",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

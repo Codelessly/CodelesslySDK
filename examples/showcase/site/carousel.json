@@ -62,36 +62,12 @@
    },
    "props": {
     "value": "i",
-    "count": 6
-   },
-   "bind": {
-    "props.thumbs": "${= map(shoes,s=>s.tone)}",
-    "visible": "${= !open}"
-   },
-   "children": [
-    "tile"
-   ]
-  },
-  "tile": {
-   "type": "ProductTile",
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "props": {
-    "kind": "shoe",
+    "thumbs": true,
     "cta": "Details"
    },
    "bind": {
-    "props.name": "${= shoes[i].name}",
-    "props.detail": "${= shoes[i].what}",
-    "props.price": "${= shoes[i].price}",
-    "props.rating": "${= shoes[i].rating}",
-    "props.tone": "${= shoes[i].tone}"
+    "props.items": "${shoes}",
+    "visible": "${= !open}"
    },
    "actions": [
     {
@@ -125,7 +101,7 @@
    },
    "bind": {
     "props.name": "${= shoes[i].name}",
-    "props.detail": "${= shoes[i].what}",
+    "props.detail": "${= shoes[i].detail}",
     "props.price": "${= shoes[i].price}",
     "props.rating": "${= shoes[i].rating}",
     "props.tone": "${= shoes[i].tone}",
@@ -296,7 +272,7 @@
     "value": [
      {
       "name": "Aero Runner",
-      "what": "Road · neutral",
+      "detail": "Road · neutral",
       "price": "$120",
       "rating": "4.8",
       "tone": "lilac",
@@ -304,7 +280,7 @@
      },
      {
       "name": "Trail Scout",
-      "what": "Trail · grippy",
+      "detail": "Trail · grippy",
       "price": "$135",
       "rating": "4.6",
       "tone": "mint",
@@ -312,7 +288,7 @@
      },
      {
       "name": "Tempo Flash",
-      "what": "Speed days",
+      "detail": "Speed days",
       "price": "$150",
       "rating": "4.7",
       "tone": "rose",
@@ -320,7 +296,7 @@
      },
      {
       "name": "Cloud Stride",
-      "what": "Max cushion",
+      "detail": "Max cushion",
       "price": "$140",
       "rating": "4.5",
       "tone": "sky",
@@ -328,7 +304,7 @@
      },
      {
       "name": "Daybreak 2",
-      "what": "Everyday",
+      "detail": "Everyday",
       "price": "$95",
       "rating": "4.4",
       "tone": "sand",
@@ -336,7 +312,7 @@
      },
      {
       "name": "Night Owl",
-      "what": "Reflective",
+      "detail": "Reflective",
       "price": "$125",
       "rating": "4.6",
       "tone": "slate",
