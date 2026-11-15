@@ -130,6 +130,75 @@ void main() {
     });
   });
 
+  group('lists and grids', () {
+    // Item i of a repeated template's box (one per item).
+    List<Rect> items(NodeTree t, WidgetTester tester) {
+      final origin = rectOf(t, tester, 'w').topLeft;
+      final boxes = t.boxesOf('it').toList();
+      final rects = [for (final b in boxes) b.rectIn(tester.renderObject(find.byType(NodeView)))!.shift(-origin)];
+      return rects;
+    }
+
+    testWidgets('a horizontal list starts at the right and runs left', (tester) async {
+      final t = await pump(tester, {
+        'w': {
+          'type': 'listView',
+          'children': ['it'],
+          'layout': {'width': 300, 'height': 40},
+          'props': {'scrollDirection': 'horizontal', 'itemCount': 3, 'separator': 'space', 'spacing': 10},
+        },
+        'it': box(50, 40),
+      });
+      final lefts = items(t, tester).map((r) => r.left).toList()..sort();
+      expect(lefts, [130, 190, 250]);
+      // The first item is the rightmost.
+      expect(rectOf(t, tester, 'w').right - t.boxesOf('it').first.rectIn(tester.renderObject(find.byType(NodeView)))!.right, 0);
+    });
+
+    testWidgets('a wrapping list fills its lines from the right', (tester) async {
+      final t = await pump(tester, {
+        'w': {
+          'type': 'listView',
+          'children': ['it'],
+          'layout': {'width': 200, 'height': {'hug': 40}},
+          'props': {'scrollDirection': 'horizontal', 'itemCount': 3, 'wrap': true, 'wrapSpacing': 10, 'runSpacing': 5},
+        },
+        'it': box(90, 20),
+      });
+      final r = items(t, tester);
+      expect(r.map((x) => x.topLeft).toSet(), {const Offset(110, 0), const Offset(10, 0), const Offset(110, 25)});
+    });
+
+    testWidgets('a grid puts its first column on the right', (tester) async {
+      final t = await pump(tester, {
+        'w': {
+          'type': 'gridView',
+          'children': ['it'],
+          'layout': {'width': 300, 'height': {'hug': 100}},
+          'props': {'crossAxisCount': 2, 'itemCount': 2, 'crossAxisSpacing': 20, 'mainAxisExtent': 40},
+        },
+        'it': {'type': 'box', 'layout': {'width': {'fill': 100}, 'height': {'fill': 40}}},
+      });
+      final first = t.boxesOf('it').first.rectIn(tester.renderObject(find.byType(NodeView)))!.shift(-rectOf(t, tester, 'w').topLeft);
+      expect(first.left, 160);
+      expect(first.right, 300);
+    });
+
+    testWidgets('left to right, a horizontal list starts at the left', (tester) async {
+      final t = await pump(tester, {
+        'w': {
+          'type': 'listView',
+          'children': ['it'],
+          'layout': {'width': 300, 'height': 40},
+          'props': {'scrollDirection': 'horizontal', 'itemCount': 3, 'separator': 'space', 'spacing': 10},
+        },
+        'it': box(50, 40),
+      }, dir: 'ltr');
+      final first = t.boxesOf('it').first.rectIn(tester.renderObject(find.byType(NodeView)))!.shift(-rectOf(t, tester, 'w').topLeft);
+      expect(first.left, 0);
+    });
+  });
+
   group('directional padding and margin', () {
     Map<String, Object?> padded(Object padding) => {
           'w': {
@@ -280,6 +349,30 @@ void main() {
       expect(IconSources.mirrorsInRtl({'type': 'MATERIAL_ICON', 'name': 'star'}), isFalse);
       expect(IconSources.mirrorsInRtl({'source': 'image', 'image': 'https://x/arrow_back.png'}), isFalse);
     });
+  });
+
+  testWidgets('a running data list (a ListView island) starts at the right under a bound right to left', (tester) async {
+    final s = await show(tester, {
+      'col': {
+        'type': 'column',
+        'children': ['list'],
+        'layout': {'width': 300, 'height': 100},
+        'bind': {'textDirection': r"${= rtl ? 'rtl' : 'ltr'}"},
+      },
+      'list': {
+        'type': 'listView',
+        'children': ['it'],
+        'layout': {'width': 300, 'height': 40},
+        'props': {'scrollDirection': 'horizontal', 'scrollable': true, 'separator': 'space', 'spacing': 10},
+        'bind': {'data': r'${= [1, 2, 3]}'},
+      },
+      'it': {'type': 'box', 'layout': {'width': 50, 'height': 40}},
+    }, variables: [v('rtl', true, VariableType.boolean)]);
+    await tester.pumpAndSettle();
+    final listLeft = s.tree.boxOf('list')!.localToGlobal(Offset.zero).dx;
+    final rights = [for (final b in s.tree.boxesOf('it')) b.localToGlobal(Offset(b.size.width, 0)).dx - listLeft]..sort();
+    expect(rights.last, moreOrLessEquals(300));
+    expect(rights, hasLength(3));
   });
 
   testWidgets('a bound direction mirrors its subtree and follows the variable', (tester) async {
