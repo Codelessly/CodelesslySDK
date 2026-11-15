@@ -542,7 +542,9 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
   double _edgeFade = 0;
   set edgeFade(double v) {
     if (v == _edgeFade) return;
+    final composited = alwaysNeedsCompositing;
     _edgeFade = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
     markNeedsPaint();
   }
 
@@ -633,6 +635,10 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
       _clip != Clip.none && _overflows ? Offset.zero & size : null;
 
   final LayerHandle<ClipRectLayer> _clipLayer = LayerHandle();
+  final LayerHandle<ShaderMaskLayer> _fadeLayer = LayerHandle();
+
+  @override
+  bool get alwaysNeedsCompositing => _edgeFade > 0;
 
   @override
   void paint(PaintingContext context, Offset offset) {
@@ -649,42 +655,29 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
     }
     final max = maxScrollExtent;
     if (_overflows && _edgeFade > 0 && max > 0) {
-      // Painted into a layer of its own, then the edges where the content
-      // goes on are rubbed out along a gradient: whatever is behind shows
-      // through, so no color of the background needs to be known.
+      // The content is masked along the scroll axis: opaque in the middle,
+      // fading to nothing at an edge it continues past. A mask layer (not a
+      // canvas save) so that children painted in layers of their own are
+      // faded and clipped too; whatever is behind shows through, so no
+      // color of the background needs to be known.
       _clipLayer.layer = null;
-      final bounds = offset & size;
       final vertical = _axis == Axis.vertical;
       final extent = vertical ? size.height : size.width;
       final fade = _edgeFade.clamp(0.0, extent / 2);
       final atStart = (_pixels / fade).clamp(0.0, 1.0), atEnd = ((max - _pixels) / fade).clamp(0.0, 1.0);
-      context.canvas.saveLayer(bounds, Paint());
-      context.canvas.save();
-      context.canvas.clipRect(bounds);
-      paintContent(context, offset);
-      context.canvas.restore();
-      void rub(Rect r, Alignment from, Alignment to, double strength) {
-        if (strength <= 0) return;
-        context.canvas.drawRect(
-          r,
-          Paint()
-            ..blendMode = BlendMode.dstOut
-            ..shader = LinearGradient(
-              begin: from,
-              end: to,
-              colors: [const Color(0x00000000), Color.fromRGBO(0, 0, 0, strength)],
-            ).createShader(r),
-        );
-      }
-
-      if (vertical) {
-        rub(Rect.fromLTWH(bounds.left, bounds.top, size.width, fade), Alignment.bottomCenter, Alignment.topCenter, atStart);
-        rub(Rect.fromLTWH(bounds.left, bounds.bottom - fade, size.width, fade), Alignment.topCenter, Alignment.bottomCenter, atEnd);
-      } else {
-        rub(Rect.fromLTWH(bounds.left, bounds.top, fade, size.height), Alignment.centerRight, Alignment.centerLeft, atStart);
-        rub(Rect.fromLTWH(bounds.right - fade, bounds.top, fade, size.height), Alignment.centerLeft, Alignment.centerRight, atEnd);
-      }
-      context.canvas.restore();
+      final f = extent <= 0 ? 0.0 : fade / extent;
+      final layer = (_fadeLayer.layer ??= ShaderMaskLayer())
+        ..shader = LinearGradient(
+          begin: vertical ? Alignment.topCenter : Alignment.centerLeft,
+          end: vertical ? Alignment.bottomCenter : Alignment.centerRight,
+          colors: [Color.fromRGBO(0, 0, 0, 1 - atStart), const Color(0xFF000000), const Color(0xFF000000), Color.fromRGBO(0, 0, 0, 1 - atEnd)],
+          stops: [0, f, 1 - f, 1],
+        ).createShader(Offset.zero & size)
+        ..maskRect = offset & size
+        ..blendMode = BlendMode.dstIn;
+      context.pushLayer(layer, (c, o) {
+        c.pushClipRect(true, o, Offset.zero & size, paintContent);
+      }, offset);
     } else if (_overflows && _clip != Clip.none) {
       _clipLayer.layer = context.pushClipRect(
         needsCompositing,
@@ -708,6 +701,7 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
     _scrollEnd?.cancel();
     _drag?.dispose();
     _clipLayer.layer = null;
+    _fadeLayer.layer = null;
     super.dispose();
   }
 
