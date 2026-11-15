@@ -1,0 +1,16 @@
+@state playing=false elapsed=42 length=200
+@every 1s while playing: elapsed=min(elapsed+1, length)
+Card pad:16 gap:12
+  Row gap:12 top
+    Media kind:"waves" tone:"sky" w:64 h:64 radius:8
+    Column gap:2
+      Text.cardTitle "Ocean Eyes"
+      Text.bodySecondary "Billie Eilish"
+  Progress {"props": {"value": "{elapsed / length}"}}
+  Row between
+    Text.caption "{clock(elapsed)}"
+    Text.caption "-{clock(length - elapsed)}"
+  Row center gap:24
+    IconButton {"props": {"icon": "skip_previous", "onPressed": "elapsed=max(elapsed-10, 0)"}}
+    IconButton.primary {"props": {"icon": "{playing ? 'pause' : 'play_arrow'}", "label": "{playing ? 'Pause' : 'Play'}", "onPressed": "playing=!playing"}}
+    IconButton {"props": {"icon": "skip_next", "onPressed": "elapsed=min(elapsed+10, length)"}}

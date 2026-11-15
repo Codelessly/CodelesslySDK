@@ -1,0 +1,17 @@
+ChatCard "Expense report" "4 expenses awaiting approval" icon:receipt status:"Pending" tone:info
+  Column gap:12
+    each e in expenses
+      Column gap:6 pad:[0,8,0,8]
+        Row between middle
+          Column
+            Text.cardTitle "{e.merchant}"
+            Text.meta "{e.category} · {e.date}"
+          Text.number "{e.amount}"
+        if not e.receipt
+          Badge.warning "Missing receipt"
+        SegmentedButton value:e.decision items:["Approve","Reject"] onChanged(event) set e.decision = event.value
+    Divider
+    Row between middle
+      Text.bodySecondary "Approved total"
+      Text.number "{sum(e.amount for e in expenses if e.decision == 'Approve')}"
+    ActionButton "Submit report" tone:primary icon:send enabled:all(e.decision for e in expenses) onPressed(event) submit(expenses)

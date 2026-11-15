@@ -1,0 +1,1 @@
+NowPlaying "Dreams" "Fleetwood Mac" kind:sunset tone:sand elapsed:182 length:257 onSkip(event) {"state": {"playing": false}, "onPlayPause": {"action": "toggle", "target": "playing", "track": "Dreams"}}

@@ -1,0 +1,4 @@
+ChatCard "Next demo" "One vote per teammate" icon:how_to_vote
+  OptionList "Which should we demo next?" value:choice options:["Search","Offline mode","Exports"] onChanged(event) hidden:voted
+  ActionButton "Vote" tone:primary icon:how_to_vote enabled:{choice != null} onPressed(event) hidden:voted onPressed:voted=true
+  PollResults "Updated just now" options:["Search","Offline mode","Exports"] votes:[4+(choice=="Search"),7+(choice=="Offline mode"),5+(choice=="Exports")] choice:choice hidden:!voted
