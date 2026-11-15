@@ -1,0 +1,36 @@
+AchievementRow layout:row gap:32 align:center justify:center padding:32 background:#15151E
+  Badge id:marathon state:unlocked size:220x270 accessibilityLabel:"Marathon Finisher - 42.2 km, unlocked"
+    Shield shape:hexagon size:200x230 fill:linear-gradient(angle:160, #FF9500 0%, #FF3B30 100%) stroke:#FFD4A3 strokeWidth:4 shadow:"0 10 28 #FF3B3066"
+      InnerOutline shape:hexagon inset:14 fill:none stroke:#FFFFFF66 strokeWidth:2
+      Text "MARATHON FINISHER" position:top offset:44 size:14 weight:bold color:#FFFFFF letterSpacing:1.5 align:center
+      Icon "star" position:center size:84 fill:linear-gradient(angle:180, #FFF6C2, #FFD000) stroke:#FFFFFF strokeWidth:2 shadow:"0 2 8 #00000040"
+      Text "42.2 km" position:center offset:72 size:20 weight:semibold color:#FFFFFF
+    Ribbon position:bottom offset:-10 size:240x48 fill:#B3140F tails:swallowtail tailFold:#7A0C09 shadow:"0 4 10 #00000050"
+      Text "Oct 12 2026" size:16 weight:bold color:#FFFFFF align:center
+    Shine shape:diagonal-band overlay:true fill:linear-gradient(transparent, #FFFFFF99, transparent) clip:Shield
+      animation trigger:onAppear, every:4s property:translateX from:-120% to:120% duration:1.2s easing:easeInOut
+    animation trigger:onAppear property:scale from:0.6 to:1 duration:0.5s easing:spring(damping:0.6)
+    animation trigger:onAppear property:rotate from:-8deg to:0 duration:0.5s
+    Star animation trigger:onAppear delay:0.3s property:scale from:0 to:1 duration:0.4s easing:spring
+    interaction trigger:hover property:scale to:1.05 duration:0.2s
+  LockedBadges layout:row gap:20 align:center
+    Badge state:locked size:120x150 opacity:0.8
+      Shield shape:hexagon size:110x127 fill:linear-gradient(angle:160, #6B6B73, #4A4A52) stroke:#8A8A92 strokeWidth:3
+        InnerOutline shape:hexagon inset:8 fill:none stroke:#FFFFFF22 strokeWidth:1.5
+        Icon "lock" position:center size:36 color:#B5B5BC
+      Ribbon position:bottom size:100x26 fill:#3A3A41
+        Text "Locked" size:11 color:#9A9AA2 align:center
+    Badge state:locked size:120x150 opacity:0.8
+      Shield shape:hexagon size:110x127 fill:linear-gradient(angle:160, #6B6B73, #4A4A52) stroke:#8A8A92 strokeWidth:3
+        InnerOutline shape:hexagon inset:8 fill:none stroke:#FFFFFF22 strokeWidth:1.5
+        Icon "lock" position:center size:36 color:#B5B5BC
+      Ribbon position:bottom size:100x26 fill:#3A3A41
+        Text "Locked" size:11 color:#9A9AA2 align:center
+    Badge state:locked size:120x150 opacity:0.8
+      Shield shape:hexagon size:110x127 fill:linear-gradient(angle:160, #6B6B73, #4A4A52) stroke:#8A8A92 strokeWidth:3
+        InnerOutline shape:hexagon inset:8 fill:none stroke:#FFFFFF22 strokeWidth:1.5
+        Icon "lock" position:center size:36 color:#B5B5BC
+      Ribbon position:bottom size:100x26 fill:#3A3A41
+        Text "Locked" size:11 color:#9A9AA2 align:center
+    interaction target:Badge trigger:hover property:translateX keyframes:[0, -3, 3, -3, 0] duration:0.3s
+    animation target:Badge trigger:onAppear stagger:0.12s property:opacity from:0 to:0.8 duration:0.4s

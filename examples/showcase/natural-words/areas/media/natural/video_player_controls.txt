@@ -1,0 +1,37 @@
+VideoPlayerCard width:640 radius:12 elevation:2 background:surface state:paused
+  Title "Intro to Sourdough - Episode 2" style:headline position:top-overlay
+  Poster aspect:16:9 fit:cover src:"sourdough-ep2-thumbnail.jpg" alt:"Hands shaping sourdough dough on a floured counter"
+    Scrim color:black opacity:0.25
+    PlayButton icon:play size:72 shape:circle background:white opacity:0.9 align:center label:"Play video"
+      on:hover scale:1.08 duration:150ms easing:ease-out
+      on:press scale:0.95 duration:80ms
+      on:click action:play hide-with:fade duration:200ms
+  ControlBar position:bottom-overlay background:gradient(transparent,black@70%) padding:12 layout:column gap:8
+    visibility paused:always playing:auto-hide-after-3s reveal-on:pointer-move,focus transition:fade duration:200ms
+    SeekBar value:185 min:0 max:872 label:"Seek" height:4 hover-height:8 transition:height 120ms
+      Track color:white@30%
+      Buffered value:340 color:white@50%
+      Progress value:185 color:accent
+      Thumb size:14 color:accent visible-on:hover,focus,drag
+      Tooltip "3:05" show-on:hover follows:pointer
+      on:drag action:scrub
+      keys left:-5s right:+5s
+    Row align:center gap:12
+      IconButton icon:play-pause state:paused→icon:play playing→icon:pause label:"Play"
+        shortcut:space
+      TimeDisplay "3:05 / 14:32" style:caption color:white font:tabular-nums
+        updates:every-second while:playing
+      Spacer grow:1
+      VolumeControl layout:row gap:8
+        IconButton icon:volume-high label:"Mute" shortcut:m
+          state:muted icon:volume-off
+          state:level<50% icon:volume-low
+        Slider value:80 min:0 max:100 width:0 label:"Volume" 
+          on:parent-hover width:80 duration:150ms
+          on:focus width:80
+      ToggleButton icon:captions label:"Captions" state:off pressed:false shortcut:c
+        on-state indicator:underline color:accent
+      IconButton icon:fullscreen label:"Fullscreen" shortcut:f
+        state:fullscreen icon:fullscreen-exit
+  BufferingSpinner type:circular size:48 color:white align:center visible:false
+    show-when:buffering fade-in-delay:300ms animation:rotate duration:1s repeat:infinite

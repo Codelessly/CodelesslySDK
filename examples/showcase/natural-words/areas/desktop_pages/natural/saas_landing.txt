@@ -1,0 +1,138 @@
+Page "Fluxboard" width:1440 background:#ffffff font:Inter color:#0f172a scroll:vertical
+
+  Nav position:sticky top:0 height:72 padding-x:64 layout:row align:center justify:space-between background:#ffffffee blur:12 border-bottom:1px solid #e2e8f0
+    Logo layout:row gap:10 align:center
+      Icon "layers" size:28 color:#4f46e5
+      Text "Fluxboard" size:20 weight:700
+    Links layout:row gap:36
+      Link "Product" href:#product size:15 color:#475569 hover-color:#0f172a
+      Link "Pricing" href:#pricing size:15 color:#475569 hover-color:#0f172a
+      Link "Docs" href:/docs size:15 color:#475569 hover-color:#0f172a
+      Link "Blog" href:/blog size:15 color:#475569 hover-color:#0f172a
+    Button "Start free trial" variant:primary background:#4f46e5 color:#ffffff radius:8 padding:10 20 weight:600 hover-background:#4338ca transition:150ms
+
+  Section id:hero padding:96 64 64 layout:column align:center gap:24 background:linear-gradient(180deg,#eef2ff,#ffffff)
+    Badge "New: Sprint forecasts 2.0" background:#e0e7ff color:#4338ca radius:999 padding:6 14 size:13 weight:600
+    Heading level:1 "Ship faster with real-time project insights" size:60 weight:800 align:center max-width:860 line-height:1.1
+    Text "Fluxboard connects your tools and turns scattered tasks into live dashboards, accurate forecasts and alerts your whole team can act on." size:19 color:#475569 align:center max-width:640 line-height:1.6
+    Row gap:16 margin-top:8
+      Button "Start free trial" variant:primary size:large background:#4f46e5 color:#ffffff radius:10 padding:14 28 weight:600
+      Button "Watch demo" variant:outline size:large icon-left:"play-circle" border:1px solid #cbd5e1 radius:10 padding:14 28 weight:600
+    Text "No credit card required · 14-day free trial" size:13 color:#64748b
+    Image alt:"Fluxboard product screenshot showing a project analytics dashboard" src:product-screenshot.png width:1100 height:620 radius:16 margin-top:40 shadow:0 30 80 #4f46e533 border:1px solid #e2e8f0
+      animation:fade-up duration:700ms on:load
+
+  Section id:customers padding:48 64 layout:column align:center gap:28
+    Text "Trusted by teams at" size:13 color:#64748b transform:uppercase letter-spacing:1.5
+    Row gap:72 align:center justify:center
+      Text "Northwind" size:22 weight:700 color:#94a3b8
+      Text "Acme Corp" size:22 weight:700 color:#94a3b8
+      Text "Globex" size:22 weight:700 color:#94a3b8
+      Text "Initech" size:22 weight:700 color:#94a3b8
+      Text "Umbrella" size:22 weight:700 color:#94a3b8
+
+  Section id:product padding:96 64 layout:column align:center gap:56
+    Column align:center gap:12
+      Text "FEATURES" size:13 weight:700 color:#4f46e5 letter-spacing:1.5
+      Heading level:2 "Everything your team needs to stay on track" size:40 weight:800 align:center max-width:700
+      Text "Powerful analytics without the setup overhead." size:18 color:#475569
+    Grid columns:3 rows:2 gap:24 width:1200
+      Card padding:32 radius:16 border:1px solid #e2e8f0 hover-shadow:0 12 32 #0f172a14 hover-translate-y:-4 transition:200ms
+        Icon "bar-chart-3" size:24 color:#4f46e5 background:#eef2ff radius:12 padding:12
+        Heading level:3 "Live dashboards" size:20 weight:700
+        Text "Watch progress, blockers and velocity update in real time across every project." color:#475569 line-height:1.6
+      Card padding:32 radius:16 border:1px solid #e2e8f0 hover-shadow:0 12 32 #0f172a14 hover-translate-y:-4 transition:200ms
+        Icon "trending-up" size:24 color:#4f46e5 background:#eef2ff radius:12 padding:12
+        Heading level:3 "Sprint forecasts" size:20 weight:700
+        Text "Predict delivery dates with confidence using historical throughput data." color:#475569 line-height:1.6
+      Card padding:32 radius:16 border:1px solid #e2e8f0 hover-shadow:0 12 32 #0f172a14 hover-translate-y:-4 transition:200ms
+        Icon "bell" size:24 color:#4f46e5 background:#eef2ff radius:12 padding:12
+        Heading level:3 "Slack alerts" size:20 weight:700
+        Text "Get notified in the channels you already use when risks or deadlines shift." color:#475569 line-height:1.6
+      Card padding:32 radius:16 border:1px solid #e2e8f0 hover-shadow:0 12 32 #0f172a14 hover-translate-y:-4 transition:200ms
+        Icon "file-text" size:24 color:#4f46e5 background:#eef2ff radius:12 padding:12
+        Heading level:3 "Custom reports" size:20 weight:700
+        Text "Build and schedule reports for stakeholders with drag-and-drop widgets." color:#475569 line-height:1.6
+      Card padding:32 radius:16 border:1px solid #e2e8f0 hover-shadow:0 12 32 #0f172a14 hover-translate-y:-4 transition:200ms
+        Icon "shield-check" size:24 color:#4f46e5 background:#eef2ff radius:12 padding:12
+        Heading level:3 "SSO" size:20 weight:700
+        Text "Secure access with SAML single sign-on and automated user provisioning." color:#475569 line-height:1.6
+      Card padding:32 radius:16 border:1px solid #e2e8f0 hover-shadow:0 12 32 #0f172a14 hover-translate-y:-4 transition:200ms
+        Icon "code-2" size:24 color:#4f46e5 background:#eef2ff radius:12 padding:12
+        Heading level:3 "API access" size:20 weight:700
+        Text "Pull your data anywhere with a fast, well-documented REST API." color:#475569 line-height:1.6
+
+  Section id:pricing padding:96 64 layout:column align:center gap:56 background:#f8fafc
+    Column align:center gap:12
+      Text "PRICING" size:13 weight:700 color:#4f46e5 letter-spacing:1.5
+      Heading level:2 "Simple pricing that scales with you" size:40 weight:800 align:center
+      Text "Start free, upgrade when your team is ready." size:18 color:#475569
+    Row gap:24 width:1100 align:stretch
+      Card flex:1 padding:36 radius:20 background:#ffffff border:1px solid #e2e8f0 layout:column gap:20
+        Heading level:3 "Starter" size:22 weight:700
+        Row align:baseline gap:4
+          Text "$0" size:48 weight:800
+          Text "/ forever" color:#64748b
+        Text "For individuals and small side projects." color:#475569
+        List gap:12
+          Item "Up to 3 projects" icon:check icon-color:#4f46e5
+          Item "Live dashboards" icon:check icon-color:#4f46e5
+          Item "7-day history" icon:check icon-color:#4f46e5
+        Button "Get started" variant:outline width:fill margin-top:auto border:1px solid #cbd5e1 radius:10 padding:12 weight:600
+      Card flex:1 padding:36 radius:20 background:#4f46e5 color:#ffffff layout:column gap:20 shadow:0 24 60 #4f46e566 scale:1.05
+        Badge "Most popular" background:#ffffff color:#4f46e5 radius:999 padding:4 12 size:12 weight:700 align-self:start
+        Heading level:3 "Team" size:22 weight:700
+        Row align:baseline gap:4
+          Text "$24" size:48 weight:800
+          Text "/ user / month" color:#c7d2fe
+        Text "For growing teams that need forecasting and alerts." color:#e0e7ff
+        List gap:12
+          Item "Unlimited projects" icon:check icon-color:#ffffff
+          Item "Sprint forecasts" icon:check icon-color:#ffffff
+          Item "Slack alerts" icon:check icon-color:#ffffff
+          Item "Custom reports" icon:check icon-color:#ffffff
+        Button "Start free trial" variant:primary width:fill margin-top:auto background:#ffffff color:#4f46e5 radius:10 padding:12 weight:700 hover-background:#eef2ff
+      Card flex:1 padding:36 radius:20 background:#ffffff border:1px solid #e2e8f0 layout:column gap:20
+        Heading level:3 "Enterprise" size:22 weight:700
+        Row align:baseline gap:4
+          Text "Custom" size:48 weight:800
+        Text "For organizations with advanced security needs." color:#475569
+        List gap:12
+          Item "Everything in Team" icon:check icon-color:#4f46e5
+          Item "SSO and SAML" icon:check icon-color:#4f46e5
+          Item "API access" icon:check icon-color:#4f46e5
+          Item "Dedicated success manager" icon:check icon-color:#4f46e5
+        Button "Contact sales" variant:outline width:fill margin-top:auto border:1px solid #cbd5e1 radius:10 padding:12 weight:600
+
+  Section id:cta padding:80 64 layout:column align:center gap:24 background:#0f172a color:#ffffff
+    Heading level:2 "Ready to see your projects clearly?" size:36 weight:800 align:center
+    Text "Join thousands of teams shipping faster with Fluxboard." color:#94a3b8 size:18
+    Button "Start free trial" variant:primary size:large background:#4f46e5 color:#ffffff radius:10 padding:14 28 weight:600
+
+  Footer padding:64 64 32 background:#0b1120 color:#94a3b8 layout:column gap:48
+    Row gap:48 justify:space-between
+      Column width:300 gap:14
+        Row gap:10 align:center
+          Icon "layers" size:26 color:#818cf8
+          Text "Fluxboard" size:20 weight:700 color:#ffffff
+        Text "Real-time project analytics for modern teams." size:14 line-height:1.6
+      Column gap:12
+        Text "Product" weight:700 color:#ffffff size:14
+        Link "Features" href:#product
+        Link "Pricing" href:#pricing
+        Link "Integrations" href:/integrations
+        Link "Changelog" href:/changelog
+      Column gap:12
+        Text "Resources" weight:700 color:#ffffff size:14
+        Link "Docs" href:/docs
+        Link "Blog" href:/blog
+        Link "API reference" href:/api
+        Link "Status" href:/status
+      Column gap:12
+        Text "Company" weight:700 color:#ffffff size:14
+        Link "About" href:/about
+        Link "Careers" href:/careers
+        Link "Contact" href:/contact
+        Link "Privacy" href:/privacy
+    Divider color:#1e293b
+    Text "© 2026 Fluxboard, Inc. All rights reserved." size:13 align:center

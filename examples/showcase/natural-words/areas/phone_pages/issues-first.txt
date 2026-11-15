@@ -1,0 +1,5 @@
+ride_booking: line 25:1: Not valid JSON: {item.icon} "directions_car"
+ride_booking: line 25:16: The {…} tail is a JSON object merged into the node.
+calendar_day: line 4:7: Unknown word "end" on a Stack. Props are written key:value.
+calendar_day: line 4:11: Unknown word "bottom" on a Stack. Props are written key:value.
+smart_home: line 20:56: Unknown word "Room'" on a ChoiceChip. Props are written key:value.

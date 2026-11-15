@@ -1,0 +1,39 @@
+Screen "This Week's Priorities"
+  Header
+    Title "Top Priorities" style:heading
+    Subtitle "Drag the handle to reorder" style:muted
+  ReorderableList id:priorities axis:vertical reorder-by:handle
+    on-reorder: renumber ranks, save automatically
+    Row id:p1 rank:1
+      DragHandle icon:grip-vertical label:"Reorder: Finish Q3 budget review" cursor:grab
+      Rank "1" style:badge-circle
+      Text "Finish Q3 budget review"
+    Row id:p2 rank:2
+      DragHandle icon:grip-vertical label:"Reorder: Hire a backend engineer" cursor:grab
+      Rank "2" style:badge-circle
+      Text "Hire a backend engineer"
+    Row id:p3 rank:3
+      DragHandle icon:grip-vertical label:"Reorder: Ship onboarding v2" cursor:grab
+      Rank "3" style:badge-circle
+      Text "Ship onboarding v2"
+    Row id:p4 rank:4
+      DragHandle icon:grip-vertical label:"Reorder: Prepare board deck" cursor:grab
+      Rank "4" style:badge-circle
+      Text "Prepare board deck"
+    Row id:p5 rank:5
+      DragHandle icon:grip-vertical label:"Reorder: Plan team offsite" cursor:grab
+      Rank "5" style:badge-circle
+      Text "Plan team offsite"
+  States
+    Handle hover: color:strong, cursor:grab
+    Row dragging: elevation:high, scale:1.02, opacity:0.95, cursor:grabbing, follows-pointer, z-top
+    Drop-slot: style:dashed-outline, height:row, shows where row will land
+    Other rows displaced: animate:slide-vertical, duration:200ms, easing:ease-out
+    Rank numbers: update live while dragging, animate:cross-fade, duration:120ms
+    Row dropped: animate:settle-into-slot, duration:180ms, then flash-highlight color:accent, duration:600ms
+    Drag released outside list: animate:return-to-origin, duration:200ms
+    Auto-scroll: when dragging near top or bottom edge
+  Keyboard
+    Handle focus: Space or Enter picks up, ArrowUp/ArrowDown moves one position, Space or Enter drops, Escape cancels and returns to the original position
+    Screen-reader-announce: "Moved to position {n} of 5"
+  Toast "Order saved" action:"Undo" visible-after:drop duration:4s animate:slide-up-fade-in

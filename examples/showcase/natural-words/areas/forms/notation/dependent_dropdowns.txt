@@ -1,0 +1,15 @@
+state make="Toyota"
+state model="Camry"
+state year="2022"
+state trim="SE"
+Card gap:12 pad:16 maxw:480
+  Text.heading "Find parts for your vehicle"
+  Text.fieldLabel "Make"
+  Select =make items:["Toyota","Honda","Ford"] -> model=""; trim=""
+  Text.fieldLabel "Model"
+  Select =model items:=make=="Toyota"?["Camry","Corolla","RAV4","Highlander"]:[] enabled:=make!=""
+  Text.fieldLabel "Year"
+  Select =year items:["2019","2020","2021","2022","2023","2024"]
+  Text.fieldLabel "Trim"
+  Select =trim items:["LE","SE","XLE","XSE"] enabled:=year!=""
+  Button "Find parts" -> emit findParts {"make":make}

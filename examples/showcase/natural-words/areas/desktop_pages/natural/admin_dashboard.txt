@@ -1,0 +1,110 @@
+app  layout:row  background:#F4F6FA  font:Inter
+  sidebar  width:240  background:#0F172A  color:#CBD5E1  padding:20  layout:column  gap:24
+    logo  layout:row  gap:10
+      icon "◉"  color:#6366F1  size:28
+      text "Orbit CRM"  color:white  weight:700  size:20
+    nav  layout:column  gap:4
+      navitem "Overview"  icon:grid  active:true  background:#1E293B  color:white  accent-bar:left #6366F1
+      navitem "Customers"  icon:users  hover:background #1E293B  transition:150ms
+      navitem "Deals"  icon:handshake  hover:background #1E293B  transition:150ms
+      navitem "Reports"  icon:bar-chart  hover:background #1E293B  transition:150ms
+      navitem "Settings"  icon:gear  hover:background #1E293B  transition:150ms
+    spacer  grow:1
+    footer-text "v2.4.1"  size:12  color:#64748B
+  main  grow:1  layout:column
+    topbar  height:64  background:white  border-bottom:#E5E7EB  padding:0 24  layout:row  align:center  justify:space-between
+      searchfield  placeholder:"Search customers, deals…"  icon:search  width:360  radius:8  background:#F1F5F9  focus:ring #6366F1  shortcut-hint:"⌘K"
+      group  layout:row  gap:16  align:center
+        iconbutton  icon:bell  label:"Notifications"  tooltip:"Notifications"
+          badge "3"  background:#EF4444  color:white  position:top-right  animate:pulse once on load
+        avatar  initials:"SP"  size:36  background:#6366F1  color:white
+        text "Sam Patel"  weight:600
+        icon "chevron-down"  size:16
+    content  padding:24  layout:column  gap:24  scroll:y
+      heading "Overview"  size:24  weight:700
+      kpi-row  layout:grid  columns:4  gap:16  animate:fade-up stagger:80ms on load
+        card  kpi
+          label "Revenue"  color:#64748B
+          value "$84,320"  size:28  weight:700  animate:count-up 800ms
+          delta "+12.4%"  color:#16A34A  icon:arrow-up  trend:positive
+        card  kpi
+          label "New customers"  color:#64748B
+          value "312"  size:28  weight:700  animate:count-up 800ms
+          delta "+8%"  color:#16A34A  icon:arrow-up  trend:positive
+        card  kpi
+          label "Churn"  color:#64748B
+          value "2.1%"  size:28  weight:700  animate:count-up 800ms
+          delta "-0.3%"  color:#16A34A  icon:arrow-down  trend:positive  note:"lower churn is good"
+        card  kpi
+          label "Open deals"  color:#64748B
+          value "47"  size:28  weight:700  animate:count-up 800ms
+      chart-row  layout:grid  columns:2fr 1fr  gap:16
+        card  padding:20
+          header  layout:row  justify:space-between
+            title "Monthly revenue"  weight:600
+            select  value:"This year"  options:"This year, Last year"
+          linechart  height:280  smooth:true  area-fill:gradient #6366F1→transparent  stroke:#6366F1  stroke-width:2.5  grid:horizontal dashed  animate:draw-line 1000ms ease-out
+            x-axis  labels:"Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec"
+            y-axis  format:"$#k"  ticks:"0, 25k, 50k, 75k, 100k"
+            series "Revenue"  values:"42k, 48k, 51k, 47k, 56k, 61k, 58k, 66k, 72k, 69k, 78k, 84k"
+            point  hover:show-dot  tooltip:"month + value"
+        card  padding:20
+          title "Deals by stage"  weight:600
+          donutchart  height:200  thickness:28  animate:sweep 900ms ease-out  hover:slice-expand 4px
+            center-label "47"  sublabel:"open deals"
+            slice "Lead"  value:14  color:#94A3B8
+            slice "Qualified"  value:12  color:#3B82F6
+            slice "Proposal"  value:11  color:#F59E0B
+            slice "Negotiation"  value:10  color:#8B5CF6
+          legend  layout:column  gap:6  position:bottom
+            item "Lead · 14"  swatch:#94A3B8
+            item "Qualified · 12"  swatch:#3B82F6
+            item "Proposal · 11"  swatch:#F59E0B
+            item "Negotiation · 10"  swatch:#8B5CF6
+      card  padding:0
+        header  padding:20  layout:row  justify:space-between
+          title "Recent deals"  weight:600
+          link "View all"  color:#6366F1
+        table  width:fill  row-hover:background #F8FAFC  row-divider:#E5E7EB
+          thead  background:#F8FAFC  color:#64748B  size:12  uppercase:true
+            col "Company"  sortable:true
+            col "Owner"  sortable:true
+            col "Stage"
+            col "Value"  align:right  sortable:true
+            col "Close date"  sortable:true  sorted:desc
+          row
+            cell "Acme Corp"  weight:600
+            cell "Sam Patel"  avatar:true
+            cell  pill "Negotiation"  background:#EDE9FE  color:#6D28D9
+            cell "$24,000"  align:right
+            cell "Jun 14, 2025"
+          row
+            cell "Globex Industries"  weight:600
+            cell "Maria Lopez"  avatar:true
+            cell  pill "Proposal"  background:#FEF3C7  color:#B45309
+            cell "$18,500"  align:right
+            cell "Jun 21, 2025"
+          row
+            cell "Initech"  weight:600
+            cell "Daniel Kim"  avatar:true
+            cell  pill "Qualified"  background:#DBEAFE  color:#1D4ED8
+            cell "$9,800"  align:right
+            cell "Jul 02, 2025"
+          row
+            cell "Umbrella Health"  weight:600
+            cell "Priya Nair"  avatar:true
+            cell  pill "Lead"  background:#E2E8F0  color:#475569
+            cell "$12,250"  align:right
+            cell "Jul 15, 2025"
+          row
+            cell "Stark Logistics"  weight:600
+            cell "Sam Patel"  avatar:true
+            cell  pill "Won"  background:#DCFCE7  color:#15803D
+            cell "$31,400"  align:right
+            cell "May 30, 2025"
+          row
+            cell "Wayne Analytics"  weight:600
+            cell "Tom Becker"  avatar:true
+            cell  pill "Negotiation"  background:#EDE9FE  color:#6D28D9
+            cell "$15,900"  align:right
+            cell "Jun 28, 2025"

@@ -1,0 +1,48 @@
+Screen "Watchlist" background:#0B0D10 state:{loading:false lastUpdatedMinutesAgo:2}
+  Header layout:row align:center justify:space-between padding:16 sticky:true
+    Title "Watchlist" style:headline weight:bold color:#FFFFFF
+    IconButton id:refreshButton icon:refresh label:"Refresh" size:40 action:refresh disabled-when:loading
+      Spinner visible-when:loading size:20 color:#FFFFFF animation:rotate duration:800ms repeat:infinite
+      Icon name:refresh visible-when:not-loading color:#FFFFFF
+  PullToRefresh action:refresh indicator:spinner threshold:64 on-release:set loading=true
+    Column
+      Text "Last updated 2 min ago" style:caption color:#8A919E padding:{horizontal:16 vertical:8} live:true
+        on-refresh-complete:set text="Last updated just now"
+        update:every 1min text:"Last updated {n} min ago"
+      List divider:true
+        StockRow id:AAPL layout:row align:center justify:space-between padding:16 tappable:true
+          Column
+            Text "AAPL" style:title weight:semibold color:#FFFFFF
+          Column align:end
+            Text "$228.14" style:title color:#FFFFFF
+            Text "+1.2%" style:body color:#22C55E icon:arrow-up
+        StockRow id:NVDA layout:row align:center justify:space-between padding:16 tappable:true
+          Column
+            Text "NVDA" style:title weight:semibold color:#FFFFFF
+          Column align:end
+            Text "$131.60" style:title color:#FFFFFF
+            Text "-0.8%" style:body color:#EF4444 icon:arrow-down
+        StockRow id:MSFT layout:row align:center justify:space-between padding:16 tappable:true
+          Column
+            Text "MSFT" style:title weight:semibold color:#FFFFFF
+          Column align:end
+            Text "$419.35" style:title color:#FFFFFF
+            Text "+0.4%" style:body color:#22C55E icon:arrow-up
+        StockRow id:TSLA layout:row align:center justify:space-between padding:16 tappable:true
+          Column
+            Text "TSLA" style:title weight:semibold color:#FFFFFF
+          Column align:end
+            Text "$252.90" style:title color:#FFFFFF
+            Text "-2.1%" style:body color:#EF4444 icon:arrow-down
+        StockRow id:AMZN layout:row align:center justify:space-between padding:16 tappable:true
+          Column
+            Text "AMZN" style:title weight:semibold color:#FFFFFF
+          Column align:end
+            Text "$187.02" style:title color:#FFFFFF
+            Text "+0.9%" style:body color:#22C55E icon:arrow-up
+  Behavior on:refresh
+    step set:loading=true
+    step await:fetchQuotes
+    step on-success set:{loading:false lastUpdatedMinutesAgo:0}
+    step on-success animate:rows property:opacity from:0.5 to:1 duration:300ms stagger:40ms
+    step on-error set:loading=false show:Toast "Couldn't refresh. Try again." duration:3s

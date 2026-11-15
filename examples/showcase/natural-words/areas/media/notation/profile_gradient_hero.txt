@@ -1,0 +1,25 @@
+Card pad:0 gap:0 maxw:360
+  Stack top center
+    Box w:fill h:140 {"props": {"gradient": {"type": "linear", "begin": "topLeft", "end": "bottomRight", "colors": ["#FF7C3AED", "#FFEC4899"]}}}
+    Box pad:[0,100,0,0]
+      Box fill:#FFFFFFFF radius:48 pad:4
+        Avatar "Sofia Ramirez" size:80
+  Column center gap:4 pad:[16,12,16,0]
+    Text.heading1 "Sofia Ramirez" center
+    Text.bodySecondary "Product Designer at Figment" center
+    Row center gap:4
+      Icon "location_on" size:16
+      Text.caption "Austin, TX"
+  Row between pad:[24,20,24,0]
+    Column center gap:2
+      Text.strong "128"
+      Text.caption "Posts"
+    Column center gap:2
+      Text.strong "4.2k"
+      Text.caption "Followers"
+    Column center gap:2
+      Text.strong "312"
+      Text.caption "Following"
+  Row gap:12 pad:20
+    Button.primary "Follow" grow -> emit follow
+    Button.outline "Message" grow -> emit message

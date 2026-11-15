@@ -1,0 +1,38 @@
+Card id:feedback-card padding:24 radius:16 elevation:2 width:400 background:surface direction:column gap:20
+  Header direction:row gap:12 align:center
+    Avatar "GB" size:40 background:green-600 color:white shape:circle
+    Column gap:2
+      Text "Green Basket" style:caption color:muted
+      Text "How was your delivery?" style:title weight:bold
+  Text "Your order was delivered today. Tell us how we did." style:body color:muted
+  Section direction:column gap:8
+    Label "Rate your experience" style:label
+    RatingInput id:rating name:rating max:5 value:4 size:36 color:amber-500 empty-color:gray-300 icon:star allow-half:false
+      Star index:1 state:filled
+      Star index:2 state:filled
+      Star index:3 state:filled
+      Star index:4 state:filled
+      Star index:5 state:empty
+      Behavior on:hover preview:fill-up-to-hovered
+      Behavior on:tap set:value animation:scale-pop duration:150ms
+      Accessibility label:"Rating, 4 out of 5 stars" role:slider
+    Text "Great!" style:caption color:green-700 bind:rating-label
+  Section direction:column gap:8
+    Label "What went well?" style:label
+    ChipGroup id:highlights name:highlights selection:multiple wrap:true gap:8
+      Chip "On time" value:on-time state:selected icon:check
+      Chip "Fresh produce" value:fresh-produce state:selected icon:check
+      Chip "Friendly driver" value:friendly-driver state:default
+      Chip "Good packaging" value:good-packaging state:default
+      Style selected background:green-100 border:green-600 color:green-800
+      Style default background:transparent border:gray-300 color:gray-700
+      Behavior on:tap toggle:selected animation:fade duration:120ms
+  Section direction:column gap:8
+    Label "Additional comments" hint:"Optional" style:label
+    Textarea id:comment name:comment placeholder:"Anything else you'd like to share?" rows:4 maxlength:500 required:false resize:vertical
+    Text "0/500" style:caption color:muted align:end bind:comment-length
+  Button "Send feedback" id:submit variant:primary width:fill height:48 radius:12 background:green-600 color:white
+    State disabled-when:rating-empty
+    State loading label:"Sending…" indicator:spinner
+    Behavior on:tap action:submit then:show-confirmation
+    Behavior on:success replace-card-with:"Thanks for your feedback!" animation:fade duration:250ms

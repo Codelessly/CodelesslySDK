@@ -1,0 +1,46 @@
+Screen "Orders" background:system
+  NavBar title:"Orders" style:largeTitle
+  SegmentedControl id:ordersTabs selected:Active width:fill margin:16
+    Segment "Active" value:Active badge:2
+    Segment "Completed" value:Completed badge:3
+    indicator motion:slide duration:250ms easing:easeInOut
+  ContentSwitcher bind:ordersTabs transition:crossfade duration:200ms
+    List id:activeList visible-when:ordersTabs==Active gap:12 padding:16
+      OrderCard id:1042 tappable:true action:openOrderDetail
+        Row align:spaceBetween
+          Text "#1042" style:headline
+          StatusChip "Arriving Tuesday" color:blue icon:truck
+        Text "3 items" style:caption color:secondary
+        ProgressBar value:0.7 color:blue animate:fillOnAppear duration:600ms
+        Button "Track package" style:link
+      OrderCard id:1043 tappable:true action:openOrderDetail
+        Row align:spaceBetween
+          Text "#1043" style:headline
+          StatusChip "Processing" color:orange icon:clock
+        Text "1 item" style:caption color:secondary
+        ProgressBar value:0.2 color:orange indeterminate:true
+        Button "Cancel order" style:link color:red confirm:true
+    List id:completedList visible-when:ordersTabs==Completed gap:12 padding:16
+      OrderCard id:1039 tappable:true action:openOrderDetail
+        Row align:spaceBetween
+          Text "#1039" style:headline
+          Text "$84.50" style:headline
+        Text "Delivered Mar 12, 2025" style:caption color:secondary
+        Button "Reorder" style:link
+      OrderCard id:1036 tappable:true action:openOrderDetail
+        Row align:spaceBetween
+          Text "#1036" style:headline
+          Text "$27.99" style:headline
+        Text "Delivered Feb 28, 2025" style:caption color:secondary
+        Button "Reorder" style:link
+      OrderCard id:1031 tappable:true action:openOrderDetail
+        Row align:spaceBetween
+          Text "#1031" style:headline
+          Text "$142.00" style:headline
+        Text "Delivered Feb 3, 2025" style:caption color:secondary
+        Button "Reorder" style:link
+  EmptyState visible-when:selectedList.isEmpty text:"No orders here yet" icon:box
+  Behavior
+    onSelect ordersTabs: scrollToTop animate:true
+    onPullDown: refresh indicator:spinner
+    onCardPress: scale:0.98 duration:100ms

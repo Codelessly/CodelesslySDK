@@ -1,0 +1,83 @@
+Column h:fill
+  Column grow scroll gap:20 pad:[16,16,16,16]
+    Row between middle
+      Text.pageTitle "Listen Now"
+      Avatar "Maya Reyes" size:40
+    Card gap:12
+      Text.caption "Continue listening"
+      Row gap:12 middle
+        Box w:72 h:72 radius:12 fill:#FF6D4C41 center middle
+          Icon "coffee" color:#FFFFFFFF
+        Column grow gap:4
+          Text.strong "The Daily Grind — Ep. 214: Coffee Economics"
+          Text.muted "The Daily Grind"
+      Progress 0.67
+      Row between
+        Text.caption "32:10"
+        Text.caption "-15:50 left"
+      Row gap:8 middle
+        Button "Resume" -> playing=true; toast "Resuming"
+        Spacer grow
+        Text.caption "48:00 total"
+    Column gap:12
+      Text.sectionTitle "Top Shows"
+      Row scroll gap:12
+        Column gap:6 w:110
+          Box h:110 radius:12 fill:#FF5C6BC0 center middle
+            Icon "history_edu" color:#FFFFFFFF
+          Text.strong "Hardcore History"
+        Column gap:6 w:110
+          Box h:110 radius:12 fill:#FF26A69A center middle
+            Icon "science" color:#FFFFFFFF
+          Text.strong "Radiolab"
+        Column gap:6 w:110
+          Box h:110 radius:12 fill:#FFEF6C00 center middle
+            Icon "architecture" color:#FFFFFFFF
+          Text.strong "99% Invisible"
+        Column gap:6 w:110
+          Box h:110 radius:12 fill:#FFAD1457 center middle
+            Icon "forum" color:#FFFFFFFF
+          Text.strong "Reply All"
+    Column gap:8
+      Text.sectionTitle "New Episodes"
+      each ep in episodes
+        Column gap:8
+          Row gap:12 middle
+            Box w:56 h:56 radius:10 fill:#FFE8DEF8 center middle
+              Icon "podcasts"
+            Column grow gap:2
+              Text.strong "{ep.title}"
+              Text.muted "{ep.show}"
+              Row gap:8
+                Text.caption "{ep.duration}"
+                Text.caption "•"
+                Text.caption "{ep.date}"
+            IconButton "play_circle" -> toast "Playing {ep.title}"
+          Divider
+  Row gap:12 middle pad:[16,10,16,10] fill:#FFF3EDF7
+    Box w:44 h:44 radius:8 fill:#FF6D4C41 center middle
+      Icon "coffee" color:#FFFFFFFF
+    Column grow gap:2
+      Text.strong "Ep. 214: Coffee Economics"
+      Text.caption "The Daily Grind"
+    IconButton "pause" visible:=playing -> playing=false
+    IconButton "play_arrow" visible:=!playing -> playing=true
+    IconButton "forward_30" -> toast "Skipped 30s"
+  Divider
+  Row between pad:[8,8,8,8]
+    Column center grow gap:2 -> tab=0
+      Icon "home" color:=tab==0?'#FF6750A4':'#FF79747E'
+      Text.caption "Home" color:=tab==0?'#FF6750A4':'#FF79747E'
+    Column center grow gap:2 -> tab=1
+      Icon "explore" color:=tab==1?'#FF6750A4':'#FF79747E'
+      Text.caption "Browse" color:=tab==1?'#FF6750A4':'#FF79747E'
+    Column center grow gap:2 -> tab=2
+      Icon "library_music" color:=tab==2?'#FF6750A4':'#FF79747E'
+      Text.caption "Library" color:=tab==2?'#FF6750A4':'#FF79747E'
+    Column center grow gap:2 -> tab=3
+      Icon "search" color:=tab==3?'#FF6750A4':'#FF79747E'
+      Text.caption "Search" color:=tab==3?'#FF6750A4':'#FF79747E'
+
+state tab=0
+state playing=true
+state episodes=[{"title":"The Last Mile of Fiber","show":"99% Invisible","duration":"42 min","date":"Today"},{"title":"Ep. 215: Tea Wars","show":"The Daily Grind","duration":"36 min","date":"Yesterday"},{"title":"The Fifth Sense","show":"Radiolab","duration":"58 min","date":"Mar 12"},{"title":"The Blindside Part II","show":"Hardcore History","duration":"3 hr 5 min","date":"Mar 9"},{"title":"The Case of the Missing Cursor","show":"Reply All","duration":"47 min","date":"Mar 6"}]

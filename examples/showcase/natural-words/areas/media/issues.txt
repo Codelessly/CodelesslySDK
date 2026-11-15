@@ -1,0 +1,5 @@
+custom_badge_shape: line 4:23: A Box has no "shape": left out. Its props are written key:value on the line.
+custom_badge_shape: line 14:21: A Box has no "shape": left out. Its props are written key:value on the line.
+custom_badge_shape: line 17:21: A Box has no "shape": left out. Its props are written key:value on the line.
+custom_badge_shape: line 20:21: A Box has no "shape": left out. Its props are written key:value on the line.
+skeleton_shimmer_reveal: line 22:17: Unknown word "item.img" on a Image. Props are written key:value.
