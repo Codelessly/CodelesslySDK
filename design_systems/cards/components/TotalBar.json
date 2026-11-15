@@ -1,0 +1,359 @@
+{
+ "schema": 3,
+ "id": "TotalBar",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "TotalBar",
+  "doc": "The card's closing bar on dark: a label over a large amount (a total, a count, a chosen time) with a note, and one cta button at the right that fires onPressed; enabled:=condition dims and blocks the button.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Total",
+    "doc": "What the amount is, small over it.",
+    "required": true
+   },
+   {
+    "key": "amount",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "$0.00",
+    "doc": "The amount or headline value, large (text: format money yourself).",
+    "required": true
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet note after the amount (empty: none)."
+   },
+   {
+    "key": "cta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Confirm",
+    "doc": "The button's label (empty: no button)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "arrow_forward_rounded",
+    "doc": "The icon after the button's label."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False dims the button and it does not fire."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The button was tapped while enabled."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Total",
+   "size": [
+    380,
+    70
+   ],
+   "props": {
+    "label": "Total",
+    "amount": "£128",
+    "note": "1 adult",
+    "cta": "Confirm flight"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "left",
+    "cta"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12,
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     18,
+     11,
+     11,
+     11
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "centerLeft",
+      "end": "centerRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "bar"
+       },
+       {
+        "position": 1,
+        "color": "barRaise"
+       }
+      ]
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.bar}"
+   }
+  },
+  "left": {
+   "type": "column",
+   "children": [
+    "label",
+    "amountRow"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "meta",
+     "color": "onBarSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "amountRow": {
+   "type": "row",
+   "children": [
+    "amount",
+    "note"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "amount": {
+   "type": "text",
+   "props": {
+    "text": "${props.amount}",
+    "style": {
+     "from": "number",
+     "color": "onBar"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "note": {
+   "type": "text",
+   "props": {
+    "text": "${props.note}",
+    "style": {
+     "from": "meta",
+     "color": "onBarSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     3
+    ]
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  },
+  "cta": {
+   "type": "row",
+   "children": [
+    "ctaLabel",
+    "ctaIcon"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 46,
+    "padding": [
+     16,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topCenter",
+      "end": "bottomCenter",
+      "stops": [
+       {
+        "position": 0,
+        "color": "accentBright"
+       },
+       {
+        "position": 1,
+        "color": "accent"
+       }
+      ]
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "decoration.radius": "${= max(0, theme.radii.panel - 6)}",
+    "opacity": "${= props.enabled ? 1 : 0.38}",
+    "visible": "${= props.cta != ''}"
+   },
+   "states": {
+    "pressed": {
+     "cta": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${props.enabled}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "componentEvent",
+         "event": "onPressed"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "ctaLabel": {
+   "type": "text",
+   "props": {
+    "text": "${props.cta}",
+    "style": {
+     "from": "cta",
+     "color": "onAccent"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "ctaIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_forward_rounded",
+    "size": 18,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  }
+ }
+}

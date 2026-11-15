@@ -1,0 +1,6281 @@
+{
+ "schema": 3,
+ "id": "Media",
+ "roots": [
+  "media"
+ ],
+ "widget": {
+  "type": "Media",
+  "doc": "A drawn picture where a photo would go (never use an image URL): kind is a product or food (shoe, mug, tote, box, beans, laptop, banana, milk, bread, eggs, cheese, apple) on a toned ground, or a travel scene (mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo); tone recolors it (products: sand, rose, mint, sky, lilac, slate; scenes: dawn, day, dusk, night); size it with h (and w).",
+  "props": [
+   {
+    "key": "kind",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "shoe",
+      "mug",
+      "tote",
+      "box",
+      "beans",
+      "laptop",
+      "banana",
+      "milk",
+      "bread",
+      "eggs",
+      "cheese",
+      "apple",
+      "mountain",
+      "harbor",
+      "skyline",
+      "dunes",
+      "forest",
+      "lagoon",
+      "market",
+      "festival",
+      "train",
+      "temple",
+      "bamboo"
+     ]
+    },
+    "default": "mountain",
+    "doc": "What is drawn. Products and food on a toned ground: shoe, mug, tote, box, beans, laptop, banana, milk, bread, eggs, cheese, apple. Travel scenes: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo.",
+    "required": true
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "auto",
+      "sand",
+      "rose",
+      "mint",
+      "sky",
+      "lilac",
+      "slate",
+      "dawn",
+      "day",
+      "dusk",
+      "night"
+     ]
+    },
+    "default": "auto",
+    "doc": "The palette. For a product: sand, rose, mint, sky, lilac or slate. For a scene, the time of day: dawn, day, dusk or night. auto picks one per kind."
+   },
+   {
+    "key": "round",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "Rounded corners (false when a parent clips it)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "shoe",
+   "size": [
+    200,
+    150
+   ],
+   "props": {
+    "kind": "shoe"
+   }
+  },
+  {
+   "name": "mountain",
+   "size": [
+    200,
+    150
+   ],
+   "props": {
+    "kind": "mountain"
+   }
+  },
+  {
+   "name": "harbor",
+   "size": [
+    200,
+    150
+   ],
+   "props": {
+    "kind": "harbor"
+   }
+  }
+ ],
+ "nodes": {
+  "media": {
+   "type": "stack",
+   "children": [
+    "ground",
+    "glyphs",
+    "scenes"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 150
+   },
+   "decoration": {
+    "radius": 14,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${= props.round ? theme.radii.tile : 0}"
+   }
+  },
+  "ground": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.kind == 'shoe' || props.kind == 'mug' || props.kind == 'tote' || props.kind == 'box' || props.kind == 'beans' || props.kind == 'laptop' || props.kind == 'banana' || props.kind == 'milk' || props.kind == 'bread' || props.kind == 'eggs' || props.kind == 'cheese' || props.kind == 'apple'}"
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "rect",
+      "rect": [
+       0,
+       0,
+       "${size.width}",
+       "${size.height}"
+      ],
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': A}, {'position': 1, 'color': B}]}}}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width / 2}",
+       "${= size.height * 0.48}"
+      ],
+      "radius": "${= min(size.width, size.height) * 0.4}",
+      "paint": "${theme.colors.artShine}"
+     }
+    ]
+   }
+  },
+  "glyphs": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.kind == 'shoe' || props.kind == 'mug' || props.kind == 'tote' || props.kind == 'box' || props.kind == 'beans' || props.kind == 'laptop' || props.kind == 'banana' || props.kind == 'milk' || props.kind == 'bread' || props.kind == 'eggs' || props.kind == 'cheese' || props.kind == 'apple'}"
+   },
+   "customPaint": {
+    "viewBox": [
+     120,
+     120
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "group",
+      "when": "${= props.kind == 'shoe'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         12.0,
+         93,
+         96,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "path",
+        "d": "M12 80 L108 80 Q112 80 112 84 Q112 92 102 92 L22 92 Q12 92 12 84 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         20,
+         86.5
+        ],
+        "p2": [
+         104,
+         86.5
+        ],
+        "paint": {
+         "color": "${M}",
+         "style": "stroke",
+         "strokeWidth": 2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M14 80 L14 58 C14 46 20 38 30 38 C35 38 37 43 39 48 C42 56 50 59 57 56 L64 51 C72 60 86 67 98 70 C105 72 110 76 110 80 Z",
+        "paint": "${M}"
+       },
+       {
+        "op": "path",
+        "d": "M14 80 L14 58 C14 46 20 38 30 38 L31 50 C25 53 23 60 24 68 L28 80 Z",
+        "paint": "${K}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M90 67 C100 70 110 75 110 80 L86 80 C86 75 87 70 90 67 Z",
+          "paint": "${K}"
+         }
+        ],
+        "opacity": 0.32
+       },
+       {
+        "op": "path",
+        "d": "M30 76 C50 77 68 70 82 60 L86 64 C72 76 52 81 30 80 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "path",
+        "d": "M30 38 C35 38 37 43 39 48 C42 56 50 59 57 56 L60 54 C52 62 40 60 36 52 C34 48 33 43 30 42 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         66,
+         54
+        ],
+        "p2": [
+         60,
+         61
+        ],
+        "paint": {
+         "color": "${theme.colors.artWhite}",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         74,
+         59
+        ],
+        "p2": [
+         68,
+         66
+        ],
+        "paint": {
+         "color": "${theme.colors.artWhite}",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         82,
+         63
+        ],
+        "p2": [
+         76,
+         70
+        ],
+        "paint": {
+         "color": "${theme.colors.artWhite}",
+         "style": "stroke",
+         "strokeWidth": 3,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'mug'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         25.0,
+         96,
+         70,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "path",
+        "d": "M80 50 C100 50 100 80 80 80",
+        "paint": {
+         "color": "${K}",
+         "style": "stroke",
+         "strokeWidth": 8,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M34 40 L84 40 L84 78 C84 90 76 96 66 96 L52 96 C42 96 34 90 34 78 Z",
+        "paint": "${M}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M70 40 L84 40 L84 78 C84 90 76 96 66 96 L60 96 C68 92 70 84 70 76 Z",
+          "paint": "${K}"
+         }
+        ],
+        "opacity": 0.28
+       },
+       {
+        "op": "oval",
+        "rect": [
+         34,
+         33,
+         50,
+         14
+        ],
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "oval",
+        "rect": [
+         38,
+         35.5,
+         42,
+         9
+        ],
+        "paint": "${K}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "rrect",
+          "rect": [
+           41,
+           52,
+           6,
+           30
+          ],
+          "radius": 3,
+          "paint": "${theme.colors.artWhite}"
+         }
+        ],
+        "opacity": 0.55
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M50 26 C45 20 55 16 50 9",
+          "paint": {
+           "color": "${K}",
+           "style": "stroke",
+           "strokeWidth": 3.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "path",
+          "d": "M66 26 C61 20 71 16 66 9",
+          "paint": {
+           "color": "${K}",
+           "style": "stroke",
+           "strokeWidth": 3.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'tote'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         20.0,
+         101,
+         80,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "path",
+        "d": "M44 48 C44 18 76 18 76 48",
+        "paint": {
+         "color": "${K}",
+         "style": "stroke",
+         "strokeWidth": 5.5,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M28 44 L92 44 L98 96 C98 101 95 104 90 104 L30 104 C25 104 22 101 22 96 Z",
+        "paint": "${M}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M28 44 L92 44 L93 54 L27 54 Z",
+          "paint": "${K}"
+         }
+        ],
+        "opacity": 0.25
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M80 44 L92 44 L98 96 C98 101 95 104 90 104 L82 104 Z",
+          "paint": "${K}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         46,
+         66,
+         28,
+         20
+        ],
+        "radius": 5,
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         52,
+         73
+        ],
+        "p2": [
+         68,
+         73
+        ],
+        "paint": {
+         "color": "${M}",
+         "style": "stroke",
+         "strokeWidth": 2.5,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         52,
+         79
+        ],
+        "p2": [
+         62,
+         79
+        ],
+        "paint": {
+         "color": "${M}",
+         "style": "stroke",
+         "strokeWidth": 2.5,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "circle",
+        "c": [
+         44,
+         49
+        ],
+        "radius": 2.6,
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         76,
+         49
+        ],
+        "radius": 2.6,
+        "paint": "${theme.colors.artWhite}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'box'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         18.0,
+         100,
+         84,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         24,
+         46,
+         72,
+         54
+        ],
+        "radius": 6,
+        "paint": "${M}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M76 46 L90 46 Q96 46 96 52 L96 94 Q96 100 90 100 L76 100 Z",
+          "paint": "${K}"
+         }
+        ],
+        "opacity": 0.2
+       },
+       {
+        "op": "path",
+        "d": "M20 34 L100 34 Q104 34 103 38 L100 48 L20 48 L17 38 Q16 34 20 34 Z",
+        "paint": "${K}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         53,
+         34,
+         14,
+         66
+        ],
+        "paint": "${theme.colors.artShine}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         32,
+         76,
+         22,
+         14
+        ],
+        "radius": 3,
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         36,
+         81
+        ],
+        "p2": [
+         50,
+         81
+        ],
+        "paint": {
+         "color": "${M}",
+         "style": "stroke",
+         "strokeWidth": 2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         36,
+         86
+        ],
+        "p2": [
+         45,
+         86
+        ],
+        "paint": {
+         "color": "${M}",
+         "style": "stroke",
+         "strokeWidth": 2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'beans'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         27.0,
+         101,
+         66,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "path",
+        "d": "M36 30 L84 30 L89 98 C89 102 87 104 84 104 L36 104 C33 104 31 102 31 98 Z",
+        "paint": "${M}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M72 30 L84 30 L89 98 C89 102 87 104 84 104 L76 104 Z",
+          "paint": "${K}"
+         }
+        ],
+        "opacity": 0.2
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         34,
+         20,
+         52,
+         13
+        ],
+        "radius": 3,
+        "paint": "${K}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         40,
+         26.5
+        ],
+        "p2": [
+         80,
+         26.5
+        ],
+        "paint": {
+         "color": "${M}",
+         "style": "stroke",
+         "strokeWidth": 1.6,
+         "strokeCap": "round",
+         "strokeJoin": "round",
+         "dashPattern": [
+          3,
+          4
+         ]
+        }
+       },
+       {
+        "op": "circle",
+        "c": [
+         60,
+         68
+        ],
+        "radius": 19,
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "oval",
+          "rect": [
+           -7,
+           -10,
+           14,
+           20
+          ],
+          "paint": "${K}"
+         },
+         {
+          "op": "path",
+          "d": "M-1 -8 C4 -3 -4 3 1 8",
+          "paint": {
+           "color": "${theme.colors.artWhite}",
+           "style": "stroke",
+           "strokeWidth": 1.8,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "translate": [
+         60,
+         68
+        ],
+        "rotate": 0.5
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'laptop'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         12.0,
+         96,
+         96,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         26,
+         30,
+         68,
+         50
+        ],
+        "radius": 6,
+        "paint": "${K}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         30,
+         34,
+         60,
+         42
+        ],
+        "radius": 3,
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': M}, {'position': 1, 'color': B}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M30 76 L58 34 L72 34 L44 76 Z",
+          "paint": "${theme.colors.artShine}"
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         38,
+         44,
+         22,
+         5
+        ],
+        "radius": 2.5,
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         38,
+         54,
+         34,
+         4
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.artShine}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         38,
+         62,
+         26,
+         4
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.artShine}"
+       },
+       {
+        "op": "path",
+        "d": "M14 82 L106 82 L102 91 C101 93 99 94 96 94 L24 94 C21 94 19 93 18 91 Z",
+        "paint": "${theme.colors.slateMid}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         50,
+         82,
+         20,
+         4
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.slateInk}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'banana'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         20.0,
+         98,
+         80,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "path",
+        "d": "M22 46 C24 80 60 104 100 82 C97 95 80 108 58 104 C34 100 18 74 18 50 Z",
+        "paint": "${theme.colors.sunDeep}"
+       },
+       {
+        "op": "path",
+        "d": "M24 40 C30 76 66 96 102 76 C100 84 96 88 92 90 C62 100 32 84 22 46 Z",
+        "paint": "${theme.colors.sun}"
+       },
+       {
+        "op": "path",
+        "d": "M24 40 L20 30 L27 28 L29 39 Z",
+        "paint": "${theme.colors.sandInk}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         101,
+         79
+        ],
+        "radius": 3,
+        "paint": "${theme.colors.sandInk}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M33 58 C42 76 62 86 82 84",
+          "paint": {
+           "color": "${theme.colors.artWhite}",
+           "style": "stroke",
+           "strokeWidth": 3,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.6
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'milk'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         32.0,
+         101,
+         56,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         40,
+         46,
+         40,
+         56
+        ],
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         68,
+         46,
+         12,
+         56
+        ],
+        "paint": "${theme.colors.cloudShade}"
+       },
+       {
+        "op": "path",
+        "d": "M40 46 L50 30 L72 30 L80 46 Z",
+        "paint": "${theme.colors.cloudShade}"
+       },
+       {
+        "op": "path",
+        "d": "M40 46 L50 30 L60 30 L68 46 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         48,
+         22,
+         26,
+         9
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.skyMid}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         40,
+         62,
+         40,
+         24
+        ],
+        "paint": "${theme.colors.skyMid}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         68,
+         62,
+         12,
+         24
+        ],
+        "paint": "${theme.colors.skyInk}"
+       },
+       {
+        "op": "path",
+        "d": "M54 68 C50 74 49 77 49 79 C49 82 51 84 54 84 C57 84 59 82 59 79 C59 77 58 74 54 68 Z",
+        "paint": "${theme.colors.artWhite}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'bread'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         18.0,
+         99,
+         84,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "path",
+        "d": "M22 62 C22 46 38 38 60 38 C82 38 98 46 98 62 C98 68 95 71 92 72 L92 94 C92 98 90 100 86 100 L34 100 C30 100 28 98 28 94 L28 72 C25 71 22 68 22 62 Z",
+        "paint": "${theme.colors.sandMid}"
+       },
+       {
+        "op": "path",
+        "d": "M28 84 L92 84 L92 94 C92 98 90 100 86 100 L34 100 C30 100 28 98 28 94 Z",
+        "paint": "${theme.colors.sandInk}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           44,
+           50
+          ],
+          "p2": [
+           52,
+           62
+          ],
+          "paint": {
+           "color": "${theme.colors.sandA}",
+           "style": "stroke",
+           "strokeWidth": 4,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           58,
+           48
+          ],
+          "p2": [
+           66,
+           60
+          ],
+          "paint": {
+           "color": "${theme.colors.sandA}",
+           "style": "stroke",
+           "strokeWidth": 4,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           72,
+           50
+          ],
+          "p2": [
+           80,
+           62
+          ],
+          "paint": {
+           "color": "${theme.colors.sandA}",
+           "style": "stroke",
+           "strokeWidth": 4,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.85
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M30 60 C32 50 44 44 58 44",
+          "paint": {
+           "color": "${theme.colors.artWhite}",
+           "style": "stroke",
+           "strokeWidth": 3,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.35
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'eggs'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         15.0,
+         99,
+         90,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "path",
+        "d": "M34 39 C41 39 45 50 45 57 C45 64 40 68 34 68 C28 68 23 64 23 57 C23 50 27 39 34 39 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M29 48 C30 45 32 43 34 43",
+          "paint": {
+           "color": "${theme.colors.sandB}",
+           "style": "stroke",
+           "strokeWidth": 2.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.55
+       },
+       {
+        "op": "path",
+        "d": "M60 36 C67 36 71 47 71 54 C71 61 66 65 60 65 C54 65 49 61 49 54 C49 47 53 36 60 36 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M55 45 C56 42 58 40 60 40",
+          "paint": {
+           "color": "${theme.colors.sandB}",
+           "style": "stroke",
+           "strokeWidth": 2.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.55
+       },
+       {
+        "op": "path",
+        "d": "M86 39 C93 39 97 50 97 57 C97 64 92 68 86 68 C80 68 75 64 75 57 C75 50 79 39 86 39 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M81 48 C82 45 84 43 86 43",
+          "paint": {
+           "color": "${theme.colors.sandB}",
+           "style": "stroke",
+           "strokeWidth": 2.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.55
+       },
+       {
+        "op": "path",
+        "d": "M14 62 L106 62 L101 92 C100 97 97 100 92 100 L28 100 C23 100 20 97 19 92 Z",
+        "paint": "${M}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M14 62 L106 62 L104 72 L16 72 Z",
+          "paint": "${K}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M22 62 C24 72 44 72 46 62 Z",
+          "paint": "${theme.colors.artWhite}"
+         }
+        ],
+        "opacity": 0.9
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M48 62 C50 72 70 72 72 62 Z",
+          "paint": "${theme.colors.artWhite}"
+         }
+        ],
+        "opacity": 0.9
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M74 62 C76 72 96 72 98 62 Z",
+          "paint": "${theme.colors.artWhite}"
+         }
+        ],
+        "opacity": 0.9
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           26,
+           88
+          ],
+          "p2": [
+           94,
+           88
+          ],
+          "paint": {
+           "color": "${theme.colors.artWhite}",
+           "style": "stroke",
+           "strokeWidth": 2.5,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.35
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'cheese'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         16.0,
+         97,
+         88,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "path",
+        "d": "M18 74 L92 48 L104 60 L30 82 Z",
+        "paint": "${theme.colors.sandA}"
+       },
+       {
+        "op": "path",
+        "d": "M18 74 L30 82 L104 60 L104 92 Q104 96 100 96 L22 96 Q18 96 18 92 Z",
+        "paint": "${theme.colors.sun}"
+       },
+       {
+        "op": "path",
+        "d": "M18 74 L30 82 L30 96 L22 96 L18 92 Z",
+        "paint": "${theme.colors.sunDeep}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         48,
+         87
+        ],
+        "radius": 5,
+        "paint": "${theme.colors.sunDeep}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         72,
+         80
+        ],
+        "radius": 6.5,
+        "paint": "${theme.colors.sunDeep}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         92,
+         86
+        ],
+        "radius": 4,
+        "paint": "${theme.colors.sunDeep}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         60,
+         70
+        ],
+        "radius": 3,
+        "paint": "${theme.colors.sandB}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         84,
+         60
+        ],
+        "radius": 3.5,
+        "paint": "${theme.colors.sandB}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'apple'}",
+      "ops": [
+       {
+        "op": "oval",
+        "rect": [
+         28.0,
+         99,
+         64,
+         9
+        ],
+        "paint": "${theme.colors.artShadow}"
+       },
+       {
+        "op": "path",
+        "d": "M60 46 C50 36 28 40 28 64 C28 84 42 102 52 102 C56 102 58 100 60 100 C62 100 64 102 68 102 C78 102 92 84 92 64 C92 40 70 36 60 46 Z",
+        "paint": "${theme.colors.bad}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M60 46 C70 36 92 40 92 64 C92 84 78 102 68 102 C76 92 82 78 80 62 C79 52 70 46 60 46 Z",
+          "paint": "${theme.colors.badDeep}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "path",
+        "d": "M60 46 C60 38 62 32 66 28",
+        "paint": {
+         "color": "${theme.colors.sandInk}",
+         "style": "stroke",
+         "strokeWidth": 3.5,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M66 34 C72 24 84 24 88 28 C84 38 72 40 66 34 Z",
+        "paint": "${theme.colors.good}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M38 60 C40 52 46 48 52 48",
+          "paint": {
+           "color": "${theme.colors.artWhite}",
+           "style": "stroke",
+           "strokeWidth": 3.5,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.55
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "scenes": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "visible": "${= !(props.kind == 'shoe' || props.kind == 'mug' || props.kind == 'tote' || props.kind == 'box' || props.kind == 'beans' || props.kind == 'laptop' || props.kind == 'banana' || props.kind == 'milk' || props.kind == 'bread' || props.kind == 'eggs' || props.kind == 'cheese' || props.kind == 'apple')}"
+   },
+   "customPaint": {
+    "viewBox": [
+     160,
+     120
+    ],
+    "fit": "cover",
+    "painter": [
+     {
+      "op": "group",
+      "when": "${= props.kind == 'mountain'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           116,
+           38
+          ],
+          "radius": 25.200000000000003,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           116,
+           38
+          ],
+          "radius": 18.0,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "circle",
+        "c": [
+         116,
+         38
+        ],
+        "radius": 12,
+        "paint": "${orb}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 74 L22 56 L40 66 L62 44 L86 68 L110 52 L132 66 L160 50 L160 120 L0 120 Z",
+          "paint": "${far}"
+         }
+        ],
+        "opacity": 0.55
+       },
+       {
+        "op": "path",
+        "d": "M-10 96 L34 50 L52 70 L84 30 L118 72 L134 60 L170 96 L170 120 L-10 120 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M84 30 L96 45 L90 42 L85 49 L79 43 L72 46 Z",
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M34 50 L42 59 L37 57 L33 62 L28 57 Z",
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M0 92 C30 80 58 86 88 94 C118 102 140 90 160 86 L160 120 L0 120 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M22 82 L28.006 94.48 L15.994 94.48 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M22 88.76 L30.736 102.28 L13.264 102.28 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M22 96.04 L32.92 108 L11.08 108 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M38 90 L42.62 99.6 L33.38 99.6 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M38 95.2 L44.72 105.6 L31.28 105.6 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M38 100.8 L46.4 110 L29.6 110 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M134 82 L139.544 93.52 L128.456 93.52 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M134 88.24 L142.064 100.72 L125.936 100.72 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M134 94.96 L144.08 106 L123.92 106 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M148 78 L154.93 92.4 L141.07 92.4 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M148 85.8 L158.08 101.4 L137.92 101.4 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M148 94.2 L160.6 108 L135.4 108 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M0 106 C40 98 100 112 160 102 L160 120 L0 120 Z",
+        "paint": "${near}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'harbor'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           76,
+           66
+          ],
+          "radius": 31.5,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           76,
+           66
+          ],
+          "radius": 22.5,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "circle",
+        "c": [
+         76,
+         66
+        ],
+        "radius": 15,
+        "paint": "${orb}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 70 L0 58 C18 52 40 58 58 70 Z",
+          "paint": "${far}"
+         },
+         {
+          "op": "path",
+          "d": "M112 70 C128 60 148 58 160 62 L160 70 Z",
+          "paint": "${far}"
+         }
+        ],
+        "opacity": 0.7
+       },
+       {
+        "op": "rect",
+        "rect": [
+         -10,
+         70,
+         180,
+         60
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': far}, {'position': 0.9, 'color': mid}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           62,
+           76
+          ],
+          "p2": [
+           90,
+           76
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           56,
+           83
+          ],
+          "p2": [
+           96,
+           83
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           66,
+           90
+          ],
+          "p2": [
+           86,
+           90
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           70,
+           97
+          ],
+          "p2": [
+           82,
+           97
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.75
+       },
+       {
+        "op": "line",
+        "p1": [
+         116,
+         50
+        ],
+        "p2": [
+         116,
+         86
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1.8,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M118 54 L118 82 L136 82 Z",
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M114 60 L114 82 L102 82 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "path",
+        "d": "M98 86 L138 86 L132 96 C131 97 130 98 128 98 L106 98 C104 98 103 97 102 96 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           100,
+           102
+          ],
+          "p2": [
+           136,
+           102
+          ],
+          "paint": {
+           "color": "${near}",
+           "style": "stroke",
+           "strokeWidth": 2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.4
+       },
+       {
+        "op": "path",
+        "d": "M0 104 L46 104 L46 108 L42 108 L42 120 L0 120 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         12,
+         96,
+         4,
+         10
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         30,
+         96,
+         4,
+         10
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           14,
+           94
+          ],
+          "radius": 2.5,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           32,
+           94
+          ],
+          "radius": 2.5,
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.8
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'skyline'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           124,
+           28
+          ],
+          "radius": 18.900000000000002,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           124,
+           28
+          ],
+          "radius": 13.5,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "circle",
+        "c": [
+         124,
+         28
+        ],
+        "radius": 9,
+        "paint": "${orb}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           20,
+           18
+          ],
+          "radius": 1,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           44,
+           30
+          ],
+          "radius": 0.8,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           70,
+           14
+          ],
+          "radius": 1,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           96,
+           26
+          ],
+          "radius": 0.8,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           150,
+           14
+          ],
+          "radius": 1,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           58,
+           24
+          ],
+          "radius": 0.7,
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.8
+       },
+       {
+        "op": "rect",
+        "rect": [
+         4,
+         60,
+         16,
+         60
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         22,
+         48,
+         14,
+         72
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         38,
+         66,
+         12,
+         54
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         52,
+         40,
+         16,
+         80
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         70,
+         58,
+         14,
+         62
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         86,
+         34,
+         12,
+         86
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         100,
+         52,
+         18,
+         68
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         120,
+         44,
+         14,
+         76
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         136,
+         62,
+         22,
+         58
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         91,
+         24,
+         2,
+         12
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M52 40 L60 30 L68 40 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "rect",
+          "rect": [
+           -10,
+           100,
+           180,
+           20
+          ],
+          "paint": "${mid}"
+         }
+        ],
+        "opacity": 0.6
+       },
+       {
+        "op": "rect",
+        "rect": [
+         -4,
+         84,
+         22,
+         36
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         20,
+         72,
+         18,
+         48
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         40,
+         90,
+         16,
+         30
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         58,
+         66,
+         20,
+         54
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         80,
+         82,
+         18,
+         38
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         100,
+         70,
+         16,
+         50
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         118,
+         88,
+         20,
+         32
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         140,
+         76,
+         24,
+         44
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "rrect",
+          "rect": [
+           24,
+           78,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           30,
+           78,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           24,
+           86,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           62,
+           72,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           70,
+           72,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           62,
+           80,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           70,
+           88,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           104,
+           76,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           110,
+           84,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           146,
+           82,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           152,
+           82,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           146,
+           92,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           84,
+           90,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           4,
+           92,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           10,
+           100,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           124,
+           96,
+           3,
+           4
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.9
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'dunes'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           40,
+           36
+          ],
+          "radius": 27.3,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           40,
+           36
+          ],
+          "radius": 19.5,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "circle",
+        "c": [
+         40,
+         36
+        ],
+        "radius": 13,
+        "paint": "${orb}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 78 C30 60 60 62 92 76 C116 66 140 62 160 70 L160 120 L0 120 Z",
+          "paint": "${far}"
+         }
+        ],
+        "opacity": 0.6
+       },
+       {
+        "op": "path",
+        "d": "M0 90 C36 70 70 66 104 86 C124 78 144 76 160 82 L160 120 L0 120 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M40 78 C66 66 86 72 104 86 C82 82 62 80 40 78 Z",
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "path",
+        "d": "M0 104 C30 84 70 80 112 100 C132 92 148 92 160 96 L160 120 L0 120 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M50 88 C76 82 96 90 112 100 C90 96 70 92 50 88 Z",
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.35
+       },
+       {
+        "op": "path",
+        "d": "M0 116 C40 100 90 100 130 112 C142 110 152 110 160 112 L160 120 L0 120 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         118,
+         88.0,
+         6,
+         3.4
+        ],
+        "radius": 1.4,
+        "paint": "${near}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         119,
+         91.0
+        ],
+        "p2": [
+         119,
+         95.0
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         123,
+         91.0
+        ],
+        "p2": [
+         123,
+         95.0
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         124,
+         89.0
+        ],
+        "p2": [
+         126,
+         86.0
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1.2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         128,
+         85.5,
+         6,
+         3.4
+        ],
+        "radius": 1.4,
+        "paint": "${near}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         129,
+         88.5
+        ],
+        "p2": [
+         129,
+         92.5
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         133,
+         88.5
+        ],
+        "p2": [
+         133,
+         92.5
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         134,
+         86.5
+        ],
+        "p2": [
+         136,
+         83.5
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1.2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         138,
+         83.0,
+         6,
+         3.4
+        ],
+        "radius": 1.4,
+        "paint": "${near}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         139,
+         86.0
+        ],
+        "p2": [
+         139,
+         90.0
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         143,
+         86.0
+        ],
+        "p2": [
+         143,
+         90.0
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         144,
+         84.0
+        ],
+        "p2": [
+         146,
+         81.0
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1.2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'forest'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           118,
+           30
+          ],
+          "radius": 23.1,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           118,
+           30
+          ],
+          "radius": 16.5,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "circle",
+        "c": [
+         118,
+         30
+        ],
+        "radius": 11,
+        "paint": "${orb}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 70 C30 56 60 60 88 68 C116 76 140 62 160 58 L160 120 L0 120 Z",
+          "paint": "${far}"
+         }
+        ],
+        "opacity": 0.55
+       },
+       {
+        "op": "path",
+        "d": "M10 62 L16.93 76.4 L3.07 76.4 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M10 69.8 L20.08 85.4 L-0.08 85.4 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M10 78.2 L22.6 92 L-2.6 92 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M26 54 L34.778 72.24 L17.222 72.24 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M26 63.88 L38.768 83.64 L13.232 83.64 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M26 74.52 L41.96 92 L10.04 92 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M44 62 L50.93 76.4 L37.07 76.4 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M44 69.8 L54.08 85.4 L33.92 85.4 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M44 78.2 L56.6 92 L31.4 92 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M62 52 L71.24 71.2 L52.76 71.2 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M62 62.4 L75.44 83.2 L48.56 83.2 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M62 73.6 L78.8 92 L45.2 92 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M82 60 L89.392 75.36 L74.608 75.36 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M82 68.32 L92.752 84.96 L71.248 84.96 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M82 77.28 L95.44 92 L68.56 92 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M100 52 L109.24 71.2 L90.76 71.2 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M100 62.4 L113.44 83.2 L86.56 83.2 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M100 73.6 L116.8 92 L83.2 92 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M120 58 L127.854 74.32 L112.146 74.32 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M120 66.84 L131.424 84.52 L108.576 84.52 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M120 76.36 L134.28 92 L105.72 92 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M140 52 L149.24 71.2 L130.76 71.2 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M140 62.4 L153.44 83.2 L126.56 83.2 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M140 73.6 L156.8 92 L123.2 92 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M156 62 L162.93 76.4 L149.07 76.4 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M156 69.8 L166.08 85.4 L145.92 85.4 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M156 78.2 L168.6 92 L143.4 92 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         -10,
+         90,
+         180,
+         40
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M0 64 L10.164 85.12 L-10.164 85.12 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M0 75.44 L14.784 98.32 L-14.784 98.32 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M0 87.76 L18.48 108 L-18.48 108 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M20 54 L32.474 79.92 L7.526 79.92 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M20 68.04 L38.144 96.12 L1.856 96.12 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M20 83.16 L42.68 108 L-2.68 108 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M46 62 L56.626 84.08 L35.374 84.08 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M46 73.96 L61.456 97.88 L30.544 97.88 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M46 86.84 L65.32 108 L26.68 108 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M112 58 L123.55 82 L100.45 82 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M112 71 L128.8 97 L95.2 97 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M112 85 L133 108 L91 108 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M134 50 L147.398 77.84 L120.602 77.84 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M134 65.08 L153.488 95.24 L114.512 95.24 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M134 81.32 L158.36 108 L109.64 108 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M156 62 L166.626 84.08 L145.374 84.08 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M156 73.96 L171.456 97.88 L140.544 97.88 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M156 86.84 L175.32 108 L136.68 108 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M0 104 C40 98 60 102 80 106 C100 102 130 98 160 104 L160 120 L0 120 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M66 120 C70 110 76 104 80 98 C84 104 90 110 96 120 Z",
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.55
+       },
+       {
+        "op": "path",
+        "d": "M8 64 L21.86 92.8 L-5.86 92.8 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M8 79.6 L28.16 110.8 L-12.16 110.8 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M8 96.4 L33.2 124 L-17.2 124 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M150 60 L165.246 91.68 L134.754 91.68 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M150 77.16 L172.176 111.48 L127.824 111.48 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M150 95.64 L177.72 126 L122.28 126 Z",
+        "paint": "${near}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'lagoon'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           110,
+           34
+          ],
+          "radius": 27.3,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           110,
+           34
+          ],
+          "radius": 19.5,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "circle",
+        "c": [
+         110,
+         34
+        ],
+        "radius": 13,
+        "paint": "${orb}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M96 72 C112 60 140 60 160 68 L160 74 L96 74 Z",
+          "paint": "${far}"
+         }
+        ],
+        "opacity": 0.7
+       },
+       {
+        "op": "rect",
+        "rect": [
+         -10,
+         72,
+         180,
+         50
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': far}, {'position': 1, 'color': mid}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           96,
+           80
+          ],
+          "p2": [
+           124,
+           80
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           88,
+           88
+          ],
+          "p2": [
+           130,
+           88
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           102,
+           96
+          ],
+          "p2": [
+           118,
+           96
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.6
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 98 C30 88 70 92 96 108 C110 116 120 118 130 120 L0 120 Z",
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.9
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 106 C26 98 60 102 84 114 C90 117 96 119 100 120 L0 120 Z",
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "path",
+        "d": "M34 106 C36 84 42 66 52 50",
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 4.5,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M52 50 C40 42 28 44 20 52",
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 3.2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M52 50 C46 36 34 30 24 32",
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 3.2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M52 50 C56 36 68 30 80 34",
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 3.2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M52 50 C64 44 76 48 84 58",
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 3.2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M52 50 C54 60 50 70 44 76",
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 3.2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "circle",
+        "c": [
+         51,
+         53
+        ],
+        "radius": 2.6,
+        "paint": "${near}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         55,
+         54
+        ],
+        "radius": 2.2,
+        "paint": "${near}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'market'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           132,
+           24
+          ],
+          "radius": 18.900000000000002,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           132,
+           24
+          ],
+          "radius": 13.5,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "circle",
+        "c": [
+         132,
+         24
+        ],
+        "radius": 9,
+        "paint": "${orb}"
+       },
+       {
+        "op": "path",
+        "d": "M-6 50 L9 36 L24 50 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         -6,
+         50,
+         30,
+         70
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         0.5999999999999996,
+         58,
+         5.1000000000000005,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         0.5999999999999996,
+         74,
+         5.1000000000000005,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         12.600000000000001,
+         58,
+         5.1000000000000005,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         12.600000000000001,
+         74,
+         5.1000000000000005,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M24 42 L37 28 L50 42 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         24,
+         42,
+         26,
+         78
+        ],
+        "paint": "${mid}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         29.72,
+         50,
+         4.42,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         29.72,
+         66,
+         4.42,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         40.120000000000005,
+         50,
+         4.42,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         40.120000000000005,
+         66,
+         4.42,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M50 54 L64 40 L78 54 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         50,
+         54,
+         28,
+         66
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         56.16,
+         62,
+         4.760000000000001,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         56.16,
+         78,
+         4.760000000000001,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         67.36,
+         62,
+         4.760000000000001,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         67.36,
+         78,
+         4.760000000000001,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M78 40 L92 26 L106 40 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         78,
+         40,
+         28,
+         80
+        ],
+        "paint": "${mid}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         84.16,
+         48,
+         4.760000000000001,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         84.16,
+         64,
+         4.760000000000001,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         95.36,
+         48,
+         4.760000000000001,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         95.36,
+         64,
+         4.760000000000001,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M106 52 L119 38 L132 52 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         106,
+         52,
+         26,
+         68
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         111.72,
+         60,
+         4.42,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         111.72,
+         76,
+         4.42,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         122.12,
+         60,
+         4.42,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         122.12,
+         76,
+         4.42,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M132 44 L149 30 L166 44 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         132,
+         44,
+         34,
+         76
+        ],
+        "paint": "${mid}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         139.48,
+         52,
+         5.78,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         139.48,
+         68,
+         5.78,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         153.07999999999998,
+         52,
+         5.78,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         153.07999999999998,
+         68,
+         5.78,
+         9
+        ],
+        "radius": 1.5,
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M2 84 L38 84 L38 94 Q32 98 26 94 Q20 98 14 94 Q8 98 2 94 Z",
+        "paint": "${lit}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         5,
+         94,
+         2,
+         16
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         33,
+         94,
+         2,
+         16
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         8,
+         100,
+         24,
+         8
+        ],
+        "radius": 2,
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M40 84 L76 84 L76 94 Q70 98 64 94 Q58 98 52 94 Q46 98 40 94 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         43,
+         94,
+         2,
+         16
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         71,
+         94,
+         2,
+         16
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         46,
+         100,
+         24,
+         8
+        ],
+        "radius": 2,
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M80 84 L116 84 L116 94 Q110 98 104 94 Q98 98 92 94 Q86 98 80 94 Z",
+        "paint": "${lit}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         83,
+         94,
+         2,
+         16
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         111,
+         94,
+         2,
+         16
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         86,
+         100,
+         24,
+         8
+        ],
+        "radius": 2,
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M120 84 L156 84 L156 94 Q150 98 144 94 Q138 98 132 94 Q126 98 120 94 Z",
+        "paint": "${theme.colors.artWhite}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         123,
+         94,
+         2,
+         16
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         151,
+         94,
+         2,
+         16
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         126,
+         100,
+         24,
+         8
+        ],
+        "radius": 2,
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         -10,
+         108,
+         180,
+         14
+        ],
+        "paint": "${near}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'festival'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           14,
+           12
+          ],
+          "radius": 0.9,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           66,
+           8
+          ],
+          "radius": 0.8,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           150,
+           24
+          ],
+          "radius": 0.9,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           98,
+           16
+          ],
+          "radius": 0.7,
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.8
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           49.6,
+           30.0
+          ],
+          "p2": [
+           60.0,
+           30.0
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           48.530495168499705,
+           33.29159741283785
+          ],
+          "p2": [
+           56.94427190999916,
+           39.404564036679574
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           45.73049516849971,
+           35.32591649125286
+          ],
+          "p2": [
+           48.94427190999916,
+           45.21690426072246
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           42.26950483150029,
+           35.32591649125286
+          ],
+          "p2": [
+           39.05572809000084,
+           45.21690426072246
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           39.469504831500295,
+           33.29159741283785
+          ],
+          "p2": [
+           31.05572809000084,
+           39.404564036679574
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           38.4,
+           30.0
+          ],
+          "p2": [
+           28.0,
+           30.000000000000004
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           39.469504831500295,
+           26.70840258716215
+          ],
+          "p2": [
+           31.05572809000084,
+           20.595435963320433
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           42.26950483150029,
+           24.67408350874714
+          ],
+          "p2": [
+           39.05572809000084,
+           14.783095739277544
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           45.7304951684997,
+           24.674083508747138
+          ],
+          "p2": [
+           48.94427190999916,
+           14.783095739277542
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           48.530495168499705,
+           26.708402587162148
+          ],
+          "p2": [
+           56.94427190999916,
+           20.595435963320426
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "circle",
+          "c": [
+           44,
+           30
+          ],
+          "radius": 1.6,
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.9
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           119.0,
+           24.0
+          ],
+          "p2": [
+           132.0,
+           24.0
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           117.66311896062463,
+           28.11449676604731
+          ],
+          "p2": [
+           128.18033988749895,
+           35.75570504584947
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           114.16311896062463,
+           30.657395614066075
+          ],
+          "p2": [
+           118.18033988749895,
+           43.02113032590307
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           109.83688103937537,
+           30.657395614066075
+          ],
+          "p2": [
+           105.81966011250105,
+           43.02113032590307
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           106.33688103937537,
+           28.114496766047314
+          ],
+          "p2": [
+           95.81966011250105,
+           35.75570504584947
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           105.0,
+           24.0
+          ],
+          "p2": [
+           92.0,
+           24.000000000000004
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           106.33688103937537,
+           19.88550323395269
+          ],
+          "p2": [
+           95.81966011250105,
+           12.24429495415054
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           109.83688103937537,
+           17.342604385933925
+          ],
+          "p2": [
+           105.81966011250105,
+           4.978869674096931
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           114.16311896062463,
+           17.342604385933925
+          ],
+          "p2": [
+           118.18033988749895,
+           4.978869674096927
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           117.66311896062463,
+           19.885503233952686
+          ],
+          "p2": [
+           128.18033988749895,
+           12.244294954150533
+          ],
+          "paint": {
+           "color": "${orb}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "circle",
+          "c": [
+           112,
+           24
+          ],
+          "radius": 1.6,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.9
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           87.5,
+           46.0
+          ],
+          "p2": [
+           94.0,
+           46.0
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           86.83155948031232,
+           48.057248383023655
+          ],
+          "p2": [
+           92.09016994374947,
+           51.877852522924734
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           85.08155948031232,
+           49.32869780703304
+          ],
+          "p2": [
+           87.09016994374947,
+           55.510565162951536
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           82.91844051968768,
+           49.32869780703304
+          ],
+          "p2": [
+           80.90983005625053,
+           55.510565162951536
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           81.16844051968768,
+           48.057248383023655
+          ],
+          "p2": [
+           75.90983005625053,
+           51.877852522924734
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           80.5,
+           46.0
+          ],
+          "p2": [
+           74.0,
+           46.0
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           81.16844051968768,
+           43.942751616976345
+          ],
+          "p2": [
+           75.90983005625053,
+           40.12214747707527
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           82.91844051968768,
+           42.67130219296696
+          ],
+          "p2": [
+           80.90983005625053,
+           36.489434837048464
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           85.08155948031232,
+           42.67130219296696
+          ],
+          "p2": [
+           87.09016994374947,
+           36.489434837048464
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "line",
+          "p1": [
+           86.83155948031232,
+           43.942751616976345
+          ],
+          "p2": [
+           92.09016994374947,
+           40.122147477075266
+          ],
+          "paint": {
+           "color": "${far}",
+           "style": "stroke",
+           "strokeWidth": 1.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         },
+         {
+          "op": "circle",
+          "c": [
+           84,
+           46
+          ],
+          "radius": 1.6,
+          "paint": "${far}"
+         }
+        ],
+        "opacity": 0.9
+       },
+       {
+        "op": "path",
+        "d": "M0 56 Q39 76 78 56 Q117 76 160 54",
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1.2,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "circle",
+        "c": [
+         8,
+         58.0
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         21,
+         61.6
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         34,
+         65.2
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         47,
+         65.2
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         60,
+         61.6
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         73,
+         58.0
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         86,
+         58.0
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         99,
+         61.6
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         112,
+         65.2
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         125,
+         65.2
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         138,
+         61.6
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         151,
+         58.0
+        ],
+        "radius": 2.4,
+        "paint": "${lit}"
+       },
+       {
+        "op": "path",
+        "d": "M8 104 L34 70 L60 104 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M34 70 L44 104 L24 104 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "path",
+        "d": "M96 104 L124 66 L152 104 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M124 66 L136 104 L112 104 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         34,
+         70
+        ],
+        "p2": [
+         34,
+         62
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M34 62 L42 65 L34 68 Z",
+        "paint": "${lit}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         124,
+         66
+        ],
+        "p2": [
+         124,
+         58
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M124 58 L132 61 L124 64 Z",
+        "paint": "${lit}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         -10,
+         104,
+         180,
+         20
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         66,
+         98
+        ],
+        "radius": 2.6,
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         63.4,
+         100,
+         5.2,
+         8
+        ],
+        "radius": 2,
+        "paint": "${near}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         74,
+         98
+        ],
+        "radius": 2.6,
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         71.4,
+         100,
+         5.2,
+         8
+        ],
+        "radius": 2,
+        "paint": "${near}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         82,
+         98
+        ],
+        "radius": 2.6,
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         79.4,
+         100,
+         5.2,
+         8
+        ],
+        "radius": 2,
+        "paint": "${near}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         90,
+         98
+        ],
+        "radius": 2.6,
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         87.4,
+         100,
+         5.2,
+         8
+        ],
+        "radius": 2,
+        "paint": "${near}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'train'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           30,
+           26
+          ],
+          "radius": 16.8,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           30,
+           26
+          ],
+          "radius": 12.0,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "circle",
+        "c": [
+         30,
+         26
+        ],
+        "radius": 8,
+        "paint": "${orb}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           60,
+           14
+          ],
+          "radius": 0.9,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           88,
+           26
+          ],
+          "radius": 0.7,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           120,
+           12
+          ],
+          "radius": 1,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           146,
+           30
+          ],
+          "radius": 0.8,
+          "paint": "${lit}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           104,
+           40
+          ],
+          "radius": 0.6,
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.8
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 78 L30 52 L54 72 L86 44 L116 70 L138 56 L160 72 L160 120 L0 120 Z",
+          "paint": "${far}"
+         }
+        ],
+        "opacity": 0.6
+       },
+       {
+        "op": "path",
+        "d": "M0 96 C40 82 70 86 100 92 C126 98 146 90 160 88 L160 120 L0 120 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         -10,
+         78,
+         180,
+         7
+        ],
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M-14 85 L-14 120 L-8 120 L-8 100 Q6 88 20 100 L20 120 L26 120 L26 85 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M26 85 L26 120 L32 120 L32 100 Q46 88 60 100 L60 120 L66 120 L66 85 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M66 85 L66 120 L72 120 L72 100 Q86 88 100 100 L100 120 L106 120 L106 85 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M106 85 L106 120 L112 120 L112 100 Q126 88 140 100 L140 120 L146 120 L146 85 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M146 85 L146 120 L152 120 L152 100 Q166 88 180 100 L180 120 L186 120 L186 85 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         46,
+         66,
+         44,
+         12
+        ],
+        "radius": 3,
+        "paint": "${far}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         92,
+         66,
+         44,
+         12
+        ],
+        "radius": 3,
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M138 78 L138 66 L150 66 C156 66 160 72 160 78 Z",
+        "paint": "${far}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         50,
+         69,
+         6,
+         4.5
+        ],
+        "radius": 1,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         59,
+         69,
+         6,
+         4.5
+        ],
+        "radius": 1,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         68,
+         69,
+         6,
+         4.5
+        ],
+        "radius": 1,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         77,
+         69,
+         6,
+         4.5
+        ],
+        "radius": 1,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         96,
+         69,
+         6,
+         4.5
+        ],
+        "radius": 1,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         105,
+         69,
+         6,
+         4.5
+        ],
+        "radius": 1,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         114,
+         69,
+         6,
+         4.5
+        ],
+        "radius": 1,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         123,
+         69,
+         6,
+         4.5
+        ],
+        "radius": 1,
+        "paint": "${lit}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         141,
+         69,
+         6,
+         4.5
+        ],
+        "radius": 1,
+        "paint": "${lit}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M150 60 C146 54 152 50 148 44",
+          "paint": {
+           "color": "${theme.colors.artWhite}",
+           "style": "stroke",
+           "strokeWidth": 2.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'temple'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           46,
+           40
+          ],
+          "radius": 29.400000000000002,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.22
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           46,
+           40
+          ],
+          "radius": 21.0,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.3
+       },
+       {
+        "op": "circle",
+        "c": [
+         46,
+         40
+        ],
+        "radius": 14,
+        "paint": "${orb}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 82 C26 64 50 66 76 78 C104 66 130 62 160 74 L160 120 L0 120 Z",
+          "paint": "${far}"
+         }
+        ],
+        "opacity": 0.55
+       },
+       {
+        "op": "path",
+        "d": "M0 98 C36 86 64 88 92 96 C120 90 142 90 160 94 L160 120 L0 120 Z",
+        "paint": "${mid}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         104,
+         22
+        ],
+        "p2": [
+         104,
+         34
+        ],
+        "paint": {
+         "color": "${near}",
+         "style": "stroke",
+         "strokeWidth": 1.8,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "path",
+        "d": "M88 44 Q96 42 97.28 35 L110.72 35 Q112 42 120 44 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         95,
+         44,
+         18,
+         10
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M83 64 Q93.5 62 95.18 55 L112.82 55 Q114.5 62 125 64 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         92,
+         64,
+         24,
+         10
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "path",
+        "d": "M78 84 Q91 82 93.08 75 L114.92 75 Q117 82 130 84 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         89,
+         84,
+         30,
+         14
+        ],
+        "paint": "${far}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         101,
+         88,
+         6,
+         10
+        ],
+        "paint": "${lit}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         22,
+         86,
+         3.5,
+         24
+        ],
+        "paint": "${theme.colors.bad}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         44,
+         86,
+         3.5,
+         24
+        ],
+        "paint": "${theme.colors.bad}"
+       },
+       {
+        "op": "path",
+        "d": "M14 80 Q35 85 56 80 L55 86 Q35 90 15 86 Z",
+        "paint": "${theme.colors.bad}"
+       },
+       {
+        "op": "rect",
+        "rect": [
+         19,
+         91,
+         32,
+         3
+        ],
+        "paint": "${theme.colors.bad}"
+       },
+       {
+        "op": "path",
+        "d": "M0 108 C50 100 110 104 160 108 L160 120 L0 120 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M140 84 L146.006 96.48 L133.994 96.48 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M140 90.76 L148.736 104.28 L131.264 104.28 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M140 98.04 L150.92 110 L129.08 110 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M152 92 L156.62 101.6 L147.38 101.6 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M152 97.2 L158.72 107.6 L145.28 107.6 Z",
+        "paint": "${near}"
+       },
+       {
+        "op": "path",
+        "d": "M152 102.8 L160.4 112 L143.6 112 Z",
+        "paint": "${near}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'bamboo'}",
+      "ops": [
+       {
+        "op": "rect",
+        "rect": [
+         -40,
+         -40,
+         240,
+         200
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.2, 'color': s1}, {'position': 0.75, 'color': s2}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           80,
+           30
+          ],
+          "radius": 46,
+          "paint": "${orb}"
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         7.0,
+         -6,
+         6,
+         132
+        ],
+        "radius": 1.5,
+        "paint": "${far}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           7.0,
+           19
+          ],
+          "p2": [
+           13.0,
+           19
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           7.0,
+           47
+          ],
+          "p2": [
+           13.0,
+           47
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           7.0,
+           75
+          ],
+          "p2": [
+           13.0,
+           75
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           7.0,
+           103
+          ],
+          "p2": [
+           13.0,
+           103
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         23.5,
+         -6,
+         5,
+         132
+        ],
+        "radius": 1.5,
+        "paint": "${far}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           23.5,
+           26
+          ],
+          "p2": [
+           28.5,
+           26
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           23.5,
+           54
+          ],
+          "p2": [
+           28.5,
+           54
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           23.5,
+           82
+          ],
+          "p2": [
+           28.5,
+           82
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           23.5,
+           110
+          ],
+          "p2": [
+           28.5,
+           110
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         44.5,
+         -6,
+         7,
+         132
+        ],
+        "radius": 1.5,
+        "paint": "${mid}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           44.5,
+           21
+          ],
+          "p2": [
+           51.5,
+           21
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           44.5,
+           49
+          ],
+          "p2": [
+           51.5,
+           49
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           44.5,
+           77
+          ],
+          "p2": [
+           51.5,
+           77
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           44.5,
+           105
+          ],
+          "p2": [
+           51.5,
+           105
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         67.5,
+         -6,
+         5,
+         132
+        ],
+        "radius": 1.5,
+        "paint": "${far}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           67.5,
+           25
+          ],
+          "p2": [
+           72.5,
+           25
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           67.5,
+           53
+          ],
+          "p2": [
+           72.5,
+           53
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           67.5,
+           81
+          ],
+          "p2": [
+           72.5,
+           81
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           67.5,
+           109
+          ],
+          "p2": [
+           72.5,
+           109
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         88.0,
+         -6,
+         8,
+         132
+        ],
+        "radius": 1.5,
+        "paint": "${mid}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           88.0,
+           20
+          ],
+          "p2": [
+           96.0,
+           20
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           88.0,
+           48
+          ],
+          "p2": [
+           96.0,
+           48
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           88.0,
+           76
+          ],
+          "p2": [
+           96.0,
+           76
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           88.0,
+           104
+          ],
+          "p2": [
+           96.0,
+           104
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         113.5,
+         -6,
+         5,
+         132
+        ],
+        "radius": 1.5,
+        "paint": "${far}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           113.5,
+           26
+          ],
+          "p2": [
+           118.5,
+           26
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           113.5,
+           54
+          ],
+          "p2": [
+           118.5,
+           54
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           113.5,
+           82
+          ],
+          "p2": [
+           118.5,
+           82
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           113.5,
+           110
+          ],
+          "p2": [
+           118.5,
+           110
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         130.5,
+         -6,
+         7,
+         132
+        ],
+        "radius": 1.5,
+        "paint": "${mid}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           130.5,
+           26
+          ],
+          "p2": [
+           137.5,
+           26
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           130.5,
+           54
+          ],
+          "p2": [
+           137.5,
+           54
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           130.5,
+           82
+          ],
+          "p2": [
+           137.5,
+           82
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           130.5,
+           110
+          ],
+          "p2": [
+           137.5,
+           110
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         149.0,
+         -6,
+         6,
+         132
+        ],
+        "radius": 1.5,
+        "paint": "${far}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           149.0,
+           26
+          ],
+          "p2": [
+           155.0,
+           26
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           149.0,
+           54
+          ],
+          "p2": [
+           155.0,
+           54
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           149.0,
+           82
+          ],
+          "p2": [
+           155.0,
+           82
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "line",
+          "p1": [
+           149.0,
+           110
+          ],
+          "p2": [
+           155.0,
+           110
+          ],
+          "paint": {
+           "color": "${lit}",
+           "style": "stroke",
+           "strokeWidth": 1.2,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 0 C6 -5 14 -5 20 0 C14 3 6 3 0 0 Z",
+          "paint": "${near}"
+         }
+        ],
+        "translate": [
+         34,
+         24
+        ],
+        "rotate": -0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 0 C6 -5 14 -5 20 0 C14 3 6 3 0 0 Z",
+          "paint": "${near}"
+         }
+        ],
+        "translate": [
+         60,
+         40
+        ],
+        "rotate": 0.4
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 0 C6 -5 14 -5 20 0 C14 3 6 3 0 0 Z",
+          "paint": "${near}"
+         }
+        ],
+        "translate": [
+         104,
+         20
+        ],
+        "rotate": -0.4
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 0 C6 -5 14 -5 20 0 C14 3 6 3 0 0 Z",
+          "paint": "${near}"
+         }
+        ],
+        "translate": [
+         126,
+         44
+        ],
+        "rotate": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 0 C6 -5 14 -5 20 0 C14 3 6 3 0 0 Z",
+          "paint": "${near}"
+         }
+        ],
+        "translate": [
+         18,
+         60
+        ],
+        "rotate": 0.3
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M0 0 C6 -5 14 -5 20 0 C14 3 6 3 0 0 Z",
+          "paint": "${near}"
+         }
+        ],
+        "translate": [
+         146,
+         70
+        ],
+        "rotate": -0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M54 120 C62 100 72 88 80 80 C88 88 98 100 106 120 Z",
+          "paint": "${lit}"
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "path",
+        "d": "M0 112 C40 106 60 110 80 112 C100 110 120 106 160 112 L160 120 L0 120 Z",
+        "paint": "${near}"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ },
+ "variables": {
+  "media": [
+   {
+    "name": "A",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'rose' ? theme.colors.roseA : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'mint' ? theme.colors.mintA : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'sky' ? theme.colors.skyA : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'lilac' ? theme.colors.lilacA : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'slate' ? theme.colors.slateA : theme.colors.sandA"
+   },
+   {
+    "name": "B",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'rose' ? theme.colors.roseB : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'mint' ? theme.colors.mintB : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'sky' ? theme.colors.skyB : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'lilac' ? theme.colors.lilacB : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'slate' ? theme.colors.slateB : theme.colors.sandB"
+   },
+   {
+    "name": "M",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'rose' ? theme.colors.roseMid : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'mint' ? theme.colors.mintMid : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'sky' ? theme.colors.skyMid : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'lilac' ? theme.colors.lilacMid : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'slate' ? theme.colors.slateMid : theme.colors.sandMid"
+   },
+   {
+    "name": "K",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'rose' ? theme.colors.roseInk : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'mint' ? theme.colors.mintInk : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'sky' ? theme.colors.skyInk : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'lilac' ? theme.colors.lilacInk : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'slate' ? theme.colors.slateInk : theme.colors.sandInk"
+   },
+   {
+    "name": "s1",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'day' ? theme.colors.daySky1 : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'dusk' ? theme.colors.duskSky1 : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'night' ? theme.colors.nightSky1 : theme.colors.dawnSky1"
+   },
+   {
+    "name": "s2",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'day' ? theme.colors.daySky2 : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'dusk' ? theme.colors.duskSky2 : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'night' ? theme.colors.nightSky2 : theme.colors.dawnSky2"
+   },
+   {
+    "name": "orb",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'day' ? theme.colors.dayOrb : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'dusk' ? theme.colors.duskOrb : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'night' ? theme.colors.nightOrb : theme.colors.dawnOrb"
+   },
+   {
+    "name": "far",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'day' ? theme.colors.dayFar : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'dusk' ? theme.colors.duskFar : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'night' ? theme.colors.nightFar : theme.colors.dawnFar"
+   },
+   {
+    "name": "mid",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'day' ? theme.colors.dayMid : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'dusk' ? theme.colors.duskMid : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'night' ? theme.colors.nightMid : theme.colors.dawnMid"
+   },
+   {
+    "name": "near",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'day' ? theme.colors.dayNear : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'dusk' ? theme.colors.duskNear : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'night' ? theme.colors.nightNear : theme.colors.dawnNear"
+   },
+   {
+    "name": "lit",
+    "type": "text",
+    "formula": "(props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'day' ? theme.colors.dayLight : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'dusk' ? theme.colors.duskLight : (props.tone != 'auto' ? props.tone : props.kind == 'shoe' ? 'lilac' : props.kind == 'mug' ? 'rose' : props.kind == 'tote' ? 'mint' : props.kind == 'box' ? 'sand' : props.kind == 'beans' ? 'sand' : props.kind == 'laptop' ? 'sky' : props.kind == 'banana' ? 'sand' : props.kind == 'milk' ? 'sky' : props.kind == 'bread' ? 'rose' : props.kind == 'eggs' ? 'mint' : props.kind == 'cheese' ? 'lilac' : props.kind == 'apple' ? 'mint' : props.kind == 'mountain' ? 'dawn' : props.kind == 'harbor' ? 'dawn' : props.kind == 'skyline' ? 'dusk' : props.kind == 'dunes' ? 'dusk' : props.kind == 'forest' ? 'day' : props.kind == 'lagoon' ? 'day' : props.kind == 'market' ? 'dawn' : props.kind == 'festival' ? 'night' : props.kind == 'train' ? 'night' : props.kind == 'temple' ? 'dawn' : props.kind == 'bamboo' ? 'day' : 'sand') == 'night' ? theme.colors.nightLight : theme.colors.dawnLight"
+   }
+  ]
+ }
+}

@@ -1,0 +1,409 @@
+{
+ "primary": "#FF3B82F6",
+ "onPrimary": "#FFFFFFFF",
+ "surface": "#FF141414",
+ "onSurface": "#FFFFFFFF",
+ "error": "#FFEF4444",
+ "success": "#FF22C55E",
+ "warning": "#FFFB923C",
+ "colors": {
+  "primaryBackground": "#FF141414",
+  "secondaryBackground": "#FF1C1C1C",
+  "tertiaryBackground": "#FF383838",
+  "primaryText": "#FFFFFFFF",
+  "secondaryText": "#99FFFFFF",
+  "tertiaryText": "#66FFFFFF",
+  "primaryBorder": "#FF383838",
+  "secondaryBorder": "#FF4A4A4A",
+  "info": "#FF06B6D4",
+  "purple": "#FFA855F7",
+  "subtleFill": "#FF262626",
+  "neutralFill": "#FF4A4A4A",
+  "raisedBackground": "#FF383838",
+  "track": "#FF383838",
+  "scrim": "#99000000",
+  "onAccent": "#FFFFFFFF",
+  "focusBorder": "#803B82F6",
+  "hoverOverlay": "#14FFFFFF",
+  "pressedOverlay": "#24FFFFFF",
+  "activeTint": "#383B82F6",
+  "primaryTint": "#293B82F6",
+  "primaryTintBorder": "#5C3B82F6",
+  "successTint": "#2922C55E",
+  "successTintBorder": "#5C22C55E",
+  "warningTint": "#29FB923C",
+  "warningTintBorder": "#5CFB923C",
+  "errorTint": "#29EF4444",
+  "errorTintBorder": "#5CEF4444",
+  "infoTint": "#2906B6D4",
+  "infoTintBorder": "#5C06B6D4",
+  "neutralTint": "#FF262626",
+  "neutralTintBorder": "#FF383838",
+  "tooltipBackground": "#FFF3F4F6",
+  "tooltipText": "#FF111827",
+  "tooltipMuted": "#99111827",
+  "page": "#FF141414",
+  "card": "#FF1C1C1C",
+  "tile": "#FF232323",
+  "tileDeep": "#FF383838",
+  "line": "#FF383838",
+  "lineStrong": "#FF4A4A4A",
+  "ink": "#FFFFFFFF",
+  "inkSoft": "#99FFFFFF",
+  "inkFaint": "#66FFFFFF",
+  "inkGhost": "#FF4A4A4A",
+  "accent": "#FF3B82F6",
+  "accentDeep": "#FF60A5FA",
+  "accentBright": "#FF60A5FA",
+  "accentTint": "#FF262626",
+  "accentLine": "#FF4A4A4A",
+  "accentGlow": "#523B82F6",
+  "good": "#FF22C55E",
+  "goodDeep": "#FF4ADE80",
+  "goodTint": "#2922C55E",
+  "goodLine": "#5C22C55E",
+  "bad": "#FFEF4444",
+  "badDeep": "#FFFCA5A5",
+  "badTint": "#29EF4444",
+  "badLine": "#5CEF4444",
+  "warn": "#FFFB923C",
+  "warnDeep": "#FFFDBA74",
+  "warnTint": "#29FB923C",
+  "warnLine": "#5CFB923C",
+  "bar": "#FF262626",
+  "barRaise": "#FF383838",
+  "onBar": "#FFFFFFFF",
+  "onBarSoft": "#99FFFFFF",
+  "barGlow": "#66000000",
+  "heroA": "#FF383838",
+  "heroB": "#FF262626",
+  "heroGlow": "#FF4A4A4A",
+  "onHero": "#FFFFFFFF",
+  "onHeroSoft": "#B3FFFFFF",
+  "heroChip": "#24FFFFFF",
+  "heroLine": "#14FFFFFF",
+  "skySunA": "#FF1D4ED8",
+  "skySunB": "#FF3B82F6",
+  "skyCloudA": "#FF383838",
+  "skyCloudB": "#FF4A4A4A",
+  "skyRainA": "#FF262626",
+  "skyRainB": "#FF4A4A4A",
+  "skyNightA": "#FF141414",
+  "skyNightB": "#FF383838",
+  "sun": "#FFFFC83D",
+  "sunDeep": "#FFFF9D1F",
+  "sunGlow": "#66FFE08A",
+  "cloud": "#FFF1F4FB",
+  "cloudShade": "#FFC9D5EA",
+  "cloudDark": "#FF9FAEC9",
+  "rain": "#FF6BB5FF",
+  "moon": "#FFF5F0D8",
+  "sandA": "#FF262626",
+  "sandB": "#FF383838",
+  "sandMid": "#FFF3A65A",
+  "sandInk": "#FF8A4B14",
+  "roseA": "#FF262626",
+  "roseB": "#FF383838",
+  "roseMid": "#FFF2708A",
+  "roseInk": "#FF93203B",
+  "mintA": "#FF262626",
+  "mintB": "#FF383838",
+  "mintMid": "#FF3DBE8B",
+  "mintInk": "#FF0B5E43",
+  "skyA": "#FF262626",
+  "skyB": "#FF383838",
+  "skyMid": "#FF4C9BF5",
+  "skyInk": "#FF114A8F",
+  "lilacA": "#FF262626",
+  "lilacB": "#FF383838",
+  "lilacMid": "#FF8F78FF",
+  "lilacInk": "#FF37228F",
+  "slateA": "#FF262626",
+  "slateB": "#FF383838",
+  "slateMid": "#FF9CA3AF",
+  "slateInk": "#FFF3F4F6",
+  "artWhite": "#FFF9FAFB",
+  "artShadow": "#52000000",
+  "artShine": "#59FFFFFF",
+  "dawnSky1": "#FFE08C7A",
+  "dawnSky2": "#FFF2C79A",
+  "dawnOrb": "#FFFFF4D6",
+  "dawnFar": "#FFC97C88",
+  "dawnMid": "#FF99557D",
+  "dawnNear": "#FF54306A",
+  "dawnLight": "#FFFFE9A8",
+  "daySky1": "#FF3E93D6",
+  "daySky2": "#FFA9D4EE",
+  "dayOrb": "#FFFFE27A",
+  "dayFar": "#FF7FB4CE",
+  "dayMid": "#FF3E927F",
+  "dayNear": "#FF175955",
+  "dayLight": "#FFFFFFFF",
+  "duskSky1": "#FF46308A",
+  "duskSky2": "#FFE07F60",
+  "duskOrb": "#FFFFD27A",
+  "duskFar": "#FFA35479",
+  "duskMid": "#FF5A3070",
+  "duskNear": "#FF221446",
+  "duskLight": "#FFFFD98A",
+  "nightSky1": "#FF0A0D2A",
+  "nightSky2": "#FF2A2F78",
+  "nightOrb": "#FFF6F1DC",
+  "nightFar": "#FF3B4090",
+  "nightMid": "#FF20245E",
+  "nightNear": "#FF0C0F30",
+  "nightLight": "#FFFFD66B",
+  "mapLand": "#FF1C1C1C",
+  "mapBlock": "#FF262626",
+  "mapRoad": "#FF383838",
+  "mapRoadLine": "#FF4A4A4A",
+  "mapPark": "#FF1D4438",
+  "mapWater": "#FF1E3D66",
+  "mapPin": "#FFFFFFFF",
+  "onMapPin": "#FF141414",
+  "codeBg": "#FF141414",
+  "codeGutter": "#66FFFFFF",
+  "gold": "#FFFFB020"
+ },
+ "radii": {
+  "card": 26,
+  "panel": 18,
+  "tile": 14,
+  "control": 12,
+  "chip": 999,
+  "cta": 14
+ },
+ "shadows": {
+  "card": [
+   {
+    "type": "dropShadow",
+    "color": "#66000000",
+    "offset": [
+     0,
+     18
+    ],
+    "blurRadius": 40,
+    "spreadRadius": -14
+   }
+  ],
+  "tile": [
+   {
+    "type": "dropShadow",
+    "color": "#4D000000",
+    "offset": [
+     0,
+     6
+    ],
+    "blurRadius": 16,
+    "spreadRadius": -6
+   }
+  ],
+  "pick": [
+   {
+    "type": "dropShadow",
+    "color": "#66000000",
+    "offset": [
+     0,
+     10
+    ],
+    "blurRadius": 22,
+    "spreadRadius": -10
+   }
+  ],
+  "cta": [
+   {
+    "type": "dropShadow",
+    "color": "#66000000",
+    "offset": [
+     0,
+     8
+    ],
+    "blurRadius": 18,
+    "spreadRadius": -8
+   }
+  ],
+  "bar": [
+   {
+    "type": "dropShadow",
+    "color": "#80000000",
+    "offset": [
+     0,
+     14
+    ],
+    "blurRadius": 26,
+    "spreadRadius": -12
+   }
+  ],
+  "hero": [
+   {
+    "type": "dropShadow",
+    "color": "#66000000",
+    "offset": [
+     0,
+     16
+    ],
+    "blurRadius": 30,
+    "spreadRadius": -14
+   }
+  ],
+  "knob": [
+   {
+    "type": "dropShadow",
+    "color": "#66000000",
+    "offset": [
+     0,
+     2
+    ],
+    "blurRadius": 6,
+    "spreadRadius": -1
+   }
+  ]
+ },
+ "textStyles": {
+  "cardTitle": {
+   "fontFamily": "Inter Display",
+   "fontSize": 19,
+   "fontWeight": 700,
+   "height": 1.2,
+   "letterSpacing": -0.3,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "blockTitle": {
+   "fontFamily": "Inter",
+   "fontSize": 15,
+   "fontWeight": 600,
+   "height": 1.3,
+   "letterSpacing": -0.1,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "rowTitle": {
+   "fontFamily": "Inter",
+   "fontSize": 14.5,
+   "fontWeight": 600,
+   "height": 1.3,
+   "letterSpacing": -0.1,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "lead": {
+   "fontFamily": "Inter",
+   "fontSize": 14,
+   "fontWeight": 400,
+   "height": 1.45,
+   "color": "inkSoft",
+   "leadingDistribution": "even"
+  },
+  "meta": {
+   "fontFamily": "Inter",
+   "fontSize": 12.5,
+   "fontWeight": 500,
+   "height": 1.35,
+   "color": "inkFaint",
+   "leadingDistribution": "even"
+  },
+  "eyebrow": {
+   "fontFamily": "Inter",
+   "fontSize": 10.5,
+   "fontWeight": 700,
+   "height": 1.2,
+   "letterSpacing": 0.9,
+   "color": "inkFaint",
+   "leadingDistribution": "even"
+  },
+  "chip": {
+   "fontFamily": "Inter",
+   "fontSize": 12,
+   "fontWeight": 600,
+   "height": 1.2,
+   "letterSpacing": 0.05,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "cta": {
+   "fontFamily": "Inter",
+   "fontSize": 14.5,
+   "fontWeight": 600,
+   "height": 1.2,
+   "letterSpacing": -0.1,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "field": {
+   "fontFamily": "Inter",
+   "fontSize": 14.5,
+   "fontWeight": 500,
+   "height": 1.4,
+   "color": "ink",
+   "leadingDistribution": "even"
+  },
+  "numberHero": {
+   "fontFamily": "Inter Display",
+   "fontSize": 56,
+   "fontWeight": 800,
+   "height": 1.0,
+   "letterSpacing": -2.4,
+   "color": "ink",
+   "fontFeatures": [
+    "tnum"
+   ],
+   "leadingDistribution": "even"
+  },
+  "numberLarge": {
+   "fontFamily": "Inter Display",
+   "fontSize": 30,
+   "fontWeight": 800,
+   "height": 1.05,
+   "letterSpacing": -1.0,
+   "color": "ink",
+   "fontFeatures": [
+    "tnum"
+   ],
+   "leadingDistribution": "even"
+  },
+  "number": {
+   "fontFamily": "Inter Display",
+   "fontSize": 22,
+   "fontWeight": 700,
+   "height": 1.1,
+   "letterSpacing": -0.6,
+   "color": "ink",
+   "fontFeatures": [
+    "tnum"
+   ],
+   "leadingDistribution": "even"
+  },
+  "numberSmall": {
+   "fontFamily": "Inter Display",
+   "fontSize": 16,
+   "fontWeight": 700,
+   "height": 1.15,
+   "letterSpacing": -0.3,
+   "color": "ink",
+   "fontFeatures": [
+    "tnum"
+   ],
+   "leadingDistribution": "even"
+  },
+  "figure": {
+   "fontFamily": "Inter",
+   "fontSize": 13.5,
+   "fontWeight": 500,
+   "height": 1.3,
+   "color": "ink",
+   "fontFeatures": [
+    "tnum"
+   ],
+   "leadingDistribution": "even"
+  },
+  "code": {
+   "fontFamily": "JetBrains Mono",
+   "fontSize": 12,
+   "fontWeight": 400,
+   "height": 1.5,
+   "color": "ink",
+   "leadingDistribution": "even"
+  }
+ }
+}

@@ -1,0 +1,405 @@
+{
+ "schema": 3,
+ "id": "CartLine",
+ "roots": [
+  "line"
+ ],
+ "widget": {
+  "type": "CartLine",
+  "doc": "One line of a cart or order with a drawn thumbnail and a quantity stepper: the title, a detail, the price, kind (the picture, as Media) and qty; minus and plus fire onChanged with the new quantity as result (0 when the last one is removed), so write -> items=updateWhere(items,x=>x.id==i.id,x=>with(x,\"qty\",result)).",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Item",
+    "doc": "The item's name.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet second line: a size, a unit price."
+   },
+   {
+    "key": "price",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The price, as text ($4.75)."
+   },
+   {
+    "key": "qty",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "The quantity shown between minus and plus.",
+    "required": true
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "box",
+    "doc": "The drawn thumbnail, a Media kind: shoe, mug, tote, box, beans, laptop, banana, milk, bread, eggs, cheese, apple."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "auto",
+    "doc": "The thumbnail's tone (sand, rose, mint, sky, lilac, slate; auto picks one)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "Minus or plus was tapped; the value is the new quantity."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Line",
+   "size": [
+    340,
+    78
+   ],
+   "props": {
+    "title": "Ceramic mug",
+    "detail": "Sand glaze, 350 ml",
+    "price": "$12.00",
+    "qty": 2,
+    "kind": "mug"
+   }
+  }
+ ],
+ "nodes": {
+  "line": {
+   "type": "row",
+   "children": [
+    "thumb",
+    "texts",
+    "right"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     9,
+     0,
+     9
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1,
+    "strokeSides": "bottom"
+   }
+  },
+  "thumb": {
+   "type": "Media",
+   "props": {
+    "kind": "box"
+   },
+   "layout": {
+    "width": 58,
+    "height": 58
+   },
+   "bind": {
+    "props.kind": "${props.kind}",
+    "props.tone": "${props.tone}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "detail",
+    "price"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "rowTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "price": {
+   "type": "text",
+   "props": {
+    "text": "${props.price}",
+    "style": "numberSmall"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     2,
+     0,
+     0
+    ]
+   }
+  },
+  "right": {
+   "type": "column",
+   "children": [
+    "step"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "stepMinus": {
+   "type": "row",
+   "children": [
+    "stepMinusI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 15.0
+   },
+   "bind": {
+    "opacity": "${= true ? 1 : 0.35}",
+    "decoration.effects": "${theme.shadows.knob}"
+   },
+   "states": {
+    "pressed": {
+     "stepMinus": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= max(0, props.qty - 1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "stepMinusI": {
+   "type": "icon",
+   "props": {
+    "icon": "remove_rounded",
+    "size": 17,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 17,
+    "height": 17
+   },
+   "bind": {
+    "props.icon": "${= props.qty <= 1 ? 'delete_outline_rounded' : 'remove_rounded'}"
+   }
+  },
+  "stepPlus": {
+   "type": "row",
+   "children": [
+    "stepPlusI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 15.0
+   },
+   "bind": {
+    "opacity": "${= true ? 1 : 0.35}",
+    "decoration.effects": "${theme.shadows.knob}"
+   },
+   "states": {
+    "pressed": {
+     "stepPlus": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= props.qty + 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "stepPlusI": {
+   "type": "icon",
+   "props": {
+    "icon": "add_rounded",
+    "size": 17,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 17,
+    "height": 17
+   }
+  },
+  "stepValue": {
+   "type": "text",
+   "props": {
+    "text": "${= props.qty}",
+    "style": "numberSmall",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "step": {
+   "type": "row",
+   "children": [
+    "stepMinus",
+    "stepValue",
+    "stepPlus"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     3,
+     3,
+     3,
+     3
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 999
+   }
+  }
+ }
+}

@@ -1,0 +1,225 @@
+{
+ "schema": 3,
+ "id": "Tabs",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "Tabs",
+  "doc": "A row of tabs over a panel, the current one in your variable; show the panel for it yourself. Fires onChanged.",
+  "props": [
+   {
+    "key": "tabs",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Overview",
+     "Activity",
+     "Settings"
+    ],
+    "doc": "The tab labels.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable holding the current tab."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "payload": {
+     "kind": "string",
+     "flutter": "String"
+    }
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Overview",
+   "size": [
+    360,
+    36
+   ],
+   "props": {
+    "tabs": [
+     "Overview",
+     "Activity",
+     "Settings"
+    ],
+    "value": "Overview"
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "tabList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 36,
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "tabList": {
+   "type": "listView",
+   "children": [
+    "tab"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 16
+   },
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "fill": 36
+    }
+   },
+   "bind": {
+    "data": "${props.tabs}"
+   }
+  },
+  "tab": {
+   "type": "stack",
+   "children": [
+    "tabLabel",
+    "tabLine"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "fill": 36
+    }
+   },
+   "bind": {
+    "selected": "${= item == props.value}"
+   },
+   "states": {
+    "selected": {
+     "tabLabel": {
+      "props": {
+       "style": {
+        "color": "primaryText",
+        "fontWeight": 600
+       }
+      }
+     },
+     "tabLine": {
+      "visible": true
+     }
+    },
+    "hovered": {
+     "tabLabel": {
+      "props": {
+       "style": {
+        "color": "primaryText"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "tabLabel": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "controlCompact",
+     "color": "secondaryText"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 15
+    },
+    "y": {
+     "align": 0
+    }
+   }
+  },
+  "tabLine": {
+   "type": "box",
+   "visible": false,
+   "layout": {
+    "width": {
+     "fill": 50
+    },
+    "height": 2,
+    "y": {
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ],
+    "radius": [
+     1,
+     1,
+     0,
+     0
+    ]
+   }
+  }
+ }
+}

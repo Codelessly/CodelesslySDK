@@ -1,0 +1,296 @@
+{
+ "schema": 3,
+ "roots": [
+  "message_draft"
+ ],
+ "nodes": {
+  "message_draft": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Email to your landlord",
+    "subtitle": "Edit anything before it goes",
+    "icon": "mail_rounded"
+   },
+   "bind": {
+    "props.status": "${= sent?\"Sent\":\"Draft\"}",
+    "props.tone": "${= sent?\"good\":\"accent\"}"
+   },
+   "children": [
+    "to",
+    "subject",
+    "tone",
+    "body",
+    "row1",
+    "Receipt1"
+   ]
+  },
+  "to": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "To",
+    "placeholder": "name@example.com",
+    "value": "to",
+    "keyboard": "emailAddress"
+   },
+   "bind": {
+    "props.error": "${= to==\"\"?\"Add a recipient to send\":\"\"}",
+    "visible": "${= !sent}"
+   }
+  },
+  "subject": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Subject",
+    "placeholder": "What is it about?",
+    "value": "subject"
+   },
+   "bind": {
+    "props.error": "${= subject==\"\"?\"Add a subject to send\":\"\"}",
+    "visible": "${= !sent}"
+   }
+  },
+  "tone": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "tone",
+    "options": [
+     "Polite",
+     "Firm"
+    ]
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "body",
+       "value": "${= result==\"Firm\"?firm:polite}"
+      }
+     ]
+    }
+   ]
+  },
+  "body": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Message",
+    "value": "body",
+    "lines": 11
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   },
+   "children": [
+    "discard",
+    "send"
+   ]
+  },
+  "discard": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Discard",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "discard_draft"
+      }
+     ]
+    }
+   ]
+  },
+  "send": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 2,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Send",
+    "icon": "send_rounded"
+   },
+   "bind": {
+    "props.enabled": "${= to!=\"\"&&subject!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sent",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "send_email",
+       "value": "${body}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "send_rounded"
+   },
+   "bind": {
+    "props.title": "Sent to ${to}",
+    "props.message": "${subject}",
+    "visible": "${= sent}"
+   }
+  }
+ },
+ "variables": {
+  "message_draft": [
+   {
+    "name": "to",
+    "type": "text",
+    "value": "landlord@example.com"
+   },
+   {
+    "name": "subject",
+    "type": "text",
+    "value": "Heating not working in apartment 4B"
+   },
+   {
+    "name": "tone",
+    "type": "text",
+    "value": "Polite"
+   },
+   {
+    "name": "polite",
+    "type": "text",
+    "value": "Dear Mr. Alvarez,\n\nI hope you are well. The heating in my apartment (4B) stopped working on Monday and the flat is getting very cold.\n\nCould you please arrange for someone to take a look this week? I am happy to work around your schedule for access.\n\nThank you very much,\nAlex"
+   },
+   {
+    "name": "firm",
+    "type": "text",
+    "value": "Dear Mr. Alvarez,\n\nThe heating in apartment 4B has been broken since Monday and the flat is now below a livable temperature.\n\nPlease confirm by Thursday when a repair will be carried out. If I do not hear back I will arrange it myself and deduct the cost from next month's rent.\n\nRegards,\nAlex"
+   },
+   {
+    "name": "body",
+    "type": "text",
+    "value": "Dear Mr. Alvarez,\n\nI hope you are well. The heating in my apartment (4B) stopped working on Monday and the flat is getting very cold.\n\nCould you please arrange for someone to take a look this week? I am happy to work around your schedule for access.\n\nThank you very much,\nAlex"
+   },
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

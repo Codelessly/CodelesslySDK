@@ -1,0 +1,413 @@
+{
+ "schema": 3,
+ "id": "Recommendation",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "Recommendation",
+  "doc": "The one recommendation on the accent gradient: a title, why (one sentence), reasons (a list, each with a check), an eyebrow chip and an optional drawn picture (kind, as Media).",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Our pick",
+    "doc": "What is recommended.",
+    "required": true
+   },
+   {
+    "key": "why",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One sentence of reasoning."
+   },
+   {
+    "key": "reasons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "Short reasons, each with a check (empty: none)."
+   },
+   {
+    "key": "eyebrow",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Recommended",
+    "doc": "The small chip over the title."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Media kind drawn at the right, e.g. laptop or shoe (empty: none)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Pick",
+   "size": [
+    340,
+    200
+   ],
+   "props": {
+    "title": "Max plan",
+    "why": "Unlimited data and roaming for $20 more.",
+    "reasons": [
+     "Wins 5 of 6 rows",
+     "No contract"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "column",
+   "children": [
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "heroA"
+       },
+       {
+        "position": 1,
+        "color": "heroB"
+       }
+      ]
+     }
+    ],
+    "radius": 18,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.hero}"
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "top",
+    "reasons"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     18,
+     16,
+     18,
+     18
+    ]
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width - 40}",
+       30
+      ],
+      "radius": 110,
+      "paint": "${theme.colors.heroLine}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width - 40}",
+       30
+      ],
+      "radius": 70,
+      "paint": "${theme.colors.heroLine}"
+     }
+    ]
+   }
+  },
+  "top": {
+   "type": "row",
+   "children": [
+    "heads",
+    "art"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "heads": {
+   "type": "column",
+   "children": [
+    "chip",
+    "title",
+    "why"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "chip": {
+   "type": "row",
+   "children": [
+    "chipIcon",
+    "chipText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     5,
+     10,
+     5
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= props.eyebrow != ''}"
+   }
+  },
+  "chipIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "auto_awesome_rounded",
+    "size": 13,
+    "color": "onHero"
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  },
+  "chipText": {
+   "type": "text",
+   "props": {
+    "text": "${props.eyebrow}",
+    "style": {
+     "from": "chip",
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 21,
+     "letterSpacing": -0.4,
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     2,
+     0,
+     0
+    ]
+   }
+  },
+  "art": {
+   "type": "Media",
+   "props": {
+    "kind": "laptop"
+   },
+   "layout": {
+    "width": 84,
+    "height": 84
+   },
+   "bind": {
+    "props.kind": "${= props.kind != '' ? props.kind : 'box'}",
+    "visible": "${= props.kind != ''}"
+   }
+  },
+  "why": {
+   "type": "text",
+   "props": {
+    "text": "${props.why}",
+    "style": {
+     "from": "lead",
+     "fontSize": 13.5,
+     "color": "onHeroSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.why != ''}"
+   }
+  },
+  "reasons": {
+   "type": "listView",
+   "children": [
+    "reason"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 7
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.reasons}",
+    "visible": "${= length(props.reasons) > 0}"
+   }
+  },
+  "reason": {
+   "type": "row",
+   "children": [
+    "reasonIcon",
+    "reasonText"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "reasonIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_circle_rounded",
+    "size": 17,
+    "color": "onHero"
+   },
+   "layout": {
+    "width": 17,
+    "height": 17
+   }
+  },
+  "reasonText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "lead",
+     "fontSize": 13.5,
+     "fontWeight": 500,
+     "height": 1.3,
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

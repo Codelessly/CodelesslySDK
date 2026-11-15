@@ -1,0 +1,549 @@
+{
+ "schema": 3,
+ "id": "ProductTile",
+ "roots": [
+  "tile"
+ ],
+ "widget": {
+  "type": "ProductTile",
+  "doc": "A product with a large drawn picture: the name, a detail, the price, the rating as stars, kind (the picture, as Media: shoe, mug, tote...) and tone (its color: sand, rose, mint, sky, lilac, slate); a tap fires onPressed (open its details).",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Aero Runner",
+    "doc": "The product's name.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet line under the name (a category, a color)."
+   },
+   {
+    "key": "price",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The price, as text ($120)."
+   },
+   {
+    "key": "rating",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The rating out of 5, as text (4.8): drawn as stars with the number (empty: none)."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "shoe",
+    "doc": "The drawn picture, a Media kind: shoe, mug, tote, box, beans, laptop, banana, milk, bread, eggs, cheese, apple."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "auto",
+    "doc": "The picture's tone: sand, rose, mint, sky, lilac or slate (give each product its own)."
+   },
+   {
+    "key": "badge",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small label over the picture, e.g. New (empty: none)."
+   },
+   {
+    "key": "cta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small pill at the bottom right of the picture that invites a tap, e.g. Details (empty: none)."
+   },
+   {
+    "key": "height",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 196,
+    "doc": "The picture's height."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The product was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Shoe",
+   "size": [
+    340,
+    280
+   ],
+   "props": {
+    "price": "$120",
+    "rating": "4.8",
+    "detail": "Road running"
+   }
+  }
+ ],
+ "nodes": {
+  "tile": {
+   "type": "column",
+   "children": [
+    "frame",
+    "info"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "states": {
+    "pressed": {
+     "tile": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "frame": {
+   "type": "stack",
+   "children": [
+    "art",
+    "badge",
+    "open"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 196
+   },
+   "bind": {
+    "layout.height": "${props.height}"
+   }
+  },
+  "art": {
+   "type": "Media",
+   "props": {
+    "kind": "shoe"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "props.kind": "${props.kind}",
+    "props.tone": "${props.tone}"
+   }
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "badgeText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     9,
+     5,
+     9,
+     5
+    ],
+    "x": {
+     "start": 12
+    },
+    "y": {
+     "start": 12
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= props.badge != ''}",
+    "decoration.effects": "${theme.shadows.knob}"
+   }
+  },
+  "badgeText": {
+   "type": "text",
+   "props": {
+    "text": "${props.badge}",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "open": {
+   "type": "row",
+   "children": [
+    "openText",
+    "openIcon"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     11,
+     6,
+     7,
+     6
+    ],
+    "x": {
+     "end": 12
+    },
+    "y": {
+     "end": 12
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= props.cta != ''}",
+    "decoration.effects": "${theme.shadows.knob}"
+   }
+  },
+  "openText": {
+   "type": "text",
+   "props": {
+    "text": "${props.cta}",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "openIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 16,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "info": {
+   "type": "row",
+   "children": [
+    "texts",
+    "price"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "name",
+    "detail",
+    "rating"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${props.name}",
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 17
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "rating": {
+   "type": "row",
+   "children": [
+    "stars",
+    "ratingText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     3,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.rating != ''}"
+   }
+  },
+  "stars": {
+   "type": "box",
+   "layout": {
+    "width": 74,
+    "height": 14
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "group",
+      "translate": [
+       0,
+       0
+      ],
+      "ops": [
+       {
+        "op": "path",
+        "d": "M7 0.8 L8.9 4.9 L13.3 5.4 L10 8.4 L10.9 12.8 L7 10.6 L3.1 12.8 L4 8.4 L0.7 5.4 L5.1 4.9 Z",
+        "paint": "${= 0 < round(number(props.rating)) ? theme.colors.gold : theme.colors.lineStrong}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "translate": [
+       15,
+       0
+      ],
+      "ops": [
+       {
+        "op": "path",
+        "d": "M7 0.8 L8.9 4.9 L13.3 5.4 L10 8.4 L10.9 12.8 L7 10.6 L3.1 12.8 L4 8.4 L0.7 5.4 L5.1 4.9 Z",
+        "paint": "${= 1 < round(number(props.rating)) ? theme.colors.gold : theme.colors.lineStrong}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "translate": [
+       30,
+       0
+      ],
+      "ops": [
+       {
+        "op": "path",
+        "d": "M7 0.8 L8.9 4.9 L13.3 5.4 L10 8.4 L10.9 12.8 L7 10.6 L3.1 12.8 L4 8.4 L0.7 5.4 L5.1 4.9 Z",
+        "paint": "${= 2 < round(number(props.rating)) ? theme.colors.gold : theme.colors.lineStrong}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "translate": [
+       45,
+       0
+      ],
+      "ops": [
+       {
+        "op": "path",
+        "d": "M7 0.8 L8.9 4.9 L13.3 5.4 L10 8.4 L10.9 12.8 L7 10.6 L3.1 12.8 L4 8.4 L0.7 5.4 L5.1 4.9 Z",
+        "paint": "${= 3 < round(number(props.rating)) ? theme.colors.gold : theme.colors.lineStrong}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "translate": [
+       60,
+       0
+      ],
+      "ops": [
+       {
+        "op": "path",
+        "d": "M7 0.8 L8.9 4.9 L13.3 5.4 L10 8.4 L10.9 12.8 L7 10.6 L3.1 12.8 L4 8.4 L0.7 5.4 L5.1 4.9 Z",
+        "paint": "${= 4 < round(number(props.rating)) ? theme.colors.gold : theme.colors.lineStrong}"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "ratingText": {
+   "type": "text",
+   "props": {
+    "text": "${props.rating}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600,
+     "fontSize": 12.5,
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "price": {
+   "type": "text",
+   "props": {
+    "text": "${props.price}",
+    "style": "number"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

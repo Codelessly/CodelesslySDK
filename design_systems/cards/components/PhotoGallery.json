@@ -1,0 +1,577 @@
+{
+ "schema": 3,
+ "id": "PhotoGallery",
+ "roots": [
+  "gallery"
+ ],
+ "widget": {
+  "type": "PhotoGallery",
+  "doc": "A photo grid with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; optional tone: dawn, day, dusk, night) with its caption; tapping one opens it large over the grid with its caption, a \"3 of 9\" counter, previous and next arrows and a close button, keeping the open photo's number (0: closed) in your variable.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable: 0 while the grid shows, else the number of the photo open (from 1)."
+   },
+   {
+    "key": "photos",
+    "type": {
+     "kind": "list",
+     "flutter": "List<dynamic>",
+     "item": {
+      "kind": "json",
+      "flutter": "dynamic"
+     }
+    },
+    "default": [
+     {
+      "kind": "harbor",
+      "caption": "Harbour at sunrise"
+     },
+     {
+      "kind": "mountain",
+      "caption": "Mountain hut"
+     },
+     {
+      "kind": "skyline",
+      "caption": "Evening skyline"
+     }
+    ],
+    "doc": "The photos: records with kind (a Media scene: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo), caption and optionally tone (dawn, day, dusk, night).",
+    "required": true
+   },
+   {
+    "key": "columns",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 3,
+    "doc": "Thumbnails per row."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "A photo was opened, changed or closed; the value is its number (0: closed)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Grid",
+   "size": [
+    360,
+    130
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "gallery": {
+   "type": "stack",
+   "children": [
+    "grid",
+    "veil"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "grid": {
+   "type": "gridView",
+   "children": [
+    "cell"
+   ],
+   "props": {
+    "crossAxisCount": 1,
+    "crossAxisSpacing": 8,
+    "mainAxisSpacing": 10,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.photos}",
+    "props.crossAxisCount": "${props.columns}"
+   }
+  },
+  "cell": {
+   "type": "column",
+   "children": [
+    "thumb",
+    "caption"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "states": {
+    "pressed": {
+     "cell": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= index + 1}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= index + 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "thumb": {
+   "type": "Media",
+   "props": {
+    "kind": "mountain"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 92
+   },
+   "bind": {
+    "props.kind": "${item.kind}",
+    "props.tone": "${= coalesce(item.tone, 'auto')}"
+   }
+  },
+  "caption": {
+   "type": "text",
+   "props": {
+    "text": "${= coalesce(item.caption, '')}",
+    "style": {
+     "from": "meta",
+     "fontSize": 11.5,
+     "height": 1.25,
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "veil": {
+   "type": "column",
+   "children": [
+    "bar",
+    "stage",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    },
+    "padding": [
+     12,
+     12,
+     12,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "bar"
+     }
+    ],
+    "radius": 14
+   },
+   "bind": {
+    "visible": "${= props.value > 0}",
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "bar": {
+   "type": "row",
+   "children": [
+    "count",
+    "close"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8,
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "count": {
+   "type": "row",
+   "children": [
+    "countText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     6,
+     10,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "barRaise"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "countText": {
+   "type": "text",
+   "props": {
+    "text": "${props.value} of ${= length(props.photos)}",
+    "style": {
+     "from": "chip",
+     "color": "onBar"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "close": {
+   "type": "row",
+   "children": [
+    "closeI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "barRaise"
+     }
+    ],
+    "radius": 17.0
+   },
+   "states": {
+    "pressed": {
+     "close": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= 0}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "0"
+      }
+     ]
+    }
+   ]
+  },
+  "closeI": {
+   "type": "icon",
+   "props": {
+    "icon": "close_rounded",
+    "size": 19,
+    "color": "onBar"
+   },
+   "layout": {
+    "width": 19,
+    "height": 19
+   }
+  },
+  "stage": {
+   "type": "stack",
+   "children": [
+    "big",
+    "prev",
+    "next"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "flex": 1
+   }
+  },
+  "big": {
+   "type": "Media",
+   "props": {
+    "kind": "mountain"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "props.kind": "${= at(props.photos, clamp(props.value - 1, 0, max(0, length(props.photos) - 1))).kind}",
+    "props.tone": "${= coalesce(at(props.photos, clamp(props.value - 1, 0, max(0, length(props.photos) - 1))).tone, 'auto')}"
+   }
+  },
+  "prev": {
+   "type": "row",
+   "children": [
+    "prevI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 38,
+    "height": 38,
+    "x": {
+     "start": 10
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 19.0
+   },
+   "states": {
+    "pressed": {
+     "prev": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (props.value - 2 + length(props.photos)) % length(props.photos) + 1}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ],
+   "bind": {
+    "decoration.effects": "${theme.shadows.knob}"
+   }
+  },
+  "prevI": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_left_rounded",
+    "size": 21,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 21,
+    "height": 21
+   }
+  },
+  "next": {
+   "type": "row",
+   "children": [
+    "nextI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 38,
+    "height": 38,
+    "x": {
+     "end": 10
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 19.0
+   },
+   "states": {
+    "pressed": {
+     "next": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= props.value % length(props.photos) + 1}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ],
+   "bind": {
+    "decoration.effects": "${theme.shadows.knob}"
+   }
+  },
+  "nextI": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 21,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 21,
+    "height": 21
+   }
+  },
+  "foot": {
+   "type": "text",
+   "props": {
+    "text": "${= coalesce(at(props.photos, clamp(props.value - 1, 0, max(0, length(props.photos) - 1))).caption, '')}",
+    "style": {
+     "from": "blockTitle",
+     "color": "onBar"
+    },
+    "textAlign": "center",
+    "maxLines": 2,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

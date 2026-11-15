@@ -1,0 +1,207 @@
+{
+ "schema": 3,
+ "id": "StatusCardList",
+ "roots": [
+  "list"
+ ],
+ "widget": {
+  "type": "StatusCardList",
+  "doc": "A list of connections with when they were last checked and a refresh button. Its children are StatusCard calls. Fires onRefresh.",
+  "props": [
+   {
+    "key": "updatedLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "When it was last checked (empty: no line)."
+   },
+   {
+    "key": "refreshLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Refresh",
+    "doc": "The refresh button's label."
+   }
+  ],
+  "events": [
+   {
+    "key": "onRefresh"
+   }
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Default",
+   "size": [
+    300,
+    40
+   ],
+   "props": {
+    "updatedLabel": "Checked 2 minutes ago"
+   }
+  }
+ ],
+ "nodes": {
+  "list": {
+   "type": "column",
+   "children": [
+    "content",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 40
+    }
+   }
+  },
+  "content": {
+   "type": "slot"
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "updated",
+    "refresh"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 20
+    },
+    "margin": [
+     0,
+     10,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.updatedLabel != ''}"
+   }
+  },
+  "updated": {
+   "type": "text",
+   "props": {
+    "text": "${props.updatedLabel}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.1
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "refresh": {
+   "type": "row",
+   "children": [
+    "refreshIcon",
+    "refreshText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     4,
+     2,
+     4,
+     2
+    ]
+   },
+   "decoration": {
+    "radius": 4
+   },
+   "states": {
+    "hovered": {
+     "refresh": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onRefresh"
+      }
+     ]
+    }
+   ]
+  },
+  "refreshIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "refresh",
+    "color": "secondaryText",
+    "size": 11
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  },
+  "refreshText": {
+   "type": "text",
+   "props": {
+    "text": "${props.refreshLabel}",
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.3,
+     "color": "secondaryText",
+     "leadingDistribution": "even"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  }
+ }
+}

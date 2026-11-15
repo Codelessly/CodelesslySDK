@@ -1,0 +1,192 @@
+{
+ "schema": 3,
+ "id": "ActionButton",
+ "roots": [
+  "btn"
+ ],
+ "widget": {
+  "type": "ActionButton",
+  "doc": "A full-width button that fires onPressed: tone is primary (one per card), quiet, danger, good or dark; enabled:=condition dims and blocks it; put two in a Row gap:10 for a pair such as Cancel and Confirm.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Continue",
+    "doc": "The button's label.",
+    "required": true
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "primary",
+      "quiet",
+      "danger",
+      "good",
+      "dark"
+     ]
+    },
+    "default": "primary",
+    "doc": "primary (the accent, one per card), quiet (grey), danger (red), good (green) or dark."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon before the label (empty: none)."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False dims it and it does not fire."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The button was tapped while enabled."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Primary",
+   "size": [
+    240,
+    46
+   ],
+   "props": {
+    "label": "Confirm flight"
+   }
+  },
+  {
+   "name": "Quiet",
+   "size": [
+    240,
+    46
+   ],
+   "props": {
+    "label": "Cancel",
+    "tone": "quiet"
+   }
+  }
+ ],
+ "nodes": {
+  "btn": {
+   "type": "row",
+   "children": [
+    "icon",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8,
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46,
+    "padding": [
+     16,
+     0,
+     16,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 14
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.tone == 'quiet' ? theme.colors.tile : props.tone == 'danger' ? theme.colors.bad : props.tone == 'good' ? theme.colors.goodDeep : props.tone == 'dark' ? theme.colors.bar : theme.colors.accent}",
+    "decoration.radius": "${theme.radii.cta}",
+    "decoration.effects": "${= props.tone == 'primary' && props.enabled ? theme.shadows.cta : []}",
+    "opacity": "${= props.enabled ? 1 : 0.4}"
+   },
+   "states": {
+    "pressed": {
+     "btn": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${props.enabled}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "componentEvent",
+         "event": "onPressed"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "icon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 18,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${props.icon}",
+    "props.color": "${= props.tone == 'quiet' ? theme.colors.ink : props.tone == 'dark' ? theme.colors.onBar : theme.colors.onAccent}",
+    "visible": "${= props.icon != ''}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "cta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.tone == 'quiet' ? theme.colors.ink : props.tone == 'dark' ? theme.colors.onBar : theme.colors.onAccent}"
+   }
+  }
+ }
+}

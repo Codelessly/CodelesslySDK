@@ -1,0 +1,485 @@
+{
+ "schema": 3,
+ "id": "InputField",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "InputField",
+  "doc": "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" =email; lines:6 makes a multi-line box, icon:\"search_rounded\" a search field, error:=cond?\"message\":\"\" shows a red message under it, success a green one.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable: the field shows it and writes it as the user types."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The label over the field (empty: none)."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Shown while the field is empty."
+   },
+   {
+    "key": "lines",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 1,
+    "doc": "More than 1 makes it a multi-line box about that many lines tall (a message body)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon inside the field, e.g. search_rounded (empty: none)."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A message under the field, in red with a red border (empty: no error)."
+   },
+   {
+    "key": "success",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A green confirmation under the field, e.g. \"SAVE10 applied\" (empty: none)."
+   },
+   {
+    "key": "keyboard",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "text",
+      "emailAddress",
+      "number",
+      "phone",
+      "url"
+     ]
+    },
+    "default": "text",
+    "doc": "The keyboard a phone shows."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "The text changed; the value is the new text."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Field",
+   "size": [
+    340,
+    72
+   ],
+   "props": {
+    "label": "Email",
+    "placeholder": "you@example.com"
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": [
+    "label",
+    "box",
+    "error",
+    "note"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "meta",
+     "fontWeight": 600,
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.label != ''}"
+   }
+  },
+  "box": {
+   "type": "row",
+   "children": [
+    "icon",
+    "field",
+    "area"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     13,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 12
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.control}",
+    "decoration.strokes[0].color": "${= props.error != '' ? theme.colors.bad : props.success != '' ? theme.colors.good : theme.colors.line}",
+    "decoration.strokeWidth": "${= props.error != '' ? 1.6 : 1.2}"
+   }
+  },
+  "icon": {
+   "type": "icon",
+   "props": {
+    "icon": "search_rounded",
+    "size": 18,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18,
+    "margin": [
+     0,
+     14,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "props.icon": "${props.icon}",
+    "visible": "${= props.icon != ''}"
+   }
+  },
+  "field": {
+   "type": "textField",
+   "props": {
+    "style": "field",
+    "cursorColor": "accent",
+    "maxLines": 1,
+    "decoration": {
+     "isDense": true,
+     "filled": false,
+     "contentPadding": [
+      0,
+      13,
+      0,
+      13
+     ],
+     "hintStyle": {
+      "from": "field",
+      "color": "inkFaint",
+      "fontWeight": 400
+     },
+     "border": {
+      "type": "none"
+     },
+     "enabledBorder": {
+      "type": "none"
+     },
+     "focusedBorder": {
+      "type": "none"
+     },
+     "errorBorder": {
+      "type": "none"
+     },
+     "focusedErrorBorder": {
+      "type": "none"
+     },
+     "disabledBorder": {
+      "type": "none"
+     },
+     "hoverColor": "#00000000"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}",
+    "props.keyboardType": "${props.keyboard}",
+    "visible": "${= props.lines <= 1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "area": {
+   "type": "textField",
+   "props": {
+    "style": {
+     "from": "field",
+     "fontWeight": 400,
+     "height": 1.5
+    },
+    "cursorColor": "accent",
+    "maxLines": 0,
+    "minLines": 3,
+    "keyboardType": "multiline",
+    "textAlignVertical": "top",
+    "decoration": {
+     "isDense": true,
+     "filled": false,
+     "contentPadding": [
+      0,
+      13,
+      0,
+      13
+     ],
+     "hintStyle": {
+      "from": "field",
+      "color": "inkFaint",
+      "fontWeight": 400
+     },
+     "border": {
+      "type": "none"
+     },
+     "enabledBorder": {
+      "type": "none"
+     },
+     "focusedBorder": {
+      "type": "none"
+     },
+     "errorBorder": {
+      "type": "none"
+     },
+     "focusedErrorBorder": {
+      "type": "none"
+     },
+     "disabledBorder": {
+      "type": "none"
+     },
+     "hoverColor": "#00000000"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.decoration.hintText": "${props.placeholder}",
+    "props.minLines": "${= max(2, props.lines)}",
+    "visible": "${= props.lines > 1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "error": {
+   "type": "row",
+   "children": [
+    "errorIcon",
+    "errorText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.error != ''}"
+   }
+  },
+  "errorIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "error_rounded",
+    "size": 14,
+    "color": "bad"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   }
+  },
+  "errorText": {
+   "type": "text",
+   "props": {
+    "text": "${props.error}",
+    "style": {
+     "from": "meta",
+     "color": "bad"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "note": {
+   "type": "row",
+   "children": [
+    "noteIcon",
+    "noteText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.success != '' && props.error == ''}"
+   }
+  },
+  "noteIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_circle_rounded",
+    "size": 14,
+    "color": "good"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   }
+  },
+  "noteText": {
+   "type": "text",
+   "props": {
+    "text": "${props.success}",
+    "style": {
+     "from": "meta",
+     "color": "goodDeep"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

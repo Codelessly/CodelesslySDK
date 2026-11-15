@@ -1,0 +1,1416 @@
+{
+ "schema": 3,
+ "id": "ComparisonTable",
+ "roots": [
+  "table"
+ ],
+ "widget": {
+  "type": "ComparisonTable",
+  "doc": "Two or three options compared side by side: names and prices head the columns, rows is a list of [label, value per column..., winner] where winner is the winning column's number (1, 2, 3; 0 a tie) and gets a check; pick names the recommended column (tinted); the Choose button under each column fires onChoose with that name as result.",
+  "props": [
+   {
+    "key": "names",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Lite",
+     "Max"
+    ],
+    "doc": "The two or three things compared, one column each.",
+    "required": true
+   },
+   {
+    "key": "prices",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The headline figure under each name ($25/mo)."
+   },
+   {
+    "key": "notes",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A quiet line under each figure (optional)."
+   },
+   {
+    "key": "rows",
+    "type": {
+     "kind": "list",
+     "flutter": "List<dynamic>",
+     "item": {
+      "kind": "json",
+      "flutter": "dynamic"
+     }
+    },
+    "default": [
+     [
+      "Data",
+      "10 GB",
+      "Unlimited",
+      2
+     ]
+    ],
+    "doc": "One list per row: the label, a value per column, then the winning column (1, 2 or 3; 0 for a tie).",
+    "required": true
+   },
+   {
+    "key": "pick",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The recommended name: its column is tinted and its button filled (empty: none)."
+   },
+   {
+    "key": "pickLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Best value",
+    "doc": "The small label over the recommended column."
+   },
+   {
+    "key": "cta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Choose",
+    "doc": "The label of the button under each column."
+   },
+   {
+    "key": "corner",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small caps label in the top-left corner (optional)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChoose",
+    "doc": "A column's button was tapped; the value is its name."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Plans",
+   "size": [
+    360,
+    220
+   ],
+   "props": {
+    "prices": [
+     "$25/mo",
+     "$45/mo"
+    ],
+    "pick": "Max",
+    "rows": [
+     [
+      "Data",
+      "10 GB",
+      "Unlimited",
+      2
+     ],
+     [
+      "Contract",
+      "Monthly",
+      "24 months",
+      1
+     ]
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "table": {
+   "type": "column",
+   "children": [
+    "head",
+    "rows",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "corner",
+    "h0",
+    "h1",
+    "h2"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "corner": {
+   "type": "column",
+   "children": [
+    "cornerText"
+   ],
+   "props": {
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 5
+   }
+  },
+  "cornerText": {
+   "type": "text",
+   "props": {
+    "text": "${props.corner}",
+    "style": "eyebrow"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     12
+    ]
+   }
+  },
+  "rows": {
+   "type": "listView",
+   "children": [
+    "r"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.rows}"
+   }
+  },
+  "r": {
+   "type": "row",
+   "children": [
+    "rl",
+    "c0",
+    "c1",
+    "c2"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1,
+    "strokeSides": "top"
+   }
+  },
+  "rl": {
+   "type": "row",
+   "children": [
+    "rlText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 5,
+    "padding": [
+     0,
+     12,
+     6,
+     12
+    ]
+   }
+  },
+  "rlText": {
+   "type": "text",
+   "props": {
+    "text": "${= at(item, 0)}",
+    "style": {
+     "from": "meta",
+     "fontWeight": 600,
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "footGap",
+    "f0",
+    "f1",
+    "f2"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "footGap": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 1,
+    "flex": 5
+   }
+  },
+  "h0": {
+   "type": "column",
+   "children": [
+    "hc0",
+    "hn0",
+    "hp0",
+    "hs0"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 6,
+    "padding": [
+     10,
+     12,
+     10,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": [
+     14,
+     14,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.names) > 0}",
+    "decoration.fills[0].color": "${= at(props.names, 0) == props.pick ? theme.colors.accentTint : '#00FFFFFF'}"
+   }
+  },
+  "hc0": {
+   "type": "row",
+   "children": [
+    "hcT0"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     7,
+     3,
+     7,
+     3
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "opacity": "${= at(props.names, 0) == props.pick ? 1 : 0}"
+   }
+  },
+  "hcT0": {
+   "type": "text",
+   "props": {
+    "text": "${props.pickLabel}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.5,
+     "color": "onAccent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "hn0": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.names) > 0 ? at(props.names, 0) : \"\"}",
+    "style": "blockTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     3,
+     0,
+     0
+    ]
+   }
+  },
+  "hp0": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.prices) > 0 ? at(props.prices, 0) : \"\"}",
+    "style": "number",
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= at(props.names, 0) == props.pick ? theme.colors.accent : theme.colors.ink}"
+   }
+  },
+  "hs0": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.notes) > 0 ? at(props.notes, 0) : \"\"}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.notes) > 0}"
+   }
+  },
+  "c0": {
+   "type": "row",
+   "children": [
+    "ct0",
+    "cw0"
+   ],
+   "props": {
+    "spacing": 5,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 6,
+    "padding": [
+     10,
+     11,
+     6,
+     11
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.names) > 0}",
+    "decoration.fills[0].color": "${= at(props.names, 0) == props.pick ? theme.colors.accentTint : '#00FFFFFF'}"
+   }
+  },
+  "ct0": {
+   "type": "text",
+   "props": {
+    "text": "${= length(item) > 2 ? at(item, 1) : \"\"}",
+    "style": "figure"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (at(item, length(item) - 1) == 1) ? theme.colors.ink : theme.colors.inkSoft}",
+    "props.style.fontWeight": "${= (at(item, length(item) - 1) == 1) ? 600 : 400}"
+   }
+  },
+  "cw0": {
+   "type": "icon",
+   "props": {
+    "icon": "check_circle_rounded",
+    "size": 16,
+    "color": "good"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= (at(item, length(item) - 1) == 1)}"
+   }
+  },
+  "f0": {
+   "type": "column",
+   "children": [
+    "fb0"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 6,
+    "padding": [
+     8,
+     6,
+     8,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": [
+     0,
+     0,
+     14,
+     14
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.names) > 0}",
+    "decoration.fills[0].color": "${= at(props.names, 0) == props.pick ? theme.colors.accentTint : '#00FFFFFF'}"
+   }
+  },
+  "fb0": {
+   "type": "row",
+   "children": [
+    "fbT0"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= at(props.names, 0) == props.pick ? theme.colors.accent : theme.colors.card}",
+    "decoration.strokes[0].color": "${= at(props.names, 0) == props.pick ? theme.colors.accent : theme.colors.lineStrong}",
+    "decoration.effects": "${= at(props.names, 0) == props.pick ? theme.shadows.cta : []}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "states": {
+    "pressed": {
+     "fb0": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChoose",
+       "value": "${= at(props.names, 0)}"
+      }
+     ]
+    }
+   ]
+  },
+  "fbT0": {
+   "type": "text",
+   "props": {
+    "text": "${props.cta}",
+    "style": {
+     "from": "cta",
+     "fontSize": 13.5
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= at(props.names, 0) == props.pick ? theme.colors.onAccent : theme.colors.ink}"
+   }
+  },
+  "h1": {
+   "type": "column",
+   "children": [
+    "hc1",
+    "hn1",
+    "hp1",
+    "hs1"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 6,
+    "padding": [
+     10,
+     12,
+     10,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": [
+     14,
+     14,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.names) > 1}",
+    "decoration.fills[0].color": "${= at(props.names, 1) == props.pick ? theme.colors.accentTint : '#00FFFFFF'}"
+   }
+  },
+  "hc1": {
+   "type": "row",
+   "children": [
+    "hcT1"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     7,
+     3,
+     7,
+     3
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "opacity": "${= at(props.names, 1) == props.pick ? 1 : 0}"
+   }
+  },
+  "hcT1": {
+   "type": "text",
+   "props": {
+    "text": "${props.pickLabel}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.5,
+     "color": "onAccent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "hn1": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.names) > 1 ? at(props.names, 1) : \"\"}",
+    "style": "blockTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     3,
+     0,
+     0
+    ]
+   }
+  },
+  "hp1": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.prices) > 1 ? at(props.prices, 1) : \"\"}",
+    "style": "number",
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= at(props.names, 1) == props.pick ? theme.colors.accent : theme.colors.ink}"
+   }
+  },
+  "hs1": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.notes) > 1 ? at(props.notes, 1) : \"\"}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.notes) > 1}"
+   }
+  },
+  "c1": {
+   "type": "row",
+   "children": [
+    "ct1",
+    "cw1"
+   ],
+   "props": {
+    "spacing": 5,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 6,
+    "padding": [
+     10,
+     11,
+     6,
+     11
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.names) > 1}",
+    "decoration.fills[0].color": "${= at(props.names, 1) == props.pick ? theme.colors.accentTint : '#00FFFFFF'}"
+   }
+  },
+  "ct1": {
+   "type": "text",
+   "props": {
+    "text": "${= length(item) > 3 ? at(item, 2) : \"\"}",
+    "style": "figure"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (at(item, length(item) - 1) == 2) ? theme.colors.ink : theme.colors.inkSoft}",
+    "props.style.fontWeight": "${= (at(item, length(item) - 1) == 2) ? 600 : 400}"
+   }
+  },
+  "cw1": {
+   "type": "icon",
+   "props": {
+    "icon": "check_circle_rounded",
+    "size": 16,
+    "color": "good"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= (at(item, length(item) - 1) == 2)}"
+   }
+  },
+  "f1": {
+   "type": "column",
+   "children": [
+    "fb1"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 6,
+    "padding": [
+     8,
+     6,
+     8,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": [
+     0,
+     0,
+     14,
+     14
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.names) > 1}",
+    "decoration.fills[0].color": "${= at(props.names, 1) == props.pick ? theme.colors.accentTint : '#00FFFFFF'}"
+   }
+  },
+  "fb1": {
+   "type": "row",
+   "children": [
+    "fbT1"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= at(props.names, 1) == props.pick ? theme.colors.accent : theme.colors.card}",
+    "decoration.strokes[0].color": "${= at(props.names, 1) == props.pick ? theme.colors.accent : theme.colors.lineStrong}",
+    "decoration.effects": "${= at(props.names, 1) == props.pick ? theme.shadows.cta : []}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "states": {
+    "pressed": {
+     "fb1": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChoose",
+       "value": "${= at(props.names, 1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "fbT1": {
+   "type": "text",
+   "props": {
+    "text": "${props.cta}",
+    "style": {
+     "from": "cta",
+     "fontSize": 13.5
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= at(props.names, 1) == props.pick ? theme.colors.onAccent : theme.colors.ink}"
+   }
+  },
+  "h2": {
+   "type": "column",
+   "children": [
+    "hc2",
+    "hn2",
+    "hp2",
+    "hs2"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 6,
+    "padding": [
+     10,
+     12,
+     10,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": [
+     14,
+     14,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.names) > 2}",
+    "decoration.fills[0].color": "${= at(props.names, 2) == props.pick ? theme.colors.accentTint : '#00FFFFFF'}"
+   }
+  },
+  "hc2": {
+   "type": "row",
+   "children": [
+    "hcT2"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     7,
+     3,
+     7,
+     3
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "opacity": "${= at(props.names, 2) == props.pick ? 1 : 0}"
+   }
+  },
+  "hcT2": {
+   "type": "text",
+   "props": {
+    "text": "${props.pickLabel}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.5,
+     "color": "onAccent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "hn2": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.names) > 2 ? at(props.names, 2) : \"\"}",
+    "style": "blockTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     3,
+     0,
+     0
+    ]
+   }
+  },
+  "hp2": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.prices) > 2 ? at(props.prices, 2) : \"\"}",
+    "style": "number",
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= at(props.names, 2) == props.pick ? theme.colors.accent : theme.colors.ink}"
+   }
+  },
+  "hs2": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.notes) > 2 ? at(props.notes, 2) : \"\"}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.notes) > 2}"
+   }
+  },
+  "c2": {
+   "type": "row",
+   "children": [
+    "ct2",
+    "cw2"
+   ],
+   "props": {
+    "spacing": 5,
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 6,
+    "padding": [
+     10,
+     11,
+     6,
+     11
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.names) > 2}",
+    "decoration.fills[0].color": "${= at(props.names, 2) == props.pick ? theme.colors.accentTint : '#00FFFFFF'}"
+   }
+  },
+  "ct2": {
+   "type": "text",
+   "props": {
+    "text": "${= length(item) > 4 ? at(item, 3) : \"\"}",
+    "style": "figure"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (at(item, length(item) - 1) == 3) ? theme.colors.ink : theme.colors.inkSoft}",
+    "props.style.fontWeight": "${= (at(item, length(item) - 1) == 3) ? 600 : 400}"
+   }
+  },
+  "cw2": {
+   "type": "icon",
+   "props": {
+    "icon": "check_circle_rounded",
+    "size": 16,
+    "color": "good"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= (at(item, length(item) - 1) == 3)}"
+   }
+  },
+  "f2": {
+   "type": "column",
+   "children": [
+    "fb2"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 6,
+    "padding": [
+     8,
+     6,
+     8,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": [
+     0,
+     0,
+     14,
+     14
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.names) > 2}",
+    "decoration.fills[0].color": "${= at(props.names, 2) == props.pick ? theme.colors.accentTint : '#00FFFFFF'}"
+   }
+  },
+  "fb2": {
+   "type": "row",
+   "children": [
+    "fbT2"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= at(props.names, 2) == props.pick ? theme.colors.accent : theme.colors.card}",
+    "decoration.strokes[0].color": "${= at(props.names, 2) == props.pick ? theme.colors.accent : theme.colors.lineStrong}",
+    "decoration.effects": "${= at(props.names, 2) == props.pick ? theme.shadows.cta : []}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "states": {
+    "pressed": {
+     "fb2": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChoose",
+       "value": "${= at(props.names, 2)}"
+      }
+     ]
+    }
+   ]
+  },
+  "fbT2": {
+   "type": "text",
+   "props": {
+    "text": "${props.cta}",
+    "style": {
+     "from": "cta",
+     "fontSize": 13.5
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= at(props.names, 2) == props.pick ? theme.colors.onAccent : theme.colors.ink}"
+   }
+  }
+ }
+}

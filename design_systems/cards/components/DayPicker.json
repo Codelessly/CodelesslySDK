@@ -1,0 +1,201 @@
+{
+ "schema": 3,
+ "id": "DayPicker",
+ "roots": [
+  "days"
+ ],
+ "widget": {
+  "type": "DayPicker",
+  "doc": "A strip of days to pick one from: DayPicker =day days:[\"Sat 14\",\"Sun 15\",\"Mon 16\"] (each a short weekday, a space, the date) keeps the chosen day's text in your variable; onChanged fires with it.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable: it holds the chosen day as written in days."
+   },
+   {
+    "key": "days",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Sat 14",
+     "Sun 15",
+     "Mon 16",
+     "Tue 17",
+     "Wed 18",
+     "Thu 19",
+     "Fri 20"
+    ],
+    "doc": "The days as \"Sat 14\": a short weekday, a space, the day of the month.",
+    "required": true
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "A day was chosen; the value is its text."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Week",
+   "size": [
+    340,
+    62
+   ],
+   "props": {
+    "value": "Sun 15"
+   }
+  }
+ ],
+ "nodes": {
+  "days": {
+   "type": "gridView",
+   "children": [
+    "day"
+   ],
+   "props": {
+    "crossAxisCount": 1,
+    "crossAxisSpacing": 6,
+    "mainAxisSpacing": 6,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.days}",
+    "props.crossAxisCount": "${= max(1, length(props.days))}"
+   }
+  },
+  "day": {
+   "type": "column",
+   "children": [
+    "dow",
+    "num"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     9,
+     0,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 13
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.accent : theme.colors.tile}",
+    "decoration.effects": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.shadows.pick : []}",
+    "decoration.radius": "${theme.radii.tile}"
+   },
+   "states": {
+    "pressed": {
+     "day": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "dow": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(at(split(item, ' '), 0))}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.6
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.onAccent : theme.colors.inkFaint}"
+   }
+  },
+  "num": {
+   "type": "text",
+   "props": {
+    "text": "${= length(split(item, ' ')) > 1 ? at(split(item, ' '), 1) : ''}",
+    "style": {
+     "from": "number",
+     "fontSize": 18
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.onAccent : theme.colors.ink}"
+   }
+  }
+ }
+}

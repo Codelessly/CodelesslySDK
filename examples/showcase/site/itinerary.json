@@ -1,0 +1,288 @@
+{
+ "schema": 3,
+ "roots": [
+  "itinerary"
+ ],
+ "nodes": {
+  "itinerary": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Two days in Kyoto",
+    "icon": "temple_buddhist_rounded",
+    "status": "Sat and Sun"
+   },
+   "bind": {
+    "props.subtitle": "${= 6-length(d1)-length(d2)} of 6 bookings left to make"
+   },
+   "children": [
+    "DayHeader1",
+    "c1",
+    "DayHeader2",
+    "Checklist1"
+   ]
+  },
+  "DayHeader1": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 1",
+    "subtitle": "Higashiyama and Gion",
+    "kind": "temple",
+    "tag": "Temples"
+   },
+   "children": [
+    "s1",
+    "ItineraryStop1",
+    "ItineraryStop2",
+    "ItineraryStop3"
+   ]
+  },
+  "s1": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Fushimi Inari Shrine",
+    "detail": "Walk the first loop of torii gates before the crowds. Allow 90 minutes; the shrine is free and always open.",
+    "time": "08:00",
+    "travel": "JR Nara Line, then bus 206, 25 min"
+   }
+  },
+  "ItineraryStop1": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lunch at Nishiki Market",
+    "detail": "Graze the stalls: tamagoyaki, pickles, grilled eel. Most close by 17:00.",
+    "time": "11:30",
+    "travel": "Walk east to Kiyomizu, 25 min"
+   }
+  },
+  "ItineraryStop2": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kiyomizu-dera",
+    "detail": "The wooden stage over the valley. Entry 500 yen; go late for softer light.",
+    "time": "14:00",
+    "travel": "Walk down Sannenzaka to Gion, 15 min"
+   }
+  },
+  "ItineraryStop3": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Gion stroll and dinner",
+    "detail": "Hanamikoji at dusk, then kaiseki nearby.",
+    "time": "18:00",
+    "last": true
+   }
+  },
+  "c1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Book for day 1",
+    "value": "d1",
+    "items": [
+     "Dinner reservation in Gion",
+     "Kiyomizu-dera evening tickets",
+     "Tea ceremony in Higashiyama"
+    ]
+   }
+  },
+  "DayHeader2": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 2",
+    "subtitle": "Arashiyama and the north",
+    "kind": "bamboo",
+    "tag": "Nature"
+   },
+   "children": [
+    "ItineraryStop4",
+    "ItineraryStop5",
+    "ItineraryStop6",
+    "ItineraryStop7"
+   ]
+  },
+  "ItineraryStop4": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Bamboo Grove",
+    "detail": "Arrive early: by 10:00 the path is full.",
+    "time": "08:30",
+    "travel": "Walk to Tenryu-ji, 5 min"
+   }
+  },
+  "ItineraryStop5": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tenryu-ji garden",
+    "detail": "A Zen garden with the mountains as its backdrop. Entry 500 yen.",
+    "time": "10:00",
+    "travel": "Randen tram, then bus 205, 45 min"
+   }
+  },
+  "ItineraryStop6": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lunch, then Kinkaku-ji",
+    "detail": "The Golden Pavilion; the circuit takes 40 minutes.",
+    "time": "13:00",
+    "travel": "Bus 12 to Sanjo, 40 min"
+   }
+  },
+  "ItineraryStop7": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pontocho Alley dinner",
+    "detail": "A narrow lantern-lit lane of restaurants beside the river.",
+    "time": "17:30",
+    "last": true
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Book for day 2",
+    "value": "d2",
+    "items": [
+     "Pontocho dinner table",
+     "Sagano scenic train seats",
+     "Rickshaw ride in Arashiyama"
+    ]
+   }
+  }
+ },
+ "variables": {
+  "itinerary": [
+   {
+    "name": "d1",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "d2",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

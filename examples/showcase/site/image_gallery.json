@@ -1,0 +1,117 @@
+{
+ "schema": 3,
+ "roots": [
+  "image_gallery"
+ ],
+ "nodes": {
+  "image_gallery": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "My trip",
+    "subtitle": "Nine photos · tap one to open it",
+    "icon": "photo_library_rounded"
+   },
+   "bind": {
+    "props.status": "${= open>0?open+\" of 9\":\"9 photos\"}"
+   },
+   "children": [
+    "g"
+   ]
+  },
+  "g": {
+   "type": "PhotoGallery",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "open"
+   },
+   "bind": {
+    "props.photos": "${photos}"
+   }
+  }
+ },
+ "variables": {
+  "image_gallery": [
+   {
+    "name": "photos",
+    "type": "list",
+    "value": [
+     {
+      "kind": "harbor",
+      "caption": "Harbour at sunrise"
+     },
+     {
+      "kind": "market",
+      "caption": "Old town market"
+     },
+     {
+      "kind": "forest",
+      "caption": "Forest trail"
+     },
+     {
+      "kind": "dunes",
+      "caption": "Desert dunes"
+     },
+     {
+      "kind": "skyline",
+      "caption": "Evening skyline"
+     },
+     {
+      "kind": "lagoon",
+      "caption": "Hidden lagoon"
+     },
+     {
+      "kind": "mountain",
+      "caption": "Mountain hut"
+     },
+     {
+      "kind": "festival",
+      "caption": "Street festival"
+     },
+     {
+      "kind": "train",
+      "caption": "Night train"
+     }
+    ]
+   },
+   {
+    "name": "open",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

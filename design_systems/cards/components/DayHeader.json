@@ -1,0 +1,343 @@
+{
+ "schema": 3,
+ "id": "DayHeader",
+ "roots": [
+  "day"
+ ],
+ "widget": {
+  "type": "DayHeader",
+  "doc": "One day of a trip: a banner drawn as a travel scene (the title, such as Day 1, over the subtitle, where it goes; kind the scene: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; tone its time of day; tag a pill), with that day's ItineraryStop lines indented under it as its timeline.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Day 1",
+    "doc": "The small line: Day 1, Saturday.",
+    "required": true
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The large line: where the day goes."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "temple",
+    "doc": "The scene drawn behind, a Media scene: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "auto",
+    "doc": "Its time of day: dawn, day, dusk or night."
+   },
+   {
+    "key": "tag",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small pill at the top right (empty: none)."
+   }
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Day",
+   "size": [
+    360,
+    92
+   ],
+   "props": {
+    "subtitle": "Higashiyama and Gion",
+    "tag": "3 to book"
+   }
+  }
+ ],
+ "nodes": {
+  "day": {
+   "type": "column",
+   "children": [
+    "head",
+    "stops"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "head": {
+   "type": "stack",
+   "children": [
+    "art",
+    "scrim",
+    "texts",
+    "tag"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 92
+   },
+   "decoration": {
+    "radius": 16,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "art": {
+   "type": "Media",
+   "props": {
+    "kind": "temple",
+    "round": false
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "props.kind": "${props.kind}",
+    "props.tone": "${props.tone}"
+   }
+  },
+  "scrim": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "centerLeft",
+      "end": "centerRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#C2000000"
+       },
+       {
+        "position": 0.6,
+        "color": "#59000000"
+       },
+       {
+        "position": 1,
+        "color": "#00000000"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "eyebrow",
+    "title"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    },
+    "padding": [
+     16,
+     0,
+     90,
+     0
+    ]
+   }
+  },
+  "eyebrow": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.title)}",
+    "style": {
+     "from": "eyebrow",
+     "letterSpacing": 1.2,
+     "color": "#D9FFFFFF"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.subtitle}",
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 18,
+     "letterSpacing": -0.2,
+     "color": "#FFFFFFFF"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "tag": {
+   "type": "row",
+   "children": [
+    "tagText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     9,
+     5,
+     9,
+     5
+    ],
+    "x": {
+     "end": 12
+    },
+    "y": {
+     "start": 12
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#E6FFFFFF"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= props.tag != ''}"
+   }
+  },
+  "tagText": {
+   "type": "text",
+   "props": {
+    "text": "${props.tag}",
+    "style": {
+     "from": "chip",
+     "color": "#FF111827"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "stops": {
+   "type": "column",
+   "children": [
+    "slot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${slots.children}"
+   }
+  },
+  "slot": {
+   "type": "slot"
+  }
+ }
+}

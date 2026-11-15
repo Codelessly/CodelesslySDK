@@ -1,0 +1,1496 @@
+{
+ "schema": 3,
+ "id": "MapPanel",
+ "roots": [
+  "map"
+ ],
+ "widget": {
+  "type": "MapPanel",
+  "doc": "A drawn map (an illustration: blocks, streets, a park, water, a dot for you) with numbered pins: MapPanel =pick count:5 shows pins 1 to 5 and keeps the tapped pin's number in your variable (0: none), the same variable the PlaceRow lines use.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable: the number of the pin chosen (0: none)."
+   },
+   {
+    "key": "count",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 5,
+    "doc": "How many numbered pins (up to 8).",
+    "required": true
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "A pin was tapped; the value is its number (0: cleared)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Map",
+   "size": [
+    360,
+    178
+   ],
+   "props": {
+    "value": 2
+   }
+  }
+ ],
+ "nodes": {
+  "map": {
+   "type": "stack",
+   "children": [
+    "draw",
+    "p0",
+    "p1",
+    "p2",
+    "p3",
+    "p4",
+    "p5",
+    "p6",
+    "p7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapLand"
+     }
+    ],
+    "radius": 16,
+    "clip": "antiAlias",
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "draw": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "customPaint": {
+    "viewBox": [
+     360,
+     180
+    ],
+    "fit": "cover",
+    "painter": [
+     {
+      "op": "rect",
+      "rect": [
+       -20,
+       -20,
+       400,
+       240
+      ],
+      "paint": "${theme.colors.mapLand}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       14,
+       12,
+       44,
+       26
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       84,
+       10,
+       54,
+       30
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       164,
+       8,
+       60,
+       22
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       252,
+       12,
+       46,
+       30
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       322,
+       8,
+       40,
+       34
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       10,
+       64,
+       50,
+       36
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       84,
+       70,
+       30,
+       30
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       252,
+       62,
+       46,
+       40
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       322,
+       66,
+       44,
+       36
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       16,
+       128,
+       44,
+       40
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       84,
+       126,
+       54,
+       44
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       164,
+       134,
+       60,
+       40
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       252,
+       128,
+       46,
+       44
+      ],
+      "radius": 5,
+      "paint": "${theme.colors.mapBlock}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       126,
+       58,
+       104,
+       58
+      ],
+      "radius": 12,
+      "paint": "${theme.colors.mapPark}"
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "circle",
+        "c": [
+         150,
+         80
+        ],
+        "radius": 7,
+        "paint": "${theme.colors.good}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         168,
+         96
+        ],
+        "radius": 9,
+        "paint": "${theme.colors.good}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         204,
+         78
+        ],
+        "radius": 8,
+        "paint": "${theme.colors.good}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         190,
+         100
+        ],
+        "radius": 6,
+        "paint": "${theme.colors.good}"
+       }
+      ],
+      "opacity": 0.7
+     },
+     {
+      "op": "path",
+      "d": "M300 190 C316 150 350 140 384 120 L384 190 Z",
+      "paint": "${theme.colors.mapWater}"
+     },
+     {
+      "op": "path",
+      "d": "M-10 50 L380 50",
+      "paint": {
+       "color": "${theme.colors.mapRoadLine}",
+       "style": "stroke",
+       "strokeWidth": 11,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M-10 50 L380 50",
+      "paint": {
+       "color": "${theme.colors.mapRoad}",
+       "style": "stroke",
+       "strokeWidth": 9,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M-10 118 L380 118",
+      "paint": {
+       "color": "${theme.colors.mapRoadLine}",
+       "style": "stroke",
+       "strokeWidth": 11,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M-10 118 L380 118",
+      "paint": {
+       "color": "${theme.colors.mapRoad}",
+       "style": "stroke",
+       "strokeWidth": 9,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M72 -10 L72 190",
+      "paint": {
+       "color": "${theme.colors.mapRoadLine}",
+       "style": "stroke",
+       "strokeWidth": 10,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M72 -10 L72 190",
+      "paint": {
+       "color": "${theme.colors.mapRoad}",
+       "style": "stroke",
+       "strokeWidth": 8,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M150 -10 L150 56",
+      "paint": {
+       "color": "${theme.colors.mapRoadLine}",
+       "style": "stroke",
+       "strokeWidth": 9,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M150 -10 L150 56",
+      "paint": {
+       "color": "${theme.colors.mapRoad}",
+       "style": "stroke",
+       "strokeWidth": 7,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M150 118 L150 190",
+      "paint": {
+       "color": "${theme.colors.mapRoadLine}",
+       "style": "stroke",
+       "strokeWidth": 9,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M150 118 L150 190",
+      "paint": {
+       "color": "${theme.colors.mapRoad}",
+       "style": "stroke",
+       "strokeWidth": 7,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M240 -10 L240 190",
+      "paint": {
+       "color": "${theme.colors.mapRoadLine}",
+       "style": "stroke",
+       "strokeWidth": 10,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M240 -10 L240 190",
+      "paint": {
+       "color": "${theme.colors.mapRoad}",
+       "style": "stroke",
+       "strokeWidth": 8,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M310 -10 L310 190",
+      "paint": {
+       "color": "${theme.colors.mapRoadLine}",
+       "style": "stroke",
+       "strokeWidth": 9,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M310 -10 L310 190",
+      "paint": {
+       "color": "${theme.colors.mapRoad}",
+       "style": "stroke",
+       "strokeWidth": 7,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M-10 176 C80 150 180 110 240 84 C290 62 330 40 380 22",
+      "paint": {
+       "color": "${theme.colors.mapRoadLine}",
+       "style": "stroke",
+       "strokeWidth": 13,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M-10 176 C80 150 180 110 240 84 C290 62 330 40 380 22",
+      "paint": {
+       "color": "${theme.colors.mapRoad}",
+       "style": "stroke",
+       "strokeWidth": 11,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "path",
+        "d": "M-10 176 C80 150 180 110 240 84 C290 62 330 40 380 22",
+        "paint": {
+         "color": "${theme.colors.mapRoadLine}",
+         "style": "stroke",
+         "strokeWidth": 1.2,
+         "dashPattern": [
+          6,
+          7
+         ]
+        }
+       }
+      ],
+      "opacity": 0.9
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "circle",
+        "c": [
+         196,
+         104
+        ],
+        "radius": 20,
+        "paint": "${theme.colors.accent}"
+       }
+      ],
+      "opacity": 0.25
+     },
+     {
+      "op": "circle",
+      "c": [
+       196,
+       104
+      ],
+      "radius": 8,
+      "paint": "${theme.colors.card}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       196,
+       104
+      ],
+      "radius": 5.5,
+      "paint": "${theme.colors.accent}"
+     }
+    ]
+   }
+  },
+  "p0": {
+   "type": "stack",
+   "children": [
+    "pt0",
+    "pd0"
+   ],
+   "layout": {
+    "width": 34,
+    "height": 42,
+    "x": {
+     "align": -0.74
+    },
+    "y": {
+     "align": -0.42
+    }
+   },
+   "bind": {
+    "visible": "${= props.count > 0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= props.value == 1 ? 0 : 1}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "pd0": {
+   "type": "row",
+   "children": [
+    "pn0"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30,
+    "x": 2,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 15,
+    "strokeAlign": "outside"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 1 ? theme.colors.accent : theme.colors.mapPin}",
+    "decoration.effects": "${= props.value == 1 ? theme.shadows.cta : theme.shadows.knob}",
+    "motion.scale": "${= props.value == 1 ? 1.18 : 1}"
+   }
+  },
+  "pn0": {
+   "type": "text",
+   "props": {
+    "text": "1",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 1 ? theme.colors.onAccent : theme.colors.onMapPin}"
+   }
+  },
+  "pt0": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": 12,
+    "y": 25
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 1 ? theme.colors.accent : theme.colors.mapPin}"
+   },
+   "motion": {
+    "rotate": 45
+   }
+  },
+  "p1": {
+   "type": "stack",
+   "children": [
+    "pt1",
+    "pd1"
+   ],
+   "layout": {
+    "width": 34,
+    "height": 42,
+    "x": {
+     "align": 0.36
+    },
+    "y": {
+     "align": -0.7
+    }
+   },
+   "bind": {
+    "visible": "${= props.count > 1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= props.value == 2 ? 0 : 2}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "pd1": {
+   "type": "row",
+   "children": [
+    "pn1"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30,
+    "x": 2,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 15,
+    "strokeAlign": "outside"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 2 ? theme.colors.accent : theme.colors.mapPin}",
+    "decoration.effects": "${= props.value == 2 ? theme.shadows.cta : theme.shadows.knob}",
+    "motion.scale": "${= props.value == 2 ? 1.18 : 1}"
+   }
+  },
+  "pn1": {
+   "type": "text",
+   "props": {
+    "text": "2",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 2 ? theme.colors.onAccent : theme.colors.onMapPin}"
+   }
+  },
+  "pt1": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": 12,
+    "y": 25
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 2 ? theme.colors.accent : theme.colors.mapPin}"
+   },
+   "motion": {
+    "rotate": 45
+   }
+  },
+  "p2": {
+   "type": "stack",
+   "children": [
+    "pt2",
+    "pd2"
+   ],
+   "layout": {
+    "width": 34,
+    "height": 42,
+    "x": {
+     "align": -0.44
+    },
+    "y": {
+     "align": 0.34
+    }
+   },
+   "bind": {
+    "visible": "${= props.count > 2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= props.value == 3 ? 0 : 3}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "pd2": {
+   "type": "row",
+   "children": [
+    "pn2"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30,
+    "x": 2,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 15,
+    "strokeAlign": "outside"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 3 ? theme.colors.accent : theme.colors.mapPin}",
+    "decoration.effects": "${= props.value == 3 ? theme.shadows.cta : theme.shadows.knob}",
+    "motion.scale": "${= props.value == 3 ? 1.18 : 1}"
+   }
+  },
+  "pn2": {
+   "type": "text",
+   "props": {
+    "text": "3",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 3 ? theme.colors.onAccent : theme.colors.onMapPin}"
+   }
+  },
+  "pt2": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": 12,
+    "y": 25
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 3 ? theme.colors.accent : theme.colors.mapPin}"
+   },
+   "motion": {
+    "rotate": 45
+   }
+  },
+  "p3": {
+   "type": "stack",
+   "children": [
+    "pt3",
+    "pd3"
+   ],
+   "layout": {
+    "width": 34,
+    "height": 42,
+    "x": {
+     "align": 0.78
+    },
+    "y": {
+     "align": 0.2
+    }
+   },
+   "bind": {
+    "visible": "${= props.count > 3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= props.value == 4 ? 0 : 4}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "pd3": {
+   "type": "row",
+   "children": [
+    "pn3"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30,
+    "x": 2,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 15,
+    "strokeAlign": "outside"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 4 ? theme.colors.accent : theme.colors.mapPin}",
+    "decoration.effects": "${= props.value == 4 ? theme.shadows.cta : theme.shadows.knob}",
+    "motion.scale": "${= props.value == 4 ? 1.18 : 1}"
+   }
+  },
+  "pn3": {
+   "type": "text",
+   "props": {
+    "text": "4",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 4 ? theme.colors.onAccent : theme.colors.onMapPin}"
+   }
+  },
+  "pt3": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": 12,
+    "y": 25
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 4 ? theme.colors.accent : theme.colors.mapPin}"
+   },
+   "motion": {
+    "rotate": 45
+   }
+  },
+  "p4": {
+   "type": "stack",
+   "children": [
+    "pt4",
+    "pd4"
+   ],
+   "layout": {
+    "width": 34,
+    "height": 42,
+    "x": {
+     "align": -0.7
+    },
+    "y": {
+     "align": 0.72
+    }
+   },
+   "bind": {
+    "visible": "${= props.count > 4}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= props.value == 5 ? 0 : 5}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "pd4": {
+   "type": "row",
+   "children": [
+    "pn4"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30,
+    "x": 2,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 15,
+    "strokeAlign": "outside"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 5 ? theme.colors.accent : theme.colors.mapPin}",
+    "decoration.effects": "${= props.value == 5 ? theme.shadows.cta : theme.shadows.knob}",
+    "motion.scale": "${= props.value == 5 ? 1.18 : 1}"
+   }
+  },
+  "pn4": {
+   "type": "text",
+   "props": {
+    "text": "5",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 5 ? theme.colors.onAccent : theme.colors.onMapPin}"
+   }
+  },
+  "pt4": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": 12,
+    "y": 25
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 5 ? theme.colors.accent : theme.colors.mapPin}"
+   },
+   "motion": {
+    "rotate": 45
+   }
+  },
+  "p5": {
+   "type": "stack",
+   "children": [
+    "pt5",
+    "pd5"
+   ],
+   "layout": {
+    "width": 34,
+    "height": 42,
+    "x": {
+     "align": 0.34
+    },
+    "y": {
+     "align": 0.74
+    }
+   },
+   "bind": {
+    "visible": "${= props.count > 5}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= props.value == 6 ? 0 : 6}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "pd5": {
+   "type": "row",
+   "children": [
+    "pn5"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30,
+    "x": 2,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 15,
+    "strokeAlign": "outside"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 6 ? theme.colors.accent : theme.colors.mapPin}",
+    "decoration.effects": "${= props.value == 6 ? theme.shadows.cta : theme.shadows.knob}",
+    "motion.scale": "${= props.value == 6 ? 1.18 : 1}"
+   }
+  },
+  "pn5": {
+   "type": "text",
+   "props": {
+    "text": "6",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 6 ? theme.colors.onAccent : theme.colors.onMapPin}"
+   }
+  },
+  "pt5": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": 12,
+    "y": 25
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 6 ? theme.colors.accent : theme.colors.mapPin}"
+   },
+   "motion": {
+    "rotate": 45
+   }
+  },
+  "p6": {
+   "type": "stack",
+   "children": [
+    "pt6",
+    "pd6"
+   ],
+   "layout": {
+    "width": 34,
+    "height": 42,
+    "x": {
+     "align": -0.2
+    },
+    "y": {
+     "align": -0.78
+    }
+   },
+   "bind": {
+    "visible": "${= props.count > 6}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= props.value == 7 ? 0 : 7}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "pd6": {
+   "type": "row",
+   "children": [
+    "pn6"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30,
+    "x": 2,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 15,
+    "strokeAlign": "outside"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 7 ? theme.colors.accent : theme.colors.mapPin}",
+    "decoration.effects": "${= props.value == 7 ? theme.shadows.cta : theme.shadows.knob}",
+    "motion.scale": "${= props.value == 7 ? 1.18 : 1}"
+   }
+  },
+  "pn6": {
+   "type": "text",
+   "props": {
+    "text": "7",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 7 ? theme.colors.onAccent : theme.colors.onMapPin}"
+   }
+  },
+  "pt6": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": 12,
+    "y": 25
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 7 ? theme.colors.accent : theme.colors.mapPin}"
+   },
+   "motion": {
+    "rotate": 45
+   }
+  },
+  "p7": {
+   "type": "stack",
+   "children": [
+    "pt7",
+    "pd7"
+   ],
+   "layout": {
+    "width": 34,
+    "height": 42,
+    "x": {
+     "align": 0.86
+    },
+    "y": {
+     "align": -0.62
+    }
+   },
+   "bind": {
+    "visible": "${= props.count > 7}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= props.value == 8 ? 0 : 8}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "pd7": {
+   "type": "row",
+   "children": [
+    "pn7"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30,
+    "x": 2,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 2.5,
+    "radius": 15,
+    "strokeAlign": "outside"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 8 ? theme.colors.accent : theme.colors.mapPin}",
+    "decoration.effects": "${= props.value == 8 ? theme.shadows.cta : theme.shadows.knob}",
+    "motion.scale": "${= props.value == 8 ? 1.18 : 1}"
+   }
+  },
+  "pn7": {
+   "type": "text",
+   "props": {
+    "text": "8",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 8 ? theme.colors.onAccent : theme.colors.onMapPin}"
+   }
+  },
+  "pt7": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": 12,
+    "y": 25
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 8 ? theme.colors.accent : theme.colors.mapPin}"
+   },
+   "motion": {
+    "rotate": 45
+   }
+  }
+ }
+}

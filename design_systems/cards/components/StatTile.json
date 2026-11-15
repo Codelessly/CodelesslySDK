@@ -1,0 +1,345 @@
+{
+ "schema": 3,
+ "id": "StatTile",
+ "roots": [
+  "tile"
+ ],
+ "widget": {
+  "type": "StatTile",
+  "doc": "A dashboard figure with its change: the label, value (text) and delta (+8.5% or -0.4%: an up or down chip, green when good; invert:true when a fall is good, as for churn); put four in a Grid cols:2 gap:10.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Revenue",
+    "doc": "What the figure is.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "$0",
+    "doc": "The figure, as text ($78.9k).",
+    "required": true
+   },
+   {
+    "key": "delta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Its change, starting with + or - (+8.5%): drawn as an up or down chip, green when good (empty: none)."
+   },
+   {
+    "key": "invert",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True when a fall is the good direction (churn, cost): the colors swap."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet note after the change (vs last month)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon in the small tile (empty: none)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Revenue",
+   "size": [
+    170,
+    110
+   ],
+   "props": {
+    "value": "$78.9k",
+    "delta": "+8.5%",
+    "icon": "payments_rounded"
+   }
+  }
+ ],
+ "nodes": {
+  "tile": {
+   "type": "column",
+   "children": [
+    "top",
+    "value",
+    "bottom"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     13,
+     14,
+     13
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "top": {
+   "type": "row",
+   "children": [
+    "mark",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "mark": {
+   "type": "row",
+   "children": [
+    "markIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "visible": "${= props.icon != ''}"
+   }
+  },
+  "markIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "payments_rounded",
+    "size": 15,
+    "color": "accent"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${props.value}",
+    "style": {
+     "from": "numberLarge",
+     "fontSize": 26
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     10,
+     0,
+     6
+    ]
+   }
+  },
+  "bottom": {
+   "type": "row",
+   "children": [
+    "delta",
+    "note"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "delta": {
+   "type": "row",
+   "children": [
+    "deltaIcon",
+    "deltaText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     5,
+     3,
+     7,
+     3
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goodTint"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= props.delta != ''}",
+    "decoration.fills[0].color": "${= (!startsWith(props.delta, '-')) != props.invert ? theme.colors.goodTint : theme.colors.badTint}"
+   }
+  },
+  "deltaIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_upward_rounded",
+    "size": 12,
+    "color": "good"
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "props.icon": "${= !startsWith(props.delta, '-') ? 'arrow_upward_rounded' : 'arrow_downward_rounded'}",
+    "props.color": "${= (!startsWith(props.delta, '-')) != props.invert ? theme.colors.goodDeep : theme.colors.badDeep}"
+   }
+  },
+  "deltaText": {
+   "type": "text",
+   "props": {
+    "text": "${= replace(replace(props.delta, '+', ''), '-', '')}",
+    "style": {
+     "from": "chip",
+     "fontSize": 11.5
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (!startsWith(props.delta, '-')) != props.invert ? theme.colors.goodDeep : theme.colors.badDeep}"
+   }
+  },
+  "note": {
+   "type": "text",
+   "props": {
+    "text": "${props.note}",
+    "style": {
+     "from": "meta",
+     "fontSize": 11.5
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

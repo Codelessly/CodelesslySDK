@@ -1,0 +1,216 @@
+{
+ "schema": 3,
+ "id": "Callout",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "Callout",
+  "doc": "A tinted note inside a card: a bold title and a message with an icon; tone is warn (default), danger (a risk, cannot be undone), good, accent or neutral.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The short point, bold (This cannot be undone)."
+   },
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One or two sentences under it (empty: none)."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "accent",
+      "good",
+      "warn",
+      "danger",
+      "neutral"
+     ]
+    },
+    "default": "warn",
+    "doc": "accent, good, warn, danger or neutral."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "info_rounded",
+    "doc": "A Material icon."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Risk",
+   "size": [
+    340,
+    70
+   ],
+   "props": {
+    "title": "This cannot be undone",
+    "message": "Deleted files skip the trash.",
+    "tone": "danger",
+    "icon": "warning_rounded"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "row",
+   "children": [
+    "icon",
+    "texts"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 11
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     13,
+     12,
+     14,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "warnTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "warnLine"
+     }
+    ],
+    "strokeWidth": 1,
+    "radius": 14
+   },
+   "bind": {
+    "decoration.fills[0].color": "${toneTint}",
+    "decoration.strokes[0].color": "${toneLine}",
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "icon": {
+   "type": "icon",
+   "props": {
+    "icon": "info_rounded",
+    "size": 19,
+    "color": "warn"
+   },
+   "layout": {
+    "width": 19,
+    "height": 19
+   },
+   "bind": {
+    "props.icon": "${props.icon}",
+    "props.color": "${toneInk}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "message"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "rowTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${toneDeep}",
+    "visible": "${= props.title != ''}"
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${props.message}",
+    "style": {
+     "from": "lead",
+     "fontSize": 13.5
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.message != ''}"
+   }
+  }
+ },
+ "variables": {
+  "box": [
+   {
+    "name": "toneInk",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.good : props.tone == 'warn' ? theme.colors.warn : props.tone == 'danger' ? theme.colors.bad : props.tone == 'neutral' ? theme.colors.inkSoft : theme.colors.accent"
+   },
+   {
+    "name": "toneDeep",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.goodDeep : props.tone == 'warn' ? theme.colors.warnDeep : props.tone == 'danger' ? theme.colors.badDeep : props.tone == 'neutral' ? theme.colors.ink : theme.colors.accentDeep"
+   },
+   {
+    "name": "toneTint",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.goodTint : props.tone == 'warn' ? theme.colors.warnTint : props.tone == 'danger' ? theme.colors.badTint : props.tone == 'neutral' ? theme.colors.tile : theme.colors.accentTint"
+   },
+   {
+    "name": "toneLine",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.goodLine : props.tone == 'warn' ? theme.colors.warnLine : props.tone == 'danger' ? theme.colors.badLine : props.tone == 'neutral' ? theme.colors.lineStrong : theme.colors.accentLine"
+   }
+  ]
+ }
+}

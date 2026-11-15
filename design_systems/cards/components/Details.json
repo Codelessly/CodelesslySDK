@@ -1,0 +1,216 @@
+{
+ "schema": 3,
+ "id": "Details",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "Details",
+  "doc": "Labels and their values as rows in one quiet tile (a price breakdown, the facts of a request): rows:=[[\"Subtotal\",money(sub,\"$\",2)],[\"Delivery\",\"$4.99\"]], each a [label, value] pair (a row with an empty value is hidden); icons is an optional list alongside.",
+  "props": [
+   {
+    "key": "rows",
+    "type": {
+     "kind": "list",
+     "flutter": "List<dynamic>",
+     "item": {
+      "kind": "json",
+      "flutter": "dynamic"
+     }
+    },
+    "default": [
+     [
+      "Subtotal",
+      "$25.95"
+     ],
+     [
+      "Delivery",
+      "$4.99"
+     ]
+    ],
+    "doc": "One [label, value] pair per row; a row whose value is empty is not shown.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A Material icon per row, before its label (optional)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Prices",
+   "size": [
+    340,
+    90
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "column",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     3,
+     14,
+     3
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 14
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "item"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.rows}"
+   }
+  },
+  "item": {
+   "type": "row",
+   "children": [
+    "icon",
+    "label",
+    "value"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     10,
+     0,
+     10
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1,
+    "strokeSides": "top"
+   },
+   "bind": {
+    "visible": "${= (length(item) > 1 && text(at(item, 1)) != '')}",
+    "decoration.strokeWidth": "${= index == 0 ? 0 : 1}"
+   }
+  },
+  "icon": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "size": 16,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index}",
+    "props.icon": "${= length(props.icons) > index ? at(props.icons, index) : 'circle'}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${= at(item, 0)}",
+    "style": {
+     "from": "lead",
+     "fontSize": 13.5
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${= length(item) > 1 ? at(item, 1) : ''}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600
+    },
+    "textAlign": "right",
+    "maxLines": 2,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 210
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,210 @@
+{
+ "schema": 3,
+ "id": "WeatherDay",
+ "roots": [
+  "day"
+ ],
+ "widget": {
+  "type": "WeatherDay",
+  "doc": "One day of a forecast with a temperature range bar: the day (label), kind (sun, partly, cloud, rain, storm, night), low and high; min and max are the lowest low and highest high of all the days shown, so the bars line up.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Tue",
+    "doc": "The day.",
+    "required": true
+   },
+   {
+    "key": "low",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 14,
+    "doc": "The day's low.",
+    "required": true
+   },
+   {
+    "key": "high",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 20,
+    "doc": "The day's high.",
+    "required": true
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "sun",
+      "partly",
+      "cloud",
+      "rain",
+      "storm",
+      "night"
+     ]
+    },
+    "default": "sun",
+    "doc": "The conditions: sun, partly, cloud, rain, storm, night."
+   },
+   {
+    "key": "min",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 10,
+    "doc": "The lowest low of all the days shown (where every bar starts from)."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 28,
+    "doc": "The highest high of all the days shown."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Tue",
+   "size": [
+    360,
+    40
+   ],
+   "props": {
+    "kind": "rain",
+    "min": 13,
+    "max": 25
+   }
+  }
+ ],
+ "nodes": {
+  "day": {
+   "type": "row",
+   "children": [
+    "name",
+    "glyph",
+    "low",
+    "bar",
+    "high"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "rowTitle",
+    "maxLines": 1
+   },
+   "layout": {
+    "width": 44,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "glyph": {
+   "type": "WeatherGlyph",
+   "props": {
+    "kind": "sun"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "bind": {
+    "props.kind": "${props.kind}"
+   }
+  },
+  "low": {
+   "type": "text",
+   "props": {
+    "text": "${props.low}°",
+    "style": {
+     "from": "figure",
+     "color": "inkFaint"
+    },
+    "textAlign": "right"
+   },
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "bar": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 18
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "rrect",
+      "rect": [
+       0,
+       "${= size.height / 2 - 3}",
+       "${size.width}",
+       6
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.tileDeep}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       "${= size.width * ((props.low - props.min) / max(1, props.max - props.min))}",
+       "${= size.height / 2 - 3}",
+       "${= max(8, size.width * (((props.high - props.min) / max(1, props.max - props.min)) - ((props.low - props.min) / max(1, props.max - props.min))))}",
+       6
+      ],
+      "radius": 3,
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': theme.colors.skyMid}, {'position': 1, 'color': theme.colors.sunDeep}]}}}"
+     }
+    ]
+   }
+  },
+  "high": {
+   "type": "text",
+   "props": {
+    "text": "${props.high}°",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600
+    },
+    "textAlign": "right"
+   },
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

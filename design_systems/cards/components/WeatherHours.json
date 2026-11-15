@@ -1,0 +1,212 @@
+{
+ "schema": 3,
+ "id": "WeatherHours",
+ "roots": [
+  "strip"
+ ],
+ "widget": {
+  "type": "WeatherHours",
+  "doc": "The next hours as a strip of small forecasts: hours (labels), temps (numbers) and kinds (sun, partly, cloud, rain, storm, night), three lists of the same length.",
+  "props": [
+   {
+    "key": "hours",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "1 PM",
+     "2 PM",
+     "3 PM",
+     "4 PM",
+     "5 PM"
+    ],
+    "doc": "The hour labels.",
+    "required": true
+   },
+   {
+    "key": "temps",
+    "type": {
+     "kind": "list",
+     "flutter": "List<double>",
+     "item": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": [
+     23,
+     24,
+     24,
+     23,
+     21
+    ],
+    "doc": "The temperature at each hour.",
+    "required": true
+   },
+   {
+    "key": "kinds",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "sun",
+     "sun",
+     "partly",
+     "cloud",
+     "rain"
+    ],
+    "doc": "The conditions at each hour: sun, partly, cloud, rain, storm, night."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Five",
+   "size": [
+    360,
+    100
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "strip": {
+   "type": "column",
+   "children": [
+    "cells"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     6,
+     10,
+     6,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 16
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "cells": {
+   "type": "gridView",
+   "children": [
+    "cell"
+   ],
+   "props": {
+    "crossAxisCount": 1,
+    "crossAxisSpacing": 0,
+    "mainAxisSpacing": 0,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.hours}",
+    "props.crossAxisCount": "${= max(1, length(props.hours))}"
+   }
+  },
+  "cell": {
+   "type": "column",
+   "children": [
+    "hour",
+    "glyph",
+    "temp"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "hour": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "meta",
+     "fontSize": 11.5
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "glyph": {
+   "type": "WeatherGlyph",
+   "props": {
+    "kind": "sun"
+   },
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "bind": {
+    "props.kind": "${= length(props.kinds) > index ? at(props.kinds, index) : 'sun'}"
+   }
+  },
+  "temp": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.temps) > index ? at(props.temps, index) + '°' : ''}",
+    "style": "numberSmall",
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

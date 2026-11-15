@@ -1,0 +1,223 @@
+{
+ "schema": 3,
+ "id": "Pager",
+ "roots": [
+  "bar"
+ ],
+ "widget": {
+  "type": "Pager",
+  "doc": "Paging for a list: \"Page 1 of 3\" with previous and next buttons; Pager =page count:=ceil(length(rows)/5) keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5).",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable: the page, from 0."
+   },
+   {
+    "key": "count",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 1,
+    "doc": "How many pages there are (ceil(length(rows)/5)).",
+    "required": true
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Page",
+    "doc": "The word before \"1 of 3\"."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "The page changed; the value is the new page."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Pages",
+   "size": [
+    340,
+    36
+   ],
+   "props": {
+    "count": 3
+   }
+  }
+ ],
+ "nodes": {
+  "bar": {
+   "type": "row",
+   "children": [
+    "label",
+    "prev",
+    "next"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label} ${= props.value + 1} of ${= max(1, props.count)}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "prev": {
+   "type": "row",
+   "children": [
+    "prevI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 17.0
+   },
+   "bind": {
+    "opacity": "${= props.value > 0 ? 1 : 0.35}"
+   },
+   "states": {
+    "pressed": {
+     "prev": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= max(0, props.value - 1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "prevI": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_left_rounded",
+    "size": 19,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 19,
+    "height": 19
+   }
+  },
+  "next": {
+   "type": "row",
+   "children": [
+    "nextI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 17.0
+   },
+   "bind": {
+    "opacity": "${= props.value < props.count - 1 ? 1 : 0.35}"
+   },
+   "states": {
+    "pressed": {
+     "next": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= min(max(1, props.count) - 1, props.value + 1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "nextI": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 19,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 19,
+    "height": 19
+   }
+  }
+ }
+}

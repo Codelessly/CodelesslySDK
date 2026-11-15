@@ -1,0 +1,464 @@
+{
+ "schema": 3,
+ "id": "Receipt",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "Receipt",
+  "doc": "The card's end state after a decision: a drawn badge with an icon, a title, a message and an optional code (an order or booking number); tone good for done, danger for denied, neutral for cancelled; show it under an if line in place of the controls.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "All done",
+    "doc": "What happened, e.g. Order confirmed.",
+    "required": true
+   },
+   {
+    "key": "message",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One or two sentences under it."
+   },
+   {
+    "key": "code",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A reference to keep: an order or booking number (empty: none)."
+   },
+   {
+    "key": "codeLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Reference",
+    "doc": "What the code is."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "accent",
+      "good",
+      "warn",
+      "danger",
+      "neutral"
+     ]
+    },
+    "default": "good",
+    "doc": "good (done), danger (denied, deleted), neutral (cancelled), accent or warn."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "check_rounded",
+    "doc": "The icon in the badge: check_rounded, close_rounded, send_rounded."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Done",
+   "size": [
+    340,
+    230
+   ],
+   "props": {
+    "title": "Order confirmed",
+    "message": "A receipt is on its way.",
+    "code": "CL-48213",
+    "codeLabel": "Order"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "column",
+   "children": [
+    "badge",
+    "title",
+    "message",
+    "code"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     20,
+     22,
+     20,
+     22
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 360,
+     "delay": 0,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 8,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "badge": {
+   "type": "row",
+   "children": [
+    "disc"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 120,
+    "height": 84
+   },
+   "customPaint": {
+    "viewBox": [
+     120,
+     84
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "circle",
+      "c": [
+       60,
+       42
+      ],
+      "radius": 38,
+      "paint": "${toneTint}"
+     },
+     {
+      "op": "group",
+      "ops": [
+       {
+        "op": "circle",
+        "c": [
+         18,
+         20
+        ],
+        "radius": 3,
+        "paint": "${toneInk}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         104,
+         30
+        ],
+        "radius": 2.4,
+        "paint": "${theme.colors.gold}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         98,
+         66
+        ],
+        "radius": 3,
+        "paint": "${toneInk}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         22,
+         62
+        ],
+        "radius": 2.4,
+        "paint": "${theme.colors.gold}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         8,
+         40,
+         7,
+         3
+        ],
+        "radius": 1.5,
+        "paint": "${theme.colors.accentBright}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         106,
+         48,
+         7,
+         3
+        ],
+        "radius": 1.5,
+        "paint": "${theme.colors.accentBright}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         36,
+         6,
+         3,
+         7
+        ],
+        "radius": 1.5,
+        "paint": "${theme.colors.gold}"
+       },
+       {
+        "op": "rrect",
+        "rect": [
+         82,
+         74,
+         3,
+         7
+        ],
+        "radius": 1.5,
+        "paint": "${theme.colors.accentBright}"
+       }
+      ],
+      "opacity": 0.9
+     }
+    ]
+   }
+  },
+  "disc": {
+   "type": "row",
+   "children": [
+    "discIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 50,
+    "height": 50
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "good"
+     }
+    ],
+    "radius": 25
+   },
+   "bind": {
+    "decoration.fills[0].color": "${toneInk}",
+    "decoration.effects": "${theme.shadows.tile}"
+   }
+  },
+  "discIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 30,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "cardTitle",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     10,
+     0,
+     0
+    ]
+   }
+  },
+  "message": {
+   "type": "text",
+   "props": {
+    "text": "${props.message}",
+    "style": "lead",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     5,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.message != ''}"
+   }
+  },
+  "code": {
+   "type": "row",
+   "children": [
+    "codeLabel",
+    "codeText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     7,
+     12,
+     7
+    ],
+    "margin": [
+     0,
+     14,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1,
+    "dashPattern": [
+     4,
+     3
+    ],
+    "radius": 10
+   },
+   "bind": {
+    "visible": "${= props.code != ''}"
+   }
+  },
+  "codeLabel": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.codeLabel)}",
+    "style": "eyebrow"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "codeText": {
+   "type": "text",
+   "props": {
+    "text": "${props.code}",
+    "style": {
+     "from": "code",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ },
+ "variables": {
+  "box": [
+   {
+    "name": "toneInk",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.good : props.tone == 'warn' ? theme.colors.warn : props.tone == 'danger' ? theme.colors.bad : props.tone == 'neutral' ? theme.colors.inkSoft : theme.colors.accent"
+   },
+   {
+    "name": "toneDeep",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.goodDeep : props.tone == 'warn' ? theme.colors.warnDeep : props.tone == 'danger' ? theme.colors.badDeep : props.tone == 'neutral' ? theme.colors.ink : theme.colors.accentDeep"
+   },
+   {
+    "name": "toneTint",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.goodTint : props.tone == 'warn' ? theme.colors.warnTint : props.tone == 'danger' ? theme.colors.badTint : props.tone == 'neutral' ? theme.colors.tile : theme.colors.accentTint"
+   },
+   {
+    "name": "toneLine",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.goodLine : props.tone == 'warn' ? theme.colors.warnLine : props.tone == 'danger' ? theme.colors.badLine : props.tone == 'neutral' ? theme.colors.lineStrong : theme.colors.accentLine"
+   }
+  ]
+ }
+}

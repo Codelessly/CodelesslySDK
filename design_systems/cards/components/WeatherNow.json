@@ -1,0 +1,461 @@
+{
+ "schema": 3,
+ "id": "WeatherNow",
+ "roots": [
+  "now"
+ ],
+ "widget": {
+  "type": "WeatherNow",
+  "doc": "The weather now as the card's hero on a sky that follows the conditions: the place (title), the conditions in words (detail), temp, high and low (numbers only) and kind (sun, partly, cloud, rain, storm, night) for the drawn glyph.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Lisbon",
+    "doc": "The place.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Mostly sunny",
+    "doc": "The conditions, in words."
+   },
+   {
+    "key": "temp",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "22",
+    "doc": "The temperature now, the number only.",
+    "required": true
+   },
+   {
+    "key": "high",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "24",
+    "doc": "Today's high, the number only."
+   },
+   {
+    "key": "low",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "15",
+    "doc": "Today's low, the number only."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "sun",
+      "partly",
+      "cloud",
+      "rain",
+      "storm",
+      "night"
+     ]
+    },
+    "default": "sun",
+    "doc": "The conditions, for the drawn glyph and the sky: sun, partly, cloud, rain, storm, night."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Sunny",
+   "size": [
+    360,
+    170
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "now": {
+   "type": "row",
+   "children": [
+    "left",
+    "glyph"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     18,
+     16,
+     14,
+     16
+    ]
+   },
+   "decoration": {
+    "radius": 18
+   },
+   "bind": {
+    "decoration.effects": "${theme.shadows.tile}"
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "rrect",
+      "rect": [
+       0,
+       0,
+       "${size.width}",
+       "${size.height}"
+      ],
+      "radius": "${theme.radii.panel}",
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': props.kind == 'night' ? theme.colors.skyNightA : props.kind == 'rain' || props.kind == 'storm' ? theme.colors.skyRainA : props.kind == 'cloud' ? theme.colors.skyCloudA : theme.colors.skySunA}, {'position': 1, 'color': props.kind == 'night' ? theme.colors.skyNightB : props.kind == 'rain' || props.kind == 'storm' ? theme.colors.skyRainB : props.kind == 'cloud' ? theme.colors.skyCloudB : theme.colors.skySunB}]}}}"
+     },
+     {
+      "op": "group",
+      "clipRRect": {
+       "rect": [
+        0,
+        0,
+        "${size.width}",
+        "${size.height}"
+       ],
+       "radius": 18
+      },
+      "ops": [
+       {
+        "op": "circle",
+        "c": [
+         "${= size.width - 60}",
+         54
+        ],
+        "radius": 96,
+        "paint": "#14FFFFFF"
+       },
+       {
+        "op": "circle",
+        "c": [
+         "${= size.width - 60}",
+         54
+        ],
+        "radius": 66,
+        "paint": "#14FFFFFF"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "left": {
+   "type": "column",
+   "children": [
+    "place",
+    "temp",
+    "cond",
+    "range"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "place": {
+   "type": "row",
+   "children": [
+    "placeIcon",
+    "placeText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "placeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "near_me_rounded",
+    "size": 14,
+    "color": "onHeroSoft"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   }
+  },
+  "placeText": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "rowTitle",
+     "fontSize": 13.5,
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "temp": {
+   "type": "text",
+   "props": {
+    "text": "${props.temp}°",
+    "style": {
+     "from": "numberHero",
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     6,
+     0,
+     0
+    ]
+   }
+  },
+  "cond": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": {
+     "from": "blockTitle",
+     "fontWeight": 500,
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     2,
+     0,
+     10
+    ]
+   }
+  },
+  "range": {
+   "type": "row",
+   "children": [
+    "hi",
+    "lo"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "hi": {
+   "type": "row",
+   "children": [
+    "hiL",
+    "hiV"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     4,
+     9,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "hiL": {
+   "type": "text",
+   "props": {
+    "text": "High",
+    "style": {
+     "from": "chip",
+     "fontSize": 11,
+     "color": "onHeroSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "hiV": {
+   "type": "text",
+   "props": {
+    "text": "${props.high}°",
+    "style": {
+     "from": "chip",
+     "fontSize": 12,
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lo": {
+   "type": "row",
+   "children": [
+    "loL",
+    "loV"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     4,
+     9,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "heroChip"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "loL": {
+   "type": "text",
+   "props": {
+    "text": "Low",
+    "style": {
+     "from": "chip",
+     "fontSize": 11,
+     "color": "onHeroSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "loV": {
+   "type": "text",
+   "props": {
+    "text": "${props.low}°",
+    "style": {
+     "from": "chip",
+     "fontSize": 12,
+     "color": "onHero"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "glyph": {
+   "type": "WeatherGlyph",
+   "props": {
+    "kind": "sun"
+   },
+   "layout": {
+    "width": 112,
+    "height": 112
+   },
+   "bind": {
+    "props.kind": "${props.kind}"
+   }
+  }
+ }
+}

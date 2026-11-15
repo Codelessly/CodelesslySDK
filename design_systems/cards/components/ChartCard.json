@@ -1,0 +1,643 @@
+{
+ "schema": 3,
+ "id": "ChartCard",
+ "roots": [
+  "card"
+ ],
+ "widget": {
+  "type": "ChartCard",
+  "doc": "A designed chart in its own tile: kind:\"line\" draws values as an area line (a trend), kind:\"bars\" one rounded bar per value with its number (a breakdown); the title, a headline value, a delta chip and labels (one per value) complete it; never use BarChart or LineChart in a card.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Revenue",
+    "doc": "What the chart shows.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The headline figure under the title, as text (empty: none)."
+   },
+   {
+    "key": "values",
+    "type": {
+     "kind": "list",
+     "flutter": "List<double>",
+     "item": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": [
+     42,
+     48,
+     45,
+     56,
+     61,
+     58,
+     72
+    ],
+    "doc": "The numbers, in order.",
+    "required": true
+   },
+   {
+    "key": "labels",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A label per value, under the axis (a line shows about six of them)."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "line",
+      "bars"
+     ]
+    },
+    "default": "line",
+    "doc": "line (an area line, for a trend over time) or bars (one rounded bar per value, the largest lit)."
+   },
+   {
+    "key": "delta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A change chip at the right (+12%; red when it starts with -)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Line",
+   "size": [
+    360,
+    220
+   ],
+   "props": {
+    "value": "$78.9k",
+    "delta": "+8.5%",
+    "labels": [
+     "1",
+     "5",
+     "10",
+     "15",
+     "20",
+     "25",
+     "30"
+    ]
+   }
+  },
+  {
+   "name": "Bars",
+   "size": [
+    360,
+    220
+   ],
+   "props": {
+    "kind": "bars",
+    "title": "Sign-ups by channel",
+    "values": [
+     420,
+     310,
+     220,
+     160,
+     90
+    ],
+    "labels": [
+     "Organic",
+     "Paid",
+     "Referral",
+     "Social",
+     "Email"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "card": {
+   "type": "column",
+   "children": [
+    "head",
+    "plot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "heads",
+    "delta"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "heads": {
+   "type": "column",
+   "children": [
+    "title",
+    "value"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "value": {
+   "type": "text",
+   "props": {
+    "text": "${props.value}",
+    "style": "number"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.value != ''}"
+   }
+  },
+  "delta": {
+   "type": "row",
+   "children": [
+    "deltaText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     4,
+     8,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goodTint"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= props.delta != ''}",
+    "decoration.fills[0].color": "${= startsWith(props.delta, '-') ? theme.colors.badTint : theme.colors.goodTint}"
+   }
+  },
+  "deltaText": {
+   "type": "text",
+   "props": {
+    "text": "${props.delta}",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(props.delta, '-') ? theme.colors.badDeep : theme.colors.goodDeep}"
+   }
+  },
+  "plot": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 142
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "group",
+      "when": "${= props.kind == 'line'}",
+      "ops": [
+       {
+        "op": "repeat",
+        "count": "${= max(0, max(1, length(props.values)) - 1)}",
+        "ops": [
+         {
+          "op": "path",
+          "commands": [
+           {
+            "moveTo": [
+             "${= (max(1, length(props.values)) > 1 ? (index) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2)}",
+             118
+            ]
+           },
+           {
+            "lineTo": [
+             "${= (max(1, length(props.values)) > 1 ? (index) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2)}",
+             "${= (118 - (at(props.values, index) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}"
+            ]
+           },
+           {
+            "cubicTo": [
+             "${= (max(1, length(props.values)) > 1 ? (index) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2) + ((size.width - 8) / max(1, max(1, length(props.values)) - 1) / 2)}",
+             "${= (118 - (at(props.values, index) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}",
+             "${= (max(1, length(props.values)) > 1 ? (index + 1) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2) - ((size.width - 8) / max(1, max(1, length(props.values)) - 1) / 2)}",
+             "${= (118 - (at(props.values, index + 1) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}",
+             "${= (max(1, length(props.values)) > 1 ? (index + 1) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2)}",
+             "${= (118 - (at(props.values, index + 1) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}"
+            ]
+           },
+           {
+            "lineTo": [
+             "${= (max(1, length(props.values)) > 1 ? (index + 1) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2) + 0.6}",
+             "${= (118 - (at(props.values, index + 1) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}"
+            ]
+           },
+           {
+            "lineTo": [
+             "${= (max(1, length(props.values)) > 1 ? (index + 1) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2) + 0.6}",
+             118
+            ]
+           },
+           {
+            "close": true
+           }
+          ],
+          "paint": "${theme.colors.accentLine}"
+         }
+        ]
+       },
+       {
+        "op": "rect",
+        "rect": [
+         0,
+         0,
+         "${size.width}",
+         118
+        ],
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"
+       },
+       {
+        "op": "repeat",
+        "count": "${= max(0, max(1, length(props.values)) - 1)}",
+        "ops": [
+         {
+          "op": "path",
+          "commands": [
+           {
+            "moveTo": [
+             "${= (max(1, length(props.values)) > 1 ? (index) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2)}",
+             "${= (118 - (at(props.values, index) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}"
+            ]
+           },
+           {
+            "cubicTo": [
+             "${= (max(1, length(props.values)) > 1 ? (index) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2) + ((size.width - 8) / max(1, max(1, length(props.values)) - 1) / 2)}",
+             "${= (118 - (at(props.values, index) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}",
+             "${= (max(1, length(props.values)) > 1 ? (index + 1) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2) - ((size.width - 8) / max(1, max(1, length(props.values)) - 1) / 2)}",
+             "${= (118 - (at(props.values, index + 1) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}",
+             "${= (max(1, length(props.values)) > 1 ? (index + 1) * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2)}",
+             "${= (118 - (at(props.values, index + 1) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}"
+            ]
+           }
+          ],
+          "paint": {
+           "color": "${theme.colors.accent}",
+           "style": "stroke",
+           "strokeWidth": 2.6,
+           "strokeCap": "round",
+           "strokeJoin": "round"
+          }
+         }
+        ]
+       },
+       {
+        "op": "repeat",
+        "each": "${props.values}",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           "${= (max(1, length(props.values)) > 1 ? index * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2)}",
+           "${= (118 - (item - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}"
+          ],
+          "radius": 9,
+          "when": "${= index == max(1, length(props.values)) - 1}",
+          "paint": "${theme.colors.accentGlow}"
+         },
+         {
+          "op": "circle",
+          "c": [
+           "${= (max(1, length(props.values)) > 1 ? index * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2)}",
+           "${= (118 - (item - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) / max(0.0001, max(1, max(props.values) * 1.12) - (props.kind == 'line' ? min(props.values) * 0.82 : 0)) * 118)}"
+          ],
+          "radius": 4.5,
+          "when": "${= index == max(1, length(props.values)) - 1}",
+          "paint": [
+           "${theme.colors.card}",
+           {
+            "color": "${theme.colors.accent}",
+            "style": "stroke",
+            "strokeWidth": 2.6
+           }
+          ]
+         },
+         {
+          "op": "paragraph",
+          "text": "${= index < length(props.labels) ? at(props.labels, index) : ''}",
+          "offset": [
+           "${= (max(1, length(props.values)) > 1 ? index * (size.width - 8) / (max(1, length(props.values)) - 1) + 4 : size.width / 2)}",
+           126
+          ],
+          "anchor": "topCenter",
+          "style": {
+           "fontSize": 10.5,
+           "fontWeight": 600,
+           "fontFamily": "Inter"
+          },
+          "paint": "${theme.colors.inkFaint}",
+          "when": "${= (max(1, length(props.values)) <= 7 || (index % ceil(max(1, length(props.values)) / 6) == 0 && max(1, length(props.values)) - 1 - index >= ceil(max(1, length(props.values)) / 6) * 0.6)) && index > 0 && index < max(1, length(props.values)) - 1}"
+         },
+         {
+          "op": "paragraph",
+          "text": "${= index < length(props.labels) ? at(props.labels, index) : ''}",
+          "offset": [
+           4,
+           126
+          ],
+          "anchor": "topLeft",
+          "style": {
+           "fontSize": 10.5,
+           "fontWeight": 600,
+           "fontFamily": "Inter"
+          },
+          "paint": "${theme.colors.inkFaint}",
+          "when": "${= index == 0}"
+         },
+         {
+          "op": "paragraph",
+          "text": "${= index < length(props.labels) ? at(props.labels, index) : ''}",
+          "offset": [
+           "${= size.width - 4}",
+           126
+          ],
+          "anchor": "topRight",
+          "style": {
+           "fontSize": 10.5,
+           "fontWeight": 600,
+           "fontFamily": "Inter"
+          },
+          "paint": "${theme.colors.inkFaint}",
+          "when": "${= index == max(1, length(props.values)) - 1 && max(1, length(props.values)) > 1}"
+         }
+        ]
+       }
+      ]
+     },
+     {
+      "op": "line",
+      "p1": [
+       0,
+       0.0
+      ],
+      "p2": [
+       "${size.width}",
+       0.0
+      ],
+      "paint": {
+       "color": "${theme.colors.line}",
+       "style": "stroke",
+       "strokeWidth": 1,
+       "dashPattern": [
+        3,
+        4
+       ]
+      }
+     },
+     {
+      "op": "line",
+      "p1": [
+       0,
+       39.33333333333333
+      ],
+      "p2": [
+       "${size.width}",
+       39.33333333333333
+      ],
+      "paint": {
+       "color": "${theme.colors.line}",
+       "style": "stroke",
+       "strokeWidth": 1,
+       "dashPattern": [
+        3,
+        4
+       ]
+      }
+     },
+     {
+      "op": "line",
+      "p1": [
+       0,
+       78.66666666666666
+      ],
+      "p2": [
+       "${size.width}",
+       78.66666666666666
+      ],
+      "paint": {
+       "color": "${theme.colors.line}",
+       "style": "stroke",
+       "strokeWidth": 1,
+       "dashPattern": [
+        3,
+        4
+       ]
+      }
+     },
+     {
+      "op": "line",
+      "p1": [
+       0,
+       118
+      ],
+      "p2": [
+       "${size.width}",
+       118
+      ],
+      "paint": {
+       "color": "${theme.colors.lineStrong}",
+       "style": "stroke",
+       "strokeWidth": 1
+      }
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind != 'line'}",
+      "ops": [
+       {
+        "op": "repeat",
+        "each": "${props.values}",
+        "ops": [
+         {
+          "op": "rrect",
+          "rect": [
+           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10))}",
+           "${= 118 - max(6, item / max(1, max(props.values) * 1.12) * 118)}",
+           "${= ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))}",
+           "${= max(6, item / max(1, max(props.values) * 1.12) * 118)}"
+          ],
+          "radius": "${= min(8, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2)}",
+          "when": "${= !(item == max(props.values))}",
+          "paint": "${theme.colors.accentLine}"
+         },
+         {
+          "op": "rrect",
+          "rect": [
+           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10))}",
+           "${= 118 - max(6, item / max(1, max(props.values) * 1.12) * 118)}",
+           "${= ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values)))}",
+           "${= max(6, item / max(1, max(props.values) * 1.12) * 118)}"
+          ],
+          "radius": "${= min(8, ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2)}",
+          "when": "${= (item == max(props.values))}",
+          "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': theme.colors.accentBright}, {'position': 1, 'color': theme.colors.accent}]}}}"
+         },
+         {
+          "op": "paragraph",
+          "text": "${= thousands(item)}",
+          "offset": [
+           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10)) + ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2}",
+           "${= 118 - max(6, item / max(1, max(props.values) * 1.12) * 118) - 6}"
+          ],
+          "anchor": "bottomCenter",
+          "style": {
+           "fontSize": 10.5,
+           "fontWeight": 700,
+           "fontFamily": "Inter"
+          },
+          "paint": "${= (item == max(props.values)) ? theme.colors.accent : theme.colors.inkSoft}"
+         },
+         {
+          "op": "paragraph",
+          "text": "${= index < length(props.labels) ? at(props.labels, index) : ''}",
+          "offset": [
+           "${= (index * (((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) + 10)) + ((size.width - 10 * (max(1, length(props.values)) - 1)) / max(1, length(props.values))) / 2}",
+           126
+          ],
+          "anchor": "topCenter",
+          "style": {
+           "fontSize": 10.5,
+           "fontWeight": 600,
+           "fontFamily": "Inter"
+          },
+          "paint": "${theme.colors.inkFaint}"
+         }
+        ]
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

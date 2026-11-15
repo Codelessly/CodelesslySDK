@@ -1,0 +1,645 @@
+{
+ "schema": 3,
+ "id": "TableHeader",
+ "roots": [
+  "head"
+ ],
+ "widget": {
+  "type": "TableHeader",
+  "doc": "The header of a sortable table: columns are the titles, keys the fields they sort by; tapping a title sets your sort variable to its key and flips desc on a second tap, so write state desc=false, TableHeader =sort desc:desc columns:[...] keys:[...] and show sortBy or sortByDesc(rows,sort). selectable:true adds a tick-all box that fires onToggleAll.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable: the key of the column sorted by (empty: none)."
+   },
+   {
+    "key": "desc",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "boolean",
+      "flutter": "bool"
+     }
+    },
+    "default": "",
+    "doc": "The name of your boolean variable: true when the sort is high to low. Declare it (state desc=false) and write desc:desc."
+   },
+   {
+    "key": "columns",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Plan",
+     "Subs",
+     "Revenue"
+    ],
+    "doc": "The column titles (up to five).",
+    "required": true
+   },
+   {
+    "key": "keys",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The field each column sorts by, e.g. [\"plan\",\"subs\",\"revenue\"] (default: the title in lower case)."
+   },
+   {
+    "key": "widths",
+    "type": {
+     "kind": "list",
+     "flutter": "List<double>",
+     "item": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": [],
+    "doc": "Relative column widths, e.g. [3,2,2] (default: the first wider); give TableRow the same."
+   },
+   {
+    "key": "selectable",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True shows a tick-all box before the titles."
+   },
+   {
+    "key": "checked",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Whether the tick-all box is ticked."
+   }
+  ],
+  "events": [
+   {
+    "key": "onToggleAll",
+    "doc": "The tick-all box was tapped; the value is the new state."
+   },
+   {
+    "key": "onSort",
+    "doc": "A title was tapped; the value is its key."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Header",
+   "size": [
+    360,
+    36
+   ],
+   "props": {
+    "value": "revenue",
+    "desc": true
+   }
+  }
+ ],
+ "nodes": {
+  "head": {
+   "type": "row",
+   "children": [
+    "tickBox",
+    "h0",
+    "h1",
+    "h2",
+    "h3",
+    "h4"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36,
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 10
+   }
+  },
+  "tickBox": {
+   "type": "row",
+   "children": [
+    "tick"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 20,
+    "height": 36
+   },
+   "bind": {
+    "visible": "${props.selectable}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onToggleAll",
+       "value": "${= !props.checked}"
+      }
+     ]
+    }
+   ]
+  },
+  "tick": {
+   "type": "row",
+   "children": [
+    "tickI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 6
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.checked ? theme.colors.accent : theme.colors.card}",
+    "decoration.strokes[0].color": "${= props.checked ? theme.colors.accent : theme.colors.lineStrong}"
+   }
+  },
+  "tickI": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 14,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "visible": "${= props.checked}"
+   }
+  },
+  "h0": {
+   "type": "row",
+   "children": [
+    "ht0"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36,
+    "flex": 2
+   },
+   "bind": {
+    "visible": "${= length(props.columns) > 0}",
+    "layout.flex": "${= length(props.widths) > 0 ? at(props.widths, 0) : 3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= (props.value == (length(props.keys) > 0 ? at(props.keys, 0) : lower(at(props.columns, 0))))}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "op": "toggle"
+        }
+       ],
+       "else": [
+        {
+         "type": "setVariable",
+         "variable": "props.value",
+         "value": "${= (length(props.keys) > 0 ? at(props.keys, 0) : lower(at(props.columns, 0)))}"
+        },
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "value": "${= false}"
+        }
+       ]
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSort",
+       "value": "${= (length(props.keys) > 0 ? at(props.keys, 0) : lower(at(props.columns, 0)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "ht0": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.columns) > 0 ? upper(at(props.columns, 0)) + ((props.value == (length(props.keys) > 0 ? at(props.keys, 0) : lower(at(props.columns, 0)))) ? (props.desc ? ' ↓' : ' ↑') : '') : ''}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.3
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.keys) > 0 ? at(props.keys, 0) : lower(at(props.columns, 0)))) ? theme.colors.accent : theme.colors.inkFaint}",
+    "props.textAlign": "${= (0 == length(props.columns) - 1 && 0 > 0) ? 'right' : 'left'}"
+   }
+  },
+  "h1": {
+   "type": "row",
+   "children": [
+    "ht1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36,
+    "flex": 2
+   },
+   "bind": {
+    "visible": "${= length(props.columns) > 1}",
+    "layout.flex": "${= length(props.widths) > 1 ? at(props.widths, 1) : 2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= (props.value == (length(props.keys) > 1 ? at(props.keys, 1) : lower(at(props.columns, 1))))}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "op": "toggle"
+        }
+       ],
+       "else": [
+        {
+         "type": "setVariable",
+         "variable": "props.value",
+         "value": "${= (length(props.keys) > 1 ? at(props.keys, 1) : lower(at(props.columns, 1)))}"
+        },
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "value": "${= false}"
+        }
+       ]
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSort",
+       "value": "${= (length(props.keys) > 1 ? at(props.keys, 1) : lower(at(props.columns, 1)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "ht1": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.columns) > 1 ? upper(at(props.columns, 1)) + ((props.value == (length(props.keys) > 1 ? at(props.keys, 1) : lower(at(props.columns, 1)))) ? (props.desc ? ' ↓' : ' ↑') : '') : ''}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.3
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.keys) > 1 ? at(props.keys, 1) : lower(at(props.columns, 1)))) ? theme.colors.accent : theme.colors.inkFaint}",
+    "props.textAlign": "${= (1 == length(props.columns) - 1 && 1 > 0) ? 'right' : 'left'}"
+   }
+  },
+  "h2": {
+   "type": "row",
+   "children": [
+    "ht2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36,
+    "flex": 2
+   },
+   "bind": {
+    "visible": "${= length(props.columns) > 2}",
+    "layout.flex": "${= length(props.widths) > 2 ? at(props.widths, 2) : 2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= (props.value == (length(props.keys) > 2 ? at(props.keys, 2) : lower(at(props.columns, 2))))}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "op": "toggle"
+        }
+       ],
+       "else": [
+        {
+         "type": "setVariable",
+         "variable": "props.value",
+         "value": "${= (length(props.keys) > 2 ? at(props.keys, 2) : lower(at(props.columns, 2)))}"
+        },
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "value": "${= false}"
+        }
+       ]
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSort",
+       "value": "${= (length(props.keys) > 2 ? at(props.keys, 2) : lower(at(props.columns, 2)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "ht2": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.columns) > 2 ? upper(at(props.columns, 2)) + ((props.value == (length(props.keys) > 2 ? at(props.keys, 2) : lower(at(props.columns, 2)))) ? (props.desc ? ' ↓' : ' ↑') : '') : ''}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.3
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.keys) > 2 ? at(props.keys, 2) : lower(at(props.columns, 2)))) ? theme.colors.accent : theme.colors.inkFaint}",
+    "props.textAlign": "${= (2 == length(props.columns) - 1 && 2 > 0) ? 'right' : 'left'}"
+   }
+  },
+  "h3": {
+   "type": "row",
+   "children": [
+    "ht3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36,
+    "flex": 2
+   },
+   "bind": {
+    "visible": "${= length(props.columns) > 3}",
+    "layout.flex": "${= length(props.widths) > 3 ? at(props.widths, 3) : 2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= (props.value == (length(props.keys) > 3 ? at(props.keys, 3) : lower(at(props.columns, 3))))}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "op": "toggle"
+        }
+       ],
+       "else": [
+        {
+         "type": "setVariable",
+         "variable": "props.value",
+         "value": "${= (length(props.keys) > 3 ? at(props.keys, 3) : lower(at(props.columns, 3)))}"
+        },
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "value": "${= false}"
+        }
+       ]
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSort",
+       "value": "${= (length(props.keys) > 3 ? at(props.keys, 3) : lower(at(props.columns, 3)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "ht3": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.columns) > 3 ? upper(at(props.columns, 3)) + ((props.value == (length(props.keys) > 3 ? at(props.keys, 3) : lower(at(props.columns, 3)))) ? (props.desc ? ' ↓' : ' ↑') : '') : ''}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.3
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.keys) > 3 ? at(props.keys, 3) : lower(at(props.columns, 3)))) ? theme.colors.accent : theme.colors.inkFaint}",
+    "props.textAlign": "${= (3 == length(props.columns) - 1 && 3 > 0) ? 'right' : 'left'}"
+   }
+  },
+  "h4": {
+   "type": "row",
+   "children": [
+    "ht4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36,
+    "flex": 2
+   },
+   "bind": {
+    "visible": "${= length(props.columns) > 4}",
+    "layout.flex": "${= length(props.widths) > 4 ? at(props.widths, 4) : 2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= (props.value == (length(props.keys) > 4 ? at(props.keys, 4) : lower(at(props.columns, 4))))}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "op": "toggle"
+        }
+       ],
+       "else": [
+        {
+         "type": "setVariable",
+         "variable": "props.value",
+         "value": "${= (length(props.keys) > 4 ? at(props.keys, 4) : lower(at(props.columns, 4)))}"
+        },
+        {
+         "type": "setVariable",
+         "variable": "props.desc",
+         "value": "${= false}"
+        }
+       ]
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSort",
+       "value": "${= (length(props.keys) > 4 ? at(props.keys, 4) : lower(at(props.columns, 4)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "ht4": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.columns) > 4 ? upper(at(props.columns, 4)) + ((props.value == (length(props.keys) > 4 ? at(props.keys, 4) : lower(at(props.columns, 4)))) ? (props.desc ? ' ↓' : ' ↑') : '') : ''}",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5,
+     "letterSpacing": 0.3
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.keys) > 4 ? at(props.keys, 4) : lower(at(props.columns, 4)))) ? theme.colors.accent : theme.colors.inkFaint}",
+    "props.textAlign": "${= (4 == length(props.columns) - 1 && 4 > 0) ? 'right' : 'left'}"
+   }
+  }
+ }
+}

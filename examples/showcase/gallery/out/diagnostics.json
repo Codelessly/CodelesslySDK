@@ -1,0 +1,95 @@
+{
+  "errors": 8,
+  "warnings": 3,
+  "images": [],
+  "diagnostics": [
+    {
+      "code": "out_of_range",
+      "severity": "error",
+      "path": "/nodes/p0/props/spacing",
+      "message": "-4 is below the minimum 0.0; it reads as 0.0.",
+      "nodeId": "p0",
+      "file": "../../../../design_systems/cards/components/MapPanel.json"
+    },
+    {
+      "code": "out_of_range",
+      "severity": "error",
+      "path": "/nodes/p1/props/spacing",
+      "message": "-4 is below the minimum 0.0; it reads as 0.0.",
+      "nodeId": "p1",
+      "file": "../../../../design_systems/cards/components/MapPanel.json"
+    },
+    {
+      "code": "out_of_range",
+      "severity": "error",
+      "path": "/nodes/p2/props/spacing",
+      "message": "-4 is below the minimum 0.0; it reads as 0.0.",
+      "nodeId": "p2",
+      "file": "../../../../design_systems/cards/components/MapPanel.json"
+    },
+    {
+      "code": "out_of_range",
+      "severity": "error",
+      "path": "/nodes/p3/props/spacing",
+      "message": "-4 is below the minimum 0.0; it reads as 0.0.",
+      "nodeId": "p3",
+      "file": "../../../../design_systems/cards/components/MapPanel.json"
+    },
+    {
+      "code": "out_of_range",
+      "severity": "error",
+      "path": "/nodes/p4/props/spacing",
+      "message": "-4 is below the minimum 0.0; it reads as 0.0.",
+      "nodeId": "p4",
+      "file": "../../../../design_systems/cards/components/MapPanel.json"
+    },
+    {
+      "code": "out_of_range",
+      "severity": "error",
+      "path": "/nodes/p5/props/spacing",
+      "message": "-4 is below the minimum 0.0; it reads as 0.0.",
+      "nodeId": "p5",
+      "file": "../../../../design_systems/cards/components/MapPanel.json"
+    },
+    {
+      "code": "out_of_range",
+      "severity": "error",
+      "path": "/nodes/p6/props/spacing",
+      "message": "-4 is below the minimum 0.0; it reads as 0.0.",
+      "nodeId": "p6",
+      "file": "../../../../design_systems/cards/components/MapPanel.json"
+    },
+    {
+      "code": "out_of_range",
+      "severity": "error",
+      "path": "/nodes/p7/props/spacing",
+      "message": "-4 is below the minimum 0.0; it reads as 0.0.",
+      "nodeId": "p7",
+      "file": "../../../../design_systems/cards/components/MapPanel.json"
+    },
+    {
+      "code": "layout_clamped",
+      "severity": "warning",
+      "path": "/nodes/glow/layout/y",
+      "message": "Stack \"card\" hugs its children on this axis, so it grows to hold them: a negative offset is clamped to 0. Give the stack a fixed or fill size to let this child overhang its edge (as Flutter's Positioned with a negative offset), and clip with \"decoration\": {\"clip\": \"hardEdge\"}.",
+      "nodeId": "glow",
+      "file": "../../../../design_systems/cards/components/Recommendation.json"
+    },
+    {
+      "code": "fit_not_allowed",
+      "severity": "warning",
+      "path": "/nodes/dot/layout/height",
+      "message": "fixed is not honored here: Items in a list always fill across it.",
+      "nodeId": "dot",
+      "file": "../../../../design_systems/cards/components/Carousel.json"
+    },
+    {
+      "code": "layout_clamped",
+      "severity": "warning",
+      "path": "/nodes/star/layout/margin",
+      "message": "A negative margin does not overlap neighbors (Flutter has no negative margins): it takes room from the node's own box. To overlap a neighbor, move what it paints: \"motion\": {\"translateY\": -36} (Flutter's Transform.translate; a media rule may patch it), or put both in a stack and give this one a negative x/y offset; to bleed past a parent's padding, see the guide's \"Overlapping a neighbor\" and \"Bleeding past the gutter\" (section 3).",
+      "nodeId": "star",
+      "file": "../../../../design_systems/cards/components/PlaceRow.json"
+    }
+  ]
+}

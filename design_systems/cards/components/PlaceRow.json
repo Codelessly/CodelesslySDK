@@ -1,0 +1,675 @@
+{
+ "schema": 3,
+ "id": "PlaceRow",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "PlaceRow",
+  "doc": "A numbered place in a list beside a MapPanel: the name, a detail, index (its pin number), rating, distance and hours; selected:=pick==1 highlights it and reveals the three facts, and a tap fires onPressed (-> pick=1).",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Bean There",
+    "doc": "The place's name.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet second line (what it is, the street)."
+   },
+   {
+    "key": "index",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 1,
+    "doc": "Its number, the same as its pin on the MapPanel.",
+    "required": true
+   },
+   {
+    "key": "rating",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The rating, as text (4.7)."
+   },
+   {
+    "key": "distance",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "How far, as text (0.2 mi)."
+   },
+   {
+    "key": "hours",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Opening hours, as text (7:00 to 18:00)."
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True highlights it and shows rating, distance and hours."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The place was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Selected",
+   "size": [
+    360,
+    120
+   ],
+   "props": {
+    "detail": "Specialty coffee",
+    "rating": "4.7",
+    "distance": "0.2 mi",
+    "hours": "7:00 to 18:00",
+    "selected": true
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": [
+    "card"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ]
+   }
+  },
+  "card": {
+   "type": "column",
+   "children": [
+    "top",
+    "facts"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     11,
+     14,
+     11
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 14
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.strokes[0].color": "${= props.selected ? theme.colors.accent : theme.colors.line}",
+    "decoration.fills[0].color": "${= props.selected ? theme.colors.accentTint : theme.colors.card}"
+   },
+   "states": {
+    "pressed": {
+     "card": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "top": {
+   "type": "row",
+   "children": [
+    "num",
+    "texts",
+    "rate"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "rate": {
+   "type": "row",
+   "children": [
+    "star",
+    "score"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.rating != ''}"
+   }
+  },
+  "num": {
+   "type": "row",
+   "children": [
+    "numText"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "mapPin"
+     }
+    ],
+    "radius": 14
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.selected ? theme.colors.accent : theme.colors.mapPin}"
+   }
+  },
+  "numText": {
+   "type": "text",
+   "props": {
+    "text": "${props.index}",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.selected ? theme.colors.onAccent : theme.colors.onMapPin}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "name",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${props.name}",
+    "style": "rowTitle",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "star": {
+   "type": "icon",
+   "props": {
+    "icon": "star_rounded",
+    "size": 16,
+    "color": "gold"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= props.rating != ''}"
+   }
+  },
+  "score": {
+   "type": "text",
+   "props": {
+    "text": "${props.rating}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.rating != ''}"
+   }
+  },
+  "facts": {
+   "type": "row",
+   "children": [
+    "fRating",
+    "fDistance",
+    "fHours"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 10
+   },
+   "bind": {
+    "visible": "${= props.selected}"
+   }
+  },
+  "fRating": {
+   "type": "column",
+   "children": [
+    "fRatingL",
+    "fRatingV"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fRatingL": {
+   "type": "row",
+   "children": [
+    "fRatingI",
+    "fRatingT"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fRatingI": {
+   "type": "icon",
+   "props": {
+    "icon": "star_outline_rounded",
+    "size": 13,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  },
+  "fRatingT": {
+   "type": "text",
+   "props": {
+    "text": "RATING",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fRatingV": {
+   "type": "text",
+   "props": {
+    "text": "${props.rating}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600,
+     "fontSize": 13
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fDistance": {
+   "type": "column",
+   "children": [
+    "fDistanceL",
+    "fDistanceV"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fDistanceL": {
+   "type": "row",
+   "children": [
+    "fDistanceI",
+    "fDistanceT"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fDistanceI": {
+   "type": "icon",
+   "props": {
+    "icon": "near_me_outlined",
+    "size": 13,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  },
+  "fDistanceT": {
+   "type": "text",
+   "props": {
+    "text": "DISTANCE",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fDistanceV": {
+   "type": "text",
+   "props": {
+    "text": "${props.distance}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600,
+     "fontSize": 13
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fHours": {
+   "type": "column",
+   "children": [
+    "fHoursL",
+    "fHoursV"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 2
+   }
+  },
+  "fHoursL": {
+   "type": "row",
+   "children": [
+    "fHoursI",
+    "fHoursT"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fHoursI": {
+   "type": "icon",
+   "props": {
+    "icon": "schedule_rounded",
+    "size": 13,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 13,
+    "height": 13
+   }
+  },
+  "fHoursT": {
+   "type": "text",
+   "props": {
+    "text": "HOURS",
+    "style": {
+     "from": "eyebrow",
+     "fontSize": 9.5
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "fHoursV": {
+   "type": "text",
+   "props": {
+    "text": "${props.hours}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600,
+     "fontSize": 13
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}
