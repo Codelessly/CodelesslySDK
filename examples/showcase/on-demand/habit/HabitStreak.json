@@ -1,0 +1,46 @@
+{
+ "schema": 3,
+ "id": "HabitStreak",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "HabitStreak",
+  "doc": "A habit's streak and its week: HabitStreak \"Meditation\" streak:=streak best:21 days:=days (seven of done, missed, today, ahead; labels default to a Monday-first week) fires onCheckIn when today's mark is tapped (-> days=setAt(days,indexOf(days,\"today\"),\"done\"); streak=streak+1).",
+  "props": [
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Meditation", "doc": "The habit's name (empty: none)."},
+   {"key": "streak", "type": {"kind": "number", "flutter": "double"}, "default": 0, "doc": "The current streak in days, the leading figure.", "required": true},
+   {"key": "best", "type": {"kind": "number", "flutter": "double"}, "default": 0, "doc": "The longest streak so far, in the quiet foot line."},
+   {"key": "days", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["done", "done", "missed", "done", "today", "ahead", "ahead"], "doc": "Seven states, one per day of the week: done, missed, today or ahead.", "required": true},
+   {"key": "labels", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["M", "T", "W", "T", "F", "S", "S"], "doc": "The weekday letters over the marks (a Monday-first week by default)."}
+  ],
+  "events": [
+   {"key": "onCheckIn", "doc": "Today's mark was tapped; the value is today's position in the week, from 0."}
+  ]
+ },
+ "previews": [
+  {"name": "Week", "size": [360, 250], "props": {"title": "Meditation", "streak": 12, "best": 21, "days": ["done", "done", "done", "missed", "today", "ahead", "ahead"]}}
+ ],
+ "nodes": {
+  "wrap": {"type": "column", "children": ["title", "hero", "weekTile", "foot"], "props": {"crossAxisAlignment": "stretch", "spacing": 14}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "title": {"type": "text", "props": {"text": "${props.title}", "style": "rowTitle", "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "bind": {"visible": "${= props.title != ''}"}},
+  "hero": {"type": "row", "children": ["flame", "figures"], "props": {"crossAxisAlignment": "center", "spacing": 14}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "flame": {"type": "row", "children": ["flameIcon"], "props": {"mainAxisAlignment": "center"}, "layout": {"width": 52, "height": 52}, "decoration": {"fills": [{"color": "warnTint"}], "strokes": [{"color": "warnLine"}], "strokeWidth": 1, "radius": 14}, "bind": {"decoration.radius": "${theme.radii.tile}", "decoration.fills[0].color": "${= props.streak > 0 ? theme.colors.warnTint : theme.colors.tile}", "decoration.strokes[0].color": "${= props.streak > 0 ? theme.colors.warnLine : theme.colors.line}"}},
+  "flameIcon": {"type": "icon", "props": {"icon": "local_fire_department_rounded", "size": 28, "color": "warn"}, "layout": {"width": 28, "height": 28}, "bind": {"props.color": "${= props.streak > 0 ? theme.colors.warn : theme.colors.inkFaint}"}},
+  "figures": {"type": "column", "children": ["eyebrow", "numRow"], "props": {"crossAxisAlignment": "start", "spacing": 2}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "eyebrow": {"type": "text", "props": {"text": "CURRENT STREAK", "style": "eyebrow"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "numRow": {"type": "row", "children": ["num", "unit"], "props": {"crossAxisAlignment": "end", "spacing": 6}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "num": {"type": "text", "props": {"text": "${props.streak}", "style": "numberHero", "maxLines": 1}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "unit": {"type": "text", "props": {"text": "${= props.streak == 1 ? 'day' : 'days'}", "style": {"from": "lead", "color": "inkSoft"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [0, 0, 0, 7]}},
+  "weekTile": {"type": "column", "children": ["week"], "props": {"crossAxisAlignment": "stretch"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [8, 12, 8, 12]}, "decoration": {"fills": [{"color": "tile"}], "radius": 18}, "bind": {"decoration.radius": "${theme.radii.panel}"}},
+  "week": {"type": "gridView", "children": ["cell"], "props": {"crossAxisCount": 7, "mainAxisExtent": 60, "crossAxisSpacing": 4, "mainAxisSpacing": 0}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "bind": {"data": "${= take(props.days, 7)}"}},
+  "cell": {"type": "column", "children": ["dayLabel", "mark", "markToday"], "props": {"crossAxisAlignment": "center", "spacing": 8}, "layout": {"width": {"fill": 0}, "height": {"fill": 0}}},
+  "dayLabel": {"type": "text", "props": {"text": "${= length(props.labels) > index ? at(props.labels, index) : ''}", "style": "eyebrow", "maxLines": 1}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}, "bind": {"props.style.color": "${= item == 'today' ? theme.colors.accent : theme.colors.inkFaint}"}},
+  "mark": {"type": "row", "children": ["markIcon"], "props": {"mainAxisAlignment": "center"}, "layout": {"width": 34, "height": 34}, "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1.5, "radius": 17}, "bind": {"visible": "${= item != 'today'}", "decoration.fills[0].color": "${= item == 'done' ? theme.colors.good : (item == 'missed' ? theme.colors.tileDeep : theme.colors.card)}", "decoration.strokes[0].color": "${= item == 'done' ? theme.colors.good : (item == 'missed' ? theme.colors.tileDeep : theme.colors.lineStrong)}"}},
+  "markIcon": {"type": "icon", "props": {"icon": "check_rounded", "size": 17, "color": "onAccent"}, "layout": {"width": 17, "height": 17}, "bind": {"visible": "${= item == 'done' || item == 'missed'}", "props.icon": "${= item == 'done' ? 'check_rounded' : 'close_rounded'}", "props.color": "${= item == 'done' ? theme.colors.onAccent : theme.colors.inkFaint}"}},
+  "markToday": {"type": "row", "children": ["todayIcon"], "props": {"mainAxisAlignment": "center"}, "layout": {"width": 34, "height": 34}, "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "accent"}], "strokeWidth": 2, "radius": 17}, "bind": {"visible": "${= item == 'today'}"}, "states": {"pressed": {"markToday": {"opacity": 0.75}}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onCheckIn", "value": "${index}"}]}]},
+  "todayIcon": {"type": "icon", "props": {"icon": "add_rounded", "size": 19, "color": "accent"}, "layout": {"width": 19, "height": 19}},
+  "foot": {"type": "row", "children": ["bestIcon", "best", "count"], "props": {"crossAxisAlignment": "center", "spacing": 6}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [2, 0, 2, 0]}},
+  "bestIcon": {"type": "icon", "props": {"icon": "emoji_events_rounded", "size": 15, "color": "inkFaint"}, "layout": {"width": 15, "height": 15}, "bind": {"props.color": "${= props.streak >= props.best && props.streak > 0 ? theme.colors.gold : theme.colors.inkFaint}"}},
+  "best": {"type": "text", "props": {"text": "${= props.streak >= props.best && props.streak > 0 ? 'Your longest streak yet' : 'Best streak ' + props.best + (props.best == 1 ? ' day' : ' days')}", "style": "meta", "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "count": {"type": "text", "props": {"text": "${= length(filter(props.days, d => d == 'done')) + ' of ' + length(props.days) + ' this week'}", "style": {"from": "meta", "color": "inkSoft"}, "maxLines": 1}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}}
+ }
+}

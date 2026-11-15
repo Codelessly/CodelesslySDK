@@ -37,7 +37,7 @@ def run(cmd):
 
 
 def ask(model, system, messages):
-    body = {'model': model, 'max_tokens': 16000, 'system': system, 'messages': messages}
+    body = {'model': model, 'max_tokens': 32000, 'system': system, 'messages': messages}
     req = urllib.request.Request('https://api.anthropic.com/v1/messages', data=json.dumps(body).encode(), headers={
         'content-type': 'application/json', 'x-api-key': os.environ['ANTHROPIC_API_KEY'], 'anthropic-version': '2023-06-01'})
     t0 = time.time()
@@ -203,6 +203,14 @@ def main():
         d = f'{out}/round{n}'
         os.makedirs(d, exist_ok=True)
         open(f'{d}/answer.txt', 'w').write(text)
+        # The designer may keep what it has: a further round is taken only when it would change something. (Six
+        # outside runs found a forced third round as often made a block worse as better.)
+        if n > 1 and text.strip().upper().startswith('SHIP') and '```' not in text:
+            summary['rounds'].append({'round': n, 'modelSeconds': seconds, 'kept': n - 1, 'input_tokens': usage.get('input_tokens'), 'output_tokens': usage.get('output_tokens')})
+            summary['final'] = n - 1
+            print(json.dumps(summary['rounds'][-1]))
+            break
+        summary['final'] = n
         t0 = time.time()
         problems = check(name, ds, manifest, d, fenced(text, 'json'), fenced(text, 'notation'))
         summary['rounds'].append({'round': n, 'modelSeconds': seconds, 'checkAndRenderSeconds': round(time.time() - t0, 1), 'problems': len(problems),
@@ -213,7 +221,7 @@ def main():
         back = [{'type': 'text', 'text': 'This is how it rendered: your block alone from its first preview (light, then dark), then the card as it first appears (light, then dark).'}]
         back += [image(f'{d}/{m}.png') for m in ('block-light', 'block-dark', 'light', 'dark') if os.path.exists(f'{d}/{m}.png')]
         back.append({'type': 'text', 'text': ('Problems reported:\n' + '\n'.join(problems) + '\n\n' if problems else 'No problems were reported.\n\n') +
-                     'Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the other blocks, and whether anything is broken or empty. Fix every problem, then answer again in the same format, block and card whole.'})
+                     'Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the other blocks, and whether anything is broken or empty. If nothing is reported and you would ship it as it is, answer with the one word SHIP and nothing else: a round that changes what was already right makes it worse. Otherwise fix every problem and answer again in the same format, block and card whole.'})
         messages += [{'role': 'assistant', 'content': text}, {'role': 'user', 'content': back}]
     summary['totalSeconds'] = round(time.time() - t_all, 1)
     json.dump(summary, open(f'{out}/summary.json', 'w'), indent=1)

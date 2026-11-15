@@ -1,0 +1,1 @@
+A habit streak: the habit's name, the current streak as the leading figure with a flame, the days of this week as marks (done, missed, today, still to come), and a quiet line with the best streak. Parameters: title, streak (number), best (number), days (a list of seven states: "done", "missed", "today", "ahead"), and an event when today is tapped to check in.
