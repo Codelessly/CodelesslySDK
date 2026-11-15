@@ -1,0 +1,19 @@
+$invoices = [{"customer":"Northwind Traders","amount":1200,"status":"Paid"},{"customer":"Blue Harbor Cafe","amount":340,"status":"Due"},{"customer":"Kestrel Labs","amount":2750,"status":"Overdue"},{"customer":"Oakline Dental","amount":480,"status":"Paid"},{"customer":"Parcel and Pine","amount":905,"status":"Due"},{"customer":"Redwood Studio","amount":1560,"status":"Overdue"},{"customer":"Summit Freight","amount":220,"status":"Paid"},{"customer":"Lark Bakery","amount":775,"status":"Due"}]
+$query = ""
+$status = "All"
+$sort = ""
+$dir = "asc"
+$matches = filter($invoices, contains(lower(customer), lower($query)) and ($status == "All" or status == $status))
+$shown = $sort == "amount" ? sort($matches, amount, $dir) : $matches
+$sum = sum($shown, amount)
+
+Card
+  Text.cardTitle "Invoices"
+  Input "Search customers" "Type a name" value:$query change:"$query = value"
+  ChoiceChips value:$status options:["All","Paid","Due","Overdue"] change:"$status = value"
+  TableHeader value:$sort desc:"$dir == 'desc'" columns:["Customer","Amount","Status"] keys:["customer","amount","status"] sortable:["amount"] change:"$dir = ($sort == value and $dir == 'asc') ? 'desc' : 'asc'; $sort = value"
+  for inv in $shown
+    TableRow cells:["{inv.customer}","{money(inv.amount)}"] badge:"{inv.status}"
+  Row between
+    Text.caption "{count($shown)} of {count($invoices)} invoices"
+    Text.strong "Total {money($sum)}"

@@ -1,0 +1,17 @@
+state items = [{"id":1,"name":"Espresso beans","price":24,"qty":1},{"id":2,"name":"Ceramic mug","price":18,"qty":1},{"id":3,"name":"Canvas tote","price":32,"qty":1}]
+let subtotal = sum(items, i => i.price * i.qty)
+let tax = subtotal * 0.08
+let total = subtotal + tax
+ChatCard "Your cart" "{count(items, i => i.qty > 0)} items" icon:shopping_cart
+  for item in items
+    if item.qty > 0
+      CartLine "{item.name}" "${item.price * item.qty}" price:item.price qty:item.qty
+        onChanged: item.qty = max(0, value)
+    else
+      Row center between
+        Text.muted "{item.name} removed"
+        Button.ghost "Undo"
+          onPressed: item.qty = 1
+  Divider
+  Details rows:[["Subtotal","${subtotal}"],["Tax (8%)","${tax}"]]
+  TotalBar "Total" "incl. 8% tax" amount:"${total}" cta:"Checkout"

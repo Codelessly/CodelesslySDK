@@ -1,0 +1,31 @@
+$lines = [{"name":"Espresso beans","price":24,"qty":1},{"name":"Ceramic mug","price":18,"qty":1},{"name":"Canvas tote","price":32,"qty":1}]
+$subtotal = sum($lines, price * qty)
+$tax = $subtotal * 0.08
+$total = $subtotal + $tax
+
+Card
+  Text.cardTitle "Your cart"
+  Column gap:12
+    for i, l in $lines
+      Row between if:"l.qty > 0"
+        Column
+          Text.rowTitle "{l.name}"
+          Text.caption "{money(l.price)} each"
+        Row gap:8
+          IconButton "remove" tap:"$lines[i].qty = max(0, $lines[i].qty - 1)"
+          Text.body "{l.qty}"
+          IconButton "add" tap:"$lines[i].qty = $lines[i].qty + 1"
+        Text.strong "{money(l.price * l.qty)}"
+      Row between if:"l.qty == 0"
+        Text.muted "{l.name} removed"
+        Button.ghost "Undo" tap:"$lines[i].qty = 1"
+    Divider
+    Row between
+      Text.bodySecondary "Subtotal"
+      Text "{money($subtotal)}"
+    Row between
+      Text.bodySecondary "Tax (8%)"
+      Text "{money($tax)}"
+    Row between
+      Text.strong "Total"
+      Text.numberSmall "{money($total)}"

@@ -1,0 +1,16 @@
+state standing = 0
+state seated = 0
+state vip = 0
+let count = standing + seated + vip
+let total = standing * 45 + seated * 70 + vip * 120
+let full = count >= 6
+ChatCard "Concert tickets" "{count} of 6 tickets" icon:confirmation_number
+  Counter "Standing" "$45" value:standing min:0 max:standing + (6 - count)
+    onChanged: standing = value
+  Counter "Seated" "$70" value:seated min:0 max:seated + (6 - count)
+    onChanged: seated = value
+  Counter "VIP" "$120" value:vip min:0 max:vip + (6 - count)
+    onChanged: vip = value
+  if full
+    Callout "Limit reached" "You can hold at most 6 tickets." tone:warning
+  TotalBar "{count} tickets" amount:"${total}" cta:"Checkout" enabled:count > 0

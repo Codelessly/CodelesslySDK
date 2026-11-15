@@ -1,0 +1,16 @@
+$tiers = [{"name":"Standing","price":45,"count":0},{"name":"Seated","price":70,"count":0},{"name":"VIP","price":120,"count":0}]
+$held = sum($tiers, count)
+$room = 6 - $held
+$total = sum($tiers, count * price)
+$full = $held >= 6
+
+Card
+  Text.cardTitle "Concert tickets"
+  Column gap:12
+    for i, t in $tiers
+      Counter "{t.name}" "{money(t.price)} each" value:t.count min:0 max:"t.count + $room" step:1 change:"$tiers[i].count = value"
+  Callout "Limit reached" "You can hold 6 tickets in total." tone:warning icon:info if:$full
+  Row between
+    Text.bodySecondary "{held} of 6 tickets"
+    Text.numberSmall "{money($total)}"
+  Button "Checkout" enabled:"$held > 0"

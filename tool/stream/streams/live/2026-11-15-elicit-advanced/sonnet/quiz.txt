@@ -1,0 +1,24 @@
+state questions = [{"q":"Capital of France?","options":["Paris","Lyon","Nice","Lille"],"answer":"Paris"},{"q":"Capital of Japan?","options":["Osaka","Kyoto","Tokyo","Nagoya"],"answer":"Tokyo"},{"q":"Capital of Brazil?","options":["Rio de Janeiro","Brasilia","Sao Paulo","Salvador"],"answer":"Brasilia"}]
+state index = 0
+state picked = null
+state score = 0
+let current = questions[index]
+let answered = picked != null
+let finished = index >= 3
+if finished
+  ChatCard "Quiz finished" icon:emoji_events
+    Text "You got {score} of 3" size:32 weight:700
+    ActionButton "Play again"
+      onPressed: index = 0; picked = null; score = 0
+else
+  ChatCard "World capitals" "Question {index + 1} of 3 · Score {score}" icon:public
+    Text.cardTitle "{current.q}"
+    OptionList value:picked options:current.options disabled:answered
+      onChanged: picked = value; if value == current.answer then score = score + 1
+    if answered
+      if picked == current.answer
+        Callout "Correct" tone:success icon:check
+      else
+        Callout "Not quite" "The answer is {current.answer}." tone:danger icon:close
+    ActionButton "{index == 2 ? "Finish" : "Next"}" enabled:answered
+      onPressed: index = index + 1; picked = null

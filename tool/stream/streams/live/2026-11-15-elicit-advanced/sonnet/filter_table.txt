@@ -1,0 +1,18 @@
+state invoices = [{"customer":"Acme Corp","amount":1200,"status":"Paid"},{"customer":"Globex","amount":850,"status":"Due"},{"customer":"Initech","amount":430,"status":"Overdue"},{"customer":"Umbrella","amount":2300,"status":"Paid"},{"customer":"Hooli","amount":640,"status":"Due"},{"customer":"Stark Industries","amount":5400,"status":"Paid"},{"customer":"Wayne Enterprises","amount":980,"status":"Overdue"},{"customer":"Soylent","amount":310,"status":"Due"}]
+state query = ""
+state status = "All"
+state sortAsc = null
+let matches = invoices.filter(i => contains(lower(i.customer), lower(query)) and (status == "All" or i.status == status))
+let rows = sortAsc == null ? matches : sortBy(matches, i => i.amount, sortAsc)
+let sum = sum(matches, i => i.amount)
+ChatCard "Invoices" "{count(matches)} match · ${sum}" icon:receipt_long
+  InputField "Search" "Customer" value:query icon:search
+    onChanged: query = value
+  ChoiceChips value:status options:["All","Paid","Due","Overdue"] columns:4
+    onChanged: status = value
+  TableHeader value:"amount" desc:sortAsc == false columns:["Customer","Amount","Status"] keys:["customer","amount","status"]
+    onPressed: sortAsc = sortAsc == true ? false : true
+  for i in rows
+    TableRow cells:["{i.customer}","${i.amount}"] badge:i.status
+  if count(matches) == 0
+    Text.muted "No invoices match."
