@@ -2135,6 +2135,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..itemSnapping = n.prop(ScrollProps.itemSnapping)
       ..axis = axis
       ..reverse = n.prop(ScrollProps.reverse)
+      ..edgeFade = n.prop(ScrollProps.edgeFade)
       ..clipBehavior = clip(n.prop(ScrollProps.clipBehavior));
     chain.add(viewport);
     final pad = n.layout.padding.flutter;
