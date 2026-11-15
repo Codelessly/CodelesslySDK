@@ -8,7 +8,6 @@
 import 'dart:async';
 
 import 'package:codelessly_api/core.dart';
-import 'package:codelessly_api/validate.dart' show Severity, ValidateOptions, validateDocument;
 
 import 'ui_session.dart';
 
@@ -53,13 +52,26 @@ final class BlockOutcome {
 /// // it again and apply the answer with applyNotation(answer, replace: true).
 /// ```
 final class OnDemandBlocks {
-  OnDemandBlocks(this.session, {required this.design, this.check, this.onAdded, this.maxTries = 2});
+  OnDemandBlocks(this.session, {required this.design, this.validate, this.check, this.onAdded, this.maxTries = 2});
 
   final UiSession session;
   final BlockDesigner design;
 
-  /// Checks past the built-in ones (a component of the name asked for, no
-  /// validation errors, no cycle).
+  /// The validator, when the host has one: the problems it finds in a
+  /// design, none to pass. The session's own code is the core only, so the
+  /// strict validator of `package:codelessly_api/validate.dart` is given
+  /// here, with the session's theme and components:
+  ///
+  /// ```dart
+  /// validate: (json) => [
+  ///   for (final d in validateDocument(json, options: ValidateOptions(theme: session.theme, components: session.designSystem!.components)))
+  ///     if (d.code.severity == Severity.error) '${d.code.name} at ${d.path}: ${d.message}',
+  /// ],
+  /// ```
+  final List<String> Function(Json definition)? validate;
+
+  /// Checks past those (the built-in ones: a component of the name asked
+  /// for, of node types the session has, calling no cycle).
   final BlockCheck? check;
 
   /// Called with each block added: where a host stores it.
@@ -85,6 +97,14 @@ final class OnDemandBlocks {
         if (_name.hasMatch(w.name) && seen.add(w.name) && ds.components[w.name] == null) _running[w.name] ??= _design(w),
     ]);
   }
+
+  /// What the view on screen shows wrong of the session's UI, as a host's
+  /// gate after a card was swapped in: content that overflows its row or
+  /// column (`content_overflows`), a block that rendered nothing, a value
+  /// that was not worked out. Empty when it is clean, and when no view shows
+  /// the session. A host that finds problems here undoes the swap
+  /// ([UiSession.undo]) and has the block designed again with them as notes.
+  List<String> shownProblems() => [for (final d in session.shownDiagnostics()) '${d.code} at ${d.path}: ${d.message}'];
 
   static final _name = RegExp(r'^[A-Z][A-Za-z0-9]*$');
 
@@ -147,11 +167,10 @@ final class OnDemandBlocks {
     if (type == null) return (null, ['Not a component: the document needs a "widget" that declares its type and parameters.']);
     if (type != wanted.name) return (null, ['The component is "$type"; it was asked for as "${wanted.name}".']);
     final problems = <String>[
-      for (final d in Catalog.run(
-        session.catalog,
-        () => validateDocument(json, options: ValidateOptions(theme: session.theme, components: session.designSystem!.components)),
-      ))
-        if (d.code.severity == Severity.error) '${d.code.name} at ${d.path}: ${d.message}',
+      // Every node of it is a type the session can draw.
+      for (final n in definition.nodes.values)
+        if (session.catalog.widget(n.type) == null && n.type != type) 'Node "${n.id}" is a "${n.type}", which the session has no type for.',
+      ...?validate?.call(json),
     ];
     final library = ComponentLibrary({...session.designSystem!.components.definitions, type: definition});
     for (final c in library.cycles) {
