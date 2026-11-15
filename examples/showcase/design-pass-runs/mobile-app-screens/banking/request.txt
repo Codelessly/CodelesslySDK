@@ -1,0 +1,1 @@
+A mobile banking home screen: the total balance large at the top with a hide toggle, a horizontal row of two account cards, four quick actions (Send, Request, Pay bill, Top up), a spending-this-month bar chart, a list of six recent transactions with merchant, category, date and amount, and a bottom navigation bar.

@@ -1,0 +1,21 @@
+Row gap:24 pad:16 center middle
+  Column center gap:12
+    Stack center w:180 h:210
+      Box w:180 h:200 {"props":{"shape":"hexagon","gradient":{"colors":["#FFFF9800","#FFF44336"],"begin":"topCenter","end":"bottomCenter"}}}
+      Column center w:180 h:210
+        Spacer h:45
+        Icon "star" size:72 color:#FFFFFFFF
+        Spacer grow
+        Box fill:#FFB71C1C radius:4 pad:[16,6,16,6]
+          Text.strong "Oct 12 2026" color:#FFFFFFFF center
+    Text.heading "Marathon Finisher - 42.2 km" center
+  Column gap:12
+    Stack center w:70 h:80
+      Box w:70 h:80 {"props":{"shape":"hexagon","fill":"#FFBDBDBD"}}
+      Icon "lock" size:28 color:#FF757575
+    Stack center w:70 h:80
+      Box w:70 h:80 {"props":{"shape":"hexagon","fill":"#FFBDBDBD"}}
+      Icon "lock" size:28 color:#FF757575
+    Stack center w:70 h:80
+      Box w:70 h:80 {"props":{"shape":"hexagon","fill":"#FFBDBDBD"}}
+      Icon "lock" size:28 color:#FF757575

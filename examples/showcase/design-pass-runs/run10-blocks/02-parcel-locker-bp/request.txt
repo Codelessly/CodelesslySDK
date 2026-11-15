@@ -1,0 +1,1 @@
+An inline chat card for a parcel locker delivery. Display locker B-14, a six digit access PIN, the expiration time, and a short instruction. Include an action to send directions and a separate action to mark the parcel collected.

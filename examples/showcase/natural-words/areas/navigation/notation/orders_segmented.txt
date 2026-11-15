@@ -1,0 +1,55 @@
+state tab="Active"
+Column gap:16 pad:16 scroll
+  Text.pageTitle "Orders"
+  SegmentedButton =tab items:["Active","Completed"]
+  if tab=="Active"
+    Column gap:12
+      Card gap:8
+        Row between
+          Text.heading3 "Order #1042"
+          Badge.info "Shipped"
+        Text.bodySecondary "Arriving Tuesday"
+        Divider
+        Row between
+          Text.caption "2 items"
+          Text.strong "$84.50"
+        Button.outline "Track order" -> toast "Tracking #1042"
+      Card gap:8
+        Row between
+          Text.heading3 "Order #1043"
+          Badge.warning "Processing"
+        Text.bodySecondary "We're preparing your order"
+        Divider
+        Row between
+          Text.caption "1 item"
+          Text.strong "$29.00"
+        Button.outline "View details" -> toast "Order #1043"
+  if tab=="Completed"
+    Column gap:12
+      Card gap:8
+        Row between
+          Text.heading3 "Order #1038"
+          Badge.success "Delivered"
+        Text.bodySecondary "Delivered Mar 12"
+        Divider
+        Row between
+          Text.caption "3 items"
+          Text.strong "$112.30"
+      Card gap:8
+        Row between
+          Text.heading3 "Order #1031"
+          Badge.success "Delivered"
+        Text.bodySecondary "Delivered Feb 27"
+        Divider
+        Row between
+          Text.caption "1 item"
+          Text.strong "$45.00"
+      Card gap:8
+        Row between
+          Text.heading3 "Order #1024"
+          Badge.success "Delivered"
+        Text.bodySecondary "Delivered Feb 9"
+        Divider
+        Row between
+          Text.caption "2 items"
+          Text.strong "$67.80"

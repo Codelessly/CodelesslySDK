@@ -1,0 +1,44 @@
+Screen "Vehicle Lookup" layout:vertical padding:24 max-width:480
+  Heading "Find parts for your vehicle" level:2
+  Text "Select your vehicle to see compatible parts." style:secondary
+  Form id:vehicle-lookup gap:16
+    Dropdown "Make" id:make selected:"Toyota" required:true
+      Option "Acura"
+      Option "Honda"
+      Option "Ford"
+      Option "Toyota" selected:true
+      Option "Subaru"
+      on-change: reset(model, year, trim); load model.options for selected make
+    Dropdown "Model" id:model selected:"Camry" required:true depends-on:make
+      Option "4Runner"
+      Option "Camry" selected:true
+      Option "Corolla"
+      Option "Highlander"
+      Option "RAV4"
+      Option "Tacoma"
+      note: lists only models for the selected make (Toyota)
+      on-change: reset(year, trim)
+    Dropdown "Year" id:year selected:"2022" required:true depends-on:model
+      Option "2024"
+      Option "2023"
+      Option "2022" selected:true
+      Option "2021"
+      Option "2020"
+      Option "2019"
+      on-change: reset(trim); load trim.options for make, model, year
+    Dropdown "Trim" id:trim selected:"SE" required:true depends-on:year
+      state: enabled
+      enabled-when:year.hasSelection
+      was:disabled
+      transition: enable fade 150ms ease-out
+      Option "LE"
+      Option "SE" selected:true
+      Option "XLE"
+      Option "XSE"
+      Option "TRD"
+      placeholder-when-disabled:"Select a year first"
+    Button "Find parts" id:find-parts style:primary full-width:true type:submit
+      state: enabled
+      enabled-when:all(make, model, year, trim).hasSelection
+      on-click: submit; loading-state spinner label:"Searching…"
+  Text "Toyota Camry · 2022 · SE" id:summary style:caption color:muted

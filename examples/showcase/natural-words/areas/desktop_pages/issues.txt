@@ -1,0 +1,4 @@
+blog_index: line 33:7: duration:, delay: and stagger: go with animate: on the same line (animate:fade duration:400).
+about_team: line 35:13: A Avatar has no "src". It takes: name, image, size.
+about_team: line 35:13: A Avatar needs name: write name:"…".
+contact_page: line 52:9: No node type "Embed". A node line takes the document's own type names (column, row, stack, text, icon, customPaint…): see the reference's nodes page.

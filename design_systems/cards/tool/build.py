@@ -125,7 +125,11 @@ def main():
             f.write('\n')
         own.append(f'components/{name}.json')
     replaced = sorted(base_names & {o.split('/')[1][:-5] for o in own})
-    manifest['components'] = own + [c for c in base if c not in own]
+    # Blocks stored after the build (designed on demand in a session and written into components/): kept, after
+    # the blocks made here.
+    made = set(own) | set(base)
+    kept = sorted(f'components/{f}' for f in os.listdir(f'{ROOT}/components') if f.endswith('.json') and f'components/{f}' not in made)
+    manifest['components'] = own + [c for c in base if c not in own] + kept
     manifest['design'] = 'DESIGN.md'
     manifest['patterns'] = 'PATTERNS.md'
     with open(f'{ROOT}/design_system.json', 'w') as f:

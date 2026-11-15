@@ -288,7 +288,11 @@ class CoreActions implements ActionRunner {
     final when = reaction.trigger.when.trim();
     if (when.isEmpty) return true;
     final result = event.containsKey('result') ? event['result'] : (event.containsKey('value') ? event['value'] : (event.isEmpty ? null : event));
-    final scope = ValuesScope({'result': result, if (event.containsKey('value')) 'value': event['value']}, context.scope);
+    final scope = ValuesScope({
+      'result': result,
+      if (event.containsKey('value')) 'value': event['value'],
+      if (event.containsKey('field')) 'field': event['field'],
+    }, context.scope);
     try {
       // `${path}` and `${= formula}` as written; a bare one is a formula.
       final value = when.contains(r'${')
@@ -356,6 +360,9 @@ class CoreActions implements ActionRunner {
         'result': result,
         if (event.containsKey('value')) 'value': event['value'],
         if (event.containsKey('drag')) 'drag': event['drag'],
+        // `field` too: a text field's text and cursor (`\${field.word}`,
+        // the word being typed, for a mention or macro popup).
+        if (event.containsKey('field')) 'field': event['field'],
       }, context.scope),
       cancellation ?? ActionCancellation(),
       node,

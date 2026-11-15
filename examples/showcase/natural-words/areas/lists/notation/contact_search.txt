@@ -1,0 +1,15 @@
+state query=""
+state contacts=[{"name":"Maya Patel","dept":"Design"},{"name":"Jonas Weber","dept":"Engineering"},{"name":"Aiko Tanaka","dept":"Marketing"},{"name":"Luis Ortega","dept":"Sales"},{"name":"Priya Nair","dept":"Engineering"},{"name":"Sam O'Connor","dept":"Support"}]
+Card gap:12
+  Text.title "Contacts"
+  Input "Search" "Search by name or department" =query
+  each c in contacts
+    Column visible:=contains(lower(c.name),lower(query))||contains(lower(c.dept),lower(query))
+      Row gap:12 center
+        Avatar "{c.name}" size:40
+        Column
+          Text.strong "{c.name}"
+          Text.muted "{c.dept}"
+      Divider
+  if count(contacts,c=>contains(lower(c.name),lower(query))||contains(lower(c.dept),lower(query)))==0
+    Text.muted "No contacts match “{query}”."

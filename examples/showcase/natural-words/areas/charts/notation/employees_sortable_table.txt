@@ -1,0 +1,18 @@
+state rows=[{"name":"Priya Shah","dept":"Engineering","start":"2021-03-14","salary":142000},{"name":"Tom Becker","dept":"Engineering","start":"2023-01-09","salary":131000},{"name":"Marcus Lee","dept":"Design","start":"2022-07-01","salary":118500},{"name":"Aisha Khan","dept":"Finance","start":"2020-05-18","salary":109750},{"name":"Elena Rossi","dept":"Sales","start":"2019-11-20","salary":96000}]
+state key="salary"
+state dir="desc"
+Card gap:8 maxw:720
+  Text.heading "Employees"
+  Row gap:8 center
+    Button.ghost "Name {key==\"name\"?(dir==\"asc\"?\"▲\":\"▼\"):\"↕\"}" w:150 -> dir=(key=="name"&&dir=="asc")?"desc":"asc"; key="name"; rows=dir=="asc"?sortBy(rows,r=>r.name):sortByDesc(rows,r=>r.name)
+    Button.ghost "Department {key==\"dept\"?(dir==\"asc\"?\"▲\":\"▼\"):\"↕\"}" w:150 -> dir=(key=="dept"&&dir=="asc")?"desc":"asc"; key="dept"; rows=dir=="asc"?sortBy(rows,r=>r.dept):sortByDesc(rows,r=>r.dept)
+    Button.ghost "Start date {key==\"start\"?(dir==\"asc\"?\"▲\":\"▼\"):\"↕\"}" w:150 -> dir=(key=="start"&&dir=="asc")?"desc":"asc"; key="start"; rows=dir=="asc"?sortBy(rows,r=>r.start):sortByDesc(rows,r=>r.start)
+    Button.ghost "Salary {key==\"salary\"?(dir==\"asc\"?\"▲\":\"▼\"):\"↕\"}" w:130 -> dir=(key=="salary"&&dir=="asc")?"desc":"asc"; key="salary"; rows=dir=="asc"?sortBy(rows,r=>r.salary):sortByDesc(rows,r=>r.salary)
+  Divider
+  each row in rows
+    Row gap:8 center
+      Text.strong "{row.name}" w:150
+      Text "{row.dept}" w:150
+      Text "{row.start}" w:150
+      Text "{money(row.salary,\"$\",0)}" w:130
+    Divider

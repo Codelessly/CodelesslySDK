@@ -18,7 +18,7 @@
    "decoration": {
     "fills": [
      {
-      "color": "#FFFFFFFF"
+      "color": "#FFF3F4F6"
      }
     ]
    }
@@ -127,7 +127,6 @@
    },
    "props": {
     "value": "sort",
-    "desc": "desc",
     "columns": [
      "No.",
      "Customer",
@@ -152,6 +151,7 @@
     "selectable": true
    },
    "bind": {
+    "props.desc": "${desc}",
     "props.checked": "${= length((slice(desc?sortByDesc((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),sort):sortBy((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),sort),page*5,page*5+5)))>0&&all((slice(desc?sortByDesc((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),sort):sortBy((filter(invoices,r=>(status==\"All\"||r.status==status)&&contains(lower(r.customer),lower(q)))),sort),page*5,page*5+5)),r=>contains(sel,r.id))}"
    },
    "actions": [

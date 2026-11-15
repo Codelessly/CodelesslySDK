@@ -125,6 +125,157 @@ void main() {
     expect(jsonEncode(session.document.toJson()), plain);
   });
 
+  group('with blocks', () {
+    const card = '''
+state note="Ready at the desk"
+Card
+  Text#title "Lab kit ready"
+  Text#where "{note}"
+  Button#go "I'll pick it up" -> emit collect
+''';
+
+    // The plain button and the title's text go; an ActionButton and a
+    // SectionLabel carry what they said and did.
+    List<Object?> swap(UiSession session, {String label = "I'll pick it up", bool actions = true, bool title = false}) {
+      final nodes = session.document.toJson()['nodes'] as Map;
+      final parent = nodes.entries.firstWhere((e) => ((e.value as Map)['children'] as List? ?? const []).contains('go')).key;
+      final reactions = (nodes['go'] as Map)['actions'] as List;
+      return [
+        {
+          'op': 'set',
+          'id': 'goBlock',
+          'parent': parent,
+          'node': {
+            'type': 'ActionButton',
+            'props': {'label': label, 'tone': 'primary'},
+            'layout': {'width': {'fill': 0}, 'height': 46},
+            if (actions)
+              'actions': [
+                {
+                  'trigger': {'type': 'event', 'event': 'onPressed'},
+                  'actions': (reactions.first as Map)['actions'],
+                },
+              ],
+          },
+        },
+        {'op': 'remove', 'id': 'go'},
+        if (title) {'op': 'remove', 'id': 'where'},
+      ];
+    }
+
+    test('the instructions list the blocks with their sizes and show the closest as written', () async {
+      final session = UiSession(designSystem: await _cards());
+      addTearDown(session.dispose);
+      await session.applyNotation(Stream.value(card));
+      final plain = DesignPass(session, design: (_) async => null).instructions();
+      expect(plain, isNot(contains("THE SYSTEM'S BLOCKS")));
+      final text = DesignPass(session, design: (_) async => null, blocks: const ['ActionButton', 'TotalBar', 'Receipt', 'NoSuchBlock'])
+          .instructions(request: 'a button that confirms');
+      expect(text, contains("THE SYSTEM'S BLOCKS"));
+      expect(text, contains('ActionButton: '));
+      expect(text, contains('layout: {"width":{"fill":0},"height":46}'));
+      expect(text, contains('events: onPressed'));
+      expect(text, contains('unless a block takes its place and carries what it said and did'));
+      expect(text, contains('THE CLOSEST BLOCKS, AS WRITTEN'));
+      expect(text, isNot(contains('NoSuchBlock')));
+    });
+
+    test('a block that carries a removed node\'s label and actions is kept', () async {
+      final session = UiSession(designSystem: await _cards());
+      addTearDown(session.dispose);
+      await session.applyNotation(Stream.value(card));
+      final plain = jsonEncode(session.document.toJson());
+      final outcome = await DesignPass(session, design: (_) async => swap(session), blocks: const ['ActionButton']).run();
+      expect(outcome.problems, isEmpty);
+      expect(outcome.kept, isTrue);
+      final nodes = session.document.toJson()['nodes'] as Map;
+      expect(nodes.containsKey('go'), isFalse);
+      expect((nodes['goBlock'] as Map)['type'], 'ActionButton');
+      expect(session.undo(author: DesignPass.author), isTrue);
+      expect(jsonEncode(session.document.toJson()), plain);
+    });
+
+    test('without blocks the same answer is refused: a node that takes input is gone', () async {
+      final session = UiSession(designSystem: await _cards());
+      addTearDown(session.dispose);
+      await session.applyNotation(Stream.value(card));
+      final outcome = await DesignPass(session, design: (_) async => swap(session), maxRounds: 1).run();
+      expect(outcome.kept, isFalse);
+      expect(outcome.problems.join('\n'), contains('"go" (filledButton) is gone'));
+    });
+
+    test('a block that drops the label, the actions or a bound text is refused, each named', () async {
+      final session = UiSession(designSystem: await _cards());
+      addTearDown(session.dispose);
+      await session.applyNotation(Stream.value(card));
+      final plain = jsonEncode(session.document.toJson());
+      Future<DesignOutcome> run(List<Object?> ops) => DesignPass(session, design: (_) async => ops, blocks: const ['ActionButton'], maxRounds: 1).run();
+
+      final relabeled = await run(swap(session, label: 'Collect'));
+      expect(relabeled.kept, isFalse);
+      expect(relabeled.problems.single, allOf(contains('"go" (filledButton) is gone and no block carries'), contains('its "label" ("I\'ll pick it up")')));
+      expect(jsonEncode(session.document.toJson()), plain);
+
+      final inert = await run(swap(session, actions: false));
+      expect(inert.kept, isFalse);
+      expect(inert.problems.single, contains('its actions'));
+
+      // The text that reads {note} is removed and no block reads the same value.
+      final unbound = await run(swap(session, title: true));
+      expect(unbound.kept, isFalse);
+      expect(unbound.problems.join('\n'), allOf(contains('"where" (text) is gone and no block carries'), contains(r'its "text" ("${note}")')));
+      expect(jsonEncode(session.document.toJson()), plain);
+    });
+
+    test('a removed text whose value a block reads the same way is accepted', () async {
+      final session = UiSession(designSystem: await _cards());
+      addTearDown(session.dispose);
+      await session.applyNotation(Stream.value(card));
+      final before = session.document;
+      final nodes = before.toJson()['nodes'] as Map;
+      final parent = nodes.entries.firstWhere((e) => ((e.value as Map)['children'] as List? ?? const []).contains('where')).key;
+      final result = session.apply([
+        {
+          'op': 'set',
+          'id': 'whereBlock',
+          'parent': parent,
+          'node': {
+            'type': 'Paragraph',
+            'layout': {'width': {'fill': 0}, 'height': {'hug': 0}},
+            'props': {'text': ((nodes['where'] as Map)['props'] as Map)['text']},
+          },
+        },
+        {'op': 'remove', 'id': 'where'},
+      ], author: DesignPass.author);
+      expect(result.rejected, isEmpty, reason: '${result.diagnostics.map((d) => d.message)}');
+      expect(DesignPass.changedMeaning(before, session.document, blocks: const {'Paragraph'}), isEmpty);
+      expect(DesignPass.changedMeaning(before, session.document).single, contains('"where" (text) is gone'));
+    });
+  });
+
+    test('a text a block shows in pieces is carried; a piece left out is named', () {
+      api.LayoutDocument doc(Map<String, Object?> nodes) => api.LayoutDocument.fromJson({
+            'schema': 3,
+            'roots': ['c'],
+            'nodes': {
+              'c': {'type': 'canvas', 'children': nodes.keys.toList()},
+              ...nodes,
+            },
+          });
+      final before = doc({
+        'times': {'type': 'text', 'props': {'text': '07:15 → 09:50'}},
+        'air': {'type': 'text', 'props': {'text': r'${f.air} · Direct'}},
+      });
+      Map<String, Object?> option(Map<String, Object?> props) => {
+            'opt': {'type': 'FlightOption', 'props': props},
+          };
+      final split = doc(option({'depart': '07:15', 'arrive': '09:50', 'name': r'${f.air}', 'stops': 'Direct'}));
+      expect(DesignPass.changedMeaning(before, split, blocks: const {'FlightOption'}), isEmpty);
+      final short = doc(option({'depart': '07:15', 'name': r'${f.air}', 'stops': 'Direct'}));
+      expect(DesignPass.changedMeaning(before, short, blocks: const {'FlightOption'}).single,
+          allOf(contains('"times" (text) is gone and no block carries'), contains('07:15 → 09:50')));
+    });
+
   test('the operations are read from a list, a map, a fenced answer or a bare one', () {
     expect(DesignPass.opsOf(_good), hasLength(2));
     expect(DesignPass.opsOf({'ops': _good}), hasLength(2));

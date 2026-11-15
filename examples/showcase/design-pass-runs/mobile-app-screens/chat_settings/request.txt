@@ -1,0 +1,1 @@
+A messaging app profile and settings screen: avatar, name and status at the top with an Edit button, a section for account (phone, username, bio), a section of toggles (notifications, read receipts, last seen), a storage usage bar with a Manage button, a list of three linked devices, and a Log out button.

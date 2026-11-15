@@ -1,0 +1,47 @@
+Screen "Shipping FAQ" background:#FFFFFF padding:24
+  Text "Shipping FAQ" role:heading size:24 weight:bold margin-bottom:16
+  List divider:1px #E5E5E5 gap:0
+    Accordion id:faq1 state:collapsed behavior:toggle-on-tap exclusive:false
+      Header tap-target:full-row padding:16 layout:row align:space-between
+        Text "How long does shipping take?" size:16 weight:medium
+        Icon "chevron-down" size:20 color:#666 rotation:0deg
+          when-expanded rotation:180deg
+          transition property:rotation duration:250ms easing:ease-in-out
+      Content padding:0 16 16 16 color:#444 size:15
+        when-collapsed height:0 opacity:0 overflow:hidden
+        when-expanded height:auto opacity:1
+        transition property:height,opacity duration:250ms easing:ease-in-out
+        Text "3-5 business days in the US."
+    Accordion id:faq2 state:collapsed behavior:toggle-on-tap exclusive:false
+      Header tap-target:full-row padding:16 layout:row align:space-between
+        Text "Do you ship internationally?" size:16 weight:medium
+        Icon "chevron-down" size:20 color:#666 rotation:0deg
+          when-expanded rotation:180deg
+          transition property:rotation duration:250ms easing:ease-in-out
+      Content padding:0 16 16 16 color:#444 size:15
+        when-collapsed height:0 opacity:0 overflow:hidden
+        when-expanded height:auto opacity:1
+        transition property:height,opacity duration:250ms easing:ease-in-out
+        Text "Yes, to 40 countries, 7-14 days."
+    Accordion id:faq3 state:collapsed behavior:toggle-on-tap exclusive:false
+      Header tap-target:full-row padding:16 layout:row align:space-between
+        Text "Can I change my address?" size:16 weight:medium
+        Icon "chevron-down" size:20 color:#666 rotation:0deg
+          when-expanded rotation:180deg
+          transition property:rotation duration:250ms easing:ease-in-out
+      Content padding:0 16 16 16 color:#444 size:15
+        when-collapsed height:0 opacity:0 overflow:hidden
+        when-expanded height:auto opacity:1
+        transition property:height,opacity duration:250ms easing:ease-in-out
+        Text "Within 2 hours of ordering."
+    Accordion id:faq4 state:collapsed behavior:toggle-on-tap exclusive:false
+      Header tap-target:full-row padding:16 layout:row align:space-between
+        Text "What if my package is lost?" size:16 weight:medium
+        Icon "chevron-down" size:20 color:#666 rotation:0deg
+          when-expanded rotation:180deg
+          transition property:rotation duration:250ms easing:ease-in-out
+      Content padding:0 16 16 16 color:#444 size:15
+        when-collapsed height:0 opacity:0 overflow:hidden
+        when-expanded height:auto opacity:1
+        transition property:height,opacity duration:250ms easing:ease-in-out
+        Text "We reship free after 10 days."

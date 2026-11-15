@@ -1,0 +1,72 @@
+Column scroll maxw:1100 gap:40 pad:24
+  Column center gap:12 pad:[0,48,0,24]
+    Badge.primary "About us"
+    Text.pageTitle "We design tools people love to use" center animate:fade
+    Text.bodySecondary "Northwind Studio is an independent product design and engineering team helping companies build software that feels effortless." center maxw:640
+    Button "Meet the team" -> emit meetTeam
+  Card
+    Row between
+      Column center gap:4 grow
+        Text "2014" size:32 weight:700
+        Text.muted "Founded"
+      Column center gap:4 grow
+        Text "42" size:32 weight:700
+        Text.muted "People"
+      Column center gap:4 grow
+        Text "9" size:32 weight:700
+        Text.muted "Countries"
+      Column center gap:4 grow
+        Text "300+" size:32 weight:700
+        Text.muted "Projects"
+  Column gap:16
+    Text.heading1 "Our story"
+    Row gap:24 middle
+      Column gap:12 grow
+        Text "Northwind began in 2014 as three designers sharing a small studio above a bakery in Gothenburg. We were tired of software that made people feel slow and confused."
+        Text "A decade later we are a distributed team of 42 across nine countries, still obsessed with the same thing: making complicated work feel simple. We partner with startups and established teams from first sketch to shipped product."
+        Text "We believe good tools respect your time, and that great teams are built on trust, craft and curiosity."
+      Image "https://picsum.photos/seed/northwind-office/600/400" w:360 h:260 radius:12
+  Column gap:16
+    Text.heading1 "Meet the team"
+    Grid cols:4 gap:16
+      each p in team
+        Card gap:8
+          Column center gap:8
+            Avatar src:"{p.photo}" size:96
+            Text.strong "{p.name}" center
+            Text.muted "{p.role}" center
+            Row gap:4 center
+              IconButton "work" -> link https://www.linkedin.com
+              IconButton "alternate_email" -> link https://twitter.com
+  Column gap:16
+    Text.heading1 "Our values"
+    Grid cols:2 gap:16
+      Card gap:8
+        Icon "favorite"
+        Text.heading3 "Craft with care"
+        Text.bodySecondary "We sweat the details because details are what people feel every day."
+      Card gap:8
+        Icon "groups"
+        Text.heading3 "Collaborate openly"
+        Text.bodySecondary "Clients are partners. We share work early and welcome honest feedback."
+      Card gap:8
+        Icon "lightbulb"
+        Text.heading3 "Stay curious"
+        Text.bodySecondary "We keep learning, question assumptions and try new approaches."
+      Card gap:8
+        Icon "verified"
+        Text.heading3 "Be accountable"
+        Text.bodySecondary "We do what we say, own our mistakes and ship work we are proud of."
+  Box fill:#FF1F2937 radius:16 pad:32 gap:12 center
+    Text.heading1 "We're hiring" color:#FFFFFFFF center
+    Text "Join a friendly, remote-first team working on products that matter." color:#FFE5E7EB center
+    Button "See open roles" -> emit openRoles
+  Divider
+  Row between pad:[0,0,0,16]
+    Text.caption "© 2024 Northwind Studio. All rights reserved."
+    Row gap:16
+      Button.ghost "Contact" -> link https://northwind.studio/contact
+      Button.ghost "Careers" -> emit openRoles
+      Button.ghost "Privacy" -> link https://northwind.studio/privacy
+
+state team=[{"name":"Ava Lindqvist","role":"CEO","photo":"https://i.pravatar.cc/200?img=47"},{"name":"Marcus Bell","role":"CTO","photo":"https://i.pravatar.cc/200?img=12"},{"name":"Priya Nair","role":"Head of Design","photo":"https://i.pravatar.cc/200?img=45"},{"name":"Tomás Herrera","role":"Lead Engineer","photo":"https://i.pravatar.cc/200?img=33"},{"name":"Sofia Rossi","role":"Product Manager","photo":"https://i.pravatar.cc/200?img=32"},{"name":"Kenji Watanabe","role":"Senior Designer","photo":"https://i.pravatar.cc/200?img=15"},{"name":"Hannah Okafor","role":"Engineering Manager","photo":"https://i.pravatar.cc/200?img=44"},{"name":"Liam Carter","role":"Operations Lead","photo":"https://i.pravatar.cc/200?img=53"}]

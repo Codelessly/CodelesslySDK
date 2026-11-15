@@ -1,0 +1,22 @@
+state loading=true
+state articles=[{"title":"Designing calmer dashboards","meta":"UX · 5 min read"},{"title":"Why small teams ship faster","meta":"Work · 4 min read"},{"title":"A beginner's guide to sourdough","meta":"Food · 7 min read"}]
+state slots=[1,2,3]
+every 2s when loading -> loading=false
+
+Card gap:16
+  Text.title "Latest articles"
+  if loading
+    each s in slots
+      Row gap:12 middle
+        Box w:48 h:48 radius:8 fill:#FFE0E0E0 animate:shimmer
+        Column gap:8 grow
+          Box h:14 radius:4 fill:#FFE0E0E0 animate:shimmer
+          Box w:120 h:12 radius:4 fill:#FFE0E0E0 animate:shimmer
+  if !loading
+    each a in articles
+      Row gap:12 middle animate:fade
+        Icon "article"
+        Column gap:2 grow
+          Text.strong "{a.title}"
+          Text.muted "{a.meta}"
+        Icon "chevron_right"

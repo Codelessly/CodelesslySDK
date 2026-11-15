@@ -1,0 +1,1 @@
+A language-learning app's lesson home: a streak and XP header, a daily goal progress bar, a Continue lesson card with unit name and progress, a grid of six units each with an icon, title and progress, a leaderboard preview of three people, and a bottom navigation bar.

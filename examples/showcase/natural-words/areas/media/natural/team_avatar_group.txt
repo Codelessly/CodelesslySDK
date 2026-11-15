@@ -1,0 +1,13 @@
+Card "Q3 Launch" padding:20 radius:16 background:white shadow:soft width:320
+  Text "Q3 Launch" style:title weight:semibold
+  AvatarStack overlap:-12 spacing:tight align:left margin-top:16
+    Avatar "Maya Chen" initials:"MC" color:coral size:44 ring:white ring-width:2 z:1
+      StatusDot status:online color:green size:10 position:bottom-right ring:white ring-width:2 animate:pulse duration:2s loop:true
+    Avatar "Raj Patel" initials:"RP" color:indigo size:44 ring:white ring-width:2 z:2
+    Avatar "Lena Fischer" initials:"LF" color:amber size:44 ring:white ring-width:2 z:3
+    Avatar "Tom Okafor" initials:"TO" color:teal size:44 ring:white ring-width:2 z:4
+      StatusDot status:online color:green size:10 position:bottom-right ring:white ring-width:2 animate:pulse duration:2s loop:true
+    Bubble "+4" size:44 background:gray-100 color:gray-700 weight:medium ring:white ring-width:2 z:5 action:open-member-list
+    on:hover-avatar lift:4 tooltip:name transition:150ms ease-out
+    on:press-bubble scale:0.95 transition:100ms
+  Text "8 members - 3 online" style:caption color:gray-600 margin-top:12

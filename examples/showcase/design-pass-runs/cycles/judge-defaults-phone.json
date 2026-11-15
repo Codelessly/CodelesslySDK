@@ -1,0 +1,380 @@
+{
+ "what": "11 phone screens (the 8 app screens and run 10's pantry, reading, transit): Cards defaults as committed (designed), a section card with no shadow (shadow), a quiet button alone on its line at its own size (quiet), both (all).",
+ "judges": "Judges: Opus and Sonnet subagents of a Claude Code session, shown the versions unlabeled and shuffled (ways.py pack); not judge.py, because no API key was at hand.",
+ "judgments": [
+  {
+   "case": "banking",
+   "judge": "opus",
+   "rank": [
+    "designed",
+    "shadow",
+    "quiet",
+    "all"
+   ],
+   "scores": {
+    "designed": 7,
+    "quiet": 7,
+    "all": 6,
+    "shadow": 7
+   },
+   "why": "All four are nearly identical polished screens; C swaps the spending card's soft shadow for a flat border, which reads slightly less refined than the elevated card in the others."
+  },
+  {
+   "case": "banking",
+   "judge": "sonnet",
+   "rank": [
+    "designed",
+    "quiet",
+    "all",
+    "shadow"
+   ],
+   "scores": {
+    "designed": 7,
+    "quiet": 7,
+    "all": 6,
+    "shadow": 6
+   },
+   "why": "Nearly identical; A and B have a softer card shadow giving slightly more depth than flat C and D."
+  },
+  {
+   "case": "chat_settings",
+   "judge": "opus",
+   "rank": [
+    "all",
+    "quiet",
+    "designed",
+    "shadow"
+   ],
+   "scores": {
+    "all": 7,
+    "designed": 6,
+    "shadow": 6,
+    "quiet": 7
+   },
+   "why": "A and D keep the Manage button compact and consistent with the other small secondary actions, while B and C stretch it to a heavy full-width block that competes with the Log out button."
+  },
+  {
+   "case": "chat_settings",
+   "judge": "sonnet",
+   "rank": [
+    "designed",
+    "shadow",
+    "quiet",
+    "all"
+   ],
+   "scores": {
+    "designed": 8,
+    "shadow": 7,
+    "quiet": 7,
+    "all": 6
+   },
+   "why": "Full-width Manage button with soft card shadow (B) feels most finished; small left-aligned Manage with flat cards (A) is weakest."
+  },
+  {
+   "case": "ecommerce_product",
+   "judge": "opus",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "shadow": 4,
+    "designed": 5,
+    "quiet": 5,
+    "all": 4
+   },
+   "why": "All share a blank hero image area and undersized, squat bottom CTAs and quantity steppers; B and C edge ahead because their softly shadowed review cards give a bit more depth than the flat bordered cards in A and D."
+  },
+  {
+   "case": "ecommerce_product",
+   "judge": "sonnet",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "designed": 7,
+    "quiet": 7,
+    "shadow": 6,
+    "all": 6
+   },
+   "why": "All share an empty hero image area; B and C add soft shadows on review cards for slightly more polish than flat A and D."
+  },
+  {
+   "case": "fitness_home",
+   "judge": "opus",
+   "rank": [
+    "quiet",
+    "designed",
+    "all",
+    "shadow"
+   ],
+   "scores": {
+    "all": 5,
+    "quiet": 6,
+    "designed": 6,
+    "shadow": 5
+   },
+   "why": "All share an unfilled progress bar despite 72% and an icon-less, unevenly spaced tab bar; B and C use cleaner borderless elevated cards while A and D double up border and shadow, which looks slightly busier."
+  },
+  {
+   "case": "fitness_home",
+   "judge": "sonnet",
+   "rank": [
+    "quiet",
+    "designed",
+    "all",
+    "shadow"
+   ],
+   "scores": {
+    "quiet": 7,
+    "designed": 7,
+    "all": 6,
+    "shadow": 6
+   },
+   "why": "All have an unfilled progress bar and cramped tab bar; B and C add soft card shadows giving more depth than flat A and D."
+  },
+  {
+   "case": "food_order",
+   "judge": "opus",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "designed": 5,
+    "shadow": 4,
+    "all": 4,
+    "quiet": 5
+   },
+   "why": "All share a blank hero area, a cart bar floating above the screen bottom and small Add buttons; A and D lift the menu cards with soft shadows, which separates items better than the flat bordered cards in B and C."
+  },
+  {
+   "case": "food_order",
+   "judge": "sonnet",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "designed": 7,
+    "quiet": 7,
+    "shadow": 6,
+    "all": 6
+   },
+   "why": "Identical layouts with an empty hero; A and D have soft card shadows adding depth over flat B and C."
+  },
+  {
+   "case": "habit_tracker",
+   "judge": "opus",
+   "rank": [
+    "quiet",
+    "designed",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "shadow": 6,
+    "quiet": 7,
+    "all": 6,
+    "designed": 7
+   },
+   "why": "Layouts are identical and clean; B and D separate cards from the background with soft shadows, which feels more finished than the thin outlined cards of A and C."
+  },
+  {
+   "case": "habit_tracker",
+   "judge": "sonnet",
+   "rank": [
+    "quiet",
+    "designed",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "quiet": 7,
+    "designed": 7,
+    "shadow": 6,
+    "all": 6
+   },
+   "why": "Essentially identical layouts; B and D have subtle card shadows that add polish over flat A and C."
+  },
+  {
+   "case": "learning",
+   "judge": "opus",
+   "rank": [
+    "designed",
+    "quiet",
+    "all",
+    "shadow"
+   ],
+   "scores": {
+    "all": 5,
+    "designed": 6,
+    "quiet": 6,
+    "shadow": 5
+   },
+   "why": "All share an icon-less tab bar, a blue progress bar clashing with the green lesson card and a cramped Continue button; B and C read a touch more polished thanks to soft card elevation versus the flat outlines in A and D."
+  },
+  {
+   "case": "learning",
+   "judge": "sonnet",
+   "rank": [
+    "designed",
+    "quiet",
+    "all",
+    "shadow"
+   ],
+   "scores": {
+    "designed": 7,
+    "quiet": 7,
+    "all": 6,
+    "shadow": 6
+   },
+   "why": "Same layout throughout; B and C have soft card shadows giving more depth than flat A and D."
+  },
+  {
+   "case": "pantry_phone",
+   "judge": "opus",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "designed": 7,
+    "shadow": 6,
+    "quiet": 6,
+    "all": 5
+   },
+   "why": "A combines softly elevated cards with a full-width Open list button that matches the Plan a meal button's width, while D pairs flat outlined cards with a small, tucked-away Open list button that looks unfinished."
+  },
+  {
+   "case": "pantry_phone",
+   "judge": "sonnet",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "designed": 8,
+    "quiet": 7,
+    "shadow": 7,
+    "all": 6
+   },
+   "why": "A pairs a full-width Open list button matching Plan a meal with soft card shadows; flat D with a small left button is plainest."
+  },
+  {
+   "case": "reading_phone",
+   "judge": "opus",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "quiet": 6,
+    "shadow": 6,
+    "designed": 7,
+    "all": 5
+   },
+   "why": "C pairs softly elevated cards with a full-width View book button that echoes the Log reading button, whereas D's flat outlined cards and small left-tucked View book button feel least resolved."
+  },
+  {
+   "case": "reading_phone",
+   "judge": "sonnet",
+   "rank": [
+    "designed",
+    "shadow",
+    "quiet",
+    "all"
+   ],
+   "scores": {
+    "designed": 8,
+    "shadow": 7,
+    "quiet": 7,
+    "all": 6
+   },
+   "why": "C has a full-width View book button consistent with Log reading plus soft shadows; flat D with a small left button is plainest."
+  },
+  {
+   "case": "transit_phone",
+   "judge": "opus",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "shadow": 6,
+    "designed": 7,
+    "quiet": 6,
+    "all": 5
+   },
+   "why": "B gives cards a soft lift and a full-width View notice button aligned with Start directions, while D combines flat outlines with a small left-tucked button that reads as an afterthought."
+  },
+  {
+   "case": "transit_phone",
+   "judge": "sonnet",
+   "rank": [
+    "designed",
+    "shadow",
+    "quiet",
+    "all"
+   ],
+   "scores": {
+    "designed": 8,
+    "shadow": 7,
+    "quiet": 7,
+    "all": 6
+   },
+   "why": "B has a full-width View notice button consistent with Start directions plus soft shadows; flat D with a small left button is plainest."
+  },
+  {
+   "case": "travel_booking",
+   "judge": "opus",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "shadow": 6,
+    "all": 6,
+    "designed": 7,
+    "quiet": 7
+   },
+   "why": "All share squat, undersized Manage booking and Share buttons; C and D give the itinerary cards a soft elevation that layers better than the flat outlined cards of A and B."
+  },
+  {
+   "case": "travel_booking",
+   "judge": "sonnet",
+   "rank": [
+    "designed",
+    "quiet",
+    "shadow",
+    "all"
+   ],
+   "scores": {
+    "designed": 7,
+    "quiet": 7,
+    "shadow": 6,
+    "all": 6
+   },
+   "why": "All share a short, cramped Manage booking/Share footer; C and D add soft card shadows for slightly more depth than flat A and B."
+  }
+ ]
+}

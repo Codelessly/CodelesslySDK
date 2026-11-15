@@ -1,0 +1,28 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/ic/plan_progress.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [],
+ "before": {
+  "problems": 0,
+  "texts": 16
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 401.5,
+   "problems": 0,
+   "ops": 26
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 422.0,
+   "problems": 0,
+   "ops": 26
+  }
+ ],
+ "final": 2,
+ "problems": 0,
+ "status": "passed"
+}

@@ -687,6 +687,27 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
     return own == null ? base : base.merge(own);
   }
 
+  /// How far below the content's top the hint is painted: its baseline on
+  /// the content's (Flutter's InputDecorator lays the hint and the input
+  /// out on one baseline), 0 when they share a style.
+  double get hintBaselineShift {
+    final d = decoration;
+    if (d.hintStyle == null) return 0;
+    final key = (d.valueStyle, hintStyle);
+    if (_hintShiftKey == key) return _hintShift;
+    final value = TextPainter(text: TextSpan(text: ' ', style: d.valueStyle), textDirection: TextDirection.ltr)..layout();
+    final hint = TextPainter(text: TextSpan(text: ' ', style: hintStyle), textDirection: TextDirection.ltr)..layout();
+    _hintShift = value.computeDistanceToActualBaseline(TextBaseline.alphabetic) -
+        hint.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    value.dispose();
+    hint.dispose();
+    _hintShiftKey = key;
+    return _hintShift;
+  }
+
+  Object? _hintShiftKey;
+  double _hintShift = 0;
+
   /// The hint's style: the content's, in `tertiaryText`, the decoration's
   /// hint style over it (so the hint and the typed text share a line).
   TextStyle get hintStyle {
@@ -961,7 +982,13 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
     } else {
       final free = boxRect.height - line;
       final y = _alignVertical?.y ?? 0;
-      if (d.contentPadding != null && !d.collapsed && _alignVertical != null && _alignVertical!.y < 0) {
+      // Flutter's InputDecorator aligns a field with no outline border to the
+      // top (textAlignVertical null): a padding given puts the line its top
+      // below the box's top.
+      final outlined = [d.border, d.enabledBorder, d.focusedBorder].any((b) => b?.kind == FieldBorderKind.outline);
+      if (d.contentPadding != null && _alignVertical == null && !outlined) {
+        top = boxRect.top + d.contentPadding!.top;
+      } else if (d.contentPadding != null && !d.collapsed && _alignVertical != null && _alignVertical!.y < 0) {
         top = boxRect.top + d.contentPadding!.top;
       } else {
         top = boxRect.top + free / 2 * (1 + y);
@@ -1079,7 +1106,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
     // The hint and the content, inside the box.
     final clip = d.collapsed ? (Offset.zero & size) : boxRect;
     _clip.layer = context.pushClipRect(needsCompositing, offset, clip, (context, offset) {
-      if (hintShown) _hint.paint(context.canvas, offset + contentRect.topLeft);
+      if (hintShown) _hint.paint(context.canvas, offset + contentRect.topLeft + Offset(0, hintBaselineShift));
       paintContent(context, offset);
     }, oldLayer: _clip.layer);
     // The clip may have pushed a layer: draw on the canvas after it.

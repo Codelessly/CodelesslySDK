@@ -1,0 +1,56 @@
+Card w:390 gap:16
+  Row between middle
+    Column gap:2
+      Text.heading "Lisbon"
+      Text.muted "Portugal"
+    Icon "wb_sunny"
+  Row gap:16 middle
+    Text.title "22°"
+    Column gap:2
+      Text.strong "Mostly sunny"
+      Text.muted "H: 24°  L: 15°"
+  Divider
+  Text.strong "Next 5 hours"
+  Row between
+    Column gap:4 center
+      Text.caption "1 PM"
+      Icon "wb_sunny"
+      Text.strong "23°"
+    Column gap:4 center
+      Text.caption "2 PM"
+      Icon "wb_sunny"
+      Text.strong "24°"
+    Column gap:4 center
+      Text.caption "3 PM"
+      Icon "wb_cloudy"
+      Text.strong "24°"
+    Column gap:4 center
+      Text.caption "4 PM"
+      Icon "cloud"
+      Text.strong "23°"
+    Column gap:4 center
+      Text.caption "5 PM"
+      Icon "grain"
+      Text.strong "21°"
+  Divider
+  Text.strong "Next 3 days"
+  Row gap:8 middle
+    Text "Tue" w:40
+    Icon "cloud"
+    Text.muted "14°" w:30
+    Progress 0.5 grow
+    Text.strong "20°" w:30
+  Row gap:8 middle
+    Text "Wed" w:40
+    Icon "grain"
+    Text.muted "13°" w:30
+    Progress 0.35 grow
+    Text.strong "18°" w:30
+  Row gap:8 middle
+    Text "Thu" w:40
+    Icon "wb_sunny"
+    Text.muted "15°" w:30
+    Progress 0.7 grow
+    Text.strong "25°" w:30
+  Divider
+  Button "Alert me before it rains" -> toast "We'll alert you before rain in Lisbon"
