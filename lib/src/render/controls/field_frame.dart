@@ -202,7 +202,7 @@ TextStyle ownStyle(api.TextStyle s) {
   }
   return TextStyle(
     fontFamily: s.fontFamily,
-    fontFamilyFallback: s.fontFamilyFallback.isEmpty ? null : s.fontFamilyFallback,
+    fontFamilyFallback: FontDemand.fallbackOf(s.fontFamily, s.fontFamilyFallback),
     fontSize: s.fontSize,
     fontWeight: w == null ? null : FontWeight.values[(w ~/ 100 - 1).clamp(0, 8)],
     fontStyle: s.fontStyle == null ? null : FontStyle.values.byName(s.fontStyle!.name),

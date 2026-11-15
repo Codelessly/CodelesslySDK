@@ -242,7 +242,7 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     final weight = s.fontWeight;
     return TextStyle(
       fontFamily: s.fontFamily,
-      fontFamilyFallback: s.fontFamilyFallback,
+      fontFamilyFallback: FontDemand.fallbackOf(s.fontFamily, s.fontFamilyFallback),
       fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
       fontStyle: s.fontStyle == api.FontStyle.italic ? FontStyle.italic : null,
     );

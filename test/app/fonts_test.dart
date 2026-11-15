@@ -4,7 +4,10 @@ import 'dart:typed_data';
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/app/fonts.dart';
+import 'package:codelessly_sdk/src/render/controls/field_frame.dart' show ownStyle;
 import 'package:codelessly_sdk/src/render/convert.dart' show FontDemand;
+import 'package:codelessly_sdk/src/runtime/actions/look.dart' show applyTextStyle;
+import 'package:flutter/painting.dart' show TextStyle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -170,5 +173,14 @@ void main() {
       await cache.load('Barlow', [file(1)]);
       expect(calls, 2);
     });
+  });
+
+  test('a field\'s hint and a feedback look fall back to the family\'s glyphs too', () {
+    FontDemand.glyphFallback = true;
+    addTearDown(() => FontDemand.glyphFallback = false);
+    // Tack's "Add an item and press ↵" placeholder drew ↵ as a box.
+    expect(ownStyle(const api.TextStyle(fontFamily: 'Geist')).fontFamilyFallback, ['Geist glyphs']);
+    expect(applyTextStyle(const api.TextStyle(fontFamily: 'Geist'), const TextStyle()).fontFamilyFallback, ['Geist glyphs']);
+    expect(ownStyle(const api.TextStyle(fontSize: 12)).fontFamilyFallback, isNull);
   });
 }

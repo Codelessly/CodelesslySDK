@@ -468,6 +468,14 @@ class _SourceDrag implements Drag {
     final offsets = <ViewportOffset>{};
     var moved = false;
     void consider(RenderBox box, ViewportOffset offset, AxisDirection direction) {
+      // A view its node keeps still under a drag (`dragEdgeScroll: false`):
+      // the node that owns the viewport is the nearest one above it.
+      for (RenderObject? o = box; o != null; o = o.parent) {
+        if (o is NodeBox) {
+          if (o.node?.prop(api.ScrollProps.dragEdgeScroll) == false) return;
+          break;
+        }
+      }
       final axis = axisDirectionToAxis(direction);
       if (!offsets.add(offset) ||
           axes.contains(axis) ||
