@@ -1390,7 +1390,19 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     if (tree.isInstanceRoot(id, instance)) {
       final ci = instance! as ComponentInstance;
       _callListenable = tree.sourceOf(ci.outer).watch(ci.call)..addListener(_apply);
+    } else if (componentInstanceOf(instance) case final ComponentInstance ci
+        when source.node(id)?.children.any((c) => source.node(c)?.type == api.SlotProps.spec.type) ?? false) {
+      // A node of a definition that holds a slot lays out what the call
+      // passes: children the call gains later (a card filled line by line as
+      // an answer streams in) are its to place, though its own node is as
+      // it was.
+      _callListenable = tree.sourceOf(ci.outer).watch(ci.call)..addListener(_slotContentChanged);
     }
+  }
+
+  void _slotContentChanged() {
+    _applied = null;
+    _apply();
   }
 
   ValueListenable<Node?>? _callListenable;
@@ -1399,6 +1411,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     _listenable?.removeListener(_apply);
     _listenable = null;
     _callListenable?.removeListener(_apply);
+    _callListenable?.removeListener(_slotContentChanged);
     _callListenable = null;
     _watchBindings(const []);
   }
