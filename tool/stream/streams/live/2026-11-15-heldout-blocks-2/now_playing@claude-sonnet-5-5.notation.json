@@ -1,0 +1,504 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= playing}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= min(total,elapsed+1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Now playing",
+    "subtitle": "Up next: 3 tracks",
+    "icon": "music_note",
+    "status": "Live",
+    "tone": "accent"
+   },
+   "children": [
+    "row1",
+    "ProgressLine1",
+    "row2",
+    "SectionLabel1",
+    "listView1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Media1",
+    "column1",
+    "iconButton1"
+   ]
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "width": 96,
+    "height": 96
+   },
+   "props": {
+    "kind": "mug",
+    "tone": "tracks[current].tone"
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "text3"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "${= tracks[current].title}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${= tracks[current].artist}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "${= tracks[current].album}"
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "favorite"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "liked",
+       "value": "${= !liked}"
+      }
+     ]
+    }
+   ]
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${= floor(elapsed/60)}:${= elapsed%60<10?'0':''}${= elapsed%60}",
+    "props.detail": "-${= floor((total-elapsed)/60)}:${= (total-elapsed)%60<10?'0':''}${= (total-elapsed)%60}",
+    "props.value": "${= elapsed/total}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center",
+    "spacing": 16
+   },
+   "children": [
+    "iconButton2",
+    "iconButton3",
+    "iconButton4"
+   ]
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "skip_previous"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "current",
+       "value": "${= (current+3)%4}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "iconButton3": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "pause"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "playing",
+       "value": "${= !playing}"
+      }
+     ]
+    }
+   ]
+  },
+  "iconButton4": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "skip_next"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "current",
+       "value": "${= (current+1)%4}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Up next",
+    "note": "3 tracks"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= slice(tracks,current+1,current+4)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listTile1"
+   ]
+  },
+  "listTile1": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "text4",
+    "subtitle": "text5"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.title}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.artist}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    }
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "playing",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "liked",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "elapsed",
+    "type": "integer",
+    "value": 84
+   },
+   {
+    "name": "total",
+    "type": "integer",
+    "value": 215
+   },
+   {
+    "name": "current",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "tracks",
+    "type": "list",
+    "value": [
+     {
+      "title": "Midnight City",
+      "artist": "M83",
+      "album": "Hurry Up, We're Dreaming",
+      "tone": "lilac"
+     },
+     {
+      "title": "Electric Feel",
+      "artist": "MGMT",
+      "album": "Oracular Spectacular",
+      "tone": "mint"
+     },
+     {
+      "title": "Dog Days Are Over",
+      "artist": "Florence + The Machine",
+      "album": "Lungs",
+      "tone": "rose"
+     },
+     {
+      "title": "Intro",
+      "artist": "The xx",
+      "album": "xx",
+      "tone": "slate"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,120 @@
+{"meta":{"ui":"recipe","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: total time and difficulty, a servings control that scales the ingredient amounts, the ingredients as a checklist I can tick off, the four steps, and a start cooking button.","text":"ChatCard \"Lemon chicken traybake\" \"Weeknight dinner · 45 min · Easy\" icon:\"restaurant\" status:\"Easy\" tone:good w:390\n  Media kind:\"bread\" tone:sand h:120\n  Row gap:10\n    StatTile \"Total time\" value:\"45 min\" icon:\"schedule\"\n    StatTile \"Difficulty\" value:\"Easy\" icon:\"restaurant\"\n  Counter \"Servings\" \"People at the table\" =servings min:1 max:12\n  SectionLabel \"Ingredients\" \"{servings} servings\"\n  Details rows:=[[\"Chicken thighs\",fixed(servings*2,0)+\" pieces\"],[\"Baby potatoes\",fixed(servings*150,0)+\" g\"],[\"Lemons\",fixed(servings*0.5,1)],[\"Garlic\",fixed(servings*2,0)+\" cloves\"],[\"Olive oil\",fixed(servings*1,0)+\" tbsp\"],[\"Fresh thyme\",fixed(servings*2,0)+\" sprigs\"]]\n  Checklist \"Tick off as you gather\" =gathered items:[\"Chicken thighs\",\"Baby potatoes\",\"Lemons\",\"Garlic\",\"Olive oil\",\"Fresh thyme\"]\n  SectionLabel \"Method\" \"4 steps\"\n  PlanStep \"Prep the tray\" \"Heat oven to 220°C. Halve potatoes and toss with oil, salt and pepper.\" index:0 current:=0\n  PlanStep \"Season the chicken\" \"Rub thighs with garlic, thyme, lemon zest and juice.\" index:1 current:=0\n  PlanStep \"Roast\" \"Nestle chicken among potatoes, add lemon halves, roast 35 minutes.\" index:2 current:=0\n  PlanStep \"Rest and serve\" \"Rest 5 minutes, spoon over pan juices and serve.\" index:3 current:=0 last:true\n  ActionButton \"Start cooking\" tone:primary icon:\"play_arrow\" -> emit startCooking servings; toast \"Let's cook!\"","usage":{"input_tokens":8857,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":688,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1303,"totalMs":5278}}
+{"tMs":1303,"delta":"ChatCard \"L"}
+{"tMs":1602,"delta":"emon chicken traybake"}
+{"tMs":1602,"delta":"\" \""}
+{"tMs":1602,"delta":"Weeknight d"}
+{"tMs":1602,"delta":"inner · 45 min ·"}
+{"tMs":1602,"delta":" Easy\" icon:\""}
+{"tMs":1602,"delta":"restaurant\""}
+{"tMs":1602,"delta":" status:\"Eas"}
+{"tMs":1602,"delta":"y\" tone:good"}
+{"tMs":1602,"delta":" w:390"}
+{"tMs":1605,"delta":"\n  "}
+{"tMs":1639,"delta":"Media kind:\"bread"}
+{"tMs":1670,"delta":"\" t"}
+{"tMs":1923,"delta":"one:s"}
+{"tMs":1923,"delta":"and h:120"}
+{"tMs":1923,"delta":"\n  Row"}
+{"tMs":1923,"delta":" gap:10"}
+{"tMs":1923,"delta":"\n    St"}
+{"tMs":1923,"delta":"atTile \"Total"}
+{"tMs":1929,"delta":" time\" value"}
+{"tMs":1964,"delta":":\"45 min\" icon"}
+{"tMs":1996,"delta":":\"sch"}
+{"tMs":2031,"delta":"edule\"\n    StatT"}
+{"tMs":2066,"delta":"ile \"Difficulty\""}
+{"tMs":2243,"delta":" value:\"Easy\" ic"}
+{"tMs":2243,"delta":"on:\"rest"}
+{"tMs":2243,"delta":"aurant\"\n  "}
+{"tMs":2243,"delta":"Counter \"Servings\" \""}
+{"tMs":2243,"delta":"People"}
+{"tMs":2265,"delta":" at"}
+{"tMs":2300,"delta":" the table\" =servings min:"}
+{"tMs":2333,"delta":"1 max:12"}
+{"tMs":2400,"delta":"\n  SectionLabel \""}
+{"tMs":2434,"delta":"Ingredients\" \"{"}
+{"tMs":2467,"delta":"servings} serv"}
+{"tMs":2561,"delta":"ings\"\n  Details rows"}
+{"tMs":2561,"delta":":=[[\"Chicken"}
+{"tMs":2569,"delta":" thighs\",fixed("}
+{"tMs":2601,"delta":"serv"}
+{"tMs":2634,"delta":"ings*2"}
+{"tMs":2667,"delta":",0"}
+{"tMs":2701,"delta":")+\" pieces\"],"}
+{"tMs":2734,"delta":"[\"Baby potatoes"}
+{"tMs":2769,"delta":"\",fixed(servings*"}
+{"tMs":2801,"delta":"150"}
+{"tMs":2835,"delta":",0)+\" g\"],"}
+{"tMs":2869,"delta":"[\"Lemons\",fix"}
+{"tMs":2903,"delta":"ed(servings*0.5"}
+{"tMs":2935,"delta":",1"}
+{"tMs":2968,"delta":")],"}
+{"tMs":3002,"delta":"[\"Garlic\",fix"}
+{"tMs":3036,"delta":"ed(servings*2"}
+{"tMs":3069,"delta":",0)+\" cloves"}
+{"tMs":3103,"delta":"\"],[\"Olive oil"}
+{"tMs":3141,"delta":"\",fixed(servings*"}
+{"tMs":3175,"delta":"1,0)+\" tb"}
+{"tMs":3204,"delta":"sp\"],[\"F"}
+{"tMs":3238,"delta":"resh thyme\",fix"}
+{"tMs":3272,"delta":"ed(servings*2"}
+{"tMs":3305,"delta":",0)+\" sprig"}
+{"tMs":3339,"delta":"s\"]]\n  Chec"}
+{"tMs":3372,"delta":"klist \"Tick off as"}
+{"tMs":3406,"delta":" you g"}
+{"tMs":3439,"delta":"ather\" =g"}
+{"tMs":3472,"delta":"athered items:[\"Chic"}
+{"tMs":3505,"delta":"ken thighs\",\"Baby"}
+{"tMs":3539,"delta":" potatoes\",\"Lem"}
+{"tMs":3573,"delta":"ons\",\"Garlic\",\""}
+{"tMs":3607,"delta":"Olive oil\",\"Fres"}
+{"tMs":3640,"delta":"h thyme\"]\n  "}
+{"tMs":3673,"delta":"SectionLabel \""}
+{"tMs":3707,"delta":"Method\" \"4 steps\""}
+{"tMs":3740,"delta":"\n  P"}
+{"tMs":3773,"delta":"lanStep \""}
+{"tMs":3806,"delta":"Pr"}
+{"tMs":3839,"delta":"ep the"}
+{"tMs":3873,"delta":" tray\" \"Heat o"}
+{"tMs":3907,"delta":"ven to 220"}
+{"tMs":3939,"delta":"°"}
+{"tMs":3973,"delta":"C. Halve potato"}
+{"tMs":4006,"delta":"es and toss with o"}
+{"tMs":4039,"delta":"il,"}
+{"tMs":4072,"delta":" salt and p"}
+{"tMs":4105,"delta":"epper.\" index:0 current"}
+{"tMs":4139,"delta":":=0\n  Plan"}
+{"tMs":4172,"delta":"Step \"Season the"}
+{"tMs":4206,"delta":" chicken\" \"Rub"}
+{"tMs":4239,"delta":" th"}
+{"tMs":4272,"delta":"ighs with gar"}
+{"tMs":4305,"delta":"lic, th"}
+{"tMs":4339,"delta":"yme, lemon z"}
+{"tMs":4372,"delta":"est and juice.\" index:1"}
+{"tMs":4406,"delta":" current:=0\n  P"}
+{"tMs":4439,"delta":"lanStep \"Roast"}
+{"tMs":4472,"delta":"\" \"Nest"}
+{"tMs":4506,"delta":"le chicken among"}
+{"tMs":4539,"delta":" potatoes, add lem"}
+{"tMs":4572,"delta":"on halves,"}
+{"tMs":4605,"delta":" ro"}
+{"tMs":4638,"delta":"ast 35"}
+{"tMs":4674,"delta":" minutes.\" index:2"}
+{"tMs":4705,"delta":" current:=0\n  P"}
+{"tMs":4739,"delta":"lanStep \"Rest"}
+{"tMs":4775,"delta":" and ser"}
+{"tMs":4806,"delta":"ve\" \"Rest 5"}
+{"tMs":4839,"delta":" minutes, spoon"}
+{"tMs":4872,"delta":" over p"}
+{"tMs":4940,"delta":"an juices and serve.\""}
+{"tMs":4940,"delta":" index:3 current:=0"}
+{"tMs":4973,"delta":" last:true\n  Act"}
+{"tMs":5007,"delta":"ionButton \"Start coo"}
+{"tMs":5043,"delta":"king\" tone:primary ic"}
+{"tMs":5073,"delta":"on:\"play_"}
+{"tMs":5106,"delta":"arrow\" -> emit"}
+{"tMs":5139,"delta":" start"}
+{"tMs":5173,"delta":"Cooking servings;"}
+{"tMs":5206,"delta":" toast \"Let"}
+{"tMs":5260,"delta":"'s c"}
+{"tMs":5275,"delta":"ook!\""}

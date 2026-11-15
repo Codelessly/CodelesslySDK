@@ -1,0 +1,131 @@
+{"meta":{"ui":"now_playing","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show what is playing right now as an inline music card: the track, artist and album art, a progress bar with elapsed and remaining time, previous, play or pause and next controls, a like button, and the next three tracks in the queue.","text":"state playing=true\nstate liked=false\nstate elapsed=84\nstate total=215\nstate current=0\nstate tracks=[{\"title\":\"Midnight City\",\"artist\":\"M83\",\"album\":\"Hurry Up, We're Dreaming\",\"tone\":\"lilac\"},{\"title\":\"Electric Feel\",\"artist\":\"MGMT\",\"album\":\"Oracular Spectacular\",\"tone\":\"mint\"},{\"title\":\"Dog Days Are Over\",\"artist\":\"Florence + The Machine\",\"album\":\"Lungs\",\"tone\":\"rose\"},{\"title\":\"Intro\",\"artist\":\"The xx\",\"album\":\"xx\",\"tone\":\"slate\"},{\"title\":\"Re: Stacks\",\"artist\":\"Bon Iver\",\"album\":\"For Emma, Forever Ago\",\"tone\":\"sky\"},{\"title\":\"Holocene\",\"artist\":\"Bon Iver\",\"album\":\"Bon Iver\",\"tone\":\"sand\"}]\nevery 1s when playing -> elapsed=min(total,elapsed+1)\nChatCard \"Now playing\" \"Up next: 3 tracks\" icon:\"music_note\" status:\"Live\" tone:accent w:390\n  Row gap:14 middle\n    Media kind:\"mug\" tone:\"lilac\" w:96 h:96 visible:=tracks[current].tone==\"lilac\"\n    Media kind:\"mug\" tone:\"mint\" w:96 h:96 visible:=tracks[current].tone==\"mint\"\n    Media kind:\"mug\" tone:\"rose\" w:96 h:96 visible:=tracks[current].tone==\"rose\"\n    Media kind:\"mug\" tone:\"slate\" w:96 h:96 visible:=tracks[current].tone==\"slate\"\n    Media kind:\"mug\" tone:\"sky\" w:96 h:96 visible:=tracks[current].tone==\"sky\"\n    Media kind:\"mug\" tone:\"sand\" w:96 h:96 visible:=tracks[current].tone==\"sand\"\n    Column gap:4 grow\n      Text.heading \"{tracks[current].title}\"\n      Text.bodySecondary \"{tracks[current].artist}\"\n      Text.caption \"{tracks[current].album}\"\n    IconButton \"favorite\" -> liked=!liked\n  ProgressLine \"{floor(elapsed/60)}:{elapsed%60<10?'0':''}{elapsed%60}\" \"-{floor((total-elapsed)/60)}:{(total-elapsed)%60<10?'0':''}{(total-elapsed)%60}\" value:=elapsed/total\n  Row center middle gap:16\n    IconButton \"skip_previous\" -> current=(current+5)%6; elapsed=0\n    IconButton \"pause\" -> playing=!playing\n    IconButton \"skip_next\" -> current=(current+1)%6; elapsed=0\n  SectionLabel \"Up next\" \"3 tracks\"\n  each n in [1,2,3]\n    ListTile \"{tracks[(current+n)%6].title}\" \"{tracks[(current+n)%6].artist}\"","usage":{"input_tokens":9610,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":987,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1040,"totalMs":5372}}
+{"tMs":1040,"delta":"state playing=true\nstate li"}
+{"tMs":1365,"delta":"ked=false\nstate elaps"}
+{"tMs":1365,"delta":"ed=84\nstate total=215"}
+{"tMs":1365,"delta":"\nstate current=0\nstate t"}
+{"tMs":1365,"delta":"racks=[{\"title\":"}
+{"tMs":1365,"delta":"\"Midnight City\",\"art"}
+{"tMs":1365,"delta":"ist\":\"M83\",\"album\":"}
+{"tMs":1365,"delta":"\"Hurry Up,"}
+{"tMs":1365,"delta":" We"}
+{"tMs":1365,"delta":"'re Dreaming\",\"t"}
+{"tMs":1369,"delta":"one\":\"lilac\"},"}
+{"tMs":1403,"delta":"{\"title\":\"Electric"}
+{"tMs":1437,"delta":" Feel\",\"artist\":\""}
+{"tMs":1699,"delta":"MGMT\",\"album\":\""}
+{"tMs":1699,"delta":"Oracular Spectac"}
+{"tMs":1699,"delta":"ular\",\"tone\":\"mint"}
+{"tMs":1699,"delta":"\"},{\"title\":\""}
+{"tMs":1699,"delta":"Dog Days Are Over"}
+{"tMs":1699,"delta":"\",\"artist\":\"Florence"}
+{"tMs":1699,"delta":" + The Machine\",\"album\":"}
+{"tMs":1704,"delta":"\"Lungs\",\"tone"}
+{"tMs":1738,"delta":"\":\"rose\"},{\""}
+{"tMs":1771,"delta":"title\":\"Intro\",\"art"}
+{"tMs":1805,"delta":"ist\":\"The xx\",\"album"}
+{"tMs":1838,"delta":"\":\"xx\",\"tone\":"}
+{"tMs":2032,"delta":"\"slate\"},"}
+{"tMs":2032,"delta":"{\"title\":\"Re"}
+{"tMs":2032,"delta":":"}
+{"tMs":2032,"delta":" Stac"}
+{"tMs":2032,"delta":"ks\",\"artist\":\"B"}
+{"tMs":2035,"delta":"on Iver\",\"album\":\""}
+{"tMs":2070,"delta":"For Emma,"}
+{"tMs":2102,"delta":" Forever Ago\",\"t"}
+{"tMs":2136,"delta":"one\":\"sky\"},{"}
+{"tMs":2169,"delta":"\"title\":\"Holoc"}
+{"tMs":2202,"delta":"ene"}
+{"tMs":2235,"delta":"\",\"artist\":\"B"}
+{"tMs":2361,"delta":"on Iver\",\"album\":\""}
+{"tMs":2361,"delta":"Bon Iver\",\"t"}
+{"tMs":2361,"delta":"one\":\"sand\"}]"}
+{"tMs":2368,"delta":"\nevery 1s when playing"}
+{"tMs":2402,"delta":" -> elapsed=min"}
+{"tMs":2435,"delta":"(total,elapsed+"}
+{"tMs":2469,"delta":"1)\nChatCard"}
+{"tMs":2502,"delta":" \"Now playing\" \""}
+{"tMs":2536,"delta":"Up next: 3 trac"}
+{"tMs":2569,"delta":"ks\" icon:\"music_"}
+{"tMs":2604,"delta":"note\" status:\"Live"}
+{"tMs":2637,"delta":"\" tone:accent w:"}
+{"tMs":2684,"delta":"390\n  Row gap:"}
+{"tMs":2703,"delta":"14 middle\n    Media"}
+{"tMs":2736,"delta":" kind:\"mug\" t"}
+{"tMs":2771,"delta":"one:\"lilac\" w"}
+{"tMs":2803,"delta":":96 h:96 "}
+{"tMs":2836,"delta":"visible:=tracks["}
+{"tMs":2870,"delta":"current].tone==\"lil"}
+{"tMs":2903,"delta":"ac\"\n    Media"}
+{"tMs":2936,"delta":" kind:\"mug\" t"}
+{"tMs":2969,"delta":"one:\"mint\" w:"}
+{"tMs":3003,"delta":"96 h:96 visible"}
+{"tMs":3036,"delta":":=tracks[current]."}
+{"tMs":3070,"delta":"tone==\"mint\""}
+{"tMs":3104,"delta":"\n    Media kind:\"m"}
+{"tMs":3137,"delta":"ug\" tone:\"rose"}
+{"tMs":3170,"delta":"\" w:96 h:96"}
+{"tMs":3203,"delta":" visible:=tracks"}
+{"tMs":3237,"delta":"[current].tone==\"r"}
+{"tMs":3270,"delta":"ose\"\n    Media kind"}
+{"tMs":3303,"delta":":\"mug\" tone:"}
+{"tMs":3337,"delta":"\"slate\" w:96 "}
+{"tMs":3370,"delta":"h:96 visible:="}
+{"tMs":3404,"delta":"tracks[current].tone"}
+{"tMs":3438,"delta":"==\"slate\"\n    "}
+{"tMs":3470,"delta":"Media kind:\"mug\""}
+{"tMs":3504,"delta":" tone:\"sky\" w"}
+{"tMs":3537,"delta":":96 h:96 vis"}
+{"tMs":3570,"delta":"ible:=tracks[current"}
+{"tMs":3604,"delta":"].tone==\"sky\""}
+{"tMs":3637,"delta":"\n    Media kind:\""}
+{"tMs":3671,"delta":"mug\" tone:\"s"}
+{"tMs":3704,"delta":"and\" w:96 h:"}
+{"tMs":3740,"delta":"96 visible:=trac"}
+{"tMs":3771,"delta":"ks[current].tone==\""}
+{"tMs":3804,"delta":"sand\"\n    Column g"}
+{"tMs":3837,"delta":"ap:4 grow\n      "}
+{"tMs":3871,"delta":"Text.heading \"{t"}
+{"tMs":3904,"delta":"racks[current].title}\""}
+{"tMs":3937,"delta":"\n      Text.bodyS"}
+{"tMs":3971,"delta":"econdary \"{tracks"}
+{"tMs":4004,"delta":"[current].artist}\""}
+{"tMs":4037,"delta":"\n      Text.caption \"{"}
+{"tMs":4071,"delta":"tracks[current].album}"}
+{"tMs":4104,"delta":"\"\n    IconButton \""}
+{"tMs":4137,"delta":"favorite\" -> liked"}
+{"tMs":4171,"delta":"=!liked\n  Pro"}
+{"tMs":4204,"delta":"gressLine \"{floor"}
+{"tMs":4238,"delta":"(elapsed/60)"}
+{"tMs":4271,"delta":"}:{elapsed%"}
+{"tMs":4306,"delta":"60<10?'0':''"}
+{"tMs":4339,"delta":"}{elapsed%60"}
+{"tMs":4371,"delta":"}\" \"-{floor(("}
+{"tMs":4406,"delta":"total-elapsed)/"}
+{"tMs":4438,"delta":"60)}:{(total-"}
+{"tMs":4471,"delta":"elapsed)%60<"}
+{"tMs":4506,"delta":"10?'0':''}{"}
+{"tMs":4538,"delta":"(total-elapsed)"}
+{"tMs":4571,"delta":"%60}\" value:=el"}
+{"tMs":4605,"delta":"apsed/total\n  "}
+{"tMs":4639,"delta":"Row center middle gap:16"}
+{"tMs":4671,"delta":"\n    IconButton \"sk"}
+{"tMs":4705,"delta":"ip_previous\" -> current"}
+{"tMs":4738,"delta":"=(current+5"}
+{"tMs":4771,"delta":")%6; elapsed"}
+{"tMs":4805,"delta":"=0\n    IconButton"}
+{"tMs":4838,"delta":" \"pause\" -> playing"}
+{"tMs":4871,"delta":"=!playing\n    Icon"}
+{"tMs":4905,"delta":"Button \"skip_next\""}
+{"tMs":4939,"delta":" -> current=(current+1"}
+{"tMs":4971,"delta":")%6; elapsed"}
+{"tMs":5004,"delta":"=0\n  SectionL"}
+{"tMs":5041,"delta":"abel \"Up next\" \""}
+{"tMs":5072,"delta":"3 tracks\"\n  "}
+{"tMs":5104,"delta":"each n"}
+{"tMs":5137,"delta":" in ["}
+{"tMs":5194,"delta":"1,2,3]\n    "}
+{"tMs":5204,"delta":"ListTile \"{trac"}
+{"tMs":5238,"delta":"ks[(current+n)%"}
+{"tMs":5271,"delta":"6].title}\" \"{t"}
+{"tMs":5304,"delta":"racks[(current+n)"}
+{"tMs":5338,"delta":"%6].artist}\""}

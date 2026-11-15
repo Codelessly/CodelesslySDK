@@ -1,0 +1,475 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Expense approvals",
+    "subtitle": "Report #2041 · 4 items",
+    "icon": "receipt_long",
+    "status": "Pending",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "listView1",
+    "TotalBar1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Expenses"
+   },
+   "bind": {
+    "props.note": "${= count(exp,x=>x.s!='')} of 4 decided",
+    "visible": "${= !done}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${exp}",
+    "visible": "${= !done}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column1"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "row1",
+    "Callout1",
+    "row2",
+    "text4"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column2",
+    "text3"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14.5,
+     "fontWeight": 600,
+     "fontFamily": "Inter",
+     "letterSpacing": -0.1,
+     "height": 1.3,
+     "color": "#FF111827"
+    },
+    "text": "${item.merchant}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12.5,
+     "fontWeight": 500,
+     "fontFamily": "Inter",
+     "height": 1.35,
+     "color": "#FF6B7280"
+    },
+    "text": "${item.cat} · ${item.date}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= money(item.amount,'$',2)}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Missing receipt",
+    "message": "Ask for a receipt before approving.",
+    "tone": "danger",
+    "icon": "warning"
+   },
+   "bind": {
+    "visible": "${= !item.receipt}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Reject",
+    "tone": "danger"
+   },
+   "bind": {
+    "props.enabled": "${= item.s!=\"rejected\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "exp",
+       "value": "${= updateWhere(exp,x=>x.id==item.id,x=>with(x,\"s\",\"rejected\"))}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Approve",
+    "tone": "good"
+   },
+   "bind": {
+    "props.enabled": "${= item.s!=\"approved\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "exp",
+       "value": "${= updateWhere(exp,x=>x.id==item.id,x=>with(x,\"s\",\"approved\"))}"
+      }
+     ]
+    }
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "Marked ${item.s}"
+   },
+   "bind": {
+    "visible": "${= item.s!=\"\"}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Approved total",
+    "cta": "Submit"
+   },
+   "bind": {
+    "props.note": "${= count(exp,x=>x.s=='approved')} approved · ${= count(exp,x=>x.s=='rejected')} rejected",
+    "props.amount": "${= money(sum(filter(exp,x=>x.s==\"approved\"),x=>x.amount),\"$\",2)}",
+    "props.enabled": "${= count(exp,x=>x.s!=\"\")==4}",
+    "visible": "${= !done}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Report submitted",
+    "code": "#2041",
+    "codeLabel": "Report",
+    "tone": "good"
+   },
+   "bind": {
+    "props.message": "Approved total ${= money(sum(filter(exp,x=>x.s=='approved'),x=>x.amount),'$',2)}",
+    "visible": "${= done}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "exp",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "merchant": "Delta Airlines",
+      "cat": "Travel",
+      "date": "Mar 4",
+      "amount": 412.5,
+      "receipt": true,
+      "s": ""
+     },
+     {
+      "id": 2,
+      "merchant": "Blue Bottle Coffee",
+      "cat": "Meals",
+      "date": "Mar 5",
+      "amount": 18.75,
+      "receipt": true,
+      "s": ""
+     },
+     {
+      "id": 3,
+      "merchant": "Uber",
+      "cat": "Transport",
+      "date": "Mar 5",
+      "amount": 36.2,
+      "receipt": false,
+      "s": ""
+     },
+     {
+      "id": 4,
+      "merchant": "Marriott Downtown",
+      "cat": "Lodging",
+      "date": "Mar 6",
+      "amount": 289,
+      "receipt": true,
+      "s": ""
+     }
+    ]
+   },
+   {
+    "name": "done",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

@@ -1,0 +1,77 @@
+{"meta":{"ui":"run_summary","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Summarize this morning's run as a card: distance, time, average pace and calories, a chart of pace per kilometer, the splits as a small table, how it compares with my last run, and a share button.","text":"ChatCard \"Morning run\" \"Today, 6:48 AM\" icon:\"directions_run\" status:\"Completed\" tone:good w:390\n  Grid cols:2 gap:10\n    StatTile \"Distance\" value:\"5.0 km\" icon:\"route\"\n    StatTile \"Time\" value:\"27:35\" icon:\"timer\"\n    StatTile \"Avg pace\" value:\"5:31 /km\" delta:\"-0.4%\" invert:true icon:\"speed\"\n    StatTile \"Calories\" value:\"342 kcal\" icon:\"local_fire_department\"\n  ChartCard \"Pace per kilometer\" value:\"5:31\" values:[5.62,5.55,5.48,5.35,5.20] labels:[\"1\",\"2\",\"3\",\"4\",\"5\"] kind:\"bars\" delta:\"min/km\"\n  SectionLabel \"Splits\" \"min/km\"\n  TableHeader columns:[\"Km\",\"Time\",\"Pace\"] keys:[\"km\",\"time\",\"pace\"] widths:[1,1,1]\n  TableRow cells:[\"1\",\"5:37\",\"5:37\"]\n  TableRow cells:[\"2\",\"5:33\",\"5:33\"]\n  TableRow cells:[\"3\",\"5:29\",\"5:29\"]\n  TableRow cells:[\"4\",\"5:21\",\"5:21\"]\n  TableRow cells:[\"5\",\"5:12\",\"5:12\"]\n  SectionLabel \"Vs. last run\" \"Sun, 4.8 km\"\n  Details rows:=[[\"Distance\",\"+0.2 km\"],[\"Time\",\"+0:48\"],[\"Avg pace\",\"15 s/km faster\"],[\"Calories\",\"+21 kcal\"]]\n  Callout \"Negative split\" \"You got faster every kilometer, finishing 25 s/km quicker than you started.\" tone:good icon:\"trending_up\"\n  ActionButton \"Share run\" tone:primary icon:\"share\" -> emit share; toast \"Run shared\"","usage":{"input_tokens":9503,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":609,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":681,"totalMs":3217}}
+{"tMs":681,"delta":"ChatCard \"Mor"}
+{"tMs":1001,"delta":"ning run\" \"Today, "}
+{"tMs":1001,"delta":"6:48 AM\" ic"}
+{"tMs":1001,"delta":"on:\"directions_run\""}
+{"tMs":1001,"delta":" status:\"Completed\" t"}
+{"tMs":1001,"delta":"one:good w:390\n  "}
+{"tMs":1001,"delta":"Grid cols:2 "}
+{"tMs":1001,"delta":"gap:10\n    Stat"}
+{"tMs":1001,"delta":"Tile \"Distance\" value"}
+{"tMs":1001,"delta":":\"5.0 km\""}
+{"tMs":1012,"delta":" icon:\"route\"\n    "}
+{"tMs":1046,"delta":"StatTile \"Time\""}
+{"tMs":1080,"delta":" value:\"27:35\" ic"}
+{"tMs":1332,"delta":"on:\"timer\"\n    "}
+{"tMs":1332,"delta":"StatTile \"Avg"}
+{"tMs":1332,"delta":" pace\" value:\"5:"}
+{"tMs":1332,"delta":"31 /km\" delta:"}
+{"tMs":1332,"delta":"\"-0.4%\" inv"}
+{"tMs":1332,"delta":"ert:true icon:\"spe"}
+{"tMs":1332,"delta":"ed\"\n    StatTile"}
+{"tMs":1346,"delta":" \"Calories\" value:\""}
+{"tMs":1380,"delta":"342 kcal\" icon"}
+{"tMs":1413,"delta":":\"local_fire_department"}
+{"tMs":1446,"delta":"\"\n  ChartCard"}
+{"tMs":1480,"delta":" \"Pace per kilomet"}
+{"tMs":1662,"delta":"er\" value:\"5:31"}
+{"tMs":1662,"delta":"\" values:[5.62,"}
+{"tMs":1662,"delta":"5.55,5.48,"}
+{"tMs":1662,"delta":"5.35,5.20]"}
+{"tMs":1662,"delta":" labels:[\"1\",\"2\",\""}
+{"tMs":1679,"delta":"3\",\"4\",\"5\"] k"}
+{"tMs":1713,"delta":"ind:\"bars\" delta"}
+{"tMs":1746,"delta":":\"min/km\"\n  "}
+{"tMs":1780,"delta":"SectionLabel \""}
+{"tMs":1813,"delta":"Splits\" \"min/km\""}
+{"tMs":1846,"delta":"\n  TableHeader colum"}
+{"tMs":1880,"delta":"ns:[\"Km\",\"Time"}
+{"tMs":1991,"delta":"\",\"Pace\"] keys"}
+{"tMs":1991,"delta":":[\"km\",\"time\",\"pace"}
+{"tMs":1991,"delta":"\"] widths:[1,"}
+{"tMs":2013,"delta":"1,1]\n  Table"}
+{"tMs":2047,"delta":"Row cells:[\"1\",\""}
+{"tMs":2080,"delta":"5:37\",\"5:37\""}
+{"tMs":2113,"delta":"]\n  TableRow c"}
+{"tMs":2147,"delta":"ells:[\"2\",\"5:33"}
+{"tMs":2180,"delta":"\",\"5:33\"]\n  "}
+{"tMs":2213,"delta":"TableRow cells:[\""}
+{"tMs":2247,"delta":"3\",\"5:29\",\"5:"}
+{"tMs":2280,"delta":"29\"]\n  TableR"}
+{"tMs":2320,"delta":"ow cells:[\"4\",\"5"}
+{"tMs":2347,"delta":":21\",\"5:21\"]"}
+{"tMs":2379,"delta":"\n  TableRow cells"}
+{"tMs":2413,"delta":":[\"5\",\"5:12\",\""}
+{"tMs":2446,"delta":"5:12\"]\n  S"}
+{"tMs":2481,"delta":"ectionLabel \"V"}
+{"tMs":2513,"delta":"s. last run\" \"S"}
+{"tMs":2547,"delta":"un, 4.8 km"}
+{"tMs":2580,"delta":"\"\n  Details rows:"}
+{"tMs":2613,"delta":"=[[\"Distance\",\"+"}
+{"tMs":2649,"delta":"0.2 km\"],[\""}
+{"tMs":2680,"delta":"Time\",\"+0:48\""}
+{"tMs":2713,"delta":"],[\"Avg pace\",\""}
+{"tMs":2746,"delta":"15 s/km faster\""}
+{"tMs":2780,"delta":"],[\"Calories\",\"+21"}
+{"tMs":2814,"delta":" kcal\"]]"}
+{"tMs":2846,"delta":"\n  Callout \"Negative"}
+{"tMs":2880,"delta":" split\" \"You got faster every"}
+{"tMs":2913,"delta":" kilometer, finishing"}
+{"tMs":2946,"delta":" 25 s/km quic"}
+{"tMs":2980,"delta":"ker than you started.\" tone:"}
+{"tMs":3013,"delta":"good icon:\"trending_"}
+{"tMs":3047,"delta":"up\"\n  ActionBut"}
+{"tMs":3080,"delta":"ton \"Share run\" tone"}
+{"tMs":3199,"delta":":primary icon:\"share"}
+{"tMs":3199,"delta":"\" -> emit share; to"}
+{"tMs":3199,"delta":"ast \"Run shared\""}

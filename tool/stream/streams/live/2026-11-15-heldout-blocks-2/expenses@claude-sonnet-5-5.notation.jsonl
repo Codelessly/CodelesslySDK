@@ -1,0 +1,146 @@
+{"meta":{"ui":"expenses","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"I have four expenses waiting for my approval from one report. Show them in a card with merchant, category, date and amount, flag the one missing a receipt, let me approve or reject each, and show the approved total and a submit button.","text":"ChatCard \"Expense approvals\" \"Report #2041 · 4 items\" icon:\"receipt_long\" status:\"Pending\" tone:\"accent\" w:390\n  state exp=[{\"id\":1,\"merchant\":\"Delta Airlines\",\"cat\":\"Travel\",\"date\":\"Mar 4\",\"amount\":412.5,\"receipt\":true,\"s\":\"\"},{\"id\":2,\"merchant\":\"Blue Bottle Coffee\",\"cat\":\"Meals\",\"date\":\"Mar 5\",\"amount\":18.75,\"receipt\":true,\"s\":\"\"},{\"id\":3,\"merchant\":\"Uber\",\"cat\":\"Transport\",\"date\":\"Mar 5\",\"amount\":36.2,\"receipt\":false,\"s\":\"\"},{\"id\":4,\"merchant\":\"Marriott Downtown\",\"cat\":\"Lodging\",\"date\":\"Mar 6\",\"amount\":289,\"receipt\":true,\"s\":\"\"}]\n  state done=false\n  if !done\n    SectionLabel \"Expenses\" \"{count(exp,x=>x.s!='')} of 4 decided\"\n    each e in exp\n      Card gap:8\n        Row between middle\n          Column gap:2\n            Text.rowTitle \"{e.merchant}\"\n            Text.meta \"{e.cat} · {e.date}\"\n          Text.strong \"{money(e.amount,'$',2)}\"\n        if !e.receipt\n          Callout \"Missing receipt\" \"Ask for a receipt before approving.\" tone:danger icon:\"warning\"\n        Row gap:10\n          ActionButton \"Reject\" tone:danger enabled:=e.s!=\"rejected\" -> exp=updateWhere(exp,x=>x.id==e.id,x=>with(x,\"s\",\"rejected\"))\n          ActionButton \"Approve\" tone:good enabled:=e.s!=\"approved\" -> exp=updateWhere(exp,x=>x.id==e.id,x=>with(x,\"s\",\"approved\"))\n        if e.s!=\"\"\n          Text.caption \"Marked {e.s}\"\n    TotalBar \"Approved total\" \"{count(exp,x=>x.s=='approved')} approved · {count(exp,x=>x.s=='rejected')} rejected\" amount:=money(sum(filter(exp,x=>x.s==\"approved\"),x=>x.amount),\"$\",2) cta:\"Submit\" enabled:=count(exp,x=>x.s!=\"\")==4 -> done=true\n  if done\n    Receipt \"Report submitted\" \"Approved total {money(sum(filter(exp,x=>x.s=='approved'),x=>x.amount),'$',2)}\" code:\"#2041\" codeLabel:\"Report\" tone:good","usage":{"input_tokens":8847,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":864,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":896,"totalMs":5684}}
+{"tMs":896,"delta":"ChatCard \"Exp"}
+{"tMs":1214,"delta":"ense appro"}
+{"tMs":1214,"delta":"v"}
+{"tMs":1214,"delta":"als\" \"Report #"}
+{"tMs":1214,"delta":"2"}
+{"tMs":1214,"delta":"041"}
+{"tMs":1214,"delta":" ·"}
+{"tMs":1214,"delta":" "}
+{"tMs":1214,"delta":"4 items"}
+{"tMs":1214,"delta":"\" icon:\"rece"}
+{"tMs":1214,"delta":"ipt_long"}
+{"tMs":1214,"delta":"\" status:\"P"}
+{"tMs":1254,"delta":"ending\" tone:\"accent"}
+{"tMs":1537,"delta":"\" w:390"}
+{"tMs":1537,"delta":"\n  state ex"}
+{"tMs":1537,"delta":"p"}
+{"tMs":1537,"delta":"=[{\"id\":1"}
+{"tMs":1537,"delta":",\"mer"}
+{"tMs":1537,"delta":"chant\":\"Del"}
+{"tMs":1537,"delta":"ta Airlines\",\"c"}
+{"tMs":1537,"delta":"at\":\"Travel\",\"date"}
+{"tMs":1562,"delta":"\":\"M"}
+{"tMs":1596,"delta":"ar 4\",\"amount"}
+{"tMs":1628,"delta":"\":412"}
+{"tMs":1660,"delta":".5"}
+{"tMs":1860,"delta":",\"receipt\":true,"}
+{"tMs":1860,"delta":"\"s"}
+{"tMs":1860,"delta":"\":\"\""}
+{"tMs":1860,"delta":"},{\"id\":2,\""}
+{"tMs":1860,"delta":"merchant\":\"Bl"}
+{"tMs":1862,"delta":"ue B"}
+{"tMs":1896,"delta":"ottle Co"}
+{"tMs":1931,"delta":"ffee\",\"cat\":\""}
+{"tMs":1966,"delta":"Meals\",\"date\":\"M"}
+{"tMs":2000,"delta":"ar 5\",\"amount\":18"}
+{"tMs":2035,"delta":".75"}
+{"tMs":2069,"delta":",\"receipt\":true,"}
+{"tMs":2185,"delta":"\"s\":\"\"},{\"id"}
+{"tMs":2185,"delta":"\":3,\"merchant\":"}
+{"tMs":2185,"delta":"\"U"}
+{"tMs":2201,"delta":"ber\",\""}
+{"tMs":2235,"delta":"cat\":\"Trans"}
+{"tMs":2269,"delta":"port\",\"date\":\"Mar"}
+{"tMs":2302,"delta":" 5"}
+{"tMs":2336,"delta":"\",\"amount\":36"}
+{"tMs":2370,"delta":".2,\"receipt\":"}
+{"tMs":2403,"delta":"false,\"s\":\"\"},{"}
+{"tMs":2438,"delta":"\"id\":4,\"merch"}
+{"tMs":2472,"delta":"ant\":\"Marriott"}
+{"tMs":2504,"delta":" Down"}
+{"tMs":2538,"delta":"town\",\"cat\":\""}
+{"tMs":2572,"delta":"Lodging\",\"date\":\""}
+{"tMs":2606,"delta":"Mar 6\",\"amount\":"}
+{"tMs":2639,"delta":"289,"}
+{"tMs":2673,"delta":"\"receipt\":true,\""}
+{"tMs":2707,"delta":"s\":\"\"}]\n  state"}
+{"tMs":2740,"delta":" done=false\n  if"}
+{"tMs":2773,"delta":" !"}
+{"tMs":2807,"delta":"done\n    SectionLab"}
+{"tMs":2840,"delta":"el \"Expenses\" \""}
+{"tMs":2873,"delta":"{count"}
+{"tMs":2906,"delta":"(ex"}
+{"tMs":2939,"delta":"p,x"}
+{"tMs":2973,"delta":"=>x.s!='"}
+{"tMs":3006,"delta":"')} of 4 "}
+{"tMs":3039,"delta":"dec"}
+{"tMs":3073,"delta":"ided\"\n    each e"}
+{"tMs":3106,"delta":" in exp\n      Card g"}
+{"tMs":3140,"delta":"ap:8\n        Row between"}
+{"tMs":3173,"delta":" midd"}
+{"tMs":3206,"delta":"le\n          Column g"}
+{"tMs":3239,"delta":"ap:2"}
+{"tMs":3272,"delta":"\n            Text.r"}
+{"tMs":3306,"delta":"owTitle \"{e."}
+{"tMs":3349,"delta":"merchant}\"\n            "}
+{"tMs":3373,"delta":"Text.me"}
+{"tMs":3406,"delta":"ta \"{e.cat}"}
+{"tMs":3441,"delta":" · {e.date}\""}
+{"tMs":3474,"delta":"\n          Text.strong \"{"}
+{"tMs":3507,"delta":"money(e.amount,'"}
+{"tMs":3541,"delta":"$',2)}\"\n        "}
+{"tMs":3576,"delta":"if !e.receipt"}
+{"tMs":3610,"delta":"\n          Callout \"Missing"}
+{"tMs":3642,"delta":" receipt\" \""}
+{"tMs":3675,"delta":"Ask for a receipt before appro"}
+{"tMs":3709,"delta":"ving.\" tone:danger ic"}
+{"tMs":3743,"delta":"on:\"warning\""}
+{"tMs":3776,"delta":"\n        "}
+{"tMs":3809,"delta":"Row gap:10"}
+{"tMs":3843,"delta":"\n          ActionButton \""}
+{"tMs":3876,"delta":"Reject\" tone:dan"}
+{"tMs":3909,"delta":"ger en"}
+{"tMs":3944,"delta":"abled:="}
+{"tMs":3976,"delta":"e.s!=\""}
+{"tMs":4009,"delta":"r"}
+{"tMs":4042,"delta":"ejected\" -> exp="}
+{"tMs":4076,"delta":"updateWhere(exp"}
+{"tMs":4110,"delta":",x=>x.id=="}
+{"tMs":4143,"delta":"e.id,x=>with"}
+{"tMs":4177,"delta":"(x,\"s\",\"rej"}
+{"tMs":4210,"delta":"ected\"))\n          Action"}
+{"tMs":4244,"delta":"Button \"Approve\" t"}
+{"tMs":4277,"delta":"one:good enabled:="}
+{"tMs":4311,"delta":"e.s!=\"approved\""}
+{"tMs":4344,"delta":" -> exp=updateW"}
+{"tMs":4377,"delta":"here(exp,x="}
+{"tMs":4411,"delta":">x.id==e.id"}
+{"tMs":4445,"delta":",x=>with(x,"}
+{"tMs":4479,"delta":"\"s\",\"approved\"))"}
+{"tMs":4512,"delta":"\n        if e.s!"}
+{"tMs":4545,"delta":"=\"\"\n          Text"}
+{"tMs":4578,"delta":".caption \"Mar"}
+{"tMs":4612,"delta":"ked {e.s}\""}
+{"tMs":4645,"delta":"\n    TotalBar \""}
+{"tMs":4679,"delta":"Approved total\" \"{count"}
+{"tMs":4712,"delta":"(ex"}
+{"tMs":4745,"delta":"p,x=>x.s"}
+{"tMs":4778,"delta":"=='approved')} appro"}
+{"tMs":4812,"delta":"ved · {"}
+{"tMs":4845,"delta":"count(exp,x=>"}
+{"tMs":4879,"delta":"x.s=='rejected"}
+{"tMs":4912,"delta":"')} rejected\" amount"}
+{"tMs":4945,"delta":":=money(sum(fil"}
+{"tMs":4979,"delta":"ter(exp,x=>"}
+{"tMs":5013,"delta":"x.s==\""}
+{"tMs":5046,"delta":"approved\"),x=>x"}
+{"tMs":5079,"delta":".amount),\"$\",2"}
+{"tMs":5113,"delta":") cta:\"Submit"}
+{"tMs":5146,"delta":"\" enabled:=count("}
+{"tMs":5180,"delta":"exp,x=>x."}
+{"tMs":5213,"delta":"s!=\"\")==4"}
+{"tMs":5247,"delta":" -> done=true\n  "}
+{"tMs":5287,"delta":"if done\n    Receipt"}
+{"tMs":5313,"delta":" \"Report"}
+{"tMs":5347,"delta":" submitted\" \"Approved"}
+{"tMs":5380,"delta":" total {money(sum(fil"}
+{"tMs":5414,"delta":"ter(exp,x=>"}
+{"tMs":5447,"delta":"x.s=='approved'"}
+{"tMs":5480,"delta":"),x=>x.amount"}
+{"tMs":5514,"delta":"),'$',2)}\""}
+{"tMs":5547,"delta":" code"}
+{"tMs":5580,"delta":":\"#"}
+{"tMs":5613,"delta":"2041\" cod"}
+{"tMs":5647,"delta":"eLabel:\"Report"}
+{"tMs":5680,"delta":"\" tone:good"}
