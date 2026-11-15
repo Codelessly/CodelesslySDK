@@ -1,0 +1,62 @@
+{
+ "ui": "now_playing",
+ "kind": "page",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24168,
+ "turns": [
+  {
+   "input_tokens": 9242,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 814,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 882,
+   "totalMs": 5591,
+   "chars": 1707,
+   "lines": 25,
+   "jsonTails": 0,
+   "nodes": 20,
+   "outputTokensPerNode": "40.7",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/iconButton3/props/size: A iconButton has no prop \"size\". Its props: icon, enabled, style, autofocus, loading."
+   ]
+  },
+  {
+   "input_tokens": 10136,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 804,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 610,
+   "totalMs": 3991,
+   "chars": 1690,
+   "lines": 25,
+   "jsonTails": 0,
+   "nodes": 20,
+   "outputTokensPerNode": "40.2",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

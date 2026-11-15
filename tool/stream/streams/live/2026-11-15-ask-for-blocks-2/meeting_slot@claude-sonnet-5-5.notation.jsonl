@@ -1,0 +1,80 @@
+{"meta":{"ui":"meeting_slot","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Help me schedule a 30 minute meeting with three colleagues next week: let me pick a day, then one of the free time slots that day (some are taken), show who is attending, and confirm. After confirming the card shows the booked time.","text":"ChatCard \"Schedule a meeting\" \"30 minutes with 3 colleagues\" icon:\"event\" status:\"Next week\" tone:accent w:390\n  state day=\"\"\n  state time=\"\"\n  state booked=false\n  if !booked\n    SectionLabel \"Pick a day\" \"Next week\"\n    DayPicker =day days:[\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"] -> time=\"\"\n    if day!=\"\"\n      SectionLabel \"Free time slots\" \"30 min\"\n      ChoiceChips =time options:[\"09:00\",\"09:30\",\"10:00\",\"10:30\",\"11:00\",\"13:00\",\"13:30\",\"14:00\",\"15:00\"] disabled:[\"09:30\",\"10:30\",\"13:00\",\"15:00\"] columns:3\n    SectionLabel \"Attending\" \"4 people\"\n    Details rows:=[[\"You\",\"Organizer\"],[\"Maya Chen\",\"Invited\"],[\"Luis Ortega\",\"Invited\"],[\"Priya Nair\",\"Invited\"]] icons:[\"person\",\"person\",\"person\",\"person\"]\n    ActionButton \"Confirm meeting\" tone:primary icon:\"check\" enabled:=day!=\"\"&&time!=\"\" -> booked=true; emit confirm\n  if booked\n    Receipt \"Meeting booked\" \"30 minutes with Maya, Luis and Priya\" code:\"{day} at {time}\" codeLabel:\"Booked time\" tone:good icon:\"event_available\"","usage":{"input_tokens":9245,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":467,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":800,"totalMs":3404}}
+{"tMs":800,"delta":"ChatCard \"Sch"}
+{"tMs":1121,"delta":"edule a"}
+{"tMs":1121,"delta":" meeting\" \"30"}
+{"tMs":1121,"delta":" minutes with"}
+{"tMs":1121,"delta":" "}
+{"tMs":1121,"delta":"3 colleagues\" ic"}
+{"tMs":1121,"delta":"on:\"event"}
+{"tMs":1121,"delta":"\""}
+{"tMs":1121,"delta":" status:\"Next"}
+{"tMs":1121,"delta":" week\" tone:acc"}
+{"tMs":1121,"delta":"ent w:390"}
+{"tMs":1145,"delta":"\n  state day=\"\"\n  state"}
+{"tMs":1176,"delta":" time"}
+{"tMs":1498,"delta":"=\"\"\n  state boo"}
+{"tMs":1498,"delta":"ked=false\n  if !"}
+{"tMs":1498,"delta":"booked\n    S"}
+{"tMs":1498,"delta":"ectionLabel \"P"}
+{"tMs":1498,"delta":"ick a day\" \""}
+{"tMs":1498,"delta":"Next week\"\n    DayP"}
+{"tMs":1498,"delta":"icker =day days:[\""}
+{"tMs":1498,"delta":"Mon 16"}
+{"tMs":1499,"delta":"\",\"Tue 17\",\""}
+{"tMs":1514,"delta":"Wed 18\",\"Thu"}
+{"tMs":1549,"delta":" 19\",\"Fri 20"}
+{"tMs":1582,"delta":"\"] -> time"}
+{"tMs":1771,"delta":"=\"\"\n    if day!="}
+{"tMs":1771,"delta":"\"\"\n      SectionLab"}
+{"tMs":1771,"delta":"el \"Free"}
+{"tMs":1771,"delta":" time slots\" \"30 min"}
+{"tMs":1771,"delta":"\"\n      Choice"}
+{"tMs":1787,"delta":"Chips =time options:[\"09"}
+{"tMs":1820,"delta":":00\",\"09"}
+{"tMs":1855,"delta":":30\",\"10:00\",\"10"}
+{"tMs":1884,"delta":":30\",\"11:00\",\"13"}
+{"tMs":1917,"delta":":00\",\"13"}
+{"tMs":1952,"delta":":30\",\"14:00\",\"15"}
+{"tMs":1984,"delta":":00\""}
+{"tMs":2107,"delta":"] disabled:[\"09:"}
+{"tMs":2107,"delta":"30\",\"10:30\",\"13"}
+{"tMs":2107,"delta":":00\",\"15"}
+{"tMs":2118,"delta":":00\"] columns:3"}
+{"tMs":2151,"delta":"\n    SectionLabel"}
+{"tMs":2186,"delta":" \"Attending"}
+{"tMs":2217,"delta":"\" \"4"}
+{"tMs":2255,"delta":" people\"\n    Details r"}
+{"tMs":2285,"delta":"ows:="}
+{"tMs":2317,"delta":"[[\"You\",\"Organ"}
+{"tMs":2351,"delta":"izer\"],[\"Maya"}
+{"tMs":2383,"delta":" Ch"}
+{"tMs":2441,"delta":"en\",\"Inv"}
+{"tMs":2450,"delta":"ited\"],[\"Lu"}
+{"tMs":2482,"delta":"is "}
+{"tMs":2516,"delta":"Ortega\",\"Invited\"],"}
+{"tMs":2550,"delta":"[\"Priya Nair\",\""}
+{"tMs":2584,"delta":"Invited\"]] icons"}
+{"tMs":2620,"delta":":[\"person\",\"person\",\"person\",\""}
+{"tMs":2655,"delta":"person\"]\n    "}
+{"tMs":2684,"delta":"ActionButton \"Confir"}
+{"tMs":2717,"delta":"m meeting\" tone:"}
+{"tMs":2750,"delta":"primary ic"}
+{"tMs":2784,"delta":"on:\"check\" enabled"}
+{"tMs":2817,"delta":":=day!="}
+{"tMs":2851,"delta":"\"\"&&time!=\""}
+{"tMs":2885,"delta":"\" -> booked=true;"}
+{"tMs":2917,"delta":" emit conf"}
+{"tMs":2952,"delta":"irm\n  if booked"}
+{"tMs":2987,"delta":"\n    Receipt \"Me"}
+{"tMs":3018,"delta":"eting booked\" \"30"}
+{"tMs":3051,"delta":" minutes with Maya"}
+{"tMs":3085,"delta":", Luis and"}
+{"tMs":3119,"delta":" Priya\" code:\"{"}
+{"tMs":3151,"delta":"day} at"}
+{"tMs":3184,"delta":" {"}
+{"tMs":3401,"delta":"time}\" cod"}
+{"tMs":3401,"delta":"eLabel:\"Boo"}
+{"tMs":3401,"delta":"ked time\" tone:good ic"}
+{"tMs":3401,"delta":"on:\"event"}
+{"tMs":3401,"delta":"_available"}
+{"tMs":3401,"delta":"\""}

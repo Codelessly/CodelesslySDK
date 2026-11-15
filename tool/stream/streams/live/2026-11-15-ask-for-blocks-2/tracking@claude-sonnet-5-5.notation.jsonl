@@ -1,0 +1,88 @@
+{"meta":{"ui":"tracking","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"ChatCard \"Your package\" \"Wireless headphones · Order #48213\" icon:\"local_shipping\" status:\"In transit\" tone:accent w:390\n  state stage=3\n  state note=\"\"\n  state sent=false\n  Details rows:[[\"Carrier\",\"UPS Ground\"],[\"Tracking number\",\"1Z 999 AA1 0123 456 784\"],[\"Estimated delivery\",\"Thursday, May 16\"]] icons:[\"local_shipping\",\"tag\",\"event\"]\n  SectionLabel \"Shipment progress\" \"Stage 3 of 5\"\n  Steps steps:[\"Order placed\",\"Packed\",\"In transit\",\"Out for delivery\",\"Delivered\"] current:stage\n  Callout \"Currently in transit\" \"Departed the Memphis, TN hub this morning. Next stop: your local depot.\" tone:accent icon:\"location_on\"\n  if !sent\n    SectionLabel \"Delivery instructions\" \"Optional\"\n    InputField \"Instructions for the driver\" \"e.g. Leave with the front desk\" =note lines:3\n    ActionButton \"Save instructions\" tone:primary icon:\"edit_note\" enabled:=length(trim(note))>0 -> sent=true; toast \"Instructions saved\"\n  if sent\n    Receipt \"Instructions saved\" \"{note}\" tone:good icon:\"check\"","usage":{"input_tokens":9243,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":432,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":868,"totalMs":3794}}
+{"tMs":868,"delta":"ChatCard \"Your"}
+{"tMs":1202,"delta":" package\" \"W"}
+{"tMs":1202,"delta":"ireless head"}
+{"tMs":1202,"delta":"phones ·"}
+{"tMs":1202,"delta":" Order"}
+{"tMs":1202,"delta":" #48"}
+{"tMs":1202,"delta":"213"}
+{"tMs":1202,"delta":"\" icon:\"local_sh"}
+{"tMs":1202,"delta":"ipping\" status:\"In"}
+{"tMs":1202,"delta":" transit\" tone:acc"}
+{"tMs":1202,"delta":"ent w:390\n  state st"}
+{"tMs":1207,"delta":"age=3"}
+{"tMs":1239,"delta":"\n  state note"}
+{"tMs":1549,"delta":"=\"\"\n  state s"}
+{"tMs":1549,"delta":"ent=false\n  Details r"}
+{"tMs":1549,"delta":"ows:["}
+{"tMs":1549,"delta":"[\"Carrier\",\"U"}
+{"tMs":1549,"delta":"PS "}
+{"tMs":1549,"delta":"Ground\"],[\"Tracking"}
+{"tMs":1550,"delta":" number"}
+{"tMs":1550,"delta":"\",\"1"}
+{"tMs":1550,"delta":"Z 999"}
+{"tMs":1572,"delta":" A"}
+{"tMs":1604,"delta":"A1"}
+{"tMs":1638,"delta":" 0"}
+{"tMs":1898,"delta":"123 456"}
+{"tMs":1898,"delta":" 784"}
+{"tMs":1898,"delta":"\"],[\"Estimated del"}
+{"tMs":1898,"delta":"ivery\",\"Thursday,"}
+{"tMs":1898,"delta":" May 16"}
+{"tMs":1898,"delta":"\"]]"}
+{"tMs":1898,"delta":" icons:[\"local"}
+{"tMs":1904,"delta":"_shipping\",\"tag"}
+{"tMs":1937,"delta":"\",\"event"}
+{"tMs":1969,"delta":"\""}
+{"tMs":2004,"delta":"]\n  SectionLab"}
+{"tMs":2036,"delta":"el \"Sh"}
+{"tMs":2246,"delta":"ipment prog"}
+{"tMs":2246,"delta":"ress\" \"St"}
+{"tMs":2246,"delta":"age 3 of 5\""}
+{"tMs":2246,"delta":"\n  Steps steps:"}
+{"tMs":2246,"delta":"[\"Order"}
+{"tMs":2246,"delta":" placed\",\"Pack"}
+{"tMs":2271,"delta":"ed\",\"In"}
+{"tMs":2305,"delta":" transit\",\"Out for"}
+{"tMs":2339,"delta":" delivery\",\"Delivered"}
+{"tMs":2373,"delta":"\"] current:stage\n  "}
+{"tMs":2407,"delta":"Callout \"Currently in"}
+{"tMs":2442,"delta":" transit\" \"Depart"}
+{"tMs":2587,"delta":"ed the"}
+{"tMs":2587,"delta":" Mem"}
+{"tMs":2587,"delta":"phis,"}
+{"tMs":2587,"delta":" TN h"}
+{"tMs":2605,"delta":"ub this"}
+{"tMs":2638,"delta":" morning. Next"}
+{"tMs":2674,"delta":" stop:"}
+{"tMs":2704,"delta":" your"}
+{"tMs":2737,"delta":" local dep"}
+{"tMs":2774,"delta":"ot.\" tone:accent ic"}
+{"tMs":2805,"delta":"on:\"location_"}
+{"tMs":2838,"delta":"on\"\n  if !"}
+{"tMs":2931,"delta":"sent\n    S"}
+{"tMs":2931,"delta":"ectionLabel \"Del"}
+{"tMs":2940,"delta":"ivery instructions\" \""}
+{"tMs":2973,"delta":"Optional\"\n    InputField"}
+{"tMs":3007,"delta":" \"Inst"}
+{"tMs":3040,"delta":"ructions for the driver\" \""}
+{"tMs":3074,"delta":"e.g. Leave with"}
+{"tMs":3107,"delta":" the"}
+{"tMs":3140,"delta":" front"}
+{"tMs":3174,"delta":" desk\" =note lines:"}
+{"tMs":3208,"delta":"3\n    ActionButton"}
+{"tMs":3241,"delta":" \"Save"}
+{"tMs":3276,"delta":" instructions\" tone:prim"}
+{"tMs":3308,"delta":"ary icon:\"ed"}
+{"tMs":3341,"delta":"it_"}
+{"tMs":3375,"delta":"note\" enabled:="}
+{"tMs":3407,"delta":"length"}
+{"tMs":3440,"delta":"(tr"}
+{"tMs":3476,"delta":"im(note))>0 -"}
+{"tMs":3512,"delta":"> sent=true; toast"}
+{"tMs":3541,"delta":" \"Instructions saved\""}
+{"tMs":3575,"delta":"\n  if sent\n    "}
+{"tMs":3609,"delta":"Receipt \"Inst"}
+{"tMs":3644,"delta":"ructions saved\" \"{"}
+{"tMs":3788,"delta":"note}\" tone:good ic"}
+{"tMs":3788,"delta":"on:\"check\""}

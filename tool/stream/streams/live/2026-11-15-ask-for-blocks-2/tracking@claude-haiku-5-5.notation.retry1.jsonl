@@ -1,0 +1,34 @@
+{"meta":{"ui":"tracking","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"ChatCard \"Your package\" \"Estimated delivery Thu 12 June\" icon:\"local_shipping\" status:\"In transit\" tone:accent\n  Details rows:[[\"Item\",\"Walnut desk lamp\"],[\"Carrier\",\"Royal Mail\"],[\"Tracking\",\"RM 4471 2290 6GB\"],[\"Estimated\",\"Thu 12 June\"]]\n  SectionLabel \"Shipment progress\" \"Stage 3 of 5\"\n  Steps steps:[\"Ordered\",\"Packed\",\"Shipped\",\"Out for delivery\",\"Delivered\"] current:3\n  Disclosure \"Leave delivery instructions\" \"Leave with the neighbour or in the porch.\" lines:[\"Ring the bell, then leave in the porch.\",\"Do not leave if no one answers.\"] icon:\"edit_note\"","usage":{"input_tokens":10078,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":264,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":413,"totalMs":1087}}
+{"tMs":413,"delta":"ChatCard \"Your package"}
+{"tMs":534,"delta":"\" \"Estimated deliv"}
+{"tMs":534,"delta":"ery Thu 12 June"}
+{"tMs":534,"delta":"\" icon:\"local_sh"}
+{"tMs":534,"delta":"ipping\" status:\"In trans"}
+{"tMs":534,"delta":"it\" tone:accent"}
+{"tMs":550,"delta":"\n  Details rows:[[\""}
+{"tMs":570,"delta":"Item\",\"Walnut des"}
+{"tMs":591,"delta":"k lamp\"],[\""}
+{"tMs":612,"delta":"Carrier\",\"Royal"}
+{"tMs":632,"delta":" Mail\"],[\"Trac"}
+{"tMs":653,"delta":"king\",\"RM 4471 "}
+{"tMs":673,"delta":"2290 6GB\"],"}
+{"tMs":696,"delta":"[\"Estimated\",\"Th"}
+{"tMs":715,"delta":"u 12 June\"]]"}
+{"tMs":735,"delta":"\n  SectionLabel"}
+{"tMs":759,"delta":" \"Shipment progress\""}
+{"tMs":776,"delta":" \"Stage 3 of"}
+{"tMs":796,"delta":" 5\"\n  Steps"}
+{"tMs":817,"delta":" steps:[\"Ordered"}
+{"tMs":837,"delta":"\",\"Packed\",\"Ship"}
+{"tMs":858,"delta":"ped\",\"Out for delivery"}
+{"tMs":878,"delta":"\",\"Delivered\"] current"}
+{"tMs":899,"delta":":3\n  Disclos"}
+{"tMs":920,"delta":"ure \"Leave delivery"}
+{"tMs":940,"delta":" instructions\" \"Leave"}
+{"tMs":960,"delta":" with the neighbour or in"}
+{"tMs":981,"delta":" the porch.\" lines:[\""}
+{"tMs":1004,"delta":"Ring the bell, then"}
+{"tMs":1021,"delta":" leave in the porch.\",\""}
+{"tMs":1042,"delta":"Do not leave if no one"}
+{"tMs":1062,"delta":" answers.\"] icon:\""}
+{"tMs":1083,"delta":"edit_note\""}

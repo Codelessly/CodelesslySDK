@@ -1,0 +1,103 @@
+{"meta":{"ui":"now_playing","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show what is playing right now as an inline music card: the track, artist and album art, a progress bar with elapsed and remaining time, previous, play or pause and next controls, a like button, and the next three tracks in the queue.","text":"Wanted \"NowPlaying\" \"album art, track and artist, a progress bar with elapsed and remaining time, previous, play/pause and next controls, a like button, and the next three tracks in the queue\"\n  ChatCard \"Now playing\" \"Midnight Drive · Neon Atlas\" icon:\"music_note\" status:\"{playing ? 'Playing' : 'Paused'}\" tone:accent w:390\n    Media kind:\"skyline\" tone:\"night\" h:180\n    Row between middle\n      Column gap:2\n        Text.cardTitle \"{tracks[current].title}\"\n        Text.bodySecondary \"{tracks[current].artist}\"\n      IconButton \"{liked ? 'favorite' : 'favorite_border'}\" -> liked=!liked\n    ProgressLine \"{floor(elapsed/60)}:{elapsed%60<10?'0':''}{elapsed%60}\" \"-{floor((length_s-elapsed)/60)}:{(length_s-elapsed)%60<10?'0':''}{(length_s-elapsed)%60}\" value:=elapsed/length_s\n    Row center middle gap:16\n      IconButton \"skip_previous\" -> current=(current+2)%3; elapsed=0\n      IconButton \"{playing ? 'pause_circle' : 'play_circle'}\" -> playing=!playing\n      IconButton \"skip_next\" -> current=(current+1)%3; elapsed=0\n    SectionLabel \"Up next\" \"3 tracks\"\n    each t in queue\n      ListTile \"{t.title}\" -> emit play t.id\n        Text.caption \"{t.artist} · {t.time}\"\n\nstate playing=true\nstate liked=false\nstate current=0\nstate elapsed=84\nstate length_s=214\nstate tracks=[{\"title\":\"Midnight Drive\",\"artist\":\"Neon Atlas\"},{\"title\":\"Glass Rivers\",\"artist\":\"Hollow Pines\"},{\"title\":\"Afterglow\",\"artist\":\"Lune\"}]\nstate queue=[{\"id\":1,\"title\":\"Glass Rivers\",\"artist\":\"Hollow Pines\",\"time\":\"3:42\"},{\"id\":2,\"title\":\"Afterglow\",\"artist\":\"Lune\",\"time\":\"4:05\"},{\"id\":3,\"title\":\"Paper Satellites\",\"artist\":\"Neon Atlas\",\"time\":\"2:58\"}]\nevery 1s when playing -> elapsed=elapsed<length_s?elapsed+1:0","usage":{"input_tokens":10136,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":804,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":610,"totalMs":3991}}
+{"tMs":610,"delta":"Wanted \""}
+{"tMs":951,"delta":"NowPlaying\" \""}
+{"tMs":951,"delta":"album art, track and artist,"}
+{"tMs":951,"delta":" a progress bar with elap"}
+{"tMs":951,"delta":"sed and remaining time,"}
+{"tMs":951,"delta":" previous, play/pause and"}
+{"tMs":951,"delta":" next controls, a like button,"}
+{"tMs":951,"delta":" and the next three tracks in"}
+{"tMs":951,"delta":" the queue\"\n  Ch"}
+{"tMs":951,"delta":"atCard \"Now playing"}
+{"tMs":954,"delta":"\" \"Midnight Dr"}
+{"tMs":988,"delta":"ive · Neon Atl"}
+{"tMs":1021,"delta":"as\" icon:\"music_"}
+{"tMs":1298,"delta":"note\" status:\"{playing"}
+{"tMs":1298,"delta":" ? 'Playing'"}
+{"tMs":1298,"delta":" : 'Paused'}"}
+{"tMs":1298,"delta":"\" tone:accent w:"}
+{"tMs":1298,"delta":"390\n    Media kind:"}
+{"tMs":1298,"delta":"\"skyline\" tone:"}
+{"tMs":1298,"delta":"\"night\" h:180\n    "}
+{"tMs":1298,"delta":"Row between middle\n      "}
+{"tMs":1321,"delta":"Column gap:2\n        "}
+{"tMs":1354,"delta":"Text.cardTitle \""}
+{"tMs":1388,"delta":"{tracks[current].title"}
+{"tMs":1421,"delta":"}\"\n        Text.b"}
+{"tMs":1638,"delta":"odySecondary \"{t"}
+{"tMs":1638,"delta":"racks[current].artist}"}
+{"tMs":1638,"delta":"\"\n      IconButton \""}
+{"tMs":1638,"delta":"{liked ? 'fav"}
+{"tMs":1638,"delta":"orite' : 'favor"}
+{"tMs":1638,"delta":"ite_border'}\" ->"}
+{"tMs":1654,"delta":" liked=!liked\n    "}
+{"tMs":1688,"delta":"ProgressLine \"{"}
+{"tMs":1721,"delta":"flo"}
+{"tMs":1760,"delta":"or(elapsed/60"}
+{"tMs":1788,"delta":")}:{elapsed"}
+{"tMs":1821,"delta":"%60<10?'0':"}
+{"tMs":1980,"delta":"''}{elapsed%"}
+{"tMs":1980,"delta":"60}\" \"-{floor"}
+{"tMs":1980,"delta":"((length_s-elaps"}
+{"tMs":1980,"delta":"ed)/60)}:{"}
+{"tMs":1987,"delta":"(length_s-elaps"}
+{"tMs":2024,"delta":"ed)%60<10?'"}
+{"tMs":2060,"delta":"0':''}{(length_"}
+{"tMs":2087,"delta":"s-elapsed)%"}
+{"tMs":2128,"delta":"60}\" value:=elap"}
+{"tMs":2160,"delta":"sed/length_s\n    "}
+{"tMs":2196,"delta":"Row center middle gap:"}
+{"tMs":2222,"delta":"16\n      IconButton \""}
+{"tMs":2323,"delta":"skip_previous\" ->"}
+{"tMs":2323,"delta":" current=(current+2)%"}
+{"tMs":2323,"delta":"3; elapsed=0"}
+{"tMs":2354,"delta":"\n      IconButton \"{"}
+{"tMs":2387,"delta":"playing ? 'pause"}
+{"tMs":2428,"delta":"_circle' : 'play"}
+{"tMs":2455,"delta":"_circle'}\" ->"}
+{"tMs":2488,"delta":" playing=!playing\n      "}
+{"tMs":2521,"delta":"IconButton \"skip_"}
+{"tMs":2554,"delta":"next\" -> current=(current"}
+{"tMs":2587,"delta":"+1)%3; elap"}
+{"tMs":2621,"delta":"sed=0\n    Sect"}
+{"tMs":2667,"delta":"ionLabel \"Up next"}
+{"tMs":2688,"delta":"\" \"3 tracks\""}
+{"tMs":2721,"delta":"\n    each t in queue"}
+{"tMs":2754,"delta":"\n      ListTile \"{t"}
+{"tMs":2787,"delta":".title}\" -> emit"}
+{"tMs":2821,"delta":" play t.id\n        Text"}
+{"tMs":2856,"delta":".caption \"{t.art"}
+{"tMs":2888,"delta":"ist} · {t.time}"}
+{"tMs":2921,"delta":"\"\n\nstate playing=true"}
+{"tMs":2954,"delta":"\nstate liked=false\nstate current"}
+{"tMs":2991,"delta":"=0\nstate elapsed"}
+{"tMs":3021,"delta":"=84\nstate length_s="}
+{"tMs":3059,"delta":"214\nstate tracks=["}
+{"tMs":3090,"delta":"{\"title\":\"Midn"}
+{"tMs":3121,"delta":"ight Drive\",\"artist\":"}
+{"tMs":3154,"delta":"\"Neon Atlas"}
+{"tMs":3187,"delta":"\"},{\"title\":\""}
+{"tMs":3221,"delta":"Glass Rivers\",\"art"}
+{"tMs":3254,"delta":"ist\":\"Hollow"}
+{"tMs":3288,"delta":" Pines\"},{\"title\":"}
+{"tMs":3322,"delta":"\"Afterglow\",\"art"}
+{"tMs":3354,"delta":"ist\":\"Lune\"}"}
+{"tMs":3388,"delta":"]\nstate queue=[{"}
+{"tMs":3421,"delta":"\"id\":1,\"title\":"}
+{"tMs":3454,"delta":"\"Glass Rivers"}
+{"tMs":3488,"delta":"\",\"artist\":\"Holl"}
+{"tMs":3521,"delta":"ow Pines\",\"time\":\""}
+{"tMs":3554,"delta":"3:42\"},{\"id"}
+{"tMs":3589,"delta":"\":2,\"title\":\""}
+{"tMs":3621,"delta":"Afterglow\",\"artist\":"}
+{"tMs":3654,"delta":"\"Lune\",\"time\":\""}
+{"tMs":3688,"delta":"4:05\"},{\"id"}
+{"tMs":3723,"delta":"\":3,\"title\":\""}
+{"tMs":3754,"delta":"Paper Satellites\",\"art"}
+{"tMs":3788,"delta":"ist\":\"Neon At"}
+{"tMs":3821,"delta":"las\",\"time\":\"2:"}
+{"tMs":3972,"delta":"58\"}]\nevery 1"}
+{"tMs":3972,"delta":"s when playing -> elap"}
+{"tMs":3972,"delta":"sed=elapsed<"}
+{"tMs":3972,"delta":"length_s?elapsed"}
+{"tMs":3987,"delta":"+1:0"}

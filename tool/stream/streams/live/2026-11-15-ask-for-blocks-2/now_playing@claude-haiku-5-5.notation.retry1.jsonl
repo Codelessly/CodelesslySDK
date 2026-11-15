@@ -1,0 +1,73 @@
+{"meta":{"ui":"now_playing","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show what is playing right now as an inline music card: the track, artist and album art, a progress bar with elapsed and remaining time, previous, play or pause and next controls, a like button, and the next three tracks in the queue.","text":"ChatCard \"Now playing\" \"Up next in your queue\" icon:\"music_note\" status:\"Playing\"\n  Media kind:\"dunes\" tone:\"dusk\" h:180\n  Text.heading \"Midnight Coast\" size:20 weight:700\n  Text.bodySecondary \"Lunar Tides · Salt & Silver\"\n  state playing=true\n  state liked=false\n  state elapsed=72\n  Progress =elapsed/214\n  Row between\n    Text.caption \"{floor(elapsed/60)}:{fixed(elapsed%60,0)}\"\n    Text.caption \"-{floor((214-elapsed)/60)}:{fixed((214-elapsed)%60,0)}\"\n  every 1000 when playing -> elapsed=min(214,elapsed+1)\n  Row center gap:20\n    IconButton icon:\"skip_previous\" -> elapsed=0\n    IconButton icon:=playing?\"pause\":\"play_arrow\" style:\"primary\" -> playing=!playing\n    IconButton icon:\"skip_next\" -> elapsed=0\n    Spacer grow\n    IconButton icon:=liked?\"favorite\":\"favorite_border\" -> liked=!liked\n  Text.sectionTitle \"Up next\"\n  each t in queue\n    ListTile \"{t.title}\" \"{t.artist}\" \"{t.length}\"\n  state queue=[{\"title\":\"Glass Harbour\",\"artist\":\"Lunar Tides\",\"length\":\"3:42\"},{\"title\":\"Low Tide Hymn\",\"artist\":\"Salt & Silver\",\"length\":\"4:10\"},{\"title\":\"Paper Moons\",\"artist\":\"Ada Reyes\",\"length\":\"3:18\"}]","usage":{"input_tokens":10010,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":555,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":434,"totalMs":1886}}
+{"tMs":434,"delta":"ChatCard \"Now"}
+{"tMs":530,"delta":" playing\" \"Up next in"}
+{"tMs":530,"delta":" your queue\" icon:\""}
+{"tMs":530,"delta":"music_note\" status:\""}
+{"tMs":530,"delta":"Playing\"\n  Media k"}
+{"tMs":536,"delta":"ind:\"dunes\" t"}
+{"tMs":556,"delta":"one:\"dusk\" h"}
+{"tMs":577,"delta":":180\n  Text.he"}
+{"tMs":597,"delta":"ading \"Midnight Co"}
+{"tMs":619,"delta":"ast\" size:20 weight"}
+{"tMs":638,"delta":":700\n  Text.b"}
+{"tMs":658,"delta":"odySecondary \"L"}
+{"tMs":679,"delta":"unar Tides · Sal"}
+{"tMs":699,"delta":"t & Silver\"\n  "}
+{"tMs":723,"delta":"state playing=true\n  state"}
+{"tMs":741,"delta":" liked=false\n  state el"}
+{"tMs":761,"delta":"apsed=72\n  "}
+{"tMs":781,"delta":"Progress =elapsed/"}
+{"tMs":801,"delta":"214\n  Row between\n    "}
+{"tMs":821,"delta":"Text.caption \"{flo"}
+{"tMs":843,"delta":"or(elapsed/60"}
+{"tMs":865,"delta":")}:{fixed("}
+{"tMs":882,"delta":"elapsed%60,0"}
+{"tMs":903,"delta":")}\"\n    Text."}
+{"tMs":923,"delta":"caption \"-{floor(("}
+{"tMs":944,"delta":"214-elapsed)/"}
+{"tMs":965,"delta":"60)}:{fixed"}
+{"tMs":988,"delta":"((214-elapsed)"}
+{"tMs":1005,"delta":"%60,0)}\""}
+{"tMs":1028,"delta":"\n  every 1000 when"}
+{"tMs":1046,"delta":" playing -> elapsed"}
+{"tMs":1066,"delta":"=min(214,elaps"}
+{"tMs":1087,"delta":"ed+1)\n  Row"}
+{"tMs":1107,"delta":" center gap:20\n    I"}
+{"tMs":1127,"delta":"conButton ic"}
+{"tMs":1148,"delta":"on:\"skip_previous"}
+{"tMs":1168,"delta":"\" -> elapsed="}
+{"tMs":1189,"delta":"0\n    IconButton ic"}
+{"tMs":1208,"delta":"on:="}
+{"tMs":1229,"delta":"playing?\"pause\":\""}
+{"tMs":1249,"delta":"play_arrow\" style"}
+{"tMs":1270,"delta":":\""}
+{"tMs":1289,"delta":"primary\" -> playing="}
+{"tMs":1310,"delta":"!playing\n    IconBut"}
+{"tMs":1331,"delta":"ton icon:\""}
+{"tMs":1352,"delta":"skip_next\" -> el"}
+{"tMs":1371,"delta":"apsed=0\n    "}
+{"tMs":1392,"delta":"Spacer grow\n    I"}
+{"tMs":1412,"delta":"conButton icon:=li"}
+{"tMs":1433,"delta":"ked?\"favorite\":\""}
+{"tMs":1453,"delta":"favorite_border\" ->"}
+{"tMs":1473,"delta":" liked=!liked\n  "}
+{"tMs":1494,"delta":"Text.sectionTit"}
+{"tMs":1516,"delta":"le \"Up next\"\n  "}
+{"tMs":1535,"delta":"each t in queue\n    "}
+{"tMs":1556,"delta":"ListTile \"{t.title"}
+{"tMs":1576,"delta":"}\" \"{t.artist"}
+{"tMs":1597,"delta":"}\" \"{t.length}"}
+{"tMs":1616,"delta":"\"\n  state queue=["}
+{"tMs":1637,"delta":"{\"title\":\"Glass"}
+{"tMs":1658,"delta":" Harbour\",\"artist\":"}
+{"tMs":1678,"delta":"\"Lunar Tides"}
+{"tMs":1699,"delta":"\",\"length\":\"3:42\""}
+{"tMs":1719,"delta":"},{\"title\":\"Low"}
+{"tMs":1739,"delta":" Tide Hymn\",\""}
+{"tMs":1763,"delta":"artist\":\"Salt &"}
+{"tMs":1780,"delta":" Silver\",\"length\":\"4"}
+{"tMs":1800,"delta":":10\"},{\"title\":"}
+{"tMs":1821,"delta":"\"Paper Moons\",\""}
+{"tMs":1841,"delta":"artist\":\"Ada"}
+{"tMs":1862,"delta":" Reyes\",\"length\":\"3"}
+{"tMs":1882,"delta":":18\"}]"}

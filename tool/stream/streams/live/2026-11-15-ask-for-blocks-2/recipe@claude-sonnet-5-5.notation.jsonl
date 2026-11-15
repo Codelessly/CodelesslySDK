@@ -1,0 +1,136 @@
+{"meta":{"ui":"recipe","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: total time and difficulty, a servings control that scales the ingredient amounts, the ingredients as a checklist I can tick off, the four steps, and a start cooking button.","text":"ChatCard \"Lemon Chicken Traybake\" \"Weeknight dinner, one tray\" icon:\"restaurant\" status:\"Easy\" tone:accent w:390\n  state servings=4\n  state ticked=[]\n  state started=false\n  if !started\n    Details rows:=[[\"Total time\",\"50 min\"],[\"Difficulty\",\"Easy\"],[\"Hands-on\",\"15 min\"]] icons:[\"schedule\",\"signal_cellular_alt\",\"back_hand\"]\n    Counter \"Servings\" \"Amounts scale automatically\" =servings min:1 max:12\n    SectionLabel \"Ingredients\" \"{length(ticked)} of 6 ticked\"\n    Checklist \"Tick off as you gather\" =ticked items:=[\"{fixed(servings*0.5,1)} kg chicken thighs\",\"{fixed(servings*0.5,1)} kg baby potatoes\",\"{fixed(servings*0.5,1)} lemons\",\"{fixed(servings*1.5,1)} tbsp olive oil\",\"{fixed(servings*1,0)} garlic cloves\",\"{fixed(servings*0.5,1)} tsp dried oregano\"]\n    SectionLabel \"Method\" \"4 steps\"\n    Steps steps:[\"Heat oven to 220°C and halve potatoes\",\"Toss everything with oil, lemon, garlic, oregano\",\"Roast chicken and potatoes for 40 min\",\"Rest 5 min, squeeze over lemon, serve\"] current:1\n    Paragraph \"Step 1: Heat the oven to 220°C and halve the potatoes. Step 2: Toss everything with oil, lemon, garlic and oregano on one tray. Step 3: Roast for 40 minutes until golden. Step 4: Rest 5 minutes and finish with fresh lemon.\"\n    ActionButton \"Start cooking\" tone:primary icon:\"play_arrow\" -> started=true; emit startCooking servings\n  if started\n    Receipt \"Let's cook!\" \"Oven to 220°C. Dinner for {servings} is about 50 minutes away.\" tone:good icon:\"local_fire_department\"","usage":{"input_tokens":9251,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":696,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":650,"totalMs":5129}}
+{"tMs":650,"delta":"ChatCard \"L"}
+{"tMs":968,"delta":"emon"}
+{"tMs":968,"delta":" Chicken Traybake\""}
+{"tMs":968,"delta":" \"Weeknight d"}
+{"tMs":968,"delta":"inner,"}
+{"tMs":968,"delta":" one t"}
+{"tMs":968,"delta":"ray\" icon:\"rest"}
+{"tMs":968,"delta":"aurant\""}
+{"tMs":968,"delta":" status:\"Easy\" t"}
+{"tMs":968,"delta":"one:accent w:390"}
+{"tMs":968,"delta":"\n  state servings=4"}
+{"tMs":998,"delta":"\n  state tic"}
+{"tMs":1031,"delta":"ked=[]\n  state started"}
+{"tMs":1303,"delta":"=false\n  if"}
+{"tMs":1303,"delta":" !"}
+{"tMs":1303,"delta":"started\n    Details rows:"}
+{"tMs":1303,"delta":"=[[\""}
+{"tMs":1303,"delta":"Total time\",\"50"}
+{"tMs":1303,"delta":" min\"],[\"Diffic"}
+{"tMs":1303,"delta":"ulty\",\"Easy\"],"}
+{"tMs":1303,"delta":"[\"Hands"}
+{"tMs":1327,"delta":"-"}
+{"tMs":1359,"delta":"on\",\""}
+{"tMs":1393,"delta":"15 min\"]]"}
+{"tMs":1430,"delta":" icons:[\"sch"}
+{"tMs":1640,"delta":"edule\",\"sign"}
+{"tMs":1640,"delta":"al_c"}
+{"tMs":1640,"delta":"ellular_"}
+{"tMs":1640,"delta":"alt\",\"back"}
+{"tMs":1640,"delta":"_h"}
+{"tMs":1640,"delta":"and\"]\n    Counter"}
+{"tMs":1657,"delta":" \"Servings\" \""}
+{"tMs":1690,"delta":"Am"}
+{"tMs":1723,"delta":"ounts scale autom"}
+{"tMs":1757,"delta":"atically\" =servings min:"}
+{"tMs":1790,"delta":"1 max:12"}
+{"tMs":1973,"delta":"\n    SectionLabel \""}
+{"tMs":1974,"delta":"Ingredients\" \"{"}
+{"tMs":1974,"delta":"length"}
+{"tMs":1974,"delta":"(ticked)} of "}
+{"tMs":1989,"delta":"6"}
+{"tMs":2025,"delta":" ticked\"\n    "}
+{"tMs":2057,"delta":"Checklist \"T"}
+{"tMs":2090,"delta":"ick off as"}
+{"tMs":2122,"delta":" you g"}
+{"tMs":2157,"delta":"ather\" =ticked items:"}
+{"tMs":2189,"delta":"="}
+{"tMs":2221,"delta":"[\"{"}
+{"tMs":2307,"delta":"fixed(servings*"}
+{"tMs":2307,"delta":"0.5,1)} k"}
+{"tMs":2329,"delta":"g chicken th"}
+{"tMs":2358,"delta":"ighs\",\"{fixed("}
+{"tMs":2391,"delta":"servings*0.5"}
+{"tMs":2424,"delta":",1)} k"}
+{"tMs":2456,"delta":"g ba"}
+{"tMs":2490,"delta":"by potatoes\",\"{f"}
+{"tMs":2524,"delta":"ixed(servings*0."}
+{"tMs":2558,"delta":"5"}
+{"tMs":2592,"delta":",1)} lemons\",\""}
+{"tMs":2624,"delta":"{fixed(servings*"}
+{"tMs":2659,"delta":"1"}
+{"tMs":2691,"delta":".5,1)} tb"}
+{"tMs":2724,"delta":"sp olive oil\",\"{"}
+{"tMs":2759,"delta":"fixed(servings*1"}
+{"tMs":2791,"delta":","}
+{"tMs":2828,"delta":"0"}
+{"tMs":2857,"delta":")} gar"}
+{"tMs":2891,"delta":"lic cloves\",\"{f"}
+{"tMs":2924,"delta":"ixed(servings*0."}
+{"tMs":2958,"delta":"5,1)} tsp"}
+{"tMs":2997,"delta":" d"}
+{"tMs":3025,"delta":"ried oregano\"]\n    "}
+{"tMs":3058,"delta":"SectionLabel \""}
+{"tMs":3092,"delta":"Method\" \""}
+{"tMs":3130,"delta":"4 steps\"\n    "}
+{"tMs":3158,"delta":"Ste"}
+{"tMs":3194,"delta":"ps steps:[\""}
+{"tMs":3224,"delta":"Heat o"}
+{"tMs":3257,"delta":"ven to 220"}
+{"tMs":3291,"delta":"°"}
+{"tMs":3327,"delta":"C and"}
+{"tMs":3361,"delta":" hal"}
+{"tMs":3391,"delta":"ve potatoes\",\"To"}
+{"tMs":3422,"delta":"ss ever"}
+{"tMs":3456,"delta":"ything with oil, l"}
+{"tMs":3491,"delta":"emon,"}
+{"tMs":3523,"delta":" garlic, oregano\",\""}
+{"tMs":3556,"delta":"Ro"}
+{"tMs":3589,"delta":"ast ch"}
+{"tMs":3622,"delta":"icken and"}
+{"tMs":3659,"delta":" potatoes for"}
+{"tMs":3689,"delta":" 40"}
+{"tMs":3722,"delta":" min\",\"Rest "}
+{"tMs":3759,"delta":"5 min, squ"}
+{"tMs":3788,"delta":"eeze over"}
+{"tMs":3822,"delta":" lemon,"}
+{"tMs":3857,"delta":" serve\"]"}
+{"tMs":3889,"delta":" current:1\n    Parag"}
+{"tMs":3922,"delta":"raph \"Step"}
+{"tMs":3957,"delta":" 1: He"}
+{"tMs":3989,"delta":"at the oven to 220°"}
+{"tMs":4023,"delta":"C and halve the potato"}
+{"tMs":4056,"delta":"es. Step"}
+{"tMs":4090,"delta":" 2: Toss everything"}
+{"tMs":4129,"delta":" with oil, lemon,"}
+{"tMs":4157,"delta":" garlic and oregano on"}
+{"tMs":4190,"delta":" one"}
+{"tMs":4226,"delta":" tray. Step 3:"}
+{"tMs":4257,"delta":" Roast for 40 min"}
+{"tMs":4290,"delta":"utes until gol"}
+{"tMs":4323,"delta":"den. Step 4:"}
+{"tMs":4358,"delta":" Rest 5 minutes"}
+{"tMs":4390,"delta":" and fin"}
+{"tMs":4427,"delta":"ish with f"}
+{"tMs":4457,"delta":"resh lemon.\"\n    "}
+{"tMs":4491,"delta":"ActionButton \"Start"}
+{"tMs":4530,"delta":" cooking\" tone:prim"}
+{"tMs":4558,"delta":"ary icon:\"play_"}
+{"tMs":4591,"delta":"arrow\" -> started="}
+{"tMs":4624,"delta":"true; emit start"}
+{"tMs":4658,"delta":"Cooking serv"}
+{"tMs":4693,"delta":"ings\n  if started\n    "}
+{"tMs":4725,"delta":"Receipt \"Let"}
+{"tMs":4760,"delta":"'s cook!\" \"O"}
+{"tMs":4792,"delta":"ven to"}
+{"tMs":4827,"delta":" 220°C."}
+{"tMs":4859,"delta":" D"}
+{"tMs":4892,"delta":"inner for {servings} is"}
+{"tMs":4924,"delta":" about"}
+{"tMs":4958,"delta":" 50 minutes away.\""}
+{"tMs":4994,"delta":" tone:good ic"}
+{"tMs":5026,"delta":"on:\"local"}
+{"tMs":5087,"delta":"_f"}
+{"tMs":5091,"delta":"ire_department"}
+{"tMs":5127,"delta":"\""}
