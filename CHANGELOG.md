@@ -1,17 +1,24 @@
 ## 32.0.0
 
-Needs codelessly_api 32.0.0.
+Needs codelessly_api 32.0.0. No SDK API was removed or renamed; the major version follows the API's (the compact
+notation's `Column center` reads differently: see its changelog).
 
-- **`DesignPass`**: a design agent you supply restyles a session's UI in place with edit operations, after a
-  fast model has written it from plain parts. The instructions are built from the session and its design system;
-  an answer that is rejected, or that changes what the UI says or does, is undone and asked for again; a kept
-  pass is one undo step. See the guide, "The design pass".
-- **`DesignPass(blocks: [...])`**: the design agent is told of the design system's blocks you name and may put
-  one in place of plain nodes; `DesignPass.changedMeaning(before, after, blocks: ...)` accepts a removed node
-  when a block carries its text, bindings and actions, and refuses a removed container that had actions.
+### Added
+
+- **`DesignPass`**: a design agent you supply restyles a session's UI in place, after a fast model has written
+  it from plain parts. An answer that is rejected, or that changes what the UI says or does, is undone and asked
+  for again; a kept pass is one undo step. See the guide, "The design pass".
+- **`DesignPass(blocks: [...])`**: the agent may put the design system's blocks you name in place of plain
+  nodes. `DesignPass.changedMeaning(before, after, blocks: ...)` accepts a removed node when a block carries its
+  text, bindings and actions.
+- **`OnDemandBlocks(store:)`**: called with a new block's files so the host can save them; a later session
+  started from that folder has the block.
 - **Designed defaults**: with a design system whose theme defines them, plain cards, badges, bar charts, popups,
   dialogs and chart series take its look, and a control's corner follows its height (`radii.controlXs` …
   `controlLarge`). The bundled look is unchanged.
+
+### Fixed
+
 - A spinner holds still when the host's tickers are off (a design canvas) and paints in its own layer.
 
 ## 31.0.1
