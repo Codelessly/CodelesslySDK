@@ -13,6 +13,8 @@
 // them by name; --components A,B,C narrows the list. --brief-file <file>
 // gives a brief of your own (--ui then only names the recording), and
 // --frame says what the answer is ("a phone screen 390 wide"), and
+// --natural teaches values, actions and lists as models write them in code
+// (the prompt's natural variant).
 // --prelude-file <file> is notation read before the answer (state the host
 // declares).
 //
@@ -69,7 +71,7 @@ Future<void> main(List<String> args) async {
   final catalog = ds?.catalogOver(standardCatalog) ?? standardCatalog;
   final options = ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds);
   final only = opt('--components')?.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty).toSet();
-  final system = Catalog.run(catalog, () => notationPrompt(catalog: catalog, options: options, designSystem: ds, only: only));
+  final system = Catalog.run(catalog, () => notationPrompt(catalog: catalog, options: options, designSystem: ds, only: only, natural: args.contains('--natural')));
   final user = '${brief.prompt}\n\n(Answer with the notation only: $frame.)';
   final messages = <Map<String, Object?>>[
     {'role': 'user', 'content': user},
