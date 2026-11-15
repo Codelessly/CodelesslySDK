@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/internals.dart';
 import 'package:crypto/crypto.dart' show sha256;
 import 'package:flutter_test/flutter_test.dart';
 

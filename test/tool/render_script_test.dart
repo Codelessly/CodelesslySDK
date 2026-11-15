@@ -89,13 +89,13 @@ void main() {
   });
 
   test('every run first prints the SDK and API versions it uses', () async {
-    File('${l.sdk}/pubspec.yaml').writeAsStringSync('name: codelessly_sdk\nversion: 30.1.0\n');
+    File('${l.sdk}/pubspec.yaml').writeAsStringSync('name: codelessly_sdk\nversion: 31.0.0\n');
     Directory('${l.root}/CodelesslyAPI').createSync();
-    File('${l.root}/CodelesslyAPI/pubspec.yaml').writeAsStringSync('name: codelessly_api\nversion: 30.1.0\n');
+    File('${l.root}/CodelesslyAPI/pubspec.yaml').writeAsStringSync('name: codelessly_api\nversion: 31.0.0\n');
     final r = await l.run({'FLUTTER_ROOT': '${l.root}/flutter'});
     expect(r.exitCode, 0, reason: '${r.stderr}');
     final first = '${r.stderr}'.split('\n').first;
-    expect(first, allOf(contains('codelessly_sdk 30.1.0'), contains('codelessly_api 30.1.0'), contains('${l.root}/CodelesslyAPI')));
+    expect(first, allOf(contains('codelessly_sdk 31.0.0'), contains('codelessly_api 31.0.0'), contains('${l.root}/CodelesslyAPI')));
   });
 
   test('dependencies are resolved when they never were, and not again while they are current', () async {
