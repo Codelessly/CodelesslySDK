@@ -252,12 +252,12 @@
     "fontFamily": "Inter"
    },
    "caption": {
+    "fontFamily": "Inter",
     "fontSize": 12,
     "fontWeight": 500,
     "height": 1.35,
     "color": "inkFaint",
-    "leadingDistribution": "even",
-    "fontFamily": "Inter"
+    "leadingDistribution": "even"
    },
    "mono": {
     "fontSize": 12,
@@ -507,9 +507,9 @@
     "fontSize": 14.5,
     "fontWeight": 600,
     "height": 1.3,
+    "letterSpacing": -0.1,
     "color": "primaryText",
-    "leadingDistribution": "even",
-    "letterSpacing": -0.1
+    "leadingDistribution": "even"
    },
    "muted": {
     "fontFamily": "Inter",
@@ -525,6 +525,15 @@
     "fontWeight": 400,
     "height": 1.4,
     "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "titleWide": {
+    "fontFamily": "Inter Display",
+    "fontSize": 28,
+    "fontWeight": 700,
+    "height": 1.15,
+    "letterSpacing": -0.6,
+    "color": "primaryText",
     "leadingDistribution": "even"
    }
   },
@@ -902,13 +911,13 @@
    "cta": 14,
    "popup": 20,
    "badge": 999,
+   "progress": 999,
    "bar": 6,
    "controlXs": 6,
    "controlCompact": 8,
    "controlSmall": 9,
    "controlMedium": 10,
-   "controlLarge": 12,
-   "progress": 999
+   "controlLarge": 12
   },
   "sizes": {
    "xs": 24,
@@ -930,7 +939,8 @@
    "cta": 46,
    "badge": 22,
    "bar": 28,
-   "progress": 8
+   "progress": 8,
+   "wide": 900
   },
   "shadows": {
    "level1": [

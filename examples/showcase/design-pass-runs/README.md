@@ -18,3 +18,20 @@ defaults, designed defaults, defaults plus the pass).
     python3 examples/showcase/tool/pass_ops.py              # what recurs across the 38 passes
     python3 examples/showcase/tool/pass_ops.py --styles     # text restyles
     tool/notation/notation.sh apply <before.json> <ops.json> --design-system design_systems/cards --out after.json
+
+Added in the second session (design 16 section 10, "Cycles"):
+
+| Folder or file | What |
+|---|---|
+| `inline-cards/*/ui.txt` | The 17 cards' notation as recorded (`tool/stream/streams/live/2026-11-14-notation-5`). The notation now expands a badge and a grid to other nodes than `before.json` has, so the recorded `ops.json` apply to `before.json`, not to a fresh expansion, for 12 of the 17 |
+| `block-pictures/` | Each own block's first preview rendered alone (`style_pass.py block-pictures`), for `--block-pictures` |
+| `run10-blocks/` | Run 10's six briefs passed again with `--blocks` (`-b`) and with block pictures too (`-bp`): the operations kept, the summary, the result in light and dark |
+| `cycles/` | The blind judgments of each change tried (`judge-*.json`: what was compared, who judged, each ranking and score) |
+| `mobile-app-screens/judge-text-styles.json` | The text styles before and after, judged together |
+
+    # the same UIs several ways, side by side, and packed for blind judging
+    python3 examples/showcase/tool/ways.py render --set examples/showcase/design-pass-runs/mobile-app-screens --out /tmp/w \
+        --dark --variant ssui= --variant designed=design_systems/cards --variant pass=design_systems/cards+ops
+    python3 examples/showcase/tool/ways.py sheet --out /tmp/w/sheet.png --col SSUI=/tmp/w/ssui --col designed=/tmp/w/designed --col pass=/tmp/w/pass
+    python3 examples/showcase/tool/ways.py pack --out /tmp/w/blind --col ssui=/tmp/w/ssui --col designed=/tmp/w/designed --col pass=/tmp/w/pass
+    python3 examples/showcase/tool/ways.py tally --out /tmp/w/blind
