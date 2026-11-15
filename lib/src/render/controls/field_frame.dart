@@ -354,8 +354,9 @@ class FieldDecoration {
       error: error,
       errorStyle: style(d.errorStyle),
       errorMaxLines: d.errorMaxLines,
-      // A design's own counter text, else the field's count against its limit.
-      counter: (d.counterText ?? '').isEmpty ? (counterFallback ?? '') : t(d.counterText),
+      // A design's own counter text (written empty: no counter, as in Flutter), else the
+      // field's count against its limit.
+      counter: d.counterText == null ? (counterFallback ?? '') : t(d.counterText),
       counterStyle: style(d.counterStyle),
       prefix: FieldAffix.of(
         d.prefixIcon,

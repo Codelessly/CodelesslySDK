@@ -556,8 +556,11 @@ void main() {
       final (tree, _) = await _show(tester, {
         'note': hugging('textField', {'maxLength': 280}),
         'own': hugging('textField', {'maxLength': 280, 'decoration': {'counterText': 'Keep it short'}}),
+        'hidden': hugging('textField', {'maxLength': 4, 'decoration': {'counterText': ''}}),
         'free': hugging('textField', {}),
       });
+      // Written empty, the counter is off (a PIN field): Flutter's rule.
+      expect(_field(tree, 'hidden').decoration.counter, '');
       expect(_field(tree, 'note').decoration.counter, '0/280');
       expect(_field(tree, 'own').decoration.counter, 'Keep it short');
       expect(_field(tree, 'free').decoration.counter, '');
