@@ -1,0 +1,15 @@
+state recording=false
+state secs=0
+every 1s when recording -> secs=secs+1
+Card gap:12
+  Row between middle
+    Column gap:4
+      Text.title "Voice memo"
+      if recording
+        Text.danger "Recording… {secs}s"
+      if !recording
+        Text.muted "{secs>0 ? 'Recorded ' + secs + 's' : 'Tap record to start'}"
+    if recording
+      Button.destructive "Stop" animate:pulse duration:800 -> recording=false
+    if !recording
+      Button "Record" -> recording=true; secs=0

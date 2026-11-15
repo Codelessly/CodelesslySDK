@@ -1,0 +1,21 @@
+card width:fill padding:16 radius:12 elevation:1 background:surface
+  row align:center justify:space-between
+    text "Current speed" style:label color:muted
+    badge "Within limit" tone:success icon:check
+  gauge id:speedometer type:semicircle width:240 align:center
+    scale min:0 max:180 unit:"km/h" step:20 minor-step:10
+    arc from:0 to:100 color:success thickness:10
+    arc from:100 to:180 color:danger thickness:10
+    marker at:100 label:"Limit 100" style:tick color:danger length:14
+    needle value:72 color:text length:80 animate:ease-out duration:600ms
+    hub radius:6 color:text
+    readout position:center
+      text "72" style:display weight:bold
+      text "km/h" style:caption color:muted
+  row justify:space-between
+    text "0" style:caption color:muted
+    text "180" style:caption color:muted
+  divider
+  row align:center gap:8
+    icon "speed" color:muted
+    text "28 km/h below the limit of 100" style:body
