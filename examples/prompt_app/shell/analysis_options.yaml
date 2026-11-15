@@ -1,0 +1,33 @@
+# The repository's rules (../../../analysis_options.yaml), stated here so they
+# resolve from this package, with the storyboard template left out.
+include: package:lints/recommended.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    # The storyboard template, as lib/storyboard was synced from
+    # soft_saas_ui/storyboard by sync_storyboard.dart. It is not edited here
+    # (a later sync writes it again), so its own lints are not this
+    # example's: the sync script writes package imports where this
+    # repository asks for relative ones. lib/storyboard/data is ours.
+    - lib/storyboard/models/**
+    - lib/storyboard/services/**
+    - lib/storyboard/widgets/**
+    - lib/storyboard/utils/**
+    - lib/storyboard/storyboard_app.dart
+    - lib/storyboard/constants.dart
+    - lib/storyboard/data/text_theme_data.dart
+    - lib/storyboard/data/color_theme_data.dart
+    - web/**
+
+linter:
+  rules:
+    prefer_single_quotes: true
+    prefer_const_constructors: true
+    prefer_const_declarations: true
+    prefer_final_fields: true
+    prefer_relative_imports: true
+    use_super_parameters: true
+
+formatter:
+  page_width: 120
