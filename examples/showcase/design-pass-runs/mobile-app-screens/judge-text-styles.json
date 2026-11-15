@@ -1,0 +1,581 @@
+{
+ "what": "Blind, four versions shown together: SSUI, Cards defaults with strong/muted/caption as before cf42026 (oldtext), the defaults as committed (designed), and designed plus the recorded pass. Judges: Opus and Sonnet subagents of a Claude Code session (no API key was at hand, so not judge.py); two shuffles.",
+ "judgments": [
+  {
+   "case": "banking",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "pass": 8,
+    "oldtext": 6,
+    "ssui": 5,
+    "designed": 7
+   },
+   "why": "A has the clearest hierarchy and most consistent card system, D and B are near-identical but B's secondary text is too faint, and C's edge-to-edge chart bars and cramped spacing look unrefined.",
+   "seed": 7
+  },
+  {
+   "case": "banking",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "pass": 9,
+    "oldtext": 7,
+    "ssui": 6,
+    "designed": 7
+   },
+   "why": "A has consistent card containers, strong hierarchy and tidy action tiles; C has odd touching bars and cramped chart.",
+   "seed": 7
+  },
+  {
+   "case": "chat_settings",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "oldtext": 6,
+    "designed": 7,
+    "pass": 8,
+    "ssui": 4
+   },
+   "why": "C has the most refined hierarchy with eyebrow section labels, emphasized values and icon tiles, B edges A on more legible secondary text, and D is cramped with a tiny, afterthought log-out button.",
+   "seed": 7
+  },
+  {
+   "case": "chat_settings",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "oldtext": 7,
+    "designed": 7,
+    "pass": 9,
+    "ssui": 5
+   },
+   "why": "C has refined small-caps section labels, clear data emphasis and a restrained logout; D has tiny orphaned buttons and weak structure.",
+   "seed": 7
+  },
+  {
+   "case": "ecommerce_product",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "oldtext": 6,
+    "ssui": 5,
+    "pass": 8,
+    "designed": 6
+   },
+   "why": "C groups purchase info into polished cards with a struck-through original price, icon tiles and a proper sticky action bar, D and A are near-identical with D's secondary text slightly more legible, and B is flat and cramped.",
+   "seed": 7
+  },
+  {
+   "case": "ecommerce_product",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "oldtext": 6,
+    "ssui": 5,
+    "pass": 9,
+    "designed": 6
+   },
+   "why": "C groups content into cards with a visible image area and clear hierarchy; A/D are near-identical flat layouts with D having slightly stronger secondary text; B is flat white and plainest.",
+   "seed": 7
+  },
+  {
+   "case": "fitness_home",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "pass": 8,
+    "designed": 6,
+    "oldtext": 5,
+    "ssui": 4
+   },
+   "why": "A is the only one with a complete icon-driven tab bar, stat icons and a clear hero metric, B beats D on more legible secondary text, and C is flat with a tiny Start button and an icon-less tab bar.",
+   "seed": 7
+  },
+  {
+   "case": "fitness_home",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "pass": 9,
+    "designed": 7,
+    "ssui": 5,
+    "oldtext": 6
+   },
+   "why": "A has bold hierarchy, icon tab bar, stat icons and tight rhythm; C has a tiny Start CTA and loose list spacing, and B/D/C lack nav icons.",
+   "seed": 7
+  },
+  {
+   "case": "food_order",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 6,
+    "ssui": 5,
+    "oldtext": 6,
+    "pass": 8
+   },
+   "why": "D fills the empty hero, adds item thumbnails, bolder prices and a floating cart bar for a shipped feel, A and C are near-identical airy card lists with A marginally crisper, and B is flat and cramped.",
+   "seed": 7
+  },
+  {
+   "case": "food_order",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "oldtext",
+    "designed",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 6,
+    "ssui": 5,
+    "oldtext": 6,
+    "pass": 9
+   },
+   "why": "D has a hero, item thumbnails, bold prices and a floating cart bar that read as a shipped product; A/C are empty-hero card lists and B is flat and cramped.",
+   "seed": 7
+  },
+  {
+   "case": "habit_tracker",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "pass": 8,
+    "ssui": 4,
+    "oldtext": 6
+   },
+   "why": "B has the strongest hierarchy with a bold progress headline, icon tiles and orange streak accents, A edges D on more legible secondary text, and C is flat with merged chart bars and a tiny Add habit button.",
+   "seed": 7
+  },
+  {
+   "case": "habit_tracker",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "pass": 9,
+    "ssui": 5,
+    "oldtext": 6
+   },
+   "why": "B has bold hero stat, icon tiles and orange streak flames giving clear hierarchy; C has a tiny Add habit button and touching chart bars.",
+   "seed": 7
+  },
+  {
+   "case": "learning",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "oldtext": 6,
+    "pass": 8,
+    "designed": 7,
+    "ssui": 5
+   },
+   "why": "B is the most cohesive with a consistent accent palette, stat pills, bold leaderboard values and an icon tab bar, C edges A on more legible secondary text, and D is flat and outlined with weaker polish.",
+   "seed": 7
+  },
+  {
+   "case": "learning",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "oldtext",
+    "designed",
+    "ssui"
+   ],
+   "scores": {
+    "oldtext": 7,
+    "pass": 9,
+    "designed": 6,
+    "ssui": 5
+   },
+   "why": "B has icon tab bar, pill stat chips and a strong hero with consistent tokens; A/C/D lack nav icons and D is flat with a low-contrast Continue button.",
+   "seed": 7
+  },
+  {
+   "case": "travel_booking",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "pass": 8,
+    "ssui": 4,
+    "designed": 7,
+    "oldtext": 6
+   },
+   "why": "A has the richest boarding-pass style hierarchy with icon tiles, an inset gate/seat panel and emphasized totals, C edges D through more legible secondary text and times, and B is flat, cramped and faint.",
+   "seed": 7
+  },
+  {
+   "case": "travel_booking",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "pass": 9,
+    "ssui": 6,
+    "designed": 7,
+    "oldtext": 7
+   },
+   "why": "A has the most deliberate hierarchy with icon tiles, tinted detail panels and small-caps labels; B is flatter with weaker contrast; C and D are near-identical, C with slightly stronger secondary text.",
+   "seed": 7
+  },
+  {
+   "case": "banking",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "ssui": 5,
+    "designed": 7,
+    "pass": 9,
+    "oldtext": 6
+   },
+   "why": "C groups content into clear cards with a strong balance hero and polished action row; B edges D on secondary-text contrast; A's cramped, gapless chart bars and smaller type feel least refined.",
+   "seed": 8
+  },
+  {
+   "case": "banking",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "ssui": 6,
+    "designed": 7,
+    "pass": 9,
+    "oldtext": 7
+   },
+   "why": "C groups content into clean cards with a strong hero balance and tidy actions; A has chunky cramped bars and an overly tight header.",
+   "seed": 8
+  },
+  {
+   "case": "chat_settings",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "pass": 9,
+    "designed": 7,
+    "ssui": 4,
+    "oldtext": 6
+   },
+   "why": "A has the clearest label/value hierarchy, a prominent storage figure and tiled device icons; B beats D on secondary-text legibility; C is flat, cramped, with a tiny undersized Log out and Manage button.",
+   "seed": 8
+  },
+  {
+   "case": "chat_settings",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "pass": 9,
+    "designed": 8,
+    "ssui": 5,
+    "oldtext": 7
+   },
+   "why": "A has refined section eyebrows, device icon tiles, a prominent storage figure and a restrained logout, while C is cramped with a tiny orphaned logout button.",
+   "seed": 8
+  },
+  {
+   "case": "ecommerce_product",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "oldtext": 6,
+    "designed": 6,
+    "pass": 8,
+    "ssui": 4
+   },
+   "why": "C groups purchase info in a card with strikethrough original price, emphasized quantity and icon tiles for features; B's slightly darker secondary text edges A; D is small, cramped and flat with thin-bordered review boxes.",
+   "seed": 8
+  },
+  {
+   "case": "ecommerce_product",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "oldtext": 6,
+    "designed": 6,
+    "pass": 9,
+    "ssui": 5
+   },
+   "why": "C is the only one with a visible image placeholder, card grouping, icon tiles and a docked CTA bar; B and A are near-identical flat layouts with B slightly better spacing, and D is the most cramped.",
+   "seed": 8
+  },
+  {
+   "case": "fitness_home",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "ssui": 4,
+    "pass": 9,
+    "oldtext": 6
+   },
+   "why": "C adds stat icons, an iconed tab bar, tighter list rhythm and a strong steps hero; A edges D on secondary-text contrast; B is flat with a tiny Start button and weak, low-contrast metadata.",
+   "seed": 8
+  },
+  {
+   "case": "fitness_home",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "ssui": 5,
+    "pass": 9,
+    "oldtext": 6
+   },
+   "why": "C has icon-led stats, a real tab bar with icons and tight consistent cards; A and D share a layout with A having more legible secondary text, while B has a small orphaned Start button and outlined cards.",
+   "seed": 8
+  },
+  {
+   "case": "food_order",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "ssui": 5,
+    "designed": 7,
+    "oldtext": 7,
+    "pass": 8
+   },
+   "why": "D fills the hero, adds item thumbnails, bold prices and a floating cart bar for the most finished look; B and C are near-identical clean card lists with B's text marginally crisper; A is cramped with small type and tight cards.",
+   "seed": 8
+  },
+  {
+   "case": "food_order",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "ssui": 5,
+    "designed": 7,
+    "oldtext": 6,
+    "pass": 9
+   },
+   "why": "D adds a hero, food thumbnails, bold prices and a floating cart bar; B has the roomiest, cleanest cards, C is similar but tighter, and A is cramped with outlined cards.",
+   "seed": 8
+  },
+  {
+   "case": "habit_tracker",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "ssui": 4,
+    "oldtext": 6,
+    "pass": 9
+   },
+   "why": "D adds a bold progress headline, icon tiles, orange streak flames and a carded date strip; A edges C on secondary-text contrast; B is flat with gapless chart bars and an undersized Add habit button.",
+   "seed": 8
+  },
+  {
+   "case": "habit_tracker",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "ssui": 5,
+    "oldtext": 7,
+    "pass": 9
+   },
+   "why": "D has a stronger hero progress figure, icon tiles, orange streak flames and clear weekly strip; A and C are near-identical with A slightly crisper text, while B has an orphaned small Add button and chunky bars.",
+   "seed": 8
+  },
+  {
+   "case": "learning",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "oldtext": 6,
+    "ssui": 5,
+    "pass": 8
+   },
+   "why": "D is most product-like with stat pills, iconed tab bar and bolder XP values, though its dark Continue button is low-contrast; A beats B on secondary-text legibility; C is flatter and tighter with small type.",
+   "seed": 8
+  },
+  {
+   "case": "learning",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "oldtext": 6,
+    "ssui": 5,
+    "pass": 9
+   },
+   "why": "D has pill stat chips, a dark hero, consistent blue icon tiles, bold XP values and an icon tab bar; A beats B on secondary text legibility, and C is tight with a low-contrast Continue button.",
+   "seed": 8
+  },
+  {
+   "case": "travel_booking",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "pass": 9,
+    "ssui": 4,
+    "oldtext": 6
+   },
+   "why": "B has the strongest hierarchy with tinted icon tiles, inset gate/boarding panel and emphasized total; A beats D on time and secondary-text contrast; C is flat, cramped and uses faint tiny timestamps.",
+   "seed": 8
+  },
+  {
+   "case": "travel_booking",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "designed",
+    "oldtext",
+    "ssui"
+   ],
+   "scores": {
+    "designed": 7,
+    "pass": 9,
+    "ssui": 5,
+    "oldtext": 6
+   },
+   "why": "B adds icon tiles, tinted detail wells, an eyebrow plan label and a highlighted total for clear hierarchy; A and D are near-identical plain cards with A having stronger secondary text, and C is tight and outlined.",
+   "seed": 8
+  }
+ ]
+}

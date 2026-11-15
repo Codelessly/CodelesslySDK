@@ -1,0 +1,1 @@
+Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.

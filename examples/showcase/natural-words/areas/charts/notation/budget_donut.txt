@@ -1,0 +1,28 @@
+Card gap:16 pad:16
+  Text.title "Household budget"
+  Text.muted "This month"
+  Stack center middle h:240
+    Donut values:[1650,720,380,290,460,700] labels:["Rent 39%","Groceries 17%","Transport 9%","Utilities 7%","Dining out 11%","Savings 17%"]
+    Column center gap:2
+      Text.heading "$4,200"
+      Text.caption "Total" center
+  Divider
+  Column gap:8
+    Row between
+      Text "Rent · 39%"
+      Text.strong "$1,650"
+    Row between
+      Text "Groceries · 17%"
+      Text.strong "$720"
+    Row between
+      Text "Transport · 9%"
+      Text.strong "$380"
+    Row between
+      Text "Utilities · 7%"
+      Text.strong "$290"
+    Row between
+      Text "Dining out · 11%"
+      Text.strong "$460"
+    Row between
+      Text "Savings · 17%"
+      Text.strong "$700"

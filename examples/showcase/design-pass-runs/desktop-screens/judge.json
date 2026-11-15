@@ -1,0 +1,212 @@
+[
+ {
+  "page": "crm",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "pass": 6,
+   "designed": 5,
+   "ssui": 1
+  },
+  "why": "A has the cleanest structure, with a full-width search, a roomier table with less truncation, and a full-height detail panel; C crams the search into the header, truncates company names more heavily, and lets the detail panel end abruptly mid-screen; B is broken, with no sidebar, table, or panel content, and a misplaced button."
+ },
+ {
+  "page": "crm",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "pass": 7,
+   "ssui": 1,
+   "designed": 6
+  },
+  "why": "A is a complete, polished screen with a clear hierarchy, a full-width search bar, comfortable spacing and a well-organized detail panel; C has the same content but is tighter, truncates the search placeholder and company names more heavily, and its detail panel has weaker spacing; B is broken, missing the sidebar, table, search and most of the panel, so it doesn't work as a screen."
+ },
+ {
+  "page": "analytics",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 6,
+   "pass": 7,
+   "ssui": 1
+  },
+  "why": "B has the most polished hierarchy, with a compact right-aligned period toggle and evenly aligned card grids, though its bottom panels sit inconsistently and Recent events is clipped. A stretches the segmented control so it crowds the subtitle and indents the lower cards awkwardly, while C renders only the page title and is effectively broken."
+ },
+ {
+  "page": "analytics",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "pass": 8,
+   "ssui": 1,
+   "designed": 6
+  },
+  "why": "A has a clear hierarchy, comfortable spacing and aligned cards with a tidy segmented control, though the Recent events card runs to the bottom edge and its padding differs from the Top pages card; C has the same content but cramped spacing, the subtitle colliding with the segmented control, and misaligned card edges; B is essentially a blank page with only the title, so it is broken and unusable."
+ },
+ {
+  "page": "inbox",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "ssui",
+   "designed"
+  ],
+  "scores": {
+   "designed": 2,
+   "ssui": 4,
+   "pass": 8
+  },
+  "why": "C is the only one that reads as a shipped product, with clean nav labels, a clear card hierarchy, a contained message bubble and a proper reply field, despite the list being cut off mid-row; B wraps nav labels into broken fragments, crams the list rows and drops the reply textarea entirely; A has the same broken nav wrapping plus a glaring yellow-black overflow error stripe over a list row."
+ },
+ {
+  "page": "inbox",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "ssui",
+   "designed"
+  ],
+  "scores": {
+   "designed": 3,
+   "pass": 9,
+   "ssui": 5
+  },
+  "why": "B is polished and consistent, with card containers, clean single-line sidebar labels, and a clear selected state and hierarchy, with only a minor clipped last row at the card edge; C is tidy but dense, its sidebar labels wrap mid-word (\"Waitin/g\"), and its reply textarea is missing; A has the same wrapping bugs plus a glaring yellow/black hazard-striped block with a red bar covering the Raj Patel row, which makes it look broken."
+ },
+ {
+  "page": "projects",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "ssui": 4,
+   "pass": 8,
+   "designed": 6
+  },
+  "why": "B is the most polished and shipped-looking, with column status dots, counts, assignee avatars, readable right-aligned dates, and a well-structured activity panel; C has the same features but its oversized column headers compete with the card titles, its metadata text is tiny and gray, and its board background ends abruptly; A is the barest, with no counts, assignees, or activity header, cramped feed text, and a background that cuts off halfway down the page."
+ },
+ {
+  "page": "projects",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 7,
+   "pass": 8,
+   "ssui": 5
+  },
+  "why": "B has the clearest hierarchy and the most shipped feel: status dots on column headers, semantic tag colors, readable dates and a well-organized activity feed with avatars. A is polished with generous card spacing, but its tiny count badges, oversized titles and heavier shadows are less refined, and the identical blue tags for Design, Research and Content add little meaning. C is flat and under-designed: it drops the avatars and the activity header and has weak column headers, cramped activity text and little visual hierarchy, so it reads as a wireframe."
+ },
+ {
+  "page": "billing",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "pass": 7,
+   "designed": 5,
+   "ssui": 1
+  },
+  "why": "A has the clearest hierarchy, with a strong page title, a contained usage panel, and right-aligned buttons sized to their content; B stretches its actions into half-width bars, crowds the billing toggle against the plan description, and pits a black secondary button against the blue primary; C is a broken render with almost no content."
+ },
+ {
+  "page": "billing",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 6,
+   "pass": 8,
+   "ssui": 1
+  },
+  "why": "B has a clear hierarchy, a larger page title, usage bars grouped in a tinted container, a tidy toggle, and right-aligned buttons that suit a desktop layout; A is competent but its page title is small, the full-width stretched buttons look heavy, and the Monthly/Annual toggle crowds the plan description; C is essentially broken, rendering only a title, a badge and stray download icons with no sidebar, cards or content."
+ },
+ {
+  "page": "dashboard_desktop",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 6,
+   "pass": 8,
+   "ssui": 4
+  },
+  "why": "B has the strongest hierarchy and polish (icons on the KPI cards, row-separated orders, a prominent goal percentage, consistent padding), A is clean but flat with cramped order rows and weak secondary text, and C feels unfinished with tight padding, a gray chart fill, and edge-to-edge bars that read as a histogram rather than a product comparison."
+ },
+ {
+  "page": "dashboard_desktop",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "ssui": 4,
+   "designed": 6.5,
+   "pass": 8
+  },
+  "why": "C has the strongest hierarchy and polish: icon-labelled KPI cards, a prominent 62% goal figure, clear order rows and a soft gray canvas that lifts the cards. B is a clean, consistent middle ground with softer shadows and slim bars, though it has little emphasis. A is the weakest: flat bordered cards on white, bars that touch with no gaps and look like a clumsy histogram, a cramped orders list and a pale gradient fill on the line chart."
+ },
+ {
+  "page": "pricing_desktop",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 6,
+   "pass": 8,
+   "ssui": 3
+  },
+  "why": "B has the strongest hierarchy, with a larger heading, a left-aligned toggle grouped with the header, a bordered Pro card and generous consistent spacing; A is clean but has an awkwardly centered toggle, a weak headline and cramped density; C has broken check-icon glyphs, cramped cards, small inconsistent buttons and the same misaligned toggle."
+ },
+ {
+  "page": "pricing_desktop",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 7,
+   "pass": 8,
+   "ssui": 3
+  },
+  "why": "B has the strongest hierarchy, with a highlighted Pro card border, a pill-style toggle that is aligned with the content, generous spacing and full-width buttons; A is clean and polished but its centered toggle sits awkwardly against the left-aligned header and Pro is less emphasized; C has broken check icons (tofu glyphs), cramped spacing, small auto-width buttons and a white background that makes the cards flat, so it looks unfinished."
+ }
+]

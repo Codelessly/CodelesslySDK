@@ -1,0 +1,10 @@
+Column gap:8 pad:16 maxw:560
+  Text.heading1 "Top priorities this week"
+  Text.muted "Drag a row by its handle to reorder."
+  state items=[{"id":1,"name":"Finish Q3 budget review"},{"id":2,"name":"Hire a backend engineer"},{"id":3,"name":"Ship onboarding v2"},{"id":4,"name":"Prepare board deck"},{"id":5,"name":"Plan team offsite"}]
+  each row in items
+    Card drag:prio(row.id) drop:prio -> items=concat(append(take(removeWhere(items,x=>x.id==result.data),indexOf(items,row)),find(items,x=>x.id==result.data)),slice(removeWhere(items,x=>x.id==result.data),indexOf(items,row),length(items)))
+      Row gap:12 center
+        Icon "drag_indicator"
+        Badge.primary "{indexOf(items,row)+1}"
+        Text.strong "{row.name}" grow

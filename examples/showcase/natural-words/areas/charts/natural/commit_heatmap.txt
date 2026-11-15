@@ -1,0 +1,41 @@
+card width:fill maxWidth:720 padding:16 radius:12 background:surface border:1 border-color:muted
+  text "1,284 contributions in the last 3 months" role:title weight:semibold size:16 margin-bottom:12
+  scroll-area direction:horizontal
+    row gap:8
+      column weekday-labels gap:3 margin-top:18 size:11 color:secondary
+        text "" height:12
+        text "Mon" height:12
+        text "" height:12
+        text "Wed" height:12
+        text "" height:12
+        text "Fri" height:12
+        text "" height:12
+      column gap:4
+        row month-labels height:14 size:11 color:secondary
+          text "Jan" column:1
+          text "Feb" column:5
+          text "Mar" column:9
+        heatmap name:contribution-grid orientation:columns-are-weeks cell-size:12 cell-gap:3 cell-radius:2 scale:#ebedf0,#9be9a8,#40c463,#30a14e,#216e39 week-start:sun
+          week levels:0,1,2,3,2,1,0
+          week levels:0,2,3,4,3,2,1
+          week levels:1,2,2,3,4,2,0
+          week levels:0,1,3,2,2,1,0
+          week levels:0,3,4,4,3,2,1
+          week levels:1,2,3,4,4,3,0
+          week levels:0,0,1,2,1,0,0
+          week levels:0,2,3,3,4,2,1
+          week levels:1,3,4,4,3,3,1
+          week levels:0,2,2,3,2,1,0
+          week levels:0,1,3,4,4,2,0
+          week levels:1,2,3,4,none,none,none
+          on-load animation:fade-in stagger:per-week 30ms duration:200ms
+          on-hover-cell tooltip:"{count} contributions on {date}" highlight:outline-1 delay:100ms
+          on-focus-cell keyboard-navigable:arrows aria-label:"{count} contributions on {date}"
+  row justify:end align:center gap:4 margin-top:12 size:11 color:secondary
+    text "Less"
+    swatch level:0 size:12 radius:2
+    swatch level:1 size:12 radius:2
+    swatch level:2 size:12 radius:2
+    swatch level:3 size:12 radius:2
+    swatch level:4 size:12 radius:2
+    text "More"

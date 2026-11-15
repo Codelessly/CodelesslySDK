@@ -1,0 +1,60 @@
+Screen name:"Job Detail" background:systemBackground
+  Header position:top fixed style:translucent-blur
+    IconButton icon:chevron-left action:navigate-back label:"Back"
+    Title "Senior iOS Engineer" opacity:0 style:headline
+      behavior: fade-in when scroll-offset > 120, duration:200ms
+    IconButton id:bookmark icon:bookmark label:"Save job" selected:false
+      state selected: icon:bookmark-filled tint:accent
+      behavior: on-tap toggle selected, haptic:light, motion:spring-scale 1.0→1.25→1.0 duration:250ms
+      behavior: on-select show Toast "Job saved" duration:2s
+  ScrollView padding:20 gap:24 insetBottom:96
+    Section id:summary gap:12
+      Row gap:14 align:center
+        Image id:company-logo src:lumen-labs-logo size:64x64 radius:14 border:1px separator
+          state loading: placeholder shimmer
+        Column gap:2
+          Text "Senior iOS Engineer" style:title1 weight:bold
+          Text "Lumen Labs" style:subheadline color:secondary
+      Row gap:16 wrap:true
+        InfoItem icon:map-pin "Remote (US)"
+        InfoItem icon:dollar "$165k–$195k"
+        InfoItem icon:briefcase "Full-time"
+      TagRow gap:8 wrap:true
+        Tag "Swift" style:pill
+        Tag "SwiftUI" style:pill
+        Tag "Combine" style:pill
+      Text "Posted 3 days ago · 142 applicants" style:footnote color:tertiary
+    Divider
+    Section id:about gap:8
+      Text "About the role" style:title3 weight:semibold
+      Text style:body color:primary lineSpacing:4 "Lumen Labs is building the next generation of tools that help people understand and manage their energy use. As a Senior iOS Engineer you will own major parts of our flagship app, shaping architecture, mentoring teammates and shipping polished experiences to hundreds of thousands of users."
+    Section id:responsibilities gap:8
+      Text "Responsibilities" style:title3 weight:semibold
+      BulletList gap:6
+        Bullet "Design and build new features in Swift and SwiftUI"
+        Bullet "Architect reactive data flows using Combine"
+        Bullet "Collaborate with design and product to refine user experiences"
+        Bullet "Review code and mentor mid-level and junior engineers"
+        Bullet "Improve performance, accessibility and test coverage"
+    Section id:requirements gap:8
+      Text "Requirements" style:title3 weight:semibold
+      BulletList gap:6
+        Bullet "5+ years of professional iOS development experience"
+        Bullet "Deep knowledge of Swift, SwiftUI and Combine"
+        Bullet "Experience shipping and maintaining apps on the App Store"
+        Bullet "Strong understanding of architecture patterns such as MVVM"
+        Bullet "Clear communication in a remote, distributed team"
+    Section id:benefits gap:8
+      Text "Benefits" style:title3 weight:semibold
+      BulletList gap:6
+        Bullet icon:heart "Fully covered health, dental and vision"
+        Bullet icon:calendar "Flexible PTO and company-wide recharge weeks"
+        Bullet icon:laptop "Home office and equipment stipend"
+        Bullet icon:chart "401(k) with company match"
+        Bullet icon:book "Annual learning budget"
+  BottomBar position:bottom fixed style:translucent-blur border-top:1px separator padding:16 safeArea:true
+    Button id:apply "Apply Now" style:primary fullWidth:true height:52 radius:14
+      state pressed: scale:0.97 opacity:0.9
+      state loading: label:"" show Spinner
+      state success: label:"Applied ✓" style:success disabled:true
+      behavior: on-tap haptic:medium, open ApplicationSheet presentation:modal-sheet

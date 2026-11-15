@@ -1,0 +1,33 @@
+Screen "Photo Detail" background:black
+  AppBar
+    IconButton icon:back action:navigate-back label:"Back"
+    Spacer
+    IconButton id:moreBtn icon:more-horizontal text:"…" label:"More options" action:open(optionsSheet)
+  Image id:photo src:photo-url fit:contain zoom:pinch,double-tap
+  InfoBar
+    Text "Golden Hour at the Pier" style:title
+    Text "Aug 14, 2024 · 3:42 PM" style:caption color:gray
+
+  Scrim id:scrim visible-when:optionsSheet.open color:black opacity:0.5
+    enter:fade-in from:0 to:0.5 duration:200ms
+    exit:fade-out duration:200ms
+    on-tap:close(optionsSheet)
+    blocks-input-behind:true
+
+  BottomSheet id:optionsSheet state:closed
+    enter:slide-up from:bottom-offscreen to:rest duration:300ms easing:ease-out
+    exit:slide-down to:bottom-offscreen duration:220ms easing:ease-in
+    dismiss-on:scrim-tap,swipe-down,back-button,Cancel
+    drag:vertical release-threshold:30% snap-back:spring
+    corner-radius:16 top-only background:surface safe-area:bottom
+    focus:trap initial-focus:first-item
+    DragHandle width:40 height:4 color:gray align:center
+    List
+      ListItem icon:share text:"Share" action:share(photo) then:close(optionsSheet)
+      ListItem icon:album-add text:"Save to album" action:open(albumPicker) then:close(optionsSheet)
+      ListItem icon:link text:"Copy link" action:copy-to-clipboard(photo.url) then:close(optionsSheet)
+        feedback:Toast "Link copied" duration:2s position:bottom
+      ListItem icon:flag text:"Report" color:red action:open(reportFlow) then:close(optionsSheet)
+      Divider
+      ListItem text:"Cancel" align:center weight:bold action:close(optionsSheet)
+    item-pressed-state:highlight background:gray-10 duration:100ms

@@ -92,6 +92,8 @@ void main() {
           }
         }
         controller.stop();
+        // Stopped here: the binding checks for running tickers before teardowns run.
+        ticker.stop();
       }
 
       const spec = api.NodeAnimation(id: 'a', duration: 1000);

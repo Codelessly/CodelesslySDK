@@ -1,0 +1,25 @@
+Screen "Profile" state:activeTab=posts
+  Header padding:16 align:center
+    Avatar src:maya-chen.jpg size:96 shape:circle
+    Text "Maya Chen" style:title
+    Text "Photographer" style:subtitle color:muted
+  Tabs selected:{activeTab} fill:width
+    Tab "Posts" icon:grid value:posts onTap:set activeTab=posts
+    Tab "Saved" icon:bookmark value:saved onTap:set activeTab=saved
+    Tab "Tagged" icon:tag value:tagged onTap:set activeTab=tagged
+    Indicator position:bottom height:2 follows:selected motion:slide duration:200ms easing:ease-out
+  Content switch:{activeTab} motion:crossfade duration:150ms scroll:vertical
+    Grid when:posts columns:3 gap:2
+      Photo src:posts/1.jpg ratio:1:1 onTap:open viewer
+      Photo src:posts/2.jpg ratio:1:1 onTap:open viewer
+      Photo src:posts/3.jpg ratio:1:1 onTap:open viewer
+      Photo src:posts/4.jpg ratio:1:1 onTap:open viewer
+      Photo src:posts/5.jpg ratio:1:1 onTap:open viewer
+      Photo src:posts/6.jpg ratio:1:1 onTap:open viewer
+    Grid when:saved columns:3 gap:2
+      Photo src:saved/1.jpg ratio:1:1 onTap:open viewer
+      Photo src:saved/2.jpg ratio:1:1 onTap:open viewer
+      Photo src:saved/3.jpg ratio:1:1 onTap:open viewer
+    EmptyState when:tagged align:center padding:48
+      Icon tag size:48 color:muted
+      Text "No tagged photos yet" color:muted

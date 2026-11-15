@@ -1,0 +1,53 @@
+Screen "ShopApp Home" state:activeTab=home background:#FFFFFF
+  AppBar position:top elevation:2
+    Logo "ShopApp" align:left
+    IconButton icon:notifications align:right
+  TabContent id:content bind:activeTab transition:crossfade duration:200ms
+    Page id:home visible-when:activeTab==home
+      SearchField placeholder:"Search products" readonly:true on-tap:set activeTab=search
+      Carousel autoplay:true interval:4000ms indicator:dots height:160 radius:12
+        Banner "Summer Sale – Up to 50% off" background:#FF7043 color:#FFFFFF
+        Banner "New Arrivals" background:#42A5F5 color:#FFFFFF
+        Banner "Free Shipping over $50" background:#66BB6A color:#FFFFFF
+      Section "Categories"
+        Row scroll:horizontal gap:12
+          CategoryChip "Fashion" icon:checkroom
+          CategoryChip "Electronics" icon:devices
+          CategoryChip "Home" icon:chair
+          CategoryChip "Beauty" icon:spa
+          CategoryChip "Sports" icon:sports_soccer
+      Section "Popular Products"
+        Grid columns:2 gap:12
+          ProductCard title:"Wireless Headphones" price:"$59.99" image:headphones rating:4.5
+            IconButton icon:favorite_border toggle:true align:top-right
+          ProductCard title:"Running Shoes" price:"$79.00" image:shoes rating:4.7
+            IconButton icon:favorite_border toggle:true align:top-right
+          ProductCard title:"Smart Watch" price:"$129.00" image:watch rating:4.3
+            IconButton icon:favorite_border toggle:true align:top-right
+          ProductCard title:"Backpack" price:"$39.50" image:backpack rating:4.6
+            IconButton icon:favorite_border toggle:true align:top-right
+    Page id:search visible-when:activeTab==search
+      SearchField placeholder:"Search products" autofocus:true
+      List title:"Recent searches"
+        ListItem "sneakers" icon:history
+        ListItem "headphones" icon:history
+    Page id:cart visible-when:activeTab==cart
+      List title:"Your Cart (3 items)"
+        CartItem title:"Wireless Headphones" price:"$59.99" quantity:1
+        CartItem title:"Running Shoes" price:"$79.00" quantity:1
+        CartItem title:"Backpack" price:"$39.50" quantity:1
+      Button "Checkout" style:primary width:fill
+    Page id:profile visible-when:activeTab==profile
+      Avatar image:user size:80
+      Text "Hi, Alex"
+      List
+        ListItem "Orders" icon:receipt chevron:true
+        ListItem "Addresses" icon:location_on chevron:true
+        ListItem "Settings" icon:settings chevron:true
+  BottomNavBar position:bottom elevation:8 background:#FFFFFF
+    NavItem "Home" icon:home selected-when:activeTab==home on-tap:set activeTab=home
+    NavItem "Search" icon:search selected-when:activeTab==search on-tap:set activeTab=search
+    NavItem "Cart" icon:shopping_cart selected-when:activeTab==cart on-tap:set activeTab=cart
+      Badge "3" background:#E53935 color:#FFFFFF shape:circle position:top-right-of-icon size:18 animate:pop-on-change
+    NavItem "Profile" icon:person selected-when:activeTab==profile on-tap:set activeTab=profile
+    style selected-color:#6200EE unselected-color:#757575 indicator:pill animate:slide duration:200ms

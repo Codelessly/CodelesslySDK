@@ -1,0 +1,27 @@
+Card gap:4
+  Text.title "Notifications"
+  Row gap:12 middle pad:8 {"props":{"animation":{"type":"slideIn","from":"left","duration":400,"delay":0}}}
+    Icon "mail"
+    Column grow
+      Text.strong "New message from Ada"
+      Text.caption "2 min ago"
+  Row gap:12 middle pad:8 {"props":{"animation":{"type":"slideIn","from":"left","duration":400,"delay":150}}}
+    Icon "event"
+    Column grow
+      Text.strong "Meeting starts at 3 PM"
+      Text.caption "10 min ago"
+  Row gap:12 middle pad:8 {"props":{"animation":{"type":"slideIn","from":"left","duration":400,"delay":300}}}
+    Icon "check_circle"
+    Column grow
+      Text.strong "Your order has shipped"
+      Text.caption "1 hour ago"
+  Row gap:12 middle pad:8 {"props":{"animation":{"type":"slideIn","from":"left","duration":400,"delay":450}}}
+    Icon "star"
+    Column grow
+      Text.strong "Grace starred your project"
+      Text.caption "3 hours ago"
+  Row gap:12 middle pad:8 {"props":{"animation":{"type":"slideIn","from":"left","duration":400,"delay":600}}}
+    Icon "system_update"
+    Column grow
+      Text.strong "Update available"
+      Text.caption "Yesterday"

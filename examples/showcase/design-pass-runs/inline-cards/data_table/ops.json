@@ -1,0 +1,23 @@
+{"ops":[
+{"op":"patch","id":"column1","patch":{"layout":{"width":{"fill":0},"padding":[18,18,18,18]},"props":{"spacing":12,"crossAxisAlignment":"stretch"},"decoration":{"fills":[{"color":"card"}],"strokes":[{"color":"line"}],"strokeWidth":1.2,"radius":26},"bind":{"decoration.radius":"${theme.radii.card}","decoration.effects":"${theme.shadows.card}"}}},
+{"op":"set","id":"header","parent":"column1","index":0,"node":{"type":"row","children":["titleMark"],"props":{"spacing":10,"crossAxisAlignment":"center"},"layout":{"width":{"fill":0},"height":{"hug":0},"padding":[0,0,0,2]}}},
+{"op":"set","id":"titleMark","parent":"header","node":{"type":"row","children":["titleIcon"],"props":{"mainAxisAlignment":"center","crossAxisAlignment":"center"},"layout":{"width":30,"height":30},"decoration":{"fills":[{"color":"accentTint"}],"radius":9}}},
+{"op":"set","id":"titleIcon","parent":"titleMark","node":{"type":"icon","props":{"icon":"receipt_long_rounded","size":17,"color":"accent"},"layout":{"width":17,"height":17}}},
+{"op":"move","id":"text1","parent":"header"},
+{"op":"patch","id":"text1","patch":{"props":{"style":{"from":"cardTitle","color":"ink","fontSize":null,"fontWeight":null}}}},
+{"op":"patch","id":"row1","patch":{"layout":{"padding":[4,2,10,2]},"props":{"spacing":2},"decoration":{"fills":[{"color":"tile"}],"radius":12},"bind":{"decoration.radius":"${theme.radii.control}"}}},
+{"op":"remove","ids":["divider1"]},
+{"op":"patch","id":"column2","patch":{"props":{"spacing":0,"crossAxisAlignment":"stretch"}}},
+{"op":"patch","id":"row2","patch":{"layout":{"padding":[4,8,2,8]},"props":{"spacing":8}}},
+{"op":"patch","id":"column3","patch":{"props":{"spacing":2}}},
+{"op":"patch","id":"text2","patch":{"props":{"style":{"from":"rowTitle","color":"ink","fontSize":null,"fontWeight":null},"maxLines":1,"overflow":"ellipsis"}}},
+{"op":"patch","id":"text3","patch":{"props":{"style":{"from":"meta","color":"inkSoft","fontSize":null},"maxLines":1,"overflow":"ellipsis"}}},
+{"op":"patch","id":"column4","patch":{"props":{"spacing":3}}},
+{"op":"patch","id":"text4","patch":{"layout":{"width":{"hug":0}},"props":{"style":{"from":"numberSmall","color":"ink","fontSize":16,"fontWeight":null}}}},
+{"op":"patch","id":"badge1","patch":{"layout":{"width":{"hug":0}},"props":{"backgroundColor":"tile","textColor":"inkSoft"},"bind":{"props.backgroundColor":"${= item.status=='Paid' ? theme.colors.goodTint : item.status=='Overdue' ? theme.colors.badTint : theme.colors.warnTint}","props.textColor":"${= item.status=='Paid' ? theme.colors.goodDeep : item.status=='Overdue' ? theme.colors.badDeep : theme.colors.warnDeep}"}}},
+{"op":"patch","id":"row3","patch":{"layout":{"padding":[0,4,0,0]}}},
+{"op":"patch","id":"text5","patch":{"props":{"style":{"from":"meta","color":"inkSoft","fontSize":null}}}},
+{"op":"patch","id":"column5","patch":{"layout":{"padding":[16,10,10,10]},"decoration":{"fills":[{"color":"bar"}],"radius":18},"bind":{"decoration.radius":"${theme.radii.panel}","decoration.effects":"${theme.shadows.bar}"}}},
+{"op":"patch","id":"row4","patch":{"props":{"spacing":10}}},
+{"op":"patch","id":"text6","patch":{"props":{"style":{"from":"numberSmall","color":"onBar","fontSize":null,"fontWeight":null},"maxLines":1,"overflow":"ellipsis"}}}
+]}

@@ -1,0 +1,1 @@
+Design a full phone screen at 390 px wide for a ferry boarding ticket. Show the route, departure and arrival times, boarding status, gate, passenger and seat, a reminder of when boarding closes, and actions to view the route map and show the ticket to staff. Keep essential boarding information readable at 320 px.

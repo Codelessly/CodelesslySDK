@@ -1,0 +1,16 @@
+{"ops":[
+{"op":"patch","id":"column1","patch":{"layout":{"width":{"fill":0},"padding":[18,18,18,18]},"decoration":{"fills":[{"color":"card"}],"strokes":[{"color":"line"}],"strokeWidth":1.2,"radius":26},"bind":{"decoration.radius":"${theme.radii.card}","decoration.effects":"${theme.shadows.card}"},"props":{"crossAxisAlignment":"stretch"}}},
+{"op":"patch","id":"column2","patch":{"props":{"spacing":14,"crossAxisAlignment":"stretch"}}},
+{"op":"patch","id":"text1","patch":{"props":{"style":{"from":"cardTitle","color":"ink","fontSize":null,"fontWeight":null}}}},
+{"op":"patch","id":"gridView1","patch":{"props":{"mainAxisSpacing":10,"crossAxisSpacing":10}}},
+{"op":"patch","id":"column3","patch":{"props":{"spacing":6,"crossAxisAlignment":"stretch"}}},
+{"op":"patch","id":"column4","patch":{"layout":{"height":96},"decoration":{"radius":14,"strokes":[{"color":"line"}],"strokeWidth":1},"bind":{"decoration.radius":"${theme.radii.tile}"}}},
+{"op":"patch","id":"text2","patch":{"props":{"style":{"from":"meta","color":"inkSoft","fontSize":null},"maxLines":1,"overflow":"ellipsis"}}},
+{"op":"patch","id":"column5","patch":{"layout":{"padding":[14,14,14,16]},"props":{"spacing":12,"crossAxisAlignment":"stretch"},"decoration":{"fills":[{"color":"card"}],"strokes":[{"color":"lineStrong"}],"strokeWidth":1.2,"radius":18},"bind":{"decoration.radius":"${theme.radii.panel}","decoration.effects":"${theme.shadows.hero}"}}},
+{"op":"set","id":"counterPill","parent":"row1","index":0,"node":{"type":"row","children":[],"props":{"crossAxisAlignment":"center"},"layout":{"width":{"hug":0},"height":{"hug":0},"padding":[10,4,10,4]},"decoration":{"fills":[{"color":"tile"}],"radius":999}}},
+{"op":"move","id":"text3","parent":"counterPill"},
+{"op":"patch","id":"text3","patch":{"props":{"style":{"from":"numberSmall","color":"inkSoft","fontSize":null,"fontWeight":null}}}},
+{"op":"patch","id":"column6","patch":{"layout":{"height":220},"decoration":{"radius":14},"bind":{"decoration.radius":"${theme.radii.tile}"}}},
+{"op":"patch","id":"text4","patch":{"props":{"style":{"from":"rowTitle","color":"ink","fontSize":null,"fontWeight":null},"maxLines":2,"overflow":"ellipsis"}}},
+{"op":"patch","id":"row2","patch":{"layout":{"padding":[0,2,0,0]}}}
+]}

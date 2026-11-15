@@ -1,0 +1,1 @@
+A desktop support inbox: a narrow left rail of folders with counts, a middle list of ten conversations (sender, subject, snippet, time, unread dot), and a right reading pane showing the selected conversation with a reply box and Send and Close ticket buttons.

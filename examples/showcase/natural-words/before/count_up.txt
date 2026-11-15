@@ -1,0 +1,6 @@
+state revenue=0
+every 30 when revenue<48200 -> revenue=min(48200,revenue+1205)
+Card gap:8
+  Text.caption "Total revenue"
+  Text.pageTitle "{money(revenue,'$',0)}" weight:700
+  Text.bodySecondary "This month"

@@ -1,0 +1,28 @@
+Card
+  padding:16 radius:16 background:surface border:1 width:fill-container direction:column gap:12
+  Row justify:space-between align:center
+    Text "Storage" style:title weight:600
+    Text "182 of 256 GB used" style:caption color:secondary
+  StorageMeter height:12 radius:6 background:track direction:row gap:2 clip:true role:meter value:182 min:0 max:256 label:"Storage used"
+    Segment id:photos value:94 width:36.7% color:blue
+    Segment id:apps value:58 width:22.7% color:orange
+    Segment id:other value:30 width:11.7% color:gray
+    Segment id:free value:74 width:28.9% color:transparent
+    Motion on:appear property:width from:0 duration:600ms easing:ease-out stagger:80ms
+  Legend direction:row justify:space-between
+    LegendItem
+      Dot color:blue size:8
+      Text "Photos" style:label
+      Text "94 GB" style:caption color:secondary
+    LegendItem
+      Dot color:orange size:8
+      Text "Apps" style:label
+      Text "58 GB" style:caption color:secondary
+    LegendItem
+      Dot color:gray size:8
+      Text "Other" style:label
+      Text "30 GB" style:caption color:secondary
+  Text "74 GB free" style:caption color:secondary align:end
+  State when:usage>90% 
+    StorageMeter.Segment:other color:red
+    Text "Almost full" color:red

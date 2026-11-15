@@ -1,0 +1,1506 @@
+{
+ "schema": 3,
+ "roots": [
+  "ecommerce_product"
+ ],
+ "nodes": {
+  "ecommerce_product": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 390,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2",
+    "row16"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": [
+     16,
+     16,
+     16,
+     16
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column3",
+    "column5",
+    "row4",
+    "column6",
+    "row7",
+    "divider1",
+    "column10",
+    "divider2",
+    "column11"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "pageView1",
+    "row1"
+   ]
+  },
+  "pageView1": {
+   "type": "pageView",
+   "layout": {
+    "height": 280,
+    "width": {
+     "fill": 0
+    }
+   },
+   "decoration": {
+    "radius": 16
+   },
+   "bind": {
+    "props.initialPage": "${page}",
+    "data": "${images}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${result.index}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "pageView1Page"
+   ]
+  },
+  "pageView1Page": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "box1"
+   ]
+  },
+  "box1": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 280
+   },
+   "decoration": {
+    "fills": [
+     {
+      "image": {
+       "url": "${item}",
+       "fit": "cover"
+      }
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "height": 16,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 6
+   },
+   "bind": {
+    "data": "${= range(4)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "column4"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "height": 6,
+    "width": 0
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 3,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "layout.width": "${= index==page?16:6}",
+    "decoration.fills[0].color": "${= index==page?theme.primary:theme.colors.track}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= index}"
+      }
+     ]
+    }
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "row3"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "AURALIS AUDIO"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading1"
+    },
+    "text": "Auralis Pro X Wireless Headphones"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text3",
+    "text4"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star",
+    "color": "#FFF5A623"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "4.7"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "(1,284 reviews)"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text5",
+    "text6",
+    "row5"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading1",
+     "fontWeight": 700
+    },
+    "text": "$224"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "$299",
+    "decoration": "lineThrough"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "errorTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "errorTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text7"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "-25%",
+    "style": {
+     "from": "badge",
+     "color": "error"
+    }
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text8",
+    "row6"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "fieldLabel"
+    },
+    "text": "Color: ${color}"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column7",
+    "column8",
+    "column9"
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": 44,
+    "height": 44
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 22,
+    "fills": [
+     {
+      "color": "primaryText"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= color==\"Midnight Black\"?theme.primary:theme.colors.primaryBorder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "color",
+       "value": "Midnight Black"
+      }
+     ]
+    }
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": 44,
+    "height": 44
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 22,
+    "fills": [
+     {
+      "color": "successTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= color==\"Pearl White\"?theme.primary:theme.colors.primaryBorder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "color",
+       "value": "Pearl White"
+      }
+     ]
+    }
+   ]
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "width": 44,
+    "height": 44
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 22,
+    "fills": [
+     {
+      "color": "#FF2F4B7C"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= color==\"Ocean Blue\"?theme.primary:theme.colors.primaryBorder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "color",
+       "value": "Ocean Blue"
+      }
+     ]
+    }
+   ]
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "children": [
+    "text9",
+    "row8"
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "fieldLabel"
+    },
+    "text": "Quantity"
+   }
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton1",
+    "text10",
+    "outlinedButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "-"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "qty",
+       "value": "${= max(1,qty-1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "${qty}"
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "+"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "qty",
+       "value": "${= min(10,qty+1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text11",
+    "row9",
+    "row10",
+    "row11"
+   ]
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading3"
+    },
+    "text": "Key features"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text12"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "volume_off"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Adaptive active noise cancellation",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon3",
+    "text13"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "battery_charging_full"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "40-hour battery with fast USB-C charging",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon4",
+    "text14"
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "bluetooth"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Bluetooth 5.3 with multipoint pairing",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column11": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text15",
+    "column12",
+    "column13"
+   ]
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading3"
+    },
+    "text": "Top reviews"
+   }
+  },
+  "column12": {
+   "type": "column",
+   "layout": {
+    "padding": 18,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 18,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#14000000",
+      "offset": [
+       0,
+       18
+      ],
+      "spreadRadius": -14,
+      "blurRadius": 40
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   },
+   "children": [
+    "row12",
+    "text18"
+   ]
+  },
+  "row12": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text16",
+    "row13"
+   ]
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "Maria K."
+   }
+  },
+  "row13": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon5",
+    "text17"
+   ]
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star",
+    "color": "#FFF5A623"
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "5.0"
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "bodySecondary"
+    },
+    "text": "Noise cancelling is unreal on my commute, and they are comfortable even after hours of wear."
+   }
+  },
+  "column13": {
+   "type": "column",
+   "layout": {
+    "padding": 18,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 18,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#14000000",
+      "offset": [
+       0,
+       18
+      ],
+      "spreadRadius": -14,
+      "blurRadius": 40
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   },
+   "children": [
+    "row14",
+    "text21"
+   ]
+  },
+  "row14": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text19",
+    "row15"
+   ]
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "Daniel R."
+   }
+  },
+  "row15": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon6",
+    "text20"
+   ]
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star",
+    "color": "#FFF5A623"
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "4.5"
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "bodySecondary"
+    },
+    "text": "Great sound and battery life. The case feels a little bulky, but otherwise perfect."
+   }
+  },
+  "row16": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     16,
+     12,
+     16,
+     16
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton3",
+    "filledButton1"
+   ]
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Add to cart"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addToCart"
+      },
+      {
+       "type": "showToast",
+       "message": "Added to cart"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Buy now"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "buyNow"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "ecommerce_product": [
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "color",
+    "type": "text",
+    "value": "Midnight Black"
+   },
+   {
+    "name": "qty",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "images",
+    "type": "list",
+    "value": [
+     "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=780",
+     "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=780",
+     "https://images.unsplash.com/photo-1484704849700-f032a568e944?w=780",
+     "https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=780"
+    ]
+   }
+  ]
+ }
+}

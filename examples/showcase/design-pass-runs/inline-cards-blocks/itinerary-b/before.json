@@ -1,0 +1,1666 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 18,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 26,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#14000000",
+      "offset": [
+       0,
+       18
+      ],
+      "spreadRadius": -14,
+      "blurRadius": 40
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   },
+   "children": [
+    "text1",
+    "row1",
+    "progressBar1",
+    "divider1",
+    "row2",
+    "accordion1",
+    "row4",
+    "accordion2",
+    "row5",
+    "accordion3",
+    "row6",
+    "accordion4",
+    "text20",
+    "checkbox1",
+    "checkbox2",
+    "checkbox3",
+    "divider2",
+    "row7",
+    "accordion5",
+    "row9",
+    "accordion6",
+    "row10",
+    "accordion7",
+    "row11",
+    "accordion8",
+    "text38",
+    "checkbox4",
+    "checkbox5",
+    "checkbox6"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "title"
+    },
+    "text": "Two days in Kyoto"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text2"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "event_available"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "${= (d1a?0:1)+(d1b?0:1)+(d1c?0:1)+(d2a?0:1)+(d2b?0:1)+(d2c?0:1)} of 6 bookings left"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "height": 8,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 999,
+    "color": "primary",
+    "backgroundColor": "track"
+   },
+   "bind": {
+    "props.value": "${= 0}"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "row3"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading"
+    },
+    "text": "Day 1: Higashiyama"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "infoTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "infoTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Temples",
+    "style": {
+     "from": "badge",
+     "color": "info"
+    }
+   }
+  },
+  "accordion1": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "expanded": false
+   },
+   "children": [
+    "text5",
+    "column2"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "08:00 Fushimi Inari Shrine",
+    "style": {
+     "from": "strong"
+    }
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text6",
+    "text7"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Walk thousands of torii gates up the mountain. Go early to avoid crowds.",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Stay about 2 hours"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text8"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "train"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "JR Nara Line to Kyoto Station, 5 min, then bus 206, 20 min"
+   }
+  },
+  "accordion2": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "expanded": false
+   },
+   "children": [
+    "text9",
+    "column3"
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "11:30 Lunch at Nishiki Market",
+    "style": {
+     "from": "strong"
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text10",
+    "text11"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Try tamagoyaki, pickles and fresh tofu doughnuts along the covered street.",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Stay about 1.5 hours"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon3",
+    "text12"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "directions_walk"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "Walk east to Gion, 20 min"
+   }
+  },
+  "accordion3": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "expanded": false
+   },
+   "children": [
+    "text13",
+    "column4"
+   ]
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "14:00 Kiyomizu-dera",
+    "style": {
+     "from": "strong"
+    }
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text14",
+    "text15"
+   ]
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Wooden stage over the hillside. Wander Sannenzaka and Ninenzaka lanes after.",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Stay about 2 hours"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon4",
+    "text16"
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "directions_walk"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "Walk to Gion, 15 min"
+   }
+  },
+  "accordion4": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "expanded": false
+   },
+   "children": [
+    "text17",
+    "column5"
+   ]
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "18:00 Gion evening stroll and dinner",
+    "style": {
+     "from": "strong"
+    }
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text18",
+    "text19"
+   ]
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Hanamikoji Street at dusk, then kaiseki or izakaya dinner.",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Stay about 2.5 hours"
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "Book ahead"
+   }
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Dinner reservation in Gion"
+   },
+   "bind": {
+    "props.value": "${d1a}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d1a",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Kiyomizu-dera evening illumination tickets"
+   },
+   "bind": {
+    "props.value": "${d1b}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d1b",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox3": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Tea ceremony in Higashiyama"
+   },
+   "bind": {
+    "props.value": "${d1c}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d1c",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text21",
+    "row8"
+   ]
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading"
+    },
+    "text": "Day 2: Arashiyama and north"
+   }
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "successTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "successTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text22"
+   ]
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Nature",
+    "style": {
+     "from": "badge",
+     "color": "success"
+    }
+   }
+  },
+  "accordion5": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "expanded": false
+   },
+   "children": [
+    "text23",
+    "column6"
+   ]
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "08:30 Bamboo Grove",
+    "style": {
+     "from": "strong"
+    }
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text24",
+    "text25"
+   ]
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Quiet path through towering bamboo, best before the tour groups arrive.",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Stay about 1 hour"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon5",
+    "text26"
+   ]
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "directions_walk"
+   }
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "Walk to Tenryu-ji, 5 min"
+   }
+  },
+  "accordion6": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "expanded": false
+   },
+   "children": [
+    "text27",
+    "column7"
+   ]
+  },
+  "text27": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "10:00 Tenryu-ji Garden",
+    "style": {
+     "from": "strong"
+    }
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text28",
+    "text29"
+   ]
+  },
+  "text28": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Zen temple with a pond garden that has barely changed in 700 years.",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "text29": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Stay about 1.5 hours"
+   }
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon6",
+    "text30"
+   ]
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "train"
+   }
+  },
+  "text30": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "JR Sagano Line then bus 205, 45 min total"
+   }
+  },
+  "accordion7": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "expanded": false
+   },
+   "children": [
+    "text31",
+    "column8"
+   ]
+  },
+  "text31": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "13:00 Lunch and Kinkaku-ji",
+    "style": {
+     "from": "strong"
+    }
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text32",
+    "text33"
+   ]
+  },
+  "text32": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Soba lunch nearby, then the Golden Pavilion reflected in its pond.",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "text33": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Stay about 2.5 hours"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon7",
+    "text34"
+   ]
+  },
+  "icon7": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "directions_bus"
+   }
+  },
+  "text34": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "Bus 101 to Gion, 40 min"
+   }
+  },
+  "accordion8": {
+   "type": "accordion",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "expanded": false
+   },
+   "children": [
+    "text35",
+    "column9"
+   ]
+  },
+  "text35": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "17:00 Pontocho Alley dinner",
+    "style": {
+     "from": "strong"
+    }
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "padding": 8,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text36",
+    "text37"
+   ]
+  },
+  "text36": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Lantern-lit lane along the Kamo River with small restaurants.",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "text37": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Stay about 2 hours"
+   }
+  },
+  "text38": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "Book ahead"
+   }
+  },
+  "checkbox4": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Pontocho dinner table"
+   },
+   "bind": {
+    "props.value": "${d2a}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d2a",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox5": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Tenryu-ji garden and temple entry"
+   },
+   "bind": {
+    "props.value": "${d2b}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d2b",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox6": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Rickshaw ride in Arashiyama"
+   },
+   "bind": {
+    "props.value": "${d2c}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "d2c",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "d1a",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d1b",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d1c",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d2a",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d2b",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "d2c",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

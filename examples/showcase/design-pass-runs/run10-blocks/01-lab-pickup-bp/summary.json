@@ -1,0 +1,32 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/run10/01-lab-pickup/before.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [
+  "ActionButton",
+  "TotalBar",
+  "Receipt"
+ ],
+ "before": {
+  "problems": 0,
+  "texts": 7
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 126.7,
+   "problems": 7,
+   "ops": 18
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 229.0,
+   "problems": 0,
+   "ops": 18
+  }
+ ],
+ "final": 2,
+ "problems": 0,
+ "status": "passed"
+}

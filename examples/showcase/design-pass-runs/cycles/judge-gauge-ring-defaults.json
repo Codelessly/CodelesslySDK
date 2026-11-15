@@ -1,0 +1,126 @@
+{
+ "what": "Four cards with the new Gauge and Ring: the defaults as first written (olddefaults: a 240 wide gauge at the left, a 40 px figure, the ring at the control's own stroke), after the pass's changes were folded in (newdefaults: as wide as the card and centered, the gaugeValue style, sizes.ring 11), and the design pass (pass).",
+ "judges": "judge.py (claude-opus-5-5 and claude-sonnet-5-5 by the API), versions shown together, unlabeled and shuffled.",
+ "judgments": [
+  {
+   "case": "gauge_speed",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "pass",
+    "newdefaults",
+    "olddefaults"
+   ],
+   "scores": {
+    "pass": 8,
+    "newdefaults": 6,
+    "olddefaults": 4
+   },
+   "why": "A feels most shipped, with proper card margins, a centered gauge in an inset panel, a weighted title, and an icon-backed status and limit pill; C is centered but plain and sits flush against the viewport edges, while B also has an awkwardly left-aligned gauge that breaks balance with the full-width footer labels."
+  },
+  {
+   "case": "gauge_speed",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "pass",
+    "newdefaults",
+    "olddefaults"
+   ],
+   "scores": {
+    "pass": 8,
+    "olddefaults": 5,
+    "newdefaults": 6
+   },
+   "why": "A has the most finished structure: margin around the card, an inset gauge panel, a check icon in the status pill, and a limit chip that clearly relates to the tick mark. C's gauge is centered, but the card is flush to the screen edge with tight padding. B has the same flush-edge problem and also an off-center gauge, which unbalances the layout against the centered limit label."
+  },
+  {
+   "case": "knob_thermostat",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "pass",
+    "newdefaults",
+    "olddefaults"
+   ],
+   "scores": {
+    "pass": 8,
+    "newdefaults": 5,
+    "olddefaults": 4
+   },
+   "why": "B looks like a shipped product: a header icon anchors the title, the gauge and stepper sit together in one inset panel, the +/- buttons are real tap targets, and the segmented control spans the full width, while A and C share weak stepper affordances, an awkward empty gap below the gauge, and a cramped mode toggle, with A's bolder numeral giving it slightly stronger hierarchy than C."
+  },
+  {
+   "case": "knob_thermostat",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "pass",
+    "newdefaults",
+    "olddefaults"
+   ],
+   "scores": {
+    "pass": 8,
+    "olddefaults": 5,
+    "newdefaults": 5.5
+   },
+   "why": "A has clear hierarchy, with an icon tile, a recessed dial panel, tappable circular +/- buttons and a full-width segmented control, so it looks like a shipped product, whereas B and C are stripped-down versions with tiny, hard-to-tap +/- glyphs, a small left-orphaned toggle, loose spacing and a redundant badge, and C edges out B only through a slightly bolder, more confident numeral."
+  },
+  {
+   "case": "dial_battery",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "pass",
+    "newdefaults",
+    "olddefaults"
+   ],
+   "scores": {
+    "pass": 8,
+    "newdefaults": 6,
+    "olddefaults": 6
+   },
+   "why": "C has the clearest hierarchy and the most shipped-product polish, with its header icon, iconified status pill, stronger 64% figure and grouped time-to-full panel; A and B are nearly identical, competent but plain, and B's heavier ring stroke feels slightly cruder than A's."
+  },
+  {
+   "case": "dial_battery",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "pass",
+    "newdefaults",
+    "olddefaults"
+   ],
+   "scores": {
+    "newdefaults": 6,
+    "pass": 8,
+    "olddefaults": 5
+   },
+   "why": "B adds a battery icon, a lightning glyph in the badge, and a tinted panel that groups the time-to-full info, so its hierarchy and polish read as a shipped product, and its ring is proportionate to the text; A is clean but plain, with a heavy ring stroke and a lot of empty space around the ring; C is nearly identical to A but with an even thicker ring stroke that crowds the center text, which makes it the clunkiest."
+  },
+  {
+   "case": "ring_goal",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "pass",
+    "olddefaults",
+    "newdefaults"
+   ],
+   "scores": {
+    "pass": 8,
+    "olddefaults": 5,
+    "newdefaults": 4
+   },
+   "why": "B has the clearest hierarchy: a bold 72% hero number inside the ring, an icon-anchored header, and a contained footer pill that emphasizes the step count, so it reads like a shipped product, while A and C bury the key metric in tiny, timid center text, with A's thicker ring giving it slightly more presence than C's thin, sparse one."
+  },
+  {
+   "case": "ring_goal",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "pass",
+    "newdefaults",
+    "olddefaults"
+   ],
+   "scores": {
+    "newdefaults": 6,
+    "pass": 8,
+    "olddefaults": 5
+   },
+   "why": "B has the clearest hierarchy, with a bold 72% focal point, an icon-anchored header, and a tinted footer strip that groups steps and goal, so it looks shipped; A is clean but flat, with a small center label and a thin ring; C is nearly identical to A but its thicker ring has uneven round caps and a slightly awkward gap at the start, so it looks less refined."
+  }
+ ]
+}

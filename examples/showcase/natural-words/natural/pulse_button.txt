@@ -1,0 +1,20 @@
+Card padding:16 radius:12 width:320 background:#fff border:"1px solid #e5e7eb" layout:row align:center gap:16
+  RecordButton id:recBtn size:56 shape:circle background:#ef4444 icon:"mic" iconColor:#fff role:button label:"Record" state:idle
+    State name:idle background:#ef4444 icon:"mic" label:"Start recording"
+    State name:recording background:#dc2626 icon:"stop" label:"Stop recording"
+    Animation when:recording property:scale from:1.0 to:1.12 duration:800ms easing:ease-in-out repeat:infinite reverse:true
+    Animation when:recording target:halo property:opacity from:0.5 to:0 duration:800ms repeat:infinite
+    Halo id:halo shape:circle color:#ef4444 size:56 scaleTo:1.6 visible:false visibleWhen:recording
+    Transition property:background duration:150ms
+    OnTap action:toggle state:recording
+  Column gap:2 flex:1
+    Text "Voice memo" size:16 weight:600 color:#111827
+    Row align:center gap:6
+      Dot size:8 shape:circle color:#ef4444 visibleWhen:recording
+        Animation property:opacity from:1 to:0.2 duration:600ms repeat:infinite reverse:true
+      Timer id:elapsed text:"0s" format:"{seconds}s" size:14 color:#6b7280 monospaceDigits:true
+        Behavior when:recording action:start tick:1s increment:seconds
+        Behavior when:stopped action:pause
+        Behavior when:recordingStarted action:reset value:0
+    Text "Tap to record" size:12 color:#9ca3af visibleWhen:idle
+    Text "Recording…" size:12 color:#ef4444 visibleWhen:recording

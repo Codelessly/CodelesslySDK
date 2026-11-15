@@ -1,0 +1,39 @@
+Screen "Invoices"
+  Header
+    Text "Invoices" style:title
+    Text "Showing 11–15 of 42" style:subtitle color:muted
+  List id:invoice-list type:paged pageSize:5 page:3 totalItems:42
+    ListHeader
+      Text "Invoice" width:20%
+      Text "Customer" width:35%
+      Text "Amount" width:20% align:right
+      Text "Status" width:25%
+    ListItem id:INV-1011
+      Text "INV-1011"
+      Text "Acme Corp"
+      Text "$1,200" align:right
+      Badge "Paid" color:green
+    ListItem id:INV-1012
+      Text "INV-1012"
+      Text "Globex"
+      Text "$850" align:right
+      Badge "Overdue" color:red
+    ListItem id:INV-1013
+      Text "INV-1013"
+      Text "Initech"
+      Text "$2,340" align:right
+      Badge "Paid" color:green
+    ListItem id:INV-1014
+      Text "INV-1014"
+      Text "Umbrella Co"
+      Text "$415" align:right
+      Badge "Draft" color:gray
+    ListItem id:INV-1015
+      Text "INV-1015"
+      Text "Hooli"
+      Text "$3,100" align:right
+      Badge "Paid" color:green
+  Pagination layout:row align:center gap:16
+    Button "Previous" id:prev action:goToPage(2) enabled:true
+    Text "Page 3 of 9" id:page-label
+    Button "Next" id:next action:goToPage(4) enabled:true

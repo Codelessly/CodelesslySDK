@@ -17,6 +17,7 @@ import 'package:flutter/widgets.dart' show Builder, WidgetBuilder;
 
 import 'animations.dart' show RenderAnimations, animatesOpacity;
 import 'behaviors.dart';
+import 'markdown.dart';
 import 'components.dart';
 import 'typewriter.dart';
 import 'hero.dart';
@@ -1340,9 +1341,27 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       result.add(BoxHitTestEntry(this, position));
       return true;
     }
+    // Drawn fully transparent, it takes no taps, as a hidden node: a scrim
+    // that fades in over a page (Flutter's AnimatedOpacity would still take
+    // them, so apps wrap it in IgnorePointer). Its reactions layer is
+    // outside the layer that fades it, so the check is the node's.
+    if (_seeThrough()) return false;
     final outside = outsideHitTest;
     if (outside != null && hasSize && !size.contains(position)) return outside(result, position);
     return super.hitTest(result, position: position);
+  }
+
+  /// Whether a layer of this node's own (down to its content) draws it at
+  /// opacity 0: its opacity, or the player that eases or animates it.
+  bool _seeThrough() {
+    final end = contentBox;
+    for (RenderObject? at = child;
+        at is RenderBox && !identical(at, end);
+        at = at is RenderObjectWithChildMixin<RenderBox> ? (at as RenderObjectWithChildMixin<RenderBox>).child : null) {
+      if (at is RenderOpacity && at.opacity <= 0) return true;
+      if (at is RenderPose && at.opacity <= 0) return true;
+    }
+    return false;
   }
 
   @override
@@ -2366,10 +2385,17 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// The node's text as spans: each run's characters in its style, merged
   /// over the text's base style.
   TextSpan _textSpan(Node n) {
-    final text = n.prop(TextProps.text);
+    var text = n.prop(TextProps.text);
     final inherited = n.behaviors.defaultTextStyle;
-    final base = inherited == null ? n.prop(TextProps.style) : inherited.merge(n.prop(TextProps.style));
-    final runs = n.prop(TextProps.runs);
+    var base = inherited == null ? n.prop(TextProps.style) : inherited.merge(n.prop(TextProps.style));
+    var runs = n.prop(TextProps.runs);
+    // Markdown: the text without its markers, and runs for its parts. Its
+    // runs replace the written ones, so the text takes the style of its
+    // first run (a text written as one styled run keeps its size).
+    if (MarkdownLook.of(n.prop(TextProps.markdown)) case final look?) {
+      if (runs.isNotEmpty) base = base.merge(runs.first.style);
+      (text, runs) = markdownRuns(text, look, color: base.color, fontSize: base.fontSize);
+    }
     if (runs.isEmpty) return TextSpan(text: text, style: textStyle(base));
     // Runs style ranges; they do not replace the unstyled characters.
     // Split at each boundary so gaps and overlapping styles retain text once.

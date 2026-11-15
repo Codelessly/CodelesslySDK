@@ -1,0 +1,54 @@
+{"ops": [
+ {"op": "patch", "id": "column1", "patch": {
+   "layout": {"padding": [16, 16, 16, 18]},
+   "props": {"spacing": 14, "crossAxisAlignment": "stretch"},
+   "decoration": {"strokes": [{"color": "line"}], "effects": null},
+   "bind": {"decoration.radius": "${theme.radii.card}", "decoration.effects": "${theme.shadows.card}"}
+ }},
+ {"op": "set", "id": "now", "parent": "column1", "index": 0, "node": {
+   "type": "WeatherNow",
+   "props": {"title": "Lisbon, Portugal", "detail": "Mostly sunny", "temp": "22", "high": "24", "low": "15", "kind": "sun"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"props.temp": "${= '22'}"}
+ }},
+ {"op": "patch", "id": "text6", "patch": {"props": {"style": {"from": "eyebrow"}}, "layout": {"padding": [2, 4, 0, 0]}}},
+ {"op": "set", "id": "hours", "parent": "column1", "index": 5, "node": {
+   "type": "WeatherHours",
+   "props": {"hours": ["1 PM", "2 PM", "3 PM", "4 PM", "5 PM"], "temps": [23, 24, 24, 23, 21], "kinds": ["sun", "sun", "partly", "cloud", "rain"]},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"props.hours": "${= ['1 PM', '2 PM', '3 PM', '4 PM', '5 PM']}", "props.temps": "${= [23, 24, 24, 23, 21]}"}
+ }},
+ {"op": "patch", "id": "text17", "patch": {"props": {"style": {"from": "eyebrow"}}, "layout": {"padding": [2, 4, 0, 0]}}},
+ {"op": "set", "id": "days", "parent": "column1", "index": 9, "node": {
+   "type": "column",
+   "props": {"spacing": 6, "crossAxisAlignment": "stretch"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [14, 10, 14, 10]},
+   "decoration": {"fills": [{"color": "tile"}], "radius": 18},
+   "bind": {"decoration.radius": "${theme.radii.panel}"}
+ }},
+ {"op": "set", "id": "dayTue", "parent": "days", "node": {
+   "type": "WeatherDay",
+   "props": {"label": "Tue", "kind": "cloud", "low": 14, "high": 20, "min": 13, "max": 25},
+   "layout": {"width": {"fill": 0}, "height": 30},
+   "bind": {"props.label": "${= 'Tue'}", "props.low": "${= 14}", "props.high": "${= 20}"}
+ }},
+ {"op": "set", "id": "dayWed", "parent": "days", "node": {
+   "type": "WeatherDay",
+   "props": {"label": "Wed", "kind": "rain", "low": 13, "high": 18, "min": 13, "max": 25},
+   "layout": {"width": {"fill": 0}, "height": 30},
+   "bind": {"props.label": "${= 'Wed'}", "props.low": "${= 13}", "props.high": "${= 18}"}
+ }},
+ {"op": "set", "id": "dayThu", "parent": "days", "node": {
+   "type": "WeatherDay",
+   "props": {"label": "Thu", "kind": "sun", "low": 15, "high": 25, "min": 13, "max": 25},
+   "layout": {"width": {"fill": 0}, "height": 30},
+   "bind": {"props.label": "${= 'Thu'}", "props.low": "${= 15}", "props.high": "${= 25}"}
+ }},
+ {"op": "set", "id": "alertButton", "parent": "column1", "node": {
+   "type": "ActionButton",
+   "props": {"label": "Alert me before it rains", "tone": "primary", "icon": "notifications_active_rounded"},
+   "layout": {"width": {"fill": 0}, "height": 46},
+   "actions": [{"trigger": {"type": "event", "event": "onPressed"}, "actions": [{"type": "showToast", "message": "We'll alert you before rain in Lisbon"}]}]
+ }},
+ {"op": "remove", "ids": ["row1", "row2", "divider1", "row3", "divider2", "row4", "row5", "row6", "divider3", "filledButton1"]}
+]}

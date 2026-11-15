@@ -182,6 +182,20 @@ Future<TestGesture> dragTo(WidgetTester tester, Offset start, Offset to, {bool r
 // the handle starts the drag.
 
 void main() {
+  for (final shows in [true, false]) {
+    testWidgets('a refused drag ${shows ? 'opens' : 'opens no'} slot in the list (slotWhenRefused: $shows)', (tester) async {
+      final b = await pump(tester, bTarget: {'acceptIf': r'${= false}', 'slotWhenRefused': shows});
+      final four = textRect(tester, 'Four').topCenter;
+      final gesture = await dragTo(tester, textRect(tester, 'One').center, four + const Offset(0, 4), release: false);
+      expect(b.drag['over'], 'b');
+      expect(b.drag['accepted'], isFalse, reason: 'styled as blocked by \${drag.accepted}');
+      expect(dropSlotOf(b.tree, 'list_b')!.size, shows ? const Size(160, 40) : Size.zero);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(b.lane('b'), ['c4'], reason: 'refused: nothing moves');
+    });
+  }
+
   testWidgets('a card dragged into another column lands before the card under the pointer', (tester) async {
     final b = await pump(tester);
     final start = textRect(tester, 'One').center;

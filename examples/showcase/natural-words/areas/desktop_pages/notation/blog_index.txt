@@ -1,0 +1,57 @@
+state category="All"
+state page=1
+state posts=[{"title":"Designing a calmer settings page","tag":"Design","date":"Mar 4","author":"Leo Park","img":"https://picsum.photos/seed/craft1/600/360"},{"title":"Shipping faster with small pull requests","tag":"Engineering","date":"Mar 1","author":"Ana Silva","img":"https://picsum.photos/seed/craft2/600/360"},{"title":"What we learned from 40 user interviews","tag":"Product","date":"Feb 26","author":"Sam Ortiz","img":"https://picsum.photos/seed/craft3/600/360"},{"title":"Building a culture of written feedback","tag":"Culture","date":"Feb 21","author":"Priya Nair","img":"https://picsum.photos/seed/craft4/600/360"},{"title":"A practical guide to design tokens","tag":"Design","date":"Feb 17","author":"Leo Park","img":"https://picsum.photos/seed/craft5/600/360"},{"title":"Rethinking our roadmap process","tag":"Product","date":"Feb 12","author":"Jon Weber","img":"https://picsum.photos/seed/craft6/600/360"}]
+Column scroll gap:24 pad:24 maxw:1100
+  Row between center
+    Text.heading1 "The Craft Journal"
+    Row gap:4 center
+      Button.ghost "Articles" -> toast "Articles"
+      Button.ghost "Topics" -> toast "Topics"
+      Button.ghost "About" -> toast "About"
+      Button "Subscribe to newsletter" -> emit subscribe; toast "Thanks for subscribing!"
+  Divider
+  Card gap:0 pad:0 animate:fade
+    Image "https://picsum.photos/seed/craftfeatured/1400/560" w:fill h:320
+    Column gap:12 pad:24
+      Row
+        Badge.info "Engineering"
+      Text.pageTitle "How we cut build times by 70%"
+      Text.bodySecondary "Our CI pipeline had grown slow and brittle. Here is how we profiled every step, introduced caching and parallelized tests to bring a 30-minute build down to nine."
+      Row gap:12 center
+        Avatar "Maya Chen" size:40
+        Text.strong "Maya Chen"
+        Text.muted "·"
+        Text.muted "8 min read"
+  Row gap:8 scroll
+    ChoiceChip "All" selected:=category=="All" -> category="All"
+    ChoiceChip "Design" selected:=category=="Design" -> category="Design"
+    ChoiceChip "Engineering" selected:=category=="Engineering" -> category="Engineering"
+    ChoiceChip "Product" selected:=category=="Product" -> category="Product"
+    ChoiceChip "Culture" selected:=category=="Culture" -> category="Culture"
+  Grid cols:3 gap:16
+    each p in filter(posts,x=>category=="All"||x.tag==category)
+      Card gap:0 pad:0 stagger:80
+        Image "{p.img}" w:fill h:150
+        Column gap:8 pad:16
+          Row
+            Badge.neutral "{p.tag}"
+          Text.heading3 "{p.title}"
+          Row between center
+            Row gap:8 center
+              Avatar "{p.author}" size:24
+              Text.small "{p.author}"
+            Text.caption "{p.date}"
+  Row center gap:8
+    IconButton "chevron_left" -> page=max(1,page-1)
+    Button.outline "1" -> page=1
+    Button.outline "2" -> page=2
+    Button.outline "3" -> page=3
+    IconButton "chevron_right" -> page=min(3,page+1)
+  Text.caption "Page {page} of 3" center
+  Divider
+  Row between center
+    Text.muted "© 2025 The Craft Journal. All rights reserved."
+    Row gap:4
+      Button.ghost "RSS" -> toast "RSS"
+      Button.ghost "Privacy" -> toast "Privacy"
+      Button.ghost "Contact" -> toast "Contact"

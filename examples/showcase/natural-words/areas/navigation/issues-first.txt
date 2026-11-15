@@ -1,0 +1,1 @@
+delete_confirm_dialog: line 10:3: No node type "Modal". A node line takes the document's own type names (column, row, stack, text, icon, customPaint…): see the reference's nodes page.

@@ -357,8 +357,9 @@ DropSlotSpec? dropSlotOf(RenderTree tree, String listNodeId, {Object? instance})
   if (!identical(target._listBox, tree.boxOf(listNodeId, instance: instance))) return null;
   final before = session.rawBefore;
   if (before == null) return null;
-  // A refused drop opens no slot.
-  if (!session.accepted) return DropSlotSpec(before: before, size: Size.zero);
+  // A refused drop opens no slot, unless the target shows where it would
+  // land (`slotWhenRefused`: a full column, styled by `${drag.accepted}`).
+  if (!session.accepted && !m.slotWhenRefused) return DropSlotSpec(before: before, size: Size.zero);
   final hasNode = m.slot == api.DropSlot.node && m.slotNodeId.isNotEmpty;
   return DropSlotSpec(
     before: before,

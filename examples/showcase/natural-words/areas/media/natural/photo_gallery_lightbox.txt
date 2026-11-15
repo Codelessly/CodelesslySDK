@@ -1,0 +1,50 @@
+Screen "Lisbon trip"
+  state lightbox_open:false current_index:0
+  Header
+    IconButton "Back" icon:chevron-left action:navigate-back
+    Text "Lisbon trip" style:title
+    Text "6 photos" style:subtitle color:muted
+  PhotoGrid columns:3 gap:4 aspect:square padding:4
+    Photo image:alfama-rooftops.jpg alt:"Alfama rooftops" index:0
+      on-tap set:lightbox_open=true current_index=0 transition:expand-from-thumbnail duration:250ms
+      pressed-state scale:0.97 duration:100ms
+    Photo image:tram-28.jpg alt:"Tram 28" index:1
+      on-tap set:lightbox_open=true current_index=1 transition:expand-from-thumbnail duration:250ms
+      pressed-state scale:0.97 duration:100ms
+    Photo image:belem-tower.jpg alt:"Belem Tower" index:2
+      on-tap set:lightbox_open=true current_index=2 transition:expand-from-thumbnail duration:250ms
+      pressed-state scale:0.97 duration:100ms
+    Photo image:pasteis-de-nata.jpg alt:"Pasteis de nata" index:3
+      on-tap set:lightbox_open=true current_index=3 transition:expand-from-thumbnail duration:250ms
+      pressed-state scale:0.97 duration:100ms
+    Photo image:lx-factory-mural.jpg alt:"LX Factory mural" index:4
+      on-tap set:lightbox_open=true current_index=4 transition:expand-from-thumbnail duration:250ms
+      pressed-state scale:0.97 duration:100ms
+    Photo image:miradouro-sunset.jpg alt:"Sunset at Miradouro" index:5
+      on-tap set:lightbox_open=true current_index=5 transition:expand-from-thumbnail duration:250ms
+      pressed-state scale:0.97 duration:100ms
+    loading-state placeholder:shimmer per-photo fade-in:200ms
+
+  Lightbox visible:lightbox_open fullscreen:true background:black opacity:0.95 layer:overlay
+    enter animation:fade duration:200ms
+    exit animation:fade duration:150ms
+    trap-focus:true
+    keys left:prev right:next escape:close
+    TopBar position:top padding:16
+      Text "{current_index + 1} / 6" style:counter align:center color:white
+        example:"3 / 6"
+      IconButton "Close" icon:x position:top-right label:"Close photo" action:set lightbox_open=false
+    ImageViewer fill:true fit:contain
+      image:photos[current_index]
+      gestures swipe-left:next swipe-right:prev pinch:zoom double-tap:zoom-toggle swipe-down:close
+      on-change animation:crossfade-slide duration:200ms direction:follows-navigation
+      loading-state Spinner color:white
+      preload:adjacent
+    IconButton "Previous" icon:chevron-left position:left-center label:"Previous photo" action:set current_index=current_index-1
+      disabled-when:current_index==0 disabled-style:opacity:0.3
+    IconButton "Next" icon:chevron-right position:right-center label:"Next photo" action:set current_index=current_index+1
+      disabled-when:current_index==5 disabled-style:opacity:0.3
+    Caption position:bottom padding:16 color:white align:center text:photos[current_index].alt
+      on-change animation:fade duration:150ms
+    auto-hide Controls (TopBar, arrows, Caption) after:3s idle fade:200ms
+      reveal-on tap, mouse-move

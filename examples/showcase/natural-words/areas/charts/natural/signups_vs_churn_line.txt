@@ -1,0 +1,20 @@
+Card id:signups-churn-card padding:24 radius:12 elevation:2 width:640
+  Header layout:row justify:space-between align:center
+    Column
+      Text "Signups vs. Churn" style:title
+      Text "Weekly, last 8 weeks" style:subtitle color:muted
+    Legend layout:row gap:16 align:center position:top-right
+      LegendItem "Signups" swatch:#2563EB shape:line series:signups toggle:true
+      LegendItem "Churned users" swatch:#EF4444 shape:line series:churned toggle:true
+  LineChart height:320 animate:draw-in duration:800ms easing:ease-out
+    XAxis label:"Week" categories:"W1,W2,W3,W4,W5,W6,W7,W8" gridlines:false
+    YAxis label:"Users" min:0 max:800 step:200 gridlines:dashed format:number
+    Series id:signups name:"Signups" color:#2563EB strokeWidth:3 curve:smooth markers:circle
+      Data values:"420,465,510,498,560,610,645,702"
+    Series id:churned name:"Churned users" color:#EF4444 strokeWidth:3 curve:smooth markers:circle
+      Data values:"120,118,131,125,140,132,128,135"
+    Tooltip trigger:hover shared:true format:"{series}: {value}"
+    Crosshair axis:x style:dashed color:muted
+  Footer layout:row gap:24 margin-top:16
+    Stat "Latest signups" value:"702" delta:"+8.8% vs prior week" deltaColor:green
+    Stat "Latest churned" value:"135" delta:"+5.5% vs prior week" deltaColor:red

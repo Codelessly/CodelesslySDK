@@ -1,0 +1,39 @@
+screen "Onboarding" background:#F7F8FA padding:32 align:center
+  card width:640 radius:16 padding:32 background:white shadow:soft
+    stepper current:2 total:4 aria-label:"Onboarding progress"
+      step "Account" index:1 state:done icon:checkmark color:green clickable:true
+      connector state:complete color:green
+      step "Profile" index:2 state:current color:blue emphasis:bold aria-current:step
+      connector state:incomplete color:gray
+      step "Preferences" index:3 state:upcoming color:gray
+      connector state:incomplete color:gray
+      step "Review" index:4 state:upcoming color:gray
+      motion on:enter connector-fill:left-to-right duration:300ms easing:ease-out
+    section gap:4 margin-top:24
+      heading "Tell us about yourself" level:1
+      text "This helps personalize your experience." color:muted
+    form gap:20 margin-top:24
+      field label:"Display name" required:true
+        input type:text placeholder:"e.g. Jane Doe" maxlength:50 autofocus:true
+        error "Display name is required" show:on-blur-if-empty color:red
+      field label:"Job title" required:true
+        dropdown placeholder:"Select your role" searchable:true
+          option "Designer"
+          option "Engineer"
+          option "Product Manager"
+          option "Marketing"
+          option "Sales"
+          option "Other"
+        motion on:open menu:fade-slide-down duration:150ms
+      field label:"Bio" hint:"Optional"
+        textarea rows:4 placeholder:"Write a short intro about yourself…" maxlength:160 resize:vertical
+        counter "0/160" align:right color:muted
+          behavior update:live-on-input
+          behavior at:140 color:amber
+          behavior at:160 color:red
+    footer layout:row justify:space-between margin-top:32
+      button "Back" variant:secondary icon:arrow-left action:go-to-step-1
+      button "Continue" variant:primary icon:arrow-right icon-position:end
+        state default:disabled enabled-when:"display name filled and job title selected"
+        state on-click:loading spinner:true label:"Saving…"
+        action on-success:go-to-step-3 transition:slide-left duration:250ms
