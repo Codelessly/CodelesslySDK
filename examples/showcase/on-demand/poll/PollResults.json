@@ -1,0 +1,434 @@
+{
+ "schema": 3,
+ "id": "PollResults",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "PollResults",
+  "doc": "A poll's results after the vote: PollResults options:[\"A\",\"B\"] votes:[12,7] choice:\"A\" note:\"votes are anonymous\" draws one row per option with its share as a bar and a percentage, the leader in the accent, the voter's choice marked, and the total votes at the foot.",
+  "props": [
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Option A",
+     "Option B"
+    ],
+    "doc": "The options' names, one row each.",
+    "required": true
+   },
+   {
+    "key": "votes",
+    "type": {
+     "kind": "list",
+     "flutter": "List<double>",
+     "item": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": [
+     3,
+     1
+    ],
+    "doc": "The vote count per option, in the same order.",
+    "required": true
+   },
+   {
+    "key": "choice",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The option the voter chose (empty: none marked)."
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet note after the total (votes are anonymous, closes Thu 5 pm)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Lunch",
+   "size": [
+    360,
+    330
+   ],
+   "props": {
+    "options": [
+     "Pho Saigon",
+     "Taqueria Luz",
+     "Green Bowl",
+     "Napoli Pizza"
+    ],
+    "votes": [
+     5,
+     9,
+     3,
+     6
+    ],
+    "choice": "Napoli Pizza",
+    "note": "votes are anonymous"
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": [
+    "list",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     6,
+     6,
+     6,
+     13
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "opt"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.options}"
+   }
+  },
+  "opt": {
+   "type": "column",
+   "children": [
+    "head",
+    "bar"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     13
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 14
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.fills[0].color": "${= props.choice == item ? theme.colors.accentTint : theme.colors.card}",
+    "decoration.strokes[0].color": "${= props.choice == item ? theme.colors.accent : theme.colors.card}"
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "name",
+    "mine",
+    "pct"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "name": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "rowTitle"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.fontWeight": "${= (length(props.votes) > index ? at(props.votes, index) : 0) > 0 && (length(props.votes) > index ? at(props.votes, index) : 0) == first(sortByDesc(props.votes, v => v)) ? 700 : 500}"
+   }
+  },
+  "mine": {
+   "type": "row",
+   "children": [
+    "mineDot",
+    "mineText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.choice == item}"
+   }
+  },
+  "mineDot": {
+   "type": "row",
+   "children": [
+    "mineIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 8
+   }
+  },
+  "mineIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 11,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 11,
+    "height": 11
+   }
+  },
+  "mineText": {
+   "type": "text",
+   "props": {
+    "text": "You",
+    "style": {
+     "from": "chip",
+     "fontSize": 11.5,
+     "color": "accent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "pct": {
+   "type": "text",
+   "props": {
+    "text": "${= fixed(100 * (length(props.votes) > index ? at(props.votes, index) : 0) / max(1, sum(props.votes, v => v)), 0) + '%'}",
+    "style": {
+     "from": "numberSmall",
+     "color": "inkSoft"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     4,
+     0,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "props.style.color": "${= (length(props.votes) > index ? at(props.votes, index) : 0) > 0 && (length(props.votes) > index ? at(props.votes, index) : 0) == first(sortByDesc(props.votes, v => v)) ? theme.colors.ink : theme.colors.inkSoft}",
+    "props.style.fontWeight": "${= (length(props.votes) > index ? at(props.votes, index) : 0) > 0 && (length(props.votes) > index ? at(props.votes, index) : 0) == first(sortByDesc(props.votes, v => v)) ? 800 : 600}"
+   }
+  },
+  "bar": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 6
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "rrect",
+      "rect": [
+       0,
+       0,
+       "${size.width}",
+       6
+      ],
+      "radius": 3,
+      "paint": "${theme.colors.tileDeep}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       0,
+       0,
+       "${= max(6, size.width * (length(props.votes) > index ? at(props.votes, index) : 0) / max(1, sum(props.votes, v => v)))}",
+       6
+      ],
+      "radius": 3,
+      "when": "${= (length(props.votes) > index ? at(props.votes, index) : 0) > 0}",
+      "paint": "${= (length(props.votes) > index ? at(props.votes, index) : 0) == first(sortByDesc(props.votes, v => v)) ? {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': theme.colors.accentBright}, {'position': 1, 'color': theme.colors.accent}]}} : theme.colors.inkFaint}"
+     }
+    ]
+   }
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "footIcon",
+    "footText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     4,
+     14,
+     0
+    ]
+   }
+  },
+  "footIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "how_to_vote_rounded",
+    "size": 14,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   }
+  },
+  "footText": {
+   "type": "text",
+   "props": {
+    "text": "${= (sum(props.votes, v => v) == 1 ? '1 vote' : fixed(sum(props.votes, v => v), 0) + ' votes') + (props.note != '' ? ' · ' + props.note : '')}",
+    "style": "meta",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}
