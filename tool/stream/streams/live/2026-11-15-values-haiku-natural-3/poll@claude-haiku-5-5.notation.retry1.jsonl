@@ -1,0 +1,103 @@
+{"meta":{"ui":"poll","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Run a quick team poll in a card: \"Where should we go for lunch on Friday?\" with four options and their votes so far: Pho Saigon 5, Taqueria Luz 8, Green Bowl 3, Napoli Pizza 6. Before I vote I only see the options. When I vote, my vote is counted and I see each option's share as a bar with the percentage (rounded to a whole number), my choice marked as mine, and the total number of votes.","text":"ChatCard \"Team lunch poll\" \"Friday\" icon:\"how_to_vote\" status:\"Open\"\n  Paragraph \"Where should we go for lunch on Friday?\"\n  state pick=\"\"\n  state votes={\"Pho Saigon\":5,\"Taqueria Luz\":8,\"Green Bowl\":3,\"Napoli Pizza\":6}\n  let total = sum(map([\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"], n => votes[n]))\n  if pick==\"\"\n    OptionList \"Choose one\" =pick options:[\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"] -> votes=with(votes,pick,votes[pick]+1)\n  if pick!=\"\"\n    Column gap:10\n      Text.strong \"Results\"\n      Column gap:8\n        Row gap:8\n          Text.body \"Pho Saigon\"\n          Spacer grow\n          Text.muted \"{round(votes[\\\"Pho Saigon\\\"]*100/total,0)}%\"\n          if pick==\"Pho Saigon\"\n            Text.success \"Your vote\"\n        Progress =share1\n        Row gap:8\n          Text.body \"Taqueria Luz\"\n          Spacer grow\n          Text.muted \"{round(votes[\\\"Taqueria Luz\\\"]*100/total,0)}%\"\n          if pick==\"Taqueria Luz\"\n            Text.success \"Your vote\"\n        Progress =share2\n        Row gap:8\n          Text.body \"Green Bowl\"\n          Spacer grow\n          Text.muted \"{round(votes[\\\"Green Bowl\\\"]*100/total,0)}%\"\n          if pick==\"Green Bowl\"\n            Text.success \"Your vote\"\n        Progress =share3\n        Row gap:8\n          Text.body \"Napoli Pizza\"\n          Spacer grow\n          Text.muted \"{round(votes[\\\"Napoli Pizza\\\"]*100/total,0)}%\"\n          if pick==\"Napoli Pizza\"\n            Text.success \"Your vote\"\n        Progress =share4\n      Text.caption \"{total} votes in total\"\n\nlet share1 = votes[\"Pho Saigon\"]/total\nlet share2 = votes[\"Taqueria Luz\"]/total\nlet share3 = votes[\"Green Bowl\"]/total\nlet share4 = votes[\"Napoli Pizza\"]/total","usage":{"input_tokens":10635,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":796,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":414,"totalMs":2626}}
+{"tMs":414,"delta":"ChatCard \"Team l"}
+{"tMs":591,"delta":"unch poll\" \"Fri"}
+{"tMs":592,"delta":"day\" icon:\"how_"}
+{"tMs":592,"delta":"to_vote\" status:\""}
+{"tMs":592,"delta":"Open\"\n  Parag"}
+{"tMs":592,"delta":"raph \"Where should we go"}
+{"tMs":592,"delta":" for lunch on Friday"}
+{"tMs":592,"delta":"?\"\n  state pick="}
+{"tMs":607,"delta":"\"\"\n  state votes={\""}
+{"tMs":623,"delta":"Pho Saigon\":"}
+{"tMs":645,"delta":"5,\"Taqueria"}
+{"tMs":667,"delta":" Luz\":8,\""}
+{"tMs":688,"delta":"Green Bowl\":3,"}
+{"tMs":781,"delta":"\"Napoli Piz"}
+{"tMs":781,"delta":"za\":6}\n  let total"}
+{"tMs":781,"delta":" = sum(map([\""}
+{"tMs":781,"delta":"Pho Saigon\",\""}
+{"tMs":796,"delta":"Taqueria Luz\",\""}
+{"tMs":818,"delta":"Green Bowl\",\""}
+{"tMs":840,"delta":"Napoli Pizza\""}
+{"tMs":861,"delta":"], n => votes[n]"}
+{"tMs":883,"delta":"))\n  if pick==\"\""}
+{"tMs":904,"delta":"\n    OptionList \""}
+{"tMs":926,"delta":"Choose one\" =pick options"}
+{"tMs":947,"delta":":[\"Pho Saig"}
+{"tMs":969,"delta":"on\",\"Taqueria"}
+{"tMs":990,"delta":" Luz\",\"Green Bow"}
+{"tMs":1011,"delta":"l\",\"Napoli P"}
+{"tMs":1033,"delta":"izza\"] -> votes"}
+{"tMs":1054,"delta":"=with(votes,pick"}
+{"tMs":1076,"delta":",votes[pick]+"}
+{"tMs":1097,"delta":"1)\n  if pick!"}
+{"tMs":1119,"delta":"=\"\"\n    Column gap"}
+{"tMs":1143,"delta":":10\n      Text.str"}
+{"tMs":1162,"delta":"ong \"Results\"\n      "}
+{"tMs":1183,"delta":"Column gap:8\n        "}
+{"tMs":1205,"delta":"Row gap:8\n          "}
+{"tMs":1226,"delta":"Text.body \"Pho"}
+{"tMs":1248,"delta":" Saigon\"\n          Sp"}
+{"tMs":1269,"delta":"acer grow\n          Text"}
+{"tMs":1290,"delta":".muted \"{round(vot"}
+{"tMs":1312,"delta":"es[\\\"Pho"}
+{"tMs":1334,"delta":" Saigon\\\"]*100"}
+{"tMs":1355,"delta":"/total,0)}%\""}
+{"tMs":1376,"delta":"\n          if pick==\""}
+{"tMs":1398,"delta":"Pho Saigon\""}
+{"tMs":1420,"delta":"\n            Text.success \"Your"}
+{"tMs":1441,"delta":" vote\"\n        Progress"}
+{"tMs":1462,"delta":" ="}
+{"tMs":1483,"delta":"share"}
+{"tMs":1504,"delta":"1"}
+{"tMs":1547,"delta":"\n        Row gap:8"}
+{"tMs":1570,"delta":"\n          Text.body \"Ta"}
+{"tMs":1590,"delta":"queria Luz\""}
+{"tMs":1611,"delta":"\n          Spacer grow"}
+{"tMs":1632,"delta":"\n          Text.muted \"{"}
+{"tMs":1654,"delta":"round(votes[\\\""}
+{"tMs":1675,"delta":"Taqueria Luz\\"}
+{"tMs":1697,"delta":"\"]*100/total,0"}
+{"tMs":1718,"delta":")}%\"\n          if p"}
+{"tMs":1740,"delta":"ick==\"Taqueria"}
+{"tMs":1761,"delta":" Luz\"\n            Text"}
+{"tMs":1783,"delta":".success \"Your vote\""}
+{"tMs":1804,"delta":"\n        Progress =share2"}
+{"tMs":1826,"delta":"\n        Row gap:8"}
+{"tMs":1847,"delta":"\n          Text.body \""}
+{"tMs":1869,"delta":"Green Bowl\"\n          "}
+{"tMs":1890,"delta":"Spacer grow\n          "}
+{"tMs":1912,"delta":"Text.muted \"{round"}
+{"tMs":1933,"delta":"(votes[\\\"Green"}
+{"tMs":1955,"delta":" Bowl\\\"]*"}
+{"tMs":1976,"delta":"100/total,0)}%"}
+{"tMs":1998,"delta":"\"\n          if pick==\""}
+{"tMs":2019,"delta":"Green Bowl\""}
+{"tMs":2041,"delta":"\n            Text.success \"Your"}
+{"tMs":2062,"delta":" vote\"\n        Progress"}
+{"tMs":2087,"delta":" =share3\n        Row g"}
+{"tMs":2105,"delta":"ap:8\n          Text."}
+{"tMs":2127,"delta":"body \"Napoli P"}
+{"tMs":2149,"delta":"izza\"\n          Spac"}
+{"tMs":2169,"delta":"er grow\n          Text."}
+{"tMs":2192,"delta":"muted \"{round(votes"}
+{"tMs":2213,"delta":"[\\\"Napoli"}
+{"tMs":2234,"delta":" Pizza\\\"]*100"}
+{"tMs":2255,"delta":"/total,0)}%\""}
+{"tMs":2277,"delta":"\n          if pick==\""}
+{"tMs":2299,"delta":"Napoli Pizza\""}
+{"tMs":2319,"delta":"\n            Text.success \""}
+{"tMs":2341,"delta":"Your vote\"\n        Prog"}
+{"tMs":2363,"delta":"ress =share4\n      Text"}
+{"tMs":2384,"delta":".caption \"{total} vot"}
+{"tMs":2406,"delta":"es in total\"\n\nlet share1"}
+{"tMs":2428,"delta":" = votes[\"Pho"}
+{"tMs":2451,"delta":" Saigon\"]/total"}
+{"tMs":2471,"delta":"\nlet share2 = votes"}
+{"tMs":2492,"delta":"[\"Taqueria Lu"}
+{"tMs":2513,"delta":"z\"]/total\nlet share"}
+{"tMs":2534,"delta":"3 = votes[\"Green"}
+{"tMs":2556,"delta":" Bowl\"]/total"}
+{"tMs":2577,"delta":"\nlet share4 = votes"}
+{"tMs":2599,"delta":"[\"Napoli Piz"}
+{"tMs":2621,"delta":"za\"]/total"}

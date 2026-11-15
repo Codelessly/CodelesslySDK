@@ -1,0 +1,78 @@
+{
+ "ui": "dashboard",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24320,
+ "turns": [
+  {
+   "input_tokens": 9733,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1004,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 570,
+   "totalMs": 3926,
+   "chars": 1950,
+   "lines": 26,
+   "jsonTails": 0,
+   "nodes": 19,
+   "outputTokensPerNode": "52.8",
+   "notationIssues": [
+    "line 18:167: Unknown word \"[(range\" on a ChartCard. Props are written key:value.",
+    "line 18:187: Unknown word \"?\" on a ChartCard. Props are written key:value.",
+    "line 18:189: Unknown word \"0\" on a ChartCard. Props are written key:value.",
+    "line 18:3: A ChartCard has no \"\". It takes: title, value, values, labels, kind, delta.",
+    "line 18:193: Unknown word \"range\" on a ChartCard. Props are written key:value.",
+    "line 18:202: A ChartCard takes no more strings (title): write the rest as key:\"value\".",
+    "line 18:212: Unknown word \"?\" on a ChartCard. Props are written key:value.",
+    "line 18:214: Unknown word \"1\" on a ChartCard. Props are written key:value.",
+    "line 18:3: A ChartCard has no \"\". It takes: title, value, values, labels, kind, delta.",
+    "line 18:218: Unknown word \"2)]\" on a ChartCard. Props are written key:value.",
+    "line 18:272: The string on this line is already the ChartCard's delta: write delta once."
+   ],
+   "errors": [
+    "wrong_type /nodes/ChartCard1/props/values/0: Expected a number, got a list of 7.",
+    "wrong_type /nodes/ChartCard1/props/values/1: Expected a number, got a list of 1.",
+    "wrong_type /nodes/ChartCard1/props/values/2: Expected a number, got a list of 1.",
+    "unknown_prop /nodes/ChartCard1/props/: A ChartCard has no prop \"\". Its props: title, value, values, labels, kind, delta.",
+    "unknown_variable /nodes/TableHeader1/props/desc: No variable \"desc\" to pass as \"desc\": declare it in this document (or the project)."
+   ]
+  },
+  {
+   "input_tokens": 11347,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 979,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 493,
+   "totalMs": 3118,
+   "chars": 1936,
+   "lines": 28,
+   "jsonTails": 0,
+   "nodes": 19,
+   "outputTokensPerNode": "51.5",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

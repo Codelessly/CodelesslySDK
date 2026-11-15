@@ -1,0 +1,65 @@
+{"meta":{"ui":"subscription","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"My Pro plan renews in 3 days, on Nov 18. Show a card with the plan and its price ($12 a month), how much of my storage (68 of 100 GB) and seats (3 of 5) I have used as percentages with bars, a switch to annual billing ($120 a year) that shows the yearly price, the price per month and what I would save compared with paying monthly (in dollars and as a percentage), and Manage plan and Cancel renewal buttons.","text":"ChatCard \"Pro plan\" \"Renews Nov 18, in 3 days\" icon:\"workspace_premium\" status:\"Active\" tone:accent\n  state annual=false\n  Row between\n    Text.strong \"Monthly\"\n    Toggle =annual\n  if annual==false\n    Text.heading \"$12 / month\"\n  if annual==true\n    Text.heading \"$120 / year\"\n    Text.muted \"$10 / month\"\n    Text.success \"You save $24 a year (17%) compared with monthly\"\n  SectionLabel \"Usage\"\n  Column gap:8\n    Row between\n      Text.body \"Storage\"\n      Text.strong \"68 of 100 GB (68%)\"\n    Progress 0.68\n    Row between\n      Text.body \"Seats\"\n      Text.strong \"3 of 5 (60%)\"\n    Progress 0.6\n  Row gap:10\n    ActionButton \"Manage plan\" quiet icon:\"tune\" -> emit manage_plan\n    ActionButton \"Cancel renewal\" danger icon:\"cancel\" -> emit cancel_renewal","usage":{"input_tokens":9419,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":356,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":602,"totalMs":1874}}
+{"tMs":602,"delta":"ChatCard \"P"}
+{"tMs":792,"delta":"ro plan\" \"Ren"}
+{"tMs":792,"delta":"ews"}
+{"tMs":792,"delta":" Nov 18, in 3"}
+{"tMs":792,"delta":" days\" icon:\"work"}
+{"tMs":792,"delta":"space_prem"}
+{"tMs":792,"delta":"ium\" status:\"Active\""}
+{"tMs":792,"delta":" tone:acc"}
+{"tMs":792,"delta":"ent\n  state"}
+{"tMs":792,"delta":" annual=false\n  "}
+{"tMs":792,"delta":"Row between"}
+{"tMs":810,"delta":"\n    Text.strong \""}
+{"tMs":829,"delta":"Mon"}
+{"tMs":853,"delta":"thly\"\n    To"}
+{"tMs":870,"delta":"ggle ="}
+{"tMs":890,"delta":"annual\n  if"}
+{"tMs":909,"delta":" annual=="}
+{"tMs":931,"delta":"false\n    Text.he"}
+{"tMs":951,"delta":"ading \"$12 /"}
+{"tMs":972,"delta":" month\"\n  if annual=="}
+{"tMs":993,"delta":"true\n    Text.heading"}
+{"tMs":1014,"delta":" \"$120 / year\""}
+{"tMs":1035,"delta":"\n    Text.mu"}
+{"tMs":1055,"delta":"ted \"$10 / month\""}
+{"tMs":1076,"delta":"\n    Text.success"}
+{"tMs":1101,"delta":" \"You"}
+{"tMs":1115,"delta":" save $24"}
+{"tMs":1135,"delta":" a"}
+{"tMs":1159,"delta":" year (17"}
+{"tMs":1175,"delta":"%)"}
+{"tMs":1195,"delta":" compared with mon"}
+{"tMs":1215,"delta":"thly\"\n  S"}
+{"tMs":1236,"delta":"ectionLabel \"Us"}
+{"tMs":1256,"delta":"age\""}
+{"tMs":1276,"delta":"\n  Column"}
+{"tMs":1300,"delta":" gap:8\n    Row"}
+{"tMs":1318,"delta":" between\n      Text.body"}
+{"tMs":1339,"delta":" \"Storage\"\n      "}
+{"tMs":1359,"delta":"Text.str"}
+{"tMs":1380,"delta":"ong \"68 of 100 "}
+{"tMs":1401,"delta":"GB (68%)\""}
+{"tMs":1421,"delta":"\n    Progress 0.68"}
+{"tMs":1441,"delta":"\n    "}
+{"tMs":1462,"delta":"Row between\n      Text."}
+{"tMs":1483,"delta":"body \"Seats\"\n      "}
+{"tMs":1504,"delta":"Text.strong \"3 "}
+{"tMs":1524,"delta":"of 5 (60%)"}
+{"tMs":1544,"delta":"\"\n    Progress 0"}
+{"tMs":1566,"delta":".6\n  Row gap"}
+{"tMs":1586,"delta":":10\n    ActionBut"}
+{"tMs":1606,"delta":"ton \"Manage plan\""}
+{"tMs":1626,"delta":" qu"}
+{"tMs":1646,"delta":"iet ic"}
+{"tMs":1669,"delta":"on:\"t"}
+{"tMs":1686,"delta":"une\" -"}
+{"tMs":1707,"delta":"> em"}
+{"tMs":1727,"delta":"it manage_"}
+{"tMs":1748,"delta":"plan\n    ActionBut"}
+{"tMs":1769,"delta":"ton \"Cancel renew"}
+{"tMs":1789,"delta":"al\" danger icon:\""}
+{"tMs":1809,"delta":"c"}
+{"tMs":1831,"delta":"ancel\""}
+{"tMs":1850,"delta":" -> emit cancel_"}
+{"tMs":1871,"delta":"renewal"}

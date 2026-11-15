@@ -1,0 +1,585 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your grocery order",
+    "subtitle": "5 items",
+    "icon": "shopping_cart",
+    "status": "Review",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "listView1",
+    "textField1",
+    "Details1",
+    "TotalBar1",
+    "row3",
+    "Receipt1",
+    "Receipt2"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Items"
+   },
+   "bind": {
+    "props.note": "${= (sum(map(lines, l => l.qty)))} items"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${lines}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Media1",
+    "column1",
+    "text3",
+    "row2"
+   ]
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 44,
+    "width": 44
+   },
+   "props": {
+    "kind": "banana"
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14.5,
+     "fontWeight": 600,
+     "fontFamily": "Inter",
+     "letterSpacing": -0.1,
+     "height": 1.3,
+     "color": "#FF111827"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${item.detail}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= money(item.price,\"$\",2)}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "iconButton1",
+    "text4",
+    "iconButton2"
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "remove"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "lines",
+       "value": "${= setAt(lines,index,with(item,\"qty\",item.qty - (1)))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "lines",
+       "value": "${= (item.qty <= 0) ? (without(lines,item)) : lines}"
+      }
+     ]
+    }
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "x${item.qty}"
+   }
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "lines",
+       "value": "${= setAt(lines,index,with(item,\"qty\",item.qty + (1)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Promo code",
+     "hintText": "Enter code"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${promo}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "promo",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Subtotal\",\"{money((sum(map(lines, l => l.qty * l.price))),\"$\",2)}\"],[\"Promo SAVE10\",\"{(promo == \"SAVE10\" ? (sum(map(lines, l => l.qty * l.price))) * 0.1 : 0) > 0 ? \"-\" + money((promo == \"SAVE10\" ? (sum(map(lines, l => l.qty * l.price))) * 0.1 : 0),\"$\",2) : \"\"}\"],[\"Delivery\",\"{money(delivery,\"$\",2)}\"]]}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "cta": "Confirm",
+    "icon": "check"
+   },
+   "bind": {
+    "props.note": "${= (sum(map(lines, l => l.qty)))} items",
+    "props.amount": "${= money(((sum(map(lines, l => l.qty * l.price))) - (promo == \"SAVE10\" ? (sum(map(lines, l => l.qty * l.price))) * 0.1 : 0) + delivery),\"$\",2)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "confirmed"
+      }
+     ]
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Cancel",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "cancelled"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Confirm",
+    "tone": "primary"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "confirmed"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order placed",
+    "message": "Your groceries are on the way.",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "visible": "${= decision == \"confirmed\"}"
+   }
+  },
+  "Receipt2": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order cancelled",
+    "message": "Nothing was charged.",
+    "tone": "neutral",
+    "icon": "close"
+   },
+   "bind": {
+    "visible": "${= decision == \"cancelled\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "lines",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Bananas",
+      "detail": "1 kg",
+      "price": 2.5,
+      "qty": 1
+     },
+     {
+      "id": 2,
+      "name": "Whole milk",
+      "detail": "2 L",
+      "price": 3.2,
+      "qty": 2
+     },
+     {
+      "id": 3,
+      "name": "Sourdough loaf",
+      "detail": "Bakery",
+      "price": 4.5,
+      "qty": 1
+     },
+     {
+      "id": 4,
+      "name": "Free-range eggs",
+      "detail": "Dozen",
+      "price": 5.0,
+      "qty": 1
+     },
+     {
+      "id": 5,
+      "name": "Cheddar",
+      "detail": "400 g",
+      "price": 7.0,
+      "qty": 1
+     }
+    ]
+   },
+   {
+    "name": "promo",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "decision",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "delivery",
+    "type": "decimal",
+    "value": 4.99
+   }
+  ]
+ }
+}

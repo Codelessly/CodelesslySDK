@@ -1,0 +1,143 @@
+{"meta":{"ui":"order_summary","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show my grocery order as an inline card before you place it, with the number of items at the top. Five lines, each with a picture placeholder, its price and a quantity I can raise or lower (removing the line at zero): Bananas 1 kg $2.50 x1, Whole milk 2 L $3.20 x2, Sourdough loaf $4.50 x1, Free-range eggs $5.00 x1, Cheddar $7.00 x1. A promo code field where SAVE10 takes 10% off the subtotal, delivery of $4.99, and the subtotal, promo and total kept up to date as I change things. Confirm and cancel buttons that tell you what I decided.","text":"ChatCard \"Your grocery order\" \"5 items\" icon:\"shopping_cart\" status:\"Review\" tone:accent\n  state lines=[{\"id\":1,\"name\":\"Bananas\",\"detail\":\"1 kg\",\"price\":2.5,\"qty\":1},{\"id\":2,\"name\":\"Whole milk\",\"detail\":\"2 L\",\"price\":3.2,\"qty\":2},{\"id\":3,\"name\":\"Sourdough loaf\",\"detail\":\"Bakery\",\"price\":4.5,\"qty\":1},{\"id\":4,\"name\":\"Free-range eggs\",\"detail\":\"Dozen\",\"price\":5.0,\"qty\":1},{\"id\":5,\"name\":\"Cheddar\",\"detail\":\"400 g\",\"price\":7.0,\"qty\":1}]\n  state promo=\"\"\n  state decision=\"\"\n  let items = sum(map(lines, l => l.qty))\n  let subtotal = sum(map(lines, l => l.qty * l.price))\n  let discount = promo == \"SAVE10\" ? subtotal * 0.1 : 0\n  let delivery = 4.99\n  let total = subtotal - discount + delivery\n  SectionLabel \"Items\" \"{items} items\"\n  each l in lines\n    Row gap:12 between\n      Media kind:\"banana\" h:44 w:44\n      Column gap:2 grow\n        Text.rowTitle \"{l.name}\"\n        Text.muted \"{l.detail}\"\n      Text.strong \"{money(l.price,\"$\",2)}\"\n      Row gap:6\n        IconButton \"remove\" -> l.qty -= 1; if (l.qty <= 0) { lines.remove(l) }\n        Text.strong \"x{l.qty}\"\n        IconButton \"add\" -> l.qty += 1\n  Input \"Promo code\" \"Enter code\" =promo\n  Details rows:[[\"Subtotal\",\"{money(subtotal,\"$\",2)}\"],[\"Promo SAVE10\",\"{discount > 0 ? \"-\" + money(discount,\"$\",2) : \"\"}\"],[\"Delivery\",\"{money(delivery,\"$\",2)}\"]]\n  TotalBar \"Total\" \"{items} items\" amount:\"{money(total,\"$\",2)}\" cta:\"Confirm\" icon:\"check\" -> decision=\"confirmed\"\n  Row gap:10\n    ActionButton \"Cancel\" quiet -> decision=\"cancelled\"\n    ActionButton \"Confirm\" primary -> decision=\"confirmed\"\n  if decision == \"confirmed\"\n    Receipt \"Order placed\" \"Your groceries are on the way.\" tone:good icon:\"check\"\n  if decision == \"cancelled\"\n    Receipt \"Order cancelled\" \"Nothing was charged.\" tone:neutral icon:\"close\"","usage":{"input_tokens":9488,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":878,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":590,"totalMs":3463}}
+{"tMs":591,"delta":"ChatCard \"Your"}
+{"tMs":805,"delta":" grocery order\" \"5"}
+{"tMs":805,"delta":" items\" icon:\"sh"}
+{"tMs":805,"delta":"opping_cart\" status:"}
+{"tMs":805,"delta":"\"Review"}
+{"tMs":805,"delta":"\" tone:acc"}
+{"tMs":805,"delta":"ent\n  state lines=["}
+{"tMs":805,"delta":"{\"id"}
+{"tMs":805,"delta":"\":1,\"name\":\""}
+{"tMs":805,"delta":"Bananas\",\"det"}
+{"tMs":805,"delta":"ail\":\"1 kg\",\""}
+{"tMs":805,"delta":"price\":2.5"}
+{"tMs":826,"delta":",\"qty\":1},{"}
+{"tMs":1249,"delta":"\"id\":2,\"name\":"}
+{"tMs":1249,"delta":"\"Whole milk\",\"det"}
+{"tMs":1249,"delta":"ail\":\"2 L\",\"price"}
+{"tMs":1249,"delta":"\":3.2,\"qty"}
+{"tMs":1249,"delta":"\":2},{\"id\":3"}
+{"tMs":1249,"delta":",\"name\":\"Sour"}
+{"tMs":1249,"delta":"dough loaf\",\"detail"}
+{"tMs":1249,"delta":"\":\"Bak"}
+{"tMs":1249,"delta":"ery\",\"price\":4.5,"}
+{"tMs":1249,"delta":"\"qty\":1},{\""}
+{"tMs":1249,"delta":"id\":4,\"name\":\""}
+{"tMs":1249,"delta":"Free-range eggs\",\""}
+{"tMs":1400,"delta":"detail\":\""}
+{"tMs":1400,"delta":"Dozen\",\"price\":5."}
+{"tMs":1400,"delta":"0,\"qty\":1},"}
+{"tMs":1400,"delta":"{\"id\":5,\"name"}
+{"tMs":1400,"delta":"\":\"Cheddar\",\""}
+{"tMs":1400,"delta":"detail\":\"400"}
+{"tMs":1400,"delta":" g\",\"price\":7.0"}
+{"tMs":1400,"delta":",\"qty\":1}]"}
+{"tMs":1400,"delta":"\n  state promo=\"\""}
+{"tMs":1400,"delta":"\n  state decision"}
+{"tMs":1400,"delta":"=\"\"\n  let items"}
+{"tMs":1400,"delta":" = s"}
+{"tMs":1558,"delta":"um(map"}
+{"tMs":1558,"delta":"(lines, l => l."}
+{"tMs":1558,"delta":"qty))\n  let subt"}
+{"tMs":1558,"delta":"otal = sum(map("}
+{"tMs":1558,"delta":"lines, l => l.q"}
+{"tMs":1558,"delta":"ty * l.price))\n  "}
+{"tMs":1558,"delta":"let discount = prom"}
+{"tMs":1558,"delta":"o == \"SAVE10"}
+{"tMs":1558,"delta":"\" ? subtotal *"}
+{"tMs":1558,"delta":" 0.1"}
+{"tMs":1558,"delta":" : 0\n  let del"}
+{"tMs":1562,"delta":"ivery = 4.99"}
+{"tMs":1773,"delta":"\n  let total = subtotal"}
+{"tMs":1773,"delta":" - discount + delivery"}
+{"tMs":1773,"delta":"\n  SectionLabel \""}
+{"tMs":1773,"delta":"Items"}
+{"tMs":1773,"delta":"\" \"{items"}
+{"tMs":1774,"delta":"} items\"\n  "}
+{"tMs":1774,"delta":"each l"}
+{"tMs":1774,"delta":" in lines\n    Row"}
+{"tMs":1774,"delta":" gap:12"}
+{"tMs":1774,"delta":" between\n      Media"}
+{"tMs":1785,"delta":" k"}
+{"tMs":1805,"delta":"ind:\"ban"}
+{"tMs":1946,"delta":"ana\" h:44"}
+{"tMs":1946,"delta":" "}
+{"tMs":1946,"delta":"w:44\n      "}
+{"tMs":1946,"delta":"Column"}
+{"tMs":1946,"delta":" gap:2"}
+{"tMs":1946,"delta":" "}
+{"tMs":1946,"delta":"grow"}
+{"tMs":1967,"delta":"\n        Text.r"}
+{"tMs":1988,"delta":"owTitle \"{l."}
+{"tMs":2008,"delta":"name}\"\n        Text."}
+{"tMs":2029,"delta":"muted \"{l.detail"}
+{"tMs":2049,"delta":"}\"\n      Text"}
+{"tMs":2120,"delta":".strong \"{money(l"}
+{"tMs":2120,"delta":".price"}
+{"tMs":2120,"delta":","}
+{"tMs":2130,"delta":"\"$\",2)}"}
+{"tMs":2150,"delta":"\"\n      Row gap:"}
+{"tMs":2171,"delta":"6\n        I"}
+{"tMs":2192,"delta":"conButton \"rem"}
+{"tMs":2212,"delta":"ove\" -> l"}
+{"tMs":2232,"delta":".qty -"}
+{"tMs":2254,"delta":"= 1; if (l."}
+{"tMs":2273,"delta":"qty <"}
+{"tMs":2294,"delta":"= 0) { lines."}
+{"tMs":2318,"delta":"remove(l) }\n        "}
+{"tMs":2334,"delta":"Text.strong \"x"}
+{"tMs":2356,"delta":"{l.qty}\""}
+{"tMs":2378,"delta":"\n        IconButton \"add\""}
+{"tMs":2395,"delta":" -> l.qty += "}
+{"tMs":2416,"delta":"1\n  "}
+{"tMs":2437,"delta":"Input \"Promo code"}
+{"tMs":2460,"delta":"\" \""}
+{"tMs":2478,"delta":"Enter code"}
+{"tMs":2498,"delta":"\" =promo\n  Details"}
+{"tMs":2518,"delta":" rows:"}
+{"tMs":2538,"delta":"["}
+{"tMs":2558,"delta":"[\"Subtotal\",\""}
+{"tMs":2615,"delta":"{money(subtotal,"}
+{"tMs":2615,"delta":"\"$\",2)}\"],"}
+{"tMs":2619,"delta":"[\"Promo S"}
+{"tMs":2652,"delta":"AVE10\",\"{disc"}
+{"tMs":2671,"delta":"ount > 0 ? \""}
+{"tMs":2681,"delta":"-\" + money(discount,"}
+{"tMs":2701,"delta":"\"$\",2) : "}
+{"tMs":2722,"delta":"\"\"}\"],[\"Deliv"}
+{"tMs":2743,"delta":"ery\",\"{money(delivery"}
+{"tMs":2763,"delta":",\"$\",2)}\""}
+{"tMs":2784,"delta":"]]"}
+{"tMs":2811,"delta":"\n  TotalBar \""}
+{"tMs":2824,"delta":"Total\" \"{items"}
+{"tMs":2845,"delta":"} items\" amount:\""}
+{"tMs":2866,"delta":"{money(total,\"$\","}
+{"tMs":2886,"delta":"2)}\" cta:"}
+{"tMs":2906,"delta":"\"Confirm\" ic"}
+{"tMs":2927,"delta":"on:\"check\" -> dec"}
+{"tMs":2947,"delta":"ision=\"confirm"}
+{"tMs":2968,"delta":"ed\"\n  Row gap"}
+{"tMs":2988,"delta":":10\n    ActionBut"}
+{"tMs":3008,"delta":"ton \"Cancel\" qu"}
+{"tMs":3029,"delta":"iet -> decision=\"c"}
+{"tMs":3051,"delta":"ancelled\"\n    Act"}
+{"tMs":3071,"delta":"ionButton \"Confirm"}
+{"tMs":3092,"delta":"\" primary -> decision=\""}
+{"tMs":3111,"delta":"confirmed\"\n  if"}
+{"tMs":3131,"delta":" dec"}
+{"tMs":3151,"delta":"ision =="}
+{"tMs":3171,"delta":" \"confirmed\"\n    "}
+{"tMs":3192,"delta":"Receipt \"Order plac"}
+{"tMs":3213,"delta":"ed\" \"Your gro"}
+{"tMs":3232,"delta":"ceries are on"}
+{"tMs":3253,"delta":" the way.\""}
+{"tMs":3273,"delta":" tone:good icon:\""}
+{"tMs":3294,"delta":"check\""}
+{"tMs":3314,"delta":"\n  if decision == \"c"}
+{"tMs":3335,"delta":"ancelled\"\n    Rece"}
+{"tMs":3356,"delta":"ipt \"Order cancel"}
+{"tMs":3376,"delta":"led\" \"N"}
+{"tMs":3396,"delta":"othing was char"}
+{"tMs":3418,"delta":"ged.\" tone:neutral"}
+{"tMs":3437,"delta":" icon:\"close"}
+{"tMs":3457,"delta":"\""}

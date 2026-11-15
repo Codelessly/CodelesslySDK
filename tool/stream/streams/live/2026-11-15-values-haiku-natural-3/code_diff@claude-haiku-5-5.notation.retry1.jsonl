@@ -1,0 +1,61 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show the change you want to make to my config.yaml as a diff I can review, in three separate hunks with line numbers, removed lines red and added lines green in a monospace font. Hunk 1 (Server port, lines 4 to 5): -port: 8080 +port: 9090. Hunk 2 (Logging, lines 12 to 15): -level: debug -file: /tmp/app.log +level: warn +file: /var/log/app.log. Hunk 3 (Cache, lines 20 to 22): +enabled: true +ttl: 300. Keep and Discard buttons on each hunk, a count of how many are decided and how many kept, and an Apply button that only works once all three are decided; after Apply the card says how many hunks were kept and how many discarded.","text":"state h1=\"\"\nstate h2=\"\"\nstate h3=\"\"\nlet decided = (h1!=\"\" ? 1 : 0) + (h2!=\"\" ? 1 : 0) + (h3!=\"\" ? 1 : 0)\nlet keptCount = (h1==\"keep\" ? 1 : 0) + (h2==\"keep\" ? 1 : 0) + (h3==\"keep\" ? 1 : 0)\nlet discarded = decided - keptCount\nstate done=0\nCard gap:10 w:390\n  Text.heading \"Review config.yaml\"\n  Text.muted \"{decided} of 3 decided, {keptCount} kept\"\n  DiffHunk =h1 \"Server port\" \"lines 4 to 5\" start:4 lines:[\"-port: 8080\",\"+port: 9090\"]\n  DiffHunk =h2 \"Logging\" \"lines 12 to 15\" start:12 lines:[\"-level: debug\",\"-file: /tmp/app.log\",\"+level: warn\",\"+file: /var/log/app.log\"]\n  DiffHunk =h3 \"Cache\" \"lines 20 to 22\" start:20 lines:[\"+enabled: true\",\"+ttl: 300\"]\n  ActionButton \"Apply\" primary enabled:{decided==3} -> done=1\n  if done==1\n    Receipt \"Changes applied\" \"{keptCount} hunks kept, {discarded} discarded\" tone:good","usage":{"input_tokens":10133,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":451,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":583,"totalMs":1840}}
+{"tMs":583,"delta":"state"}
+{"tMs":801,"delta":" h1=\"\"\nstate h2"}
+{"tMs":801,"delta":"=\"\"\nstate h3=\"\""}
+{"tMs":801,"delta":"\nlet"}
+{"tMs":801,"delta":" dec"}
+{"tMs":801,"delta":"ided = (h1!=\"\""}
+{"tMs":801,"delta":" ? 1 : 0"}
+{"tMs":801,"delta":") + (h2!=\"\""}
+{"tMs":801,"delta":" ? 1 : 0"}
+{"tMs":801,"delta":") + (h3!=\"\""}
+{"tMs":803,"delta":" ? 1 : 0"}
+{"tMs":823,"delta":")\nlet keptCount ="}
+{"tMs":844,"delta":" (h1==\"keep\""}
+{"tMs":1004,"delta":" ? 1 : 0"}
+{"tMs":1004,"delta":") + (h2==\"ke"}
+{"tMs":1004,"delta":"ep\" ? 1 :"}
+{"tMs":1004,"delta":" 0) + (h3="}
+{"tMs":1004,"delta":"=\"keep\" ? 1"}
+{"tMs":1004,"delta":" : 0)\nlet disc"}
+{"tMs":1004,"delta":"arded = dec"}
+{"tMs":1007,"delta":"ided - keptCount\nstate"}
+{"tMs":1028,"delta":" done=0\nCard gap"}
+{"tMs":1048,"delta":":10 w:390"}
+{"tMs":1070,"delta":"\n  Text.heading \""}
+{"tMs":1089,"delta":"Review config.yaml\""}
+{"tMs":1233,"delta":"\n  Text.muted \""}
+{"tMs":1233,"delta":"{decided} of 3 "}
+{"tMs":1233,"delta":"decided, {keptCount"}
+{"tMs":1233,"delta":"} kept\"\n  Di"}
+{"tMs":1233,"delta":"ffHunk =h1 "}
+{"tMs":1233,"delta":"\"Server port\" \""}
+{"tMs":1233,"delta":"lines 4 to 5"}
+{"tMs":1253,"delta":"\" start:4 lines:"}
+{"tMs":1273,"delta":"[\"-port: 8080\",\""}
+{"tMs":1293,"delta":"+port: 9090\"]"}
+{"tMs":1314,"delta":"\n  DiffHunk"}
+{"tMs":1334,"delta":" =h2 \"Logging"}
+{"tMs":1411,"delta":"\" \"lines 12 to"}
+{"tMs":1411,"delta":" 15\" start:12 l"}
+{"tMs":1411,"delta":"ines:[\"-level: debug"}
+{"tMs":1416,"delta":"\",\"-file: /tmp"}
+{"tMs":1437,"delta":"/app.log\",\"+level:"}
+{"tMs":1457,"delta":" warn\",\"+file: /var"}
+{"tMs":1479,"delta":"/log/app.log\"]"}
+{"tMs":1497,"delta":"\n  DiffHunk"}
+{"tMs":1518,"delta":" =h3 \"Cache"}
+{"tMs":1538,"delta":"\" \"lines 20 to"}
+{"tMs":1559,"delta":" 22\" start:20 l"}
+{"tMs":1579,"delta":"ines:[\"+enabled:"}
+{"tMs":1834,"delta":" true\",\"+ttl: "}
+{"tMs":1834,"delta":"300\"]\n  Action"}
+{"tMs":1834,"delta":"Button \"Apply\" prim"}
+{"tMs":1834,"delta":"ary enabled:{decided"}
+{"tMs":1834,"delta":"==3} -> done=1"}
+{"tMs":1834,"delta":"\n  if done==1\n    "}
+{"tMs":1834,"delta":"Receipt \"Changes"}
+{"tMs":1834,"delta":" applied\" \"{keptC"}
+{"tMs":1834,"delta":"ount} hunks kept,"}
+{"tMs":1834,"delta":" {discarded} discarded"}
+{"tMs":1834,"delta":"\" tone:good"}

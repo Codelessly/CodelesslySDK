@@ -1,0 +1,302 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Schedule a meeting",
+    "subtitle": "30 minutes with Priya, Marcus and Elena",
+    "icon": "event_rounded",
+    "status": "Next week",
+    "spacing": 12
+   },
+   "children": [
+    "SectionLabel1",
+    "DayPicker1",
+    "SectionLabel2",
+    "ChoiceChips1",
+    "SectionLabel3",
+    "Details1",
+    "ActionButton1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day",
+    "note": "Nov"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "DayPicker1": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day",
+    "days": [
+     "Mon 16",
+     "Tue 17",
+     "Wed 18",
+     "Thu 19",
+     "Fri 20"
+    ]
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "slot",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Time",
+    "note": "30 min"
+   },
+   "bind": {
+    "visible": "${= (!booked) && (day!=\"\")}"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "slot",
+    "options": [
+     "09:00",
+     "10:00",
+     "11:00",
+     "13:00",
+     "14:00",
+     "15:00"
+    ]
+   },
+   "bind": {
+    "props.disabled": "${= coalesce(taken[day],[])}",
+    "visible": "${= (!booked) && (day!=\"\")}"
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Attendees",
+    "note": "3"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Priya",
+      "Required"
+     ],
+     [
+      "Marcus",
+      "Required"
+     ],
+     [
+      "Elena",
+      "Required"
+     ]
+    ]
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Confirm",
+    "tone": "primary",
+    "icon": "check_rounded"
+   },
+   "bind": {
+    "props.enabled": "${= day!=\"\" && slot!=\"\"}",
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "booked",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Meeting booked",
+    "message": "Priya, Marcus and Elena have been invited.",
+    "tone": "good",
+    "icon": "event_available_rounded"
+   },
+   "bind": {
+    "props.code": "${day} Nov, ${slot} to ${slot}",
+    "visible": "${= booked}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "slot",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "booked",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "taken",
+    "type": "map",
+    "value": {
+     "Mon 16": [
+      "10:00",
+      "13:00"
+     ],
+     "Tue 17": [
+      "09:00",
+      "14:00"
+     ],
+     "Wed 18": [
+      "11:00",
+      "15:00"
+     ],
+     "Thu 19": [
+      "09:00",
+      "10:00",
+      "13:00"
+     ],
+     "Fri 20": [
+      "11:00",
+      "14:00"
+     ]
+    }
+   }
+  ]
+ }
+}

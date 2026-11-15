@@ -1,0 +1,75 @@
+{"meta":{"ui":"map_list","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no map tiles) with a numbered pin for each: 1 Bean There, 4.8 stars, 0.2 mi, open 7:00 to 18:00; 2 Daily Grind, 4.6, 0.3 mi, 6:30 to 17:00; 3 Roast & Co, 4.7, 0.4 mi, 8:00 to 19:00; 4 The Steam Cup, 4.4, 0.5 mi, 7:30 to 20:00; 5 Cafe Lune, 4.5, 0.6 mi, 10:00 to 23:00. Tapping a shop or its pin highlights both and shows that shop's rating, distance and opening hours (only the chosen one's). On a narrow screen the map goes above the list.","text":"ChatCard \"Coffee near you\" \"Five shops within walking distance\" icon:\"local_cafe\" status:\"5 open\"\n  state pick=0\n  Row gap:12 wrap\n    MapPanel =pick count:5\n    Column gap:8 grow\n      PlaceRow \"Bean There\" \"Espresso and filter\" index:1 rating:\"4.8\" distance:\"0.2 mi\" hours:\"7:00 to 18:00\" selected:{pick==1} -> pick=1\n      PlaceRow \"Daily Grind\" \"Pour-over bar\" index:2 rating:\"4.6\" distance:\"0.3 mi\" hours:\"6:30 to 17:00\" selected:{pick==2} -> pick=2\n      PlaceRow \"Roast & Co\" \"Single origin\" index:3 rating:\"4.7\" distance:\"0.4 mi\" hours:\"8:00 to 19:00\" selected:{pick==3} -> pick=3\n      PlaceRow \"The Steam Cup\" \"Milk drinks\" index:4 rating:\"4.4\" distance:\"0.5 mi\" hours:\"7:30 to 20:00\" selected:{pick==4} -> pick=4\n      PlaceRow \"Cafe Lune\" \"Late night\" index:5 rating:\"4.5\" distance:\"0.6 mi\" hours:\"10:00 to 23:00\" selected:{pick==5} -> pick=5","usage":{"input_tokens":9547,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":463,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":698,"totalMs":2936}}
+{"tMs":698,"delta":"ChatCard \"Co"}
+{"tMs":1106,"delta":"ffee near"}
+{"tMs":1106,"delta":" you\" \"Five"}
+{"tMs":1106,"delta":" sh"}
+{"tMs":1106,"delta":"ops within wal"}
+{"tMs":1106,"delta":"king distance\" icon:\""}
+{"tMs":1106,"delta":"local"}
+{"tMs":1106,"delta":"_c"}
+{"tMs":1106,"delta":"afe\" status:\"5"}
+{"tMs":1106,"delta":" open\"\n  state"}
+{"tMs":1106,"delta":" pick=0\n  "}
+{"tMs":1106,"delta":"Row gap:12"}
+{"tMs":1106,"delta":" w"}
+{"tMs":1347,"delta":"rap"}
+{"tMs":1347,"delta":"\n    MapPanel =p"}
+{"tMs":1347,"delta":"ick count:5\n    "}
+{"tMs":1347,"delta":"Column gap:8 gr"}
+{"tMs":1347,"delta":"ow\n      PlaceR"}
+{"tMs":1347,"delta":"ow \"Bean There\" \""}
+{"tMs":1347,"delta":"Esp"}
+{"tMs":1347,"delta":"resso and"}
+{"tMs":1347,"delta":" fil"}
+{"tMs":1347,"delta":"ter"}
+{"tMs":1347,"delta":"\" index:1 r"}
+{"tMs":1347,"delta":"ating:\""}
+{"tMs":1741,"delta":"4.8\" distance:\""}
+{"tMs":1741,"delta":"0.2 mi\" h"}
+{"tMs":1742,"delta":"ours:\"7:00 to"}
+{"tMs":1742,"delta":" 18:00\" selected:"}
+{"tMs":1742,"delta":"{"}
+{"tMs":1742,"delta":"pick==1} -> p"}
+{"tMs":1742,"delta":"ick=1\n      Pla"}
+{"tMs":1742,"delta":"ceRow \"Daily"}
+{"tMs":1742,"delta":" Grind\" \"Pour-"}
+{"tMs":1742,"delta":"over b"}
+{"tMs":1742,"delta":"ar\" index:2 rating"}
+{"tMs":1742,"delta":":\"4.6\" distance"}
+{"tMs":1885,"delta":":\"0.3 mi"}
+{"tMs":1885,"delta":"\" hours:\"6:30"}
+{"tMs":1885,"delta":" to 17:00\" sel"}
+{"tMs":1886,"delta":"ected:{pick==2}"}
+{"tMs":1886,"delta":" -> pick=2\n      "}
+{"tMs":1886,"delta":"PlaceRow \""}
+{"tMs":1886,"delta":"Roast & Co\" \""}
+{"tMs":1886,"delta":"Single"}
+{"tMs":1886,"delta":" orig"}
+{"tMs":1886,"delta":"in"}
+{"tMs":1886,"delta":"\" index:3 rating:"}
+{"tMs":1886,"delta":"\"4.7\" distance:"}
+{"tMs":2264,"delta":"\"0.4 mi\""}
+{"tMs":2265,"delta":" hours:\"8:00 "}
+{"tMs":2265,"delta":"to 19:00\" selected"}
+{"tMs":2265,"delta":":{pick==3} -"}
+{"tMs":2265,"delta":"> pick=3\n      P"}
+{"tMs":2265,"delta":"laceRow \"The"}
+{"tMs":2265,"delta":" Steam Cup\" \""}
+{"tMs":2265,"delta":"Milk dr"}
+{"tMs":2265,"delta":"inks\""}
+{"tMs":2265,"delta":" index:4 rating:\""}
+{"tMs":2265,"delta":"4.4\" distance:\""}
+{"tMs":2265,"delta":"0.5 mi\" h"}
+{"tMs":2460,"delta":"ours:\"7:30 to"}
+{"tMs":2460,"delta":" 20:00\" selected:"}
+{"tMs":2460,"delta":"{pick==4} ->"}
+{"tMs":2460,"delta":" pick=4\n      Pl"}
+{"tMs":2460,"delta":"aceRow \"Caf"}
+{"tMs":2460,"delta":"e Lune\" \"Late"}
+{"tMs":2460,"delta":" night\" index:5 rating"}
+{"tMs":2460,"delta":":\"4.5\" distance"}
+{"tMs":2460,"delta":":\"0.6 mi"}
+{"tMs":2460,"delta":"\" hours:\"10:00"}
+{"tMs":2460,"delta":" to 23:00\" sel"}
+{"tMs":2460,"delta":"ected:{pick==5}"}
+{"tMs":2932,"delta":" -> pick=5"}

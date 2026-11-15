@@ -1,0 +1,90 @@
+{"meta":{"ui":"approval","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card that says what will happen, the folder (Shared Drive / Archive / 2019), the number of files (214, all older than 2020) and the space freed (3.2 GB), and that it cannot be undone. Give me a way to see the first five file names (Q1-2019-budget.xlsx, meeting-notes-2018-03.docx, old-logo-draft-v2.png, onboarding-2017.pdf, team-photo-2016.jpg, and 209 more) and Approve and Deny buttons. After I choose, the card shows the decision (Approved or Denied) and locks: no buttons left.","text":"state decision=\"\"\nChatCard \"Delete 214 old files?\" \"Shared Drive / Archive / 2019\" icon:\"delete_outline\" status:\"Needs approval\" tone:\"danger\"\n  Paragraph \"This will permanently delete 214 files, all older than 2020, from Shared Drive / Archive / 2019. It frees 3.2 GB.\"\n  Details rows! rows:=[[\"Folder\",\"Shared Drive / Archive / 2019\"],[\"Files\",\"214, all older than 2020\"],[\"Space freed\",\"3.2 GB\"],[\"Undoable\",\"No\"]]\n  Callout \"This cannot be undone\" \"Deleted files cannot be recovered after you approve.\" \"danger\" \"warning_amber\"\n  Disclosure \"Show the first five files\" \"…and 209 more\" lines:[\"Q1-2019-budget.xlsx\",\"meeting-notes-2018-03.docx\",\"old-logo-draft-v2.png\",\"onboarding-2017.pdf\",\"team-photo-2016.jpg\"]\n  if decision==\"\"\n    Row gap:10\n      ActionButton \"Deny\" \"quiet\" \"close\" -> decision=\"Denied\"\n      ActionButton \"Approve\" \"danger\" \"delete_outline\" -> decision=\"Approved\"\n  if decision!=\"\"\n    Receipt \"{decision}\" \"{decision == \\\"Approved\\\" ? \\\"214 files are being deleted from Shared Drive / Archive / 2019.\\\" : \\\"No files were deleted.\\\"}\" tone:=decision==\"Approved\"?\"good\":\"neutral\" icon:\"check\"","usage":{"input_tokens":9492,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":508,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":541,"totalMs":2373}}
+{"tMs":541,"delta":"state"}
+{"tMs":670,"delta":" decision="}
+{"tMs":670,"delta":"\"\"\nChatCard \""}
+{"tMs":670,"delta":"Delete 214 old files"}
+{"tMs":670,"delta":"?"}
+{"tMs":670,"delta":"\" \"Sh"}
+{"tMs":673,"delta":"ared Drive / Archive"}
+{"tMs":694,"delta":" / 2019\" icon:"}
+{"tMs":714,"delta":"\"del"}
+{"tMs":735,"delta":"ete_out"}
+{"tMs":755,"delta":"line\" status:\""}
+{"tMs":776,"delta":"Need"}
+{"tMs":796,"delta":"s approval\" tone:\""}
+{"tMs":825,"delta":"danger\""}
+{"tMs":837,"delta":"\n  Pa"}
+{"tMs":857,"delta":"ragraph \"This"}
+{"tMs":877,"delta":" will permanently delete "}
+{"tMs":898,"delta":"214 files,"}
+{"tMs":919,"delta":" all older than 2020, from"}
+{"tMs":961,"delta":" Shared Drive / Arch"}
+{"tMs":980,"delta":"ive / 2019. It"}
+{"tMs":1000,"delta":" frees 3.2 G"}
+{"tMs":1021,"delta":"B.\"\n  Details rows"}
+{"tMs":1041,"delta":"! r"}
+{"tMs":1061,"delta":"ows:="}
+{"tMs":1082,"delta":"[[\"Fol"}
+{"tMs":1104,"delta":"der\",\"Shared Drive"}
+{"tMs":1123,"delta":" / Archive / 2019"}
+{"tMs":1143,"delta":"\"],[\"Files\",\"214,"}
+{"tMs":1164,"delta":" all older than 2020\"],"}
+{"tMs":1184,"delta":"[\"Space freed\",\"3."}
+{"tMs":1205,"delta":"2 GB\"],[\""}
+{"tMs":1226,"delta":"Und"}
+{"tMs":1245,"delta":"oable\",\"No"}
+{"tMs":1266,"delta":"\"]]\n  Callout"}
+{"tMs":1297,"delta":" \"This"}
+{"tMs":1314,"delta":" cannot be undone\" \""}
+{"tMs":1335,"delta":"Deleted files c"}
+{"tMs":1358,"delta":"annot be recovered after"}
+{"tMs":1379,"delta":" you"}
+{"tMs":1394,"delta":" approve.\" \""}
+{"tMs":1409,"delta":"danger\" \""}
+{"tMs":1429,"delta":"warning_"}
+{"tMs":1449,"delta":"amber\"\n  Discl"}
+{"tMs":1470,"delta":"osure \""}
+{"tMs":1490,"delta":"Show the first five files\" \"…"}
+{"tMs":1511,"delta":"and 209 more\" l"}
+{"tMs":1531,"delta":"ines:[\"Q1-2"}
+{"tMs":1552,"delta":"019-budget.xls"}
+{"tMs":1572,"delta":"x\",\"meeting-notes"}
+{"tMs":1593,"delta":"-2018-03.docx"}
+{"tMs":1613,"delta":"\",\"old-logo-draft"}
+{"tMs":1637,"delta":"-v2.png\",\"onbo"}
+{"tMs":1654,"delta":"arding-2017.pd"}
+{"tMs":1674,"delta":"f\",\"team-photo-2"}
+{"tMs":1695,"delta":"016.jpg\"]"}
+{"tMs":1715,"delta":"\n  if decision=="}
+{"tMs":1736,"delta":"\"\"\n    Row gap:"}
+{"tMs":1756,"delta":"10\n      ActionButton"}
+{"tMs":1776,"delta":" \"De"}
+{"tMs":1796,"delta":"ny\" \"qu"}
+{"tMs":1817,"delta":"iet\" \""}
+{"tMs":1837,"delta":"close"}
+{"tMs":1858,"delta":"\" -> decision=\""}
+{"tMs":1879,"delta":"Denied\"\n      Action"}
+{"tMs":1899,"delta":"Button \"Approve\" \""}
+{"tMs":1920,"delta":"danger\" \"del"}
+{"tMs":1939,"delta":"ete_outline\" -> dec"}
+{"tMs":1960,"delta":"ision=\"Approved\"\n  "}
+{"tMs":1981,"delta":"if decision!"}
+{"tMs":2001,"delta":"=\"\"\n    Receipt"}
+{"tMs":2021,"delta":" \"{"}
+{"tMs":2042,"delta":"decision}\" \"{"}
+{"tMs":2062,"delta":"decision == \\"}
+{"tMs":2082,"delta":"\"Approved\\\" ?"}
+{"tMs":2103,"delta":" \\\"214"}
+{"tMs":2123,"delta":" files are"}
+{"tMs":2143,"delta":" being deleted from Shared"}
+{"tMs":2164,"delta":" Drive / Archive /"}
+{"tMs":2185,"delta":" 2019.\\\" : \\"}
+{"tMs":2205,"delta":"\"No files were deleted."}
+{"tMs":2225,"delta":"\\\"}"}
+{"tMs":2246,"delta":"\" t"}
+{"tMs":2266,"delta":"one:="}
+{"tMs":2286,"delta":"decision="}
+{"tMs":2307,"delta":"=\"Approved\""}
+{"tMs":2333,"delta":"?\"good\":\"neutral"}
+{"tMs":2347,"delta":"\" icon:\"check"}
+{"tMs":2368,"delta":"\""}

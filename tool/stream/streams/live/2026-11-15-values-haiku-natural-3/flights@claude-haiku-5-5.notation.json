@@ -1,0 +1,176 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Flights to Lisbon",
+    "subtitle": "Fri 20 Nov · 2 adults",
+    "icon": "flight",
+    "status": "3 direct",
+    "tone": "accent"
+   },
+   "children": [
+    "listView1",
+    "TotalBar1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= [{\"id\":\"TAP\",\"name\":\"TAP Air Portugal\",\"depart\":\"07:15\",\"arrive\":\"09:50\",\"duration\":\"2h 35m\",\"price\":128,\"tag\":\"Best time\"},{\"id\":\"EZY\",\"name\":\"easyJet\",\"depart\":\"11:40\",\"arrive\":\"14:20\",\"duration\":\"2h 40m\",\"price\":84,\"tag\":\"Cheapest\"},{\"id\":\"BA\",\"name\":\"British Airways\",\"depart\":\"18:05\",\"arrive\":\"20:40\",\"duration\":\"2h 35m\",\"price\":156,\"tag\":\"\"}]}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "FlightOption1"
+   ]
+  },
+  "FlightOption1": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "origin": "LHR",
+    "destination": "LIS",
+    "stops": "Direct"
+   },
+   "bind": {
+    "props.name": "${item.name}",
+    "props.depart": "${item.depart}",
+    "props.arrive": "${item.arrive}",
+    "props.duration": "${item.duration}",
+    "props.price": "${= money(item.price,\"£\",0)}",
+    "props.tag": "${item.tag}",
+    "props.selected": "${= pick == item.id}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total for 2 adults",
+    "cta": "Confirm",
+    "icon": "check"
+   },
+   "bind": {
+    "props.note": "{money((find([${= \"id\":\"TAP\",\"price\":128},${= \"id\":\"EZY\",\"price\":84},${= \"id\":\"BA\",\"price\":156}], f => f.id == pick)).price*adults,\"£\",2)} · ${= pick == \"TAP\" ? \"TAP Air Portugal\" : pick == \"EZY\" ? \"easyJet\" : \"British Airways\"}",
+    "props.amount": "${= money((find([{\"id\":\"TAP\",\"price\":128},{\"id\":\"EZY\",\"price\":84},{\"id\":\"BA\",\"price\":156}], f => f.id == pick)).price*adults,\"£\",2)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "confirmFlight",
+       "value": "${pick}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "text",
+    "value": "TAP"
+   },
+   {
+    "name": "adults",
+    "type": "integer",
+    "value": 2
+   }
+  ]
+ }
+}

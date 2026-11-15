@@ -1,0 +1,65 @@
+{"meta":{"ui":"meeting_slot","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Help me schedule a 30 minute meeting with three colleagues (Priya, Marcus and Elena) next week. Let me pick a day (Mon 16, Tue 17, Wed 18, Thu 19, Fri 20 Nov), then one of that day's time slots: 09:00, 10:00, 11:00, 13:00, 14:00 or 15:00, where some are taken: Mon 10:00 and 13:00; Tue 09:00 and 14:00; Wed 11:00 and 15:00; Thu 09:00, 10:00 and 13:00; Fri 11:00 and 14:00. Show who is attending and a confirm button. After confirming the card says the meeting is booked, with the day and the time it runs from and to (for example Wed 18 Nov, 14:00 to 14:30).","text":"ChatCard \"Schedule a meeting\" \"30 minutes with Priya, Marcus and Elena\" icon:\"event_rounded\" status:\"Next week\" w:390\n  state day=\"\"\n  state slot=\"\"\n  state booked=false\n  let taken = {\"Mon 16\":[\"10:00\",\"13:00\"],\"Tue 17\":[\"09:00\",\"14:00\"],\"Wed 18\":[\"11:00\",\"15:00\"],\"Thu 19\":[\"09:00\",\"10:00\",\"13:00\"],\"Fri 20\":[\"11:00\",\"14:00\"]}\n  if !booked\n    SectionLabel \"Day\" \"Nov\"\n    DayPicker =day days:[\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"] -> slot=\"\"\n    if day!=\"\"\n      SectionLabel \"Time\" \"30 min\"\n      ChoiceChips =slot options:[\"09:00\",\"10:00\",\"11:00\",\"13:00\",\"14:00\",\"15:00\"] disabled:=coalesce(taken[day],[])\n    SectionLabel \"Attendees\" \"3\"\n    Details rows:[[\"Priya\",\"Required\"],[\"Marcus\",\"Required\"],[\"Elena\",\"Required\"]]\n    ActionButton \"Confirm\" primary icon:\"check_rounded\" enabled:{day!=\"\" and slot!=\"\"} -> booked=true\n  if booked\n    Receipt \"Meeting booked\" \"Priya, Marcus and Elena have been invited.\" code:=\"{day} Nov, {slot} to {slot}\" tone:good icon:\"event_available_rounded\"","usage":{"input_tokens":10130,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":501,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":662,"totalMs":2512}}
+{"tMs":662,"delta":"ChatCard \"Sched"}
+{"tMs":887,"delta":"ule a meeting\" \"30"}
+{"tMs":887,"delta":" minutes with Priya"}
+{"tMs":887,"delta":", Marcus and El"}
+{"tMs":887,"delta":"ena\" icon:\"event_"}
+{"tMs":887,"delta":"rounded\" status:\""}
+{"tMs":887,"delta":"Next week\" w"}
+{"tMs":887,"delta":":390\n  state day=\"\""}
+{"tMs":887,"delta":"\n  state slot=\"\""}
+{"tMs":887,"delta":"\n  state booked=false\n  "}
+{"tMs":887,"delta":"let taken = {\"M"}
+{"tMs":901,"delta":"on 16\":[\"10:00"}
+{"tMs":921,"delta":"\",\"13:00\"],\""}
+{"tMs":1172,"delta":"Tue 17\":[\"09:"}
+{"tMs":1172,"delta":"00\",\"14:00\"],\""}
+{"tMs":1172,"delta":"Wed 18\":[\"11"}
+{"tMs":1172,"delta":":00\",\"15:00\"],"}
+{"tMs":1172,"delta":"\"Thu 19\":[\""}
+{"tMs":1172,"delta":"09:00\",\"10:00\",\""}
+{"tMs":1172,"delta":"13:00\"],\"F"}
+{"tMs":1172,"delta":"ri 20\":[\"11:00"}
+{"tMs":1172,"delta":"\",\"14:00\"]}"}
+{"tMs":1172,"delta":"\n  if !booked\n    S"}
+{"tMs":1172,"delta":"ectionLabel \"Day"}
+{"tMs":1172,"delta":"\" \"Nov\"\n    "}
+{"tMs":1471,"delta":"DayPicker =day days"}
+{"tMs":1471,"delta":":[\"Mon 16\",\""}
+{"tMs":1471,"delta":"Tue 17\",\"W"}
+{"tMs":1471,"delta":"ed 18\",\"Thu "}
+{"tMs":1471,"delta":"19\",\"Fri 20\""}
+{"tMs":1471,"delta":"] -> slot=\"\""}
+{"tMs":1471,"delta":"\n    if day!=\"\"\n      "}
+{"tMs":1471,"delta":"SectionLabel \""}
+{"tMs":1471,"delta":"Time\" \"30 min\""}
+{"tMs":1471,"delta":"\n      ChoiceChips"}
+{"tMs":1471,"delta":" =slot options:[\"09:"}
+{"tMs":1471,"delta":"00\",\"10:00\",\"11:"}
+{"tMs":1726,"delta":"00\",\"13:00\",\"14:"}
+{"tMs":1726,"delta":"00\",\""}
+{"tMs":1726,"delta":"15:00\"] disabled"}
+{"tMs":1726,"delta":":=coalesce(ta"}
+{"tMs":1726,"delta":"ken[day],[])\n    "}
+{"tMs":1727,"delta":"SectionLabel \""}
+{"tMs":1727,"delta":"Attendees\" \"3\""}
+{"tMs":1727,"delta":"\n    Details rows:["}
+{"tMs":1727,"delta":"[\"Priya\",\"Required\""}
+{"tMs":1727,"delta":"],[\"Marcus\",\""}
+{"tMs":1727,"delta":"Required\"],[\"Elena\",\""}
+{"tMs":1727,"delta":"Required\"]]\n    "}
+{"tMs":1942,"delta":"ActionButton \"Confir"}
+{"tMs":1942,"delta":"m\" primary icon:\""}
+{"tMs":1942,"delta":"check_rounded\" enab"}
+{"tMs":1942,"delta":"led:{day!=\"\" and"}
+{"tMs":1942,"delta":" slot!=\"\"} ->"}
+{"tMs":1943,"delta":" booked=true\n  if boo"}
+{"tMs":1943,"delta":"ked\n    Receipt \""}
+{"tMs":1943,"delta":"Meeting booked\" \""}
+{"tMs":1943,"delta":"Priya, Marcus"}
+{"tMs":1943,"delta":" and Elena have been invited"}
+{"tMs":1943,"delta":".\" code:=\"{day}"}
+{"tMs":1943,"delta":" Nov, {slot} to"}
+{"tMs":2510,"delta":" {slot}\" tone:"}
+{"tMs":2510,"delta":"good icon:\"event_available"}
+{"tMs":2510,"delta":"_rounded\""}
