@@ -1,0 +1,58 @@
+{"meta":{"ui":"tracking","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Today is Sat 15 Nov. Show a tracking card: the item (Nikon Z fc camera body), carrier DHL Express, tracking number JD014600003SE, estimated delivery Tue 18 Nov and how many days away that is, and the shipment's five stages as a timeline with the current one marked: Label created (Nov 12), Picked up (Nov 13), In transit (Nov 14, current), Out for delivery, Delivered. Say which stage it is at (\"Stage 3 of 5\"). And a field where I can type delivery instructions and a Save button; once saved the card shows them back to me as saved.","text":"ChatCard \"Where is my package?\" \"Nikon Z fc camera body\" icon:\"local_shipping\" status:\"In transit\" tone:accent\n  Steps steps:[\"Label created\",\"Picked up\",\"In transit\",\"Out for delivery\",\"Delivered\"] current:3\n  Row between\n    Text.fieldLabel \"DHL Express · JD014600003SE\"\n    Text.strong \"Stage 3 of 5\"\n  Row between\n    Text.muted \"Estimated delivery\"\n    Text.strong \"Tue 18 Nov · in 3 days\"\n  Text.caption \"Label created Nov 12 · Picked up Nov 13 · In transit since Nov 14\"\n  state instructions=\"\"\n  state saved=false\n  if !saved\n    InputField \"Delivery instructions\" \"e.g. leave with the neighbour\" =instructions lines:3\n    ActionButton \"Save\" primary icon:\"save\" enabled:=instructions!=\"\" -> saved=true\n  if saved\n    Callout \"Instructions saved\" \"{instructions}\" tone:good icon:\"check_circle\"","usage":{"input_tokens":9130,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":352,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":575,"totalMs":1876}}
+{"tMs":575,"delta":"ChatCard \"Where is"}
+{"tMs":797,"delta":" my"}
+{"tMs":797,"delta":" package?\" \"Nikon"}
+{"tMs":797,"delta":" Z fc camera body\""}
+{"tMs":797,"delta":" icon:\"local"}
+{"tMs":797,"delta":"_shipping\" status:\""}
+{"tMs":797,"delta":"In transit\" tone:acc"}
+{"tMs":797,"delta":"ent\n  "}
+{"tMs":797,"delta":"Steps ste"}
+{"tMs":797,"delta":"ps:[\"Label created\",\""}
+{"tMs":797,"delta":"Picked up\",\"In transit\",\""}
+{"tMs":814,"delta":"Out for delivery\",\""}
+{"tMs":837,"delta":"Delivered\"] current:3"}
+{"tMs":1023,"delta":"\n  Row between"}
+{"tMs":1023,"delta":"\n    Text.f"}
+{"tMs":1023,"delta":"ieldLabel \"D"}
+{"tMs":1023,"delta":"HL Express ·"}
+{"tMs":1023,"delta":" JD014600003SE\""}
+{"tMs":1023,"delta":"\n    Text.str"}
+{"tMs":1023,"delta":"ong \"Stage 3 "}
+{"tMs":1023,"delta":"of 5\"\n  Row"}
+{"tMs":1030,"delta":" between"}
+{"tMs":1051,"delta":"\n    Text.muted \""}
+{"tMs":1073,"delta":"Estimated delivery\""}
+{"tMs":1095,"delta":"\n    Text.strong \""}
+{"tMs":1273,"delta":"Tue 18 N"}
+{"tMs":1273,"delta":"ov ·"}
+{"tMs":1273,"delta":" in 3 days\"\n  "}
+{"tMs":1273,"delta":"Text.ca"}
+{"tMs":1273,"delta":"ption \"Label"}
+{"tMs":1274,"delta":" created Nov 12 ·"}
+{"tMs":1274,"delta":" Picked up Nov "}
+{"tMs":1287,"delta":"13 · In transit since"}
+{"tMs":1309,"delta":" Nov 14\"\n  "}
+{"tMs":1332,"delta":"state instructions=\"\"\n  "}
+{"tMs":1353,"delta":"state saved=false\n  if"}
+{"tMs":1373,"delta":" !"}
+{"tMs":1509,"delta":"saved\n    InputField \""}
+{"tMs":1509,"delta":"Delivery instructions\""}
+{"tMs":1509,"delta":" \"e"}
+{"tMs":1509,"delta":".g. leave with"}
+{"tMs":1509,"delta":" the"}
+{"tMs":1509,"delta":" neighbour\""}
+{"tMs":1523,"delta":" =instructions l"}
+{"tMs":1544,"delta":"ines:3"}
+{"tMs":1565,"delta":"\n    ActionButton \""}
+{"tMs":1587,"delta":"Save\""}
+{"tMs":1607,"delta":" prim"}
+{"tMs":1629,"delta":"ary icon:\"save\" en"}
+{"tMs":1869,"delta":"abled:=instructions!"}
+{"tMs":1869,"delta":"=\"\" -> saved=true"}
+{"tMs":1869,"delta":"\n  if saved\n    "}
+{"tMs":1869,"delta":"Callout \"Inst"}
+{"tMs":1869,"delta":"ructions saved\" \"{"}
+{"tMs":1869,"delta":"instructions}\" tone:"}
+{"tMs":1869,"delta":"good icon:\"check_circ"}
+{"tMs":1869,"delta":"le\""}

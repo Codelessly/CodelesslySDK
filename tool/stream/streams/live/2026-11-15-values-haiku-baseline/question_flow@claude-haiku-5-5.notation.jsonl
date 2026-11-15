@@ -1,0 +1,158 @@
+{"meta":{"ui":"question_flow","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time, with progress (Question 1 of 3) and a Back button. Question 1: what I use it for (School or study, Work and office, Gaming, Creative projects). Question 2 depends on it: for Gaming ask \"What do you play?\" with Competitive esports or Big open-world titles; otherwise ask what matters most (All-day battery, A big screen and keyboard, As light as possible). Question 3: budget (Under $800, $800 to $1,500, Over $1,500). End on one recommendation with two reasons that repeat my answers and a Start over button: Gaming gets the Volt 16 Gaming at $1,399, Creative projects the Studio 14 Pro at $1,799, and anyone else the Slate 13 at $649 if the budget is under $800, otherwise the Aero 14 at $1,099.","text":"ChatCard \"Find your laptop\" \"Three quick questions\" icon:\"laptop_mac\" status:\"Question 1 of 3\" tone:accent\n  state use=\"\"\n  state play=\"\"\n  state matters=\"\"\n  state budget=\"\"\n  state step=1\n  if step==1\n    SectionLabel \"Question 1 of 3\" \"What for\"\n    OptionList =use options:[\"School or study\",\"Work and office\",\"Gaming\",\"Creative projects\"] -> step=2\n  if step==2 && use==\"Gaming\"\n    SectionLabel \"Question 2 of 3\" \"Your games\"\n    OptionList =play options:[\"Competitive esports\",\"Big open-world titles\"] -> step=3\n  if step==2 && use!=\"Gaming\"\n    SectionLabel \"Question 2 of 3\" \"What matters most\"\n    OptionList =matters options:[\"All-day battery\",\"A big screen and keyboard\",\"As light as possible\"] -> step=3\n  if step==3\n    SectionLabel \"Question 3 of 3\" \"Your budget\"\n    OptionList =budget options:[\"Under $800\",\"$800 to $1,500\",\"Over $1,500\"] -> step=4\n  if step>1 && step<4\n    Row gap:10\n      ActionButton \"Back\" quiet icon:\"arrow_back\" -> step=step-1\n  if step==4\n    Receipt \"Your match\" \"Based on your answers\" tone:good icon:\"check\"\n    Details rows:=[[\"Use\",use],[\"Priority\",coalesce(play,matters,\"\")],[\"Budget\",budget]]\n    if use==\"Gaming\"\n      Recommendation \"Volt 16 Gaming\" \"Built for play at $1,399.\" reasons:=[\"Fits your gaming plans\",\"Within your budget range\"] eyebrow:\"Gaming\"\n    if use==\"Creative projects\"\n      Recommendation \"Studio 14 Pro\" \"Built for creative work at $1,799.\" reasons:=[\"Suited to creative projects\",\"Top-end screen and power\"] eyebrow:\"Creative\"\n    if use!=\"Gaming\" && use!=\"Creative projects\" && budget==\"Under $800\"\n      Recommendation \"Slate 13\" \"A light, affordable pick at $649.\" reasons:=[\"Matches your use\",\"Fits under $800\"] eyebrow:\"Best value\"\n    if use!=\"Gaming\" && use!=\"Creative projects\" && budget!=\"Under $800\"\n      Recommendation \"Aero 14\" \"A balanced laptop at $1,099.\" reasons:=[\"Matches your use\",\"Fits your budget\"] eyebrow:\"Best balance\"\n    ActionButton \"Start over\" quiet icon:\"refresh\" -> use=\"\"; play=\"\"; matters=\"\"; budget=\"\"; step=1","usage":{"input_tokens":9209,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":877,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":593,"totalMs":3751}}
+{"tMs":593,"delta":"ChatCard \""}
+{"tMs":738,"delta":"Find"}
+{"tMs":738,"delta":" your laptop\" \"Three"}
+{"tMs":738,"delta":" qu"}
+{"tMs":738,"delta":"ick questions\" icon:\""}
+{"tMs":739,"delta":"laptop_m"}
+{"tMs":739,"delta":"ac\" status:\"Question"}
+{"tMs":739,"delta":" 1 of 3\" t"}
+{"tMs":739,"delta":"one:accent\n  state"}
+{"tMs":747,"delta":" use=\"\""}
+{"tMs":767,"delta":"\n  state play"}
+{"tMs":788,"delta":"=\"\"\n  state mat"}
+{"tMs":809,"delta":"ters=\"\"\n  state budget"}
+{"tMs":941,"delta":"=\"\"\n  state step=1"}
+{"tMs":941,"delta":"\n  if step"}
+{"tMs":941,"delta":"==1\n    S"}
+{"tMs":941,"delta":"ectionLabel \""}
+{"tMs":941,"delta":"Question"}
+{"tMs":941,"delta":" 1 "}
+{"tMs":951,"delta":"of 3\" \"What for"}
+{"tMs":970,"delta":"\""}
+{"tMs":990,"delta":"\n    O"}
+{"tMs":1010,"delta":"ptionList ="}
+{"tMs":1031,"delta":"use options:[\"School or study\",\""}
+{"tMs":1053,"delta":"Work and office\",\"Ga"}
+{"tMs":1133,"delta":"ming\",\"Creative projects\""}
+{"tMs":1133,"delta":"] -> step"}
+{"tMs":1133,"delta":"=2\n  "}
+{"tMs":1134,"delta":"if step==2 "}
+{"tMs":1154,"delta":"&& use="}
+{"tMs":1175,"delta":"=\"Gaming\"\n    "}
+{"tMs":1196,"delta":"SectionLabel \""}
+{"tMs":1216,"delta":"Question 2 of 3\""}
+{"tMs":1236,"delta":" \"Your"}
+{"tMs":1256,"delta":" games"}
+{"tMs":1277,"delta":"\"\n    OptionList ="}
+{"tMs":1298,"delta":"play options:[\"Competitive"}
+{"tMs":1319,"delta":" esports\",\"Big open-world"}
+{"tMs":1339,"delta":" titles\"] -> step="}
+{"tMs":1360,"delta":"3\n  if step==2 "}
+{"tMs":1380,"delta":"&& use!=\""}
+{"tMs":1401,"delta":"Gaming\"\n    S"}
+{"tMs":1422,"delta":"ectionLabel \"Question"}
+{"tMs":1442,"delta":" 2 of 3\" \""}
+{"tMs":1463,"delta":"What matters most\"\n    O"}
+{"tMs":1483,"delta":"ptionList =matters options:"}
+{"tMs":1504,"delta":"[\"All-day battery\",\"A"}
+{"tMs":1525,"delta":" big screen and keyboard"}
+{"tMs":1545,"delta":"\",\"As light as possible\"]"}
+{"tMs":1566,"delta":" -> step=3\n  if"}
+{"tMs":1587,"delta":" step==3\n    Section"}
+{"tMs":1607,"delta":"Label \"Question 3"}
+{"tMs":1628,"delta":" of 3\" \"Your"}
+{"tMs":1648,"delta":" budget\"\n    Option"}
+{"tMs":1668,"delta":"List =budget options:[\""}
+{"tMs":1689,"delta":"Under $800\",\"$800 to"}
+{"tMs":1709,"delta":" $1,500\",\"Over $"}
+{"tMs":1731,"delta":"1,500\"] -> step"}
+{"tMs":1750,"delta":"=4\n  "}
+{"tMs":1771,"delta":"if step>"}
+{"tMs":1791,"delta":"1 "}
+{"tMs":1811,"delta":"&& step<4"}
+{"tMs":1831,"delta":"\n    Row gap:10"}
+{"tMs":1852,"delta":"\n      "}
+{"tMs":1872,"delta":"ActionButton \"Back\""}
+{"tMs":1893,"delta":" qu"}
+{"tMs":1912,"delta":"iet ic"}
+{"tMs":1933,"delta":"on:\"arrow_back"}
+{"tMs":1954,"delta":"\" -> step=step-1"}
+{"tMs":1974,"delta":"\n  if step==4\n    "}
+{"tMs":1995,"delta":"Receipt \"Your"}
+{"tMs":2015,"delta":" match"}
+{"tMs":2035,"delta":"\" \"Based"}
+{"tMs":2055,"delta":" on your answers\" tone:"}
+{"tMs":2076,"delta":"good ic"}
+{"tMs":2096,"delta":"on:\"check"}
+{"tMs":2117,"delta":"\"\n    "}
+{"tMs":2137,"delta":"Details"}
+{"tMs":2157,"delta":" r"}
+{"tMs":2177,"delta":"ows:="}
+{"tMs":2198,"delta":"[[\"Use\","}
+{"tMs":2218,"delta":"use],[\"Pri"}
+{"tMs":2239,"delta":"ority\",co"}
+{"tMs":2258,"delta":"alesce(play,mat"}
+{"tMs":2279,"delta":"ters,\"\")],[\"Bud"}
+{"tMs":2300,"delta":"get\",budget]]\n    "}
+{"tMs":2320,"delta":"if"}
+{"tMs":2340,"delta":" use==\"Gaming\""}
+{"tMs":2360,"delta":"\n      "}
+{"tMs":2381,"delta":"Recommendation \"Volt"}
+{"tMs":2402,"delta":" 16 Gaming\""}
+{"tMs":2422,"delta":" \""}
+{"tMs":2442,"delta":"Built for play"}
+{"tMs":2462,"delta":" at"}
+{"tMs":2483,"delta":" $1,399.\""}
+{"tMs":2503,"delta":" re"}
+{"tMs":2523,"delta":"asons:="}
+{"tMs":2543,"delta":"[\"Fits"}
+{"tMs":2565,"delta":" your g"}
+{"tMs":2584,"delta":"aming pl"}
+{"tMs":2605,"delta":"ans"}
+{"tMs":2624,"delta":"\",\"Within"}
+{"tMs":2645,"delta":" your budget range"}
+{"tMs":2665,"delta":"\"] eyebrow:"}
+{"tMs":2689,"delta":"\"Gaming\"\n    "}
+{"tMs":2706,"delta":"if"}
+{"tMs":2726,"delta":" use==\"Creative projects"}
+{"tMs":2747,"delta":"\"\n      Recommendation"}
+{"tMs":2767,"delta":" \"Studio 14 "}
+{"tMs":2788,"delta":"Pro\" \"Built for cre"}
+{"tMs":2809,"delta":"ative work at $1,799.\""}
+{"tMs":2829,"delta":" reasons:=[\"Su"}
+{"tMs":2850,"delta":"ited to creative projects\",\""}
+{"tMs":2870,"delta":"Top-end"}
+{"tMs":2890,"delta":" scre"}
+{"tMs":2911,"delta":"en and power\"] eyeb"}
+{"tMs":2932,"delta":"row:\"Creative\""}
+{"tMs":2952,"delta":"\n    if use"}
+{"tMs":2972,"delta":"!=\"Gaming\" &&"}
+{"tMs":2993,"delta":" use!=\"Creative projects"}
+{"tMs":3012,"delta":"\""}
+{"tMs":3034,"delta":" && budget==\"Under $"}
+{"tMs":3054,"delta":"800\"\n      Recommend"}
+{"tMs":3074,"delta":"ation \"Slate 13\""}
+{"tMs":3094,"delta":" \"A"}
+{"tMs":3114,"delta":" light,"}
+{"tMs":3135,"delta":" aff"}
+{"tMs":3155,"delta":"ordable pick at"}
+{"tMs":3176,"delta":" $649.\" reasons:="}
+{"tMs":3196,"delta":"[\"Matches your use"}
+{"tMs":3217,"delta":"\",\""}
+{"tMs":3237,"delta":"F"}
+{"tMs":3257,"delta":"its under"}
+{"tMs":3279,"delta":" $800\"] eyebr"}
+{"tMs":3298,"delta":"ow:\"Best"}
+{"tMs":3318,"delta":" value"}
+{"tMs":3339,"delta":"\"\n    if use!=\""}
+{"tMs":3359,"delta":"Gaming\" && use!=\""}
+{"tMs":3380,"delta":"Creative projects\" && bud"}
+{"tMs":3400,"delta":"get!=\"Under $800\""}
+{"tMs":3421,"delta":"\n      Recommendation \""}
+{"tMs":3442,"delta":"Aero 14\""}
+{"tMs":3462,"delta":" \"A balanced laptop"}
+{"tMs":3482,"delta":" at $1,099.\" reas"}
+{"tMs":3503,"delta":"ons:=[\"Matches your"}
+{"tMs":3523,"delta":" use\",\"Fits your budget"}
+{"tMs":3544,"delta":"\"] eyebrow:"}
+{"tMs":3565,"delta":"\"Best"}
+{"tMs":3585,"delta":" bal"}
+{"tMs":3605,"delta":"ance\"\n    ActionBut"}
+{"tMs":3625,"delta":"ton \"Start over\" qu"}
+{"tMs":3647,"delta":"iet ic"}
+{"tMs":3666,"delta":"on:\"ref"}
+{"tMs":3686,"delta":"resh\" -> use=\"\""}
+{"tMs":3707,"delta":"; play=\"\"; matters="}
+{"tMs":3727,"delta":"\"\"; budget=\"\"; step"}
+{"tMs":3748,"delta":"=1"}

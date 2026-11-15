@@ -1,0 +1,251 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Choose your flight",
+    "subtitle": "London to Lisbon, Fri 20 Nov, 2 adults",
+    "icon": "flight",
+    "status": "3 direct",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "FlightOption1",
+    "FlightOption2",
+    "FlightOption3",
+    "TotalBar1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Flights",
+    "note": "per person"
+   }
+  },
+  "FlightOption1": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "TAP Air Portugal",
+    "depart": "07:15",
+    "arrive": "09:50",
+    "origin": "LHR",
+    "destination": "LIS",
+    "duration": "2h 35m",
+    "stops": "Direct",
+    "price": "£128",
+    "tag": "Best time"
+   },
+   "bind": {
+    "props.selected": "${= pick==\"tap\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "tap"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 128}"
+      }
+     ]
+    }
+   ]
+  },
+  "FlightOption2": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "easyJet",
+    "depart": "11:40",
+    "arrive": "14:20",
+    "origin": "LHR",
+    "destination": "LIS",
+    "duration": "2h 40m",
+    "stops": "Direct",
+    "price": "£84",
+    "tag": "Cheapest"
+   },
+   "bind": {
+    "props.selected": "${= pick==\"easy\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "easy"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 84}"
+      }
+     ]
+    }
+   ]
+  },
+  "FlightOption3": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "British Airways",
+    "depart": "18:05",
+    "arrive": "20:40",
+    "origin": "LHR",
+    "destination": "LIS",
+    "duration": "2h 35m",
+    "stops": "Direct",
+    "price": "£156"
+   },
+   "bind": {
+    "props.selected": "${= pick==\"ba\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "ba"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 156}"
+      }
+     ]
+    }
+   ]
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total for 2 adults",
+    "note": "return not included",
+    "cta": "Confirm",
+    "icon": "check"
+   },
+   "bind": {
+    "props.amount": "${= money(sel*2,\"£\",0)}",
+    "props.enabled": "${= sel>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "confirm",
+       "value": "${pick}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "text",
+    "value": "tap"
+   },
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

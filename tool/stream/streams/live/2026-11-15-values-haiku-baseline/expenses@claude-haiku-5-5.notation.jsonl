@@ -1,0 +1,125 @@
+{"meta":{"ui":"expenses","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"I have four expenses from one report waiting for my approval: Delta Air Lines, Travel, Nov 3, $412.60; Blue Bottle Coffee, Meals, Nov 4, $18.40; Uber, Transport, Nov 5, $36.25 (no receipt attached); WeWork day pass, Office, Nov 6, $45.00. Show them in a card with merchant, category, date and amount, flag the one missing a receipt, and let me approve or reject each (changing my mind is fine). Show how many are approved (\"N of 4 approved\") and the approved total, and a Submit button; after I submit, the card says Submitted with the count and the total.","text":"state rows=[{\"id\":1,\"merchant\":\"Delta Air Lines\",\"category\":\"Travel\",\"date\":\"Nov 3\",\"amount\":412.60,\"receipt\":true,\"decision\":\"\"},{\"id\":2,\"merchant\":\"Blue Bottle Coffee\",\"category\":\"Meals\",\"date\":\"Nov 4\",\"amount\":18.40,\"receipt\":true,\"decision\":\"\"},{\"id\":3,\"merchant\":\"Uber\",\"category\":\"Transport\",\"date\":\"Nov 5\",\"amount\":36.25,\"receipt\":false,\"decision\":\"\"},{\"id\":4,\"merchant\":\"WeWork day pass\",\"category\":\"Office\",\"date\":\"Nov 6\",\"amount\":45.00,\"receipt\":true,\"decision\":\"\"}]\nstate submitted=false\nstate approvedCount=count(rows,r=>r.decision==\"approve\")\nstate approvedTotal=sum(filter(rows,r=>r.decision==\"approve\"),r=>r.amount)\nCard w:390 gap:12 pad:16\n  Row between\n    Text.heading \"Expense report\"\n    Badge.neutral \"4 items\"\n  if submitted\n    Callout \"Submitted\" \"{approvedCount} approved, total {money(approvedTotal,\"$\",2)}\" tone:good icon:\"check_circle\"\n  each row in rows\n    Card gap:6 pad:10\n      Row between\n        Column gap:2\n          Text.rowTitle \"{row.merchant}\"\n          Text.meta \"{row.category} · {row.date}\"\n        Text.strong \"{money(row.amount,\"$\",2)}\"\n      if !row.receipt\n        Callout \"Missing receipt\" \"Attach a receipt before approving.\" tone:warn icon:\"receipt_long\"\n      Row gap:8\n        Button.outline \"Approve\" enabled:=!submitted -> rows=updateWhere(rows,r=>r.id==row.id,r=>with(r,\"decision\",\"approve\"))\n        Button.outline \"Reject\" enabled:=!submitted -> rows=updateWhere(rows,r=>r.id==row.id,r=>with(r,\"decision\",\"reject\"))\n  Text.muted \"{approvedCount} of 4 approved\"\n  Row between\n    Text.body \"Approved total\"\n    Text.strong \"{money(approvedTotal,\"$\",2)}\"\n  ActionButton \"Submit\" primary enabled:=approvedCount>0&&!submitted -> submitted=true; emit submit approvedCount","usage":{"input_tokens":9137,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":797,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":458,"totalMs":3009}}
+{"tMs":458,"delta":"state"}
+{"tMs":552,"delta":" r"}
+{"tMs":552,"delta":"ows=[{\"id"}
+{"tMs":552,"delta":"\":1,\"merchant\":"}
+{"tMs":552,"delta":"\"Delta Air L"}
+{"tMs":572,"delta":"ines\",\"category\":\"Travel"}
+{"tMs":593,"delta":"\",\"date\":\"Nov "}
+{"tMs":614,"delta":"3\",\"amount\":412.60"}
+{"tMs":635,"delta":",\"receipt\":true"}
+{"tMs":654,"delta":",\"decision\":\"\""}
+{"tMs":675,"delta":"},{\"id\":2,\""}
+{"tMs":695,"delta":"merchant\":\"Blue"}
+{"tMs":715,"delta":" Bottle Coffee"}
+{"tMs":736,"delta":"\",\"category\":\"Meals\",\""}
+{"tMs":756,"delta":"date\":\"Nov 4"}
+{"tMs":777,"delta":"\",\"amount\":18.40,"}
+{"tMs":798,"delta":"\"receipt\":true,\""}
+{"tMs":818,"delta":"decision\":\"\"},{\"id"}
+{"tMs":838,"delta":"\":3,\"merchant\":"}
+{"tMs":859,"delta":"\"Uber\",\"category\":\""}
+{"tMs":880,"delta":"Transport\",\"date\":\""}
+{"tMs":900,"delta":"Nov 5\",\"amount\":"}
+{"tMs":920,"delta":"36.25,\"receipt"}
+{"tMs":941,"delta":"\":false,\"decision\":\"\""}
+{"tMs":961,"delta":"},{\"id\":4,\""}
+{"tMs":981,"delta":"merchant\":\"WeW"}
+{"tMs":1002,"delta":"ork day pass\",\"category\":\""}
+{"tMs":1023,"delta":"Office\",\"date\":\"N"}
+{"tMs":1042,"delta":"ov 6\",\"amount\":45"}
+{"tMs":1064,"delta":".00,\"receipt\":"}
+{"tMs":1084,"delta":"true,\"decision\":\"\"}"}
+{"tMs":1104,"delta":"]\nstate submitted=false"}
+{"tMs":1124,"delta":"\nstate approv"}
+{"tMs":1144,"delta":"edCount=count"}
+{"tMs":1165,"delta":"(rows,r"}
+{"tMs":1185,"delta":"=>r.decision==\""}
+{"tMs":1206,"delta":"approve\")\nstate approved"}
+{"tMs":1226,"delta":"Total=sum(fil"}
+{"tMs":1247,"delta":"ter(rows,r=>"}
+{"tMs":1267,"delta":"r.decision==\"approve"}
+{"tMs":1287,"delta":"\"),r=>r.am"}
+{"tMs":1308,"delta":"ount)\nCard w"}
+{"tMs":1328,"delta":":390 gap:12"}
+{"tMs":1349,"delta":" pad:16\n  "}
+{"tMs":1369,"delta":"Row between\n    Text.he"}
+{"tMs":1389,"delta":"ading \"Expense report"}
+{"tMs":1410,"delta":"\"\n    Bad"}
+{"tMs":1430,"delta":"ge.ne"}
+{"tMs":1451,"delta":"utral \"4 items"}
+{"tMs":1471,"delta":"\"\n  if submitted"}
+{"tMs":1492,"delta":"\n    Call"}
+{"tMs":1512,"delta":"out \"Submitted\" \""}
+{"tMs":1532,"delta":"{approvedCount} appro"}
+{"tMs":1554,"delta":"ved, total"}
+{"tMs":1595,"delta":" {money"}
+{"tMs":1596,"delta":"(approvedTotal,"}
+{"tMs":1651,"delta":"\""}
+{"tMs":1651,"delta":"$\",2)}\" tone"}
+{"tMs":1654,"delta":":good ic"}
+{"tMs":1679,"delta":"on:\"check_"}
+{"tMs":1695,"delta":"circle\"\n  each row in"}
+{"tMs":1716,"delta":" rows\n    Card"}
+{"tMs":1739,"delta":" gap:6"}
+{"tMs":1757,"delta":" "}
+{"tMs":1777,"delta":"pad:10"}
+{"tMs":1799,"delta":"\n      Row between\n        "}
+{"tMs":1818,"delta":"Column"}
+{"tMs":1839,"delta":" gap:2"}
+{"tMs":1859,"delta":"\n          Text.rowT"}
+{"tMs":1879,"delta":"itle \""}
+{"tMs":1899,"delta":"{row.merchant}\""}
+{"tMs":1919,"delta":"\n          Text.me"}
+{"tMs":1940,"delta":"ta \"{row.category} ·"}
+{"tMs":1960,"delta":" {row.date}\"\n        "}
+{"tMs":1981,"delta":"Text"}
+{"tMs":2002,"delta":".str"}
+{"tMs":2023,"delta":"ong \"{money(row"}
+{"tMs":2042,"delta":".amount,\"$\",2"}
+{"tMs":2063,"delta":")}\"\n      if"}
+{"tMs":2083,"delta":" !row.receipt\n        "}
+{"tMs":2103,"delta":"Call"}
+{"tMs":2124,"delta":"out \"Missing receipt"}
+{"tMs":2144,"delta":"\" \"Attach a receip"}
+{"tMs":2165,"delta":"t before approving.\" tone:"}
+{"tMs":2185,"delta":"warn icon:\"rece"}
+{"tMs":2205,"delta":"ipt_long"}
+{"tMs":2226,"delta":"\"\n      Row gap:"}
+{"tMs":2247,"delta":"8\n        Button"}
+{"tMs":2267,"delta":".outline \"Approve\""}
+{"tMs":2288,"delta":" enabled:=!"}
+{"tMs":2308,"delta":"submitted -"}
+{"tMs":2328,"delta":"> r"}
+{"tMs":2348,"delta":"ows=updateWhere("}
+{"tMs":2369,"delta":"rows,r=>r."}
+{"tMs":2389,"delta":"id==row.id,r="}
+{"tMs":2410,"delta":">with(r,\"decision"}
+{"tMs":2430,"delta":"\",\"approve\"))\n        "}
+{"tMs":2451,"delta":"Button.outline \"Reject"}
+{"tMs":2471,"delta":"\" enabled:=!subm"}
+{"tMs":2491,"delta":"itted -> rows=upd"}
+{"tMs":2512,"delta":"ateWhere(rows,"}
+{"tMs":2532,"delta":"r=>r.id==row"}
+{"tMs":2552,"delta":".id,r=>with("}
+{"tMs":2573,"delta":"r,\"decision\",\"reject"}
+{"tMs":2594,"delta":"\"))\n  Text."}
+{"tMs":2615,"delta":"muted \"{approvedC"}
+{"tMs":2634,"delta":"ount} of "}
+{"tMs":2655,"delta":"4 approved\"\n  "}
+{"tMs":2677,"delta":"Row"}
+{"tMs":2695,"delta":" between"}
+{"tMs":2716,"delta":"\n    Text.body"}
+{"tMs":2736,"delta":" \"Approved total\"\n    "}
+{"tMs":2756,"delta":"Text.strong \"{money"}
+{"tMs":2777,"delta":"(approvedTotal,"}
+{"tMs":2797,"delta":"\"$\",2)}"}
+{"tMs":2817,"delta":"\"\n  "}
+{"tMs":2838,"delta":"ActionButton \""}
+{"tMs":2858,"delta":"Submit\" prim"}
+{"tMs":2878,"delta":"ary enabled:=appro"}
+{"tMs":2899,"delta":"vedCount>0&"}
+{"tMs":2919,"delta":"&!submitted -> subm"}
+{"tMs":2941,"delta":"itted=true; emit subm"}
+{"tMs":2960,"delta":"it"}
+{"tMs":2981,"delta":" approvedCount"}

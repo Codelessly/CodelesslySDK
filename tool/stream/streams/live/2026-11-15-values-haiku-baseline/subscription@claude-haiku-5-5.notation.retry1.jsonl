@@ -1,0 +1,45 @@
+{"meta":{"ui":"subscription","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"My Pro plan renews in 3 days, on Nov 18. Show a card with the plan and its price ($12 a month), how much of my storage (68 of 100 GB) and seats (3 of 5) I have used as percentages with bars, a switch to annual billing ($120 a year) that shows the yearly price, the price per month and what I would save compared with paying monthly (in dollars and as a percentage), and Manage plan and Cancel renewal buttons.","text":"ChatCard \"Pro plan\" \"Renews Nov 18 · in 3 days\" icon:\"workspace_premium\" status:\"Active\" tone:\"accent\"\n  SectionLabel \"Usage\"\n  Text.strong \"Storage: 68 of 100 GB (68%)\"\n  Progress 0.68\n  Text.strong \"Seats: 3 of 5 (60%)\"\n  Progress 0.6\n  SectionLabel \"Billing\"\n  Segments =billing options:[\"Monthly\",\"Annual\"]\n  if billing==\"Monthly\"\n    Details rows:[[\"Price\",\"$12 a month\"]]\n  if billing==\"Annual\"\n    Details rows:[[\"Price\",\"$120 a year\"],[\"Per month\",\"$10\"],[\"You save\",\"$24 a year (17%) vs monthly\"]]\n  Row gap:10\n    ActionButton \"Manage plan\" tone:\"quiet\" icon:\"tune\" -> emit manage_plan\n    ActionButton \"Cancel renewal\" tone:\"danger\" icon:\"cancel\" -> emit cancel_renewal","usage":{"input_tokens":9500,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":350,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":529,"totalMs":1429}}
+{"tMs":529,"delta":"ChatCard \"P"}
+{"tMs":758,"delta":"ro plan\" \"Renews"}
+{"tMs":758,"delta":" Nov 18 · in"}
+{"tMs":758,"delta":" 3 days\" icon:"}
+{"tMs":758,"delta":"\"workspace_premium\""}
+{"tMs":758,"delta":" status:\"Active\""}
+{"tMs":758,"delta":" tone:\"accent\""}
+{"tMs":758,"delta":"\n  SectionLabel \""}
+{"tMs":758,"delta":"Usage\"\n  Text"}
+{"tMs":758,"delta":".strong \"Storage:"}
+{"tMs":758,"delta":" 68 of 100 G"}
+{"tMs":758,"delta":"B (68%)\"\n  "}
+{"tMs":772,"delta":"Progress 0.68"}
+{"tMs":821,"delta":"\n  Text.strong \""}
+{"tMs":821,"delta":"Seats: 3 of "}
+{"tMs":834,"delta":"5 (60%)\""}
+{"tMs":854,"delta":"\n  Progress 0.6"}
+{"tMs":876,"delta":"\n  SectionLabel"}
+{"tMs":895,"delta":" \"Billing\"\n  "}
+{"tMs":916,"delta":"Segments =billing options:"}
+{"tMs":936,"delta":"[\"Monthly\",\"Ann"}
+{"tMs":957,"delta":"ual\"]\n  if billing"}
+{"tMs":977,"delta":"==\"Monthly\""}
+{"tMs":997,"delta":"\n    Details rows:[[\""}
+{"tMs":1018,"delta":"Price\",\"$12 a month"}
+{"tMs":1115,"delta":"\"]]\n  if billing"}
+{"tMs":1116,"delta":"==\"Annual\"\n    "}
+{"tMs":1116,"delta":"Details rows:[[\""}
+{"tMs":1116,"delta":"Price\",\"$120 a year\""}
+{"tMs":1119,"delta":"],[\"Per month\",\"$10"}
+{"tMs":1140,"delta":"\"],[\"You save\",\"$24"}
+{"tMs":1160,"delta":" a year (17%) v"}
+{"tMs":1181,"delta":"s monthly\"]]"}
+{"tMs":1202,"delta":"\n  Row gap:10"}
+{"tMs":1222,"delta":"\n    ActionButton \""}
+{"tMs":1242,"delta":"Manage plan\" tone:"}
+{"tMs":1262,"delta":"\"quiet\" icon:"}
+{"tMs":1375,"delta":"\"tune\" -> emit"}
+{"tMs":1375,"delta":" manage_plan\n    "}
+{"tMs":1375,"delta":"ActionButton \"Canc"}
+{"tMs":1375,"delta":"el renewal\" tone:"}
+{"tMs":1375,"delta":"\"danger\" icon:\""}
+{"tMs":1388,"delta":"cancel\" -> emit"}
+{"tMs":1405,"delta":" cancel_renewal"}

@@ -1,0 +1,66 @@
+{"meta":{"ui":"recipe","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: 45 minutes, Easy, serves 4 to start, with a servings control from 2 to 8 that scales the ingredient amounts. Ingredients for 4: chicken thighs 800 g, baby potatoes 600 g, lemons 2, olive oil 4 tbsp, garlic cloves 4, dried oregano 2 tsp. The ingredients as a checklist I can tick off (ticks stay when I change the servings), the four steps (Heat the oven to 220C; Toss everything in the oil, lemon and oregano; Roast 35 minutes, turning once; Rest 5 minutes and serve) and a Start cooking button.","text":"ChatCard \"Lemon chicken traybake\" \"45 min · Easy · Serves 4\" icon:\"restaurant\" status:\"Weeknight\"\n  state servings=4\n  state done=[]\n  Row between\n    Text.strong \"Servings\"\n    Counter \"Serves\" \"people\" =servings min:2 max:8 step:1\n  SectionLabel \"Ingredients\" \"for {servings}\"\n  Checklist \"Tick as you prep\" =done items:[\"Chicken thighs, 800 g\", \"Baby potatoes, 600 g\", \"Lemons, 2\", \"Olive oil, 4 tbsp\", \"Garlic cloves, 4\", \"Dried oregano, 2 tsp\"]\n  SectionLabel \"Method\" \"4 steps\"\n  Details rows:[[\"1. Heat the oven\",\"Heat the oven to 220C\"],[\"2. Toss everything\",\"Toss in the oil, lemon and oregano\"],[\"3. Roast\",\"Roast 35 minutes, turning once\"],[\"4. Rest and serve\",\"Rest 5 minutes and serve\"]]\n  ActionButton \"Start cooking\" primary icon:\"play_arrow\" -> emit startCooking","usage":{"input_tokens":9159,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":386,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":454,"totalMs":1762}}
+{"tMs":454,"delta":"ChatCard \"L"}
+{"tMs":609,"delta":"emon chicken traybake"}
+{"tMs":609,"delta":"\" \"45 min ·"}
+{"tMs":609,"delta":" Easy · Ser"}
+{"tMs":609,"delta":"ves 4\" icon:\""}
+{"tMs":609,"delta":"restaurant\" status:\""}
+{"tMs":609,"delta":"We"}
+{"tMs":609,"delta":"eknight\"\n  state serv"}
+{"tMs":609,"delta":"ings=4\n  state"}
+{"tMs":624,"delta":" done"}
+{"tMs":645,"delta":"=[]\n  Row"}
+{"tMs":663,"delta":" between"}
+{"tMs":685,"delta":"\n    Text.strong \""}
+{"tMs":704,"delta":"Serv"}
+{"tMs":725,"delta":"ings\"\n    Counter \""}
+{"tMs":744,"delta":"Ser"}
+{"tMs":765,"delta":"ves\" \"people"}
+{"tMs":786,"delta":"\" =servings min:2 "}
+{"tMs":806,"delta":"max:8 step:1"}
+{"tMs":828,"delta":"\n  S"}
+{"tMs":850,"delta":"ectionLabel \""}
+{"tMs":867,"delta":"Ingredients\" \"for"}
+{"tMs":890,"delta":" {servings}\"\n  "}
+{"tMs":908,"delta":"Checklist \""}
+{"tMs":927,"delta":"T"}
+{"tMs":949,"delta":"ick as"}
+{"tMs":966,"delta":" you pr"}
+{"tMs":988,"delta":"ep\" =done items:[\""}
+{"tMs":1008,"delta":"Chicken thighs,"}
+{"tMs":1030,"delta":" 800 g\", \"Ba"}
+{"tMs":1050,"delta":"by potatoes, 600"}
+{"tMs":1070,"delta":" g\", \"Lemons"}
+{"tMs":1092,"delta":", 2\", \"Olive"}
+{"tMs":1112,"delta":" oil, 4 tb"}
+{"tMs":1133,"delta":"sp\", \"Garlic"}
+{"tMs":1155,"delta":" cloves, 4\", \""}
+{"tMs":1175,"delta":"Dried oregano, "}
+{"tMs":1195,"delta":"2 tsp\"]"}
+{"tMs":1215,"delta":"\n  S"}
+{"tMs":1236,"delta":"ectionLabel \"Method"}
+{"tMs":1257,"delta":"\" \"4"}
+{"tMs":1276,"delta":" steps\"\n  Details"}
+{"tMs":1296,"delta":" r"}
+{"tMs":1316,"delta":"ows:"}
+{"tMs":1337,"delta":"[[\"1"}
+{"tMs":1357,"delta":". Heat the oven\",\""}
+{"tMs":1377,"delta":"Heat the oven to "}
+{"tMs":1398,"delta":"220C\"],[\"2."}
+{"tMs":1418,"delta":" Toss everything\",\"Toss"}
+{"tMs":1439,"delta":" in the oil, lemon"}
+{"tMs":1460,"delta":" and oregano\"],[\"3"}
+{"tMs":1480,"delta":". Roast\",\""}
+{"tMs":1501,"delta":"Roast 35 minut"}
+{"tMs":1521,"delta":"es, turning once\"],[\""}
+{"tMs":1543,"delta":"4. Rest and"}
+{"tMs":1564,"delta":" serve\",\"Rest 5"}
+{"tMs":1584,"delta":" minutes and serve\""}
+{"tMs":1603,"delta":"]]"}
+{"tMs":1626,"delta":"\n  ActionButton \""}
+{"tMs":1644,"delta":"Start cooking\" prim"}
+{"tMs":1664,"delta":"ary ic"}
+{"tMs":1684,"delta":"on:\"play"}
+{"tMs":1707,"delta":"_arrow\" -> em"}
+{"tMs":1726,"delta":"it start"}
+{"tMs":1745,"delta":"Cooking"}

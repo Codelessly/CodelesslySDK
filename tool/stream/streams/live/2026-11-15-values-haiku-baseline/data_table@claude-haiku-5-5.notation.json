@@ -1,0 +1,430 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Invoices",
+    "subtitle": "12 invoices, May",
+    "icon": "receipt_long",
+    "status": "Live"
+   },
+   "children": [
+    "textField1",
+    "Segments1",
+    "WideScroll1",
+    "Pager1",
+    "TotalBar1"
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Search customer",
+     "hintText": "Type a customer"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "status",
+    "options": [
+     "All",
+     "Paid",
+     "Due",
+     "Overdue"
+    ]
+   }
+  },
+  "WideScroll1": {
+   "type": "WideScroll",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "width": 390
+   },
+   "children": [
+    "TableHeader1",
+    "listView1"
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "desc": "desc",
+    "columns": [
+     "#",
+     "Customer",
+     "Date",
+     "Amount",
+     "Status"
+    ],
+    "keys": [
+     "no",
+     "customer",
+     "date",
+     "amount",
+     "status"
+    ],
+    "selectable": true
+   },
+   "bind": {
+    "props.checked": "${= length(picked)>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onToggleAll"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= []}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${rows}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "selectable": true
+   },
+   "bind": {
+    "props.cells": "${= [item.no,item.customer,item.date,item.amount]}",
+    "props.badge": "${item.status}",
+    "props.checked": "${= contains(picked,item.no)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= contains(picked,item.no)?without(picked,item.no):append(picked,item.no)}"
+      }
+     ]
+    }
+   ]
+  },
+  "Pager1": {
+   "type": "Pager",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "page"
+   },
+   "bind": {
+    "props.count": "${= ceil(length(rows)/5)}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cta": "Send reminders",
+    "icon": "mail"
+   },
+   "bind": {
+    "props.label": "${= length(picked)} selected",
+    "props.note": "Total ${= money(sum(filter(invoices,x=>contains(picked,x.no)),x=>x.value),\"$\",0)}",
+    "props.amount": "${= money(sum(filter(invoices,x=>contains(picked,x.no)),x=>x.value),\"$\",0)}",
+    "visible": "${= length(picked)>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "remind",
+       "value": "${picked}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "status",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "date"
+   },
+   {
+    "name": "picked",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "invoices",
+    "type": "list",
+    "value": [
+     {
+      "no": "#1001",
+      "customer": "Acme Corp",
+      "date": "May 02",
+      "amount": "$1,200",
+      "value": 1200,
+      "status": "Paid"
+     },
+     {
+      "no": "#1002",
+      "customer": "Globex",
+      "date": "May 05",
+      "amount": "$860",
+      "value": 860,
+      "status": "Due"
+     },
+     {
+      "no": "#1003",
+      "customer": "Initech",
+      "date": "May 09",
+      "amount": "$430",
+      "value": 430,
+      "status": "Overdue"
+     },
+     {
+      "no": "#1004",
+      "customer": "Umbrella",
+      "date": "May 12",
+      "amount": "$2,250",
+      "value": 2250,
+      "status": "Paid"
+     },
+     {
+      "no": "#1005",
+      "customer": "Hooli",
+      "date": "May 15",
+      "amount": "$975",
+      "value": 975,
+      "status": "Due"
+     },
+     {
+      "no": "#1006",
+      "customer": "Stark Ltd",
+      "date": "May 16",
+      "amount": "$3,100",
+      "value": 3100,
+      "status": "Overdue"
+     },
+     {
+      "no": "#1007",
+      "customer": "Wayne Co",
+      "date": "May 18",
+      "amount": "$640",
+      "value": 640,
+      "status": "Paid"
+     },
+     {
+      "no": "#1008",
+      "customer": "Wonka",
+      "date": "May 20",
+      "amount": "$1,480",
+      "value": 1480,
+      "status": "Due"
+     },
+     {
+      "no": "#1009",
+      "customer": "Soylent",
+      "date": "May 22",
+      "amount": "$300",
+      "value": 300,
+      "status": "Overdue"
+     },
+     {
+      "no": "#1010",
+      "customer": "Cyberdyne",
+      "date": "May 24",
+      "amount": "$5,200",
+      "value": 5200,
+      "status": "Paid"
+     },
+     {
+      "no": "#1011",
+      "customer": "Tyrell",
+      "date": "May 27",
+      "amount": "$760",
+      "value": 760,
+      "status": "Due"
+     },
+     {
+      "no": "#1012",
+      "customer": "Aperture",
+      "date": "May 29",
+      "amount": "$1,890",
+      "value": 1890,
+      "status": "Paid"
+     }
+    ]
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

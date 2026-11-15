@@ -1,0 +1,78 @@
+{"meta":{"ui":"map_list","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no map tiles) with a numbered pin for each: 1 Bean There, 4.8 stars, 0.2 mi, open 7:00 to 18:00; 2 Daily Grind, 4.6, 0.3 mi, 6:30 to 17:00; 3 Roast & Co, 4.7, 0.4 mi, 8:00 to 19:00; 4 The Steam Cup, 4.4, 0.5 mi, 7:30 to 20:00; 5 Cafe Lune, 4.5, 0.6 mi, 10:00 to 23:00. Tapping a shop or its pin highlights both and shows that shop's rating, distance and opening hours (only the chosen one's). On a narrow screen the map goes above the list.","text":"state pick=0\nColumn gap:12 pad:12\n  Text.heading \"Coffee shops near you\"\n  Row gap:12 wrap\n    MapPanel =pick count:5 w:200 h:200\n    Column gap:8 grow\n      PlaceRow \"Bean There\" \"Espresso bar\" index:1 rating:\"4.8\" distance:\"0.2 mi\" hours:\"7:00 to 18:00\" selected:=pick==1 -> pick=1\n      PlaceRow \"Daily Grind\" \"Drip coffee\" index:2 rating:\"4.6\" distance:\"0.3 mi\" hours:\"6:30 to 17:00\" selected:=pick==2 -> pick=2\n      PlaceRow \"Roast & Co\" \"Single origin\" index:3 rating:\"4.7\" distance:\"0.4 mi\" hours:\"8:00 to 19:00\" selected:=pick==3 -> pick=3\n      PlaceRow \"The Steam Cup\" \"Lattes and pastries\" index:4 rating:\"4.4\" distance:\"0.5 mi\" hours:\"7:30 to 20:00\" selected:=pick==4 -> pick=4\n      PlaceRow \"Cafe Lune\" \"Late-night cafe\" index:5 rating:\"4.5\" distance:\"0.6 mi\" hours:\"10:00 to 23:00\" selected:=pick==5 -> pick=5","usage":{"input_tokens":9198,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":461,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1083,"totalMs":2669}}
+{"tMs":1083,"delta":"state"}
+{"tMs":1245,"delta":" pick=0"}
+{"tMs":1245,"delta":"\nColumn"}
+{"tMs":1245,"delta":" gap:12 "}
+{"tMs":1245,"delta":"pad:12"}
+{"tMs":1245,"delta":"\n  "}
+{"tMs":1245,"delta":"Text."}
+{"tMs":1251,"delta":"heading \"Coffee sh"}
+{"tMs":1273,"delta":"ops near you\"\n  "}
+{"tMs":1293,"delta":"Row gap:12"}
+{"tMs":1314,"delta":" wrap"}
+{"tMs":1334,"delta":"\n    MapPanel =p"}
+{"tMs":1410,"delta":"ick count:5 "}
+{"tMs":1410,"delta":"w:200"}
+{"tMs":1410,"delta":" "}
+{"tMs":1417,"delta":"h:200\n    "}
+{"tMs":1438,"delta":"Column gap:8"}
+{"tMs":1456,"delta":" grow"}
+{"tMs":1477,"delta":"\n      P"}
+{"tMs":1497,"delta":"laceRow \"B"}
+{"tMs":1519,"delta":"ean There\" \"Esp"}
+{"tMs":1539,"delta":"resso b"}
+{"tMs":1560,"delta":"ar\" index:1 rating"}
+{"tMs":1580,"delta":":\""}
+{"tMs":1601,"delta":"4.8\" distance:\""}
+{"tMs":1622,"delta":"0.2 mi\" h"}
+{"tMs":1641,"delta":"ours:\"7:00 to"}
+{"tMs":1662,"delta":" 18:00\" selected:"}
+{"tMs":1681,"delta":"="}
+{"tMs":1702,"delta":"pick==1 -> p"}
+{"tMs":1723,"delta":"ick=1\n      Pla"}
+{"tMs":1743,"delta":"ceRow \"Daily"}
+{"tMs":1765,"delta":" Grind\" \"Dr"}
+{"tMs":1784,"delta":"ip"}
+{"tMs":1804,"delta":" co"}
+{"tMs":1825,"delta":"ffee\""}
+{"tMs":1845,"delta":" index:2 rating:\""}
+{"tMs":1865,"delta":"4.6\" distance:\""}
+{"tMs":1886,"delta":"0.3 mi\" h"}
+{"tMs":1906,"delta":"ours:\"6:30 to"}
+{"tMs":1928,"delta":" 17:00\" selected:"}
+{"tMs":1948,"delta":"=pick==2 ->"}
+{"tMs":1968,"delta":" pick=2\n      Pl"}
+{"tMs":1989,"delta":"aceRow \"Roast"}
+{"tMs":2012,"delta":" & Co\" \"Single"}
+{"tMs":2029,"delta":" orig"}
+{"tMs":2049,"delta":"in"}
+{"tMs":2070,"delta":"\" index:3 rating:"}
+{"tMs":2091,"delta":"\"4.7\" distance:"}
+{"tMs":2111,"delta":"\"0.4 mi\""}
+{"tMs":2135,"delta":" hours:\"8:00 "}
+{"tMs":2151,"delta":"to 19:00\" selected"}
+{"tMs":2172,"delta":":=pick==3 -"}
+{"tMs":2192,"delta":"> pick=3\n      P"}
+{"tMs":2213,"delta":"laceRow \"The"}
+{"tMs":2233,"delta":" Steam Cup\" \""}
+{"tMs":2254,"delta":"L"}
+{"tMs":2274,"delta":"attes and p"}
+{"tMs":2295,"delta":"astries\" index:4 r"}
+{"tMs":2316,"delta":"ating:\"4.4\" dist"}
+{"tMs":2336,"delta":"ance:\"0.5 m"}
+{"tMs":2355,"delta":"i\" hours:\"7:"}
+{"tMs":2377,"delta":"30 to 20:00\""}
+{"tMs":2397,"delta":" selected:=pick==4"}
+{"tMs":2417,"delta":" -> pick=4"}
+{"tMs":2438,"delta":"\n      PlaceRow \""}
+{"tMs":2461,"delta":"Cafe Lune\""}
+{"tMs":2479,"delta":" \"Late"}
+{"tMs":2499,"delta":"-"}
+{"tMs":2519,"delta":"night cafe\" index:5"}
+{"tMs":2540,"delta":" rating:\"4.5"}
+{"tMs":2560,"delta":"\" distance:\"0.6"}
+{"tMs":2581,"delta":" mi\" hours:\""}
+{"tMs":2602,"delta":"10:00 to 23:"}
+{"tMs":2622,"delta":"00\" selected:=pick"}
+{"tMs":2643,"delta":"==5 -> pick="}
+{"tMs":2663,"delta":"5"}

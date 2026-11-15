@@ -1,0 +1,71 @@
+{"meta":{"ui":"reservation","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Let me book a table at Osteria Lume as an inline card: pick one of the next seven days (Sat 14, Sun 15, Mon 16, Tue 17, Wed 18, Thu 19, Fri 20), a party size from 1 to 8 (starting at 2), then a time slot: 17:30, 18:00, 18:30, 19:00, 19:30, 20:00, 20:30 or 21:00. Some are full and cannot be picked: on Sat 14 the 18:00 and 20:00 slots; on Sun 15 the 17:30 and 19:00 slots; on every day, for parties of 5 or more, 20:30 and 21:00 too. A confirm button, and once I confirm the card says \"Table booked\" with one line giving the day, the party size and the time.","text":"ChatCard \"Osteria Lume\" \"Book a table\" icon:\"restaurant\" status:\"Booking\"\n  SectionLabel \"Day\" \"Next 7 days\"\n  DayPicker =day days:[\"Sat 14\",\"Sun 15\",\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"]\n  SectionLabel \"Party size\" \"Guests\"\n  Counter \"Guests\" \"Up to 8\" =party min:1 max:8 step:1\n  SectionLabel \"Time\" \"Choose a slot\"\n  ChoiceChips =time options:[\"17:30\",\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\",\"21:00\"] disabled:=(day==\"Sat 14\"?[\"18:00\",\"20:00\"]:day==\"Sun 15\"?[\"17:30\",\"19:00\"]:[])+(party>=5?[\"20:30\",\"21:00\"]:[]) columns:4\n  if confirmed==false\n    ActionButton \"Confirm booking\" primary icon:\"check\" enabled:=day!=\"\"&&time!=\"\" -> confirmed=true\n  if confirmed\n    Receipt \"Table booked\" \"{day}, party of {party}, at {time}\" tone:good icon:\"check\"\n\nstate day=\"\"\nstate party=2\nstate time=\"\"\nstate confirmed=false","usage":{"input_tokens":9179,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":426,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":484,"totalMs":1962}}
+{"tMs":484,"delta":"ChatCard \"Os"}
+{"tMs":699,"delta":"teria Lume\" \""}
+{"tMs":699,"delta":"Book"}
+{"tMs":699,"delta":" a table\" icon:\"rest"}
+{"tMs":699,"delta":"aurant\" status:\""}
+{"tMs":699,"delta":"Boo"}
+{"tMs":699,"delta":"king\"\n  S"}
+{"tMs":699,"delta":"ectionLabel \"Day"}
+{"tMs":699,"delta":"\" \"Next "}
+{"tMs":699,"delta":"7 days\"\n  Day"}
+{"tMs":699,"delta":"Picker =day days:[\""}
+{"tMs":709,"delta":"Sat 14\",\"S"}
+{"tMs":731,"delta":"un 15\",\"Mon "}
+{"tMs":921,"delta":"16\",\"Tue 17\",\""}
+{"tMs":921,"delta":"Wed 18\",\"Th"}
+{"tMs":921,"delta":"u 19\",\"Fri "}
+{"tMs":921,"delta":"20\"]\n  Section"}
+{"tMs":921,"delta":"Label \"Party size\""}
+{"tMs":921,"delta":" \"Gu"}
+{"tMs":921,"delta":"ests\"\n  Counter \""}
+{"tMs":921,"delta":"Guests\" \""}
+{"tMs":927,"delta":"Up"}
+{"tMs":946,"delta":" to 8\" =party min:"}
+{"tMs":968,"delta":"1 max:8 step:"}
+{"tMs":990,"delta":"1\n  SectionLab"}
+{"tMs":1140,"delta":"el \"Time\" \"Cho"}
+{"tMs":1140,"delta":"ose a slot\"\n  "}
+{"tMs":1140,"delta":"ChoiceChips =time"}
+{"tMs":1140,"delta":" options:[\"17:30\",\"18"}
+{"tMs":1140,"delta":":00\",\"18:30\",\"19"}
+{"tMs":1140,"delta":":00\",\"19:30\",\"20"}
+{"tMs":1141,"delta":":00\",\"20:30\",\"21"}
+{"tMs":1163,"delta":":00\"] disabled:"}
+{"tMs":1183,"delta":"="}
+{"tMs":1204,"delta":"("}
+{"tMs":1225,"delta":"day==\"Sat 14"}
+{"tMs":1247,"delta":"\"?[\"18:00\",\"20"}
+{"tMs":1363,"delta":":00\"]:day==\""}
+{"tMs":1363,"delta":"Sun 15\"?[\""}
+{"tMs":1364,"delta":"17:30\",\"19:00\""}
+{"tMs":1364,"delta":"]:[])"}
+{"tMs":1364,"delta":"+"}
+{"tMs":1378,"delta":"(party>=5?[\"20"}
+{"tMs":1397,"delta":":30\",\"21:00\"]"}
+{"tMs":1418,"delta":":[]) columns:4"}
+{"tMs":1440,"delta":"\n  if conf"}
+{"tMs":1461,"delta":"irmed==false"}
+{"tMs":1483,"delta":"\n    ActionButton \""}
+{"tMs":1504,"delta":"Confirm boo"}
+{"tMs":1602,"delta":"king\" prim"}
+{"tMs":1602,"delta":"ary icon:\"check\""}
+{"tMs":1602,"delta":" enabled:=day"}
+{"tMs":1602,"delta":"!="}
+{"tMs":1610,"delta":"\"\"&&time!=\""}
+{"tMs":1632,"delta":"\" -> confirmed="}
+{"tMs":1653,"delta":"true"}
+{"tMs":1675,"delta":"\n  if confirmed\n    "}
+{"tMs":1697,"delta":"Receipt \"Table boo"}
+{"tMs":1718,"delta":"ked\" \"{"}
+{"tMs":1739,"delta":"day}"}
+{"tMs":1760,"delta":", party"}
+{"tMs":1955,"delta":" of"}
+{"tMs":1955,"delta":" {party}, at"}
+{"tMs":1955,"delta":" {time}\" t"}
+{"tMs":1955,"delta":"one:good icon:\"check"}
+{"tMs":1955,"delta":"\""}
+{"tMs":1955,"delta":"\n\nstate day"}
+{"tMs":1955,"delta":"=\"\"\nstate party=2"}
+{"tMs":1955,"delta":"\nstate time=\"\"\nstate confir"}
+{"tMs":1955,"delta":"med=false"}

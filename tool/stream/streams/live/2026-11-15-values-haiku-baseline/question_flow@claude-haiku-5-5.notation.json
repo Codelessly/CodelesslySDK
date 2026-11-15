@@ -1,0 +1,529 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Find your laptop",
+    "subtitle": "Three quick questions",
+    "icon": "laptop_mac",
+    "status": "Question 1 of 3",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "OptionList1",
+    "SectionLabel2",
+    "OptionList2",
+    "SectionLabel3",
+    "OptionList3",
+    "SectionLabel4",
+    "OptionList4",
+    "row1",
+    "Receipt1",
+    "Details1",
+    "Recommendation1",
+    "Recommendation2",
+    "Recommendation3",
+    "Recommendation4",
+    "ActionButton2"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Question 1 of 3",
+    "note": "What for"
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "use",
+    "options": [
+     "School or study",
+     "Work and office",
+     "Gaming",
+     "Creative projects"
+    ]
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Question 2 of 3",
+    "note": "Your games"
+   },
+   "bind": {
+    "visible": "${= step==2 && use==\"Gaming\"}"
+   }
+  },
+  "OptionList2": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "play",
+    "options": [
+     "Competitive esports",
+     "Big open-world titles"
+    ]
+   },
+   "bind": {
+    "visible": "${= step==2 && use==\"Gaming\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Question 2 of 3",
+    "note": "What matters most"
+   },
+   "bind": {
+    "visible": "${= step==2 && use!=\"Gaming\"}"
+   }
+  },
+  "OptionList3": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "matters",
+    "options": [
+     "All-day battery",
+     "A big screen and keyboard",
+     "As light as possible"
+    ]
+   },
+   "bind": {
+    "visible": "${= step==2 && use!=\"Gaming\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel4": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Question 3 of 3",
+    "note": "Your budget"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "OptionList4": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "budget",
+    "options": [
+     "Under $800",
+     "$800 to $1,500",
+     "Over $1,500"
+    ]
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step>1 && step<4}"
+   },
+   "children": [
+    "ActionButton1"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back",
+    "tone": "quiet",
+    "icon": "arrow_back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= step-1}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your match",
+    "message": "Based on your answers",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "visible": "${= step==4}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Use\",use],[\"Priority\",coalesce(play,matters,\"\")],[\"Budget\",budget]]}",
+    "visible": "${= step==4}"
+   }
+  },
+  "Recommendation1": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Volt 16 Gaming",
+    "why": "Built for play at $1,399.",
+    "eyebrow": "Gaming"
+   },
+   "bind": {
+    "props.reasons": "${= [\"Fits your gaming plans\",\"Within your budget range\"]}",
+    "visible": "${= (step==4) && (use==\"Gaming\")}"
+   }
+  },
+  "Recommendation2": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Studio 14 Pro",
+    "why": "Built for creative work at $1,799.",
+    "eyebrow": "Creative"
+   },
+   "bind": {
+    "props.reasons": "${= [\"Suited to creative projects\",\"Top-end screen and power\"]}",
+    "visible": "${= (step==4) && (use==\"Creative projects\")}"
+   }
+  },
+  "Recommendation3": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Slate 13",
+    "why": "A light, affordable pick at $649.",
+    "eyebrow": "Best value"
+   },
+   "bind": {
+    "props.reasons": "${= [\"Matches your use\",\"Fits under $800\"]}",
+    "visible": "${= (step==4) && (use!=\"Gaming\" && use!=\"Creative projects\" && budget==\"Under $800\")}"
+   }
+  },
+  "Recommendation4": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Aero 14",
+    "why": "A balanced laptop at $1,099.",
+    "eyebrow": "Best balance"
+   },
+   "bind": {
+    "props.reasons": "${= [\"Matches your use\",\"Fits your budget\"]}",
+    "visible": "${= (step==4) && (use!=\"Gaming\" && use!=\"Creative projects\" && budget!=\"Under $800\")}"
+   }
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start over",
+    "tone": "quiet",
+    "icon": "refresh"
+   },
+   "bind": {
+    "visible": "${= step==4}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "use",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "play",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "matters",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "budget",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "use",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "play",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "matters",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "budget",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 1
+   }
+  ]
+ }
+}
