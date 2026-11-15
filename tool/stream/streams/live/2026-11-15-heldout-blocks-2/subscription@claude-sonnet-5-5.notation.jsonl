@@ -1,0 +1,68 @@
+{"meta":{"ui":"subscription","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"My Pro plan renews in 3 days. Show a card with the plan and price, how much of my storage and seats I have used, a switch to annual billing that shows what I would save, and buttons to manage the plan or cancel renewal.","text":"ChatCard \"Pro plan\" \"Renews in 3 days\" icon:\"workspace_premium\" status:\"Active\" tone:accent w:390\n  state annual=false\n  state monthly=19\n  Details rows:=[[\"Plan\",\"Pro\"],[\"Price\",annual?\"$190 / year\":\"$19 / month\"],[\"Next renewal\",\"In 3 days\"]]\n  SectionLabel \"Usage\" \"this period\"\n  ProgressLine \"Storage\" \"72 of 100 GB\" value:=0.72\n  ProgressLine \"Seats\" \"8 of 10 used\" value:=0.8\n  SectionLabel \"Billing\"\n  Toggle \"Switch to annual billing\" =annual\n  if annual\n    Callout \"You save $38 a year\" \"Annual billing is $190 instead of $228, about 2 months free.\" tone:good icon:\"savings\"\n  if !annual\n    Paragraph \"Pay yearly and save $38 compared with monthly billing.\"\n  Row gap:10\n    ActionButton \"Manage plan\" tone:primary -> emit manage annual\n    ActionButton \"Cancel renewal\" tone:danger -> emit cancelRenewal","usage":{"input_tokens":8852,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":380,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":864,"totalMs":3054}}
+{"tMs":864,"delta":"ChatCard \"P"}
+{"tMs":1175,"delta":"ro pl"}
+{"tMs":1175,"delta":"an\" \"Renews in "}
+{"tMs":1175,"delta":"3 days\" icon:\""}
+{"tMs":1175,"delta":"workspace_prem"}
+{"tMs":1175,"delta":"ium\" status:\"Active"}
+{"tMs":1175,"delta":"\" tone:acc"}
+{"tMs":1175,"delta":"ent w:390"}
+{"tMs":1175,"delta":"\n  state ann"}
+{"tMs":1175,"delta":"ual=false\n  state mon"}
+{"tMs":1175,"delta":"thly=19"}
+{"tMs":1211,"delta":"\n  Details rows:="}
+{"tMs":1243,"delta":"[[\"Pl"}
+{"tMs":1502,"delta":"an\",\"Pro\""}
+{"tMs":1502,"delta":"],[\"Price"}
+{"tMs":1502,"delta":"\",annual?\"$190"}
+{"tMs":1502,"delta":" "}
+{"tMs":1502,"delta":"/ year\":\""}
+{"tMs":1502,"delta":"$19 / month\"],"}
+{"tMs":1502,"delta":"[\"Next renewal\",\"In"}
+{"tMs":1509,"delta":" 3 days\"]]"}
+{"tMs":1544,"delta":"\n  SectionLabel \""}
+{"tMs":1577,"delta":"Usage\" \"this"}
+{"tMs":1609,"delta":" period"}
+{"tMs":1642,"delta":"\"\n  "}
+{"tMs":1811,"delta":"ProgressLine \""}
+{"tMs":1811,"delta":"Storage\""}
+{"tMs":1811,"delta":" \"72"}
+{"tMs":1811,"delta":" of"}
+{"tMs":1811,"delta":" 100 GB\" value:"}
+{"tMs":1842,"delta":"=0.72\n  Pro"}
+{"tMs":1875,"delta":"gressLine \"Seats"}
+{"tMs":1907,"delta":"\" \"8"}
+{"tMs":1941,"delta":" of 10 used"}
+{"tMs":1975,"delta":"\" value:=0.8"}
+{"tMs":2009,"delta":"\n  SectionLabel \""}
+{"tMs":2043,"delta":"Billing\""}
+{"tMs":2126,"delta":"\n  Toggle \""}
+{"tMs":2126,"delta":"Switch to annual billing\""}
+{"tMs":2143,"delta":" =annual"}
+{"tMs":2177,"delta":"\n  if annual\n    Call"}
+{"tMs":2209,"delta":"out \"You"}
+{"tMs":2243,"delta":" save $38 a"}
+{"tMs":2276,"delta":" year\" \"Ann"}
+{"tMs":2308,"delta":"ual bill"}
+{"tMs":2343,"delta":"ing is $190 inst"}
+{"tMs":2375,"delta":"ead of $228,"}
+{"tMs":2407,"delta":" about"}
+{"tMs":2441,"delta":" 2 months free"}
+{"tMs":2474,"delta":".\" tone:good ic"}
+{"tMs":2507,"delta":"on:\"sav"}
+{"tMs":2541,"delta":"ings\"\n  if"}
+{"tMs":2574,"delta":" !annual\n    Pa"}
+{"tMs":2608,"delta":"ragraph \"P"}
+{"tMs":2640,"delta":"ay y"}
+{"tMs":2674,"delta":"early and save $38 comp"}
+{"tMs":2707,"delta":"ared with"}
+{"tMs":2741,"delta":" monthly billing.\"\n  "}
+{"tMs":2774,"delta":"Row gap:10\n    "}
+{"tMs":2809,"delta":"ActionButton \"Man"}
+{"tMs":2842,"delta":"age plan\" tone:prim"}
+{"tMs":3031,"delta":"ary -> emit manage ann"}
+{"tMs":3031,"delta":"ual\n    ActionButton"}
+{"tMs":3031,"delta":" \"Cancel renewal"}
+{"tMs":3031,"delta":"\" tone:dan"}
+{"tMs":3031,"delta":"ger -> emit cancel"}
+{"tMs":3043,"delta":"Renewal"}

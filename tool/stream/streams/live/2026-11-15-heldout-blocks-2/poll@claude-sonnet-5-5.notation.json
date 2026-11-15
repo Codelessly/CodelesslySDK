@@ -1,0 +1,255 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Team lunch poll",
+    "subtitle": "Friday",
+    "icon": "restaurant",
+    "status": "Open"
+   },
+   "children": [
+    "Paragraph1",
+    "OptionList1",
+    "ActionButton1",
+    "SectionLabel1",
+    "listView1",
+    "Callout1"
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Where should we go for lunch on Friday?",
+    "strong": true
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pick one",
+    "value": "choice",
+    "options": [
+     "Ramen bar",
+     "Taco truck",
+     "Salad place",
+     "Pizzeria"
+    ]
+   },
+   "bind": {
+    "visible": "${= !voted}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Vote",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= choice!=\"\"}",
+    "visible": "${= !voted}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "votes",
+       "value": "${= updateWhere(votes,v=>v.name==choice,v=>with(v,\"n\",v.n+1))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "voted",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Results"
+   },
+   "bind": {
+    "props.note": "${= sum(votes,v=>v.n)} votes",
+    "visible": "${= voted}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${votes}",
+    "visible": "${= voted}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ProgressLine1"
+   ]
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${item.name}${= item.name==choice?' ✓ your choice':''}",
+    "props.detail": "${= round(item.n*100/sum(votes,x=>x.n),0)}%",
+    "props.value": "${= item.n/sum(votes,x=>x.n)}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.title": "You voted for ${choice}",
+    "props.message": "Total votes: ${= sum(votes,v=>v.n)}",
+    "visible": "${= voted}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "voted",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "choice",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "votes",
+    "type": "list",
+    "value": [
+     {
+      "name": "Ramen bar",
+      "n": 8
+     },
+     {
+      "name": "Taco truck",
+      "n": 6
+     },
+     {
+      "name": "Salad place",
+      "n": 3
+     },
+     {
+      "name": "Pizzeria",
+      "n": 5
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,91 @@
+{"meta":{"ui":"tracking","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"ChatCard \"Where is your package?\" \"Wireless headphones · Order #48213\" icon:\"local_shipping\" status:\"In transit\" tone:accent w:390\n  state stage=3\n  state note=\"\"\n  state saved=false\n  Details rows:=[[\"Item\",\"Wireless headphones, black\"],[\"Carrier\",\"UPS Ground\"],[\"Tracking number\",\"1Z 999 AA1 01 2345 6784\"],[\"Estimated delivery\",\"Thursday, May 16\"]]\n  SectionLabel \"Shipment progress\" \"Stage 3 of 5\"\n  Steps steps:[\"Order placed\",\"Packed\",\"In transit\",\"Out for delivery\",\"Delivered\"] current:=stage\n  Callout \"Now: In transit\" \"Left the Chicago, IL hub this morning. Next stop: your local facility.\" tone:accent icon:\"local_shipping\"\n  SectionLabel \"Delivery instructions\" \"Optional\"\n  if !saved\n    InputField \"Instructions for the driver\" \"e.g. Leave at the side door\" =note lines:3\n    ActionButton \"Save instructions\" tone:primary icon:\"edit_note\" enabled:=length(note)>0 -> saved=true; toast \"Instructions saved\"\n  if saved\n    Callout \"Instructions saved\" \"{note}\" tone:good icon:\"check_circle\"\n    ActionButton \"Edit instructions\" tone:quiet -> saved=false","usage":{"input_tokens":8849,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":463,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":792,"totalMs":3777}}
+{"tMs":792,"delta":"ChatCard \"Where"}
+{"tMs":1087,"delta":" is your package?\" \"W"}
+{"tMs":1087,"delta":"ireless head"}
+{"tMs":1087,"delta":"phones · Order #"}
+{"tMs":1087,"delta":"48"}
+{"tMs":1087,"delta":"213"}
+{"tMs":1087,"delta":"\" icon:\"local"}
+{"tMs":1087,"delta":"_shipping\" status:\""}
+{"tMs":1087,"delta":"In transit\" tone:acc"}
+{"tMs":1087,"delta":"ent w:390"}
+{"tMs":1102,"delta":"\n  state st"}
+{"tMs":1133,"delta":"age=3"}
+{"tMs":1166,"delta":"\n  state note"}
+{"tMs":1393,"delta":"=\"\"\n  state"}
+{"tMs":1393,"delta":" saved=false\n  Details"}
+{"tMs":1393,"delta":" rows:="}
+{"tMs":1393,"delta":"[[\"Item"}
+{"tMs":1393,"delta":"\",\"Wireless headphones"}
+{"tMs":1393,"delta":", black"}
+{"tMs":1402,"delta":"\"],[\"Carrier\",\""}
+{"tMs":1433,"delta":"U"}
+{"tMs":1466,"delta":"PS "}
+{"tMs":1501,"delta":"Ground\"],[\"Tracking"}
+{"tMs":1532,"delta":" number"}
+{"tMs":1565,"delta":"\",\"1"}
+{"tMs":1703,"delta":"Z 999"}
+{"tMs":1703,"delta":" A"}
+{"tMs":1703,"delta":"A1"}
+{"tMs":1703,"delta":" 01"}
+{"tMs":1726,"delta":" 2"}
+{"tMs":1761,"delta":"345 6784"}
+{"tMs":1794,"delta":"\"],[\"Estimated del"}
+{"tMs":1829,"delta":"ivery\",\"Thursday,"}
+{"tMs":1861,"delta":" May 16"}
+{"tMs":1896,"delta":"\"]]\n  Section"}
+{"tMs":1930,"delta":"Label \"Sh"}
+{"tMs":1964,"delta":"ipment prog"}
+{"tMs":2022,"delta":"ress\" \"Stage"}
+{"tMs":2030,"delta":" 3 of 5\""}
+{"tMs":2065,"delta":"\n  Steps steps:[\""}
+{"tMs":2097,"delta":"Order"}
+{"tMs":2131,"delta":" placed\",\"Pack"}
+{"tMs":2165,"delta":"ed\",\"In"}
+{"tMs":2197,"delta":" transit\",\"Out"}
+{"tMs":2232,"delta":" for delivery\",\"Deliv"}
+{"tMs":2265,"delta":"ered\"] current:="}
+{"tMs":2298,"delta":"st"}
+{"tMs":2331,"delta":"age\n  "}
+{"tMs":2365,"delta":"Callout \"Now"}
+{"tMs":2396,"delta":":"}
+{"tMs":2431,"delta":" In transit\" \"Left"}
+{"tMs":2463,"delta":" the"}
+{"tMs":2496,"delta":" Chicago,"}
+{"tMs":2529,"delta":" IL h"}
+{"tMs":2562,"delta":"ub this"}
+{"tMs":2594,"delta":" mor"}
+{"tMs":2628,"delta":"ning. Next"}
+{"tMs":2661,"delta":" stop: your"}
+{"tMs":2695,"delta":" local facility.\" tone:acc"}
+{"tMs":2729,"delta":"ent icon:\"local"}
+{"tMs":2763,"delta":"_shipping\"\n  S"}
+{"tMs":2797,"delta":"ectionLabel \"Del"}
+{"tMs":2831,"delta":"ivery instructions\""}
+{"tMs":2864,"delta":" \"Optional\"\n  if"}
+{"tMs":2897,"delta":" !"}
+{"tMs":2931,"delta":"saved\n    InputField \""}
+{"tMs":2964,"delta":"Instructions for"}
+{"tMs":2998,"delta":" the driver\" \"e"}
+{"tMs":3032,"delta":".g. Leave at the"}
+{"tMs":3065,"delta":" side door\""}
+{"tMs":3097,"delta":" ="}
+{"tMs":3131,"delta":"note lines:3"}
+{"tMs":3164,"delta":"\n    "}
+{"tMs":3198,"delta":"ActionButton \"Save inst"}
+{"tMs":3232,"delta":"ructions\" tone:primary"}
+{"tMs":3265,"delta":" icon:\"ed"}
+{"tMs":3298,"delta":"it_"}
+{"tMs":3332,"delta":"note\" enabled:=length"}
+{"tMs":3365,"delta":"(note)>0 ->"}
+{"tMs":3399,"delta":" saved=true;"}
+{"tMs":3437,"delta":" toast \"Instructions sa"}
+{"tMs":3466,"delta":"ved\"\n  if"}
+{"tMs":3499,"delta":" saved\n    Callout \""}
+{"tMs":3534,"delta":"Instructions saved\" \""}
+{"tMs":3570,"delta":"{note}\" tone:good"}
+{"tMs":3606,"delta":" icon:\"check_"}
+{"tMs":3635,"delta":"circle\"\n    Action"}
+{"tMs":3668,"delta":"Button \"Edit inst"}
+{"tMs":3701,"delta":"ructions\" tone:qui"}
+{"tMs":3735,"delta":"et -> saved=false"}

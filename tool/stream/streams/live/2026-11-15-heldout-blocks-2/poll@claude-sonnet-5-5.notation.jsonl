@@ -1,0 +1,75 @@
+{"meta":{"ui":"poll","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Run a quick team poll in a card: \"Where should we go for lunch on Friday?\" with four options. Before I vote I only see the options; after I vote I see each option's share as a bar with the percentage, my choice marked, and the total number of votes.","text":"ChatCard \"Team lunch poll\" \"Friday\" icon:\"restaurant\" status:\"Open\" w:390\n  state voted=false\n  state choice=\"\"\n  state votes=[{\"name\":\"Ramen bar\",\"n\":8},{\"name\":\"Taco truck\",\"n\":6},{\"name\":\"Salad place\",\"n\":3},{\"name\":\"Pizzeria\",\"n\":5}]\n  Paragraph \"Where should we go for lunch on Friday?\" strong:true\n  if !voted\n    OptionList \"Pick one\" =choice options:[\"Ramen bar\",\"Taco truck\",\"Salad place\",\"Pizzeria\"]\n    ActionButton \"Vote\" tone:primary enabled:=choice!=\"\" -> votes=updateWhere(votes,v=>v.name==choice,v=>with(v,\"n\",v.n+1)); voted=true\n  if voted\n    SectionLabel \"Results\" \"{sum(votes,v=>v.n)} votes\"\n    each v in votes\n      ProgressLine \"{v.name}{v.name==choice?' ✓ your choice':''}\" \"{round(v.n*100/sum(votes,x=>x.n),0)}%\" value:=v.n/sum(votes,x=>x.n)\n    Callout \"You voted for {choice}\" \"Total votes: {sum(votes,v=>v.n)}\" tone:good icon:\"check_circle\"","usage":{"input_tokens":8857,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":446,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":630,"totalMs":3093}}
+{"tMs":630,"delta":"ChatCard \""}
+{"tMs":950,"delta":"Team"}
+{"tMs":950,"delta":" lunch poll\" \""}
+{"tMs":951,"delta":"Friday\" icon:\"rest"}
+{"tMs":951,"delta":"aurant\" status"}
+{"tMs":951,"delta":":\"Open"}
+{"tMs":951,"delta":"\" w:390\n  state vo"}
+{"tMs":951,"delta":"ted=false\n  state cho"}
+{"tMs":951,"delta":"ice=\"\"\n  state votes"}
+{"tMs":951,"delta":"=[{\"name"}
+{"tMs":959,"delta":"\":\"Ramen b"}
+{"tMs":991,"delta":"ar\",\"n"}
+{"tMs":1022,"delta":"\":8"}
+{"tMs":1284,"delta":"},{\"name\":\"Ta"}
+{"tMs":1284,"delta":"co tru"}
+{"tMs":1284,"delta":"ck\",\"n\":6"}
+{"tMs":1284,"delta":"},{\"name\":\"Sal"}
+{"tMs":1284,"delta":"ad place"}
+{"tMs":1284,"delta":"\",\"n\":3"}
+{"tMs":1284,"delta":"},{\"name\":\"P"}
+{"tMs":1287,"delta":"izz"}
+{"tMs":1321,"delta":"eria\",\"n\":5}]"}
+{"tMs":1355,"delta":"\n  Paragraph \""}
+{"tMs":1389,"delta":"Where should we go for lun"}
+{"tMs":1423,"delta":"ch on Friday?\" str"}
+{"tMs":1634,"delta":"ong:"}
+{"tMs":1634,"delta":"true\n  if !"}
+{"tMs":1634,"delta":"voted\n    OptionList"}
+{"tMs":1634,"delta":" \"P"}
+{"tMs":1634,"delta":"ick one"}
+{"tMs":1634,"delta":"\" =choice options:[\""}
+{"tMs":1656,"delta":"Ramen bar\",\"Ta"}
+{"tMs":1689,"delta":"co truck\",\"Salad place"}
+{"tMs":1723,"delta":"\",\"Pizzeria\""}
+{"tMs":1757,"delta":"]\n    ActionButton"}
+{"tMs":1791,"delta":" \"Vote\" t"}
+{"tMs":1824,"delta":"one:primary en"}
+{"tMs":1959,"delta":"abled:=choice!=\""}
+{"tMs":1959,"delta":"\" -> votes=update"}
+{"tMs":1959,"delta":"Where(votes,v"}
+{"tMs":1959,"delta":"=>v.name==choice"}
+{"tMs":1992,"delta":",v=>with(v,"}
+{"tMs":2026,"delta":"\"n\",v.n+1"}
+{"tMs":2059,"delta":")); voted=true\n  "}
+{"tMs":2092,"delta":"if voted\n    Section"}
+{"tMs":2126,"delta":"Label \"Results\" \""}
+{"tMs":2159,"delta":"{s"}
+{"tMs":2192,"delta":"um(votes,v=>"}
+{"tMs":2227,"delta":"v.n)} votes\""}
+{"tMs":2300,"delta":"\n    each v in votes"}
+{"tMs":2300,"delta":"\n      "}
+{"tMs":2331,"delta":"ProgressLine \"{v"}
+{"tMs":2364,"delta":".name}{v.name=="}
+{"tMs":2392,"delta":"choice?"}
+{"tMs":2425,"delta":"'"}
+{"tMs":2458,"delta":" "}
+{"tMs":2491,"delta":"✓ your"}
+{"tMs":2525,"delta":" choice':''}\" \"{"}
+{"tMs":2558,"delta":"round(v.n*"}
+{"tMs":2592,"delta":"100/sum(votes,"}
+{"tMs":2625,"delta":"x"}
+{"tMs":2658,"delta":"=>x.n),0)"}
+{"tMs":2692,"delta":"}%\" value:=v."}
+{"tMs":2725,"delta":"n/sum(votes,"}
+{"tMs":2758,"delta":"x=>x.n)"}
+{"tMs":2792,"delta":"\n    Call"}
+{"tMs":2825,"delta":"out \"You"}
+{"tMs":2858,"delta":" voted for {cho"}
+{"tMs":2891,"delta":"ice}\" \"Total"}
+{"tMs":2925,"delta":" votes: {sum(vot"}
+{"tMs":2958,"delta":"es,v=>v.n"}
+{"tMs":2992,"delta":")}\" tone:good ic"}
+{"tMs":3027,"delta":"on:\"check_"}
+{"tMs":3085,"delta":"circle\""}
