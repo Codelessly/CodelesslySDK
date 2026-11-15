@@ -1,0 +1,69 @@
+Card w:390 gap:12
+  Row between middle
+    Column gap:2
+      Text.heading2 "Morning Run"
+      Text.caption "Today, 6:45 AM"
+    Badge.success "New best pace"
+  Divider
+  Grid cols:2 gap:8
+    Column gap:2
+      Text.caption "Distance"
+      Text.heading2 "5.0 km"
+    Column gap:2
+      Text.caption "Time"
+      Text.heading2 "27:35"
+    Column gap:2
+      Text.caption "Avg pace"
+      Text.heading2 "5:31 /km"
+    Column gap:2
+      Text.caption "Calories"
+      Text.heading2 "342 kcal"
+  Divider
+  Text.sectionTitle "Pace per kilometer"
+  LineChart values:[5.7,5.6,5.5,5.5,5.3] labels:["1","2","3","4","5"]
+  Text.sectionTitle "Splits"
+  Column gap:6
+    Row between
+      Text.caption "KM"
+      Text.caption "Pace"
+      Text.caption "Time"
+    Divider
+    Row between
+      Text "1"
+      Text "5:42"
+      Text "5:42"
+    Row between
+      Text "2"
+      Text "5:36"
+      Text "11:18"
+    Row between
+      Text "3"
+      Text "5:30"
+      Text "16:48"
+    Row between
+      Text "4"
+      Text "5:28"
+      Text "22:16"
+    Row between
+      Text "5"
+      Text "5:19"
+      Text "27:35"
+  Divider
+  Text.sectionTitle "Vs. last run"
+  Column gap:6
+    Row between middle
+      Text "Pace"
+      Row gap:4 middle
+        Icon "arrow_downward" color:#FF2E7D32
+        Text.success "0:08 /km faster"
+    Row between middle
+      Text "Distance"
+      Row gap:4 middle
+        Icon "arrow_upward" color:#FF2E7D32
+        Text.success "+0.4 km"
+    Row between middle
+      Text "Calories"
+      Row gap:4 middle
+        Icon "arrow_upward" color:#FF2E7D32
+        Text.success "+28 kcal"
+  Button "Share run" -> emit share; toast "Run shared"

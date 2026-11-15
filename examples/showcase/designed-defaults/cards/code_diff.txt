@@ -1,0 +1,42 @@
+state d1=""
+state d2=""
+state d3=""
+state kept=0
+Card w:390 gap:12
+  Text.title "Review config changes"
+  Text.muted "{(d1=='keep'?1:0)+(d2=='keep'?1:0)+(d3=='keep'?1:0)} of 3 hunks kept"
+  Box gap:6 pad:8 radius:6 fill:#FFF5F5F5
+    Row between
+      Text.caption "Hunk 1 · @@ -4,2 +4,2 @@"
+      if d1!=""
+        Badge.info "{d1=='keep'?'Kept':'Discarded'}"
+    Text.caption "4  - port: 8080" fontFamily:monospace fill:#FFFFEBEE color:#FFC62828
+    Text.caption "4  + port: 9090" fontFamily:monospace fill:#FFE8F5E9 color:#FF2E7D32
+    Text.caption "5    host: localhost" fontFamily:monospace
+    Row gap:8
+      Button.outline "Keep" -> d1="keep"
+      Button.ghost "Discard" -> d1="discard"
+  Box gap:6 pad:8 radius:6 fill:#FFF5F5F5
+    Row between
+      Text.caption "Hunk 2 · @@ -12,3 +12,2 @@"
+      if d2!=""
+        Badge.info "{d2=='keep'?'Kept':'Discarded'}"
+    Text.caption "12    logging:" fontFamily:monospace
+    Text.caption "13 -   level: debug" fontFamily:monospace fill:#FFFFEBEE color:#FFC62828
+    Text.caption "14 -   file: /tmp/app.log" fontFamily:monospace fill:#FFFFEBEE color:#FFC62828
+    Text.caption "13 +   level: warn" fontFamily:monospace fill:#FFE8F5E9 color:#FF2E7D32
+    Row gap:8
+      Button.outline "Keep" -> d2="keep"
+      Button.ghost "Discard" -> d2="discard"
+  Box gap:6 pad:8 radius:6 fill:#FFF5F5F5
+    Row between
+      Text.caption "Hunk 3 · @@ -20,1 +19,3 @@"
+      if d3!=""
+        Badge.info "{d3=='keep'?'Kept':'Discarded'}"
+    Text.caption "19    cache:" fontFamily:monospace
+    Text.caption "20 +   enabled: true" fontFamily:monospace fill:#FFE8F5E9 color:#FF2E7D32
+    Text.caption "21 +   ttl: 300" fontFamily:monospace fill:#FFE8F5E9 color:#FF2E7D32
+    Row gap:8
+      Button.outline "Keep" -> d3="keep"
+      Button.ghost "Discard" -> d3="discard"
+  Button "Apply changes" enabled:=d1!=""&&d2!=""&&d3!="" -> emit apply; toast "Changes applied"

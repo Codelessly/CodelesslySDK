@@ -144,6 +144,34 @@ TEXT_STYLES = {
     'code': {'fontFamily': MONO, 'fontSize': 12, 'fontWeight': 400, 'height': 1.5, 'color': 'ink'},
 }
 
+# The look of plain parts (Card, Text.title, Badge, Button...) when an answer is written without blocks: what
+# NotationOptions.fromTheme reads (codelessly_api notation.dart) and the controls' per-step radii (the SDK's
+# lib/src/render/controls/tokens.dart). build.py merges these into the theme.
+PLAIN_TEXT_STYLES = {
+    # The short words an answer writes, on the Cards scale (title as a card title, heading as a block title).
+    'title': {'fontFamily': DISPLAY, 'fontSize': 20, 'fontWeight': 700, 'height': 1.2, 'letterSpacing': -0.3, 'color': 'primaryText'},
+    'heading': {'fontFamily': TEXT, 'fontSize': 15, 'fontWeight': 600, 'height': 1.3, 'letterSpacing': -0.1, 'color': 'primaryText'},
+    'strong': {'fontFamily': TEXT, 'fontSize': 13.5, 'fontWeight': 600, 'height': 1.4, 'color': 'primaryText'},
+    'muted': {'fontFamily': TEXT, 'fontSize': 13, 'fontWeight': 400, 'height': 1.45, 'color': 'secondaryText'},
+    'small': {'fontFamily': TEXT, 'fontSize': 12.5, 'fontWeight': 400, 'height': 1.4, 'color': 'secondaryText'},
+}
+PLAIN = {
+    # A card: radii.card, shadows.card, spacing.card (its padding), colors.card, on colors.page.
+    # A card in a card: radii.tile, spacing.tile, no shadow. A badge: a pill 22 high, 9 at its sides. A button alone
+    # on its line in a column: full width, 46 high. A bar chart: rounded bars at most 28 wide, 10 apart.
+    # A control's corner by its height (a 28-high button 8, not the 12 of the 44-high action button).
+    # What floats (dialogs, sheets, menus, pickers, toasts): radii.popup, shadows.popup.
+    'radii': {'popup': 20, 'badge': 999, 'bar': 6, 'controlXs': 6, 'controlCompact': 8, 'controlSmall': 9, 'controlMedium': 10, 'controlLarge': 12},
+    'sizes': {'cta': 46, 'badge': 22, 'bar': 28},
+    'spacing': {'card': 18, 'tile': 14, 'badge': 9, 'bar': 10},
+    'shadows': {'popup': [{'type': 'dropShadow', 'color': '#24000000', 'offset': [0, 16], 'blurRadius': 40, 'spreadRadius': -8},
+                          {'type': 'dropShadow', 'color': '#0F000000', 'offset': [0, 2], 'blurRadius': 6}]},
+}
+# A series chart's series colors, in turn (the SDK's indicator_theme.dart reads colors.chart1...).
+PLAIN_COLORS = {'chart1': '#FF2563EB', 'chart2': '#FF0891B2', 'chart3': '#FF9333EA', 'chart4': '#FF16A34A', 'chart5': '#FFEA580C'}
+PLAIN_DARK_COLORS = {'chart1': '#FF3B82F6', 'chart2': '#FF06B6D4', 'chart3': '#FFA855F7', 'chart4': '#FF22C55E', 'chart5': '#FFFB923C'}
+PLAIN_DARK_SHADOWS = {'popup': [{'type': 'dropShadow', 'color': '#80000000', 'offset': [0, 16], 'blurRadius': 40, 'spreadRadius': -8}]}
+
 FONTS = [
     {'family': TEXT, 'fonts': [{'asset': 'fonts/Inter-Regular.otf'}, {'asset': 'fonts/Inter-Medium.otf', 'weight': 500},
                                {'asset': 'fonts/Inter-SemiBold.otf', 'weight': 600}, {'asset': 'fonts/Inter-Bold.otf', 'weight': 700}]},

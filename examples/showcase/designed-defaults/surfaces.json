@@ -1,0 +1,485 @@
+{
+ "schema": 3,
+ "roots": [
+  "surf",
+  "sheet",
+  "menu"
+ ],
+ "nodes": {
+  "bConfirm": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "label": "Confirm dialog"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "confirm",
+       "title": "Delete 214 files?",
+       "message": "This cannot be undone.",
+       "confirmLabel": "Delete",
+       "destructive": true
+      }
+     ]
+    }
+   ]
+  },
+  "bToast": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "label": "Toast"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Saved to your library",
+       "actionLabel": "Undo",
+       "durationMs": 600000
+      }
+     ]
+    }
+   ]
+  },
+  "bToastOk": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "label": "Success toast"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Payment received",
+       "style": "success",
+       "durationMs": 600000
+      }
+     ]
+    }
+   ]
+  },
+  "bDialog": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "label": "Modal dialog"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "sheet",
+       "presentation": "dialog"
+      }
+     ]
+    }
+   ]
+  },
+  "bSheet": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "label": "Bottom sheet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "sheet",
+       "presentation": "bottomSheet",
+       "showDragHandle": true
+      }
+     ]
+    }
+   ]
+  },
+  "bPop": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "label": "Popover menu"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openModal",
+       "to": "menu",
+       "presentation": "popover",
+       "anchor": "trigger"
+      }
+     ]
+    }
+   ]
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 6,
+    "reorder": {
+     "start": "press"
+    },
+    "swipeActions": {
+     "endActions": [
+      {
+       "id": "archive",
+       "label": "Archive",
+       "icon": "archive",
+       "removes": false
+      }
+     ],
+     "startActions": [
+      {
+       "id": "done",
+       "label": "Done",
+       "icon": "check",
+       "background": "#FF16A34A",
+       "removes": false
+      }
+     ]
+    }
+   },
+   "bind": {
+    "data": "${rows}"
+   }
+  },
+  "item": {
+   "type": "listTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "slots": {
+    "title": "itemT"
+   },
+   "props": {}
+  },
+  "itemT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.n}",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "col": {
+   "type": "column",
+   "children": [
+    "bConfirm",
+    "bToast",
+    "bToastOk",
+    "bDialog",
+    "bSheet",
+    "bPop",
+    "list"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 16
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "surf": {
+   "type": "canvas",
+   "slots": {
+    "body": "col"
+   },
+   "layout": {
+    "width": 390,
+    "height": 844
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "sheetCol": {
+   "type": "column",
+   "children": [
+    "sheetT",
+    "sheetM",
+    "sheetB"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 20
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "sheetT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Share this list",
+    "style": {
+     "from": "title"
+    }
+   }
+  },
+  "sheetM": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Anyone with the link can view it.",
+    "style": {
+     "from": "muted"
+    }
+   }
+  },
+  "sheetB": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46
+   },
+   "props": {
+    "label": "Copy link"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
+      }
+     ]
+    }
+   ]
+  },
+  "sheet": {
+   "type": "canvas",
+   "slots": {
+    "body": "sheetCol"
+   },
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   }
+  },
+  "menuCol": {
+   "type": "column",
+   "children": [
+    "m1",
+    "m2",
+    "m3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 6
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "m1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32
+   },
+   "props": {
+    "label": "Rename"
+   }
+  },
+  "m2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32
+   },
+   "props": {
+    "label": "Duplicate"
+   }
+  },
+  "m3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 32
+   },
+   "props": {
+    "label": "Delete"
+   }
+  },
+  "menu": {
+   "type": "canvas",
+   "slots": {
+    "body": "menuCol"
+   },
+   "layout": {
+    "width": 180,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   }
+  }
+ },
+ "variables": {
+  "surf": [
+   {
+    "name": "rows",
+    "type": "list",
+    "value": [
+     {
+      "n": "Espresso beans"
+     },
+     {
+      "n": "Ceramic mug"
+     },
+     {
+      "n": "Milk frother"
+     },
+     {
+      "n": "Paper filters"
+     }
+    ]
+   }
+  ]
+ }
+}

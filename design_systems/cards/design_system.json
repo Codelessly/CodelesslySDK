@@ -13,7 +13,6 @@
   "success": "#FF16A34A",
   "warning": "#FFEA580C",
   "radius": 12,
-  "buttonRadius": 12,
   "colors": {
    "primaryBackground": "#FFFFFFFF",
    "secondaryBackground": "#FFF9FAFB",
@@ -171,7 +170,12 @@
    "onMapPin": "#FFFFFFFF",
    "codeBg": "#FFF9FAFB",
    "codeGutter": "#FF9CA3AF",
-   "gold": "#FFFFB020"
+   "gold": "#FFFFB020",
+   "chart1": "#FF2563EB",
+   "chart2": "#FF0891B2",
+   "chart3": "#FF9333EA",
+   "chart4": "#FF16A34A",
+   "chart5": "#FFEA580C"
   },
   "textStyles": {
    "pageTitle": {
@@ -180,70 +184,80 @@
     "height": 1.3,
     "color": "primaryText",
     "leadingDistribution": "even",
-    "letterSpacing": -0.2
+    "letterSpacing": -0.2,
+    "fontFamily": "Inter"
    },
    "sectionTitle": {
     "fontSize": 14,
     "fontWeight": 600,
     "height": 1.4,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "dialogTitle": {
     "fontSize": 14,
     "fontWeight": 600,
     "height": 1.4,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "panelTitle": {
     "fontSize": 12,
     "fontWeight": 600,
     "height": 1.4,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "body": {
     "fontSize": 13,
     "fontWeight": 400,
     "height": 1.5,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "bodySecondary": {
     "fontSize": 12,
     "fontWeight": 400,
     "height": 1.5,
     "color": "secondaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "inputText": {
     "fontSize": 12.5,
     "fontWeight": 400,
     "height": 1.25,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "placeholder": {
     "fontSize": 12.5,
     "fontWeight": 400,
     "height": 1.25,
     "color": "tertiaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "fieldLabel": {
     "fontSize": 11.5,
     "fontWeight": 600,
     "height": 1.3,
     "color": "secondaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "caption": {
     "fontSize": 11,
     "fontWeight": 400,
     "height": 1.4,
     "color": "tertiaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "mono": {
     "fontSize": 12,
@@ -258,63 +272,72 @@
     "fontWeight": 500,
     "height": 1.2,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "controlXs": {
     "fontSize": 11.5,
     "fontWeight": 500,
     "height": 1.2,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "controlCompact": {
     "fontSize": 12,
     "fontWeight": 500,
     "height": 1.2,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "controlSmall": {
     "fontSize": 12.5,
     "fontWeight": 500,
     "height": 1.2,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "controlMedium": {
     "fontSize": 13,
     "fontWeight": 500,
     "height": 1.2,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "controlLarge": {
     "fontSize": 15,
     "fontWeight": 500,
     "height": 1.2,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "heading1": {
     "fontSize": 30,
     "fontWeight": 700,
     "height": 1.2,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "heading2": {
     "fontSize": 24,
     "fontWeight": 700,
     "height": 1.2,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "heading3": {
     "fontSize": 18,
     "fontWeight": 600,
     "height": 1.2,
     "color": "primaryText",
-    "leadingDistribution": "even"
+    "leadingDistribution": "even",
+    "fontFamily": "Inter"
    },
    "cardTitle": {
     "fontFamily": "Inter Display",
@@ -459,6 +482,48 @@
     "fontWeight": 400,
     "height": 1.5,
     "color": "ink",
+    "leadingDistribution": "even"
+   },
+   "title": {
+    "fontFamily": "Inter Display",
+    "fontSize": 20,
+    "fontWeight": 700,
+    "height": 1.2,
+    "letterSpacing": -0.3,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "heading": {
+    "fontFamily": "Inter",
+    "fontSize": 15,
+    "fontWeight": 600,
+    "height": 1.3,
+    "letterSpacing": -0.1,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "strong": {
+    "fontFamily": "Inter",
+    "fontSize": 13.5,
+    "fontWeight": 600,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "muted": {
+    "fontFamily": "Inter",
+    "fontSize": 13,
+    "fontWeight": 400,
+    "height": 1.45,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "small": {
+    "fontFamily": "Inter",
+    "fontSize": 12.5,
+    "fontWeight": 400,
+    "height": 1.4,
+    "color": "secondaryText",
     "leadingDistribution": "even"
    }
   },
@@ -628,6 +693,18 @@
       "blurRadius": 6,
       "spreadRadius": -1
      }
+    ],
+    "popup": [
+     {
+      "type": "dropShadow",
+      "color": "#80000000",
+      "offset": [
+       0,
+       16
+      ],
+      "blurRadius": 40,
+      "spreadRadius": -8
+     }
     ]
    },
    "colors": {
@@ -787,7 +864,12 @@
     "onMapPin": "#FF141414",
     "codeBg": "#FF141414",
     "codeGutter": "#66FFFFFF",
-    "gold": "#FFFFB020"
+    "gold": "#FFFFB020",
+    "chart1": "#FF3B82F6",
+    "chart2": "#FF06B6D4",
+    "chart3": "#FFA855F7",
+    "chart4": "#FF22C55E",
+    "chart5": "#FFFB923C"
    }
   },
   "spacing": {
@@ -800,7 +882,11 @@
    "8": 32,
    "10": 40,
    "12": 48,
-   "16": 64
+   "16": 64,
+   "card": 18,
+   "tile": 14,
+   "badge": 9,
+   "bar": 10
   },
   "radii": {
    "inner": 9,
@@ -811,7 +897,15 @@
    "card": 26,
    "tile": 14,
    "chip": 999,
-   "cta": 14
+   "cta": 14,
+   "popup": 20,
+   "badge": 999,
+   "bar": 6,
+   "controlXs": 6,
+   "controlCompact": 8,
+   "controlSmall": 9,
+   "controlMedium": 10,
+   "controlLarge": 12
   },
   "sizes": {
    "xs": 24,
@@ -829,7 +923,10 @@
    "statusBar": 24,
    "dialogSmall": 400,
    "dialogMedium": 520,
-   "dialogLarge": 720
+   "dialogLarge": 720,
+   "cta": 46,
+   "badge": 22,
+   "bar": 28
   },
   "shadows": {
    "level1": [
@@ -1006,6 +1103,27 @@
      ],
      "blurRadius": 6,
      "spreadRadius": -1
+    }
+   ],
+   "popup": [
+    {
+     "type": "dropShadow",
+     "color": "#24000000",
+     "offset": [
+      0,
+      16
+     ],
+     "blurRadius": 40,
+     "spreadRadius": -8
+    },
+    {
+     "type": "dropShadow",
+     "color": "#0F000000",
+     "offset": [
+      0,
+      2
+     ],
+     "blurRadius": 6
     }
    ]
   },

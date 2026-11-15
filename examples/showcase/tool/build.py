@@ -75,6 +75,10 @@ def crop(src, dst):
     y = h - 1
     while y > 0 and max(abs(a - b) for a, b in zip(px[2, y], page)) > 5:
         y -= 1
+    # Under a design system whose page color is the canvas's own (Cards: colors.page), the rows below the shell
+    # are that color too: cut at the last row with anything else on it.
+    while y > 0 and all(max(abs(a - b) for a, b in zip(px[x, y], page)) <= 3 for x in range(0, w, 2)):
+        y -= 1
     im.crop((0, 0, w, min(h, y + 1))).save(dst)
 
 

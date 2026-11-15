@@ -1,0 +1,36 @@
+state day=""
+state slot=""
+state booked=false
+state slots=[{"t":"9:00 AM","free":true},{"t":"9:30 AM","free":false},{"t":"10:00 AM","free":true},{"t":"10:30 AM","free":true},{"t":"11:00 AM","free":false},{"t":"1:00 PM","free":true},{"t":"1:30 PM","free":true},{"t":"2:00 PM","free":false},{"t":"3:00 PM","free":true}]
+Card w:390 gap:12
+  Row between middle
+    Text.title "Team sync"
+    Badge.info "30 min"
+  if !booked
+    Text.fieldLabel "Attendees"
+    Row gap:8
+      Chip "Ana"
+      Chip "Ben"
+      Chip "Chloe"
+    Divider
+    Text.fieldLabel "Pick a day (next week)"
+    Row gap:8 scroll
+      ChoiceChip "Mon" selected:=day=="Mon" -> day="Mon"; slot=""
+      ChoiceChip "Tue" selected:=day=="Tue" -> day="Tue"; slot=""
+      ChoiceChip "Wed" selected:=day=="Wed" -> day="Wed"; slot=""
+      ChoiceChip "Thu" selected:=day=="Thu" -> day="Thu"; slot=""
+      ChoiceChip "Fri" selected:=day=="Fri" -> day="Fri"; slot=""
+    if day!=""
+      Text.fieldLabel "Available times on {day}"
+      Grid cols:3 gap:8
+        each s in slots
+          ChoiceChip "{s.t}" selected:=slot==s.t enabled:=s.free -> slot=s.t
+      Text.caption "Greyed-out times are already taken."
+    Button "Confirm meeting" enabled:=day!="" && slot!="" -> booked=true; emit confirm slot; toast "Meeting booked"
+  if booked
+    Row gap:8 middle
+      Icon "check_circle"
+      Text.strong "Meeting booked"
+    Text.heading "{day}, {slot}"
+    Text.muted "30 minutes with Ana, Ben and Chloe"
+    Button.outline "Reschedule" -> booked=false

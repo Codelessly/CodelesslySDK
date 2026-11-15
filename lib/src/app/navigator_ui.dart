@@ -24,6 +24,8 @@ import 'ui/presentation_route.dart';
 import 'ui/presentation_scope.dart';
 import 'ui/route_transition.dart';
 import 'ui/toast.dart';
+import '../render/control_theme.dart' show CodelesslyThemeTokens;
+import '../render/convert.dart' show boxShadow;
 import '../runtime/actions/ui.dart';
 
 /// Builds the route that shows screen [destination] (a canvas or layout id)
@@ -115,7 +117,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
         ? inherited
         : Padding(
             padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
-            child: inherited,
+            child: action.presentation == ModalPresentation.fullScreen || action.cover ? inherited : popupSurface(c, inherited),
           );
     final pointer = RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero;
     final anchor = switch (action.anchor) {
@@ -246,6 +248,24 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
   @override
   Future<List<PickedFile>> pickFiles({bool images = true, bool multiple = true}) =>
       files?.call(images: images, multiple: multiple) ?? Future.value(const []);
+}
+
+/// [content] (a dialog's or popover's screen) with the corners and shadow
+/// the project's theme gives what floats (`radii.popup`, `shadows.popup`),
+/// when it names them; else as the screen draws itself.
+Widget popupSurface(BuildContext context, Widget content) {
+  final own = Theme.of(context).extension<CodelesslyThemeTokens>();
+  final radius = own?.tokens.radii['popup'];
+  if (own == null || radius == null) return content;
+  final tokens = own.tokens.forBrightness(dark: own.brightness == Brightness.dark);
+  final r = BorderRadius.circular(radius);
+  return DecoratedBox(
+    decoration: BoxDecoration(
+      borderRadius: r,
+      boxShadow: [for (final e in tokens.shadows['popup'] ?? const <api.Effect>[]) if (e.visible) boxShadow(e)],
+    ),
+    child: ClipRRect(borderRadius: r, child: content),
+  );
 }
 
 /// Shows [content] (a screen) over [context]'s navigator as [presentation]

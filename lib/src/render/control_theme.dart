@@ -213,12 +213,19 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
   // Shapes: the tokens' radii, else small ones (never Material's stadium
   // buttons, pill indicators or 28 px dialogs). Surfaces that float (dialogs,
   // menus, pickers) have a hairline border.
-  final buttonRadius = tokens.buttonRadius ?? kControlRadius;
+  // A theme that gives each control height its own corner (`radii
+  // .controlMedium`, as the stock controls read it) and none for every
+  // button: a dialog's buttons take the medium step's.
+  final buttonRadius = tokens.buttonRadius ?? tokens.radii['controlMedium'] ?? kControlRadius;
   final radius = tokens.radius ?? kSurfaceRadius;
   final OutlinedBorder buttonShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(buttonRadius));
   final OutlinedBorder cardShape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius));
+  // What floats (dialogs, menus, pickers, sheets): a theme's `radii.popup`
+  // and, with `shadows.popup`, a soft shadow under it.
+  final popupRadius = tokens.radii['popup'] ?? radius;
+  final popupElevation = tokens.shadows.containsKey('popup') ? 6.0 : 0.0;
   final OutlinedBorder surfaceShape =
-      RoundedRectangleBorder(borderRadius: BorderRadius.circular(radius), side: BorderSide(color: outlineVariant));
+      RoundedRectangleBorder(borderRadius: BorderRadius.circular(popupRadius), side: BorderSide(color: outlineVariant));
   // Fields: an outline of the theme's radius, else the control radius (a
   // hairline at rest, the accent when focused), the label inside as a hint,
   // never floating into a notch; no underline.
@@ -248,7 +255,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     backgroundColor: WidgetStatePropertyAll(surface),
     surfaceTintColor: const WidgetStatePropertyAll(Colors.transparent),
     shadowColor: const WidgetStatePropertyAll(shadow),
-    elevation: const WidgetStatePropertyAll(0),
+    elevation: WidgetStatePropertyAll(popupElevation),
     side: WidgetStatePropertyAll(BorderSide(color: outlineVariant)),
     shape: WidgetStatePropertyAll(surfaceShape),
   );
@@ -411,7 +418,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       backgroundColor: surface,
       surfaceTintColor: Colors.transparent,
       shadowColor: shadow,
-      elevation: 0,
+      elevation: popupElevation,
       barrierColor: Colors.black54,
       shape: surfaceShape,
     ),
@@ -428,14 +435,14 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       surfaceTintColor: Colors.transparent,
       shadowColor: shadow,
       elevation: 0,
-      modalElevation: 0,
+      modalElevation: popupElevation,
       dragHandleColor: outline,
     ),
     popupMenuTheme: PopupMenuThemeData(
       color: surface,
       surfaceTintColor: Colors.transparent,
       shadowColor: shadow,
-      elevation: 0,
+      elevation: popupElevation,
       shape: surfaceShape,
     ),
     menuTheme: MenuThemeData(style: menuStyle),
@@ -444,7 +451,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
       backgroundColor: surface,
       surfaceTintColor: Colors.transparent,
       shadowColor: shadow,
-      elevation: 0,
+      elevation: popupElevation,
       headerBackgroundColor: surface,
       headerForegroundColor: onSurface,
       dividerColor: outlineVariant,
@@ -456,7 +463,7 @@ ThemeData _themeData(api.ThemeTokens tokens, Brightness requested, Color? backdr
     ),
     timePickerTheme: TimePickerThemeData(
       backgroundColor: surface,
-      elevation: 0,
+      elevation: popupElevation,
       shape: surfaceShape,
       cancelButtonStyle: plain,
       confirmButtonStyle: plain,
