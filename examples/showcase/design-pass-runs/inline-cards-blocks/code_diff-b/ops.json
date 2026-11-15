@@ -1,0 +1,17 @@
+{"ops": [
+{"op":"patch","id":"column1","patch":{"layout":{"padding":[16,16,16,16]},"props":{"spacing":12,"crossAxisAlignment":"stretch"},"decoration":{"strokes":[{"color":"line"}],"strokeWidth":1.2,"effects":null},"bind":{"decoration.radius":"${theme.radii.card}","decoration.effects":"${theme.shadows.card}"}}},
+{"op":"set","id":"headRow","parent":"column1","index":0,"node":{"type":"row","children":[],"props":{"crossAxisAlignment":"center","spacing":12},"layout":{"width":{"fill":0},"height":{"hug":0},"padding":[0,2,0,4]}}},
+{"op":"set","id":"headMark","parent":"headRow","node":{"type":"row","children":[],"props":{"mainAxisAlignment":"center","crossAxisAlignment":"center"},"layout":{"width":40,"height":40},"decoration":{"fills":[{"color":"accentTint"}],"radius":12},"bind":{"decoration.radius":"${theme.radii.control}"}}},
+{"op":"set","id":"headMarkIcon","parent":"headMark","node":{"type":"icon","props":{"icon":"difference_outlined","size":20,"color":"accent"},"layout":{"width":20,"height":20}}},
+{"op":"set","id":"headText","parent":"headRow","node":{"type":"column","children":[],"props":{"crossAxisAlignment":"start","spacing":2},"layout":{"width":{"fill":0},"height":{"hug":0}}}},
+{"op":"move","id":"text1","parent":"headText"},
+{"op":"move","id":"text2","parent":"headText"},
+{"op":"patch","id":"text1","patch":{"props":{"style":{"from":"cardTitle"},"maxLines":2}}},
+{"op":"patch","id":"text2","patch":{"props":{"style":{"from":"meta","color":"inkSoft"}}}},
+{"op":"set","id":"hunk1","parent":"column1","index":1,"node":{"type":"DiffHunk","props":{"title":"Hunk 1 · @@ -4,2 +4,2 @@","detail":"","start":4,"lines":["-port: 8080","+port: 9090"," host: localhost"]},"layout":{"width":{"fill":0},"height":{"hug":0}},"bind":{"props.value":"${d1}","props.lines":"${= [\"-port: 8080\",\"+port: 9090\",\" host: localhost\"]}"},"actions":[{"trigger":{"type":"event","event":"onChanged"},"actions":[{"type":"setVariable","variable":"d1","value":"${result}"}]}]}},
+{"op":"set","id":"hunk2","parent":"column1","index":2,"node":{"type":"DiffHunk","props":{"title":"Hunk 2 · @@ -12,3 +12,2 @@","detail":"","start":12,"lines":[" logging:","-  level: debug","-  file: /tmp/app.log","+  level: warn"]},"layout":{"width":{"fill":0},"height":{"hug":0}},"bind":{"props.value":"${d2}"},"actions":[{"trigger":{"type":"event","event":"onChanged"},"actions":[{"type":"setVariable","variable":"d2","value":"${result}"}]}]}},
+{"op":"set","id":"hunk3","parent":"column1","index":3,"node":{"type":"DiffHunk","props":{"title":"Hunk 3 · @@ -20,1 +19,3 @@","detail":"","start":19,"lines":[" cache:","+  enabled: true","+  ttl: 300"]},"layout":{"width":{"fill":0},"height":{"hug":0}},"bind":{"props.value":"${d3}"},"actions":[{"trigger":{"type":"event","event":"onChanged"},"actions":[{"type":"setVariable","variable":"d3","value":"${result}"}]}]}},
+{"op":"remove","ids":["column2","column3","column4"]},
+{"op":"set","id":"applyButton","parent":"column1","node":{"type":"ActionButton","props":{"label":"Apply changes","tone":"primary","icon":"check_rounded"},"layout":{"width":{"fill":0},"height":46},"bind":{"props.enabled":"${= d1!=\"\"&&d2!=\"\"&&d3!=\"\"}"},"actions":[{"trigger":{"type":"event","event":"onPressed"},"actions":[{"type":"componentEvent","event":"apply"},{"type":"showToast","message":"Changes applied"}]}]}},
+{"op":"remove","ids":["filledButton1"]}
+]}

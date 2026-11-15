@@ -1,0 +1,10 @@
+{"ops": [
+ {"op":"set","id":"chat","parent":"column1","index":0,"node":{"type":"ChatCard","layout":{"width":{"fill":0},"height":{"hug":0}},"props":{"title":"London to Lisbon","subtitle":"This Friday · 1 adult · Direct flights","icon":"flight_takeoff_rounded","tone":"accent"},"children":[]}},
+ {"op":"move","id":"listView1","parent":"chat"},
+ {"op":"set","id":"flightOpt","parent":"listView1Item","node":{"type":"FlightOption","layout":{"width":{"fill":0},"height":{"hug":0}},"props":{"stops":"Direct"},"bind":{"props.name":"${item.airline}","props.depart":"${item.dep}","props.arrive":"${item.arr}","props.duration":"${item.dur}","props.price":"£${item.price}","props.tag":"${item.tag}","props.selected":"${= sel==item.id}"},"actions":[{"trigger":{"type":"event","event":"onPressed"},"actions":[{"type":"setVariable","variable":"sel","value":"${= item.id}"}]}]}},
+ {"op":"set","id":"totalBar","parent":"chat","node":{"type":"TotalBar","layout":{"width":{"fill":0},"height":{"hug":0}},"props":{"label":"Total","cta":"Confirm flight","icon":"arrow_forward_rounded","enabled":true},"bind":{"props.amount":"£${= flights[sel].price}"},"actions":[{"trigger":{"type":"event","event":"onPressed"},"actions":[{"type":"componentEvent","event":"confirm","value":"${= flights[sel].id}"},{"type":"showToast","message":"Flight confirmed"}]}]}},
+ {"op":"remove","ids":["column3","column2","divider1","row6","filledButton1"]},
+ {"op":"patch","id":"column1","patch":{"layout":{"padding":0},"props":{"spacing":0,"crossAxisAlignment":"stretch"},"decoration":null}},
+ {"op":"patch","id":"listView1","patch":{"props":{"spacing":0}}},
+ {"op":"patch","id":"listView1Item","patch":{"props":{"crossAxisAlignment":"stretch"}}}
+]}

@@ -253,6 +253,29 @@ Card
     });
   });
 
+    test('a text a block shows in pieces is carried; a piece left out is named', () {
+      api.LayoutDocument doc(Map<String, Object?> nodes) => api.LayoutDocument.fromJson({
+            'schema': 3,
+            'roots': ['c'],
+            'nodes': {
+              'c': {'type': 'canvas', 'children': nodes.keys.toList()},
+              ...nodes,
+            },
+          });
+      final before = doc({
+        'times': {'type': 'text', 'props': {'text': '07:15 → 09:50'}},
+        'air': {'type': 'text', 'props': {'text': r'${f.air} · Direct'}},
+      });
+      Map<String, Object?> option(Map<String, Object?> props) => {
+            'opt': {'type': 'FlightOption', 'props': props},
+          };
+      final split = doc(option({'depart': '07:15', 'arrive': '09:50', 'name': r'${f.air}', 'stops': 'Direct'}));
+      expect(DesignPass.changedMeaning(before, split, blocks: const {'FlightOption'}), isEmpty);
+      final short = doc(option({'depart': '07:15', 'name': r'${f.air}', 'stops': 'Direct'}));
+      expect(DesignPass.changedMeaning(before, short, blocks: const {'FlightOption'}).single,
+          allOf(contains('"times" (text) is gone and no block carries'), contains('07:15 → 09:50')));
+    });
+
   test('the operations are read from a list, a map, a fenced answer or a bare one', () {
     expect(DesignPass.opsOf(_good), hasLength(2));
     expect(DesignPass.opsOf({'ops': _good}), hasLength(2));

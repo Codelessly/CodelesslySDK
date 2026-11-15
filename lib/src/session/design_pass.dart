@@ -263,8 +263,9 @@ Two or three sentences on what you change and why. Then one ```json fence holdin
   ///
   /// With [blocks] (component types the pass may place), a node that is gone
   /// is accepted when new block nodes carry what it said and did: each of
-  /// its texts and values as a block's prop, each of its data bindings as a
-  /// block's binding, each of its reactions' actions under a block's event.
+  /// its texts and values as a block's prop (a text may be carried in
+  /// pieces, by several props), each of its data bindings as a block's
+  /// binding, each of its reactions' actions under a block's event.
   static List<String> changedMeaning(LayoutDocument before, LayoutDocument after, {Set<String> blocks = const {}}) {
     final out = <String>[];
     final was = before.toJson(), now = after.toJson();
@@ -288,6 +289,22 @@ Two or three sentences on what you change and why. Then one ```json fence holdin
         done.add(jsonEncode(r['actions']));
       }
     }
+    // A value is carried whole, or, for a text, in pieces: a block may draw
+    // "07:15" and "09:50" where the node said "07:15 → 09:50". Then every
+    // value it read (\${…}) and every word with a letter or a digit must be
+    // in what the blocks carry.
+    final all = [...said, ...bound].join('\n');
+    final piece = RegExp(r'\$\{[^}]*\}|[^\s]+');
+    bool carried(Object v) {
+      if (said.contains(v is String ? v : jsonEncode(v))) return true;
+      if (v is! String) return false;
+      final pieces = [
+        for (final m in piece.allMatches(v))
+          if (m[0]!.contains(RegExp(r'[\p{L}\p{N}]', unicode: true))) m[0]!,
+      ];
+      return pieces.isNotEmpty && pieces.every(all.contains);
+    }
+
     for (final e in nodesWas.entries) {
       final a = readMap(e.value) ?? const {}, b = readMap(nodesNow[e.key]);
       final type = a['type'];
@@ -297,7 +314,7 @@ Two or three sentences on what you change and why. Then one ```json fence holdin
         final lost = <String>[
           for (final key in _saying)
             // A bound prop's written value is a placeholder: its binding is what must be carried.
-            if (pa[key] case final Object v when readMap(a['bind'])?['props.$key'] == null && !said.contains(v is String ? v : jsonEncode(v)))
+            if (pa[key] case final Object v when readMap(a['bind'])?['props.$key'] == null && !carried(v))
               'its "$key" (${v is String ? '"$v"' : jsonEncode(v)})',
           for (final b in _dataBinds(a['bind']).entries)
             if (!bound.contains('${b.value}')) 'its binding of ${b.key} (${b.value})',
