@@ -167,7 +167,7 @@ Options:
   --label <text>          Append -<text> to the PNG names (state screenshots);
                           diagnostics go to diagnostics-<text>.json.
   --validate-only         Only validate; render nothing.
-  --dump-layout           Also write <png>.layout.json: every node's box (x, y, w, h).
+  --dump-layout           Also write <png>.layout.json: every node's box (x, y, w, h) and the text it shows.
   --component <Type>      Render one component of the site alone: once per preview
                           (at its size), or with --props at each size.
   --components-all        Render every component of the site alone, each once per

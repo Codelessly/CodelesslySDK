@@ -1,0 +1,12 @@
+[
+ {"id": "poll_lunch", "steps": [{"choose": 0}, {"press": 0, "optional": true}], "expect": ["39\\s*%", "22\\s*%", "26\\s*%", "13\\s*%", "\\b23\\b", "You\\b|[Yy]our (vote|choice|pick)"]},
+ {"id": "poll_book", "steps": [{"choose": 0}, {"press": 0, "optional": true}], "expect": ["45\\s*%", "31\\s*%", "24\\s*%", "\\b29\\b", "You\\b|[Yy]our (vote|choice|pick)"]},
+ {"id": "poll_demo", "steps": [{"choose": 0}, {"press": 0, "optional": true}], "expect": ["29\\s*%", "41\\s*%", "\\b17\\b", "You\\b|[Yy]our (vote|choice|pick)|You (voted|chose)"]},
+ {"id": "poll_film", "steps": [{"choose": 0}, {"press": 0, "optional": true}], "expect": ["46\\s*%", "31\\s*%", "23\\s*%", "\\b26\\b"]},
+ {"id": "poll_workshop", "steps": [{"choose": 0}, {"press": 0, "optional": true}], "expect": ["21\\s*%", "53\\s*%", "26\\s*%", "\\b19\\b", "You\\b|[Yy]our (vote|choice|pick)"]},
+ {"id": "player_m83", "steps": [{"block": "NowPlaying", "tap": "play"}], "expect": ["Midnight City", "NOW PLAYING|[Pp]laying"], "forbid": ["^Paused$", "^PAUSED$"]},
+ {"id": "player_jvke", "steps": [{"block": "NowPlaying", "tap": "play"}], "expect": ["NOW PLAYING|[Pp]laying"], "forbid": ["^Paused$", "^PAUSED$"]},
+ {"id": "player_billie", "steps": [{"block": "NowPlaying", "tap": "play"}], "expect": ["Ocean Eyes", "NOW PLAYING|[Pp]laying", "0:4[2-5]"], "forbid": ["^Paused$", "^PAUSED$"]},
+ {"id": "player_mgmt", "steps": [{"block": "NowPlaying", "tap": "play"}], "expect": ["NOW PLAYING|[Pp]laying"], "forbid": ["^Paused$", "^PAUSED$"]},
+ {"id": "player_fleetwood", "steps": [{"block": "NowPlaying", "tap": "play"}], "expect": ["Dreams", "NOW PLAYING|[Pp]laying", "3:0[2-5]"], "forbid": ["^Paused$", "^PAUSED$"]}
+]
