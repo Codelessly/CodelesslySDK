@@ -1,0 +1,8 @@
+ERROR   unknown_field [doc] /nodes/email/props/decoration/prefixIconColor
+        InputDecoration has no "prefixIconColor". It takes: icon, labelText, labelStyle, floatingLabelStyle, helperText, helperStyle, helperMaxLines, hintText, hintStyle, hintMaxLines, errorText, errorStyle, errorMaxLines, floatingLabelBehavior, isCollapsed, isDense, contentPadding, prefixIcon, prefixIconConstraints, prefixText, prefixStyle, suffixIcon, suffixIconConstraints, suffixText, suffixStyle, counterText, counterStyle, filled, fillColor, focusColor, hoverColor, errorBorder, focusedBorder, focusedErrorBorder, disabledBorder, enabledBorder, border, enabled, semanticCounterText, alignLabelWithHint, ... (45 in all). Did you mean "prefixIcon"?
+ERROR   unknown_field [doc] /nodes/email/props/decoration/border/borderType
+        InputBorder has no "borderType". It takes: type, borderSide, borderRadius, gapPadding. Did you mean "borderSide"?
+ERROR   unknown_field [doc] /nodes/email/props/decoration/enabledBorder/borderType
+        InputBorder has no "borderType". It takes: type, borderSide, borderRadius, gapPadding. Did you mean "borderSide"?
+ERROR   unknown_field [doc] /nodes/email/props/decoration/focusedBorder/borderType
+        InputBorder has no "borderType". It takes: type, borderSide, borderRadius, gapPadding. Did you mean "borderSide"?

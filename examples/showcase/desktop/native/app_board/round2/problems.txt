@@ -1,0 +1,2 @@
+At 768 wide: WARNING text_clipped [doc screen board 768x800] node doneText
+        Text "doneText" ("4 of 14 done") needs 32 px of height at 52 wide but its box is 28: give it {"hug": n} height or more room.

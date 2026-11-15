@@ -1,0 +1,457 @@
+The page uses a 1200 px grid, centred inside full-width bands that share one 40 px gutter (24 px at tablet widths). The product area is split 7:5: a large drawn picture with a strip of thumbnails on the left, and the buying column on the right with the name, price, finish choice, quantity, buttons and delivery notes. Below it come a white tab card, a four-across related-products grid and a dark footer. At 768 the split, the tab panes and the footer stack vertically, the related grid drops to two columns and the header's nav links hide. The header is sticky.
+
+What works:
+- The thumbnails and the arrows (also the ← and → keys) switch the main picture.
+- The finish chips recolor the drawn lamp.
+- The quantity stepper changes the amount on the "Add to cart" button, and adding a lamp or a related product updates the cart badge.
+- "318 reviews" opens the Reviews tab and scrolls to it.
+- "Buy now" only adds to the cart and shows a toast, because the store has no checkout page.
+
+```json
+{
+  "schema": 3,
+  "roots": ["product"],
+  "nodes": {
+    "product": {
+      "type": "canvas", "name": "Arc One",
+      "slots": {"body": "page"},
+      "layout": {"width": 1280, "height": 900},
+      "decoration": {"fills": [{"color": "#FFF6F7F9"}]},
+      "actions": [
+        {"trigger": {"type": "keyDown", "key": "ArrowRight"}, "actions": [{"type": "setVariable", "variable": "view", "value": "${= (view + 1) % 4}"}]},
+        {"trigger": {"type": "keyDown", "key": "ArrowLeft"}, "actions": [{"type": "setVariable", "variable": "view", "value": "${= (view + 3) % 4}"}]}
+      ]
+    },
+    "page": {
+      "type": "column",
+      "children": ["announce", "header", "crumbBand", "productBand", "tabsBand", "relatedBand", "footer"],
+      "layout": {"width": {"fill": 1280}, "height": {"fill": 900}},
+      "props": {"scrollable": true}
+    },
+
+    "announce": {
+      "type": "row", "children": ["announceText"],
+      "layout": {"width": {"fill": 1280}, "height": 36},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#FF0F172A"}]}
+    },
+    "announceText": {
+      "type": "text", "layout": {"width": {"hug": 400}, "height": {"hug": 18}},
+      "props": {"text": "Free delivery on orders over $100  ·  30-day free returns  ·  5-year warranty", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 500, "color": "#FFCBD5E1"}}
+    },
+
+    "header": {
+      "type": "column", "children": ["headerRail"],
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 72}, "padding": [40, 0, 40, 0]},
+      "decoration": {"fills": [{"color": "#FFFFFFFF"}], "strokes": [{"color": "#FFE5E7EB"}], "strokeSides": "bottom"},
+      "sticky": {"offset": 0},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [24, 0, 24, 0]}}}]
+    },
+    "headerRail": {
+      "type": "row", "children": ["logo", "nav", "hdrSpacer", "search", "iconFav", "iconUser", "cart"],
+      "layout": {"width": {"fill": 1200}, "height": 72, "constraints": {"maxWidth": 1200}},
+      "props": {"spacing": 8}
+    },
+    "logo": {"type": "row", "children": ["logoMark", "logoText"], "layout": {"width": {"hug": 140}, "height": {"hug": 28}}, "props": {"spacing": 10}},
+    "logoMark": {
+      "type": "box", "layout": {"width": 28, "height": 28},
+      "decoration": {"shape": "circle", "fills": [{"type": "linear", "begin": "topLeft", "end": "bottomRight", "stops": [{"position": 0, "color": "#FFFBBF24"}, {"position": 1, "color": "#FF2563EB"}]}]}
+    },
+    "logoText": {"type": "text", "layout": {"width": {"hug": 110}, "height": {"hug": 26}}, "props": {"text": "Nord & Co", "style": {"fontFamily": "Inter Display", "fontSize": 21, "fontWeight": 700, "letterSpacing": -0.4, "color": "#FF0F172A"}}},
+    "nav": {
+      "type": "row", "children": ["nav1", "nav2", "nav3", "nav4"],
+      "layout": {"width": {"hug": 360}, "height": {"hug": 20}, "margin": [40, 0, 0, 0]},
+      "props": {"spacing": 28},
+      "media": [{"maxWidth": 1023, "patch": {"visible": false}}]
+    },
+    "nav1": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}}, "props": {"text": "Lighting", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 600, "color": "#FF0F172A"}}},
+    "nav2": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}}, "props": {"text": "Furniture", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 500, "color": "#FF475569"}}},
+    "nav3": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}}, "props": {"text": "Decor", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 500, "color": "#FF475569"}}},
+    "nav4": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}}, "props": {"text": "Journal", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 500, "color": "#FF475569"}}},
+    "hdrSpacer": {"type": "spacer"},
+    "search": {
+      "type": "textField",
+      "layout": {"width": 300, "height": {"hug": 44}, "margin": [0, 0, 8, 0]},
+      "props": {"decoration": {"hintText": "Search lamps, chairs, decor", "prefixIcon": {"icon": "search", "size": 18}}},
+      "bind": {"props.initialValue": "${query}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "query", "value": "${result}"}]}],
+      "media": [{"maxWidth": 900, "patch": {"layout": {"width": 220}}}]
+    },
+    "iconFav": {"type": "iconButton", "layout": {"width": 40, "height": 40}, "props": {"icon": "favorite_border", "style": {"foregroundColor": "#FF475569"}}, "tooltip": "Wishlist"},
+    "iconUser": {"type": "iconButton", "layout": {"width": 40, "height": 40}, "props": {"icon": "person_outline", "style": {"foregroundColor": "#FF475569"}}, "tooltip": "Account"},
+    "cart": {
+      "type": "badge", "slots": {"child": "cartIcon"},
+      "layout": {"width": 40, "height": 40},
+      "props": {"count": 2, "backgroundColor": "#FF2563EB", "textColor": "#FFFFFFFF", "alignment": [1, -1], "offset": [2, -2]},
+      "bind": {"props.count": "${cartCount}"},
+      "tooltip": "Cart"
+    },
+    "cartIcon": {"type": "icon", "layout": {"width": 40, "height": 40}, "props": {"icon": "shopping_bag_outlined", "size": 24, "color": "#FF0F172A"}},
+
+    "crumbBand": {
+      "type": "column", "children": ["crumbRail"],
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 48}, "padding": [40, 28, 40, 0]},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [24, 24, 24, 0]}}}]
+    },
+    "crumbRail": {
+      "type": "row", "children": ["c1", "cs1", "c2", "cs2", "c3", "cs3", "c4"],
+      "layout": {"width": {"fill": 1200}, "height": {"hug": 20}, "constraints": {"maxWidth": 1200}},
+      "props": {"spacing": 6}
+    },
+    "c1": {"type": "text", "layout": {"width": {"hug": 40}, "height": {"hug": 18}}, "props": {"text": "Home", "style": {"fontFamily": "Inter", "fontSize": 13, "color": "#FF64748B"}}},
+    "cs1": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "chevron_right", "size": 16, "color": "#FF94A3B8"}},
+    "c2": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 18}}, "props": {"text": "Lighting", "style": {"fontFamily": "Inter", "fontSize": 13, "color": "#FF64748B"}}},
+    "cs2": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "chevron_right", "size": 16, "color": "#FF94A3B8"}},
+    "c3": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 18}}, "props": {"text": "Desk lamps", "style": {"fontFamily": "Inter", "fontSize": 13, "color": "#FF64748B"}}},
+    "cs3": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "chevron_right", "size": 16, "color": "#FF94A3B8"}},
+    "c4": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 18}}, "props": {"text": "Arc One", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600, "color": "#FF0F172A"}}},
+
+    "productBand": {
+      "type": "column", "children": ["productRail"],
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 760}, "padding": [40, 24, 40, 64]},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [24, 20, 24, 48]}}}]
+    },
+    "productRail": {
+      "type": "flex", "children": ["gallery", "info"],
+      "layout": {"width": {"fill": 1200}, "height": {"hug": 760}, "constraints": {"maxWidth": 1200}},
+      "props": {"direction": "horizontal", "spacing": 56, "crossAxisAlignment": "start"},
+      "media": [{"maxWidth": 900, "patch": {"props": {"direction": "vertical", "spacing": 32}}}]
+    },
+    "gallery": {
+      "type": "column", "children": ["hero", "thumbs"],
+      "layout": {"width": {"fill": 660}, "height": {"hug": 700}, "flex": 7},
+      "props": {"spacing": 16, "crossAxisAlignment": "stretch"}
+    },
+    "hero": {
+      "type": "stack", "children": ["heroArt", "heroTag", "heroFav", "heroCaption", "heroPrev", "heroNext"],
+      "layout": {"width": {"fill": 660}, "height": 560},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"height": 460}}}]
+    },
+    "heroArt": {
+      "type": "box",
+      "layout": {"width": {"fill": 660}, "height": {"fill": 560}},
+      "decoration": {
+        "radius": 24, "clip": "antiAlias",
+        "strokes": [{"color": "#FFE5E7EB"}],
+        "fills": [
+          {"color": "#FFF3EEE6"},
+          {"type": "radial", "center": [0.3, -0.4], "radius": 0.9, "stops": [{"position": 0, "color": "#66FFFFFF"}, {"position": 1, "color": "#00FFFFFF"}]},
+          {"type": "linear", "begin": "topCenter", "end": "bottomCenter", "stops": [{"position": 0.6, "color": "#00000000"}, {"position": 1, "color": "#0F000000"}]}
+        ]
+      },
+      "bind": {"decoration.fills[0].color": "${= views[view].a}"},
+      "customPaint": {
+        "viewBox": [400, 400], "fit": "contain",
+        "painter": [
+          {"op": "path", "d": "M0 346 L400 346 L400 400 L0 400 Z", "paint": "${= view == 3 ? '#FFC9AE8C' : '#00000000'}"},
+          {"op": "circle", "c": [70, 270], "radius": 28, "paint": "${= view == 3 ? '#FF6F9277' : '#00000000'}"},
+          {"op": "path", "d": "M50 296 L90 296 L84 346 L56 346 Z", "paint": "${= view == 3 ? '#FFE7DCCB' : '#00000000'}"},
+          {"op": "circle", "c": [262, 196], "radius": 78, "paint": "#33FFE7A8"},
+          {"op": "circle", "c": [262, 196], "radius": 46, "paint": "#33FFE7A8"},
+          {"op": "path", "d": "M126 332 Q200 314 274 332 L274 345 Q200 360 126 345 Z", "paint": "${lampColor}"},
+          {"op": "line", "p1": [200, 330], "p2": [160, 200], "paint": {"color": "${lampColor}", "style": "stroke", "strokeWidth": 9}},
+          {"op": "line", "p1": [160, 200], "p2": [238, 118], "paint": {"color": "${lampColor}", "style": "stroke", "strokeWidth": 9}},
+          {"op": "circle", "c": [160, 200], "radius": 11, "paint": "${lampColor}"},
+          {"op": "circle", "c": [200, 330], "radius": 9, "paint": "${lampColor}"},
+          {"op": "path", "d": "M224 96 Q268 76 320 120 L288 170 Q256 140 204 134 Z", "paint": "${lampColor}"},
+          {"op": "circle", "c": [250, 150], "radius": 9, "paint": "#FFFFF4D6"},
+          {"op": "circle", "c": [160, 200], "radius": 26, "paint": {"color": "${= view == 2 ? '#FF2563EB' : '#002563EB'}", "style": "stroke", "strokeWidth": 2}}
+        ]
+      }
+    },
+    "heroTag": {
+      "type": "row", "children": ["heroTagText"],
+      "layout": {"width": {"hug": 140}, "height": {"hug": 28}, "padding": [12, 6, 12, 6], "x": {"start": 20}, "y": {"start": 20}},
+      "decoration": {"fills": [{"color": "#FFFFFFFF"}], "radius": 999}
+    },
+    "heroTagText": {"type": "text", "layout": {"width": {"hug": 120}, "height": {"hug": 16}}, "props": {"text": "New · 2025 edition", "style": {"fontFamily": "Inter", "fontSize": 12, "fontWeight": 600, "color": "#FF0F172A"}}},
+    "heroFav": {
+      "type": "iconButton",
+      "layout": {"width": 44, "height": 44, "x": {"end": 16}, "y": {"start": 16}},
+      "props": {"icon": "favorite_border", "style": {"backgroundColor": "#FFFFFFFF", "foregroundColor": "#FF0F172A"}},
+      "bind": {"props.icon": "${= fav ? 'favorite' : 'favorite_border'}", "props.style.foregroundColor": "${= fav ? '#FFDC2626' : '#FF0F172A'}"},
+      "tooltip": "Save to wishlist",
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "fav", "op": "toggle"}]}]
+    },
+    "heroCaption": {
+      "type": "row", "children": ["heroCaptionText"],
+      "layout": {"width": {"hug": 140}, "height": {"hug": 32}, "padding": [14, 8, 14, 8], "x": {"start": 20}, "y": {"end": 20}},
+      "decoration": {"fills": [{"color": "#E6FFFFFF"}], "radius": 999}
+    },
+    "heroCaptionText": {
+      "type": "text", "layout": {"width": {"hug": 120}, "height": {"hug": 16}},
+      "props": {"text": "${= views[view].label + '  ·  ' + (view + 1) + ' / 4'}", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 500, "color": "#FF0F172A"}}
+    },
+    "heroPrev": {
+      "type": "iconButton",
+      "layout": {"width": 44, "height": 44, "x": {"end": 72}, "y": {"end": 16}},
+      "props": {"icon": "chevron_left", "style": {"backgroundColor": "#FFFFFFFF", "foregroundColor": "#FF0F172A"}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "view", "value": "${= (view + 3) % 4}"}]}]
+    },
+    "heroNext": {
+      "type": "iconButton",
+      "layout": {"width": 44, "height": 44, "x": {"end": 20}, "y": {"end": 16}},
+      "props": {"icon": "chevron_right", "style": {"backgroundColor": "#FFFFFFFF", "foregroundColor": "#FF0F172A"}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "view", "value": "${= (view + 1) % 4}"}]}]
+    },
+    "thumbs": {
+      "type": "gridView", "children": ["thumb"],
+      "layout": {"width": {"fill": 660}, "height": {"hug": 120}},
+      "props": {"crossAxisCount": 4, "mainAxisExtent": 120, "crossAxisSpacing": 12, "physics": "never"},
+      "bind": {"data": "${views}"},
+      "media": [{"maxWidth": 900, "patch": {"props": {"mainAxisExtent": 100}}}]
+    },
+    "thumb": {
+      "type": "box",
+      "layout": {"width": {"fill": 150}, "height": {"fill": 120}},
+      "decoration": {"radius": 16, "clip": "antiAlias", "fills": [{"color": "#FFF3EEE6"}], "strokes": [{"color": "#FFE5E7EB"}], "strokeWidth": 2},
+      "bind": {
+        "decoration.fills[0].color": "${item.a}",
+        "decoration.strokes[0].color": "${= index == view ? '#FF2563EB' : '#FFE5E7EB'}"
+      },
+      "tooltip": "${item.label}",
+      "customPaint": {
+        "viewBox": [400, 400], "fit": "contain",
+        "painter": [
+          {"op": "path", "d": "M0 346 L400 346 L400 400 L0 400 Z", "paint": "${= index == 3 ? '#FFC9AE8C' : '#00000000'}"},
+          {"op": "circle", "c": [262, 196], "radius": 70, "paint": "#33FFE7A8"},
+          {"op": "path", "d": "M126 332 Q200 314 274 332 L274 345 Q200 360 126 345 Z", "paint": "${lampColor}"},
+          {"op": "line", "p1": [200, 330], "p2": [160, 200], "paint": {"color": "${lampColor}", "style": "stroke", "strokeWidth": 12}},
+          {"op": "line", "p1": [160, 200], "p2": [238, 118], "paint": {"color": "${lampColor}", "style": "stroke", "strokeWidth": 12}},
+          {"op": "circle", "c": [160, 200], "radius": 13, "paint": "${lampColor}"},
+          {"op": "path", "d": "M224 96 Q268 76 320 120 L288 170 Q256 140 204 134 Z", "paint": "${lampColor}"}
+        ]
+      },
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "view", "value": "${index}"}]}]
+    },
+
+    "info": {
+      "type": "column",
+      "children": ["eyebrow", "titleBlock", "ratingRow", "priceBlock", "rule1", "finishLabel", "finishList", "qtyRow", "ctaRow", "notes"],
+      "layout": {"width": {"fill": 484}, "height": {"hug": 760}, "flex": 5},
+      "props": {"spacing": 20, "crossAxisAlignment": "start"}
+    },
+    "eyebrow": {"type": "text", "layout": {"width": {"fill": 484}, "height": {"hug": 16}}, "props": {"text": "DESK LIGHTING", "style": {"fontFamily": "Inter", "fontSize": 12, "fontWeight": 600, "letterSpacing": 1.4, "color": "#FF64748B"}}},
+    "titleBlock": {"type": "column", "children": ["title", "subtitle"], "layout": {"width": {"fill": 484}, "height": {"hug": 90}, "margin": [0, -8, 0, 0]}, "props": {"spacing": 10, "crossAxisAlignment": "start"}},
+    "title": {"type": "text", "layout": {"width": {"fill": 484}, "height": {"hug": 46}}, "props": {"text": "Arc One Desk Lamp", "style": {"fontFamily": "Inter Display", "fontSize": 42, "fontWeight": 700, "letterSpacing": -0.84, "height": 1.1, "color": "#FF0F172A"}}},
+    "subtitle": {"type": "text", "layout": {"width": {"fill": 484}, "height": {"hug": 24}}, "props": {"text": "A dimmable LED task lamp on a counter-balanced, hand-finished arm.", "style": {"fontFamily": "Inter", "fontSize": 16, "height": 1.55, "color": "#FF475569"}}},
+    "ratingRow": {"type": "row", "children": ["stars", "ratingNum", "ratingDot", "ratingLink"], "layout": {"width": {"hug": 300}, "height": {"hug": 20}}, "props": {"spacing": 8}},
+    "stars": {
+      "type": "listView", "children": ["star"],
+      "layout": {"width": 100, "height": 18},
+      "props": {"scrollDirection": "horizontal", "scrollable": false, "spacing": 2},
+      "bind": {"data": "${= range(5)}"}
+    },
+    "star": {"type": "icon", "layout": {"width": 18, "height": {"fill": 18}}, "props": {"icon": "star_rounded", "size": 18, "color": "#FFF59E0B"}, "bind": {"props.icon": "${= index < 4 ? 'star_rounded' : 'star_half_rounded'}"}},
+    "ratingNum": {"type": "text", "layout": {"width": {"hug": 24}, "height": {"hug": 20}}, "props": {"text": "4.7", "style": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600, "color": "#FF0F172A"}}},
+    "ratingDot": {"type": "text", "layout": {"width": {"hug": 6}, "height": {"hug": 20}}, "props": {"text": "·", "style": {"fontFamily": "Inter", "fontSize": 14, "color": "#FF94A3B8"}}},
+    "ratingLink": {
+      "type": "text", "layout": {"width": {"hug": 90}, "height": {"hug": 20}},
+      "props": {"text": "318 reviews", "style": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 500, "color": "#FF2563EB", "decoration": "underline"}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "tab", "value": "reviews"},
+        {"type": "scrollTo", "node": "tabsBand", "offset": 88, "durationMs": 500}
+      ]}]
+    },
+    "priceBlock": {"type": "column", "children": ["priceRow", "priceNote"], "layout": {"width": {"fill": 484}, "height": {"hug": 64}}, "props": {"spacing": 4, "crossAxisAlignment": "start"}},
+    "priceRow": {"type": "row", "children": ["price", "was", "save"], "layout": {"width": {"hug": 300}, "height": {"hug": 44}}, "props": {"spacing": 12}},
+    "price": {"type": "text", "layout": {"width": {"hug": 90}, "height": {"hug": 44}}, "props": {"text": "$149", "style": {"fontFamily": "Inter Display", "fontSize": 36, "fontWeight": 700, "letterSpacing": -0.72, "color": "#FF0F172A"}}},
+    "was": {"type": "text", "layout": {"width": {"hug": 50}, "height": {"hug": 24}}, "props": {"text": "$189", "style": {"fontFamily": "Inter", "fontSize": 18, "color": "#FF94A3B8", "decoration": "lineThrough"}}},
+    "save": {"type": "row", "children": ["saveText"], "layout": {"width": {"hug": 80}, "height": {"hug": 24}, "padding": [10, 4, 10, 4]}, "decoration": {"fills": [{"color": "#FFDCFCE7"}], "radius": 999}},
+    "saveText": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 16}}, "props": {"text": "Save $40", "style": {"fontFamily": "Inter", "fontSize": 12, "fontWeight": 600, "color": "#FF15803D"}}},
+    "priceNote": {"type": "text", "layout": {"width": {"fill": 484}, "height": {"hug": 18}}, "props": {"text": "Incl. VAT · or 4 interest-free payments of $37.25", "style": {"fontFamily": "Inter", "fontSize": 13, "color": "#FF64748B"}}},
+    "rule1": {"type": "box", "layout": {"width": {"fill": 484}, "height": 1}, "decoration": {"fills": [{"color": "#FFE5E7EB"}]}},
+    "finishLabel": {"type": "text", "layout": {"width": {"fill": 484}, "height": {"hug": 20}}, "props": {"text": "Finish  ·  ${finish}", "style": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600, "color": "#FF0F172A"}}},
+    "finishList": {
+      "type": "listView", "children": ["finishItem"],
+      "layout": {"width": {"fill": 484}, "height": 44, "margin": [0, -8, 0, 0]},
+      "props": {"scrollDirection": "horizontal", "scrollable": false, "spacing": 10},
+      "bind": {"data": "${finishes}"}
+    },
+    "finishItem": {
+      "type": "row", "children": ["finishSwatch", "finishName"],
+      "layout": {"width": {"hug": 116}, "height": {"fill": 44}, "padding": [12, 0, 16, 0]},
+      "props": {"spacing": 10},
+      "decoration": {"radius": 12, "fills": [{"color": "#FFFFFFFF"}], "strokes": [{"color": "#FFE5E7EB"}], "strokeWidth": 1.5},
+      "bind": {
+        "decoration.strokes[0].color": "${= finish == item.name ? '#FF2563EB' : '#FFE5E7EB'}",
+        "decoration.fills[0].color": "${= finish == item.name ? '#FFEFF6FF' : '#FFFFFFFF'}"
+      },
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "finish", "value": "${item.name}"}]}]
+    },
+    "finishSwatch": {"type": "box", "layout": {"width": 20, "height": 20}, "decoration": {"shape": "circle", "fills": [{"color": "#FFB8893B"}], "strokes": [{"color": "#1F000000"}]}, "bind": {"decoration.fills[0].color": "${item.color}"}},
+    "finishName": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 20}}, "props": {"text": "${item.name}", "style": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 500, "color": "#FF0F172A"}}},
+    "qtyRow": {"type": "row", "children": ["stepper", "stock"], "layout": {"width": {"fill": 484}, "height": {"hug": 48}}, "props": {"spacing": 16, "wrap": true, "runSpacing": 12}},
+    "stepper": {
+      "type": "row", "children": ["minus", "qtyText", "plus"],
+      "layout": {"width": {"hug": 128}, "height": 48, "padding": [4, 4, 4, 4]},
+      "decoration": {"radius": 12, "fills": [{"color": "#FFFFFFFF"}], "strokes": [{"color": "#FFE5E7EB"}]}
+    },
+    "minus": {
+      "type": "iconButton", "layout": {"width": 40, "height": 40}, "props": {"icon": "remove", "style": {"foregroundColor": "#FF0F172A"}},
+      "bind": {"props.enabled": "${= qty > 1}"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "qty", "value": "${= max(1, qty - 1)}"}]}]
+    },
+    "qtyText": {"type": "text", "layout": {"width": 36, "height": {"hug": 22}}, "props": {"text": "${qty}", "textAlign": "center", "style": {"fontFamily": "Inter", "fontSize": 16, "fontWeight": 600, "color": "#FF0F172A"}}},
+    "plus": {
+      "type": "iconButton", "layout": {"width": 40, "height": 40}, "props": {"icon": "add", "style": {"foregroundColor": "#FF0F172A"}},
+      "bind": {"props.enabled": "${= qty < 10}"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "qty", "value": "${= min(10, qty + 1)}"}]}]
+    },
+    "stock": {"type": "row", "children": ["stockDot", "stockText"], "layout": {"width": {"hug": 260}, "height": 48}, "props": {"spacing": 8}},
+    "stockDot": {"type": "box", "layout": {"width": 8, "height": 8}, "decoration": {"shape": "circle", "fills": [{"color": "#FF16A34A"}]}},
+    "stockText": {"type": "text", "layout": {"width": {"hug": 240}, "height": {"hug": 18}}, "props": {"text": "In stock · ships in 1–2 business days", "style": {"fontFamily": "Inter", "fontSize": 13, "color": "#FF475569"}}},
+    "ctaRow": {"type": "row", "children": ["addBtn", "buyBtn"], "layout": {"width": {"fill": 484}, "height": 52}, "props": {"spacing": 12}},
+    "addBtn": {
+      "type": "filledButton",
+      "layout": {"width": {"fill": 290}, "height": 52, "flex": 3},
+      "props": {"label": "Add to cart", "icon": "shopping_bag_outlined", "style": {"backgroundColor": "#FF2563EB", "foregroundColor": "#FFFFFFFF", "textStyle": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 600}}},
+      "bind": {"props.label": "${= 'Add to cart  ·  $' + (149 * qty)}"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "cartCount", "op": "add", "value": "${qty}"},
+        {"type": "showToast", "message": "${= 'Added ' + qty + ' × Arc One (' + finish + ') to your cart'}"}
+      ]}]
+    },
+    "buyBtn": {
+      "type": "outlinedButton",
+      "layout": {"width": {"fill": 180}, "height": 52, "flex": 2},
+      "props": {"label": "Buy now", "style": {"backgroundColor": "#FFFFFFFF", "foregroundColor": "#FF0F172A", "side": {"color": "#FF0F172A", "width": 1.5}, "textStyle": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 600}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "cartCount", "op": "add", "value": "${qty}"},
+        {"type": "showToast", "message": "Taking you to secure checkout…"}
+      ]}]
+    },
+    "notes": {
+      "type": "column", "children": ["notesList"],
+      "layout": {"width": {"fill": 484}, "height": {"hug": 220}, "padding": [20, 4, 20, 4]},
+      "decoration": {"radius": 16, "fills": [{"color": "#FFFFFFFF"}], "strokes": [{"color": "#FFE5E7EB"}]}
+    },
+    "notesList": {
+      "type": "listView", "children": ["note"],
+      "layout": {"width": {"fill": 444}, "height": {"hug": 210}},
+      "props": {"scrollable": false, "separator": "divider", "spacing": 1, "dividerColor": "#FFE5E7EB"},
+      "bind": {"data": "${notes}"}
+    },
+    "note": {"type": "row", "children": ["noteIconWrap", "noteText"], "layout": {"width": {"fill": 444}, "height": {"hug": 68}, "padding": [0, 16, 0, 16]}, "props": {"spacing": 14, "crossAxisAlignment": "start"}},
+    "noteIconWrap": {"type": "row", "children": ["noteIcon"], "layout": {"width": 40, "height": 40}, "props": {"mainAxisAlignment": "center"}, "decoration": {"radius": 12, "fills": [{"color": "#FFEFF6FF"}]}},
+    "noteIcon": {"type": "icon", "layout": {"width": 20, "height": 20}, "props": {"icon": "local_shipping_outlined", "size": 20, "color": "#FF2563EB"}, "bind": {"props.icon": "${item.icon}"}},
+    "noteText": {"type": "column", "children": ["noteTitle", "noteBody"], "layout": {"width": {"fill": 380}, "height": {"hug": 40}}, "props": {"spacing": 2, "crossAxisAlignment": "start"}},
+    "noteTitle": {"type": "text", "layout": {"width": {"fill": 380}, "height": {"hug": 20}}, "props": {"text": "${item.title}", "style": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600, "color": "#FF0F172A"}}},
+    "noteBody": {"type": "text", "layout": {"width": {"fill": 380}, "height": {"hug": 20}}, "props": {"text": "${item.body}", "style": {"fontFamily": "Inter", "fontSize": 13, "height": 1.5, "color": "#FF64748B"}}},
+
+    "tabsBand": {
+      "type": "column", "children": ["tabsRail"],
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 500}, "padding": [40, 0, 40, 72]},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [24, 0, 24, 56]}}}]
+    },
+    "tabsRail": {
+      "type": "column", "children": ["tabBar", "tabBody"],
+      "layout": {"width": {"fill": 1200}, "height": {"hug": 500}, "constraints": {"maxWidth": 1200}},
+      "props": {"crossAxisAlignment": "stretch"},
+      "decoration": {"radius": 24, "fills": [{"color": "#FFFFFFFF"}], "strokes": [{"color": "#FFE5E7EB"}], "effects": [{"type": "dropShadow", "color": "#0A0F172A", "offset": [0, 16], "blurRadius": 48}]}
+    },
+    "tabBar": {
+      "type": "row", "children": ["tabList"],
+      "layout": {"width": {"fill": 1200}, "height": 60, "padding": [32, 0, 32, 0]},
+      "decoration": {"strokes": [{"color": "#FFE5E7EB"}], "strokeSides": "bottom"},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [24, 0, 24, 0]}}}]
+    },
+    "tabList": {
+      "type": "listView", "children": ["tabItem"],
+      "layout": {"width": {"fill": 1136}, "height": 60},
+      "props": {"scrollDirection": "horizontal", "scrollable": false, "spacing": 32},
+      "bind": {"data": "${tabs}"}
+    },
+    "tabItem": {
+      "type": "column", "children": ["tabLabel", "tabLine"],
+      "layout": {"width": {"hug": 110}, "height": {"fill": 60}, "padding": [0, 20, 0, 0]},
+      "props": {"mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "stretch"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "tab", "value": "${item.id}"}]}]
+    },
+    "tabLabel": {
+      "type": "text", "layout": {"width": {"hug": 110}, "height": {"hug": 20}},
+      "props": {"text": "${item.label}", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 600, "color": "#FF64748B"}},
+      "bind": {"props.style.color": "${= tab == item.id ? '#FF0F172A' : '#FF64748B'}"}
+    },
+    "tabLine": {"type": "box", "layout": {"width": {"fill": 110}, "height": 2}, "decoration": {"fills": [{"color": "#00000000"}]}, "bind": {"decoration.fills[0].color": "${= tab == item.id ? '#FF2563EB' : '#00000000'}"}},
+    "tabBody": {
+      "type": "column", "children": ["descPane", "specPane", "revPane"],
+      "layout": {"width": {"fill": 1200}, "height": {"hug": 420}, "padding": [32, 32, 32, 40]},
+      "props": {"crossAxisAlignment": "stretch"},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [24, 24, 24, 32]}}}]
+    },
+
+    "descPane": {
+      "type": "flex", "children": ["descText", "featureCard"],
+      "layout": {"width": {"fill": 1136}, "height": {"hug": 300}},
+      "props": {"direction": "horizontal", "spacing": 48, "crossAxisAlignment": "start"},
+      "bind": {"visible": "${= tab == 'description'}"},
+      "media": [{"maxWidth": 900, "patch": {"props": {"direction": "vertical", "spacing": 28}}}]
+    },
+    "descText": {"type": "column", "children": ["descH", "descP1", "descP2"], "layout": {"width": {"fill": 640}, "height": {"hug": 260}, "flex": 3}, "props": {"spacing": 16, "crossAxisAlignment": "start"}},
+    "descH": {"type": "text", "layout": {"width": {"fill": 640}, "height": {"hug": 32}}, "props": {"text": "Light exactly where you need it.", "style": {"fontFamily": "Inter Display", "fontSize": 26, "fontWeight": 700, "letterSpacing": -0.52, "height": 1.2, "color": "#FF0F172A"}}},
+    "descP1": {"type": "text", "layout": {"width": {"fill": 640}, "height": {"hug": 70}}, "props": {"text": "Arc One balances on a single sprung joint, so the shade stays wherever you leave it: low and close for sketching, high and wide for a full desk. A warm 2700 K LED with a high colour rendering index keeps paper, fabric and skin tones true.", "style": {"fontFamily": "Inter", "fontSize": 15, "height": 1.55, "color": "#FF475569"}}},
+    "descP2": {"type": "text", "layout": {"width": {"fill": 640}, "height": {"hug": 70}}, "props": {"text": "Each arm is turned from solid aluminium and finished by hand in our Aarhus workshop, then weighted with a cast-iron base so it never tips. Touch the shade to switch on; hold to dim smoothly from a reading glow to full brightness.", "style": {"fontFamily": "Inter", "fontSize": 15, "height": 1.55, "color": "#FF475569"}}},
+    "featureCard": {
+      "type": "column", "children": ["featTitle", "featList"],
+      "layout": {"width": {"fill": 420}, "height": {"hug": 260}, "flex": 2, "padding": 24},
+      "props": {"spacing": 16, "crossAxisAlignment": "start"},
+      "decoration": {"radius": 16, "fills": [{"color": "#FFF6F7F9"}]}
+    },
+    "featTitle": {"type": "text", "layout": {"width": {"fill": 372}, "height": {"hug": 20}}, "props": {"text": "Why you'll like it", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 600, "color": "#FF0F172A"}}},
+    "featList": {"type": "listView", "children": ["featItem"], "layout": {"width": {"fill": 372}, "height": {"hug": 180}}, "props": {"scrollable": false, "spacing": 12}, "bind": {"data": "${features}"}},
+    "featItem": {"type": "row", "children": ["featIcon", "featText"], "layout": {"width": {"fill": 372}, "height": {"hug": 22}}, "props": {"spacing": 10, "crossAxisAlignment": "start"}},
+    "featIcon": {"type": "icon", "layout": {"width": 20, "height": 20}, "props": {"icon": "check_circle_rounded", "size": 20, "color": "#FF16A34A"}},
+    "featText": {"type": "text", "layout": {"width": {"fill": 340}, "height": {"hug": 22}}, "props": {"text": "${item}", "style": {"fontFamily": "Inter", "fontSize": 14, "height": 1.5, "color": "#FF334155"}}},
+
+    "specPane": {
+      "type": "column", "children": ["specList"],
+      "layout": {"width": {"fill": 1136}, "height": {"hug": 330}},
+      "props": {"crossAxisAlignment": "stretch"},
+      "bind": {"visible": "${= tab == 'specs'}"}
+    },
+    "specList": {"type": "listView", "children": ["specRow"], "layout": {"width": {"fill": 1136}, "height": {"hug": 330}}, "props": {"scrollable": false}, "bind": {"data": "${specs}"}},
+    "specRow": {
+      "type": "row", "children": ["specK", "specV"],
+      "layout": {"width": {"fill": 1136}, "height": {"hug": 54}, "padding": [0, 16, 0, 16]},
+      "props": {"spacing": 24},
+      "decoration": {"strokes": [{"color": "#FFE5E7EB"}], "strokeSides": "bottom"}
+    },
+    "specK": {"type": "text", "layout": {"width": 240, "height": {"hug": 20}}, "props": {"text": "${item.k}", "style": {"fontFamily": "Inter", "fontSize": 14, "color": "#FF64748B"}}, "media": [{"maxWidth": 900, "patch": {"layout": {"width": 180}}}]},
+    "specV": {"type": "text", "layout": {"width": {"fill": 800}, "height": {"hug": 20}}, "props": {"text": "${item.v}", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 500, "color": "#FF0F172A"}}},
+
+    "revPane": {
+      "type": "flex", "children": ["revSummary", "revList"],
+      "layout": {"width": {"fill": 1136}, "height": {"hug": 500}},
+      "props": {"direction": "horizontal", "spacing": 56, "crossAxisAlignment": "start"},
+      "bind": {"visible": "${= tab == 'reviews'}"},
+      "media": [{"maxWidth": 900, "patch": {"props": {"direction": "vertical", "spacing": 32}}}]
+    },
+    "revSummary": {
+      "type": "column", "children": ["revBig", "revStars", "revCount", "distList", "writeBtn"],
+      "layout": {"width": 300, "height": {"hug": 360}},
+      "props": {"spacing": 12, "crossAxisAlignment": "start"},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"width": {"fill": 660}}}}]
+    },
+    "revBig": {"type": "text", "layout": {"width": {"hug": 80}, "height": {"hug": 60}}, "props": {"text": "4.7", "style": {"fontFamily": "Inter Display", "fontSize": 56, "fontWeight": 700, "letterSpacing": -1.1, "height": 1, "color": "#FF0F172A"}}},
+    "revStars": {"type": "listView", "children": ["revStar"], "layout": {"width": 120, "height": 22}, "props": {"scrollDirection": "horizontal", "scrollable": false, "spacing": 2}, "bind": {"data": "${= range(5)}"}},
+    "revStar": {"type": "icon", "layout": {"width": 22, "height": {"fill": 22}}, "props": {"icon": "star_rounded", "size": 22, "color": "#FFF59E0B"}, "bind": {"props.icon": "${= index < 4 ? 'star_rounded' : 'star_half_rounded'}"}},
+    "revCount": {"type": "text", "layout": {"width": {"fill": 300}, "height": {"hug": 20}}, "props": {"text": "Based on 318 verified reviews", "style": {"fontFamily": "Inter", "fontSize": 14, "color": "#FF64748B"}}},
+    "distList": {"type": "listView", "children": ["distRow"], "layout": {"width": {"fill": 300}, "height": {"hug": 120}, "margin": [0, 8, 0, 8]}, "props": {"scrollable": false, "spacing": 8}, "bind": {"data": "${dist}"}},
+    "distRow": {"type": "row", "children": ["distLabel", "distIcon", "distBar", "distPct"], "layout": {"width": {"fill": 300}, "height": {"hug": 18}}, "props": {"spacing": 8}},
+    "distLabel": {"type": "text", "layout": {"width": 10, "height": {"hug": 18}}, "props": {"text": "${item.stars}", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 500, "color": "#FF334155"}}},
+    "distIcon": {"type": "icon", "layout": {"width": 14, "height": 14}, "props": {"icon": "star_rounded", "size": 14, "color": "#FFF59E0B"}},
+    "distBar": {"type": "progressBar", "layout": {"width": {"fill": 200}, "height": 8}, "props": {"max": 100, "color": "#FFF59E0B", "backgroundColor": "#FFF1F5F9", "borderRadius": 4, "exactFill": true}, "bind": {"props.value": "${item.pct}"}},
+    "distPct": {"type": "text", "layout": {"width": 36, "height": {"hug": 18}}, "props": {"text": "${item.pct}%", "textAlign": "right", "style": {"fontFamily": "Inter", "fontSize": 13, "color": "#FF64748B"}}},
+    "writeBtn": {
+      "type": "outlinedButton", "layout": {"width": {"fill": 300}, "height": 44},
+      "props": {"label": "Write a review", "icon": "rate_review_outlined", "style": {"foregroundColor": "#FF0F172A", "side": {"color": "#FFE5E7EB", "width": 1}, "textStyle": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "showToast", "message": "Sign in to review a product you bought"}]}]
+    },
+    "revList": {
+      "type": "listView", "children": ["revItem"],
+      "layout": {"width": {"fill": 780}, "height": {"hug": 480}},
+      "props": {"scrollable": false, "separator": "divider", "spacing": 41, "dividerColor": "#FFE5E7EB"},
+      "bind": {"data": "${reviews}"}
+    },
+    "revItem": {"type": "column", "children": ["revHead", "revTitle", "revBody", "revMeta"], "layout": {"width": {"fill": 780}, "height": {"hug": 140}}, "props": {"spacing": 8, "crossAxisAlignment": "start"}},

@@ -42,6 +42,10 @@ pipeline until there are desktop-native layouts to make blocks from:
 3. Each reusable part of a reference becomes a block; the library is compared with the next cycle's pages, and
    what a block lacks to serve them is the list for the next cycle. At least ten cycles, as the inline blocks took.
 
+Cycle 1, `native/` (2026-11-15): all ten pages render with no error at 1280 and at 768 (two with one warning);
+seven were kept at their second round and three at their third. `<page>.png` and `<page>-narrow.png` are the
+pictures, `<page>.json` the document, `<page>/round<n>/` each round with what was reported.
+
 `reference/` (Opus in the notation with Cards, then the design pass) and `blocks/` (eighteen block briefs for
 the block designer, six of which were designed before the change of method) are kept as the record of the first
 attempt, and are not part of the design system.

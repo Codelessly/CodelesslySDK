@@ -1,0 +1,2 @@
+WARNING media_overridden [doc] /nodes/sidebar/media/0/patch
+        The patch sets visible, which the patch's own "bind" also sets ("visible"): a binding wins over a value, so the patch's value never shows. To bind it only at these sizes, put the binding in the patch ("patch": {"bind": {"visible": "${...}"}}) and give the node its value for the other sizes; to use the patch's value here, drop the binding at these sizes ("patch": {"bind": {"visible": null}, ...}).

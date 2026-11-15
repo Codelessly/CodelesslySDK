@@ -1,0 +1,24 @@
+ERROR   render_exception [doc screen docs 1280x800] node shell
+        Node "shell" (row): BoxConstraints forces an infinite height. These invalid constraints were provided to NodeBox's layout() function by the following function, which probably computed the invalid constraints in question: ChildLayoutHelper.layoutChild (package:flutter/src/rendering/layout_helper.dart:65:11)
+ERROR   render_exception [doc screen docs 1280x800] node shell
+        Node "shell" (row): 'package:flutter/src/rendering/box.dart': Failed assertion: line 2256 pos 12: 'hasSize': RenderBox was not laid out: RenderCodelesslyFlex#017df relayoutBoundary=up9 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+ERROR   render_exception [doc screen docs 1280x800] node shell
+        Node "shell" (row): 'package:flutter/src/rendering/box.dart': Failed assertion: line 2256 pos 12: 'hasSize': RenderBox was not laid out: NodeBox#4c5a2 NEEDS-LAYOUT NEEDS-PAINT
+ERROR   render_exception [screen docs 1280x800]
+        'package:flutter/src/rendering/object.dart': Failed assertion: line 6028 pos 14: '!childSemantics.renderObject._needsLayout': is not true. (Flutter named no render object for it: it was thrown outside a node's layout and paint, while building or in a callback.)
+ERROR   render_exception [screen docs 1280x800]
+        'package:flutter/src/rendering/object.dart': Failed assertion: line 5730 pos 14: '!semantics.parentDataDirty': is not true. (Flutter named no render object for it: it was thrown outside a node's layout and paint, while building or in a callback.)
+ERROR   render_exception [doc screen docs 1280x800] node shell
+        Node "shell" (row): 'package:flutter/src/rendering/box.dart': Failed assertion: line 2256 pos 12: 'hasSize': RenderBox was not laid out: RenderCodelesslyFlex#017df relayoutBoundary=up9 NEEDS-PAINT
+At 768 wide: ERROR   render_exception [doc screen docs 768x800] node shell
+        Node "shell" (row): BoxConstraints forces an infinite height. These invalid constraints were provided to NodeBox's layout() function by the following function, which probably computed the invalid constraints in question: ChildLayoutHelper.layoutChild (package:flutter/src/rendering/layout_helper.dart:65:11)
+At 768 wide: ERROR   render_exception [doc screen docs 768x800] node shell
+        Node "shell" (row): 'package:flutter/src/rendering/box.dart': Failed assertion: line 2256 pos 12: 'hasSize': RenderBox was not laid out: RenderCodelesslyFlex#adceb relayoutBoundary=up9 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+At 768 wide: ERROR   render_exception [doc screen docs 768x800] node shell
+        Node "shell" (row): 'package:flutter/src/rendering/box.dart': Failed assertion: line 2256 pos 12: 'hasSize': RenderBox was not laid out: NodeBox#cade2 NEEDS-LAYOUT NEEDS-PAINT
+At 768 wide: ERROR   render_exception [screen docs 768x800]
+        'package:flutter/src/rendering/object.dart': Failed assertion: line 6028 pos 14: '!childSemantics.renderObject._needsLayout': is not true. (Flutter named no render object for it: it was thrown outside a node's layout and paint, while building or in a callback.)
+At 768 wide: ERROR   render_exception [screen docs 768x800]
+        'package:flutter/src/rendering/object.dart': Failed assertion: line 5730 pos 14: '!semantics.parentDataDirty': is not true. (Flutter named no render object for it: it was thrown outside a node's layout and paint, while building or in a callback.)
+At 768 wide: ERROR   render_exception [doc screen docs 768x800] node shell
+        Node "shell" (row): 'package:flutter/src/rendering/box.dart': Failed assertion: line 2256 pos 12: 'hasSize': RenderBox was not laid out: RenderCodelesslyFlex#adceb relayoutBoundary=up9 NEEDS-PAINT

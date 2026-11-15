@@ -1,0 +1,2 @@
+ERROR   expression_syntax [doc] /nodes/barText/bind/props.text
+        "${= bioOver ? 'Bio is over 160 character..." is not closed: write ${name} or ${= formula}, with its quotes closed and braces balanced.
