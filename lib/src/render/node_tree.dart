@@ -896,6 +896,15 @@ class RenderTree {
   /// a component call a list repeats (`card`: each copy's definition root).
   List<NodeBox> boxesAtPath(String path) => [for (final b in _boxes.values) if (_plainPath(b) == path) b];
 
+  /// The boxes on screen (attached and laid out) whose node is called
+  /// [name]: a node named in an action when its id differs per copy (each
+  /// breakpoint's layout of a responsive screen has its own ids, the same
+  /// names).
+  List<NodeBox> boxesNamed(String name) => [
+        for (final b in _boxes.values)
+          if (b.attached && b.hasSize && b.node?.name == name) b,
+      ];
+
   static Offset? _topLeftOf(NodeBox b) => b.attached && b.hasSize ? b.localToGlobal(Offset.zero) : null;
 
   /// [b]'s path without copy indexes.
