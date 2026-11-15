@@ -6,15 +6,28 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   tearDown(() => FontDemand.handler = null);
 
-  test('generic families become the site font and named ones keep it as their fallback', () {
-    final out = SvgFonts.resolve(
-      '<svg><text font-family="sans-serif">a</text><text font-family="\'DejaVu Sans\', monospace">b</text>'
-      '<text style="font-family: Inter; font-size: 12px">c</text></svg>',
-      defaultFamily: 'Lora',
-    );
+  test('generic families become the site font; a named one is drawn, or the site font when it is lacking', () {
+    const svg = '<svg><text font-family="sans-serif">a</text><text font-family="\'DejaVu Sans\', monospace">b</text>'
+        '<text style="font-family: Inter; font-size: 12px">c</text></svg>';
+    // One family each: vector_graphics reads the attribute as a single family
+    // name, so a list ("DejaVu Sans, Lora") would name a font nothing has.
+    final out = SvgFonts.resolve(svg, defaultFamily: 'Lora');
     expect(out, contains('<text font-family="Lora">a'));
-    expect(out, contains('<text font-family="DejaVu Sans, Lora">b'));
-    expect(out, contains('font-family: Inter, Lora; font-size'));
+    expect(out, contains('<text font-family="DejaVu Sans">b'));
+    expect(out, contains('font-family: Inter; font-size'));
+    // A caller that knows its fonts: a family it lacks falls to the next one
+    // the list names (monospace: the site font), but is still reported.
+    final reported = <String>[];
+    SvgFonts.isAvailable = (family) => family == 'Inter';
+    SvgFonts.onFamily = (family, _) => reported.add(family);
+    addTearDown(() {
+      SvgFonts.isAvailable = null;
+      SvgFonts.onFamily = null;
+    });
+    final known = SvgFonts.resolve(svg, defaultFamily: 'Lora');
+    expect(known, contains('<text font-family="Lora">b'));
+    expect(known, contains('font-family: Inter; font-size'));
+    expect(reported, ['DejaVu Sans', 'Inter']);
   });
 
   test('text naming no family inherits the site font from the root', () {
