@@ -40,6 +40,9 @@ the Cards values are in `design_systems/cards/tool/tokens.py` (`PLAIN_TEXT_STYLE
 | `Text.title/heading/strong/muted/small` | theme `textStyles` of those names (else pageTitle, sectionTitle, body+600...) | Inter Display 20/700; Inter 15/600; 13.5/600; 13 secondaryText; 12.5 secondaryText |
 | Every SSUI-named style (body, caption, pageTitle...) | its `fontFamily` | Inter added (sizes and colors unchanged) |
 | `Text.title`, `Text.pageTitle` on a canvas `sizes.wide` (900) or wider | theme `textStyles.titleWide` | Inter Display 28/700 (20 read as a section heading at 1280) |
+| `Gauge`, `Dial` | fills its parent's width; figure `textStyles.gaugeValue`, unit `gaugeUnit` | Inter Display 46/800; 12.5 secondaryText |
+| `Ring` | `sizes.ring`, the track color | 11 |
+| A neutral `fill:` written on the page, not in a card | `colors.pageFill` where the neutral fill equals the page color | white (dark: #262626) |
 | `Text "…" size:28 weight:700` | starts from `body` under a theme | keeps the theme's ink and font |
 | Written colors (`fill:`, `border:`, `color:`, incl. inside `fill:=a?"#…":"#…"`) | nearest theme role within a distance (`NotationOptions.palette`, named mode only) | gray panels → subtleFill, light blue → primaryTint, grays text → secondaryText... |
 | `Badge.*` | `radii.badge`, `sizes.badge`, `spacing.badge`, `textStyles.badge`, the role tints | pill, 22 high, 9 sides |

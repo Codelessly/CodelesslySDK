@@ -171,6 +171,7 @@
    "codeBg": "#FFF9FAFB",
    "codeGutter": "#FF9CA3AF",
    "gold": "#FFFFB020",
+   "pageFill": "#FFFFFFFF",
    "chart1": "#FF2563EB",
    "chart2": "#FF0891B2",
    "chart3": "#FF9333EA",
@@ -527,6 +528,23 @@
     "color": "secondaryText",
     "leadingDistribution": "even"
    },
+   "gaugeValue": {
+    "fontFamily": "Inter Display",
+    "fontSize": 46,
+    "fontWeight": 800,
+    "height": 1.05,
+    "letterSpacing": -1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "gaugeUnit": {
+    "fontFamily": "Inter",
+    "fontSize": 12.5,
+    "fontWeight": 500,
+    "height": 1.4,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
    "titleWide": {
     "fontFamily": "Inter Display",
     "fontSize": 28,
@@ -875,6 +893,7 @@
     "codeBg": "#FF141414",
     "codeGutter": "#66FFFFFF",
     "gold": "#FFFFB020",
+    "pageFill": "#FF262626",
     "chart1": "#FF3B82F6",
     "chart2": "#FF06B6D4",
     "chart3": "#FFA855F7",
@@ -940,7 +959,8 @@
    "badge": 22,
    "bar": 28,
    "progress": 8,
-   "wide": 900
+   "wide": 900,
+   "ring": 11
   },
   "shadows": {
    "level1": [
