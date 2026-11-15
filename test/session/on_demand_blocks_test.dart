@@ -114,4 +114,18 @@ void main() {
     expect(jsonEncode(quote.toJson()), contains('"change":1.84'));
   });
 
+
+  test('a card of mostly plain parts is told from one made of blocks', () async {
+    final session = UiSession(designSystem: await _cards());
+    addTearDown(session.dispose);
+    final blocks = OnDemandBlocks(session, design: (w, s, n) async => null);
+    await session.applyNotation(Stream.value('ChatCard "Poll" "Friday"\n  Row\n    Text "Ramen"\n    Text "45%"\n  Row\n    Text "Taco"\n    Text "30%"\n'));
+    expect(blocks.mostlyPlainParts, isTrue);
+    await session.applyNotation(
+      Stream.value('ChatCard "Plan" "Team"\n  Counter "Seats" =seats min:1 max:9\n  ActionButton "Upgrade"\n  Text "Billed monthly"\n'),
+      replace: true,
+    );
+    expect(blocks.mostlyPlainParts, isFalse);
+  });
+
 }

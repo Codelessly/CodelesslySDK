@@ -88,6 +88,26 @@ final class OnDemandBlocks {
 
   static final _name = RegExp(r'^[A-Z][A-Za-z0-9]*$');
 
+  /// Whether the session's UI is mostly plain parts: at most a third of its
+  /// blocks-and-plain nodes are blocks of the design system, and at least
+  /// five are plain (rows, columns, texts, boxes). A second signal for a
+  /// host, beside what the model asked for, that a card deserved a block
+  /// it did not have. The threshold comes from an outside reading of
+  /// sixteen recorded answers (it agreed with the eye on all sixteen); it is
+  /// a starting point, not a measured rate.
+  bool get mostlyPlainParts {
+    final blocks = session.designSystem?.components.definitions.keys.toSet() ?? const <String>{};
+    var designed = 0, plain = 0;
+    for (final n in session.document.nodes.values) {
+      if (blocks.contains(n.type)) {
+        designed++;
+      } else if (const {'row', 'column', 'text', 'box'}.contains(n.type)) {
+        plain++;
+      }
+    }
+    return plain >= 5 && designed * 3 <= designed + plain;
+  }
+
   Future<BlockOutcome> _design(WantedBlock wanted) async {
     var notes = const <String>[];
     var tries = 0;
