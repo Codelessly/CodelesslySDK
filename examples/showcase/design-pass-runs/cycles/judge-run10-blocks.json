@@ -1,0 +1,210 @@
+{
+ "what": "Run 10's six briefs: plain (before), run 10's pass (run10), the pass with --blocks (blocks), with --blocks and pictures of the three closest blocks (blockpics).",
+ "judges": "Judges: Opus and Sonnet subagents of a Claude Code session, shown the versions unlabeled and shuffled (ways.py pack); not judge.py, because no API key was at hand.",
+ "judgments": [
+  {
+   "case": "01-lab-pickup",
+   "judge": "opus",
+   "rank": [
+    "blocks",
+    "run10",
+    "blockpics",
+    "before"
+   ],
+   "scores": {
+    "before": 3,
+    "run10": 8,
+    "blocks": 8,
+    "blockpics": 7
+   },
+   "why": "C groups the code and ID note cleanly with a clear title hierarchy, B is nearly as polished, D's dashed box and cramped toggle spacing feel less refined, and A is a flat, unstyled list with no hierarchy."
+  },
+  {
+   "case": "01-lab-pickup",
+   "judge": "sonnet",
+   "rank": [
+    "run10",
+    "blocks",
+    "blockpics",
+    "before"
+   ],
+   "scores": {
+    "before": 3,
+    "run10": 8,
+    "blocks": 8,
+    "blockpics": 7
+   },
+   "why": "B has clean header, prominent code and tidy spacing; C is close with nested card; D dashed box is slightly off; A is unstyled plain text."
+  },
+  {
+   "case": "02-parcel-locker",
+   "judge": "opus",
+   "rank": [
+    "blocks",
+    "run10",
+    "blockpics",
+    "before"
+   ],
+   "scores": {
+    "run10": 7,
+    "before": 3,
+    "blocks": 8,
+    "blockpics": 4
+   },
+   "why": "C pairs a dominant PIN with a clear primary/secondary button hierarchy, A is solid but has two competing primary buttons, D's action buttons are visibly squashed, and B is a flat unstyled list with undersized buttons."
+  },
+  {
+   "case": "02-parcel-locker",
+   "judge": "sonnet",
+   "rank": [
+    "blocks",
+    "run10",
+    "blockpics",
+    "before"
+   ],
+   "scores": {
+    "run10": 7,
+    "before": 3,
+    "blocks": 9,
+    "blockpics": 5
+   },
+   "why": "C has clear primary/secondary button hierarchy and a strong PIN; A is good but two equal primaries; D buttons are squashed thin; B is unstyled with tiny buttons."
+  },
+  {
+   "case": "03-water-alert",
+   "judge": "opus",
+   "rank": [
+    "blocks",
+    "blockpics",
+    "run10",
+    "before"
+   ],
+   "scores": {
+    "before": 3,
+    "blockpics": 8,
+    "blocks": 8,
+    "run10": 7
+   },
+   "why": "C has the most consistent grouping with the stat and tips in matched panels and a clean divider before the controls, B is nearly as strong, D is solid but slightly cramped and plainer, and A is an unstyled text list."
+  },
+  {
+   "case": "03-water-alert",
+   "judge": "sonnet",
+   "rank": [
+    "blocks",
+    "run10",
+    "blockpics",
+    "before"
+   ],
+   "scores": {
+    "before": 2,
+    "blockpics": 7,
+    "blocks": 9,
+    "run10": 8
+   },
+   "why": "C has a strong hero number in a panel with coherent clock icon and clean grouping; D is tidy and compact; B has odd icon choice and loose layout; A is unstyled text."
+  },
+  {
+   "case": "04-library-holds",
+   "judge": "opus",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "run10",
+    "before"
+   ],
+   "scores": {
+    "blocks": 8,
+    "blockpics": 8,
+    "before": 3,
+    "run10": 6
+   },
+   "why": "B has the richest yet consistent hierarchy with tinted cover tiles and clear metadata, A is equally clean but slightly plainer, D is tighter with odd bold queue text and less margin, and C is an unstyled stack of text rows."
+  },
+  {
+   "case": "04-library-holds",
+   "judge": "sonnet",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "run10",
+    "before"
+   ],
+   "scores": {
+    "blocks": 8,
+    "blockpics": 9,
+    "before": 2,
+    "run10": 7
+   },
+   "why": "B has colorful covers, clear hierarchy and consistent cards; A is clean but monotone hourglass icons; D has a slightly clipped detail panel; C is unstyled text."
+  },
+  {
+   "case": "05-garden-rounds",
+   "judge": "opus",
+   "rank": [
+    "blocks",
+    "run10",
+    "blockpics",
+    "before"
+   ],
+   "scores": {
+    "run10": 6,
+    "blockpics": 4,
+    "before": 3,
+    "blocks": 8
+   },
+   "why": "D has properly sized primary/secondary actions and consistent icon rows, A is clean but its undersized, mismatched buttons weaken it, B's action buttons are visibly squashed, and C is flat unstyled text with tiny buttons."
+  },
+  {
+   "case": "05-garden-rounds",
+   "judge": "sonnet",
+   "rank": [
+    "blocks",
+    "run10",
+    "blockpics",
+    "before"
+   ],
+   "scores": {
+    "run10": 7,
+    "blockpics": 5,
+    "before": 2,
+    "blocks": 9
+   },
+   "why": "D has well-proportioned buttons, a strong hero and consistent icons; A is clean but plain; B has squashed thin action buttons; C is unstyled text."
+  },
+  {
+   "case": "06-ferry-ticket",
+   "judge": "opus",
+   "rank": [
+    "blockpics",
+    "run10",
+    "blocks",
+    "before"
+   ],
+   "scores": {
+    "blockpics": 8,
+    "run10": 8,
+    "blocks": 7,
+    "before": 3
+   },
+   "why": "A reads as a polished shipped boarding pass with a clear hero, route and detail hierarchy, B is clean and restrained but slightly plainer, C is solid but over-boxed and heavier, and D is flat text with two competing primary buttons."
+  },
+  {
+   "case": "06-ferry-ticket",
+   "judge": "sonnet",
+   "rank": [
+    "blockpics",
+    "run10",
+    "blocks",
+    "before"
+   ],
+   "scores": {
+    "blockpics": 9,
+    "run10": 8,
+    "blocks": 7,
+    "before": 2
+   },
+   "why": "A has a rich illustrated header, clear route hierarchy and a distinct warning; B is clean and balanced; C is solid but the stacked buttons are cramped; D is unstyled text."
+  }
+ ]
+}

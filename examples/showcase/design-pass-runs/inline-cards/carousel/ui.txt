@@ -1,0 +1,40 @@
+state shoes=[{"id":0,"name":"Aero Runner","price":120,"rating":4.8,"desc":"Lightweight daily trainer with responsive foam for smooth miles."},{"id":1,"name":"Trail Blazer","price":135,"rating":4.6,"desc":"Grippy outsole and rock plate built for rough trails."},{"id":2,"name":"Cloud Strider","price":150,"rating":4.9,"desc":"Max cushioning for long recovery runs."},{"id":3,"name":"Swift Racer","price":170,"rating":4.7,"desc":"Carbon-plated racing shoe for personal bests."},{"id":4,"name":"Urban Pacer","price":110,"rating":4.4,"desc":"Versatile city shoe with breathable knit upper."},{"id":5,"name":"Endurance Pro","price":140,"rating":4.5,"desc":"Stable and durable for marathon training."}]
+state i=0
+state detail=false
+state size=""
+Card w:390 gap:12
+  if !detail
+    Text.title "Running shoes"
+    Row middle gap:8
+      IconButton "chevron_left" -> i=i==0?5:i-1
+      Box grow gap:8 pad:12 fill:#FFF2F2F2 radius:12 -> detail=true; size=""
+        Box h:160 fill:#FFD9D9D9 radius:8 center middle
+          Icon "image"
+        Text.heading "{shoes[i].name}"
+        Row between
+          Text.strong "${shoes[i].price}"
+          Row gap:4
+            Icon "star"
+            Text "{shoes[i].rating}"
+      IconButton "chevron_right" -> i=i==5?0:i+1
+    Row center gap:8
+      each n in range(6)
+        Box w:10 h:10 radius:5 fill:=n==i?"#FF3366CC":"#FFCCCCCC" -> i=n
+  if detail
+    Row middle gap:8
+      IconButton "arrow_back" -> detail=false
+      Text.heading "{shoes[i].name}"
+    Box h:160 fill:#FFD9D9D9 radius:8 center middle
+      Icon "image"
+    Row between
+      Text.strong "${shoes[i].price}"
+      Row gap:4
+        Icon "star"
+        Text "{shoes[i].rating}"
+    Text.muted "{shoes[i].desc}"
+    Text.strong "Size"
+    Row gap:8
+      each s in [7,8,9,10,11]
+        ChoiceChip "{s}" selected:=size==s -> size=s
+    Button "Add to bag" enabled:=size!="" -> emit addToBag shoes[i].id; toast "Added to bag"
+    Button.ghost "Back to carousel" -> detail=false
