@@ -1,0 +1,34 @@
+{
+ "name": "SeatMap",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 175.7,
+   "checkAndRenderSeconds": 57.1,
+   "problems": 35,
+   "input_tokens": 33168,
+   "output_tokens": 19034
+  },
+  {
+   "round": 2,
+   "modelSeconds": 66.4,
+   "checkAndRenderSeconds": 54.1,
+   "problems": 0,
+   "input_tokens": 48397,
+   "output_tokens": 9078
+  },
+  {
+   "round": 3,
+   "modelSeconds": 67.3,
+   "checkAndRenderSeconds": 59.5,
+   "problems": 0,
+   "input_tokens": 59711,
+   "output_tokens": 9131
+  }
+ ],
+ "final": 3,
+ "problems": 0,
+ "status": "passed",
+ "totalSeconds": 480.1
+}

@@ -1,0 +1,1 @@
+{"steps":[{"tap":"SeatMap1/sA#0"},{"tap":"SeatMap1/sC#6"},{"tap":"SeatMap1/sD#6"},{"tap":"TotalBar1/cta"}],"expect":["7C, 7D are held"],"forbid":["1A","Tap a seat","Continue"]}
