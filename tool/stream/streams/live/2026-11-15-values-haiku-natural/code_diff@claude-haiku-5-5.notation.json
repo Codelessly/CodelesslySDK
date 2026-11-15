@@ -1,0 +1,254 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "text1",
+    "text2",
+    "Receipt1",
+    "DiffHunk1",
+    "DiffHunk2",
+    "DiffHunk3",
+    "ActionButton1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "config.yaml"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${= ((h1!=\"\" ? 1 : 0) + (h2!=\"\" ? 1 : 0) + (h3!=\"\" ? 1 : 0))} of 3 decided, ${= ((h1==\"keep\" ? 1 : 0) + (h2==\"keep\" ? 1 : 0) + (h3==\"keep\" ? 1 : 0))} kept"
+   }
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Changes applied",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.message": "${= ((h1==\"keep\" ? 1 : 0) + (h2==\"keep\" ? 1 : 0) + (h3==\"keep\" ? 1 : 0))} kept, ${= (((h1!=\"\" ? 1 : 0) + (h2!=\"\" ? 1 : 0) + (h3!=\"\" ? 1 : 0)) - ((h1==\"keep\" ? 1 : 0) + (h2==\"keep\" ? 1 : 0) + (h3==\"keep\" ? 1 : 0)))} discarded",
+    "visible": "${= applied}"
+   }
+  },
+  "DiffHunk1": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Server port",
+    "detail": "@@ -4,2 +4,2 @@",
+    "value": "h1",
+    "start": 4,
+    "lines": [
+     "-port: 8080",
+     "+port: 9090"
+    ]
+   },
+   "bind": {
+    "visible": "${= !applied}"
+   }
+  },
+  "DiffHunk2": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Logging",
+    "detail": "@@ -12,4 +12,4 @@",
+    "value": "h2",
+    "start": 12,
+    "lines": [
+     "-level: debug",
+     "-file: /tmp/app.log",
+     "+level: warn",
+     "+file: /var/log/app.log"
+    ]
+   },
+   "bind": {
+    "visible": "${= !applied}"
+   }
+  },
+  "DiffHunk3": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Cache",
+    "detail": "@@ -20,3 +20,5 @@",
+    "value": "h3",
+    "start": 20,
+    "lines": [
+     "+enabled: true",
+     "+ttl: 300"
+    ]
+   },
+   "bind": {
+    "visible": "${= !applied}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Apply",
+    "tone": "primary",
+    "icon": "done_all"
+   },
+   "bind": {
+    "props.enabled": "${= ((h1!=\"\" ? 1 : 0) + (h2!=\"\" ? 1 : 0) + (h3!=\"\" ? 1 : 0))==3}",
+    "visible": "${= !applied}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "applied",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "h1",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h2",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h3",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "applied",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

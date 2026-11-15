@@ -284,15 +284,20 @@ class UiSession implements NodeSource {
   /// its looks are the defaults ([options] replaces them). [prelude] is
   /// notation the host puts before the model's answer: the state of an app's
   /// data contract, a screen's clock, anything that must be right and is not
-  /// the model's to write (see [notationInstructions]).
+  /// the model's to write (see [notationInstructions]). With [replace], the
+  /// UI the session holds is removed first, so the answer takes its place
+  /// (a card written again once a block it wanted exists); without it, a
+  /// session that has a UI takes changes to it, not a second one.
   Future<EditResult> applyNotation(
     Stream<String> text, {
     NotationOptions? options,
     String prelude = '',
     String author = 'agent',
+    bool replace = false,
     void Function(StreamProgress progress)? onOp,
   }) {
     final ds = designSystem;
+    final old = replace ? [..._document.roots] : const <String>[];
     final used = options ?? (ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds, named: true));
     final notation = Catalog.run(catalog, () => NotationStream(catalog: catalog, options: used));
     Stream<String> ops() async* {
@@ -308,6 +313,9 @@ class UiSession implements NodeSource {
         return b.toString();
       }
 
+      // The UI written before goes, in the same revision the new one arrives in.
+      if (old.isNotEmpty) yield encode([RemoveOp(old).toJson()]);
+
       if (prelude.trim().isNotEmpty) {
         final out = encode(Catalog.run(catalog, () => notation.add('${prelude.trimRight()}\n')));
         if (out.isNotEmpty) yield out;
@@ -321,14 +329,22 @@ class UiSession implements NodeSource {
       yield ']}';
     }
 
-    return applyStream(ops(), author: author, onOp: onOp).whenComplete(() => _notationIssues = notation.issues);
+    return applyStream(ops(), author: author, onOp: onOp, protect: old.isEmpty ? null : false).whenComplete(() {
+      _notationIssues = notation.issues;
+      _wantedBlocks = notation.wanted;
+    });
   }
 
   /// What a model is told so that it writes this session's UI in the compact
   /// notation: the grammar, the words, and the [designSystem]'s components.
   /// [blocks] names the only components to list (an app's own screen blocks,
   /// not the whole base set), which keeps the instructions short.
-  String notationInstructions({Set<String>? blocks}) {
+  ///
+  /// [askForBlocks] tells the model to name a component it would want where
+  /// none fits (`Wanted "Name" "what it shows"`, the part built from plain
+  /// types under it): what it asked for is in [wantedBlocks] after the
+  /// answer, and [OnDemandBlocks] has each designed and added.
+  String notationInstructions({Set<String>? blocks, bool askForBlocks = false}) {
     final ds = designSystem;
     return Catalog.run(
       catalog,
@@ -337,6 +353,7 @@ class UiSession implements NodeSource {
         options: ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds),
         designSystem: ds,
         only: blocks,
+        wanted: askForBlocks,
       ),
     );
   }
@@ -344,6 +361,11 @@ class UiSession implements NodeSource {
   /// What the last [applyNotation] could not read, by line.
   List<NotationIssue> get notationIssues => _notationIssues;
   List<NotationIssue> _notationIssues = const [];
+
+  /// The components the last [applyNotation] asked for because none fitted
+  /// (see [notationInstructions]' `askForBlocks`), in the order written.
+  List<WantedBlock> get wantedBlocks => _wantedBlocks;
+  List<WantedBlock> _wantedBlocks = const [];
 
   /// Applies a streamed `ui_apply` tool input: [deltas] are the raw text
   /// chunks as the model's API delivers them. Each op is applied the moment
@@ -360,6 +382,7 @@ class UiSession implements NodeSource {
     int? baseRev,
     EditOp Function(EditOp op)? map,
     void Function(StreamProgress progress)? onOp,
+    bool? protect,
   }) async {
     final decoder = OpStreamDecoder();
     final before = _document;
@@ -372,14 +395,14 @@ class UiSession implements NodeSource {
     var chars = 0;
     // A UI that existed when the stream began is fixed, not rebuilt; a new
     // one may set its roots and canvases as it streams.
-    final protect = protectRoots && _document.roots.isNotEmpty;
+    final protected = protect ?? (protectRoots && _document.roots.isNotEmpty);
     _streaming.value = true;
     _arrived.clear();
     void one(StreamedOp s) {
       final op = map == null ? s.op : map(s.op);
       // Every op of the stream is in the same revision.
       final r = _run([op],
-          author: author, baseRev: baseRev, incomplete: true, protect: protect, revisions: EditRevisions(rev: startRevisions.rev, fields: fields.fields));
+          author: author, baseRev: baseRev, incomplete: true, protect: protected, revisions: EditRevisions(rev: startRevisions.rev, fields: fields.fields));
       for (final d in r.diagnostics) {
         diagnostics.add(d.atOp(s.index));
       }

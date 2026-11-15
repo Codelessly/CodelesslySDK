@@ -1,0 +1,73 @@
+{"meta":{"ui":"subscription","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"My Pro plan renews in 3 days, on Nov 18. Show a card with the plan and its price ($12 a month), how much of my storage (68 of 100 GB) and seats (3 of 5) I have used as percentages with bars, a switch to annual billing ($120 a year) that shows the yearly price, the price per month and what I would save compared with paying monthly (in dollars and as a percentage), and Manage plan and Cancel renewal buttons.","text":"ChatCard \"Pro plan\" \"Renews Nov 18, in 3 days\" icon:\"workspace_premium\" status:\"Active\" tone:accent\n  state annual=false\n  Row between\n    Text.strong \"Pro plan\"\n    Text.strong \"{annual ? money(120,\\\"$\\\",0) + \\\"/yr\\\" : money(12,\\\"$\\\",0) + \\\"/mo\\\"}\"\n  Row between\n    Text.body \"Annual billing\"\n    Toggle =annual\n  if annual\n    Text.muted \"$10 a month, billed as $120 a year\"\n    Text.success \"You save $24 a year (20%) compared with monthly billing\"\n  SectionLabel \"Usage\"\n  Row between\n    Text.body \"Storage\"\n    Text.body \"68 of 100 GB (68%)\"\n  Progress 0.68\n  Row between\n    Text.body \"Seats\"\n    Text.body \"3 of 5 (60%)\"\n  Progress 0.6\n  Row gap:10\n    ActionButton \"Manage plan\" quiet icon:\"tune\"\n    ActionButton \"Cancel renewal\" danger icon:\"cancel\" -> emit cancel_renewal","usage":{"input_tokens":9371,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":384,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":619,"totalMs":3070}}
+{"tMs":619,"delta":"ChatCard \""}
+{"tMs":1004,"delta":"Pro pl"}
+{"tMs":1004,"delta":"an\" \"Ren"}
+{"tMs":1004,"delta":"ews"}
+{"tMs":1004,"delta":" Nov 18,"}
+{"tMs":1004,"delta":" in 3 days\" icon"}
+{"tMs":1004,"delta":":\"work"}
+{"tMs":1004,"delta":"space_prem"}
+{"tMs":1004,"delta":"ium\" status:\"Active\""}
+{"tMs":1004,"delta":" tone:acc"}
+{"tMs":1004,"delta":"ent\n  state annual=false"}
+{"tMs":1004,"delta":"\n  Row between"}
+{"tMs":1004,"delta":"\n    Text.strong \""}
+{"tMs":1196,"delta":"Pro plan\"\n    "}
+{"tMs":1196,"delta":"Text.strong \"{"}
+{"tMs":1196,"delta":"annual ? money"}
+{"tMs":1196,"delta":"(120,\\"}
+{"tMs":1196,"delta":"\"$\\\",0"}
+{"tMs":1196,"delta":") +"}
+{"tMs":1196,"delta":" \\\""}
+{"tMs":1196,"delta":"/yr\\\" : money("}
+{"tMs":1197,"delta":"12,\\\"$\\\",0"}
+{"tMs":1197,"delta":") + \\\"/mo\\"}
+{"tMs":1197,"delta":"\"}\"\n  "}
+{"tMs":1197,"delta":"Row between"}
+{"tMs":1526,"delta":"\n    Text.body"}
+{"tMs":1526,"delta":" \"Ann"}
+{"tMs":1526,"delta":"ual billing\"\n    To"}
+{"tMs":1526,"delta":"ggle =annual"}
+{"tMs":1526,"delta":"\n  if annual\n    Text"}
+{"tMs":1526,"delta":".mu"}
+{"tMs":1526,"delta":"ted \"$"}
+{"tMs":1526,"delta":"10"}
+{"tMs":1526,"delta":" a"}
+{"tMs":1526,"delta":" month, bill"}
+{"tMs":1526,"delta":"ed as"}
+{"tMs":1526,"delta":" $120 a year\""}
+{"tMs":1658,"delta":"\n    Text"}
+{"tMs":1658,"delta":".success"}
+{"tMs":1658,"delta":" \"You"}
+{"tMs":1658,"delta":" save $"}
+{"tMs":1658,"delta":"24"}
+{"tMs":1658,"delta":" a year ("}
+{"tMs":1658,"delta":"20"}
+{"tMs":1658,"delta":"%)"}
+{"tMs":1658,"delta":" compared with mon"}
+{"tMs":1659,"delta":"thly billing\"\n  S"}
+{"tMs":1659,"delta":"ectionLabel \"Us"}
+{"tMs":1659,"delta":"age\""}
+{"tMs":2271,"delta":"\n  Row between\n    "}
+{"tMs":2271,"delta":"Text.body \"Storage\""}
+{"tMs":2271,"delta":"\n    Text.body \"68"}
+{"tMs":2271,"delta":" of 100 GB ("}
+{"tMs":2271,"delta":"68%)\"\n  Prog"}
+{"tMs":2271,"delta":"ress 0.68\n  "}
+{"tMs":2271,"delta":"Row between\n    Text.body"}
+{"tMs":2271,"delta":" \"Seats\"\n    "}
+{"tMs":2271,"delta":"Text.body \"3 of "}
+{"tMs":2271,"delta":"5 (60%)\""}
+{"tMs":2271,"delta":"\n  Progress 0.6"}
+{"tMs":2272,"delta":"\n  Row g"}
+{"tMs":3058,"delta":"ap:10"}
+{"tMs":3058,"delta":"\n    ActionButton \""}
+{"tMs":3058,"delta":"Manage plan\" qu"}
+{"tMs":3058,"delta":"iet ic"}
+{"tMs":3058,"delta":"on:\"t"}
+{"tMs":3058,"delta":"une\"\n    ActionBut"}
+{"tMs":3058,"delta":"ton \"Cancel renew"}
+{"tMs":3058,"delta":"al\" danger icon:\""}
+{"tMs":3058,"delta":"cancel\""}
+{"tMs":3058,"delta":" -> emit cancel_"}
+{"tMs":3058,"delta":"renewal"}

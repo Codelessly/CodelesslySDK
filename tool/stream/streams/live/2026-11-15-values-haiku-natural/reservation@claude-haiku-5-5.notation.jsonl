@@ -1,0 +1,84 @@
+{"meta":{"ui":"reservation","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Let me book a table at Osteria Lume as an inline card: pick one of the next seven days (Sat 14, Sun 15, Mon 16, Tue 17, Wed 18, Thu 19, Fri 20), a party size from 1 to 8 (starting at 2), then a time slot: 17:30, 18:00, 18:30, 19:00, 19:30, 20:00, 20:30 or 21:00. Some are full and cannot be picked: on Sat 14 the 18:00 and 20:00 slots; on Sun 15 the 17:30 and 19:00 slots; on every day, for parties of 5 or more, 20:30 and 21:00 too. A confirm button, and once I confirm the card says \"Table booked\" with one line giving the day, the party size and the time.","text":"ChatCard \"Book a table\" \"Osteria Lume\" icon:\"restaurant\" status:\"Booking\"\n  state day=\"Sat 14\"\n  state party=2\n  state time=\"\"\n  state booked=false\n  let slots = [\"17:30\",\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\",\"21:00\"]\n  let full = party >= 5 ? [\"20:30\",\"21:00\"] : []\n  let unavailable = day == \"Sat 14\" ? [\"18:00\",\"20:00\"] : day == \"Sun 15\" ? [\"17:30\",\"19:00\"] : []\n  if booked\n    Receipt \"Table booked\" \"{day}, party of {party}, at {time}\" tone:good icon:\"check_circle\"\n  if !booked\n    SectionLabel \"Day\" \"next 7 days\"\n    DayPicker =day days:[\"Sat 14\",\"Sun 15\",\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"] -> time=\"\"\n    SectionLabel \"Party size\" \"1 to 8\"\n    Counter \"Guests\" =party min:1 max:8 step:1 -> time=\"\"\n    SectionLabel \"Time\" \"pick a slot\"\n    ChoiceChips =time options:=slots disabled:=union(unavailable,full) columns:4\n    TotalBar \"Booking\" \"{day}, party of {party}\" amount:=time cta:\"Confirm\" icon:\"check\" enabled:=time != \"\" -> booked=true","usage":{"input_tokens":9480,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":481,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":642,"totalMs":2342}}
+{"tMs":642,"delta":"ChatCard \"Book"}
+{"tMs":774,"delta":" a table\" \"Osteria"}
+{"tMs":774,"delta":" Lume\" icon:\""}
+{"tMs":774,"delta":"rest"}
+{"tMs":774,"delta":"aurant\" status:\""}
+{"tMs":774,"delta":"Booking\"\n  state day=\""}
+{"tMs":774,"delta":"Sat 14\"\n  "}
+{"tMs":788,"delta":"state party=2\n  state time"}
+{"tMs":808,"delta":"=\"\"\n  state boo"}
+{"tMs":829,"delta":"ked=false\n  let"}
+{"tMs":848,"delta":" slots = "}
+{"tMs":873,"delta":"[\"17:30\",\"18:00"}
+{"tMs":890,"delta":"\",\"18:30\",\"19:00"}
+{"tMs":936,"delta":"\",\"19:30\",\"20:00"}
+{"tMs":936,"delta":"\",\"20:30\",\""}
+{"tMs":951,"delta":"21:00\"]\n  let"}
+{"tMs":971,"delta":" full = party"}
+{"tMs":997,"delta":" >"}
+{"tMs":1011,"delta":"= 5 ? [\""}
+{"tMs":1031,"delta":"20"}
+{"tMs":1053,"delta":":30\",\"21:00\"]"}
+{"tMs":1072,"delta":" : []\n  let unav"}
+{"tMs":1093,"delta":"ailable = day == \"S"}
+{"tMs":1114,"delta":"at 14\" ? [\""}
+{"tMs":1134,"delta":"18:00\",\"20:00\""}
+{"tMs":1155,"delta":"] : day == \"Sun"}
+{"tMs":1177,"delta":" 15\" ? [\"17"}
+{"tMs":1202,"delta":":30\",\"19:00\"]"}
+{"tMs":1244,"delta":" : []\n  if boo"}
+{"tMs":1244,"delta":"ked"}
+{"tMs":1290,"delta":"\n    Rece"}
+{"tMs":1291,"delta":"ipt \"Table booked\""}
+{"tMs":1298,"delta":" \"{"}
+{"tMs":1318,"delta":"day"}
+{"tMs":1336,"delta":"}"}
+{"tMs":1357,"delta":", party"}
+{"tMs":1376,"delta":" of"}
+{"tMs":1397,"delta":" {party}, at"}
+{"tMs":1420,"delta":" {time}\" t"}
+{"tMs":1438,"delta":"one:good"}
+{"tMs":1457,"delta":" icon:\"check_"}
+{"tMs":1479,"delta":"circle\"\n  "}
+{"tMs":1498,"delta":"if"}
+{"tMs":1522,"delta":" !booked\n    S"}
+{"tMs":1553,"delta":"ectionLabel \"Day"}
+{"tMs":1560,"delta":"\" \"next"}
+{"tMs":1579,"delta":" "}
+{"tMs":1607,"delta":"7 "}
+{"tMs":1627,"delta":"days\"\n    DayPic"}
+{"tMs":1640,"delta":"ker =day"}
+{"tMs":1668,"delta":" days:[\"Sat 14"}
+{"tMs":1682,"delta":"\",\"Sun 15\",\""}
+{"tMs":1706,"delta":"Mon 16\",\"Tue"}
+{"tMs":1729,"delta":" 17\",\"Wed 18"}
+{"tMs":1744,"delta":"\",\"Thu 19\",\""}
+{"tMs":1764,"delta":"Fri 20\"] ->"}
+{"tMs":1792,"delta":" time=\"\"\n    Section"}
+{"tMs":1805,"delta":"Label \"Party size"}
+{"tMs":1827,"delta":"\" \"1"}
+{"tMs":1849,"delta":" to 8\"\n    "}
+{"tMs":1866,"delta":"Counter \""}
+{"tMs":1889,"delta":"Guests\" =party min:"}
+{"tMs":1907,"delta":"1 max:8 step:"}
+{"tMs":1927,"delta":"1 -> time=\"\""}
+{"tMs":1948,"delta":"\n    SectionLabel \""}
+{"tMs":1969,"delta":"Time\" \"p"}
+{"tMs":1989,"delta":"ick a sl"}
+{"tMs":2009,"delta":"ot\"\n    Choi"}
+{"tMs":2032,"delta":"ceChips =time options:="}
+{"tMs":2050,"delta":"slots disabled:="}
+{"tMs":2070,"delta":"union"}
+{"tMs":2091,"delta":"(unavailable,full)"}
+{"tMs":2113,"delta":" columns:4\n    T"}
+{"tMs":2132,"delta":"otalBar \"Boo"}
+{"tMs":2152,"delta":"king\" \"{day"}
+{"tMs":2172,"delta":"}"}
+{"tMs":2193,"delta":", party of {party}\""}
+{"tMs":2213,"delta":" am"}
+{"tMs":2234,"delta":"ount:=time cta:\""}
+{"tMs":2254,"delta":"Confirm\" icon:"}
+{"tMs":2275,"delta":"\"check\" enabled:="}
+{"tMs":2297,"delta":"time != \"\" -> booked"}
+{"tMs":2315,"delta":"=true"}

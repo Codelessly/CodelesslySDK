@@ -1,0 +1,277 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Coffee near you",
+    "subtitle": "5 shops within 0.6 mi",
+    "icon": "local_cafe",
+    "status": "Open now"
+   },
+   "children": [
+    "column1"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "MapPanel1",
+    "PlaceRow1",
+    "PlaceRow2",
+    "PlaceRow3",
+    "PlaceRow4",
+    "PlaceRow5"
+   ]
+  },
+  "MapPanel1": {
+   "type": "MapPanel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178.0
+   },
+   "props": {
+    "value": "pick",
+    "count": 5
+   }
+  },
+  "PlaceRow1": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Bean There",
+    "detail": "Espresso and pour-over",
+    "index": 1,
+    "rating": "4.8",
+    "distance": "0.2 mi",
+    "hours": "7:00 to 18:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow2": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Daily Grind",
+    "detail": "Bagels and cold brew",
+    "index": 2,
+    "rating": "4.6",
+    "distance": "0.3 mi",
+    "hours": "6:30 to 17:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow3": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Roast & Co",
+    "detail": "Single-origin beans",
+    "index": 3,
+    "rating": "4.7",
+    "distance": "0.4 mi",
+    "hours": "8:00 to 19:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow4": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "The Steam Cup",
+    "detail": "Lattes and pastries",
+    "index": 4,
+    "rating": "4.4",
+    "distance": "0.5 mi",
+    "hours": "7:30 to 20:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==4}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow5": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Cafe Lune",
+    "detail": "Quiet corner, late hours",
+    "index": 5,
+    "rating": "4.5",
+    "distance": "0.6 mi",
+    "hours": "10:00 to 23:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==5}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 5}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

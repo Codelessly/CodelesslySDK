@@ -1,0 +1,67 @@
+{"meta":{"ui":"poll","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Run a quick team poll in a card: \"Where should we go for lunch on Friday?\" with four options and their votes so far: Pho Saigon 5, Taqueria Luz 8, Green Bowl 3, Napoli Pizza 6. Before I vote I only see the options. When I vote, my vote is counted and I see each option's share as a bar with the percentage (rounded to a whole number), my choice marked as mine, and the total number of votes.","text":"ChatCard \"Team lunch poll\" \"Friday, where should we go?\" icon:\"how_to_vote\" status:\"Open\"\n  state pick=\"\"\n  state votes={\"Pho Saigon\":5,\"Taqueria Luz\":8,\"Green Bowl\":3,\"Napoli Pizza\":6}\n  let total = sum(map([\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"], n => votes[n]))\n  if pick==\"\"\n    Paragraph \"Where should we go for lunch on Friday? Pick one option and vote.\"\n    OptionList \"Where should we go for lunch on Friday?\" =pick options:[\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"]\n    ActionButton \"Vote\" primary enabled:{pick!=\"\"} -> votes=with(votes,pick,votes[pick]+1)\n  if pick!=\"\"\n    Paragraph \"Thanks, your vote for {pick} is counted.\"\n    each n in [\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"]\n      Row between\n        Text.strong \"{n}{n==pick ? ' (your vote)' : ''}\"\n        Text.muted \"{round(votes[n]*100/total,0)}%\"\n      Progress {votes[n]/total}\n    TotalBar \"Total votes\" \"{total} votes so far\" amount:{total} cta \"Done\" enabled:{false}","usage":{"input_tokens":10031,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":493,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":560,"totalMs":1887}}
+{"tMs":560,"delta":"ChatCard \"Team"}
+{"tMs":694,"delta":" lunch poll\" \""}
+{"tMs":694,"delta":"Friday, where should we go?"}
+{"tMs":694,"delta":"\" icon:\"how_to"}
+{"tMs":694,"delta":"_vote\" status:\""}
+{"tMs":694,"delta":"Open\"\n  state pick="}
+{"tMs":694,"delta":"\"\"\n  state votes={\""}
+{"tMs":703,"delta":"Pho Saigon\":"}
+{"tMs":723,"delta":"5,\"Taqueria"}
+{"tMs":743,"delta":" Luz\":8,\""}
+{"tMs":764,"delta":"Green Bowl\":3,"}
+{"tMs":784,"delta":"\"Napoli Piz"}
+{"tMs":805,"delta":"za\":6}\n  let total"}
+{"tMs":846,"delta":" = sum(map([\""}
+{"tMs":846,"delta":"Pho Saigon\",\""}
+{"tMs":866,"delta":"Taqueria Luz"}
+{"tMs":886,"delta":"\",\"Green Bowl\",\""}
+{"tMs":907,"delta":"Napoli Pizza"}
+{"tMs":927,"delta":"\"], n => votes[n"}
+{"tMs":947,"delta":"]))\n  if pick=="}
+{"tMs":968,"delta":"\"\"\n    Paragraph"}
+{"tMs":988,"delta":" \"Where should we go for l"}
+{"tMs":1009,"delta":"unch on Friday?"}
+{"tMs":1029,"delta":" Pick one option and vote.\""}
+{"tMs":1050,"delta":"\n    OptionList \""}
+{"tMs":1071,"delta":"Where should we go for lunch"}
+{"tMs":1091,"delta":" on Friday?\" =p"}
+{"tMs":1111,"delta":"ick options:[\"Pho"}
+{"tMs":1131,"delta":" Saigon\",\"Taque"}
+{"tMs":1152,"delta":"ria Luz\",\"Green"}
+{"tMs":1172,"delta":" Bowl\",\"Napoli"}
+{"tMs":1192,"delta":" Pizza\"]\n    "}
+{"tMs":1213,"delta":"ActionButton \"V"}
+{"tMs":1234,"delta":"ote\" primary enabled:"}
+{"tMs":1253,"delta":"{pick!=\"\"} -"}
+{"tMs":1274,"delta":"> votes=with(votes"}
+{"tMs":1294,"delta":",pick,votes[p"}
+{"tMs":1315,"delta":"ick]+1)\n  if"}
+{"tMs":1335,"delta":" pick!=\"\"\n    "}
+{"tMs":1357,"delta":"Paragraph \"Than"}
+{"tMs":1378,"delta":"ks, your vote for {p"}
+{"tMs":1396,"delta":"ick} is counted.\"\n    "}
+{"tMs":1416,"delta":"each"}
+{"tMs":1438,"delta":" n in [\"Pho"}
+{"tMs":1467,"delta":" Saigon\",\"Taque"}
+{"tMs":1490,"delta":"ria Luz\",\"Green"}
+{"tMs":1503,"delta":" Bowl\",\"Napoli"}
+{"tMs":1518,"delta":" Pizza\"]\n      "}
+{"tMs":1539,"delta":"Row between\n        Text."}
+{"tMs":1559,"delta":"strong \"{n}{n"}
+{"tMs":1581,"delta":"==pick ? ' ("}
+{"tMs":1600,"delta":"your vote)' : ''"}
+{"tMs":1621,"delta":"}\"\n        Text.mu"}
+{"tMs":1748,"delta":"ted \"{round(votes["}
+{"tMs":1748,"delta":"n]*100/total,0"}
+{"tMs":1748,"delta":")}%\"\n      Prog"}
+{"tMs":1748,"delta":"ress {votes[n]/"}
+{"tMs":1748,"delta":"total}\n    TotalB"}
+{"tMs":1748,"delta":"ar \"Total votes\" \""}
+{"tMs":1764,"delta":"{total} votes so far\""}
+{"tMs":1784,"delta":" amount:{total} cta"}
+{"tMs":1806,"delta":" \""}
+{"tMs":1825,"delta":"Done"}
+{"tMs":1845,"delta":"\" enabled:{"}
+{"tMs":1865,"delta":"false"}
+{"tMs":1887,"delta":"}"}

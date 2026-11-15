@@ -1,0 +1,42 @@
+{"meta":{"ui":"image_gallery","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (gradients as placeholders), each with a caption: 1 Harbour at sunrise, 2 Old town market, 3 Forest trail, 4 Desert dunes, 5 Evening skyline, 6 Hidden lagoon, 7 Mountain hut, 8 Street festival, 9 Night train. Tapping one opens it large with its caption, previous and next arrows, a counter such as \"3 of 9\" and a close button; the arrow keys and Escape work too.","text":"state open=0\nstate photos=[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},{\"kind\":\"market\",\"caption\":\"Old town market\"},{\"kind\":\"forest\",\"caption\":\"Forest trail\"},{\"kind\":\"dunes\",\"caption\":\"Desert dunes\"},{\"kind\":\"skyline\",\"caption\":\"Evening skyline\"},{\"kind\":\"lagoon\",\"caption\":\"Hidden lagoon\"},{\"kind\":\"mountain\",\"caption\":\"Mountain hut\"},{\"kind\":\"festival\",\"caption\":\"Street festival\"},{\"kind\":\"train\",\"caption\":\"Night train\"}]\n\nChatCard \"Trip photos\" \"Nine moments from the trip\" icon:\"photo_library\" status:\"9 photos\" w:390\n  PhotoGallery =open photos:=photos layout:grid columns:3 fade:false","usage":{"input_tokens":9395,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":278,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":614,"totalMs":1456}}
+{"tMs":614,"delta":"state"}
+{"tMs":762,"delta":" open"}
+{"tMs":762,"delta":"=0"}
+{"tMs":762,"delta":"\nstate photos=[{\""}
+{"tMs":762,"delta":"kind\":\"harbor\",\""}
+{"tMs":762,"delta":"caption\":\"Harbour"}
+{"tMs":762,"delta":" at sunrise\"},{"}
+{"tMs":762,"delta":"\"kind\":\"market\",\"ca"}
+{"tMs":775,"delta":"ption\":\"Old town market\""}
+{"tMs":796,"delta":"},{\"kind\":\"for"}
+{"tMs":816,"delta":"est\",\"caption\":\"For"}
+{"tMs":837,"delta":"est trail\"},{\"k"}
+{"tMs":857,"delta":"ind\":\"dunes\",\"ca"}
+{"tMs":938,"delta":"ption\":\"Desert dun"}
+{"tMs":938,"delta":"es\"},{\"kind\":"}
+{"tMs":938,"delta":"\"skyline\",\"caption\":"}
+{"tMs":941,"delta":"\"Evening skyline\""}
+{"tMs":959,"delta":"},{\"kind\":\"l"}
+{"tMs":982,"delta":"agoon\",\"caption\":\""}
+{"tMs":1000,"delta":"Hidden lagoon"}
+{"tMs":1021,"delta":"\"},{\"kind\":\""}
+{"tMs":1041,"delta":"mountain\",\"caption\":\""}
+{"tMs":1062,"delta":"Mountain hut\"},"}
+{"tMs":1082,"delta":"{\"kind\":\"festival"}
+{"tMs":1102,"delta":"\",\"caption\":\"Street fest"}
+{"tMs":1123,"delta":"ival\"},{\"kind\":"}
+{"tMs":1143,"delta":"\"train\",\"caption\":\""}
+{"tMs":1164,"delta":"Night train\"}]"}
+{"tMs":1205,"delta":"\n\nChatCard \"Trip"}
+{"tMs":1225,"delta":" photos\" \"N"}
+{"tMs":1245,"delta":"ine mo"}
+{"tMs":1265,"delta":"ments from"}
+{"tMs":1286,"delta":" the trip\" icon:\""}
+{"tMs":1307,"delta":"photo_library\" status:\""}
+{"tMs":1328,"delta":"9"}
+{"tMs":1347,"delta":" photos\" w:390"}
+{"tMs":1367,"delta":"\n  PhotoGallery"}
+{"tMs":1435,"delta":" =open photos:="}
+{"tMs":1435,"delta":"photos layout:gr"}
+{"tMs":1435,"delta":"id columns:3 fade"}
+{"tMs":1450,"delta":":false"}

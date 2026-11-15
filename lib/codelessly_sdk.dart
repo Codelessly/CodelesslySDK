@@ -254,6 +254,7 @@ export 'src/app/viewport.dart'
     hide CanvasBox, CanvasSizingScope, CanvasViewport;
 // Agent-written UI: a document edited by ops, and the widget that shows it.
 export 'src/session/ui_session.dart';
+export 'src/session/on_demand_blocks.dart';
 export 'src/session/view.dart' hide SessionValues, ThemedSource;
 export 'src/session/shown.dart' show shownDiagnostics, paragraphIssues;
 

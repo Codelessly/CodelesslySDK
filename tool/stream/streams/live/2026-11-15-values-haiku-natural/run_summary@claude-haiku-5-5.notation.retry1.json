@@ -1,0 +1,463 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Morning run",
+    "subtitle": "5.0 km · today",
+    "icon": "directions_run",
+    "status": "Done",
+    "tone": "good"
+   },
+   "children": [
+    "row1",
+    "row2",
+    "ChartCard1",
+    "SectionLabel1",
+    "TableHeader1",
+    "TableRow1",
+    "TableRow2",
+    "TableRow3",
+    "TableRow4",
+    "TableRow5",
+    "Callout1",
+    "Receipt1",
+    "ActionButton1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Distance",
+    "note": "km",
+    "value": "5.0",
+    "delta": "+0%"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total time",
+    "note": "mm:ss",
+    "value": "27:00",
+    "delta": "+0%"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "StatTile3",
+    "StatTile4"
+   ]
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Avg pace",
+    "note": "per km",
+    "value": "5:24",
+    "delta": "+0%"
+   }
+  },
+  "StatTile4": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Calories",
+    "note": "kcal",
+    "value": "380",
+    "delta": "+0%"
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pace per km",
+    "value": "5:24",
+    "values": [
+     330,
+     325,
+     335,
+     320,
+     310
+    ],
+    "labels": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "kind": "line"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Splits",
+    "note": "per km"
+   }
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "km",
+     "Pace",
+     "Time"
+    ],
+    "keys": [
+     "km",
+     "pace",
+     "time"
+    ],
+    "widths": [
+     60,
+     120,
+     120
+    ]
+   },
+   "bind": {
+    "props.desc": "${desc}"
+   }
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "1",
+     "5:30",
+     "5:30"
+    ],
+    "widths": [
+     60,
+     120,
+     120
+    ]
+   }
+  },
+  "TableRow2": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "2",
+     "5:25",
+     "10:55"
+    ],
+    "widths": [
+     60,
+     120,
+     120
+    ]
+   }
+  },
+  "TableRow3": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "3",
+     "5:35",
+     "16:30"
+    ],
+    "widths": [
+     60,
+     120,
+     120
+    ]
+   }
+  },
+  "TableRow4": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "4",
+     "5:20",
+     "21:50"
+    ],
+    "widths": [
+     60,
+     120,
+     120
+    ]
+   }
+  },
+  "TableRow5": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "5",
+     "5:10",
+     "27:00"
+    ],
+    "widths": [
+     60,
+     120,
+     120
+    ]
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Versus last run",
+    "message": "Last run: 5.0 km in 28:15. Today: 27:00. You were 1:15 faster.",
+    "tone": "good",
+    "icon": "trending_down"
+   }
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Shared",
+    "message": "Your run was shared.",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "visible": "${= shared}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Share",
+    "tone": "primary",
+    "icon": "share"
+   },
+   "bind": {
+    "visible": "${= !shared}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "shared",
+       "value": "${= true}"
+      },
+      {
+       "type": "showToast",
+       "message": "Shared"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "km"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "shared",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "lastRun",
+    "type": "integer",
+    "value": 1695
+   },
+   {
+    "name": "total",
+    "type": "integer",
+    "value": 1620
+   },
+   {
+    "name": "avgPace",
+    "type": "integer",
+    "value": 324
+   }
+  ]
+ }
+}

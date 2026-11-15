@@ -1,0 +1,70 @@
+{
+ "ui": "poll",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24214,
+ "turns": [
+  {
+   "input_tokens": 9366,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 503,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 747,
+   "totalMs": 2621,
+   "chars": 1030,
+   "lines": 17,
+   "jsonTails": 1,
+   "nodes": 14,
+   "outputTokensPerNode": "35.9",
+   "notationIssues": [
+    "line 16:1: Not valid JSON: {votes[item]/(sum(map([\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"], n => votes[n])))}",
+    "line 16:18: The {…} tail is a JSON object merged into the node."
+   ],
+   "errors": [
+    "wrong_type /nodes/TotalBar1/props/cta: Expected text, got a boolean (true)."
+   ]
+  },
+  {
+   "input_tokens": 10031,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 493,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 560,
+   "totalMs": 1887,
+   "chars": 992,
+   "lines": 16,
+   "jsonTails": 1,
+   "nodes": 13,
+   "outputTokensPerNode": "37.9",
+   "notationIssues": [
+    "line 15:1: Not valid JSON: {votes[item]/(sum(map([\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"], n => votes[n])))}",
+    "line 15:16: The {…} tail is a JSON object merged into the node."
+   ],
+   "errors": [
+    "wrong_type /nodes/TotalBar1/props/cta: Expected text, got a boolean (true)."
+   ]
+  }
+ ]
+}

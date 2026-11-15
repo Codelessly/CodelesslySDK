@@ -1,0 +1,175 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Phone plans",
+    "subtitle": "Lite against Max",
+    "icon": "compare_arrows",
+    "status": "Compare"
+   },
+   "children": [
+    "ComparisonTable1",
+    "Receipt1",
+    "Receipt2"
+   ]
+  },
+  "ComparisonTable1": {
+   "type": "ComparisonTable",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Lite",
+     "Max"
+    ],
+    "prices": [
+     "$25/mo",
+     "$45/mo"
+    ],
+    "pick": "1",
+    "pickLabel": "Best value",
+    "cta": "Choose",
+    "rows": [
+     [
+      "Data",
+      "10 GB",
+      "Unlimited",
+      2
+     ],
+     [
+      "Calls",
+      "500 min",
+      "Unlimited",
+      2
+     ],
+     [
+      "Roaming",
+      "Not included",
+      "EU and US",
+      2
+     ],
+     [
+      "Contract",
+      "Monthly",
+      "24 months",
+      1
+     ],
+     [
+      "Extras",
+      "None",
+      "Streaming and 5G",
+      2
+     ],
+     [
+      "Price",
+      "$25/mo",
+      "$45/mo",
+      1
+     ]
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChoose"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lite chosen",
+    "message": "You picked the Lite plan at $25 a month.",
+    "tone": "good",
+    "icon": "check_rounded"
+   },
+   "bind": {
+    "visible": "${= pick==0}"
+   }
+  },
+  "Receipt2": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Max chosen",
+    "message": "You picked the Max plan at $45 a month.",
+    "tone": "good",
+    "icon": "check_rounded"
+   },
+   "bind": {
+    "visible": "${= pick==2}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

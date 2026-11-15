@@ -1,0 +1,204 @@
+{"meta":{"ui":"checkout","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Build a small checkout in three steps. Step 1, my cart: Espresso beans $24 x1, Ceramic mug $12 x2, Canvas tote $18 x1, with quantities I can change and the subtotal. Step 2, shipping: name, address, city, postcode and email, all required, with a message under a field that is empty or an email without an @. Step 3, payment summary: a choice of Standard delivery ($4, 3 to 5 working days) or Express ($12, next working day) that changes the total, subtotal plus delivery. Then a confirmation with an order number, my name, my email and the total I paid. I can go back a step without losing what I typed.","text":"state step=1\nstate items=[{\"id\":\"beans\",\"name\":\"Espresso beans\",\"price\":24,\"qty\":1},{\"id\":\"mug\",\"name\":\"Ceramic mug\",\"price\":12,\"qty\":2},{\"id\":\"tote\",\"name\":\"Canvas tote\",\"price\":18,\"qty\":1}]\nstate name=\"\"\nstate address=\"\"\nstate city=\"\"\nstate postcode=\"\"\nstate email=\"\"\nstate delivery=\"Standard\"\nlet subtotal = sum(map(items, i => i.qty * i.price))\nlet shipping = delivery == \"Express\" ? 12 : 4\nlet total = subtotal + shipping\nlet nameErr = trim(name) == \"\" ? \"Name is required\" : \"\"\nlet addrErr = trim(address) == \"\" ? \"Address is required\" : \"\"\nlet cityErr = trim(city) == \"\" ? \"City is required\" : \"\"\nlet postErr = trim(postcode) == \"\" ? \"Postcode is required\" : \"\"\nlet emailErr = trim(email) == \"\" ? \"Email is required\" : (contains(email, \"@\") ? \"\" : \"Enter a valid email\")\nlet shipValid = nameErr == \"\" and addrErr == \"\" and cityErr == \"\" and postErr == \"\" and emailErr == \"\"\nlet orderNo = \"ORD-\" + replace(upper(name), \" \", \"\") + \"-\" + round(total, 0)\nCard w:390 gap:12 pad:16\n  Row between\n    Text.heading \"Checkout\"\n    Text.muted \"Step {step} of 3\"\n  Progress =step\n  if step == 1\n    Text.title \"Your cart\"\n    each item in items\n      Row between\n        Column\n          Text.strong \"{item.name}\"\n          Text.muted \"${item.price} each\"\n        Row gap:8\n          IconButton \"remove\" -> items = updateWhere(items, x => x.id == item.id, x => with(x, \"qty\", max(0, x.qty - 1)))\n          Text.strong \"{item.qty}\"\n          IconButton \"add\" -> items = updateWhere(items, x => x.id == item.id, x => with(x, \"qty\", x.qty + 1))\n    Divider\n    Row between\n      Text.strong \"Subtotal\"\n      Text.strong \"${fixed(subtotal, 2)}\"\n    Button \"Continue to shipping\" enabled:{length(items) > 0} -> step = 2\n  if step == 2\n    Text.title \"Shipping\"\n    InputField \"Full name\" \"Jane Doe\" =name error:{nameErr}\n    InputField \"Address\" \"12 High Street\" =address error:{addrErr}\n    InputField \"City\" \"London\" =city error:{cityErr}\n    InputField \"Postcode\" \"SW1A 1AA\" =postcode error:{postErr}\n    InputField \"Email\" \"you@example.com\" =email error:{emailErr}\n    Row gap:8\n      Button.outline \"Back\" -> step = 1\n      Button \"Continue\" enabled:{shipValid} -> step = 3\n  if step == 3\n    Text.title \"Payment summary\"\n    OptionList \"Delivery\" =delivery options:[\"Standard\",\"Express\"] details:[\"3 to 5 working days\",\"Next working day\"] prices:[\"$4\",\"$12\"] -> step = 3\n    Details rows:[[\"Subtotal\", \"${fixed(subtotal, 2)}\"],[\"Delivery\", \"${fixed(shipping, 2)}\"],[\"Total\", \"${fixed(total, 2)}\"]]\n    Row gap:8\n      Button.outline \"Back\" -> step = 2\n      Button \"Place order\" -> step = 4\n  if step == 4\n    Receipt \"Order confirmed\" \"Thanks {name}. A confirmation is on its way to {email}.\" code:{orderNo} codeLabel:\"Order number\" tone:good\n    Details rows:[[\"Name\", \"{name}\"],[\"Email\", \"{email}\"],[\"Total paid\", \"${fixed(total, 2)}\"]]","usage":{"input_tokens":9434,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1270,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":588,"totalMs":4720}}
+{"tMs":588,"delta":"state"}
+{"tMs":727,"delta":" step"}
+{"tMs":727,"delta":"=1\nstate items"}
+{"tMs":727,"delta":"=[{\"id"}
+{"tMs":728,"delta":"\":\""}
+{"tMs":728,"delta":"be"}
+{"tMs":728,"delta":"ans\",\"name\":\"Espres"}
+{"tMs":728,"delta":"so beans\",\"price\":24,"}
+{"tMs":751,"delta":"\"qty\":1},{\""}
+{"tMs":771,"delta":"id\":\"mug\",\"name\":"}
+{"tMs":789,"delta":"\"Ceramic mug"}
+{"tMs":810,"delta":"\",\"price\":12,\"qty"}
+{"tMs":830,"delta":"\":2},{\"id\":\""}
+{"tMs":930,"delta":"tote\",\"name\":\"Can"}
+{"tMs":930,"delta":"vas tote\",\"price\":18"}
+{"tMs":930,"delta":",\"qty\":1}]"}
+{"tMs":930,"delta":"\nstate"}
+{"tMs":931,"delta":" name=\"\"\nstate"}
+{"tMs":953,"delta":" address=\"\"\nstate city=\"\""}
+{"tMs":973,"delta":"\nstate postcode=\"\""}
+{"tMs":994,"delta":"\nstate email=\"\"\nstate deliv"}
+{"tMs":1014,"delta":"ery=\""}
+{"tMs":1034,"delta":"Standard\"\nlet subtot"}
+{"tMs":1055,"delta":"al = sum(map(items"}
+{"tMs":1075,"delta":", i => i.qty *"}
+{"tMs":1098,"delta":" i.price))\nlet sh"}
+{"tMs":1116,"delta":"ipping = del"}
+{"tMs":1136,"delta":"ivery == \"Express"}
+{"tMs":1158,"delta":"\" ? 12"}
+{"tMs":1179,"delta":" : 4\nlet total ="}
+{"tMs":1200,"delta":" subtotal + shipping"}
+{"tMs":1219,"delta":"\nlet nameEr"}
+{"tMs":1238,"delta":"r = tr"}
+{"tMs":1262,"delta":"im(name) == \""}
+{"tMs":1279,"delta":"\" ? \""}
+{"tMs":1300,"delta":"Name is required\" : \"\""}
+{"tMs":1323,"delta":"\nlet addrErr = trim"}
+{"tMs":1341,"delta":"(address) == \"\" ?"}
+{"tMs":1361,"delta":" \"Address is required\" : "}
+{"tMs":1383,"delta":"\"\"\nlet cityErr ="}
+{"tMs":1402,"delta":" trim(city) == \"\""}
+{"tMs":1424,"delta":" ? \"City is required\" :"}
+{"tMs":1444,"delta":" \"\"\nlet postErr ="}
+{"tMs":1464,"delta":" trim(postcode) =="}
+{"tMs":1484,"delta":" \"\" ? \"Postc"}
+{"tMs":1504,"delta":"ode is required\" : \"\""}
+{"tMs":1528,"delta":"\nlet emailErr = tr"}
+{"tMs":1547,"delta":"im(email) == \"\" "}
+{"tMs":1566,"delta":"? \"Email is required\" :"}
+{"tMs":1586,"delta":" ("}
+{"tMs":1606,"delta":"contains(email, \"@\")"}
+{"tMs":1628,"delta":" ? \"\" : \"En"}
+{"tMs":1647,"delta":"ter a valid email\")\nlet"}
+{"tMs":1667,"delta":" shipVal"}
+{"tMs":1687,"delta":"id = nameErr == \""}
+{"tMs":1708,"delta":"\" and addrErr == \""}
+{"tMs":1728,"delta":"\" and cityErr == \""}
+{"tMs":1749,"delta":"\" and postErr == \"\""}
+{"tMs":1771,"delta":" and emailErr == \"\""}
+{"tMs":1789,"delta":"\nlet orderN"}
+{"tMs":1814,"delta":"o = \"ORD-\""}
+{"tMs":1830,"delta":" + replace(up"}
+{"tMs":1851,"delta":"per(name"}
+{"tMs":1872,"delta":"), \" \", \"\")"}
+{"tMs":1892,"delta":" + \"-\" + round"}
+{"tMs":1912,"delta":"(total"}
+{"tMs":1935,"delta":", 0"}
+{"tMs":1953,"delta":")\nCard w"}
+{"tMs":1974,"delta":":390 gap:12"}
+{"tMs":1995,"delta":" pad:16\n  "}
+{"tMs":2014,"delta":"Row between\n    Text.he"}
+{"tMs":2035,"delta":"ading \"Checkout\""}
+{"tMs":2056,"delta":"\n    Text.mu"}
+{"tMs":2075,"delta":"ted \"Step {step}"}
+{"tMs":2096,"delta":" of 3\"\n  "}
+{"tMs":2118,"delta":"Progress ="}
+{"tMs":2137,"delta":"step\n  if step == 1"}
+{"tMs":2158,"delta":"\n    Text"}
+{"tMs":2177,"delta":".title \""}
+{"tMs":2200,"delta":"Your cart\"\n    each"}
+{"tMs":2218,"delta":" item in items\n      Row"}
+{"tMs":2239,"delta":" between"}
+{"tMs":2259,"delta":"\n        Column"}
+{"tMs":2280,"delta":"\n          Text.strong \""}
+{"tMs":2300,"delta":"{item.name}\"\n          "}
+{"tMs":2320,"delta":"Text."}
+{"tMs":2341,"delta":"muted \"${"}
+{"tMs":2361,"delta":"item"}
+{"tMs":2382,"delta":".price} each"}
+{"tMs":2402,"delta":"\"\n        Row gap:"}
+{"tMs":2426,"delta":"8\n          IconButton \""}
+{"tMs":2444,"delta":"rem"}
+{"tMs":2463,"delta":"ove\" -> items"}
+{"tMs":2484,"delta":" ="}
+{"tMs":2504,"delta":" updateWhere(items,"}
+{"tMs":2524,"delta":" x => x.id == item."}
+{"tMs":2545,"delta":"id, x => with(x,"}
+{"tMs":2565,"delta":" \"qty\", max(0,"}
+{"tMs":2585,"delta":" x.qty - 1)"}
+{"tMs":2606,"delta":"))\n          Text"}
+{"tMs":2627,"delta":".strong \"{item.q"}
+{"tMs":2647,"delta":"ty}\"\n          IconBut"}
+{"tMs":2667,"delta":"ton \"add\" -> items ="}
+{"tMs":2688,"delta":" updateWhere(items,"}
+{"tMs":2709,"delta":" x => x.id == item."}
+{"tMs":2730,"delta":"id, x => with(x,"}
+{"tMs":2748,"delta":" \"qty\", x.qty"}
+{"tMs":2769,"delta":" + 1))\n    Div"}
+{"tMs":2789,"delta":"ider\n    "}
+{"tMs":2815,"delta":"Row between\n      Text."}
+{"tMs":2830,"delta":"strong \"Subtotal"}
+{"tMs":2851,"delta":"\"\n      Text.str"}
+{"tMs":2875,"delta":"ong \"${"}
+{"tMs":2891,"delta":"fixed(subtotal"}
+{"tMs":2912,"delta":", 2)}\"\n    "}
+{"tMs":2932,"delta":"Button \"Contin"}
+{"tMs":2953,"delta":"ue to"}
+{"tMs":2973,"delta":" shipping\" en"}
+{"tMs":2998,"delta":"abled:{length"}
+{"tMs":3014,"delta":"(items) > 0} -"}
+{"tMs":3039,"delta":"> step = 2\n  if"}
+{"tMs":3055,"delta":" step == 2\n    Text"}
+{"tMs":3075,"delta":".title \"Shipping\""}
+{"tMs":3107,"delta":"\n    In"}
+{"tMs":3122,"delta":"putField \"Full name\" \""}
+{"tMs":3139,"delta":"J"}
+{"tMs":3157,"delta":"ane Do"}
+{"tMs":3177,"delta":"e\" =name error"}
+{"tMs":3197,"delta":":{"}
+{"tMs":3218,"delta":"nameErr}\n    In"}
+{"tMs":3238,"delta":"putField \"Address\" \"12"}
+{"tMs":3259,"delta":" High"}
+{"tMs":3279,"delta":" Street\" =address error"}
+{"tMs":3303,"delta":":{addrErr}"}
+{"tMs":3323,"delta":"\n    InputField \"City\" \""}
+{"tMs":3340,"delta":"London\" =city error"}
+{"tMs":3361,"delta":":{cityErr}"}
+{"tMs":3381,"delta":"\n    InputField \"Postc"}
+{"tMs":3402,"delta":"ode\" \"S"}
+{"tMs":3422,"delta":"W1A"}
+{"tMs":3443,"delta":" 1AA\" =postc"}
+{"tMs":3463,"delta":"ode error:{postErr}"}
+{"tMs":3484,"delta":"\n    InputField \"Email"}
+{"tMs":3504,"delta":"\" \"you@example.com\""}
+{"tMs":3527,"delta":" =email error:{emailEr"}
+{"tMs":3545,"delta":"r}\n    Row gap"}
+{"tMs":3567,"delta":":8\n      Button."}
+{"tMs":3586,"delta":"outline \"Back\" ->"}
+{"tMs":3606,"delta":" step = 1\n      Button"}
+{"tMs":3626,"delta":" \"Continue\" enabled"}
+{"tMs":3647,"delta":":{shipValid} -"}
+{"tMs":3667,"delta":"> step = 3\n  if"}
+{"tMs":3687,"delta":" step == 3\n    Text"}
+{"tMs":3708,"delta":".title \"Payment summary"}
+{"tMs":3729,"delta":"\"\n    OptionList \""}
+{"tMs":3748,"delta":"Del"}
+{"tMs":3769,"delta":"ivery\""}
+{"tMs":3789,"delta":" =delivery options:[\""}
+{"tMs":3810,"delta":"Standard\",\"Express\"] details"}
+{"tMs":3831,"delta":":[\"3"}
+{"tMs":3851,"delta":" to 5 working days\",\""}
+{"tMs":3873,"delta":"Next working day\"] prices"}
+{"tMs":3894,"delta":":[\"$4\",\""}
+{"tMs":3913,"delta":"$12\"]"}
+{"tMs":3936,"delta":" -> step = 3"}
+{"tMs":3953,"delta":"\n    Details"}
+{"tMs":3974,"delta":" rows:"}
+{"tMs":3994,"delta":"[[\"Subtotal\","}
+{"tMs":4019,"delta":" \"${fixed(subt"}
+{"tMs":4035,"delta":"otal, 2)}\""}
+{"tMs":4060,"delta":"],"}
+{"tMs":4075,"delta":"[\"Delivery\", \"${"}
+{"tMs":4096,"delta":"fixed(shipping,"}
+{"tMs":4117,"delta":" 2)}\"],"}
+{"tMs":4139,"delta":"[\"Total\", \"${fix"}
+{"tMs":4157,"delta":"ed(total, 2)}"}
+{"tMs":4183,"delta":"\"]]\n    Row g"}
+{"tMs":4199,"delta":"ap:8\n      Button."}
+{"tMs":4218,"delta":"outline \"Back\" ->"}
+{"tMs":4238,"delta":" step = 2\n      Button"}
+{"tMs":4259,"delta":" \"Place"}
+{"tMs":4279,"delta":" order\" -> step = 4"}
+{"tMs":4302,"delta":"\n  if step == 4"}
+{"tMs":4320,"delta":"\n    Receipt \""}
+{"tMs":4340,"delta":"Order confirmed\" \""}
+{"tMs":4361,"delta":"Than"}
+{"tMs":4381,"delta":"ks {"}
+{"tMs":4402,"delta":"name}."}
+{"tMs":4425,"delta":" A"}
+{"tMs":4442,"delta":" confirmation is"}
+{"tMs":4464,"delta":" on"}
+{"tMs":4483,"delta":" its"}
+{"tMs":4504,"delta":" way to {email}.\" code:"}
+{"tMs":4524,"delta":"{orderNo} cod"}
+{"tMs":4544,"delta":"eLabel:\"Order"}
+{"tMs":4565,"delta":" number\" tone:good\n    "}
+{"tMs":4587,"delta":"Details rows:[[\""}
+{"tMs":4606,"delta":"Name\", \""}
+{"tMs":4626,"delta":"{name}\"],[\"Email"}
+{"tMs":4648,"delta":"\", \"{email}\"],[\""}
+{"tMs":4667,"delta":"Total paid\", \"${f"}
+{"tMs":4688,"delta":"ixed(total, 2)"}
+{"tMs":4708,"delta":"}\"]]"}

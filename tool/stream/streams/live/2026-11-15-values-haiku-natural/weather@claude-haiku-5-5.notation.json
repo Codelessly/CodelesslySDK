@@ -1,0 +1,248 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lisbon weather",
+    "subtitle": "Right now",
+    "icon": "cloud",
+    "status": "Live"
+   },
+   "children": [
+    "WeatherNow1",
+    "SectionLabel1",
+    "WeatherHours1",
+    "SectionLabel2",
+    "WeatherDay1",
+    "WeatherDay2",
+    "WeatherDay3",
+    "Callout1",
+    "ActionButton1"
+   ]
+  },
+  "WeatherNow1": {
+   "type": "WeatherNow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lisbon",
+    "detail": "Partly cloudy",
+    "temp": "22",
+    "high": "24",
+    "low": "15",
+    "kind": "partly"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next hours"
+   }
+  },
+  "WeatherHours1": {
+   "type": "WeatherHours",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "hours": [
+     "1 PM",
+     "2 PM",
+     "3 PM",
+     "4 PM",
+     "5 PM"
+    ],
+    "temps": [
+     23,
+     24,
+     24,
+     23,
+     21
+    ],
+    "kinds": [
+     "sun",
+     "sun",
+     "partly",
+     "cloud",
+     "rain"
+    ]
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next three days"
+   }
+  },
+  "WeatherDay1": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Tue",
+    "low": 14,
+    "high": 20,
+    "kind": "rain",
+    "min": 13,
+    "max": 25
+   }
+  },
+  "WeatherDay2": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Wed",
+    "low": 13,
+    "high": 18,
+    "kind": "partly",
+    "min": 13,
+    "max": 25
+   }
+  },
+  "WeatherDay3": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Thu",
+    "low": 15,
+    "high": 25,
+    "kind": "sun",
+    "min": 13,
+    "max": 25
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Rain alert is on",
+    "message": "We will tell you before rain arrives.",
+    "tone": "good",
+    "icon": "notifications_active"
+   },
+   "bind": {
+    "visible": "${= alert}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Alert me before it rains",
+    "tone": "primary",
+    "icon": "notifications"
+   },
+   "bind": {
+    "visible": "${= !alert}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "alert",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "alert",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}
