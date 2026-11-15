@@ -1,0 +1,27 @@
+{
+ "model": "claude-opus-5-5",
+ "status": "passed",
+ "problems": 0,
+ "final": 2,
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 41.1,
+   "checkAndRenderSeconds": 31.4,
+   "problems": 2,
+   "ops": 59,
+   "input_tokens": 18591,
+   "output_tokens": 5072
+  },
+  {
+   "round": 2,
+   "modelSeconds": 30.6,
+   "checkAndRenderSeconds": 32.9,
+   "problems": 0,
+   "ops": 60,
+   "input_tokens": 24716,
+   "output_tokens": 4300
+  }
+ ],
+ "totalSeconds": 163.4
+}

@@ -5,7 +5,10 @@ actions stay as they were; only how it looks changes. The experiment for "fast, 
 
     ANTHROPIC_API_KEY=... python3 examples/showcase/tool/style_pass.py --card <document.json> --out <dir> \
         [--request <file: what the user asked for>] [--model claude-opus-5-5] [--rounds 2] \
-        [--design-system design_systems/cards] [--width 420] [--narrow 320]
+        [--design-system design_systems/cards] [--width 420] [--narrow 320] [--blocks]
+
+--blocks tells the agent of the design system's own blocks (each one's purpose, props and events, and the three
+closest to the request as written) and lets it put a block in place of plain nodes that show the same thing.
 
 --width and --narrow are the widths it is rendered at (a full page on a desktop: --width 1280 --narrow 768).
 
@@ -54,7 +57,47 @@ def render(card, ds, d, width=420, narrow=320):
     return problems, texts
 
 
-def brief_for(ds, doc, request):
+def own_blocks(ds, manifest):
+    """The design system's own blocks (not the stock controls it copies from its base), as their documents."""
+    base = os.path.join(os.path.dirname(ds), 'ssui', 'components')
+    stock = set(os.listdir(base)) if os.path.isdir(base) and os.path.basename(ds) != 'ssui' else set()
+    out = []
+    for ref in manifest['components']:
+        if os.path.basename(ref) in stock or not os.path.exists(f'{ds}/{ref}'):
+            continue
+        d = json.load(open(f'{ds}/{ref}'))
+        if isinstance(d.get('widget'), dict):
+            out.append(d)
+    return out
+
+
+def blocks_section(ds, manifest, doc, request, exemplars=3):
+    """What the agent is told of the system's blocks: each one's purpose, props and events, and the few closest
+    to this request as written, so it sees the bar and can use a block where one fits."""
+    blocks = own_blocks(ds, manifest)
+    if not blocks:
+        return ''
+    words = lambda t: {w for w in ''.join(c.lower() if c.isalnum() else ' ' for c in t).split() if len(w) > 3}
+    said = words(request + ' ' + ' '.join(str((n.get('props') or {}).get('text', '')) for n in doc['nodes'].values()))
+    lines = []
+    for d in blocks:
+        w = d['widget']
+        props = ', '.join(f"{p['key']} ({(p.get('type') or {}).get('kind', '?')}{', required' if p.get('required') else ''})" for p in w.get('props', []))
+        events = ', '.join(e['key'] for e in w.get('events', []))
+        lines.append(f"{w['type']}: {w.get('doc', '')}\n    props: {props or 'none'}{'; events: ' + events if events else ''}{'; takes children' if w.get('slots') else ''}")
+    near = sorted(blocks, key=lambda d: -len(said & words(d['widget'].get('doc', '') + ' ' + d['widget']['type'])))[:exemplars]
+    shown = '\n\n'.join(f"{d['widget']['type']}\n{json.dumps(d['nodes'], indent=1)}" for d in near)
+    return f"""
+THE SYSTEM'S BLOCKS (the bar; use one where it fits)
+A block is a designed part. Where a group of plain nodes shows what a block shows, put the block in their place: set a node whose "type" is the block's name under the same parent ("props" for fixed values; "bind": {{"props.name": "${{…}}"}} for a value that was bound; an event as "actions": [{{"trigger": {{"type": "event", "event": "onPressed"}}, "actions": [the same actions the plain node had]}}]), then remove the plain nodes it replaces. Everything those nodes said, every binding and every action must be carried into the block; if a block cannot show all of it, do not use it there. Where no block fits, build at the same bar from plain nodes.
+{chr(10).join(lines)}
+
+THE CLOSEST BLOCKS, AS WRITTEN (this is the level of composition to reach: a focal element, drawn detail, grouped facts)
+{shown}
+"""
+
+
+def brief_for(ds, doc, request, blocks=False):
     manifest = json.load(open(f'{ds}/design_system.json'))
     theme = manifest['theme']
     code, ops = run(['tool/notation/notation.sh', 'apply', '--reference'])
@@ -65,7 +108,7 @@ A fast model has just written a card from plain parts (rows, columns, texts, the
 
 WHAT MUST NOT CHANGE
 - What the card says: every text, number and label, and every binding ("bind", "${{…}}" in a value), stays as it is. Do not rewrite copy.
-- What the card does: every "actions" list, every variable, every node id and every node's type. Do not remove a node that shows content or takes input.
+- What the card does: every "actions" list, every variable, every node id and every node's type. Do not remove a node that shows content or takes input{', unless a block takes its place and carries what it said and did' if blocks else ''}.
 - The order of its content, unless the layout needs it.
 
 WHAT YOU MAY CHANGE
@@ -88,6 +131,7 @@ A color is written as one of the names above, exactly, or as #AARRGGBB; prefer n
 HOW NODES OF THIS SYSTEM ARE WRITTEN (one of its blocks, for the shape of layout, decoration and text style)
 {json.dumps(example, indent=1)}
 
+{blocks_section(ds, manifest, doc, request) if blocks else ''}
 THE EDIT OPERATIONS
 {ops.strip()}
 
@@ -106,7 +150,7 @@ def main():
     doc = json.load(open(card))
     request = open(opt('--request')).read().strip() if opt('--request') else ''
     width, narrow = int(opt('--width', '420')), int(opt('--narrow', '320'))
-    system = brief_for(ds, doc, request)
+    system = brief_for(ds, doc, request, blocks='--blocks' in sys.argv)
     if width != 420:
         system = system.replace('a card', 'a screen').replace('The card', 'The screen').replace('the card', 'the screen').replace('THE CARD', 'THE SCREEN').replace('in a 320-wide column', f'at {narrow} wide').replace('It is correct', f'It is shown {width} wide. It is correct')
     if mode == 'brief':

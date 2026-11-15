@@ -1,0 +1,1 @@
+A mobile trip details screen for a booked holiday: destination title with dates, a flight card (airline, times, airports, gate), a hotel card (name, nights, check-in time, address), a day-by-day plan of three days with two items each, a total paid summary, and Manage booking and Share buttons.

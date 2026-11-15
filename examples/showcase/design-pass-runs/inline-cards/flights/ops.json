@@ -1,0 +1,21 @@
+{"ops":[
+{"op":"patch","id":"column1","patch":{"layout":{"width":{"fill":0},"padding":[18,18,18,18]},"props":{"spacing":14,"crossAxisAlignment":"stretch"},"decoration":{"fills":[{"color":"card"}],"strokes":[{"color":"line"}],"strokeWidth":1.2,"radius":26},"bind":{"decoration.radius":"${theme.radii.card}","decoration.effects":"${theme.shadows.card}"}}},
+{"op":"patch","id":"column2","patch":{"props":{"spacing":3},"layout":{"padding":[2,0,2,2]}}},
+{"op":"patch","id":"text1","patch":{"props":{"style":{"from":"cardTitle","fontSize":null,"fontWeight":null,"color":"ink"}}}},
+{"op":"patch","id":"text2","patch":{"props":{"style":{"from":"meta","fontSize":null,"color":"inkSoft"}}}},
+{"op":"patch","id":"listView1Item","patch":{"props":{"crossAxisAlignment":"stretch"},"layout":{"padding":[0,0,0,8]}}},
+{"op":"patch","id":"column3","patch":{"layout":{"padding":[14,12,14,12]},"props":{"spacing":4,"crossAxisAlignment":"stretch"},"decoration":{"fills":[{"color":"card"}],"strokes":[{"color":"line"}],"strokeWidth":1.5,"radius":14},"bind":{"decoration.fills[0].color":"${= sel==item.id ? theme.colors.accentTint : theme.colors.card}","decoration.strokes[0].color":"${= sel==item.id ? theme.colors.accent : theme.colors.line}","decoration.radius":"${theme.radii.tile}"}}},
+{"op":"patch","id":"text3","patch":{"layout":{"width":{"fill":0}},"props":{"style":{"from":"number","fontSize":17,"fontWeight":null,"color":"ink"},"maxLines":1,"overflow":"ellipsis"}}},
+{"op":"patch","id":"text4","patch":{"props":{"style":{"from":"number","fontSize":18,"fontWeight":null,"color":"ink"},"maxLines":1}}},
+{"op":"patch","id":"text5","patch":{"layout":{"width":{"fill":0}},"props":{"style":{"from":"meta","fontSize":null,"color":"inkSoft"},"maxLines":1,"overflow":"ellipsis"}}},
+{"op":"patch","id":"text6","patch":{"props":{"style":{"from":"meta","fontSize":null,"fontWeight":null,"color":"inkFaint"},"maxLines":1}}},
+{"op":"patch","id":"row3","patch":{"layout":{"padding":[0,6,0,0]}}},
+{"op":"patch","id":"badge1","patch":{"props":{"backgroundColor":"tile","textColor":"inkSoft"}}},
+{"op":"patch","id":"badge2","patch":{"props":{"backgroundColor":"goodTint","textColor":"goodDeep"}}},
+{"op":"patch","id":"icon1","patch":{"layout":{"width":20,"height":20},"props":{"icon":"check_circle_rounded","size":20,"color":"accent"}}},
+{"op":"remove","ids":["divider1"]},
+{"op":"patch","id":"row4","patch":{"layout":{"padding":[16,12,16,12]},"decoration":{"fills":[{"color":"tile"}],"radius":18},"bind":{"decoration.radius":"${theme.radii.panel}"}}},
+{"op":"patch","id":"text7","patch":{"props":{"style":{"from":"eyebrow","fontSize":null,"color":"inkSoft"}}}},
+{"op":"patch","id":"text8","patch":{"props":{"style":{"from":"numberLarge","fontSize":26,"fontWeight":null,"color":"ink"},"maxLines":1}}},
+{"op":"patch","id":"filledButton1","patch":{"layout":{"width":{"fill":0},"height":{"hug":48}}}}
+]}

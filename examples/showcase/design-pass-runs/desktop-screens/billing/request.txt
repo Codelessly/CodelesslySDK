@@ -1,0 +1,1 @@
+A desktop billing and account settings page: a left settings navigation, the current plan with usage bars, a payment method card, a table of six invoices with status and a download action, and a danger zone at the bottom.

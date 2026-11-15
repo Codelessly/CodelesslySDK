@@ -1,0 +1,1 @@
+A mobile product page for a pair of headphones: an image area with page dots, name, rating with review count, price with a struck-through old price and a discount badge, a color picker of three colors, a quantity stepper, three feature bullet rows with icons, two review snippets, and Add to cart and Buy now buttons.

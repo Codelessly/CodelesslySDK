@@ -151,8 +151,11 @@ PLAIN_TEXT_STYLES = {
     # The short words an answer writes, on the Cards scale (title as a card title, heading as a block title).
     'title': {'fontFamily': DISPLAY, 'fontSize': 20, 'fontWeight': 700, 'height': 1.2, 'letterSpacing': -0.3, 'color': 'primaryText'},
     'heading': {'fontFamily': TEXT, 'fontSize': 15, 'fontWeight': 600, 'height': 1.3, 'letterSpacing': -0.1, 'color': 'primaryText'},
-    'strong': {'fontFamily': TEXT, 'fontSize': 13.5, 'fontWeight': 600, 'height': 1.4, 'color': 'primaryText'},
-    'muted': {'fontFamily': TEXT, 'fontSize': 13, 'fontWeight': 400, 'height': 1.45, 'color': 'secondaryText'},
+    # Three follow what the design pass changed them to on 31 cards and pages (design 16): strong as a row title,
+    # muted and caption as the meta line (caption was 11 in the faintest gray: too small and too faint on a phone).
+    'strong': {'fontFamily': TEXT, 'fontSize': 14.5, 'fontWeight': 600, 'height': 1.3, 'letterSpacing': -0.1, 'color': 'primaryText'},
+    'muted': {'fontFamily': TEXT, 'fontSize': 12.5, 'fontWeight': 500, 'height': 1.4, 'color': 'secondaryText'},
+    'caption': {'fontFamily': TEXT, 'fontSize': 12, 'fontWeight': 500, 'height': 1.35, 'color': 'inkFaint'},
     'small': {'fontFamily': TEXT, 'fontSize': 12.5, 'fontWeight': 400, 'height': 1.4, 'color': 'secondaryText'},
 }
 PLAIN = {
