@@ -1,0 +1,141 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Next demo",
+    "subtitle": "Vote on the feature to show",
+    "icon": "how_to_vote",
+    "status": "Open"
+   },
+   "children": [
+    "OptionList1",
+    "Paragraph1",
+    "PollResults1"
+   ]
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "choice",
+    "options": [
+     "Search",
+     "Offline mode",
+     "Exports"
+    ]
+   },
+   "bind": {
+    "visible": "${= !voted}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "voted",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "One vote per teammate."
+   },
+   "bind": {
+    "visible": "${= !voted}"
+   }
+  },
+  "PollResults1": {
+   "type": "PollResults",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "options": [
+     "Search",
+     "Offline mode",
+     "Exports"
+    ],
+    "note": "One vote per teammate"
+   },
+   "bind": {
+    "props.votes": "${= [4+(choice==\"Search\"?1:0),7+(choice==\"Offline mode\"?1:0),5+(choice==\"Exports\"?1:0)]}",
+    "props.choice": "${choice}",
+    "visible": "${= voted}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "choice",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "voted",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

@@ -1,0 +1,98 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Now listening",
+    "subtitle": "Electric Feel",
+    "icon": "music_note",
+    "status": "paused"
+   },
+   "children": [
+    "NowPlaying1"
+   ]
+  },
+  "NowPlaying1": {
+   "type": "NowPlaying",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "playing": "playing",
+    "title": "Electric Feel",
+    "artist": "MGMT",
+    "kind": "vinyl",
+    "tone": "mint",
+    "length": 229
+   },
+   "bind": {
+    "props.elapsed": "${t}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onSkip"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "i",
+       "value": "${= result==\"next\"?i+1:i-1}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "playing",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "i",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

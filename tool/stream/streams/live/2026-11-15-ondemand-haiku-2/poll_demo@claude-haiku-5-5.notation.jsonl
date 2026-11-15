@@ -1,0 +1,36 @@
+{"meta":{"ui":"poll_demo","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Design a compact card for a product team deciding the next demo. The choices are Search (4 votes), Offline mode (7), and Exports (5). Give me a voting control. Once I vote, replace it with results showing the updated shares and total and identify what I chose. Mention ‘One vote per teammate’.","text":"ChatCard \"Next demo\" \"Vote on the feature to show\" icon:\"how_to_vote\" status:\"Open\"\n  if !voted\n    OptionList =choice options:[\"Search\",\"Offline mode\",\"Exports\"] -> voted=true\n    Paragraph \"One vote per teammate.\"\n  if voted\n    PollResults options:[\"Search\",\"Offline mode\",\"Exports\"] votes:[4+(choice==\"Search\"?1:0),7+(choice==\"Offline mode\"?1:0),5+(choice==\"Exports\"?1:0)] choice:=choice note:\"One vote per teammate\"\n\nstate choice=\"\"\nstate voted=false","usage":{"input_tokens":9291,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":206,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":613,"totalMs":1313}}
+{"tMs":613,"delta":"ChatCard \"Next dem"}
+{"tMs":769,"delta":"o\" \"V"}
+{"tMs":769,"delta":"ote on the fe"}
+{"tMs":769,"delta":"ature to"}
+{"tMs":769,"delta":" show\" icon:\"how"}
+{"tMs":769,"delta":"_to_vote\" status:"}
+{"tMs":769,"delta":"\"Open\"\n  if"}
+{"tMs":769,"delta":" !"}
+{"tMs":773,"delta":"voted\n    O"}
+{"tMs":794,"delta":"ptionList =choice options"}
+{"tMs":816,"delta":":[\"Search\",\"Offline"}
+{"tMs":838,"delta":" mode\",\"Exports\"]"}
+{"tMs":856,"delta":" -"}
+{"tMs":899,"delta":"> vo"}
+{"tMs":899,"delta":"ted=true\n    "}
+{"tMs":917,"delta":"Paragraph \"One v"}
+{"tMs":941,"delta":"ote per teammate.\"\n  "}
+{"tMs":960,"delta":"if voted\n    P"}
+{"tMs":981,"delta":"ollResults options:[\"Search"}
+{"tMs":1003,"delta":"\",\"Offline mode\",\""}
+{"tMs":1023,"delta":"Exports\"] votes:["}
+{"tMs":1043,"delta":"4+"}
+{"tMs":1062,"delta":"("}
+{"tMs":1081,"delta":"choice="}
+{"tMs":1102,"delta":"=\"Search\"?1"}
+{"tMs":1172,"delta":":0),7+(choice"}
+{"tMs":1172,"delta":"==\"Offline mode\""}
+{"tMs":1172,"delta":"?1:0),5+("}
+{"tMs":1186,"delta":"choice==\"Exports\""}
+{"tMs":1206,"delta":"?1:0)] cho"}
+{"tMs":1226,"delta":"ice:="}
+{"tMs":1247,"delta":"choice note:\"One vote"}
+{"tMs":1268,"delta":" per teammate\"\n\nstate cho"}
+{"tMs":1289,"delta":"ice=\"\"\nstate voted="}
+{"tMs":1309,"delta":"false"}

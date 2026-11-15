@@ -1,0 +1,20 @@
+{"meta":{"ui":"player_jvke","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Create an inline now-playing card for ‘Golden Hour’ by JVKE. Use sunset art in rose. It starts paused 2:11 into a 3:29 track. Show the progress and both time labels plus previous, play/pause, and next controls. Tapping play should visibly switch to playing without losing the song data.","text":"ChatCard \"Now playing\" \"Golden Hour · JVKE\" icon:\"music_note\" status:\"Paused\"\n  NowPlaying =playing title:\"Golden Hour\" artist:\"JVKE\" kind:\"dusk\" tone:\"rose\" elapsed:=t length:209 -> t=t","usage":{"input_tokens":9298,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":102,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":490,"totalMs":882}}
+{"tMs":490,"delta":"ChatCard \"Now"}
+{"tMs":503,"delta":" playing\" \"Golden"}
+{"tMs":600,"delta":" Hour ·"}
+{"tMs":600,"delta":" JVKE\" icon:"}
+{"tMs":600,"delta":"\"music_note\" status:\""}
+{"tMs":600,"delta":"Pa"}
+{"tMs":600,"delta":"used\""}
+{"tMs":614,"delta":"\n  "}
+{"tMs":636,"delta":"NowPlaying ="}
+{"tMs":657,"delta":"playing title:\"Golden"}
+{"tMs":679,"delta":" Hour\" artist:\""}
+{"tMs":700,"delta":"JVKE\" kind:"}
+{"tMs":719,"delta":"\"d"}
+{"tMs":740,"delta":"usk\" tone:\"r"}
+{"tMs":780,"delta":"ose\" elapsed:="}
+{"tMs":780,"delta":"t"}
+{"tMs":800,"delta":" length:209"}
+{"tMs":820,"delta":" -> t"}
+{"tMs":839,"delta":"=t"}

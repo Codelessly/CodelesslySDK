@@ -1,0 +1,37 @@
+{"meta":{"ui":"poll_workshop","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Make an inline workshop poll card asking which session to run: Prototyping (3 votes), Accessibility (10), or Animation (5). A person chooses and confirms one option. After confirmation show updated share bars and percents, their choice, and the total vote count. Add ‘Results update after voting’.","text":"ChatCard \"Workshop poll\" \"Which session should we run?\" icon:\"how_to_vote\" status:\"Open\"\n  state choice=\"\"\n  state voted=false\n  if !voted\n    OptionList =choice options:[\"Prototyping\",\"Accessibility\",\"Animation\"] -> choice=result\n    Paragraph \"Results update after voting.\"\n    ActionButton \"Confirm vote\" primary enabled:=choice!=\"\" -> voted=true\n  if voted\n    PollResults options:[\"Prototyping\",\"Accessibility\",\"Animation\"] votes:[3,10,5] choice:=choice note:\"Results update after voting\"","usage":{"input_tokens":9290,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":201,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":538,"totalMs":1264}}
+{"tMs":538,"delta":"ChatCard \"Work"}
+{"tMs":544,"delta":"shop po"}
+{"tMs":709,"delta":"ll\" \"Which session should"}
+{"tMs":709,"delta":" we run?\" icon:\""}
+{"tMs":709,"delta":"how"}
+{"tMs":710,"delta":"_to_vote\" status:"}
+{"tMs":710,"delta":"\"Open"}
+{"tMs":710,"delta":"\"\n  state cho"}
+{"tMs":710,"delta":"ice=\"\"\n  state vo"}
+{"tMs":710,"delta":"ted=false"}
+{"tMs":726,"delta":"\n  if !"}
+{"tMs":747,"delta":"voted\n    O"}
+{"tMs":767,"delta":"ptionList =choice options"}
+{"tMs":789,"delta":":[\"Prototyping\",\""}
+{"tMs":812,"delta":"Accessibility\",\"Anim"}
+{"tMs":830,"delta":"ation\"] -"}
+{"tMs":852,"delta":"> choice="}
+{"tMs":870,"delta":"result\n    "}
+{"tMs":891,"delta":"Paragraph \"Results update"}
+{"tMs":913,"delta":" after voting.\"\n    Act"}
+{"tMs":933,"delta":"ionButton \"Confirm"}
+{"tMs":953,"delta":" v"}
+{"tMs":972,"delta":"ote\" prim"}
+{"tMs":993,"delta":"ary enabled:=choice"}
+{"tMs":1013,"delta":"!=\""}
+{"tMs":1035,"delta":"\" -> voted=true"}
+{"tMs":1055,"delta":"\n  if voted\n    Poll"}
+{"tMs":1075,"delta":"Results options"}
+{"tMs":1095,"delta":":[\"Prototyping\",\""}
+{"tMs":1117,"delta":"Accessibility\",\"Anim"}
+{"tMs":1138,"delta":"ation\"] votes:[3"}
+{"tMs":1158,"delta":",10,5] choice:"}
+{"tMs":1178,"delta":"="}
+{"tMs":1198,"delta":"choice note"}
+{"tMs":1218,"delta":":\""}
+{"tMs":1239,"delta":"Results update after voting\""}

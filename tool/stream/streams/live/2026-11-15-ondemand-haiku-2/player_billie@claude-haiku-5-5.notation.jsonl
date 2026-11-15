@@ -1,0 +1,20 @@
+{"meta":{"ui":"player_billie","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Build a compact audio player for ‘Ocean Eyes’ by Billie Eilish. Draw waves art in sky blue. Start paused at 0:42 of 3:20. Include progress, elapsed and remaining time, and transport controls. The central control should start playback and update its state while keeping all labels correct.","text":"NowPlaying =playing title:\"Ocean Eyes\" artist:\"Billie Eilish\" kind:\"waves\" tone:\"sky\" elapsed:=t length:200 -> t=result==\"next\"?t+10:t-10\n  state playing=false\n  state t=42\n  every 1s when playing -> t=min(200,t+1)","usage":{"input_tokens":9296,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":111,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":752,"totalMs":1158}}
+{"tMs":752,"delta":"NowPlaying ="}
+{"tMs":963,"delta":"playing title:\"Oc"}
+{"tMs":963,"delta":"ean Eyes\" artist"}
+{"tMs":963,"delta":":\"Billie Eil"}
+{"tMs":963,"delta":"ish\" kind:\"waves"}
+{"tMs":963,"delta":"\" tone:\"sky\""}
+{"tMs":963,"delta":" elapsed:=t length"}
+{"tMs":963,"delta":":200"}
+{"tMs":963,"delta":" "}
+{"tMs":963,"delta":"-> t"}
+{"tMs":963,"delta":"=result==\"next\"?"}
+{"tMs":968,"delta":"t+10:t-10"}
+{"tMs":989,"delta":"\n  "}
+{"tMs":1152,"delta":"state play"}
+{"tMs":1152,"delta":"ing=false\n  state t="}
+{"tMs":1152,"delta":"42\n  every 1s when"}
+{"tMs":1152,"delta":" playing -> t=min"}
+{"tMs":1152,"delta":"(200"}
+{"tMs":1152,"delta":",t+1)"}

@@ -1,0 +1,106 @@
+{"meta":{"ui":"poll_film","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Create a movie-night voting card: Spirited Away has 11 votes, Arrival has 8, and Knives Out has 6. Let me cast one vote, then display each film’s percentage and bar, highlight the leader, mark my vote, and show the correct total. Include ‘Screening Saturday’ below.","text":"ChatCard \"Movie night\" \"Pick the film for Saturday\" icon:\"movie\" status:\"Voting open\"\n  state vote=\"\"\n  state votes={\"Spirited Away\":11,\"Arrival\":8,\"Knives Out\":6}\n  Text.body \"Cast one vote below.\"\n  OptionList \"Which film?\" =vote options:[\"Spirited Away\",\"Arrival\",\"Knives Out\"] -> votes=with(votes,vote,votes[vote]+1)\n  if vote!=\"\"\n    Text.strong \"You voted for {vote}.\"\n  Details rows:=[[\"Spirited Away\",fixed(100*votes[\"Spirited Away\"]/sum([\"Spirited Away\",\"Arrival\",\"Knives Out\"],x=>votes[x]),0)+\"%  ·  \"+votes[\"Spirited Away\"]+\" votes\"],[\"Arrival\",fixed(100*votes[\"Arrival\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"]),0)+\"%  ·  \"+votes[\"Arrival\"]+\" votes\"],[\"Knives Out\",fixed(100*votes[\"Knives Out\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"]),0)+\"%  ·  \"+votes[\"Knives Out\"]+\" votes\"]]\n  Progress =votes[\"Spirited Away\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"])\n  Progress =votes[\"Arrival\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"])\n  Progress =votes[\"Knives Out\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"])\n  Text.caption \"Total votes: {votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"]}\"\n  Callout \"Screening Saturday\" \"Spirited Away leads so far; the winner screens Saturday.\" tone:accent icon:\"event\"","usage":{"input_tokens":9295,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":687,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":652,"totalMs":2941}}
+{"tMs":652,"delta":"ChatCard \"Movie"}
+{"tMs":872,"delta":" night\" \"Pick the"}
+{"tMs":872,"delta":" film for"}
+{"tMs":872,"delta":" Saturday\" icon:"}
+{"tMs":872,"delta":"\"movie\" status:\""}
+{"tMs":872,"delta":"Voting open"}
+{"tMs":872,"delta":"\"\n  state v"}
+{"tMs":872,"delta":"ote=\"\""}
+{"tMs":872,"delta":"\n  state votes={"}
+{"tMs":872,"delta":"\"Spirited Away\":"}
+{"tMs":872,"delta":"11,\"Arrival\":"}
+{"tMs":892,"delta":"8,\"Knives Out"}
+{"tMs":914,"delta":"\":6}\n  "}
+{"tMs":1102,"delta":"Text"}
+{"tMs":1103,"delta":".body"}
+{"tMs":1103,"delta":" \"Cast one vote below"}
+{"tMs":1103,"delta":".\"\n  O"}
+{"tMs":1103,"delta":"ptionList \""}
+{"tMs":1103,"delta":"Which film?\" =vote"}
+{"tMs":1103,"delta":" options:[\"Spirited"}
+{"tMs":1103,"delta":" Away\",\"Arrival\",\""}
+{"tMs":1105,"delta":"Knives Out\"] -"}
+{"tMs":1126,"delta":"> vot"}
+{"tMs":1148,"delta":"es=with(votes,v"}
+{"tMs":1170,"delta":"ote,vot"}
+{"tMs":1336,"delta":"es[vote]+1)"}
+{"tMs":1336,"delta":"\n  if"}
+{"tMs":1336,"delta":" vote!=\"\"\n    "}
+{"tMs":1336,"delta":"Text.strong \"You voted"}
+{"tMs":1337,"delta":" for {vote}.\"\n  "}
+{"tMs":1337,"delta":"Details"}
+{"tMs":1337,"delta":" rows:"}
+{"tMs":1341,"delta":"="}
+{"tMs":1364,"delta":"[[\"Spirited Away"}
+{"tMs":1384,"delta":"\",f"}
+{"tMs":1405,"delta":"ixed(100"}
+{"tMs":1425,"delta":"*vot"}
+{"tMs":1605,"delta":"es[\"Spirited Away"}
+{"tMs":1606,"delta":"\"]/sum([\""}
+{"tMs":1606,"delta":"Spirited Away\",\""}
+{"tMs":1606,"delta":"Arrival\",\"Knives"}
+{"tMs":1606,"delta":" Out\"],x=>votes"}
+{"tMs":1606,"delta":"["}
+{"tMs":1606,"delta":"x]),0)+\"%"}
+{"tMs":1606,"delta":"  "}
+{"tMs":1641,"delta":"·  \"+vot"}
+{"tMs":1663,"delta":"es[\"Spirited Away"}
+{"tMs":1684,"delta":"\"]+\" votes\"],"}
+{"tMs":1706,"delta":"[\"Arrival\",fix"}
+{"tMs":1837,"delta":"ed(100*votes[\""}
+{"tMs":1837,"delta":"Arrival\"]/("}
+{"tMs":1837,"delta":"votes[\"Spirited"}
+{"tMs":1837,"delta":" Away\"]+votes[\""}
+{"tMs":1837,"delta":"Arrival\"]+votes"}
+{"tMs":1837,"delta":"[\"Knives Out\"]"}
+{"tMs":1858,"delta":"),0)+\"%  "}
+{"tMs":1880,"delta":"·  \"+votes[\""}
+{"tMs":1901,"delta":"Arrival\"]+\" vot"}
+{"tMs":1923,"delta":"es\"],[\"Knives"}
+{"tMs":1944,"delta":" Out\",fixed(100*"}
+{"tMs":1966,"delta":"votes[\"Knives Out"}
+{"tMs":2066,"delta":"\"]/(votes[\""}
+{"tMs":2066,"delta":"Spirited Away\"]+"}
+{"tMs":2066,"delta":"votes[\"Arrival\""}
+{"tMs":2067,"delta":"]+votes[\"Knives"}
+{"tMs":2075,"delta":" Out\"]),0)+"}
+{"tMs":2096,"delta":"\"%  ·  \"+"}
+{"tMs":2118,"delta":"votes[\"Knives Out"}
+{"tMs":2139,"delta":"\"]+\" votes\"]"}
+{"tMs":2160,"delta":"]\n  Progress =vot"}
+{"tMs":2183,"delta":"es[\"Spirited Away"}
+{"tMs":2204,"delta":"\"]/(votes[\""}
+{"tMs":2225,"delta":"Spirited Away\"]+"}
+{"tMs":2296,"delta":"votes[\"Arrival\""}
+{"tMs":2296,"delta":"]+votes[\"Knives"}
+{"tMs":2296,"delta":" Out\"])\n  Prog"}
+{"tMs":2313,"delta":"ress =votes[\"Arr"}
+{"tMs":2334,"delta":"ival\"]/(votes[\""}
+{"tMs":2355,"delta":"Spirited Away\"]"}
+{"tMs":2376,"delta":"+votes[\"Arrival"}
+{"tMs":2398,"delta":"\"]+votes[\"Kn"}
+{"tMs":2420,"delta":"ives Out\"])\n  "}
+{"tMs":2441,"delta":"Progress =votes[\"Kn"}
+{"tMs":2462,"delta":"ives Out\"]/(vot"}
+{"tMs":2484,"delta":"es[\"Spirited Away"}
+{"tMs":2526,"delta":"\"]+votes[\"Ar"}
+{"tMs":2526,"delta":"rival\"]+votes[\""}
+{"tMs":2559,"delta":"Knives Out\"])"}
+{"tMs":2573,"delta":"\n  Text"}
+{"tMs":2591,"delta":".ca"}
+{"tMs":2613,"delta":"ption \"Total vot"}
+{"tMs":2635,"delta":"es: {votes[\"Sp"}
+{"tMs":2657,"delta":"irited Away\"]+vot"}
+{"tMs":2677,"delta":"es[\"Arrival\"]"}
+{"tMs":2699,"delta":"+votes[\"Knives"}
+{"tMs":2720,"delta":" Out\"]}\"\n  "}
+{"tMs":2742,"delta":"Callout \"Screening Sa"}
+{"tMs":2913,"delta":"turday\" \"Spirited"}
+{"tMs":2913,"delta":" Away le"}
+{"tMs":2913,"delta":"ads so"}
+{"tMs":2913,"delta":" far; the winner scre"}
+{"tMs":2913,"delta":"ens"}
+{"tMs":2913,"delta":" Saturday.\" tone:acc"}
+{"tMs":2913,"delta":"ent icon:\"event"}
+{"tMs":2913,"delta":"\""}

@@ -1,0 +1,32 @@
+{"meta":{"ui":"player_m83","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Make a small music player card for ‘Midnight City’ by M83. Draw vinyl-style art in lilac, show it paused at 1:14 of 4:03 with a progress display, and offer previous, play/pause, and next. Tapping the main play button should change the card to playing with the same track, artist, and valid times.","text":"state playing=false\nstate t=74\nevery 1000 when playing -> t=min(243,t+1)\nChatCard \"Now playing\" \"M83\" icon:\"music_note\" status:\"Live\"\n  NowPlaying =playing title:\"Midnight City\" artist:\"M83\" kind:\"vinyl\" tone:\"lilac\" elapsed:=t length:243 -> t=0\n  ProgressLine \"{formatTime(t)}\" \"{formatTime(243)}\" value:=t/243","usage":{"input_tokens":9296,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":159,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":482,"totalMs":1108}}
+{"tMs":482,"delta":"state"}
+{"tMs":592,"delta":" playing=false"}
+{"tMs":592,"delta":"\nstate t"}
+{"tMs":592,"delta":"=74"}
+{"tMs":592,"delta":"\nevery"}
+{"tMs":592,"delta":" 1000"}
+{"tMs":612,"delta":" when playing -> t="}
+{"tMs":635,"delta":"min(243"}
+{"tMs":654,"delta":",t+1)"}
+{"tMs":676,"delta":"\nChatCard \"Now"}
+{"tMs":695,"delta":" playing\" \"M"}
+{"tMs":716,"delta":"83\""}
+{"tMs":736,"delta":" ic"}
+{"tMs":758,"delta":"on:\"music"}
+{"tMs":776,"delta":"_note"}
+{"tMs":797,"delta":"\" status:\"Live"}
+{"tMs":818,"delta":"\"\n  NowPla"}
+{"tMs":838,"delta":"ying =playing title:\""}
+{"tMs":859,"delta":"Midnight City\" artist:"}
+{"tMs":880,"delta":"\"M83\" kind:\""}
+{"tMs":900,"delta":"vinyl\" tone:"}
+{"tMs":920,"delta":"\"lilac\" elaps"}
+{"tMs":941,"delta":"ed:=t length:243 "}
+{"tMs":962,"delta":"-> t"}
+{"tMs":982,"delta":"=0"}
+{"tMs":1002,"delta":"\n  "}
+{"tMs":1023,"delta":"ProgressLine \"{"}
+{"tMs":1043,"delta":"formatTime(t)}"}
+{"tMs":1064,"delta":"\" \"{formatTime("}
+{"tMs":1085,"delta":"243)}\" value:=t"}
+{"tMs":1104,"delta":"/243"}

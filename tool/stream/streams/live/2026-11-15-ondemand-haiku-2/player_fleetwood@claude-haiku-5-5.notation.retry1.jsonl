@@ -1,0 +1,37 @@
+{"meta":{"ui":"player_fleetwood","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Create an inline music card for ‘Dreams’ by Fleetwood Mac, with sand-toned sunset art. Start paused at 3:02 of a 4:17 track. Show progress and time labels with previous, play/pause, and next. Tapping the main control should play the same track and show no missing values.","text":"The error came from putting the state and timer lines above the root. A single root must come first, with everything else indented under it. Here the state and timer are declared inside a Column root, so the layout has one root and the timer runs only while playing.\n\nColumn w:390 pad:16\n  state playing=false\n  state elapsed=182\n  every 1s when playing -> elapsed=min(257,elapsed+1)\n  NowPlaying =playing title:\"Dreams\" artist:\"Fleetwood Mac\" kind:\"dusk\" tone:\"sand\" elapsed:=elapsed length:257 -> skip=result","usage":{"input_tokens":9670,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":192,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":383,"totalMs":1177}}
+{"tMs":383,"delta":"The error came"}
+{"tMs":521,"delta":" from put"}
+{"tMs":521,"delta":"ting the state and tim"}
+{"tMs":521,"delta":"er lines above the root. A"}
+{"tMs":521,"delta":" single root must come"}
+{"tMs":521,"delta":" first, with"}
+{"tMs":521,"delta":" ever"}
+{"tMs":531,"delta":"ything else indented under it."}
+{"tMs":550,"delta":" Here"}
+{"tMs":569,"delta":" the"}
+{"tMs":588,"delta":" state"}
+{"tMs":610,"delta":" and timer are declared in"}
+{"tMs":631,"delta":"side a"}
+{"tMs":687,"delta":" Column"}
+{"tMs":687,"delta":" root"}
+{"tMs":690,"delta":", so the lay"}
+{"tMs":711,"delta":"out has"}
+{"tMs":737,"delta":" one root and the timer run"}
+{"tMs":752,"delta":"s only"}
+{"tMs":772,"delta":" while play"}
+{"tMs":793,"delta":"ing.\n\nColumn w:390"}
+{"tMs":815,"delta":" pad:16\n  state"}
+{"tMs":836,"delta":" playing=false\n  state el"}
+{"tMs":857,"delta":"apsed=182\n  every"}
+{"tMs":878,"delta":" 1s when playing ->"}
+{"tMs":1173,"delta":" elapsed=min(257"}
+{"tMs":1173,"delta":",elapsed+1)"}
+{"tMs":1173,"delta":"\n  NowPlaying"}
+{"tMs":1173,"delta":" =playing title:\"D"}
+{"tMs":1173,"delta":"reams\" artist:\""}
+{"tMs":1173,"delta":"Fleetwood Mac"}
+{"tMs":1174,"delta":"\" kind:\"dusk"}
+{"tMs":1174,"delta":"\" tone:\"sand\""}
+{"tMs":1174,"delta":" elapsed:=elap"}
+{"tMs":1174,"delta":"sed length:257 ->"}
+{"tMs":1174,"delta":" skip=result"}

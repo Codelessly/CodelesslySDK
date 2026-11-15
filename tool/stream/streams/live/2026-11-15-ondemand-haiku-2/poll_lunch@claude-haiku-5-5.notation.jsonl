@@ -1,0 +1,58 @@
+{"meta":{"ui":"poll_lunch","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Make an inline card for our team lunch vote. Ask ‘Where should we eat Friday?’ with Pho (8 votes), Tacos (5), Pizza (6), and Salads (3). Let me choose one and cast exactly one vote, then show every option’s updated count as a share bar and percent, mark my choice, and show the updated total. Note that votes are anonymous.","text":"ChatCard \"Where should we eat Friday?\" \"Team lunch vote\" icon:\"restaurant\" status:\"Open\" -> emit vote\n  state pick=\"\"\n  state voted=false\n  state counts={\"Pho\":8,\"Tacos\":5,\"Pizza\":6,\"Salads\":3}\n  if !voted\n    SectionLabel \"Choose one\" \"one vote each\"\n    OptionList =pick options:[\"Pho\",\"Tacos\",\"Pizza\",\"Salads\"]\n    ActionButton \"Cast vote\" primary enabled:=pick!=\"\" -> voted=true; counts=with(counts,pick,counts[pick]+1); emit vote pick\n  if voted\n    PollResults options:[\"Pho\",\"Tacos\",\"Pizza\",\"Salads\"] votes:[counts.Pho,counts.Tacos,counts.Pizza,counts.Salads] choice:pick note:\"votes are anonymous\"\n    Receipt \"Vote cast\" \"You voted for {pick}. Votes are anonymous.\" tone:good icon:\"check_rounded\"","usage":{"input_tokens":9317,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":344,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":512,"totalMs":1730}}
+{"tMs":512,"delta":"ChatCard \"Where should"}
+{"tMs":713,"delta":" we eat Friday?\""}
+{"tMs":713,"delta":" \""}
+{"tMs":713,"delta":"Team lunch vote\" ic"}
+{"tMs":713,"delta":"on:\"rest"}
+{"tMs":713,"delta":"aurant\" status:\""}
+{"tMs":713,"delta":"Open\" -"}
+{"tMs":713,"delta":"> em"}
+{"tMs":713,"delta":"it vote\n  state"}
+{"tMs":713,"delta":" p"}
+{"tMs":721,"delta":"ick="}
+{"tMs":743,"delta":"\"\"\n  state vo"}
+{"tMs":763,"delta":"ted=false"}
+{"tMs":923,"delta":"\n  state counts={"}
+{"tMs":923,"delta":"\"Pho\":8,\""}
+{"tMs":923,"delta":"Tacos\":5,\""}
+{"tMs":923,"delta":"Pizza\":6,\""}
+{"tMs":923,"delta":"Salads\":3}\n  "}
+{"tMs":923,"delta":"if !"}
+{"tMs":923,"delta":"voted\n    Sect"}
+{"tMs":942,"delta":"ionLabel \"Choose"}
+{"tMs":963,"delta":" one"}
+{"tMs":983,"delta":"\" \"one"}
+{"tMs":1004,"delta":" vote each"}
+{"tMs":1027,"delta":"\"\n    OptionList ="}
+{"tMs":1139,"delta":"pick options:[\"Pho"}
+{"tMs":1139,"delta":"\",\"Tacos\",\"P"}
+{"tMs":1139,"delta":"izza\",\"Salads\"]"}
+{"tMs":1139,"delta":"\n    ActionButton \""}
+{"tMs":1139,"delta":"Cast vote\" primary"}
+{"tMs":1159,"delta":" enabled:=pick!"}
+{"tMs":1181,"delta":"=\"\" -> voted=true"}
+{"tMs":1201,"delta":"; coun"}
+{"tMs":1224,"delta":"ts=with(counts,p"}
+{"tMs":1246,"delta":"ick,counts[pick]"}
+{"tMs":1267,"delta":"+1); emit vote p"}
+{"tMs":1289,"delta":"ick\n  if voted\n    "}
+{"tMs":1355,"delta":"P"}
+{"tMs":1355,"delta":"ollResults options:[\"P"}
+{"tMs":1355,"delta":"ho\",\"Tacos\",\""}
+{"tMs":1376,"delta":"Pizza\",\"Salads\""}
+{"tMs":1397,"delta":"] votes:[coun"}
+{"tMs":1419,"delta":"ts.Pho,counts"}
+{"tMs":1440,"delta":".Tacos,counts"}
+{"tMs":1462,"delta":".Pizza,counts"}
+{"tMs":1484,"delta":".Salads] choice:"}
+{"tMs":1506,"delta":"pick note:\"votes are"}
+{"tMs":1528,"delta":" anonymous\"\n    "}
+{"tMs":1548,"delta":"Receipt \"V"}
+{"tMs":1699,"delta":"ote c"}
+{"tMs":1699,"delta":"ast\" \"You"}
+{"tMs":1699,"delta":" vo"}
+{"tMs":1699,"delta":"ted for {pick}."}
+{"tMs":1699,"delta":" Votes are anonymous.\""}
+{"tMs":1699,"delta":" tone:good icon:\""}
+{"tMs":1699,"delta":"check_r"}
+{"tMs":1721,"delta":"ounded\""}
