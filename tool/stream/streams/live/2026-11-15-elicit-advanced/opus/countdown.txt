@@ -1,0 +1,18 @@
+ChatCard "Focus timer" "25-minute session" icon:timer
+  state remaining = 1500
+  state running = false
+  state started = false
+  derived finished = remaining == 0
+  derived clock = pad2(floor(remaining / 60)) + ":" + pad2(remaining % 60)
+  every 1s while:{running} onTick:{remaining = remaining - 1; if (remaining == 0) { running = false }}
+  Row center
+    Text "{clock}" size:64 weight:700
+  ProgressLine "Elapsed" "{floor((1500 - remaining) / 60)} of 25 min" value:{(1500 - remaining) / 1500}
+  if finished
+    Callout "Time for a break" "You focused for the full 25 minutes." tone:success icon:coffee
+  Row gap:8
+    if !started
+      Button "Start" grow onPressed:{running = true; started = true}
+    if started && !finished
+      Button "{running ? 'Pause' : 'Resume'}" grow onPressed:{running = !running}
+    Button.secondary "Reset" grow onPressed:{remaining = 1500; running = false; started = false}

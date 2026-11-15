@@ -1,0 +1,10 @@
+ChatCard "Concert tickets" "Up to 6 per order" icon:confirmation_number
+  state tickets = [{"name":"Standing","price":45,"qty":0,"icon":"groups"},{"name":"Seated","price":70,"qty":0,"icon":"event_seat"},{"name":"VIP","price":120,"qty":0,"icon":"star"}]
+  derived count = tickets.sum(t => t.qty)
+  derived total = tickets.sum(t => t.price * t.qty)
+  derived full = count >= 6
+  for t in tickets
+    Counter "{t.name}" "${t.price} each" value:{t.qty} min:0 max:{t.qty + 6 - count} step:1 icon:{t.icon} onChanged:{t.qty = value}
+  if full
+    Callout "Limit reached" "You can hold at most 6 tickets in one order." tone:warning icon:info
+  TotalBar "{count} {count == 1 ? 'ticket' : 'tickets'}" "Total price" amount:{total} cta:"Checkout" enabled:{count > 0}

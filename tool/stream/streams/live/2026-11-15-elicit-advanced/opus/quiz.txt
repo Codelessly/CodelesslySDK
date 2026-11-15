@@ -1,0 +1,17 @@
+ChatCard "Capitals quiz" "{finished ? 'Done' : 'Question ' + (index + 1) + ' of 3'} · Score {score}" icon:public
+  state questions = [{"q":"What is the capital of Australia?","choices":["Sydney","Canberra","Melbourne","Perth"],"answer":"Canberra"},{"q":"What is the capital of Canada?","choices":["Toronto","Vancouver","Ottawa","Montreal"],"answer":"Ottawa"},{"q":"What is the capital of Brazil?","choices":["Rio de Janeiro","São Paulo","Salvador","Brasília"],"answer":"Brasília"}]
+  state index = 0
+  state picked = null
+  state score = 0
+  state finished = false
+  derived current = questions[index]
+  derived correct = picked == current.answer
+  if finished
+    Text "You got {score} of 3" size:32 weight:700
+    ActionButton "Play again" icon:replay onPressed:{index = 0; picked = null; score = 0; finished = false}
+  else
+    Text.cardTitle "{current.q}"
+    OptionList value:{picked} options:{current.choices} onChanged:{if (picked == null) { picked = value; if (value == current.answer) { score = score + 1 } }}
+    if picked != null
+      Callout "{correct ? 'Correct!' : 'Not quite'}" "The capital is {current.answer}." tone:{correct ? 'success' : 'error'} icon:{correct ? 'check_circle' : 'cancel'}
+    ActionButton "{index < 2 ? 'Next' : 'See my score'}" icon:arrow_forward enabled:{picked != null} onPressed:{if (index < 2) { index = index + 1; picked = null } else { finished = true }}

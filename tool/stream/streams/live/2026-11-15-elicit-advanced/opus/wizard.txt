@@ -1,0 +1,27 @@
+ChatCard "Sign up" "Step {step} of 3" icon:person_add
+  state step = 1
+  state name = ""
+  state email = ""
+  state plan = ""
+  state confirmed = false
+  derived emailOk = email.contains("@")
+  derived stepValid = step == 1 ? name.trim() != "" && emailOk : step == 2 ? plan != "" : true
+  if confirmed
+    Receipt "Welcome, {name}" "You're signed up on the {plan} plan." tone:success icon:check_circle
+  else
+    Steps steps:["Details","Plan","Confirm"] current:{step - 1}
+    if step == 1
+      InputField "Name" "Your full name" value:{name} icon:person onChanged:{name = value}
+      InputField "Email" "you@example.com" value:{email} icon:mail keyboard:email error:{email != "" && !emailOk ? "An email needs an @" : null} onChanged:{email = value}
+    if step == 2
+      OptionList "Pick a plan" value:{plan} options:["Free","Pro","Team"] prices:["$0","$12/mo","$40/mo"] details:["For trying it out","For one person","For your whole team"] onChanged:{plan = value}
+    if step == 3
+      SectionLabel "Summary" "Check before you confirm"
+      Details rows:[["Name","{name}"],["Email","{email}"],["Plan","{plan}"]]
+    Row gap:8
+      if step > 1
+        Button.secondary "Back" grow onPressed:{step = step - 1}
+      if step < 3
+        Button "Next" grow enabled:{stepValid} onPressed:{step = step + 1}
+      else
+        Button "Confirm" grow onPressed:{confirmed = true}

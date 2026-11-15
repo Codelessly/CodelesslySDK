@@ -1,0 +1,16 @@
+ChatCard "Your cart" "{count} items" icon:shopping_cart
+  state items = [{"name":"Espresso beans","price":24,"qty":1,"kind":"coffee"},{"name":"Ceramic mug","price":18,"qty":1,"kind":"mug"},{"name":"Canvas tote","price":32,"qty":1,"kind":"bag"}]
+  derived count = items.sum(i => i.qty)
+  derived subtotal = items.sum(i => i.price * i.qty)
+  derived tax = subtotal * 0.08
+  derived total = subtotal + tax
+  for item in items
+    if item.qty > 0
+      CartLine "{item.name}" "${item.price} each · ${(item.price * item.qty).toFixed(2)}" price:{item.price} qty:{item.qty} kind:{item.kind} onChanged:{item.qty = max(value, 0)}
+    else
+      Row between middle pad:[0,8,0,8]
+        Text.muted "{item.name} removed"
+        Button.ghost "Undo" onPressed:{item.qty = 1}
+  Divider
+  Details rows:[["Subtotal","${subtotal.toFixed(2)}"],["Tax (8%)","${tax.toFixed(2)}"]]
+  TotalBar "Total" "incl. 8% tax" amount:{total} cta:"Checkout" enabled:{count > 0}
