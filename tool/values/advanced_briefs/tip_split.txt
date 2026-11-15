@@ -1,0 +1,1 @@
+A tip calculator card: a bill amount I can type (start at 84.00), a tip I choose from 10%, 15%, 20% or 25%, and a number of people from 1 to 8. Show the tip amount, the total, and what each person pays, all updating as I change anything. If the bill is empty or not a number, show a hint instead of the results.

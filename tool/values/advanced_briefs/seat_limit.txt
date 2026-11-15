@@ -1,0 +1,1 @@
+A ticket card for a concert: three ticket types (Standing $45, Seated $70, VIP $120), each with a counter. I can hold at most 6 tickets in total, so the plus buttons stop working at 6 and a note says the limit is reached. Show the count and the total price, and a Checkout button that is disabled at 0 tickets.

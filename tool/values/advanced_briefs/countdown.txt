@@ -1,0 +1,1 @@
+A focus timer card: 25:00 counting down once a second after I press Start, a Pause button that becomes Resume, and Reset back to 25:00. Show a progress bar of the time elapsed. When it reaches 00:00 it stops by itself and the card says "Time for a break".

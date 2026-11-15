@@ -1,0 +1,1 @@
+Show my cart as a card: three items (Espresso beans $24, Ceramic mug $18, Canvas tote $32), each with its own quantity I can raise or lower (never below 0). Show each line's total, the subtotal of all lines, 8% tax, and the grand total, all updating as I change a quantity. An item at quantity 0 shows as removed with an Undo.

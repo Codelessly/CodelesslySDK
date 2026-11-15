@@ -1,0 +1,1 @@
+A card listing eight invoices (customer, amount, status of Paid, Due or Overdue). Above it: a search field that filters by customer as I type, and status chips (All, Paid, Due, Overdue). Tapping the Amount header sorts by amount, tapping again reverses it. Show how many invoices match and the sum of their amounts.
