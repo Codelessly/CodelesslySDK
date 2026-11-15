@@ -1,0 +1,87 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the change you want to make to my config.yaml as a diff I can review, in three separate hunks with line numbers, removed lines red and added lines green in a monospace font. Hunk 1 (Server port, lines 4 to 5): -port: 8080 +port: 9090. Hunk 2 (Logging, lines 12 to 15): -level: debug -file: /tmp/app.log +level: warn +file: /var/log/app.log. Hunk 3 (Cache, lines 20 to 22): +enabled: true +ttl: 300. Keep and Discard buttons on each hunk, a count of how many are decided and how many kept, and an Apply button that only works once all three are decided; after Apply the card says how many hunks were kept and how many discarded.","text":"I'll build this with the DiffHunk component. Each hunk keeps its decision in its own text variable, a count tracks decisions, and Apply is enabled only when all three are decided.\n\nstate h1=\"\"\nstate h2=\"\"\nstate h3=\"\"\nstate kept=0\nstate done=0\nlet decided = (h1!=\"\" ? 1 : 0) + (h2!=\"\" ? 1 : 0) + (h3!=\"\" ? 1 : 0)\nlet keptCount = (h1==\"keep\" ? 1 : 0) + (h2==\"keep\" ? 1 : 0) + (h3==\"keep\" ? 1 : 0)\nlet discarded = 3 - keptCount\nnode {\"type\": \"Column\", \"props\": {\"width\": 390}}\n  Card gap:10\n    Text.heading \"Review config.yaml\"\n    Text.muted \"{decided} of 3 decided, {keptCount} kept\"\n    DiffHunk =h1 \"Server port\" \"lines 4 to 5\" start:4 lines:[\"-port: 8080\",\"+port: 9090\"]\n    DiffHunk =h2 \"Logging\" \"lines 12 to 15\" start:12 lines:[\"-level: debug\",\"-file: /tmp/app.log\",\"+level: warn\",\"+file: /var/log/app.log\"]\n    DiffHunk =h3 \"Cache\" \"lines 20 to 22\" start:20 lines:[\"+enabled: true\",\"+ttl: 300\"]\n    ActionButton \"Apply\" primary enabled:{decided==3} -> done=1\n    if done==1\n      Receipt \"Changes applied\" \"{keptCount} hunks kept, {discarded} discarded\" tone:good","usage":{"input_tokens":9517,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":535,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":552,"totalMs":2310}}
+{"tMs":552,"delta":"I'll build this"}
+{"tMs":731,"delta":" with"}
+{"tMs":731,"delta":" the"}
+{"tMs":731,"delta":" DiffHunk component."}
+{"tMs":731,"delta":" Each hunk ke"}
+{"tMs":731,"delta":"eps its dec"}
+{"tMs":731,"delta":"ision in its"}
+{"tMs":731,"delta":" own text variable, a"}
+{"tMs":731,"delta":" count t"}
+{"tMs":731,"delta":"racks decisions, and"}
+{"tMs":748,"delta":" Apply is en"}
+{"tMs":770,"delta":"abled only when"}
+{"tMs":792,"delta":" all three are decided.\n\nstate"}
+{"tMs":942,"delta":" h1=\"\""}
+{"tMs":942,"delta":"\nstate h2=\"\"\nstate"}
+{"tMs":942,"delta":" h3=\"\"\nstate k"}
+{"tMs":942,"delta":"ept=0\nstate done=0"}
+{"tMs":942,"delta":"\nlet decided = (h1"}
+{"tMs":942,"delta":"!=\"\" ? 1 "}
+{"tMs":942,"delta":": 0) + (h2"}
+{"tMs":959,"delta":"!=\"\" ? 1 "}
+{"tMs":979,"delta":": 0) + (h3"}
+{"tMs":1000,"delta":"!=\"\" ? 1 "}
+{"tMs":1020,"delta":": 0)\nlet ke"}
+{"tMs":1041,"delta":"ptCount = (h1="}
+{"tMs":1117,"delta":"=\"keep\" ? 1"}
+{"tMs":1117,"delta":" : 0) + (h"}
+{"tMs":1117,"delta":"2==\"keep\" ?"}
+{"tMs":1123,"delta":" 1 : 0) +"}
+{"tMs":1145,"delta":" (h3==\"keep\""}
+{"tMs":1166,"delta":" ? 1 : 0"}
+{"tMs":1184,"delta":")\nlet disc"}
+{"tMs":1204,"delta":"arded = "}
+{"tMs":1225,"delta":"3 - keptCount"}
+{"tMs":1245,"delta":"\nnode"}
+{"tMs":1268,"delta":" {\"type\":"}
+{"tMs":1286,"delta":" \"Column"}
+{"tMs":1312,"delta":"\", \"props"}
+{"tMs":1326,"delta":"\": {\"width\": 390}"}
+{"tMs":1347,"delta":"}"}
+{"tMs":1367,"delta":"\n  Card g"}
+{"tMs":1387,"delta":"ap:10"}
+{"tMs":1407,"delta":"\n    "}
+{"tMs":1428,"delta":"Text.he"}
+{"tMs":1448,"delta":"ading \"Review"}
+{"tMs":1468,"delta":" config.yaml\"\n    "}
+{"tMs":1488,"delta":"Text.mu"}
+{"tMs":1509,"delta":"ted \"{"}
+{"tMs":1529,"delta":"decided} of 3 dec"}
+{"tMs":1550,"delta":"ided, {keptCount}"}
+{"tMs":1570,"delta":" kept\"\n    Diff"}
+{"tMs":1593,"delta":"Hunk =h1 \""}
+{"tMs":1612,"delta":"Server port\" \"l"}
+{"tMs":1643,"delta":"ines 4 to 5\""}
+{"tMs":1652,"delta":" start:4 lines:[\""}
+{"tMs":1673,"delta":"-port: 8080\",\"+"}
+{"tMs":1693,"delta":"port: 9090\"]"}
+{"tMs":1714,"delta":"\n    DiffHunk"}
+{"tMs":1735,"delta":" =h2 \"Logging"}
+{"tMs":1755,"delta":"\" \"lines 12 to"}
+{"tMs":1775,"delta":" 15\" start:12 l"}
+{"tMs":1796,"delta":"ines:[\"-level: debug"}
+{"tMs":1817,"delta":"\",\"-file: /tmp"}
+{"tMs":1837,"delta":"/app.log\",\"+level:"}
+{"tMs":1858,"delta":" warn\",\"+file: /var"}
+{"tMs":1878,"delta":"/log/app.log\"]"}
+{"tMs":1898,"delta":"\n    DiffHunk"}
+{"tMs":1926,"delta":" =h3 \"Cache"}
+{"tMs":1939,"delta":"\" \"lines 20 to"}
+{"tMs":1961,"delta":" 22\" start:20 l"}
+{"tMs":1980,"delta":"ines:[\"+enabled:"}
+{"tMs":2002,"delta":" true\",\"+ttl: "}
+{"tMs":2021,"delta":"300\"]\n    "}
+{"tMs":2042,"delta":"ActionButton \"Apply"}
+{"tMs":2062,"delta":"\" prim"}
+{"tMs":2082,"delta":"ary enabled:{"}
+{"tMs":2103,"delta":"decided=="}
+{"tMs":2123,"delta":"3} -> done"}
+{"tMs":2144,"delta":"=1"}
+{"tMs":2164,"delta":"\n    if done==1\n      "}
+{"tMs":2184,"delta":"Receipt \"Chang"}
+{"tMs":2205,"delta":"es applied\" \"{kept"}
+{"tMs":2225,"delta":"Count} h"}
+{"tMs":2245,"delta":"unks kept, {discar"}
+{"tMs":2266,"delta":"ded} discarded\" t"}
+{"tMs":2286,"delta":"one:good"}

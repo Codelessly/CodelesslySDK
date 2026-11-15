@@ -1,0 +1,90 @@
+{"meta":{"ui":"tracking","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Today is Sat 15 Nov. Show a tracking card: the item (Nikon Z fc camera body), carrier DHL Express, tracking number JD014600003SE, estimated delivery Tue 18 Nov and how many days away that is, and the shipment's five stages as a timeline with the current one marked: Label created (Nov 12), Picked up (Nov 13), In transit (Nov 14, current), Out for delivery, Delivered. Say which stage it is at (\"Stage 3 of 5\"). And a field where I can type delivery instructions and a Save button; once saved the card shows them back to me as saved.","text":"ChatCard \"Where is my package?\" \"Nikon Z fc camera body\" icon:\"local_shipping\" status:\"In transit\"\n  Row gap:8\n    Text.bodySecondary \"Carrier\"\n    Spacer grow\n    Text.strong \"DHL Express\"\n  Row gap:8\n    Text.bodySecondary \"Tracking\"\n    Spacer grow\n    Text.mono \"JD014600003SE\"\n  Row gap:8\n    Text.bodySecondary \"Estimated delivery\"\n    Spacer grow\n    Text.strong \"Tue 18 Nov (3 days away)\"\n  SectionLabel \"Shipment progress\" \"Stage 3 of 5\"\n  Column gap:0\n    Row gap:12\n      Icon \"check_circle\"\n      Text \"Label created · Nov 12\"\n    Row gap:12\n      Icon \"check_circle\"\n      Text \"Picked up · Nov 13\"\n    Row gap:12\n      Icon \"radio_button_checked\"\n      Text.strong \"In transit · Nov 14 (current)\"\n    Row gap:12\n      Icon \"radio_button_unchecked\"\n      Text.muted \"Out for delivery\"\n    Row gap:12\n      Icon \"radio_button_unchecked\"\n      Text.muted \"Delivered\"\n  state instructions=\"\"\n  state saved=false\n  SectionLabel \"Delivery instructions\"\n  if !saved\n    InputField \"Instructions\" \"e.g. leave at the side door\" =instructions lines:3\n    ActionButton \"Save\" primary icon:\"save\" enabled:{trim(instructions) != \"\"} -> saved=true\n  if saved\n    Callout \"Instructions saved\" \"{instructions}\" good \"check_circle\"","usage":{"input_tokens":9479,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":567,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":596,"totalMs":2742}}
+{"tMs":596,"delta":"ChatCard \"Where is"}
+{"tMs":986,"delta":" my"}
+{"tMs":986,"delta":" package?\" \"Nikon"}
+{"tMs":986,"delta":" Z fc camera body\""}
+{"tMs":986,"delta":" icon:\"local"}
+{"tMs":986,"delta":"_sh"}
+{"tMs":986,"delta":"ipping\" status:\"In trans"}
+{"tMs":986,"delta":"it\"\n  "}
+{"tMs":986,"delta":"Row gap:8\n    "}
+{"tMs":986,"delta":"Text.bodySecondary"}
+{"tMs":986,"delta":" \""}
+{"tMs":986,"delta":"Carrier\""}
+{"tMs":986,"delta":"\n    Sp"}
+{"tMs":1116,"delta":"acer grow\n    Text"}
+{"tMs":1116,"delta":".strong \"DHL"}
+{"tMs":1116,"delta":" Express\"\n  Row"}
+{"tMs":1116,"delta":" gap:8\n    Text"}
+{"tMs":1116,"delta":".bodySecondary \""}
+{"tMs":1116,"delta":"Tracking\"\n    "}
+{"tMs":1116,"delta":"Spacer grow\n    "}
+{"tMs":1116,"delta":"Text.mono \"JD014"}
+{"tMs":1116,"delta":"600003SE\"\n  "}
+{"tMs":1116,"delta":"Row gap:8\n    "}
+{"tMs":1116,"delta":"Text.bodySecondary"}
+{"tMs":1116,"delta":" \"Estimated delivery"}
+{"tMs":1345,"delta":"\"\n    Spacer gr"}
+{"tMs":1345,"delta":"ow\n    Text.strong"}
+{"tMs":1345,"delta":" \"Tue "}
+{"tMs":1345,"delta":"18 Nov ("}
+{"tMs":1345,"delta":"3"}
+{"tMs":1345,"delta":" days away)\"\n  S"}
+{"tMs":1345,"delta":"ectionLabel \"Sh"}
+{"tMs":1345,"delta":"ipment prog"}
+{"tMs":1345,"delta":"ress\" \"Stage 3"}
+{"tMs":1345,"delta":" of 5\"\n  "}
+{"tMs":1345,"delta":"Column gap:0"}
+{"tMs":1345,"delta":"\n    Row gap:12"}
+{"tMs":1739,"delta":"\n      Ic"}
+{"tMs":1739,"delta":"on \"check_"}
+{"tMs":1739,"delta":"circle\"\n      Text \""}
+{"tMs":1739,"delta":"Label created ·"}
+{"tMs":1739,"delta":" Nov 12\"\n    "}
+{"tMs":1739,"delta":"Row gap:12\n      "}
+{"tMs":1739,"delta":"Icon \"check_circle"}
+{"tMs":1739,"delta":"\"\n      Text \"Pic"}
+{"tMs":1739,"delta":"ked up · Nov 13"}
+{"tMs":1739,"delta":"\"\n    Row gap:"}
+{"tMs":1739,"delta":"12\n      Icon \"rad"}
+{"tMs":1739,"delta":"io_button"}
+{"tMs":1907,"delta":"_chec"}
+{"tMs":1907,"delta":"ked\"\n      Text.str"}
+{"tMs":1907,"delta":"ong \"In transit · N"}
+{"tMs":1907,"delta":"ov 14 "}
+{"tMs":1907,"delta":"(current)\"\n    Row"}
+{"tMs":1907,"delta":" gap:12\n      Ic"}
+{"tMs":1907,"delta":"on \"radio_button_un"}
+{"tMs":1907,"delta":"checked\"\n      Text"}
+{"tMs":1907,"delta":".mu"}
+{"tMs":1907,"delta":"ted \"Out for delivery"}
+{"tMs":1907,"delta":"\"\n    Row gap:"}
+{"tMs":1907,"delta":"12\n      Icon \"rad"}
+{"tMs":2107,"delta":"io_button_unchecked"}
+{"tMs":2107,"delta":"\"\n      Text.muted"}
+{"tMs":2107,"delta":" \"Delivered\"\n  "}
+{"tMs":2107,"delta":"state inst"}
+{"tMs":2107,"delta":"ructions=\"\"\n  state sa"}
+{"tMs":2107,"delta":"ved=false\n  Section"}
+{"tMs":2107,"delta":"Label \"Delivery"}
+{"tMs":2107,"delta":" instructions\"\n  if !"}
+{"tMs":2107,"delta":"saved\n    InputField \""}
+{"tMs":2107,"delta":"Inst"}
+{"tMs":2107,"delta":"ructions\" \"e"}
+{"tMs":2107,"delta":".g. leave at the side"}
+{"tMs":2484,"delta":" door\" =instructions l"}
+{"tMs":2484,"delta":"ines:3"}
+{"tMs":2484,"delta":"\n    ActionButton \""}
+{"tMs":2484,"delta":"Save\" prim"}
+{"tMs":2484,"delta":"ary ic"}
+{"tMs":2484,"delta":"on:\"save"}
+{"tMs":2484,"delta":"\" enabled:{"}
+{"tMs":2484,"delta":"tr"}
+{"tMs":2484,"delta":"im(instructions)"}
+{"tMs":2484,"delta":" != \"\"}"}
+{"tMs":2484,"delta":" -> saved=true\n  "}
+{"tMs":2484,"delta":"if saved\n    Call"}
+{"tMs":2733,"delta":"out \"Inst"}
+{"tMs":2733,"delta":"ructions saved\" \"{"}
+{"tMs":2733,"delta":"instructions}\" good \""}
+{"tMs":2733,"delta":"check_circle\""}

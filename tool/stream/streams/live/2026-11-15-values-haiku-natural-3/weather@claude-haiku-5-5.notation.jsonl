@@ -1,0 +1,53 @@
+{"meta":{"ui":"weather","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the weather in Lisbon as an inline card. Now: 22° and partly cloudy, high 24°, low 15°. The next five hours: 1 PM 23° sunny, 2 PM 24° sunny, 3 PM 24° partly cloudy, 4 PM 23° cloudy, 5 PM 21° rain. The next three days with a temperature range bar: Tue rain 14° to 20°, Wed partly cloudy 13° to 18°, Thu sunny 15° to 25°. Add a button \"Alert me before it rains\" that, once I press it, reads \"Rain alert is on\" and shows the alert as switched on.","text":"ChatCard \"Lisbon weather\" \"Right now\" icon:\"cloud\" status:\"Live\" tone:\"accent\"\n  WeatherNow \"Lisbon\" \"Partly cloudy\" temp:22 high:24 low:15 kind:\"partly\"\n  WeatherHours hours:[\"1 PM\",\"2 PM\",\"3 PM\",\"4 PM\",\"5 PM\"] temps:[23,24,24,23,21] kinds:[\"sun\",\"sun\",\"partly\",\"cloud\",\"rain\"]\n  SectionLabel \"Next three days\"\n  each d in days\n    WeatherDay d.label low:d.low high:d.high kind:d.kind min:13 max:25\n  state alert=false\n  if !alert\n    ActionButton \"Alert me before it rains\" tone:\"primary\" -> alert=true\n  if alert\n    Callout \"Rain alert is on\" \"We will warn you before the next rain.\" tone:\"good\" icon:\"notifications_active\"","usage":{"input_tokens":9482,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":305,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":644,"totalMs":1678}}
+{"tMs":644,"delta":"ChatCard \"L"}
+{"tMs":848,"delta":"isbon we"}
+{"tMs":848,"delta":"ather\" \"Right"}
+{"tMs":848,"delta":" now\" icon:\"c"}
+{"tMs":848,"delta":"loud\" status:\"Live"}
+{"tMs":848,"delta":"\" tone:\"accent\""}
+{"tMs":848,"delta":"\n  WeatherNow"}
+{"tMs":848,"delta":" \"Lisbon\" \""}
+{"tMs":848,"delta":"Partly cloudy\""}
+{"tMs":848,"delta":" temp:22 high:24"}
+{"tMs":848,"delta":" low:15 kind:"}
+{"tMs":859,"delta":"\"partly\"\n  We"}
+{"tMs":879,"delta":"atherHours hours:[\""}
+{"tMs":985,"delta":"1 PM\",\"2 P"}
+{"tMs":985,"delta":"M\",\"3 PM\",\"4"}
+{"tMs":985,"delta":" PM\",\"5 PM"}
+{"tMs":985,"delta":"\"] temps:[23,"}
+{"tMs":985,"delta":"24,24,23,21]"}
+{"tMs":1003,"delta":" kinds:[\"sun\",\""}
+{"tMs":1023,"delta":"sun\",\"partly\",\"clo"}
+{"tMs":1044,"delta":"ud\",\"rain\"]\n  "}
+{"tMs":1063,"delta":"S"}
+{"tMs":1083,"delta":"ectionLabel \"Next"}
+{"tMs":1103,"delta":" three days\""}
+{"tMs":1123,"delta":"\n  each"}
+{"tMs":1151,"delta":" d"}
+{"tMs":1163,"delta":" in days"}
+{"tMs":1183,"delta":"\n    WeatherDay"}
+{"tMs":1203,"delta":" d"}
+{"tMs":1223,"delta":".label low"}
+{"tMs":1243,"delta":":d.low high:d."}
+{"tMs":1264,"delta":"high kind:d.kind"}
+{"tMs":1284,"delta":" min:13"}
+{"tMs":1304,"delta":" max:25"}
+{"tMs":1324,"delta":"\n  state"}
+{"tMs":1344,"delta":" alert"}
+{"tMs":1364,"delta":"=false\n  if"}
+{"tMs":1385,"delta":" !"}
+{"tMs":1404,"delta":"alert\n    "}
+{"tMs":1426,"delta":"ActionButton \"Alert"}
+{"tMs":1446,"delta":" me before it rains\" tone"}
+{"tMs":1468,"delta":":\"primary\" -> al"}
+{"tMs":1491,"delta":"ert=true\n  if alert"}
+{"tMs":1507,"delta":"\n    Call"}
+{"tMs":1529,"delta":"out \"Rain alert is"}
+{"tMs":1548,"delta":" on\" \"We"}
+{"tMs":1568,"delta":" will war"}
+{"tMs":1588,"delta":"n you before the"}
+{"tMs":1608,"delta":" next"}
+{"tMs":1629,"delta":" rain.\" tone:\"good"}
+{"tMs":1649,"delta":"\" icon:\"not"}
+{"tMs":1670,"delta":"ifications_active\""}

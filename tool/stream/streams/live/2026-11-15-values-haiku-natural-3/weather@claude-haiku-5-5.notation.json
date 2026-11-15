@@ -1,0 +1,236 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lisbon weather",
+    "subtitle": "Right now",
+    "icon": "cloud",
+    "status": "Live",
+    "tone": "accent"
+   },
+   "children": [
+    "WeatherNow1",
+    "WeatherHours1",
+    "SectionLabel1",
+    "listView1",
+    "ActionButton1",
+    "Callout1"
+   ]
+  },
+  "WeatherNow1": {
+   "type": "WeatherNow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lisbon",
+    "detail": "Partly cloudy",
+    "temp": "22",
+    "high": "24",
+    "low": "15",
+    "kind": "partly"
+   }
+  },
+  "WeatherHours1": {
+   "type": "WeatherHours",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "hours": [
+     "1 PM",
+     "2 PM",
+     "3 PM",
+     "4 PM",
+     "5 PM"
+    ],
+    "temps": [
+     23,
+     24,
+     24,
+     23,
+     21
+    ],
+    "kinds": [
+     "sun",
+     "sun",
+     "partly",
+     "cloud",
+     "rain"
+    ]
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next three days"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${days}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "WeatherDay1"
+   ]
+  },
+  "WeatherDay1": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "min": 13,
+    "max": 25
+   },
+   "bind": {
+    "props.low": "${item.low}",
+    "props.high": "${item.high}",
+    "props.kind": "${item.kind}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Alert me before it rains",
+    "tone": "primary"
+   },
+   "bind": {
+    "visible": "${= !alert}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "alert",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Rain alert is on",
+    "message": "We will warn you before the next rain.",
+    "tone": "good",
+    "icon": "notifications_active"
+   },
+   "bind": {
+    "visible": "${= alert}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "alert",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

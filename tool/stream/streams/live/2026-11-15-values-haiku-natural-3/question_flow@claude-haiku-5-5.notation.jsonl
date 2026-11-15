@@ -1,0 +1,121 @@
+{"meta":{"ui":"question_flow","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time, with progress (Question 1 of 3) and a Back button. Question 1: what I use it for (School or study, Work and office, Gaming, Creative projects). Question 2 depends on it: for Gaming ask \"What do you play?\" with Competitive esports or Big open-world titles; otherwise ask what matters most (All-day battery, A big screen and keyboard, As light as possible). Question 3: budget (Under $800, $800 to $1,500, Over $1,500). End on one recommendation with two reasons that repeat my answers and a Start over button: Gaming gets the Volt 16 Gaming at $1,399, Creative projects the Studio 14 Pro at $1,799, and anyone else the Slate 13 at $649 if the budget is under $800, otherwise the Aero 14 at $1,099.","text":"ChatCard \"Find your laptop\" \"Three quick questions\" icon:\"laptop_mac\" status:\"Step 1 of 3\" tone:accent\n  state use=\"\"\n  state play=\"\"\n  state matters=\"\"\n  state budget=\"\"\n  state step=1\n  let q2 = use == \"Gaming\" ? \"What do you play?\" : \"What matters most?\"\n  let rec = use == \"Gaming\" ? \"Volt 16 Gaming\" : (use == \"Creative projects\" ? \"Studio 14 Pro\" : (budget == \"Under $800\" ? \"Slate 13\" : \"Aero 14\"))\n  let price = use == \"Gaming\" ? \"$1,399\" : (use == \"Creative projects\" ? \"$1,799\" : (budget == \"Under $800\" ? \"$649\" : \"$1,099\"))\n  if step == 1\n    SectionLabel \"Question 1 of 3\" \"Use\"\n    Paragraph \"What will you use it for?\"\n    OptionList =use options:[\"School or study\",\"Work and office\",\"Gaming\",\"Creative projects\"] -> step=2\n  if step == 2\n    SectionLabel \"Question 2 of 3\" \"Focus\"\n    Paragraph \"{q2}\"\n    if use == \"Gaming\"\n      OptionList =play options:[\"Competitive esports\",\"Big open-world titles\"] -> step=3\n    if use != \"Gaming\"\n      OptionList =matters options:[\"All-day battery\",\"A big screen and keyboard\",\"As light as possible\"] -> step=3\n    ActionButton \"Back\" quiet -> step=1\n  if step == 3\n    SectionLabel \"Question 3 of 3\" \"Budget\"\n    Paragraph \"What is your budget?\"\n    OptionList =budget options:[\"Under $800\",\"$800 to $1,500\",\"Over $1,500\"] -> step=4\n    ActionButton \"Back\" quiet -> step=2\n  if step == 4\n    Callout \"Our pick: {rec}\" \"Based on your answers, this is the best fit.\" good \"check_circle\"\n    Details rows:[[\"Use\", use],[\"Focus\", coalesce(play, matters)],[\"Budget\", budget],[\"Price\", price]]\n    ActionButton \"Start over\" primary -> use=\"\"; play=\"\"; matters=\"\"; budget=\"\"; step=1","usage":{"input_tokens":9558,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":729,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1148,"totalMs":3588}}
+{"tMs":1148,"delta":"ChatCard \"Find"}
+{"tMs":1330,"delta":" your"}
+{"tMs":1330,"delta":" laptop\" \"Three"}
+{"tMs":1330,"delta":" qu"}
+{"tMs":1330,"delta":"ick questions\" icon:\""}
+{"tMs":1330,"delta":"laptop_m"}
+{"tMs":1330,"delta":"ac\" status:\"Step"}
+{"tMs":1330,"delta":" 1"}
+{"tMs":1330,"delta":" "}
+{"tMs":1330,"delta":"of 3\""}
+{"tMs":1330,"delta":" tone:acc"}
+{"tMs":1350,"delta":"ent\n  state use"}
+{"tMs":1369,"delta":"=\"\""}
+{"tMs":1496,"delta":"\n  state play"}
+{"tMs":1496,"delta":"=\"\"\n  state mat"}
+{"tMs":1496,"delta":"ters=\"\"\n  state budget"}
+{"tMs":1496,"delta":"=\"\"\n  state step=1"}
+{"tMs":1496,"delta":"\n  let q2"}
+{"tMs":1497,"delta":" = use"}
+{"tMs":1516,"delta":" == \"Gaming\" "}
+{"tMs":1538,"delta":"? \"What do you play?\""}
+{"tMs":1558,"delta":" : \"What mat"}
+{"tMs":1580,"delta":"ters most?\"\n  let r"}
+{"tMs":1601,"delta":"ec = use == \"Ga"}
+{"tMs":1621,"delta":"ming\" ? \"Volt"}
+{"tMs":1668,"delta":" 16 Gaming\""}
+{"tMs":1669,"delta":" : ("}
+{"tMs":1683,"delta":"use == \"Creative projects"}
+{"tMs":1704,"delta":"\" ? \"Studio "}
+{"tMs":1725,"delta":"14 Pro\" : ("}
+{"tMs":1745,"delta":"budget =="}
+{"tMs":1766,"delta":" \"Under $800\" ?"}
+{"tMs":1786,"delta":" \"Slate 13\" :"}
+{"tMs":1807,"delta":" \"Aero 14\"))"}
+{"tMs":1828,"delta":"\n  let price = use == \""}
+{"tMs":1849,"delta":"Gaming\" ? \""}
+{"tMs":1870,"delta":"$1,399\" : ("}
+{"tMs":1890,"delta":"use == \"Creative projects"}
+{"tMs":1911,"delta":"\" ? \"$1,799"}
+{"tMs":1931,"delta":"\" : (budget == \""}
+{"tMs":1952,"delta":"Under $800\" ? \"$"}
+{"tMs":1973,"delta":"649\" : \"$1,099"}
+{"tMs":1993,"delta":"\"))\n  if step == "}
+{"tMs":2013,"delta":"1\n    S"}
+{"tMs":2034,"delta":"ectionLabel \"Question"}
+{"tMs":2054,"delta":" 1 "}
+{"tMs":2074,"delta":"of 3\" \""}
+{"tMs":2094,"delta":"Use"}
+{"tMs":2114,"delta":"\""}
+{"tMs":2134,"delta":"\n    "}
+{"tMs":2155,"delta":"Paragraph \"What will"}
+{"tMs":2176,"delta":" you use it for?\"\n    "}
+{"tMs":2196,"delta":"OptionList ="}
+{"tMs":2217,"delta":"use options:[\"School or study\",\""}
+{"tMs":2237,"delta":"Work and office\",\"Ga"}
+{"tMs":2258,"delta":"ming\",\"Creative projects\""}
+{"tMs":2278,"delta":"] -> step=2\n  "}
+{"tMs":2299,"delta":"if step == 2\n    S"}
+{"tMs":2320,"delta":"ectionLabel \"Question"}
+{"tMs":2340,"delta":" 2 of 3\" \""}
+{"tMs":2360,"delta":"Foc"}
+{"tMs":2380,"delta":"us\"\n    Paragra"}
+{"tMs":2401,"delta":"ph \"{q2}\""}
+{"tMs":2422,"delta":"\n    if use == \"Ga"}
+{"tMs":2442,"delta":"ming\"\n      OptionList"}
+{"tMs":2463,"delta":" =play options:[\"Competit"}
+{"tMs":2483,"delta":"ive esports\",\"Big open-"}
+{"tMs":2504,"delta":"world titles\"] -> step"}
+{"tMs":2524,"delta":"=3"}
+{"tMs":2544,"delta":"\n    if"}
+{"tMs":2565,"delta":" use != \"Gaming\""}
+{"tMs":2585,"delta":"\n      OptionList =mat"}
+{"tMs":2605,"delta":"ters options:[\"All-day batt"}
+{"tMs":2626,"delta":"ery\",\"A big screen and ke"}
+{"tMs":2646,"delta":"yboard\",\"As light as poss"}
+{"tMs":2667,"delta":"ible\"] -> step=3"}
+{"tMs":2687,"delta":"\n    ActionButton \""}
+{"tMs":2708,"delta":"Back\" qu"}
+{"tMs":2728,"delta":"iet -> step=1"}
+{"tMs":2749,"delta":"\n  if step == 3\n    "}
+{"tMs":2769,"delta":"SectionLabel \""}
+{"tMs":2790,"delta":"Question 3 of 3\""}
+{"tMs":2810,"delta":" \"Budget\"\n    "}
+{"tMs":2831,"delta":"Paragraph \"What is"}
+{"tMs":2851,"delta":" your budget?\"\n    O"}
+{"tMs":2872,"delta":"ptionList =budget options:"}
+{"tMs":2892,"delta":"[\"Under $800\",\"$800"}
+{"tMs":2913,"delta":" to $1,500\",\""}
+{"tMs":2934,"delta":"Over $1,500\"] -"}
+{"tMs":2954,"delta":"> step=4\n    Act"}
+{"tMs":2974,"delta":"ionButton \"Back\" qu"}
+{"tMs":2994,"delta":"iet -> step=2"}
+{"tMs":3015,"delta":"\n  if step == 4\n    "}
+{"tMs":3047,"delta":"Callout \"Our"}
+{"tMs":3060,"delta":" p"}
+{"tMs":3083,"delta":"ick:"}
+{"tMs":3100,"delta":" {rec}\" \"Based"}
+{"tMs":3122,"delta":" on your"}
+{"tMs":3143,"delta":" answers,"}
+{"tMs":3157,"delta":" this"}
+{"tMs":3177,"delta":" is the best f"}
+{"tMs":3198,"delta":"it.\""}
+{"tMs":3218,"delta":" good"}
+{"tMs":3242,"delta":" \""}
+{"tMs":3258,"delta":"check_"}
+{"tMs":3279,"delta":"circle\"\n    Details r"}
+{"tMs":3299,"delta":"ows:"}
+{"tMs":3320,"delta":"[[\"Use\", use"}
+{"tMs":3340,"delta":"],"}
+{"tMs":3360,"delta":"[\"Focus\", co"}
+{"tMs":3380,"delta":"alesce(play,"}
+{"tMs":3402,"delta":" matters)],[\"Budget"}
+{"tMs":3424,"delta":"\", budget],"}
+{"tMs":3442,"delta":"[\"Price\", price]]"}
+{"tMs":3462,"delta":"\n    "}
+{"tMs":3483,"delta":"ActionButton \"Start over"}
+{"tMs":3503,"delta":"\" primary -> use"}
+{"tMs":3523,"delta":"=\"\"; play"}
+{"tMs":3544,"delta":"=\"\"; matters=\"\";"}
+{"tMs":3564,"delta":" budget=\"\"; step=1"}

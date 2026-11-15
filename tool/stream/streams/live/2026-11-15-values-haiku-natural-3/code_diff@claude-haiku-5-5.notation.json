@@ -1,0 +1,249 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "text1",
+    "text2",
+    "DiffHunk1",
+    "DiffHunk2",
+    "DiffHunk3",
+    "ActionButton1",
+    "Receipt1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "Review config.yaml"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${= ((h1!=\"\" ? 1 : 0) + (h2!=\"\" ? 1 : 0) + (h3!=\"\" ? 1 : 0))} of 3 decided, ${= ((h1==\"keep\" ? 1 : 0) + (h2==\"keep\" ? 1 : 0) + (h3==\"keep\" ? 1 : 0))} kept"
+   }
+  },
+  "DiffHunk1": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "h1",
+    "title": "Server port",
+    "detail": "lines 4 to 5",
+    "start": 4,
+    "lines": [
+     "-port: 8080",
+     "+port: 9090"
+    ]
+   }
+  },
+  "DiffHunk2": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "h2",
+    "title": "Logging",
+    "detail": "lines 12 to 15",
+    "start": 12,
+    "lines": [
+     "-level: debug",
+     "-file: /tmp/app.log",
+     "+level: warn",
+     "+file: /var/log/app.log"
+    ]
+   }
+  },
+  "DiffHunk3": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "h3",
+    "title": "Cache",
+    "detail": "lines 20 to 22",
+    "start": 20,
+    "lines": [
+     "+enabled: true",
+     "+ttl: 300"
+    ]
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Apply",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= ((h1!=\"\" ? 1 : 0) + (h2!=\"\" ? 1 : 0) + (h3!=\"\" ? 1 : 0))==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Changes applied",
+    "tone": "good"
+   },
+   "bind": {
+    "props.message": "${= ((h1==\"keep\" ? 1 : 0) + (h2==\"keep\" ? 1 : 0) + (h3==\"keep\" ? 1 : 0))} hunks kept, ${= (3 - ((h1==\"keep\" ? 1 : 0) + (h2==\"keep\" ? 1 : 0) + (h3==\"keep\" ? 1 : 0)))} discarded",
+    "visible": "${= done==1}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "h1",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h2",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h3",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "kept",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "done",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}
