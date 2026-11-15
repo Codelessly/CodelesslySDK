@@ -989,9 +989,11 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
       height = line;
     }
     contentRect = Rect.fromLTWH(_across(left, contentWidth), top, contentWidth, height);
-    // An affix's text width, when it has text (its painter is laid out).
-    final prefixTextWidth = d.prefix?.hasText ?? false ? _prefixText.width : 0.0;
-    final suffixTextWidth = d.suffix?.hasText ?? false ? _suffixText.width : 0.0;
+    // An affix's text width, when its text shows (only then is its painter
+    // laid out).
+    bool shows(FieldAffix? a) => a != null && a.hasText && (a.alwaysVisible || affixTextsShown);
+    final prefixTextWidth = shows(d.prefix) ? _prefixText.width : 0.0;
+    final suffixTextWidth = shows(d.suffix) ? _suffixText.width : 0.0;
     _prefixTextAt = Offset(_across(_prefixTextAt.dx, prefixTextWidth), contentRect.top);
     _suffixTextAt = Offset(_across(_suffixTextAt.dx, suffixTextWidth), contentRect.top);
     if (_rtl) {
