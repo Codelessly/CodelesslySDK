@@ -182,7 +182,10 @@ def check_round(out, ds, n, text, problems0, texts0, width, narrow):
             shown = ' '.join(texts)
             # With a block in place of plain nodes a text may be drawn in parts or joined with another: it is
             # gone only when what it said is nowhere on the card.
-            gone = [t for t in texts0 if t not in texts and t not in shown]
+            # ...or in pieces (a block draws "07:15" and "09:50" where the card said "07:15 → 09:50"): every
+            # word of it that holds a letter or a digit must still be on the card.
+            words = lambda t: [w for w in t.split() if any(c.isalnum() for c in w)]
+            gone = [t for t in texts0 if t not in texts and t not in shown and not all(w in shown for w in words(t))]
             problems += [f'A text the card showed is gone: "{t[:80]}". The pass must not change what the card says.' for t in gone[:12]]
     open(f'{d}/problems.txt', 'w').write('\n'.join(problems) + '\n')
     try:

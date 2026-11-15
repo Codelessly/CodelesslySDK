@@ -1,0 +1,47 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/ic/itinerary.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [
+  "PhotoGallery",
+  "DayHeader",
+  "Checklist"
+ ],
+ "before": {
+  "problems": 0,
+  "texts": 44
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 27.3,
+   "problems": 18,
+   "ops": 36
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 26.9,
+   "problems": 12,
+   "ops": 50
+  }
+ ],
+ "final": 2,
+ "problems": 12,
+ "status": "failed",
+ "firstCheck": {
+  "status": "failed",
+  "final": 2,
+  "rounds": [
+   [
+    1,
+    21
+   ],
+   [
+    2,
+    14
+   ]
+  ],
+  "note": "As first checked; then checked again after two faults of the checks were fixed (a required prop equal to its default was dropped; a text a block shows in pieces counted as gone)."
+ }
+}

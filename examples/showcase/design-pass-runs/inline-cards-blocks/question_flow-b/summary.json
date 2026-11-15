@@ -1,0 +1,28 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/ic/question_flow.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [],
+ "before": {
+  "problems": 0,
+  "texts": 8
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 462.8,
+   "problems": 1,
+   "ops": 84
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 359.1,
+   "problems": 0,
+   "ops": 84
+  }
+ ],
+ "final": 2,
+ "problems": 0,
+ "status": "passed"
+}
