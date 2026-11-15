@@ -720,4 +720,38 @@ void main() {
       await tester.pumpAndSettle();
     });
   }
+
+  testWidgets('a tab whose list shows only after the drag enters it opens the slot at the list\'s end', (tester) async {
+    // Column b's list is hidden until the drag enters the tab, as a phone
+    // board shows a column's page once a card is held over its tab.
+    final b = lane('b');
+    (b['list_b']! as Map<String, Object?>)['bind'] = {
+      'data': "\${= filter(cards, c => c.lane == 'b')}",
+      'visible': r'${= length(log) > 0}',
+    };
+    final board = await pump(tester, extraNodes: {
+      ...b,
+      'board': {'type': 'row', 'children': ['list_a', 'list_b', 'tab'], 'layout': {'width': 400, 'height': 400}},
+      'tab': {
+        'type': 'box',
+        'layout': {'width': 80, 'height': 40},
+        'dropTarget': {'accepts': ['card'], 'key': 'b', 'listNodeId': 'list_b', 'slot': 'gap'},
+        'actions': [
+          {'trigger': {'type': 'dragEnter'}, 'actions': [log('entered')]},
+        ],
+      },
+    });
+    final tab = board.tree.boxOf('tab')!;
+    final at = tab.localToGlobal(tab.size.center(Offset.zero));
+    final gesture = await dragTo(tester, textRect(tester, 'One').center, at, release: false);
+    await tester.pump();
+    await tester.pump();
+    expect(board.drag['over'], 'b');
+    expect(paragraphs(tester, 'Four'), 1, reason: 'column b shows now');
+    // At the end of column b (after Four), not before its first card.
+    expect(dropSlotOf(board.tree, 'list_b')!.before, greaterThanOrEqualTo(1));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(board.lane('b'), ['c4', 'c1']);
+  });
 }
