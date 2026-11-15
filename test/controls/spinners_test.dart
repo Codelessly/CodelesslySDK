@@ -7,7 +7,7 @@ import 'dart:io';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/spinner.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart' show SizedBox;
+import 'package:flutter/widgets.dart' show SizedBox, TickerMode;
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support.dart';
@@ -61,6 +61,21 @@ void main() {
     await tester.pumpWidget(NodeView(tree: tree, rootId: 'col', interactive: true));
     expect(rectOf(tree, 'wheel').size, const Size(16, 16));
     expect(_spinner(tree, 'wheel').spinning, isFalse);
+  });
+
+  testWidgets('with the host\'s tickers off (a design canvas) a spinner holds still, in its own layer', (tester) async {
+    final (tree, _) = runningTree(columnDoc({
+      'spin': {'type': 'circularProgressIndicator'},
+    }));
+    addTearDown(tree.dispose);
+    await tester.pumpWidget(TickerMode(enabled: false, child: NodeView(tree: tree, rootId: 'col')));
+    final spin = _spinner(tree, 'spin');
+    expect(spin.isRepaintBoundary, isTrue);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(const Duration(milliseconds: 225));
+    expect(spin.turns, 0);
+    expect(spin.debugNeedsPaint, isFalse);
+    await tester.pumpWidget(const SizedBox());
   });
 
   test('no file in the SDK imports Cupertino', () {

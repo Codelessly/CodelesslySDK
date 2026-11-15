@@ -135,7 +135,9 @@ void _circularProgressIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..trackGap = n.prop(CircularProgressIndicatorProps.trackGap) ?? 0
     ..diameter = 16
     ..period = const Duration(milliseconds: 900)
-    // It spins on a design canvas too, as the island did.
+    // It spins on a design canvas too, as the island did, unless the host
+    // has tickers off there (`TickerMode`).
+    ..tickersEnabled = (() => b.tree.runtimeVisible)
     ..animating = true);
 }
 
@@ -157,6 +159,7 @@ void _activityIndicator(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..color = n.prop(ActivityIndicatorProps.color)?.flutter ?? ControlTokens.of(b).secondaryText
     ..diameter = radius * 2
     ..period = const Duration(seconds: 1)
+    ..tickersEnabled = (() => b.tree.runtimeVisible)
     ..animating = n.prop(ActivityIndicatorProps.animating));
 }
 
