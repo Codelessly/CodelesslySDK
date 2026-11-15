@@ -5,7 +5,9 @@ actions stay as they were; only how it looks changes. The experiment for "fast, 
 
     ANTHROPIC_API_KEY=... python3 examples/showcase/tool/style_pass.py --card <document.json> --out <dir> \
         [--request <file: what the user asked for>] [--model claude-opus-5-5] [--rounds 2] \
-        [--design-system design_systems/cards]
+        [--design-system design_systems/cards] [--width 420] [--narrow 320]
+
+--width and --narrow are the widths it is rendered at (a full page on a desktop: --width 1280 --narrow 768).
 
 <document.json> is the card as a layout document (a recording's .notation.json, or what
 tool/notation/notation.sh expand wrote). Each round: the agent is shown the card's render (light, dark and 320
@@ -31,18 +33,18 @@ def reported(log):
             for i, l in enumerate(lines) if l.startswith(('ERROR', 'WARNING'))]
 
 
-def render(card, ds, d):
+def render(card, ds, d, width=420, narrow=320):
     """Renders <card> with the design system's theme into <d>: light.png, dark.png, narrow.png. Returns the
     problems the renderer reported (light, at 420 and at 320) and the texts on the card."""
     os.makedirs(d, exist_ok=True)
     problems, texts = [], []
-    for name, extra in (('light', ['--sizes', '420x1400', '--dump-layout']), ('dark', ['--sizes', '420x1400', '--theme', 'dark']),
-                        ('narrow', ['--sizes', '320x1400'])):
+    for name, extra in (('light', ['--sizes', f'{width}x1400', '--dump-layout']), ('dark', ['--sizes', f'{width}x1400', '--theme', 'dark']),
+                        ('narrow', ['--sizes', f'{narrow}x1400'])):
         folder = f'{d}/raw-{name}'
         shutil.rmtree(folder, ignore_errors=True)
         code, log = run(['tool/render/render.sh', card, '--out', folder, '--design-system', ds] + extra)
         if name != 'dark':
-            problems += [('At 320 wide: ' if name == 'narrow' else '') + l for l in reported(log) if l not in problems]
+            problems += [(f'At {narrow} wide: ' if name == 'narrow' else '') + l for l in reported(log) if l not in problems]
         shots = sorted(f for f in os.listdir(folder) if f.endswith('.png')) if os.path.isdir(folder) else []
         if shots:
             crop(f'{folder}/{shots[0]}', f'{d}/{name}.png', dark=name == 'dark')
@@ -103,7 +105,10 @@ def main():
     os.makedirs(out, exist_ok=True)
     doc = json.load(open(card))
     request = open(opt('--request')).read().strip() if opt('--request') else ''
+    width, narrow = int(opt('--width', '420')), int(opt('--narrow', '320'))
     system = brief_for(ds, doc, request)
+    if width != 420:
+        system = system.replace('a card', 'a screen').replace('The card', 'The screen').replace('the card', 'the screen').replace('THE CARD', 'THE SCREEN').replace('in a 320-wide column', f'at {narrow} wide').replace('It is correct', f'It is shown {width} wide. It is correct')
     if mode == 'brief':
         open(f'{out}/brief.txt', 'w').write(system)
         print(f'{out}/brief.txt ({len(system)} characters)')
@@ -111,10 +116,10 @@ def main():
     model, rounds = opt('--model', 'claude-opus-5-5'), int(opt('--rounds', '2'))
     shutil.copy(card, f'{out}/before.json')
     t_all = time.time()
-    problems0, texts0 = render(f'{out}/before.json', ds, f'{out}/before')
+    problems0, texts0 = render(f'{out}/before.json', ds, f'{out}/before', width, narrow)
     summary = {'model': model, 'card': os.path.relpath(card, SDK), 'designSystem': os.path.relpath(ds, SDK),
                'before': {'problems': len(problems0), 'texts': len(texts0)}, 'rounds': []}
-    shown = [{'type': 'text', 'text': 'The card as it is on screen now: light, dark, and in a 320-wide column.'}]
+    shown = [{'type': 'text', 'text': 'The card as it is on screen now: light, dark, and narrow.'}]
     shown += [image(f'{out}/before/{m}.png') for m in ('light', 'dark', 'narrow') if os.path.exists(f'{out}/before/{m}.png')]
     messages = [{'role': 'user', 'content': shown}]
     for n in range(1, rounds + 1):
@@ -137,7 +142,7 @@ def main():
             code, log = run(['tool/notation/notation.sh', 'apply', f'{out}/before.json', f'{d}/ops.json', '--design-system', ds, '--out', f'{d}/card.json'])
             problems += [l for l in log.splitlines() if l.startswith('ERROR')]
             if os.path.exists(f'{d}/card.json'):
-                rendered, texts = render(f'{d}/card.json', ds, d)
+                rendered, texts = render(f'{d}/card.json', ds, d, width, narrow)
                 problems += [l for l in rendered if l not in problems0]
                 gone = [t for t in texts0 if t not in texts]
                 problems += [f'A text the card showed is gone: "{t[:80]}". The pass must not change what the card says.' for t in gone[:12]]
@@ -148,7 +153,7 @@ def main():
         print(json.dumps(summary['rounds'][-1]))
         if n == rounds:
             break
-        back = [{'type': 'text', 'text': 'This is the card with your operations applied: light, dark, and 320 wide.'}]
+        back = [{'type': 'text', 'text': 'This is the card with your operations applied: light, dark, and narrow.'}]
         back += [image(f'{d}/{m}.png') for m in ('light', 'dark', 'narrow') if os.path.exists(f'{d}/{m}.png')]
         back.append({'type': 'text', 'text': ('Problems reported:\n' + '\n'.join(problems) + '\n\n' if problems else 'No problems were reported.\n\n') +
                      'Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the system, and whether anything is broken, clipped or empty. '
