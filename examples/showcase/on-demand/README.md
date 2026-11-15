@@ -7,17 +7,18 @@ other block.
 
 `../tool/design_block.py` is the loop. With a model:
 
-    ANTHROPIC_API_KEY=... python3 examples/showcase/tool/design_block.py --name PollResults \
-        --brief-file on-demand/poll/block-brief.txt --card-file heldout/briefs/poll.txt --out <dir> --rounds 2
+    python3 examples/showcase/tool/design_block.py --name PollResults \
+        --brief-file examples/showcase/on-demand/poll/block-brief.txt --card-file examples/showcase/heldout/briefs/poll.txt --out <dir> --rounds 2
 
 With a person or an agent as the designer, given exactly what the model is given:
 
     python3 examples/showcase/tool/design_block.py brief --name PollResults --out <dir>
-    python3 examples/showcase/tool/design_block.py check --name PollResults --out <dir> --block <file.json> --card <file.txt>
+    python3 examples/showcase/tool/design_block.py check --name PollResults --out <dir> --block <file.json> --card <file.txt> [--use <steps.json>]
 
 `brief` writes the instructions word for word (the system's principles, its theme names, three of its blocks as
 written, the notation). `check` is one round: it validates the block and the card, renders the block alone from
-its first preview and the card as it first appears, light and dark, and lists every problem reported. The design
+its first preview and the card as it first appears, light and dark, then drives `--use` steps and checks
+expected texts. Blocks with actions or events require a use script. It lists every problem reported. The design
 system is copied to `<dir>/ds`; only the copy changes.
 
 | Run | Rounds | To first block | Total | Problems by round | What came out |

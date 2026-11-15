@@ -2,7 +2,7 @@
 """A block designed on demand: a strong model writes a new block for a design system at the full API, sees
 how it rendered, and revises it. The experiment for the gap between ready-made blocks and new design.
 
-    ANTHROPIC_API_KEY=... python3 examples/showcase/tool/design_block.py --name PollResults \
+    python3 examples/showcase/tool/design_block.py --name PollResults \
         --brief-file <what the block shows> --card-file <the request a card using it answers> \
         --out <dir> [--model claude-opus-5-5] [--rounds 2] [--design-system design_systems/cards]
 
@@ -103,6 +103,7 @@ def brief_for(name, ds, manifest):
             if m:
                 charts += m.group(0).strip() + '\n\n'
     system = f"""You are the designer of the "{manifest['name']}" design system: {manifest['description']}
+Today is {time.strftime('%A %d %B %Y')}: a date the request gives relative to now ("the next two weeks") is counted from today.
 You add one new block to it, at the same visual bar as the blocks it has. A block is a component document (JSON, schema 3): its declaration under "widget" (type, doc, props with kind and default, events) and its nodes, which read their parameters as ${{props.name}} and the theme as ${{theme.colors.name}}. Colors, text styles, radii and shadows are the theme's names, never literal values, so the block is right in light and dark. Sizes, padding and gaps inside a block are yours to write as numbers, as the blocks below do (the system's rule against writing sizes is for someone composing a card from blocks, not for a block's author); radii and shadows take the theme's names. Where the request leaves a rule open (a week's first day, a currency, how many steps), choose the common case, take it as a parameter with that default, and say so in the block's doc.
 
 THE SYSTEM'S PRINCIPLES
@@ -127,19 +128,18 @@ HOW A CARD IS WRITTEN WITH THE BLOCKS (the notation)
 {notation}
 
 ANSWER FORMAT
-First two or three sentences on the design decisions. Then the block, whole, in a ```json fence (its "id" and "widget.type" are {name}; keep the whole block under about 12,000 characters; keep its doc to one sentence that says how to call it, and give it a "previews" entry with realistic props and a size, as the examples have: that is how you will see it). Then one card that uses it, in a ```notation fence, written as the notation above (your block is called by its name like the others). If the block does anything when used (a tap, a drag, typing), end with a ```use fence holding JSON that proves it works: {{"steps": [...], "expect": [...], "forbid": [...]}}. A step is {{"tap": "<node>"}}, {{"type": "<node>", "text": "..."}}, {{"drag": "<node>", "by": [dx, dy]}} or {{"wait": ms}}. <node> is the id of a node inside your block, or a node of the card: a card's node is its type and its number among that type from 1 (ActionButton1, OptionList1), with a part inside it after a slash (ActionButton1/btn is the button, OptionList1/opt#1 its second option, ChoiceChips1/chip#0, Segments1/cell#2, InputField1/field, TotalBar1/cta); expect and forbid are regular expressions tested against the texts on the card after the steps (expect: each must match some text; forbid: none may). Choose steps and texts that would fail if the block only looked right: the value that must change, the state that must clear. A block that only shows data needs no use fence."""
+First two or three sentences on the design decisions. Then the block, whole, in a ```json fence (its "id" and "widget.type" are {name}; keep the whole block under about 12,000 characters; keep its doc to one sentence that says how to call it, and give it a "previews" entry with realistic props and a size, as the examples have: that is how you will see it). Then one card that uses it, in a ```notation fence, written as the notation above (your block is called by its name like the others). If the block does anything when used (a tap, a drag, typing), end with a ```use fence holding JSON that proves it works: {{"steps": [...], "expect": [...], "forbid": [...]}}. A step is {{"tap": "<node>"}}, {{"type": "<node>", "text": "..."}}, {{"drag": "<node>", "by": [dx, dy]}} or {{"wait": ms}}. <node> is the id of a node inside your block, or a node of the card: a card's node is its type and its number among that type from 1 (ActionButton1, OptionList1), with a part inside it after a slash (ActionButton1/btn is the button, OptionList1/opt#1 its second option, ChoiceChips1/chip#0, Segments1/cell#2, InputField1/field, TotalBar1/cta); expect and forbid are regular expressions tested against the texts on the card after the steps (expect: each must match some text; forbid: none may). Choose steps and texts that would fail if the block only looked right: the value that must change, the state that must clear, and every rule the request implies tried the wrong way (seats that must be together: tap two that are apart and expect the action to stay unavailable; a field that must be filled: press the button with it empty). A block that only shows data needs no use fence."""
     return system
 
 
 def check(name, ds, manifest, d, block, written, use=None):
-    """Validates and renders a block and the card that uses it into <d>: the block alone from its first preview
-    and the card as it first appears, light and dark. Returns the problems reported."""
+    """Validates the block, its first-state renders, and the card after the supplied use steps."""
     os.makedirs(d, exist_ok=True)
     problems = []
     if not block or not written:
         return ['The answer must hold a ```json fence with the block and a ```notation fence with the card.']
     try:
-        json.loads(block)
+        block_doc = json.loads(block)
     except ValueError as e:
         return [f'The block is not valid JSON: {e}']
     open(f'{ds}/components/{name}.json', 'w').write(block)
@@ -182,6 +182,9 @@ def check(name, ds, manifest, d, block, written, use=None):
     shots = sorted(f for f in os.listdir(f'{d}/raw-narrow') if f.endswith('.png')) if os.path.isdir(f'{d}/raw-narrow') else []
     if shots:
         crop(f'{d}/raw-narrow/{shots[0]}', f'{d}/narrow.png', dark=False)
+    interactive = bool(block_doc['widget'].get('events')) or any(n.get('actions') for n in block_doc['nodes'].values())
+    if interactive and not use:
+        problems.append('The block has actions or events but no ```use fence with steps and expected texts.')
     problems += used(name, site, d, use)
     open(f'{d}/problems.txt', 'w').write('\n'.join(problems) + '\n')
     return problems
@@ -196,6 +199,8 @@ def used(name, site, d, use):
         card = json.load(open(f'{site}/card.json'))
     except (ValueError, OSError) as e:
         return [f'The use fence is not valid JSON: {e}'] if use else []
+    if use and (not isinstance(case, dict) or not case.get('steps') or not case.get('expect')):
+        return ['The use fence needs nonempty steps and expected texts.']
     at = next((k for k, n in card['nodes'].items() if n['type'] == name), None)
     steps, problems = [], []
     def node(ref):
@@ -214,7 +219,9 @@ def used(name, site, d, use):
         elif 'wait' in s:
             steps += ['--wait', str(s['wait'])]
     code, log = run(['tool/render/render.sh', site, '--out', f'{d}/raw-used', '--sizes', '420x1400', '--dump-layout'] + steps)
-    problems += [f'After the steps: {l.strip()}' for l in log.splitlines() if l.startswith('ERROR') and 'interaction_failed' in l]
+    problems += [f'After the steps: {l.strip()}' for l in log.splitlines() if l.startswith('ERROR')]
+    if code and not any(l.startswith('ERROR') for l in log.splitlines()):
+        problems.append(f'After the steps: render exited {code} without an ERROR line.')
     folder = f'{d}/raw-used'
     dumps = [f for f in os.listdir(folder) if f.endswith('.layout.json')] if os.path.isdir(folder) else []
     texts = [b['text'] for b in json.load(open(f'{folder}/{dumps[0]}')) if b.get('text')] if dumps else []
@@ -246,6 +253,8 @@ def main():
         print(f'round{n}: {len(problems)} problem(s)')
         print('\n'.join(problems))
         print(f'look at: {out}/round{n}/block-light.png block-dark.png light.png dark.png narrow.png used.png')
+        if problems:
+            sys.exit(1)
         return
     ds, manifest = setup(out, src)
     system = brief_for(name, ds, manifest)
