@@ -11,6 +11,7 @@ import 'dart:ui' as ui;
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
@@ -2325,6 +2326,14 @@ String? _shownText(NodeBox box) {
     if (o is RenderParagraph) {
       out = o.text.toPlainText();
       return;
+    }
+    // A control that draws its own label (a button, a chip) shows it too.
+    if (o is LabeledControl) {
+      final text = o.labels.map((l) => l.text).where((t) => t.trim().isNotEmpty).join(' ');
+      if (text.isNotEmpty) {
+        out = text;
+        return;
+      }
     }
     o.visitChildren(visit);
   }

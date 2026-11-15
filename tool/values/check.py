@@ -48,6 +48,12 @@ def labels_of(n):
     return out
 
 
+def field_of(n):
+    """The part of a field block that takes the typing: its one-line field, or its area when it shows several lines."""
+    lines = (n.get('props') or {}).get('lines')
+    return 'area' if isinstance(lines, (int, float)) and lines > 1 else FIELDS.get(n['type'], 'field')
+
+
 def copy_of(nodes, ids, n):
     """The n-th node of a block, or the n-th copy of the one node a list repeats: (node id with its copy mark)."""
     if len(ids) > n:
@@ -61,11 +67,16 @@ def resolve(step, doc):
     nodes = doc['nodes']
     if 'block' in step:
         ids = [k for k, n in nodes.items() if n['type'] == step['block']]
+        # A card that wrote the plain field where the block was expected is typed into all the same.
+        if not ids and 'type' in step and step['block'] in FIELDS:
+            plain = [k for k, n in nodes.items() if n['type'] == 'textField']
+            at = copy_of(nodes, plain, step.get('nth', 0)) if plain else None
+            return ('type', f"{at}={step['type']}") if at else None
         at = copy_of(nodes, ids, step.get('nth', 0)) if ids else None
         if at is None:
             return None
         if 'type' in step:
-            return ('type', f"{at}/{FIELDS.get(step['block'], 'field')}={step['type']}")
+            return ('type', f"{at}/{field_of(nodes[at.split('#')[0]])}={step['type']}")
         return f"{at}/{step['tap']}" if step.get('tap') else at
     if 'tap' in step:
         return step['tap']
@@ -144,6 +155,8 @@ def main():
         log = r.stdout + r.stderr
         errors = [l.strip() for l in log.splitlines() if l.startswith('ERROR')]
         dumps = glob.glob(f'{site}/o/*.layout.json')
+        if not dumps:  # a render that wrote no dump is a failed render, not a card with no text
+            errors.append('ERROR no layout dump was written')
         boxes = sorted((b for b in json.load(open(dumps[0])) if 'text' in b), key=lambda b: (b.get('y', 0), b.get('x', 0))) if dumps else []
         texts = [b['text'] for b in boxes]
         missing = [e for e in case.get('expect', []) if not any(re.search(e, t) for t in texts)]
