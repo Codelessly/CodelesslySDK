@@ -24,6 +24,11 @@ system is copied to `<dir>/ds`; only the copy changes.
 |---|---|---|---|---|---|
 | `poll/` (PollResults) | 3 | 84 s | 251 s | 0, 0, 0 | Share bars, the leader in the accent, the voter's choice, the total; right in light and dark. Round 3 changed almost nothing. |
 | `player/` (NowPlaying) | 2 | 164 s | 271 s | 3, 0 | Drawn art, track and artist, progress with times, a transport row. Round 1's card wired the block's events in a way the notation does not read; round 2 fixed it. |
+| `stock/` (StockQuote) | 2 | 87 s | 173 s | 0, 2 | The price as the leading figure, change chip, a sparkline on the engine's `lineChart` node, open, high, low, volume. Round 1 is the one kept: round 2's card wrote `enabled:=false`, which the notation then read as a variable (fixed since). |
+
+The brief names every node type the engine has and carries the chart nodes in full. Before it did, a standalone
+run of this same block had the model draw the chart point by point until it hit its output limit and produced
+nothing.
 
 Each folder holds the block's brief, the block as designed, the designer's card, the rounds side by side and the
 timings. `poll/fast-model-card.*` is the card a fast model then wrote with the new block in 2.3 s, before and

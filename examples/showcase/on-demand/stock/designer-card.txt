@@ -1,0 +1,8 @@
+state watching=false
+ChatCard "ACME today" "Nasdaq · as of 3:42 PM" icon:"show_chart_rounded" status:"Market open" tone:"good"
+  StockQuote symbol:"ACME" name:"Acme Corporation" price:"$153.62" change:1.84 percent:1.21 values:[151.9,152.4,151.6,151.3,152.2,153.0,152.7,153.4,154.1,153.5,153.9,153.62] open:"$151.90" high:"$154.10" low:"$151.22" volume:"38.4M"
+  if watching
+    Callout "On your watchlist" "ACME will show up in your daily summary." tone:"good" icon:"visibility_rounded"
+  Row gap:10
+    ActionButton "Set price alert" tone:"quiet" icon:"notifications_rounded" -> emit alert "ACME"
+    ActionButton "Add to watchlist" tone:"primary" icon:"add_rounded" enabled:=!watching -> watching=true; emit watch "ACME"

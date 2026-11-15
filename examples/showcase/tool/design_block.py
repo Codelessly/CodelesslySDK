@@ -83,6 +83,20 @@ def brief_for(name, ds, manifest):
     examples = '\n\n'.join(f'{n}.json\n' + open(f'{ds}/components/{n}.json').read() for n in ('ProgressLine', 'OptionList', 'StatTile'))
     _, notation = run(['tool/notation/notation.sh', 'prompt', '--design-system', ds])
     notation = notation[notation.index('You describe a UI'):]
+    # What the engine already draws, so a block uses it and does not draw it again by hand: every node type by
+    # name, and the chart nodes in full (a designer left without them draws a chart point by point).
+    api_ref = os.path.join(os.path.dirname(SDK), 'CodelesslyAPI', 'docs', 'reference')
+    types, charts = '', ''
+    if os.path.exists(f'{api_ref}/catalog.json'):
+        cat = json.load(open(f'{api_ref}/catalog.json'))
+        ws = cat.get('nodeTypes', [])
+        types = ', '.join(sorted(ws) if isinstance(ws, dict) else sorted(w['type'] if isinstance(w, dict) else str(w) for w in ws))
+    if os.path.exists(f'{api_ref}/charts.md'):
+        page = open(f'{api_ref}/charts.md').read()
+        for name in ('barChart', 'lineChart', 'ChartSeries'):
+            m = re.search(r'^### `?' + name + r'`?\n[\s\S]*?(?=^### |\Z)', page, re.M)
+            if m:
+                charts += m.group(0).strip() + '\n\n'
     system = f"""You are the designer of the "{manifest['name']}" design system: {manifest['description']}
 You add one new block to it, at the same visual bar as the blocks it has. A block is a component document (JSON, schema 3): its declaration under "widget" (type, doc, props with kind and default, events) and its nodes, which read their parameters as ${{props.name}} and the theme as ${{theme.colors.name}}. Colors, text styles, radii and shadows are the theme's names, never literal values, so the block is right in light and dark.
 
@@ -99,11 +113,16 @@ shadows (${{theme.shadows.name}}): {', '.join(theme.get('shadows', {}))}
 THREE OF ITS BLOCKS, AS WRITTEN
 {examples}
 
+NODE TYPES A BLOCK MAY USE (the engine draws these; use one where it fits, and never draw by hand what a node already is: a chart is a lineChart or barChart node, not a path)
+{types}
+
+THE CHART NODES
+{charts}
 HOW A CARD IS WRITTEN WITH THE BLOCKS (the notation)
 {notation}
 
 ANSWER FORMAT
-First two or three sentences on the design decisions. Then the block, whole, in a ```json fence (its "id" and "widget.type" are {name}; keep its doc to one sentence that says how to call it, and give it a "previews" entry with realistic props and a size, as the examples have: that is how you will see it). Then one card that uses it, in a ```notation fence, written as the notation above (your block is called by its name like the others)."""
+First two or three sentences on the design decisions. Then the block, whole, in a ```json fence (its "id" and "widget.type" are {name}; keep the whole block under about 12,000 characters; keep its doc to one sentence that says how to call it, and give it a "previews" entry with realistic props and a size, as the examples have: that is how you will see it). Then one card that uses it, in a ```notation fence, written as the notation above (your block is called by its name like the others)."""
     return system
 
 

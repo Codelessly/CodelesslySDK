@@ -1,0 +1,1 @@
+A stock quote: the ticker and company name, the price as the leading figure, the day's change in value and percent (green up, red down), a sparkline of the day's prices, and a quiet row of open, high, low and volume. Parameters: symbol, name, price (text), change (number), percent (number), values (a list of numbers for the sparkline), open, high, low, volume (texts).

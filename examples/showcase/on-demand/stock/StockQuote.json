@@ -1,0 +1,159 @@
+{
+ "schema": 3,
+ "id": "StockQuote",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "StockQuote",
+  "doc": "A stock quote: StockQuote symbol:\"ACME\" name:\"Acme Corp\" price:\"$153.62\" change:1.84 percent:1.21 values:[151.9,152.4,...] open:\"$151.90\" high:\"$154.10\" low:\"$151.22\" volume:\"38.4M\" draws the price, a green or red change pill, the day's sparkline and the open, high, low and volume.",
+  "props": [
+   {"key": "symbol", "type": {"kind": "string", "flutter": "String"}, "default": "ACME", "doc": "The ticker.", "required": true},
+   {"key": "name", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The company name, quiet beside the ticker."},
+   {"key": "price", "type": {"kind": "string", "flutter": "String"}, "default": "$0.00", "doc": "The last price, as text.", "required": true},
+   {"key": "change", "type": {"kind": "number", "flutter": "double"}, "default": 0, "doc": "The day's change in value (negative: down, red)."},
+   {"key": "percent", "type": {"kind": "number", "flutter": "double"}, "default": 0, "doc": "The day's change in percent."},
+   {"key": "values", "type": {"kind": "list", "flutter": "List<double>", "item": {"kind": "number", "flutter": "double"}}, "default": [1, 2], "doc": "The day's prices, oldest first, for the sparkline."},
+   {"key": "open", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The opening price."},
+   {"key": "high", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The day's high."},
+   {"key": "low", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The day's low."},
+   {"key": "volume", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "Shares traded (38.4M)."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Up day",
+   "size": [340, 300],
+   "props": {
+    "symbol": "ACME", "name": "Acme Corporation", "price": "$153.62", "change": 1.84, "percent": 1.21,
+    "values": [151.9, 152.4, 151.6, 151.3, 152.2, 153.0, 152.7, 153.4, 154.1, 153.5, 153.9, 153.62],
+    "open": "$151.90", "high": "$154.10", "low": "$151.22", "volume": "38.4M"
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": ["head", "priceRow", "spark", "stats"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 12},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "head": {
+   "type": "row",
+   "children": ["mark", "names"],
+   "props": {"crossAxisAlignment": "center", "spacing": 10},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "mark": {
+   "type": "row",
+   "children": ["markIcon"],
+   "props": {"mainAxisAlignment": "center"},
+   "layout": {"width": 32, "height": 32},
+   "decoration": {"fills": [{"color": "tile"}], "radius": 10}
+  },
+  "markIcon": {
+   "type": "icon",
+   "props": {"icon": "candlestick_chart_rounded", "size": 17, "color": "inkSoft"},
+   "layout": {"width": 17, "height": 17}
+  },
+  "names": {
+   "type": "column",
+   "children": ["symbol", "name"],
+   "props": {"crossAxisAlignment": "start", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "symbol": {
+   "type": "text",
+   "props": {"text": "${props.symbol}", "style": "rowTitle", "maxLines": 1},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "name": {
+   "type": "text",
+   "props": {"text": "${props.name}", "style": "meta", "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.name != ''}"}
+  },
+  "priceRow": {
+   "type": "row",
+   "children": ["price", "chip"],
+   "props": {"crossAxisAlignment": "center", "spacing": 10},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "price": {
+   "type": "text",
+   "props": {"text": "${props.price}", "style": "numberHero", "maxLines": 1, "scaleDown": true},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "chip": {
+   "type": "row",
+   "children": ["chipIcon", "chipText"],
+   "props": {"crossAxisAlignment": "center", "spacing": 3},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [7, 4, 9, 4]},
+   "decoration": {"fills": [{"color": "goodTint"}], "radius": 999},
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "decoration.fills[0].color": "${= props.change >= 0 ? theme.colors.goodTint : theme.colors.badTint}"
+   }
+  },
+  "chipIcon": {
+   "type": "icon",
+   "props": {"icon": "arrow_upward_rounded", "size": 13, "color": "goodDeep"},
+   "layout": {"width": 13, "height": 13},
+   "bind": {
+    "props.icon": "${= props.change >= 0 ? 'arrow_upward_rounded' : 'arrow_downward_rounded'}",
+    "props.color": "${= props.change >= 0 ? theme.colors.goodDeep : theme.colors.badDeep}"
+   }
+  },
+  "chipText": {
+   "type": "text",
+   "props": {
+    "text": "${= fixed(abs(props.change), 2) + '  ' + fixed(abs(props.percent), 2) + '%'}",
+    "style": {"from": "chip", "fontSize": 12}
+   },
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"props.style.color": "${= props.change >= 0 ? theme.colors.goodDeep : theme.colors.badDeep}"}
+  },
+  "spark": {
+   "type": "lineChart",
+   "layout": {"width": {"fill": 0}, "height": 76},
+   "props": {
+    "plotPadding": [2, 6, 6, 6],
+    "smooth": true,
+    "lineWidth": 2,
+    "areaBottomColor": "#00000000",
+    "gridColor": "#00000000",
+    "axisColor": "#00000000",
+    "zeroLineColor": "#00000000",
+    "animate": true
+   },
+   "bind": {
+    "props.data": "${= map(range(length(props.values)), i => {'x': i, 'y': at(props.values, i)})}",
+    "props.xMin": "${= 0}",
+    "props.xMax": "${= max(1, length(props.values) - 1)}",
+    "props.lineColor": "${= props.change >= 0 ? theme.colors.good : theme.colors.bad}",
+    "props.areaTopColor": "${= props.change >= 0 ? theme.colors.goodTint : theme.colors.badTint}",
+    "props.markerHollowColor": "${theme.colors.card}",
+    "props.referenceLines": "${= length(props.values) > 0 ? [{'y': first(props.values), 'color': theme.colors.lineStrong, 'width': 1, 'dash': [3, 4]}] : []}",
+    "props.markers": "${= length(props.values) > 0 ? [{'x': length(props.values) - 1, 'y': last(props.values), 'filled': true, 'radius': 3.5, 'color': props.change >= 0 ? theme.colors.good : theme.colors.bad}] : []}"
+   }
+  },
+  "stats": {
+   "type": "row",
+   "children": ["sOpen", "sHigh", "sLow", "sVol"],
+   "props": {"crossAxisAlignment": "start", "spacing": 8},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [14, 11, 14, 11]},
+   "decoration": {"fills": [{"color": "tile"}], "radius": 14},
+   "bind": {"decoration.radius": "${theme.radii.tile}"}
+  },
+  "sOpen": {"type": "column", "children": ["sOpenL", "sOpenV"], "props": {"crossAxisAlignment": "start", "spacing": 3}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "sOpenL": {"type": "text", "props": {"text": "OPEN", "style": "eyebrow"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "sOpenV": {"type": "text", "props": {"text": "${= props.open != '' ? props.open : '—'}", "style": "numberSmall", "maxLines": 1, "scaleDown": true}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "sHigh": {"type": "column", "children": ["sHighL", "sHighV"], "props": {"crossAxisAlignment": "start", "spacing": 3}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "sHighL": {"type": "text", "props": {"text": "HIGH", "style": "eyebrow"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "sHighV": {"type": "text", "props": {"text": "${= props.high != '' ? props.high : '—'}", "style": "numberSmall", "maxLines": 1, "scaleDown": true}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "sLow": {"type": "column", "children": ["sLowL", "sLowV"], "props": {"crossAxisAlignment": "start", "spacing": 3}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "sLowL": {"type": "text", "props": {"text": "LOW", "style": "eyebrow"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "sLowV": {"type": "text", "props": {"text": "${= props.low != '' ? props.low : '—'}", "style": "numberSmall", "maxLines": 1, "scaleDown": true}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "sVol": {"type": "column", "children": ["sVolL", "sVolV"], "props": {"crossAxisAlignment": "start", "spacing": 3}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "sVolL": {"type": "text", "props": {"text": "VOLUME", "style": "eyebrow"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "sVolV": {"type": "text", "props": {"text": "${= props.volume != '' ? props.volume : '—'}", "style": "numberSmall", "maxLines": 1, "scaleDown": true}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}}
+ }
+}
