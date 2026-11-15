@@ -1,0 +1,92 @@
+{
+ "SiteNav": {
+  "brief": "The navigation bar of a website: the brand (a small mark and the name) at the left, the page links in the middle with the current one marked, and at the right a quiet 'Sign in' and one primary action. Parameters: brand, icon, links (a list of names), active (the current link's name), secondary (the quiet action's label), cta (the primary action's label). Events: onNavigate (a link was chosen: result is its name), onCta, onSecondary. A band as wide as the window with its content in the centered column.",
+  "page": "The top of the landing page of 'Tidewater', a booking tool for small hotels: navigation with Features, Pricing, Customers, Docs, 'Sign in' and 'Start free', over a short hero.",
+  "reference": "site_landing"
+ },
+ "Hero": {
+  "brief": "The opening band of a landing page: a small eyebrow chip, a large headline, one or two lines of supporting text, a primary and a secondary action and a short note under them, with one of the design system's drawn pictures (Media kind) beside the text on a wide window and under it on a narrow one. Parameters: eyebrow, title, text, primary, secondary, note, kind (the Media picture), tone, align (\"split\" with the picture beside, or \"center\" with everything centered and no picture). Events: onPrimary, onSecondary.",
+  "page": "The landing page of 'Tidewater', a booking tool for small hotels: headline 'Fill every room, without the spreadsheets', supporting text, 'Start free' and 'Book a demo', the note 'No credit card needed'.",
+  "reference": "site_landing"
+ },
+ "LogoStrip": {
+  "brief": "A quiet strip of customer names under a hero: a small label ('Trusted by\u2026') and the names set as wordmarks in a row, evenly spread, wrapping when the window is narrow. Parameters: label, names (a list).",
+  "page": "Under the hero of 'Tidewater': 'Trusted by independent hotels' with Harbor House, The Larkspur, Salt & Pine, Casa Marisol, Northgate Inn.",
+  "reference": "site_landing"
+ },
+ "FeatureCard": {
+  "brief": "One feature of a product, as a tile in a grid of three: an icon in a tinted square, the feature's name, two lines of description and an optional 'Learn more' link. Parameters: icon, title, text, tone (which tint the icon square takes), link (its label; empty for none). Event: onPressed. As wide as its grid cell.",
+  "page": "The features section of 'Tidewater': a heading and three features (Live calendar, Channel sync, Smart pricing), each with an icon and a description.",
+  "reference": "site_landing"
+ },
+ "StatBand": {
+  "brief": "A row of three or four headline numbers, each with what it counts: large figures in the number style, small labels under them, hairlines between, inside one tile as wide as the section. Parameters: values (a list of texts like \"4,200\"), labels (a list), notes (an optional list, a third line). Wraps to two across when narrow.",
+  "page": "A section of the 'Tidewater' landing page with three numbers: 4,200 hotels, 31% more direct bookings, 2 min setup.",
+  "reference": "site_landing"
+ },
+ "Testimonial": {
+  "brief": "One customer quote on a landing page: the quote set large, the person's round initials, name and role under it, an optional star rating. Parameters: quote, name, role, rating (0 for none), align (\"center\" or \"start\"). As wide as its place; reads well alone in a narrow section or three across in a grid.",
+  "page": "A section of the 'Tidewater' landing page with one quote from Elena Vasquez, owner of The Larkspur: 'We stopped juggling three spreadsheets and an inbox. Direct bookings went up the first month.'",
+  "reference": "site_landing"
+ },
+ "PricingPlan": {
+  "brief": "One plan of a pricing page, as a tile in a row of three: the plan's name, an optional badge ('Most popular'), the price large with its period small beside it, one line on who it is for, a checklist of features and a full-width action; the featured plan is raised (accent border, primary action) and the others quiet. Parameters: name, price, period, note, features (a list), cta, featured (true or false), badge. Event: onChoose. As wide as its grid cell, as tall as its row.",
+  "page": "The pricing page of 'Ledgerly', accounting software: a centered title, a Monthly / Yearly choice that changes the prices, and three plans side by side: Solo $9/mo, Team $29/mo (most popular), Scale $79/mo, each with five features.",
+  "reference": "site_pricing"
+ },
+ "CallToAction": {
+  "brief": "The closing band of a landing page: a headline, one line of text and one or two actions, centered on the design system's hero gradient (the heroA/heroB colors, light text), with rounded corners, as wide as its section. Parameters: title, text, primary, secondary. Events: onPrimary, onSecondary.",
+  "page": "The end of the 'Tidewater' landing page: 'Ready to fill every room?', 'Set up in two minutes. Free for 14 days.', with 'Start free' and 'Talk to sales'.",
+  "reference": "site_landing"
+ },
+ "SiteFooter": {
+  "brief": "The footer of a website: the brand with a one-line description at the left, then up to four columns of links each under a small heading, a hairline, and under it the copyright line and a few legal links. Parameters: brand, tagline, headings (a list), links (a list of lists of names, one per heading), legal (the copyright line), small (a list of small links). Event: onNavigate (result: the link's name). A band as wide as the window with its content in the centered column; the columns wrap when narrow.",
+  "page": "The footer of the 'Tidewater' site: columns Product, Company, Resources, Legal with four links each, '\u00a9 2026 Tidewater'.",
+  "reference": "site_landing"
+ },
+ "PostCard": {
+  "brief": "One article on a blog index, as a tile in a grid of three: a drawn cover picture (Media kind) at the top, a category tag, the title (two lines at most), a one-line excerpt, and the author's initials, name, date and reading time at the foot. Parameters: kind (the picture), tag, title, excerpt, author, meta. Event: onPressed. As wide as its grid cell.",
+  "page": "The 'Related articles' section of the engineering blog 'Signal & Noise': three articles as cards, each with a picture, a tag, a title, the author and the reading time.",
+  "reference": "site_blog"
+ },
+ "SideNav": {
+  "brief": "The sidebar of an app window: the product's mark and name at the top, then the sections as lines with an icon, a name and an optional count, the current one marked with a tinted fill and accent ink, optional small group labels, and the signed-in person (initials, name, role) pinned at the foot. Parameters: brand, icon, value (the variable holding the current section's name), items (a list of names), icons (a list), counts (a list of texts, empty for none), user, role. Event: onChanged (result: the name chosen). It fills the pane it is put in (a Sidebar of an App with pad:0) from top to bottom.",
+  "page": "The overview screen of 'Harbor', an operations dashboard: a sidebar with Overview (current), Orders (12), Inventory, Customers, Reports, Settings and the user Sam Patel, Operations lead; beside it a top bar and four figures.",
+  "reference": "app_dashboard"
+ },
+ "PageHeader": {
+  "brief": "The header of an app screen's content: the screen's title large, an optional count chip beside it and a one-line description under it at the left; the screen's actions (the lines written under it: buttons, a search field) at the right, level with the title. Parameters: title, subtitle, count. It takes children (the actions). As wide as its place; the actions go under the title when narrow.",
+  "page": "The customers screen of 'Fieldbook', a CRM: the header with the title 'Customers', the count 248, an Import button and 'Add customer', above a toolbar and a table.",
+  "reference": "app_table"
+ },
+ "DataTable": {
+  "brief": "A table of records in an app: a header row of column names (small, muted, the sorted one marked with an arrow), then one row per record with hairlines between, the first column strong, a column that holds a status drawn as a tinted tag (green for good words like Paid or Active, amber for waiting ones like Pending or Trial, red for bad ones like Overdue or Churned, neutral otherwise), money and numbers right-aligned, a hover tint, and an optional checkbox column. Parameters: columns (the names), keys (each column's field in a record), rows (a list of records), widths (optional shares), status (the key of the status column), numeric (keys that are right-aligned), sort (the key sorted by), selectable, value (a variable holding the list of selected ids, when selectable), idKey. Events: onRow (result: the record), onSort (result: the key). Inside a Card or alone; as wide as its place, scrolling sideways when the columns cannot fit.",
+  "page": "The overview of 'Harbor', an operations dashboard: a card 'Latest orders' with a table of eight orders (number, customer, status, total, date) and a 'View all' link.",
+  "reference": "app_dashboard"
+ },
+ "ConversationRow": {
+  "brief": "One conversation in an inbox list: the customer's round initials, the name with the time at the right, the subject, a one-line preview, an unread dot, and a selected state (tinted fill, accent bar at the left). Parameters: name, subject, preview, time, unread (true or false), selected (true or false). Event: onPressed. As wide as the pane it is in, with a hairline under it.",
+  "page": "A support inbox for 'Relaydesk' as an app window: a rail of folders, a list of eight conversations with the second one selected, and the open conversation at the right.",
+  "reference": "app_inbox"
+ },
+ "MessageBubble": {
+  "brief": "One message of a support conversation: the author's initials, name and time over the text in a rounded bubble; tone \"them\" (the customer: the card color, at the left), \"us\" (the agent: the accent tint, at the right) or \"note\" (an internal note: the warning tint with a small lock and the word 'Internal note', full width). Parameters: author, time, text, tone. The bubble is at most about 560 wide and never wider than its place.",
+  "page": "The open conversation of the 'Relaydesk' support inbox: its subject and status, four messages back and forth between Maya Reyes and the agent Dan Whitaker, an internal note, and a reply box with Send.",
+  "reference": "app_inbox"
+ },
+ "TaskCard": {
+  "brief": "One task on a project board, as a small tile in a column: the title (two lines at most), a colored label chip, and at the foot the due date with a small calendar icon, the comment count with a small bubble icon, and the assignee's round initials at the right; a selected state (accent border). Parameters: title, label, tone (the label's tint: one of the design system's tints), due, comments, assignee, selected. Event: onPressed. As wide as its column.",
+  "page": "A project board for 'Lanes' as an app window: a top bar and four columns (Backlog, In progress, In review, Done) of task cards.",
+  "reference": "app_board"
+ },
+ "SettingRow": {
+  "brief": "One setting of an app's settings screen: the setting's name with a line of description under it at the left, and at the right its control: a switch bound to a variable (kind \"switch\"), or the current choice as text with a chevron (kind \"link\"), or a quiet button (kind \"button\"). Rows stack with hairlines between them inside a Card. Parameters: title, description, kind, value (the variable, for a switch), detail (the text for a link or the button's label), danger (true: the button is in the error color). Events: onChanged (the switch changed), onPressed.",
+  "page": "The account settings of 'Plume', a writing app: a Notifications group of five switches with descriptions, and a Danger zone with 'Delete account'.",
+  "reference": "app_settings"
+ },
+ "FormSection": {
+  "brief": "One group of a settings or form screen on a desktop: the group's title and a line of description in a narrow column at the left, and the group's fields (the lines written under it) in a card at the right; on a narrow window the title goes above the card. Parameters: title, description. It takes children (the fields). As wide as its place.",
+  "page": "The Profile section of the account settings of 'Plume': name, username, a multi-line bio and a time zone choice, with a title and description beside the fields.",
+  "reference": "app_settings"
+ }
+}

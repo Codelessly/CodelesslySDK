@@ -5,6 +5,13 @@ how it rendered, and revises it. The experiment for the gap between ready-made b
     python3 examples/showcase/tool/design_block.py --name PollResults \
         --brief-file <what the block shows> --card-file <the request a card using it answers> \
         --out <dir> [--model claude-opus-5-5] [--rounds 2] [--design-system design_systems/cards]
+        [--width 1280 --narrow 768] [--reference <picture.png>]
+
+--reference is a picture of a designed page that holds the part the block is to be (a page a strong model wrote
+and the design pass restyled): the designer is shown it and asked to make that part a reusable block.
+
+--width and --narrow are the widths it is checked at: 420 and 320 for a block of a chat card; a desktop width
+(1280, with 768) for a block of a page, whose "card" is then a page or an app window written with the page words.
 
 Each round: the model answers with the block (a component document) and one card in the notation that uses
 it; both are checked and rendered at 420 wide, light and dark, the block alone from its own preview and the
@@ -70,6 +77,10 @@ def crop(src, dst, dark=False):
     bg.save(dst)
 
 
+def widths():
+    return int(opt('--width', '420')), int(opt('--narrow', '320'))
+
+
 def setup(out, src):
     """A copy of the design system under <out>/ds; its manifest."""
     ds = os.path.join(out, 'ds')
@@ -85,7 +96,8 @@ def brief_for(name, ds, manifest):
     theme = manifest['theme']
     examples = '\n\n'.join(f'{n}.json\n' + open(f'{ds}/components/{n}.json').read() for n in ('ProgressLine', 'OptionList', 'StatTile'))
     # The prompt alone: what the tool prints while it builds is not part of it.
-    notation = subprocess.run(['tool/notation/notation.sh', 'prompt', '--design-system', ds], cwd=SDK, capture_output=True, text=True).stdout
+    width, narrow = widths()
+    notation = subprocess.run(['tool/notation/notation.sh', 'prompt', '--design-system', ds, '--width', str(width)], cwd=SDK, capture_output=True, text=True).stdout
     at = notation.find('You describe a UI')
     notation = notation[at:] if at >= 0 else notation
     # What the engine already draws, so a block uses it and does not draw it again by hand: every node type by
@@ -102,6 +114,11 @@ def brief_for(name, ds, manifest):
             m = re.search(r'^### `?' + chart_name + r'`?\n[\s\S]*?(?=^### |\Z)', page, re.M)
             if m:
                 charts += m.group(0).strip() + '\n\n'
+    # A block of a page, not of a chat card: where it sits and what it must hold at.
+    page = '' if width < 700 else f"""
+
+THIS BLOCK IS FOR A DESKTOP PAGE, NOT A CHAT CARD
+The system's blocks were designed for a chat card about 420 wide; this one extends the same language to a website page or an app window {width} wide: the same tokens, type, corners, shadows and restraint, at the scale of a page (more air, larger headings from the theme's heading1/heading2/lead/numberHero styles, the content never stretched edge to edge). It is called inside the page words of the notation (PAGES, below): a block that is a band of a website (a navigation bar, a hero, a footer) is written directly under Page, is as wide as the window, paints its own background and keeps its own content in a centered column at most {1120} wide with side padding; a block that is one item (a tile, a row, a plan) is as wide as the place it is given (a Grid cell, a Section, a Pane) and never assumes a width. Where this document says "card", read "page": the notation you write to show it is a whole page or app window that uses it (start with Page or App), with realistic content around it. It is rendered {width} wide and again {narrow} wide: at {narrow} it must not overflow (let texts wrap; a row of several items that cannot fit wraps: the row has "props": {{"wrap": true}} and each child "layout": {{"width": {{"fill": 300}}, "basis": 240}}, so three sit across at 900 and one at 390 with no breakpoints), and its preview is sized for the place it is used in."""
     system = f"""You are the designer of the "{manifest['name']}" design system: {manifest['description']}
 Today is {time.strftime('%A %d %B %Y')}: a date the request gives relative to now ("the next two weeks") is counted from today.
 You add one new block to it, at the same visual bar as the blocks it has. A block is a component document (JSON, schema 3): its declaration under "widget" (type, doc, props with kind and default, events) and its nodes, which read their parameters as ${{props.name}} and the theme as ${{theme.colors.name}}. Colors, text styles, radii and shadows are the theme's names, never literal values, so the block is right in light and dark. Sizes, padding and gaps inside a block are yours to write as numbers, as the blocks below do (the system's rule against writing sizes is for someone composing a card from blocks, not for a block's author); radii and shadows take the theme's names. Where the request leaves a rule open (a week's first day, a currency, how many steps), choose the common case, take it as a parameter with that default, and say so in the block's doc.
@@ -124,6 +141,8 @@ NODE TYPES A BLOCK MAY USE (the engine draws these; use one where it fits, and n
 
 THE CHART NODES
 {charts}
+{page}
+
 HOW A CARD IS WRITTEN WITH THE BLOCKS (the notation)
 {notation}
 
@@ -151,7 +170,8 @@ def check(name, ds, manifest, d, block, written, use=None):
         json.dump(manifest, open(f'{ds}/design_system.json', 'w'), indent=1)
     site = f'{d}/site'
     os.makedirs(site, exist_ok=True)
-    code, log = run(['tool/notation/notation.sh', 'expand', f'{d}/card.txt', '--design-system', ds, '--id', 'card', '--out', f'{site}/card.json'])
+    width, narrow = widths()
+    code, log = run(['tool/notation/notation.sh', 'expand', f'{d}/card.txt', '--design-system', ds, '--id', 'card', '--width', str(width), '--out', f'{site}/card.json'])
     problems += [l for l in log.splitlines() if 'line ' in l or 'does not load' in l or 'rror' in l]
     if not os.path.exists(f'{site}/card.json'):
         return problems
@@ -166,7 +186,7 @@ def check(name, ds, manifest, d, block, written, use=None):
     json.dump({'schema': 3, 'pages': ['card.json'], 'designSystem': os.path.relpath(ds, site)}, open(f'{site}/site.json', 'w'))
     for mode in ('light', 'dark'):
         dark = ['--theme', 'dark'] if mode == 'dark' else []
-        for label, cmd in (('', ['tool/render/render.sh', site, '--out', f'{d}/raw-{mode}', '--sizes', '420x1400']),
+        for label, cmd in (('', ['tool/render/render.sh', site, '--out', f'{d}/raw-{mode}', '--sizes', f'{width}x1400']),
                            ('block-', ['tool/render/render.sh', site, '--component', name, '--out', f'{d}/block-{mode}'])):
             code, log = run(cmd + dark)
             if mode == 'light':
@@ -177,8 +197,8 @@ def check(name, ds, manifest, d, block, written, use=None):
                 crop(f'{folder}/{shots[0]}', f'{d}/{label}{mode}.png', dark=mode == 'dark')
     # The same card in a narrow chat column: what overflows or breaks there is a problem too. (Outside runs,
     # 2026-11-15: blocks that passed at one width were sized for it and broke at others.)
-    code, log = run(['tool/render/render.sh', site, '--out', f'{d}/raw-narrow', '--sizes', '320x1400'])
-    problems += [f'At 320 wide: {l}' for l in reported(log) if l not in problems]
+    code, log = run(['tool/render/render.sh', site, '--out', f'{d}/raw-narrow', '--sizes', f'{narrow}x1400'])
+    problems += [f'At {narrow} wide: {l}' for l in reported(log) if l not in problems]
     shots = sorted(f for f in os.listdir(f'{d}/raw-narrow') if f.endswith('.png')) if os.path.isdir(f'{d}/raw-narrow') else []
     if shots:
         crop(f'{d}/raw-narrow/{shots[0]}', f'{d}/narrow.png', dark=False)
@@ -218,7 +238,7 @@ def used(name, site, d, use):
             steps += ['--drag', f"{node(s['drag'])}={s['by'][0]},{s['by'][1]}"]
         elif 'wait' in s:
             steps += ['--wait', str(s['wait'])]
-    code, log = run(['tool/render/render.sh', site, '--out', f'{d}/raw-used', '--sizes', '420x1400', '--dump-layout'] + steps)
+    code, log = run(['tool/render/render.sh', site, '--out', f'{d}/raw-used', '--sizes', f'{widths()[0]}x1400', '--dump-layout'] + steps)
     problems += [f'After the steps: {l.strip()}' for l in log.splitlines() if l.startswith('ERROR')]
     if code and not any(l.startswith('ERROR') for l in log.splitlines()):
         problems.append(f'After the steps: render exited {code} without an ERROR line.')
@@ -264,7 +284,17 @@ def main():
         return
     model, rounds = opt('--model', 'claude-opus-5-5'), int(opt('--rounds', '2'))
     brief, card = open(opt('--brief-file')).read().strip(), open(opt('--card-file')).read().strip()
-    messages = [{'role': 'user', 'content': f'THE BLOCK TO DESIGN: {name}\n{brief}\n\nTHE CARD THAT USES IT answers this request:\n{card}'}]
+    first = f'THE BLOCK TO DESIGN: {name}\n{brief}\n\nTHE CARD THAT USES IT answers this request:\n{card}'
+    messages = [{'role': 'user', 'content': first}]
+    if opt('--reference') and os.path.exists(opt('--reference')):
+        # A designed page that holds this part: the look to reach, made reusable.
+        from PIL import Image
+        ref = Image.open(opt('--reference')).convert('RGB')
+        ref = ref.crop((0, 0, ref.width, min(ref.height, 2400)))
+        ref.save(f'{out}/reference.png')
+        messages = [{'role': 'user', 'content': [
+            {'type': 'text', 'text': first + '\n\nA REFERENCE: the picture is a page designed for this request, in this design system. The part of it that this block is to be is the look to reach or better: make that part a block anyone can call with their own content, in any page, and say in two sentences what you kept from the reference and what you changed to make it reusable.'},
+            image(f'{out}/reference.png')]}]
     summary = {'name': name, 'model': model, 'rounds': []}
     t_all = time.time()
     for n in range(1, rounds + 1):
@@ -287,7 +317,7 @@ def main():
         print(json.dumps(summary['rounds'][-1]))
         if n == rounds:
             break
-        back = [{'type': 'text', 'text': 'This is how it rendered: your block alone from its first preview (light, then dark), then the card as it first appears (light, then dark), then the card in a narrow column (320 wide), then, when you gave steps, the card after them.'}]
+        back = [{'type': 'text', 'text': f'This is how it rendered: your block alone from its first preview (light, then dark), then the card as it first appears (light, then dark), then the card in a narrow column ({widths()[1]} wide), then, when you gave steps, the card after them.'}]
         back += [image(f'{d}/{m}.png') for m in ('block-light', 'block-dark', 'light', 'dark', 'narrow', 'used') if os.path.exists(f'{d}/{m}.png')]
         back.append({'type': 'text', 'text': ('Problems reported:\n' + '\n'.join(problems) + '\n\n' if problems else 'No problems were reported.\n\n') +
                      'Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the other blocks, and whether anything is broken or empty. If nothing is reported and you would ship it as it is, answer with the one word SHIP and nothing else: a round that changes what was already right makes it worse. Otherwise fix every problem and answer again in the same format, block and card whole.'})

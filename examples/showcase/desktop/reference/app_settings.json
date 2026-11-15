@@ -1,0 +1,2336 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_settings"
+ ],
+ "nodes": {
+  "app_settings": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280,
+    "height": {
+     "fill": 800
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "children": [
+    "column1",
+    "column2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column1": {
+   "type": "column",
+   "children": [
+    "brandRow",
+    "row2",
+    "row3",
+    "row4",
+    "row5",
+    "row6",
+    "row7",
+    "spacer1",
+    "row8"
+   ],
+   "layout": {
+    "width": 248,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     16,
+     20,
+     16,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 18,
+     "color": "ink"
+    },
+    "text": "Plume"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Settings"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "children": [
+    "icon1",
+    "text3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"profile\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "profile"
+      }
+     ]
+    }
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "person",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Profile",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "row3": {
+   "type": "row",
+   "children": [
+    "icon2",
+    "text4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"account\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "account"
+      }
+     ]
+    }
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "manage_accounts",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Account",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "row4": {
+   "type": "row",
+   "children": [
+    "icon3",
+    "text5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"notifications\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "notifications"
+      }
+     ]
+    }
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "notifications",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Notifications",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "row5": {
+   "type": "row",
+   "children": [
+    "icon4",
+    "text6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"appearance\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "appearance"
+      }
+     ]
+    }
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "palette",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Appearance",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "children": [
+    "icon5",
+    "text7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"billing\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "billing"
+      }
+     ]
+    }
+   ]
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "credit_card",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Billing",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "children": [
+    "icon6",
+    "text8"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"team\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "team"
+      }
+     ]
+    }
+   ]
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "group",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Team",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "row8": {
+   "type": "row",
+   "children": [
+    "Avatar1",
+    "text9"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 14
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.name": "${name}"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "${name}"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "children": [
+    "row9",
+    "divider1",
+    "column3",
+    "row16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "children": [
+    "text10",
+    "row10"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     32,
+     22,
+     32,
+     18
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 24
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 28,
+     "color": "ink"
+    },
+    "text": "Profile"
+   }
+  },
+  "row10": {
+   "type": "row",
+   "children": [
+    "StatusBadge1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "StatusBadge1": {
+   "type": "StatusBadge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Unsaved changes",
+    "tone": "warning"
+   },
+   "bind": {
+    "visible": "${= dirty}"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "children": [
+    "column4",
+    "column8",
+    "column9"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 760
+    },
+    "padding": [
+     32,
+     24,
+     32,
+     40
+    ]
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 20,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "children": [
+    "SectionHeader1",
+    "row11",
+    "row12",
+    "bioGroup",
+    "tzGroup",
+    "ToggleRow1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 26
+   },
+   "props": {
+    "spacing": 18,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "SectionHeader1": {
+   "type": "SectionHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "title": "Public profile"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "children": [
+    "Avatar2",
+    "column5",
+    "spacer2",
+    "outlinedButton1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 14
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 14
+   },
+   "props": {
+    "spacing": 16
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "large"
+   },
+   "bind": {
+    "props.name": "${name}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "children": [
+    "text11",
+    "text12"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Profile picture"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "PNG or JPG, at least 256 × 256."
+   }
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Change"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "changePhoto"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "row12": {
+   "type": "row",
+   "children": [
+    "column6",
+    "column7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16
+   }
+  },
+  "column6": {
+   "type": "column",
+   "children": [
+    "textField1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Name"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${name}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "children": [
+    "textField2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "textField2": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Username",
+     "hintText": "yourname"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${username}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "username",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "textField3": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Bio",
+     "hintText": "Tell readers about yourself"
+    },
+    "minLines": 3,
+    "maxLines": 6
+   },
+   "bind": {
+    "props.initialValue": "${bio}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "bio",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "row13": {
+   "type": "row",
+   "children": [
+    "text13",
+    "text14"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "Shown on your public profile."
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "fontSize": 12
+    },
+    "text": "${= length(bio)}/160"
+   },
+   "bind": {
+    "props.style.color": "${= length(bio)>160?theme.error:theme.colors.secondaryText}"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "fieldLabel",
+     "color": "inkSoft"
+    },
+    "text": "Time zone"
+   }
+  },
+  "dropdown1": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "(GMT-08:00) Los Angeles",
+     "(GMT-05:00) New York",
+     "(GMT+00:00) London",
+     "(GMT+01:00) Paris",
+     "(GMT+05:30) Mumbai",
+     "(GMT+09:00) Tokyo"
+    ]
+   },
+   "bind": {
+    "props.value": "${tz}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tz",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "ToggleRow1": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Public profile",
+    "description": "Anyone can see your profile and published pieces.",
+    "value": "isPublic"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "children": [
+    "SectionHeader2",
+    "ToggleRow2",
+    "ToggleRow3",
+    "ToggleRow4",
+    "ToggleRow5",
+    "ToggleRow6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 26
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "SectionHeader2": {
+   "type": "SectionHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "title": "Notifications"
+   }
+  },
+  "ToggleRow2": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Comments",
+    "description": "When someone comments on your drafts or posts.",
+    "value": "nComments"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "ToggleRow3": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Mentions",
+    "description": "When a collaborator mentions you in a document.",
+    "value": "nMentions"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "ToggleRow4": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Weekly summary",
+    "description": "A Monday email with your words written and reads.",
+    "value": "nWeekly"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "ToggleRow5": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Product news",
+    "description": "New features and tips for writing in Plume.",
+    "value": "nProduct"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "ToggleRow6": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Security alerts",
+    "description": "Sign-ins from new devices and password changes.",
+    "value": "nSecurity"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "column9": {
+   "type": "column",
+   "children": [
+    "dangerHead",
+    "row14",
+    "Callout1",
+    "row15"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "badLine"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 26
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "bad"
+    },
+    "text": "Danger zone"
+   }
+  },
+  "row14": {
+   "type": "row",
+   "children": [
+    "column10",
+    "filledButton1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 16
+   }
+  },
+  "column10": {
+   "type": "column",
+   "children": [
+    "text17",
+    "text18"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Delete account"
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Permanently remove your account, drafts and published work."
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "backgroundColor": "badTint",
+     "foregroundColor": "badDeep"
+    },
+    "label": "Delete account"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "confirmDelete",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Delete your account?",
+    "message": "This cannot be undone. All your documents will be erased.",
+    "tone": "danger"
+   },
+   "bind": {
+    "visible": "${= confirmDelete}"
+   }
+  },
+  "row15": {
+   "type": "row",
+   "children": [
+    "textButton1",
+    "filledButton2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "end"
+   },
+   "bind": {
+    "visible": "${= confirmDelete}"
+   }
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Keep account"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "confirmDelete",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "backgroundColor": "bad",
+     "foregroundColor": "onAccent"
+    },
+    "label": "Yes, delete permanently"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "deleteAccount"
+      },
+      {
+       "type": "setVariable",
+       "variable": "confirmDelete",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "row16": {
+   "type": "row",
+   "children": [
+    "text19",
+    "spacer3",
+    "outlinedButton2",
+    "filledButton3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     32,
+     14,
+     32,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "props": {
+    "spacing": 10,
+    "mainAxisAlignment": "end"
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Changes apply to your whole account."
+   },
+   "bind": {
+    "visible": "${dirty}"
+   }
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Cancel"
+   },
+   "bind": {
+    "props.enabled": "${dirty}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "Maya Reyes"
+      },
+      {
+       "type": "setVariable",
+       "variable": "username",
+       "value": "mayawrites"
+      },
+      {
+       "type": "setVariable",
+       "variable": "bio",
+       "value": "Essayist and newsletter writer. Drafting my second book in Plume."
+      },
+      {
+       "type": "setVariable",
+       "variable": "tz",
+       "value": "(GMT+01:00) Paris"
+      },
+      {
+       "type": "setVariable",
+       "variable": "isPublic",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "nComments",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "nMentions",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "nWeekly",
+       "value": "${= false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "nProduct",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "nSecurity",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Save changes",
+    "style": {
+     "backgroundColor": "bar",
+     "foregroundColor": "onBar"
+    }
+   },
+   "bind": {
+    "props.enabled": "${= dirty&&length(bio)<=160}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "save"
+      },
+      {
+       "type": "setVariable",
+       "variable": "dirty",
+       "value": "${= false}"
+      },
+      {
+       "type": "showToast",
+       "message": "Settings saved"
+      }
+     ]
+    }
+   ]
+  },
+  "brandRow": {
+   "type": "row",
+   "children": [
+    "brandMark",
+    "brandText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     4,
+     0,
+     4,
+     18
+    ]
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "brandMark": {
+   "type": "row",
+   "children": [
+    "brandIcon"
+   ],
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "ink"
+     }
+    ],
+    "radius": 10
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "brandIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "edit_note",
+     "style": "rounded"
+    },
+    "size": 20,
+    "color": "card"
+   }
+  },
+  "brandText": {
+   "type": "column",
+   "children": [
+    "text1",
+    "text2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 1,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "bioGroup": {
+   "type": "column",
+   "children": [
+    "textField3",
+    "row13"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "tzGroup": {
+   "type": "column",
+   "children": [
+    "text15",
+    "dropdown1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "dangerHead": {
+   "type": "row",
+   "children": [
+    "dangerIcon",
+    "text16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "dangerIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "warning_amber",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "bad"
+   }
+  }
+ },
+ "variables": {
+  "app_settings": [
+   {
+    "name": "tab",
+    "type": "text",
+    "value": "profile"
+   },
+   {
+    "name": "name",
+    "type": "text",
+    "value": "Maya Reyes"
+   },
+   {
+    "name": "username",
+    "type": "text",
+    "value": "mayawrites"
+   },
+   {
+    "name": "bio",
+    "type": "text",
+    "value": "Essayist and newsletter writer. Drafting my second book in Plume."
+   },
+   {
+    "name": "tz",
+    "type": "text",
+    "value": "(GMT+01:00) Paris"
+   },
+   {
+    "name": "isPublic",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "nComments",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "nMentions",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "nWeekly",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "nProduct",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "nSecurity",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "dirty",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "confirmDelete",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

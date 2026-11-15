@@ -1,0 +1,13 @@
+WARNING [site_blog] layout_field_ignored [site_blog.doc] /nodes/column12/layout/y
+WARNING [app_dashboard] fit_not_allowed [app_dashboard.doc] /nodes/spacer1/layout/height
+WARNING [app_inbox] fit_not_allowed [app_inbox.doc] /nodes/spacer2/layout/height
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text16
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text16
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text16
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text16
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text16
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text16
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text16
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text16
+WARNING [app_settings] fit_not_allowed [app_settings.doc] /nodes/spacer1/layout/height
+WARNING [app_table] fit_not_allowed [app_table.doc] /nodes/spacer1/layout/height

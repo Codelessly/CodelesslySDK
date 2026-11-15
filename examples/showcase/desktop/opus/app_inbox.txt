@@ -1,0 +1,103 @@
+state folder="inbox"
+state sel=2
+state reply=""
+state convos=[{"id":1,"name":"Priya Nair","subject":"Can't log in after reset","preview":"I reset my password twice and still get an error on the sign-in page.","time":"9:41","unread":true},{"id":2,"name":"Marco Ruiz","subject":"Charged twice for order #4821","preview":"Thanks, I can see the refund pending on my card statement now.","time":"9:12","unread":false},{"id":3,"name":"Hannah Becker","subject":"Change billing address","preview":"We moved offices last month and need the invoices updated.","time":"8:55","unread":true},{"id":4,"name":"Tomás Silva","subject":"Export to CSV is empty","preview":"The file downloads but there are only headers, no rows at all.","time":"8:30","unread":true},{"id":5,"name":"Aiko Tanaka","subject":"Add two seats to our plan","preview":"Our team is growing, could you add two more seats this week?","time":"Yesterday","unread":false},{"id":6,"name":"Daniel Okafor","subject":"Webhook retries","preview":"How many times do you retry a failed webhook before giving up?","time":"Yesterday","unread":true},{"id":7,"name":"Sofia Rossi","subject":"Invoice for March","preview":"I can't find the March invoice in the billing section.","time":"Mon","unread":false},{"id":8,"name":"Liam O'Connor","subject":"Feature request: dark mode","preview":"Any plans for a dark theme? My team works late shifts.","time":"Mon","unread":false}]
+App
+  Sidebar w:220
+    Row gap:8 middle
+      Icon "support_agent"
+      Text.strong "Relaydesk"
+    Spacer h:8
+    NavItem "Inbox" icon:"inbox" badge:"12" selected:=folder=="inbox" -> folder="inbox"
+    NavItem "Assigned to me" icon:"person" badge:"4" selected:=folder=="mine" -> folder="mine"
+    NavItem "Waiting" icon:"schedule" badge:"7" selected:=folder=="waiting" -> folder="waiting"
+    NavItem "Closed" icon:"check_circle" selected:=folder=="closed" -> folder="closed"
+    Spacer grow
+    Row gap:8 middle
+      Avatar "Sam Patel" size:28
+      Column gap:0
+        Text.strong "Sam Patel"
+        Text.caption "Support agent"
+  Pane w:340 pad:0 gap:0
+    Row between middle pad:16 border-bottom:#FFE5E7EB
+      Heading "Inbox" level:3
+      Badge.primary "12 open"
+    Column scroll gap:0
+      each c in convos
+        Box pad:[16,12,16,12] fill:=sel==c.id?"#FFEEF2FF":"#00FFFFFF" border-bottom:#FFF1F2F4 -> sel=c.id
+          Row gap:12 top
+            Avatar "{c.name}" size:36
+            Column grow gap:2
+              Row between middle
+                Text.strong "{c.name}"
+                Row gap:6 middle
+                  Text.caption "{c.time}"
+                  Box w:8 h:8 radius:4 fill:#FF2563EB visible:=c.unread
+              Text.rowTitle "{c.subject}"
+              Text.muted "{c.preview}" {"props": {"maxLines": 1}}
+  Main
+    Nav
+      Column gap:4
+        Heading "Charged twice for order #4821" level:2
+        Row gap:8 middle
+          Badge.warning "Open"
+          Text.muted "Assigned to Sam Patel"
+          Text.muted "· #CS-2048"
+      Row gap:8
+        Button.outline "Reassign" -> emit reassign
+        Button.ghost "Snooze" -> emit snooze
+    Column pad:24 gap:16 scroll
+      Row start
+        Card gap:6 maxw:520
+          Row gap:8 middle
+            Avatar "Marco Ruiz" size:24
+            Text.strong "Marco Ruiz"
+            Text.caption "8:02"
+          Text "Hi, I placed order #4821 yesterday and my card was charged twice for $86.40. Can you help?"
+      Row end
+        Box gap:6 maxw:520 pad:14 radius:12 fill:#FF2563EB
+          Row gap:8 middle
+            Text "Sam Patel" color:#FFFFFFFF weight:700
+            Text "8:20" color:#FFDBEAFE size:12
+          Text "Sorry about that, Marco. I can see two charges on our side and I've started a refund for the duplicate." color:#FFFFFFFF
+      Box gap:6 pad:14 radius:12 fill:#FFFEF3C7
+        Row gap:8 middle
+          Icon "lock"
+          Text "Internal note · Sam Patel · 8:24" weight:700 color:#FF92400E
+        Text "Payment processor retried after a timeout. Flagged to billing; refund ID RF-77310." color:#FF78350F
+      Row start
+        Card gap:6 maxw:520
+          Row gap:8 middle
+            Avatar "Marco Ruiz" size:24
+            Text.strong "Marco Ruiz"
+            Text.caption "9:05"
+          Text "How long will the refund take to show up?"
+      Row end
+        Box gap:6 maxw:520 pad:14 radius:12 fill:#FF2563EB
+          Row gap:8 middle
+            Text "Sam Patel" color:#FFFFFFFF weight:700
+            Text "9:10" color:#FFDBEAFE size:12
+          Text "Usually 3 to 5 business days, depending on your bank. I'll keep this open until it lands." color:#FFFFFFFF
+      Card gap:10
+        Input "Reply to Marco" "Write a reply…" =reply multiline
+        Row gap:8 middle
+          IconButton "attach_file" -> emit attach
+          Spacer grow
+          Button.outline "Send and close" enabled:=trim(reply)!="" -> emit sendClose reply; reply=""; toast "Sent and closed"
+          Button "Send" enabled:=trim(reply)!="" -> emit send reply; reply=""; toast "Sent"
+  Pane w:300 pad:16 gap:12
+    Text.eyebrow "Customer"
+    Row gap:12 middle
+      Avatar "Marco Ruiz" size:48
+      Column gap:2
+        Text.strong "Marco Ruiz"
+        Text.muted "marco.ruiz@fastmail.com"
+    Divider
+    Details rows:=[["Plan","Pro, annual"],["Customer since","March 2022"],["Last order","#4821 · $86.40"],["Conversations","6"]]
+    Text.eyebrow "Tags"
+    Row gap:6
+      Chip "VIP"
+      Chip "Billing"
+      Chip "Refund"
+    Divider
+    Button.ghost "View all orders" -> emit openOrders
