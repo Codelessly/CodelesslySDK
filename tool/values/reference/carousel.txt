@@ -1,0 +1,15 @@
+state open=false
+state i=0
+state size=""
+state shoes=[{"name":"Aero Runner","detail":"Road · neutral","price":"$120","rating":"4.8","tone":"lilac","about":"A light daily trainer with a springy foam midsole and a breathable knit upper."},{"name":"Trail Scout","detail":"Trail · grippy","price":"$135","rating":"4.6","tone":"mint","about":"Deep lugs and a rock plate for wet roots and loose gravel."},{"name":"Tempo Flash","detail":"Speed days","price":"$150","rating":"4.7","tone":"rose","about":"A snappy plate and a low stack for intervals and race day."},{"name":"Cloud Stride","detail":"Max cushion","price":"$140","rating":"4.5","tone":"sky","about":"Soft, tall and stable for long easy miles."},{"name":"Daybreak 2","detail":"Everyday","price":"$95","rating":"4.4","tone":"sand","about":"An honest all-rounder at a friendly price."},{"name":"Night Owl","detail":"Reflective","price":"$125","rating":"4.6","tone":"slate","about":"Reflective panels all round for runs after dark."}]
+ChatCard "Running shoes" "Six picks for road and trail" icon:"directions_run_rounded" status:"{i+1} of 6"
+  if !open
+    Carousel#car =i items:=shoes thumbs:true cta:"Details" -> open=true
+  if open
+    ProductTile "{shoes[i].name}" detail:"{shoes[i].detail}" price:"{shoes[i].price}" rating:"{shoes[i].rating}" kind:"shoe" tone:"{shoes[i].tone}" height:150
+    Paragraph "{shoes[i].about}"
+    SectionLabel "Size (US)" "{size==""?"Pick one":"Size "+size}"
+    ChoiceChips#sizes =size options:["7","8","9","10","11","12"] disabled:["8"] columns:6
+    Row gap:10
+      ActionButton#back "Back" tone:"quiet" icon:"arrow_back_rounded" grow -> open=false
+      ActionButton "Add to bag" icon:"shopping_bag_rounded" enabled:=size!="" grow:2 -> emit add_to_bag shoes[i].name; toast "Added to bag"

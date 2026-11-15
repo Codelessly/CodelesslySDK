@@ -21,3 +21,12 @@ The outside agent, judging by eye, counted 8 and 1 for the first two: it also fa
 was not the one asked for and whose two time labels disagreed, which a text check cannot see. What it reads is
 what a person reads as numbers and labels; what it cannot judge is a picture, a color, or whether a control that
 changed nothing should have.
+
+## The 25 pinned cases
+
+`cases.json` (with `briefs/`, `reference/` and the write-up in `CASES.md`) pins 25 briefs (the 17 card briefs and the 8
+held-out ones) to numbers and names stated in the request, so each card can be right or wrong after use. Each case has
+a hand-written reference card that must come out right:
+
+    tool/notation/notation.sh expand tool/values/reference/<id>.txt --design-system design_systems/cards --id <id> --out <dir>/<id>@reference.notation.json
+    python3 tool/values/check.py tool/values/cases.json <dir> --design-system design_systems/cards --model reference --out <scratch>

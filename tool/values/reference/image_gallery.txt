@@ -1,0 +1,3 @@
+state photos=[{"kind":"harbor","caption":"Harbour at sunrise"},{"kind":"market","caption":"Old town market"},{"kind":"forest","caption":"Forest trail"},{"kind":"dunes","caption":"Desert dunes"},{"kind":"skyline","caption":"Evening skyline"},{"kind":"lagoon","caption":"Hidden lagoon"},{"kind":"mountain","caption":"Mountain hut"},{"kind":"festival","caption":"Street festival"},{"kind":"train","caption":"Night train"}]
+ChatCard "My trip" "Nine photos · tap one to open it" icon:"photo_library_rounded" status:=open>0?open+" of 9":"9 photos"
+  PhotoGallery#g =open photos:=photos
