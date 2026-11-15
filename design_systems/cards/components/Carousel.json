@@ -184,7 +184,7 @@
     "viewportFraction": 0.86,
     "scrollDirection": "horizontal",
     "padEnds": false,
-    "edgeFade": 28
+    "edgeFade": 12
    },
    "layout": {
     "width": {
@@ -196,7 +196,7 @@
     "props.initialPage": "${props.value}",
     "data": "${props.items}",
     "props.viewportFraction": "${props.peek}",
-    "props.edgeFade": "${= props.fade && props.peek < 1 ? 28 : 0}",
+    "props.edgeFade": "${= props.fade && props.peek < 1 ? 12 : 0}",
     "layout.height": "${= props.height + 94}"
    },
    "actions": [

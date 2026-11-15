@@ -68,7 +68,7 @@
     "scrollable": true,
     "scrollDirection": "horizontal",
     "crossAxisAlignment": "start",
-    "edgeFade": 28
+    "edgeFade": 12
    },
    "layout": {
     "width": {
@@ -79,7 +79,7 @@
     }
    },
    "bind": {
-    "props.edgeFade": "${= props.fade ? 28 : 0}"
+    "props.edgeFade": "${= props.fade ? 12 : 0}"
    }
   },
   "inner": {

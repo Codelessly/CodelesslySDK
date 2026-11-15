@@ -819,8 +819,8 @@ def page_dots():
 def wide_scroll():
     nodes = {
         'frame': col(['scroller']),
-        'scroller': node('row', {'width': FILL, 'height': HUG}, {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start', 'edgeFade': 28}, ['inner'],
-                         bind={'props.edgeFade': '${= props.fade ? 28 : 0}'}),
+        'scroller': node('row', {'width': FILL, 'height': HUG}, {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start', 'edgeFade': 12}, ['inner'],
+                         bind={'props.edgeFade': '${= props.fade ? 12 : 0}'}),
         'inner': node('column', {'width': 640, 'height': HUG}, {'crossAxisAlignment': 'stretch', 'spacing': 0}, ['slot'],
                       bind={'layout.width': '${props.width}'}),
         'slot': {'type': 'slot'},
@@ -887,9 +887,9 @@ def carousel():
     f = lambda key, fallback="''": "${= coalesce(item.%s, %s)}" % (key, fallback)
     nodes = {
         'wrap': col(['pages', 'thumbs', 'bar'], 10),
-        'pages': node('pageView', {'width': FILL, 'height': 290}, {'viewportFraction': 0.86, 'scrollDirection': 'horizontal', 'padEnds': False, 'edgeFade': 28},
+        'pages': node('pageView', {'width': FILL, 'height': 290}, {'viewportFraction': 0.86, 'scrollDirection': 'horizontal', 'padEnds': False, 'edgeFade': 12},
                       ['page'], bind={'props.initialPage': '${props.value}', 'data': '${props.items}', 'props.viewportFraction': '${props.peek}',
-                                      'props.edgeFade': '${= props.fade && props.peek < 1 ? 28 : 0}',
+                                      'props.edgeFade': '${= props.fade && props.peek < 1 ? 12 : 0}',
                                       'layout.height': '${= props.height + 94}'},
                       actions=[{'trigger': {'type': 'changed'}, 'actions': [setv('props.value', '${result.index}'), fire('onChanged', '${result.index}')]}]),
         'page': node('column', {'width': FILL, 'height': FILL, 'padding': [0, 0, 10, 0]}, {'crossAxisAlignment': 'stretch'}, ['tile'],
@@ -1036,7 +1036,7 @@ def comparison_table():
         # The engine's edgeFade is set on the scroller, but with this content it neither fades nor clips (see NOTES,
         # limits): so the frame clips, and the trailing edge is also faded by a painted gradient in the card color.
         'scrollCol': col(['scroller'], decoration={'clip': 'hardEdge'}, customPaint={'foregroundPainter': [
-            {'op': 'rect', 'rect': ['${= size.width - 28}', 0, 28, '${size.height}'], 'when': E('%s && props.fade' % wide),
+            {'op': 'rect', 'rect': ['${= size.width - 12}', 0, 12, '${size.height}'], 'when': E('%s && props.fade' % wide),
              'paint': "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"}]}),
         'labels': node('column', {'width': LABEL + 14, 'height': HUG, 'x': 0, 'y': 0, 'padding': [0, 0, 14, 0]}, {'crossAxisAlignment': 'stretch'},
                        ['corner', 'labelRows', 'labelFoot'],
@@ -1051,8 +1051,8 @@ def comparison_table():
         'rl': node('row', {'width': FILL, 'height': CELL, 'padding': [0, 0, 6, 0]}, None, ['rlText'], decoration=dict(rule)),
         'rlText': text('${= at(item, 0)}', {'from': 'meta', 'fontWeight': 600}, FILL, color='inkSoft', maxLines=2, overflow='ellipsis'),
         'scroller': node('row', {'width': FILL, 'height': HUG},
-                         {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start', 'edgeFade': 28},
-                         ['strip'], bind={'props.edgeFade': '${= props.fade ? 28 : 0}'}),
+                         {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start', 'edgeFade': 12},
+                         ['strip'], bind={'props.edgeFade': '${= props.fade ? 12 : 0}'}),
         'strip': node('row', {'width': HUG, 'height': HUG}, {'crossAxisAlignment': 'start'},
                       ['lead'] + ['k%d' % i for i in range(COMPARE)] + ['tail']),
         'lead': node('spacer', {'width': LABEL, 'height': 1}),
@@ -1376,8 +1376,8 @@ def photo_gallery():
         'thumb': node('Media', {'width': FILL, 'height': 92}, {'kind': 'mountain'}, bind=dict(kind)),
         'caption': cap('caption'),
         # a strip that scrolls sideways
-        'strip': node('row', {'width': FILL, 'height': 150}, {'scrollable': True, 'scrollDirection': 'horizontal', 'edgeFade': 28}, ['stripList'],
-                      bind={'visible': "${= props.layout == 'strip' && %s}" % closed, 'props.edgeFade': '${= props.fade ? 28 : 0}'}),
+        'strip': node('row', {'width': FILL, 'height': 150}, {'scrollable': True, 'scrollDirection': 'horizontal', 'edgeFade': 12}, ['stripList'],
+                      bind={'visible': "${= props.layout == 'strip' && %s}" % closed, 'props.edgeFade': '${= props.fade ? 12 : 0}'}),
         'stripList': node('listView', {'width': HUG, 'height': 150}, {'scrollable': False, 'spacing': 10, 'scrollDirection': 'horizontal'}, ['tile'],
                           bind={'data': '${props.photos}'}),
         'tile': col(['tileArt', 'tileCaption'], 6, width=168, height=FILL, states={'pressed': {'tile': PRESS}}, actions=open_it),

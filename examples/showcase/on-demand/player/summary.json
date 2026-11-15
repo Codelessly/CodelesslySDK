@@ -1,0 +1,23 @@
+{
+ "name": "NowPlaying",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 98.5,
+   "checkAndRenderSeconds": 65.5,
+   "problems": 3,
+   "input_tokens": 27477,
+   "output_tokens": 12084
+  },
+  {
+   "round": 2,
+   "modelSeconds": 73.3,
+   "checkAndRenderSeconds": 33.4,
+   "problems": 0,
+   "input_tokens": 37399,
+   "output_tokens": 9911
+  }
+ ],
+ "totalSeconds": 270.8
+}
