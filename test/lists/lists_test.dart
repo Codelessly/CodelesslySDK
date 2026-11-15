@@ -6,6 +6,8 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import '../support/screen.dart' as harness;
+
 import 'support.dart' as lists;
 
 // The collections group beyond what parity sees: the goldens record each
@@ -276,6 +278,29 @@ void main() {
     );
     expect(r[1]!.left - r[0]!.left, 24);
     expect(r[2]!.left - r[1]!.left, 24);
+  });
+
+  testWidgets('a running list bound to data overlaps its items with a negative spacing too (an avatar stack)', (tester) async {
+    final s = await harness.show(
+      tester,
+      {
+        'col': {'type': 'column', 'children': ['stack'], 'layout': {'width': 300, 'height': 100}},
+        'stack': {
+          'type': 'listView',
+          'children': ['avatar'],
+          'layout': {'width': {'hug': 120}, 'height': {'hug': 26}},
+          'bind': {'data': r'${members}'},
+          'props': {'spacing': -3, 'separator': 'space', 'scrollDirection': 'horizontal'},
+        },
+        'avatar': {'type': 'box', 'layout': {'width': 26, 'height': 26}},
+      },
+      variables: [harness.v('members', ['mo', 'dr', 'pn'], VariableType.list)],
+    );
+    await tester.pumpAndSettle();
+    final lefts = [for (final b in s.tree.boxesOf('avatar')) b.localToGlobal(Offset.zero).dx]..sort();
+    expect(lefts, hasLength(3));
+    expect(lefts[1] - lefts[0], 23);
+    expect(lefts[2] - lefts[1], 23);
   });
 
   testWidgets('an endless list builds only the items that cover its view', (tester) async {
