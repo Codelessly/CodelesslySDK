@@ -1,0 +1,15 @@
+$total = 1500
+$secs = 1500
+$running = false
+$share = ($total - $secs) / $total
+$label = $running ? "Pause" : ($secs == $total ? "Start" : "Resume")
+$done = $secs == 0
+
+Card every:1s while:$running do:"$secs = max(0, $secs - 1); $running = $secs > 0"
+  Text.cardTitle "Focus"
+  Text.numberLarge "{clock($secs)}"
+  Progress $share
+  Row gap:8
+    Button "{label}" enabled:"!$done" tap:"$running = !$running"
+    Button.secondary "Reset" tap:"$secs = $total; $running = false"
+  Text.heading2 "Time for a break" if:$done

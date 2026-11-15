@@ -1,0 +1,33 @@
+state step = 1
+state name = ""
+state email = ""
+state plan = "Free"
+state confirmed = false
+let price = plan == "Pro" ? 12 : plan == "Team" ? 40 : 0
+let valid = step == 1 ? (trim(name) != "" and contains(email, "@")) : true
+if confirmed
+  ChatCard "You're in" "Welcome, {name}" icon:check_circle tone:success
+    Receipt "Sign-up confirmed" "{name}, you are on the {plan} plan." code:"{email}" codeLabel:"Email"
+else
+  ChatCard "Sign up" "Step {step} of 3" icon:person_add
+    Steps steps:["You","Plan","Confirm"] current:step
+    if step == 1
+      InputField "Name" "Your name" value:name
+        onChanged: name = value
+      InputField "Email" "you@example.com" value:email keyboard:email
+        onChanged: email = value
+    if step == 2
+      OptionList "Pick a plan" value:plan options:["Free","Pro","Team"] prices:["$0","$12","$40"]
+        onChanged: plan = value
+    if step == 3
+      Details rows:[["Name","{name}"],["Email","{email}"],["Plan","{plan} (${price})"]]
+    Row gap:8
+      if step > 1
+        Button.outline "Back" grow
+          onPressed: step = step - 1
+      if step < 3
+        Button "Next" grow enabled:valid
+          onPressed: step = step + 1
+      if step == 3
+        Button "Confirm" grow
+          onPressed: confirmed = true

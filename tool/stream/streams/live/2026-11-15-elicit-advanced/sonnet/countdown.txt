@@ -1,0 +1,22 @@
+state remaining = 1500
+state running = false
+let mm = pad(floor(remaining / 60), 2)
+let ss = pad(remaining % 60, 2)
+let done = remaining == 0
+every 1s when running
+  remaining = remaining - 1
+  if remaining == 0 then running = false
+ChatCard "Focus timer" icon:timer
+  Text "{mm}:{ss}" size:64 weight:700 center
+  Progress (1500 - remaining) / 1500
+  if done
+    Callout "Time for a break" tone:success icon:coffee
+  Row gap:8
+    if running
+      Button.secondary "Pause" grow
+        onPressed: running = false
+    else
+      Button "{remaining < 1500 and not done ? "Resume" : "Start"}" grow enabled:not done
+        onPressed: running = true
+    Button.outline "Reset" grow
+      onPressed: running = false; remaining = 1500

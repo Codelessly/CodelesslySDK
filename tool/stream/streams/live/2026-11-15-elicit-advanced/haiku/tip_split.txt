@@ -1,0 +1,18 @@
+$bill = "84.00"
+$tip = 15
+$people = 1
+$amount = number($bill)
+$valid = $amount > 0
+$tipAmount = $valid ? $amount * $tip / 100 : 0
+$total = $amount + $tipAmount
+$each = $total / $people
+
+Card
+  Text.cardTitle "Tip calculator"
+  Input "Bill" "0.00" type:number value:$bill change:"$bill = value"
+  Column gap:6
+    Text.fieldLabel "Tip"
+    Segments value:$tip options:[10,15,20,25] unit:"%" change:"$tip = value"
+  Counter "People" "Splitting the bill" value:$people min:1 max:8 step:1 change:"$people = value"
+  Callout "Enter the bill" "Type an amount, like 84.00, to see the split." tone:warning icon:info if:"!$valid"
+  Details if:$valid rows:[{"label":"Tip","value":"{money($tipAmount)}"},{"label":"Total","value":"{money($total)}"},{"label":"Each person","value":"{money($each)}"}]

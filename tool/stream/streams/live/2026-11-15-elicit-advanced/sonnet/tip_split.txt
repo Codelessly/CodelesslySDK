@@ -1,0 +1,21 @@
+state bill = "84.00"
+state tipPct = 15
+state people = 2
+let amount = number(bill)
+let valid = amount != null and amount >= 0
+let tip = amount * tipPct / 100
+let total = amount + tip
+let each = total / people
+ChatCard "Tip calculator" icon:payments
+  InputField "Bill" "0.00" value:bill keyboard:number
+    onChanged: bill = value
+  SectionLabel "Tip"
+  ChoiceChips value:tipPct options:[10,15,20,25] columns:4
+    onChanged: tipPct = value
+  Counter "People" value:people min:1 max:8
+    onChanged: people = value
+  if valid
+    Details rows:[["Tip","${format(tip, 2)}"],["Total","${format(total, 2)}"]]
+    TotalBar "Each person pays" amount:"${format(each, 2)}"
+  else
+    Callout "Enter a bill" "Type the bill as a number to see the split." tone:warning

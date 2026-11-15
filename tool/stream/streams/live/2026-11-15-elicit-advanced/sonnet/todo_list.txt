@@ -1,0 +1,21 @@
+state tasks = [{"id":1,"text":"Buy milk","done":false},{"id":2,"text":"Send invoice","done":true},{"id":3,"text":"Call dentist","done":false}]
+state draft = ""
+state nextId = 4
+let doneCount = count(tasks, t => t.done)
+let left = count(tasks) - doneCount
+ChatCard "To-do" "{left} left of {count(tasks)}" icon:checklist
+  Row gap:8
+    InputField "New task" "What needs doing?" value:draft grow
+      onChanged: draft = value
+    Button "Add"
+      onPressed: if trim(draft) != "" then tasks = tasks + [{"id":nextId,"text":trim(draft),"done":false}]; nextId = nextId + 1; draft = ""
+  for t in tasks
+    Row middle gap:8
+      Checkbox "{t.text}" value:t.done grow
+        onChanged: tasks = tasks.map(x => x.id == t.id ? {...x, "done": value} : x)
+      IconButton "delete"
+        onPressed: tasks = tasks.filter(x => x.id != t.id)
+  Text.muted "{left} left out of {count(tasks)}"
+  if doneCount > 0
+    Button.outline "Clear completed"
+      onPressed: tasks = tasks.filter(x => !x.done)

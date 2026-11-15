@@ -1,0 +1,23 @@
+$questions = [{"q":"What is the capital of France?","choices":["Lyon","Paris","Marseille","Nice"],"answer":1},{"q":"What is the capital of Japan?","choices":["Osaka","Kyoto","Tokyo","Nagoya"],"answer":2},{"q":"What is the capital of Canada?","choices":["Toronto","Vancouver","Ottawa","Montreal"],"answer":2}]
+$i = 0
+$picked = -1
+$score = 0
+$q = $questions[$i]
+$finished = $i >= count($questions)
+$answered = $picked >= 0
+$right = $picked == $q.answer
+$correct = $q.choices[$q.answer]
+$feedback = $right ? "Correct!" : "Not quite. The answer is {correct}."
+
+Card
+  Text.cardTitle "World capitals"
+  Text.caption "Question {i + 1} of 3" if:"!$finished"
+  Text.heading3 "{q.q}" if:"!$finished"
+  Column gap:8 if:"!$finished"
+    for k, c in $q.choices
+      Button.outline "{c}" enabled:"!$answered" tap:"$picked = k; $score += (k == $q.answer ? 1 : 0)"
+  Callout "{feedback}" tone:"$right ? 'success' : 'danger'" if:$answered
+  Button "Next" enabled:$answered tap:"$i += 1; $picked = -1" if:"!$finished"
+  Column gap:12 if:$finished
+    Text.heading2 "You got {score} of 3"
+    Button "Play again" tap:"$i = 0; $picked = -1; $score = 0"

@@ -1,0 +1,19 @@
+$tasks = [{"text":"Buy milk","done":false},{"text":"Book dentist","done":true},{"text":"Reply to Sam","done":false}]
+$draft = ""
+$doneCount = count($tasks, done)
+$left = count($tasks, !done)
+
+Card
+  Text.cardTitle "To do"
+  Row gap:8
+    Input "New task" "What needs doing?" value:$draft change:"$draft = value"
+    Button "Add" tap:"when trim($draft) != '': $tasks += {text: $draft, done: false}; $draft = ''"
+  Column gap:6
+    for i, t in $tasks
+      Row between
+        Row gap:8
+          Checkbox value:t.done change:"$tasks[i].done = value"
+          Text.body "{t.text}" decoration:"t.done ? 'strike' : 'none'"
+        IconButton "delete" tap:"$tasks = remove($tasks, i)"
+  Text.caption "{left} of {count($tasks)} left"
+  Button.secondary "Clear completed" if:"doneCount > 0" tap:"$tasks = filter($tasks, !done)"

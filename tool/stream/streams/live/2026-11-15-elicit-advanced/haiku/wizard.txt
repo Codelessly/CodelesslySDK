@@ -1,0 +1,28 @@
+$step = 1
+$done = false
+$name = ""
+$email = ""
+$plan = ""
+$emailOk = contains($email, "@")
+$emailError = $email != "" and !$emailOk ? "Email needs an @" : ""
+$canNext = $step == 1 ? (trim($name) != "" and $emailOk) : ($step == 2 ? $plan != "" : true)
+
+Card if:"!$done"
+  Text.cardTitle "Sign up"
+  Steps steps:["Details","Plan","Confirm"] current:$step
+  Column gap:12
+    Column gap:12 if:"$step == 1"
+      InputField "Name" "Your name" value:$name change:"$name = value"
+      InputField "Email" "you@example.com" value:$email error:$emailError keyboard:email change:"$email = value"
+    Column gap:12 if:"$step == 2"
+      OptionList "Pick a plan" value:$plan options:["Free","Pro","Team"] prices:["$0","$12","$40"] change:"$plan = value"
+    Column gap:12 if:"$step == 3"
+      Details rows:[{"label":"Name","value":"{name}"},{"label":"Email","value":"{email}"},{"label":"Plan","value":"{plan}"}]
+  Row between
+    Button.secondary "Back" if:"$step > 1" tap:"$step -= 1"
+    Button "Next" if:"$step < 3" enabled:$canNext tap:"$step += 1"
+    Button "Confirm" if:"$step == 3" tap:"$done = true"
+
+Card if:"$done"
+  Text.cardTitle "You're signed up"
+  Text.body "Welcome, {name}. Your plan is {plan}."
