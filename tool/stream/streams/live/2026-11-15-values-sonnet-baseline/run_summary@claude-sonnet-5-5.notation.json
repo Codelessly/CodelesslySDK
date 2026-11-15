@@ -1,0 +1,51 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChartCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "values": true,
+    "decimals": ""
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "shared",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

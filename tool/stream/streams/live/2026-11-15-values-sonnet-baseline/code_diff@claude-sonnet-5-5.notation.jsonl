@@ -1,0 +1,78 @@
+{"meta":{"ui":"code_diff","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the change you want to make to my config.yaml as a diff I can review, in three separate hunks with line numbers, removed lines red and added lines green in a monospace font. Hunk 1 (Server port, lines 4 to 5): -port: 8080 +port: 9090. Hunk 2 (Logging, lines 12 to 15): -level: debug -file: /tmp/app.log +level: warn +file: /var/log/app.log. Hunk 3 (Cache, lines 20 to 22): +enabled: true +ttl: 300. Keep and Discard buttons on each hunk, a count of how many are decided and how many kept, and an Apply button that only works once all three are decided; after Apply the card says how many hunks were kept and how many discarded.","text":"ChatCard \"Review config.yaml\" \"Three proposed changes\" icon:\"description\" status:\"Pending\" w:390\n  state h1=\"\"\n  state h2=\"\"\n  state h3=\"\"\n  state applied=false\n  if !applied\n    SectionLabel \"Changes\" \"{(h1!=\"\"?1:0)+(h2!=\"\"?1:0)+(h3!=\"\"?1:0)} of 3 decided · {(h1==\"keep\"?1:0)+(h2==\"keep\"?1:0)+(h3==\"keep\"?1:0)} kept\"\n    DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" =h1 start:4 lines:[\"-port: 8080\",\"+port: 9090\"]\n    DiffHunk \"Logging\" \"@@ -12,4 +12,4 @@\" =h2 start:12 lines:[\"-level: debug\",\"-file: /tmp/app.log\",\"+level: warn\",\"+file: /var/log/app.log\"]\n    DiffHunk \"Cache\" \"@@ -20,0 +20,3 @@\" =h3 start:20 lines:[\"+enabled: true\",\"+ttl: 300\"]\n    ActionButton \"Apply changes\" tone:primary icon:\"check\" enabled:=h1!=\"\"&&h2!=\"\"&&h3!=\"\" -> applied=true\n  if applied\n    Receipt \"Changes applied\" \"{(h1==\"keep\"?1:0)+(h2==\"keep\"?1:0)+(h3==\"keep\"?1:0)} hunks kept, {(h1==\"discard\"?1:0)+(h2==\"discard\"?1:0)+(h3==\"discard\"?1:0)} discarded.\" tone:good","usage":{"input_tokens":9169,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":547,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":941,"totalMs":3519}}
+{"tMs":941,"delta":"ChatCard \""}
+{"tMs":1263,"delta":"Review config"}
+{"tMs":1263,"delta":".yaml\" \"Three"}
+{"tMs":1263,"delta":" pro"}
+{"tMs":1263,"delta":"posed changes\" icon:"}
+{"tMs":1263,"delta":"\"description"}
+{"tMs":1263,"delta":"\" status:\"Pending\""}
+{"tMs":1263,"delta":" w:390"}
+{"tMs":1263,"delta":"\n  state h1=\"\"\n  "}
+{"tMs":1263,"delta":"state h2=\"\"\n  state"}
+{"tMs":1263,"delta":" h3=\"\"\n  state appl"}
+{"tMs":1295,"delta":"ied=false\n  if"}
+{"tMs":1328,"delta":" !applied\n    S"}
+{"tMs":1596,"delta":"ectionLabel \"Chang"}
+{"tMs":1596,"delta":"es\" \"{("}
+{"tMs":1596,"delta":"h1!="}
+{"tMs":1596,"delta":"\"\"?1:0)+("}
+{"tMs":1596,"delta":"h2!=\"\"?1:"}
+{"tMs":1596,"delta":"0)+(h3!="}
+{"tMs":1596,"delta":"\"\"?1:0)} of"}
+{"tMs":1597,"delta":" 3 decided · {("}
+{"tMs":1630,"delta":"h1="}
+{"tMs":1665,"delta":"=\"keep\"?1:0"}
+{"tMs":1698,"delta":")+(h2==\"ke"}
+{"tMs":1733,"delta":"ep\"?1:0)+"}
+{"tMs":1925,"delta":"(h3==\"keep\""}
+{"tMs":1925,"delta":"?1:0)} kept"}
+{"tMs":1925,"delta":"\"\n    DiffHun"}
+{"tMs":1925,"delta":"k \"Server port\" \"@"}
+{"tMs":1925,"delta":"@ -4,2 +"}
+{"tMs":1933,"delta":"4,2 @@\" ="}
+{"tMs":1967,"delta":"h1 start:4 l"}
+{"tMs":2001,"delta":"ines:[\"-port: 8"}
+{"tMs":2034,"delta":"080\",\"+port: 9090"}
+{"tMs":2067,"delta":"\"]\n    DiffH"}
+{"tMs":2103,"delta":"unk \"Logging\" \""}
+{"tMs":2134,"delta":"@@ -12,4 "}
+{"tMs":2276,"delta":"+12,4 @@\""}
+{"tMs":2277,"delta":" =h2 start:12 "}
+{"tMs":2277,"delta":"lines:[\"-level: deb"}
+{"tMs":2277,"delta":"ug\",\"-file: /tm"}
+{"tMs":2302,"delta":"p/app.log\",\"+level"}
+{"tMs":2335,"delta":": warn\",\"+file: /"}
+{"tMs":2369,"delta":"var/log/app.log\""}
+{"tMs":2402,"delta":"]\n    DiffHun"}
+{"tMs":2436,"delta":"k \"Cache\" \"@"}
+{"tMs":2468,"delta":"@ -20,0"}
+{"tMs":2501,"delta":" +20"}
+{"tMs":2535,"delta":",3 @@\" =h"}
+{"tMs":2631,"delta":"3 start:20 lines"}
+{"tMs":2631,"delta":":[\"+enabled: true"}
+{"tMs":2635,"delta":"\",\"+ttl: 300"}
+{"tMs":2668,"delta":"\"]\n    ActionBut"}
+{"tMs":2702,"delta":"ton \"Apply chang"}
+{"tMs":2735,"delta":"es\" tone:primary ic"}
+{"tMs":2768,"delta":"on:\"check\" enabled"}
+{"tMs":2802,"delta":":=h1!="}
+{"tMs":2835,"delta":"\"\"&&h2!=\"\""}
+{"tMs":2869,"delta":"&&h3!=\""}
+{"tMs":2902,"delta":"\" -> applied=true"}
+{"tMs":2936,"delta":"\n  if applied\n    Rece"}
+{"tMs":2970,"delta":"ipt \"Chang"}
+{"tMs":3002,"delta":"es applied\" \"{"}
+{"tMs":3036,"delta":"(h1==\"keep\""}
+{"tMs":3069,"delta":"?1:0)+(h"}
+{"tMs":3102,"delta":"2==\"keep\"?1"}
+{"tMs":3136,"delta":":0)+(h3="}
+{"tMs":3169,"delta":"=\"keep\"?1:0"}
+{"tMs":3203,"delta":")} hunks"}
+{"tMs":3236,"delta":" kept, {(h1="}
+{"tMs":3269,"delta":"=\"discard\"?1:0"}
+{"tMs":3305,"delta":")+(h2==\"disc"}
+{"tMs":3336,"delta":"ard\"?1:0)+"}
+{"tMs":3513,"delta":"(h3==\"discard\""}
+{"tMs":3513,"delta":"?1:0)} discar"}
+{"tMs":3513,"delta":"ded.\""}
+{"tMs":3513,"delta":" tone:good"}

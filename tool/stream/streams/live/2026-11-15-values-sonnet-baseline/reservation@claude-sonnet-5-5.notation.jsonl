@@ -1,0 +1,129 @@
+{"meta":{"ui":"reservation","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Let me book a table at Osteria Lume as an inline card: pick one of the next seven days (Sat 14, Sun 15, Mon 16, Tue 17, Wed 18, Thu 19, Fri 20), a party size from 1 to 8 (starting at 2), then a time slot: 17:30, 18:00, 18:30, 19:00, 19:30, 20:00, 20:30 or 21:00. Some are full and cannot be picked: on Sat 14 the 18:00 and 20:00 slots; on Sun 15 the 17:30 and 19:00 slots; on every day, for parties of 5 or more, 20:30 and 21:00 too. A confirm button, and once I confirm the card says \"Table booked\" with one line giving the day, the party size and the time.","text":"state day=\"Sat 14\"\nstate party=2\nstate time=\"\"\nstate done=false\nstate full=day==\"Sat 14\"?[\"18:00\",\"20:00\"]:(day==\"Sun 15\"?[\"17:30\",\"19:00\"]:[])\nstate big=party>=5?[\"20:30\",\"21:00\"]:[]\n\nChatCard \"Osteria Lume\" \"Book a table\" icon:\"restaurant\" status:\"Open\" tone:accent w:390\n  if !done\n    SectionLabel \"Day\" \"Next 7 days\"\n    DayPicker =day days:[\"Sat 14\",\"Sun 15\",\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"] -> time=\"\"\n    Counter \"Party size\" \"Guests\" =party min:1 max:8 -> time=\"\"\n    SectionLabel \"Time\" \"Full slots are dimmed\"\n    ChoiceChips =time options:[\"17:30\",\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\",\"21:00\"] disabled:=concat2 columns:4\n    ActionButton \"Confirm booking\" tone:primary icon:\"check\" enabled:=time!=\"\" -> done=true\n  if done\n    Receipt \"Table booked\" \"{day}, table for {party}, at {time}\" tone:good icon:\"check\"\n\nNote: the `disabled` list must be computed, so I should write it inline. Corrected final version:\n\nstate day=\"Sat 14\"\nstate party=2\nstate time=\"\"\nstate done=false\n\nChatCard \"Osteria Lume\" \"Book a table\" icon:\"restaurant\" status:\"Open\" tone:accent w:390\n  if !done\n    SectionLabel \"Day\" \"Next 7 days\"\n    DayPicker =day days:[\"Sat 14\",\"Sun 15\",\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"] -> time=\"\"\n    Counter \"Party size\" \"Guests\" =party min:1 max:8 -> time=\"\"\n    SectionLabel \"Time\" \"Full slots are dimmed\"\n    ChoiceChips =time options:[\"17:30\",\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\",\"21:00\"] disabled:=(day==\"Sat 14\"?[\"18:00\",\"20:00\"]:(day==\"Sun 15\"?[\"17:30\",\"19:00\"]:[]))+(party>=5?[\"20:30\",\"21:00\"]:[]) columns:4 -> time=time\n    ActionButton \"Confirm booking\" tone:primary icon:\"check\" enabled:=time!=\"\" -> done=true\n  if done\n    Receipt \"Table booked\" \"{day}, table for {party}, at {time}\" tone:good icon:\"check\"","usage":{"input_tokens":9180,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":871,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":753,"totalMs":5016}}
+{"tMs":753,"delta":"state"}
+{"tMs":1097,"delta":" day=\""}
+{"tMs":1097,"delta":"Sat 14\"\nstate"}
+{"tMs":1097,"delta":" party=2\nstate time=\"\""}
+{"tMs":1097,"delta":"\nstate done"}
+{"tMs":1097,"delta":"=false\nstate full"}
+{"tMs":1097,"delta":"=day"}
+{"tMs":1097,"delta":"==\"Sat 14\""}
+{"tMs":1097,"delta":"?[\"18:00\",\"20:"}
+{"tMs":1098,"delta":"00\"]:("}
+{"tMs":1108,"delta":"day==\"Sun 15"}
+{"tMs":1141,"delta":"\"?[\"17:30\",\"19"}
+{"tMs":1176,"delta":":00\"]:[])"}
+{"tMs":1455,"delta":"\nstate big"}
+{"tMs":1455,"delta":"=party>=5?[\"20"}
+{"tMs":1455,"delta":":30\",\"21:00\"]"}
+{"tMs":1455,"delta":":[]"}
+{"tMs":1455,"delta":"\n\nChatCard \""}
+{"tMs":1455,"delta":"Osteria Lume\""}
+{"tMs":1455,"delta":" \"Book a table\" icon"}
+{"tMs":1455,"delta":":\"rest"}
+{"tMs":1475,"delta":"aurant\" status:\""}
+{"tMs":1509,"delta":"Open\" t"}
+{"tMs":1542,"delta":"one:accent w:390"}
+{"tMs":1575,"delta":"\n  if !done\n    S"}
+{"tMs":1810,"delta":"ectionLabel \"Day"}
+{"tMs":1810,"delta":"\" \"Next "}
+{"tMs":1810,"delta":"7 days\"\n    Day"}
+{"tMs":1810,"delta":"Picker =day days:[\""}
+{"tMs":1810,"delta":"Sat 14\",\"S"}
+{"tMs":1810,"delta":"un 15\",\"Mon "}
+{"tMs":1810,"delta":"16\",\"Tue 17\",\""}
+{"tMs":1843,"delta":"Wed 18\",\"Th"}
+{"tMs":1875,"delta":"u 19\",\"Fri "}
+{"tMs":1909,"delta":"20\"] -> time=\"\""}
+{"tMs":1942,"delta":"\n    Counter \"Party"}
+{"tMs":1975,"delta":" size\" \""}
+{"tMs":2169,"delta":"Guests\" =party min:"}
+{"tMs":2169,"delta":"1 max:8 -"}
+{"tMs":2169,"delta":"> time=\"\"\n    Sect"}
+{"tMs":2169,"delta":"ionLabel \"Time\""}
+{"tMs":2169,"delta":" \""}
+{"tMs":2175,"delta":"Full"}
+{"tMs":2208,"delta":" slots are d"}
+{"tMs":2242,"delta":"immed\"\n    Ch"}
+{"tMs":2276,"delta":"oiceChips =time options"}
+{"tMs":2309,"delta":":[\"17:30\",\"18:"}
+{"tMs":2342,"delta":"00\",\"18:30\",\"19:"}
+{"tMs":2375,"delta":"00\",\"19:30\",\"20:"}
+{"tMs":2536,"delta":"00\",\"20:30\",\"21:"}
+{"tMs":2536,"delta":"00\"] disabled:="}
+{"tMs":2536,"delta":"concat2"}
+{"tMs":2536,"delta":" "}
+{"tMs":2542,"delta":"colum"}
+{"tMs":2575,"delta":"ns:4\n    Action"}
+{"tMs":2609,"delta":"Button \"Confirm boo"}
+{"tMs":2642,"delta":"king\" tone:primary ic"}
+{"tMs":2675,"delta":"on:\"check\" enabled"}
+{"tMs":2709,"delta":":=time!"}
+{"tMs":2742,"delta":"=\"\" -> done=true"}
+{"tMs":2775,"delta":"\n  if done\n    Receip"}
+{"tMs":2897,"delta":"t \"Table booked\" \""}
+{"tMs":2897,"delta":"{day}"}
+{"tMs":2897,"delta":", table"}
+{"tMs":2908,"delta":" for {party}"}
+{"tMs":2942,"delta":", at {time}\" t"}
+{"tMs":2975,"delta":"one:good icon:\"check"}
+{"tMs":3008,"delta":"\"\n\nNote: the `"}
+{"tMs":3042,"delta":"disabled` list must be comput"}
+{"tMs":3075,"delta":"ed, so I should"}
+{"tMs":3109,"delta":" write it inline. Cor"}
+{"tMs":3143,"delta":"rected final"}
+{"tMs":3175,"delta":" version"}
+{"tMs":3256,"delta":":\n\nstate day=\"Sat"}
+{"tMs":3256,"delta":" 14\"\nstate party=2"}
+{"tMs":3276,"delta":"\nstate time=\"\"\nstate done"}
+{"tMs":3309,"delta":"=false\n\nChatCard"}
+{"tMs":3342,"delta":" \"Osteria Lume"}
+{"tMs":3375,"delta":"\" \"Book a table\" ic"}
+{"tMs":3408,"delta":"on:\"restaurant\""}
+{"tMs":3442,"delta":" status:\"Open\" tone"}
+{"tMs":3476,"delta":":accent w:390\n  "}
+{"tMs":3509,"delta":"if !done\n    Section"}
+{"tMs":3542,"delta":"Label \"Day\" \""}
+{"tMs":3575,"delta":"Next 7 days\""}
+{"tMs":3613,"delta":"\n    DayPicker =day"}
+{"tMs":3642,"delta":" days:[\"Sat 14"}
+{"tMs":3675,"delta":"\",\"Sun 15\",\""}
+{"tMs":3708,"delta":"Mon 16\",\"Tue"}
+{"tMs":3742,"delta":" 17\",\"Wed 18"}
+{"tMs":3775,"delta":"\",\"Thu 19\",\""}
+{"tMs":3808,"delta":"Fri 20\"] ->"}
+{"tMs":3842,"delta":" time=\"\"\n    Counter"}
+{"tMs":3876,"delta":" \"Party size\" \"Gu"}
+{"tMs":3909,"delta":"ests\" =party min:1 "}
+{"tMs":3942,"delta":"max:8 -"}
+{"tMs":3975,"delta":"> time=\"\"\n    Sect"}
+{"tMs":4009,"delta":"ionLabel \"Time\""}
+{"tMs":4044,"delta":" \"Full slots are dim"}
+{"tMs":4075,"delta":"med\"\n    Cho"}
+{"tMs":4109,"delta":"iceChips =time options:"}
+{"tMs":4143,"delta":"[\"17:30\",\"18:00"}
+{"tMs":4175,"delta":"\",\"18:30\",\"19:00"}
+{"tMs":4209,"delta":"\",\"19:30\",\"20:00"}
+{"tMs":4243,"delta":"\",\"20:30\",\"21:00"}
+{"tMs":4276,"delta":"\"] disabled:=("}
+{"tMs":4309,"delta":"day==\"Sat 14"}
+{"tMs":4342,"delta":"\"?[\"18:00\",\"20"}
+{"tMs":4376,"delta":":00\"]:(day="}
+{"tMs":4409,"delta":"=\"Sun 15\"?"}
+{"tMs":4445,"delta":"[\"17:30\",\"19:00"}
+{"tMs":4476,"delta":"\"]:[]"}
+{"tMs":4510,"delta":"))+(party>=5?"}
+{"tMs":4542,"delta":"[\"20:30\",\"21:00"}
+{"tMs":4576,"delta":"\"]:[]) columns"}
+{"tMs":4609,"delta":":4 "}
+{"tMs":4643,"delta":"-> time=time"}
+{"tMs":4676,"delta":"\n    ActionButton \""}
+{"tMs":4709,"delta":"Confirm booking\" t"}
+{"tMs":4743,"delta":"one:primary icon:\""}
+{"tMs":4776,"delta":"check\" enabled:=time"}
+{"tMs":5009,"delta":"!=\"\" -> done=true"}
+{"tMs":5009,"delta":"\n  if done\n    Rece"}
+{"tMs":5009,"delta":"ipt \"Table booked\""}
+{"tMs":5009,"delta":" \"{day}, table for {"}
+{"tMs":5009,"delta":"party}, at {time}\""}
+{"tMs":5009,"delta":" tone:good icon:\""}
+{"tMs":5009,"delta":"check\""}

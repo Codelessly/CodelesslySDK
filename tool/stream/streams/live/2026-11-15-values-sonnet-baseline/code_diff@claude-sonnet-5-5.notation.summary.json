@@ -1,0 +1,35 @@
+{
+ "ui": "code_diff",
+ "kind": "page",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 23397,
+ "turns": [
+  {
+   "input_tokens": 9169,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 547,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 941,
+   "totalMs": 3519,
+   "chars": 944,
+   "lines": 13,
+   "jsonTails": 0,
+   "nodes": 8,
+   "outputTokensPerNode": "68.4",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

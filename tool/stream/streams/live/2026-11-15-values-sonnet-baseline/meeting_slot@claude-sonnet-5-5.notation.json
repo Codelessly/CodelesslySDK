@@ -1,0 +1,283 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Schedule a meeting",
+    "subtitle": "30 minutes with Priya, Marcus and Elena",
+    "icon": "event",
+    "status": "Next week",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "DayPicker1",
+    "SectionLabel2",
+    "ChoiceChips1",
+    "SectionLabel3",
+    "Details1",
+    "TotalBar1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day",
+    "note": "Nov"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "DayPicker1": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day",
+    "days": [
+     "Mon 16",
+     "Tue 17",
+     "Wed 18",
+     "Thu 19",
+     "Fri 20"
+    ]
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Time slot",
+    "note": "30 min"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "09:00",
+     "10:00",
+     "11:00",
+     "13:00",
+     "14:00",
+     "15:00"
+    ],
+    "columns": 3
+   },
+   "bind": {
+    "props.disabled": "${= day==\"Mon 16\"?[\"10:00\",\"13:00\"]:day==\"Tue 17\"?[\"09:00\",\"14:00\"]:day==\"Wed 18\"?[\"11:00\",\"15:00\"]:day==\"Thu 19\"?[\"09:00\",\"10:00\",\"13:00\"]:[\"11:00\",\"14:00\"]}",
+    "visible": "${= !booked}"
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Attending",
+    "note": "3 colleagues"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icons": [
+     "person",
+     "person",
+     "person"
+    ]
+   },
+   "bind": {
+    "props.rows": "${= [[\"Priya\",\"Invited\"],[\"Marcus\",\"Invited\"],[\"Elena\",\"Invited\"]]}",
+    "visible": "${= !booked}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Meeting",
+    "note": "30 minutes",
+    "cta": "Confirm",
+    "icon": "check"
+   },
+   "bind": {
+    "props.amount": "${= time==\"\"?\"Pick a time\":day+\", \"+time}",
+    "props.enabled": "${= time!=\"\"}",
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "booked",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Meeting booked",
+    "tone": "good",
+    "icon": "event_available"
+   },
+   "bind": {
+    "props.message": "${day} Nov, ${time} to ${= endTimes[time]}, with Priya, Marcus and Elena.",
+    "visible": "${= booked}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": "Mon 16"
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "booked",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "endTimes",
+    "type": "map",
+    "value": {
+     "09:00": "09:30",
+     "10:00": "10:30",
+     "11:00": "11:30",
+     "13:00": "13:30",
+     "14:00": "14:30",
+     "15:00": "15:30"
+    }
+   }
+  ]
+ }
+}

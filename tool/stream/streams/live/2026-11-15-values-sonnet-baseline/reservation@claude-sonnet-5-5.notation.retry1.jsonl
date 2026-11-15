@@ -1,0 +1,55 @@
+{"meta":{"ui":"reservation","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Let me book a table at Osteria Lume as an inline card: pick one of the next seven days (Sat 14, Sun 15, Mon 16, Tue 17, Wed 18, Thu 19, Fri 20), a party size from 1 to 8 (starting at 2), then a time slot: 17:30, 18:00, 18:30, 19:00, 19:30, 20:00, 20:30 or 21:00. Some are full and cannot be picked: on Sat 14 the 18:00 and 20:00 slots; on Sun 15 the 17:30 and 19:00 slots; on every day, for parties of 5 or more, 20:30 and 21:00 too. A confirm button, and once I confirm the card says \"Table booked\" with one line giving the day, the party size and the time.","text":"state day=\"Sat 14\"\nstate party=2\nstate time=\"\"\nstate done=false\n\nChatCard \"Osteria Lume\" \"Book a table\" icon:\"restaurant\" status:\"Open\" tone:accent w:390\n  if !done\n    SectionLabel \"Day\" \"Next 7 days\"\n    DayPicker =day days:[\"Sat 14\",\"Sun 15\",\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"] -> time=\"\"\n    Counter \"Party size\" \"Guests\" =party min:1 max:8 -> time=\"\"\n    SectionLabel \"Time\" \"Full slots are unavailable\"\n    ChoiceChips =time options:[\"17:30\",\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\",\"21:00\"] disabled:=(day==\"Sat 14\"?[\"18:00\",\"20:00\"]:(day==\"Sun 15\"?[\"17:30\",\"19:00\"]:[]))+(party>=5?[\"20:30\",\"21:00\"]:[]) columns:4\n    ActionButton \"Confirm booking\" tone:primary icon:\"check\" enabled:=time!=\"\" -> done=true\n  if done\n    Receipt \"Table booked\" \"{day}, party of {party}, at {time}\" tone:good icon:\"check\"","usage":{"input_tokens":10481,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":414,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":964,"totalMs":3223}}
+{"tMs":964,"delta":"state day=\"Sat 14"}
+{"tMs":1350,"delta":"\"\nstate party=2\nstate"}
+{"tMs":1350,"delta":" time=\"\"\nstate done=false"}
+{"tMs":1350,"delta":"\n\nChatCard \""}
+{"tMs":1350,"delta":"Oste"}
+{"tMs":1350,"delta":"ria Lume\" \"Book"}
+{"tMs":1350,"delta":" a table\" icon:\"rest"}
+{"tMs":1350,"delta":"aurant\" status:\""}
+{"tMs":1350,"delta":"Open\" tone:accent w"}
+{"tMs":1350,"delta":":390\n  if !done"}
+{"tMs":1350,"delta":"\n    SectionLabel \""}
+{"tMs":1350,"delta":"Day\" \"Next 7"}
+{"tMs":1362,"delta":" days\"\n    DayP"}
+{"tMs":1739,"delta":"icker =day days:[\""}
+{"tMs":1739,"delta":"Sat 14\",\"S"}
+{"tMs":1739,"delta":"un 15\",\"Mon "}
+{"tMs":1739,"delta":"16\",\"Tue 17\",\""}
+{"tMs":1739,"delta":"Wed 18\",\"Th"}
+{"tMs":1739,"delta":"u 19\",\"Fri "}
+{"tMs":1739,"delta":"20\"] -> time=\"\""}
+{"tMs":1739,"delta":"\n    Counter \"Party"}
+{"tMs":1739,"delta":" size\" \"Guests\" ="}
+{"tMs":1739,"delta":"party min:1 max:8"}
+{"tMs":1739,"delta":" -"}
+{"tMs":1761,"delta":"> time=\"\"\n    Sect"}
+{"tMs":2135,"delta":"ionLabel \"Time\""}
+{"tMs":2135,"delta":" \"Full slots are un"}
+{"tMs":2135,"delta":"available\"\n    Ch"}
+{"tMs":2135,"delta":"oiceChips =time options"}
+{"tMs":2135,"delta":":[\"17:30\",\"18:"}
+{"tMs":2135,"delta":"00\",\"18:30\",\"19:"}
+{"tMs":2135,"delta":"00\",\"19:30\",\"20:"}
+{"tMs":2135,"delta":"00\",\"20:30\",\"21:"}
+{"tMs":2135,"delta":"00\"] disabled:="}
+{"tMs":2135,"delta":"(day==\"Sat "}
+{"tMs":2135,"delta":"14\"?[\"18:00\",\""}
+{"tMs":2162,"delta":"20:00\"]:(day"}
+{"tMs":2529,"delta":"==\"Sun 15\""}
+{"tMs":2529,"delta":"?[\"17:30\",\"19:"}
+{"tMs":2529,"delta":"00\"]:[]))+"}
+{"tMs":2529,"delta":"(party>=5?[\"20"}
+{"tMs":2529,"delta":":30\",\"21:00\"]"}
+{"tMs":2529,"delta":":[]) columns:4"}
+{"tMs":2529,"delta":"\n    ActionButton \""}
+{"tMs":2529,"delta":"Confirm booking\" t"}
+{"tMs":2530,"delta":"one:primary icon:\""}
+{"tMs":2530,"delta":"check\" enabled:=time"}
+{"tMs":2530,"delta":"!=\"\" -> done=true"}
+{"tMs":2563,"delta":"\n  if done\n    Rece"}
+{"tMs":3217,"delta":"ipt \"Table booked\""}
+{"tMs":3217,"delta":" \"{day}, party"}
+{"tMs":3217,"delta":" of {party}, at {time"}
+{"tMs":3217,"delta":"}\" tone:good icon"}
+{"tMs":3217,"delta":":\"check\""}

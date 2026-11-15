@@ -1,0 +1,103 @@
+{"meta":{"ui":"plan_progress","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the plan for migrating my blog as six steps: Back up your content, Set up the new host, Import posts, Move media, Redirect old URLs, Final checks, each with a short description. A Start button runs them one after another, 2 seconds each: a spinner on the running step, ticks on the finished ones, a progress bar that reads \"N of 6 steps\" with the seconds elapsed, and a Pause button. When all six are done, a summary says \"Migration complete\" and the total time in seconds.","text":"state done=0\nstate running=false\nstate elapsed=0\n\nevery 1s when running -> elapsed=elapsed+1; done=min(6,floor((elapsed)/2)); running=elapsed<12\n\nChatCard \"Blog migration\" \"Six steps, about 2 seconds each\" icon:\"sync\" status:=done==6?\"Complete\":(running?\"Running\":\"Ready\") tone:=done==6?\"good\":\"accent\" w:390\n  ProgressLine \"{done} of 6 steps\" \"{elapsed} s elapsed\" value:=done/6\n  SectionLabel \"Plan\" \"6 steps\"\n  PlanStep \"Back up your content\" \"Export posts, pages and settings\" index:0 current:=done running:=running\n  PlanStep \"Set up the new host\" \"Install the platform and configure the domain\" index:1 current:=done running:=running\n  PlanStep \"Import posts\" \"Bring over articles, tags and comments\" index:2 current:=done running:=running\n  PlanStep \"Move media\" \"Copy images and downloads to the new storage\" index:3 current:=done running:=running\n  PlanStep \"Redirect old URLs\" \"Point the old addresses to the new ones\" index:4 current:=done running:=running\n  PlanStep \"Final checks\" \"Test links, feeds and page speed\" index:5 current:=done running:=running last:true\n  if done==6\n    Receipt \"Migration complete\" \"Total time: {elapsed} seconds\" tone:\"good\" icon:\"check\"\n  if done<6\n    Row gap:10\n      ActionButton \"Start\" tone:\"primary\" icon:\"play_arrow\" enabled:=!running -> elapsed=done*2; running=true\n      ActionButton \"Pause\" tone:\"quiet\" icon:\"pause\" enabled:=running -> running=false","usage":{"input_tokens":9081,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":587,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":756,"totalMs":4186}}
+{"tMs":756,"delta":"state"}
+{"tMs":1062,"delta":" done=0"}
+{"tMs":1062,"delta":"\nstate running=false\nstate elap"}
+{"tMs":1062,"delta":"sed=0\n\nevery"}
+{"tMs":1062,"delta":" 1s when running -> el"}
+{"tMs":1062,"delta":"apsed=elapsed"}
+{"tMs":1062,"delta":"+1; done=min"}
+{"tMs":1062,"delta":"(6,flo"}
+{"tMs":1062,"delta":"or((elapsed)"}
+{"tMs":1078,"delta":"/2)); running=el"}
+{"tMs":1124,"delta":"apsed<12"}
+{"tMs":1144,"delta":"\n\nChatCard \""}
+{"tMs":1178,"delta":"Blog migration\""}
+{"tMs":1393,"delta":" \"Six steps,"}
+{"tMs":1393,"delta":" about"}
+{"tMs":1394,"delta":" "}
+{"tMs":1394,"delta":"2"}
+{"tMs":1394,"delta":" seconds each\" icon"}
+{"tMs":1394,"delta":":\"s"}
+{"tMs":1410,"delta":"ync\""}
+{"tMs":1444,"delta":" status:="}
+{"tMs":1476,"delta":"done"}
+{"tMs":1510,"delta":"==6?\"Compl"}
+{"tMs":1543,"delta":"ete\":("}
+{"tMs":1578,"delta":"running?\"Running\":\""}
+{"tMs":1719,"delta":"Ready\") t"}
+{"tMs":1719,"delta":"one:=done==6?\""}
+{"tMs":1719,"delta":"good\":\"accent\" w:"}
+{"tMs":1719,"delta":"390\n  "}
+{"tMs":1744,"delta":"ProgressLine \"{done"}
+{"tMs":1777,"delta":"} of 6 steps\""}
+{"tMs":1810,"delta":" \"{elapsed} s"}
+{"tMs":1844,"delta":" elapsed\" value:="}
+{"tMs":1878,"delta":"done/6\n  S"}
+{"tMs":1912,"delta":"ectionLabel \"Pl"}
+{"tMs":1945,"delta":"an\" \"6 steps\""}
+{"tMs":1978,"delta":"\n  PlanStep \""}
+{"tMs":2041,"delta":"Back up your content\" \""}
+{"tMs":2044,"delta":"Export pos"}
+{"tMs":2077,"delta":"ts,"}
+{"tMs":2113,"delta":" pages and sett"}
+{"tMs":2144,"delta":"ings\""}
+{"tMs":2177,"delta":" index:0 current:=done"}
+{"tMs":2211,"delta":" running:=running\n  Pl"}
+{"tMs":2244,"delta":"anStep \"Set up the"}
+{"tMs":2278,"delta":" new host\" \"Install the"}
+{"tMs":2311,"delta":" plat"}
+{"tMs":2344,"delta":"form and configure the"}
+{"tMs":2378,"delta":" domain\" index:1"}
+{"tMs":2411,"delta":" current:=done running:="}
+{"tMs":2444,"delta":"running\n  PlanStep"}
+{"tMs":2478,"delta":" \"Import posts\" \""}
+{"tMs":2511,"delta":"B"}
+{"tMs":2545,"delta":"ring over"}
+{"tMs":2577,"delta":" artic"}
+{"tMs":2617,"delta":"les, t"}
+{"tMs":2646,"delta":"ags and comments\" index:2"}
+{"tMs":2679,"delta":" current:=done running:="}
+{"tMs":2711,"delta":"running\n  PlanStep"}
+{"tMs":2744,"delta":" \"Move media\" \"Cop"}
+{"tMs":2777,"delta":"y images and down"}
+{"tMs":2829,"delta":"loads to the new stor"}
+{"tMs":2844,"delta":"age\" index:3 current:"}
+{"tMs":2880,"delta":"=done running:=running\n  "}
+{"tMs":2926,"delta":"PlanStep \"Red"}
+{"tMs":2944,"delta":"irect old URLs\" \""}
+{"tMs":2978,"delta":"Point"}
+{"tMs":3011,"delta":" the old add"}
+{"tMs":3067,"delta":"resses to the new "}
+{"tMs":3083,"delta":"ones\" index:4 current:"}
+{"tMs":3114,"delta":"=done running:=running\n  "}
+{"tMs":3145,"delta":"PlanStep \"Final"}
+{"tMs":3179,"delta":" checks\" \"Test"}
+{"tMs":3211,"delta":" links, fe"}
+{"tMs":3244,"delta":"eds and page"}
+{"tMs":3277,"delta":" spe"}
+{"tMs":3311,"delta":"ed\" index:5 current:"}
+{"tMs":3346,"delta":"=done running:=running last:"}
+{"tMs":3388,"delta":"true\n  if done==6"}
+{"tMs":3415,"delta":"\n    Rece"}
+{"tMs":3445,"delta":"ipt \"Migration complete"}
+{"tMs":3477,"delta":"\" \"Total"}
+{"tMs":3511,"delta":" time: {elapsed}"}
+{"tMs":3547,"delta":" seconds\" t"}
+{"tMs":3578,"delta":"one:\"good\""}
+{"tMs":3611,"delta":" icon:\"check\"\n  "}
+{"tMs":3644,"delta":"if done<"}
+{"tMs":3677,"delta":"6\n    Row gap:"}
+{"tMs":3713,"delta":"10\n      ActionButton"}
+{"tMs":3744,"delta":" \"Start\" t"}
+{"tMs":3778,"delta":"one:\""}
+{"tMs":3811,"delta":"primary\" icon:\"play"}
+{"tMs":3845,"delta":"_arrow\" enabled"}
+{"tMs":3877,"delta":":=!running -> el"}
+{"tMs":3911,"delta":"apsed=done"}
+{"tMs":3944,"delta":"*"}
+{"tMs":3978,"delta":"2; running"}
+{"tMs":4012,"delta":"=true\n      ActionBut"}
+{"tMs":4044,"delta":"ton \"Pause\" tone"}
+{"tMs":4077,"delta":":\"quiet\" icon"}
+{"tMs":4111,"delta":":\"pause\" enabled"}
+{"tMs":4144,"delta":":=running -> running=false"}

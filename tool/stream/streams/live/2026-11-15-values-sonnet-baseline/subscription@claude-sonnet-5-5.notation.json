@@ -1,0 +1,289 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pro plan",
+    "subtitle": "Renews in 3 days, on Nov 18",
+    "icon": "workspace_premium",
+    "status": "Active",
+    "tone": "accent"
+   },
+   "children": [
+    "Details1",
+    "SectionLabel1",
+    "ProgressLine1",
+    "ProgressLine2",
+    "SectionLabel2",
+    "Segments1",
+    "Details2",
+    "Callout1",
+    "row1"
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Plan\",\"Pro\"],[\"Price\",annual?\"$120 a year\":\"$12 a month\"],[\"Next renewal\",\"Nov 18\"]]}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Usage",
+    "note": "this month"
+   }
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Storage: 68%",
+    "detail": "68 of 100 GB"
+   },
+   "bind": {
+    "props.value": "${= 68/100}"
+   }
+  },
+  "ProgressLine2": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Seats: 60%",
+    "detail": "3 of 5 used"
+   },
+   "bind": {
+    "props.value": "${= 3/5}"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Billing",
+    "note": "choose a cycle"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "cycle",
+    "options": [
+     "Monthly",
+     "Annual"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "annual",
+       "value": "${= result==\"Annual\"}"
+      }
+     ]
+    }
+   ]
+  },
+  "Details2": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Yearly price\",\"$120\"],[\"Per month\",\"$10.00\"],[\"You save\",\"$24 a year (16.7%)\"]]}",
+    "visible": "${= annual}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Save $24 a year",
+    "message": "Annual billing costs $10 a month instead of $12, which is 16.7% less.",
+    "tone": "good",
+    "icon": "savings"
+   },
+   "bind": {
+    "visible": "${= annual}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Manage plan",
+    "tone": "primary"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "manage"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Cancel renewal",
+    "tone": "danger"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "cancel"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "annual",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "cycle",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

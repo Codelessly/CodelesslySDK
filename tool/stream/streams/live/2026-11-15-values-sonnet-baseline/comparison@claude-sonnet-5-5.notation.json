@@ -1,0 +1,179 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Compare phone plans",
+    "subtitle": "Lite vs Max",
+    "icon": "sim_card"
+   },
+   "children": [
+    "ComparisonTable1",
+    "Recommendation1",
+    "Receipt1"
+   ]
+  },
+  "ComparisonTable1": {
+   "type": "ComparisonTable",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Lite",
+     "Max"
+    ],
+    "prices": [
+     "$25/mo",
+     "$45/mo"
+    ],
+    "pick": "Max",
+    "pickLabel": "Recommended",
+    "cta": "Choose",
+    "rows": [
+     [
+      "Price",
+      "$25",
+      "$45",
+      1
+     ],
+     [
+      "Data",
+      "10 GB",
+      "Unlimited",
+      2
+     ],
+     [
+      "Calls",
+      "500 min",
+      "Unlimited",
+      2
+     ],
+     [
+      "Roaming",
+      "Not included",
+      "EU and US",
+      2
+     ],
+     [
+      "Contract",
+      "Monthly",
+      "24 months",
+      1
+     ],
+     [
+      "Extras",
+      "None",
+      "Streaming and 5G",
+      2
+     ]
+    ]
+   },
+   "bind": {
+    "visible": "${= picked==\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChoose"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Recommendation1": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Max",
+    "why": "Max wins 4 of the 6 rows and costs $20 more per month than Lite.",
+    "reasons": [
+     "Unlimited data and calls",
+     "Roaming in the EU and US",
+     "Streaming and 5G included"
+    ],
+    "eyebrow": "Recommended"
+   },
+   "bind": {
+    "visible": "${= picked==\"\"}"
+   }
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.title": "You picked ${picked}",
+    "props.message": "Your ${picked} plan is selected.",
+    "visible": "${= picked!=\"\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "picked",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

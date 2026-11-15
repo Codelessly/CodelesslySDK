@@ -1,0 +1,170 @@
+{"meta":{"ui":"recipe","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: 45 minutes, Easy, serves 4 to start, with a servings control from 2 to 8 that scales the ingredient amounts. Ingredients for 4: chicken thighs 800 g, baby potatoes 600 g, lemons 2, olive oil 4 tbsp, garlic cloves 4, dried oregano 2 tsp. The ingredients as a checklist I can tick off (ticks stay when I change the servings), the four steps (Heat the oven to 220C; Toss everything in the oil, lemon and oregano; Roast 35 minutes, turning once; Rest 5 minutes and serve) and a Start cooking button.","text":"ChatCard \"Lemon chicken traybake\" \"Weeknight dinner\" icon:\"restaurant\" status:\"Easy\" tone:\"good\" w:390\n  Details rows:[[\"Time\",\"45 minutes\"],[\"Difficulty\",\"Easy\"],[\"Serves\",\"{servings}\"]]\n  Counter \"Servings\" \"Scales the amounts\" =servings min:2 max:8 step:1\n  SectionLabel \"Ingredients\" \"{length(items)-length(ticked)} left\"\n  Checklist \"For {servings}\" =ticked items:=[\n    \"Chicken thighs, \"+round(800*servings/4,0)+\" g\",\n    \"Baby potatoes, \"+round(600*servings/4,0)+\" g\",\n    \"Lemons, \"+round(2*servings/4,1),\n    \"Olive oil, \"+round(4*servings/4,1)+\" tbsp\",\n    \"Garlic cloves, \"+round(4*servings/4,1),\n    \"Dried oregano, \"+round(2*servings/4,1)+\" tsp\"]\n  SectionLabel \"Method\" \"4 steps\"\n  Paragraph \"1. Heat the oven to 220C\"\n  Paragraph \"2. Toss everything in the oil, lemon and oregano\"\n  Paragraph \"3. Roast 35 minutes, turning once\"\n  Paragraph \"4. Rest 5 minutes and serve\"\n  ActionButton \"Start cooking\" tone:primary icon:\"play_arrow\" -> emit startCooking servings\n\nI should note a flaw: the state lines were omitted and the checklist's ticks are tied to item text that changes with servings, so ticks would reset. Here is the corrected version:\n\nstate servings=4\nstate ticked=[]\n\nChatCard \"Lemon chicken traybake\" \"Weeknight dinner\" icon:\"restaurant\" status:\"Easy\" tone:\"good\" w:390\n  Details rows:=[[\"Time\",\"45 minutes\"],[\"Difficulty\",\"Easy\"],[\"Serves\",\"{servings}\"]]\n  Counter \"Servings\" \"Scales the amounts\" =servings min:2 max:8 step:1\n  SectionLabel \"Ingredients\" \"{6-length(ticked)} left\"\n  Checklist \"Tick off as you go\" =ticked items:=[\"Chicken thighs, \"+round(800*servings/4,0)+\" g\",\"Baby potatoes, \"+round(600*servings/4,0)+\" g\",\"Lemons, \"+round(2*servings/4,1),\"Olive oil, \"+round(4*servings/4,1)+\" tbsp\",\"Garlic cloves, \"+round(4*servings/4,1),\"Dried oregano, \"+round(2*servings/4,1)+\" tsp\"]\n  SectionLabel \"Method\" \"4 steps\"\n  Paragraph \"1. Heat the oven to 220C\"\n  Paragraph \"2. Toss everything in the oil, lemon and oregano\"\n  Paragraph \"3. Roast 35 minutes, turning once\"\n  Paragraph \"4. Rest 5 minutes and serve\"\n  ActionButton \"Start cooking\" tone:primary icon:\"play_arrow\" -> emit startCooking servings","usage":{"input_tokens":9160,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1043,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1248,"totalMs":6850}}
+{"tMs":1248,"delta":"ChatCard \"L"}
+{"tMs":1274,"delta":"emon chicken trayb"}
+{"tMs":1308,"delta":"ake\" \"Weeknight"}
+{"tMs":1331,"delta":" d"}
+{"tMs":1367,"delta":"inner\" icon:\"rest"}
+{"tMs":1405,"delta":"aurant\" status:\""}
+{"tMs":1434,"delta":"Easy\" t"}
+{"tMs":1464,"delta":"one:\""}
+{"tMs":1492,"delta":"good"}
+{"tMs":1527,"delta":"\" w:390"}
+{"tMs":1614,"delta":"\n  Details rows:["}
+{"tMs":1991,"delta":"[\""}
+{"tMs":1991,"delta":"Time\",\"45 min"}
+{"tMs":1991,"delta":"utes\"],[\"Dif"}
+{"tMs":1991,"delta":"ficulty\",\"Easy\""}
+{"tMs":1991,"delta":"],[\"Serves\",\"{"}
+{"tMs":1991,"delta":"servings}\"]]\n  "}
+{"tMs":1991,"delta":"Counter \"Servings\""}
+{"tMs":1991,"delta":" \"Sc"}
+{"tMs":1991,"delta":"ales the"}
+{"tMs":1991,"delta":" amounts\" =servings min"}
+{"tMs":1991,"delta":":2 max:8 step"}
+{"tMs":1991,"delta":":1\n  SectionL"}
+{"tMs":2372,"delta":"abel \"Ingredients"}
+{"tMs":2373,"delta":"\" \"{"}
+{"tMs":2373,"delta":"length"}
+{"tMs":2373,"delta":"(items)-length(tic"}
+{"tMs":2373,"delta":"ked)} left\"\n  "}
+{"tMs":2373,"delta":"Checklist \"For"}
+{"tMs":2373,"delta":" {servings}\" =tic"}
+{"tMs":2373,"delta":"ked items:="}
+{"tMs":2373,"delta":"["}
+{"tMs":2373,"delta":"\n    "}
+{"tMs":2373,"delta":"\""}
+{"tMs":2373,"delta":"Chicken thighs,"}
+{"tMs":2742,"delta":" \""}
+{"tMs":2742,"delta":"+"}
+{"tMs":2742,"delta":"round(800"}
+{"tMs":2742,"delta":"*servings/4,0"}
+{"tMs":2742,"delta":")+\" g\",\n    \""}
+{"tMs":2742,"delta":"Baby potatoes,"}
+{"tMs":2742,"delta":" \"+round(600*servings"}
+{"tMs":2742,"delta":"/4,0)+\" g"}
+{"tMs":2742,"delta":"\",\n    \"Lemons"}
+{"tMs":2742,"delta":", \"+round(2*serv"}
+{"tMs":2742,"delta":"ings/4,1),"}
+{"tMs":2763,"delta":"\n    \"Olive oil"}
+{"tMs":3137,"delta":", \"+round(4*serv"}
+{"tMs":3137,"delta":"ings/4,1)+\""}
+{"tMs":3137,"delta":" tbsp\",\n    \""}
+{"tMs":3137,"delta":"Garlic cloves,"}
+{"tMs":3137,"delta":" \"+round(4*servings"}
+{"tMs":3137,"delta":"/4,1),\n    \""}
+{"tMs":3137,"delta":"Dried oregano, \""}
+{"tMs":3137,"delta":"+round(2*servings/"}
+{"tMs":3137,"delta":"4,1)+\" ts"}
+{"tMs":3137,"delta":"p\"]"}
+{"tMs":3137,"delta":"\n  SectionLabel"}
+{"tMs":3165,"delta":" \"Method"}
+{"tMs":3507,"delta":"\" \""}
+{"tMs":3507,"delta":"4 steps\"\n  "}
+{"tMs":3507,"delta":"Paragraph \"1."}
+{"tMs":3507,"delta":" Heat the oven to 220"}
+{"tMs":3507,"delta":"C\"\n  Paragra"}
+{"tMs":3507,"delta":"ph \"2. Toss ever"}
+{"tMs":3507,"delta":"ything in the oil, lem"}
+{"tMs":3507,"delta":"on and oregano\"\n  "}
+{"tMs":3507,"delta":"Paragraph \"3."}
+{"tMs":3507,"delta":" Roast 35 minut"}
+{"tMs":3533,"delta":"es, turning once\"\n  "}
+{"tMs":3566,"delta":"Paragraph \"4."}
+{"tMs":3880,"delta":" Rest 5 minut"}
+{"tMs":3880,"delta":"es and serve\"\n  "}
+{"tMs":3880,"delta":"ActionButton \"Start c"}
+{"tMs":3880,"delta":"ooking\" tone:primary"}
+{"tMs":3880,"delta":" icon:\"play"}
+{"tMs":3880,"delta":"_"}
+{"tMs":3880,"delta":"arrow\" -> emit"}
+{"tMs":3880,"delta":" start"}
+{"tMs":3880,"delta":"Cooking serv"}
+{"tMs":3899,"delta":"ings\n\nI"}
+{"tMs":3932,"delta":" should"}
+{"tMs":3965,"delta":" note"}
+{"tMs":4256,"delta":" a"}
+{"tMs":4256,"delta":" flaw: the state l"}
+{"tMs":4256,"delta":"ines were"}
+{"tMs":4256,"delta":" om"}
+{"tMs":4256,"delta":"itted and"}
+{"tMs":4256,"delta":" the"}
+{"tMs":4256,"delta":" chec"}
+{"tMs":4256,"delta":"klist's "}
+{"tMs":4261,"delta":"ticks"}
+{"tMs":4294,"delta":" are"}
+{"tMs":4327,"delta":" tied to item text"}
+{"tMs":4360,"delta":" that"}
+{"tMs":4630,"delta":" chang"}
+{"tMs":4630,"delta":"es with servings, so tic"}
+{"tMs":4630,"delta":"ks would"}
+{"tMs":4630,"delta":" reset. Here"}
+{"tMs":4630,"delta":" is the corrected version"}
+{"tMs":4630,"delta":":\n\nstate servings=4"}
+{"tMs":4630,"delta":"\nstate ticked=[]"}
+{"tMs":4630,"delta":"\n\nChatCard \""}
+{"tMs":4661,"delta":"Lemon chicken trayb"}
+{"tMs":4695,"delta":"ake\" \"Weeknight"}
+{"tMs":4728,"delta":" dinner\" icon:\""}
+{"tMs":4763,"delta":"restaurant\" status:\""}
+{"tMs":5043,"delta":"Easy\" tone:\""}
+{"tMs":5043,"delta":"good\" w:390\n  "}
+{"tMs":5043,"delta":"Details rows:="}
+{"tMs":5043,"delta":"[[\"Time\",\"45 min"}
+{"tMs":5043,"delta":"utes\"],[\"Diffic"}
+{"tMs":5043,"delta":"ulty\",\"Easy\"],"}
+{"tMs":5044,"delta":"[\"Serves\",\"{servings"}
+{"tMs":5044,"delta":"}\"]]\n  Coun"}
+{"tMs":5063,"delta":"ter \"Servings\" \""}
+{"tMs":5097,"delta":"Scales the amounts\" ="}
+{"tMs":5131,"delta":"servings min:2"}
+{"tMs":5163,"delta":" max:8 step:1"}
+{"tMs":5445,"delta":"\n  SectionLabel"}
+{"tMs":5445,"delta":" \"Ingredients\" \""}
+{"tMs":5445,"delta":"{6"}
+{"tMs":5445,"delta":"-length(ticked)}"}
+{"tMs":5445,"delta":" left\"\n  Checklist"}
+{"tMs":5445,"delta":" \"T"}
+{"tMs":5445,"delta":"ick off"}
+{"tMs":5445,"delta":" as"}
+{"tMs":5462,"delta":" you go\" =ticked items"}
+{"tMs":5496,"delta":":="}
+{"tMs":5531,"delta":"[\"Chicken thighs"}
+{"tMs":5563,"delta":", \"+"}
+{"tMs":5805,"delta":"round"}
+{"tMs":5805,"delta":"(800*servings/4,"}
+{"tMs":5805,"delta":"0)+\" g\",\"Ba"}
+{"tMs":5805,"delta":"by potatoes, \"+"}
+{"tMs":5805,"delta":"round(600*servings/4"}
+{"tMs":5805,"delta":",0)+\" g\",\""}
+{"tMs":5805,"delta":"Lemons, \"+round("}
+{"tMs":5831,"delta":"2*servings/4,1"}
+{"tMs":5863,"delta":"),"}
+{"tMs":5897,"delta":"\"Olive oil, \""}
+{"tMs":5933,"delta":"+round(4*servings/"}
+{"tMs":5963,"delta":"4,1)+\" tb"}
+{"tMs":6173,"delta":"sp\",\"Garlic c"}
+{"tMs":6173,"delta":"loves, \"+round(4"}
+{"tMs":6173,"delta":"*servings/4,1),"}
+{"tMs":6173,"delta":"\"Dried oregano,"}
+{"tMs":6173,"delta":" \"+round(2*servings"}
+{"tMs":6173,"delta":"/4,1)+\" t"}
+{"tMs":6197,"delta":"sp\"]\n  Sect"}
+{"tMs":6231,"delta":"ionLabel \"Method\""}
+{"tMs":6264,"delta":" \"4 steps\"\n  "}
+{"tMs":6298,"delta":"Paragraph \"1."}
+{"tMs":6332,"delta":" Heat the oven to "}
+{"tMs":6365,"delta":"220C\"\n  Parag"}
+{"tMs":6706,"delta":"raph \"2. Toss"}
+{"tMs":6706,"delta":" everything in the oil, l"}
+{"tMs":6706,"delta":"emon and oregano\""}
+{"tMs":6706,"delta":"\n  Paragraph \"3"}
+{"tMs":6706,"delta":". Roast 35 min"}
+{"tMs":6706,"delta":"utes, turning once\""}
+{"tMs":6706,"delta":"\n  Paragraph \"4"}
+{"tMs":6706,"delta":". Rest 5 min"}
+{"tMs":6706,"delta":"utes and serve\"\n  "}
+{"tMs":6706,"delta":"ActionButton \"Start"}
+{"tMs":6733,"delta":" cooking\" tone:prim"}
+{"tMs":6766,"delta":"ary icon:\"play_ar"}
+{"tMs":6799,"delta":"row\" -> emit start"}
+{"tMs":6833,"delta":"Cooking servings"}
