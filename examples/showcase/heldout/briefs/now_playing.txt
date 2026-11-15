@@ -1,0 +1,1 @@
+Show what is playing right now as an inline music card: the track, artist and album art, a progress bar with elapsed and remaining time, previous, play or pause and next controls, a like button, and the next three tracks in the queue.

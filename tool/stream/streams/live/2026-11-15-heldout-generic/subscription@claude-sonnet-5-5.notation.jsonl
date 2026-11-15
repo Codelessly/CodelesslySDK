@@ -1,0 +1,100 @@
+{"meta":{"ui":"subscription","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"My Pro plan renews in 3 days. Show a card with the plan and price, how much of my storage and seats I have used, a switch to annual billing that shows what I would save, and buttons to manage the plan or cancel renewal.","text":"Card w:390 gap:12\n  Row between middle\n    Column gap:2\n      Text.title \"Pro plan\"\n      Text.muted \"Renews in 3 days\"\n    Badge.warning \"Renewing soon\"\n  Row middle gap:4\n    Text \"{annual ? money(biller*10,'$',0) : money(biller,'$',0)}\" size:32 weight:700\n    Text.muted \"{annual ? '/ year' : '/ month'}\"\n  Divider\n  Column gap:4\n    Row between\n      Text.fieldLabel \"Storage\"\n      Text.small \"{storageUsed} of {storageTotal} GB\"\n    Progress =storageShare\n  Column gap:4\n    Row between\n      Text.fieldLabel \"Seats\"\n      Text.small \"{seatsUsed} of {seatsTotal} seats\"\n    Progress =seatShare\n  Divider\n  Toggle \"Switch to annual billing\" =annual\n  if annual\n    Box fill:#FFE8F5E9 radius:8 pad:10\n      Text \"You save {money(biller*2,'$',0)} a year (2 months free)\" color:#FF1B5E20\n  if !annual\n    Text.muted \"Pay yearly and get 2 months free.\"\n  Row gap:8\n    Button \"Manage plan\" -> emit manage\n    Button.outline \"Cancel renewal\" -> emit cancelRenewal; toast \"Renewal canceled\"\n\nstate biller=20\nstate annual=false\nstate storageUsed=68\nstate storageTotal=100\nstate seatsUsed=8\nstate seatsTotal=10\nstate storageShare=0.68\nstate seatShare=0.8","usage":{"input_tokens":3219,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":544,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":679,"totalMs":3967}}
+{"tMs":679,"delta":"Card w:390 g"}
+{"tMs":998,"delta":"ap:12"}
+{"tMs":999,"delta":"\n  Row between midd"}
+{"tMs":999,"delta":"le\n    Column"}
+{"tMs":999,"delta":" gap:2"}
+{"tMs":999,"delta":"\n      Text.title"}
+{"tMs":999,"delta":" \"Pro pl"}
+{"tMs":1000,"delta":"an\"\n      Text"}
+{"tMs":1000,"delta":".muted \"Renews in"}
+{"tMs":1000,"delta":" 3 days\"\n    "}
+{"tMs":1000,"delta":"Badge.war"}
+{"tMs":1027,"delta":"ning \"Ren"}
+{"tMs":1058,"delta":"ew"}
+{"tMs":1312,"delta":"ing soon\"\n  Row"}
+{"tMs":1313,"delta":" midd"}
+{"tMs":1313,"delta":"le g"}
+{"tMs":1313,"delta":"ap:4"}
+{"tMs":1313,"delta":"\n    Text \""}
+{"tMs":1313,"delta":"{ann"}
+{"tMs":1313,"delta":"ual ? money"}
+{"tMs":1317,"delta":"(bi"}
+{"tMs":1349,"delta":"ller"}
+{"tMs":1381,"delta":"*10"}
+{"tMs":1414,"delta":",'"}
+{"tMs":1446,"delta":"$',0"}
+{"tMs":1640,"delta":") : money(biller,"}
+{"tMs":1640,"delta":"'$',0)}\" size"}
+{"tMs":1641,"delta":":32"}
+{"tMs":1641,"delta":" weight:700\n    "}
+{"tMs":1641,"delta":"Text.muted \"{"}
+{"tMs":1651,"delta":"annual ? '/"}
+{"tMs":1686,"delta":" year' : '/ month'"}
+{"tMs":1720,"delta":"}\"\n  Divider"}
+{"tMs":1755,"delta":"\n  Column gap:4"}
+{"tMs":1787,"delta":"\n    Row"}
+{"tMs":1820,"delta":" between"}
+{"tMs":1854,"delta":"\n      Text.f"}
+{"tMs":1971,"delta":"ieldLabel \"Stor"}
+{"tMs":1971,"delta":"age\"\n      Text.small"}
+{"tMs":1971,"delta":" \"{storage"}
+{"tMs":1989,"delta":"Used} of"}
+{"tMs":2022,"delta":" {storageTotal} G"}
+{"tMs":2057,"delta":"B\"\n    Progress ="}
+{"tMs":2090,"delta":"storageSh"}
+{"tMs":2123,"delta":"are\n  Column gap:"}
+{"tMs":2157,"delta":"4\n    Row between\n      "}
+{"tMs":2191,"delta":"Text.fieldLab"}
+{"tMs":2225,"delta":"el \"Seats\"\n      "}
+{"tMs":2259,"delta":"Text.small \"{seat"}
+{"tMs":2303,"delta":"sUsed} of {se"}
+{"tMs":2326,"delta":"atsTotal} seats"}
+{"tMs":2360,"delta":"\"\n    Progress =se"}
+{"tMs":2394,"delta":"atShare\n  Divider"}
+{"tMs":2428,"delta":"\n  To"}
+{"tMs":2460,"delta":"ggle \"Swit"}
+{"tMs":2494,"delta":"ch to annual billing\" ="}
+{"tMs":2529,"delta":"annual\n  if annual"}
+{"tMs":2560,"delta":"\n    Box"}
+{"tMs":2593,"delta":" f"}
+{"tMs":2626,"delta":"ill:#"}
+{"tMs":2659,"delta":"FFE"}
+{"tMs":2694,"delta":"8F5E9 radius"}
+{"tMs":2727,"delta":":8 pad:10"}
+{"tMs":2762,"delta":"\n      Text \""}
+{"tMs":2793,"delta":"You save"}
+{"tMs":2826,"delta":" {money(biller*2,"}
+{"tMs":2860,"delta":"'$',0"}
+{"tMs":2893,"delta":")} a"}
+{"tMs":2926,"delta":" year ("}
+{"tMs":2959,"delta":"2 months free)\" color:"}
+{"tMs":2994,"delta":"#FF1B5E20"}
+{"tMs":3059,"delta":"\n  if"}
+{"tMs":3092,"delta":" !annual\n    Text."}
+{"tMs":3126,"delta":"muted \"Pay y"}
+{"tMs":3159,"delta":"early and get"}
+{"tMs":3193,"delta":" 2 months free.\"\n  "}
+{"tMs":3227,"delta":"Row gap:8\n    "}
+{"tMs":3259,"delta":"Button \""}
+{"tMs":3294,"delta":"Manage plan\" -"}
+{"tMs":3330,"delta":"> em"}
+{"tMs":3359,"delta":"it manage\n    Button."}
+{"tMs":3392,"delta":"out"}
+{"tMs":3426,"delta":"line \"Cancel renew"}
+{"tMs":3460,"delta":"al\" -> emit canc"}
+{"tMs":3492,"delta":"el"}
+{"tMs":3527,"delta":"Renewal; toast \""}
+{"tMs":3559,"delta":"Renewal can"}
+{"tMs":3592,"delta":"celed\""}
+{"tMs":3626,"delta":"\n\nstate biller"}
+{"tMs":3658,"delta":"=20"}
+{"tMs":3692,"delta":"\nstate annual=false\nstate"}
+{"tMs":3726,"delta":" storageUsed=68"}
+{"tMs":3759,"delta":"\nstate storageTotal="}
+{"tMs":3793,"delta":"100\nstate seatsUs"}
+{"tMs":3826,"delta":"ed=8\nstate seats"}
+{"tMs":3861,"delta":"Total=10\nstate stor"}
+{"tMs":3895,"delta":"ageShare=0.68"}
+{"tMs":3927,"delta":"\nstate seatShare=0."}
+{"tMs":3960,"delta":"8"}

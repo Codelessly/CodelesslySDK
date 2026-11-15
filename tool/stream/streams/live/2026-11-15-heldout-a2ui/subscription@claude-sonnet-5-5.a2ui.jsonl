@@ -1,0 +1,164 @@
+{"meta":{"ui":"subscription","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"My Pro plan renews in 3 days. Show a card with the plan and price, how much of my storage and seats I have used, a switch to annual billing that shows what I would save, and buttons to manage the plan or cancel renewal.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"main\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"content\"},{\"id\":\"content\",\"component\":\"Column\",\"children\":[\"header\",\"renewal\",\"div1\",\"storageCol\",\"seatsCol\",\"div2\",\"annualBox\",\"savings\",\"actions\"]},{\"id\":\"header\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"align\":\"center\",\"children\":[\"planName\",\"price\"]},{\"id\":\"planName\",\"component\":\"Text\",\"text\":{\"@path\":\"/plan/name\"}},{\"id\":\"price\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/priceLabel}\"}}},{\"id\":\"renewal\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Renews in ${/plan/renewDays} days\"}}},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"storageCol\",\"component\":\"Column\",\"children\":[\"storageText\",\"storageSlider\"]},{\"id\":\"storageText\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Storage: ${/usage/storageUsed} GB of ${/usage/storageTotal} GB used\"}}},{\"id\":\"storageSlider\",\"component\":\"Slider\",\"label\":\"Storage used (GB)\",\"min\":0,\"max\":100,\"value\":{\"@path\":\"/usage/storageUsed\"}},{\"id\":\"seatsCol\",\"component\":\"Column\",\"children\":[\"seatsText\",\"seatsSlider\"]},{\"id\":\"seatsText\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Seats: ${/usage/seatsUsed} of ${/usage/seatsTotal} used\"}}},{\"id\":\"seatsSlider\",\"component\":\"Slider\",\"label\":\"Seats used\",\"min\":0,\"max\":10,\"value\":{\"@path\":\"/usage/seatsUsed\"}},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"annualBox\",\"component\":\"CheckBox\",\"label\":\"Switch to annual billing\",\"value\":{\"@path\":\"/annual\"}},{\"id\":\"savings\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Annual billing: ${/annualPriceLabel} — save ${/savingsLabel} per year\"}}},{\"id\":\"actions\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"manageBtn\",\"cancelBtn\"]},{\"id\":\"manageText\",\"component\":\"Text\",\"text\":\"Manage plan\"},{\"id\":\"manageBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"manageText\",\"action\":{\"event\":{\"name\":\"manage_plan\",\"context\":{\"annual\":{\"@path\":\"/annual\"}}}}},{\"id\":\"cancelText\",\"component\":\"Text\",\"text\":\"Cancel renewal\"},{\"id\":\"cancelBtn\",\"component\":\"Button\",\"child\":\"cancelText\",\"action\":{\"event\":{\"name\":\"cancel_renewal\"}}}],\"dataModel\":{\"plan\":{\"name\":\"Pro plan\",\"renewDays\":3},\"priceLabel\":\"$20/month\",\"annualPriceLabel\":\"$200/year\",\"savingsLabel\":\"$40\",\"annual\":false,\"usage\":{\"storageUsed\":64,\"storageTotal\":100,\"seatsUsed\":7,\"seatsTotal\":10}}}}","usage":{"input_tokens":21153,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1125,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1118,"totalMs":6509}}
+{"tMs":1118,"delta":"{\"version\":\"1.0"}
+{"tMs":1419,"delta":"\",\"createSurface\":{\""}
+{"tMs":1419,"delta":"surfaceId\":\"main"}
+{"tMs":1419,"delta":"\",\"catalogId\":\"https"}
+{"tMs":1419,"delta":"://a2ui.org/"}
+{"tMs":1419,"delta":"specification/v1_0/"}
+{"tMs":1419,"delta":"catalogs/basic/"}
+{"tMs":1419,"delta":"catalog.json\",\"components\":"}
+{"tMs":1419,"delta":"[{\"id\":\"root\",\""}
+{"tMs":1419,"delta":"component\":\"Card\",\"child\":"}
+{"tMs":1439,"delta":"\"content\"},{\"id\":"}
+{"tMs":1471,"delta":"\"content\",\"component\":\"Column"}
+{"tMs":1504,"delta":"\",\"children\":[\"header\",\"ren"}
+{"tMs":1734,"delta":"ewal\",\"div"}
+{"tMs":1735,"delta":"1\",\"stor"}
+{"tMs":1735,"delta":"ageC"}
+{"tMs":1735,"delta":"ol\",\"se"}
+{"tMs":1735,"delta":"atsCol\",\"div2\",\""}
+{"tMs":1735,"delta":"annualB"}
+{"tMs":1735,"delta":"ox\",\"sav"}
+{"tMs":1761,"delta":"ings"}
+{"tMs":1795,"delta":"\",\"actions\"]},{\""}
+{"tMs":1829,"delta":"id\":\"header\",\"component\":\""}
+{"tMs":1862,"delta":"Row\",\"just"}
+{"tMs":1895,"delta":"ify\":\"spaceBet"}
+{"tMs":2053,"delta":"ween\",\"align\":\"center\",\"children"}
+{"tMs":2053,"delta":"\":[\"planName"}
+{"tMs":2053,"delta":"\",\"price"}
+{"tMs":2053,"delta":"\"]},{\"id\":\""}
+{"tMs":2061,"delta":"planName\",\"component\":\"Text"}
+{"tMs":2095,"delta":"\",\"text\":{"}
+{"tMs":2128,"delta":"\"@path"}
+{"tMs":2160,"delta":"\":\"/plan/"}
+{"tMs":2194,"delta":"name\"}},{\"id\":"}
+{"tMs":2228,"delta":"\"price\",\"component\":\"Text"}
+{"tMs":2263,"delta":"\",\"text\":{\"@call\":"}
+{"tMs":2295,"delta":"\"formatString\",\"args\":{"}
+{"tMs":2366,"delta":"\"value\":\""}
+{"tMs":2366,"delta":"${/pri"}
+{"tMs":2395,"delta":"ceL"}
+{"tMs":2426,"delta":"abel}\""}
+{"tMs":2460,"delta":"}}},{\"id\":\""}
+{"tMs":2494,"delta":"renewal\",\"component\":\""}
+{"tMs":2526,"delta":"Text\",\"vari"}
+{"tMs":2560,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":2594,"delta":"{\"@call\":\"format"}
+{"tMs":2627,"delta":"String\",\"args\":{\"value\":"}
+{"tMs":2662,"delta":"\"Renews in ${/"}
+{"tMs":2694,"delta":"pl"}
+{"tMs":2727,"delta":"an/renewDays} days"}
+{"tMs":2761,"delta":"\"}}},{\"id\":"}
+{"tMs":2795,"delta":"\"div1\",\"component\":\""}
+{"tMs":2829,"delta":"Divider\"},{\"id\":"}
+{"tMs":2863,"delta":"\"storageCol\",\"component\":"}
+{"tMs":2896,"delta":"\"Column\",\"children\":[\"stor"}
+{"tMs":2928,"delta":"ageText"}
+{"tMs":2961,"delta":"\",\"storageS"}
+{"tMs":2995,"delta":"lider\"]},{\"id"}
+{"tMs":3028,"delta":"\":\"storageText\",\"component\":"}
+{"tMs":3062,"delta":"\"Text\",\"text\":{\""}
+{"tMs":3096,"delta":"@call\":\"formatString\",\""}
+{"tMs":3129,"delta":"args\":{\"value\":\""}
+{"tMs":3163,"delta":"Storage: ${/usage"}
+{"tMs":3195,"delta":"/storage"}
+{"tMs":3229,"delta":"Used} GB of "}
+{"tMs":3262,"delta":"${/usage/storageT"}
+{"tMs":3295,"delta":"otal} GB used"}
+{"tMs":3328,"delta":"\"}}"}
+{"tMs":3363,"delta":"},{\"id\":\"storage"}
+{"tMs":3396,"delta":"Slider\",\"component\":\""}
+{"tMs":3428,"delta":"Slider\",\"label"}
+{"tMs":3462,"delta":"\":\"Storage used"}
+{"tMs":3495,"delta":" ("}
+{"tMs":3529,"delta":"GB)\",\"min\":0,"}
+{"tMs":3562,"delta":"\"max\":100,\"value\":"}
+{"tMs":3596,"delta":"{\"@path\":\"/us"}
+{"tMs":3629,"delta":"age/storageUsed\""}
+{"tMs":3662,"delta":"}},{\"id\":\"se"}
+{"tMs":3696,"delta":"atsCol\",\"component\":\""}
+{"tMs":3729,"delta":"Column\",\"children\":[\"seat"}
+{"tMs":3762,"delta":"sText\",\"seats"}
+{"tMs":3796,"delta":"Slider\"]},{\""}
+{"tMs":3831,"delta":"id\":\"seatsText\",\""}
+{"tMs":3863,"delta":"component\":\"Text"}
+{"tMs":3896,"delta":"\",\"text\":{\"@call\":"}
+{"tMs":3929,"delta":"\"formatString\",\"args\":{"}
+{"tMs":3963,"delta":"\"value\":\"Seats:"}
+{"tMs":3996,"delta":" ${/usage/seat"}
+{"tMs":4030,"delta":"sUsed} of ${"}
+{"tMs":4067,"delta":"/usage/seatsT"}
+{"tMs":4097,"delta":"otal} used\"}}"}
+{"tMs":4137,"delta":"},{\"id\":\"seat"}
+{"tMs":4170,"delta":"sSlider\",\"component\":\""}
+{"tMs":4197,"delta":"Slider\",\"label\":\""}
+{"tMs":4230,"delta":"Seats used\",\"min\":0,"}
+{"tMs":4265,"delta":"\"max\":10,\"value\":"}
+{"tMs":4298,"delta":"{\"@path\":\"/us"}
+{"tMs":4335,"delta":"age/seatsUsed"}
+{"tMs":4372,"delta":"\"}},{\"id\":\""}
+{"tMs":4401,"delta":"div2\",\"component\":\"Div"}
+{"tMs":4431,"delta":"ider\"},{\"id\":\""}
+{"tMs":4465,"delta":"annualBox\",\"component\":\""}
+{"tMs":4498,"delta":"CheckBox\",\"label\":"}
+{"tMs":4533,"delta":"\"Switch to annual bill"}
+{"tMs":4565,"delta":"ing\",\"value\":{\"@path"}
+{"tMs":4600,"delta":"\":\"/ann"}
+{"tMs":4632,"delta":"ual\"}},{\"id\":"}
+{"tMs":4667,"delta":"\"savings\",\"component\":\""}
+{"tMs":4698,"delta":"Text\",\"vari"}
+{"tMs":4731,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":4766,"delta":"{\"@call\":\"format"}
+{"tMs":4798,"delta":"String\",\"args\":{\"value\":"}
+{"tMs":4831,"delta":"\"Annual billing: "}
+{"tMs":4864,"delta":"${/annualPri"}
+{"tMs":4900,"delta":"ceLabel} —"}
+{"tMs":4932,"delta":" save ${/sav"}
+{"tMs":4965,"delta":"ingsLabel}"}
+{"tMs":4999,"delta":" per year\"}}},{\""}
+{"tMs":5033,"delta":"id\":\"actions\",\"component\":"}
+{"tMs":5064,"delta":"\"Row\",\"justify\":\""}
+{"tMs":5098,"delta":"spaceBetween\",\"children"}
+{"tMs":5131,"delta":"\":[\"manageB"}
+{"tMs":5164,"delta":"tn\",\"cancelBt"}
+{"tMs":5198,"delta":"n\"]},{\"id\":"}
+{"tMs":5232,"delta":"\"manageText"}
+{"tMs":5266,"delta":"\",\"component\":\"Text"}
+{"tMs":5298,"delta":"\",\"text\":\"Manage pl"}
+{"tMs":5332,"delta":"an\"},{\"id\":\""}
+{"tMs":5365,"delta":"manageBtn\",\"component\":"}
+{"tMs":5398,"delta":"\"Button\",\"vari"}
+{"tMs":5431,"delta":"ant\":\"primary\",\"child\":"}
+{"tMs":5465,"delta":"\"manageText\",\"action\":{"}
+{"tMs":5499,"delta":"\"event\":{\"name\":\""}
+{"tMs":5532,"delta":"manage_plan\",\"context\":"}
+{"tMs":5567,"delta":"{\"annual\":{\"@"}
+{"tMs":5598,"delta":"path\":\"/annual\"}"}
+{"tMs":5632,"delta":"}}}},{\"id\":"}
+{"tMs":5668,"delta":"\"cancelText\",\"component\":"}
+{"tMs":5698,"delta":"\"Text\",\"text\":\""}
+{"tMs":5732,"delta":"Cancel renewal\"},"}
+{"tMs":5766,"delta":"{\"id\":\"cancel"}
+{"tMs":5798,"delta":"Btn\",\"component\":\""}
+{"tMs":5832,"delta":"Button\",\"child\":\"cancel"}
+{"tMs":5866,"delta":"Text\",\"action\":{\"event\":"}
+{"tMs":5899,"delta":"{\"name\":\"cancel"}
+{"tMs":5933,"delta":"_renewal\"}}}"}
+{"tMs":5966,"delta":"],\"dataModel\":{"}
+{"tMs":5999,"delta":"\"plan\":{\"name\":"}
+{"tMs":6032,"delta":"\"Pro pl"}
+{"tMs":6065,"delta":"an\",\"renewDays\":3"}
+{"tMs":6099,"delta":"},\"priceLabel\":"}
+{"tMs":6132,"delta":"\"$20"}
+{"tMs":6165,"delta":"/month\",\"annualPrice"}
+{"tMs":6198,"delta":"Label\":\"$200"}
+{"tMs":6232,"delta":"/year\",\"savingsLab"}
+{"tMs":6266,"delta":"el\":\"$40\",\"annual"}
+{"tMs":6299,"delta":"\":false,\"usage\":{"}
+{"tMs":6334,"delta":"\"storageUsed\":64"}
+{"tMs":6366,"delta":",\"storageTotal\":"}
+{"tMs":6400,"delta":"100,\"seatsUs"}
+{"tMs":6432,"delta":"ed\":7,\"seats"}
+{"tMs":6465,"delta":"Total\":10}}}"}
+{"tMs":6499,"delta":"}"}

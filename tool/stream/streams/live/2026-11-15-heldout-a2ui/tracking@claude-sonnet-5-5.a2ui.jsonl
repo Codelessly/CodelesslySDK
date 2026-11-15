@@ -1,0 +1,197 @@
+{"meta":{"ui":"tracking","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"tracking\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"content\"},{\"id\":\"content\",\"component\":\"Column\",\"children\":[\"itemRow\",\"carrierText\",\"etaRow\",\"div1\",\"stagesTitle\",\"stageList\",\"div2\",\"instrModal\"]},{\"id\":\"itemRow\",\"component\":\"Row\",\"align\":\"center\",\"children\":[\"pkgIcon\",\"itemText\"]},{\"id\":\"pkgIcon\",\"component\":\"Icon\",\"name\":\"shoppingCart\"},{\"id\":\"itemText\",\"component\":\"Text\",\"text\":{\"@path\":\"/item\"},\"weight\":1},{\"id\":\"carrierText\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/carrier} · Tracking # ${/trackingNumber}\"}}},{\"id\":\"etaRow\",\"component\":\"Row\",\"align\":\"center\",\"children\":[\"etaIcon\",\"etaText\"]},{\"id\":\"etaIcon\",\"component\":\"Icon\",\"name\":\"calendarToday\"},{\"id\":\"etaText\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Estimated delivery: ${/eta}\"}},\"weight\":1},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"stagesTitle\",\"component\":\"Text\",\"text\":\"Shipment progress\"},{\"id\":\"stageList\",\"component\":\"List\",\"direction\":\"vertical\",\"children\":{\"path\":\"/stages\",\"componentId\":\"stageRow\"}},{\"id\":\"stageRow\",\"component\":\"Row\",\"align\":\"center\",\"children\":[\"stageIcon\",\"stageCol\"]},{\"id\":\"stageIcon\",\"component\":\"Icon\",\"name\":{\"@path\":\"icon\"}},{\"id\":\"stageCol\",\"component\":\"Column\",\"weight\":1,\"children\":[\"stageName\",\"stageNote\"]},{\"id\":\"stageName\",\"component\":\"Text\",\"text\":{\"@path\":\"name\"}},{\"id\":\"stageNote\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@path\":\"note\"}},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"instrModal\",\"component\":\"Modal\",\"trigger\":\"instrBtn\",\"content\":\"instrForm\"},{\"id\":\"instrBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"instrBtnText\",\"action\":{\"functionCall\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Opening instructions\"}}}},{\"id\":\"instrBtnText\",\"component\":\"Text\",\"text\":\"Leave delivery instructions\"},{\"id\":\"instrForm\",\"component\":\"Column\",\"children\":[\"instrTitle\",\"instrField\",\"instrSave\"]},{\"id\":\"instrTitle\",\"component\":\"Text\",\"text\":\"Delivery instructions\"},{\"id\":\"instrField\",\"component\":\"TextField\",\"label\":\"Instructions for the driver\",\"variant\":\"longText\",\"value\":{\"@path\":\"/instructions\"},\"placeholder\":\"e.g. Leave with the front desk\"},{\"id\":\"instrSave\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"instrSaveText\",\"action\":{\"event\":{\"name\":\"saveDeliveryInstructions\",\"context\":{\"instructions\":{\"@path\":\"/instructions\"},\"trackingNumber\":{\"@path\":\"/trackingNumber\"}}}}},{\"id\":\"instrSaveText\",\"component\":\"Text\",\"text\":\"Save\"}],\"dataModel\":{\"item\":\"Wireless Noise-Cancelling Headphones\",\"carrier\":\"UPS\",\"trackingNumber\":\"1Z 999 AA1 01 2345 6784\",\"eta\":\"Thursday, May 16\",\"instructions\":\"\",\"stages\":[{\"name\":\"Order placed\",\"note\":\"May 12\",\"icon\":\"check\"},{\"name\":\"Packed\",\"note\":\"May 12\",\"icon\":\"check\"},{\"name\":\"Shipped\",\"note\":\"May 13\",\"icon\":\"check\"},{\"name\":\"Out for delivery · Current\",\"note\":\"Today, on the truck in your area\",\"icon\":\"locationOn\"},{\"name\":\"Delivered\",\"note\":\"Pending\",\"icon\":\"starOff\"}]}}}","usage":{"input_tokens":21150,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1335,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":770,"totalMs":7289}}
+{"tMs":770,"delta":"{\"version\":\"1.0"}
+{"tMs":1056,"delta":"\",\"createSurface\":{\""}
+{"tMs":1056,"delta":"surfaceId\":\"t"}
+{"tMs":1056,"delta":"racking\",\"catalogId\":"}
+{"tMs":1056,"delta":"\"https://a2ui."}
+{"tMs":1056,"delta":"org/specification/v1_"}
+{"tMs":1056,"delta":"0/catalogs/bas"}
+{"tMs":1056,"delta":"ic/catalog.json\",\""}
+{"tMs":1056,"delta":"components\":[{\"id\":\""}
+{"tMs":1057,"delta":"root\",\"component\":\"Card\",\""}
+{"tMs":1094,"delta":"child\":\"content\"},{\""}
+{"tMs":1124,"delta":"id\":\"content\",\"component\":\""}
+{"tMs":1157,"delta":"Column\",\"children\":[\"it"}
+{"tMs":1361,"delta":"emR"}
+{"tMs":1361,"delta":"ow\",\"carrierText"}
+{"tMs":1361,"delta":"\",\"et"}
+{"tMs":1361,"delta":"aR"}
+{"tMs":1362,"delta":"ow\",\"div"}
+{"tMs":1362,"delta":"1\",\"stag"}
+{"tMs":1383,"delta":"esTitle\",\"stage"}
+{"tMs":1416,"delta":"List\",\"div2\",\"instr"}
+{"tMs":1447,"delta":"Mod"}
+{"tMs":1479,"delta":"al\""}
+{"tMs":1513,"delta":"]},{\"id\":\"it"}
+{"tMs":1548,"delta":"emRow\",\"component\":\""}
+{"tMs":1676,"delta":"Row\",\"align"}
+{"tMs":1676,"delta":"\":\"center\",\"children\":[\"p"}
+{"tMs":1677,"delta":"kgIcon\",\"it"}
+{"tMs":1680,"delta":"emText\"]},{\"id"}
+{"tMs":1714,"delta":"\":\"pkgIcon"}
+{"tMs":1748,"delta":"\",\"component\":\"Icon\",\""}
+{"tMs":1782,"delta":"name\":\"shoppingC"}
+{"tMs":1816,"delta":"art\"},{\"id\":\""}
+{"tMs":1850,"delta":"itemText\",\"component\":\""}
+{"tMs":1883,"delta":"Text\",\"text\":{"}
+{"tMs":1916,"delta":"\"@path\":\"/item\""}
+{"tMs":1951,"delta":"},\""}
+{"tMs":1996,"delta":"weight\":1},{\"id"}
+{"tMs":2016,"delta":"\":\"carrierText\",\"component"}
+{"tMs":2049,"delta":"\":\"Text\",\"vari"}
+{"tMs":2083,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":2116,"delta":"{\"@call\":\"format"}
+{"tMs":2150,"delta":"String\",\"args\":{\"value\":"}
+{"tMs":2184,"delta":"\"${/carrier} ·"}
+{"tMs":2216,"delta":" Tracking #"}
+{"tMs":2250,"delta":" ${/trackingNum"}
+{"tMs":2284,"delta":"ber}\"}}},{\""}
+{"tMs":2317,"delta":"id\":\"etaRow\",\""}
+{"tMs":2350,"delta":"component\":\"Row\",\"align\":"}
+{"tMs":2386,"delta":"\"center\",\"children\":[\"eta"}
+{"tMs":2417,"delta":"Icon\",\"etaText\""}
+{"tMs":2451,"delta":"]},{\"id\":\"et"}
+{"tMs":2484,"delta":"aIcon\",\"component\":\""}
+{"tMs":2518,"delta":"Icon\",\"name\":\"cal"}
+{"tMs":2551,"delta":"endarToday\"},{\""}
+{"tMs":2585,"delta":"id\":\"etaText\",\"component"}
+{"tMs":2618,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":2651,"delta":"\"@call\":\"formatString"}
+{"tMs":2685,"delta":"\",\"args\":{\"value\":\""}
+{"tMs":2719,"delta":"Estimated delivery:"}
+{"tMs":2752,"delta":" ${/eta}\"}"}
+{"tMs":2785,"delta":"},"}
+{"tMs":2819,"delta":"\"weight\":1},{\""}
+{"tMs":2852,"delta":"id\":\"div1\",\"component\":"}
+{"tMs":2887,"delta":"\"Divider\"},{\""}
+{"tMs":2918,"delta":"id\":\"stagesTit"}
+{"tMs":2952,"delta":"le\",\"component\":\"Text\",\""}
+{"tMs":2986,"delta":"text\":\"Shipment prog"}
+{"tMs":3020,"delta":"ress\"},{\"id\":\""}
+{"tMs":3053,"delta":"stageList\",\"component\":\"List"}
+{"tMs":3085,"delta":"\",\"dire"}
+{"tMs":3119,"delta":"ction\":\"vertical\",\"children"}
+{"tMs":3152,"delta":"\":{\"path\":\"/st"}
+{"tMs":3186,"delta":"ages\",\"componentId\":\"st"}
+{"tMs":3219,"delta":"ageRow\"}},{\""}
+{"tMs":3253,"delta":"id\":\"stageRow\",\""}
+{"tMs":3286,"delta":"component\":\"Row\",\"align\":"}
+{"tMs":3319,"delta":"\"center\",\"children\":[\"stage"}
+{"tMs":3352,"delta":"Icon\",\"stageC"}
+{"tMs":3398,"delta":"ol\""}
+{"tMs":3427,"delta":"]},{\"id\":\"st"}
+{"tMs":3458,"delta":"ageIcon\",\"component\":\""}
+{"tMs":3485,"delta":"Icon\",\"name\":{\""}
+{"tMs":3518,"delta":"@path\":\"ic"}
+{"tMs":3552,"delta":"on\"}},{\"id\":"}
+{"tMs":3586,"delta":"\"stageCol\",\"component\":"}
+{"tMs":3620,"delta":"\"Column\",\"we"}
+{"tMs":3653,"delta":"ight\":1,\"children\":[\""}
+{"tMs":3687,"delta":"stageName\",\"stageN"}
+{"tMs":3719,"delta":"ote\"]},{\"id\":"}
+{"tMs":3752,"delta":"\"stageName\",\"component\":\""}
+{"tMs":3786,"delta":"Text\",\"text\":{\"@"}
+{"tMs":3819,"delta":"path\":\"name\"}},{"}
+{"tMs":3852,"delta":"\"id\":\"stageNote"}
+{"tMs":3886,"delta":"\",\"component\":\"Text\",\"vari"}
+{"tMs":3919,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":3954,"delta":"{\"@path\":\"note\""}
+{"tMs":3987,"delta":"}},{\"id\":\"div"}
+{"tMs":4019,"delta":"2\",\"component\":\"Divider"}
+{"tMs":4053,"delta":"\"},{\"id\":\"inst"}
+{"tMs":4086,"delta":"rModal\",\"component\":\""}
+{"tMs":4119,"delta":"Modal\",\"trigger\":\""}
+{"tMs":4152,"delta":"instrB"}
+{"tMs":4186,"delta":"tn\",\"content\":\"instr"}
+{"tMs":4219,"delta":"Form\"},{\"id\":"}
+{"tMs":4253,"delta":"\"instrBtn\",\"component"}
+{"tMs":4286,"delta":"\":\"Button\",\"vari"}
+{"tMs":4319,"delta":"ant\":\"primary\",\"child\":"}
+{"tMs":4353,"delta":"\"instrBtnText\",\""}
+{"tMs":4386,"delta":"action\":{\"funct"}
+{"tMs":4419,"delta":"ionCall\":{\"@call"}
+{"tMs":4453,"delta":"\":\"form"}
+{"tMs":4486,"delta":"atString\",\"args\":{\"value"}
+{"tMs":4519,"delta":"\":\"Op"}
+{"tMs":4553,"delta":"ening instructions\"}}}"}
+{"tMs":4586,"delta":"},{\"id\":\"instr"}
+{"tMs":4620,"delta":"BtnText\",\"component\":\""}
+{"tMs":4652,"delta":"Text\",\"text\":\"Le"}
+{"tMs":4686,"delta":"ave delivery instructions\""}
+{"tMs":4719,"delta":"},{\"id\":\"instr"}
+{"tMs":4753,"delta":"Form\",\"component\":\"Column"}
+{"tMs":4786,"delta":"\",\"children\":[\"instrTit"}
+{"tMs":4820,"delta":"le\",\"instrField\",\"instr"}
+{"tMs":4853,"delta":"Save\"]},{\"id"}
+{"tMs":4887,"delta":"\":\"instrTitle\",\""}
+{"tMs":4920,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":4953,"delta":"\"Delivery instructions"}
+{"tMs":4987,"delta":"\"},{\"id\":\"inst"}
+{"tMs":5020,"delta":"rField\",\"component\":\"Text"}
+{"tMs":5053,"delta":"Field\",\"label\":\"Instruct"}
+{"tMs":5086,"delta":"ions for"}
+{"tMs":5120,"delta":" the driver\",\"vari"}
+{"tMs":5153,"delta":"ant\":\"longText\",\"value"}
+{"tMs":5186,"delta":"\":{\"@path\":\"/"}
+{"tMs":5219,"delta":"instructions\"},\"place"}
+{"tMs":5253,"delta":"holder\":\"e.g."}
+{"tMs":5305,"delta":" Leave with"}
+{"tMs":5319,"delta":" the"}
+{"tMs":5353,"delta":" front desk\"},{\"id"}
+{"tMs":5386,"delta":"\":\"instrSave\",\"component"}
+{"tMs":5420,"delta":"\":\"Button\",\"variant\":"}
+{"tMs":5453,"delta":"\"primary\",\"child\":\"inst"}
+{"tMs":5486,"delta":"rSaveText\",\"action\":"}
+{"tMs":5519,"delta":"{\"event\":{\"name\":"}
+{"tMs":5553,"delta":"\"saveDelivery"}
+{"tMs":5586,"delta":"Instructions\",\"context\":{"}
+{"tMs":5620,"delta":"\"instructions\":{\"@"}
+{"tMs":5653,"delta":"path\":\"/instructions\""}
+{"tMs":5687,"delta":"},\"trackingNumber"}
+{"tMs":5720,"delta":"\":{\"@path\":\"/"}
+{"tMs":5753,"delta":"trackingNumber\"}"}
+{"tMs":5786,"delta":"}}}"}
+{"tMs":5820,"delta":"},{\"id\":\"instr"}
+{"tMs":5853,"delta":"SaveText\",\"component\":\""}
+{"tMs":5886,"delta":"Text\",\"text\":\"Save"}
+{"tMs":5920,"delta":"\"}],\"dataModel"}
+{"tMs":5953,"delta":"\":{\"item\":\"W"}
+{"tMs":5986,"delta":"ireless No"}
+{"tMs":6020,"delta":"ise-"}
+{"tMs":6053,"delta":"Cancelling Headph"}
+{"tMs":6086,"delta":"ones\",\"carrier\":\"U"}
+{"tMs":6119,"delta":"PS\",\"trackingNum"}
+{"tMs":6153,"delta":"ber\":\"1"}
+{"tMs":6186,"delta":"Z 999"}
+{"tMs":6219,"delta":" A"}
+{"tMs":6253,"delta":"A1"}
+{"tMs":6285,"delta":" 01"}
+{"tMs":6319,"delta":" 2"}
+{"tMs":6352,"delta":"345 6784"}
+{"tMs":6385,"delta":"\",\"eta\":\"Th"}
+{"tMs":6419,"delta":"ursday, May 16"}
+{"tMs":6452,"delta":"\",\"instructions\":\"\",\"st"}
+{"tMs":6486,"delta":"ages\":[{\"name"}
+{"tMs":6519,"delta":"\":\"Order plac"}
+{"tMs":6552,"delta":"ed\",\"note\":\"May"}
+{"tMs":6585,"delta":" 12"}
+{"tMs":6619,"delta":"\",\"icon\":\"check\""}
+{"tMs":6652,"delta":"},{\"name\":\"Pack"}
+{"tMs":6685,"delta":"ed\",\""}
+{"tMs":6722,"delta":"note\":\"May 12\",\"ic"}
+{"tMs":6752,"delta":"on\":\"check\"},{\""}
+{"tMs":6785,"delta":"name\":\"Shipped\",\""}
+{"tMs":6820,"delta":"note\":\"May 13\",\"ic"}
+{"tMs":6851,"delta":"on\":\"check\"},{\""}
+{"tMs":6885,"delta":"name\":\"Out for del"}
+{"tMs":6918,"delta":"ivery ·"}
+{"tMs":6951,"delta":" Current\",\"note\":\"Today"}
+{"tMs":6985,"delta":","}
+{"tMs":7018,"delta":" on the"}
+{"tMs":7051,"delta":" truck in"}
+{"tMs":7084,"delta":" your area\",\"icon\":\"loc"}
+{"tMs":7118,"delta":"ationOn\"},{\"name"}
+{"tMs":7151,"delta":"\":\"Delivered\",\"note"}
+{"tMs":7187,"delta":"\":\"Pending\",\"icon"}
+{"tMs":7218,"delta":"\":\"star"}
+{"tMs":7252,"delta":"Off\"}]}}}"}

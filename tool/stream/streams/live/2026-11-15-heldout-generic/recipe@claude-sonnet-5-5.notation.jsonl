@@ -1,0 +1,123 @@
+{"meta":{"ui":"recipe","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: total time and difficulty, a servings control that scales the ingredient amounts, the ingredients as a checklist I can tick off, the four steps, and a start cooking button.","text":"Card w:390 gap:12\n  state servings=4\n  state ingredients=[{\"name\":\"Chicken thighs, bone-in\",\"qty\":8,\"unit\":\"pieces\",\"per\":2,\"done\":false},{\"name\":\"Baby potatoes\",\"qty\":800,\"unit\":\"g\",\"per\":200,\"done\":false},{\"name\":\"Lemons\",\"qty\":2,\"unit\":\"\",\"per\":0.5,\"done\":false},{\"name\":\"Garlic cloves\",\"qty\":6,\"unit\":\"\",\"per\":1.5,\"done\":false},{\"name\":\"Olive oil\",\"qty\":4,\"unit\":\"tbsp\",\"per\":1,\"done\":false},{\"name\":\"Fresh thyme\",\"qty\":8,\"unit\":\"sprigs\",\"per\":2,\"done\":false}]\n  Text.heading \"Lemon Chicken Traybake\"\n  Row gap:8 middle\n    Icon \"schedule\"\n    Text.muted \"55 min\"\n    Spacer\n    Badge.success \"Easy\"\n  Divider\n  Row between middle\n    Text.strong \"Servings\"\n    Row gap:8 middle\n      IconButton \"remove\" -> servings=max(1,servings-1)\n      Text.strong \"{servings}\"\n      IconButton \"add\" -> servings=min(12,servings+1)\n  Text.sectionTitle \"Ingredients\"\n  each ing in ingredients\n    Checkbox \"{round(ing.per*servings,1)} {ing.unit} {ing.name}\" =ing.done\n  Divider\n  Text.sectionTitle \"Steps\"\n  Row gap:8\n    Badge.primary \"1\"\n    Text \"Heat the oven to 220°C (200°C fan).\"\n  Row gap:8\n    Badge.primary \"2\"\n    Text \"Toss potatoes, garlic, thyme, oil and lemon wedges on a tray; season well.\"\n  Row gap:8\n    Badge.primary \"3\"\n    Text \"Nestle in the chicken skin-side up and roast for 40 minutes.\"\n  Row gap:8\n    Badge.primary \"4\"\n    Text \"Rest for 5 minutes, then squeeze over roasted lemon and serve.\"\n  Button \"Start cooking\" -> emit startCooking servings; toast \"Happy cooking!\"","usage":{"input_tokens":3224,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":733,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":581,"totalMs":4643}}
+{"tMs":581,"delta":"Card w:390 g"}
+{"tMs":878,"delta":"ap:12"}
+{"tMs":879,"delta":"\n  state"}
+{"tMs":879,"delta":" servings=4"}
+{"tMs":879,"delta":"\n  state ingredients="}
+{"tMs":880,"delta":"[{\"name\":\"Ch"}
+{"tMs":880,"delta":"icken th"}
+{"tMs":880,"delta":"ighs,"}
+{"tMs":880,"delta":" bone-in\",\"qty\":"}
+{"tMs":880,"delta":"8"}
+{"tMs":892,"delta":",\"unit\":\"p"}
+{"tMs":924,"delta":"ieces\",\"per"}
+{"tMs":955,"delta":"\":2"}
+{"tMs":1184,"delta":","}
+{"tMs":1184,"delta":"\"done\":false},{\"name"}
+{"tMs":1184,"delta":"\":\"Ba"}
+{"tMs":1184,"delta":"by potatoes\",\"qty"}
+{"tMs":1184,"delta":"\":800"}
+{"tMs":1185,"delta":",\"unit\":\"g\",\""}
+{"tMs":1192,"delta":"per\":200,\"done\":false"}
+{"tMs":1228,"delta":"},{\"name\":\"L"}
+{"tMs":1261,"delta":"emons\",\"qty\":2"}
+{"tMs":1295,"delta":",\"unit\":\"\",\""}
+{"tMs":1327,"delta":"per\":0"}
+{"tMs":1361,"delta":".5,\"done\":false},"}
+{"tMs":1493,"delta":"{\"name\":\"Garl"}
+{"tMs":1493,"delta":"ic cloves\",\"qty\":"}
+{"tMs":1493,"delta":"6"}
+{"tMs":1495,"delta":",\"unit\":\"\",\"per"}
+{"tMs":1530,"delta":"\":1.5,\"done\":"}
+{"tMs":1564,"delta":"false},{\"name\":\""}
+{"tMs":1597,"delta":"Olive oil\",\"qty\":"}
+{"tMs":1631,"delta":"4,\"unit\":\"t"}
+{"tMs":1665,"delta":"bsp\",\"per\":1"}
+{"tMs":1699,"delta":",\"done\":false},{\""}
+{"tMs":1732,"delta":"name\":\"F"}
+{"tMs":1767,"delta":"resh thyme\",\"qty"}
+{"tMs":1809,"delta":"\":8,\"unit\":\""}
+{"tMs":1834,"delta":"sprigs\",\"per\":2"}
+{"tMs":1867,"delta":",\"done\":false}]"}
+{"tMs":1900,"delta":"\n  Text.heading \""}
+{"tMs":1933,"delta":"Lemon"}
+{"tMs":1968,"delta":" Chicken Traybake\""}
+{"tMs":2001,"delta":"\n  Row gap:8"}
+{"tMs":2033,"delta":" "}
+{"tMs":2067,"delta":"middle\n    Icon \""}
+{"tMs":2101,"delta":"schedule\"\n    Text"}
+{"tMs":2133,"delta":"."}
+{"tMs":2166,"delta":"muted \"55"}
+{"tMs":2200,"delta":" min\"\n    Sp"}
+{"tMs":2233,"delta":"acer\n    Bad"}
+{"tMs":2267,"delta":"ge.success \"Eas"}
+{"tMs":2300,"delta":"y\"\n  Div"}
+{"tMs":2333,"delta":"ider\n  Row between midd"}
+{"tMs":2367,"delta":"le\n    Text.strong"}
+{"tMs":2400,"delta":" \"Servings\"\n    "}
+{"tMs":2434,"delta":"Row gap:8 middle"}
+{"tMs":2467,"delta":"\n      I"}
+{"tMs":2500,"delta":"conButton \"rem"}
+{"tMs":2534,"delta":"ove\" -> servings=max"}
+{"tMs":2567,"delta":"(1,servings-1)"}
+{"tMs":2601,"delta":"\n      Text.strong \""}
+{"tMs":2635,"delta":"{servings}\"\n      I"}
+{"tMs":2668,"delta":"conButton \"add\" ->"}
+{"tMs":2705,"delta":" servings=min(12,serv"}
+{"tMs":2734,"delta":"ings+1)\n  Text"}
+{"tMs":2768,"delta":".sectionTitle \""}
+{"tMs":2802,"delta":"Ingredients\"\n  "}
+{"tMs":2835,"delta":"each "}
+{"tMs":2868,"delta":"ing in ingredients\n    "}
+{"tMs":2901,"delta":"Checkbox \""}
+{"tMs":2934,"delta":"{round"}
+{"tMs":2968,"delta":"(ing.per*servings"}
+{"tMs":3001,"delta":",1)} {ing."}
+{"tMs":3035,"delta":"unit} {ing.name"}
+{"tMs":3068,"delta":"}\" =ing.done"}
+{"tMs":3102,"delta":"\n  Div"}
+{"tMs":3135,"delta":"ider\n  Text.sect"}
+{"tMs":3168,"delta":"ionTitle \"Steps"}
+{"tMs":3201,"delta":"\"\n  Row"}
+{"tMs":3235,"delta":" gap:8"}
+{"tMs":3301,"delta":"\n    Bad"}
+{"tMs":3337,"delta":"ge.primary \"1\""}
+{"tMs":3367,"delta":"\n    Text \"Heat the"}
+{"tMs":3401,"delta":" oven to 220"}
+{"tMs":3434,"delta":"°C ("}
+{"tMs":3468,"delta":"200°C"}
+{"tMs":3500,"delta":" fan)"}
+{"tMs":3535,"delta":".\"\n  Row gap:"}
+{"tMs":3567,"delta":"8\n    Badge.prim"}
+{"tMs":3601,"delta":"ary \"2\"\n    Text"}
+{"tMs":3634,"delta":" \"Toss pot"}
+{"tMs":3667,"delta":"atoes, gar"}
+{"tMs":3700,"delta":"lic, th"}
+{"tMs":3733,"delta":"yme, o"}
+{"tMs":3767,"delta":"il and lemon w"}
+{"tMs":3800,"delta":"edges on"}
+{"tMs":3833,"delta":" a tray;"}
+{"tMs":3866,"delta":" season well"}
+{"tMs":3900,"delta":".\"\n  Row gap:"}
+{"tMs":3933,"delta":"8\n    Bad"}
+{"tMs":3966,"delta":"ge.primary \"3\""}
+{"tMs":4000,"delta":"\n    Text \"Nestle"}
+{"tMs":4034,"delta":" in"}
+{"tMs":4066,"delta":" the chicken sk"}
+{"tMs":4099,"delta":"in-side"}
+{"tMs":4133,"delta":" up and roast for 40 "}
+{"tMs":4166,"delta":"minutes.\"\n  Row"}
+{"tMs":4199,"delta":" gap:8\n    Bad"}
+{"tMs":4233,"delta":"ge.primary \"4\""}
+{"tMs":4267,"delta":"\n    Text \"Rest for"}
+{"tMs":4300,"delta":" 5 minutes, then"}
+{"tMs":4333,"delta":" squeeze over"}
+{"tMs":4366,"delta":" ro"}
+{"tMs":4399,"delta":"asted lemon and"}
+{"tMs":4433,"delta":" serve.\"\n  Button \""}
+{"tMs":4467,"delta":"Start cooking\" ->"}
+{"tMs":4500,"delta":" emit start"}
+{"tMs":4533,"delta":"Cooking serv"}
+{"tMs":4566,"delta":"ings;"}
+{"tMs":4600,"delta":" toast \"Happ"}
+{"tMs":4633,"delta":"y cooking!\""}

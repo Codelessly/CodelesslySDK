@@ -1,0 +1,1 @@
+My Pro plan renews in 3 days. Show a card with the plan and price, how much of my storage and seats I have used, a switch to annual billing that shows what I would save, and buttons to manage the plan or cancel renewal.

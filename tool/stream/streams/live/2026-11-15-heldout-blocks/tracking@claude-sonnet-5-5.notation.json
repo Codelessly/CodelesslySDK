@@ -1,0 +1,319 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Wireless Headphones",
+    "subtitle": "Order #48213 · Arriving Thursday",
+    "icon": "local_shipping",
+    "status": "In transit",
+    "tone": "accent"
+   },
+   "children": [
+    "Details1",
+    "SectionLabel1",
+    "Steps1",
+    "Details2",
+    "Callout1",
+    "Receipt1",
+    "Disclosure1",
+    "ActionButton1",
+    "InputField1",
+    "ActionButton2"
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Carrier",
+      "UPS Ground"
+     ],
+     [
+      "Tracking",
+      "1Z999AA10123456784"
+     ],
+     [
+      "Estimated delivery",
+      "Thursday, May 16"
+     ]
+    ]
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Shipment progress",
+    "note": "Stage 3 of 5"
+   }
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Ordered",
+     "Packed",
+     "Shipped",
+     "Out for delivery",
+     "Delivered"
+    ],
+    "current": 3
+   }
+  },
+  "Details2": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Ordered",
+      "May 12 · 9:14 AM"
+     ],
+     [
+      "Packed",
+      "May 12 · 4:40 PM"
+     ],
+     [
+      "Shipped",
+      "May 13 · Louisville, KY"
+     ],
+     [
+      "Out for delivery",
+      "Pending"
+     ],
+     [
+      "Delivered",
+      "Pending"
+     ]
+    ]
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Currently: Shipped",
+    "message": "Your package left the Louisville hub and is on its way to your local facility.",
+    "tone": "accent",
+    "icon": "local_shipping"
+   }
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Instructions saved",
+    "message": "The driver will see your note.",
+    "tone": "good"
+   },
+   "bind": {
+    "visible": "${= saved}"
+   }
+  },
+  "Disclosure1": {
+   "type": "Disclosure",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Delivery instructions",
+    "note": "Optional",
+    "lines": [
+     "Leave at front door",
+     "Ring the bell",
+     "Leave with neighbor"
+    ]
+   },
+   "bind": {
+    "visible": "${= !saved}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Leave delivery instructions",
+    "tone": "quiet",
+    "icon": "edit"
+   },
+   "bind": {
+    "visible": "${= !saved}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "showNote",
+       "value": "${= !showNote}"
+      }
+     ]
+    }
+   ]
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Instructions",
+    "placeholder": "e.g. Leave behind the gate",
+    "value": "note",
+    "lines": 3
+   },
+   "bind": {
+    "visible": "${= (!saved) && (showNote)}"
+   }
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Save instructions",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= length(note)>0}",
+    "visible": "${= (!saved) && (showNote)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= true}"
+      },
+      {
+       "type": "showToast",
+       "message": "Saved"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "showNote",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "note",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "saved",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

@@ -1,0 +1,468 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "Media1",
+    "text1",
+    "row1",
+    "Counter1",
+    "SectionLabel1",
+    "Checklist1",
+    "SectionLabel2",
+    "Steps1",
+    "column2",
+    "Callout1",
+    "ActionButton1"
+   ]
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 140,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "kind": "bread",
+    "tone": "sand"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 24,
+     "fontWeight": 700,
+     "height": 1.2,
+     "color": "#FF111827"
+    },
+    "text": "Weeknight Lemon Chicken Traybake"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row2",
+    "row3"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1A0891B2"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#470891B2"
+     }
+    ],
+    "radius": 5
+   },
+   "children": [
+    "text2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "45 min",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF0891B2"
+    }
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1A16A34A"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#4716A34A"
+     }
+    ],
+    "radius": 5
+   },
+   "children": [
+    "text3"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Easy",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF16A34A"
+    }
+   }
+  },
+  "Counter1": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Servings",
+    "detail": "Amounts scale automatically",
+    "value": "servings",
+    "min": 1,
+    "max": 12
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Ingredients"
+   },
+   "bind": {
+    "props.note": "${= length(have)} of 6 ticked"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Gather",
+    "value": "have",
+    "items": [
+     "{round(servings*0.5,1)} kg chicken thighs",
+     "{servings*0.5} lemons",
+     "{round(servings*0.75,1)} tbsp olive oil",
+     "{servings*200} g baby potatoes",
+     "{servings} garlic cloves",
+     "{round(servings*0.5,1)} tsp dried oregano"
+    ]
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Method",
+    "note": "4 steps"
+   }
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Prep",
+     "Roast",
+     "Add lemon",
+     "Rest"
+    ],
+    "current": 1
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Paragraph1",
+    "Paragraph2",
+    "Paragraph3",
+    "Paragraph4"
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "1. Heat the oven to 220°C. Toss potatoes with oil, oregano and salt on a large tray."
+   }
+  },
+  "Paragraph2": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "2. Nestle the chicken among the potatoes, skin side up, and roast for 20 minutes."
+   }
+  },
+  "Paragraph3": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "3. Add lemon wedges and garlic, then roast 15 minutes more until golden."
+   }
+  },
+  "Paragraph4": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "4. Rest for 5 minutes, spoon over the pan juices and serve."
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Cooking started",
+    "message": "Oven on at 220°C. Follow the four steps above.",
+    "tone": "good"
+   },
+   "bind": {
+    "visible": "${= started}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start cooking",
+    "tone": "primary",
+    "icon": "play_arrow"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "started",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "startCooking"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "servings",
+    "type": "integer",
+    "value": 4
+   },
+   {
+    "name": "have",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "started",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

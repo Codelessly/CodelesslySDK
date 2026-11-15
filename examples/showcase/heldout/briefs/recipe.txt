@@ -1,0 +1,1 @@
+Show me a recipe card for a weeknight lemon chicken traybake: total time and difficulty, a servings control that scales the ingredient amounts, the ingredients as a checklist I can tick off, the four steps, and a start cooking button.

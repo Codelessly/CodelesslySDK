@@ -1,0 +1,223 @@
+{"meta":{"ui":"recipe","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: total time and difficulty, a servings control that scales the ingredient amounts, the ingredients as a checklist I can tick off, the four steps, and a start cooking button.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"recipe\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"body\"},{\"id\":\"body\",\"component\":\"Column\",\"children\":[\"title\",\"meta\",\"div1\",\"servingsLabel\",\"servings\",\"div2\",\"ingTitle\",\"ingList\",\"div3\",\"stepsTitle\",\"stepsList\",\"startBtn\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Weeknight Lemon Chicken Traybake\"},{\"id\":\"meta\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"time\",\"difficulty\"]},{\"id\":\"time\",\"component\":\"Text\",\"text\":\"Total time: 45 min\",\"variant\":\"caption\"},{\"id\":\"difficulty\",\"component\":\"Text\",\"text\":\"Difficulty: Easy\",\"variant\":\"caption\"},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"servingsLabel\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Servings: ${/servings}\"}}},{\"id\":\"servings\",\"component\":\"Slider\",\"label\":\"Servings\",\"min\":1,\"max\":12,\"steps\":11,\"value\":{\"@path\":\"/servings\"}},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"ingTitle\",\"component\":\"Text\",\"text\":\"Ingredients\"},{\"id\":\"ingList\",\"component\":\"Column\",\"children\":[\"ing1\",\"ing2\",\"ing3\",\"ing4\",\"ing5\",\"ing6\"]},{\"id\":\"ing1\",\"component\":\"CheckBox\",\"label\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/ingredients/0/qty} chicken thighs, bone-in\"}},\"value\":{\"@path\":\"/checked/0\"}},{\"id\":\"ing2\",\"component\":\"CheckBox\",\"label\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/ingredients/1/qty} baby potatoes, halved\"}},\"value\":{\"@path\":\"/checked/1\"}},{\"id\":\"ing3\",\"component\":\"CheckBox\",\"label\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/ingredients/2/qty} lemons\"}},\"value\":{\"@path\":\"/checked/2\"}},{\"id\":\"ing4\",\"component\":\"CheckBox\",\"label\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/ingredients/3/qty} garlic cloves\"}},\"value\":{\"@path\":\"/checked/3\"}},{\"id\":\"ing5\",\"component\":\"CheckBox\",\"label\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/ingredients/4/qty} tbsp olive oil\"}},\"value\":{\"@path\":\"/checked/4\"}},{\"id\":\"ing6\",\"component\":\"CheckBox\",\"label\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/ingredients/5/qty} tsp dried oregano\"}},\"value\":{\"@path\":\"/checked/5\"}},{\"id\":\"div3\",\"component\":\"Divider\"},{\"id\":\"stepsTitle\",\"component\":\"Text\",\"text\":\"Steps\"},{\"id\":\"stepsList\",\"component\":\"Column\",\"children\":[\"s1\",\"s2\",\"s3\",\"s4\"]},{\"id\":\"s1\",\"component\":\"Text\",\"text\":\"1. Heat the oven to 220°C (200°C fan).\"},{\"id\":\"s2\",\"component\":\"Text\",\"text\":\"2. Toss potatoes, garlic, oil, oregano and lemon wedges on a tray; season.\"},{\"id\":\"s3\",\"component\":\"Text\",\"text\":\"3. Nestle the chicken skin-side up on top and squeeze over some lemon juice.\"},{\"id\":\"s4\",\"component\":\"Text\",\"text\":\"4. Roast 35 minutes until the chicken is golden and cooked through; rest 5 minutes.\"},{\"id\":\"startBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"startTxt\",\"action\":{\"event\":{\"name\":\"startCooking\",\"context\":{\"servings\":{\"@path\":\"/servings\"}}}}},{\"id\":\"startTxt\",\"component\":\"Text\",\"text\":\"Start cooking\"}],\"dataModel\":{\"servings\":4,\"checked\":[false,false,false,false,false,false],\"ingredients\":[{\"qty\":{\"@call\":\"formatNumber\",\"args\":{\"value\":8,\"decimals\":0}}}]}}}\n{\"version\":\"1.0\",\"updateDataModel\":{\"surfaceId\":\"recipe\",\"path\":\"/ingredients\",\"value\":[{\"qty\":8},{\"qty\":600},{\"qty\":2},{\"qty\":4},{\"qty\":2},{\"qty\":2}]}}","usage":{"input_tokens":21158,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1488,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1017,"totalMs":8409}}
+{"tMs":1017,"delta":"{\"version\":\"1.0"}
+{"tMs":1320,"delta":"\",\"createSurface\":{\""}
+{"tMs":1320,"delta":"surfaceId\":\"rec"}
+{"tMs":1320,"delta":"ipe\",\"catalogId\":"}
+{"tMs":1320,"delta":"\"https://a2ui."}
+{"tMs":1320,"delta":"org/specification/v1_"}
+{"tMs":1320,"delta":"0/catalogs/bas"}
+{"tMs":1320,"delta":"ic/catalog.json\",\""}
+{"tMs":1320,"delta":"components"}
+{"tMs":1320,"delta":"\":[{\"id\":\"root"}
+{"tMs":1337,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":1368,"delta":"\":\"body"}
+{"tMs":1404,"delta":"\"},{\"id\":\"body"}
+{"tMs":1640,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1641,"delta":"\":[\"title\",\"me"}
+{"tMs":1641,"delta":"ta\",\"div"}
+{"tMs":1641,"delta":"1\",\"servingsL"}
+{"tMs":1641,"delta":"abel\",\"servings"}
+{"tMs":1641,"delta":"\",\"div2\",\"ingT"}
+{"tMs":1641,"delta":"itle\",\"ingList"}
+{"tMs":1664,"delta":"\",\"div"}
+{"tMs":1699,"delta":"3"}
+{"tMs":1731,"delta":"\",\"stepsTitle\",\""}
+{"tMs":1764,"delta":"stepsList\",\"startBt"}
+{"tMs":1798,"delta":"n\"]},{\"id\":"}
+{"tMs":1959,"delta":"\"title\",\"component\":\"Text"}
+{"tMs":1959,"delta":"\",\"text\":\"Weekn"}
+{"tMs":1959,"delta":"ight Lemon Chic"}
+{"tMs":1959,"delta":"ken Traybake\"},{"}
+{"tMs":1966,"delta":"\"id\":\"meta\",\"component"}
+{"tMs":1999,"delta":"\":\"Row\",\"just"}
+{"tMs":2032,"delta":"ify\":\"sp"}
+{"tMs":2068,"delta":"aceBetween\",\"children"}
+{"tMs":2099,"delta":"\":[\"time"}
+{"tMs":2134,"delta":"\",\"difficulty\"]},"}
+{"tMs":2167,"delta":"{\"id\":\"time\",\"component"}
+{"tMs":2200,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":2281,"delta":"Total time: 45 min"}
+{"tMs":2282,"delta":"\",\"variant\":\"caption\""}
+{"tMs":2300,"delta":"},{\"id\":\"diffic"}
+{"tMs":2335,"delta":"ulty\",\"component\":\"Text"}
+{"tMs":2367,"delta":"\",\"text\":\"Difficul"}
+{"tMs":2400,"delta":"ty: Easy\",\"variant"}
+{"tMs":2434,"delta":"\":\"caption\"},{\""}
+{"tMs":2469,"delta":"id\":\"div1\",\"component\":"}
+{"tMs":2501,"delta":"\"Divider\"},{\""}
+{"tMs":2535,"delta":"id\":\"servingsLab"}
+{"tMs":2569,"delta":"el\",\"component\":\"Text"}
+{"tMs":2600,"delta":"\",\"text\":{"}
+{"tMs":2635,"delta":"\"@"}
+{"tMs":2667,"delta":"call\":\"formatString\",\"args"}
+{"tMs":2700,"delta":"\":{\"value\":\""}
+{"tMs":2767,"delta":"Servings: ${/servings"}
+{"tMs":2807,"delta":"}\"}}},{\"id"}
+{"tMs":2833,"delta":"\":\"servings\",\"component\":\""}
+{"tMs":2867,"delta":"Slider\",\"label\":\""}
+{"tMs":2904,"delta":"Servings\",\"min\":1,\""}
+{"tMs":2933,"delta":"max\":12"}
+{"tMs":2966,"delta":",\"ste"}
+{"tMs":2999,"delta":"ps\":11"}
+{"tMs":3032,"delta":",\"value\":{\"@path"}
+{"tMs":3066,"delta":"\":\"/servings\"}},"}
+{"tMs":3099,"delta":"{\"id\":\"div2\",\""}
+{"tMs":3133,"delta":"component\":\"Divider\"},"}
+{"tMs":3168,"delta":"{\"id\":\"ingT"}
+{"tMs":3200,"delta":"itle\",\"component\":\"Text"}
+{"tMs":3237,"delta":"\",\"text\":\"Ingred"}
+{"tMs":3267,"delta":"ients\"},{\"id\":\""}
+{"tMs":3300,"delta":"ingList\",\"component"}
+{"tMs":3333,"delta":"\":\"Column\",\"children\":[\""}
+{"tMs":3367,"delta":"ing1\",\"ing2\",\""}
+{"tMs":3400,"delta":"ing3\",\"ing4\",\""}
+{"tMs":3437,"delta":"ing5\",\"ing6\""}
+{"tMs":3467,"delta":"]},{\"id\":\""}
+{"tMs":3500,"delta":"ing1\",\"component\":\"Che"}
+{"tMs":3534,"delta":"ckBox\",\"label\":{\""}
+{"tMs":3569,"delta":"@call\":\"formatString\",\""}
+{"tMs":3602,"delta":"args\":{\"value\":\"${"}
+{"tMs":3633,"delta":"/ing"}
+{"tMs":3667,"delta":"redients/0"}
+{"tMs":3700,"delta":"/"}
+{"tMs":3733,"delta":"qty} ch"}
+{"tMs":3767,"delta":"icken th"}
+{"tMs":3799,"delta":"ighs, b"}
+{"tMs":3832,"delta":"one-in\"}},\""}
+{"tMs":3866,"delta":"value\":{\"@path\":\""}
+{"tMs":3899,"delta":"/chec"}
+{"tMs":3932,"delta":"ked/0\"}},{\""}
+{"tMs":3966,"delta":"id\":\"ing2\",\"component"}
+{"tMs":3999,"delta":"\":\"CheckBox\",\""}
+{"tMs":4034,"delta":"label\":{\"@call\":\""}
+{"tMs":4066,"delta":"formatString\",\"args\":{\""}
+{"tMs":4100,"delta":"value\":\"${/ingred"}
+{"tMs":4133,"delta":"ients/1/qty} ba"}
+{"tMs":4172,"delta":"by potatoes,"}
+{"tMs":4200,"delta":" halved\"}},\"value\":"}
+{"tMs":4232,"delta":"{\"@path\":\"/chec"}
+{"tMs":4266,"delta":"ked/1\"}},{\""}
+{"tMs":4300,"delta":"id\":\"ing3\",\"component"}
+{"tMs":4334,"delta":"\":\"CheckBox\",\""}
+{"tMs":4367,"delta":"label\":{\"@call\":\""}
+{"tMs":4400,"delta":"formatString\",\"args\":{\""}
+{"tMs":4433,"delta":"value\":\"${/ingred"}
+{"tMs":4467,"delta":"ients/2/qty} l"}
+{"tMs":4501,"delta":"emons\""}
+{"tMs":4533,"delta":"}},\"value\":{\"@"}
+{"tMs":4570,"delta":"path\":\"/checked/2"}
+{"tMs":4602,"delta":"\"}},{\"id\":\""}
+{"tMs":4634,"delta":"ing4\",\"component\":\"C"}
+{"tMs":4667,"delta":"heckBox\",\"label\":{"}
+{"tMs":4701,"delta":"\"@call\":\"formatString"}
+{"tMs":4733,"delta":"\",\"args\":{\"value\":\""}
+{"tMs":4767,"delta":"${/ingredients/3"}
+{"tMs":4800,"delta":"/qty} garlic c"}
+{"tMs":4834,"delta":"loves\"}},\"value\":"}
+{"tMs":4868,"delta":"{\"@path\":\"/chec"}
+{"tMs":4903,"delta":"ked/3\"}},{\""}
+{"tMs":4934,"delta":"id\":\"ing5\",\"component"}
+{"tMs":4967,"delta":"\":\"CheckBox\",\""}
+{"tMs":5001,"delta":"label\":{\"@call\":\""}
+{"tMs":5034,"delta":"formatString\",\"args\":{\""}
+{"tMs":5068,"delta":"value\":\"${/ingred"}
+{"tMs":5102,"delta":"ients/4/qty} t"}
+{"tMs":5134,"delta":"bsp olive oil\""}
+{"tMs":5167,"delta":"}},\"value\":{\"@"}
+{"tMs":5201,"delta":"path\":\"/checked/4"}
+{"tMs":5235,"delta":"\"}},{\"id\":\""}
+{"tMs":5288,"delta":"ing6\",\"component\":\"C"}
+{"tMs":5301,"delta":"heckBox\",\"label\":{"}
+{"tMs":5335,"delta":"\"@call\":\"formatString"}
+{"tMs":5369,"delta":"\",\"args\":{\"value\":\""}
+{"tMs":5403,"delta":"${/ingredients/5"}
+{"tMs":5435,"delta":"/qty} tsp d"}
+{"tMs":5468,"delta":"ried oregano\"}},\""}
+{"tMs":5503,"delta":"value\":{\"@path\":\""}
+{"tMs":5535,"delta":"/checked/5\"}},"}
+{"tMs":5579,"delta":"{\"id\":\"div3\",\""}
+{"tMs":5607,"delta":"component\":\"Divider\"},"}
+{"tMs":5635,"delta":"{\"id\":\"steps"}
+{"tMs":5668,"delta":"Title\",\"component\":\""}
+{"tMs":5702,"delta":"Text\",\"text\":\"Steps"}
+{"tMs":5735,"delta":"\"},{\"id\":\"st"}
+{"tMs":5768,"delta":"epsList\",\"component\":\""}
+{"tMs":5802,"delta":"Column\",\"children\":[\"s1\",\""}
+{"tMs":5836,"delta":"s2\",\"s3\",\"s4"}
+{"tMs":5869,"delta":"\"]},{\"id\":\""}
+{"tMs":5902,"delta":"s1\",\"component\":\"Text"}
+{"tMs":5935,"delta":"\",\"text\":\"1. He"}
+{"tMs":5969,"delta":"at the"}
+{"tMs":6002,"delta":" oven to 220"}
+{"tMs":6035,"delta":"°C ("}
+{"tMs":6068,"delta":"200°C"}
+{"tMs":6101,"delta":" fan)"}
+{"tMs":6135,"delta":".\"},{\"id\":\"s"}
+{"tMs":6168,"delta":"2\",\"component\":\"Text\",\""}
+{"tMs":6203,"delta":"text\":\"2. Toss"}
+{"tMs":6235,"delta":" pot"}
+{"tMs":6267,"delta":"atoes,"}
+{"tMs":6301,"delta":" gar"}
+{"tMs":6335,"delta":"lic, oil,"}
+{"tMs":6369,"delta":" oregano and l"}
+{"tMs":6401,"delta":"emon w"}
+{"tMs":6434,"delta":"edges on"}
+{"tMs":6467,"delta":" a t"}
+{"tMs":6501,"delta":"ray; season.\""}
+{"tMs":6534,"delta":"},{\"id\":\"s3"}
+{"tMs":6568,"delta":"\",\"component\":\"Text"}
+{"tMs":6600,"delta":"\",\"text\":\"3. N"}
+{"tMs":6633,"delta":"est"}
+{"tMs":6667,"delta":"le the chicken sk"}
+{"tMs":6700,"delta":"in-side"}
+{"tMs":6733,"delta":" up on"}
+{"tMs":6766,"delta":" top"}
+{"tMs":6800,"delta":" and squ"}
+{"tMs":6833,"delta":"eeze over"}
+{"tMs":6865,"delta":" some"}
+{"tMs":6899,"delta":" lemon juice.\"},{"}
+{"tMs":6932,"delta":"\"id\":\"s4\",\"component"}
+{"tMs":6966,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":7000,"delta":"4. Roast 35 "}
+{"tMs":7033,"delta":"minutes until the chicken"}
+{"tMs":7066,"delta":" is golden and c"}
+{"tMs":7099,"delta":"ooked through;"}
+{"tMs":7132,"delta":" rest "}
+{"tMs":7166,"delta":"5 min"}
+{"tMs":7199,"delta":"utes.\"},{\"id\":"}
+{"tMs":7236,"delta":"\"startBtn"}
+{"tMs":7266,"delta":"\",\"component\":\"Button\",\"vari"}
+{"tMs":7300,"delta":"ant\":\"primary\",\"child\":"}
+{"tMs":7332,"delta":"\"startT"}
+{"tMs":7366,"delta":"xt\",\"action\":{\"event"}
+{"tMs":7400,"delta":"\":{\"name\":\"startC"}
+{"tMs":7432,"delta":"ooking\",\"context\":{\"serv"}
+{"tMs":7467,"delta":"ings\":{\"@path\":\""}
+{"tMs":7499,"delta":"/servings\"}}}}"}
+{"tMs":7534,"delta":"},{\"id\":\"startT"}
+{"tMs":7568,"delta":"xt\",\"component\":\"Text"}
+{"tMs":7601,"delta":"\",\"text\":\"Start c"}
+{"tMs":7633,"delta":"ooking\"}],\"data"}
+{"tMs":7666,"delta":"Model\":{\"servings\":"}
+{"tMs":7699,"delta":"4,\"chec"}
+{"tMs":7733,"delta":"ked\":[false,false,false"}
+{"tMs":7766,"delta":",false,false,false],\""}
+{"tMs":7800,"delta":"ingredients\":[{\""}
+{"tMs":7834,"delta":"qty\":{\"@call\":"}
+{"tMs":7866,"delta":"\"formatNumber\",\"args"}
+{"tMs":7899,"delta":"\":{\"value\":8"}
+{"tMs":7933,"delta":",\"decimals\":0"}
+{"tMs":7966,"delta":"}}}"}
+{"tMs":8000,"delta":"]}}}"}
+{"tMs":8033,"delta":"\n{\"version\":\"1.0"}
+{"tMs":8068,"delta":"\",\"updateDataModel\":"}
+{"tMs":8100,"delta":"{\"surfaceId\":"}
+{"tMs":8133,"delta":"\"recipe\",\"path\":\""}
+{"tMs":8166,"delta":"/ingredients\",\"value\":"}
+{"tMs":8200,"delta":"[{\"qty\":8"}
+{"tMs":8233,"delta":"},{\"qty\":600"}
+{"tMs":8267,"delta":"},{\"qty\":2"}
+{"tMs":8299,"delta":"},{\"qty\":4},"}
+{"tMs":8333,"delta":"{\"qty\":2},{"}
+{"tMs":8366,"delta":"\"qty\":2}]}"}
+{"tMs":8401,"delta":"}"}

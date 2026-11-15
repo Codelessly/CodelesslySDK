@@ -1,0 +1,132 @@
+{"meta":{"ui":"tracking","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"Card w:390 gap:12\n  Row between middle\n    Column gap:2\n      Text.heading \"Wireless Headphones\"\n      Text.muted \"Order #A-48213\"\n    Badge.info \"In transit\"\n  Divider\n  Row between\n    Column gap:2\n      Text.caption \"Carrier\"\n      Text.strong \"UPS\"\n    Column gap:2 end\n      Text.caption \"Tracking number\"\n      Text.mono \"1Z999AA10123456784\"\n  Box fill:#FFE8F0FE radius:8 pad:12 gap:2\n    Text.caption \"Estimated delivery\"\n    Text.heading2 \"Thursday, May 16\"\n  state stage=2\n  Text.sectionTitle \"Shipment progress\"\n  Column gap:0\n    Row gap:12 middle\n      Icon \"check_circle\" color:#FF2E7D32\n      Column gap:0\n        Text.strong \"Order placed\"\n        Text.caption \"May 12, 9:41 AM\"\n    Row gap:12 middle\n      Icon \"check_circle\" color:#FF2E7D32\n      Column gap:0\n        Text.strong \"Packed\"\n        Text.caption \"May 12, 4:15 PM\"\n    Row gap:12 middle\n      Icon \"local_shipping\" color:#FF1565C0\n      Column gap:0\n        Text.strong \"In transit · Current\" color:#FF1565C0\n        Text.caption \"Departed Denver, CO hub\"\n    Row gap:12 middle\n      Icon \"radio_button_unchecked\" color:#FF9E9E9E\n      Column gap:0\n        Text.muted \"Out for delivery\"\n        Text.caption \"Expected May 16\"\n    Row gap:12 middle\n      Icon \"radio_button_unchecked\" color:#FF9E9E9E\n      Column gap:0\n        Text.muted \"Delivered\"\n        Text.caption \"Expected May 16\"\n  Divider\n  state showNote=false\n  state note=\"\"\n  Button.outline \"Delivery instructions\" -> showNote=!showNote\n  if showNote\n    Column gap:8\n      Input \"Instructions\" hint:\"e.g. Leave with the front desk\" =note\n      Button \"Save instructions\" -> emit saveInstructions note; toast \"Instructions saved\"; showNote=false","usage":{"input_tokens":3216,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":763,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":739,"totalMs":5079}}
+{"tMs":739,"delta":"Card w:"}
+{"tMs":1045,"delta":"390 gap:12"}
+{"tMs":1047,"delta":"\n  Row"}
+{"tMs":1047,"delta":" between midd"}
+{"tMs":1047,"delta":"le\n    Column"}
+{"tMs":1047,"delta":" gap:2"}
+{"tMs":1047,"delta":"\n      Text.heading \""}
+{"tMs":1047,"delta":"Wireless Head"}
+{"tMs":1048,"delta":"phones\"\n      Text."}
+{"tMs":1048,"delta":"muted \"Order #A"}
+{"tMs":1066,"delta":"-48"}
+{"tMs":1098,"delta":"213"}
+{"tMs":1131,"delta":"\"\n    Bad"}
+{"tMs":1363,"delta":"ge.info"}
+{"tMs":1363,"delta":" \"In trans"}
+{"tMs":1363,"delta":"it\"\n  Div"}
+{"tMs":1363,"delta":"ider\n  Row between"}
+{"tMs":1363,"delta":"\n    Column gap:2"}
+{"tMs":1363,"delta":"\n      Text.caption \""}
+{"tMs":1366,"delta":"Carrier\"\n      "}
+{"tMs":1400,"delta":"Text.strong \"U"}
+{"tMs":1434,"delta":"PS\"\n    Column"}
+{"tMs":1467,"delta":" gap:2 "}
+{"tMs":1501,"delta":"end\n      Text.caption"}
+{"tMs":1534,"delta":" \"Tracking number"}
+{"tMs":1684,"delta":"\"\n      Text.m"}
+{"tMs":1684,"delta":"ono \"1Z999"}
+{"tMs":1684,"delta":"AA"}
+{"tMs":1684,"delta":"10"}
+{"tMs":1700,"delta":"123456784"}
+{"tMs":1733,"delta":"\"\n  Box"}
+{"tMs":1766,"delta":" f"}
+{"tMs":1799,"delta":"ill:#FFE"}
+{"tMs":1832,"delta":"8"}
+{"tMs":1865,"delta":"F0FE"}
+{"tMs":1899,"delta":" rad"}
+{"tMs":1932,"delta":"ius:8 pad:12"}
+{"tMs":2016,"delta":" "}
+{"tMs":2016,"delta":"gap:2"}
+{"tMs":2033,"delta":"\n    Text.ca"}
+{"tMs":2082,"delta":"ption \"Estimated deliv"}
+{"tMs":2106,"delta":"ery\"\n    Text.he"}
+{"tMs":2133,"delta":"ading2 \"Thursday"}
+{"tMs":2166,"delta":", May 16"}
+{"tMs":2199,"delta":"\"\n  state"}
+{"tMs":2233,"delta":" stage=2"}
+{"tMs":2266,"delta":"\n  Text.section"}
+{"tMs":2300,"delta":"Title \"Shipment"}
+{"tMs":2333,"delta":" progress\"\n  Column g"}
+{"tMs":2366,"delta":"ap:0"}
+{"tMs":2400,"delta":"\n    Row gap:12"}
+{"tMs":2434,"delta":" middle\n      Icon"}
+{"tMs":2467,"delta":" \"check_circle\" color:"}
+{"tMs":2500,"delta":"#F"}
+{"tMs":2540,"delta":"F2E7D32\n      "}
+{"tMs":2568,"delta":"Column"}
+{"tMs":2599,"delta":" gap:0"}
+{"tMs":2634,"delta":"\n        Text.strong \""}
+{"tMs":2669,"delta":"Order placed\"\n        "}
+{"tMs":2705,"delta":"Text.caption \"May 12"}
+{"tMs":2734,"delta":","}
+{"tMs":2767,"delta":" 9:41"}
+{"tMs":2800,"delta":" AM\"\n    Row"}
+{"tMs":2835,"delta":" gap:12 middle"}
+{"tMs":2868,"delta":"\n      Icon \"check_circ"}
+{"tMs":2901,"delta":"le\" color:#FF2"}
+{"tMs":2935,"delta":"E7D32\n      Column"}
+{"tMs":2968,"delta":" gap:0\n        Text"}
+{"tMs":3002,"delta":".strong \"Packed\""}
+{"tMs":3035,"delta":"\n        Text.caption \""}
+{"tMs":3068,"delta":"May 12, 4"}
+{"tMs":3102,"delta":":15"}
+{"tMs":3137,"delta":" PM\"\n    Row"}
+{"tMs":3169,"delta":" gap:12 middle"}
+{"tMs":3204,"delta":"\n      Icon \"local"}
+{"tMs":3240,"delta":"_shipping\" color:#"}
+{"tMs":3268,"delta":"FF1565"}
+{"tMs":3302,"delta":"C0\n      Column gap"}
+{"tMs":3336,"delta":":0\n        Text.str"}
+{"tMs":3368,"delta":"ong \"In"}
+{"tMs":3403,"delta":" transit ·"}
+{"tMs":3435,"delta":" Current\""}
+{"tMs":3469,"delta":" color:#F"}
+{"tMs":3505,"delta":"F1565C0\n        "}
+{"tMs":3535,"delta":"Text.caption \"Depart"}
+{"tMs":3571,"delta":"ed Denver, C"}
+{"tMs":3602,"delta":"O hub\""}
+{"tMs":3640,"delta":"\n    Row gap:12"}
+{"tMs":3670,"delta":" middle\n      Icon"}
+{"tMs":3704,"delta":" \"radio_button_un"}
+{"tMs":3736,"delta":"checked\" color:#F"}
+{"tMs":3769,"delta":"F9E9E9E"}
+{"tMs":3804,"delta":"\n      Column"}
+{"tMs":3837,"delta":" gap:0\n        Text"}
+{"tMs":3870,"delta":".muted \"Out for del"}
+{"tMs":3904,"delta":"ivery\"\n        Text."}
+{"tMs":3936,"delta":"caption \""}
+{"tMs":3970,"delta":"Exp"}
+{"tMs":4003,"delta":"ected May 16\"\n    "}
+{"tMs":4037,"delta":"Row gap:12 middle"}
+{"tMs":4069,"delta":"\n      Icon \"radio"}
+{"tMs":4105,"delta":"_button_unchecked\""}
+{"tMs":4140,"delta":" color:#FF9E9"}
+{"tMs":4170,"delta":"E9E\n      Column g"}
+{"tMs":4203,"delta":"ap:0\n        Text."}
+{"tMs":4237,"delta":"muted \"Delivered\""}
+{"tMs":4270,"delta":"\n        Text.caption \""}
+{"tMs":4303,"delta":"Exp"}
+{"tMs":4337,"delta":"ected May 16\"\n  "}
+{"tMs":4370,"delta":"Divider\n  state show"}
+{"tMs":4403,"delta":"Note=false\n  state"}
+{"tMs":4436,"delta":" note=\"\"\n  Button"}
+{"tMs":4471,"delta":".outline \"Delivery"}
+{"tMs":4505,"delta":" instructions\" -> showN"}
+{"tMs":4537,"delta":"ote=!showNote\n  "}
+{"tMs":4570,"delta":"if showNote\n    Column"}
+{"tMs":4604,"delta":" gap:8\n      Input"}
+{"tMs":4637,"delta":" \"Inst"}
+{"tMs":4671,"delta":"ructions\" h"}
+{"tMs":4705,"delta":"int:\"e"}
+{"tMs":4737,"delta":".g. Leave with"}
+{"tMs":4770,"delta":" the"}
+{"tMs":4803,"delta":" front"}
+{"tMs":4836,"delta":" desk\" =note\n      "}
+{"tMs":4870,"delta":"Button \""}
+{"tMs":4903,"delta":"Save inst"}
+{"tMs":4936,"delta":"ructions\" -> emit sa"}
+{"tMs":4971,"delta":"veInstructions note"}
+{"tMs":5003,"delta":"; toast \"Instructions"}
+{"tMs":5044,"delta":" saved\"; showNote="}
+{"tMs":5071,"delta":"false"}

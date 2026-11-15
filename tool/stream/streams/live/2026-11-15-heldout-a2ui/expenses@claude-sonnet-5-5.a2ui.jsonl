@@ -1,0 +1,185 @@
+{"meta":{"ui":"expenses","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"I have four expenses waiting for my approval from one report. Show them in a card with merchant, category, date and amount, flag the one missing a receipt, let me approve or reject each, and show the approved total and a submit button.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"expenses\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"main\"},{\"id\":\"main\",\"component\":\"Column\",\"children\":[\"title\",\"sub\",\"div1\",\"list\",\"div2\",\"totalRow\",\"submitBtn\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Expense Report Approval\"},{\"id\":\"sub\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"4 expenses awaiting your approval\"},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"list\",\"component\":\"List\",\"direction\":\"vertical\",\"children\":{\"path\":\"/expenses\",\"componentId\":\"item\"}},{\"id\":\"item\",\"component\":\"Column\",\"children\":[\"itemTop\",\"itemMeta\",\"itemFlag\",\"itemActions\",\"itemDiv\"]},{\"id\":\"itemTop\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"align\":\"center\",\"children\":[\"merchant\",\"amount\"]},{\"id\":\"merchant\",\"component\":\"Text\",\"text\":{\"@path\":\"merchant\"}},{\"id\":\"amount\",\"component\":\"Text\",\"text\":{\"@call\":\"formatCurrency\",\"args\":{\"value\":{\"@path\":\"amount\"},\"currency\":\"USD\"}}},{\"id\":\"itemMeta\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${category} · ${date}\"}}},{\"id\":\"itemFlag\",\"component\":\"Text\",\"text\":{\"@path\":\"flag\"}},{\"id\":\"itemActions\",\"component\":\"Row\",\"justify\":\"start\",\"children\":[\"approveBtn\",\"rejectBtn\"]},{\"id\":\"approveBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"approveTxt\",\"action\":{\"event\":{\"name\":\"approve_expense\",\"context\":{\"id\":{\"@path\":\"id\"}}}}},{\"id\":\"approveTxt\",\"component\":\"Text\",\"text\":\"Approve\"},{\"id\":\"rejectBtn\",\"component\":\"Button\",\"child\":\"rejectTxt\",\"action\":{\"event\":{\"name\":\"reject_expense\",\"context\":{\"id\":{\"@path\":\"id\"}}}}},{\"id\":\"rejectTxt\",\"component\":\"Text\",\"text\":\"Reject\"},{\"id\":\"itemDiv\",\"component\":\"Divider\"},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"totalRow\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"align\":\"center\",\"children\":[\"totalLabel\",\"totalValue\"]},{\"id\":\"totalLabel\",\"component\":\"Text\",\"text\":\"Approved total\"},{\"id\":\"totalValue\",\"component\":\"Text\",\"text\":{\"@call\":\"formatCurrency\",\"args\":{\"value\":{\"@path\":\"/approvedTotal\"},\"currency\":\"USD\"}}},{\"id\":\"submitBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"submitTxt\",\"action\":{\"event\":{\"name\":\"submit_approvals\",\"context\":{\"reportId\":\"report-1\"}}}},{\"id\":\"submitTxt\",\"component\":\"Text\",\"text\":\"Submit\"}],\"dataModel\":{\"approvedTotal\":0,\"expenses\":[{\"id\":\"e1\",\"merchant\":\"Delta Air Lines\",\"category\":\"Travel\",\"date\":\"Mar 3, 2025\",\"amount\":412.8,\"flag\":\"Receipt attached\"},{\"id\":\"e2\",\"merchant\":\"Marriott Downtown\",\"category\":\"Lodging\",\"date\":\"Mar 4, 2025\",\"amount\":289.5,\"flag\":\"Receipt attached\"},{\"id\":\"e3\",\"merchant\":\"Uber\",\"category\":\"Transport\",\"date\":\"Mar 5, 2025\",\"amount\":36.4,\"flag\":\"⚠ Missing receipt\"},{\"id\":\"e4\",\"merchant\":\"The Capital Grille\",\"category\":\"Meals\",\"date\":\"Mar 5, 2025\",\"amount\":124.15,\"flag\":\"Receipt attached\"}]}}}","usage":{"input_tokens":21148,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1275,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1228,"totalMs":7387}}
+{"tMs":1228,"delta":"{\"version\":\"1.0"}
+{"tMs":1519,"delta":"\",\"createSurface\":{\""}
+{"tMs":1519,"delta":"surfaceId\":\"exp"}
+{"tMs":1519,"delta":"enses\",\"catalogId\":"}
+{"tMs":1519,"delta":"\"https://a2ui."}
+{"tMs":1519,"delta":"org/specification/v1_"}
+{"tMs":1519,"delta":"0/catalogs/bas"}
+{"tMs":1519,"delta":"ic/catalog.json\",\""}
+{"tMs":1519,"delta":"components"}
+{"tMs":1519,"delta":"\":[{\"id\":\"root"}
+{"tMs":1549,"delta":"\",\"component\":\"Card\",\"child"}
+{"tMs":1580,"delta":"\":\"main"}
+{"tMs":1614,"delta":"\"},{\"id\":\"main"}
+{"tMs":1823,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1823,"delta":"\":[\"title\",\"s"}
+{"tMs":1823,"delta":"ub\",\"div"}
+{"tMs":1823,"delta":"1\",\"list\",\"div2\",\"tot"}
+{"tMs":1823,"delta":"alRow\",\"subm"}
+{"tMs":1823,"delta":"itBtn\"]},{"}
+{"tMs":1846,"delta":"\"id\":\"title\",\"component\":"}
+{"tMs":1880,"delta":"\"Text\",\"text\":\""}
+{"tMs":1912,"delta":"Expense Report"}
+{"tMs":1944,"delta":" Approval"}
+{"tMs":1978,"delta":"\"},{\"id\":\"s"}
+{"tMs":2012,"delta":"ub\",\"component\":\"Text\",\""}
+{"tMs":2124,"delta":"variant\":\"caption\",\"text"}
+{"tMs":2124,"delta":"\":\"4 expenses aw"}
+{"tMs":2124,"delta":"aiting your"}
+{"tMs":2147,"delta":" approval\"},{\"id\":"}
+{"tMs":2181,"delta":"\"div1\",\"component\":\""}
+{"tMs":2213,"delta":"Divider\"},{\"id\":"}
+{"tMs":2245,"delta":"\"list\",\"component"}
+{"tMs":2282,"delta":"\":\"List\",\"dire"}
+{"tMs":2315,"delta":"ction\":\"vertical\",\"children"}
+{"tMs":2345,"delta":"\":{\"path\":\"/exp"}
+{"tMs":2379,"delta":"enses\",\"componentId\":\""}
+{"tMs":2411,"delta":"item"}
+{"tMs":2445,"delta":"\"}},{\"id\":\""}
+{"tMs":2479,"delta":"item\",\"component\":\"Column\",\""}
+{"tMs":2512,"delta":"children\":[\"it"}
+{"tMs":2544,"delta":"emT"}
+{"tMs":2577,"delta":"op\",\"itemM"}
+{"tMs":2611,"delta":"eta\",\"itemFlag"}
+{"tMs":2644,"delta":"\",\"itemActions\",\""}
+{"tMs":2678,"delta":"itemDiv\"]},"}
+{"tMs":2711,"delta":"{\"id\":\"itemT"}
+{"tMs":2744,"delta":"op\",\"component\":\"Row\",\""}
+{"tMs":2778,"delta":"justify\":\"sp"}
+{"tMs":2811,"delta":"aceBetween\",\"align\":"}
+{"tMs":2845,"delta":"\"center\",\"children\":[\"merch"}
+{"tMs":2882,"delta":"ant\",\"amount\"]},{"}
+{"tMs":2912,"delta":"\"id\":\"merchant\",\""}
+{"tMs":2945,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":2979,"delta":"{\"@path\":\"merch"}
+{"tMs":3012,"delta":"ant\"}},{\"id\":"}
+{"tMs":3045,"delta":"\"amount\",\"component\":\""}
+{"tMs":3079,"delta":"Text\",\"text\":{\"@call"}
+{"tMs":3112,"delta":"\":\"formatCurrency"}
+{"tMs":3146,"delta":"\",\"args\":{\"value\":{"}
+{"tMs":3179,"delta":"\"@path\":\"amount\""}
+{"tMs":3213,"delta":"},\"currency\":\"USD"}
+{"tMs":3246,"delta":"\"}}},{\"id\":"}
+{"tMs":3280,"delta":"\"itemMeta\",\"component"}
+{"tMs":3313,"delta":"\":\"Text\",\"variant\":"}
+{"tMs":3347,"delta":"\"caption\",\"text\":{\""}
+{"tMs":3380,"delta":"@call\":\"formatString\",\""}
+{"tMs":3414,"delta":"args\":{\"value\":\""}
+{"tMs":3447,"delta":"${category} · ${date}"}
+{"tMs":3480,"delta":"\"}}},{\"id\":"}
+{"tMs":3514,"delta":"\"itemFlag\",\"component"}
+{"tMs":3547,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":3580,"delta":"\"@path\":\"fl"}
+{"tMs":3614,"delta":"ag\"}"}
+{"tMs":3647,"delta":"},{\"id\":\"item"}
+{"tMs":3680,"delta":"Actions\",\"component\":\"Row"}
+{"tMs":3713,"delta":"\",\"justify\":\"start"}
+{"tMs":3747,"delta":"\",\"children\":[\"approveBt"}
+{"tMs":3780,"delta":"n\",\"rejectBtn"}
+{"tMs":3813,"delta":"\""}
+{"tMs":3850,"delta":"]"}
+{"tMs":3886,"delta":"},{\"id\":\"approve"}
+{"tMs":3918,"delta":"Btn\",\"component\":\""}
+{"tMs":3954,"delta":"Button\",\"variant\":\"primary"}
+{"tMs":3979,"delta":"\",\"child\":\""}
+{"tMs":4012,"delta":"approveT"}
+{"tMs":4046,"delta":"xt\",\"action\":{\"event"}
+{"tMs":4081,"delta":"\":{\"name\":\"approve"}
+{"tMs":4114,"delta":"_expense\",\"context\":{\""}
+{"tMs":4146,"delta":"id\":{\"@path\":\""}
+{"tMs":4179,"delta":"id\"}}}}"}
+{"tMs":4213,"delta":"},{\"id\":\"appro"}
+{"tMs":4246,"delta":"veTxt\",\"component\":\""}
+{"tMs":4280,"delta":"Text\",\"text\":\"Appro"}
+{"tMs":4313,"delta":"ve\"},{\"id\":\""}
+{"tMs":4346,"delta":"rejectBtn\",\"component"}
+{"tMs":4379,"delta":"\":\"Button\",\"child\":\""}
+{"tMs":4414,"delta":"rejectTxt\",\"action"}
+{"tMs":4447,"delta":"\":{\"event\":{\"name"}
+{"tMs":4483,"delta":"\":\"reject_expense\",\""}
+{"tMs":4513,"delta":"context\":{\"id\":{\""}
+{"tMs":4547,"delta":"@path\":\"id\"}}"}
+{"tMs":4580,"delta":"}}},{\"id\":\""}
+{"tMs":4613,"delta":"rejectTxt\",\"component"}
+{"tMs":4647,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":4680,"delta":"Reject\"},{\"id"}
+{"tMs":4714,"delta":"\":\"itemDiv\",\""}
+{"tMs":4747,"delta":"component\":\"Divider\"},"}
+{"tMs":4780,"delta":"{\"id\":\"div2\",\""}
+{"tMs":4815,"delta":"component\":\"Divider\"},"}
+{"tMs":4847,"delta":"{\"id\":\"totalR"}
+{"tMs":4881,"delta":"ow\",\"component\":\"Row\",\""}
+{"tMs":4914,"delta":"justify\":\"spaceB"}
+{"tMs":4947,"delta":"etween\",\"align\":\"center\",\""}
+{"tMs":4981,"delta":"children\":[\"totalLabel"}
+{"tMs":5014,"delta":"\",\"totalVal"}
+{"tMs":5048,"delta":"ue\"]},{\"id\":"}
+{"tMs":5080,"delta":"\"totalLabel\",\"component"}
+{"tMs":5114,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":5148,"delta":"Approved total\"},{\""}
+{"tMs":5181,"delta":"id\":\"totalValue\",\""}
+{"tMs":5215,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":5248,"delta":"{\"@call\":\"format"}
+{"tMs":5281,"delta":"Currency\",\"args\":{"}
+{"tMs":5318,"delta":"\"value\":{\"@path\":"}
+{"tMs":5348,"delta":"\"/approvedTotal"}
+{"tMs":5381,"delta":"\"},\"currency\":\"US"}
+{"tMs":5414,"delta":"D\"}}},{\"id"}
+{"tMs":5448,"delta":"\":\"submitBtn\",\""}
+{"tMs":5481,"delta":"component\":\"Button\",\"variant"}
+{"tMs":5514,"delta":"\":\"primary\",\"child\":\""}
+{"tMs":5548,"delta":"submitTxt\",\"action\":"}
+{"tMs":5581,"delta":"{\"event\":{\"name\":"}
+{"tMs":5614,"delta":"\"submit_appro"}
+{"tMs":5648,"delta":"vals\",\"context\":{\"re"}
+{"tMs":5681,"delta":"portId\":\""}
+{"tMs":5714,"delta":"report"}
+{"tMs":5748,"delta":"-1\"}}}},{"}
+{"tMs":5781,"delta":"\"id\":\"submitTx"}
+{"tMs":5814,"delta":"t\",\"component\":\"Text\",\""}
+{"tMs":5848,"delta":"text\":\"Submit\""}
+{"tMs":5881,"delta":"}],\"dataModel\":"}
+{"tMs":5914,"delta":"{\"approvedTotal"}
+{"tMs":5947,"delta":"\":0,\"expenses\":"}
+{"tMs":5981,"delta":"[{\"id\":\"e"}
+{"tMs":6014,"delta":"1\",\"merchant\":\""}
+{"tMs":6047,"delta":"Delta Air"}
+{"tMs":6081,"delta":" Lines\",\"category\":\""}
+{"tMs":6114,"delta":"Travel\",\"date\":\"M"}
+{"tMs":6152,"delta":"ar 3"}
+{"tMs":6181,"delta":", 2025\",\"amount\":"}
+{"tMs":6214,"delta":"412.8"}
+{"tMs":6247,"delta":",\"flag\":\""}
+{"tMs":6282,"delta":"Receipt att"}
+{"tMs":6314,"delta":"ached\"},{\"id\":\""}
+{"tMs":6347,"delta":"e2\",\"merchant\":\""}
+{"tMs":6380,"delta":"Marriott Down"}
+{"tMs":6414,"delta":"town\",\"category\":\"L"}
+{"tMs":6447,"delta":"odging\",\"date\":\"M"}
+{"tMs":6480,"delta":"ar 4, 2025\",\""}
+{"tMs":6514,"delta":"amount\":289"}
+{"tMs":6547,"delta":".5"}
+{"tMs":6580,"delta":",\"flag\":\"Rece"}
+{"tMs":6614,"delta":"ipt attached\"},{\""}
+{"tMs":6651,"delta":"id\":\"e3\",\"merch"}
+{"tMs":6680,"delta":"ant\":\"Uber\",\""}
+{"tMs":6714,"delta":"category\":\"Trans"}
+{"tMs":6747,"delta":"port\",\"date\":\"Mar"}
+{"tMs":6780,"delta":" 5, 2025\",\"am"}
+{"tMs":6814,"delta":"ount\":36"}
+{"tMs":6847,"delta":".4,\"flag\":\""}
+{"tMs":6914,"delta":"⚠ Missing receip"}
+{"tMs":6950,"delta":"t\"},{\"id\":\""}
+{"tMs":6980,"delta":"e4\",\"merchant\":\""}
+{"tMs":7013,"delta":"The"}
+{"tMs":7047,"delta":" Cap"}
+{"tMs":7080,"delta":"ital Gr"}
+{"tMs":7113,"delta":"ille"}
+{"tMs":7146,"delta":"\",\"category\":\"Meals\",\""}
+{"tMs":7179,"delta":"date\":\"Mar 5"}
+{"tMs":7213,"delta":", 2025\",\"amount\":"}
+{"tMs":7249,"delta":"124.15"}
+{"tMs":7283,"delta":",\"flag\":\"Rece"}
+{"tMs":7313,"delta":"ipt attached\"}]}"}
+{"tMs":7346,"delta":"}}"}

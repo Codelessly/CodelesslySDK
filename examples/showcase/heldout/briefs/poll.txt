@@ -1,0 +1,1 @@
+Run a quick team poll in a card: "Where should we go for lunch on Friday?" with four options. Before I vote I only see the options; after I vote I see each option's share as a bar with the percentage, my choice marked, and the total number of votes.

@@ -1,0 +1,62 @@
+{"meta":{"ui":"poll","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Run a quick team poll in a card: \"Where should we go for lunch on Friday?\" with four options. Before I vote I only see the options; after I vote I see each option's share as a bar with the percentage, my choice marked, and the total number of votes.","text":"Card w:390 gap:12\n  state voted=false\n  state choice=\"\"\n  state votes=[{\"name\":\"Taqueria\",\"n\":8},{\"name\":\"Ramen bar\",\"n\":11},{\"name\":\"Salad place\",\"n\":5},{\"name\":\"Pizza\",\"n\":9}]\n  Text.title \"Where should we go for lunch on Friday?\"\n  if !voted\n    Column gap:8\n      each o in votes\n        Button.outline \"{o.name}\" -> choice=o.name; votes=updateWhere(votes,v=>v.name==o.name,v=>with(v,\"n\",v.n+1)); voted=true\n  if voted\n    Column gap:10\n      each o in votes\n        Column gap:4\n          Row between\n            Text.strong \"{o.name}{choice==o.name ? ' ✓ your vote' : ''}\"\n            Text.strong \"{round(o.n/sum(votes,x=>x.n)*100,0)}%\"\n          Progress =o.n/sum(votes,x=>x.n)\n      Text.muted \"{sum(votes,x=>x.n)} votes in total\"","usage":{"input_tokens":7985,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":360,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":790,"totalMs":2859}}
+{"tMs":790,"delta":"Card w:"}
+{"tMs":1097,"delta":"390 gap:12"}
+{"tMs":1097,"delta":"\n  state"}
+{"tMs":1097,"delta":" vo"}
+{"tMs":1097,"delta":"ted=false\n  state cho"}
+{"tMs":1097,"delta":"ice=\"\"\n  state votes"}
+{"tMs":1097,"delta":"=[{\"name\":\""}
+{"tMs":1097,"delta":"Ta"}
+{"tMs":1097,"delta":"q"}
+{"tMs":1097,"delta":"ueria\",\"n"}
+{"tMs":1118,"delta":"\":8"}
+{"tMs":1154,"delta":"},{\"name\":\""}
+{"tMs":1187,"delta":"Ramen b"}
+{"tMs":1425,"delta":"ar\",\"n\":11"}
+{"tMs":1425,"delta":"},{\"name\":\"Sal"}
+{"tMs":1425,"delta":"ad place"}
+{"tMs":1425,"delta":"\",\"n\":5"}
+{"tMs":1425,"delta":"},{\"name\":\"P"}
+{"tMs":1425,"delta":"izza\",\""}
+{"tMs":1425,"delta":"n\":9"}
+{"tMs":1455,"delta":"}]\n  Text.title"}
+{"tMs":1489,"delta":" \"Where should we go for l"}
+{"tMs":1523,"delta":"unch on Friday?\""}
+{"tMs":1557,"delta":"\n  if !voted\n    "}
+{"tMs":1591,"delta":"Column gap:8\n      "}
+{"tMs":1786,"delta":"each"}
+{"tMs":1786,"delta":" o in votes"}
+{"tMs":1786,"delta":"\n        Button"}
+{"tMs":1786,"delta":".outline \"{"}
+{"tMs":1786,"delta":"o.name}\" -> cho"}
+{"tMs":1791,"delta":"ice=o.name; vot"}
+{"tMs":1825,"delta":"es=updateWhere("}
+{"tMs":1859,"delta":"votes,v=>v."}
+{"tMs":1892,"delta":"name==o.name,v="}
+{"tMs":1926,"delta":">with(v,\"n\","}
+{"tMs":1960,"delta":"v.n+1)); vo"}
+{"tMs":1994,"delta":"ted=true\n  if voted"}
+{"tMs":2084,"delta":"\n    Column gap:10"}
+{"tMs":2084,"delta":"\n      each o in votes"}
+{"tMs":2093,"delta":"\n        Column"}
+{"tMs":2127,"delta":" gap:4"}
+{"tMs":2160,"delta":"\n          Row between"}
+{"tMs":2194,"delta":"\n            Text.str"}
+{"tMs":2227,"delta":"ong \"{o.name}{"}
+{"tMs":2261,"delta":"choice==o.name ?"}
+{"tMs":2294,"delta":" ' ✓ your"}
+{"tMs":2327,"delta":" v"}
+{"tMs":2360,"delta":"ote' : ''}\""}
+{"tMs":2394,"delta":"\n            Text.str"}
+{"tMs":2853,"delta":"ong \"{round(o.n"}
+{"tMs":2853,"delta":"/sum(votes,x"}
+{"tMs":2853,"delta":"=>x.n)*100"}
+{"tMs":2853,"delta":",0)}%\"\n          "}
+{"tMs":2853,"delta":"Progress ="}
+{"tMs":2853,"delta":"o.n/sum(vot"}
+{"tMs":2853,"delta":"es,x=>x.n"}
+{"tMs":2853,"delta":")\n      Text.muted"}
+{"tMs":2853,"delta":" \"{sum(votes,"}
+{"tMs":2853,"delta":"x=>x.n)}"}
+{"tMs":2853,"delta":" vot"}
+{"tMs":2854,"delta":"es in total\""}

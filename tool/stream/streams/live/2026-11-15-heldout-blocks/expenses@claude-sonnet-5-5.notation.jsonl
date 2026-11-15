@@ -1,0 +1,141 @@
+{"meta":{"ui":"expenses","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"I have four expenses waiting for my approval from one report. Show them in a card with merchant, category, date and amount, flag the one missing a receipt, let me approve or reject each, and show the approved total and a submit button.","text":"state items=[{\"id\":1,\"merchant\":\"Delta Airlines\",\"cat\":\"Travel\",\"date\":\"Mar 3\",\"amt\":412.5,\"receipt\":true,\"status\":\"pending\"},{\"id\":2,\"merchant\":\"Blue Bottle Coffee\",\"cat\":\"Meals\",\"date\":\"Mar 4\",\"amt\":18.75,\"receipt\":true,\"status\":\"pending\"},{\"id\":3,\"merchant\":\"Marriott Downtown\",\"cat\":\"Lodging\",\"date\":\"Mar 5\",\"amt\":289,\"receipt\":false,\"status\":\"pending\"},{\"id\":4,\"merchant\":\"Uber\",\"cat\":\"Transport\",\"date\":\"Mar 6\",\"amt\":34.2,\"receipt\":true,\"status\":\"pending\"}]\nstate submitted=false\nChatCard \"Expense approvals\" \"Report #2041 · 4 expenses\" icon:\"receipt_long\" status:\"{count(items,x=>x.status=='pending')} pending\" tone:accent w:390\n  if !submitted\n    SectionLabel \"Expenses\" \"{length(items)} items\"\n    each e in items\n      Box pad:12 radius:12 gap:8 fill:=e.status==\"approved\"?\"#FFE8F5EC\":(e.status==\"rejected\"?\"#FFFBE9E9\":\"#FFF6F7F9\")\n        Row between middle\n          Column gap:2\n            Text.strong \"{e.merchant}\"\n            Text.caption \"{e.cat} · {e.date}\"\n          Text.strong \"{money(e.amt,'$',2)}\"\n        if !e.receipt\n          Callout \"Missing receipt\" \"Attach a receipt before approving.\" tone:warn icon:\"warning\"\n        Row gap:10\n          ActionButton \"Approve\" tone:good enabled:=e.receipt&&e.status!=\"approved\" -> items=updateWhere(items,x=>x.id==e.id,x=>with(x,\"status\",\"approved\"))\n          ActionButton \"Reject\" tone:danger enabled:=e.status!=\"rejected\" -> items=updateWhere(items,x=>x.id==e.id,x=>with(x,\"status\",\"rejected\"))\n    TotalBar \"Approved total\" \"{count(items,x=>x.status=='approved')} of {length(items)} approved\" amount:=money(sum(filter(items,x=>x.status==\"approved\"),x=>x.amt),\"$\",2) cta:\"Submit\" enabled:=count(items,x=>x.status==\"pending\")==0 -> submitted=true; emit submit\n  if submitted\n    Receipt \"Submitted\" \"Your decisions on report #2041 were sent.\" code:\"#2041\" codeLabel:\"Report\" tone:good","usage":{"input_tokens":7975,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":881,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":899,"totalMs":5561}}
+{"tMs":899,"delta":"state"}
+{"tMs":1213,"delta":" items"}
+{"tMs":1213,"delta":"=[{\"id\":1"}
+{"tMs":1213,"delta":",\"merch"}
+{"tMs":1213,"delta":"ant\":\"Delta Air"}
+{"tMs":1213,"delta":"lines\",\"c"}
+{"tMs":1213,"delta":"at\":\"Trav"}
+{"tMs":1213,"delta":"el\",\"date\":\""}
+{"tMs":1213,"delta":"Mar 3"}
+{"tMs":1220,"delta":"\",\"amt\":412"}
+{"tMs":1254,"delta":".5"}
+{"tMs":1298,"delta":",\"receipt\":true,"}
+{"tMs":1321,"delta":"\"status"}
+{"tMs":1539,"delta":"\":\"pending\"},{\""}
+{"tMs":1539,"delta":"id\":2,\"merchant"}
+{"tMs":1540,"delta":"\":\"Blue B"}
+{"tMs":1540,"delta":"ottle Co"}
+{"tMs":1540,"delta":"ffee\",\"cat\":\""}
+{"tMs":1540,"delta":"Meals\",\"date\":\"M"}
+{"tMs":1554,"delta":"ar 4\",\"amt\":18"}
+{"tMs":1588,"delta":".75,\"receipt\":"}
+{"tMs":1622,"delta":"true,\"status\":\"pending"}
+{"tMs":1655,"delta":"\"},{\"id\":3,"}
+{"tMs":1689,"delta":"\"merchant\":\"Mar"}
+{"tMs":1722,"delta":"riott Down"}
+{"tMs":1860,"delta":"town\",\"cat\":\""}
+{"tMs":1860,"delta":"Lodging\",\"date\":\""}
+{"tMs":1860,"delta":"Mar 5\",\"amt\":"}
+{"tMs":1860,"delta":"289,\"receipt\":false"}
+{"tMs":1890,"delta":",\"status\":\"pending\""}
+{"tMs":1922,"delta":"},{\"id\":4,\""}
+{"tMs":1955,"delta":"merchant\":\"Uber"}
+{"tMs":1988,"delta":"\",\""}
+{"tMs":2023,"delta":"cat\":\"Transport\",\""}
+{"tMs":2056,"delta":"date\":\"Mar 6"}
+{"tMs":2090,"delta":"\",\"amt\":34."}
+{"tMs":2122,"delta":"2,\"receipt\":true"}
+{"tMs":2182,"delta":",\"status\":\"pending\""}
+{"tMs":2189,"delta":"}]\nstate submitted="}
+{"tMs":2222,"delta":"false\nChatCard \""}
+{"tMs":2256,"delta":"Expense appro"}
+{"tMs":2289,"delta":"vals\" \"Report"}
+{"tMs":2322,"delta":" #2"}
+{"tMs":2356,"delta":"041"}
+{"tMs":2389,"delta":" · 4 expenses"}
+{"tMs":2422,"delta":"\" icon:\"rece"}
+{"tMs":2455,"delta":"ipt_"}
+{"tMs":2489,"delta":"long\" status:\"{"}
+{"tMs":2522,"delta":"count(items,x"}
+{"tMs":2555,"delta":"=>x.status=='p"}
+{"tMs":2589,"delta":"ending')} pending\" tone"}
+{"tMs":2622,"delta":":accent w:390\n  "}
+{"tMs":2655,"delta":"if !submitted\n    S"}
+{"tMs":2691,"delta":"ectionLabel \"Exp"}
+{"tMs":2722,"delta":"enses\" \"{length(items"}
+{"tMs":2755,"delta":")} items"}
+{"tMs":2789,"delta":"\"\n    each e"}
+{"tMs":2824,"delta":" in items\n      Box"}
+{"tMs":2855,"delta":" p"}
+{"tMs":2889,"delta":"ad:12 rad"}
+{"tMs":2922,"delta":"ius:12"}
+{"tMs":2955,"delta":" gap:8"}
+{"tMs":2988,"delta":" fill:="}
+{"tMs":3022,"delta":"e"}
+{"tMs":3055,"delta":".status==\"approved\""}
+{"tMs":3088,"delta":"?\"#FFE"}
+{"tMs":3122,"delta":"8"}
+{"tMs":3155,"delta":"F5E"}
+{"tMs":3189,"delta":"C"}
+{"tMs":3222,"delta":"\":("}
+{"tMs":3255,"delta":"e.status==\"rejected"}
+{"tMs":3289,"delta":"\"?\"#FFFB"}
+{"tMs":3322,"delta":"E9"}
+{"tMs":3355,"delta":"E9\":\"#FFF"}
+{"tMs":3388,"delta":"6"}
+{"tMs":3422,"delta":"F7F9\")\n        "}
+{"tMs":3455,"delta":"Row between midd"}
+{"tMs":3488,"delta":"le\n          Column"}
+{"tMs":3522,"delta":" gap:2"}
+{"tMs":3555,"delta":"\n            Text.strong \""}
+{"tMs":3588,"delta":"{e.merchant}\""}
+{"tMs":3622,"delta":"\n            Text.caption \""}
+{"tMs":3656,"delta":"{e.cat} · {"}
+{"tMs":3689,"delta":"e.date}\"\n          "}
+{"tMs":3722,"delta":"Text.strong \"{money"}
+{"tMs":3756,"delta":"(e.amt,'$"}
+{"tMs":3788,"delta":"',2)}\"\n        if"}
+{"tMs":3822,"delta":" !e.receipt\n          "}
+{"tMs":3855,"delta":"Callout \"Missing rece"}
+{"tMs":3888,"delta":"ipt\" \""}
+{"tMs":3922,"delta":"Attach a receipt before appro"}
+{"tMs":3955,"delta":"ving.\" tone:war"}
+{"tMs":3988,"delta":"n icon:\"warning\""}
+{"tMs":4022,"delta":"\n        Row gap:10"}
+{"tMs":4055,"delta":"\n          ActionButton \""}
+{"tMs":4096,"delta":"Approve\" tone:good"}
+{"tMs":4122,"delta":" en"}
+{"tMs":4155,"delta":"abled:=e.receip"}
+{"tMs":4188,"delta":"t&"}
+{"tMs":4222,"delta":"&e.status!=\"approved"}
+{"tMs":4255,"delta":"\" -> items=updateW"}
+{"tMs":4289,"delta":"here(items,x=>"}
+{"tMs":4322,"delta":"x.id==e.id,"}
+{"tMs":4355,"delta":"x=>with(x,\""}
+{"tMs":4389,"delta":"status\",\"approved\"))\n          "}
+{"tMs":4422,"delta":"ActionButton \"Re"}
+{"tMs":4455,"delta":"ject\" tone:dan"}
+{"tMs":4489,"delta":"ger enabled:=e."}
+{"tMs":4523,"delta":"status!=\"rejected\" -"}
+{"tMs":4555,"delta":"> items=updateWhere"}
+{"tMs":4589,"delta":"(items,x=>x."}
+{"tMs":4622,"delta":"id==e.id,x="}
+{"tMs":4660,"delta":">with(x,\"status\",\""}
+{"tMs":4689,"delta":"rejected\"))\n    T"}
+{"tMs":4724,"delta":"otalBar \"Approved"}
+{"tMs":4755,"delta":" total\" \"{count(items,"}
+{"tMs":4789,"delta":"x=>x.status=='"}
+{"tMs":4822,"delta":"approved')} of {"}
+{"tMs":4855,"delta":"length(items)} approved\""}
+{"tMs":4889,"delta":" amount:=money"}
+{"tMs":4922,"delta":"(sum(fil"}
+{"tMs":4955,"delta":"ter(items,x=>x"}
+{"tMs":4989,"delta":".status==\"approved\"),"}
+{"tMs":5022,"delta":"x=>x.amt),"}
+{"tMs":5057,"delta":"\"$\",2) cta:"}
+{"tMs":5089,"delta":"\"Submit\" enabled"}
+{"tMs":5122,"delta":":=count(items,x="}
+{"tMs":5156,"delta":">x.status==\"pending"}
+{"tMs":5189,"delta":"\")==0 -> submit"}
+{"tMs":5242,"delta":"ted=true; emit submit"}
+{"tMs":5255,"delta":"\n  if submitted\n    "}
+{"tMs":5289,"delta":"Receipt \"Subm"}
+{"tMs":5322,"delta":"itted\" \"Your"}
+{"tMs":5356,"delta":" dec"}
+{"tMs":5389,"delta":"isions on report #2041 "}
+{"tMs":5422,"delta":"were sent.\""}
+{"tMs":5456,"delta":" code:\"#"}
+{"tMs":5489,"delta":"2041\" cod"}
+{"tMs":5522,"delta":"eLabel:\"Report"}
+{"tMs":5556,"delta":"\" tone:good"}

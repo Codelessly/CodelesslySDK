@@ -1,0 +1,87 @@
+{"meta":{"ui":"meeting_slot","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Help me schedule a 30 minute meeting with three colleagues next week: let me pick a day, then one of the free time slots that day (some are taken), show who is attending, and confirm. After confirming the card shows the booked time.","text":"ChatCard \"Schedule meeting\" \"30 minutes with your team\" icon:\"event\" status:\"Draft\" tone:accent w:390\n  state day=\"\"\n  state slot=\"\"\n  state done=false\n  if !done\n    SectionLabel \"Day\" \"Next week\"\n    DayPicker =day days:[\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"]\n    if day!=\"\"\n      SectionLabel \"Free time slots\" \"30 min\"\n      ChoiceChips =slot options:[\"09:00\",\"09:30\",\"10:00\",\"10:30\",\"11:00\",\"13:00\",\"13:30\",\"14:00\",\"15:00\"] disabled:[\"09:30\",\"10:30\",\"13:00\",\"15:00\"] columns:3\n    SectionLabel \"Attendees\" \"3 colleagues\"\n    Details rows:=[[\"Maya Chen\",\"Accepted\"],[\"Luis Ortega\",\"Pending\"],[\"Priya Nair\",\"Pending\"]] icons:[\"person\",\"person\",\"person\"]\n    TotalBar \"Meeting time\" \"30 minutes, 3 colleagues\" amount:=(day!=\"\"&&slot!=\"\")?(day+\", \"+slot):\"Pick a time\" cta:\"Confirm\" enabled:=day!=\"\"&&slot!=\"\" -> done=true; toast \"Meeting booked\"\n  if done\n    Receipt \"Meeting booked\" \"30 minutes with Maya, Luis and Priya. Invitations are sent.\" code:=day+\", \"+slot codeLabel:\"Booked time\" tone:good icon:\"check\"","usage":{"input_tokens":7979,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":500,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":800,"totalMs":3664}}
+{"tMs":800,"delta":"ChatCard \""}
+{"tMs":1108,"delta":"Schedule me"}
+{"tMs":1108,"delta":"eting\" \"30"}
+{"tMs":1108,"delta":" minutes with"}
+{"tMs":1108,"delta":" your"}
+{"tMs":1108,"delta":" team\" icon:\"event"}
+{"tMs":1108,"delta":"\""}
+{"tMs":1108,"delta":" status:\""}
+{"tMs":1108,"delta":"Dra"}
+{"tMs":1108,"delta":"ft\" tone:acc"}
+{"tMs":1115,"delta":"ent w:390\n  state"}
+{"tMs":1147,"delta":" day=\"\""}
+{"tMs":1183,"delta":"\n  state slot=\"\""}
+{"tMs":1428,"delta":"\n  state done"}
+{"tMs":1428,"delta":"=false\n  if !"}
+{"tMs":1428,"delta":"done\n    SectionLab"}
+{"tMs":1428,"delta":"el \"Day\""}
+{"tMs":1428,"delta":" \"Next week\"\n    D"}
+{"tMs":1428,"delta":"ayPicker =day days:"}
+{"tMs":1428,"delta":"[\"Mon 16"}
+{"tMs":1456,"delta":"\",\"Tue 17\",\""}
+{"tMs":1490,"delta":"Wed 18\",\"Thu"}
+{"tMs":1525,"delta":" 19\",\"Fri 20"}
+{"tMs":1558,"delta":"\"]\n    if day!="}
+{"tMs":1593,"delta":"\"\"\n      SectionLab"}
+{"tMs":1757,"delta":"el \"Free time"}
+{"tMs":1757,"delta":" slots\" \"30"}
+{"tMs":1757,"delta":" min\"\n      Cho"}
+{"tMs":1757,"delta":"iceChips =slot options"}
+{"tMs":1760,"delta":":[\"09:00\",\"09"}
+{"tMs":1794,"delta":":30\",\"10:00\",\"10"}
+{"tMs":1827,"delta":":30\",\"11:00\",\"13"}
+{"tMs":1860,"delta":":00\",\"13"}
+{"tMs":1894,"delta":":30\",\"14:00\",\"15"}
+{"tMs":1927,"delta":":00\""}
+{"tMs":1961,"delta":"] disabled:[\"09:"}
+{"tMs":1994,"delta":"30\",\"10:30\",\"13"}
+{"tMs":2076,"delta":":00\",\"15"}
+{"tMs":2076,"delta":":00\"] columns:3"}
+{"tMs":2094,"delta":"\n    SectionLabel"}
+{"tMs":2128,"delta":" \"Attendees\""}
+{"tMs":2161,"delta":" \"3 "}
+{"tMs":2194,"delta":"colleagues\"\n    "}
+{"tMs":2228,"delta":"Details rows:="}
+{"tMs":2261,"delta":"[[\""}
+{"tMs":2293,"delta":"Ma"}
+{"tMs":2326,"delta":"ya"}
+{"tMs":2359,"delta":" Chen\",\"Acc"}
+{"tMs":2393,"delta":"epted\"],[\"Lu"}
+{"tMs":2426,"delta":"is Ortega"}
+{"tMs":2460,"delta":"\",\"Pending\"],[\""}
+{"tMs":2492,"delta":"Pri"}
+{"tMs":2526,"delta":"ya Nair\",\"Pending"}
+{"tMs":2559,"delta":"\"]"}
+{"tMs":2593,"delta":"] icons:[\"person"}
+{"tMs":2626,"delta":"\",\"person\",\"person\"]\n    "}
+{"tMs":2660,"delta":"TotalBar \"Me"}
+{"tMs":2693,"delta":"eting time\" \"30"}
+{"tMs":2726,"delta":" minutes,"}
+{"tMs":2761,"delta":" 3 col"}
+{"tMs":2793,"delta":"leagues\" amount:="}
+{"tMs":2826,"delta":"(day!="}
+{"tMs":2860,"delta":"\"\"&&slot!=\""}
+{"tMs":2892,"delta":"\")?("}
+{"tMs":2926,"delta":"day+\","}
+{"tMs":2960,"delta":" \"+slot):\"P"}
+{"tMs":2993,"delta":"ick a time\" cta:\""}
+{"tMs":3026,"delta":"Confirm\" en"}
+{"tMs":3060,"delta":"abled:=day!=\"\""}
+{"tMs":3093,"delta":"&&slot!=\""}
+{"tMs":3131,"delta":"\" -> done=true;"}
+{"tMs":3159,"delta":" to"}
+{"tMs":3193,"delta":"ast \"Me"}
+{"tMs":3227,"delta":"eting booked\"\n  if"}
+{"tMs":3261,"delta":" done\n    Receipt \""}
+{"tMs":3293,"delta":"Meeting booked\" \""}
+{"tMs":3327,"delta":"30 minutes with"}
+{"tMs":3360,"delta":" Maya, Luis and"}
+{"tMs":3393,"delta":" Priya."}
+{"tMs":3427,"delta":" Invitations are"}
+{"tMs":3460,"delta":" sent.\" code:="}
+{"tMs":3493,"delta":"day+\", \"+"}
+{"tMs":3527,"delta":"slot codeLabel:"}
+{"tMs":3560,"delta":"\"Booked time\" tone"}
+{"tMs":3593,"delta":":good ic"}
+{"tMs":3627,"delta":"on:\"check\""}

@@ -1,0 +1,1 @@
+Summarize this morning's run as a card: distance, time, average pace and calories, a chart of pace per kilometer, the splits as a small table, how it compares with my last run, and a share button.

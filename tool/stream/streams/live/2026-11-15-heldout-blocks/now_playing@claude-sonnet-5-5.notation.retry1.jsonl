@@ -1,0 +1,75 @@
+{"meta":{"ui":"now_playing","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show what is playing right now as an inline music card: the track, artist and album art, a progress bar with elapsed and remaining time, previous, play or pause and next controls, a like button, and the next three tracks in the queue.","text":"state playing=true\nstate liked=false\nstate elapsed=84\nstate total=215\nstate queue=[{\"t\":\"Midnight City\",\"a\":\"M83\"},{\"t\":\"Electric Feel\",\"a\":\"MGMT\"},{\"t\":\"Genesis\",\"a\":\"Grimes\"}]\nevery 1s when playing -> elapsed=elapsed<total?elapsed+1:0\n\nCard w:390 gap:14 pad:16\n  Row gap:14 middle\n    Media kind:laptop tone:lilac w:84 h:84\n    Column grow gap:4\n      Text.eyebrow \"NOW PLAYING\"\n      Text.heading \"Neon Skyline\"\n      Text.bodySecondary \"The Midnight\"\n      Text.caption \"Album: Endless Summer\"\n    IconButton \"{liked?'favorite':'favorite_border'}\" -> liked=!liked\n  Column gap:6\n    Progress =elapsed/total\n    Row between\n      Text.caption \"{floor(elapsed/60)}:{elapsed%60<10?'0':''}{elapsed%60}\"\n      Text.caption \"-{floor((total-elapsed)/60)}:{(total-elapsed)%60<10?'0':''}{(total-elapsed)%60}\"\n  Row center middle gap:20\n    IconButton \"skip_previous\" -> elapsed=0\n    IconButton \"{playing?'pause_circle':'play_circle'}\" -> playing=!playing\n    IconButton \"skip_next\" -> elapsed=0\n  Divider\n  Text.eyebrow \"UP NEXT\"\n  each q in queue\n    Row gap:12 middle\n      Icon \"music_note\"\n      Column grow\n        Text.rowTitle \"{q.t}\"\n        Text.caption \"{q.a}\"","usage":{"input_tokens":8647,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":587,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":766,"totalMs":3373}}
+{"tMs":766,"delta":"state playing=true\nstate li"}
+{"tMs":1112,"delta":"ked=false\nstate elaps"}
+{"tMs":1112,"delta":"ed=84\nstate total=215"}
+{"tMs":1112,"delta":"\nstate queue=[{\""}
+{"tMs":1112,"delta":"t\":\"Midnight City"}
+{"tMs":1112,"delta":"\",\"a\":\"M83\"},"}
+{"tMs":1112,"delta":"{\"t\":\"Electric"}
+{"tMs":1112,"delta":" Feel\",\"a\":\"M"}
+{"tMs":1112,"delta":"GMT\"},{\"t"}
+{"tMs":1112,"delta":"\":\"Genesis\",\"a"}
+{"tMs":1112,"delta":"\":\"Grimes\"}"}
+{"tMs":1131,"delta":"]\nevery 1s when"}
+{"tMs":1165,"delta":" playing -> elapsed"}
+{"tMs":1465,"delta":"=elapsed<total?"}
+{"tMs":1465,"delta":"elapsed+1:0"}
+{"tMs":1465,"delta":"\n\nCard w:390 g"}
+{"tMs":1465,"delta":"ap:14 pad:16"}
+{"tMs":1465,"delta":"\n  Row gap:14"}
+{"tMs":1466,"delta":" middle\n    Media k"}
+{"tMs":1466,"delta":"ind:laptop tone:"}
+{"tMs":1466,"delta":"lilac w:84 h"}
+{"tMs":1466,"delta":":84\n    Column grow"}
+{"tMs":1498,"delta":" gap:4\n      Text"}
+{"tMs":1532,"delta":".eyebrow \"N"}
+{"tMs":1565,"delta":"OW PLAYING\""}
+{"tMs":1814,"delta":"\n      Text.heading \""}
+{"tMs":1814,"delta":"Neon Skyline\""}
+{"tMs":1814,"delta":"\n      Text.bodyS"}
+{"tMs":1814,"delta":"econdary \"The Midn"}
+{"tMs":1814,"delta":"ight\"\n      Text.ca"}
+{"tMs":1814,"delta":"ption \"Album: Endless"}
+{"tMs":1814,"delta":" Summer\"\n    Icon"}
+{"tMs":1833,"delta":"Button \"{liked?'"}
+{"tMs":1865,"delta":"favorite':'favorite"}
+{"tMs":1899,"delta":"_border'}\" -> li"}
+{"tMs":1932,"delta":"ked=!liked\n  "}
+{"tMs":1966,"delta":"Column gap:6\n    "}
+{"tMs":2160,"delta":"Progress =elapsed/"}
+{"tMs":2160,"delta":"total\n    Row between\n      "}
+{"tMs":2160,"delta":"Text.caption \"{flo"}
+{"tMs":2160,"delta":"or(elapsed/60"}
+{"tMs":2160,"delta":")}:{elapsed"}
+{"tMs":2165,"delta":"%60<10?'0':"}
+{"tMs":2198,"delta":"''}{elapsed%"}
+{"tMs":2232,"delta":"60}\"\n      Text."}
+{"tMs":2266,"delta":"caption \"-{floor(("}
+{"tMs":2298,"delta":"total-elapsed)/"}
+{"tMs":2332,"delta":"60)}:{(total-"}
+{"tMs":2365,"delta":"elapsed)%60<"}
+{"tMs":2550,"delta":"10?'0':''}{"}
+{"tMs":2550,"delta":"(total-elapsed)"}
+{"tMs":2550,"delta":"%60}\"\n  Row"}
+{"tMs":2550,"delta":" center middle gap:20"}
+{"tMs":2550,"delta":"\n    IconButton \"skip"}
+{"tMs":2565,"delta":"_previous\" -> elap"}
+{"tMs":2599,"delta":"sed=0\n    Icon"}
+{"tMs":2632,"delta":"Button \"{playing?'"}
+{"tMs":2668,"delta":"pause_circle':'play"}
+{"tMs":2699,"delta":"_circle'}\" ->"}
+{"tMs":2732,"delta":" playing=!playing\n    "}
+{"tMs":2765,"delta":"IconButton \"skip_"}
+{"tMs":2897,"delta":"next\" -> elapsed"}
+{"tMs":2897,"delta":"=0\n  Divider"}
+{"tMs":2897,"delta":"\n  Text.eyebr"}
+{"tMs":2898,"delta":"ow \"UP NEXT"}
+{"tMs":2932,"delta":"\"\n  each q in queue"}
+{"tMs":2965,"delta":"\n    Row gap:12"}
+{"tMs":2999,"delta":" middle\n      Icon"}
+{"tMs":3032,"delta":" \"music_note\"\n      "}
+{"tMs":3066,"delta":"Column grow\n        Text."}
+{"tMs":3099,"delta":"rowTitle \"{q"}
+{"tMs":3132,"delta":".t}\"\n        Text"}
+{"tMs":3165,"delta":".caption \"{q.a"}
+{"tMs":3367,"delta":"}\""}
