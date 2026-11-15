@@ -1,0 +1,239 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lemon chicken traybake",
+    "subtitle": "45 min · Easy · Serves 4",
+    "icon": "restaurant",
+    "status": "Weeknight"
+   },
+   "children": [
+    "row1",
+    "SectionLabel1",
+    "Checklist1",
+    "SectionLabel2",
+    "Details1",
+    "ActionButton1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "Counter1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "Servings"
+   }
+  },
+  "Counter1": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Serves",
+    "detail": "people",
+    "value": "servings",
+    "min": 2,
+    "max": 8,
+    "step": 1
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Ingredients"
+   },
+   "bind": {
+    "props.note": "for ${servings}"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tick as you prep",
+    "value": "done",
+    "items": [
+     "Chicken thighs, 800 g",
+     "Baby potatoes, 600 g",
+     "Lemons, 2",
+     "Olive oil, 4 tbsp",
+     "Garlic cloves, 4",
+     "Dried oregano, 2 tsp"
+    ]
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Method",
+    "note": "4 steps"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "1. Heat the oven",
+      "Heat the oven to 220C"
+     ],
+     [
+      "2. Toss everything",
+      "Toss in the oil, lemon and oregano"
+     ],
+     [
+      "3. Roast",
+      "Roast 35 minutes, turning once"
+     ],
+     [
+      "4. Rest and serve",
+      "Rest 5 minutes and serve"
+     ]
+    ]
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start cooking",
+    "tone": "primary",
+    "icon": "play_arrow"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "startCooking"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "servings",
+    "type": "integer",
+    "value": 4
+   },
+   {
+    "name": "done",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

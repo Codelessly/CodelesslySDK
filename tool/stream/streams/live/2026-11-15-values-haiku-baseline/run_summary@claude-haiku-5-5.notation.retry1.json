@@ -1,0 +1,424 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Morning run",
+    "subtitle": "5.0 km",
+    "icon": "directions_run",
+    "status": "Done"
+   },
+   "children": [
+    "row1",
+    "StatTile3",
+    "SectionLabel1",
+    "ChartCard1",
+    "SectionLabel2",
+    "WideScroll1",
+    "SectionLabel3",
+    "Callout1",
+    "ActionButton1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Distance",
+    "note": "",
+    "value": "5.0 km",
+    "delta": "",
+    "icon": "route"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total time",
+    "note": "",
+    "value": "27:00",
+    "delta": "",
+    "icon": "timer"
+   }
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Average pace",
+    "note": "",
+    "value": "5:24 /km",
+    "delta": "",
+    "icon": "speed"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Pace per km",
+    "note": "min/km"
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pace per km",
+    "value": "5:24",
+    "values": [
+     330,
+     325,
+     335,
+     320,
+     310
+    ],
+    "labels": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "kind": "line"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Splits",
+    "note": "5 km"
+   }
+  },
+  "WideScroll1": {
+   "type": "WideScroll",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "width": 340
+   },
+   "children": [
+    "TableHeader1",
+    "TableRow1",
+    "TableRow2",
+    "TableRow3",
+    "TableRow4",
+    "TableRow5"
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "KM",
+     "Pace",
+     "Time"
+    ],
+    "keys": [
+     "km",
+     "pace",
+     "time"
+    ],
+    "widths": [
+     60,
+     140,
+     140
+    ]
+   },
+   "bind": {
+    "props.desc": "${desc}"
+   }
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "1",
+     "5:30",
+     "5:30"
+    ],
+    "widths": [
+     60,
+     140,
+     140
+    ]
+   }
+  },
+  "TableRow2": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "2",
+     "5:25",
+     "10:55"
+    ],
+    "widths": [
+     60,
+     140,
+     140
+    ]
+   }
+  },
+  "TableRow3": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "3",
+     "5:35",
+     "16:30"
+    ],
+    "widths": [
+     60,
+     140,
+     140
+    ]
+   }
+  },
+  "TableRow4": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "4",
+     "5:20",
+     "21:50"
+    ],
+    "widths": [
+     60,
+     140,
+     140
+    ]
+   }
+  },
+  "TableRow5": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "5",
+     "5:10",
+     "27:00"
+    ],
+    "widths": [
+     60,
+     140,
+     140
+    ]
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Compared with last run",
+    "note": "5.0 km"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Last run: 28:15",
+    "message": "You were 1 min 15 s faster than your last 5.0 km run.",
+    "tone": "good",
+    "icon": "trending_down"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Share",
+    "tone": "primary",
+    "icon": "share"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Shared"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "sort",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

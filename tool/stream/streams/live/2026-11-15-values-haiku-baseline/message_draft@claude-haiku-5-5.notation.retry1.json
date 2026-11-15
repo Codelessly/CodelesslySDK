@@ -1,0 +1,398 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Email to landlord",
+    "subtitle": "Draft, editable before sending",
+    "icon": "mail"
+   },
+   "bind": {
+    "props.status": "${= sent?\"Sent\":\"Draft\"}",
+    "props.tone": "${= sent?\"good\":\"accent\"}"
+   },
+   "w": 390,
+   "children": [
+    "SectionLabel1",
+    "Segments1",
+    "SectionLabel2",
+    "InputField1",
+    "SectionLabel3",
+    "InputField2",
+    "SectionLabel4",
+    "InputField3",
+    "row1",
+    "Receipt1",
+    "Details1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Tone",
+    "note": "rewrites the body"
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "tone",
+    "options": [
+     "Polite",
+     "Firm"
+    ]
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "body",
+       "value": "${= result==\"Polite\"?polite:firm}"
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "To",
+    "note": ""
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Recipient",
+    "placeholder": "name@example.com",
+    "value": "to"
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Subject",
+    "note": ""
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "InputField2": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Subject",
+    "placeholder": "",
+    "value": "subject"
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "SectionLabel4": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Body",
+    "note": ""
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "InputField3": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Message",
+    "placeholder": "",
+    "value": "body",
+    "lines": 8
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Discard",
+    "tone": "quiet",
+    "icon": "delete"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "to",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "subject",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "body",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Send",
+    "tone": "primary",
+    "icon": "send"
+   },
+   "bind": {
+    "props.enabled": "${= to!=\"\"&&subject!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sent",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "send"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Sent to",
+    "message": "landlord@example.com",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "visible": "${= sent}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Subject\",subject],[\"Body\",body]]}",
+    "visible": "${= sent}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "tone",
+    "type": "text",
+    "value": "Polite"
+   },
+   {
+    "name": "to",
+    "type": "text",
+    "value": "landlord@example.com"
+   },
+   {
+    "name": "subject",
+    "type": "text",
+    "value": "Heating not working in apartment 4B"
+   },
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "polite",
+    "type": "text",
+    "value": "Dear Mr. Alvarez,\n\nThe heating in apartment 4B has stopped working. Could you please arrange for someone to take a look this week?\n\nThank you,\nAlex"
+   },
+   {
+    "name": "firm",
+    "type": "text",
+    "value": "Dear Mr. Alvarez,\n\nThe heating in apartment 4B has stopped working. Please confirm by Thursday when a repair will be carried out.\n\nThank you,\nAlex"
+   },
+   {
+    "name": "body",
+    "type": "text",
+    "value": "Dear Mr. Alvarez,\n\nThe heating in apartment 4B has stopped working. Could you please arrange for someone to take a look this week?\n\nThank you,\nAlex"
+   }
+  ]
+ }
+}

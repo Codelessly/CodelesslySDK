@@ -1,0 +1,119 @@
+{"meta":{"ui":"carousel","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots and a position like \"3 of 6\": Aero Runner $120, 4.8 stars; Trail Scout $135, 4.6; Tempo Flash $150, 4.7; Cloud Stride $140, 4.5; Daybreak 2 $95, 4.4; Night Owl $125, 4.6, each with a picture placeholder. Tapping one opens its details in place: its name and price, a description (for Tempo Flash: \"A snappy plate and a low stack for intervals and race day.\"), sizes 7 to 12 to pick (8 is sold out), the chosen size shown as \"Size 9\" and so on, an Add to bag button, and a way back to the carousel.","text":"state page=0\nstate open=0\nstate size=\"\"\nstate bag=0\nstate shoes=[{\"id\":1,\"name\":\"Aero Runner\",\"price\":120,\"rating\":4.8,\"kind\":\"shoe\",\"tone\":\"sand\",\"detail\":\"Lightweight daily trainer\"},{\"id\":2,\"name\":\"Trail Scout\",\"price\":135,\"rating\":4.6,\"kind\":\"shoe\",\"tone\":\"mint\",\"detail\":\"Grippy trail outsole\"},{\"id\":3,\"name\":\"Tempo Flash\",\"price\":150,\"rating\":4.7,\"kind\":\"shoe\",\"tone\":\"sky\",\"detail\":\"A snappy plate and a low stack for intervals and race day.\",\"desc\":true},{\"id\":4,\"name\":\"Cloud Stride\",\"price\":140,\"rating\":4.5,\"kind\":\"shoe\",\"tone\":\"lilac\",\"detail\":\"Soft cushioned long-run comfort\"},{\"id\":5,\"name\":\"Daybreak 2\",\"price\":95,\"rating\":4.4,\"kind\":\"shoe\",\"tone\":\"rose\",\"detail\":\"Affordable everyday runner\"},{\"id\":6,\"name\":\"Night Owl\",\"price\":125,\"rating\":4.6,\"kind\":\"shoe\",\"tone\":\"slate\",\"detail\":\"Reflective panels for night runs\"}]\n\nColumn\n  ChatCard \"Running shoes\" \"Swipe or step through\" icon:\"directions_run\" status:\"Shop\"\n    if open==0\n      Carousel =open items:=shoes dots arrows counter height:260 -> open=open\n    if open>0\n      Text.title \"{shoes[open-1].name}\"\n      Text.strong \"${shoes[open-1].price}\"\n      Paragraph \"{shoes[open-1].desc ? shoes[open-1].detail : shoes[open-1].detail}\"\n      SectionLabel \"Size\" \"pick one\"\n      ChoiceChips =size options:[\"7\",\"8\",\"9\",\"10\",\"11\",\"12\"] disabled:[\"8\"] columns:3\n      if size!=\"\"\n        Text.muted \"Size {size}\"\n      Row gap:10\n        ActionButton \"Back\" quiet icon:\"arrow_back\" -> open=0\n        ActionButton \"Add to bag\" primary icon:\"shopping_bag\" enabled:=size!=\"\" -> bag=bag+1; toast \"Added to bag\"","usage":{"input_tokens":9169,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":749,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":498,"totalMs":3148}}
+{"tMs":498,"delta":"state"}
+{"tMs":734,"delta":" page"}
+{"tMs":734,"delta":"=0\nstate open"}
+{"tMs":735,"delta":"=0"}
+{"tMs":735,"delta":"\nstate size"}
+{"tMs":735,"delta":"=\"\"\nstate b"}
+{"tMs":735,"delta":"ag=0"}
+{"tMs":735,"delta":"\nstate shoes=[{"}
+{"tMs":735,"delta":"\"id"}
+{"tMs":735,"delta":"\":1,\"name\":\""}
+{"tMs":735,"delta":"Aero Runner\",\"price\":"}
+{"tMs":742,"delta":"120,\"rating\":4."}
+{"tMs":764,"delta":"8,\"kind\":\"sh"}
+{"tMs":979,"delta":"oe\",\"tone\":\"s"}
+{"tMs":979,"delta":"and\",\"detail\":\""}
+{"tMs":979,"delta":"Lightweight da"}
+{"tMs":979,"delta":"ily trainer\"},{\""}
+{"tMs":979,"delta":"id\":2,\"name\":\""}
+{"tMs":979,"delta":"Trail Scout\",\"price"}
+{"tMs":979,"delta":"\":135,\"rating\":4"}
+{"tMs":979,"delta":".6,\"kind\":\""}
+{"tMs":979,"delta":"shoe\",\"tone\":\""}
+{"tMs":979,"delta":"mint\",\"detail\":\""}
+{"tMs":1001,"delta":"Gripp"}
+{"tMs":1022,"delta":"y tr"}
+{"tMs":1224,"delta":"ail outs"}
+{"tMs":1224,"delta":"ole\"},{\"id\":3"}
+{"tMs":1224,"delta":",\"name\":\"Temp"}
+{"tMs":1224,"delta":"o Flash\",\"price\":150"}
+{"tMs":1224,"delta":",\"rating\":4.7"}
+{"tMs":1224,"delta":",\"kind\":\"sho"}
+{"tMs":1224,"delta":"e\",\"tone\":\"s"}
+{"tMs":1224,"delta":"ky\",\"detail\":\"A sn"}
+{"tMs":1224,"delta":"appy plate and a low st"}
+{"tMs":1237,"delta":"ack for intervals and race day"}
+{"tMs":1259,"delta":"."}
+{"tMs":1280,"delta":"\",\"des"}
+{"tMs":1468,"delta":"c\":true"}
+{"tMs":1468,"delta":"},{\"id\":4,\""}
+{"tMs":1468,"delta":"name\":\"Cloud"}
+{"tMs":1468,"delta":" Stride\",\"price\":140,\""}
+{"tMs":1468,"delta":"rating\":4.5,\""}
+{"tMs":1468,"delta":"kind\":\"shoe\",\""}
+{"tMs":1468,"delta":"tone\":\"lilac\",\""}
+{"tMs":1468,"delta":"detail\":\"Soft c"}
+{"tMs":1473,"delta":"ushioned"}
+{"tMs":1495,"delta":" long-"}
+{"tMs":1516,"delta":"run com"}
+{"tMs":1537,"delta":"fort\"},{\"id\":"}
+{"tMs":1733,"delta":"5,\"name\":\"Da"}
+{"tMs":1733,"delta":"ybreak 2\",\"price\":"}
+{"tMs":1733,"delta":"95,\"rating\":4."}
+{"tMs":1733,"delta":"4,\"kind\":\"sh"}
+{"tMs":1733,"delta":"oe\",\"tone\":\"r"}
+{"tMs":1733,"delta":"ose\",\"detail\":\"Aff"}
+{"tMs":1733,"delta":"ordable everyday run"}
+{"tMs":1733,"delta":"ner\"},{\"id\":6"}
+{"tMs":1733,"delta":",\"name\":\"Night"}
+{"tMs":1752,"delta":" Owl\",\"price\":125,\""}
+{"tMs":1774,"delta":"rating\":4.6,\""}
+{"tMs":1795,"delta":"kind\":\"shoe\",\""}
+{"tMs":1976,"delta":"tone\":\"slate\",\"det"}
+{"tMs":1976,"delta":"ail\":\"Reflective pan"}
+{"tMs":1976,"delta":"els for night runs\"}]"}
+{"tMs":1976,"delta":"\n\nColumn"}
+{"tMs":1976,"delta":"\n  ChatCard \""}
+{"tMs":1976,"delta":"Running"}
+{"tMs":1976,"delta":" shoes\" \"Sw"}
+{"tMs":1988,"delta":"ipe or step through\" icon"}
+{"tMs":2010,"delta":":\"direct"}
+{"tMs":2031,"delta":"ions_run\" status:\""}
+{"tMs":2052,"delta":"Sh"}
+{"tMs":2220,"delta":"op\"\n    if open==0"}
+{"tMs":2220,"delta":"\n      Carousel =open"}
+{"tMs":2220,"delta":" items:=shoes d"}
+{"tMs":2220,"delta":"ots arrows counter height"}
+{"tMs":2220,"delta":":260"}
+{"tMs":2220,"delta":" -"}
+{"tMs":2220,"delta":"> open"}
+{"tMs":2224,"delta":"=open"}
+{"tMs":2246,"delta":"\n    if open>0\n      "}
+{"tMs":2267,"delta":"Text"}
+{"tMs":2289,"delta":".title \"{shoes["}
+{"tMs":2310,"delta":"open-1].name}\""}
+{"tMs":2468,"delta":"\n      Text.str"}
+{"tMs":2468,"delta":"ong \"${"}
+{"tMs":2468,"delta":"shoes[open-1]."}
+{"tMs":2468,"delta":"price}\"\n      Parag"}
+{"tMs":2468,"delta":"raph \"{shoes["}
+{"tMs":2468,"delta":"open-1].desc "}
+{"tMs":2468,"delta":"? shoes[open-1"}
+{"tMs":2482,"delta":"].detail : shoes["}
+{"tMs":2503,"delta":"open-1].detail}\""}
+{"tMs":2525,"delta":"\n      SectionLabel"}
+{"tMs":2546,"delta":" \"Size\" \"p"}
+{"tMs":2568,"delta":"ick one\"\n      "}
+{"tMs":2711,"delta":"ChoiceChips =size"}
+{"tMs":2711,"delta":" options:[\"7\",\"8\",\"9"}
+{"tMs":2711,"delta":"\",\"10\",\"11\",\"12\"]"}
+{"tMs":2711,"delta":" disabled:[\"8\"]"}
+{"tMs":2711,"delta":" columns:3\n      if"}
+{"tMs":2711,"delta":" size!=\"\"\n        Text"}
+{"tMs":2718,"delta":".muted \"Size {size"}
+{"tMs":2739,"delta":"}\"\n      Row gap"}
+{"tMs":2762,"delta":":10\n        ActionBut"}
+{"tMs":2783,"delta":"ton \"Back"}
+{"tMs":2804,"delta":"\""}
+{"tMs":2826,"delta":" qu"}
+{"tMs":3142,"delta":"iet icon:\"arr"}
+{"tMs":3142,"delta":"ow_back\" -> open="}
+{"tMs":3142,"delta":"0\n        ActionButton"}
+{"tMs":3142,"delta":" \"Add to bag\" prim"}
+{"tMs":3142,"delta":"ary icon:\"sh"}
+{"tMs":3142,"delta":"opping_bag\" enab"}
+{"tMs":3142,"delta":"led:=size!=\"\" -"}
+{"tMs":3142,"delta":"> bag=bag+1"}
+{"tMs":3142,"delta":"; toast \"Added to b"}
+{"tMs":3142,"delta":"ag\""}

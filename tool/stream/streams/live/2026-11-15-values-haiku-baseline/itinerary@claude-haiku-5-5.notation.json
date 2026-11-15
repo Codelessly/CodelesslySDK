@@ -1,0 +1,367 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Two days in Kyoto",
+    "subtitle": "Higashiyama, Gion, Arashiyama",
+    "icon": "map_rounded",
+    "status": "6 bookings"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "SectionLabel1",
+    "DayHeader1",
+    "Checklist1",
+    "SectionLabel2",
+    "DayHeader2",
+    "Checklist2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${= length(filter([\"a\"],x=>false))}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= 6-length(booked)} of 6 bookings left to make"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day 1",
+    "note": "Higashiyama and Gion"
+   }
+  },
+  "DayHeader1": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 1",
+    "subtitle": "Higashiyama and Gion",
+    "kind": "temple",
+    "tone": "dawn",
+    "tag": "Day 1"
+   },
+   "children": [
+    "ItineraryStop1",
+    "ItineraryStop2",
+    "ItineraryStop3",
+    "ItineraryStop4"
+   ]
+  },
+  "ItineraryStop1": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Fushimi Inari Shrine",
+    "detail": "Walk the first loop of torii gates before the crowds",
+    "time": "08:00",
+    "travel": "JR Nara Line then bus 206, 25 min"
+   }
+  },
+  "ItineraryStop2": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Nishiki Market lunch",
+    "detail": "Street snacks and a seated lunch",
+    "time": "11:30",
+    "travel": "Walk, 20 min"
+   }
+  },
+  "ItineraryStop3": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kiyomizu-dera",
+    "detail": "The hillside temple and its wooden stage",
+    "time": "14:00",
+    "travel": "Walk, 15 min"
+   }
+  },
+  "ItineraryStop4": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Gion stroll and dinner",
+    "detail": "Evening lanes, then dinner",
+    "time": "18:00",
+    "last": true
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 1 bookings",
+    "value": "done1",
+    "items": [
+     "Dinner reservation in Gion",
+     "Kiyomizu-dera evening tickets",
+     "Tea ceremony in Higashiyama"
+    ]
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day 2",
+    "note": "Arashiyama and the north"
+   }
+  },
+  "DayHeader2": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 2",
+    "subtitle": "Arashiyama and the north",
+    "kind": "forest",
+    "tone": "day",
+    "tag": "Day 2"
+   },
+   "children": [
+    "ItineraryStop5",
+    "ItineraryStop6",
+    "ItineraryStop7",
+    "ItineraryStop8"
+   ]
+  },
+  "ItineraryStop5": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Bamboo Grove",
+    "detail": "An early walk through the bamboo",
+    "time": "08:30",
+    "travel": "Train, 15 min"
+   }
+  },
+  "ItineraryStop6": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tenryu-ji garden",
+    "detail": "Garden and pond at the temple",
+    "time": "10:00",
+    "travel": "Walk, 10 min"
+   }
+  },
+  "ItineraryStop7": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lunch, then Kinkaku-ji",
+    "detail": "Lunch nearby, then the golden pavilion",
+    "time": "13:00",
+    "travel": "Bus, 25 min"
+   }
+  },
+  "ItineraryStop8": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pontocho Alley dinner",
+    "detail": "Narrow lanes and riverside dining",
+    "time": "17:30",
+    "last": true
+   }
+  },
+  "Checklist2": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 2 bookings",
+    "value": "done2",
+    "items": [
+     "Pontocho dinner table",
+     "Sagano scenic train seats",
+     "Rickshaw ride in Arashiyama"
+    ]
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "booked",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "done1",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "done2",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

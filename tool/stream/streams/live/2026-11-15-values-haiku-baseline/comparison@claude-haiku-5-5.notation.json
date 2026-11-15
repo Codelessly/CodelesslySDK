@@ -1,0 +1,175 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Compare phone plans",
+    "subtitle": "Lite vs Max",
+    "icon": "compare_arrows",
+    "status": "Compare"
+   },
+   "children": [
+    "ComparisonTable1",
+    "Recommendation1",
+    "Receipt1"
+   ]
+  },
+  "ComparisonTable1": {
+   "type": "ComparisonTable",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Lite",
+     "Max"
+    ],
+    "prices": [
+     "$25/mo",
+     "$45/mo"
+    ],
+    "rows": [
+     [
+      "Data",
+      "10 GB",
+      "Unlimited",
+      2
+     ],
+     [
+      "Calls",
+      "500 min",
+      "Unlimited",
+      2
+     ],
+     [
+      "Roaming",
+      "Not included",
+      "EU and US",
+      2
+     ],
+     [
+      "Contract",
+      "Monthly",
+      "24 months",
+      1
+     ],
+     [
+      "Extras",
+      "None",
+      "Streaming and 5G",
+      2
+     ],
+     [
+      "Price",
+      "$25",
+      "$45",
+      1
+     ]
+    ],
+    "pick": "2",
+    "cta": "Choose"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChoose"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "chosen",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Recommendation1": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Max is the better fit",
+    "why": "It wins 5 of the 6 rows (Contract is the exception) for $20 more per month.",
+    "reasons": [
+     "Unlimited data and calls",
+     "Roaming in the EU and US",
+     "Streaming and 5G included"
+    ],
+    "eyebrow": "Recommended"
+   }
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Plan chosen",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.message": "You picked the ${chosen} plan.",
+    "visible": "${= chosen!=\"\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "chosen",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

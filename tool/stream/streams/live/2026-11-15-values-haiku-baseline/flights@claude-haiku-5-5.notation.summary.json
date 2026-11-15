@@ -1,0 +1,35 @@
+{
+ "ui": "flights",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 23397,
+ "turns": [
+  {
+   "input_tokens": 9122,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 470,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 473,
+   "totalMs": 1960,
+   "chars": 906,
+   "lines": 8,
+   "jsonTails": 0,
+   "nodes": 7,
+   "outputTokensPerNode": "67.1",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,64 @@
+{
+ "ui": "run_summary",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 23397,
+ "turns": [
+  {
+   "input_tokens": 9093,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 560,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 709,
+   "totalMs": 2617,
+   "chars": 1115,
+   "lines": 18,
+   "jsonTails": 0,
+   "nodes": 19,
+   "outputTokensPerNode": "29.5",
+   "notationIssues": [],
+   "errors": [
+    "unknown_variable /nodes/TableHeader1/props/desc: No variable \"desc\" to pass as \"desc\": declare it in this document (or the project)."
+   ]
+  },
+  {
+   "input_tokens": 9730,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 561,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 486,
+   "totalMs": 1955,
+   "chars": 1116,
+   "lines": 18,
+   "jsonTails": 0,
+   "nodes": 19,
+   "outputTokensPerNode": "29.5",
+   "notationIssues": [],
+   "errors": [
+    "unknown_name /nodes/TableHeader1/bind/props.desc: \"desc\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form)."
+   ]
+  }
+ ]
+}

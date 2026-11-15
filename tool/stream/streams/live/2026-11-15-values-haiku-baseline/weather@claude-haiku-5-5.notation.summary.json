@@ -1,0 +1,66 @@
+{
+ "ui": "weather",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 23397,
+ "turns": [
+  {
+   "input_tokens": 9133,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 313,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 529,
+   "totalMs": 1582,
+   "chars": 636,
+   "lines": 12,
+   "jsonTails": 0,
+   "nodes": 11,
+   "outputTokensPerNode": "28.5",
+   "notationIssues": [
+    "line 7:16: Unknown word \"item.label\" on a WeatherDay. Props are written key:value.",
+    "line 7:5: A WeatherDay needs label: write label:\"…\"."
+   ],
+   "errors": [
+    "unknown_name /nodes/listView1/bind/data: \"days\" is not a declared variable of canvas \"screen\" nor a runtime scope (data, route, storage, screen, theme, item, index, parent, result, loop, auth, drag, perf, track, dismiss, pan, transform, flip, tilt, view, sticky, script, speech, pageOffset, form).",
+    "missing_prop /nodes/WeatherDay1/props: WeatherDay needs \"label\" (String): set \"props\": {\"label\": ...} or bind \"props.label\"."
+   ]
+  },
+  {
+   "input_tokens": 9708,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 382,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 512,
+   "totalMs": 1556,
+   "chars": 746,
+   "lines": 13,
+   "jsonTails": 0,
+   "nodes": 11,
+   "outputTokensPerNode": "34.7",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

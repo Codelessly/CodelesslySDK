@@ -1,0 +1,66 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Compare two phone plans side by side. Lite: $25 a month, 10 GB data, 500 minutes of calls, roaming not included, monthly contract, no extras. Max: $45 a month, unlimited data, unlimited calls, roaming in the EU and US, 24-month contract, streaming and 5G included. Mark the better plan on each row (cheaper price, more data, more calls, roaming, shorter contract, more extras). Under the table a recommendation with one sentence that says how many of the six rows the recommended plan wins and how much more it costs per month, and a Choose button under each plan; once I choose, the card says which plan I picked.","text":"ChatCard \"Compare phone plans\" \"Lite vs Max\" icon:\"compare_arrows\" status:\"Compare\"\n  ComparisonTable names:[\"Lite\",\"Max\"] prices:[\"$25/mo\",\"$45/mo\"] rows:[[\"Data\",\"10 GB\",\"Unlimited\",2],[\"Calls\",\"500 min\",\"Unlimited\",2],[\"Roaming\",\"Not included\",\"EU and US\",2],[\"Contract\",\"Monthly\",\"24 months\",1],[\"Extras\",\"None\",\"Streaming and 5G\",2],[\"Price\",\"$25\",\"$45\",1]] pick:2 cta:\"Choose\" -> chosen=result\n  Recommendation \"Max is the better fit\" \"It wins 5 of the 6 rows (Contract is the exception) for $20 more per month.\" reasons:[\"Unlimited data and calls\",\"Roaming in the EU and US\",\"Streaming and 5G included\"] eyebrow:\"Recommended\"\n  if chosen!=\"\"\n    Receipt \"Plan chosen\" \"You picked the {chosen} plan.\" tone:good icon:\"check_circle\"\n\nstate chosen=\"\"","usage":{"input_tokens":9131,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":354,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":601,"totalMs":1921}}
+{"tMs":601,"delta":"Ch"}
+{"tMs":745,"delta":"atCard \"Comp"}
+{"tMs":745,"delta":"are ph"}
+{"tMs":746,"delta":"one plans\" \"L"}
+{"tMs":746,"delta":"ite vs Max\" icon"}
+{"tMs":746,"delta":":\"compare_ar"}
+{"tMs":746,"delta":"rows\" status:\""}
+{"tMs":751,"delta":"Compare\"\n  Compar"}
+{"tMs":771,"delta":"isonTable names"}
+{"tMs":792,"delta":":[\"Lite\",\""}
+{"tMs":813,"delta":"Max\"] prices:[\""}
+{"tMs":833,"delta":"$25/m"}
+{"tMs":853,"delta":"o\",\"$45/mo\""}
+{"tMs":876,"delta":"] rows:[[\""}
+{"tMs":898,"delta":"Data"}
+{"tMs":915,"delta":"\",\"10 GB\",\""}
+{"tMs":936,"delta":"Unlimited\",2"}
+{"tMs":955,"delta":"],[\"Calls\",\"500 "}
+{"tMs":976,"delta":"min\",\"Unlimited\","}
+{"tMs":996,"delta":"2],[\"Roaming\",\""}
+{"tMs":1018,"delta":"Not included\",\"EU and"}
+{"tMs":1037,"delta":" US\",2"}
+{"tMs":1057,"delta":"],[\"Contract\",\"Mon"}
+{"tMs":1079,"delta":"thly\",\"24"}
+{"tMs":1098,"delta":" months\",1],[\"Ext"}
+{"tMs":1119,"delta":"ras\",\"None"}
+{"tMs":1139,"delta":"\",\"Streaming and 5"}
+{"tMs":1160,"delta":"G\",2],[\"Price"}
+{"tMs":1180,"delta":"\",\"$25"}
+{"tMs":1201,"delta":"\",\"$45\",1]] p"}
+{"tMs":1221,"delta":"ick:"}
+{"tMs":1242,"delta":"2 c"}
+{"tMs":1261,"delta":"ta:\"Choose\" -"}
+{"tMs":1282,"delta":"> ch"}
+{"tMs":1302,"delta":"osen=result"}
+{"tMs":1324,"delta":"\n  Recommendation \""}
+{"tMs":1343,"delta":"Max is"}
+{"tMs":1363,"delta":" the better"}
+{"tMs":1383,"delta":" f"}
+{"tMs":1404,"delta":"it\" \"It"}
+{"tMs":1424,"delta":" wins 5 of the "}
+{"tMs":1445,"delta":"6 rows ("}
+{"tMs":1465,"delta":"Contract is"}
+{"tMs":1485,"delta":" the ex"}
+{"tMs":1506,"delta":"ception) for $20 more"}
+{"tMs":1526,"delta":" per"}
+{"tMs":1547,"delta":" month.\" re"}
+{"tMs":1567,"delta":"asons:[\"Unlim"}
+{"tMs":1587,"delta":"ited data and"}
+{"tMs":1608,"delta":" calls\",\"Roaming in"}
+{"tMs":1628,"delta":" the EU and US\",\""}
+{"tMs":1649,"delta":"Streaming and 5G"}
+{"tMs":1670,"delta":" included\"] eyebrow"}
+{"tMs":1690,"delta":":\"Recommended"}
+{"tMs":1710,"delta":"\"\n  if chosen!"}
+{"tMs":1730,"delta":"=\"\"\n    Rece"}
+{"tMs":1751,"delta":"ipt \"Pl"}
+{"tMs":1772,"delta":"an chosen\" \"You"}
+{"tMs":1792,"delta":" picked the"}
+{"tMs":1813,"delta":" {chosen} plan.\""}
+{"tMs":1833,"delta":" t"}
+{"tMs":1853,"delta":"one:good"}
+{"tMs":1874,"delta":" icon:\"check"}
+{"tMs":1894,"delta":"_circle\"\n\nstate chos"}
+{"tMs":1915,"delta":"en=\"\""}

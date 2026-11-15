@@ -1,0 +1,49 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show the plan for migrating my blog as six steps: Back up your content, Set up the new host, Import posts, Move media, Redirect old URLs, Final checks, each with a short description. A Start button runs them one after another, 2 seconds each: a spinner on the running step, ticks on the finished ones, a progress bar that reads \"N of 6 steps\" with the seconds elapsed, and a Pause button. When all six are done, a summary says \"Migration complete\" and the total time in seconds.","text":"state running=false\nstate done=0\nstate elapsed=0\nstate steps=[\"Back up your content\",\"Set up the new host\",\"Import posts\",\"Move media\",\"Redirect old URLs\",\"Final checks\"]\nevery 1000 when running -> elapsed=elapsed+1\nevery 2000 when running && done<6 -> done=done+1\nChatCard \"Blog migration\" \"Six steps, one after another\" icon:\"swap_horiz\" status:=done==6?\"Complete\":(running?\"Running\":\"Ready\")\n  each s in steps\n    PlanStep \"{s}\" \"\" index:=indexOf(steps,s) current:=done running:=running && indexOf(steps,s)==done\n  ProgressLine \"{done} of 6 steps\" \"{elapsed} s elapsed\" value:=done/6\n  if done==6\n    Callout \"Migration complete\" \"Total time: {elapsed} seconds\" tone:good icon:\"check_circle\"\n  Row gap:10\n    ActionButton \"Start\" tone:primary enabled:=!running && done<6 -> running=true\n    ActionButton \"Pause\" tone:quiet enabled:=running -> running=false","usage":{"input_tokens":10012,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":370,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":525,"totalMs":1508}}
+{"tMs":525,"delta":"state running"}
+{"tMs":684,"delta":"=false\nstate done=0"}
+{"tMs":684,"delta":"\nstate elapsed=0"}
+{"tMs":684,"delta":"\nstate steps=[\"Back up"}
+{"tMs":684,"delta":" your content\",\"Set up the new"}
+{"tMs":684,"delta":" host\",\"Import posts\",\""}
+{"tMs":684,"delta":"Move media\",\"Redirect old"}
+{"tMs":684,"delta":" URLs\",\"Final checks"}
+{"tMs":703,"delta":"\"]\nevery 1000 "}
+{"tMs":724,"delta":"when running -> elapsed"}
+{"tMs":744,"delta":"=elapsed+1"}
+{"tMs":765,"delta":"\nevery 2000 when running &&"}
+{"tMs":785,"delta":" done<6 -> done="}
+{"tMs":851,"delta":"done+1\nChatC"}
+{"tMs":851,"delta":"ard \"Blog migration\""}
+{"tMs":851,"delta":" \"Six steps, one after"}
+{"tMs":866,"delta":" another\" icon:\"swap"}
+{"tMs":887,"delta":"_horiz\" status:="}
+{"tMs":907,"delta":"done==6?\"Complete"}
+{"tMs":927,"delta":"\":(running?\"Running\":"}
+{"tMs":948,"delta":"\"Ready\")\n  each"}
+{"tMs":968,"delta":" s in steps\n    Pl"}
+{"tMs":990,"delta":"anStep \""}
+{"tMs":1009,"delta":"{s}\" \"\" index:"}
+{"tMs":1031,"delta":"=indexOf(steps"}
+{"tMs":1050,"delta":",s) current:=done running"}
+{"tMs":1070,"delta":":=running && indexOf"}
+{"tMs":1092,"delta":"(steps,s)==done"}
+{"tMs":1113,"delta":"\n  ProgressLine"}
+{"tMs":1133,"delta":" \"{done} of 6 "}
+{"tMs":1152,"delta":"steps\" \"{elaps"}
+{"tMs":1172,"delta":"ed} s elapsed\""}
+{"tMs":1193,"delta":" value:=done/6\n  "}
+{"tMs":1214,"delta":"if done==6\n    Call"}
+{"tMs":1234,"delta":"out \"Migration complete\""}
+{"tMs":1255,"delta":" \"Total time: {elap"}
+{"tMs":1275,"delta":"sed} seconds\" t"}
+{"tMs":1334,"delta":"one:good icon:\"check"}
+{"tMs":1334,"delta":"_circle\"\n  Row"}
+{"tMs":1335,"delta":" gap:10\n    Act"}
+{"tMs":1356,"delta":"ionButton \"Start\" t"}
+{"tMs":1377,"delta":"one:primary enabled:"}
+{"tMs":1397,"delta":"=!running && done<6 "}
+{"tMs":1417,"delta":"-> running=true\n    "}
+{"tMs":1438,"delta":"ActionButton \"Pause"}
+{"tMs":1458,"delta":"\" tone:quiet en"}
+{"tMs":1479,"delta":"abled:=running -> running"}
+{"tMs":1499,"delta":"=false"}

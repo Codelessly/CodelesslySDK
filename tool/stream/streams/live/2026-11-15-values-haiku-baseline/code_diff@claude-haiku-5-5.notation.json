@@ -1,0 +1,294 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "config.yaml",
+    "subtitle": "3 changes to review",
+    "icon": "description",
+    "status": "Review"
+   },
+   "children": [
+    "DiffHunk1",
+    "DiffHunk2",
+    "DiffHunk3",
+    "row1",
+    "ActionButton1",
+    "Receipt1"
+   ]
+  },
+  "DiffHunk1": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Server port",
+    "detail": "@@ -4,2 +4,2 @@",
+    "value": "h1",
+    "start": 4,
+    "lines": [
+     "-port: 8080",
+     "+port: 9090"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "h1",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "DiffHunk2": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Logging",
+    "detail": "@@ -12,4 +12,4 @@",
+    "value": "h2",
+    "start": 12,
+    "lines": [
+     "-level: debug",
+     "-file: /tmp/app.log",
+     "+level: warn",
+     "+file: /var/log/app.log"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "h2",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "DiffHunk3": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Cache",
+    "detail": "@@ -20,3 +20,5 @@",
+    "value": "h3",
+    "start": 20,
+    "lines": [
+     "+enabled: true",
+     "+ttl: 300"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "h3",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "Decided ${= (h1!=\"\"?1:0)+(h2!=\"\"?1:0)+(h3!=\"\"?1:0)} of 3, kept ${= (h1==\"keep\"?1:0)+(h2==\"keep\"?1:0)+(h3==\"keep\"?1:0)}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Apply",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= h1!=\"\"&&h2!=\"\"&&h3!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "applied",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "kept",
+       "value": "${= (h1==\"keep\"?1:0)+(h2==\"keep\"?1:0)+(h3==\"keep\"?1:0)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "discarded",
+       "value": "${= 3-kept}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Changes applied",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.message": "${kept} kept, ${discarded} discarded",
+    "visible": "${= applied}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "h1",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h2",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h3",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "applied",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "kept",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "discarded",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

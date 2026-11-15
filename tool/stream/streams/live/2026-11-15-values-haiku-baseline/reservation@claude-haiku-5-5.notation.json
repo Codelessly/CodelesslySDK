@@ -1,0 +1,246 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Osteria Lume",
+    "subtitle": "Book a table",
+    "icon": "restaurant",
+    "status": "Booking"
+   },
+   "children": [
+    "SectionLabel1",
+    "DayPicker1",
+    "SectionLabel2",
+    "Counter1",
+    "SectionLabel3",
+    "ChoiceChips1",
+    "ActionButton1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day",
+    "note": "Next 7 days"
+   }
+  },
+  "DayPicker1": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day",
+    "days": [
+     "Sat 14",
+     "Sun 15",
+     "Mon 16",
+     "Tue 17",
+     "Wed 18",
+     "Thu 19",
+     "Fri 20"
+    ]
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Party size",
+    "note": "Guests"
+   }
+  },
+  "Counter1": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Guests",
+    "detail": "Up to 8",
+    "value": "party",
+    "min": 1,
+    "max": 8,
+    "step": 1
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Time",
+    "note": "Choose a slot"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "17:30",
+     "18:00",
+     "18:30",
+     "19:00",
+     "19:30",
+     "20:00",
+     "20:30",
+     "21:00"
+    ],
+    "columns": 4
+   },
+   "bind": {
+    "props.disabled": "${= (day==\"Sat 14\"?[\"18:00\",\"20:00\"]:day==\"Sun 15\"?[\"17:30\",\"19:00\"]:[])+(party>=5?[\"20:30\",\"21:00\"]:[])}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Confirm booking",
+    "tone": "primary",
+    "icon": "check"
+   },
+   "bind": {
+    "props.enabled": "${= day!=\"\"&&time!=\"\"}",
+    "visible": "${= confirmed==false}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "confirmed",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Table booked",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.message": "${day}, party of ${party}, at ${time}",
+    "visible": "${= confirmed}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "party",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "confirmed",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}
