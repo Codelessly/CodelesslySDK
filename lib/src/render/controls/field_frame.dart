@@ -325,6 +325,7 @@ class FieldDecoration {
     ControlTokens tokens, {
     required TextStyle valueStyle,
     String? errorOverride,
+    String? counterFallback,
     double focusRingWidth = 0,
     Color? focusRingColor,
     String Function(String? text)? text,
@@ -353,7 +354,8 @@ class FieldDecoration {
       error: error,
       errorStyle: style(d.errorStyle),
       errorMaxLines: d.errorMaxLines,
-      counter: t(d.counterText),
+      // A design's own counter text, else the field's count against its limit.
+      counter: (d.counterText ?? '').isEmpty ? (counterFallback ?? '') : t(d.counterText),
       counterStyle: style(d.counterStyle),
       prefix: FieldAffix.of(
         d.prefixIcon,

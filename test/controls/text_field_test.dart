@@ -548,6 +548,19 @@ void main() {
       tester.testTextInput.enterText('123456');
       await tester.pump();
       expect(f.editor.text, '1234');
+      // …and the field shows how much of the limit is used, as it types.
+      expect(f.decoration.counter, '4/4');
+    });
+
+    testWidgets('a limit shows its count from the start; a counter the design wrote replaces it', (tester) async {
+      final (tree, _) = await _show(tester, {
+        'note': hugging('textField', {'maxLength': 280}),
+        'own': hugging('textField', {'maxLength': 280, 'decoration': {'counterText': 'Keep it short'}}),
+        'free': hugging('textField', {}),
+      });
+      expect(_field(tree, 'note').decoration.counter, '0/280');
+      expect(_field(tree, 'own').decoration.counter, 'Keep it short');
+      expect(_field(tree, 'free').decoration.counter, '');
     });
 
     testWidgets('a long line scrolls to keep the caret in view', (tester) async {
