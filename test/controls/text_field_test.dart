@@ -605,6 +605,28 @@ void main() {
       expect(f.currentBorder.side.color, const Color(0xFFDC2626));
     });
 
+    testWidgets('a focused field whose view leaves during layout lets go quietly (the editor preview closing)', (tester) async {
+      final (tree, _) = runningTree(columnDoc({'name': hugging('textField')}, height: 400));
+      addTearDown(tree.dispose);
+      final shown = ValueNotifier(true);
+      // A LayoutBuilder rebuilds during layout: the field's root detaches in
+      // the middle of it, as when the preview over the editor closes.
+      await tester.pumpWidget(ValueListenableBuilder<bool>(
+        valueListenable: shown,
+        builder: (context, on, _) => LayoutBuilder(
+          builder: (context, c) => on ? NodeView(tree: tree, rootId: 'col', interactive: true) : const SizedBox(),
+        ),
+      ));
+      final f = await _focus(tester, tree, 'name');
+      tester.testTextInput.enterText('Mezzanine');
+      await tester.pump();
+      shown.value = false;
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(f.focusNode.hasFocus, isFalse);
+      expect(tester.testTextInput.hasAnyClients, isFalse);
+    });
+
     testWidgets('the focus and editText actions reach it through its handle', (tester) async {
       final (tree, _) = await _show(tester, {'name': hugging('textField')});
       final handle = TextFieldHandle.of(tree, 'name')!;

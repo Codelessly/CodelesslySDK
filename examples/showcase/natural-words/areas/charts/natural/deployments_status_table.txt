@@ -1,0 +1,60 @@
+Card width:720 padding:0 radius:12 elevation:1
+  Header padding:16 layout:row align:center justify:between
+    Stack
+      Title "Recent deployments" size:18 weight:600
+      Subtitle "Last 3 hours across production services" color:muted size:13
+    Button "View all" variant:text
+  Divider
+  Table density:comfortable hoverRow:highlight
+    Columns
+      Column "Service" width:30% sortable:true
+      Column "Version" width:15%
+      Column "Status" width:20%
+      Column "Deployed" width:17% sortable:true
+      Column "Actions" width:18% align:end
+    Row id:api-gateway
+      Cell "api-gateway" weight:500
+      Cell "v2.4.1" font:mono color:muted
+      Cell
+        Pill "Succeeded" color:green icon:check-circle
+      Cell "4 min ago" color:muted
+      Cell layout:row gap:8 justify:end
+        Button "Logs" variant:text size:small icon:file-text
+        Button "Redeploy" variant:outlined size:small icon:refresh
+    Row id:billing-service highlight:red-subtle
+      Cell "billing-service" weight:500
+      Cell "v1.9.0" font:mono color:muted
+      Cell
+        Pill "Failed" color:red icon:x-circle
+      Cell "22 min ago" color:muted
+      Cell layout:row gap:8 justify:end
+        Button "Logs" variant:text size:small icon:file-text
+        Button "Redeploy" variant:outlined size:small icon:refresh
+    Row id:web-frontend
+      Cell "web-frontend" weight:500
+      Cell "v5.12.3" font:mono color:muted
+      Cell
+        Pill "In progress" color:blue icon:spinner
+          Animation type:rotate target:icon duration:1s repeat:infinite
+      Cell "1 min ago" color:muted
+      Cell layout:row gap:8 justify:end
+        Button "Logs" variant:text size:small icon:file-text
+        Button "Redeploy" variant:outlined size:small icon:refresh disabled:true tooltip:"Deployment in progress"
+    Row id:auth-service
+      Cell "auth-service" weight:500
+      Cell "v3.0.2" font:mono color:muted
+      Cell
+        Pill "Succeeded" color:green icon:check-circle
+      Cell "1 hr ago" color:muted
+      Cell layout:row gap:8 justify:end
+        Button "Logs" variant:text size:small icon:file-text
+        Button "Redeploy" variant:outlined size:small icon:refresh
+    Row id:search-indexer
+      Cell "search-indexer" weight:500
+      Cell "v0.8.7" font:mono color:muted
+      Cell
+        Pill "Rolled back" color:amber icon:undo
+      Cell "3 hr ago" color:muted
+      Cell layout:row gap:8 justify:end
+        Button "Logs" variant:text size:small icon:file-text
+        Button "Redeploy" variant:outlined size:small icon:refresh

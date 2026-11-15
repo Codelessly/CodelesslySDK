@@ -1,0 +1,999 @@
+{
+ "schema": 3,
+ "roots": [
+  "crm"
+ ],
+ "nodes": {
+  "crm": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": 1280,
+    "height": 800
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ]
+   },
+   "children": [
+    "Sidebar1",
+    "column1",
+    "column3"
+   ]
+  },
+  "Sidebar1": {
+   "type": "Sidebar",
+   "layout": {
+    "width": 256.0,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "value": "nav",
+    "brand": "Northwind CRM",
+    "sectionLabel": "Workspace",
+    "items": [
+     "Dashboard",
+     "Contacts",
+     "Companies",
+     "Deals",
+     "Reports"
+    ],
+    "icons": [
+     "dashboard",
+     "people",
+     "business",
+     "handshake",
+     "bar_chart"
+    ],
+    "badges": [
+     "",
+     "8",
+     "",
+     "5",
+     ""
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": 24,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "row3",
+    "column2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "spacer1",
+    "SearchBar1",
+    "filledButton1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "pageTitle"
+    },
+    "text": "Contacts"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "SearchBar1": {
+   "type": "SearchBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "placeholder": "Search contacts, companies…",
+    "value": "q"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Add contact"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addContact"
+      }
+     ]
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text2",
+    "text3",
+    "text4"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "${= length(contacts)} contacts"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "·"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Pipeline value ${= money(sum(contacts,c=>c.value),\"$\",0)}"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": 0,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 26,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#14000000",
+      "offset": [
+       0,
+       18
+      ],
+      "spreadRadius": -14,
+      "blurRadius": 40
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   },
+   "children": [
+    "TableHeader1",
+    "listView1"
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "Name",
+     "Company",
+     "Owner",
+     "Last contact",
+     "Deal value",
+     "Stage"
+    ],
+    "keys": [
+     "name",
+     "company",
+     "owner",
+     "last",
+     "value",
+     "stage"
+    ]
+   },
+   "bind": {
+    "props.desc": "${desc}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= filter(contacts,c=>contains(lower(c.name),lower(q))||contains(lower(c.company),lower(q)))}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.cells": "${= [item.name,item.company,item.owner,item.last,money(item.value,\"$\",0)]}",
+    "props.badge": "${item.stage}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item}"
+      }
+     ]
+    }
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": 340,
+    "padding": 20,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ]
+   },
+   "children": [
+    "column4"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row4",
+    "StatusBadge1",
+    "Details1",
+    "SectionLabel1",
+    "Paragraph1",
+    "SectionLabel2",
+    "column6",
+    "row6"
+   ]
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar1",
+    "column5"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": 48
+   },
+   "bind": {
+    "props.name": "${sel.name}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text5",
+    "text6"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading"
+    },
+    "text": "${sel.name}"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "${sel.role}, ${sel.company}"
+   }
+  },
+  "StatusBadge1": {
+   "type": "StatusBadge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "tone": "info"
+   },
+   "bind": {
+    "props.label": "${sel.stage}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Email\",sel.email],[\"Phone\",sel.phone],[\"Owner\",sel.owner],[\"Last contact\",sel.last],[\"Deal value\",money(sel.value,\"$\",0)]]}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Notes"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.text": "${sel.notes}"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next steps"
+   },
+   "bind": {
+    "props.note": "${= length(sel.steps)} open"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView2"
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${sel.steps}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row5"
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text7"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "radio_button_unchecked"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Log note",
+    "tone": "quiet",
+    "icon": "edit_note"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "logNote",
+       "value": "${sel.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Email",
+    "tone": "primary",
+    "icon": "mail"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "email",
+       "value": "${sel.id}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "crm": [
+   {
+    "name": "contacts",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Priya Raman",
+      "company": "Lumen Analytics",
+      "role": "VP Operations",
+      "owner": "Dana Cole",
+      "last": "2 days ago",
+      "value": 48000,
+      "stage": "Qualified",
+      "email": "priya.raman@lumenanalytics.com",
+      "phone": "+1 415 555 0142",
+      "notes": "Evaluating us against two other vendors. Wants a pilot with the ops team before Q3 budget lock.",
+      "steps": [
+       "Send pilot scope document",
+       "Book demo with ops leads",
+       "Share security questionnaire"
+      ]
+     },
+     {
+      "id": 2,
+      "name": "Marcus Hale",
+      "company": "Brightway Logistics",
+      "role": "Director of Procurement",
+      "owner": "Sam Ortiz",
+      "last": "Today",
+      "value": 125000,
+      "stage": "Negotiation",
+      "email": "m.hale@brightway.io",
+      "phone": "+1 312 555 0187",
+      "notes": "Legal is reviewing the MSA. Marcus asked for a 12% volume discount and quarterly billing.",
+      "steps": [
+       "Reply to redline on clause 7",
+       "Get discount approval from finance",
+       "Schedule signing call for Friday"
+      ]
+     },
+     {
+      "id": 3,
+      "name": "Elena Petrova",
+      "company": "Fjord & Co.",
+      "role": "Head of Growth",
+      "owner": "Dana Cole",
+      "last": "Yesterday",
+      "value": 72500,
+      "stage": "Proposal",
+      "email": "elena@fjordco.com",
+      "phone": "+1 206 555 0113",
+      "notes": "Liked the reporting module. Proposal sent Monday, waiting on feedback from her CFO.",
+      "steps": [
+       "Follow up on proposal",
+       "Prepare ROI one-pager"
+      ]
+     },
+     {
+      "id": 4,
+      "name": "Tomás Aguirre",
+      "company": "Solera Foods",
+      "role": "Operations Manager",
+      "owner": "Jin Park",
+      "last": "1 week ago",
+      "value": 18000,
+      "stage": "Lead",
+      "email": "tomas.aguirre@solerafoods.com",
+      "phone": "+1 512 555 0166",
+      "notes": "Inbound from the webinar. Small team, price sensitive, interested in the starter plan.",
+      "steps": [
+       "Send intro email",
+       "Qualify budget and timeline"
+      ]
+     },
+     {
+      "id": 5,
+      "name": "Hannah Wu",
+      "company": "Kestrel Health",
+      "role": "Chief of Staff",
+      "owner": "Sam Ortiz",
+      "last": "3 days ago",
+      "value": 96000,
+      "stage": "Won",
+      "email": "hannah.wu@kestrelhealth.org",
+      "phone": "+1 617 555 0129",
+      "notes": "Signed a 2-year agreement. Onboarding kicks off next week with 40 seats.",
+      "steps": [
+       "Hand off to customer success",
+       "Schedule kickoff call",
+       "Request case study in 90 days"
+      ]
+     },
+     {
+      "id": 6,
+      "name": "Oliver Grant",
+      "company": "Peakline Outdoors",
+      "role": "E-commerce Lead",
+      "owner": "Jin Park",
+      "last": "5 days ago",
+      "value": 33400,
+      "stage": "Qualified",
+      "email": "oliver.grant@peaklineoutdoors.com",
+      "phone": "+1 303 555 0175",
+      "notes": "Needs Shopify integration. Budget confirmed, decision expected end of month.",
+      "steps": [
+       "Confirm integration requirements",
+       "Send technical overview"
+      ]
+     },
+     {
+      "id": 7,
+      "name": "Amara Okafor",
+      "company": "Delta Freight",
+      "role": "COO",
+      "owner": "Dana Cole",
+      "last": "4 days ago",
+      "value": 61200,
+      "stage": "Proposal",
+      "email": "amara.okafor@deltafreight.com",
+      "phone": "+1 404 555 0198",
+      "notes": "Strong champion internally. Concerned about migration effort from their legacy system.",
+      "steps": [
+       "Draft migration plan",
+       "Introduce implementation lead"
+      ]
+     },
+     {
+      "id": 8,
+      "name": "Liam Becker",
+      "company": "Northgate Realty",
+      "role": "Managing Partner",
+      "owner": "Sam Ortiz",
+      "last": "2 weeks ago",
+      "value": 9800,
+      "stage": "Lead",
+      "email": "liam@northgaterealty.com",
+      "phone": "+1 720 555 0104",
+      "notes": "Cold outreach got a reply. Interested but busy until after the spring season.",
+      "steps": [
+       "Check in after April 15",
+       "Send lightweight case study"
+      ]
+     }
+    ]
+   },
+   {
+    "name": "sel",
+    "type": "text",
+    "value": "contacts[1]"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "name"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "nav",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

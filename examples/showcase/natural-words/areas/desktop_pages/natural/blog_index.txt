@@ -1,0 +1,132 @@
+Page "The Craft Journal" background:#FAFAF8 font:Inter max-width:1200 
+  Header sticky:true height:72 background:white border-bottom:1px solid #EAEAE6 shadow-on-scroll:subtle
+    Row justify:space-between align:center padding-x:32
+      Logo "The Craft Journal" font:serif weight:700 size:22 href:/
+      Nav gap:28
+        Link "Articles" active:true underline:2px
+        Link "Topics"
+        Link "Authors"
+        Link "About"
+      Button "Subscribe" variant:primary background:#1F3D36 color:white radius:999 padding:10x20 hover:background-lighten transition:150ms press:scale(0.97) action:open-modal(newsletter)
+      IconButton icon:menu visible:mobile-only action:toggle-drawer
+
+  Main padding-y:48
+    Section "Featured" 
+      Card variant:featured layout:stacked radius:20 overflow:hidden hover:image-zoom(1.03) transition:400ms href:/posts/cut-build-times
+        Image src:cover-build-times.jpg alt:"Build pipeline visualization" aspect:21/9 width:full fit:cover loading:eager
+        Column padding:40 gap:16 max-width:800
+          Tag "Engineering" color:#1F3D36 background:#E3EEE9 radius:999
+          Heading "How we cut build times by 70%" level:1 font:serif size:44 line-height:1.15
+          Text "We rewrote our CI pipeline around incremental caching and parallel test sharding. Here is what worked, what failed, and the numbers behind every step." color:#555 size:18 max-lines:3
+          Row gap:12 align:center
+            Avatar "Maya Chen" src:maya.jpg size:40 shape:circle
+            Text "Maya Chen" weight:600
+            Text "·" color:#999
+            Text "8 min read" color:#777
+          Link "Read the story →" color:#1F3D36 hover:arrow-nudge-right(4px)
+
+    Section "Filters" margin-top:56
+      ChipGroup selection:single default:"All" scrollable-x:mobile aria-label:"Filter by category"
+        Chip "All" selected:true background:#1F3D36 color:white
+        Chip "Design" selected:false
+        Chip "Engineering" selected:false
+        Chip "Product" selected:false
+        Chip "Culture" selected:false
+        on-select animate:grid-crossfade duration:250ms update:url-query(category)
+        unselected-style border:1px solid #D8D8D2 hover:background:#F0F0EB
+
+    Section "Posts" margin-top:32
+      Grid columns:3 gap:32 tablet-columns:2 mobile-columns:1
+        Card variant:post hover:lift(-4px)+shadow transition:200ms enter:fade-up stagger:60ms
+          Image src:design-systems.jpg aspect:16/10 radius:12
+          Tag "Design"
+          Heading "Designing a system that scales past ten teams" level:3 max-lines:2
+          Row gap:8 align:center color:#777 size:14
+            Text "Mar 12, 2025"
+            Avatar "Lena Ortiz" size:24 shape:circle
+            Text "Lena Ortiz"
+        Card variant:post
+          Image src:onboarding.jpg aspect:16/10 radius:12
+          Tag "Product"
+          Heading "Rethinking onboarding: fewer steps, better activation" level:3 max-lines:2
+          Row
+            Text "Mar 5, 2025"
+            Avatar "Sam Patel" size:24 shape:circle
+            Text "Sam Patel"
+        Card variant:post
+          Image src:remote-culture.jpg aspect:16/10 radius:12
+          Tag "Culture"
+          Heading "What five years of remote work taught us" level:3 max-lines:2
+          Row
+            Text "Feb 27, 2025"
+            Avatar "Jo Rivera" size:24 shape:circle
+            Text "Jo Rivera"
+        Card variant:post
+          Image src:type-scale.jpg aspect:16/10 radius:12
+          Tag "Design"
+          Heading "A practical guide to fluid typography" level:3 max-lines:2
+          Row
+            Text "Feb 19, 2025"
+            Avatar "Lena Ortiz" size:24 shape:circle
+            Text "Lena Ortiz"
+        Card variant:post
+          Image src:database-migration.jpg aspect:16/10 radius:12
+          Tag "Engineering"
+          Heading "Zero-downtime migrations on a 4TB database" level:3 max-lines:2
+          Row
+            Text "Feb 11, 2025"
+            Avatar "Dev Anand" size:24 shape:circle
+            Text "Dev Anand"
+        Card variant:post
+          Image src:roadmap.jpg aspect:16/10 radius:12
+          Tag "Product"
+          Heading "Roadmaps without the guesswork" level:3 max-lines:2
+          Row
+            Text "Feb 3, 2025"
+            Avatar "Sam Patel" size:24 shape:circle
+            Text "Sam Patel"
+      loading-state Skeleton cards:6 shimmer:1.2s-loop
+      empty-state Text "No posts in this category yet." align:center
+
+    Pagination align:center margin-top:56 gap:8 aria-label:"Pagination"
+      Button "← Previous" variant:ghost disabled:true
+      Button "1" current:true background:#1F3D36 color:white shape:circle
+      Button "2" shape:circle hover:background:#F0F0EB
+      Button "3" shape:circle
+      Text "…"
+      Button "8" shape:circle
+      Button "Next →" variant:ghost
+      on-change scroll-to:Posts behavior:smooth
+
+  Footer background:#1F3D36 color:#E8EFEC padding:64x32 margin-top:96
+    Grid columns:4 gap:40 mobile-columns:1
+      Column
+        Text "The Craft Journal" font:serif size:20 weight:700
+        Text "Stories on design, engineering and the people who build things." color:#B5C8C1 max-width:280
+      Column
+        Text "Explore" weight:600
+        Link "Articles"
+        Link "Topics"
+        Link "Authors"
+      Column
+        Text "Company" weight:600
+        Link "About"
+        Link "Contact"
+        Link "Careers"
+      Column
+        Text "Follow" weight:600
+        Link "RSS"
+        Link "Twitter"
+        Link "LinkedIn"
+    Divider color:#2F5A50 margin-y:32
+    Row justify:space-between color:#B5C8C1 size:14
+      Text "© 2025 The Craft Journal"
+      Row gap:20
+        Link "Privacy"
+        Link "Terms"
+
+  Modal id:newsletter trigger:Subscribe enter:fade+scale-from(0.96) duration:200ms backdrop:rgba(0,0,0,0.4) close-on:escape,backdrop-click
+    Heading "Get the Journal in your inbox" level:2
+    Text "One thoughtful email every Friday. No spam."
+    Input type:email placeholder:"you@example.com" required:true validate:on-blur error:"Please enter a valid email"
+    Button "Subscribe" variant:primary loading-state:spinner success-state:"You're in! Check your inbox." success-action:auto-close-after(2500ms)

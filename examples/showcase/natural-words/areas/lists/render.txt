@@ -1,0 +1,1 @@
+WARNING text_clipped [swipe_inbox screen kanban_sprint 420x1400] node text7 Text "text7" ("In Progress") has a word 78 px wide in a box 73 wide: it is cut. Give the text more width (a fill or larger width), a smaller font size, or "scaleDown": true.

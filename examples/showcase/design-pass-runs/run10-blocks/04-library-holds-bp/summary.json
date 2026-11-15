@@ -1,0 +1,32 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/run10/04-library-holds/before.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [
+  "PhotoGallery",
+  "Receipt",
+  "ProductTile"
+ ],
+ "before": {
+  "problems": 0,
+  "texts": 18
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 241.9,
+   "problems": 3,
+   "ops": 71
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 203.4,
+   "problems": 0,
+   "ops": 70
+  }
+ ],
+ "final": 2,
+ "problems": 0,
+ "status": "passed"
+}

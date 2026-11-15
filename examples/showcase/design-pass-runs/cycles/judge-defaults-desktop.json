@@ -1,0 +1,234 @@
+{
+ "what": "6 screens at 1280 (run 10's inventory, learning, clinic; analytics, billing, crm): designed, shadow, quiet, the wide title at 28 (title), all three (all).",
+ "judges": "Judges: Opus and Sonnet subagents of a Claude Code session, shown the versions unlabeled and shuffled (ways.py pack); not judge.py, because no API key was at hand.",
+ "judgments": [
+  {
+   "case": "analytics",
+   "judge": "opus",
+   "rank": [
+    "title",
+    "all",
+    "quiet",
+    "designed",
+    "shadow"
+   ],
+   "scores": {
+    "title": 7,
+    "all": 7,
+    "quiet": 6,
+    "designed": 6,
+    "shadow": 6
+   },
+   "why": "B and D give the page title a stronger bold weight that anchors the hierarchy, while A, C and E use a weaker title; all share the misaligned, heavier-shadowed bottom cards."
+  },
+  {
+   "case": "analytics",
+   "judge": "sonnet",
+   "rank": [
+    "title",
+    "all",
+    "quiet",
+    "designed",
+    "shadow"
+   ],
+   "scores": {
+    "title": 8,
+    "all": 8,
+    "quiet": 7,
+    "designed": 7,
+    "shadow": 7
+   },
+   "why": "B and D have a bolder, larger page title giving clearer hierarchy; the others are otherwise near-identical with a weak title."
+  },
+  {
+   "case": "billing",
+   "judge": "opus",
+   "rank": [
+    "title",
+    "all",
+    "quiet",
+    "designed",
+    "shadow"
+   ],
+   "scores": {
+    "title": 7,
+    "all": 7,
+    "quiet": 6,
+    "designed": 6,
+    "shadow": 6
+   },
+   "why": "A and B use a bold, larger page title that sets a clear hierarchy over the section cards, while C, D and E have a weak regular-weight title; layouts are otherwise identical, including the cramped plan toggle."
+  },
+  {
+   "case": "billing",
+   "judge": "sonnet",
+   "rank": [
+    "title",
+    "all",
+    "quiet",
+    "designed",
+    "shadow"
+   ],
+   "scores": {
+    "title": 8,
+    "all": 8,
+    "quiet": 7,
+    "designed": 7,
+    "shadow": 7
+   },
+   "why": "A and B have a larger bold page title with clearer hierarchy; C, D, E are otherwise identical with a weaker title."
+  },
+  {
+   "case": "clinic_desktop",
+   "judge": "opus",
+   "rank": [
+    "title",
+    "all",
+    "designed",
+    "shadow",
+    "quiet"
+   ],
+   "scores": {
+    "title": 8,
+    "all": 7,
+    "designed": 7,
+    "shadow": 6,
+    "quiet": 6
+   },
+   "why": "C combines the strongest page title, subtle card elevation and a full-width Manage rooms button that anchors the side card, while the others each miss one or more of these (A has a weak title and a stubby button)."
+  },
+  {
+   "case": "clinic_desktop",
+   "judge": "sonnet",
+   "rank": [
+    "title",
+    "all",
+    "shadow",
+    "designed",
+    "quiet"
+   ],
+   "scores": {
+    "title": 8,
+    "all": 7,
+    "shadow": 7,
+    "designed": 7,
+    "quiet": 6
+   },
+   "why": "C pairs the larger bold title with a full-width Manage rooms button and soft card shadow; B has the big title but a small button; D/E have the full-width button with a weaker title; A has neither."
+  },
+  {
+   "case": "crm",
+   "judge": "opus",
+   "rank": [
+    "title",
+    "all",
+    "designed",
+    "quiet",
+    "shadow"
+   ],
+   "scores": {
+    "title": 5,
+    "all": 5,
+    "designed": 4,
+    "quiet": 4,
+    "shadow": 4
+   },
+   "why": "All share a broken, empty contact detail panel (blank name, $0, stray comma), so B edges ahead only through its bold page title plus soft table elevation, with C close behind and D the flattest and weakest."
+  },
+  {
+   "case": "crm",
+   "judge": "sonnet",
+   "rank": [
+    "title",
+    "all",
+    "designed",
+    "quiet",
+    "shadow"
+   ],
+   "scores": {
+    "title": 6,
+    "all": 5,
+    "designed": 5,
+    "quiet": 5,
+    "shadow": 4
+   },
+   "why": "All share a broken, empty detail panel; B and C have the stronger page title, and B adds the table shadow and a narrower search that avoids truncation."
+  },
+  {
+   "case": "inventory_desktop",
+   "judge": "opus",
+   "rank": [
+    "title",
+    "all",
+    "quiet",
+    "designed",
+    "shadow"
+   ],
+   "scores": {
+    "title": 8,
+    "all": 7,
+    "quiet": 7,
+    "designed": 7,
+    "shadow": 6
+   },
+   "why": "A pairs a bold, confident page title with soft card elevation for the clearest hierarchy; D has the title but flatter cards, C and E the elevation but a weak title, and B lacks both."
+  },
+  {
+   "case": "inventory_desktop",
+   "judge": "sonnet",
+   "rank": [
+    "title",
+    "all",
+    "quiet",
+    "designed",
+    "shadow"
+   ],
+   "scores": {
+    "title": 8,
+    "all": 7,
+    "quiet": 7,
+    "designed": 6,
+    "shadow": 6
+   },
+   "why": "A combines a larger bold title with soft card shadows for depth; D has the title but flat cards; C and E have shadows but a small title; B has neither."
+  },
+  {
+   "case": "learning_desktop",
+   "judge": "opus",
+   "rank": [
+    "title",
+    "all",
+    "designed",
+    "shadow",
+    "quiet"
+   ],
+   "scores": {
+    "title": 8,
+    "all": 7,
+    "designed": 7,
+    "shadow": 6,
+    "quiet": 6
+   },
+   "why": "D combines a bold page title, soft card elevation and a full-width Open calendar button that grounds the side card; B and C each have only some of these, and E has a weak title and a stubby button."
+  },
+  {
+   "case": "learning_desktop",
+   "judge": "sonnet",
+   "rank": [
+    "title",
+    "all",
+    "designed",
+    "shadow",
+    "quiet"
+   ],
+   "scores": {
+    "title": 8,
+    "all": 7,
+    "designed": 7,
+    "shadow": 6,
+    "quiet": 6
+   },
+   "why": "D has the larger bold title, full-width Open calendar button and soft shadows; B has the title but a small button and flat cards; C has button and shadows but a small title; A is flat and small-titled; E has the small button and small title."
+  }
+ ]
+}

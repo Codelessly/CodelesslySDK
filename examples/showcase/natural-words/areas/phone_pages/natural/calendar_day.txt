@@ -1,0 +1,39 @@
+Screen "Day View" background:#FFFFFF
+  Header padding:16 layout:row align:center justify:space-between
+    IconButton "‹" label:"Previous day" action:go-previous-day
+    Text "March 2024" style:title weight:semibold
+    IconButton "›" label:"Next day" action:go-next-day
+  WeekStrip layout:row justify:space-around padding:8 swipe:horizontal-changes-week
+    Day "S" date:"10" state:default
+    Day "M" date:"11" state:default
+    Day "T" date:"12" state:selected shape:circle fill:#1A73E8 textColor:#FFFFFF transition:"fill scale-in 150ms"
+    Day "W" date:"13" state:default
+    Day "T" date:"14" state:default
+    Day "F" date:"15" state:default
+    Day "S" date:"16" state:default
+  Divider
+  Text "Tuesday, March 12" style:subtitle padding:12
+  Timeline scroll:vertical hourHeight:64 range:"8 AM–6 PM" initialScroll:current-time
+    HourGrid labelWidth:56 lineColor:#E0E0E0
+      Hour "8 AM"
+      Hour "9 AM"
+      Hour "10 AM"
+      Hour "11 AM"
+      Hour "12 PM"
+      Hour "1 PM"
+      Hour "2 PM"
+      Hour "3 PM"
+      Hour "4 PM"
+      Hour "5 PM"
+      Hour "6 PM"
+    Events layout:absolute leftInset:64 rightInset:16
+      Event "Standup" start:9:00 end:9:15 color:#F9A825 textColor:#3E2A00 radius:6 subtitle:"9:00 – 9:15" press:highlight action:open-event
+      Event "Design Review" start:10:00 end:11:30 color:#8E24AA textColor:#FFFFFF radius:6 subtitle:"10:00 – 11:30" press:highlight action:open-event
+      Event "Lunch with Priya" start:12:30 end:13:30 color:#43A047 textColor:#FFFFFF radius:6 subtitle:"12:30 – 1:30 PM" press:highlight action:open-event
+      Event "Focus Time" start:14:00 end:16:00 color:#1E88E5 textColor:#FFFFFF radius:6 subtitle:"2:00 – 4:00 PM" press:highlight action:open-event
+      Event "1:1 with Marcus" start:16:30 end:17:00 color:#E53935 textColor:#FFFFFF radius:6 subtitle:"4:30 – 5:00 PM" press:highlight action:open-event
+    NowIndicator time:11:45 color:#D32F2F zIndex:10 updates:every-minute
+      Label "11:45" color:#D32F2F style:caption position:left
+      Dot size:10 color:#D32F2F animation:"pulse 2s infinite"
+      Line height:2 color:#D32F2F extends:full-width
+  FloatingActionButton "+" label:"New event" position:bottom-right margin:20 size:56 shape:circle color:#1A73E8 textColor:#FFFFFF elevation:6 press:"scale 0.95 100ms" action:create-event enter:"scale-in 250ms ease-out"

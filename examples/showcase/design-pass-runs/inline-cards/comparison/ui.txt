@@ -1,0 +1,68 @@
+Card w:390 gap:12
+  Text.title "Compare phone plans"
+  Row gap:8
+    Spacer w:84
+    Column grow gap:2 center
+      Text.strong "Lite"
+      Text.caption "Monthly plan"
+    Column grow gap:2 center
+      Text.strong "Max"
+      Text.caption "Premium plan"
+  Divider
+  Row gap:8 middle
+    Text.strong "Price" w:84
+    Column grow gap:4 center
+      Text "$25/mo"
+      Badge.success "Better value"
+    Column grow gap:4 center
+      Text "$45/mo"
+  Divider
+  Row gap:8 middle
+    Text.strong "Data" w:84
+    Column grow gap:4 center
+      Text "10 GB"
+    Column grow gap:4 center
+      Text "Unlimited"
+      Badge.success "Better value"
+  Divider
+  Row gap:8 middle
+    Text.strong "Calls" w:84
+    Column grow gap:4 center
+      Text "500 min"
+    Column grow gap:4 center
+      Text "Unlimited"
+      Badge.success "Better value"
+  Divider
+  Row gap:8 middle
+    Text.strong "Roaming" w:84
+    Column grow gap:4 center
+      Text "Not included"
+    Column grow gap:4 center
+      Text "EU + US"
+      Badge.success "Better value"
+  Divider
+  Row gap:8 middle
+    Text.strong "Contract" w:84
+    Column grow gap:4 center
+      Text "Monthly"
+      Badge.success "Better value"
+    Column grow gap:4 center
+      Text "24 months"
+  Divider
+  Row gap:8 middle
+    Text.strong "Extras" w:84
+    Column grow gap:4 center
+      Text "None"
+    Column grow gap:4 center
+      Text "Streaming + 5G"
+      Badge.success "Better value"
+  Divider
+  Card gap:4
+    Text.strong "Recommendation: Max"
+    Text.muted "Max wins on five of six rows, and unlimited data plus roaming justify the extra $20 a month for most people."
+  Row gap:8
+    Button.outline "Choose Lite" grow -> pick="Lite"; toast "You picked Lite"; emit choose "Lite"
+    Button "Choose Max" grow -> pick="Max"; toast "You picked Max"; emit choose "Max"
+  state pick=""
+  if pick!=""
+    Text.success "You picked: {pick}"

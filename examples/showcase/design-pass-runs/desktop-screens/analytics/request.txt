@@ -1,0 +1,1 @@
+A desktop analytics overview for a SaaS product: a left sidebar, a header with a date range control, four KPI tiles, a revenue line chart beside a sign-ups by channel bar chart, and below them a table of top pages and a list of recent events.

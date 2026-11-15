@@ -1,0 +1,26 @@
+card inline width:320 padding:16 radius:12 elevation:1 gap:12
+  state bill:84.00 tipPercent:15
+  derived tip:"bill * tipPercent / 100" total:"bill + tip"
+  row justify:space-between align:center
+    text "Bill"
+    text "$84.00" weight:medium format:currency
+  column gap:4
+    row justify:space-between align:center
+      text "Tip"
+      text "{tipPercent}%" weight:medium
+    slider min:0 max:30 step:1 value:15 bind:tipPercent
+      marks "0%" "15%" "30%"
+      on:change update:live (no debounce)
+      thumb:feedback scale:1.15 while:dragging
+      track:fill color:accent from:min to:value
+      a11y label:"Tip percentage" valuetext:"{tipPercent} percent"
+  divider
+  row justify:space-between align:center
+    text "Tip amount"
+    text "{tip}" format:currency decimals:2 bind:tip
+      on:change animate:count-tween duration:150ms easing:ease-out
+  row justify:space-between align:center
+    text "Total" weight:bold size:large
+    text "{total}" format:currency decimals:2 weight:bold size:large bind:total
+      on:change animate:count-tween duration:150ms easing:ease-out
+      font:tabular-nums

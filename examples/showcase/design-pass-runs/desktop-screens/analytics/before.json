@@ -1,0 +1,750 @@
+{
+ "schema": 3,
+ "roots": [
+  "analytics"
+ ],
+ "nodes": {
+  "analytics": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": 1280,
+    "height": 900
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Sidebar1",
+    "column1"
+   ]
+  },
+  "Sidebar1": {
+   "type": "Sidebar",
+   "layout": {
+    "width": 256.0,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "value": "nav",
+    "brand": "Beacon Analytics",
+    "sectionLabel": "Workspace",
+    "items": [
+     "Overview",
+     "Acquisition",
+     "Behavior",
+     "Revenue",
+     "Retention",
+     "Experiments",
+     "Settings"
+    ],
+    "icons": [
+     "dashboard",
+     "group_add",
+     "touch_app",
+     "payments",
+     "autorenew",
+     "science",
+     "settings"
+    ],
+    "badges": [
+     "",
+     "",
+     "",
+     "",
+     "",
+     "3",
+     ""
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": 24,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "grid1",
+    "row3",
+    "row4"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column2",
+    "Segments1"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "pageTitle"
+    },
+    "text": "Overview"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Product performance for Beacon, updated 2 minutes ago"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "range",
+    "options": [
+     "7 days",
+     "30 days",
+     "90 days"
+    ]
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2",
+    "StatTile3",
+    "StatTile4"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Monthly recurring revenue",
+    "note": "vs. previous period",
+    "value": "$184,230",
+    "delta": "+8.5%",
+    "icon": "payments"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Active users",
+    "note": "weekly average",
+    "value": "42,918",
+    "delta": "+5.2%",
+    "icon": "group"
+   }
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Trial conversion",
+    "note": "trial to paid",
+    "value": "18.6%",
+    "delta": "+1.3%",
+    "icon": "trending_up"
+   }
+  },
+  "StatTile4": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Churn rate",
+    "note": "monthly, logo churn",
+    "value": "2.4%",
+    "delta": "-0.4%",
+    "invert": true,
+    "icon": "person_remove"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ChartCard1",
+    "ChartCard2"
+   ]
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Revenue",
+    "value": "$184,230",
+    "kind": "line",
+    "delta": "+8.5%",
+    "values": [
+     121,
+     128,
+     126,
+     139,
+     147,
+     152,
+     149,
+     160,
+     168,
+     171,
+     177,
+     184
+    ],
+    "labels": [
+     "Jan",
+     "Feb",
+     "Mar",
+     "Apr",
+     "May",
+     "Jun",
+     "Jul",
+     "Aug",
+     "Sep",
+     "Oct",
+     "Nov",
+     "Dec"
+    ]
+   }
+  },
+  "ChartCard2": {
+   "type": "ChartCard",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Sign-ups by channel",
+    "value": "5,010",
+    "kind": "bars",
+    "delta": "+12.1%",
+    "values": [
+     1840,
+     1220,
+     960,
+     610,
+     380
+    ],
+    "labels": [
+     "Organic",
+     "Paid",
+     "Referral",
+     "Social",
+     "Email"
+    ]
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column3",
+    "column4"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ChatCard1"
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Top pages",
+    "subtitle": "Ranked by page views",
+    "icon": "article",
+    "status": "Live",
+    "tone": "accent"
+   },
+   "children": [
+    "TableHeader1",
+    "listView1"
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "Page",
+     "Views",
+     "Visitors",
+     "Conversion",
+     "Bounce"
+    ],
+    "keys": [
+     "path",
+     "views",
+     "visitors",
+     "conv",
+     "bounce"
+    ]
+   },
+   "bind": {
+    "props.desc": "${desc}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= desc?sortByDesc(pages,sort):sortBy(pages,sort)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.cells": "${= [item.path,item.views,item.visitors,item.conv,item.bounce]}"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": 420,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ChatCard2"
+   ]
+  },
+  "ChatCard2": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Recent events",
+    "subtitle": "Across all workspaces",
+    "icon": "bolt",
+    "status": "6 new",
+    "tone": "good"
+   },
+   "children": [
+    "listView2"
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${events}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ListRow1"
+   ]
+  },
+  "ListRow1": {
+   "type": "ListRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.title}",
+    "props.subtitle": "${item.detail}",
+    "props.icon": "${item.icon}"
+   }
+  }
+ },
+ "variables": {
+  "analytics": [
+   {
+    "name": "nav",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "range",
+    "type": "text",
+    "value": "30 days"
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "views"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "pages",
+    "type": "list",
+    "value": [
+     {
+      "path": "/pricing",
+      "views": 48210,
+      "visitors": 31840,
+      "conv": "6.8%",
+      "bounce": "32%"
+     },
+     {
+      "path": "/",
+      "views": 112480,
+      "visitors": 78200,
+      "conv": "3.1%",
+      "bounce": "47%"
+     },
+     {
+      "path": "/features/automations",
+      "views": 27650,
+      "visitors": 19420,
+      "conv": "4.9%",
+      "bounce": "38%"
+     },
+     {
+      "path": "/signup",
+      "views": 21380,
+      "visitors": 17910,
+      "conv": "41.2%",
+      "bounce": "21%"
+     },
+     {
+      "path": "/blog/churn-benchmarks-2024",
+      "views": 19870,
+      "visitors": 16500,
+      "conv": "1.4%",
+      "bounce": "63%"
+     },
+     {
+      "path": "/docs/getting-started",
+      "views": 15240,
+      "visitors": 9870,
+      "conv": "2.7%",
+      "bounce": "29%"
+     }
+    ]
+   },
+   {
+    "name": "events",
+    "type": "list",
+    "value": [
+     {
+      "title": "Acme Robotics upgraded to Business",
+      "detail": "$1,188 / year · 4 min ago",
+      "icon": "workspace_premium"
+     },
+     {
+      "title": "New sign-up from Product Hunt",
+      "detail": "maya@loopwork.io · 11 min ago",
+      "icon": "person_add"
+     },
+     {
+      "title": "Trial ended without conversion",
+      "detail": "Northwind Studio · 26 min ago",
+      "icon": "hourglass_bottom"
+     },
+     {
+      "title": "Payment failed, retry scheduled",
+      "detail": "Invoice #4821 · 41 min ago",
+      "icon": "error_outline"
+     },
+     {
+      "title": "Seat count increased to 25",
+      "detail": "Brightside Health · 1 h ago",
+      "icon": "group"
+     },
+     {
+      "title": "Experiment “Annual toggle” reached 95%",
+      "detail": "Pricing page · 2 h ago",
+      "icon": "science"
+     }
+    ]
+   }
+  ]
+ }
+}

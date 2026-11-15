@@ -171,6 +171,7 @@
    "codeBg": "#FFF9FAFB",
    "codeGutter": "#FF9CA3AF",
    "gold": "#FFFFB020",
+   "pageFill": "#FFFFFFFF",
    "chart1": "#FF2563EB",
    "chart2": "#FF0891B2",
    "chart3": "#FF9333EA",
@@ -252,12 +253,12 @@
     "fontFamily": "Inter"
    },
    "caption": {
-    "fontSize": 11,
-    "fontWeight": 400,
-    "height": 1.4,
-    "color": "tertiaryText",
-    "leadingDistribution": "even",
-    "fontFamily": "Inter"
+    "fontFamily": "Inter",
+    "fontSize": 12,
+    "fontWeight": 500,
+    "height": 1.35,
+    "color": "inkFaint",
+    "leadingDistribution": "even"
    },
    "mono": {
     "fontSize": 12,
@@ -504,17 +505,18 @@
    },
    "strong": {
     "fontFamily": "Inter",
-    "fontSize": 13.5,
+    "fontSize": 14.5,
     "fontWeight": 600,
-    "height": 1.4,
+    "height": 1.3,
+    "letterSpacing": -0.1,
     "color": "primaryText",
     "leadingDistribution": "even"
    },
    "muted": {
     "fontFamily": "Inter",
-    "fontSize": 13,
-    "fontWeight": 400,
-    "height": 1.45,
+    "fontSize": 12.5,
+    "fontWeight": 500,
+    "height": 1.4,
     "color": "secondaryText",
     "leadingDistribution": "even"
    },
@@ -524,6 +526,32 @@
     "fontWeight": 400,
     "height": 1.4,
     "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "gaugeValue": {
+    "fontFamily": "Inter Display",
+    "fontSize": 46,
+    "fontWeight": 800,
+    "height": 1.05,
+    "letterSpacing": -1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "gaugeUnit": {
+    "fontFamily": "Inter",
+    "fontSize": 12.5,
+    "fontWeight": 500,
+    "height": 1.4,
+    "color": "secondaryText",
+    "leadingDistribution": "even"
+   },
+   "titleWide": {
+    "fontFamily": "Inter Display",
+    "fontSize": 28,
+    "fontWeight": 700,
+    "height": 1.15,
+    "letterSpacing": -0.6,
+    "color": "primaryText",
     "leadingDistribution": "even"
    }
   },
@@ -865,6 +893,7 @@
     "codeBg": "#FF141414",
     "codeGutter": "#66FFFFFF",
     "gold": "#FFFFB020",
+    "pageFill": "#FF262626",
     "chart1": "#FF3B82F6",
     "chart2": "#FF06B6D4",
     "chart3": "#FFA855F7",
@@ -886,7 +915,8 @@
    "card": 18,
    "tile": 14,
    "badge": 9,
-   "bar": 10
+   "bar": 10,
+   "cardGap": 12
   },
   "radii": {
    "inner": 9,
@@ -900,6 +930,7 @@
    "cta": 14,
    "popup": 20,
    "badge": 999,
+   "progress": 999,
    "bar": 6,
    "controlXs": 6,
    "controlCompact": 8,
@@ -926,7 +957,10 @@
    "dialogLarge": 720,
    "cta": 46,
    "badge": 22,
-   "bar": 28
+   "bar": 28,
+   "progress": 8,
+   "wide": 900,
+   "ring": 11
   },
   "shadows": {
    "level1": [

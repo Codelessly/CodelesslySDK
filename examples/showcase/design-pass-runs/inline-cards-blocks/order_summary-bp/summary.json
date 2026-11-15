@@ -1,0 +1,47 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/ic/order_summary.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [
+  "Receipt",
+  "CartLine",
+  "Details"
+ ],
+ "before": {
+  "problems": 0,
+  "texts": 26
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 27.8,
+   "problems": 0,
+   "ops": 29
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 29.4,
+   "problems": 1,
+   "ops": 29
+  }
+ ],
+ "final": 1,
+ "problems": 0,
+ "status": "passed",
+ "firstCheck": {
+  "status": "failed",
+  "final": 2,
+  "rounds": [
+   [
+    1,
+    1
+   ],
+   [
+    2,
+    1
+   ]
+  ],
+  "note": "As first checked; then checked again after two faults of the checks were fixed (a required prop equal to its default was dropped; a text a block shows in pieces counted as gone)."
+ }
+}

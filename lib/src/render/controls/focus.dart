@@ -203,6 +203,23 @@ class ControlFocusScope {
   /// The host focused one of its own widgets: this scope lets go.
   void hostTookFocus() => _focus(null);
 
+  /// True while the root is detaching and drops the focus: its controls are
+  /// leaving the screen, so they let go without asking for a new layout
+  /// (the framework may be in the middle of one: a LayoutBuilder rebuilding
+  /// the subtree that held the preview).
+  bool get detaching => _detaching;
+  bool _detaching = false;
+
+  /// Drops the focus as the root leaves the screen ([detaching] meanwhile).
+  void releaseOnDetach() {
+    _detaching = true;
+    try {
+      _focus(null);
+    } finally {
+      _detaching = false;
+    }
+  }
+
   /// The nodes Tab stops at, in reading order: rows from the top (boxes
   /// that overlap vertically are a row), left to right in a row.
   List<ControlFocusNode> get order {

@@ -1,0 +1,76 @@
+page "Pulse API Docs" layout:rows background:#ffffff font:Inter
+  header role:banner height:64 layout:row align:center padding:0 24 border-bottom:1px solid #e5e7eb position:sticky-top
+    logo "Pulse API" icon:pulse-wave color:#6d28d9 weight:700 href:/
+    spacer grow:1
+    searchbox placeholder:"Search documentation…" width:320 icon:search shortcut:"⌘K"
+      behavior focus:"expand width to 420 over 150ms ease-out"
+    select "v3.2" label:"API version" width:90 margin-left:16
+      option "v3.2" selected:true
+      option "v3.1"
+      option "v3.0"
+      option "v2.x" tag:"legacy"
+  body layout:columns grow:1 max-width:1440 margin:0 auto
+    sidebar role:navigation label:"Docs navigation" width:260 padding:24 border-right:1px solid #e5e7eb position:sticky scroll:y
+      group "Getting Started"
+        link "Introduction" href:/docs/introduction
+        link "Authentication" href:/docs/authentication state:active background:#f3e8ff color:#6d28d9 weight:600 border-left:3px solid #6d28d9 aria-current:page
+        link "Rate limits" href:/docs/rate-limits
+      group "Endpoints" margin-top:24
+        link "Users" href:/docs/users
+        link "Events" href:/docs/events
+        link "Webhooks" href:/docs/webhooks
+      style group-title:"uppercase 12px weight:600 color:#6b7280 letter-spacing:0.05em"
+      style link:"padding:6 12; radius:6; hover:background #f9fafb; transition:background 120ms"
+    main role:main grow:1 padding:40 48 max-width:780
+      breadcrumb
+        link "Docs" href:/docs
+        link "Getting Started" href:/docs/getting-started
+        text "Authentication" state:current
+      heading "Authentication" level:1 size:36 weight:700 margin-top:16 id:authentication
+      paragraph "The Pulse API uses API keys to authenticate requests. You can view and manage your keys in the Pulse dashboard under Settings → Developers."
+      paragraph "Authentication is performed with HTTP Bearer authentication. Provide your secret key in the Authorization header of every request. All requests must be made over HTTPS; calls over plain HTTP will fail."
+      callout "Keep your secret keys safe. Do not share them in public repositories or client-side code. If a key is compromised, roll it immediately from the dashboard." variant:warning title:"Warning" icon:alert-triangle background:#fffbeb border-left:4px solid #f59e0b radius:6 padding:16
+      heading "Making an authenticated request" level:2 id:making-a-request margin-top:40
+      paragraph "Include your key as a Bearer token in the Authorization header:"
+      codeblock language:bash copyable:true theme:dark radius:8 padding:16
+        toolbar
+          text "bash" color:#9ca3af
+          button "Copy" icon:copy
+            behavior click:"label changes to 'Copied!' for 2s then reverts"
+        code "curl https://api.pulse.io/v3.2/users \\\n  -H \"Authorization: Bearer sk_live_51Hx9aQ2eZvKYlo2C\" \\\n  -H \"Content-Type: application/json\""
+      heading "Authentication parameters" level:2 id:parameters margin-top:40
+      table striped:true border:1px solid #e5e7eb radius:8
+        row type:header
+          cell "Name"
+          cell "Type"
+          cell "Required"
+          cell "Description"
+        row
+          cell "Authorization" font:mono
+          cell "string"
+          cell "Yes" color:#b91c1c weight:600
+          cell "Bearer token in the form Bearer <API_KEY>."
+        row
+          cell "Content-Type" font:mono
+          cell "string"
+          cell "Yes" color:#b91c1c weight:600
+          cell "Must be application/json for requests with a body."
+        row
+          cell "X-Pulse-Version" font:mono
+          cell "string"
+          cell "No"
+          cell "Overrides the API version for this request, e.g. 3.1."
+        row
+          cell "Idempotency-Key" font:mono
+          cell "string"
+          cell "No"
+          cell "Unique value that makes POST requests safe to retry."
+      pager layout:row justify:space-between margin-top:48
+        link "← Introduction" href:/docs/introduction
+        link "Rate limits →" href:/docs/rate-limits
+    toc role:complementary label:"On this page" width:220 padding:40 24 position:sticky top:64
+      text "On this page" size:12 weight:600 uppercase:true color:#6b7280
+      link "Authentication" href:#authentication state:active color:#6d28d9
+      link "Making an authenticated request" href:#making-a-request indent:1
+      link "Authentication parameters" href:#parameters indent:1
+      behavior scroll-spy:"highlight the link of the section currently in view; smooth scroll on click 300ms"

@@ -1,0 +1,12 @@
+Card gap:8
+  Text.title "Road Trip Playlist"
+  Text.muted "Drag a song to reorder"
+  each song in songs
+    Row gap:12 middle pad:8 radius:8 drag:song(song.id) drop:song -> songs=concat(concat(take(removeWhere(songs,s=>s.id==result.data),indexOf(map(songs,s=>s.id),song.id)),[find(songs,s=>s.id==result.data)]),slice(removeWhere(songs,s=>s.id==result.data),indexOf(map(songs,s=>s.id),song.id),length(songs)))
+      Icon "drag_handle"
+      Column grow
+        Text.strong "{song.title}"
+        Text.caption "{song.artist}"
+      Text.muted "{song.length}"
+
+state songs=[{"id":1,"title":"Midnight City","artist":"M83","length":"4:03"},{"id":2,"title":"Electric Feel","artist":"MGMT","length":"3:49"},{"id":3,"title":"Dog Days Are Over","artist":"Florence + The Machine","length":"4:12"},{"id":4,"title":"Little Talks","artist":"Of Monsters and Men","length":"4:27"},{"id":5,"title":"Pumped Up Kicks","artist":"Foster the People","length":"3:59"},{"id":6,"title":"Ho Hey","artist":"The Lumineers","length":"2:43"}]

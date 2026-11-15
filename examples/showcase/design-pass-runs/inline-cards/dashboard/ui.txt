@@ -1,0 +1,67 @@
+Card w:390 gap:16
+  state range="30 days"
+  state sortKey="revenue"
+  state plans=[{"name":"Pro","subs":420,"revenue":12600,"churn":2.1},{"name":"Team","subs":210,"revenue":16800,"churn":1.4},{"name":"Starter","subs":680,"revenue":6120,"churn":4.8},{"name":"Enterprise","subs":36,"revenue":28800,"churn":0.6},{"name":"Basic","subs":910,"revenue":4550,"churn":6.2}]
+  state revenue={"7 days":"$18.4k","30 days":"$78.9k","90 days":"$231k"}
+  state revenueChg={"7 days":"+3.2%","30 days":"+8.5%","90 days":"+14.1%"}
+  state signups={"7 days":"312","30 days":"1,340","90 days":"3,980"}
+  state signupsChg={"7 days":"+5.0%","30 days":"+11.2%","90 days":"+19.6%"}
+  state churn={"7 days":"0.9%","30 days":"3.1%","90 days":"8.7%"}
+  state churnChg={"7 days":"+0.1%","30 days":"+0.4%","90 days":"+0.9%"}
+  state active={"7 days":"9,820","30 days":"14,260","90 days":"17,900"}
+  state activeChg={"7 days":"+1.8%","30 days":"+6.3%","90 days":"+12.4%"}
+  Row between middle
+    Text.title "Product performance"
+    Icon "insights"
+  SegmentedButton =range items:["7 days","30 days","90 days"]
+  Grid cols:2 gap:8
+    Card gap:4
+      Text.caption "Revenue"
+      Text.heading "{revenue[range]}"
+      Badge.success "{revenueChg[range]}"
+    Card gap:4
+      Text.caption "Sign-ups"
+      Text.heading "{signups[range]}"
+      Badge.success "{signupsChg[range]}"
+    Card gap:4
+      Text.caption "Churn"
+      Text.heading "{churn[range]}"
+      Badge.danger "{churnChg[range]}"
+    Card gap:4
+      Text.caption "Active users"
+      Text.heading "{active[range]}"
+      Badge.success "{activeChg[range]}"
+  Text.strong "Revenue"
+  if range=="7 days"
+    LineChart values:[2.4,2.6,2.5,2.7,2.6,2.8,2.8] labels:["M","T","W","T","F","S","S"]
+  if range=="30 days"
+    LineChart values:[15,17,18,19,20,21,22,23] labels:["W1","","W2","","W3","","W4",""]
+  if range=="90 days"
+    LineChart values:[52,60,68,75,82,90,98,105] labels:["Wk1","","Wk4","","Wk8","","Wk12",""]
+  Text.strong "Sign-ups by channel"
+  if range=="7 days"
+    BarChart values:[110,80,60,40,22] labels:["Organic","Paid","Referral","Social","Email"]
+  if range=="30 days"
+    BarChart values:[480,360,250,150,100] labels:["Organic","Paid","Referral","Social","Email"]
+  if range=="90 days"
+    BarChart values:[1400,1050,720,480,330] labels:["Organic","Paid","Referral","Social","Email"]
+  Divider
+  Text.strong "Top plans"
+  Row gap:4
+    ChoiceChip "Plan" selected:=sortKey=="name" -> sortKey="name"
+    ChoiceChip "Subs" selected:=sortKey=="subs" -> sortKey="subs"
+    ChoiceChip "Revenue" selected:=sortKey=="revenue" -> sortKey="revenue"
+    ChoiceChip "Churn" selected:=sortKey=="churn" -> sortKey="churn"
+  Row gap:8
+    Text.caption "Plan" grow
+    Text.caption "Subs" w:50
+    Text.caption "Revenue" w:70
+    Text.caption "Churn" w:50
+  Divider
+  each p in plans
+    if sortKey=="name"
+      Row gap:8 middle
+        Text.strong "{p.name}" grow
+        Text "{p.subs}" w:50
+        Text "{p.revenue}" w:70
+        Text "{p.churn}%" w:50

@@ -1,0 +1,25 @@
+state loading=true
+state skeletons=[1,2,3]
+state articles=[{"title":"Fed holds rates steady","source":"Reuters","img":"https://picsum.photos/id/1011/200/200"},{"title":"Mars rover finds clay deposits","source":"Space Daily","img":"https://picsum.photos/id/1016/200/200"},{"title":"City opens new bike lanes","source":"City Herald","img":"https://picsum.photos/id/1018/200/200"}]
+every 3s when loading -> loading=false
+Column gap:12 pad:16 maxw:720
+  Row between middle
+    Text.heading1 "Top stories"
+    Button.outline "Reload" -> loading=true
+  if loading
+    each s in skeletons
+      Card
+        Row gap:12
+          Box w:88 h:88 radius:8 fill:#FFE0E0E0 animate:shimmer
+          Column grow gap:10
+            Box h:18 radius:4 fill:#FFE0E0E0 animate:shimmer
+            Box h:12 radius:4 fill:#FFE0E0E0 animate:shimmer
+            Box h:12 w:160 radius:4 fill:#FFE0E0E0 animate:shimmer
+  if !loading
+    each a in articles
+      Card animate:slide-up stagger:100
+        Row gap:12
+          Image a.img w:88 h:88 radius:8
+          Column grow gap:4
+            Text.caption "{a.source}"
+            Text.heading "{a.title}"

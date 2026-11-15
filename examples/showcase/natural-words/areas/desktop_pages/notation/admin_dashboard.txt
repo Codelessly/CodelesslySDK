@@ -1,0 +1,72 @@
+Row stretch
+  Column w:220 fill:#FF0F172A pad:16 gap:4
+    Row gap:10 center pad:[8,8,8,24]
+      Icon "public" color:#FF818CF8
+      Text "Orbit CRM" size:20 weight:700 color:#FFFFFFFF
+    Row gap:12 center pad:12 radius:8 fill:#FF4F46E5
+      Icon "dashboard" color:#FFFFFFFF
+      Text "Overview" color:#FFFFFFFF weight:600
+    Row gap:12 center pad:12 radius:8
+      Icon "people" color:#FFCBD5E1
+      Text "Customers" color:#FFCBD5E1
+    Row gap:12 center pad:12 radius:8
+      Icon "handshake" color:#FFCBD5E1
+      Text "Deals" color:#FFCBD5E1
+    Row gap:12 center pad:12 radius:8
+      Icon "bar_chart" color:#FFCBD5E1
+      Text "Reports" color:#FFCBD5E1
+    Row gap:12 center pad:12 radius:8
+      Icon "settings" color:#FFCBD5E1
+      Text "Settings" color:#FFCBD5E1
+  Column grow scroll gap:20 pad:24
+    state deals=[{"company":"Acme Corp","owner":"Sam Patel","stage":"Won","value":48000,"date":"Jun 28","bg":"#FFDCFCE7","fg":"#FF166534"},{"company":"Globex Inc","owner":"Lena Ortiz","stage":"Negotiation","value":126500,"date":"Jul 12","bg":"#FFFEF3C7","fg":"#FF92400E"},{"company":"Initech","owner":"Marcus Lee","stage":"Proposal","value":32900,"date":"Jul 19","bg":"#FFDBEAFE","fg":"#FF1E40AF"},{"company":"Umbrella Ltd","owner":"Priya Nair","stage":"Qualified","value":74200,"date":"Aug 02","bg":"#FFEDE9FE","fg":"#FF5B21B6"},{"company":"Hooli","owner":"Sam Patel","stage":"Lost","value":19800,"date":"Jun 21","bg":"#FFFEE2E2","fg":"#FF991B1B"},{"company":"Stark Industries","owner":"Lena Ortiz","stage":"Negotiation","value":210000,"date":"Aug 15","bg":"#FFFEF3C7","fg":"#FF92400E"}]
+    Row between center gap:16
+      Input "Search" "Search customers, deals..." w:360
+      Row gap:16 center
+        IconButton "notifications"
+        Avatar "Sam Patel" size:40
+        Text.strong "Sam Patel"
+    Text.pageTitle "Overview"
+    Row gap:16
+      Card grow gap:4
+        Text.caption "Revenue"
+        Text "$84,320" size:28 weight:700
+        Text "+12.4%" color:#FF16A34A weight:600
+      Card grow gap:4
+        Text.caption "New customers"
+        Text "312" size:28 weight:700
+        Text "+8%" color:#FF16A34A weight:600
+      Card grow gap:4
+        Text.caption "Churn"
+        Text "2.1%" size:28 weight:700
+        Text "-0.3%" color:#FF16A34A weight:600
+      Card grow gap:4
+        Text.caption "Open deals"
+        Text "47" size:28 weight:700
+        Text.muted "Across all stages"
+    Row gap:16 stretch
+      Card grow gap:12
+        Text.panelTitle "Monthly revenue"
+        LineChart values:[52,58,55,63,67,71,69,75,78,80,82,84] labels:["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+      Card w:360 gap:12
+        Text.panelTitle "Deals by stage"
+        Donut values:[12,10,14,7,4] labels:["Qualified","Proposal","Negotiation","Won","Lost"]
+    Card gap:8
+      Text.panelTitle "Recent deals"
+      Row gap:8 pad:[0,8,0,8]
+        Text.caption "Company" grow
+        Text.caption "Owner" grow
+        Text.caption "Stage" grow
+        Text.caption "Value" grow
+        Text.caption "Close date" grow
+      Divider
+      each deal in deals
+        Row gap:8 center pad:[0,8,0,8]
+          Text.strong "{deal.company}" grow
+          Text "{deal.owner}" grow
+          Row grow
+            Box fill:=deal.bg radius:12 pad:[10,4,10,4]
+              Text "{deal.stage}" color:=deal.fg size:12 weight:600
+          Text "{money(deal.value,'$',0)}" grow
+          Text.muted "{deal.date}" grow
+        Divider

@@ -127,6 +127,64 @@ class Grid extends MultiChildRenderObjectWidget {
 }
 
 void main() {
+  testWidgets('a tapped item keeps its item and index for the whole chain, though the list changes under it', (tester) async {
+    // Open tables first: tapping one seats it (it moves to the end of the
+    // list), then records which one and where it was. The item scope follows
+    // the list's data, but the chain keeps the item and index it started on,
+    // as a Flutter onTap closure does.
+    final s = await lists.show(tester, {
+      'col': {'type': 'column', 'children': ['list'], 'layout': {'width': 300, 'height': {'hug': 400}}},
+      'list': {
+        'type': 'listView',
+        'children': ['row'],
+        'bind': {'data': r'${openTables}'},
+        'layout': {'width': 300, 'height': 400},
+      },
+      'label': {
+        'type': 'text',
+        'props': {'text': r'${item.label}', 'style': {'fontSize': 14, 'color': '#FF000000'}},
+        'layout': {'width': 300, 'height': 40},
+      },
+      'row': {
+        'type': 'row',
+        'children': ['label'],
+        'layout': {'width': 300, 'height': 40},
+        'actions': [
+          lists.reaction('click', [
+            {'type': 'setVariable', 'variable': 'tables', 'value': r"${= updateWhere(tables, 'id', item.id, t => set(t, 'open', false))}"},
+            // A frame between the actions (an awaited action does that in a
+            // running app): the list rebuilds without the seated table.
+            {'type': 'setVariable', 'variable': 'before', 'value': r'${item.label}'},
+            {'type': 'delay', 'ms': 50},
+            {'type': 'setVariable', 'variable': 'picked', 'value': r'${item.label}'},
+            {'type': 'setVariable', 'variable': 'pickedIndex', 'value': r'${index}'},
+          ]),
+        ],
+      },
+    }, variables: [
+      lists.v('tables', [
+        {'id': 't1', 'label': 'T1', 'open': true},
+        {'id': 't2', 'label': 'T2', 'open': true},
+        {'id': 't3', 'label': 'T3', 'open': true},
+      ], VariableType.list),
+      const Variable(name: 'openTables', type: VariableType.list, formula: 'sortBy(tables, t => t.open ? 0 : 1)'),
+      lists.v('picked', ''),
+      lists.v('before', ''),
+      lists.v('pickedIndex', 0, VariableType.integer),
+    ]);
+    // The first row is the list's top 40 px.
+    final list = s.tree.boxOf('list')!;
+    await tester.tapAt(list.localToGlobal(const Offset(150, 20)));
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+    await tester.pumpAndSettle();
+    expect(s['before'], 'T1');
+    expect(s['picked'], 'T1');
+    expect(s['pickedIndex'], 0);
+    expect((s['openTables'] as List).map((t) => (t as Map)['label']), ['T2', 'T3', 'T1']);
+  });
+
   testWidgets('a list with a fixed count spaces its items and centers them across', (tester) async {
     final r = await _items(tester, {
       'type': 'listView',

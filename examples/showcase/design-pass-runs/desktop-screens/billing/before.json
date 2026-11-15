@@ -1,0 +1,1097 @@
+{
+ "schema": 3,
+ "roots": [
+  "billing"
+ ],
+ "nodes": {
+  "billing": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": 1280,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Sidebar1",
+    "column1"
+   ]
+  },
+  "Sidebar1": {
+   "type": "Sidebar",
+   "layout": {
+    "width": 260,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "value": "nav",
+    "brand": "Northwind Cloud",
+    "sectionLabel": "Account settings",
+    "items": [
+     "Profile",
+     "Workspace",
+     "Billing",
+     "Team members",
+     "Security",
+     "Integrations",
+     "Notifications"
+    ],
+    "icons": [
+     "person",
+     "apartment",
+     "credit_card",
+     "group",
+     "lock",
+     "extension",
+     "notifications"
+    ],
+    "badges": [
+     "",
+     "",
+     "",
+     "3",
+     "",
+     "",
+     ""
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": [
+     40,
+     32,
+     40,
+     40
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2",
+    "Panel1",
+    "Panel2",
+    "Panel3",
+    "Panel4"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "pageTitle"
+    },
+    "text": "Billing"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "bodySecondary"
+    },
+    "text": "Manage your plan, payment method and invoices for Northwind Labs."
+   }
+  },
+  "Panel1": {
+   "type": "Panel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Current plan",
+    "subtitle": "Team plan, renews on Jul 14, 2025",
+    "icon": "workspace_premium",
+    "open": true
+   },
+   "children": [
+    "column3"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "Callout1",
+    "SectionLabel1",
+    "ProgressLine1",
+    "ProgressLine2",
+    "ProgressLine3",
+    "row5"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column4",
+    "Segments1"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row3",
+    "Paragraph1"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "row4"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading2"
+    },
+    "text": "Team"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "successTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "successTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Active",
+    "style": {
+     "from": "badge",
+     "color": "success"
+    }
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.text": "${= cycle=='Monthly' ? '$180 per month' : '$1,728 per year'} for up to 25 seats, 500 GB storage and 1M API calls."
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "cycle",
+    "options": [
+     "Monthly",
+     "Annual"
+    ]
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "You save $432 a year",
+    "message": "Switching to annual billing takes effect at your next renewal.",
+    "tone": "good",
+    "icon": "savings"
+   },
+   "bind": {
+    "visible": "${= cycle==\"Annual\"}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Usage this period",
+    "note": "Resets Jul 14"
+   }
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Seats"
+   },
+   "bind": {
+    "props.detail": "${seats} of ${seatLimit} used",
+    "props.value": "${= seats/seatLimit}"
+   }
+  },
+  "ProgressLine2": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Storage"
+   },
+   "bind": {
+    "props.detail": "${storage} GB of ${storageLimit} GB",
+    "props.value": "${= storage/storageLimit}"
+   }
+  },
+  "ProgressLine3": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "API calls"
+   },
+   "bind": {
+    "props.detail": "${= round(apiCalls/1000,0)}k of ${= round(apiLimit/1000,0)}k",
+    "props.value": "${= apiCalls/apiLimit}"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Change plan",
+    "tone": "quiet",
+    "icon": "swap_vert"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "changePlan"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Add seats",
+    "tone": "primary",
+    "icon": "person_add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addSeats"
+      }
+     ]
+    }
+   ]
+  },
+  "Panel2": {
+   "type": "Panel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Payment method",
+    "subtitle": "Used for all future invoices",
+    "icon": "credit_card",
+    "open": true
+   },
+   "children": [
+    "column5"
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Details1",
+    "row6"
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icons": [
+     "credit_card",
+     "event",
+     "person",
+     "mail",
+     "home"
+    ]
+   },
+   "bind": {
+    "props.rows": "${= [[\"Card\",\"Visa ending in 4242\"],[\"Expires\",\"08 / 2027\"],[\"Cardholder\",\"Maya Okafor\"],[\"Billing email\",\"billing@northwindlabs.io\"],[\"Billing address\",\"218 Harbor Street, Portland, OR 97209\"]]}"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton3",
+    "ActionButton4"
+   ]
+  },
+  "ActionButton3": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Edit billing details",
+    "tone": "quiet",
+    "icon": "edit"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "editBilling"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton4": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Update card",
+    "tone": "dark",
+    "icon": "credit_card"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "updateCard"
+      }
+     ]
+    }
+   ]
+  },
+  "Panel3": {
+   "type": "Panel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Invoices",
+    "subtitle": "Last six months",
+    "icon": "receipt_long",
+    "open": true
+   },
+   "children": [
+    "column6"
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row7",
+    "listView1"
+   ]
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "TableHeader1",
+    "spacer1"
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "desc": true,
+    "columns": [
+     "Invoice",
+     "Date",
+     "Description",
+     "Amount",
+     "Status"
+    ],
+    "keys": [
+     "id",
+     "date",
+     "desc",
+     "amount",
+     "status"
+    ]
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "width": 48,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 4
+   },
+   "bind": {
+    "data": "${invoices}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row8"
+   ]
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "TableRow1",
+    "iconButton1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.cells": "${= [item.id,item.date,item.desc,money(item.amount,\"$\",2)]}",
+    "props.badge": "${item.status}"
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": 48,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "download"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Downloading ${item.id}.pdf"
+      }
+     ]
+    }
+   ]
+  },
+  "Panel4": {
+   "type": "Panel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Danger zone",
+    "subtitle": "These actions cannot be undone",
+    "icon": "warning",
+    "open": true
+   },
+   "children": [
+    "column7"
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Callout2",
+    "row9"
+   ]
+  },
+  "Callout2": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Cancelling ends access on Jul 14",
+    "message": "All 18 seats lose access and your 412 GB of files are kept for 30 days before deletion.",
+    "tone": "danger",
+    "icon": "error"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton5",
+    "ActionButton6"
+   ]
+  },
+  "ActionButton5": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Cancel subscription",
+    "tone": "danger",
+    "icon": "block"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "cancelPlan"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton6": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Delete account",
+    "tone": "danger",
+    "icon": "delete_forever"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "deleteAccount"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "billing": [
+   {
+    "name": "nav",
+    "type": "text",
+    "value": "Billing"
+   },
+   {
+    "name": "cycle",
+    "type": "text",
+    "value": "Monthly"
+   },
+   {
+    "name": "seats",
+    "type": "integer",
+    "value": 18
+   },
+   {
+    "name": "seatLimit",
+    "type": "integer",
+    "value": 25
+   },
+   {
+    "name": "storage",
+    "type": "integer",
+    "value": 412
+   },
+   {
+    "name": "storageLimit",
+    "type": "integer",
+    "value": 500
+   },
+   {
+    "name": "apiCalls",
+    "type": "integer",
+    "value": 742000
+   },
+   {
+    "name": "apiLimit",
+    "type": "integer",
+    "value": 1000000
+   },
+   {
+    "name": "invoices",
+    "type": "list",
+    "value": [
+     {
+      "id": "INV-2025-006",
+      "date": "Jun 14, 2025",
+      "desc": "Team plan, 25 seats",
+      "amount": 180,
+      "status": "Due"
+     },
+     {
+      "id": "INV-2025-005",
+      "date": "May 14, 2025",
+      "desc": "Team plan, 25 seats",
+      "amount": 180,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-2025-004",
+      "date": "Apr 14, 2025",
+      "desc": "Team plan, 25 seats + 50 GB add-on",
+      "amount": 195,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-2025-003",
+      "date": "Mar 14, 2025",
+      "desc": "Team plan, 25 seats",
+      "amount": 180,
+      "status": "Paid"
+     },
+     {
+      "id": "INV-2025-002",
+      "date": "Feb 14, 2025",
+      "desc": "Team plan, 20 seats",
+      "amount": 150,
+      "status": "Overdue"
+     },
+     {
+      "id": "INV-2025-001",
+      "date": "Jan 14, 2025",
+      "desc": "Team plan, 20 seats",
+      "amount": 150,
+      "status": "Paid"
+     }
+    ]
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

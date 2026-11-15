@@ -1,0 +1,38 @@
+Card id:notifications width:360 padding:0 radius:12 elevation:2 background:surface overflow:hidden
+  Header padding:16 direction:row align:center justify:space-between border-bottom:1 divider
+    Text "Notifications" style:title weight:600
+    Badge "5" color:primary shape:pill
+  List id:notification-list direction:column
+    animation on:card-appear type:stagger stagger-delay:120ms
+    Row id:n1 padding:12,16 direction:row gap:12 align:center
+      animation type:slide-in from:right distance:24 opacity:0->1 duration:300ms delay:0ms easing:ease-out
+      Avatar initials:"AM" size:36 color:blue
+      Column grow:1
+        Text "Alex commented on your photo" style:body
+        Text "2 min ago" style:caption color:muted
+      Dot color:primary size:8 visible:unread
+    Row id:n2 padding:12,16 direction:row gap:12 align:center
+      animation type:slide-in from:right distance:24 opacity:0->1 duration:300ms delay:120ms easing:ease-out
+      Avatar initials:"JK" size:36 color:green
+      Column grow:1
+        Text "Jamie sent you a friend request" style:body
+        Text "15 min ago" style:caption color:muted
+      Dot color:primary size:8 visible:unread
+    Row id:n3 padding:12,16 direction:row gap:12 align:center
+      animation type:slide-in from:right distance:24 opacity:0->1 duration:300ms delay:240ms easing:ease-out
+      Avatar icon:"calendar" size:36 color:orange
+      Column grow:1
+        Text "Team meeting starts at 3:00 PM" style:body
+        Text "1 hour ago" style:caption color:muted
+    Row id:n4 padding:12,16 direction:row gap:12 align:center
+      animation type:slide-in from:right distance:24 opacity:0->1 duration:300ms delay:360ms easing:ease-out
+      Avatar icon:"shield" size:36 color:red
+      Column grow:1
+        Text "New login from a Chrome browser" style:body
+        Text "3 hours ago" style:caption color:muted
+    Row id:n5 padding:12,16 direction:row gap:12 align:center
+      animation type:slide-in from:right distance:24 opacity:0->1 duration:300ms delay:480ms easing:ease-out
+      Avatar icon:"download" size:36 color:purple
+      Column grow:1
+        Text "Your export is ready to download" style:body
+        Text "Yesterday" style:caption color:muted

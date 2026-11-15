@@ -1,0 +1,32 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/ic/comparison.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [
+  "ComparisonTable",
+  "Details",
+  "PhotoGallery"
+ ],
+ "before": {
+  "problems": 0,
+  "texts": 33
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 327.8,
+   "problems": 6,
+   "ops": 75
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 25.8,
+   "problems": 0,
+   "ops": 76
+  }
+ ],
+ "final": 2,
+ "problems": 0,
+ "status": "passed"
+}

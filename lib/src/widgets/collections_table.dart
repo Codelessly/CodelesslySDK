@@ -432,10 +432,15 @@ class RenderRunningTable extends RenderBox
     }
   }
 
-  // --- paint: the body, then what is pinned over it ---
+  // --- paint: in layout order, what is pinned first ---
 
-  /// The four parts: (rows pinned, columns pinned), in paint order.
-  static const _parts = [(false, false), (true, false), (false, true), (true, true)];
+  /// The four parts: (rows pinned, columns pinned), in paint order: the
+  /// pinned corner, the pinned header row, the pinned header column, then
+  /// the scrolled cells, as a header above (or beside) a list paints in
+  /// Flutter. Each part is clipped to its own area, so the order only shows
+  /// where two meet on a fractional edge: there the cells paint over the
+  /// header's last fraction of a pixel, as a list under a header does.
+  static const _parts = [(true, true), (true, false), (false, true), (false, false)];
 
   Rect _clipOf(bool rowsPinned, bool columnsPinned) => Rect.fromLTRB(
         columnsPinned ? 0 : _pinnedWidth,
@@ -530,8 +535,8 @@ class RenderRunningTable extends RenderBox
 
   @override
   bool hitTestChildren(BoxHitTestResult result, {required Offset position}) {
-    // What is pinned is on top.
-    for (final (rowsPinned, columnsPinned) in _parts.reversed) {
+    // What is pinned first (the parts' areas don't overlap).
+    for (final (rowsPinned, columnsPinned) in _parts) {
       if (rowsPinned && !pinHeaderRow || columnsPinned && !pinHeaderColumn) continue;
       if (!_clipOf(rowsPinned, columnsPinned).contains(position)) continue;
       final children = getChildrenAsList();

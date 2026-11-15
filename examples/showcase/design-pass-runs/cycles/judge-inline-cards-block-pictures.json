@@ -1,0 +1,246 @@
+{
+ "what": "Eight of the inline cards: the recorded pass (recorded), the pass with --blocks (blocks), with --blocks and pictures of the three closest blocks (blockpics; itinerary and weather were refused by the checks and are absent).",
+ "judges": "Judges: Opus and Sonnet subagents of a Claude Code session, shown the versions unlabeled and shuffled (ways.py pack); not judge.py, because no API key was at hand.",
+ "judgments": [
+  {
+   "case": "approval",
+   "judge": "opus",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "recorded"
+   ],
+   "scores": {
+    "blocks": 7,
+    "blockpics": 8,
+    "recorded": 6
+   },
+   "why": "B is the cleanest and most consistent, with a trash icon that fits the action and simple balanced buttons; A is nearly as good but busier with button icons; C has uneven value type sizes and a cramped icon-less detail list."
+  },
+  {
+   "case": "approval",
+   "judge": "sonnet",
+   "rank": [
+    "blocks",
+    "recorded",
+    "blockpics"
+   ],
+   "scores": {
+    "blocks": 8,
+    "blockpics": 7,
+    "recorded": 7
+   },
+   "why": "A has consistent icons, balanced buttons and clear hierarchy; C has nice asymmetric CTA but no row icons and tight spacing; B has mismatched icons."
+  },
+  {
+   "case": "comparison",
+   "judge": "opus",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "recorded"
+   ],
+   "scores": {
+    "blockpics": 8,
+    "blocks": 7,
+    "recorded": 5
+   },
+   "why": "A has the clearest hierarchy with bolded winners and check badges and a calm recommendation; B is solid but its heavy dark promo card clashes with the rest; C has undersized buttons, a price smaller than other values, and headers floating outside the table panel."
+  },
+  {
+   "case": "comparison",
+   "judge": "sonnet",
+   "rank": [
+    "blocks",
+    "recorded",
+    "blockpics"
+   ],
+   "scores": {
+    "blockpics": 6,
+    "blocks": 8,
+    "recorded": 7
+   },
+   "why": "B has a clear table panel and a strong recommendation callout with good CTAs; C is tidy but its buttons are small and the callout is weak; A has an odd grayed Max price and a flat, dense layout."
+  },
+  {
+   "case": "dashboard",
+   "judge": "opus",
+   "rank": [
+    "blocks",
+    "blockpics",
+    "recorded"
+   ],
+   "scores": {
+    "blocks": 6,
+    "blockpics": 5,
+    "recorded": 2
+   },
+   "why": "A is polished with a clear selected period and good charts though its table is empty; C matches it but loses the selected segment state and has an equally empty table; B is broken with stray brace characters in place of every metric and revenue value."
+  },
+  {
+   "case": "dashboard",
+   "judge": "sonnet",
+   "rank": [
+    "blocks",
+    "blockpics",
+    "recorded"
+   ],
+   "scores": {
+    "blocks": 7,
+    "recorded": 3,
+    "blockpics": 6
+   },
+   "why": "A and C share polished KPI cards and charts but both show an empty table, with C also losing the segmented control selected state; B is broken with KPI values and revenue cells rendering as stray braces and a flat chart."
+  },
+  {
+   "case": "flights",
+   "judge": "opus",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "recorded"
+   ],
+   "scores": {
+    "blockpics": 8,
+    "blocks": 8,
+    "recorded": 6
+   },
+   "why": "A and C are effectively identical, with a rich route visualization, clear selection, and a strong total bar despite truncating the TAP name; B is clean and untruncated but flatter, with a squashed thin confirm button and an oversized total row."
+  },
+  {
+   "case": "flights",
+   "judge": "sonnet",
+   "rank": [
+    "recorded",
+    "blockpics",
+    "blocks"
+   ],
+   "scores": {
+    "blockpics": 6,
+    "recorded": 7,
+    "blocks": 6
+   },
+   "why": "B is clean, full-width and untruncated; A and C are identical, richer with timeline and dark CTA bar but the card sits narrow and off-center in the frame and the airline name is truncated."
+  },
+  {
+   "case": "itinerary",
+   "judge": "opus",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "recorded"
+   ],
+   "scores": {
+    "blockpics": 8,
+    "blocks": 7,
+    "recorded": 4
+   },
+   "why": "C reads as a polished product with a time-aligned timeline, titled hero banners, and progress counts; A is clean but repetitive with stacked grey rows; B expands every stop into a very long scroll, appears cut off, and its transit line runs to the card edge."
+  },
+  {
+   "case": "itinerary",
+   "judge": "sonnet",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "recorded"
+   ],
+   "scores": {
+    "blocks": 7,
+    "recorded": 5,
+    "blockpics": 9
+   },
+   "why": "C uses a compact timeline with hero day headers and a progress count on book-ahead, looking shipped; A is tidy but repetitive with flat banners; B expands every item into a very long page and its transit text nearly touches the edge."
+  },
+  {
+   "case": "order_summary",
+   "judge": "opus",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "recorded"
+   ],
+   "scores": {
+    "blockpics": 8,
+    "blocks": 6,
+    "recorded": 5
+   },
+   "why": "A looks shipped with real product illustrations, smart trash-at-one steppers, and a strong total bar; B is tidy but uses generic image placeholders that read unfinished; C repeats cart icons and has squashed, undersized action buttons."
+  },
+  {
+   "case": "order_summary",
+   "judge": "sonnet",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "recorded"
+   ],
+   "scores": {
+    "blockpics": 9,
+    "blocks": 7,
+    "recorded": 6
+   },
+   "why": "A has product illustrations, smart trash-at-one stepper and a strong total/CTA bar; B is clean but with generic placeholder images; C uses repeated cart icons and a tiny Cancel button beside a cramped CTA."
+  },
+  {
+   "case": "reservation",
+   "judge": "opus",
+   "rank": [
+    "recorded",
+    "blocks",
+    "blockpics"
+   ],
+   "scores": {
+    "recorded": 7,
+    "blocks": 7,
+    "blockpics": 6
+   },
+   "why": "Nearly identical layouts; A edges ahead with an info icon on the hint and a well-framed footer icon, B is equally tidy but slightly plainer, and C has a flatter, less finished footer row."
+  },
+  {
+   "case": "reservation",
+   "judge": "sonnet",
+   "rank": [
+    "recorded",
+    "blocks",
+    "blockpics"
+   ],
+   "scores": {
+    "recorded": 7,
+    "blocks": 7,
+    "blockpics": 6
+   },
+   "why": "Nearly identical; A adds an info icon on the legend and a more balanced footer, B is similar with a slightly larger title, C has a flatter footer without an icon tile."
+  },
+  {
+   "case": "weather",
+   "judge": "opus",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "recorded"
+   ],
+   "scores": {
+    "blockpics": 8,
+    "blocks": 7,
+    "recorded": 4
+   },
+   "why": "A is the most polished with a location pin, clear high/low chips, and varied accurate icons; B is close but its Portugal subtitle is low-contrast on blue and its icons less distinct; C has empty temperature range bars that look broken and a plainer, less finished hero."
+  },
+  {
+   "case": "weather",
+   "judge": "sonnet",
+   "rank": [
+    "blockpics",
+    "blocks",
+    "recorded"
+   ],
+   "scores": {
+    "blockpics": 9,
+    "blocks": 8,
+    "recorded": 5
+   },
+   "why": "A has a polished hero with location pin and pill chips plus richer icons and range bars; B is nearly as good but its header is slightly heavier; C is plain with crude icons and empty range bars."
+  }
+ ]
+}

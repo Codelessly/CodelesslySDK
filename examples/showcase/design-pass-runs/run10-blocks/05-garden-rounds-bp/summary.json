@@ -1,0 +1,32 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/run10/05-garden-rounds/before.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [
+  "TotalBar",
+  "Receipt",
+  "PlanStep"
+ ],
+ "before": {
+  "problems": 0,
+  "texts": 14
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 225.6,
+   "problems": 1,
+   "ops": 47
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 221.6,
+   "problems": 4,
+   "ops": 47
+  }
+ ],
+ "final": 1,
+ "problems": 1,
+ "status": "failed"
+}

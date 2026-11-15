@@ -1,0 +1,95 @@
+Screen "Wallet" background:#F6F7F9 layout:column
+  Header layout:row align:center justify:space-between padding:16,20
+    Title "Wallet" size:28 weight:bold color:#111
+    IconButton icon:scan label:"Scan to pay" size:44 shape:circle background:#FFFFFF shadow:soft
+      onTap action:open-scanner
+  Scroll direction:vertical flex:1 padding-bottom:88
+    CardCarousel direction:horizontal swipe:true snap:center peek:24 gap:12 padding:0,20 initial-index:0
+      indicator type:dots position:below active-color:#111 inactive-color:#CCC
+      motion on:swipe transform:scale active:1.0 inactive:0.94 duration:200ms easing:ease-out
+      Card id:chase radius:20 height:180 padding:20 background:gradient(#1A3A6B,#2E6FD8) color:#FFF layout:column justify:space-between
+        Row justify:space-between align:center
+          Text "Chase Sapphire" size:17 weight:semibold
+          Icon icon:contactless
+        Column
+          Text "Available balance" size:12 opacity:0.7
+          Text "$3,482.16" size:30 weight:bold
+        Text "•••• 8812" size:15 letter-spacing:2
+      Card id:apple radius:20 height:180 padding:20 background:gradient(#F2F2F4,#D9DADF) color:#111 layout:column justify:space-between
+        Row justify:space-between align:center
+          Text "Apple Card" size:17 weight:semibold
+          Icon icon:apple-logo
+        Column
+          Text "Current balance" size:12 opacity:0.6
+          Text "$912.40" size:30 weight:bold
+        Text "•••• 1290" size:15 letter-spacing:2
+      Card id:amex radius:20 height:180 padding:20 background:gradient(#C9A24B,#8E6B1E) color:#FFF layout:column justify:space-between
+        Row justify:space-between align:center
+          Text "Amex Gold" size:17 weight:semibold
+          Icon icon:contactless
+        Column
+          Text "Current balance" size:12 opacity:0.8
+          Text "$1,205.73" size:30 weight:bold
+        Text "•••• 3005" size:15 letter-spacing:2
+    QuickActions layout:row justify:space-between padding:20,20
+      Action layout:column align:center gap:8
+        IconButton icon:arrow-up-right size:56 shape:circle background:#111 color:#FFF
+          onTap action:navigate target:send
+          motion on:press transform:scale to:0.92 duration:100ms
+        Text "Send" size:13 weight:medium
+      Action layout:column align:center gap:8
+        IconButton icon:arrow-down-left size:56 shape:circle background:#111 color:#FFF
+          onTap action:navigate target:request
+          motion on:press transform:scale to:0.92 duration:100ms
+        Text "Request" size:13 weight:medium
+      Action layout:column align:center gap:8
+        IconButton icon:plus size:56 shape:circle background:#111 color:#FFF
+          onTap action:navigate target:top-up
+          motion on:press transform:scale to:0.92 duration:100ms
+        Text "Top up" size:13 weight:medium
+      Action layout:column align:center gap:8
+        IconButton icon:receipt size:56 shape:circle background:#111 color:#FFF
+          onTap action:navigate target:pay-bills
+          motion on:press transform:scale to:0.92 duration:100ms
+        Text "Pay bills" size:13 weight:medium
+    Section padding:0,20
+      Row justify:space-between align:center margin-bottom:8
+        Text "Recent activity" size:18 weight:bold
+        TextButton "See all" color:#2E6FD8 size:14
+      List background:#FFFFFF radius:16 divider:inset
+        ListItem layout:row align:center gap:12 padding:12,16
+          Avatar icon:coffee size:44 shape:circle background:#E8F3EC color:#1E7A46
+          Column flex:1
+            Text "Starbucks" size:16 weight:medium
+            Text "Today, 8:42 AM" size:13 color:#8A8F98
+          Text "-$6.45" size:16 weight:semibold color:#D93025
+        ListItem layout:row align:center gap:12 padding:12,16
+          Avatar icon:briefcase size:44 shape:circle background:#E6F4EA color:#1E8E3E
+          Column flex:1
+            Text "Salary" size:16 weight:medium
+            Text "Yesterday" size:13 color:#8A8F98
+          Text "+$4,250.00" size:16 weight:semibold color:#1E8E3E
+        ListItem layout:row align:center gap:12 padding:12,16
+          Avatar icon:car size:44 shape:circle background:#EEE color:#111
+          Column flex:1
+            Text "Uber" size:16 weight:medium
+            Text "Yesterday" size:13 color:#8A8F98
+          Text "-$18.20" size:16 weight:semibold color:#D93025
+        ListItem layout:row align:center gap:12 padding:12,16
+          Avatar icon:play size:44 shape:circle background:#FDE8E8 color:#E50914
+          Column flex:1
+            Text "Netflix" size:16 weight:medium
+            Text "Mar 12" size:13 color:#8A8F98
+          Text "-$15.49" size:16 weight:semibold color:#D93025
+        ListItem layout:row align:center gap:12 padding:12,16
+          Avatar icon:user size:44 shape:circle background:#E3F0FD color:#2E6FD8
+          Column flex:1
+            Text "Venmo from Alex" size:16 weight:medium
+            Text "Mar 10" size:13 color:#8A8F98
+          Text "+$40.00" size:16 weight:semibold color:#1E8E3E
+        onTap item action:open-transaction-detail
+  BottomNav position:fixed-bottom height:72 background:#FFFFFF border-top:1,#E5E7EB layout:row justify:space-around align:center
+    NavItem icon:wallet label:"Wallet" state:selected color:#111
+    NavItem icon:chart label:"Activity" color:#8A8F98
+    NavItem icon:credit-card label:"Cards" color:#8A8F98
+    NavItem icon:user label:"Profile" color:#8A8F98

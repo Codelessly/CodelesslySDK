@@ -1,0 +1,43 @@
+Card
+  padding:16 radius:12 elevation:2 width:fill
+  Header
+    Text "Employees" style:title
+    Text "5 people · sorted by Salary, high to low" style:caption color:muted
+  Table sortBy:salary sortDirection:descending
+    HeaderRow
+      HeaderCell "Name" key:name sortable:true sortIcon:arrow-up-down state:inactive align:left
+      HeaderCell "Department" key:department sortable:true sortIcon:arrow-up-down state:inactive align:left
+      HeaderCell "Start date" key:startDate sortable:true sortIcon:arrow-up-down state:inactive align:left
+      HeaderCell "Salary" key:salary sortable:true sortIcon:arrow-down state:active sortDirection:descending align:right weight:bold
+    Row
+      Cell "Priya Shah"
+      Cell "Engineering"
+      Cell "2021-03-14"
+      Cell "$142,000" align:right
+    Row
+      Cell "Tom Becker"
+      Cell "Engineering"
+      Cell "2023-01-09"
+      Cell "$131,000" align:right
+    Row
+      Cell "Marcus Lee"
+      Cell "Design"
+      Cell "2022-07-01"
+      Cell "$118,500" align:right
+    Row
+      Cell "Aisha Khan"
+      Cell "Finance"
+      Cell "2020-05-18"
+      Cell "$109,750" align:right
+    Row
+      Cell "Elena Rossi"
+      Cell "Sales"
+      Cell "2019-11-20"
+      Cell "$96,000" align:right
+  Behavior
+    onClick target:HeaderCell action:sort cycle:ascending,descending
+    onSortChange arrow:rotate duration:150ms
+    onSortChange rows:reorder animation:slide duration:250ms easing:ease-in-out
+    onHover target:HeaderCell cursor:pointer background:subtle
+    onHover target:Row background:subtle
+    numericColumns:salary dateColumns:startDate sortAs:number,date

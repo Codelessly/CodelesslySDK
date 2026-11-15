@@ -18,7 +18,7 @@
    "decoration": {
     "fills": [
      {
-      "color": "#FFFFFFFF"
+      "color": "#FFF3F4F6"
      }
     ]
    }
@@ -279,7 +279,6 @@
    },
    "props": {
     "value": "sort",
-    "desc": "desc",
     "columns": [
      "Plan",
      "Subs",
@@ -292,6 +291,9 @@
      "revenue",
      "churn"
     ]
+   },
+   "bind": {
+    "props.desc": "${desc}"
    }
   },
   "listView1": {

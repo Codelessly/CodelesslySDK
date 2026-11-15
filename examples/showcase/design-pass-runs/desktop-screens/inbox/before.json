@@ -1,0 +1,1563 @@
+{
+ "schema": 3,
+ "roots": [
+  "inbox"
+ ],
+ "nodes": {
+  "inbox": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": 1280,
+    "height": 800
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ]
+   },
+   "children": [
+    "column1",
+    "divider1",
+    "column2",
+    "divider3",
+    "column6"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 210,
+    "height": {
+     "fill": 0
+    },
+    "padding": 12
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "subtleFill"
+     }
+    ]
+   },
+   "children": [
+    "text1",
+    "spacer1",
+    "filledButton1",
+    "spacer2",
+    "row2",
+    "row3",
+    "row4",
+    "row5",
+    "row6"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "sectionTitle"
+    },
+    "text": "Northwind Support"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "height": 8,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Compose",
+    "icon": "edit"
+   }
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "height": 8,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= folder==\"Inbox\"?theme.colors.primaryTint:\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "Inbox"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "icon1",
+    "text2",
+    "spacer3",
+    "text3"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "inbox"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Inbox",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "${= count(convos,x=>x.unread)}"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= folder==\"Assigned\"?theme.colors.primaryTint:\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "Assigned"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "icon2",
+    "text4",
+    "spacer4",
+    "text5"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "person"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Assigned to me",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer4": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "4"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= folder==\"Waiting\"?theme.colors.primaryTint:\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "Waiting"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "icon3",
+    "text6",
+    "spacer5",
+    "text7"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "schedule"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Waiting",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer5": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "${= count(convos,x=>x.status=='Waiting')}"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= folder==\"Resolved\"?theme.colors.primaryTint:\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "Resolved"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "icon4",
+    "text8",
+    "spacer6",
+    "text9"
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check_circle"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Resolved",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer6": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "${= count(convos,x=>x.status=='Resolved')}"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= folder==\"Spam\"?theme.colors.primaryTint:\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "Spam"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "icon5",
+    "text10",
+    "spacer7",
+    "text11"
+   ]
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "report"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Spam",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer7": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "12"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": 390,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row7",
+    "divider2",
+    "column3"
+   ]
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     16,
+     14,
+     16,
+     14
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text12",
+    "text13"
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "sectionTitle"
+    },
+    "text": "${folder}"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "${= count(convos,x=>x.unread)} unread"
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${convos}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row8"
+   ]
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==item.id?theme.colors.infoTint:theme.colors.primaryBackground}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item.id}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "cur",
+       "value": "${= item}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "convos",
+       "value": "${= updateWhere(convos,x=>x.id==item.id,x=>with(x,\"unread\",false))}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "column4",
+    "column5"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 4,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item.unread?theme.primary:\"#00000000\"}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row9",
+    "text16",
+    "text17"
+   ]
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text14",
+    "text15"
+   ]
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "${item.from}"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${item.time}"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle"
+    },
+    "text": "${item.subject}"
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted",
+     "fontSize": 12
+    },
+    "text": "${item.snippet}"
+   }
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "padding": 24,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row10",
+    "divider4",
+    "text21",
+    "text22",
+    "spacer8",
+    "divider5",
+    "text23",
+    "TextArea1",
+    "row12"
+   ]
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column7",
+    "row11"
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text18",
+    "text19"
+   ]
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading2"
+    },
+    "text": "${cur.subject}"
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "${cur.from} · ${cur.email}"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "infoTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "infoTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text20"
+   ]
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${cur.status}",
+    "style": {
+     "from": "badge",
+     "color": "info"
+    }
+   }
+  },
+  "divider4": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${cur.time}"
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${cur.body}",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer8": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "divider5": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "fieldLabel"
+    },
+    "text": "Reply to ${cur.from}"
+   }
+  },
+  "TextArea1": {
+   "type": "TextArea",
+   "layout": {
+    "height": 130,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "placeholder": "Write your reply…",
+    "value": "reply"
+   }
+  },
+  "row12": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton1",
+    "filledButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Close ticket"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "convos",
+       "value": "${= updateWhere(convos,x=>x.id==cur.id,x=>with(x,\"status\",\"Resolved\"))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "cur",
+       "value": "${= with(cur,\"status\",\"Resolved\")}"
+      },
+      {
+       "type": "showToast",
+       "message": "Ticket closed"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send"
+   },
+   "bind": {
+    "props.enabled": "${= trim(reply)!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "convos",
+       "value": "${= updateWhere(convos,x=>x.id==cur.id,x=>with(x,\"status\",\"Waiting\"))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "cur",
+       "value": "${= with(cur,\"status\",\"Waiting\")}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": ""
+      },
+      {
+       "type": "showToast",
+       "message": "Reply sent"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "inbox": [
+   {
+    "name": "folder",
+    "type": "text",
+    "value": "Inbox"
+   },
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "reply",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "cur",
+    "type": "map",
+    "value": {
+     "id": 1,
+     "from": "Priya Raman",
+     "email": "priya.raman@brightlane.io",
+     "subject": "Invoice charged twice for March",
+     "time": "9:42 AM",
+     "unread": false,
+     "status": "Open",
+     "body": "Hi team, I noticed two charges of $49.00 on my card for the March billing cycle, both dated March 3rd. I only have one workspace on the Team plan. Could you refund the duplicate? I've attached a screenshot of my bank statement. Thanks, Priya"
+    }
+   },
+   {
+    "name": "convos",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "from": "Priya Raman",
+      "email": "priya.raman@brightlane.io",
+      "subject": "Invoice charged twice for March",
+      "snippet": "Hi team, I noticed two charges of $49.00 on my card…",
+      "time": "9:42 AM",
+      "unread": true,
+      "status": "Open",
+      "body": "Hi team, I noticed two charges of $49.00 on my card for the March billing cycle, both dated March 3rd. I only have one workspace on the Team plan. Could you refund the duplicate? I've attached a screenshot of my bank statement. Thanks, Priya"
+     },
+     {
+      "id": 2,
+      "from": "Marcus Eilert",
+      "email": "marcus@eilertdesign.com",
+      "subject": "Can't reset my password",
+      "snippet": "The reset email never arrives, I've checked spam twice…",
+      "time": "9:15 AM",
+      "unread": true,
+      "status": "Open",
+      "body": "The reset email never arrives. I've checked spam twice and tried three times in the last hour. My account email is marcus@eilertdesign.com. Is there a problem with your mail delivery today?"
+     },
+     {
+      "id": 3,
+      "from": "Dana Whitfield",
+      "email": "dana.w@northwindlabs.com",
+      "subject": "SSO login loops back to sign-in",
+      "snippet": "After we switched to Okta, users bounce back to the…",
+      "time": "8:51 AM",
+      "unread": true,
+      "status": "Open",
+      "body": "After we switched our identity provider to Okta yesterday, users bounce back to the sign-in page after authenticating. About 40 people on our team are blocked. Our SAML ACS URL hasn't changed. Please escalate if needed."
+     },
+     {
+      "id": 4,
+      "from": "Tomás Herrera",
+      "email": "tomas.herrera@cobaltfreight.co",
+      "subject": "Feature request: export reports to CSV",
+      "snippet": "We'd love to download the weekly shipment report as…",
+      "time": "8:20 AM",
+      "unread": false,
+      "status": "Open",
+      "body": "We'd love to download the weekly shipment report as a CSV file. Right now my team copies the table into a spreadsheet by hand every Monday, which takes about an hour. Is this on the roadmap?"
+     },
+     {
+      "id": 5,
+      "from": "Aiko Tanaka",
+      "email": "aiko@lumenapps.jp",
+      "subject": "Re: API rate limit increase",
+      "snippet": "Thanks for the quick reply. We expect roughly 2,000…",
+      "time": "Yesterday",
+      "unread": false,
+      "status": "Waiting",
+      "body": "Thanks for the quick reply. We expect roughly 2,000 requests per minute during our launch next Thursday, up from the current 600 limit. Can you confirm the increase will be in place by Wednesday evening?"
+     },
+     {
+      "id": 6,
+      "from": "Greg Olawale",
+      "email": "greg.olawale@mailbox.org",
+      "subject": "Please cancel my subscription",
+      "snippet": "I'm moving to a different tool and would like to cancel…",
+      "time": "Yesterday",
+      "unread": true,
+      "status": "Open",
+      "body": "I'm moving to a different tool and would like to cancel my subscription before the next renewal on the 18th. Please confirm once it's done and let me know how to export my data first."
+     },
+     {
+      "id": 7,
+      "from": "Sofia Lindqvist",
+      "email": "sofia.lindqvist@fjordstudio.se",
+      "subject": "Mobile app crashes on launch",
+      "snippet": "Since the 4.2 update on my Pixel 8 the app closes right…",
+      "time": "Yesterday",
+      "unread": false,
+      "status": "Open",
+      "body": "Since the 4.2 update on my Pixel 8 the app closes right after the splash screen. I've reinstalled it and cleared the cache, with no luck. Android 15, app version 4.2.0."
+     },
+     {
+      "id": 8,
+      "from": "Hannah Boyd",
+      "email": "hboyd@meridianclinic.org",
+      "subject": "Team seats not showing up",
+      "snippet": "We bought 5 extra seats this morning but the admin page…",
+      "time": "Mon",
+      "unread": false,
+      "status": "Waiting",
+      "body": "We bought 5 extra seats this morning but the admin page still shows 10 total instead of 15. The payment went through and I have the receipt. Can someone take a look?"
+     },
+     {
+      "id": 9,
+      "from": "Raj Patel",
+      "email": "raj.patel@quillworks.dev",
+      "subject": "Thanks, that fixed it!",
+      "snippet": "Clearing the browser cache did the trick. Really…",
+      "time": "Mon",
+      "unread": false,
+      "status": "Resolved",
+      "body": "Clearing the browser cache did the trick. Really appreciate the fast help and the clear steps. Feel free to close this one out."
+     },
+     {
+      "id": 10,
+      "from": "Elena Petrova",
+      "email": "elena.petrova@kestrelbank.eu",
+      "subject": "Data processing agreement request",
+      "snippet": "Our legal team needs a signed DPA before we can roll…",
+      "time": "Sun",
+      "unread": false,
+      "status": "Open",
+      "body": "Our legal team needs a signed data processing agreement before we can roll out to the EU offices. Could you send over your standard DPA, along with your list of sub-processors?"
+     }
+    ]
+   }
+  ]
+ }
+}

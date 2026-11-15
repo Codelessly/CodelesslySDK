@@ -1,0 +1,23 @@
+Card gap:12
+  Row between middle
+    Text.heading "Storage"
+    Text.muted "182 of 256 GB used"
+  Row h:12 gap:2
+    Box grow:84 h:12 fill:#FF4285F4 radius:6
+    Box grow:62 h:12 fill:#FFF9AB00 radius:6
+    Box grow:36 h:12 fill:#FF9AA0A6 radius:6
+    Box grow:74 h:12 fill:#FFE8EAED radius:6
+  Row between
+    Row gap:6 middle
+      Box w:10 h:10 fill:#FF4285F4 radius:5
+      Text.small "Photos"
+      Text.muted "84 GB"
+    Row gap:6 middle
+      Box w:10 h:10 fill:#FFF9AB00 radius:5
+      Text.small "Apps"
+      Text.muted "62 GB"
+    Row gap:6 middle
+      Box w:10 h:10 fill:#FF9AA0A6 radius:5
+      Text.small "Other"
+      Text.muted "36 GB"
+  Text.caption "74 GB free"

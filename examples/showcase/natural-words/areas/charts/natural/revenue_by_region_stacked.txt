@@ -1,0 +1,32 @@
+Card
+  padding:24 radius:16 background:white shadow:soft width:640
+  Header
+    Column gap:4
+      Text "Quarterly Revenue by Region" style:title
+      Text "2026 · USD millions" style:caption color:gray
+    Badge "Total $12.3M" color:neutral align:right
+  Legend position:top-left direction:row gap:16 interactive:true
+    LegendItem "North America" swatch:#2F6FED
+    LegendItem "Europe" swatch:#19B38A
+    LegendItem "APAC" swatch:#F5A524
+  StackedBarChart height:320 stack-order:[North America, Europe, APAC] bar-radius:4 bar-gap:32
+    YAxis label:"Revenue ($M)" min:0 max:4 step:1 format:"$#M" gridlines:dashed
+    XAxis categories:[Q1, Q2, Q3, Q4]
+    Series "North America" color:#2F6FED values:[1.2, 1.4, 1.5, 1.7]
+    Series "Europe" color:#19B38A values:[0.8, 0.9, 1.0, 1.1]
+    Series "APAC" color:#F5A524 values:[0.5, 0.6, 0.7, 0.9]
+    SegmentLabels show:true format:"$#.#M" color:white size:12
+    TotalLabels position:above-bar weight:bold format:"$#.#M"
+      Total category:Q1 text:"$2.5M"
+      Total category:Q2 text:"$2.9M"
+      Total category:Q3 text:"$3.2M"
+      Total category:Q4 text:"$3.7M"
+    Tooltip trigger:hover content:"region, quarter, value, share of quarter"
+    Animation on:load type:grow-from-baseline duration:700ms easing:ease-out stagger:100ms
+    Hover target:segment effect:highlight-and-dim-others duration:150ms
+  Footer
+    Divider
+    Row distribution:space-between
+      Text "North America $5.8M" color:#2F6FED
+      Text "Europe $3.8M" color:#19B38A
+      Text "APAC $2.7M" color:#F5A524

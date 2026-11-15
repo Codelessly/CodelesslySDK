@@ -1,0 +1,80 @@
+Screen "Listen Now" background:#0F0F12 scroll:vertical safe-area:true
+  Header layout:row align:center justify:space-between padding:16,12
+    Title "Listen Now" style:largeTitle weight:bold color:#FFFFFF
+    Avatar image:"profile.jpg" size:36 shape:circle fallback:initials action:open-profile accessibility-label:"Profile"
+  Section "Continue listening" gap:12 padding-x:16
+    Heading "Continue listening" style:title2 weight:semibold color:#FFFFFF
+    Card id:continue radius:16 background:#1C1C22 padding:12 layout:row gap:12 action:resume-episode press:scale(0.98) 
+      Image source:"daily-grind-cover.jpg" size:72 radius:12
+      Column grow:1 gap:6
+        Label "THE DAILY GRIND" style:caption color:#9A9AA5 letter-spacing:1
+        Text "Ep. 214: Coffee Economics" style:headline color:#FFFFFF lines:2
+        ProgressBar value:0.671 max:1 height:4 track:#3A3A44 fill:#FF6B35 radius:2 animate:width duration:300ms
+        Row justify:space-between
+          Text "32:10" style:caption color:#9A9AA5 live:true
+          Text "15:50 left" style:caption color:#9A9AA5 live:true
+        Note "Progress of 32:10 of 48:00" accessibility-only:true
+      IconButton icon:play-circle-fill size:44 color:#FF6B35 state:paused toggles:pause-circle-fill action:toggle-playback
+  Section "Top Shows" gap:12
+    Row padding-x:16 justify:space-between align:center
+      Heading "Top Shows" style:title2 weight:semibold color:#FFFFFF
+      Link "See All" color:#FF6B35 action:open-top-shows
+    ScrollView direction:horizontal snap:start show-indicator:false padding-x:16 gap:14
+      ShowTile width:132 action:open-show press:scale(0.96)
+        Image source:"hardcore-history.jpg" size:132 radius:14 placeholder:shimmer
+        Text "Hardcore History" style:subhead color:#FFFFFF lines:1
+      ShowTile width:132 action:open-show press:scale(0.96)
+        Image source:"radiolab.jpg" size:132 radius:14 placeholder:shimmer
+        Text "Radiolab" style:subhead color:#FFFFFF lines:1
+      ShowTile width:132 action:open-show press:scale(0.96)
+        Image source:"99-percent-invisible.jpg" size:132 radius:14 placeholder:shimmer
+        Text "99% Invisible" style:subhead color:#FFFFFF lines:1
+      ShowTile width:132 action:open-show press:scale(0.96)
+        Image source:"reply-all.jpg" size:132 radius:14 placeholder:shimmer
+        Text "Reply All" style:subhead color:#FFFFFF lines:1
+  Section "New Episodes" gap:4 padding-bottom:140
+    Heading "New Episodes" style:title2 weight:semibold color:#FFFFFF padding-x:16
+    List divider:inset color-divider:#2A2A32 enter-animation:fade-up stagger:50ms
+      EpisodeRow layout:row gap:12 padding:12,16 action:open-episode press:highlight(#1C1C22)
+        Image source:"hardcore-history.jpg" size:56 radius:10
+        Column grow:1 gap:2
+          Text "Hardcore History" style:caption color:#9A9AA5
+          Text "Supernova in the East VI" style:body weight:medium color:#FFFFFF lines:2
+          Text "3 hr 12 min · Today" style:caption color:#9A9AA5
+        IconButton icon:plus-circle size:28 color:#9A9AA5 action:add-to-queue toggled-icon:checkmark-circle
+      EpisodeRow layout:row gap:12 padding:12,16 action:open-episode press:highlight(#1C1C22)
+        Image source:"radiolab.jpg" size:56 radius:10
+        Column grow:1 gap:2
+          Text "Radiolab" style:caption color:#9A9AA5
+          Text "The Fifth Taste" style:body weight:medium color:#FFFFFF lines:2
+          Text "47 min · Yesterday" style:caption color:#9A9AA5
+        IconButton icon:plus-circle size:28 color:#9A9AA5 action:add-to-queue toggled-icon:checkmark-circle
+      EpisodeRow layout:row gap:12 padding:12,16 action:open-episode press:highlight(#1C1C22)
+        Image source:"99-percent-invisible.jpg" size:56 radius:10
+        Column grow:1 gap:2
+          Text "99% Invisible" style:caption color:#9A9AA5
+          Text "The Pool Problem" style:body weight:medium color:#FFFFFF lines:2
+          Text "29 min · Mar 12" style:caption color:#9A9AA5
+        IconButton icon:plus-circle size:28 color:#9A9AA5 action:add-to-queue toggled-icon:checkmark-circle
+      EpisodeRow layout:row gap:12 padding:12,16 action:open-episode press:highlight(#1C1C22)
+        Image source:"reply-all.jpg" size:56 radius:10
+        Column grow:1 gap:2
+          Text "Reply All" style:caption color:#9A9AA5
+          Text "The Case of the Missing Hit" style:body weight:medium color:#FFFFFF lines:2
+          Text "52 min · Mar 10" style:caption color:#9A9AA5
+        IconButton icon:plus-circle size:28 color:#9A9AA5 action:add-to-queue toggled-icon:checkmark-circle
+  MiniPlayer id:mini position:fixed bottom:tab-bar-height height:64 margin-x:8 radius:14 background:#26262E blur:true shadow:0,-2,12,#00000066 action:expand-player enter:slide-up duration:300ms easing:ease-out gesture:swipe-up→expand, swipe-down→dismiss
+    ProgressBar value:0.671 position:top height:2 fill:#FF6B35 track:transparent
+    Row align:center gap:12 padding:8,12
+      Image source:"daily-grind-cover.jpg" size:44 radius:8
+      Column grow:1
+        Text "Ep. 214: Coffee Economics" style:subhead weight:medium color:#FFFFFF lines:1 marquee:when-overflow
+        Text "The Daily Grind" style:caption color:#9A9AA5 lines:1
+      IconButton icon:play-fill size:32 color:#FFFFFF state:paused toggles:pause-fill action:toggle-playback press:scale(0.9)
+      IconButton icon:goforward-30 size:28 color:#FFFFFF action:skip-forward-30
+  TabBar position:fixed bottom:0 height:56 background:#16161B blur:true border-top:#2A2A32 safe-area-bottom:true
+    Tab "Home" icon:house-fill selected:true color-selected:#FF6B35 color:#9A9AA5 action:navigate-home
+    Tab "Browse" icon:square-grid-2x2 color:#9A9AA5 color-selected:#FF6B35 action:navigate-browse
+    Tab "Library" icon:books-vertical color:#9A9AA5 color-selected:#FF6B35 action:navigate-library badge:none
+    Tab "Search" icon:magnifyingglass color:#9A9AA5 color-selected:#FF6B35 action:navigate-search
+    transition:selection icon-bounce duration:200ms

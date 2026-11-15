@@ -1,0 +1,1 @@
+A desktop CRM contacts screen: a left sidebar with the app name and five navigation items, a top bar with search and an Add contact button, a table of eight contacts (name, company, stage badge, owner, last contact, deal value), and a right-hand detail panel for the selected contact with notes and next steps.

@@ -1,0 +1,34 @@
+state to="landlord@example.com"
+state subject="Heating not working in my apartment"
+state tone="Polite"
+state body="Hi,\n\nI hope you're well. The heating in my apartment has stopped working. Could you please arrange for someone to take a look as soon as you're able? I'm happy to work around your schedule for access.\n\nThank you very much,\nAlex"
+state sent=false
+state discarded=false
+state valid=true
+
+Card w:390 gap:12
+  if sent
+    Row gap:8 middle
+      Icon "check_circle"
+      Text.heading "Email sent"
+    Text.muted "To: {to}"
+    Text.strong "{subject}"
+    Text.body "{body}"
+  if discarded
+    Row gap:8 middle
+      Icon "delete"
+      Text.heading "Draft discarded"
+    Button.outline "Start over" -> discarded=false
+  if !sent && !discarded
+    Row between middle
+      Text.heading "Draft email"
+      Badge.info "Draft"
+    Input "To" "name@example.com" =to
+    Input "Subject" =subject
+    SegmentedButton =tone items:["Polite","Firm"] -> body=(tone=="Polite" ? "Hi,\n\nI hope you're well. The heating in my apartment has stopped working. Could you please arrange for someone to take a look as soon as you're able? I'm happy to work around your schedule for access.\n\nThank you very much,\nAlex" : "Hello,\n\nThe heating in my apartment is broken and has not been working. This needs to be repaired promptly. Please confirm today when a technician will visit. If it is not fixed soon, I will have to look at my options under my tenancy agreement.\n\nRegards,\nAlex")
+    Input "Message" =body lines:10
+    if trim(to)=="" || trim(subject)==""
+      Text.danger "Add a recipient and a subject to send."
+    Row gap:8 end
+      Button.ghost "Discard" -> discarded=true
+      Button "Send" enabled:=trim(to)!=""&&trim(subject)!="" -> sent=true; emit send; toast "Email sent"

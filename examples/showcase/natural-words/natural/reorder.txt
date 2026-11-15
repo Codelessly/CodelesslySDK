@@ -1,0 +1,83 @@
+card width:fill maxWidth:480 radius:16 padding:16 background:surface shadow:soft
+  row align:center gap:12 marginBottom:12
+    image src:"playlist-cover.jpg" size:56 radius:8
+    column grow:1
+      text "Late Night Drive" style:title
+      text "6 songs · 22 min" style:caption color:muted
+    button icon:shuffle label:"Shuffle" variant:ghost
+    button icon:play label:"Play all" variant:primary shape:circle
+  list id:playlist reorderable:true axis:vertical gap:4 onReorder:save
+    item id:s1 draggable:true state:playing
+      icon "drag-handle" cursor:grab color:muted dragHandle:true
+      image src:"art1.jpg" size:40 radius:6
+      column grow:1
+        text "Midnight City" style:body weight:semibold color:accent
+        text "M83" style:caption color:muted
+      equalizer animate:bars loop:true visible:whenPlaying
+      text "4:03" style:caption
+      button icon:more label:"More options" variant:ghost
+    item id:s2 draggable:true
+      icon "drag-handle" cursor:grab color:muted dragHandle:true
+      image src:"art2.jpg" size:40 radius:6
+      column grow:1
+        text "Nightcall" style:body weight:semibold
+        text "Kavinsky" style:caption color:muted
+      text "4:18" style:caption
+      button icon:more label:"More options" variant:ghost
+    item id:s3 draggable:true
+      icon "drag-handle" cursor:grab color:muted dragHandle:true
+      image src:"art3.jpg" size:40 radius:6
+      column grow:1
+        text "Resonance" style:body weight:semibold
+        text "HOME" style:caption color:muted
+      text "3:32" style:caption
+      button icon:more label:"More options" variant:ghost
+    item id:s4 draggable:true
+      icon "drag-handle" cursor:grab color:muted dragHandle:true
+      image src:"art4.jpg" size:40 radius:6
+      column grow:1
+        text "A Real Hero" style:body weight:semibold
+        text "College & Electric Youth" style:caption color:muted
+      text "4:30" style:caption
+      button icon:more label:"More options" variant:ghost
+    item id:s5 draggable:true
+      icon "drag-handle" cursor:grab color:muted dragHandle:true
+      image src:"art5.jpg" size:40 radius:6
+      column grow:1
+        text "Genesis" style:body weight:semibold
+        text "Grimes" style:caption color:muted
+      text "4:15" style:caption
+      button icon:more label:"More options" variant:ghost
+    item id:s6 draggable:true
+      icon "drag-handle" cursor:grab color:muted dragHandle:true
+      image src:"art6.jpg" size:40 radius:6
+      column grow:1
+        text "Instant Crush" style:body weight:semibold
+        text "Daft Punk" style:caption color:muted
+      text "5:37" style:caption
+      button icon:more label:"More options" variant:ghost
+  behavior for:item state:hover background:hover transition:120ms
+  behavior for:item.dragHandle state:hover color:default
+  behavior for:item trigger:pressHandle holdDelay:150ms
+    state:dragging
+      scale:1.03 shadow:lifted opacity:0.95 zIndex:top
+      transition:150ms easing:easeOut
+      follow:pointer lockAxis:vertical clampTo:list
+      haptic:light
+    placeholder background:accent-tint border:dashed radius:8 height:sameAsItem
+    others:shiftToMakeRoom animate:slide duration:200ms easing:spring
+    autoScroll:whenNearEdge
+  behavior trigger:drop
+    animate:settleIntoSlot duration:180ms easing:spring
+    shadow:fadeOut scale:1.0
+    haptic:soft
+    announce "Moved {title} to position {n} of 6" liveRegion:polite
+    updateNumbering:true
+  behavior trigger:dragCancel key:Escape
+    animate:returnToOriginalSlot duration:200ms easing:spring
+  behavior trigger:keyboard
+    key:"Space" on:handle action:pickUp
+    key:"ArrowUp/ArrowDown" while:pickedUp action:moveOneSlot
+    key:"Space/Enter" while:pickedUp action:drop
+    focusRing:visible
+  behavior trigger:doubleClick on:item action:playSong
