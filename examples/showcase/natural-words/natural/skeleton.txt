@@ -1,0 +1,31 @@
+card "Latest articles" width:fill padding:16 radius:12 elevation:1 layout:column gap:12 state:loading
+  behavior
+    on:mount set state:loading
+    after:2s set state:loaded transition:crossfade duration:300ms
+  header layout:row align:center
+    text "Latest articles" style:title
+    text "Updated just now" style:caption color:muted show-when:state=loaded transition:fade-in
+  list layout:column gap:12
+    group show-when:state=loading aria-busy:true aria-label:"Loading articles"
+      skeleton-row repeat:3 layout:row gap:12 stagger:100ms
+        skeleton shape:rect size:64x64 radius:8
+        group layout:column gap:8 grow:1
+          skeleton shape:line width:80% height:14
+          skeleton shape:line width:50% height:12
+      animation shimmer target:skeleton type:gradient-sweep direction:left-to-right duration:1.2s easing:linear loop:infinite
+    group show-when:state=loaded layout:column gap:12 transition:fade-in stagger:80ms
+      article layout:row gap:12 action:open-link
+        image "Cover" size:64x64 radius:8 fit:cover
+        group layout:column gap:4 grow:1
+          text "Designing calmer interfaces" style:headline lines:2
+          text "Maya Chen · 5 min read" style:caption color:muted
+      article layout:row gap:12 action:open-link
+        image "Cover" size:64x64 radius:8 fit:cover
+        group layout:column gap:4 grow:1
+          text "What loading states teach us about trust" style:headline lines:2
+          text "Jon Alvarez · 7 min read" style:caption color:muted
+      article layout:row gap:12 action:open-link
+        image "Cover" size:64x64 radius:8 fit:cover
+        group layout:column gap:4 grow:1
+          text "A field guide to motion in everyday apps" style:headline lines:2
+          text "Priya Nair · 4 min read" style:caption color:muted

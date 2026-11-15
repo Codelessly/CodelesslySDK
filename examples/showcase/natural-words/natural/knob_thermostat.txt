@@ -1,0 +1,29 @@
+card width:360 padding:20 radius:20 background:surface elevation:2
+  column gap:16
+    row align:center justify:space-between
+      column gap:2
+        text "Living Room" style:title weight:600
+        text "Currently 19°" style:caption color:muted
+      icon name:thermostat size:24 color:muted
+    dial id:temperature min:16 max:28 step:0.5 value:21 size:220 align:center
+      track width:14 color:track-muted startAngle:135 sweep:270 cap:round
+      progress color:{mode == "heat" ? orange : blue} animate:ease-out duration:200ms
+      handle size:28 draggable:true color:white elevation:3 hapticOnStep:true
+      center
+        column align:center gap:2
+          text "{value}°" style:display size:48 weight:700 transition:fade duration:150ms
+          text "Target" style:caption color:muted
+      scale ticks:12 labels:[16,28] color:muted
+      accessibility role:slider label:"Target temperature" valueText:"{value} degrees"
+      keys left:decrease right:increase step:0.5
+    row justify:space-between align:center
+      text "Mode" style:label
+      switch id:mode value:heat
+        option "Heat" value:heat icon:flame color:orange
+        option "Cool" value:cool icon:snowflake color:blue
+        selected:heat
+        animate:slide duration:200ms
+        onChange: update dial.progress color
+    row justify:center gap:8 align:center
+      indicator shape:dot size:8 color:{mode == "heat" ? orange : blue} pulse:{currentTemp != value} period:1.5s
+      text "{mode == 'heat' ? 'Heating' : 'Cooling'} to {value}°" style:caption color:muted

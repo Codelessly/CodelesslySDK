@@ -1,0 +1,28 @@
+Card gap:12
+  Text.title "Watchlist"
+  Row middle gap:12
+    Column grow gap:2
+      Text.strong "AAPL"
+      Text.caption "Apple Inc."
+    Sparkline values:[172,174,173,176,178,181] w:80 h:32
+    Column end gap:2
+      Text.strong "$181.20"
+      Text.success "+1.8%"
+  Divider
+  Row middle gap:12
+    Column grow gap:2
+      Text.strong "TSLA"
+      Text.caption "Tesla, Inc."
+    Sparkline values:[250,247,249,244,240,238] w:80 h:32
+    Column end gap:2
+      Text.strong "$238.45"
+      Text.danger "-2.4%"
+  Divider
+  Row middle gap:12
+    Column grow gap:2
+      Text.strong "MSFT"
+      Text.caption "Microsoft Corp."
+    Sparkline values:[402,405,404,408,411,414] w:80 h:32
+    Column end gap:2
+      Text.strong "$414.10"
+      Text.success "+0.9%"
