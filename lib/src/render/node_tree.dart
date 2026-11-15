@@ -61,7 +61,7 @@ enum SlotKind {
 
 @immutable
 class Slot {
-  const Slot(this.kind, [this.parent, this.textDefault]);
+  const Slot(this.kind, [this.parent, this.textDefault, this.direction]);
   const Slot.root() : this(SlotKind.root);
 
   final SlotKind kind;
@@ -74,15 +74,26 @@ class Slot {
   /// `defaultTextStyle` above it: Flutter's `DefaultTextStyle`); null: none.
   final api.TextStyle? textDefault;
 
+  /// The text direction the child inherits (the nearest `textDirection`
+  /// above it: Flutter's `Directionality`); null: none, left to right.
+  final api.TextDirection? direction;
+
   /// This slot with [style] as the inherited default text style.
-  Slot inheriting(api.TextStyle? style) => style == textDefault ? this : Slot(kind, parent, style);
+  Slot inheriting(api.TextStyle? style) => style == textDefault ? this : Slot(kind, parent, style, direction);
+
+  /// This slot with [dir] as the inherited text direction.
+  Slot directed(api.TextDirection? dir) => dir == direction ? this : Slot(kind, parent, textDefault, dir);
 
   @override
   bool operator ==(Object other) =>
-      other is Slot && other.kind == kind && identical(other.parent, parent) && other.textDefault == textDefault;
+      other is Slot &&
+      other.kind == kind &&
+      identical(other.parent, parent) &&
+      other.textDefault == textDefault &&
+      other.direction == direction;
 
   @override
-  int get hashCode => Object.hash(kind, identityHashCode(parent), textDefault);
+  int get hashCode => Object.hash(kind, identityHashCode(parent), textDefault, direction);
 }
 
 /// A running app's interaction layers: what wires a node's reactions (taps,
@@ -931,12 +942,15 @@ class RenderTree {
   /// the source, as it does where it sits (null for a top-level node).
   Slot rootSlot(String id) {
     var at = source.parentOf(id);
-    for (var i = 0; at != null && i < 256; i++) {
-      final style = source.node(at)?.behaviors.defaultTextStyle;
-      if (style != null) return const Slot.root().inheriting(style);
+    api.TextStyle? style;
+    api.TextDirection? dir;
+    for (var i = 0; at != null && i < 256 && (style == null || dir == null); i++) {
+      final b = source.node(at)?.behaviors;
+      style ??= b?.defaultTextStyle;
+      dir ??= b?.textDirection;
       at = source.parentOf(at);
     }
-    return const Slot.root();
+    return const Slot.root().inheriting(style).directed(dir);
   }
 
   NodeBox obtain(String id, Slot slot, {Object? instance}) {
@@ -1198,6 +1212,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
   /// over it.
   Node? _withTextDefault(Node? n) {
     if (n == null) return n;
+    n = _withDirection(n);
     final own = n.behaviors.defaultTextStyle;
     final chosen = own ?? _slot.textDefault;
     // The tree's default (the theme's font) under it.
@@ -1206,6 +1221,29 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     if (style == null || style == own) return n;
     return n.copyWith(behaviors: n.behaviors.copyWith(defaultTextStyle: style));
   }
+
+  /// [n] carrying the text direction it lays out in (Flutter's
+  /// Directionality: its own `textDirection`, else the nearest one above it),
+  /// with its directional padding and margin (`{"start", "end"}`) resolved to
+  /// sides for that direction, so everything after reads plain insets.
+  Node _withDirection(Node n) {
+    final own = n.behaviors.textDirection;
+    final dir = own ?? _slot.direction;
+    final rtl = dir == api.TextDirection.rtl;
+    final layout = n.layout;
+    final directional = layout.padding.directional || layout.margin.directional;
+    if (dir == own && !directional) return n;
+    return n.copyWith(
+      behaviors: dir == own ? null : n.behaviors.copyWith(textDirection: dir),
+      layout: directional
+          ? layout.copyWith(padding: layout.padding.resolve(rtl: rtl), margin: layout.margin.resolve(rtl: rtl))
+          : null,
+    );
+  }
+
+  /// The direction node [n] lays out in (resolved by [_withDirection]).
+  static TextDirection directionOf(Node n) =>
+      n.behaviors.textDirection == api.TextDirection.rtl ? TextDirection.rtl : TextDirection.ltr;
 
   /// Applies [n] when it is a text that differs from [old] only in its
   /// characters, runs or style (a readout ticking every frame): sets the
@@ -1568,7 +1606,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final margin = EdgeInsets.fromLTRB(m0.left, m0.top, m0.right, m0.bottom);
     if (margin != EdgeInsets.zero) {
       if (margin.isNonNegative) {
-        chain.add(_obtain<RenderPadding>('margin', () => RenderPadding(padding: margin, textDirection: TextDirection.ltr))
+        chain.add(_obtain<RenderPadding>('margin', () => RenderPadding(padding: margin, textDirection: directionOf(n)))
+            ..textDirection = directionOf(n)
           ..padding = margin);
       } else {
         // A negative side reaches past the node's box (RenderPadding takes
@@ -1871,7 +1910,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final applyPadding = padded && !n.scrolls;
     if (applyPadding && padding != EdgeInsets.zero) {
       inner.add(_fitBox('padFit', isPlaceholder ? SizeFit.hug : n.hFit, isPlaceholder ? SizeFit.hug : n.vFit, n.designSize));
-      inner.add(_obtain<RenderPadding>('pad', () => RenderPadding(padding: padding, textDirection: TextDirection.ltr))
+      inner.add(_obtain<RenderPadding>('pad', () => RenderPadding(padding: padding, textDirection: directionOf(n)))
+          ..textDirection = directionOf(n)
         ..padding = padding);
       inner.add(_obtain<RenderStack>('padStack',
           () => RenderStack(alignment: AlignmentDirectional.topStart, textDirection: TextDirection.ltr, clipBehavior: Clip.none)));
@@ -1998,7 +2038,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     final crossAlign = stretchFallsBack ? CrossAxisAlignment.start : crossAxisAlignment(cross);
     final mainFit = isRow ? n.hFit : n.vFit;
-    final flex = _obtain<RenderCodelesslyFlex>('flex', () => RenderCodelesslyFlex(textDirection: TextDirection.ltr))
+    final flex = _obtain<RenderCodelesslyFlex>('flex', () => RenderCodelesslyFlex(textDirection: directionOf(n)))
+        ..textDirection = directionOf(n)
       ..direction = isRow ? Axis.horizontal : Axis.vertical
       ..mainAxisAlignment = mainAxisAlignment(n.prop(FlexProps.mainAxisAlignment))
       ..crossAxisAlignment = crossAlign
@@ -2045,7 +2086,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       }
       // CSS align-items: stretch, per line.
       ..stretch = cross == api.CrossAxisAlignment.stretch
-      ..textDirection = TextDirection.ltr;
+      ..textDirection = directionOf(n);
     _syncChildren(wrap, _inOrder(n.children), Slot(SlotKind.flex, n));
     chain.add(wrap);
   }
@@ -2153,7 +2194,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     chain.add(viewport);
     final pad = n.layout.padding.flutter;
     if (pad != EdgeInsets.zero) {
-      chain.add(_obtain<RenderPadding>('scrollPad', () => RenderPadding(padding: pad, textDirection: TextDirection.ltr))
+      chain.add(_obtain<RenderPadding>('scrollPad', () => RenderPadding(padding: pad, textDirection: directionOf(n)))
+          ..textDirection = directionOf(n)
         ..padding = pad);
     }
     fillViewport ??= n.isFlex &&
@@ -2179,7 +2221,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     final fit = n.type == 'stack' ? n.prop(api.StackProps.fit) : null;
     if (fit != null) {
       chain.add(_obtain<RenderFillBounds>('boardFill', RenderFillBounds.new)..fallback = n.innerSize);
-      chain.add(_obtain<RenderFittedBox>('boardFit', () => RenderFittedBox(textDirection: TextDirection.ltr, clipBehavior: Clip.hardEdge))
+      chain.add(_obtain<RenderFittedBox>('boardFit', () => RenderFittedBox(textDirection: directionOf(n), clipBehavior: Clip.hardEdge))
+          ..textDirection = directionOf(n)
         ..fit = BoxFit.values.byName(fit.name)
         ..alignment = n.prop(api.StackProps.fitAlignment).flutter);
       final board = BoxConstraints.tight(n.innerSize);
@@ -2191,7 +2234,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       ..wrapsWidth = fit == null && n.hFit == SizeFit.hug
       ..wrapsHeight = fit == null && n.vFit == SizeFit.hug
       ..designSize = n.innerSize
-      ..textDirection = TextDirection.ltr;
+      ..textDirection = directionOf(n);
     _syncChildren(layout, children ?? n.children, Slot(SlotKind.freeform, n));
     chain.add(layout);
   }
@@ -2316,12 +2359,17 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
       api.TextAlignVertical.center => 0.0,
       api.TextAlignVertical.bottom => 1.0,
     };
+    // Start and end follow the text direction, as the paragraph's own lines do.
+    final rtl = directionOf(n) == TextDirection.rtl;
     final x = switch (textAlign) {
       api.TextAlign.center => 0.0,
-      api.TextAlign.right || api.TextAlign.end => 1.0,
-      _ => -1.0,
+      api.TextAlign.right => 1.0,
+      api.TextAlign.left => -1.0,
+      api.TextAlign.end => rtl ? -1.0 : 1.0,
+      _ => rtl ? 1.0 : -1.0,
     };
-    chain.add(_obtain<RenderPositionedBox>('textAlign', () => RenderPositionedBox(textDirection: TextDirection.ltr))
+    chain.add(_obtain<RenderPositionedBox>('textAlign', () => RenderPositionedBox(textDirection: directionOf(n)))
+        ..textDirection = directionOf(n)
       ..alignment = Alignment(x, y)
       ..widthFactor = hugsWidth ? 1 : null
       ..heightFactor = vFit == SizeFit.fill || vFit == SizeFit.fixed ? null : 1);
@@ -2331,18 +2379,21 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     // it; the migration drops it from schema-2 texts (step text.padding).
     final padding = n.layout.padding.flutter;
     if (padding != EdgeInsets.zero) {
-      chain.add(_obtain<RenderPadding>('textPad', () => RenderPadding(padding: padding, textDirection: TextDirection.ltr))
+      chain.add(_obtain<RenderPadding>('textPad', () => RenderPadding(padding: padding, textDirection: directionOf(n)))
+          ..textDirection = directionOf(n)
         ..padding = padding);
     }
     final span = _textSpan(n);
-    final paragraph = _obtain<RenderParagraph>('paragraph', () => RenderParagraph(span, textDirection: TextDirection.ltr))
+    final paragraph = _obtain<RenderParagraph>('paragraph', () => RenderParagraph(span, textDirection: directionOf(n)))
+        ..textDirection = directionOf(n)
       ..text = span;
     paragraph
       ..textAlign = flutterTextAlign(textAlign)
       ..maxLines = n.prop(TextProps.maxLines)
       ..overflow = textOverflow(n.prop(TextProps.overflow));
     if (n.prop(TextProps.scaleDown)) {
-      chain.add(_obtain<RenderFittedBox>('textScale', () => RenderFittedBox(fit: BoxFit.scaleDown, textDirection: TextDirection.ltr))
+      chain.add(_obtain<RenderFittedBox>('textScale', () => RenderFittedBox(fit: BoxFit.scaleDown, textDirection: directionOf(n)))
+          ..textDirection = directionOf(n)
         ..alignment = Alignment(x, y));
     }
     if (n.behaviors.typewriter case final api.Typewriter tw) {
@@ -2352,7 +2403,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     chain.add(paragraph);
   }
 
-  static TextAlign flutterTextAlign(api.TextAlign a) => a == api.TextAlign.start ? TextAlign.left : textAlign(a);
+  static TextAlign flutterTextAlign(api.TextAlign a) => textAlign(a);
 
   /// The node's text as spans: each run's characters in its style, merged
   /// over the text's base style.
@@ -2391,6 +2442,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     }
     final glyph = _obtain<RenderIconGlyph>('glyph', RenderIconGlyph.new)
       ..icon = n.prop(IconProps.icon)
+      ..mirrored = directionOf(n) == TextDirection.rtl && IconSources.mirrorsInRtl(n.prop(IconProps.icon))
       ..color = color
       ..glyphSize = unsized ? natural : written
       ..designSize = n.designSize;
@@ -2424,7 +2476,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
         ..cross = isRow ? Axis.vertical : Axis.horizontal);
     }
     if (align != null) {
-      chain.add(_obtain<RenderPositionedBox>('slotAlign', () => RenderPositionedBox(alignment: align, textDirection: TextDirection.ltr))
+      chain.add(_obtain<RenderPositionedBox>('slotAlign', () => RenderPositionedBox(alignment: align, textDirection: directionOf(n)))
+          ..textDirection = directionOf(n)
         ..alignment = align);
     }
   }
@@ -2593,7 +2646,7 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   void _syncChildren(_Container container, List<String> ids, Slot childSlot,
       {Object? instance, List<Object?>? instances}) {
-    childSlot = childSlot.inheriting(_node?.behaviors.defaultTextStyle);
+    childSlot = childSlot.inheriting(_node?.behaviors.defaultTextStyle).directed(_node?.behaviors.textDirection);
     if (!identical(_container, container) && _container != null) _releaseContainerChildren();
     _container = container;
     RenderBox? after;
