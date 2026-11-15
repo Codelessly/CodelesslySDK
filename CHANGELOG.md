@@ -4,6 +4,9 @@
   fast model has written it from plain parts. The instructions are built from the session and its design system;
   an answer that is rejected, or that changes what the UI says or does, is undone and asked for again; a kept
   pass is one undo step. See the guide, "The design pass".
+- **`DesignPass(blocks: [...])`**: the design agent is told of the design system's blocks you name and may put
+  one in place of plain nodes; `DesignPass.changedMeaning(before, after, blocks: ...)` accepts a removed node
+  when a block carries its text, bindings and actions, and refuses a removed container that had actions.
 - **Designed defaults**: with a design system whose theme defines them, plain cards, badges, bar charts, popups,
   dialogs and chart series take its look, and a control's corner follows its height (`radii.controlXs` …
   `controlLarge`). The bundled look is unchanged.

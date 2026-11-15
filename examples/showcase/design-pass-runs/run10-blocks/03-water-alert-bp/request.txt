@@ -1,0 +1,1 @@
+An inline chat card for a household water use alert. Show today's reading, the daily target, the amount over target, two concrete causes to check, and a button to open the detailed usage view. Include a switch to pause these alerts.

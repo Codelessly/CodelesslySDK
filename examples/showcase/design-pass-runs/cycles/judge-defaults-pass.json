@@ -1,0 +1,214 @@
+{
+ "what": "The 8 app screens with the recorded pass applied over the defaults as committed (pass) and over shadow+quiet+title (allpass).",
+ "judges": "Judges: Opus and Sonnet subagents of a Claude Code session, shown the versions unlabeled and shuffled (ways.py pack); not judge.py, because no API key was at hand.",
+ "judgments": [
+  {
+   "case": "banking",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 8,
+    "allpass": 8
+   },
+   "why": "The two renderings are pixel-identical: a polished, well-structured banking home whose only flaw is the intentionally cut-off second account card, so they tie."
+  },
+  {
+   "case": "banking",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 7,
+    "allpass": 7
+   },
+   "why": "The two renderings are pixel-identical, so no difference to judge."
+  },
+  {
+   "case": "chat_settings",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "allpass": 7,
+    "pass": 7
+   },
+   "why": "Nearly identical; B's full-width Manage button anchors the storage card and matches the full-width Log out control, while A's small left-aligned button looks slightly orphaned."
+  },
+  {
+   "case": "chat_settings",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 8,
+    "allpass": 7
+   },
+   "why": "B full-width Manage button matches the full-width Log out and card rhythm, while A small left-aligned button looks slightly orphaned."
+  },
+  {
+   "case": "ecommerce_product",
+   "judge": "opus",
+   "rank": [
+    "allpass",
+    "pass"
+   ],
+   "scores": {
+    "allpass": 6,
+    "pass": 6
+   },
+   "why": "Pixel-identical renderings sharing the same strengths (clear price hierarchy) and weaknesses (empty image area, tiny quantity steppers, thin bottom action bar), so they tie."
+  },
+  {
+   "case": "ecommerce_product",
+   "judge": "sonnet",
+   "rank": [
+    "allpass",
+    "pass"
+   ],
+   "scores": {
+    "allpass": 7,
+    "pass": 7
+   },
+   "why": "The two renderings are pixel-identical, so no difference to judge."
+  },
+  {
+   "case": "fitness_home",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 7,
+    "allpass": 7
+   },
+   "why": "Pixel-identical, clean fitness home with good hierarchy, though the daily goal progress bar renders empty despite 72 percent, so they tie."
+  },
+  {
+   "case": "fitness_home",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 7,
+    "allpass": 7
+   },
+   "why": "The two renderings are pixel-identical, so no difference to judge."
+  },
+  {
+   "case": "food_order",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 6,
+    "allpass": 6
+   },
+   "why": "Pixel-identical menus with solid structure but repetitive placeholder icons, small Add buttons and an oversized $0.00 cart bar, so they tie."
+  },
+  {
+   "case": "food_order",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 7,
+    "allpass": 7
+   },
+   "why": "The two renderings are pixel-identical, so no difference to judge."
+  },
+  {
+   "case": "habit_tracker",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 7,
+    "allpass": 7
+   },
+   "why": "Pixel-identical, polished habit screen with clear progress hierarchy; minor nits (stray divider after last habit, tiny checkboxes) apply equally, so they tie."
+  },
+  {
+   "case": "habit_tracker",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 7,
+    "allpass": 7
+   },
+   "why": "The two renderings are pixel-identical, so no difference to judge."
+  },
+  {
+   "case": "learning",
+   "judge": "opus",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 7,
+    "allpass": 7
+   },
+   "why": "Pixel-identical learning home with strong hierarchy and a clear continue-lesson card; the weak low-contrast Continue button affects both equally, so they tie."
+  },
+  {
+   "case": "learning",
+   "judge": "sonnet",
+   "rank": [
+    "pass",
+    "allpass"
+   ],
+   "scores": {
+    "pass": 7,
+    "allpass": 7
+   },
+   "why": "The two renderings are pixel-identical, so no difference to judge."
+  },
+  {
+   "case": "travel_booking",
+   "judge": "opus",
+   "rank": [
+    "allpass",
+    "pass"
+   ],
+   "scores": {
+    "allpass": 7,
+    "pass": 7
+   },
+   "why": "Pixel-identical itinerary with clear flight and cost hierarchy; the short, cramped bottom buttons are a shared flaw, so they tie."
+  },
+  {
+   "case": "travel_booking",
+   "judge": "sonnet",
+   "rank": [
+    "allpass",
+    "pass"
+   ],
+   "scores": {
+    "allpass": 7,
+    "pass": 7
+   },
+   "why": "The two renderings are pixel-identical, so no difference to judge."
+  }
+ ]
+}

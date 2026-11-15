@@ -1,0 +1,34 @@
+Card w:390 gap:12 pad:16
+  state done=0
+  state running=false
+  state elapsed=0
+  state steps=[{"i":0,"name":"Back up your content","desc":"Export posts, pages and settings."},{"i":1,"name":"Set up the new host","desc":"Create the site and install the theme."},{"i":2,"name":"Import posts","desc":"Copy articles, tags and categories."},{"i":3,"name":"Move media","desc":"Upload images and fix their links."},{"i":4,"name":"Redirect old URLs","desc":"Map old addresses to the new ones."},{"i":5,"name":"Final checks","desc":"Test links, feeds and the DNS switch."}]
+  Text.title "Blog migration plan"
+  Progress value:=done/6
+  Row between
+    Text.muted "{done} of 6 steps done"
+    Text.muted "Elapsed: {elapsed}s"
+  Divider
+  each s in steps
+    Row gap:12 middle
+      if s.i<done
+        Icon "check_circle"
+      if s.i==done && running
+        CircularProgressIndicator
+      if s.i>done || (s.i==done && !running)
+        Icon "radio_button_unchecked"
+      Column grow
+        Text.strong "{s.name}"
+        Text.small "{s.desc}"
+  Divider
+  if done<6 && !running && done==0
+    Button "Start migration" -> running=true; emit start
+  if done<6 && !running && done>0
+    Button "Resume" -> running=true; emit start
+  if done<6 && running
+    Button.outline "Pause" -> running=false; emit pause
+  if done==6
+    Card gap:4
+      Text.heading "Migration complete"
+      Text.body "All 6 steps finished in {elapsed} seconds."
+      Text.success "Your blog is live on the new host."
