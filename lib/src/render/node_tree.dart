@@ -1685,7 +1685,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     if (tree.animates) tree.interactions?.addLayers(this, n, chain);
     loopLayers(this, n, chain, animates: tree.animates);
     // A node whose animations set its opacity has it drawn by their player.
-    if (n.opacity < 0.99 && !animatesOpacity(n)) {
+    // A bound opacity (one that can change: a button dimmed while disabled)
+    // composites as Flutter's Opacity widget does, through an opacity layer
+    // at every visible value, 1 included: the layer stays put as the value
+    // changes, and what's under it draws as it does under Opacity (on the
+    // web a rounded border anti-aliases its inner corners differently in a
+    // layer than straight on the page).
+    if ((n.opacity < 0.99 || n.bind.containsKey('opacity')) && !animatesOpacity(n)) {
       chain.add(_obtain<RenderOpacity>('opacity', () => RenderOpacity(opacity: n.opacity))..opacity = n.opacity);
     }
     paintLayers(this, n, chain);
