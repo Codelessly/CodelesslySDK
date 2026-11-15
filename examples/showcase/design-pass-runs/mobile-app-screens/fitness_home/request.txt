@@ -1,0 +1,1 @@
+The home screen of a fitness app: a greeting with today's date, a ring or bar for today's activity goal, three stat tiles (steps, calories, active minutes), a card for the next planned workout with a Start button, a list of four recent workouts, and a bottom navigation bar with five tabs.

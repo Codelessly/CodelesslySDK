@@ -1,0 +1,1 @@
+A desktop project board: a header with the project name, member avatars and a New task button, three columns (To do, In progress, Done) each holding four task cards with a title, tag, assignee initials and due date, and a right-hand activity feed.
