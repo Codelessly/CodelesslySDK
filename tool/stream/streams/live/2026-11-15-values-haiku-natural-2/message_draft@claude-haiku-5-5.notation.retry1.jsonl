@@ -1,0 +1,57 @@
+{"meta":{"ui":"message_draft","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Draft an email to my landlord, Mr Alvarez, about the broken heating in apartment 4B and show it as an inline card I can edit before it goes. To: landlord@example.com; Subject: Heating not working in apartment 4B; the body starts \"Dear Mr. Alvarez,\" and is signed Alex. A tone switch between Polite and Firm rewrites the body: the Polite one asks \"Could you please arrange for someone to take a look this week?\", the Firm one says \"Please confirm by Thursday when a repair will be carried out.\" Send and Discard buttons; Send needs a recipient and a subject, and afterwards the card shows \"Sent to\" the address with the subject and the body as it was sent.","text":"state to=\"landlord@example.com\"\nstate subject=\"Heating not working in apartment 4B\"\nstate tone=\"Polite\"\nstate sent=false\nlet ask = tone == \"Firm\" ? \"Please confirm by Thursday when a repair will be carried out.\" : \"Could you please arrange for someone to take a look this week?\"\nlet text = \"Dear Mr. Alvarez,\\n\\nThe heating in apartment 4B has stopped working. \" + ask + \"\\n\\nThank you,\\nAlex\"\n\nChatCard \"New email\" \"To Mr Alvarez\" icon:\"mail\" status:\"Draft\" w:390\n  if sent == false\n    InputField \"To\" \"landlord@example.com\" =to\n    InputField \"Subject\" \"Subject\" =subject\n    Segments =tone options:[\"Polite\",\"Firm\"]\n    InputField \"Body\" \"\" =text lines:8\n    Row gap:10\n      ActionButton \"Discard\" quiet -> emit discard\n      ActionButton \"Send\" primary enabled:{to != \"\" and subject != \"\"} -> sent=true; toast \"Email sent\"\n  if sent\n    Receipt \"Email sent\" \"Sent to {to}\" tone:good icon:\"check\"\n    Details rows:[[\"Sent to\",to],[\"Subject\",subject]]\n    Paragraph \"{text}\"","usage":{"input_tokens":10066,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":426,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":476,"totalMs":1601}}
+{"tMs":476,"delta":"state to=\"landlord@example"}
+{"tMs":605,"delta":".com\"\nstate subject=\""}
+{"tMs":605,"delta":"Heating not working in apart"}
+{"tMs":605,"delta":"ment 4B\"\nstate t"}
+{"tMs":605,"delta":"one=\"Polite\"\nstate"}
+{"tMs":605,"delta":" sent=false\nlet"}
+{"tMs":605,"delta":" ask = t"}
+{"tMs":615,"delta":"one == \"Fir"}
+{"tMs":636,"delta":"m\" ? \"Please"}
+{"tMs":656,"delta":" confirm by Thursday"}
+{"tMs":677,"delta":" when a repair will be carried"}
+{"tMs":697,"delta":" out.\" : \"Could you please"}
+{"tMs":718,"delta":" arrange for someone to take"}
+{"tMs":777,"delta":" a look this week?\"\nlet"}
+{"tMs":777,"delta":" text = \"Dear M"}
+{"tMs":779,"delta":"r. Alvarez,"}
+{"tMs":801,"delta":"\\n\\nThe heating"}
+{"tMs":825,"delta":" in apartment 4B has"}
+{"tMs":841,"delta":" stopped working. \" + "}
+{"tMs":861,"delta":"ask + \"\\n\\nTh"}
+{"tMs":882,"delta":"ank you,\\nAlex"}
+{"tMs":903,"delta":"\"\n\nChatCard \""}
+{"tMs":923,"delta":"New email\" \"To Mr"}
+{"tMs":943,"delta":" Alvarez\" icon"}
+{"tMs":964,"delta":":\"mail\" status:\""}
+{"tMs":985,"delta":"Draft\" w:390"}
+{"tMs":1005,"delta":"\n  if sent == false\n    "}
+{"tMs":1025,"delta":"In"}
+{"tMs":1045,"delta":"putField \"To\" \"landl"}
+{"tMs":1067,"delta":"ord@example.com\" =to"}
+{"tMs":1087,"delta":"\n    InputField \"Sub"}
+{"tMs":1106,"delta":"ject\" \"Subject\" ="}
+{"tMs":1127,"delta":"subject\n    Segments ="}
+{"tMs":1147,"delta":"tone options:[\"Polite"}
+{"tMs":1169,"delta":"\",\"Firm\"]\n    "}
+{"tMs":1188,"delta":"InputField \"Body\" \""}
+{"tMs":1208,"delta":"\" =text lines:8"}
+{"tMs":1229,"delta":"\n    Row gap:10"}
+{"tMs":1249,"delta":"\n      ActionButton \""}
+{"tMs":1270,"delta":"Discard\" quiet ->"}
+{"tMs":1291,"delta":" emit discard\n      Act"}
+{"tMs":1313,"delta":"ionButton \"Send\" prim"}
+{"tMs":1331,"delta":"ary enabled:{to !="}
+{"tMs":1352,"delta":" \"\" and subject != "}
+{"tMs":1376,"delta":"\"\"} -> sent=true"}
+{"tMs":1393,"delta":"; toast \"Email sent"}
+{"tMs":1413,"delta":"\"\n  if sent\n    "}
+{"tMs":1433,"delta":"Receipt \"Email s"}
+{"tMs":1454,"delta":"ent\" \"Sent to {"}
+{"tMs":1474,"delta":"to}\" t"}
+{"tMs":1494,"delta":"one:good icon:\"check"}
+{"tMs":1515,"delta":"\"\n    Details rows:"}
+{"tMs":1537,"delta":"[[\"Sent to\",to"}
+{"tMs":1556,"delta":"],[\"Subject\",subject"}
+{"tMs":1576,"delta":"]]\n    Paragra"}
+{"tMs":1597,"delta":"ph \"{text}\""}

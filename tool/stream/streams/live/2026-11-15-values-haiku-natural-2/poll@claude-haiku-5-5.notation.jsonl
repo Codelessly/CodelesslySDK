@@ -1,0 +1,90 @@
+{"meta":{"ui":"poll","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Run a quick team poll in a card: \"Where should we go for lunch on Friday?\" with four options and their votes so far: Pho Saigon 5, Taqueria Luz 8, Green Bowl 3, Napoli Pizza 6. Before I vote I only see the options. When I vote, my vote is counted and I see each option's share as a bar with the percentage (rounded to a whole number), my choice marked as mine, and the total number of votes.","text":"ChatCard \"Team lunch poll\" \"Friday\" icon:\"how_to_vote\" status:\"Open\"\n  Paragraph \"Where should we go for lunch on Friday?\"\n  if pick==\"\"\n    OptionList =pick options:[\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"]\n    TotalBar \"Votes cast\" \"Tap an option to vote\" amount:\"{length(votes)} votes\" cta:\"Vote\" enabled:{pick!=\"\"} -> votes=append(votes,pick)\n  if pick!=\"\"\n    each o in options\n      Row between\n        Text.rowTitle \"{o.name}{o.name==pick ? ' (your vote)' : ''}\"\n        Text.strong \"{round(100*count(votes,v=>v==o.name)/length(votes),0)}%\"\n      Progress {count(votes,v=>v==o.name)/length(votes)}\n    Text.muted \"{length(votes)} votes in total\"\n\nstate pick=\"\"\nstate votes=[\"Pho Saigon\",\"Pho Saigon\",\"Pho Saigon\",\"Pho Saigon\",\"Pho Saigon\",\"Taqueria Luz\",\"Taqueria Luz\",\"Taqueria Luz\",\"Taqueria Luz\",\"Taqueria Luz\",\"Taqueria Luz\",\"Taqueria Luz\",\"Taqueria Luz\",\"Green Bowl\",\"Green Bowl\",\"Green Bowl\",\"Napoli Pizza\",\"Napoli Pizza\",\"Napoli Pizza\",\"Napoli Pizza\",\"Napoli Pizza\",\"Napoli Pizza\"]\nstate options=[{\"name\":\"Pho Saigon\"},{\"name\":\"Taqueria Luz\"},{\"name\":\"Green Bowl\"},{\"name\":\"Napoli Pizza\"}]","usage":{"input_tokens":9368,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":589,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":609,"totalMs":2483}}
+{"tMs":609,"delta":"ChatCard \"Team l"}
+{"tMs":791,"delta":"unch po"}
+{"tMs":791,"delta":"ll\" \"Fri"}
+{"tMs":791,"delta":"day\""}
+{"tMs":791,"delta":" icon:\"how"}
+{"tMs":791,"delta":"_to_vote\" status:"}
+{"tMs":791,"delta":"\"Open"}
+{"tMs":791,"delta":"\"\n  "}
+{"tMs":791,"delta":"Paragraph \"Where should"}
+{"tMs":791,"delta":" we go for lunch on"}
+{"tMs":795,"delta":" Friday?\"\n  if p"}
+{"tMs":818,"delta":"ick==\"\"\n    Option"}
+{"tMs":841,"delta":"List =pick options:[\""}
+{"tMs":1008,"delta":"Pho Saigon\",\""}
+{"tMs":1008,"delta":"Taqueria Luz\",\""}
+{"tMs":1008,"delta":"Green Bowl\",\""}
+{"tMs":1008,"delta":"Napoli Pizza\""}
+{"tMs":1008,"delta":"]\n    "}
+{"tMs":1009,"delta":"T"}
+{"tMs":1009,"delta":"otalBar \"Vot"}
+{"tMs":1014,"delta":"es cast\" \""}
+{"tMs":1034,"delta":"Tap an"}
+{"tMs":1056,"delta":" option to vote\" amount:"}
+{"tMs":1082,"delta":"\"{length(votes)}"}
+{"tMs":1101,"delta":" votes\" cta:\""}
+{"tMs":1235,"delta":"Vote\" enabled:{"}
+{"tMs":1235,"delta":"pick!=\"\"} ->"}
+{"tMs":1235,"delta":" vot"}
+{"tMs":1235,"delta":"es=append(votes,p"}
+{"tMs":1235,"delta":"ick)\n  if pick!"}
+{"tMs":1235,"delta":"=\"\"\n    each"}
+{"tMs":1250,"delta":" o"}
+{"tMs":1271,"delta":" in options"}
+{"tMs":1295,"delta":"\n      Row"}
+{"tMs":1313,"delta":" between"}
+{"tMs":1334,"delta":"\n        Text.r"}
+{"tMs":1359,"delta":"owTitle \"{o."}
+{"tMs":1450,"delta":"name}{"}
+{"tMs":1450,"delta":"o.name"}
+{"tMs":1450,"delta":"==pick ? ' ("}
+{"tMs":1450,"delta":"your vote)' : ''"}
+{"tMs":1463,"delta":"}\"\n        Text."}
+{"tMs":1485,"delta":"strong \"{round(100"}
+{"tMs":1506,"delta":"*count(vot"}
+{"tMs":1527,"delta":"es,v"}
+{"tMs":1549,"delta":"=>v==o.name)"}
+{"tMs":1571,"delta":"/length(votes),0)"}
+{"tMs":1593,"delta":"}%\"\n      Progress"}
+{"tMs":1614,"delta":" {count(votes,v="}
+{"tMs":1670,"delta":">v==o.name)/"}
+{"tMs":1670,"delta":"length(votes)}\n    "}
+{"tMs":1679,"delta":"Text.muted \"{length"}
+{"tMs":1701,"delta":"(votes)} votes in"}
+{"tMs":1723,"delta":" total\"\n\nstate p"}
+{"tMs":1744,"delta":"ick="}
+{"tMs":1765,"delta":"\"\"\nstate votes=[\""}
+{"tMs":1787,"delta":"Pho Saigon\",\""}
+{"tMs":1808,"delta":"Pho Saigon\",\""}
+{"tMs":1830,"delta":"Pho Saigon\",\""}
+{"tMs":1852,"delta":"Pho Saigon\",\""}
+{"tMs":1873,"delta":"Pho Saigon\",\""}
+{"tMs":1895,"delta":"Taqueria Luz"}
+{"tMs":1917,"delta":"\",\"Taqueria Lu"}
+{"tMs":1938,"delta":"z\",\"Taqueria"}
+{"tMs":1961,"delta":" Luz\",\"Taqueria"}
+{"tMs":1981,"delta":" Luz\",\"Taque"}
+{"tMs":2004,"delta":"ria Luz\",\"Taq"}
+{"tMs":2025,"delta":"ueria Luz\",\"Ta"}
+{"tMs":2046,"delta":"queria Luz\",\""}
+{"tMs":2068,"delta":"Taqueria Luz\",\""}
+{"tMs":2089,"delta":"Green Bowl\",\""}
+{"tMs":2111,"delta":"Green Bowl\",\"Green"}
+{"tMs":2133,"delta":" Bowl\",\"Napo"}
+{"tMs":2154,"delta":"li Pizza\",\"Nap"}
+{"tMs":2176,"delta":"oli Pizza\",\""}
+{"tMs":2199,"delta":"Napoli Pizza\",\""}
+{"tMs":2219,"delta":"Napoli Pizza"}
+{"tMs":2240,"delta":"\",\"Napoli Piz"}
+{"tMs":2262,"delta":"za\",\""}
+{"tMs":2284,"delta":"Napoli Pizza"}
+{"tMs":2304,"delta":"\"]\nstate options=["}
+{"tMs":2326,"delta":"{\"name\":\"Pho"}
+{"tMs":2347,"delta":" Saigon\"},{\""}
+{"tMs":2369,"delta":"name\":\"Taqueria"}
+{"tMs":2396,"delta":" Luz\"},{\"name"}
+{"tMs":2412,"delta":"\":\"Green Bowl"}
+{"tMs":2434,"delta":"\"},{\"name\":\""}
+{"tMs":2457,"delta":"Napoli Pizza\""}
+{"tMs":2477,"delta":"}]"}

@@ -1,0 +1,65 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Compare two phone plans side by side. Lite: $25 a month, 10 GB data, 500 minutes of calls, roaming not included, monthly contract, no extras. Max: $45 a month, unlimited data, unlimited calls, roaming in the EU and US, 24-month contract, streaming and 5G included. Mark the better plan on each row (cheaper price, more data, more calls, roaming, shorter contract, more extras). Under the table a recommendation with one sentence that says how many of the six rows the recommended plan wins and how much more it costs per month, and a Choose button under each plan; once I choose, the card says which plan I picked.","text":"ChatCard \"Phone plans\" \"Compare Lite and Max\" icon:\"compare_arrows\" status:\"Compare\"\n  state pick=\"\"\n  if pick==\"\"\n    ComparisonTable names:[\"Lite\",\"Max\"] prices:[\"$25/mo\",\"$45/mo\"] pick:2 pickLabel:\"Best value\" cta:\"Choose\" -> pick=result\n      rows:[[\"Price per month\",\"$25\",\"$45\",1],[\"Data\",\"10 GB\",\"Unlimited\",2],[\"Calls\",\"500 min\",\"Unlimited\",2],[\"Roaming\",\"Not included\",\"EU and US\",2],[\"Contract\",\"Monthly\",\"24 months\",1],[\"Extras\",\"None\",\"Streaming and 5G\",2]]\n    Paragraph \"Max wins 4 of 6 rows and costs $20 more per month. Lite is cheaper if you only need light use.\" strong\n  if pick!=\"\"\n    Receipt \"Plan chosen\" \"You picked {pick}. We will set it up for you.\" code:\"\" tone:good icon:\"check\"","usage":{"input_tokens":9432,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":331,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":628,"totalMs":2089}}
+{"tMs":628,"delta":"ChatCard \"Ph"}
+{"tMs":844,"delta":"one plans\" \""}
+{"tMs":844,"delta":"Compare"}
+{"tMs":844,"delta":" Lite and Max\" icon"}
+{"tMs":844,"delta":":\"comp"}
+{"tMs":844,"delta":"are_ar"}
+{"tMs":844,"delta":"rows\" status:\""}
+{"tMs":844,"delta":"Compare\"\n  state"}
+{"tMs":844,"delta":" p"}
+{"tMs":844,"delta":"ick="}
+{"tMs":844,"delta":"\"\"\n  if"}
+{"tMs":844,"delta":" pick=="}
+{"tMs":865,"delta":"\"\"\n    Com"}
+{"tMs":1070,"delta":"parisonTable names"}
+{"tMs":1070,"delta":":[\"Lite\",\"Max"}
+{"tMs":1070,"delta":"\"] prices:[\"$25"}
+{"tMs":1070,"delta":"/mo\",\"$45/m"}
+{"tMs":1070,"delta":"o\"] p"}
+{"tMs":1070,"delta":"ick:2"}
+{"tMs":1070,"delta":" p"}
+{"tMs":1070,"delta":"ickLabel:\"Best"}
+{"tMs":1070,"delta":" value"}
+{"tMs":1081,"delta":"\" c"}
+{"tMs":1104,"delta":"ta:\"Choose\" -"}
+{"tMs":1125,"delta":"> p"}
+{"tMs":1297,"delta":"ick=result"}
+{"tMs":1297,"delta":"\n      "}
+{"tMs":1297,"delta":"r"}
+{"tMs":1297,"delta":"ows:[[\"Price per"}
+{"tMs":1297,"delta":" month\",\"$"}
+{"tMs":1297,"delta":"25\",\"$45\","}
+{"tMs":1297,"delta":"1],[\"Data\",\"10 "}
+{"tMs":1315,"delta":"GB\",\"Unlimited"}
+{"tMs":1336,"delta":"\","}
+{"tMs":1358,"delta":"2],[\"Calls\",\"500"}
+{"tMs":1380,"delta":" min\",\"Unlimited"}
+{"tMs":1535,"delta":"\",2],[\"Roaming"}
+{"tMs":1535,"delta":"\",\"Not included\",\"E"}
+{"tMs":1535,"delta":"U and US\",2"}
+{"tMs":1535,"delta":"],[\"Contract\",\"Mon"}
+{"tMs":1536,"delta":"thly\",\"24 months\",1"}
+{"tMs":1536,"delta":"],[\"Ext"}
+{"tMs":1536,"delta":"ras\",\"None"}
+{"tMs":1554,"delta":"\",\"Streaming and 5"}
+{"tMs":1575,"delta":"G\",2"}
+{"tMs":1597,"delta":"]]\n    Paragra"}
+{"tMs":1621,"delta":"ph \"Max w"}
+{"tMs":1640,"delta":"ins 4"}
+{"tMs":1764,"delta":" of 6 rows and"}
+{"tMs":1764,"delta":" costs $20"}
+{"tMs":1764,"delta":" more per month."}
+{"tMs":1764,"delta":" Lite is cheaper"}
+{"tMs":1764,"delta":" if you only need light"}
+{"tMs":1770,"delta":" use.\" strong\n  if p"}
+{"tMs":1792,"delta":"ick!=\"\"\n    Rece"}
+{"tMs":1814,"delta":"ipt \"Plan chos"}
+{"tMs":1835,"delta":"en\" \"You pic"}
+{"tMs":1856,"delta":"ked {pick}."}
+{"tMs":1878,"delta":" We"}
+{"tMs":1898,"delta":" will"}
+{"tMs":2071,"delta":" set it"}
+{"tMs":2072,"delta":" up for"}
+{"tMs":2072,"delta":" you.\" code:\"\" tone"}
+{"tMs":2072,"delta":":good icon:\"check\""}

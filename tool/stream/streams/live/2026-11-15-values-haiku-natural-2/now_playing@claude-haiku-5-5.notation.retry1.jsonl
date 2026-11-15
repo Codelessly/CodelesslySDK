@@ -1,0 +1,87 @@
+{"meta":{"ui":"now_playing","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show what is playing right now as an inline music card, playing at 1:14 into the track: Midnight City by M83, 4:03 long, with drawn album art, a progress bar with the elapsed time and the time remaining, previous, play or pause and next buttons, and a like button that reads \"Like\" and, once pressed, \"Liked\". Under it the next three tracks in the queue: Golden Hour, JVKE, 3:29; Ocean Eyes, Billie Eilish, 3:20; Electric Feel, MGMT, 3:49 (after those comes Dreams, Fleetwood Mac, 4:17). Next moves on to the following track from 0:00 and the queue moves up with it.","text":"state playing=true\nstate liked=false\nstate pos=74\nstate queue=[{\"title\":\"Golden Hour\",\"artist\":\"JVKE\",\"len\":209,\"tone\":\"sand\",\"kind\":\"mountain\"},{\"title\":\"Ocean Eyes\",\"artist\":\"Billie Eilish\",\"len\":200,\"tone\":\"sky\",\"kind\":\"lagoon\"},{\"title\":\"Electric Feel\",\"artist\":\"MGMT\",\"len\":229,\"tone\":\"rose\",\"kind\":\"dunes\"},{\"title\":\"Dreams\",\"artist\":\"Fleetwood Mac\",\"len\":257,\"tone\":\"lilac\",\"kind\":\"skyline\"}]\nlet track = \"Midnight City\"\nlet artist = \"M83\"\nlet total = 243\nlet left = total - pos\nevery 1000 -> pos = playing && pos < total ? pos + 1 : pos\nif pos >= total\n  every 1000 -> pos = 0\n\nCard w:390 gap:12 pad:16\n  Row gap:12 middle\n    Media kind:\"skyline\" tone:\"dusk\" w:56 h:56\n    Column gap:2 grow\n      Text.heading \"{track}\"\n      Text.muted \"{artist}\"\n    IconButton \"favorite\" -> liked = !liked\n    Text.muted \"{liked ? \"Liked\" : \"Like\"}\"\n  Column gap:4\n    Progress =pos\n    Row between\n      Text.caption \"{formatTime(pos)}\"\n      Text.caption \"-{formatTime(left)}\"\n  Row center gap:24\n    IconButton \"skip_previous\" -> pos = 0\n    IconButton \"{playing ? \"pause\" : \"play_arrow\"}\" -> playing = !playing\n    IconButton \"skip_next\" -> track = queue[0].title; artist = queue[0].artist; total = queue[0].len; pos = 0; queue = removeAt(queue, 0)\n  Text.sectionTitle \"Up next\"\n  each t in queue\n    ListTile \"{t.title}\" \"{t.artist}\"\n      Media kind:\"{t.kind}\" tone:\"{t.tone}\" w:40 h:40","usage":{"input_tokens":10233,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":684,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":471,"totalMs":2210}}
+{"tMs":471,"delta":"state playing=true\nstate li"}
+{"tMs":587,"delta":"ked=false\nstate pos="}
+{"tMs":587,"delta":"74\nstate queue=[{"}
+{"tMs":587,"delta":"\"title\":\"Golden"}
+{"tMs":588,"delta":" Hour\",\"artist\":\"J"}
+{"tMs":588,"delta":"VKE\",\"len\":209,"}
+{"tMs":592,"delta":"\"tone\":\"sand\",\""}
+{"tMs":613,"delta":"kind\":\"mountain\""}
+{"tMs":633,"delta":"},{\"title\":\""}
+{"tMs":653,"delta":"Ocean Eyes\",\"art"}
+{"tMs":674,"delta":"ist\":\"Billie E"}
+{"tMs":694,"delta":"ilish\",\"len\":200,\""}
+{"tMs":715,"delta":"tone\":\"sky\",\"k"}
+{"tMs":735,"delta":"ind\":\"lagoon\""}
+{"tMs":756,"delta":"},{\"title\":\"Elect"}
+{"tMs":776,"delta":"ric Feel\",\"artist\":"}
+{"tMs":796,"delta":"\"MGMT\",\"len\":"}
+{"tMs":817,"delta":"229,\"tone\":\"r"}
+{"tMs":837,"delta":"ose\",\"kind\":\"dun"}
+{"tMs":858,"delta":"es\"},{\"title\":\""}
+{"tMs":878,"delta":"Dreams\",\"artist\":"}
+{"tMs":899,"delta":"\"Fleetwood"}
+{"tMs":921,"delta":" Mac\",\"len\":257,\""}
+{"tMs":939,"delta":"tone\":\"lilac\",\""}
+{"tMs":960,"delta":"kind\":\"skyline\""}
+{"tMs":1011,"delta":"}]\nlet track = \""}
+{"tMs":1011,"delta":"Midnight City\"\nlet art"}
+{"tMs":1069,"delta":"ist = \"M83\"\nlet"}
+{"tMs":1069,"delta":" total = 243\nlet left ="}
+{"tMs":1070,"delta":" total - pos\nevery 1"}
+{"tMs":1082,"delta":"000 -> pos = play"}
+{"tMs":1103,"delta":"ing && pos < total ?"}
+{"tMs":1123,"delta":" pos + 1 : p"}
+{"tMs":1143,"delta":"os\nif pos >= total"}
+{"tMs":1165,"delta":"\n  every 1"}
+{"tMs":1184,"delta":"000 -> pos = "}
+{"tMs":1205,"delta":"0\n\nCard w:390 "}
+{"tMs":1225,"delta":"gap:12 pad:"}
+{"tMs":1245,"delta":"16\n  Row gap:"}
+{"tMs":1265,"delta":"12 middle\n    Media"}
+{"tMs":1286,"delta":" kind:\"skyline\""}
+{"tMs":1306,"delta":" tone:\"dusk\""}
+{"tMs":1327,"delta":" w:56 h:56"}
+{"tMs":1347,"delta":"\n    Column gap:2 "}
+{"tMs":1368,"delta":"grow\n      Text.he"}
+{"tMs":1388,"delta":"ading \"{track}\"\n      "}
+{"tMs":1408,"delta":"Text.muted \"{art"}
+{"tMs":1429,"delta":"ist}\"\n    IconBut"}
+{"tMs":1449,"delta":"ton \"favorite\" ->"}
+{"tMs":1470,"delta":" liked = !liked\n    "}
+{"tMs":1490,"delta":"Text.muted \"{li"}
+{"tMs":1510,"delta":"ked ? \"Liked\""}
+{"tMs":1531,"delta":" : \"Like\"}\""}
+{"tMs":1552,"delta":"\n  Column gap:4"}
+{"tMs":1572,"delta":"\n    Progress =pos"}
+{"tMs":1592,"delta":"\n    Row between\n      Text"}
+{"tMs":1613,"delta":".caption \"{formatT"}
+{"tMs":1633,"delta":"ime(pos)}\""}
+{"tMs":1653,"delta":"\n      Text.caption \"-"}
+{"tMs":1674,"delta":"{formatTime(left)"}
+{"tMs":1694,"delta":"}\"\n  Row center g"}
+{"tMs":1715,"delta":"ap:24\n    IconBut"}
+{"tMs":1735,"delta":"ton \"skip_previous\""}
+{"tMs":1756,"delta":" -> pos = 0"}
+{"tMs":1776,"delta":"\n    IconButton \"{"}
+{"tMs":1796,"delta":"playing ? \"pause\""}
+{"tMs":1816,"delta":" : \"play_arrow\""}
+{"tMs":1837,"delta":"}\" -> playing = !"}
+{"tMs":1857,"delta":"playing\n    IconButton"}
+{"tMs":1878,"delta":" \"skip_next\" ->"}
+{"tMs":1898,"delta":" track = queue[0].title"}
+{"tMs":1919,"delta":"; artist = queue[0"}
+{"tMs":1942,"delta":"].artist; total = queue"}
+{"tMs":1962,"delta":"[0].len; pos ="}
+{"tMs":1989,"delta":" 0; queue = remove"}
+{"tMs":2000,"delta":"At(queue, 0"}
+{"tMs":2021,"delta":")\n  Text.sect"}
+{"tMs":2041,"delta":"ionTitle \"Up next"}
+{"tMs":2062,"delta":"\"\n  each t in queue"}
+{"tMs":2083,"delta":"\n    ListTile \"{"}
+{"tMs":2102,"delta":"t.title}\" \"{t"}
+{"tMs":2123,"delta":".artist}\"\n      "}
+{"tMs":2146,"delta":"Media kind:\"{t."}
+{"tMs":2164,"delta":"kind}\" tone:\""}
+{"tMs":2184,"delta":"{t.tone}\" w"}
+{"tMs":2205,"delta":":40 h:40"}

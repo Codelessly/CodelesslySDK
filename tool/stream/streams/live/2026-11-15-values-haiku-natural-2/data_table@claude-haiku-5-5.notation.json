@@ -1,0 +1,689 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "text1",
+    "textField1",
+    "Segments1",
+    "row1",
+    "listView1",
+    "Pager1",
+    "row4"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "Invoices"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Search customer"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${query}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "filter",
+    "options": [
+     "All",
+     "Paid",
+     "Due",
+     "Overdue"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "checkbox1",
+    "TableHeader1"
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${allOnPage}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "allOnPage",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "Number",
+     "Customer",
+     "Date",
+     "Amount",
+     "Status"
+    ],
+    "keys": [
+     "id",
+     "customer",
+     "date",
+     "amount",
+     "status"
+    ]
+   },
+   "bind": {
+    "props.desc": "${desc}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${= (slice((sortBy((filter(invoices, i => (filter==\"All\" || i.status==filter) && (query==\"\" || contains(lower(i.customer), lower(query))))), i => i[sort])), page*5, page*5+5))}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "checkbox2",
+    "text2",
+    "text3",
+    "text4",
+    "text5",
+    "row3"
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${tick}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tick",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "#${item.id}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.customer}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.date}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= money(item.amount,\"$\",0)}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF3F4F6"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 5
+   },
+   "children": [
+    "text6"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.status}",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF4B5563"
+    }
+   }
+  },
+  "Pager1": {
+   "type": "Pager",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Page",
+    "value": "page"
+   },
+   "bind": {
+    "props.count": "${= ceil(length((sortBy((filter(invoices, i => (filter==\"All\" || i.status==filter) && (query==\"\" || contains(lower(i.customer), lower(query))))), i => i[sort])))/5)}"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= length(picked)>0}"
+   },
+   "children": [
+    "text7",
+    "filledButton1"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= length(picked)} selected · ${= money((sum(filter(invoices, i => contains(picked, i.id)), i => i.amount)),\"$\",0)}"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send reminders"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "remind",
+       "value": "${picked}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "invoices",
+    "type": "list",
+    "value": [
+     {
+      "id": "1001",
+      "customer": "Acme Corp",
+      "date": "May 02",
+      "amount": 1200,
+      "status": "Paid"
+     },
+     {
+      "id": "1002",
+      "customer": "Globex",
+      "date": "May 05",
+      "amount": 860,
+      "status": "Due"
+     },
+     {
+      "id": "1003",
+      "customer": "Initech",
+      "date": "May 09",
+      "amount": 430,
+      "status": "Overdue"
+     },
+     {
+      "id": "1004",
+      "customer": "Umbrella",
+      "date": "May 12",
+      "amount": 2250,
+      "status": "Paid"
+     },
+     {
+      "id": "1005",
+      "customer": "Hooli",
+      "date": "May 15",
+      "amount": 975,
+      "status": "Due"
+     },
+     {
+      "id": "1006",
+      "customer": "Stark Ltd",
+      "date": "May 16",
+      "amount": 3100,
+      "status": "Overdue"
+     },
+     {
+      "id": "1007",
+      "customer": "Wayne Co",
+      "date": "May 18",
+      "amount": 640,
+      "status": "Paid"
+     },
+     {
+      "id": "1008",
+      "customer": "Wonka",
+      "date": "May 20",
+      "amount": 1480,
+      "status": "Due"
+     },
+     {
+      "id": "1009",
+      "customer": "Soylent",
+      "date": "May 22",
+      "amount": 300,
+      "status": "Overdue"
+     },
+     {
+      "id": "1010",
+      "customer": "Cyberdyne",
+      "date": "May 24",
+      "amount": 5200,
+      "status": "Paid"
+     },
+     {
+      "id": "1011",
+      "customer": "Tyrell",
+      "date": "May 27",
+      "amount": 760,
+      "status": "Due"
+     },
+     {
+      "id": "1012",
+      "customer": "Aperture",
+      "date": "May 29",
+      "amount": 1890,
+      "status": "Paid"
+     }
+    ]
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "date"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "filter",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "query",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "picked",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "allOnPage",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "tick",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

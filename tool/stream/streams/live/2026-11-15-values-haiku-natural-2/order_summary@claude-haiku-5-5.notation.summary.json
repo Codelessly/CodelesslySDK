@@ -1,0 +1,103 @@
+{
+ "ui": "order_summary",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24217,
+ "turns": [
+  {
+   "input_tokens": 9440,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 545,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 494,
+   "totalMs": 2349,
+   "chars": 1091,
+   "lines": 15,
+   "jsonTails": 0,
+   "nodes": 11,
+   "outputTokensPerNode": "49.5",
+   "notationIssues": [
+    "line 1:93: Unknown word \"(\" on a ChatCard. Props are written key:value.",
+    "line 6:31: Unknown word \"money(subtotal,\" on a Details. Props are written key:value.",
+    "line 6:46: A Details takes no string: write the rest as key:\"value\".",
+    "line 6:49: Unknown word \",2)],[\" on a Details. Props are written key:value.",
+    "line 6:55: A Details takes no string: write the rest as key:\"value\".",
+    "line 6:62: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 6:64: Unknown word \"money(-discount,\" on a Details. Props are written key:value.",
+    "line 6:80: A Details takes no string: write the rest as key:\"value\".",
+    "line 6:83: Unknown word \",2)],[\" on a Details. Props are written key:value.",
+    "line 6:89: A Details takes no string: write the rest as key:\"value\".",
+    "line 6:99: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 6:101: A Details takes no string: write the rest as key:\"value\".",
+    "line 6:108: Unknown word \"],[\" on a Details. Props are written key:value.",
+    "line 6:111: A Details takes no string: write the rest as key:\"value\".",
+    "line 6:118: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 6:120: Unknown word \"money(total,\" on a Details. Props are written key:value.",
+    "line 6:132: A Details takes no string: write the rest as key:\"value\".",
+    "line 6:135: Unknown word \",2)]]\" on a Details. Props are written key:value.",
+    "line 10:1: A line starts with a node type: Column, Text \"…\", Button \"…\"."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 10566,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 588,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 386,
+   "totalMs": 1997,
+   "chars": 1246,
+   "lines": 15,
+   "jsonTails": 0,
+   "nodes": 11,
+   "outputTokensPerNode": "53.5",
+   "notationIssues": [
+    "line 13:31: Unknown word \"money((sum(map(lines,\" on a Details. Props are written key:value.",
+    "line 13:53: Unknown word \"l\" on a Details. Props are written key:value.",
+    "line 13:55: A Details has no value to bind with =. Bind a prop: key:=expression.",
+    "line 13:95: Unknown word \"money(-(upper(trim(promo))==\" on a Details. Props are written key:value.",
+    "line 13:123: A Details takes no string: write the rest as key:\"value\".",
+    "line 13:132: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 13:134: Unknown word \"(sum(map(lines,\" on a Details. Props are written key:value.",
+    "line 13:150: Unknown word \"l\" on a Details. Props are written key:value.",
+    "line 13:152: A Details has no value to bind with =. Bind a prop: key:=expression.",
+    "line 13:207: A Details takes no string: write the rest as key:\"value\".",
+    "line 13:214: Unknown word \"],[\" on a Details. Props are written key:value.",
+    "line 13:217: A Details takes no string: write the rest as key:\"value\".",
+    "line 13:224: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 13:226: Unknown word \"money(((sum(map(lines,\" on a Details. Props are written key:value.",
+    "line 13:249: Unknown word \"l\" on a Details. Props are written key:value.",
+    "line 13:251: A Details has no value to bind with =. Bind a prop: key:=expression.",
+    "line 13:275: Unknown word \"(upper(trim(promo))==\" on a Details. Props are written key:value.",
+    "line 13:296: A Details takes no string: write the rest as key:\"value\".",
+    "line 13:305: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 13:307: Unknown word \"(sum(map(lines,\" on a Details. Props are written key:value.",
+    "line 13:323: Unknown word \"l\" on a Details. Props are written key:value.",
+    "line 13:325: A Details has no value to bind with =. Bind a prop: key:=expression."
+   ],
+   "errors": []
+  }
+ ]
+}

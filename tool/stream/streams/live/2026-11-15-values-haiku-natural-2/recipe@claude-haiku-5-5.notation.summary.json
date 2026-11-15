@@ -1,0 +1,66 @@
+{
+ "ui": "recipe",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24217,
+ "turns": [
+  {
+   "input_tokens": 9460,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 459,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 644,
+   "totalMs": 2133,
+   "chars": 973,
+   "lines": 14,
+   "jsonTails": 0,
+   "nodes": 13,
+   "outputTokensPerNode": "35.3",
+   "notationIssues": [
+    "line 6:5: A Counter needs label: write label:\"…\"."
+   ],
+   "errors": [
+    "missing_prop /nodes/Counter1/props: Counter needs \"label\" (String): set \"props\": {\"label\": ...} or bind \"props.label\"."
+   ]
+  },
+  {
+   "input_tokens": 10016,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 477,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 491,
+   "totalMs": 1741,
+   "chars": 1010,
+   "lines": 14,
+   "jsonTails": 0,
+   "nodes": 13,
+   "outputTokensPerNode": "36.7",
+   "notationIssues": [
+    "line 6:62: The string on this line is already the Counter's label: write label once."
+   ],
+   "errors": []
+  }
+ ]
+}

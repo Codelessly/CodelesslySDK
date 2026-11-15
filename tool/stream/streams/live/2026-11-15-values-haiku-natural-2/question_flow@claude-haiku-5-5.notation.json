@@ -1,0 +1,403 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Find your laptop",
+    "subtitle": "Three quick questions",
+    "icon": "laptop_mac",
+    "status": "Question 1 of 3",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "Segments1",
+    "SectionLabel2",
+    "OptionList1",
+    "SectionLabel3",
+    "OptionList2",
+    "SectionLabel4",
+    "OptionList3",
+    "Details1",
+    "Recommendation1",
+    "row1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "What will you use it for?",
+    "note": "Question 1 of 3"
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 1}"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "use",
+    "options": [
+     "School or study",
+     "Work and office",
+     "Gaming",
+     "Creative projects"
+    ]
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "play",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "matter",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "What do you play?",
+    "note": "Question 2 of 3"
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 2 && use == \"Gaming\"}"
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "play",
+    "options": [
+     "Competitive esports",
+     "Big open-world titles"
+    ]
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 2 && use == \"Gaming\"}"
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "What matters most?",
+    "note": "Question 2 of 3"
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 2 && use != \"Gaming\"}"
+   }
+  },
+  "OptionList2": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "matter",
+    "options": [
+     "All-day battery",
+     "A big screen and keyboard",
+     "As light as possible"
+    ]
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 2 && use != \"Gaming\"}"
+   }
+  },
+  "SectionLabel4": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "What is your budget?",
+    "note": "Question 3 of 3"
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 3}"
+   }
+  },
+  "OptionList3": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "budget",
+    "options": [
+     "Under $800",
+     "$800 to $1,500",
+     "Over $1,500"
+    ]
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 3}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Use\",use],[\"Priority\",coalesce(play,matter)],[\"Budget\",budget]]}",
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 4}"
+   }
+  },
+  "Recommendation1": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your pick: ",
+    "why": "",
+    "eyebrow": "Recommended"
+   },
+   "bind": {
+    "props.reasons": "${= [use,budget]}",
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 4}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) > 1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "use",
+       "value": "${= (use != \"\" && (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 2) ? (\"\") : use}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "budget",
+       "value": "${= ((use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 3) ? (\"\") : budget}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "budget",
+       "value": "${= ((use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 4) ? (\"\") : budget}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start over",
+    "tone": "primary"
+   },
+   "bind": {
+    "visible": "${= (use == \"\" ? 1 : (budget == \"\" ? (use == \"Gaming\" && play == \"\" || use != \"Gaming\" && matter == \"\" ? 2 : 3) : 4)) == 4}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "use",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "play",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "matter",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "budget",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "use",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "play",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "matter",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "budget",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

@@ -1,0 +1,532 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "grid1",
+    "ChartCard1",
+    "ChartCard2",
+    "SectionLabel1",
+    "TableHeader1",
+    "listView1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "choiceChip1",
+    "choiceChip2",
+    "choiceChip3"
+   ]
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "7 days"
+   },
+   "bind": {
+    "props.selected": "${= period==\"7\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "period",
+       "value": "7"
+      },
+      {
+       "type": "setVariable",
+       "variable": "range",
+       "value": "7 days"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip2": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "30 days"
+   },
+   "bind": {
+    "props.selected": "${= period==\"30\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "period",
+       "value": "30"
+      },
+      {
+       "type": "setVariable",
+       "variable": "range",
+       "value": "30 days"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip3": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "90 days"
+   },
+   "bind": {
+    "props.selected": "${= period==\"90\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "period",
+       "value": "90"
+      },
+      {
+       "type": "setVariable",
+       "variable": "range",
+       "value": "90 days"
+      }
+     ]
+    }
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1",
+    "grid1Row2"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Revenue",
+    "note": "vs last period"
+   },
+   "bind": {
+    "props.value": "${= (period==\"7\" ? \"$18.4k\" : period==\"30\" ? \"$78.9k\" : \"$221k\")}",
+    "props.delta": "${= (period==\"7\" ? \"+4.1%\" : period==\"30\" ? \"+8.5%\" : \"+15.3%\")}"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Sign-ups",
+    "note": "vs last period"
+   },
+   "bind": {
+    "props.value": "${= (period==\"7\" ? \"312\" : period==\"30\" ? \"1,340\" : \"3,905\")}",
+    "props.delta": "${= (period==\"7\" ? \"+6.0%\" : period==\"30\" ? \"+11.2%\" : \"+9.8%\")}"
+   }
+  },
+  "grid1Row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile3",
+    "StatTile4"
+   ]
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Churn",
+    "note": "vs last period",
+    "invert": true
+   },
+   "bind": {
+    "props.value": "${= (period==\"7\" ? \"2.9%\" : period==\"30\" ? \"3.1%\" : \"3.4%\")}",
+    "props.delta": "${= (period==\"7\" ? \"-0.2%\" : period==\"30\" ? \"+0.4%\" : \"-0.6%\")}"
+   }
+  },
+  "StatTile4": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Active users",
+    "note": "vs last period"
+   },
+   "bind": {
+    "props.value": "${= (period==\"7\" ? \"13,870\" : period==\"30\" ? \"14,260\" : \"14,260\")}",
+    "props.delta": "${= (period==\"7\" ? \"+1.4%\" : period==\"30\" ? \"+6.3%\" : \"+12.1%\")}"
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Revenue",
+    "kind": "line",
+    "labels": [
+     "Start",
+     "",
+     "",
+     "",
+     "",
+     "",
+     "End"
+    ]
+   },
+   "bind": {
+    "props.value": "${= (period==\"7\" ? \"$18.4k\" : period==\"30\" ? \"$78.9k\" : \"$221k\")}",
+    "props.values": "${= (period==\"7\" ? [2.1,2.4,2.2,2.7,2.9,2.6,3.1] : period==\"30\" ? [2.2,2.5,2.4,2.7,2.9,2.8,3.0,3.2,3.1,3.4] : [1.9,2.1,2.4,2.6,2.8,3.0,3.3,3.5,3.4,3.8,4.0,4.2])}",
+    "props.delta": "${= (period==\"7\" ? \"+4.1%\" : period==\"30\" ? \"+8.5%\" : \"+15.3%\")}"
+   }
+  },
+  "ChartCard2": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Sign-ups by channel",
+    "kind": "bars"
+   },
+   "bind": {
+    "props.value": "${= (period==\"7\" ? \"312\" : period==\"30\" ? \"1,340\" : \"3,905\")}",
+    "props.values": "${= (period==\"7\" ? [128,84,52,31,17] : period==\"30\" ? [540,372,218,134,76] : [1580,1010,640,420,255])}",
+    "props.labels": "${chanLabels}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Top plans"
+   },
+   "bind": {
+    "props.note": "${range}"
+   }
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "Plan",
+     "Subs",
+     "Revenue",
+     "Churn"
+    ],
+    "keys": [
+     "plan",
+     "subs",
+     "revenue",
+     "churn"
+    ]
+   },
+   "bind": {
+    "props.desc": "${desc}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${= (desc ? sortByDesc(plans, p => p[sort]) : sortBy(plans, p => p[sort]))}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.cells": "${= [item.plan, fixed(item.subs,0), money(item.revenue,\"$\",0), fixed(item.churn,1)+\"%\"]}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "period",
+    "type": "text",
+    "value": "30"
+   },
+   {
+    "name": "range",
+    "type": "text",
+    "value": "30 days"
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "revenue"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "plans",
+    "type": "list",
+    "value": [
+     {
+      "plan": "Pro",
+      "subs": 1340,
+      "revenue": 38900,
+      "churn": 2.1
+     },
+     {
+      "plan": "Team",
+      "subs": 412,
+      "revenue": 24700,
+      "churn": 1.4
+     },
+     {
+      "plan": "Starter",
+      "subs": 2980,
+      "revenue": 8900,
+      "churn": 5.2
+     },
+     {
+      "plan": "Business",
+      "subs": 96,
+      "revenue": 4800,
+      "churn": 0.9
+     },
+     {
+      "plan": "Student",
+      "subs": 640,
+      "revenue": 1600,
+      "churn": 6.8
+     }
+    ]
+   },
+   {
+    "name": "chanLabels",
+    "type": "list",
+    "value": [
+     "Organic",
+     "Paid",
+     "Referral",
+     "Social",
+     "Email"
+    ]
+   }
+  ]
+ }
+}

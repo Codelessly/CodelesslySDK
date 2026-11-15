@@ -1,0 +1,81 @@
+{"meta":{"ui":"map_list","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no map tiles) with a numbered pin for each: 1 Bean There, 4.8 stars, 0.2 mi, open 7:00 to 18:00; 2 Daily Grind, 4.6, 0.3 mi, 6:30 to 17:00; 3 Roast & Co, 4.7, 0.4 mi, 8:00 to 19:00; 4 The Steam Cup, 4.4, 0.5 mi, 7:30 to 20:00; 5 Cafe Lune, 4.5, 0.6 mi, 10:00 to 23:00. Tapping a shop or its pin highlights both and shows that shop's rating, distance and opening hours (only the chosen one's). On a narrow screen the map goes above the list.","text":"ChatCard \"Coffee near me\" \"5 shops within 0.6 mi\" icon:\"coffee_rounded\" status:\"Open now\" tone:\"accent\"\n  state pick=0\n  Column gap:12\n    MapPanel =pick count:5\n    PlaceRow \"Bean There\" \"Espresso and pour-over\" index:1 rating:\"4.8\" distance:\"0.2 mi\" hours:\"7:00 to 18:00\" selected:{pick==1} -> pick=1\n    PlaceRow \"Daily Grind\" \"Cold brew and pastries\" index:2 rating:\"4.6\" distance:\"0.3 mi\" hours:\"6:30 to 17:00\" selected:{pick==2} -> pick=2\n    PlaceRow \"Roast & Co\" \"Single origin beans\" index:3 rating:\"4.7\" distance:\"0.4 mi\" hours:\"8:00 to 19:00\" selected:{pick==3} -> pick=3\n    PlaceRow \"The Steam Cup\" \"Milk drinks and bakes\" index:4 rating:\"4.4\" distance:\"0.5 mi\" hours:\"7:30 to 20:00\" selected:{pick==4} -> pick=4\n    PlaceRow \"Cafe Lune\" \"Quiet corner with plants\" index:5 rating:\"4.5\" distance:\"0.6 mi\" hours:\"10:00 to 23:00\" selected:{pick==5} -> pick=5","usage":{"input_tokens":9499,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":476,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":632,"totalMs":2241}}
+{"tMs":632,"delta":"ChatCard \"Co"}
+{"tMs":791,"delta":"ffee near"}
+{"tMs":791,"delta":" me\" \"5"}
+{"tMs":791,"delta":" shops within"}
+{"tMs":791,"delta":" 0.6"}
+{"tMs":791,"delta":" m"}
+{"tMs":791,"delta":"i\" icon:\"coff"}
+{"tMs":791,"delta":"ee_"}
+{"tMs":791,"delta":"rounded\" status:\""}
+{"tMs":793,"delta":"Open now"}
+{"tMs":815,"delta":"\" tone:\"acc"}
+{"tMs":835,"delta":"ent\"\n  state"}
+{"tMs":857,"delta":" pick=0"}
+{"tMs":974,"delta":"\n  "}
+{"tMs":974,"delta":"Column gap:12\n    M"}
+{"tMs":974,"delta":"apPanel =pick count"}
+{"tMs":974,"delta":":5\n    Place"}
+{"tMs":974,"delta":"Row \"Bean There\""}
+{"tMs":981,"delta":" \""}
+{"tMs":1000,"delta":"Esp"}
+{"tMs":1020,"delta":"resso and"}
+{"tMs":1040,"delta":" p"}
+{"tMs":1062,"delta":"our-"}
+{"tMs":1081,"delta":"over\" index:1 rating"}
+{"tMs":1100,"delta":":\""}
+{"tMs":1152,"delta":"4.8\" distance:\""}
+{"tMs":1152,"delta":"0.2 mi\" h"}
+{"tMs":1164,"delta":"ours:\"7:00 to"}
+{"tMs":1185,"delta":" 18:00\" selected:"}
+{"tMs":1205,"delta":"{"}
+{"tMs":1226,"delta":"pick==1} -> p"}
+{"tMs":1247,"delta":"ick=1\n    Pla"}
+{"tMs":1268,"delta":"ceRow \"Daily"}
+{"tMs":1288,"delta":" Grind\" \"C"}
+{"tMs":1308,"delta":"old br"}
+{"tMs":1328,"delta":"ew and p"}
+{"tMs":1350,"delta":"astries\" index:2 r"}
+{"tMs":1398,"delta":"ating:\"4.6\" dist"}
+{"tMs":1398,"delta":"ance:\"0.3 m"}
+{"tMs":1412,"delta":"i\" hours:\"6:"}
+{"tMs":1436,"delta":"30 to 17:00\""}
+{"tMs":1453,"delta":" selected:{pick==2"}
+{"tMs":1474,"delta":"} -> pick=2"}
+{"tMs":1499,"delta":"\n    PlaceRow \""}
+{"tMs":1515,"delta":"Roast & Co\" \""}
+{"tMs":1536,"delta":"Single"}
+{"tMs":1555,"delta":" orig"}
+{"tMs":1575,"delta":"in be"}
+{"tMs":1596,"delta":"ans\" index:3 rating"}
+{"tMs":1616,"delta":":\"4.7\" distance"}
+{"tMs":1637,"delta":":\"0.4 mi"}
+{"tMs":1658,"delta":"\" hours:\"8"}
+{"tMs":1678,"delta":":00 to 19:00"}
+{"tMs":1699,"delta":"\" selected:{pick=="}
+{"tMs":1719,"delta":"3} -> pick=3"}
+{"tMs":1740,"delta":"\n    PlaceRow"}
+{"tMs":1761,"delta":" \"The Steam Cup"}
+{"tMs":1781,"delta":"\" \"Mil"}
+{"tMs":1801,"delta":"k dr"}
+{"tMs":1821,"delta":"inks and b"}
+{"tMs":1841,"delta":"akes"}
+{"tMs":1862,"delta":"\" index:4 rating:"}
+{"tMs":1884,"delta":"\"4.4\" distance:"}
+{"tMs":1903,"delta":"\"0.5 mi\""}
+{"tMs":1924,"delta":" hours:\"7:30 "}
+{"tMs":1945,"delta":"to 20:00\" selected"}
+{"tMs":1965,"delta":":{pick==4} -"}
+{"tMs":1987,"delta":"> pick=4\n    P"}
+{"tMs":2006,"delta":"laceRow \"C"}
+{"tMs":2029,"delta":"afe Lune\" \""}
+{"tMs":2047,"delta":"Quiet cor"}
+{"tMs":2067,"delta":"ner with pl"}
+{"tMs":2089,"delta":"ants"}
+{"tMs":2108,"delta":"\" index:5 rating:"}
+{"tMs":2129,"delta":"\"4.5\" distance:"}
+{"tMs":2149,"delta":"\"0.6 mi\""}
+{"tMs":2169,"delta":" hours:\"10:00 "}
+{"tMs":2193,"delta":"to 23:00\" selected"}
+{"tMs":2214,"delta":":{pick==5} -"}
+{"tMs":2231,"delta":"> pick=5"}

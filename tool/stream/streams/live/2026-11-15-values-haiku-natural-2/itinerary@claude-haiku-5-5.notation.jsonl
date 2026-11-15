@@ -1,0 +1,155 @@
+{"meta":{"ui":"itinerary","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Plan two days in Kyoto as an inline itinerary. Day 1 (Higashiyama and Gion): 08:00 Fushimi Inari Shrine (\"Walk the first loop of torii gates before the crowds\"; JR Nara Line then bus 206, 25 min to the next), 11:30 lunch at Nishiki Market, 14:00 Kiyomizu-dera, 18:00 Gion stroll and dinner. Day 2 (Arashiyama and the north): 08:30 Bamboo Grove, 10:00 Tenryu-ji garden, 13:00 lunch then Kinkaku-ji, 17:30 Pontocho Alley dinner. Each stop expands for details when tapped. Each day has a checklist of three things to book that I can tick off (day 1: Dinner reservation in Gion, Kiyomizu-dera evening tickets, Tea ceremony in Higashiyama; day 2: Pontocho dinner table, Sagano scenic train seats, Rickshaw ride in Arashiyama), and a line at the top that reads \"N of 6 bookings left to make\" and counts down as I tick.","text":"ChatCard \"Two days in Kyoto\" \"Higashiyama, Gion, Arashiyama and the north\" icon:\"map_rounded\" status:\"6 bookings\"\n  state booked1=[]\n  state booked2=[]\n  let left = 6 - length(booked1) - length(booked2)\n  Text.strong \"{left} of 6 bookings left to make\"\n  SectionLabel \"Day 1\" \"Higashiyama and Gion\"\n  DayHeader \"Day 1\" \"Higashiyama and Gion\" kind:\"temple\" tone:\"dawn\"\n    ItineraryStop \"Fushimi Inari Shrine\" \"Walk the first loop of torii gates before the crowds\" time:\"08:00\" travel:\"JR Nara Line, then bus 206, 25 min\" open:false\n    ItineraryStop \"Lunch at Nishiki Market\" \"Street snacks and tamago on a stick\" time:\"11:30\" travel:\"Walk to Kiyomizu-dera, 30 min\" open:false\n    ItineraryStop \"Kiyomizu-dera\" \"Wooden stage over the valley, best in late afternoon\" time:\"14:00\" travel:\"Walk to Gion, 20 min\" open:false\n    ItineraryStop \"Gion stroll and dinner\" \"Evening lanterns along Hanamikoji\" time:\"18:00\" last:true open:false\n  Checklist \"Book for Day 1\" =booked1 items:[\"Dinner reservation in Gion\",\"Kiyomizu-dera evening tickets\",\"Tea ceremony in Higashiyama\"]\n  SectionLabel \"Day 2\" \"Arashiyama and the north\"\n  DayHeader \"Day 2\" \"Arashiyama and the north\" kind:\"bamboo\" tone:\"day\"\n    ItineraryStop \"Bamboo Grove\" \"Go early, the lanes fill by mid-morning\" time:\"08:30\" travel:\"Walk to Tenryu-ji, 10 min\" open:false\n    ItineraryStop \"Tenryu-ji garden\" \"Pond garden under the Arashiyama hills\" time:\"10:00\" travel:\"Taxi to Kinkaku-ji, 20 min\" open:false\n    ItineraryStop \"Lunch, then Kinkaku-ji\" \"Golden pavilion reflected in the pond\" time:\"13:00\" travel:\"Bus 205 to Pontocho, 40 min\" open:false\n    ItineraryStop \"Pontocho Alley dinner\" \"Riverside terraces and narrow lanes\" time:\"17:30\" last:true open:false\n  Checklist \"Book for Day 2\" =booked2 items:[\"Pontocho dinner table\",\"Sagano scenic train seats\",\"Rickshaw ride in Arashiyama\"]","usage":{"input_tokens":9603,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":911,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":533,"totalMs":3683}}
+{"tMs":533,"delta":"ChatCard \"Two"}
+{"tMs":638,"delta":" days in Kyoto\""}
+{"tMs":638,"delta":" \"Hig"}
+{"tMs":638,"delta":"ashiyama,"}
+{"tMs":638,"delta":" Gion,"}
+{"tMs":639,"delta":" Arashiyama and the"}
+{"tMs":639,"delta":" north\" icon:\"map"}
+{"tMs":659,"delta":"_rounded\" status:\""}
+{"tMs":677,"delta":"6"}
+{"tMs":699,"delta":" bookings\"\n  state"}
+{"tMs":717,"delta":" boo"}
+{"tMs":736,"delta":"ked1"}
+{"tMs":757,"delta":"=[]\n  state booked"}
+{"tMs":779,"delta":"2=[]\n  let"}
+{"tMs":799,"delta":" left = "}
+{"tMs":822,"delta":"6 - length(booked1"}
+{"tMs":841,"delta":") - length(booked2)"}
+{"tMs":861,"delta":"\n  Text.strong \""}
+{"tMs":881,"delta":"{left} of "}
+{"tMs":903,"delta":"6 bookings left to make"}
+{"tMs":923,"delta":"\"\n  S"}
+{"tMs":943,"delta":"ectionLabel \"Day"}
+{"tMs":964,"delta":" 1\" \"Higashi"}
+{"tMs":987,"delta":"yama and Gion\""}
+{"tMs":1011,"delta":"\n  DayHeader \""}
+{"tMs":1027,"delta":"Day 1\" \"Higash"}
+{"tMs":1047,"delta":"iyama and Gion\""}
+{"tMs":1067,"delta":" kind:\"tem"}
+{"tMs":1088,"delta":"ple\" tone:\"d"}
+{"tMs":1108,"delta":"awn\"\n    "}
+{"tMs":1129,"delta":"ItineraryStop \""}
+{"tMs":1149,"delta":"Fushimi In"}
+{"tMs":1170,"delta":"ari Shrine\" \""}
+{"tMs":1190,"delta":"Walk the first loop of tor"}
+{"tMs":1211,"delta":"ii gates before the crowds"}
+{"tMs":1231,"delta":"\" time:\"08:00\""}
+{"tMs":1252,"delta":" travel:\"J"}
+{"tMs":1272,"delta":"R Nara Line, then"}
+{"tMs":1293,"delta":" bus 206, 25 "}
+{"tMs":1314,"delta":"min\" open"}
+{"tMs":1333,"delta":":false"}
+{"tMs":1355,"delta":"\n    ItinerarySt"}
+{"tMs":1374,"delta":"op \"L"}
+{"tMs":1396,"delta":"unch at Nishiki"}
+{"tMs":1414,"delta":" Market\" \""}
+{"tMs":1434,"delta":"Street sn"}
+{"tMs":1455,"delta":"acks and tam"}
+{"tMs":1476,"delta":"ago on"}
+{"tMs":1519,"delta":" a"}
+{"tMs":1519,"delta":" stick\" time:\"11:"}
+{"tMs":1536,"delta":"30\" travel:\"Wal"}
+{"tMs":1559,"delta":"k to Kiyom"}
+{"tMs":1577,"delta":"izu-"}
+{"tMs":1606,"delta":"dera, 30"}
+{"tMs":1617,"delta":" min\" open:false\n    "}
+{"tMs":1639,"delta":"ItineraryStop \""}
+{"tMs":1661,"delta":"Kiyomizu-"}
+{"tMs":1679,"delta":"dera\" \"Wooden"}
+{"tMs":1699,"delta":" stage over"}
+{"tMs":1719,"delta":" the val"}
+{"tMs":1739,"delta":"ley,"}
+{"tMs":1760,"delta":" best"}
+{"tMs":1781,"delta":" in"}
+{"tMs":1800,"delta":" late"}
+{"tMs":1820,"delta":" afternoon\" time:\""}
+{"tMs":1841,"delta":"14:00\" travel:\""}
+{"tMs":1861,"delta":"Walk to Gion,"}
+{"tMs":1882,"delta":" 20 min\" open:false"}
+{"tMs":1903,"delta":"\n    ItinerarySt"}
+{"tMs":1924,"delta":"op \"Gion stroll"}
+{"tMs":1944,"delta":" and dinner\" \"Ev"}
+{"tMs":1964,"delta":"ening l"}
+{"tMs":1984,"delta":"anter"}
+{"tMs":2004,"delta":"ns along"}
+{"tMs":2028,"delta":" Han"}
+{"tMs":2045,"delta":"amik"}
+{"tMs":2080,"delta":"oji\""}
+{"tMs":2085,"delta":" time:\"18:00\" last"}
+{"tMs":2106,"delta":":true open:false"}
+{"tMs":2126,"delta":"\n  Checklist \""}
+{"tMs":2146,"delta":"Book for"}
+{"tMs":2187,"delta":" Day 1\" ="}
+{"tMs":2207,"delta":"booked1 items:[\""}
+{"tMs":2228,"delta":"Dinner reservation in"}
+{"tMs":2248,"delta":" Gion\",\"Kiyom"}
+{"tMs":2269,"delta":"izu-dera evening t"}
+{"tMs":2291,"delta":"ickets\",\"Tea ce"}
+{"tMs":2310,"delta":"remony in Higashiy"}
+{"tMs":2330,"delta":"ama\"]\n  Section"}
+{"tMs":2352,"delta":"Label \"Day 2"}
+{"tMs":2372,"delta":"\" \"Arashiyama"}
+{"tMs":2392,"delta":" and the north\"\n  Day"}
+{"tMs":2413,"delta":"Header \"Day 2"}
+{"tMs":2433,"delta":"\" \"Arashiyama"}
+{"tMs":2454,"delta":" and the north\" kind:\""}
+{"tMs":2474,"delta":"bamboo\" tone:"}
+{"tMs":2496,"delta":"\"day"}
+{"tMs":2515,"delta":"\"\n    Itinerary"}
+{"tMs":2535,"delta":"Stop \"Bamboo"}
+{"tMs":2560,"delta":" Grove\" \"Go"}
+{"tMs":2576,"delta":" early,"}
+{"tMs":2599,"delta":" the l"}
+{"tMs":2617,"delta":"anes f"}
+{"tMs":2639,"delta":"ill by"}
+{"tMs":2657,"delta":" m"}
+{"tMs":2677,"delta":"id-mor"}
+{"tMs":2699,"delta":"ning\" time:\"08:30"}
+{"tMs":2721,"delta":"\" travel:\"Walk"}
+{"tMs":2750,"delta":" to Tenryu-"}
+{"tMs":2763,"delta":"ji, 10"}
+{"tMs":2779,"delta":" min\" open:false\n    "}
+{"tMs":2802,"delta":"ItineraryStop \""}
+{"tMs":2837,"delta":"Tenryu-ji"}
+{"tMs":2842,"delta":" garden\" \"Pond gar"}
+{"tMs":2883,"delta":"den under"}
+{"tMs":2891,"delta":" the"}
+{"tMs":2902,"delta":" Ar"}
+{"tMs":2927,"delta":"ash"}
+{"tMs":2943,"delta":"iyama h"}
+{"tMs":2963,"delta":"ills\" time:\"10:00"}
+{"tMs":2983,"delta":"\" travel:\"Ta"}
+{"tMs":3004,"delta":"xi to"}
+{"tMs":3024,"delta":" Kinkaku-"}
+{"tMs":3044,"delta":"ji, 20"}
+{"tMs":3065,"delta":" min\" open:false\n    "}
+{"tMs":3085,"delta":"ItineraryStop \""}
+{"tMs":3106,"delta":"Lunch,"}
+{"tMs":3127,"delta":" then Kinkaku-"}
+{"tMs":3147,"delta":"ji\" \"Gol"}
+{"tMs":3167,"delta":"den p"}
+{"tMs":3187,"delta":"avilion re"}
+{"tMs":3208,"delta":"flected in the pond\" time"}
+{"tMs":3229,"delta":":\"13:00\" travel"}
+{"tMs":3249,"delta":":\"B"}
+{"tMs":3269,"delta":"us "}
+{"tMs":3289,"delta":"205"}
+{"tMs":3310,"delta":" "}
+{"tMs":3330,"delta":"to Pontocho, "}
+{"tMs":3350,"delta":"40 min\" open:false"}
+{"tMs":3447,"delta":"\n    ItineraryStop"}
+{"tMs":3447,"delta":" \"Pontocho"}
+{"tMs":3448,"delta":" Alley dinner\" \""}
+{"tMs":3448,"delta":"Riverside ter"}
+{"tMs":3452,"delta":"races and nar"}
+{"tMs":3473,"delta":"row lanes\" time:"}
+{"tMs":3493,"delta":"\"17:30\" last:true"}
+{"tMs":3516,"delta":" open:false\n  Checkl"}
+{"tMs":3534,"delta":"ist \"Book for Day "}
+{"tMs":3556,"delta":"2\" =booked2 items"}
+{"tMs":3577,"delta":":[\"Pontocho d"}
+{"tMs":3599,"delta":"inner table\",\"Sagano"}
+{"tMs":3617,"delta":" scenic train seats\",\""}
+{"tMs":3637,"delta":"Rickshaw ride in"}
+{"tMs":3657,"delta":" Arashiyama\"]"}

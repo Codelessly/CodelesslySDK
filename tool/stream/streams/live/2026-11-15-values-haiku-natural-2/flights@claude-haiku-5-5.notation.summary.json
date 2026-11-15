@@ -1,0 +1,122 @@
+{
+ "ui": "flights",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24217,
+ "turns": [
+  {
+   "input_tokens": 9423,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 526,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 673,
+   "totalMs": 2295,
+   "chars": 993,
+   "lines": 8,
+   "jsonTails": 0,
+   "nodes": 8,
+   "outputTokensPerNode": "65.8",
+   "notationIssues": [
+    "line 7:39: Unknown word \"pick==1\" on a Details. Props are written key:value.",
+    "line 7:47: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 7:49: A Details takes no string: write the rest as key:\"value\".",
+    "line 7:3: A Details has no \"\". It takes: rows, icons.",
+    "line 7:58: Unknown word \"pick==2\" on a Details. Props are written key:value.",
+    "line 7:66: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 7:68: A Details takes no string: write the rest as key:\"value\".",
+    "line 7:3: A Details has no \"\". It takes: rows, icons.",
+    "line 7:76: A Details takes no string: write the rest as key:\"value\".",
+    "line 7:82: Unknown word \"],[\" on a Details. Props are written key:value.",
+    "line 7:85: A Details takes no string: write the rest as key:\"value\".",
+    "line 7:97: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 7:98: A Details takes no string: write the rest as key:\"value\".",
+    "line 7:108: Unknown word \"],[\" on a Details. Props are written key:value.",
+    "line 7:111: A Details takes no string: write the rest as key:\"value\".",
+    "line 7:118: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 7:120: Unknown word \"pick==1\" on a Details. Props are written key:value.",
+    "line 7:128: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 7:130: A Details takes no string: write the rest as key:\"value\".",
+    "line 7:3: A Details has no \"\". It takes: rows, icons.",
+    "line 7:139: Unknown word \"pick==2\" on a Details. Props are written key:value.",
+    "line 7:147: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 7:149: A Details takes no string: write the rest as key:\"value\".",
+    "line 7:3: A Details has no \"\". It takes: rows, icons.",
+    "line 7:158: A Details takes no string: write the rest as key:\"value\".",
+    "line 7:164: Unknown word \"]]\" on a Details. Props are written key:value."
+   ],
+   "errors": [
+    "unknown_prop /nodes/Details1/props/: A Details has no prop \"\". Its props: rows, icons."
+   ]
+  },
+  {
+   "input_tokens": 10738,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 510,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 493,
+   "totalMs": 1845,
+   "chars": 986,
+   "lines": 10,
+   "jsonTails": 0,
+   "nodes": 8,
+   "outputTokensPerNode": "63.8",
+   "notationIssues": [
+    "line 9:39: Unknown word \"money((pick==1\" on a Details. Props are written key:value.",
+    "line 9:54: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 9:56: Unknown word \"128\" on a Details. Props are written key:value.",
+    "line 9:3: A Details has no \"\". It takes: rows, icons.",
+    "line 9:62: Unknown word \"pick==2\" on a Details. Props are written key:value.",
+    "line 9:70: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 9:72: Unknown word \"84\" on a Details. Props are written key:value.",
+    "line 9:3: A Details has no \"\". It takes: rows, icons.",
+    "line 9:77: Unknown word \"156),\" on a Details. Props are written key:value.",
+    "line 9:82: A Details takes no string: write the rest as key:\"value\".",
+    "line 9:85: Unknown word \",0)],[\" on a Details. Props are written key:value.",
+    "line 9:91: A Details takes no string: write the rest as key:\"value\".",
+    "line 9:103: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 9:104: A Details takes no string: write the rest as key:\"value\".",
+    "line 9:114: Unknown word \"],[\" on a Details. Props are written key:value.",
+    "line 9:117: A Details takes no string: write the rest as key:\"value\".",
+    "line 9:124: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 9:126: Unknown word \"money(((pick==1\" on a Details. Props are written key:value.",
+    "line 9:142: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 9:144: Unknown word \"128\" on a Details. Props are written key:value.",
+    "line 9:3: A Details has no \"\". It takes: rows, icons.",
+    "line 9:150: Unknown word \"pick==2\" on a Details. Props are written key:value.",
+    "line 9:158: Unknown word \"?\" on a Details. Props are written key:value.",
+    "line 9:160: Unknown word \"84\" on a Details. Props are written key:value.",
+    "line 9:3: A Details has no \"\". It takes: rows, icons.",
+    "line 9:165: Unknown word \"156)\" on a Details. Props are written key:value.",
+    "line 9:170: Unknown word \"*\" on a Details. Props are written key:value.",
+    "line 9:172: Unknown word \"2),\" on a Details. Props are written key:value.",
+    "line 9:175: A Details takes no string: write the rest as key:\"value\".",
+    "line 9:178: Unknown word \",0)]]\" on a Details. Props are written key:value."
+   ],
+   "errors": [
+    "unknown_prop /nodes/Details1/props/: A Details has no prop \"\". Its props: rows, icons."
+   ]
+  }
+ ]
+}
