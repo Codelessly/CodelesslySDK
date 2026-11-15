@@ -1,0 +1,168 @@
+{"meta":{"ui":"data_table","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the twelve invoices you found as a table with number, customer, date, amount and status: #1001 Acme Corp May 02 $1,200 Paid; #1002 Globex May 05 $860 Due; #1003 Initech May 09 $430 Overdue; #1004 Umbrella May 12 $2,250 Paid; #1005 Hooli May 15 $975 Due; #1006 Stark Ltd May 16 $3,100 Overdue; #1007 Wayne Co May 18 $640 Paid; #1008 Wonka May 20 $1,480 Due; #1009 Soylent May 22 $300 Overdue; #1010 Cyberdyne May 24 $5,200 Paid; #1011 Tyrell May 27 $760 Due; #1012 Aperture May 29 $1,890 Paid. I can sort by any column (date first), filter by status (All, Paid, Due, Overdue), type to search the customer, page through five at a time, and tick rows (and tick all on the page). When anything is ticked a bar shows \"N selected\" with the total of the ticked amounts and a button to send reminders.","text":"I'll build this as an invoice table with sort, status filter, search, paging, multi-select, and a selection bar. The data is 12 records; I'll write them as state and derive the visible rows.\n\nstate invoices=[{\"id\":\"1001\",\"customer\":\"Acme Corp\",\"date\":\"May 02\",\"amount\":1200,\"status\":\"Paid\"},{\"id\":\"1002\",\"customer\":\"Globex\",\"date\":\"May 05\",\"amount\":860,\"status\":\"Due\"},{\"id\":\"1003\",\"customer\":\"Initech\",\"date\":\"May 09\",\"amount\":430,\"status\":\"Overdue\"},{\"id\":\"1004\",\"customer\":\"Umbrella\",\"date\":\"May 12\",\"amount\":2250,\"status\":\"Paid\"},{\"id\":\"1005\",\"customer\":\"Hooli\",\"date\":\"May 15\",\"amount\":975,\"status\":\"Due\"},{\"id\":\"1006\",\"customer\":\"Stark Ltd\",\"date\":\"May 16\",\"amount\":3100,\"status\":\"Overdue\"},{\"id\":\"1007\",\"customer\":\"Wayne Co\",\"date\":\"May 18\",\"amount\":640,\"status\":\"Paid\"},{\"id\":\"1008\",\"customer\":\"Wonka\",\"date\":\"May 20\",\"amount\":1480,\"status\":\"Due\"},{\"id\":\"1009\",\"customer\":\"Soylent\",\"date\":\"May 22\",\"amount\":300,\"status\":\"Overdue\"},{\"id\":\"1010\",\"customer\":\"Cyberdyne\",\"date\":\"May 24\",\"amount\":5200,\"status\":\"Paid\"},{\"id\":\"1011\",\"customer\":\"Tyrell\",\"date\":\"May 27\",\"amount\":760,\"status\":\"Due\"},{\"id\":\"1012\",\"customer\":\"Aperture\",\"date\":\"May 29\",\"amount\":1890,\"status\":\"Paid\"}]\nstate sort=\"date\"\nstate desc=false\nstate filter=\"All\"\nstate query=\"\"\nstate page=0\nstate picked=[]\nlet matching = filter(invoices, i => (filter==\"All\" or i.status==filter) and (query==\"\" or contains(lower(i.customer), lower(query))))\nlet sorted = sortBy(matching, i => i[sort])\nlet pageRows = slice(sorted, page*5, page*5+5)\nlet pickedTotal = sum(filter(invoices, i => contains(picked, i.id)), i => i.amount)\nCard gap:10 w:390\n  Text.sectionTitle \"Invoices\"\n  Input \"Search customer\" =query -> page=0\n  Segments =filter options:[\"All\",\"Paid\",\"Due\",\"Overdue\"] -> page=0\n  Row gap:0\n    Checkbox =allOnPage\n    TableHeader =sort desc:desc columns:[\"Number\",\"Customer\",\"Date\",\"Amount\",\"Status\"] keys:[\"id\",\"customer\",\"date\",\"amount\",\"status\"]\n  each i in pageRows\n    Row gap:0\n      Checkbox =tick\n      Text \"#{i.id}\"\n      Text \"{i.customer}\"\n      Text \"{i.date}\"\n      Text \"{money(i.amount,\"$\",0)}\"\n      Badge \"{i.status}\"\n  Pager \"Page\" =page count:=ceil(length(sorted)/5)\n  if length(picked)>0\n    Row between\n      Text.strong \"{length(picked)} selected · {money(pickedTotal,\"$\",0)}\"\n      Button \"Send reminders\" -> emit remind picked","usage":{"input_tokens":9595,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1056,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":592,"totalMs":3999}}
+{"tMs":592,"delta":"I'll build this"}
+{"tMs":594,"delta":" as an"}
+{"tMs":730,"delta":" invoice table with sort,"}
+{"tMs":730,"delta":" status filter, search, pa"}
+{"tMs":731,"delta":"ging,"}
+{"tMs":731,"delta":" mult"}
+{"tMs":731,"delta":"i-select, and a sel"}
+{"tMs":731,"delta":"ection bar. The data"}
+{"tMs":740,"delta":" is "}
+{"tMs":763,"delta":"12 records; I'll write"}
+{"tMs":782,"delta":" them as state and"}
+{"tMs":801,"delta":" der"}
+{"tMs":821,"delta":"ive the vis"}
+{"tMs":841,"delta":"ible r"}
+{"tMs":880,"delta":"ows.\n\nstate"}
+{"tMs":883,"delta":" invoices=[{\"id"}
+{"tMs":903,"delta":"\":\""}
+{"tMs":923,"delta":"1001\",\"custom"}
+{"tMs":944,"delta":"er\":\"Acme Cor"}
+{"tMs":966,"delta":"p\",\"date\":\"May 02"}
+{"tMs":988,"delta":"\",\"amount\":1200,\""}
+{"tMs":1009,"delta":"status\":\"Paid\"},"}
+{"tMs":1029,"delta":"{\"id\":\"1002\",\""}
+{"tMs":1050,"delta":"customer\":\"Globex\",\""}
+{"tMs":1070,"delta":"date\":\"May 05\",\"am"}
+{"tMs":1094,"delta":"ount\":860,\"status\":\""}
+{"tMs":1113,"delta":"Due\"},{\"id\":"}
+{"tMs":1133,"delta":"\"1003\",\"customer\":\""}
+{"tMs":1155,"delta":"Initech\",\"date\":\"May"}
+{"tMs":1176,"delta":" 09\",\"amount\":430,"}
+{"tMs":1195,"delta":"\"status\":\"Overdue"}
+{"tMs":1217,"delta":"\"},{\"id\":\"1"}
+{"tMs":1236,"delta":"004\",\"customer\":\"Um"}
+{"tMs":1258,"delta":"brella\",\"date\":\"May"}
+{"tMs":1277,"delta":" 12\",\"amount\":2250"}
+{"tMs":1298,"delta":",\"status\":\"Paid"}
+{"tMs":1318,"delta":"\"},{\"id\":\"1"}
+{"tMs":1340,"delta":"005\",\"customer\":\"H"}
+{"tMs":1372,"delta":"ooli\",\"date\":\"May "}
+{"tMs":1389,"delta":"15\",\"amount\":975,\""}
+{"tMs":1401,"delta":"status\":\"Due\"},{"}
+{"tMs":1433,"delta":"\"id\":\"1006\",\"custom"}
+{"tMs":1448,"delta":"er\":\"Stark "}
+{"tMs":1462,"delta":"Ltd\",\"date\":\"May "}
+{"tMs":1482,"delta":"16\",\"amount\":3100,"}
+{"tMs":1506,"delta":"\"status\":\"Overdue"}
+{"tMs":1525,"delta":"\"},{\"id\":\"1"}
+{"tMs":1544,"delta":"007\",\"customer\":\"W"}
+{"tMs":1570,"delta":"ayne Co\",\"date\":\""}
+{"tMs":1585,"delta":"May 18\",\"amount\":640"}
+{"tMs":1605,"delta":",\"status\":\"Paid"}
+{"tMs":1626,"delta":"\"},{\"id\":\"1"}
+{"tMs":1646,"delta":"008\",\"customer\":\"W"}
+{"tMs":1666,"delta":"onka\",\"date\":\"May "}
+{"tMs":1688,"delta":"20\",\"amount\":1480,"}
+{"tMs":1708,"delta":"\"status\":\"Due\"},"}
+{"tMs":1728,"delta":"{\"id\":\"1009\",\""}
+{"tMs":1748,"delta":"customer\":\"Soylent"}
+{"tMs":1769,"delta":"\",\"date\":\"May 22\",\""}
+{"tMs":1789,"delta":"amount\":300,\"status\":"}
+{"tMs":1810,"delta":"\"Overdue\"},{"}
+{"tMs":1832,"delta":"\"id\":\"1010\",\"custom"}
+{"tMs":1851,"delta":"er\":\"Cyberd"}
+{"tMs":1871,"delta":"yne\",\"date\":\"May "}
+{"tMs":1892,"delta":"24\",\"amount\":5200,"}
+{"tMs":1913,"delta":"\"status\":\"Paid\""}
+{"tMs":1933,"delta":"},{\"id\":\"1011"}
+{"tMs":1953,"delta":"\",\"customer\":\"Ty"}
+{"tMs":1978,"delta":"rell\",\"date\":\"May "}
+{"tMs":1994,"delta":"27\",\"amount\":760,\""}
+{"tMs":2015,"delta":"status\":\"Due\"},{"}
+{"tMs":2035,"delta":"\"id\":\"1012\",\"custom"}
+{"tMs":2055,"delta":"er\":\"Aperture\",\""}
+{"tMs":2076,"delta":"date\":\"May 29\",\"am"}
+{"tMs":2096,"delta":"ount\":1890,\"status\":"}
+{"tMs":2117,"delta":"\"Paid\"}]"}
+{"tMs":2137,"delta":"\nstate sort=\""}
+{"tMs":2157,"delta":"date\"\nstate desc=false"}
+{"tMs":2178,"delta":"\nstate filter=\""}
+{"tMs":2199,"delta":"All\"\nstate query=\"\""}
+{"tMs":2218,"delta":"\nstate page=0\nstate picked"}
+{"tMs":2239,"delta":"=[]"}
+{"tMs":2260,"delta":"\nlet"}
+{"tMs":2283,"delta":" matching = fil"}
+{"tMs":2300,"delta":"ter(invoices, i"}
+{"tMs":2320,"delta":" => ("}
+{"tMs":2344,"delta":"filter="}
+{"tMs":2361,"delta":"=\"All\" or"}
+{"tMs":2381,"delta":" i.status==filter) and"}
+{"tMs":2402,"delta":" (query"}
+{"tMs":2423,"delta":"==\"\" or contains(l"}
+{"tMs":2446,"delta":"ower(i.customer), l"}
+{"tMs":2463,"delta":"ower(query))))\nlet s"}
+{"tMs":2483,"delta":"orted = sortBy("}
+{"tMs":2504,"delta":"matching, i => i["}
+{"tMs":2524,"delta":"sort])\nlet pageR"}
+{"tMs":2545,"delta":"ows = slice(sorted"}
+{"tMs":2565,"delta":", page*5, page*5"}
+{"tMs":2585,"delta":"+5)\nlet picked"}
+{"tMs":2610,"delta":"Total = sum(fil"}
+{"tMs":2626,"delta":"ter(invoices, i =>"}
+{"tMs":2647,"delta":" contains(picked, i."}
+{"tMs":2667,"delta":"id)), i => i"}
+{"tMs":2692,"delta":".amount)"}
+{"tMs":2714,"delta":"\nCard gap:10"}
+{"tMs":2728,"delta":" w:390"}
+{"tMs":2748,"delta":"\n  Text"}
+{"tMs":2769,"delta":".s"}
+{"tMs":2789,"delta":"ectionTitle \"Inv"}
+{"tMs":2810,"delta":"oices\"\n  Input"}
+{"tMs":2831,"delta":" \"Search"}
+{"tMs":2850,"delta":" customer\" ="}
+{"tMs":2871,"delta":"query -"}
+{"tMs":2891,"delta":"> page"}
+{"tMs":2915,"delta":"=0\n  Seg"}
+{"tMs":2932,"delta":"ments =filter options"}
+{"tMs":2955,"delta":":[\"All\",\"Paid\",\""}
+{"tMs":2972,"delta":"Due\",\"Overdue\""}
+{"tMs":2993,"delta":"] -> page"}
+{"tMs":3013,"delta":"=0\n  Row gap"}
+{"tMs":3034,"delta":":0"}
+{"tMs":3054,"delta":"\n    Chec"}
+{"tMs":3074,"delta":"kbox =all"}
+{"tMs":3095,"delta":"O"}
+{"tMs":3115,"delta":"nPage\n    T"}
+{"tMs":3138,"delta":"ableHeader =sort"}
+{"tMs":3156,"delta":" desc:desc columns:"}
+{"tMs":3176,"delta":"[\"Number"}
+{"tMs":3198,"delta":"\",\"Customer\",\"Date\",\""}
+{"tMs":3217,"delta":"Amount\",\"Status\"]"}
+{"tMs":3238,"delta":" keys:[\"id\",\"custom"}
+{"tMs":3258,"delta":"er\",\"date\",\"amount\",\"status"}
+{"tMs":3278,"delta":"\"]\n  each i"}
+{"tMs":3302,"delta":" in pageRows\n    "}
+{"tMs":3320,"delta":"Row gap:0"}
+{"tMs":3340,"delta":"\n      Checkbox ="}
+{"tMs":3363,"delta":"t"}
+{"tMs":3380,"delta":"ick\n      Text \""}
+{"tMs":3401,"delta":"#"}
+{"tMs":3421,"delta":"{i.id}\""}
+{"tMs":3442,"delta":"\n      Text \"{i."}
+{"tMs":3462,"delta":"customer}\"\n      Text"}
+{"tMs":3483,"delta":" \"{i.date}\""}
+{"tMs":3503,"delta":"\n      Text \"{money(i"}
+{"tMs":3523,"delta":".amount,\""}
+{"tMs":3544,"delta":"$\",0"}
+{"tMs":3566,"delta":")}\"\n      Bad"}
+{"tMs":3590,"delta":"ge \""}
+{"tMs":3604,"delta":"{i.status}\""}
+{"tMs":3625,"delta":"\n  P"}
+{"tMs":3645,"delta":"ager \""}
+{"tMs":3666,"delta":"Page\""}
+{"tMs":3686,"delta":" =page count:="}
+{"tMs":3707,"delta":"ceil(length(sorted"}
+{"tMs":3727,"delta":")/5)\n  if length"}
+{"tMs":3748,"delta":"(picked)>0\n    "}
+{"tMs":3768,"delta":"Row between"}
+{"tMs":3809,"delta":"\n      Text.str"}
+{"tMs":3829,"delta":"ong \"{length(picked)"}
+{"tMs":3851,"delta":"} selected ·"}
+{"tMs":3870,"delta":" {money(pickedTot"}
+{"tMs":3891,"delta":"al,\"$\",0)}"}
+{"tMs":3911,"delta":"\"\n      Button \"Send"}
+{"tMs":3931,"delta":" reminders\" -> emit"}
+{"tMs":3951,"delta":" rem"}
+{"tMs":3974,"delta":"ind pic"}
+{"tMs":3992,"delta":"ked"}

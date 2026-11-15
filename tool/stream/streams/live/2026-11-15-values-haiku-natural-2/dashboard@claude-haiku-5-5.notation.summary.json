@@ -1,0 +1,89 @@
+{
+ "ui": "dashboard",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24217,
+ "turns": [
+  {
+   "input_tokens": 9685,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1528,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 638,
+   "totalMs": 6046,
+   "chars": 3065,
+   "lines": 37,
+   "jsonTails": 0,
+   "nodes": 20,
+   "outputTokensPerNode": "76.4",
+   "notationIssues": [
+    "line 38:88: Unknown word \"(period==\" on a ChartCard. Props are written key:value.",
+    "line 38:101: Unknown word \"?\" on a ChartCard. Props are written key:value.",
+    "line 38:103: Unknown word \"[2.1,2.4,2.2,2.7,2.9,2.6,3.1]\" on a ChartCard. Props are written key:value.",
+    "line 38:3: A ChartCard has no \"\". It takes: title, value, values, labels, kind, delta.",
+    "line 38:135: Unknown word \"period==\" on a ChartCard. Props are written key:value.",
+    "line 38:143: A ChartCard takes no more strings (title): write the rest as key:\"value\".",
+    "line 38:148: Unknown word \"?\" on a ChartCard. Props are written key:value.",
+    "line 38:150: Unknown word \"[2.2,2.5,2.4,2.7,2.9,2.8,3.0,3.2,3.1,3.4]\" on a ChartCard. Props are written key:value.",
+    "line 38:3: A ChartCard has no \"\". It takes: title, value, values, labels, kind, delta.",
+    "line 38:194: Unknown word \"[1.9,2.1,2.4,2.6,2.8,3.0,3.3,3.5,3.4,3.8,4.0,4.2])\" on a ChartCard. Props are written key:value.",
+    "line 38:257: The string on this line is already the ChartCard's delta: write delta once.",
+    "line 38:3: A ChartCard needs values: write values:[\"a\",\"b\"].",
+    "line 39:96: Unknown word \"(period==\" on a ChartCard. Props are written key:value.",
+    "line 39:109: Unknown word \"?\" on a ChartCard. Props are written key:value.",
+    "line 39:111: Unknown word \"[128,84,52,31,17]\" on a ChartCard. Props are written key:value.",
+    "line 39:3: A ChartCard has no \"\". It takes: title, value, values, labels, kind, delta.",
+    "line 39:131: Unknown word \"period==\" on a ChartCard. Props are written key:value.",
+    "line 39:139: A ChartCard takes no more strings (title): write the rest as key:\"value\".",
+    "line 39:144: Unknown word \"?\" on a ChartCard. Props are written key:value.",
+    "line 39:146: Unknown word \"[540,372,218,134,76]\" on a ChartCard. Props are written key:value.",
+    "line 39:3: A ChartCard has no \"\". It takes: title, value, values, labels, kind, delta.",
+    "line 39:169: Unknown word \"[1580,1010,640,420,255])\" on a ChartCard. Props are written key:value.",
+    "line 39:3: A ChartCard needs values: write values:[\"a\",\"b\"]."
+   ],
+   "errors": [
+    "unknown_prop /nodes/ChartCard1/props/: A ChartCard has no prop \"\". Its props: title, value, values, labels, kind, delta.",
+    "unknown_prop /nodes/ChartCard2/props/: A ChartCard has no prop \"\". Its props: title, value, values, labels, kind, delta.",
+    "missing_prop /nodes/ChartCard1/props: ChartCard needs \"values\" (List<double>): set \"props\": {\"values\": ...} or bind \"props.values\".",
+    "missing_prop /nodes/ChartCard2/props: ChartCard needs \"values\" (List<double>): set \"props\": {\"values\": ...} or bind \"props.values\"."
+   ]
+  },
+  {
+   "input_tokens": 12359,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1322,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 478,
+   "totalMs": 3945,
+   "chars": 2456,
+   "lines": 33,
+   "jsonTails": 0,
+   "nodes": 20,
+   "outputTokensPerNode": "66.1",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

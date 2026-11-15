@@ -1,0 +1,392 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Schedule a 30 minute meeting",
+    "subtitle": "With Priya, Marcus and Elena",
+    "icon": "event",
+    "status": "Next week",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "DayPicker1",
+    "SectionLabel2",
+    "ChoiceChips1",
+    "ChoiceChips2",
+    "ChoiceChips3",
+    "ChoiceChips4",
+    "ChoiceChips5",
+    "SectionLabel3",
+    "Details1",
+    "TotalBar1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day",
+    "note": "Pick one"
+   }
+  },
+  "DayPicker1": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day",
+    "days": [
+     "Mon 16",
+     "Tue 17",
+     "Wed 18",
+     "Thu 19",
+     "Fri 20"
+    ]
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Time",
+    "note": "30 minutes"
+   },
+   "bind": {
+    "visible": "${= day!=\"\"}"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "09:00",
+     "10:00",
+     "11:00",
+     "13:00",
+     "14:00",
+     "15:00"
+    ],
+    "disabled": [
+     "10:00",
+     "13:00"
+    ],
+    "columns": 3
+   },
+   "bind": {
+    "visible": "${= (day!=\"\") && (day==\"Mon 16\")}"
+   }
+  },
+  "ChoiceChips2": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "09:00",
+     "10:00",
+     "11:00",
+     "13:00",
+     "14:00",
+     "15:00"
+    ],
+    "disabled": [
+     "09:00",
+     "14:00"
+    ],
+    "columns": 3
+   },
+   "bind": {
+    "visible": "${= (day!=\"\") && (day==\"Tue 17\")}"
+   }
+  },
+  "ChoiceChips3": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "09:00",
+     "10:00",
+     "11:00",
+     "13:00",
+     "14:00",
+     "15:00"
+    ],
+    "disabled": [
+     "11:00",
+     "15:00"
+    ],
+    "columns": 3
+   },
+   "bind": {
+    "visible": "${= (day!=\"\") && (day==\"Wed 18\")}"
+   }
+  },
+  "ChoiceChips4": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "09:00",
+     "10:00",
+     "11:00",
+     "13:00",
+     "14:00",
+     "15:00"
+    ],
+    "disabled": [
+     "09:00",
+     "10:00",
+     "13:00"
+    ],
+    "columns": 3
+   },
+   "bind": {
+    "visible": "${= (day!=\"\") && (day==\"Thu 19\")}"
+   }
+  },
+  "ChoiceChips5": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "09:00",
+     "10:00",
+     "11:00",
+     "13:00",
+     "14:00",
+     "15:00"
+    ],
+    "disabled": [
+     "11:00",
+     "14:00"
+    ],
+    "columns": 3
+   },
+   "bind": {
+    "visible": "${= (day!=\"\") && (day==\"Fri 20\")}"
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Attendees",
+    "note": "3 people"
+   },
+   "bind": {
+    "visible": "${= day!=\"\" && time!=\"\"}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "You",
+      "Organiser"
+     ],
+     [
+      "Priya",
+      "Invited"
+     ],
+     [
+      "Marcus",
+      "Invited"
+     ],
+     [
+      "Elena",
+      "Invited"
+     ]
+    ]
+   },
+   "bind": {
+    "visible": "${= day!=\"\" && time!=\"\"}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Meeting",
+    "amount": "30 min",
+    "cta": "Confirm",
+    "icon": "check"
+   },
+   "bind": {
+    "props.note": "${day} Nov, ${time} to ${time}",
+    "props.enabled": "${= day!=\"\" && time!=\"\"}",
+    "visible": "${= day!=\"\" && time!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "booked",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Meeting booked",
+    "tone": "good",
+    "icon": "event_available"
+   },
+   "bind": {
+    "props.message": "${day} Nov, ${time} to ${time}, with Priya, Marcus and Elena.",
+    "visible": "${= booked}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "booked",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

@@ -1,0 +1,63 @@
+{"meta":{"ui":"weather","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the weather in Lisbon as an inline card. Now: 22° and partly cloudy, high 24°, low 15°. The next five hours: 1 PM 23° sunny, 2 PM 24° sunny, 3 PM 24° partly cloudy, 4 PM 23° cloudy, 5 PM 21° rain. The next three days with a temperature range bar: Tue rain 14° to 20°, Wed partly cloudy 13° to 18°, Thu sunny 15° to 25°. Add a button \"Alert me before it rains\" that, once I press it, reads \"Rain alert is on\" and shows the alert as switched on.","text":"ChatCard \"Lisbon\" \"Right now\" icon:\"cloud\" status:\"Partly cloudy\"\n  WeatherNow \"Lisbon\" \"Partly cloudy\" temp:22 high:24 low:15 kind:\"partly\"\n  WeatherHours hours:[\"1 PM\",\"2 PM\",\"3 PM\",\"4 PM\",\"5 PM\"] temps:[23,24,24,23,21] kinds:[\"sun\",\"sun\",\"partly\",\"cloud\",\"rain\"]\n  SectionLabel \"Next three days\"\n  WeatherDay \"Tue\" low:14 high:20 kind:\"rain\" min:14 max:25\n  WeatherDay \"Wed\" low:13 high:18 kind:\"partly\" min:14 max:25\n  WeatherDay \"Thu\" low:15 high:25 kind:\"sun\" min:14 max:25\n  state alert=false\n  if alert\n    Callout \"Rain alert is on\" \"We will tell you before it rains.\" tone:good icon:\"notifications\"\n  if !alert\n    ActionButton \"Alert me before it rains\" tone:primary icon:\"notifications\" -> alert=true\n  if alert\n    ActionButton \"Rain alert is on\" tone:quiet icon:\"check\" enabled:false","usage":{"input_tokens":9434,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":404,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":535,"totalMs":1778}}
+{"tMs":535,"delta":"ChatCard \"L"}
+{"tMs":721,"delta":"isbon\" \"Right"}
+{"tMs":721,"delta":" now\" icon:\"c"}
+{"tMs":721,"delta":"loud\" status:\"Part"}
+{"tMs":721,"delta":"ly cloudy\""}
+{"tMs":721,"delta":"\n  WeatherNow"}
+{"tMs":721,"delta":" \"Lisbon\""}
+{"tMs":721,"delta":" \"Partly cloudy"}
+{"tMs":721,"delta":"\" temp:22 high:"}
+{"tMs":721,"delta":"24 low:15 "}
+{"tMs":725,"delta":"kind:\"part"}
+{"tMs":745,"delta":"ly\"\n  Weather"}
+{"tMs":766,"delta":"Hours hours:[\""}
+{"tMs":826,"delta":"1 PM\",\"2 P"}
+{"tMs":826,"delta":"M\",\"3 PM\",\"4"}
+{"tMs":826,"delta":" PM\",\"5 PM"}
+{"tMs":848,"delta":"\"] temps:[23,"}
+{"tMs":871,"delta":"24,24,23,21]"}
+{"tMs":889,"delta":" kinds:[\"sun\",\""}
+{"tMs":910,"delta":"sun\",\"partly\",\"clo"}
+{"tMs":931,"delta":"ud\",\"rain\"]\n  "}
+{"tMs":950,"delta":"SectionLabel \""}
+{"tMs":970,"delta":"Next three days\""}
+{"tMs":990,"delta":"\n  "}
+{"tMs":1010,"delta":"W"}
+{"tMs":1030,"delta":"eatherDay \"T"}
+{"tMs":1054,"delta":"ue\" low:14 high:"}
+{"tMs":1071,"delta":"20 kind:\"rain"}
+{"tMs":1092,"delta":"\" min:14 max:25"}
+{"tMs":1112,"delta":"\n  WeatherDay"}
+{"tMs":1133,"delta":" \"Wed\" low:13"}
+{"tMs":1153,"delta":" high:18 kind:"}
+{"tMs":1173,"delta":"\"partly\" min:14"}
+{"tMs":1194,"delta":" max:25\n  We"}
+{"tMs":1215,"delta":"atherDay \"Thu"}
+{"tMs":1236,"delta":"\" low:15 high:25"}
+{"tMs":1257,"delta":" kind:\"sun\""}
+{"tMs":1276,"delta":" min:14 max:25"}
+{"tMs":1296,"delta":"\n  state alert="}
+{"tMs":1319,"delta":"false\n  if al"}
+{"tMs":1364,"delta":"ert"}
+{"tMs":1364,"delta":"\n    Call"}
+{"tMs":1421,"delta":"out \"Rain alert is"}
+{"tMs":1421,"delta":" on\" \"We"}
+{"tMs":1421,"delta":" will"}
+{"tMs":1437,"delta":" tell you before"}
+{"tMs":1458,"delta":" it rains.\" tone:good"}
+{"tMs":1482,"delta":" icon:\"not"}
+{"tMs":1502,"delta":"if"}
+{"tMs":1518,"delta":"ications\""}
+{"tMs":1539,"delta":"\n  if"}
+{"tMs":1559,"delta":" !alert\n    Action"}
+{"tMs":1580,"delta":"Button \"Alert me before"}
+{"tMs":1600,"delta":" it rains\" tone:prim"}
+{"tMs":1621,"delta":"ary icon:\"notifications"}
+{"tMs":1641,"delta":"\" -> alert=true"}
+{"tMs":1661,"delta":"\n  if"}
+{"tMs":1682,"delta":" alert\n    ActionBut"}
+{"tMs":1702,"delta":"ton \"Rain alert is"}
+{"tMs":1723,"delta":" on\" tone:quiet"}
+{"tMs":1743,"delta":" icon:\"check\" enab"}
+{"tMs":1773,"delta":"led:false"}

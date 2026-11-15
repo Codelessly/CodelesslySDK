@@ -1,0 +1,139 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Phone plans",
+    "subtitle": "Compare Lite and Max",
+    "icon": "compare_arrows",
+    "status": "Compare"
+   },
+   "children": [
+    "ComparisonTable1",
+    "Paragraph1",
+    "Receipt1"
+   ]
+  },
+  "ComparisonTable1": {
+   "type": "ComparisonTable",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Lite",
+     "Max"
+    ],
+    "prices": [
+     "$25/mo",
+     "$45/mo"
+    ],
+    "pick": "2",
+    "pickLabel": "Best value",
+    "cta": "Choose"
+   },
+   "bind": {
+    "visible": "${= pick==\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChoose"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Max wins 4 of 6 rows and costs $20 more per month. Lite is cheaper if you only need light use.",
+    "strong": true
+   },
+   "bind": {
+    "visible": "${= pick==\"\"}"
+   }
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Plan chosen",
+    "code": "",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.message": "You picked ${pick}. We will set it up for you.",
+    "visible": "${= pick!=\"\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

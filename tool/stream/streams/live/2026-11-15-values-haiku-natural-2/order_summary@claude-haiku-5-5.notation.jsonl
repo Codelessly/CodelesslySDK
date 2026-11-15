@@ -1,0 +1,91 @@
+{"meta":{"ui":"order_summary","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show my grocery order as an inline card before you place it, with the number of items at the top. Five lines, each with a picture placeholder, its price and a quantity I can raise or lower (removing the line at zero): Bananas 1 kg $2.50 x1, Whole milk 2 L $3.20 x2, Sourdough loaf $4.50 x1, Free-range eggs $5.00 x1, Cheddar $7.00 x1. A promo code field where SAVE10 takes 10% off the subtotal, delivery of $4.99, and the subtotal, promo and total kept up to date as I change things. Confirm and cancel buttons that tell you what I decided.","text":"ChatCard \"Your grocery order\" \"Review before placing\" icon:\"shopping_basket\" status:\"Draft\" (\n  Text.strong \"{length(lines)} items\"\n  each row in lines\n    CartLine \"{row.name}\" \"Picture placeholder\" price:\"{money(row.price,\"$\",2)}\" qty:=row.qty kind:\"box\" -> lines=updateWhere(lines, x=>x.name==row.name, x=>with(x,\"qty\",result))\n  InputField \"Promo code\" \"Enter code\" =promo\n  Details rows:=[[\"Subtotal\", money(subtotal,\"$\",2)],[\"Promo\", money(-discount,\"$\",2)],[\"Delivery\", \"$4.99\"],[\"Total\", money(total,\"$\",2)]]\n  Row gap:10\n    ActionButton \"Cancel\" quiet -> emit cancel; toast \"Order cancelled\"\n    ActionButton \"Confirm\" primary -> emit confirm; toast \"Order placed\"\n)\n\nstate lines=[{\"name\":\"Bananas 1 kg\",\"price\":2.50,\"qty\":1},{\"name\":\"Whole milk 2 L\",\"price\":3.20,\"qty\":2},{\"name\":\"Sourdough loaf\",\"price\":4.50,\"qty\":1},{\"name\":\"Free-range eggs\",\"price\":5.00,\"qty\":1},{\"name\":\"Cheddar\",\"price\":7.00,\"qty\":1}]\nstate promo=\"\"\nlet subtotal = sum(map(lines, l => l.qty * l.price))\nlet discount = upper(trim(promo))==\"SAVE10\" ? subtotal * 0.10 : 0\nlet total = subtotal - discount + 4.99","usage":{"input_tokens":9440,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":545,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":494,"totalMs":2349}}
+{"tMs":494,"delta":"ChatCard \"Your"}
+{"tMs":593,"delta":" grocery order\" \"Review"}
+{"tMs":593,"delta":" before"}
+{"tMs":593,"delta":" placing\" icon:\"sh"}
+{"tMs":593,"delta":"opping_basket\" status:"}
+{"tMs":593,"delta":"\"Dra"}
+{"tMs":602,"delta":"ft\" ("}
+{"tMs":640,"delta":"\n  Text.str"}
+{"tMs":660,"delta":"ong \"{length"}
+{"tMs":682,"delta":"(l"}
+{"tMs":700,"delta":"ines)} items\"\n  each"}
+{"tMs":719,"delta":" row"}
+{"tMs":744,"delta":" in lines\n    C"}
+{"tMs":760,"delta":"artLine \""}
+{"tMs":780,"delta":"{row.name"}
+{"tMs":802,"delta":"}\" \""}
+{"tMs":820,"delta":"Picture plac"}
+{"tMs":840,"delta":"eholder\" price"}
+{"tMs":860,"delta":":\""}
+{"tMs":879,"delta":"{money"}
+{"tMs":901,"delta":"(row.price,\"$\","}
+{"tMs":924,"delta":"2)}\" qty:="}
+{"tMs":945,"delta":"row.qty k"}
+{"tMs":964,"delta":"ind:\"box"}
+{"tMs":984,"delta":"\" -"}
+{"tMs":1003,"delta":"> l"}
+{"tMs":1022,"delta":"ines="}
+{"tMs":1044,"delta":"updateWhere(lines"}
+{"tMs":1063,"delta":","}
+{"tMs":1084,"delta":" x=>x.name"}
+{"tMs":1105,"delta":"==row.name, x=>"}
+{"tMs":1126,"delta":"with(x,"}
+{"tMs":1147,"delta":"\"qty\",result))\n  "}
+{"tMs":1168,"delta":"InputField \"Promo code"}
+{"tMs":1188,"delta":"\" \""}
+{"tMs":1208,"delta":"Enter code"}
+{"tMs":1228,"delta":"\" =prom"}
+{"tMs":1249,"delta":"o\n  Details"}
+{"tMs":1268,"delta":" r"}
+{"tMs":1288,"delta":"ows:"}
+{"tMs":1310,"delta":"=[[\"Subtotal"}
+{"tMs":1331,"delta":"\", money(subtotal,"}
+{"tMs":1351,"delta":"\"$\",2)],"}
+{"tMs":1372,"delta":"[\"Promo\", money(-"}
+{"tMs":1393,"delta":"discount,\"$\",2)"}
+{"tMs":1414,"delta":"],[\"Delivery\", \""}
+{"tMs":1435,"delta":"$4.99\"],[\""}
+{"tMs":1456,"delta":"Total\", money(total,\"$"}
+{"tMs":1476,"delta":"\",2)]]"}
+{"tMs":1498,"delta":"\n  Row g"}
+{"tMs":1517,"delta":"ap:10"}
+{"tMs":1537,"delta":"\n    ActionButton \""}
+{"tMs":1558,"delta":"C"}
+{"tMs":1578,"delta":"ancel\" qu"}
+{"tMs":1599,"delta":"iet -> emit canc"}
+{"tMs":1619,"delta":"el; toast \"Order"}
+{"tMs":1641,"delta":" cancelled\"\n    "}
+{"tMs":1664,"delta":"ActionButton \"Confir"}
+{"tMs":1681,"delta":"m\" primary -> emit"}
+{"tMs":1706,"delta":" confirm; toast \""}
+{"tMs":1723,"delta":"Order placed\"\n)\n\nstate"}
+{"tMs":1746,"delta":" lines=[{\"name\":"}
+{"tMs":1764,"delta":"\"Bananas "}
+{"tMs":1784,"delta":"1 kg\",\"price\":2"}
+{"tMs":1805,"delta":".50,\"qty\":1"}
+{"tMs":1828,"delta":"},{\"name\":\"Wh"}
+{"tMs":1846,"delta":"ole milk 2 L\",\""}
+{"tMs":1870,"delta":"price\":3.20,\"q"}
+{"tMs":1888,"delta":"ty\":2},{\"name\":"}
+{"tMs":1908,"delta":"\"Sourdough loa"}
+{"tMs":1930,"delta":"f\",\"price\":4.50,"}
+{"tMs":1950,"delta":"\"qty\":1},{\""}
+{"tMs":1972,"delta":"name\":\"Free-range e"}
+{"tMs":1990,"delta":"ggs\",\"price\":5.00"}
+{"tMs":2015,"delta":",\"qty\":1},{"}
+{"tMs":2032,"delta":"\"name\":\"Chedd"}
+{"tMs":2052,"delta":"ar\",\"price\":7.00,"}
+{"tMs":2073,"delta":"\"qty\":1}]"}
+{"tMs":2094,"delta":"\nstate promo=\"\"\nlet sub"}
+{"tMs":2114,"delta":"total = sum(map"}
+{"tMs":2134,"delta":"(lines, l => l."}
+{"tMs":2154,"delta":"q"}
+{"tMs":2178,"delta":"ty * l.price))\nlet"}
+{"tMs":2195,"delta":" discount = up"}
+{"tMs":2216,"delta":"per(trim(promo))"}
+{"tMs":2236,"delta":"==\"SAVE10\""}
+{"tMs":2257,"delta":" ? subtotal *"}
+{"tMs":2277,"delta":" 0.10 : 0"}
+{"tMs":2298,"delta":"\nlet total = subtotal"}
+{"tMs":2319,"delta":" - discount + 4.99"}

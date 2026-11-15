@@ -1,0 +1,283 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lemon chicken traybake",
+    "subtitle": "Weeknight dinner",
+    "icon": "restaurant_rounded",
+    "status": "45 min · Easy"
+   },
+   "children": [
+    "row1",
+    "SectionLabel1",
+    "Checklist1",
+    "SectionLabel2",
+    "PlanStep1",
+    "PlanStep2",
+    "PlanStep3",
+    "PlanStep4",
+    "ActionButton1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "Counter1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "Serves ${servings}"
+   }
+  },
+  "Counter1": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Servings",
+    "detail": "adjust",
+    "value": "servings",
+    "min": 2,
+    "max": 8,
+    "step": 1
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Ingredients"
+   },
+   "bind": {
+    "props.note": "for ${servings}"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Ingredients",
+    "value": "done"
+   },
+   "bind": {
+    "props.items": "${= [(\"Chicken thighs, \" + (servings*200) + \" g\"), (\"Baby potatoes, \" + (servings*150) + \" g\"), (\"Lemons, \" + (ceil(servings/2))), (\"Olive oil, \" + (servings) + \" tbsp\"), (\"Garlic cloves, \" + (servings) + \" \"), (\"Dried oregano, \" + (servings/2) + \" tsp\")]}"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Method",
+    "note": "4 steps"
+   }
+  },
+  "PlanStep1": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Heat the oven",
+    "detail": "Heat the oven to 220C",
+    "index": 0
+   },
+   "bind": {
+    "props.current": "${= length(done)}"
+   }
+  },
+  "PlanStep2": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Toss",
+    "detail": "Toss everything in the oil, lemon and oregano",
+    "index": 1
+   },
+   "bind": {
+    "props.current": "${= length(done)}"
+   }
+  },
+  "PlanStep3": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Roast",
+    "detail": "Roast 35 minutes, turning once",
+    "index": 2
+   },
+   "bind": {
+    "props.current": "${= length(done)}"
+   }
+  },
+  "PlanStep4": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Rest and serve",
+    "detail": "Rest 5 minutes and serve",
+    "index": 3,
+    "last": true
+   },
+   "bind": {
+    "props.current": "${= length(done)}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start cooking",
+    "tone": "primary",
+    "icon": "play_arrow_rounded"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "start_cooking"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "servings",
+    "type": "integer",
+    "value": 4
+   },
+   {
+    "name": "done",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

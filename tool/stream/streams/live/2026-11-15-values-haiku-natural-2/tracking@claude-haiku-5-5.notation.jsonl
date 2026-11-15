@@ -1,0 +1,99 @@
+{"meta":{"ui":"tracking","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Today is Sat 15 Nov. Show a tracking card: the item (Nikon Z fc camera body), carrier DHL Express, tracking number JD014600003SE, estimated delivery Tue 18 Nov and how many days away that is, and the shipment's five stages as a timeline with the current one marked: Label created (Nov 12), Picked up (Nov 13), In transit (Nov 14, current), Out for delivery, Delivered. Say which stage it is at (\"Stage 3 of 5\"). And a field where I can type delivery instructions and a Save button; once saved the card shows them back to me as saved.","text":"ChatCard \"Your package\" \"Nikon Z fc camera body\" icon:\"local_shipping\" status:\"In transit\" tone:\"accent\"\n  Row between\n    Text.muted \"DHL Express · JD014600003SE\"\n    Text.strong \"Stage 3 of 5\"\n  Row between\n    Text.muted \"Estimated delivery\"\n    Text.strong \"Tue 18 Nov\"\n  Text.muted \"3 days away\"\n  SectionLabel \"Shipment progress\" \"Stage 3 of 5\"\n  Column gap:6\n    Row gap:10\n      Icon \"check_circle\" color:#FF2E7D32\n      Text.body \"Label created · Nov 12\"\n    Row gap:10\n      Icon \"check_circle\" color:#FF2E7D32\n      Text.body \"Picked up · Nov 13\"\n    Row gap:10\n      Icon \"radio_button_checked\" color:#FF1565C0\n      Text.strong \"In transit · Nov 14 (current)\"\n    Row gap:10\n      Icon \"radio_button_unchecked\" color:#FF9E9E9E\n      Text.muted \"Out for delivery\"\n    Row gap:10\n      Icon \"radio_button_unchecked\" color:#FF9E9E9E\n      Text.muted \"Delivered\"\n  state instructions=\"\"\n  state saved=\"\"\n  SectionLabel \"Delivery instructions\" \"\"\n  InputField \"Instructions\" \"e.g. leave with the concierge\" =instructions lines:3\n  ActionButton \"Save\" primary icon:\"save\" enabled:{instructions != \"\"} -> saved=instructions\n  if saved != \"\"\n    Callout \"Saved\" \"{saved}\" tone:\"good\" icon:\"check_circle\"","usage":{"input_tokens":9431,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":569,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":514,"totalMs":2493}}
+{"tMs":514,"delta":"ChatCard \"Your"}
+{"tMs":716,"delta":" package\" \"Nikon"}
+{"tMs":716,"delta":" Z fc camera body\" ic"}
+{"tMs":716,"delta":"on:\"local"}
+{"tMs":716,"delta":"_sh"}
+{"tMs":716,"delta":"ipping\" status:\"In trans"}
+{"tMs":716,"delta":"it\" tone:\"accent"}
+{"tMs":716,"delta":"\"\n  "}
+{"tMs":716,"delta":"Row"}
+{"tMs":716,"delta":" between"}
+{"tMs":716,"delta":"\n    Text.mu"}
+{"tMs":723,"delta":"ted \"DHL"}
+{"tMs":743,"delta":" Express ·"}
+{"tMs":854,"delta":" JD014600003SE\""}
+{"tMs":854,"delta":"\n    Text.strong \""}
+{"tMs":854,"delta":"St"}
+{"tMs":854,"delta":"age 3 of 5\""}
+{"tMs":854,"delta":"\n  Row"}
+{"tMs":867,"delta":" between\n    Text.mu"}
+{"tMs":888,"delta":"ted \"Estimated deliv"}
+{"tMs":909,"delta":"ery\"\n    Text.str"}
+{"tMs":930,"delta":"ong \"Tue 18 "}
+{"tMs":951,"delta":"Nov\"\n  Text"}
+{"tMs":971,"delta":".muted \"3"}
+{"tMs":992,"delta":" days away\"\n  S"}
+{"tMs":1022,"delta":"ectionLabel \"Sh"}
+{"tMs":1033,"delta":"ipment progress\" \"St"}
+{"tMs":1054,"delta":"age 3 of 5\""}
+{"tMs":1074,"delta":"\n  Column"}
+{"tMs":1094,"delta":" gap:6"}
+{"tMs":1115,"delta":"\n    Row gap:10"}
+{"tMs":1135,"delta":"\n      Ic"}
+{"tMs":1159,"delta":"on \"check_"}
+{"tMs":1175,"delta":"circle\" color"}
+{"tMs":1195,"delta":":#F"}
+{"tMs":1215,"delta":"F2"}
+{"tMs":1235,"delta":"E"}
+{"tMs":1255,"delta":"7D32\n      Text."}
+{"tMs":1276,"delta":"body \"Label created ·"}
+{"tMs":1297,"delta":" Nov 12\"\n    "}
+{"tMs":1317,"delta":"Row gap:10\n      "}
+{"tMs":1338,"delta":"Icon \"check_circle"}
+{"tMs":1359,"delta":"\" color:#FF2E"}
+{"tMs":1379,"delta":"7D32\n      Text."}
+{"tMs":1400,"delta":"body \"Picked up ·"}
+{"tMs":1420,"delta":" Nov 13\"\n    "}
+{"tMs":1441,"delta":"Row gap:10\n      "}
+{"tMs":1461,"delta":"Icon \"radio_button"}
+{"tMs":1484,"delta":"_checked\" color:#F"}
+{"tMs":1502,"delta":"F1"}
+{"tMs":1525,"delta":"565C0\n      Text."}
+{"tMs":1544,"delta":"strong \"In transit ·"}
+{"tMs":1564,"delta":" Nov 14 "}
+{"tMs":1586,"delta":"(current)\"\n    Row"}
+{"tMs":1607,"delta":" gap:10\n      Ic"}
+{"tMs":1625,"delta":"on \"radio_button_un"}
+{"tMs":1646,"delta":"checked\" color:#F"}
+{"tMs":1666,"delta":"F9E9E9E"}
+{"tMs":1687,"delta":"\n      Text.muted \""}
+{"tMs":1708,"delta":"Out for delivery\"\n    "}
+{"tMs":1728,"delta":"Row gap:10\n      "}
+{"tMs":1749,"delta":"Icon \"radio_button"}
+{"tMs":1775,"delta":"_unchecked\" color:"}
+{"tMs":1790,"delta":"#FF9E9E9"}
+{"tMs":1810,"delta":"E\n      Text.muted"}
+{"tMs":1830,"delta":" \"Delivered\"\n  "}
+{"tMs":1852,"delta":"state instructions=\"\""}
+{"tMs":1871,"delta":"\n  state"}
+{"tMs":1892,"delta":" saved=\"\""}
+{"tMs":1912,"delta":"\n  SectionLabel"}
+{"tMs":1935,"delta":" \"Delivery instructions"}
+{"tMs":1953,"delta":"\" "}
+{"tMs":1974,"delta":"\"\"\n  InputField \""}
+{"tMs":1994,"delta":"Instructions\" \"e"}
+{"tMs":2015,"delta":".g. leave with"}
+{"tMs":2035,"delta":" the"}
+{"tMs":2056,"delta":" conc"}
+{"tMs":2075,"delta":"ierge\" =inst"}
+{"tMs":2097,"delta":"ructions l"}
+{"tMs":2115,"delta":"ines:3"}
+{"tMs":2135,"delta":"\n  "}
+{"tMs":2156,"delta":"ActionButton \"Save\""}
+{"tMs":2179,"delta":" prim"}
+{"tMs":2196,"delta":"ary ic"}
+{"tMs":2216,"delta":"on:\"save"}
+{"tMs":2237,"delta":"\" enabled:{"}
+{"tMs":2257,"delta":"instructions !="}
+{"tMs":2277,"delta":" \"\"} -> sa"}
+{"tMs":2298,"delta":"ved="}
+{"tMs":2318,"delta":"instructions"}
+{"tMs":2339,"delta":"\n  if saved !="}
+{"tMs":2359,"delta":" \"\"\n    Callout \""}
+{"tMs":2379,"delta":"Saved\""}
+{"tMs":2400,"delta":" \"{"}
+{"tMs":2421,"delta":"saved}\" t"}
+{"tMs":2440,"delta":"one:\"good\""}
+{"tMs":2461,"delta":" icon:\"check_circle"}
+{"tMs":2482,"delta":"\""}

@@ -1,0 +1,67 @@
+{"meta":{"ui":"flights","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show me the flights from London to Lisbon this Friday (20 Nov) as an inline card I can pick from. There are two of us flying, 2 adults, and the prices are per person. Three direct options: TAP Air Portugal 07:15 to 09:50, 2h 35m, £128, tagged Best time; easyJet 11:40 to 14:20, 2h 40m, £84, tagged Cheapest; British Airways 18:05 to 20:40, 2h 35m, £156. The first one is selected to start, the total is for both of us and follows my choice, and the confirm button tells you which flight I chose.","text":"ChatCard \"Flights to Lisbon\" \"Friday 20 Nov · 2 adults\" icon:\"flight\" status:\"3 direct\" tone:accent\n  SectionLabel \"Choose a flight\" \"per person\"\n  state pick=1\n  FlightOption \"TAP Air Portugal\" depart:\"07:15\" arrive:\"09:50\" origin:\"LON\" destination:\"LIS\" duration:\"2h 35m\" stops:\"Direct\" price:\"£128\" tag:\"Best time\" selected:{pick==1} -> pick=1\n  FlightOption \"easyJet\" depart:\"11:40\" arrive:\"14:20\" origin:\"LON\" destination:\"LIS\" duration:\"2h 40m\" stops:\"Direct\" price:\"£84\" tag:\"Cheapest\" selected:{pick==2} -> pick=2\n  FlightOption \"British Airways\" depart:\"18:05\" arrive:\"20:40\" origin:\"LON\" destination:\"LIS\" duration:\"2h 35m\" stops:\"Direct\" price:\"£156\" selected:{pick==3} -> pick=3\n  let fare = pick==1 ? 128 : pick==2 ? 84 : 156\n  let total = fare * 2\n  Details rows:=[[\"Price per person\", money(fare,\"£\",0)],[\"Passengers\",\"2 adults\"],[\"Total\", money(total,\"£\",0)]]\n  TotalBar \"Total for 2 adults\" \"Friday 20 Nov\" amount:{money(total,\"£\",0)} cta:\"Confirm\" -> emit confirm pick","usage":{"input_tokens":10738,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":510,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":493,"totalMs":1845}}
+{"tMs":493,"delta":"ChatCard \"Flights"}
+{"tMs":641,"delta":" to Lisbon\" \""}
+{"tMs":641,"delta":"Friday 20 N"}
+{"tMs":641,"delta":"ov · 2 adults\""}
+{"tMs":641,"delta":" icon:\"flight\" status"}
+{"tMs":641,"delta":":\"3 direct\" t"}
+{"tMs":641,"delta":"one:accent\n  Sect"}
+{"tMs":652,"delta":"ionLabel \"Choose"}
+{"tMs":675,"delta":" a flight\" \"per person\""}
+{"tMs":693,"delta":"\n  state pick=1"}
+{"tMs":713,"delta":"\n  FlightOption \"T"}
+{"tMs":735,"delta":"AP Air Portugal"}
+{"tMs":755,"delta":"\" depart:\"07:15"}
+{"tMs":857,"delta":"\" arrive:\"09:"}
+{"tMs":857,"delta":"50\" origin:\"LON"}
+{"tMs":857,"delta":"\" destination:\"LIS"}
+{"tMs":857,"delta":"\" duration:\"2h "}
+{"tMs":857,"delta":"35m\" stops:\""}
+{"tMs":877,"delta":"Direct\" price:\"£128"}
+{"tMs":898,"delta":"\" tag:\"Best time"}
+{"tMs":919,"delta":"\" selected:{pick=="}
+{"tMs":939,"delta":"1} -> pick=1"}
+{"tMs":960,"delta":"\n  FlightOption \""}
+{"tMs":980,"delta":"easyJet\" depart:"}
+{"tMs":1001,"delta":"\"11:40\" arrive"}
+{"tMs":1021,"delta":":\"14:20\" origin"}
+{"tMs":1041,"delta":":\"LON\" destination:"}
+{"tMs":1064,"delta":"\"LIS\" duration:"}
+{"tMs":1083,"delta":"\"2h 40m\" st"}
+{"tMs":1102,"delta":"ops:\"Direct\" price"}
+{"tMs":1123,"delta":":\"£84\" tag:"}
+{"tMs":1143,"delta":"\"Cheapest\" sel"}
+{"tMs":1172,"delta":"ected:{pick==2}"}
+{"tMs":1184,"delta":" -> pick=2\n  "}
+{"tMs":1208,"delta":"FlightOption \"British"}
+{"tMs":1226,"delta":" Airways\" depart:\"18"}
+{"tMs":1245,"delta":":05\" arrive:\""}
+{"tMs":1267,"delta":"20:40\" origin:\""}
+{"tMs":1286,"delta":"LON\" destination:\"L"}
+{"tMs":1307,"delta":"IS\" duration:\"2"}
+{"tMs":1328,"delta":"h 35m\" stops:"}
+{"tMs":1348,"delta":"\"Direct\" price:\""}
+{"tMs":1368,"delta":"£156\" selected:{p"}
+{"tMs":1388,"delta":"ick==3} -> pick"}
+{"tMs":1410,"delta":"=3\n  let"}
+{"tMs":1428,"delta":" f"}
+{"tMs":1449,"delta":"are = pick==1 "}
+{"tMs":1469,"delta":"? 128 : pick=="}
+{"tMs":1490,"delta":"2 ? 84 :"}
+{"tMs":1511,"delta":" 156\n  let total = f"}
+{"tMs":1531,"delta":"are * 2\n  Details"}
+{"tMs":1551,"delta":" rows:=[[\"Price"}
+{"tMs":1571,"delta":" per person\", money"}
+{"tMs":1592,"delta":"(fare,\"£\",0"}
+{"tMs":1613,"delta":")],[\"Passengers\",\""}
+{"tMs":1632,"delta":"2 adults\"],[\""}
+{"tMs":1653,"delta":"Total\", money(total,\"£"}
+{"tMs":1674,"delta":"\",0)]]\n  T"}
+{"tMs":1693,"delta":"otalBar \"Total for"}
+{"tMs":1714,"delta":" 2 adults\" \""}
+{"tMs":1734,"delta":"Friday 20 Nov"}
+{"tMs":1755,"delta":"\" amount:{money(total"}
+{"tMs":1775,"delta":",\"£\",0)} c"}
+{"tMs":1796,"delta":"ta:\"Confirm\""}
+{"tMs":1816,"delta":" -> emit confirm p"}
+{"tMs":1836,"delta":"ick"}

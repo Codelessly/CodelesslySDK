@@ -1,0 +1,63 @@
+{"meta":{"ui":"recipe","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: 45 minutes, Easy, serves 4 to start, with a servings control from 2 to 8 that scales the ingredient amounts. Ingredients for 4: chicken thighs 800 g, baby potatoes 600 g, lemons 2, olive oil 4 tbsp, garlic cloves 4, dried oregano 2 tsp. The ingredients as a checklist I can tick off (ticks stay when I change the servings), the four steps (Heat the oven to 220C; Toss everything in the oil, lemon and oregano; Roast 35 minutes, turning once; Rest 5 minutes and serve) and a Start cooking button.","text":"ChatCard \"Lemon chicken traybake\" \"Weeknight dinner\" icon:\"restaurant_rounded\" status:\"45 min · Easy\"\n  state servings=4\n  state done=[]\n  Row between\n    Text.strong \"Serves {servings}\"\n    Counter \"Servings\" \"adjust\" =servings min:2 max:8 step:1 label:\"Servings\"\n  SectionLabel \"Ingredients\" \"for {servings}\"\n  Checklist \"Ingredients\" =done items:[\"Chicken thighs, {servings*200} g\",\"Baby potatoes, {servings*150} g\",\"Lemons, {ceil(servings/2)}\",\"Olive oil, {servings} tbsp\",\"Garlic cloves, {servings} \",\"Dried oregano, {servings/2} tsp\"]\n  SectionLabel \"Method\" \"4 steps\"\n  PlanStep \"Heat the oven\" \"Heat the oven to 220C\" index:0 current:=length(done)\n  PlanStep \"Toss\" \"Toss everything in the oil, lemon and oregano\" index:1 current:=length(done)\n  PlanStep \"Roast\" \"Roast 35 minutes, turning once\" index:2 current:=length(done)\n  PlanStep \"Rest and serve\" \"Rest 5 minutes and serve\" index:3 last current:=length(done)\n  ActionButton \"Start cooking\" primary icon:\"play_arrow_rounded\" -> emit start_cooking","usage":{"input_tokens":10016,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":477,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":491,"totalMs":1741}}
+{"tMs":491,"delta":"ChatCard \"L"}
+{"tMs":717,"delta":"emon chicken traybake"}
+{"tMs":717,"delta":"\" \"Weeknight d"}
+{"tMs":717,"delta":"inner\" icon:\"rest"}
+{"tMs":717,"delta":"aurant_rounded\""}
+{"tMs":717,"delta":" status:\"45 min ·"}
+{"tMs":717,"delta":" Easy\"\n  state servings"}
+{"tMs":717,"delta":"=4\n  state done=["}
+{"tMs":717,"delta":"]\n  Row between\n    "}
+{"tMs":717,"delta":"Text.strong \"Ser"}
+{"tMs":717,"delta":"ves {servings}\"\n    "}
+{"tMs":720,"delta":"Counter \""}
+{"tMs":733,"delta":"Servings\" \""}
+{"tMs":819,"delta":"ad"}
+{"tMs":819,"delta":"just\" =servings min:"}
+{"tMs":819,"delta":"2 max:8 step:"}
+{"tMs":819,"delta":"1 label:\"Servings"}
+{"tMs":859,"delta":"\"\n  SectionLab"}
+{"tMs":859,"delta":"el \"Ingredients\""}
+{"tMs":897,"delta":" \"for {servings}\""}
+{"tMs":897,"delta":"\n  Checklist \""}
+{"tMs":917,"delta":"Ingredients\" =done items:"}
+{"tMs":937,"delta":"[\"Chicken thighs"}
+{"tMs":958,"delta":", {servings*200} g"}
+{"tMs":979,"delta":"\",\"Baby potatoes"}
+{"tMs":1083,"delta":", {servings*150} g"}
+{"tMs":1083,"delta":"\",\"Lemons, {"}
+{"tMs":1083,"delta":"ceil(servings/2)"}
+{"tMs":1083,"delta":"}\",\"Olive oil,"}
+{"tMs":1083,"delta":" {servings} tbsp"}
+{"tMs":1101,"delta":"\",\"Garlic cloves"}
+{"tMs":1123,"delta":", {servings} \",\""}
+{"tMs":1142,"delta":"Dried oregano, {serv"}
+{"tMs":1162,"delta":"ings/2} tsp\""}
+{"tMs":1183,"delta":"]\n  SectionLab"}
+{"tMs":1203,"delta":"el \"Method\" \"4 "}
+{"tMs":1223,"delta":"steps\"\n  Plan"}
+{"tMs":1266,"delta":"Step \"Heat the o"}
+{"tMs":1266,"delta":"ven\" \"Heat the o"}
+{"tMs":1285,"delta":"ven to 220C\" index:"}
+{"tMs":1306,"delta":"0 current:=length(done"}
+{"tMs":1326,"delta":")\n  PlanStep"}
+{"tMs":1349,"delta":" \"Toss\" \"To"}
+{"tMs":1366,"delta":"ss everything in the oil,"}
+{"tMs":1387,"delta":" lemon and oregano\""}
+{"tMs":1408,"delta":" index:1 current:=length"}
+{"tMs":1438,"delta":"(done)\n  Plan"}
+{"tMs":1449,"delta":"Step \"Roast\" \""}
+{"tMs":1469,"delta":"Roast 35 minut"}
+{"tMs":1492,"delta":"es, turning once\" index:"}
+{"tMs":1510,"delta":"2 current:=length(done"}
+{"tMs":1530,"delta":")\n  PlanStep"}
+{"tMs":1551,"delta":" \"Rest and serve\""}
+{"tMs":1571,"delta":" \"Rest 5 min"}
+{"tMs":1592,"delta":"utes and serve\" index:"}
+{"tMs":1616,"delta":"3 last current:=length("}
+{"tMs":1632,"delta":"done)\n  ActionBut"}
+{"tMs":1652,"delta":"ton \"Start cooking\""}
+{"tMs":1673,"delta":" primary icon:\"play_"}
+{"tMs":1694,"delta":"arrow_rounded\""}
+{"tMs":1714,"delta":" -> emit start_coo"}
+{"tMs":1736,"delta":"king"}

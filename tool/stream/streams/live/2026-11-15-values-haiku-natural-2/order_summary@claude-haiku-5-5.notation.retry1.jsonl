@@ -1,0 +1,80 @@
+{"meta":{"ui":"order_summary","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show my grocery order as an inline card before you place it, with the number of items at the top. Five lines, each with a picture placeholder, its price and a quantity I can raise or lower (removing the line at zero): Bananas 1 kg $2.50 x1, Whole milk 2 L $3.20 x2, Sourdough loaf $4.50 x1, Free-range eggs $5.00 x1, Cheddar $7.00 x1. A promo code field where SAVE10 takes 10% off the subtotal, delivery of $4.99, and the subtotal, promo and total kept up to date as I change things. Confirm and cancel buttons that tell you what I decided.","text":"The card's children must be written as indented lines, and the Details rows must be a list passed as a prop. I'll define the state first, then the card.\n\nstate lines=[{\"name\":\"Bananas 1 kg\",\"price\":2.50,\"qty\":1},{\"name\":\"Whole milk 2 L\",\"price\":3.20,\"qty\":2},{\"name\":\"Sourdough loaf\",\"price\":4.50,\"qty\":1},{\"name\":\"Free-range eggs\",\"price\":5.00,\"qty\":1},{\"name\":\"Cheddar\",\"price\":7.00,\"qty\":1}]\nstate promo=\"\"\nlet subtotal = sum(map(lines, l => l.qty * l.price))\nlet discount = upper(trim(promo))==\"SAVE10\" ? subtotal * 0.10 : 0\nlet total = subtotal - discount + 4.99\nChatCard \"Your grocery order\" \"Review before placing\" icon:\"shopping_basket\" status:\"Draft\" w:390\n  Text.strong \"{length(lines)} items\"\n  each row in lines\n    CartLine \"{row.name}\" \"Picture placeholder\" price:\"{money(row.price,\"$\",2)}\" qty:=row.qty kind:\"box\" -> lines=updateWhere(lines, x=>x.name==row.name, x=>with(x,\"qty\",result))\n  InputField \"Promo code\" \"Enter code\" =promo\n  Details rows:=[[\"Subtotal\", money(subtotal,\"$\",2)],[\"Promo\", money(-discount,\"$\",2)],[\"Delivery\", \"$4.99\"],[\"Total\", money(total,\"$\",2)]]\n  Row gap:10\n    ActionButton \"Cancel\" quiet -> emit cancel; toast \"Order cancelled\"\n    ActionButton \"Confirm\" primary -> emit confirm; toast \"Order placed\"","usage":{"input_tokens":10566,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":588,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":386,"totalMs":1997}}
+{"tMs":386,"delta":"The card"}
+{"tMs":483,"delta":"'s"}
+{"tMs":483,"delta":" children must"}
+{"tMs":483,"delta":" be written as indented lines,"}
+{"tMs":483,"delta":" and the Details rows must"}
+{"tMs":497,"delta":" be a list pass"}
+{"tMs":519,"delta":"ed as a prop. I'"}
+{"tMs":540,"delta":"ll define the state first,"}
+{"tMs":560,"delta":" then the"}
+{"tMs":581,"delta":" card.\n\nstate lines=["}
+{"tMs":602,"delta":"{\"name\":\"Banan"}
+{"tMs":622,"delta":"as 1 kg\",\"price"}
+{"tMs":647,"delta":"\":2.50,\"qty"}
+{"tMs":667,"delta":"\":1},{\"name\":\""}
+{"tMs":684,"delta":"Whole milk 2 "}
+{"tMs":705,"delta":"L\",\"price\":3.20,"}
+{"tMs":725,"delta":"\"qty\":2},{\""}
+{"tMs":746,"delta":"name\":\"Sourdough"}
+{"tMs":766,"delta":" loaf\",\"price\":4."}
+{"tMs":787,"delta":"50,\"qty\":1},"}
+{"tMs":807,"delta":"{\"name\":\"Free-"}
+{"tMs":828,"delta":"range eggs\",\"price\":5"}
+{"tMs":848,"delta":".00,\"qty\":1"}
+{"tMs":871,"delta":"},{\"name\":\"C"}
+{"tMs":891,"delta":"heddar\",\"price\":7."}
+{"tMs":910,"delta":"00,\"qty\":1}"}
+{"tMs":935,"delta":"]\nstate promo=\"\""}
+{"tMs":951,"delta":"\nlet subtotal = sum"}
+{"tMs":971,"delta":"(map(lines, l =>"}
+{"tMs":991,"delta":" l.qty * l.price"}
+{"tMs":1012,"delta":"))\nlet discount = upper"}
+{"tMs":1033,"delta":"(trim(promo))"}
+{"tMs":1053,"delta":"==\"SAVE10\""}
+{"tMs":1073,"delta":" ? subtotal * "}
+{"tMs":1094,"delta":"0.10 : 0"}
+{"tMs":1114,"delta":"\nlet total = subtotal -"}
+{"tMs":1134,"delta":" discount + 4.99"}
+{"tMs":1155,"delta":"\nChatCard \"Your"}
+{"tMs":1175,"delta":" grocery order\" \"Review"}
+{"tMs":1195,"delta":" before placing\" icon:\""}
+{"tMs":1216,"delta":"shopping_basket\" status"}
+{"tMs":1236,"delta":":\"Draft\" w:"}
+{"tMs":1257,"delta":"390\n  Text.strong"}
+{"tMs":1277,"delta":" \"{length(lines)}"}
+{"tMs":1298,"delta":" items\"\n  each row in l"}
+{"tMs":1319,"delta":"ines\n    CartLine \""}
+{"tMs":1339,"delta":"{row.name}\" \""}
+{"tMs":1360,"delta":"Picture placeholder\" price"}
+{"tMs":1380,"delta":":\"{money(row.price"}
+{"tMs":1400,"delta":",\""}
+{"tMs":1420,"delta":"$\",2)}\" qty"}
+{"tMs":1441,"delta":":=row.qty kind"}
+{"tMs":1463,"delta":":\"box\" -> lines"}
+{"tMs":1482,"delta":"=updateWhere(l"}
+{"tMs":1502,"delta":"ines, x=>x.name"}
+{"tMs":1523,"delta":"==row.name, x=>"}
+{"tMs":1548,"delta":"with(x,\"qty\","}
+{"tMs":1563,"delta":"result))\n  InputField \""}
+{"tMs":1584,"delta":"Promo code\" \"En"}
+{"tMs":1604,"delta":"ter code\" =promo\n  "}
+{"tMs":1624,"delta":"Details rows:=[[\""}
+{"tMs":1645,"delta":"Subtotal\", money("}
+{"tMs":1665,"delta":"subtotal,\"$\","}
+{"tMs":1687,"delta":"2)],[\"Prom"}
+{"tMs":1706,"delta":"o\", money(-discount,"}
+{"tMs":1726,"delta":"\"$\",2)],[\""}
+{"tMs":1747,"delta":"Delivery\", \"$4."}
+{"tMs":1767,"delta":"99\"],[\"Total\", money"}
+{"tMs":1788,"delta":"(total,\"$\",2)"}
+{"tMs":1808,"delta":"]]\n  Row gap"}
+{"tMs":1854,"delta":":10\n    ActionBut"}
+{"tMs":1869,"delta":"ton \"Cancel\" qu"}
+{"tMs":1869,"delta":"iet -> emit canc"}
+{"tMs":1895,"delta":"el; toast \"Order c"}
+{"tMs":1910,"delta":"ancelled\"\n    Act"}
+{"tMs":1931,"delta":"ionButton \"Confirm"}
+{"tMs":1951,"delta":"\" primary -> emit conf"}
+{"tMs":1971,"delta":"irm; toast \"Order"}
+{"tMs":1992,"delta":" placed\""}

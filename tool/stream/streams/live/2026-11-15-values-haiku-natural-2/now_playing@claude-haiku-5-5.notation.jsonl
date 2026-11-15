@@ -1,0 +1,121 @@
+{"meta":{"ui":"now_playing","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show what is playing right now as an inline music card, playing at 1:14 into the track: Midnight City by M83, 4:03 long, with drawn album art, a progress bar with the elapsed time and the time remaining, previous, play or pause and next buttons, and a like button that reads \"Like\" and, once pressed, \"Liked\". Under it the next three tracks in the queue: Golden Hour, JVKE, 3:29; Ocean Eyes, Billie Eilish, 3:20; Electric Feel, MGMT, 3:49 (after those comes Dreams, Fleetwood Mac, 4:17). Next moves on to the following track from 0:00 and the queue moves up with it.","text":"state playing=true\nstate liked=false\nstate pos=74\nstate queue=[{\"title\":\"Golden Hour\",\"artist\":\"JVKE\",\"len\":209,\"tone\":\"sand\",\"kind\":\"mountain\"},{\"title\":\"Ocean Eyes\",\"artist\":\"Billie Eilish\",\"len\":200,\"tone\":\"sky\",\"kind\":\"lagoon\"},{\"title\":\"Electric Feel\",\"artist\":\"MGMT\",\"len\":229,\"tone\":\"rose\",\"kind\":\"dunes\"},{\"title\":\"Dreams\",\"artist\":\"Fleetwood Mac\",\"len\":257,\"tone\":\"lilac\",\"kind\":\"skyline\"}]\nlet track = \"Midnight City\"\nlet artist = \"M83\"\nlet total = 243\nlet left = total - pos\nevery 1000 -> pos = playing && pos < total ? pos + 1 : pos\nif pos >= total\n  every 1 -> pos = 0\n\nCard w:390 gap:12 pad:16\n  Row gap:12 middle\n    Media kind:\"skyline\" tone:\"dusk\" w:56 h:56\n    Column gap:2 grow\n      Text.heading \"{track}\"\n      Text.muted \"{artist}\"\n    IconButton \"favorite\" -> liked = !liked\n    Text.muted \"{liked ? \"Liked\" : \"Like\"}\"\n  Column gap:4\n    Progress =pos\n    Row between\n      Text.caption \"{formatTime(pos)}\"\n      Text.caption \"-{formatTime(left)}\"\n  Row center gap:24\n    IconButton \"skip_previous\" -> pos = 0\n    IconButton.elevated \"{playing ? \"pause\" : \"play_arrow\"}\" -> playing = !playing\n    IconButton \"skip_next\" -> track = queue[0].title; artist = queue[0].artist; total = queue[0].len; pos = 0; queue = removeAt(queue, 0)\n  Text.sectionTitle \"Up next\"\n  each t in queue\n    ListTile \"{t.title}\" \"{t.artist}\"\n      Media kind:\"{t.kind}\" tone:\"{t.tone}\" w:40 h:40","usage":{"input_tokens":9449,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":687,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1129,"totalMs":3592}}
+{"tMs":1129,"delta":"state"}
+{"tMs":1256,"delta":" playing=true"}
+{"tMs":1256,"delta":"\nstate li"}
+{"tMs":1256,"delta":"ked=false\nstate p"}
+{"tMs":1256,"delta":"os=74"}
+{"tMs":1256,"delta":"\nstate queue=[{"}
+{"tMs":1256,"delta":"\"title"}
+{"tMs":1274,"delta":"\":\"Golden Hour"}
+{"tMs":1296,"delta":"\",\"artist\":\"JVK"}
+{"tMs":1316,"delta":"E\",\"len"}
+{"tMs":1336,"delta":"\":209"}
+{"tMs":1356,"delta":","}
+{"tMs":1376,"delta":"\"tone"}
+{"tMs":1399,"delta":"\":\"sand"}
+{"tMs":1417,"delta":"\",\"kind\":\"m"}
+{"tMs":1440,"delta":"ountain\"},{\"title\":"}
+{"tMs":1459,"delta":"\"Ocean Ey"}
+{"tMs":1480,"delta":"es\",\"artist\":\"Bill"}
+{"tMs":1500,"delta":"ie Eilish\",\"len\":"}
+{"tMs":1520,"delta":"200,\"tone\":\"s"}
+{"tMs":1544,"delta":"ky\",\"kind\":\"l"}
+{"tMs":1562,"delta":"agoon\"},{\"title"}
+{"tMs":1582,"delta":"\":\"Electric Feel"}
+{"tMs":1602,"delta":"\",\"artist\":\"MGM"}
+{"tMs":1622,"delta":"T\",\"len\":229,\"t"}
+{"tMs":1643,"delta":"one\":\"rose\",\"kind"}
+{"tMs":1664,"delta":"\":\"dun"}
+{"tMs":1684,"delta":"es\"},{\"title\":\""}
+{"tMs":1705,"delta":"Dreams\",\"artist\":"}
+{"tMs":1725,"delta":"\"Fleetwood"}
+{"tMs":1748,"delta":" Mac\",\"len\":257,\""}
+{"tMs":1770,"delta":"tone\":\"l"}
+{"tMs":1788,"delta":"ilac\",\"kind\":\"sk"}
+{"tMs":1810,"delta":"yline\"}]\nlet track"}
+{"tMs":1833,"delta":" = \"Midnight City\""}
+{"tMs":1859,"delta":"\nlet art"}
+{"tMs":1870,"delta":"ist = \"M83\"\nlet"}
+{"tMs":1892,"delta":" total"}
+{"tMs":1908,"delta":" = 243\nlet left = total"}
+{"tMs":1930,"delta":" - pos\nevery"}
+{"tMs":1949,"delta":" 1000 -> p"}
+{"tMs":1972,"delta":"os = play"}
+{"tMs":2001,"delta":"ing &&"}
+{"tMs":2010,"delta":" pos < total ? pos"}
+{"tMs":2031,"delta":" + 1 : p"}
+{"tMs":2051,"delta":"os\nif p"}
+{"tMs":2072,"delta":"os >= total\n  every"}
+{"tMs":2092,"delta":" 1 -> pos ="}
+{"tMs":2118,"delta":" 0\n\nCard w:390"}
+{"tMs":2133,"delta":" gap:12 pad"}
+{"tMs":2153,"delta":":16\n  Row gap"}
+{"tMs":2174,"delta":":12 "}
+{"tMs":2194,"delta":"midd"}
+{"tMs":2217,"delta":"le\n    Media kind:"}
+{"tMs":2235,"delta":"\"sk"}
+{"tMs":2256,"delta":"yline\" t"}
+{"tMs":2276,"delta":"one:\"d"}
+{"tMs":2296,"delta":"usk\" w"}
+{"tMs":2316,"delta":":56"}
+{"tMs":2337,"delta":" h:56\n    Column"}
+{"tMs":2357,"delta":" gap:2"}
+{"tMs":2378,"delta":" grow"}
+{"tMs":2398,"delta":"\n      Text.he"}
+{"tMs":2419,"delta":"ading \"{track}\""}
+{"tMs":2439,"delta":"\n      Text.mu"}
+{"tMs":2461,"delta":"ted \"{artist}\""}
+{"tMs":2481,"delta":"\n    I"}
+{"tMs":2500,"delta":"conButton \"fav"}
+{"tMs":2520,"delta":"orite\""}
+{"tMs":2541,"delta":" -> liked ="}
+{"tMs":2561,"delta":" !liked"}
+{"tMs":2582,"delta":"\n    Text.muted \""}
+{"tMs":2602,"delta":"{liked ? \"Li"}
+{"tMs":2622,"delta":"ked\" : \"Like"}
+{"tMs":2643,"delta":"\"}\"\n  Column"}
+{"tMs":2663,"delta":" gap:4"}
+{"tMs":2684,"delta":"\n    Progress =pos"}
+{"tMs":2704,"delta":"\n    Row"}
+{"tMs":2725,"delta":" between\n      Text.ca"}
+{"tMs":2745,"delta":"ption \"{form"}
+{"tMs":2765,"delta":"atT"}
+{"tMs":2786,"delta":"ime(pos)"}
+{"tMs":2806,"delta":"}\"\n      Text.ca"}
+{"tMs":2829,"delta":"ption \"-{formatTime"}
+{"tMs":2847,"delta":"(left)}\"\n  "}
+{"tMs":2867,"delta":"Row center g"}
+{"tMs":2888,"delta":"ap:24"}
+{"tMs":2908,"delta":"\n    IconButton \"sk"}
+{"tMs":2928,"delta":"ip_previous\" -> p"}
+{"tMs":2949,"delta":"os = 0\n    Icon"}
+{"tMs":2969,"delta":"Button."}
+{"tMs":2990,"delta":"el"}
+{"tMs":3010,"delta":"evated \"{"}
+{"tMs":3031,"delta":"playing ? \"pause\""}
+{"tMs":3052,"delta":" : \"play_"}
+{"tMs":3071,"delta":"arrow\"}\" ->"}
+{"tMs":3094,"delta":" playing = !playing\n    "}
+{"tMs":3112,"delta":"IconButton \"skip_"}
+{"tMs":3133,"delta":"next\" -> track"}
+{"tMs":3153,"delta":" = que"}
+{"tMs":3174,"delta":"ue[0].title; artist"}
+{"tMs":3195,"delta":" = queue[0].artist"}
+{"tMs":3215,"delta":"; total = que"}
+{"tMs":3235,"delta":"ue[0].len; pos"}
+{"tMs":3255,"delta":" = 0; queue = remov"}
+{"tMs":3275,"delta":"eAt(queue, "}
+{"tMs":3296,"delta":"0)\n  Text.s"}
+{"tMs":3316,"delta":"ectionT"}
+{"tMs":3337,"delta":"itle \"Up"}
+{"tMs":3360,"delta":" next\"\n  each"}
+{"tMs":3378,"delta":" t"}
+{"tMs":3399,"delta":" in queue\n    "}
+{"tMs":3418,"delta":"ListTile \""}
+{"tMs":3439,"delta":"{t.title}\" \"{"}
+{"tMs":3460,"delta":"t.artist}\""}
+{"tMs":3479,"delta":"\n      Media kind:\""}
+{"tMs":3504,"delta":"{t.kind}\" t"}
+{"tMs":3520,"delta":"one:\"{t.tone"}
+{"tMs":3541,"delta":"}\" w:40"}
+{"tMs":3561,"delta":" h:40"}

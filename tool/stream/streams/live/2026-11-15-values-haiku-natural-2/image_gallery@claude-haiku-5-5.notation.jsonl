@@ -1,0 +1,30 @@
+{"meta":{"ui":"image_gallery","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (gradients as placeholders), each with a caption: 1 Harbour at sunrise, 2 Old town market, 3 Forest trail, 4 Desert dunes, 5 Evening skyline, 6 Hidden lagoon, 7 Mountain hut, 8 Street festival, 9 Night train. Tapping one opens it large with its caption, previous and next arrows, a counter such as \"3 of 9\" and a close button; the arrow keys and Escape work too.","text":"PhotoGallery =open layout:grid photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},{\"kind\":\"market\",\"caption\":\"Old town market\"},{\"kind\":\"forest\",\"caption\":\"Forest trail\"},{\"kind\":\"dunes\",\"caption\":\"Desert dunes\"},{\"kind\":\"skyline\",\"caption\":\"Evening skyline\"},{\"kind\":\"lagoon\",\"caption\":\"Hidden lagoon\"},{\"kind\":\"mountain\",\"caption\":\"Mountain hut\"},{\"kind\":\"festival\",\"caption\":\"Street festival\"},{\"kind\":\"train\",\"caption\":\"Night train\"}]","usage":{"input_tokens":9397,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":211,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":557,"totalMs":1121}}
+{"tMs":557,"delta":"PhotoGallery ="}
+{"tMs":654,"delta":"open lay"}
+{"tMs":654,"delta":"out:gr"}
+{"tMs":654,"delta":"id photos:[{\"k"}
+{"tMs":655,"delta":"ind\":\"harbor"}
+{"tMs":655,"delta":"\",\"caption\":\"Harb"}
+{"tMs":664,"delta":"our at sunrise\"},"}
+{"tMs":684,"delta":"{\"kind\":\"market"}
+{"tMs":705,"delta":"\",\"caption\":\"Old town"}
+{"tMs":728,"delta":" market\"},{\"kind\":"}
+{"tMs":747,"delta":"\"forest\",\"caption\":\""}
+{"tMs":768,"delta":"Forest trail\"},{"}
+{"tMs":796,"delta":"\"kind\":\"dunes"}
+{"tMs":812,"delta":"\",\"caption\":\"Desert"}
+{"tMs":832,"delta":" dunes\"},{\"k"}
+{"tMs":853,"delta":"ind\":\"skyline\",\"ca"}
+{"tMs":871,"delta":"ption\":\"Evening sky"}
+{"tMs":892,"delta":"line\"},{\"kind\":"}
+{"tMs":912,"delta":"\"lagoon\",\"caption"}
+{"tMs":933,"delta":"\":\"Hidden lag"}
+{"tMs":957,"delta":"oon\"},{\"kind"}
+{"tMs":974,"delta":"\":\"mountain\",\"caption"}
+{"tMs":998,"delta":"\":\"Mountain hut"}
+{"tMs":1015,"delta":"\"},{\"kind\":\""}
+{"tMs":1035,"delta":"festival\",\"caption\":\""}
+{"tMs":1056,"delta":"Street festival\"},{\"k"}
+{"tMs":1079,"delta":"ind\":\"train\",\"ca"}
+{"tMs":1096,"delta":"ption\":\"Night train\"}"}
+{"tMs":1117,"delta":"]"}

@@ -1,0 +1,265 @@
+{"meta":{"ui":"dashboard","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me how the product did this month as an inline dashboard with a toggle between 7, 30 and 90 days that changes every number. Four stat tiles with their change, each period: 7 days: revenue $18.4k (+4.1%), sign-ups 312 (+6.0%), churn 2.9% (-0.2%), active users 13,870 (+1.4%); 30 days: $78.9k (+8.5%), 1,340 (+11.2%), 3.1% (+0.4%), 14,260 (+6.3%); 90 days: $221k (+15.3%), 3,905 (+9.8%), 3.4% (-0.6%), 14,260 (+12.1%). A line chart of revenue over the period, and a bar chart of sign-ups by channel (Organic, Paid, Referral, Social, Email) that adds up to the sign-ups: 7 days 128, 84, 52, 31, 17; 30 days 540, 372, 218, 134, 76; 90 days 1,580, 1,010, 640, 420, 255. Under them a table of the top five plans I can sort by any column, starting with revenue, highest first: Pro 1,340 subs, $38,900, churn 2.1%; Team 412, $24,700, 1.4%; Starter 2,980, $8,900, 5.2%; Business 96, $4,800, 0.9%; Student 640, $1,600, 6.8%.","text":"Working through the notation: a period toggle as state, `let` values picked by period, StatTile grid, ChartCard for the line chart (revenue series per period, labels per period), BarChart for channels, and a sortable TableHeader/TableRow list with `sortBy`/`sortByDesc`.\n\nRevenue series and labels for line: 7 days and 30 days and 90 days need series of values; I'll use the period's totals spread as trend points, but the brief gives only totals, so the line chart uses the period's stated figures as its shape across the window.\n\nSort: table rows are in revenue order by default, with `sort` starting at \"revenue\" and `desc` true.\n\nstate period=\"30\"\nstate range=\"30 days\"\nstate sort=\"revenue\"\nstate desc=true\nstate tab=0\n\nlet revenue = period==\"7\" ? \"$18.4k\" : period==\"30\" ? \"$78.9k\" : \"$221k\"\nlet revDelta = period==\"7\" ? \"+4.1%\" : period==\"30\" ? \"+8.5%\" : \"+15.3%\"\nlet signups = period==\"7\" ? \"312\" : period==\"30\" ? \"1,340\" : \"3,905\"\nlet signDelta = period==\"7\" ? \"+6.0%\" : period==\"30\" ? \"+11.2%\" : \"+9.8%\"\nlet churn = period==\"7\" ? \"2.9%\" : period==\"30\" ? \"3.1%\" : \"3.4%\"\nlet churnDelta = period==\"7\" ? \"-0.2%\" : period==\"30\" ? \"+0.4%\" : \"-0.6%\"\nlet active = period==\"7\" ? \"13,870\" : period==\"30\" ? \"14,260\" : \"14,260\"\nlet activeDelta = period==\"7\" ? \"+1.4%\" : period==\"30\" ? \"+6.3%\" : \"+12.1%\"\nlet revSeries = period==\"7\" ? [2.1,2.4,2.2,2.7,2.9,2.6,3.1] : period==\"30\" ? [2.2,2.5,2.4,2.7,2.9,2.8,3.0,3.2,3.1,3.4] : [1.9,2.1,2.4,2.6,2.8,3.0,3.3,3.5,3.4,3.8,4.0,4.2]\nlet chanValues = period==\"7\" ? [128,84,52,31,17] : period==\"30\" ? [540,372,218,134,76] : [1580,1010,640,420,255]\nlet chanLabels = [\"Organic\",\"Paid\",\"Referral\",\"Social\",\"Email\"]\nlet sorted = desc ? sortByDesc(plans, p => p[sort]) : sortBy(plans, p => p[sort])\n\nstate plans=[{\"plan\":\"Pro\",\"subs\":1340,\"revenue\":38900,\"churn\":2.1},{\"plan\":\"Team\",\"subs\":412,\"revenue\":24700,\"churn\":1.4},{\"plan\":\"Starter\",\"subs\":2980,\"revenue\":8900,\"churn\":5.2},{\"plan\":\"Business\",\"subs\":96,\"revenue\":4800,\"churn\":0.9},{\"plan\":\"Student\",\"subs\":640,\"revenue\":1600,\"churn\":6.8}]\n\nColumn gap:12 pad:12 w:390\n  Row gap:8\n    ChoiceChip \"7 days\" selected:{period==\"7\"} -> period=\"7\"; range=\"7 days\"\n    ChoiceChip \"30 days\" selected:{period==\"30\"} -> period=\"30\"; range=\"30 days\"\n    ChoiceChip \"90 days\" selected:{period==\"90\"} -> period=\"90\"; range=\"90 days\"\n  Grid cols:2 gap:10\n    StatTile \"Revenue\" \"vs last period\" \"{revenue}\" \"{revDelta}\"\n    StatTile \"Sign-ups\" \"vs last period\" \"{signups}\" \"{signDelta}\"\n    StatTile \"Churn\" \"vs last period\" \"{churn}\" \"{churnDelta}\" invert:true\n    StatTile \"Active users\" \"vs last period\" \"{active}\" \"{activeDelta}\"\n  ChartCard \"Revenue\" \"{revenue}\" revSeries kind:\"line\" delta:\"{revDelta}\" labels:[\"Start\",\"\",\"\",\"\",\"\",\"\",\"End\"]\n  ChartCard \"Sign-ups by channel\" \"{signups}\" chanValues kind:\"bars\" labels:chanLabels\n  SectionLabel \"Top plans\" \"{range}\"\n  TableHeader =sort desc:desc columns:[\"Plan\",\"Subs\",\"Revenue\",\"Churn\"] keys:[\"plan\",\"subs\",\"revenue\",\"churn\"]\n  each p in sorted\n    TableRow cells:[p.plan, fixed(p.subs,0), money(p.revenue,\"$\",0), fixed(p.churn,1)+\"%\"]","usage":{"input_tokens":9685,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1528,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":638,"totalMs":6046}}
+{"tMs":639,"delta":"Working"}
+{"tMs":653,"delta":" through"}
+{"tMs":796,"delta":" the notation: a period togg"}
+{"tMs":796,"delta":"le as"}
+{"tMs":796,"delta":" state"}
+{"tMs":796,"delta":", `"}
+{"tMs":796,"delta":"let` values pic"}
+{"tMs":799,"delta":"ked by"}
+{"tMs":821,"delta":" period, St"}
+{"tMs":841,"delta":"atTile gr"}
+{"tMs":876,"delta":"id, ChartCard for"}
+{"tMs":884,"delta":" the"}
+{"tMs":904,"delta":" line"}
+{"tMs":929,"delta":" ch"}
+{"tMs":968,"delta":"art ("}
+{"tMs":968,"delta":"revenue series"}
+{"tMs":985,"delta":" per"}
+{"tMs":1008,"delta":" period, labels per"}
+{"tMs":1031,"delta":" period), BarChart for"}
+{"tMs":1047,"delta":" channels, and"}
+{"tMs":1070,"delta":" a sort"}
+{"tMs":1095,"delta":"able TableHeader/"}
+{"tMs":1109,"delta":"TableRow list"}
+{"tMs":1130,"delta":" with `s"}
+{"tMs":1151,"delta":"ortBy`/"}
+{"tMs":1172,"delta":"`sortByDesc`"}
+{"tMs":1197,"delta":"."}
+{"tMs":1213,"delta":"\n\nRevenue series and"}
+{"tMs":1237,"delta":" lab"}
+{"tMs":1253,"delta":"els for line"}
+{"tMs":1274,"delta":": 7 days and"}
+{"tMs":1294,"delta":" 30 days and"}
+{"tMs":1315,"delta":" 90 days need"}
+{"tMs":1336,"delta":" series of values; I'll use"}
+{"tMs":1356,"delta":" the period"}
+{"tMs":1376,"delta":"'s totals sp"}
+{"tMs":1398,"delta":"read as"}
+{"tMs":1417,"delta":" trend points"}
+{"tMs":1437,"delta":", but the br"}
+{"tMs":1458,"delta":"ief g"}
+{"tMs":1478,"delta":"ives only tot"}
+{"tMs":1498,"delta":"als, so the"}
+{"tMs":1519,"delta":" line chart u"}
+{"tMs":1540,"delta":"ses the period's stated fig"}
+{"tMs":1593,"delta":"ures as its"}
+{"tMs":1593,"delta":" sh"}
+{"tMs":1600,"delta":"ape across"}
+{"tMs":1623,"delta":" the"}
+{"tMs":1641,"delta":" window"}
+{"tMs":1662,"delta":".\n\nSort"}
+{"tMs":1681,"delta":":"}
+{"tMs":1702,"delta":" table rows are"}
+{"tMs":1723,"delta":" in rev"}
+{"tMs":1746,"delta":"enue order by"}
+{"tMs":1764,"delta":" default, with `sort"}
+{"tMs":1784,"delta":"` star"}
+{"tMs":1805,"delta":"ting at \"revenue\" and"}
+{"tMs":1827,"delta":" `desc` true.\n\nstate"}
+{"tMs":1846,"delta":" period=\""}
+{"tMs":1866,"delta":"30"}
+{"tMs":1886,"delta":"\"\nstate range"}
+{"tMs":1907,"delta":"=\""}
+{"tMs":1928,"delta":"30"}
+{"tMs":1947,"delta":" days\"\nstate s"}
+{"tMs":1968,"delta":"ort=\"revenue\"\nstate"}
+{"tMs":1989,"delta":" desc=true\nstate tab"}
+{"tMs":2010,"delta":"="}
+{"tMs":2030,"delta":"0\n\nlet revenue = period"}
+{"tMs":2050,"delta":"==\"7\""}
+{"tMs":2071,"delta":" ? \"$18.4k"}
+{"tMs":2092,"delta":"\" : period==\"30\" "}
+{"tMs":2111,"delta":"? \"$78.9k\""}
+{"tMs":2132,"delta":" : \"$221k\"\nlet"}
+{"tMs":2153,"delta":" rev"}
+{"tMs":2173,"delta":"D"}
+{"tMs":2194,"delta":"elta = period==\"7\""}
+{"tMs":2217,"delta":" ? \"+4.1%"}
+{"tMs":2235,"delta":"\" : period==\"30\" "}
+{"tMs":2255,"delta":"? \"+8.5%\""}
+{"tMs":2277,"delta":" : \"+15.3%\""}
+{"tMs":2296,"delta":"\nlet signups"}
+{"tMs":2316,"delta":" = period==\"7\" ?"}
+{"tMs":2337,"delta":" \""}
+{"tMs":2357,"delta":"312\" : period==\"30\""}
+{"tMs":2378,"delta":" ? \"1,340\" :"}
+{"tMs":2398,"delta":" \"3,905\"\nlet sign"}
+{"tMs":2418,"delta":"D"}
+{"tMs":2440,"delta":"elta = period==\"7\""}
+{"tMs":2460,"delta":" ? \"+6.0%"}
+{"tMs":2483,"delta":"\" : period==\"30\" "}
+{"tMs":2501,"delta":"? \"+11.2%\""}
+{"tMs":2521,"delta":" : \"+9.8%\""}
+{"tMs":2541,"delta":"\nlet churn = period==\""}
+{"tMs":2562,"delta":"7\" ? \"2.9"}
+{"tMs":2583,"delta":"%\" : period==\"30\""}
+{"tMs":2603,"delta":" ? \"3.1%\""}
+{"tMs":2624,"delta":" : \"3.4%\""}
+{"tMs":2644,"delta":"\nlet churnDelta = period"}
+{"tMs":2670,"delta":"==\"7\" ? \"-"}
+{"tMs":2685,"delta":"0.2%\" : period="}
+{"tMs":2705,"delta":"=\"30\" ? \"+0"}
+{"tMs":2727,"delta":".4%\" : \"-0"}
+{"tMs":2748,"delta":".6%\"\nlet active ="}
+{"tMs":2767,"delta":" period==\"7\" ? \""}
+{"tMs":2788,"delta":"13,870\" : period==\""}
+{"tMs":2808,"delta":"30\" ? \"14,260"}
+{"tMs":2828,"delta":"\" : \"14,260\""}
+{"tMs":2849,"delta":"\nlet activeDelta = period"}
+{"tMs":2869,"delta":"==\"7\" ? \"+"}
+{"tMs":2891,"delta":"1.4%\" : period="}
+{"tMs":2910,"delta":"=\"30\" ? \"+6"}
+{"tMs":2930,"delta":".3%\" : \"+12"}
+{"tMs":2951,"delta":".1%\"\nlet revS"}
+{"tMs":2972,"delta":"eries = period==\"7\""}
+{"tMs":2992,"delta":" ? [2"}
+{"tMs":3013,"delta":".1"}
+{"tMs":3037,"delta":",2"}
+{"tMs":3053,"delta":".4"}
+{"tMs":3073,"delta":",2.2"}
+{"tMs":3095,"delta":",2.7"}
+{"tMs":3115,"delta":",2.9,2"}
+{"tMs":3135,"delta":".6"}
+{"tMs":3155,"delta":",3.1] : period="}
+{"tMs":3176,"delta":"=\"30\" ? [2."}
+{"tMs":3196,"delta":"2"}
+{"tMs":3216,"delta":",2.5,2.4"}
+{"tMs":3238,"delta":",2.7"}
+{"tMs":3257,"delta":",2.9,2.8"}
+{"tMs":3281,"delta":",3.0"}
+{"tMs":3300,"delta":",3.2,3.1"}
+{"tMs":3321,"delta":",3.4"}
+{"tMs":3338,"delta":"]"}
+{"tMs":3359,"delta":" : ["}
+{"tMs":3380,"delta":"1"}
+{"tMs":3400,"delta":".9"}
+{"tMs":3420,"delta":",2.1"}
+{"tMs":3440,"delta":",2.4"}
+{"tMs":3463,"delta":",2.6,2.8"}
+{"tMs":3481,"delta":",3.0,3.3"}
+{"tMs":3502,"delta":",3.5,3.4"}
+{"tMs":3525,"delta":",3.8,4"}
+{"tMs":3543,"delta":".0,4.2"}
+{"tMs":3564,"delta":"]\nlet chanVal"}
+{"tMs":3583,"delta":"ues = period==\"7\" "}
+{"tMs":3605,"delta":"? [128,84,52,"}
+{"tMs":3624,"delta":"31,17] : period==\""}
+{"tMs":3645,"delta":"30\" ? [540,372"}
+{"tMs":3665,"delta":",218,134,76] :"}
+{"tMs":3685,"delta":" [1580,1010,640"}
+{"tMs":3713,"delta":",420,255]\nlet ch"}
+{"tMs":3726,"delta":"anLabels = "}
+{"tMs":3747,"delta":"[\"Organic\",\"Paid"}
+{"tMs":3769,"delta":"\",\"Referral\",\"Social\",\""}
+{"tMs":3788,"delta":"Email\"]\nlet sor"}
+{"tMs":3808,"delta":"ted = des"}
+{"tMs":3828,"delta":"c ? sortBy"}
+{"tMs":3849,"delta":"Desc(pl"}
+{"tMs":3869,"delta":"ans, p"}
+{"tMs":3890,"delta":" => p["}
+{"tMs":3910,"delta":"sort]) : sortB"}
+{"tMs":3930,"delta":"y(plans, p => p"}
+{"tMs":3952,"delta":"[sort])\n\nstate"}
+{"tMs":3971,"delta":" pl"}
+{"tMs":3992,"delta":"ans=[{"}
+{"tMs":4012,"delta":"\"pl"}
+{"tMs":4032,"delta":"an\":\"Pro\",\"sub"}
+{"tMs":4053,"delta":"s\":1340,\"reven"}
+{"tMs":4073,"delta":"ue\":38900,\"churn"}
+{"tMs":4095,"delta":"\":2.1},{\"pl"}
+{"tMs":4117,"delta":"an\":\"Team\",\"subs"}
+{"tMs":4135,"delta":"\":412,\"revenue\":"}
+{"tMs":4155,"delta":"24700,\"churn\":1"}
+{"tMs":4175,"delta":".4},{\"plan\":"}
+{"tMs":4196,"delta":"\"Starter\",\"subs\":"}
+{"tMs":4217,"delta":"2980,\"revenue\":"}
+{"tMs":4238,"delta":"8900,\"churn\":5"}
+{"tMs":4257,"delta":".2},{\"plan\":"}
+{"tMs":4278,"delta":"\"Business\",\"subs\":96"}
+{"tMs":4298,"delta":",\"revenue\":4800"}
+{"tMs":4320,"delta":",\"churn\":0.9"}
+{"tMs":4339,"delta":"},{\"plan\":\""}
+{"tMs":4359,"delta":"Student\",\"subs\":640,\""}
+{"tMs":4380,"delta":"revenue\":1600,\""}
+{"tMs":4400,"delta":"churn\":6.8}]"}
+{"tMs":4421,"delta":"\n\nColumn gap:12 "}
+{"tMs":4442,"delta":"pad:12"}
+{"tMs":4462,"delta":" w:390\n  Row"}
+{"tMs":4482,"delta":" gap:8"}
+{"tMs":4503,"delta":"\n    "}
+{"tMs":4527,"delta":"ChoiceChip \"7"}
+{"tMs":4549,"delta":" days\" sel"}
+{"tMs":4564,"delta":"ected:{"}
+{"tMs":4587,"delta":"period==\"7\"} ->"}
+{"tMs":4604,"delta":" period=\"7\";"}
+{"tMs":4625,"delta":" range=\"7 days\"\n    "}
+{"tMs":4649,"delta":"ChoiceChip \""}
+{"tMs":4666,"delta":"30 days\" selected:{"}
+{"tMs":4686,"delta":"period==\"30\"} ->"}
+{"tMs":4706,"delta":" period=\"30\"; range=\"30"}
+{"tMs":4728,"delta":" days\"\n    Cho"}
+{"tMs":4747,"delta":"iceChip \"90 days"}
+{"tMs":4768,"delta":"\" selected:{period==\""}
+{"tMs":4789,"delta":"90\"} -> period=\"90"}
+{"tMs":4811,"delta":"\"; range=\"90 days\""}
+{"tMs":4829,"delta":"\n  Grid cols:"}
+{"tMs":4849,"delta":"2 gap:10"}
+{"tMs":4870,"delta":"\n    StatTile \""}
+{"tMs":4890,"delta":"Revenue\" \"v"}
+{"tMs":4913,"delta":"s last period\" \""}
+{"tMs":4931,"delta":"{revenue}\" \"{"}
+{"tMs":4953,"delta":"revDelta}\""}
+{"tMs":4972,"delta":"\n    StatTile \""}
+{"tMs":5001,"delta":"Sign-ups\" \"v"}
+{"tMs":5013,"delta":"s last period\" \"{signups"}
+{"tMs":5034,"delta":"}\" \"{signDelta"}
+{"tMs":5055,"delta":"}\"\n    StatTile"}
+{"tMs":5080,"delta":" \"Churn\" \"vs"}
+{"tMs":5100,"delta":" last period\" \"{churn"}
+{"tMs":5116,"delta":"}\" \"{churnDel"}
+{"tMs":5136,"delta":"ta}\" invert:true"}
+{"tMs":5157,"delta":"\n    StatTile \"Active"}
+{"tMs":5177,"delta":" users\" \"vs last period\""}
+{"tMs":5197,"delta":" \"{active"}
+{"tMs":5217,"delta":"}\" \"{activeDel"}
+{"tMs":5238,"delta":"ta}\"\n  Chart"}
+{"tMs":5258,"delta":"Card \"Revenue\""}
+{"tMs":5279,"delta":" \"{rev"}
+{"tMs":5299,"delta":"enue}\" rev"}
+{"tMs":5320,"delta":"Series k"}
+{"tMs":5340,"delta":"ind:\"line\" delta:"}
+{"tMs":5360,"delta":"\"{revDelta}\""}
+{"tMs":5380,"delta":" labels:[\"Start\",\"\",\""}
+{"tMs":5401,"delta":"\",\""}
+{"tMs":5421,"delta":"\",\"\",\"\",\"End"}
+{"tMs":5442,"delta":"\"]\n  "}
+{"tMs":5462,"delta":"ChartCard \"Sign"}
+{"tMs":5483,"delta":"-ups by channel\" \""}
+{"tMs":5503,"delta":"{signups}\" chanVal"}
+{"tMs":5524,"delta":"ues kind:\"bars\""}
+{"tMs":5545,"delta":" lab"}
+{"tMs":5564,"delta":"els:chanLabels"}
+{"tMs":5585,"delta":"\n  Sect"}
+{"tMs":5605,"delta":"ionLabel \"Top"}
+{"tMs":5625,"delta":" plans\" \"{range}\""}
+{"tMs":5650,"delta":"\n  TableHeader ="}
+{"tMs":5666,"delta":"sort desc:des"}
+{"tMs":5686,"delta":"c columns:[\""}
+{"tMs":5707,"delta":"Pl"}
+{"tMs":5727,"delta":"an\",\"Subs\",\"Rev"}
+{"tMs":5748,"delta":"enue\",\"Churn\"]"}
+{"tMs":5773,"delta":" keys:[\"pl"}
+{"tMs":5789,"delta":"an\",\"subs\",\"revenue"}
+{"tMs":5810,"delta":"\",\"churn\"]\n  each"}
+{"tMs":5829,"delta":" p"}
+{"tMs":5850,"delta":" in sorted\n    Table"}
+{"tMs":5871,"delta":"Row cells:["}
+{"tMs":5891,"delta":"p.plan,"}
+{"tMs":5912,"delta":" fixed(p.subs"}
+{"tMs":5932,"delta":",0), money"}
+{"tMs":5952,"delta":"(p.revenue,\""}
+{"tMs":5973,"delta":"$\",0), f"}
+{"tMs":5997,"delta":"ixed(p.churn,"}
+{"tMs":6014,"delta":"1)"}
+{"tMs":6034,"delta":"+\"%\"]"}

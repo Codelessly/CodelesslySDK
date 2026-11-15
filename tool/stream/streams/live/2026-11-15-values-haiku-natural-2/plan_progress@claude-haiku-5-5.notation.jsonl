@@ -1,0 +1,110 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the plan for migrating my blog as six steps: Back up your content, Set up the new host, Import posts, Move media, Redirect old URLs, Final checks, each with a short description. A Start button runs them one after another, 2 seconds each: a spinner on the running step, ticks on the finished ones, a progress bar that reads \"N of 6 steps\" with the seconds elapsed, and a Pause button. When all six are done, a summary says \"Migration complete\" and the total time in seconds.","text":"ChatCard \"Blog migration\" \"Six steps, about 12 seconds\" icon:\"swap_horiz\" status:\"Ready\"\n  state running=false\n  state done=0\n  state paused=false\n  state elapsed=0\n  let total = 6\n  every 1000 when running -> elapsed += 1; done = min(total, done + 0)\n  every 2000 when running -> done = min(total, done + 1); running = done + 1 < total\n  PlanStep \"Back up your content\" \"Export posts, pages and comments to a safe copy.\" index:0 current:=done running:=running\n  PlanStep \"Set up the new host\" \"Create the new site and install the blog software.\" index:1 current:=done running:=running\n  PlanStep \"Import posts\" \"Bring every post across with its dates and tags.\" index:2 current:=done running:=running\n  PlanStep \"Move media\" \"Copy images and files to the new storage.\" index:3 current:=done running:=running\n  PlanStep \"Redirect old URLs\" \"Point every old address at its new page.\" index:4 current:=done running:=running\n  PlanStep \"Final checks\" \"Test links, forms and search, then go live.\" index:5 current:=done running:=running\n  ProgressLine \"{done} of 6 steps\" \"{elapsed} s elapsed\" value:=done/total\n  if done == 0 and !running\n    ActionButton \"Start\" primary icon:\"play_arrow\" enabled:true -> running=true; paused=false\n  if running\n    ActionButton \"Pause\" quiet icon:\"pause\" -> running=false; paused=true\n  if done == total\n    Receipt \"Migration complete\" \"Total time: {elapsed} seconds.\" tone:good icon:\"check\"","usage":{"input_tokens":9381,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":549,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":565,"totalMs":2795}}
+{"tMs":565,"delta":"ChatCard \"Bl"}
+{"tMs":715,"delta":"og migration\" \"Six"}
+{"tMs":715,"delta":" steps,"}
+{"tMs":715,"delta":" about"}
+{"tMs":715,"delta":" 12"}
+{"tMs":715,"delta":" seconds\" icon:"}
+{"tMs":715,"delta":"\"swap_hor"}
+{"tMs":715,"delta":"iz\" status:\""}
+{"tMs":727,"delta":"Ready\"\n  state running=false"}
+{"tMs":732,"delta":"\n  state done=0\n  "}
+{"tMs":750,"delta":"state pa"}
+{"tMs":788,"delta":"used=false\n  state elap"}
+{"tMs":801,"delta":"sed=0\n  let"}
+{"tMs":890,"delta":" total ="}
+{"tMs":890,"delta":" 6\n  every"}
+{"tMs":890,"delta":" 1000 when"}
+{"tMs":890,"delta":" running -> elapsed +="}
+{"tMs":901,"delta":" 1;"}
+{"tMs":920,"delta":" done ="}
+{"tMs":932,"delta":" min"}
+{"tMs":951,"delta":"(total"}
+{"tMs":971,"delta":", done +"}
+{"tMs":990,"delta":" 0"}
+{"tMs":1009,"delta":")"}
+{"tMs":1030,"delta":"\n  every 2"}
+{"tMs":1055,"delta":"000 when running -> done ="}
+{"tMs":1073,"delta":" min(total, done + 1"}
+{"tMs":1094,"delta":"); running = done"}
+{"tMs":1113,"delta":" +"}
+{"tMs":1133,"delta":" 1 <"}
+{"tMs":1155,"delta":" total\n  P"}
+{"tMs":1174,"delta":"lanStep \"Back"}
+{"tMs":1201,"delta":" up your content\" \"Export"}
+{"tMs":1215,"delta":" pos"}
+{"tMs":1239,"delta":"ts, p"}
+{"tMs":1256,"delta":"ages and comments to a saf"}
+{"tMs":1276,"delta":"e cop"}
+{"tMs":1297,"delta":"y.\" index:0"}
+{"tMs":1317,"delta":" current:="}
+{"tMs":1341,"delta":"done running:="}
+{"tMs":1361,"delta":"running\n  PlanStep"}
+{"tMs":1397,"delta":" \"Set up the new host\""}
+{"tMs":1399,"delta":" \"Create the new"}
+{"tMs":1420,"delta":" site and install"}
+{"tMs":1441,"delta":" the"}
+{"tMs":1459,"delta":" bl"}
+{"tMs":1479,"delta":"og software"}
+{"tMs":1500,"delta":".\" index:1 current:="}
+{"tMs":1521,"delta":"done running:=running\n  P"}
+{"tMs":1542,"delta":"lanStep \"Import pos"}
+{"tMs":1562,"delta":"ts\" \"B"}
+{"tMs":1582,"delta":"ring every post across"}
+{"tMs":1602,"delta":" with"}
+{"tMs":1623,"delta":" its dates and t"}
+{"tMs":1643,"delta":"ags.\" index:2 current:"}
+{"tMs":1664,"delta":"=done running:=running\n  "}
+{"tMs":1686,"delta":"PlanStep \"Move"}
+{"tMs":1706,"delta":" media\" \"Cop"}
+{"tMs":1726,"delta":"y images and"}
+{"tMs":1746,"delta":" files to the new stor"}
+{"tMs":1767,"delta":"age.\" index:3 current:"}
+{"tMs":1788,"delta":"=done running:=running\n  "}
+{"tMs":1808,"delta":"PlanStep \"Red"}
+{"tMs":1829,"delta":"irect old URLs\" \""}
+{"tMs":1849,"delta":"Point"}
+{"tMs":1869,"delta":" every"}
+{"tMs":1890,"delta":" old address at"}
+{"tMs":1912,"delta":" its"}
+{"tMs":1930,"delta":" new page.\" index:4 current"}
+{"tMs":1952,"delta":":=done running:=running"}
+{"tMs":1972,"delta":"\n  PlanStep \""}
+{"tMs":1992,"delta":"Final checks\" \"Test"}
+{"tMs":2017,"delta":" links, for"}
+{"tMs":2033,"delta":"ms and search"}
+{"tMs":2053,"delta":", then go"}
+{"tMs":2074,"delta":" live.\" index:5 current:"}
+{"tMs":2094,"delta":"=done running:=running\n  "}
+{"tMs":2115,"delta":"ProgressLine \"{"}
+{"tMs":2135,"delta":"done} of "}
+{"tMs":2156,"delta":"6 steps\" \"{el"}
+{"tMs":2176,"delta":"apsed} s"}
+{"tMs":2197,"delta":" elapsed\" value:="}
+{"tMs":2217,"delta":"done/total"}
+{"tMs":2237,"delta":"\n  if"}
+{"tMs":2258,"delta":" done =="}
+{"tMs":2278,"delta":" 0 "}
+{"tMs":2298,"delta":"and !running\n    "}
+{"tMs":2319,"delta":"ActionButton \"Start\""}
+{"tMs":2339,"delta":" prim"}
+{"tMs":2359,"delta":"ary ic"}
+{"tMs":2381,"delta":"on:\"play_ar"}
+{"tMs":2401,"delta":"row\" enabled:true"}
+{"tMs":2421,"delta":" -> running"}
+{"tMs":2445,"delta":"=true; pa"}
+{"tMs":2461,"delta":"used=false\n  if running"}
+{"tMs":2502,"delta":"\n    ActionButton \""}
+{"tMs":2523,"delta":"Pause\" quiet icon"}
+{"tMs":2544,"delta":":\"pause\""}
+{"tMs":2564,"delta":" -> running"}
+{"tMs":2585,"delta":"=false; paused=true"}
+{"tMs":2605,"delta":"\n  if done == total"}
+{"tMs":2625,"delta":"\n    "}
+{"tMs":2653,"delta":"Receipt \"Migration compl"}
+{"tMs":2666,"delta":"ete\" \"Total"}
+{"tMs":2686,"delta":" time:"}
+{"tMs":2707,"delta":" {elapsed} secon"}
+{"tMs":2727,"delta":"ds.\""}
+{"tMs":2748,"delta":" tone:good"}
+{"tMs":2771,"delta":" icon:\"check\""}

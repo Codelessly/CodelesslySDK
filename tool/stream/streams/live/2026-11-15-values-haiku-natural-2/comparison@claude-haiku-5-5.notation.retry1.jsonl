@@ -1,0 +1,43 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Compare two phone plans side by side. Lite: $25 a month, 10 GB data, 500 minutes of calls, roaming not included, monthly contract, no extras. Max: $45 a month, unlimited data, unlimited calls, roaming in the EU and US, 24-month contract, streaming and 5G included. Mark the better plan on each row (cheaper price, more data, more calls, roaming, shorter contract, more extras). Under the table a recommendation with one sentence that says how many of the six rows the recommended plan wins and how much more it costs per month, and a Choose button under each plan; once I choose, the card says which plan I picked.","text":"ChatCard \"Phone plans\" \"Compare Lite and Max\" icon:\"compare_arrows\" status:\"Compare\"\n  state pick=\"\"\n  if pick==\"\"\n    ComparisonTable names:[\"Lite\",\"Max\"] prices:[\"$25/mo\",\"$45/mo\"] pick:2 pickLabel:\"Best value\" cta:\"Choose\" -> pick=result rows:[[\"Price per month\",\"$25\",\"$45\",1],[\"Data\",\"10 GB\",\"Unlimited\",2],[\"Calls\",\"500 min\",\"Unlimited\",2],[\"Roaming\",\"Not included\",\"EU and US\",2],[\"Contract\",\"Monthly\",\"24 months\",1],[\"Extras\",\"None\",\"Streaming and 5G\",2]]\n    Paragraph \"Max wins 4 of 6 rows and costs $20 more per month. Lite is cheaper if you only need light use.\" strong\n  if pick!=\"\"\n    Receipt \"Plan chosen\" \"You picked {pick}. We will set it up for you.\" code:\"\" tone:good icon:\"check\"","usage":{"input_tokens":9936,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":329,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":492,"totalMs":1463}}
+{"tMs":492,"delta":"ChatCard \"Ph"}
+{"tMs":710,"delta":"one plans\" \"Compare"}
+{"tMs":710,"delta":" Lite and Max\" ic"}
+{"tMs":710,"delta":"on:\"compare_arr"}
+{"tMs":710,"delta":"ows\" status:\"Compare"}
+{"tMs":710,"delta":"\"\n  state pick=\"\""}
+{"tMs":710,"delta":"\n  if pick==\"\""}
+{"tMs":710,"delta":"\n    ComparisonTable"}
+{"tMs":710,"delta":" names:[\"Lite\",\""}
+{"tMs":710,"delta":"Max\"] prices:[\"$"}
+{"tMs":710,"delta":"25/mo\",\"$45/"}
+{"tMs":727,"delta":"mo\"] pick:2"}
+{"tMs":751,"delta":" pickLabel:\""}
+{"tMs":942,"delta":"Best value\" cta:\""}
+{"tMs":942,"delta":"Choose\" -"}
+{"tMs":942,"delta":"> pick=result rows:"}
+{"tMs":942,"delta":"[[\"Price per month\",\"$"}
+{"tMs":942,"delta":"25\",\"$45\",1],[\""}
+{"tMs":942,"delta":"Data\",\"10 GB\",\""}
+{"tMs":943,"delta":"Unlimited\",2],"}
+{"tMs":943,"delta":"[\"Calls\",\"500 min"}
+{"tMs":943,"delta":"\",\"Unlimited\",2"}
+{"tMs":963,"delta":"],[\"Roaming\",\""}
+{"tMs":985,"delta":"Not included\",\"EU and US\","}
+{"tMs":1006,"delta":"2],[\"Contract\",\""}
+{"tMs":1160,"delta":"Monthly\",\"24 months\","}
+{"tMs":1160,"delta":"1],[\"Extras\",\"None"}
+{"tMs":1160,"delta":"\",\"Streaming and 5"}
+{"tMs":1160,"delta":"G\",2]]\n    "}
+{"tMs":1160,"delta":"Paragraph \"Max w"}
+{"tMs":1161,"delta":"ins 4 of 6 "}
+{"tMs":1161,"delta":"rows and costs $20 "}
+{"tMs":1177,"delta":"more per month. Lite is"}
+{"tMs":1199,"delta":" cheaper if you only need"}
+{"tMs":1222,"delta":" light use.\" strong\n  if"}
+{"tMs":1242,"delta":" pick!=\"\"\n    "}
+{"tMs":1264,"delta":"Receipt \"Plan ch"}
+{"tMs":1460,"delta":"osen\" \"You picked {"}
+{"tMs":1460,"delta":"pick}. We will set it"}
+{"tMs":1460,"delta":" up for you.\" code:\"\""}
+{"tMs":1460,"delta":" tone:good icon:\""}
+{"tMs":1460,"delta":"check\""}
