@@ -1,0 +1,32 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/run10/03-water-alert/before.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [
+  "TotalBar",
+  "PhotoGallery",
+  "ActionButton"
+ ],
+ "before": {
+  "problems": 0,
+  "texts": 8
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 220.9,
+   "problems": 1,
+   "ops": 29
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 221.7,
+   "problems": 0,
+   "ops": 29
+  }
+ ],
+ "final": 2,
+ "problems": 0,
+ "status": "passed"
+}

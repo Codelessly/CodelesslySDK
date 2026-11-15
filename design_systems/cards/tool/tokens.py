@@ -157,6 +157,9 @@ PLAIN_TEXT_STYLES = {
     'muted': {'fontFamily': TEXT, 'fontSize': 12.5, 'fontWeight': 500, 'height': 1.4, 'color': 'secondaryText'},
     'caption': {'fontFamily': TEXT, 'fontSize': 12, 'fontWeight': 500, 'height': 1.35, 'color': 'inkFaint'},
     'small': {'fontFamily': TEXT, 'fontSize': 12.5, 'fontWeight': 400, 'height': 1.4, 'color': 'secondaryText'},
+    # The title of a wide page (sizes.wide and up): Text.title and Text.pageTitle there. 20 read as a section
+    # heading at 1280 (run 10); judged blind over 20 on six desktop screens, 12 of 12 (design 16).
+    'titleWide': {'fontFamily': DISPLAY, 'fontSize': 28, 'fontWeight': 700, 'height': 1.15, 'letterSpacing': -0.6, 'color': 'primaryText'},
 }
 PLAIN = {
     # A card: radii.card, shadows.card, spacing.card (its padding), colors.card, on colors.page.
@@ -165,7 +168,7 @@ PLAIN = {
     # A control's corner by its height (a 28-high button 8, not the 12 of the 44-high action button).
     # What floats (dialogs, sheets, menus, pickers, toasts): radii.popup, shadows.popup.
     'radii': {'popup': 20, 'badge': 999, 'progress': 999, 'bar': 6, 'controlXs': 6, 'controlCompact': 8, 'controlSmall': 9, 'controlMedium': 10, 'controlLarge': 12},
-    'sizes': {'cta': 46, 'badge': 22, 'bar': 28, 'progress': 8},
+    'sizes': {'cta': 46, 'badge': 22, 'bar': 28, 'progress': 8, 'wide': 900},
     'spacing': {'card': 18, 'tile': 14, 'badge': 9, 'bar': 10, 'cardGap': 12},
     'shadows': {'popup': [{'type': 'dropShadow', 'color': '#24000000', 'offset': [0, 16], 'blurRadius': 40, 'spreadRadius': -8},
                           {'type': 'dropShadow', 'color': '#0F000000', 'offset': [0, 2], 'blurRadius': 6}]},
