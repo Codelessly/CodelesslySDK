@@ -78,6 +78,15 @@
     },
     "default": 3,
     "doc": "Thumbnails per row of the grid."
+   },
+   {
+    "key": "fade",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The strip fades at the edge where there are more photos (false: a hard edge)."
    }
   ],
   "events": [
@@ -249,14 +258,14 @@
    }
   },
   "strip": {
-   "type": "listView",
+   "type": "row",
    "children": [
-    "tile"
+    "stripList"
    ],
    "props": {
     "scrollable": true,
-    "spacing": 10,
-    "scrollDirection": "horizontal"
+    "scrollDirection": "horizontal",
+    "edgeFade": 28
    },
    "layout": {
     "width": {
@@ -265,8 +274,28 @@
     "height": 150
    },
    "bind": {
-    "data": "${props.photos}",
-    "visible": "${= props.layout == 'strip' && props.value <= 0}"
+    "visible": "${= props.layout == 'strip' && props.value <= 0}",
+    "props.edgeFade": "${= props.fade ? 28 : 0}"
+   }
+  },
+  "stripList": {
+   "type": "listView",
+   "children": [
+    "tile"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 10,
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 150
+   },
+   "bind": {
+    "data": "${props.photos}"
    }
   },
   "tile": {

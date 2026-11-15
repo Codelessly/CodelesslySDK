@@ -817,18 +817,17 @@ def page_dots():
 
 
 def wide_scroll():
-    fade = {'foregroundPainter': [{'op': 'rect', 'rect': ['${= size.width - 28}', 0, 28, '${size.height}'], 'when': '${props.fade}',
-            'paint': "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"}]}
     nodes = {
-        'frame': col(['scroller'], customPaint=fade),
-        'scroller': node('row', {'width': FILL, 'height': HUG}, {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start'}, ['inner']),
-        'inner': node('column', {'width': 640, 'height': HUG, 'padding': [0, 0, 20, 0]}, {'crossAxisAlignment': 'stretch', 'spacing': 0}, ['slot'],
+        'frame': col(['scroller']),
+        'scroller': node('row', {'width': FILL, 'height': HUG}, {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start', 'edgeFade': 28}, ['inner'],
+                         bind={'props.edgeFade': '${= props.fade ? 28 : 0}'}),
+        'inner': node('column', {'width': 640, 'height': HUG}, {'crossAxisAlignment': 'stretch', 'spacing': 0}, ['slot'],
                       bind={'layout.width': '${props.width}'}),
         'slot': {'type': 'slot'},
     }
     props = [P('width', NUM, 640, 'How wide the content inside is laid out, in pixels (wider than the card).', True),
-             P('fade', BOOL, True, 'A soft fade at the right edge that says there is more.')]
-    return component('WideScroll', "A frame that scrolls sideways for content wider than the card (a table with many columns): write WideScroll width:640 and the wide blocks indented under it (TableHeader, each row, TableRow) are laid out that wide and scroll together; a fade at the right edge shows there is more.",
+             P('fade', BOOL, True, 'The edges fade where there is more to scroll to (false: a hard edge).')]
+    return component('WideScroll', "A frame that scrolls sideways for content wider than the card (a table with many columns): write WideScroll width:640 and the wide blocks indented under it (TableHeader, each row, TableRow) are laid out that wide and scroll together; its edges fade where there is more to scroll to (fade:false turns that off).",
                      props, nodes, 'frame', children=True, previews=[{'name': 'Frame', 'size': [340, 40], 'props': {}}])
 
 
@@ -888,8 +887,9 @@ def carousel():
     f = lambda key, fallback="''": "${= coalesce(item.%s, %s)}" % (key, fallback)
     nodes = {
         'wrap': col(['pages', 'thumbs', 'bar'], 10),
-        'pages': node('pageView', {'width': FILL, 'height': 290}, {'viewportFraction': 0.86, 'scrollDirection': 'horizontal', 'padEnds': False},
+        'pages': node('pageView', {'width': FILL, 'height': 290}, {'viewportFraction': 0.86, 'scrollDirection': 'horizontal', 'padEnds': False, 'edgeFade': 28},
                       ['page'], bind={'props.initialPage': '${props.value}', 'data': '${props.items}', 'props.viewportFraction': '${props.peek}',
+                                      'props.edgeFade': '${= props.fade && props.peek < 1 ? 28 : 0}',
                                       'layout.height': '${= props.height + 94}'},
                       actions=[{'trigger': {'type': 'changed'}, 'actions': [setv('props.value', '${result.index}'), fire('onChanged', '${result.index}')]}]),
         'page': node('column', {'width': FILL, 'height': FILL, 'padding': [0, 0, 10, 0]}, {'crossAxisAlignment': 'stretch'}, ['tile'],
@@ -929,6 +929,7 @@ def carousel():
         P('thumbs', BOOL, False, 'A strip of small drawn thumbnails to tap.'),
         P('cta', STRING, '', 'A small pill on each picture that invites a tap, such as Details (empty: none).'),
         P('height', NUM, 196, "The pictures' height."),
+        P('fade', BOOL, True, 'The peeking next item fades at the edge (false: a hard edge).'),
     ]
     return component('Carousel', "A real carousel of products: Carousel =i items:=shoes slides one ProductTile per record (name, detail, price, rating, kind, tone) sideways by swipe, showing the edge of the next (peek), and keeps the position (from 0) in your number variable; dots, arrows, counter (\"2 of 6\") and thumbs are switches; a tap on an item fires onPressed with its position (-> open=true), and Pager or PageDots on the same variable drive it too.",
                      props, nodes, 'wrap', events=[('onPressed', 'An item was tapped; the value is its position.'),
@@ -1028,24 +1029,34 @@ def comparison_table():
     HEAD, CELL, FOOT, LABEL = 98, 46, 58, 84
     colw = '(%s ? props.columnWidth : 140)' % wide
     picked = lambda i: "(%s > %d && at(props.names, %d) == props.pick)" % (n, i, i)
-    fade = {'foregroundPainter': [{'op': 'rect', 'rect': ['${= size.width - 26}', 0, 26, '${size.height}'], 'when': E(wide),
-            'paint': "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"}]}
     rule = {'strokes': [{'color': 'line'}], 'strokeWidth': 1, 'strokeSides': 'top'}
     nodes = {
-        'table': row(['labels', 'scrollBox'], 0, cross='start'),
-        # the label column stays in place
-        'labels': node('column', {'width': LABEL, 'height': HUG}, {'crossAxisAlignment': 'stretch'}, ['corner', 'labelRows']),
+        # The columns scroll under the label column, which is laid over them and stays in place.
+        'table': node('stack', {'width': FILL, 'height': HUG}, children=['scrollCol', 'labels']),
+        # The engine's edgeFade is set on the scroller, but with this content it neither fades nor clips (see NOTES,
+        # limits): so the frame clips, and the trailing edge is also faded by a painted gradient in the card color.
+        'scrollCol': col(['scroller'], decoration={'clip': 'hardEdge'}, customPaint={'foregroundPainter': [
+            {'op': 'rect', 'rect': ['${= size.width - 28}', 0, 28, '${size.height}'], 'when': E('%s && props.fade' % wide),
+             'paint': "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"}]}),
+        'labels': node('column', {'width': LABEL + 14, 'height': HUG, 'x': 0, 'y': 0, 'padding': [0, 0, 14, 0]}, {'crossAxisAlignment': 'stretch'},
+                       ['corner', 'labelRows', 'labelFoot'],
+                       decoration={'fills': [{'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [
+                           {'position': 0, 'color': 'card'}, {'position': 0.857, 'color': 'card'}, {'position': 1, 'color': '#00FFFFFF'}]}]},
+                       bind={'decoration.fills[0].stops[2].color': '${= alpha(theme.colors.card, 0)}'}),
         'corner': node('column', {'width': FILL, 'height': HEAD, 'padding': [0, 0, 0, 12]}, {'mainAxisAlignment': 'end', 'crossAxisAlignment': 'start'},
                        ['cornerText']),
         'cornerText': text('${props.corner}', 'eyebrow'),
+        'labelFoot': node('spacer', {'width': 1, 'height': FOOT}),
         'labelRows': vlist(['rl'], 0, '${props.rows}'),
         'rl': node('row', {'width': FILL, 'height': CELL, 'padding': [0, 0, 6, 0]}, None, ['rlText'], decoration=dict(rule)),
         'rlText': text('${= at(item, 0)}', {'from': 'meta', 'fontWeight': 600}, FILL, color='inkSoft', maxLines=2, overflow='ellipsis'),
-        # the option columns scroll sideways when there are more than two
-        'scrollBox': node('column', {'width': FILL, 'height': HUG, 'flex': 1}, {'crossAxisAlignment': 'stretch'}, ['scroller'], customPaint=fade),
-        'scroller': node('row', {'width': FILL, 'height': HUG}, {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start'},
-                         ['k%d' % i for i in range(COMPARE)] + ['tail']),
-        'tail': node('spacer', {'width': 18, 'height': 1}, bind={'visible': E(wide)}),
+        'scroller': node('row', {'width': FILL, 'height': HUG},
+                         {'scrollable': True, 'scrollDirection': 'horizontal', 'crossAxisAlignment': 'start', 'edgeFade': 28},
+                         ['strip'], bind={'props.edgeFade': '${= props.fade ? 28 : 0}'}),
+        'strip': node('row', {'width': HUG, 'height': HUG}, {'crossAxisAlignment': 'start'},
+                      ['lead'] + ['k%d' % i for i in range(COMPARE)] + ['tail']),
+        'lead': node('spacer', {'width': LABEL, 'height': 1}),
+        'tail': node('spacer', {'width': 20, 'height': 1}, bind={'visible': E(wide)}),
     }
     for i in range(COMPARE):
         vis = E('%s > %d' % (n, i))
@@ -1097,6 +1108,7 @@ def comparison_table():
         P('cta', STRING, 'Choose', 'The label of the button under each column.'),
         P('corner', STRING, '', 'A small caps label in the top-left corner (optional).'),
         P('columnWidth', NUM, 124, 'The width of a column when there are more than two (they then scroll sideways).'),
+        P('fade', BOOL, True, 'The scrolling columns fade at the edge where there are more (false: a hard edge).'),
     ]
     return component('ComparisonTable', "Two to five options compared side by side: names and prices head the columns, rows is a list of [label, value per column..., winner] where winner is the winning column's number (1 to 5; 0 a tie) and gets a check; pick names the recommended column (tinted); with more than two options the columns scroll sideways while the labels stay in place; the Choose button under each column fires onChoose with that name as result.",
                      props, nodes, 'table', events=[('onChoose', "A column's button was tapped; the value is its name.")],
@@ -1364,8 +1376,10 @@ def photo_gallery():
         'thumb': node('Media', {'width': FILL, 'height': 92}, {'kind': 'mountain'}, bind=dict(kind)),
         'caption': cap('caption'),
         # a strip that scrolls sideways
-        'strip': node('listView', {'width': FILL, 'height': 150}, {'scrollable': True, 'spacing': 10, 'scrollDirection': 'horizontal'}, ['tile'],
-                      bind={'data': '${props.photos}', 'visible': "${= props.layout == 'strip' && %s}" % closed}),
+        'strip': node('row', {'width': FILL, 'height': 150}, {'scrollable': True, 'scrollDirection': 'horizontal', 'edgeFade': 28}, ['stripList'],
+                      bind={'visible': "${= props.layout == 'strip' && %s}" % closed, 'props.edgeFade': '${= props.fade ? 28 : 0}'}),
+        'stripList': node('listView', {'width': HUG, 'height': 150}, {'scrollable': False, 'spacing': 10, 'scrollDirection': 'horizontal'}, ['tile'],
+                          bind={'data': '${props.photos}'}),
         'tile': col(['tileArt', 'tileCaption'], 6, width=168, height=FILL, states={'pressed': {'tile': PRESS}}, actions=open_it),
         'tileArt': node('Media', {'width': FILL, 'height': 124}, {'kind': 'mountain'}, bind=dict(kind)),
         'tileCaption': cap('tileCaption'),
@@ -1419,6 +1433,7 @@ def photo_gallery():
         P('layout', enum('grid', 'strip', 'pages'), 'grid', 'grid (rows of thumbnails), strip (one row that scrolls sideways) or pages (one full-width photo at a time, swiped, with dots).'),
         P('dots', BOOL, True, 'Pagination dots under the paged and the large view.'),
         P('columns', INT, 3, 'Thumbnails per row of the grid.'),
+        P('fade', BOOL, True, 'The strip fades at the edge where there are more photos (false: a hard edge).'),
     ]
     return component('PhotoGallery', "A photo gallery with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: %s; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next; your variable holds the photo in view (0: none open)." % scenes,
                      props, nodes, 'gallery', events=[('onChanged', 'A photo was opened, changed or closed; the value is its number (0: closed).')],
