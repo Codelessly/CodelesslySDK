@@ -1,0 +1,76 @@
+{"meta":{"ui":"flights","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"state pick=1\nChatCard \"Flights to Lisbon\" \"London to Lisbon, this Friday\" icon:\"flight\" status:\"3 options\" tone:accent\n  FlightOption \"TAP Air Portugal\" depart:\"07:10\" arrive:\"10:25\" origin:\"LHR\" destination:\"LIS\" duration:\"3h 15m\" stops:\"Direct\" price:\"£148\" tag:\"Cheapest\" selected:=pick==1 -> pick=1\n  FlightOption \"easyJet\" depart:\"11:40\" arrive:\"15:05\" origin:\"LGW\" destination:\"LIS\" duration:\"3h 25m\" stops:\"Direct\" price:\"£162\" tag:\"Best time\" selected:=pick==2 -> pick=2\n  FlightOption \"British Airways\" depart:\"16:20\" arrive:\"19:50\" origin:\"LHR\" destination:\"LIS\" duration:\"3h 30m\" stops:\"Direct\" price:\"£205\" selected:=pick==3 -> pick=3\n  Details rows:=[[\"Fare\",pick==1?\"£148\":pick==2?\"£162\":\"£205\"],[\"Taxes and fees\",\"Included\"]]\n  TotalBar \"Total\" \"One adult, economy\" amount:=pick==1?\"£148\":pick==2?\"£162\":\"£205\" cta:\"Confirm\" icon:\"check\" -> emit confirm pick","usage":{"input_tokens":8879,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":455,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":580,"totalMs":2181}}
+{"tMs":580,"delta":"state pick=1\nCh"}
+{"tMs":795,"delta":"atCard \"Flights"}
+{"tMs":795,"delta":" to Lisbon\" \""}
+{"tMs":795,"delta":"London"}
+{"tMs":795,"delta":" to Lisbon, this"}
+{"tMs":795,"delta":" Friday\" icon:\""}
+{"tMs":795,"delta":"flight\" status:\"3"}
+{"tMs":795,"delta":" options\" tone:acc"}
+{"tMs":795,"delta":"ent\n  FlightOption"}
+{"tMs":795,"delta":" \"T"}
+{"tMs":795,"delta":"A"}
+{"tMs":801,"delta":"P Air"}
+{"tMs":822,"delta":" Portugal\" dep"}
+{"tMs":1021,"delta":"art:\"07:10\" ar"}
+{"tMs":1021,"delta":"rive:\"10"}
+{"tMs":1021,"delta":":25"}
+{"tMs":1021,"delta":"\" origin:\"LHR"}
+{"tMs":1021,"delta":"\" destination:\"LIS"}
+{"tMs":1021,"delta":"\" duration:\"3h "}
+{"tMs":1021,"delta":"15m\" stops:\""}
+{"tMs":1021,"delta":"Direct\" price:\"£"}
+{"tMs":1021,"delta":"148\" tag:\"C"}
+{"tMs":1039,"delta":"heapest\" selected:="}
+{"tMs":1061,"delta":"pick==1 -> p"}
+{"tMs":1083,"delta":"ick=1\n  Flight"}
+{"tMs":1240,"delta":"Option \"eas"}
+{"tMs":1240,"delta":"yJet\" depart:\""}
+{"tMs":1240,"delta":"11:40\" arrive:"}
+{"tMs":1240,"delta":"\"15"}
+{"tMs":1240,"delta":":05\" origin:\"L"}
+{"tMs":1240,"delta":"GW\" destination:\"L"}
+{"tMs":1240,"delta":"IS\" duration:\"3"}
+{"tMs":1255,"delta":"h 25m\" stops:"}
+{"tMs":1276,"delta":"\"Direct\" price:\""}
+{"tMs":1298,"delta":"£162\" tag:\""}
+{"tMs":1320,"delta":"Best time\" selected:=p"}
+{"tMs":1342,"delta":"ick==2 -> pick"}
+{"tMs":1461,"delta":"=2\n  FlightO"}
+{"tMs":1461,"delta":"ption \"British Airways\" dep"}
+{"tMs":1461,"delta":"art:\"16"}
+{"tMs":1461,"delta":":20"}
+{"tMs":1461,"delta":"\" arrive:\"19:"}
+{"tMs":1470,"delta":"50"}
+{"tMs":1491,"delta":"\" origin:\"LHR"}
+{"tMs":1513,"delta":"\" destination:\"LIS"}
+{"tMs":1534,"delta":"\" duration:\"3h "}
+{"tMs":1556,"delta":"30m\" stops:\""}
+{"tMs":1578,"delta":"Direct\" price:\"£205"}
+{"tMs":1599,"delta":"\" selected:=pick=="}
+{"tMs":1704,"delta":"3 -> pick=3"}
+{"tMs":1704,"delta":"\n  "}
+{"tMs":1704,"delta":"Details"}
+{"tMs":1704,"delta":" rows:"}
+{"tMs":1705,"delta":"="}
+{"tMs":1726,"delta":"[[\"F"}
+{"tMs":1749,"delta":"are\",p"}
+{"tMs":1769,"delta":"ick==1?\"£148\":"}
+{"tMs":1793,"delta":"pick==2?\"£162"}
+{"tMs":1812,"delta":"\":\"£205\"],[\""}
+{"tMs":1833,"delta":"Taxes and"}
+{"tMs":1855,"delta":" fees\",\""}
+{"tMs":1915,"delta":"Included\""}
+{"tMs":1915,"delta":"]]\n  TotalB"}
+{"tMs":1919,"delta":"ar \"Total\" \""}
+{"tMs":1940,"delta":"One"}
+{"tMs":1961,"delta":" ad"}
+{"tMs":1982,"delta":"ult, econom"}
+{"tMs":2005,"delta":"y\" amount:=pick"}
+{"tMs":2028,"delta":"==1?\"£148\":p"}
+{"tMs":2046,"delta":"ick==2?\"£162\":"}
+{"tMs":2068,"delta":"\"£205\" cta:\""}
+{"tMs":2090,"delta":"Confirm\" icon:"}
+{"tMs":2111,"delta":"\"check\" -> emit conf"}
+{"tMs":2168,"delta":"irm p"}
+{"tMs":2168,"delta":"ick"}

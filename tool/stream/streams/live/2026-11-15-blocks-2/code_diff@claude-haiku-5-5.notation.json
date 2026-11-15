@@ -1,0 +1,226 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Review config changes",
+    "subtitle": "3 hunks to review",
+    "icon": "difference_rounded",
+    "status": "Pending",
+    "tone": "accent"
+   },
+   "children": [
+    "DiffHunk1",
+    "DiffHunk2",
+    "DiffHunk3",
+    "Details1",
+    "ActionButton1"
+   ]
+  },
+  "DiffHunk1": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Server port",
+    "detail": "@@ -4,2 +4,2 @@",
+    "value": "h1",
+    "start": 4,
+    "lines": [
+     "-port: 8080",
+     "+port: 9090",
+     " host: localhost"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "h1",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "DiffHunk2": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Log level",
+    "detail": "@@ -11,2 +11,2 @@",
+    "value": "h2",
+    "start": 11,
+    "lines": [
+     "-level: info",
+     "+level: debug",
+     " format: json"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "h2",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "DiffHunk3": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Cache TTL",
+    "detail": "@@ -19,2 +19,2 @@",
+    "value": "h3",
+    "start": 19,
+    "lines": [
+     "-ttl: 60",
+     "+ttl: 300",
+     " enabled: true"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "h3",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Kept\",join([h1,h2,h3],\"\")==\"\" ? \"0 of 3\" : \"{count(['keep'],x=>x==h1)}\"]]}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Apply changes",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= h1!=\"\" && h2!=\"\" && h3!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "apply"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "h1",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h2",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h3",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

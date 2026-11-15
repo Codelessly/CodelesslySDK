@@ -1,0 +1,94 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"ChatCard \"Blog migration\" \"Six steps, run one after another\" icon:\"swap_horiz\" status:\"Ready\"\n  each s in steps\n    PlanStep s.title s.detail index:=s.i current:=done running:=running\n  ProgressLine \"Progress\" \"\" value:=done/6\n  Row gap:10\n    ActionButton \"Start\" primary icon:\"play_arrow\" enabled:=!running -> running=true; done=0\n    ActionButton \"Pause\" quiet icon:\"pause\" enabled:=running -> running=false\n\nstate running=false\nstate done=0\nstate elapsed=0\nevery 1000 -> elapsed=elapsed+1\nevery 1s when running -> done=min(6,done+1); running=done<5\n\nstate steps=[{\"i\":0,\"title\":\"Export posts\",\"detail\":\"Download all posts and drafts from the old platform.\"},{\"i\":1,\"title\":\"Convert format\",\"detail\":\"Turn HTML content into Markdown with metadata.\"},{\"i\":2,\"title\":\"Move media\",\"detail\":\"Copy images and attachments to the new storage.\"},{\"i\":3,\"title\":\"Fix links\",\"detail\":\"Rewrite internal URLs and set up redirects.\"},{\"i\":4,\"title\":\"Restore comments\",\"detail\":\"Import comments and map them to their posts.\"},{\"i\":5,\"title\":\"Verify and switch DNS\",\"detail\":\"Check every page, then point the domain at the new site.\"}]","usage":{"input_tokens":8883,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":462,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":546,"totalMs":2415}}
+{"tMs":546,"delta":"ChatCard \"Bl"}
+{"tMs":678,"delta":"og migration\" \"Six"}
+{"tMs":678,"delta":" steps,"}
+{"tMs":678,"delta":" run"}
+{"tMs":678,"delta":" one after another\" icon:\""}
+{"tMs":678,"delta":"sw"}
+{"tMs":678,"delta":"ap_hor"}
+{"tMs":678,"delta":"iz\" status:\""}
+{"tMs":692,"delta":"Ready\"\n  each s"}
+{"tMs":714,"delta":" in steps\n    Plan"}
+{"tMs":734,"delta":"Step s"}
+{"tMs":755,"delta":".title s.det"}
+{"tMs":775,"delta":"ail index:="}
+{"tMs":814,"delta":"s.i"}
+{"tMs":815,"delta":" current:=done running:=running"}
+{"tMs":835,"delta":"\n  "}
+{"tMs":856,"delta":"ProgressLine \"Prog"}
+{"tMs":878,"delta":"ress\" \"\" value:=done"}
+{"tMs":901,"delta":"/6"}
+{"tMs":917,"delta":"\n  "}
+{"tMs":938,"delta":"Row gap:10"}
+{"tMs":961,"delta":"\n    "}
+{"tMs":980,"delta":"ActionButton \"Start\""}
+{"tMs":998,"delta":" prim"}
+{"tMs":1017,"delta":"ary ic"}
+{"tMs":1041,"delta":"on:\"play_arrow"}
+{"tMs":1060,"delta":"\" enabled:=!"}
+{"tMs":1080,"delta":"running -> running=true"}
+{"tMs":1102,"delta":"; done=0\n    Act"}
+{"tMs":1122,"delta":"ionButton \"Pause\""}
+{"tMs":1142,"delta":" qu"}
+{"tMs":1165,"delta":"iet icon:\"pause"}
+{"tMs":1184,"delta":"\" enabled:=running -"}
+{"tMs":1205,"delta":"> running=false"}
+{"tMs":1224,"delta":"\n\nstate running"}
+{"tMs":1245,"delta":"=false\nstate done"}
+{"tMs":1266,"delta":"=0\nstate elapsed"}
+{"tMs":1286,"delta":"=0\nevery"}
+{"tMs":1308,"delta":" 1000 -> el"}
+{"tMs":1327,"delta":"apsed=elapsed"}
+{"tMs":1348,"delta":"+1\nevery 1s"}
+{"tMs":1369,"delta":" when running -> done=min"}
+{"tMs":1388,"delta":"(6"}
+{"tMs":1409,"delta":",done+1);"}
+{"tMs":1429,"delta":" running=done"}
+{"tMs":1450,"delta":"<5"}
+{"tMs":1469,"delta":"\n\nstate steps=[{"}
+{"tMs":1489,"delta":"\"i"}
+{"tMs":1510,"delta":"\":0,\"title\":\""}
+{"tMs":1530,"delta":"Export"}
+{"tMs":1550,"delta":" pos"}
+{"tMs":1571,"delta":"ts\",\"detail\":\"Download"}
+{"tMs":1591,"delta":" all posts and"}
+{"tMs":1611,"delta":" dr"}
+{"tMs":1632,"delta":"afts from the old platform.\""}
+{"tMs":1653,"delta":"},{\"i\":1,\""}
+{"tMs":1673,"delta":"title\":\"Convert format"}
+{"tMs":1694,"delta":"\",\"detail\":\"Tur"}
+{"tMs":1714,"delta":"n H"}
+{"tMs":1734,"delta":"TML content"}
+{"tMs":1754,"delta":" into Markdown with"}
+{"tMs":1774,"delta":" met"}
+{"tMs":1795,"delta":"adata.\"},{\"i\":"}
+{"tMs":1816,"delta":"2,\"title\":\"Move"}
+{"tMs":1836,"delta":" media"}
+{"tMs":1857,"delta":"\",\"detail\":\"Copy"}
+{"tMs":1880,"delta":" images and att"}
+{"tMs":1897,"delta":"achments to the"}
+{"tMs":1917,"delta":" new storage.\"},{\"i"}
+{"tMs":1938,"delta":"\":3,\"title\":\""}
+{"tMs":1959,"delta":"Fix links\",\"detail\":\""}
+{"tMs":1980,"delta":"Rewrite internal UR"}
+{"tMs":2000,"delta":"Ls and set"}
+{"tMs":2020,"delta":" up"}
+{"tMs":2041,"delta":" redirects.\"},{\"i"}
+{"tMs":2061,"delta":"\":4,\"title\":\""}
+{"tMs":2081,"delta":"Rest"}
+{"tMs":2101,"delta":"ore com"}
+{"tMs":2122,"delta":"ments\",\"detail\":\"Import"}
+{"tMs":2142,"delta":" comments"}
+{"tMs":2163,"delta":" and map"}
+{"tMs":2183,"delta":" them"}
+{"tMs":2203,"delta":" to their pos"}
+{"tMs":2223,"delta":"ts.\"},{\"i\":5"}
+{"tMs":2244,"delta":",\"title\":\"Verify"}
+{"tMs":2264,"delta":" and"}
+{"tMs":2284,"delta":" swit"}
+{"tMs":2304,"delta":"ch D"}
+{"tMs":2333,"delta":"NS\",\"detail\":\""}
+{"tMs":2346,"delta":"Check every"}
+{"tMs":2366,"delta":" page, then point the"}
+{"tMs":2386,"delta":" domain at"}
+{"tMs":2407,"delta":" the new site.\"}]"}

@@ -1,0 +1,550 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 14,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "text1",
+    "textField1",
+    "segmentedButton1",
+    "TableHeader1",
+    "listView1",
+    "row1",
+    "row2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "Invoices"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Search customer"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "All",
+      "label": "All"
+     },
+     {
+      "value": "Due",
+      "label": "Due"
+     },
+     {
+      "value": "Overdue",
+      "label": "Overdue"
+     },
+     {
+      "value": "Paid",
+      "label": "Paid"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [status]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "status",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "desc": "desc",
+    "columns": [
+     "Number",
+     "Customer",
+     "Date",
+     "Amount",
+     "Status"
+    ],
+    "keys": [
+     "no",
+     "customer",
+     "date",
+     "amount",
+     "status"
+    ],
+    "widths": [
+     90,
+     150,
+     90,
+     80,
+     80
+    ],
+    "selectable": true
+   },
+   "bind": {
+    "props.checked": "${= length(picked)>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onToggleAll"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= []}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${= slice(sortByDesc((filter(invoices,r=>(status==\"All\"||r.status==status)&&(q==\"\"||contains(lower(r.customer),lower(q))))),x=>x[sort]),page*5,page*5+5)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "widths": [
+     90,
+     150,
+     90,
+     80,
+     80
+    ],
+    "selectable": true
+   },
+   "bind": {
+    "props.cells": "${= [item.no,item.customer,item.date,money(item.amount,\"$\",0),item.status]}",
+    "props.badge": "${item.status}",
+    "props.checked": "${= contains(picked,item)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= contains(picked,item)?without(picked,item):append(picked,item)}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Pager1",
+    "text2"
+   ]
+  },
+  "Pager1": {
+   "type": "Pager",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "page"
+   },
+   "bind": {
+    "props.count": "${= ceil(length((filter(invoices,r=>(status==\"All\"||r.status==status)&&(q==\"\"||contains(lower(r.customer),lower(q))))))/5)}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${= length(picked)} selected"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= length(picked)>0}"
+   },
+   "children": [
+    "text3",
+    "filledButton1"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= length(picked)} invoices · ${= money((sum(picked,p=>p.amount)),\"$\",2)}"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send reminders"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "remind",
+       "value": "${picked}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "invoices",
+    "type": "list",
+    "value": [
+     {
+      "no": "INV-1041",
+      "customer": "Northwind Traders",
+      "date": "2024-05-02",
+      "amount": 1840,
+      "status": "Paid"
+     },
+     {
+      "no": "INV-1042",
+      "customer": "Blue Harbor Cafe",
+      "date": "2024-05-04",
+      "amount": 320,
+      "status": "Due"
+     },
+     {
+      "no": "INV-1043",
+      "customer": "Acme Logistics",
+      "date": "2024-05-06",
+      "amount": 4210,
+      "status": "Overdue"
+     },
+     {
+      "no": "INV-1044",
+      "customer": "Maple & Pine Bakery",
+      "date": "2024-05-09",
+      "amount": 96,
+      "status": "Paid"
+     },
+     {
+      "no": "INV-1045",
+      "customer": "Northwind Traders",
+      "date": "2024-05-12",
+      "amount": 2275,
+      "status": "Due"
+     },
+     {
+      "no": "INV-1046",
+      "customer": "Summit Dental",
+      "date": "2024-05-14",
+      "amount": 780,
+      "status": "Overdue"
+     },
+     {
+      "no": "INV-1047",
+      "customer": "Blue Harbor Cafe",
+      "date": "2024-05-17",
+      "amount": 455,
+      "status": "Paid"
+     },
+     {
+      "no": "INV-1048",
+      "customer": "Keystone Builders",
+      "date": "2024-05-20",
+      "amount": 6900,
+      "status": "Due"
+     },
+     {
+      "no": "INV-1049",
+      "customer": "Acme Logistics",
+      "date": "2024-05-23",
+      "amount": 1130,
+      "status": "Paid"
+     },
+     {
+      "no": "INV-1050",
+      "customer": "Summit Dental",
+      "date": "2024-05-25",
+      "amount": 540,
+      "status": "Due"
+     },
+     {
+      "no": "INV-1051",
+      "customer": "Keystone Builders",
+      "date": "2024-05-28",
+      "amount": 2480,
+      "status": "Overdue"
+     },
+     {
+      "no": "INV-1052",
+      "customer": "Maple & Pine Bakery",
+      "date": "2024-05-30",
+      "amount": 205,
+      "status": "Paid"
+     }
+    ]
+   },
+   {
+    "name": "status",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "date"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "picked",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

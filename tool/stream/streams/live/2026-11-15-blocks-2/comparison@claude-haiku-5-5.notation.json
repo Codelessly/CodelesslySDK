@@ -1,0 +1,140 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Phone plans",
+    "subtitle": "Side by side",
+    "icon": "compare_arrows",
+    "status": "Compare"
+   },
+   "children": [
+    "ComparisonTable1",
+    "Recommendation1"
+   ]
+  },
+  "ComparisonTable1": {
+   "type": "ComparisonTable",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Basic 10",
+     "Max 50"
+    ],
+    "prices": [
+     "$10/mo",
+     "$50/mo"
+    ],
+    "pick": "2",
+    "pickLabel": "Recommended",
+    "cta": "Choose",
+    "rows": [
+     [
+      "Data",
+      "10 GB",
+      "Unlimited",
+      2
+     ],
+     [
+      "Calls",
+      "Unlimited",
+      "Unlimited",
+      0
+     ],
+     [
+      "Roaming",
+      "$1/day",
+      "Included",
+      2
+     ],
+     [
+      "Contract",
+      "12 months",
+      "No contract",
+      2
+     ],
+     [
+      "Extras",
+      "None",
+      "Hotspot, streaming",
+      2
+     ]
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChoose"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "choosePlan"
+      }
+     ]
+    }
+   ]
+  },
+  "Recommendation1": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Max 50 is the better value",
+    "why": "Unlimited data, free roaming and no contract for $40 more a month.",
+    "reasons": [
+     "Unlimited data",
+     "Roaming included",
+     "No contract"
+    ],
+    "eyebrow": "Recommended",
+    "kind": "mountain"
+   }
+  }
+ }
+}

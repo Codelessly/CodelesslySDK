@@ -1,0 +1,113 @@
+{"meta":{"ui":"question_flow","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"ChatCard \"Find your laptop\" \"Three quick questions\" icon:\"laptop_mac\" status:\"Step 1 of 3\"\n  Steps steps:[\"Use\",\"Detail\",\"Budget\"] current:=step+1\n  if step==0\n    OptionList \"What will you use it for?\" =use options:[\"Writing and browsing\",\"Photo and video editing\",\"Gaming\",\"Coding\"] -> step=1\n    ActionButton \"Next\" primary enabled:=use!=\"\" -> step=1\n  if step==1\n    OptionList \"What matters most?\" =detail options:[\"Battery life\",\"Raw performance\",\"Lightweight\",\"Screen quality\"] -> step=2\n    Row gap:10\n      ActionButton \"Back\" quiet -> step=0\n      ActionButton \"Next\" primary enabled:=detail!=\"\" -> step=2\n  if step==2\n    OptionList \"What is your budget?\" =budget options:[\"Under $800\",\"$800 to $1,500\",\"Over $1,500\"] -> step=3\n    Row gap:10\n      ActionButton \"Back\" quiet -> step=1\n      ActionButton \"See my pick\" primary enabled:=budget!=\"\" -> step=3\n  if step==3\n    Recommendation \"Your pick: a 14-inch laptop\" \"Matches what you use it for, what matters most, and your budget.\" reasons:[\"Fits your use: \"+use,\"Priority: \"+detail,\"Within \"+budget] eyebrow:\"Best match\" kind:\"mountain\"\n    Receipt \"Start over\" \"Answer the questions again to compare other options.\" tone:neutral icon:\"refresh\"\n    ActionButton \"Start over\" quiet icon:\"refresh\" -> step=0; use=\"\"; detail=\"\"; budget=\"\"\n\nstate step=0\nstate use=\"\"\nstate detail=\"\"\nstate budget=\"\"","usage":{"input_tokens":8868,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":580,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":490,"totalMs":2859}}
+{"tMs":490,"delta":"ChatCard \"Find"}
+{"tMs":700,"delta":" your"}
+{"tMs":700,"delta":" laptop\" \""}
+{"tMs":700,"delta":"Three qu"}
+{"tMs":700,"delta":"ick questions\" icon:\""}
+{"tMs":700,"delta":"laptop_"}
+{"tMs":701,"delta":"mac\" status:\"Step"}
+{"tMs":701,"delta":" 1 of 3\""}
+{"tMs":701,"delta":"\n  "}
+{"tMs":701,"delta":"Steps ste"}
+{"tMs":701,"delta":"ps:[\"Use"}
+{"tMs":705,"delta":"\",\"Det"}
+{"tMs":728,"delta":"ail\",\"Budget\"] current"}
+{"tMs":920,"delta":":=step"}
+{"tMs":920,"delta":"+"}
+{"tMs":920,"delta":"1\n  if step==0"}
+{"tMs":920,"delta":"\n    O"}
+{"tMs":920,"delta":"ptionList \"What will you use"}
+{"tMs":920,"delta":" it for?\" =use"}
+{"tMs":920,"delta":" options:[\"Writing and"}
+{"tMs":920,"delta":" brow"}
+{"tMs":921,"delta":"sing\",\"Photo and video"}
+{"tMs":943,"delta":" editing\",\"G"}
+{"tMs":963,"delta":"aming\",\""}
+{"tMs":984,"delta":"Co"}
+{"tMs":1141,"delta":"ding\"] -"}
+{"tMs":1141,"delta":"> step=1\n    "}
+{"tMs":1141,"delta":"ActionButton \"Next\""}
+{"tMs":1141,"delta":" prim"}
+{"tMs":1141,"delta":"ary enabled:=use!"}
+{"tMs":1141,"delta":"=\"\" -> step=1"}
+{"tMs":1141,"delta":"\n  if step==1\n    O"}
+{"tMs":1158,"delta":"ptionList \"What mat"}
+{"tMs":1180,"delta":"ters most?\" =detail options"}
+{"tMs":1201,"delta":":[\"Batt"}
+{"tMs":1222,"delta":"ery life\",\"Ra"}
+{"tMs":1243,"delta":"w perform"}
+{"tMs":1361,"delta":"ance\",\"L"}
+{"tMs":1361,"delta":"ightweight\",\"Scre"}
+{"tMs":1361,"delta":"en quality\"] -> step"}
+{"tMs":1361,"delta":"=2\n    "}
+{"tMs":1362,"delta":"Row gap:10"}
+{"tMs":1373,"delta":"\n      ActionButton \""}
+{"tMs":1395,"delta":"Back\" quiet ->"}
+{"tMs":1416,"delta":" step=0\n      Action"}
+{"tMs":1438,"delta":"Button \"Next\" primary"}
+{"tMs":1460,"delta":" enabled:=detail!"}
+{"tMs":1482,"delta":"=\"\" -> step=2"}
+{"tMs":1504,"delta":"\n  if step==2\n    O"}
+{"tMs":1585,"delta":"ptionList \"What"}
+{"tMs":1585,"delta":" is"}
+{"tMs":1585,"delta":" your budget?\" =budget"}
+{"tMs":1589,"delta":" options:[\"Under $800\",\""}
+{"tMs":1611,"delta":"$800 to $1,500"}
+{"tMs":1632,"delta":"\",\""}
+{"tMs":1654,"delta":"Over $1,500\"] -"}
+{"tMs":1675,"delta":"> step=3\n    Row"}
+{"tMs":1698,"delta":" gap:10\n      Act"}
+{"tMs":1727,"delta":"ionButton \"Back\" qu"}
+{"tMs":1740,"delta":"iet -> step=1"}
+{"tMs":1762,"delta":"\n      ActionButton \"See"}
+{"tMs":1805,"delta":" my"}
+{"tMs":1805,"delta":" p"}
+{"tMs":1826,"delta":"ick\" primary enabled:"}
+{"tMs":1848,"delta":"=budget!=\"\" ->"}
+{"tMs":1869,"delta":" step=3\n  if step=="}
+{"tMs":1891,"delta":"3\n    Recommendation"}
+{"tMs":1912,"delta":" \"Your"}
+{"tMs":1933,"delta":" pick:"}
+{"tMs":1955,"delta":" a"}
+{"tMs":1976,"delta":" "}
+{"tMs":1998,"delta":"14-"}
+{"tMs":2019,"delta":"inch laptop\" \""}
+{"tMs":2040,"delta":"Matches what"}
+{"tMs":2061,"delta":" you use"}
+{"tMs":2082,"delta":" it"}
+{"tMs":2103,"delta":" for, what"}
+{"tMs":2124,"delta":" mat"}
+{"tMs":2146,"delta":"ters most,"}
+{"tMs":2168,"delta":" and your budget.\" reasons"}
+{"tMs":2189,"delta":":[\"F"}
+{"tMs":2210,"delta":"its your use"}
+{"tMs":2231,"delta":":"}
+{"tMs":2252,"delta":" \""}
+{"tMs":2274,"delta":"+use,"}
+{"tMs":2295,"delta":"\"Pri"}
+{"tMs":2317,"delta":"ority: \"+detail,\""}
+{"tMs":2339,"delta":"Within"}
+{"tMs":2359,"delta":" \""}
+{"tMs":2381,"delta":"+budget] eyebr"}
+{"tMs":2402,"delta":"ow:\"Best match\" k"}
+{"tMs":2424,"delta":"ind:\"m"}
+{"tMs":2445,"delta":"ountain\"\n    Receip"}
+{"tMs":2467,"delta":"t \"Start"}
+{"tMs":2488,"delta":" over\" \"Answ"}
+{"tMs":2510,"delta":"er the"}
+{"tMs":2531,"delta":" questions again to comp"}
+{"tMs":2553,"delta":"are other"}
+{"tMs":2574,"delta":" options"}
+{"tMs":2595,"delta":".\" t"}
+{"tMs":2616,"delta":"one:neutral icon:"}
+{"tMs":2638,"delta":"\"refresh\"\n    "}
+{"tMs":2660,"delta":"ActionButton \"Start"}
+{"tMs":2681,"delta":" over\" qu"}
+{"tMs":2702,"delta":"iet ic"}
+{"tMs":2724,"delta":"on:\"refresh\" -"}
+{"tMs":2745,"delta":"> step=0;"}
+{"tMs":2767,"delta":" use=\"\"; detail=\"\""}
+{"tMs":2789,"delta":"; budget=\"\"\n\nstate step"}
+{"tMs":2810,"delta":"=0\nstate use=\"\""}
+{"tMs":2832,"delta":"\nstate detail=\"\"\nstate bud"}
+{"tMs":2853,"delta":"get=\"\""}

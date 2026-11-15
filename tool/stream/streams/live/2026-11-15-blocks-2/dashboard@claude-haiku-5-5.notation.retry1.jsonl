@@ -1,0 +1,90 @@
+{"meta":{"ui":"dashboard","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.","text":"ChatCard \"This month\" \"Product health\" icon:\"bar_chart\" status:\"Live\"\n  Segments =range options:[\"7 days\",\"30 days\",\"90 days\"]\n  Grid cols:2 gap:10\n    StatTile \"Revenue\" \"vs last period\" value:\"$48.2k\" delta:\"+8.5%\"\n    StatTile \"Sign-ups\" \"vs last period\" value:\"1,284\" delta:\"+12.1%\"\n    StatTile \"Churn\" \"vs last period\" value:\"2.4%\" delta:\"-0.4%\" invert:true\n    StatTile \"Active users\" \"vs last period\" value:\"9,730\" delta:\"+3.2%\"\n  ChartCard \"Revenue\" value:\"$48.2k\" values:[32,35,31,38,42,40,46,48] labels:[\"W1\",\"W2\",\"W3\",\"W4\",\"W5\",\"W6\",\"W7\",\"W8\"] kind:\"line\" delta:\"+8.5%\"\n  ChartCard \"Sign-ups by channel\" value:\"1,284\" values:[520,310,250,204] labels:[\"Search\",\"Referral\",\"Social\",\"Email\"] kind:\"bars\" delta:\"+12.1%\"\n  TableHeader =sort desc:desc columns:[\"Plan\",\"Subscribers\",\"Revenue\",\"Status\"] keys:[\"plan\",\"subs\",\"revenue\",\"status\"] widths:[120,90,90,80]\n  each r in take(sortByDesc(rows,sort),5)\n    TableRow cells:=[r.plan,r.subs,money(r.revenue,\"$\",0),r.status] widths:[120,90,90,80] badge:r.status\n  state range=\"30 days\"\n  state sort=\"revenue\"\n  state desc=true\n  state rows=[{\"plan\":\"Team\",\"subs\":412,\"revenue\":19800,\"status\":\"Paid\"},{\"plan\":\"Pro\",\"subs\":688,\"revenue\":16512,\"status\":\"Paid\"},{\"plan\":\"Starter\",\"subs\":1904,\"revenue\":9520,\"status\":\"Paid\"},{\"plan\":\"Business\",\"subs\":96,\"revenue\":7680,\"status\":\"Due\"},{\"plan\":\"Trial\",\"subs\":311,\"revenue\":0,\"status\":\"Overdue\"}]","usage":{"input_tokens":9764,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":710,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":432,"totalMs":2250}}
+{"tMs":432,"delta":"ChatCard \"This month"}
+{"tMs":575,"delta":"\" \"Product health\" icon"}
+{"tMs":575,"delta":":\"bar_chart\""}
+{"tMs":575,"delta":" status:\"Live\"\n  "}
+{"tMs":575,"delta":"Segments =range options"}
+{"tMs":575,"delta":":[\"7 days\",\""}
+{"tMs":575,"delta":"30 days\",\"90 days\""}
+{"tMs":575,"delta":"]\n  Grid cols"}
+{"tMs":594,"delta":":2 gap:10"}
+{"tMs":614,"delta":"\n    StatTile \"Rev"}
+{"tMs":635,"delta":"enue\" \"vs last period"}
+{"tMs":655,"delta":"\" value:\"$48.2"}
+{"tMs":676,"delta":"k\" delta:\"+8"}
+{"tMs":717,"delta":".5%\"\n    Stat"}
+{"tMs":717,"delta":"Tile \"Sign-"}
+{"tMs":738,"delta":"ups\" \"vs last period\""}
+{"tMs":758,"delta":" value:\"1,284\" del"}
+{"tMs":779,"delta":"ta:\"+12.1%"}
+{"tMs":799,"delta":"\"\n    StatTile \""}
+{"tMs":819,"delta":"Churn\" \"vs last"}
+{"tMs":839,"delta":" period\" value:\"2.4"}
+{"tMs":860,"delta":"%\" delta:\"-0"}
+{"tMs":880,"delta":".4%\" invert:true"}
+{"tMs":900,"delta":"\n    StatTile \""}
+{"tMs":921,"delta":"Active users\" \"vs last period"}
+{"tMs":943,"delta":"\" value:\"9,730\""}
+{"tMs":962,"delta":" delta:\"+3.2"}
+{"tMs":983,"delta":"%\"\n  ChartC"}
+{"tMs":1003,"delta":"ard \"Revenue\" value"}
+{"tMs":1023,"delta":":\"$48.2k\""}
+{"tMs":1045,"delta":" values:[32,35,31"}
+{"tMs":1065,"delta":",38,42,40,46"}
+{"tMs":1085,"delta":",48] labels:[\"W"}
+{"tMs":1105,"delta":"1\",\"W2\",\"W3\",\""}
+{"tMs":1125,"delta":"W4\",\"W5\",\"W6"}
+{"tMs":1146,"delta":"\",\"W7\",\"W8\"]"}
+{"tMs":1166,"delta":" kind:\"line\" delta"}
+{"tMs":1186,"delta":":\"+8.5%\""}
+{"tMs":1207,"delta":"\n  ChartCard \""}
+{"tMs":1228,"delta":"Sign-ups by chann"}
+{"tMs":1248,"delta":"el\" value:\"1,284"}
+{"tMs":1268,"delta":"\" values:[520,310,"}
+{"tMs":1289,"delta":"250,204] labels:[\""}
+{"tMs":1309,"delta":"Search\",\"Referral\",\""}
+{"tMs":1330,"delta":"Social\",\"Email\"] kind"}
+{"tMs":1350,"delta":":\"bars\" delta:"}
+{"tMs":1370,"delta":"\"+12.1%\""}
+{"tMs":1391,"delta":"\n  TableHeader =s"}
+{"tMs":1411,"delta":"ort desc:desc columns"}
+{"tMs":1432,"delta":":[\"Plan\",\"Sub"}
+{"tMs":1452,"delta":"scribers\",\"Revenue"}
+{"tMs":1472,"delta":"\",\"Status\"] keys:"}
+{"tMs":1493,"delta":"[\"plan\",\"subs\",\"rev"}
+{"tMs":1513,"delta":"enue\",\"status\"] widths"}
+{"tMs":1534,"delta":":[120,90,90,"}
+{"tMs":1555,"delta":"80]\n  each r in take"}
+{"tMs":1574,"delta":"(sortByDesc("}
+{"tMs":1595,"delta":"rows,sort),5)"}
+{"tMs":1615,"delta":"\n    TableRow cells"}
+{"tMs":1636,"delta":":=[r.plan,"}
+{"tMs":1656,"delta":"r.subs,money(r"}
+{"tMs":1677,"delta":".revenue,\"$\","}
+{"tMs":1697,"delta":"0),r.status] widths"}
+{"tMs":1717,"delta":":[120,90,90,"}
+{"tMs":1738,"delta":"80] badge:r.status"}
+{"tMs":1758,"delta":"\n  state range=\"30 days"}
+{"tMs":1779,"delta":"\"\n  state sort=\"rev"}
+{"tMs":1799,"delta":"enue\"\n  state desc"}
+{"tMs":1821,"delta":"=true\n  state rows="}
+{"tMs":1840,"delta":"[{\"plan\":\""}
+{"tMs":1860,"delta":"Team\",\"subs\":412,\""}
+{"tMs":1883,"delta":"revenue\":19800,\""}
+{"tMs":1901,"delta":"status\":\"Paid\"},"}
+{"tMs":1923,"delta":"{\"plan\":\"P"}
+{"tMs":1942,"delta":"ro\",\"subs\":688,\""}
+{"tMs":1963,"delta":"revenue\":16512,\""}
+{"tMs":1983,"delta":"status\":\"Paid\"},"}
+{"tMs":2003,"delta":"{\"plan\":\"Star"}
+{"tMs":2024,"delta":"ter\",\"subs\":1904,"}
+{"tMs":2044,"delta":"\"revenue\":9520,"}
+{"tMs":2064,"delta":"\"status\":\"Paid\""}
+{"tMs":2085,"delta":"},{\"plan\":\""}
+{"tMs":2105,"delta":"Business\",\"subs\":96,\""}
+{"tMs":2126,"delta":"revenue\":7680,\""}
+{"tMs":2146,"delta":"status\":\"Due\"},{"}
+{"tMs":2166,"delta":"\"plan\":\"Trial"}
+{"tMs":2187,"delta":"\",\"subs\":311,\"rev"}
+{"tMs":2207,"delta":"enue\":0,\"status\":"}
+{"tMs":2227,"delta":"\"Overdue\"}]"}

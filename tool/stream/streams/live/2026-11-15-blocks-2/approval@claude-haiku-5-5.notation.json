@@ -1,0 +1,269 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Delete 214 old files?",
+    "subtitle": "Shared drive",
+    "icon": "delete_outline",
+    "status": "Needs approval",
+    "tone": "danger"
+   },
+   "children": [
+    "Paragraph1",
+    "Callout1",
+    "Details1",
+    "Disclosure1",
+    "row1",
+    "Receipt1",
+    "Receipt2"
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "This will permanently delete 214 files from the Shared drive / Archive folder, freeing about 3.8 GB. Files older than 3 years in this folder will be removed.",
+    "strong": true
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "This cannot be undone",
+    "message": "Deleted files do not go to the trash and cannot be recovered.",
+    "tone": "danger",
+    "icon": "warning_amber"
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Folder\",\"Shared drive / Archive\"],[\"Files\",\"214\"],[\"Space freed\",\"3.8 GB\"],[\"Recoverable\",\"No\"]]}",
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "Disclosure1": {
+   "type": "Disclosure",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Show the first few file names",
+    "note": "Showing 5 of 214. The rest follow the same pattern.",
+    "lines": [
+     "2019-Q2-budget-draft.xlsx",
+     "old-logo-v1.ai",
+     "meeting-notes-2019-03.docx",
+     "proposal-final-FINAL2.pdf",
+     "scan_0412.tif"
+    ]
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Deny",
+    "tone": "quiet",
+    "icon": "close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "denied"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Approve delete",
+    "tone": "danger",
+    "icon": "delete_forever"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "approved"
+      },
+      {
+       "type": "componentEvent",
+       "event": "approve_delete"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Deletion approved",
+    "message": "214 files are being deleted from Shared drive / Archive. This cannot be undone.",
+    "code": "Approved",
+    "codeLabel": "Approved",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "visible": "${= decision==\"approved\"}"
+   }
+  },
+  "Receipt2": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Deletion denied",
+    "message": "No files were deleted. The 214 files remain in Shared drive / Archive.",
+    "code": "Denied",
+    "codeLabel": "Denied",
+    "tone": "neutral",
+    "icon": "block"
+   },
+   "bind": {
+    "visible": "${= decision==\"denied\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "decision",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

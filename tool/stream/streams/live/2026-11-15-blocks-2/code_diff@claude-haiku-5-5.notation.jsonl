@@ -1,0 +1,68 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"ChatCard \"Review config changes\" \"3 hunks to review\" icon:\"difference_rounded\" status:\"Pending\" tone:\"accent\"\n  DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" =h1 start:4 lines:[\"-port: 8080\",\"+port: 9090\",\" host: localhost\"] -> h1=result\n  DiffHunk \"Log level\" \"@@ -11,2 +11,2 @@\" =h2 start:11 lines:[\"-level: info\",\"+level: debug\",\" format: json\"] -> h2=result\n  DiffHunk \"Cache TTL\" \"@@ -19,2 +19,2 @@\" =h3 start:19 lines:[\"-ttl: 60\",\"+ttl: 300\",\" enabled: true\"] -> h3=result\n  Details rows:=[[\"Kept\",join([h1,h2,h3],\"\")==\"\" ? \"0 of 3\" : \"{count(['keep'],x=>x==h1)}\"]] \n  ActionButton \"Apply changes\" primary enabled:=h1!=\"\" && h2!=\"\" && h3!=\"\" -> emit apply","usage":{"input_tokens":8888,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":364,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":518,"totalMs":1875}}
+{"tMs":518,"delta":"ChatCard \"Review"}
+{"tMs":635,"delta":" config"}
+{"tMs":635,"delta":" changes\" \"3"}
+{"tMs":635,"delta":" hunks to review\" ic"}
+{"tMs":635,"delta":"on:\"dif"}
+{"tMs":635,"delta":"ference_rounded\" status:"}
+{"tMs":643,"delta":"\"Pending\" tone:"}
+{"tMs":660,"delta":"\""}
+{"tMs":679,"delta":"acc"}
+{"tMs":698,"delta":"ent\"\n  "}
+{"tMs":721,"delta":"DiffHunk \""}
+{"tMs":743,"delta":"Server port\" \"@@ -"}
+{"tMs":765,"delta":"4,2 +4,2"}
+{"tMs":787,"delta":" @@\" =h1 "}
+{"tMs":807,"delta":"start:4 lines:[\""}
+{"tMs":829,"delta":"-port: 8080\",\"+"}
+{"tMs":851,"delta":"port: 9090\""}
+{"tMs":869,"delta":",\" host:"}
+{"tMs":890,"delta":" localhost\"] -> h"}
+{"tMs":910,"delta":"1=result"}
+{"tMs":931,"delta":"\n  DiffHunk"}
+{"tMs":951,"delta":" \"Log level"}
+{"tMs":972,"delta":"\" \"@@ -11"}
+{"tMs":992,"delta":",2 +11,2 "}
+{"tMs":1013,"delta":"@@\" =h2 start"}
+{"tMs":1034,"delta":":11 lines:[\"-"}
+{"tMs":1055,"delta":"level: info\",\"+level: deb"}
+{"tMs":1075,"delta":"ug\",\" format"}
+{"tMs":1095,"delta":": json"}
+{"tMs":1116,"delta":"\"] -> h2=result"}
+{"tMs":1136,"delta":"\n  DiffHunk"}
+{"tMs":1159,"delta":" \"C"}
+{"tMs":1176,"delta":"ache T"}
+{"tMs":1199,"delta":"TL\" \"@@ -"}
+{"tMs":1218,"delta":"19,2 +19,2"}
+{"tMs":1238,"delta":" @@\" =h3 "}
+{"tMs":1260,"delta":"start:19 lines:[\""}
+{"tMs":1280,"delta":"-ttl: 60"}
+{"tMs":1300,"delta":"\",\"+ttl: 300"}
+{"tMs":1320,"delta":"\",\" en"}
+{"tMs":1341,"delta":"abled: true\"] ->"}
+{"tMs":1361,"delta":" h3=result\n  Details"}
+{"tMs":1381,"delta":" r"}
+{"tMs":1401,"delta":"ows:"}
+{"tMs":1421,"delta":"="}
+{"tMs":1441,"delta":"[[\"Kept\","}
+{"tMs":1462,"delta":"join"}
+{"tMs":1482,"delta":"([h1,h"}
+{"tMs":1502,"delta":"2,h3],\""}
+{"tMs":1522,"delta":"\")="}
+{"tMs":1544,"delta":"=\"\" ? \"0 "}
+{"tMs":1563,"delta":"of 3\" : \""}
+{"tMs":1583,"delta":"{"}
+{"tMs":1603,"delta":"count(['"}
+{"tMs":1624,"delta":"keep'"}
+{"tMs":1644,"delta":"],x"}
+{"tMs":1664,"delta":"=>x==h1)}"}
+{"tMs":1684,"delta":"\"]"}
+{"tMs":1705,"delta":"] "}
+{"tMs":1725,"delta":"\n  "}
+{"tMs":1746,"delta":"ActionButton \"Apply"}
+{"tMs":1767,"delta":" chang"}
+{"tMs":1786,"delta":"es\" prim"}
+{"tMs":1806,"delta":"ary enabled:=h1"}
+{"tMs":1827,"delta":"!=\"\" && h2!=\""}
+{"tMs":1847,"delta":"\" && h3!=\"\" -"}
+{"tMs":1868,"delta":"> emit apply"}

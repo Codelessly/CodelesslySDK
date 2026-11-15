@@ -1,0 +1,107 @@
+{"meta":{"ui":"order_summary","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show my grocery order as an inline card before you place it: five line items with a picture placeholder, price and a quantity I can raise or lower (removing at zero), a promo code field that takes SAVE10, the subtotal, delivery and total kept up to date, and confirm and cancel buttons that tell you what I decided.","text":"ChatCard \"Grocery order\" \"5 items\" icon:\"shopping_cart\" status:\"Review\" tone:accent\n  state items=[{\"id\":1,\"title\":\"Bananas\",\"detail\":\"1 bunch\",\"price\":2.4,\"qty\":1,\"kind\":\"banana\"},{\"id\":2,\"title\":\"Whole milk\",\"detail\":\"1 L\",\"price\":1.6,\"qty\":1,\"kind\":\"milk\"},{\"id\":3,\"title\":\"Sourdough loaf\",\"detail\":\"Bakery\",\"price\":4.5,\"qty\":1,\"kind\":\"bread\"},{\"id\":4,\"title\":\"Free range eggs\",\"detail\":\"12 pack\",\"price\":3.8,\"qty\":1,\"kind\":\"eggs\"},{\"id\":5,\"title\":\"Cheddar\",\"detail\":\"400 g\",\"price\":5.2,\"qty\":1,\"kind\":\"cheese\"}]\n  state promo=\"\"\n  state applied=false\n  state decided=\"\"\n  each item in items\n    CartLine title:item.title detail:item.detail price:item.price qty:item.qty kind:item.kind -> items=updateWhere(items,x=>x.id==item.id,x=>with(x,\"qty\",result))\n  Row gap:8\n    InputField \"Promo code\" \"Enter code\" =promo\n    ActionButton \"Apply\" quiet -> applied=upper(trim(promo))==\"SAVE10\"\n  if applied\n    Callout \"Promo applied\" \"SAVE10 takes 10% off the subtotal.\" tone:good icon:\"check_circle\"\n  Details rows:=[[\"Subtotal\",money(sum(items,x=>x.price*x.qty),\"$\",2)],[\"Discount\",applied?money(-0.1*sum(items,x=>x.price*x.qty),\"$\",2):\"\"],[\"Delivery\",\"$3.99\"],[\"Total\",money(sum(items,x=>x.price*x.qty)*(applied?0.9:1)+3.99,\"$\",2)]]\n  if decided==\"\"\n    Row gap:10\n      ActionButton \"Cancel\" quiet icon:\"close\" -> decided=\"cancelled\"\n      ActionButton \"Confirm order\" primary icon:\"check\" enabled:=length(items)>0 -> decided=\"confirmed\"; emit placeOrder\n  if decided==\"confirmed\"\n    Receipt \"Order placed\" \"Your groceries are on the way.\" tone:good icon:\"check_circle\"\n  if decided==\"cancelled\"\n    Receipt \"Order cancelled\" \"Nothing was charged.\" tone:neutral icon:\"cancel\"","usage":{"input_tokens":10028,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":830,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1239,"totalMs":3407}}
+{"tMs":1239,"delta":"ChatCard \"Groc"}
+{"tMs":1407,"delta":"ery order\" \"5 items\""}
+{"tMs":1408,"delta":" icon:\"shopping_"}
+{"tMs":1408,"delta":"cart\" status:\"Review"}
+{"tMs":1408,"delta":"\" tone:accent\n  "}
+{"tMs":1408,"delta":"state items=[{\"id\":"}
+{"tMs":1408,"delta":"1,\"title\":\"B"}
+{"tMs":1408,"delta":"ananas\",\"detail\":\"1"}
+{"tMs":1419,"delta":" bunch\",\"price\":2"}
+{"tMs":1438,"delta":".4,\"qty\":1"}
+{"tMs":1458,"delta":",\"kind\":\"banana"}
+{"tMs":1479,"delta":"\"},{\"id\":2,"}
+{"tMs":1500,"delta":"\"title\":\"Whole mil"}
+{"tMs":1532,"delta":"k\",\"detail\":\"1 "}
+{"tMs":1541,"delta":"L\",\"price\":1.6,"}
+{"tMs":1561,"delta":"\"qty\":1,\"k"}
+{"tMs":1582,"delta":"ind\":\"milk\"},{"}
+{"tMs":1602,"delta":"\"id\":3,\"title\":"}
+{"tMs":1623,"delta":"\"Sourdough loa"}
+{"tMs":1643,"delta":"f\",\"detail\":\"B"}
+{"tMs":1664,"delta":"akery\",\"price\":4.5"}
+{"tMs":1685,"delta":",\"qty\":1,\""}
+{"tMs":1705,"delta":"kind\":\"bread\"},"}
+{"tMs":1726,"delta":"{\"id\":4,\"title"}
+{"tMs":1746,"delta":"\":\"Free range eggs"}
+{"tMs":1766,"delta":"\",\"detail\":\"12 p"}
+{"tMs":1787,"delta":"ack\",\"price\":3.8,"}
+{"tMs":1807,"delta":"\"qty\":1,\"k"}
+{"tMs":1828,"delta":"ind\":\"eggs\"},"}
+{"tMs":1848,"delta":"{\"id\":5,\"title"}
+{"tMs":1868,"delta":"\":\"Cheddar\",\""}
+{"tMs":1888,"delta":"detail\":\"400 g\",\""}
+{"tMs":1909,"delta":"price\":5.2,\"q"}
+{"tMs":1930,"delta":"ty\":1,\"kind\":"}
+{"tMs":1950,"delta":"\"cheese\"}]"}
+{"tMs":1970,"delta":"\n  state promo=\"\"\n  "}
+{"tMs":1993,"delta":"state applied=false\n  state"}
+{"tMs":2011,"delta":" decided=\"\"\n  each item"}
+{"tMs":2034,"delta":" in items\n    CartLine"}
+{"tMs":2051,"delta":" title"}
+{"tMs":2071,"delta":":item"}
+{"tMs":2092,"delta":".title detail:item.det"}
+{"tMs":2112,"delta":"ail price:item.price qty"}
+{"tMs":2133,"delta":":item.qty kind:"}
+{"tMs":2154,"delta":"item.kind -> items="}
+{"tMs":2173,"delta":"updateWhere(items,"}
+{"tMs":2194,"delta":"x=>x.id==item"}
+{"tMs":2217,"delta":".id,x=>with("}
+{"tMs":2235,"delta":"x,\"qty\",result))"}
+{"tMs":2255,"delta":"\n  Row gap:8"}
+{"tMs":2276,"delta":"\n    InputField \"Prom"}
+{"tMs":2296,"delta":"o code\" \"Enter code"}
+{"tMs":2316,"delta":"\" =promo\n    Act"}
+{"tMs":2337,"delta":"ionButton \"Apply\""}
+{"tMs":2357,"delta":" quiet -> applied="}
+{"tMs":2378,"delta":"upper(trim(promo"}
+{"tMs":2398,"delta":"))==\"SAVE10"}
+{"tMs":2419,"delta":"\"\n  if applied\n    "}
+{"tMs":2439,"delta":"Callout \"Promo appl"}
+{"tMs":2460,"delta":"ied\" \"SAVE10"}
+{"tMs":2480,"delta":" takes 10% off the"}
+{"tMs":2500,"delta":" subtotal.\" tone:"}
+{"tMs":2521,"delta":"good icon:\"check_circ"}
+{"tMs":2541,"delta":"le\"\n  Details rows"}
+{"tMs":2561,"delta":":=[[\"Subtot"}
+{"tMs":2582,"delta":"al\",money(sum(items"}
+{"tMs":2602,"delta":",x=>x.price*"}
+{"tMs":2623,"delta":"x.qty),\"$\","}
+{"tMs":2643,"delta":"2)],[\"Discount\","}
+{"tMs":2664,"delta":"applied?money(-0."}
+{"tMs":2685,"delta":"1*sum(items,x"}
+{"tMs":2705,"delta":"=>x.price*x."}
+{"tMs":2725,"delta":"qty),\"$\",2):"}
+{"tMs":2750,"delta":"\"\"],[\"Delivery\",\""}
+{"tMs":2766,"delta":"$3.99\"],[\""}
+{"tMs":2786,"delta":"Total\",money(sum(items"}
+{"tMs":2806,"delta":",x=>x.price*"}
+{"tMs":2827,"delta":"x.qty)*(appl"}
+{"tMs":2847,"delta":"ied?0.9:1)"}
+{"tMs":2868,"delta":"+3.99,\"$\","}
+{"tMs":2888,"delta":"2)]]\n  if dec"}
+{"tMs":2909,"delta":"ided==\"\"\n    Row g"}
+{"tMs":2929,"delta":"ap:10\n      Action"}
+{"tMs":2950,"delta":"Button \"Cancel\""}
+{"tMs":2971,"delta":" quiet icon:\"close"}
+{"tMs":2990,"delta":"\" -> decided=\"canc"}
+{"tMs":3011,"delta":"elled\"\n      Action"}
+{"tMs":3031,"delta":"Button \"Confirm order"}
+{"tMs":3052,"delta":"\" primary icon:\"check"}
+{"tMs":3072,"delta":"\" enabled:=length("}
+{"tMs":3093,"delta":"items)>0 -> dec"}
+{"tMs":3113,"delta":"ided=\"confirmed\";"}
+{"tMs":3133,"delta":" emit placeOrder"}
+{"tMs":3154,"delta":"\n  if decided==\"confir"}
+{"tMs":3176,"delta":"med\"\n    Receip"}
+{"tMs":3194,"delta":"t \"Order placed\" \""}
+{"tMs":3215,"delta":"Your groceries are on the"}
+{"tMs":3236,"delta":" way.\" tone:good"}
+{"tMs":3256,"delta":" icon:\"check_circle"}
+{"tMs":3276,"delta":"\"\n  if decided==\""}
+{"tMs":3296,"delta":"cancelled\"\n    "}
+{"tMs":3317,"delta":"Receipt \"Order canc"}
+{"tMs":3337,"delta":"elled\" \"Nothing"}
+{"tMs":3358,"delta":" was charged.\" tone:ne"}
+{"tMs":3378,"delta":"utral icon:\"canc"}
+{"tMs":3398,"delta":"el\""}

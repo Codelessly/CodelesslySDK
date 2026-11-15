@@ -1,0 +1,304 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Two days in Kyoto",
+    "subtitle": "Day by day, with what to book",
+    "icon": "map_rounded",
+    "status": "2 days"
+   },
+   "children": [
+    "text1",
+    "DayHeader1",
+    "Checklist1",
+    "DayHeader2",
+    "Checklist2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${= length(booked)} of 6 to-dos booked"
+   }
+  },
+  "DayHeader1": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 1",
+    "subtitle": "Temples and old streets",
+    "kind": "temple",
+    "tone": "dawn",
+    "tag": "Eastern hills"
+   },
+   "children": [
+    "ItineraryStop1",
+    "ItineraryStop2",
+    "ItineraryStop3",
+    "ItineraryStop4"
+   ]
+  },
+  "ItineraryStop1": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Fushimi Inari Shrine",
+    "detail": "Walk the torii gates up the mountain, about two hours round trip.",
+    "time": "07:30",
+    "travel": "Train to Gion, 12 min"
+   }
+  },
+  "ItineraryStop2": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kiyomizu-dera",
+    "detail": "Wooden stage over the valley; come before the crowds.",
+    "time": "09:30",
+    "travel": "Walk down Sannenzaka, 20 min"
+   }
+  },
+  "ItineraryStop3": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Higashiyama lanes",
+    "detail": "Ninenzaka and Sannenzaka, with tea and sweets along the way.",
+    "time": "11:30",
+    "travel": "Walk to Gion, 15 min"
+   }
+  },
+  "ItineraryStop4": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Gion at dusk",
+    "detail": "Wander the Hanamikoji streets as the lanterns come on.",
+    "time": "17:30",
+    "last": true
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 1 to book",
+    "value": "booked",
+    "items": [
+     "Kiyomizu-dera evening entry",
+     "Tea house in Higashiyama"
+    ]
+   }
+  },
+  "DayHeader2": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 2",
+    "subtitle": "Gardens and the north",
+    "kind": "forest",
+    "tone": "day",
+    "tag": "Arashiyama"
+   },
+   "children": [
+    "ItineraryStop5",
+    "ItineraryStop6",
+    "ItineraryStop7",
+    "ItineraryStop8"
+   ]
+  },
+  "ItineraryStop5": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Bamboo grove",
+    "detail": "Go early, before the tour groups arrive.",
+    "time": "07:00",
+    "travel": "Train to Saga-Arashiyama, 20 min"
+   }
+  },
+  "ItineraryStop6": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tenryu-ji garden",
+    "detail": "Strolling garden beside the Katsura River.",
+    "time": "08:30",
+    "travel": "Walk along the river, 25 min"
+   }
+  },
+  "ItineraryStop7": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kinkaku-ji",
+    "detail": "The gold pavilion over its reflecting pond.",
+    "time": "11:00",
+    "travel": "Bus to Kyoto Station, 30 min"
+   }
+  },
+  "ItineraryStop8": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Nishiki Market",
+    "detail": "Lunch among the food stalls before you head home.",
+    "time": "13:00",
+    "last": true
+   }
+  },
+  "Checklist2": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 2 to book",
+    "value": "booked",
+    "items": [
+     "Tenryu-ji garden ticket",
+     "Kinkaku-ji entry slot",
+     "Nishiki Market lunch seat",
+     "Bamboo grove early taxi"
+    ]
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "booked",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

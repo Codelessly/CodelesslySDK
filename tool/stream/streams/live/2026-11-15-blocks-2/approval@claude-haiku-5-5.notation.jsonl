@@ -1,0 +1,114 @@
+{"meta":{"ui":"approval","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","text":"ChatCard \"Delete 214 old files?\" \"Shared drive\" icon:\"delete_outline\" status:\"Needs approval\" tone:danger\n  if decision==\"\"\n    Paragraph \"This will permanently delete 214 files from the Shared drive / Archive folder, freeing about 3.8 GB. Files older than 3 years in this folder will be removed.\" strong\n    Callout \"This cannot be undone\" \"Deleted files do not go to the trash and cannot be recovered.\" tone:danger icon:\"warning_amber\"\n    Details rows:=[[\"Folder\",\"Shared drive / Archive\"],[\"Files\",\"214\"],[\"Space freed\",\"3.8 GB\"],[\"Recoverable\",\"No\"]]\n    Disclosure \"Show the first few file names\" \"Showing 5 of 214. The rest follow the same pattern.\" lines:[\"2019-Q2-budget-draft.xlsx\",\"old-logo-v1.ai\",\"meeting-notes-2019-03.docx\",\"proposal-final-FINAL2.pdf\",\"scan_0412.tif\"]\n    Row gap:10\n      ActionButton \"Deny\" quiet icon:\"close\" -> decision=\"denied\"\n      ActionButton \"Approve delete\" danger icon:\"delete_forever\" -> decision=\"approved\"; emit approve_delete\n  if decision==\"approved\"\n    Receipt \"Deletion approved\" \"214 files are being deleted from Shared drive / Archive. This cannot be undone.\" \"Approved\" \"Approved\" tone:good icon:\"check_circle\"\n  if decision==\"denied\"\n    Receipt \"Deletion denied\" \"No files were deleted. The 214 files remain in Shared drive / Archive.\" \"Denied\" \"Denied\" tone:neutral icon:\"block\"","usage":{"input_tokens":8886,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":566,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":714,"totalMs":3103}}
+{"tMs":715,"delta":"ChatCard \"Del"}
+{"tMs":898,"delta":"ete "}
+{"tMs":898,"delta":"214 old files?"}
+{"tMs":898,"delta":"\" \"Shared drive\""}
+{"tMs":898,"delta":" icon:\"del"}
+{"tMs":898,"delta":"ete_"}
+{"tMs":898,"delta":"out"}
+{"tMs":898,"delta":"line\" status:\""}
+{"tMs":898,"delta":"Need"}
+{"tMs":898,"delta":"s approval\" tone:dan"}
+{"tMs":905,"delta":"ger\n  if"}
+{"tMs":926,"delta":" decision=="}
+{"tMs":951,"delta":"\"\"\n    Paragraph"}
+{"tMs":1090,"delta":" \"This"}
+{"tMs":1090,"delta":" will permanently del"}
+{"tMs":1090,"delta":"ete 214 files"}
+{"tMs":1090,"delta":" from the Shared drive /"}
+{"tMs":1090,"delta":" Archive folder, free"}
+{"tMs":1090,"delta":"ing about 3"}
+{"tMs":1100,"delta":".8"}
+{"tMs":1121,"delta":" GB."}
+{"tMs":1142,"delta":" Files"}
+{"tMs":1168,"delta":" older than 3"}
+{"tMs":1184,"delta":" years in this"}
+{"tMs":1205,"delta":" folder will"}
+{"tMs":1282,"delta":" be removed.\" strong\n    "}
+{"tMs":1282,"delta":"Callout \"This"}
+{"tMs":1282,"delta":" cannot be undone\" \""}
+{"tMs":1294,"delta":"Deleted files do"}
+{"tMs":1315,"delta":" not go"}
+{"tMs":1336,"delta":" to the trash and"}
+{"tMs":1358,"delta":" cannot be recovered.\""}
+{"tMs":1379,"delta":" t"}
+{"tMs":1402,"delta":"one:danger icon:\""}
+{"tMs":1424,"delta":"warning_amber\""}
+{"tMs":1445,"delta":"\n    Details r"}
+{"tMs":1466,"delta":"ows:"}
+{"tMs":1486,"delta":"="}
+{"tMs":1508,"delta":"[[\"Fol"}
+{"tMs":1530,"delta":"der\",\"Shared drive /"}
+{"tMs":1552,"delta":" Archive\"],[\"Files"}
+{"tMs":1574,"delta":"\",\"214\"],[\"Space fre"}
+{"tMs":1596,"delta":"ed\",\"3.8 GB"}
+{"tMs":1617,"delta":"\"],[\"Rec"}
+{"tMs":1638,"delta":"overable\",\"No"}
+{"tMs":1662,"delta":"\"]]\n    Discl"}
+{"tMs":1682,"delta":"osure \""}
+{"tMs":1703,"delta":"Show the"}
+{"tMs":1724,"delta":" first few"}
+{"tMs":1745,"delta":" file names\" \"Show"}
+{"tMs":1767,"delta":"ing 5 of 214."}
+{"tMs":1788,"delta":" The"}
+{"tMs":1809,"delta":" rest foll"}
+{"tMs":1831,"delta":"ow the same p"}
+{"tMs":1853,"delta":"attern.\" lines:[\"2"}
+{"tMs":1873,"delta":"019"}
+{"tMs":1895,"delta":"-"}
+{"tMs":1916,"delta":"Q2"}
+{"tMs":1937,"delta":"-bud"}
+{"tMs":1958,"delta":"get-dra"}
+{"tMs":1980,"delta":"ft.xlsx\",\"old"}
+{"tMs":2001,"delta":"-log"}
+{"tMs":2023,"delta":"o-v"}
+{"tMs":2044,"delta":"1"}
+{"tMs":2065,"delta":"."}
+{"tMs":2087,"delta":"ai\",\"meeting-notes"}
+{"tMs":2108,"delta":"-2019"}
+{"tMs":2129,"delta":"-"}
+{"tMs":2150,"delta":"03.doc"}
+{"tMs":2172,"delta":"x\",\"proposal-final"}
+{"tMs":2206,"delta":"-F"}
+{"tMs":2215,"delta":"INAL2.pdf"}
+{"tMs":2236,"delta":"\",\"sc"}
+{"tMs":2257,"delta":"an"}
+{"tMs":2278,"delta":"_"}
+{"tMs":2300,"delta":"0412"}
+{"tMs":2320,"delta":".t"}
+{"tMs":2342,"delta":"if\"]\n    Row g"}
+{"tMs":2364,"delta":"ap:10\n      Action"}
+{"tMs":2386,"delta":"Button \"Deny\" qu"}
+{"tMs":2408,"delta":"iet icon:\"close\""}
+{"tMs":2430,"delta":" -> decision=\"denied\""}
+{"tMs":2451,"delta":"\n      ActionButton \""}
+{"tMs":2473,"delta":"Approve del"}
+{"tMs":2494,"delta":"ete\" dan"}
+{"tMs":2516,"delta":"ger icon:\"delete_"}
+{"tMs":2538,"delta":"for"}
+{"tMs":2559,"delta":"ever\" -> decision=\"appro"}
+{"tMs":2580,"delta":"ved\";"}
+{"tMs":2601,"delta":" emit appro"}
+{"tMs":2624,"delta":"ve_delete\n  if dec"}
+{"tMs":2645,"delta":"ision==\"approved\"\n    "}
+{"tMs":2667,"delta":"Receipt \"Delet"}
+{"tMs":2688,"delta":"ion approved\" \"214 files"}
+{"tMs":2710,"delta":" are being deleted from"}
+{"tMs":2732,"delta":" Shared drive / Archive"}
+{"tMs":2753,"delta":". This"}
+{"tMs":2775,"delta":" cannot be undone.\" \""}
+{"tMs":2796,"delta":"Approved\" \""}
+{"tMs":2818,"delta":"Approved"}
+{"tMs":2839,"delta":"\" tone:good icon:"}
+{"tMs":2861,"delta":"\"check_circle\""}
+{"tMs":2883,"delta":"\n  if decision==\"den"}
+{"tMs":2904,"delta":"ied\"\n    Receipt"}
+{"tMs":2926,"delta":" \"Deletion denied\""}
+{"tMs":2947,"delta":" \"No files were de"}
+{"tMs":2969,"delta":"leted. The "}
+{"tMs":2990,"delta":"214 files rem"}
+{"tMs":3012,"delta":"ain in Shared drive /"}
+{"tMs":3033,"delta":" Archive.\" \"Denied"}
+{"tMs":3056,"delta":"\" \"Denied\" tone"}
+{"tMs":3077,"delta":":neutral icon:\""}
+{"tMs":3098,"delta":"block\""}
