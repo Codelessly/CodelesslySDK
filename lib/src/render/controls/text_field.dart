@@ -28,6 +28,7 @@ import 'editable.dart';
 import 'focus.dart' show ControlKeyResult;
 import 'field_frame.dart';
 import 'tokens.dart';
+import '../markdown.dart';
 
 /// What the runtime does with a text field while it is shown: the `focus`
 /// and `editText` actions find it, its form validates it.
@@ -94,7 +95,9 @@ void textFieldRecipe(NodeBuilder b, Node n, List<RenderBox> chain, {TextFieldSer
             if (patched.contains(s)) b.tree.setState(b.id, s, on, instance: b.instance);
           }
         : null
-    ..onEvent = interactive ? (trigger, value) => fireTrigger(b, trigger, event: {'value': value}) : null
+    ..onEvent = interactive
+        ? (trigger, value) => fireTrigger(b, trigger, event: {'value': value, 'field': fieldEventOf(box.editor.value)})
+        : null
     ..onAffixTap = interactive ? (prefix) => fireTrigger(b, prefix ? fieldPrefixTap : fieldSuffixTap) : null;
   box.enabled = box.config.enabled && !states.contains(api.WidgetState.disabled);
   box.autofocus = interactive && box.config.autofocus;
@@ -190,6 +193,10 @@ class TextFieldConfig {
   late final ControlTokens tokens;
   late final TextStyle valueStyle;
   late final List<(int, int, TextStyle)> runs;
+
+  /// The runs that show typed Markdown (`TextFieldProps.markdown`), for the
+  /// text as it is now; null without it.
+  late final List<(int, int, TextStyle)> Function(String text)? markdown;
   late final TextAlign textAlign;
   late final TextAlignVertical? alignVertical;
   late final TextInputType keyboardType;
@@ -254,6 +261,16 @@ class TextFieldConfig {
       for (final r in n.prop(TextFieldProps.runs))
         (r.start, r.end, ownStyle(own == null ? r.style : own.merge(r.style))),
     ];
+    // Markdown shown as it is typed: every character kept, the markers
+    // dimmed, so the cursor stays where the user typed.
+    final look = MarkdownLook.of(n.prop(TextFieldProps.markdown), showMarkers: true);
+    final written = style.isEmpty ? null : style;
+    c.markdown = look == null
+        ? null
+        : (text) => [
+              for (final r in markdownRuns(text, look, color: written?.color ?? own?.color, fontSize: c.valueStyle.fontSize).$2)
+                (r.start, r.end, ownStyle(r.style)),
+            ];
     c.decoration = n.prop(TextFieldProps.decoration);
     c.tokens = tokens;
     c.textAlign = switch (n.prop(TextFieldProps.textAlign)) {
@@ -638,7 +655,8 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     final shown = c.obscureText ? c.obscuringCharacter * v.text.length : v.text;
     _editable
       ..text = fieldTextSpan(shown, c.valueStyle,
-          composing: focusNode.hasFocus ? v.composing : TextRange.empty, runs: c.obscureText ? const [] : c.runs)
+          composing: focusNode.hasFocus ? v.composing : TextRange.empty,
+          runs: c.obscureText ? const [] : [...c.runs, ...?c.markdown?.call(shown)])
       ..selection = v.selection;
   }
 
@@ -1014,3 +1032,29 @@ RenderTextField? textFieldIn(RenderBox box) {
   visit(box);
   return found;
 }
+
+/// What a text field's own reactions (changed, submitted, a tap) read in
+/// `${field}` about its text and cursor: `value` (the text), `word` (the
+/// word ending at the cursor: `@pri` while a mention is typed, empty with a
+/// selection), `cursor`, `selectionStart` and `selectionEnd`. An invalid
+/// selection counts as a cursor at the end.
+api.Json fieldEventOf(TextEditingValue value) {
+  final text = value.text;
+  final sel = value.selection.isValid && value.selection.end <= text.length
+      ? value.selection
+      : TextSelection.collapsed(offset: text.length);
+  final cursor = sel.extentOffset.clamp(0, text.length);
+  var start = cursor;
+  while (start > 0 && !_space.hasMatch(text[start - 1])) {
+    start--;
+  }
+  return {
+    'value': text,
+    'word': sel.isCollapsed ? text.substring(start, cursor) : '',
+    'cursor': cursor,
+    'selectionStart': sel.start,
+    'selectionEnd': sel.end,
+  };
+}
+
+final RegExp _space = RegExp(r'\s');
