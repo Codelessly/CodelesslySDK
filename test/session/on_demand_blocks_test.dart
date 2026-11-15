@@ -101,4 +101,17 @@ void main() {
     expect(b.problems, ['Too wide at 320.']);
     expect(session.designSystem!.components['PollResults'], isNull);
   });
+
+  test('a parameter named like a handler (change) is the parameter', () async {
+    final session = UiSession(designSystem: await _cards());
+    addTearDown(session.dispose);
+    final block = jsonDecode(File('examples/showcase/on-demand/stock/StockQuote.json').readAsStringSync()) as Map<String, Object?>;
+    session.addBlock(api.LayoutDocument.fromJson(block, catalog: api.standardCatalog));
+    final result = await session.applyNotation(Stream.value(File('examples/showcase/on-demand/stock/designer-card.txt').readAsStringSync()));
+    expect(session.notationIssues, isEmpty, reason: '${session.notationIssues}');
+    expect(result.errors, isEmpty, reason: '${result.errors}');
+    final quote = session.document.nodes.values.singleWhere((n) => n.type == 'StockQuote');
+    expect(jsonEncode(quote.toJson()), contains('"change":1.84'));
+  });
+
 }
