@@ -428,6 +428,31 @@ void main() {
       expect(f.contentRect.left, lessThan(30), reason: 'the content starts after the prefix, from the right');
     });
 
+    testWidgets('a field bound to the direction of what it holds puts Arabic text at its right edge', (tester) async {
+      await show(tester, {
+        'col': {'type': 'row', 'children': ['field'], 'layout': {'width': 300, 'height': {'hug': 40}}},
+        'field': {
+          'type': 'textField',
+          'layout': {'width': {'fill': 300}, 'height': {'hug': 30}},
+          'props': {'decoration': {'isDense': true, 'isCollapsed': true, 'contentPadding': 0}},
+          'bind': {
+            'props.initialValue': r'${query}',
+            'textDirection': r"${= textDirectionOf(query) == '' ? 'ltr' : textDirectionOf(query)}",
+          },
+        },
+      }, variables: [v('query', 'شكرا')]);
+      RenderEditable? e;
+      void visit(RenderObject o) {
+        if (o is RenderEditable) e ??= o;
+        o.visitChildren(visit);
+      }
+
+      tester.binding.renderViews.forEach(visit);
+      final text = e!.getBoxesForSelection(const TextSelection(baseOffset: 0, extentOffset: 4)).first;
+      expect(e!.textDirection, TextDirection.rtl);
+      expect(text.right, moreOrLessEquals(e!.size.width, epsilon: 4));
+    });
+
     testWidgets('its own direction wins over the one it inherits', (tester) async {
       expect(fieldOf(await pump(tester, field(own: 'rtl'), dir: 'ltr')).textDirection, TextDirection.rtl);
       expect(fieldOf(await pump(tester, field(own: 'ltr'))).textDirection, TextDirection.ltr);

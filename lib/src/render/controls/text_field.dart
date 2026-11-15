@@ -257,10 +257,8 @@ class TextFieldConfig {
     ];
     c.decoration = n.prop(TextFieldProps.decoration);
     c.tokens = tokens;
-    c.textAlign = switch (n.prop(TextFieldProps.textAlign)) {
-      api.TextAlign.start => TextAlign.left,
-      final a => convert.textAlign(a),
-    };
+    // Start and end follow the field's text direction.
+    c.textAlign = convert.textAlign(n.prop(TextFieldProps.textAlign));
     c.alignVertical = switch (n.prop(TextFieldProps.textAlignVertical)) {
       null => null,
       api.TextAlignVertical.top => TextAlignVertical.top,
