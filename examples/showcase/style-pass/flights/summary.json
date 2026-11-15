@@ -1,0 +1,33 @@
+{
+ "model": "claude-opus-5-5",
+ "card": "../../../tmp/claude-0/-home-user/d11c2670-1755-578e-aaa9-037ed813c978/scratchpad/sp/flights.json",
+ "designSystem": "design_systems/cards",
+ "before": {
+  "problems": 2,
+  "texts": 22
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 29.0,
+   "checkAndRenderSeconds": 26.5,
+   "problems": 1,
+   "ops": 23,
+   "input_tokens": 11005,
+   "output_tokens": 3227
+  },
+  {
+   "round": 2,
+   "modelSeconds": 15.9,
+   "checkAndRenderSeconds": 26.8,
+   "problems": 0,
+   "ops": 23,
+   "input_tokens": 13988,
+   "output_tokens": 2192
+  }
+ ],
+ "final": 2,
+ "problems": 0,
+ "status": "passed",
+ "totalSeconds": 135.6
+}
