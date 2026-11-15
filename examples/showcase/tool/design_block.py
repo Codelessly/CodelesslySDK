@@ -8,7 +8,9 @@ how it rendered, and revises it. The experiment for the gap between ready-made b
 
 Each round: the model answers with the block (a component document) and one card in the notation that uses
 it; both are checked and rendered at 420 wide, light and dark, the block alone from its own preview and the
-card as it first appears; the pictures and every problem reported go back for the next round. Writes
+card as it first appears, and the card again in a 320-wide column; the pictures and every problem reported go
+back for the next round. The round with the fewest problems is kept, and the script exits 1 when that round
+still has any. Writes
 <out>/round<n>/ (answer.txt, the block, card.txt, block-light.png, block-dark.png, light.png, dark.png,
 problems.txt) and <out>/summary.json (seconds and tokens per round). The design system is copied to <out>/ds
 and only the copy is changed. The key is read from the environment and never written.
@@ -172,6 +174,13 @@ def check(name, ds, manifest, d, block, written):
             shots = sorted(f for f in os.listdir(folder) if f.endswith('.png')) if os.path.isdir(folder) else []
             if shots:
                 crop(f'{folder}/{shots[0]}', f'{d}/{label}{mode}.png', dark=mode == 'dark')
+    # The same card in a narrow chat column: what overflows or breaks there is a problem too. (Outside runs,
+    # 2026-11-15: blocks that passed at one width were sized for it and broke at others.)
+    code, log = run(['tool/render/render.sh', site, '--out', f'{d}/raw-narrow', '--sizes', '320x1400'])
+    problems += [f'At 320 wide: {l}' for l in reported(log) if l not in problems]
+    shots = sorted(f for f in os.listdir(f'{d}/raw-narrow') if f.endswith('.png')) if os.path.isdir(f'{d}/raw-narrow') else []
+    if shots:
+        crop(f'{d}/raw-narrow/{shots[0]}', f'{d}/narrow.png', dark=False)
     open(f'{d}/problems.txt', 'w').write('\n'.join(problems) + '\n')
     return problems
 
@@ -188,7 +197,7 @@ def main():
         problems = check(name, ds, manifest, f'{out}/round{n}', open(opt('--block')).read(), open(opt('--card')).read())
         print(f'round{n}: {len(problems)} problem(s)')
         print('\n'.join(problems))
-        print(f'look at: {out}/round{n}/block-light.png block-dark.png light.png dark.png')
+        print(f'look at: {out}/round{n}/block-light.png block-dark.png light.png dark.png narrow.png')
         return
     ds, manifest = setup(out, src)
     system = brief_for(name, ds, manifest)
@@ -221,8 +230,8 @@ def main():
         print(json.dumps(summary['rounds'][-1]))
         if n == rounds:
             break
-        back = [{'type': 'text', 'text': 'This is how it rendered: your block alone from its first preview (light, then dark), then the card as it first appears (light, then dark).'}]
-        back += [image(f'{d}/{m}.png') for m in ('block-light', 'block-dark', 'light', 'dark') if os.path.exists(f'{d}/{m}.png')]
+        back = [{'type': 'text', 'text': 'This is how it rendered: your block alone from its first preview (light, then dark), then the card as it first appears (light, then dark), then the card in a narrow column (320 wide).'}]
+        back += [image(f'{d}/{m}.png') for m in ('block-light', 'block-dark', 'light', 'dark', 'narrow') if os.path.exists(f'{d}/{m}.png')]
         back.append({'type': 'text', 'text': ('Problems reported:\n' + '\n'.join(problems) + '\n\n' if problems else 'No problems were reported.\n\n') +
                      'Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the other blocks, and whether anything is broken or empty. If nothing is reported and you would ship it as it is, answer with the one word SHIP and nothing else: a round that changes what was already right makes it worse. Otherwise fix every problem and answer again in the same format, block and card whole.'})
         messages += [{'role': 'assistant', 'content': text}, {'role': 'user', 'content': back}]
