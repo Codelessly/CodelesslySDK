@@ -1,5 +1,5 @@
 name: skip_shell
-description: The generated Skip screens running as an app. One data store, navigation by the screens' own events, a person switch.
+description: The generated Skip screens as a storyboard. Stories per person and screen, a flow, a live run on one data store, and a properties panel for the person, the token set and the store.
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -15,10 +15,23 @@ dependencies:
   # The frame around the phone is the Editor's design system (design 15 §4.1).
   soft_saas_ui:
     path: ../../../../OverlookV2/packages/soft_saas_ui
+  # Every control that changes what is shown is a row of this panel.
+  dynamic_properties_panel:
+    path: ../../../../CodelesslyEditor/packages/dynamic_properties_panel
+  flutter_lucide: ">=1.63.0 <1.64.0"
+  # What the storyboard template (lib/storyboard, synced from soft_saas_ui/storyboard) imports.
+  material_ui: ^1.11.0
+  shared_preferences: ^2.5.6
+  toastification: ^3.2.0
+  fuzzy: ^0.5.1
+  scrollable_positioned_list: ^0.3.8
+  inspector: ^4.0.0
+  uuid: ^4.6.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  lints: ^6.1.0
 
 flutter:
   uses-material-design: true

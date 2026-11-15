@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "lastModified": "2026-11-14T00:00:00.000Z",
+  "statuses": {
+    "/flow_session": "completed",
+    "/page_run": "completed",
+    "/page_home_beginner": "completed",
+    "/page_history_beginner": "completed",
+    "/page_session_beginner": "completed",
+    "/page_home_kid": "completed",
+    "/page_history_kid": "completed",
+    "/page_session_kid": "completed",
+    "/page_home_athlete": "completed",
+    "/page_history_athlete": "completed",
+    "/page_session_athlete": "needsReview"
+  }
+}
