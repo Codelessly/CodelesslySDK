@@ -1,0 +1,254 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your package",
+    "subtitle": "Wireless headphones · Order #48213",
+    "icon": "local_shipping",
+    "status": "In transit",
+    "tone": "accent"
+   },
+   "children": [
+    "Details1",
+    "SectionLabel1",
+    "Steps1",
+    "Callout1",
+    "SectionLabel2",
+    "InputField1",
+    "ActionButton1",
+    "Receipt1"
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Carrier",
+      "UPS Ground"
+     ],
+     [
+      "Tracking number",
+      "1Z 999 AA1 0123 456 784"
+     ],
+     [
+      "Estimated delivery",
+      "Thursday, May 16"
+     ]
+    ],
+    "icons": [
+     "local_shipping",
+     "tag",
+     "event"
+    ]
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Shipment progress",
+    "note": "Stage 3 of 5"
+   }
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Order placed",
+     "Packed",
+     "In transit",
+     "Out for delivery",
+     "Delivered"
+    ]
+   },
+   "bind": {
+    "props.current": "${stage}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Currently in transit",
+    "message": "Departed the Memphis, TN hub this morning. Next stop: your local depot.",
+    "tone": "accent",
+    "icon": "location_on"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Delivery instructions",
+    "note": "Optional"
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Instructions for the driver",
+    "placeholder": "e.g. Leave with the front desk",
+    "value": "note",
+    "lines": 3
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Save instructions",
+    "tone": "primary",
+    "icon": "edit_note"
+   },
+   "bind": {
+    "props.enabled": "${= length(trim(note))>0}",
+    "visible": "${= !sent}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sent",
+       "value": "${= true}"
+      },
+      {
+       "type": "showToast",
+       "message": "Instructions saved"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Instructions saved",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.message": "${note}",
+    "visible": "${= sent}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "stage",
+    "type": "integer",
+    "value": 3
+   },
+   {
+    "name": "note",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

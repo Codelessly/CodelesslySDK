@@ -1,0 +1,64 @@
+{"meta":{"ui":"tracking","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"ChatCard \"Your package\" \"Estimated delivery Thu 12 June\" icon:\"local_shipping\" status:\"In transit\" tone:accent\n  Details [\"Item\",\"Walnut desk lamp\"],[\"Carrier\",\"Royal Mail\"],[\"Tracking\",\"RM 4471 2290 6GB\"],[\"Estimated\",\"Thu 12 June\"]\n  SectionLabel \"Shipment progress\" \"Stage 3 of 5\"\n  Steps steps:[\"Ordered\",\"Packed\",\"Shipped\",\"Out for delivery\",\"Delivered\"] current:3\n  Disclosure \"Leave delivery instructions\" \"Leave with the neighbour or in the porch.\" lines:[\"Ring the bell, then leave in the porch.\",\"Do not leave if no one answers.\"] icon:\"edit_note\"","usage":{"input_tokens":9242,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":260,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":506,"totalMs":1768}}
+{"tMs":506,"delta":"ChatCard \"Your"}
+{"tMs":601,"delta":" package\" \"Est"}
+{"tMs":601,"delta":"imated delivery"}
+{"tMs":601,"delta":" Th"}
+{"tMs":601,"delta":"u 12 June"}
+{"tMs":601,"delta":"\" icon:\"local"}
+{"tMs":601,"delta":"_sh"}
+{"tMs":619,"delta":"ipping\""}
+{"tMs":642,"delta":" status:\"In transit\" t"}
+{"tMs":661,"delta":"one:acc"}
+{"tMs":681,"delta":"ent\n  "}
+{"tMs":699,"delta":"Details "}
+{"tMs":721,"delta":"[\"Item\",\""}
+{"tMs":739,"delta":"Wal"}
+{"tMs":757,"delta":"n"}
+{"tMs":776,"delta":"ut des"}
+{"tMs":795,"delta":"k l"}
+{"tMs":815,"delta":"amp\""}
+{"tMs":834,"delta":"],"}
+{"tMs":856,"delta":"[\"Carrier\",\"Roy"}
+{"tMs":877,"delta":"al M"}
+{"tMs":899,"delta":"ail\"],[\"Tracking"}
+{"tMs":919,"delta":"\",\"R"}
+{"tMs":938,"delta":"M"}
+{"tMs":957,"delta":" 4"}
+{"tMs":976,"delta":"471"}
+{"tMs":997,"delta":" 2290"}
+{"tMs":1017,"delta":" 6G"}
+{"tMs":1039,"delta":"B\"],[\"Estimated"}
+{"tMs":1058,"delta":"\",\""}
+{"tMs":1082,"delta":"Thu 12 June\""}
+{"tMs":1102,"delta":"]\n  SectionLab"}
+{"tMs":1124,"delta":"el \"Shipment prog"}
+{"tMs":1144,"delta":"ress\""}
+{"tMs":1164,"delta":" \"St"}
+{"tMs":1185,"delta":"age 3 "}
+{"tMs":1205,"delta":"of 5\"\n  "}
+{"tMs":1226,"delta":"Steps steps:[\""}
+{"tMs":1248,"delta":"Ordered\",\"Pack"}
+{"tMs":1268,"delta":"ed\",\"Sh"}
+{"tMs":1289,"delta":"ipped\",\"Out for"}
+{"tMs":1310,"delta":" delivery\",\"Delivered"}
+{"tMs":1335,"delta":"\"] current:3"}
+{"tMs":1351,"delta":"\n  Dis"}
+{"tMs":1372,"delta":"closure \"Leave del"}
+{"tMs":1393,"delta":"ivery instructions\" \""}
+{"tMs":1413,"delta":"Leave with"}
+{"tMs":1435,"delta":" the ne"}
+{"tMs":1454,"delta":"ighbour or in"}
+{"tMs":1474,"delta":" the por"}
+{"tMs":1494,"delta":"ch.\""}
+{"tMs":1515,"delta":" lines:[\""}
+{"tMs":1535,"delta":"Ring the"}
+{"tMs":1555,"delta":" bell, then"}
+{"tMs":1591,"delta":" leave in the porch."}
+{"tMs":1596,"delta":"\",\"Do"}
+{"tMs":1616,"delta":" not le"}
+{"tMs":1639,"delta":"ave if"}
+{"tMs":1656,"delta":" no"}
+{"tMs":1676,"delta":" one answ"}
+{"tMs":1697,"delta":"ers.\"] icon:\"ed"}
+{"tMs":1717,"delta":"it_"}
+{"tMs":1737,"delta":"note\""}

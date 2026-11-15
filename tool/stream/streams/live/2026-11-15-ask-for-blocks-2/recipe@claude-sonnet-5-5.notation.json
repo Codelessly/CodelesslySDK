@@ -1,0 +1,268 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lemon Chicken Traybake",
+    "subtitle": "Weeknight dinner, one tray",
+    "icon": "restaurant",
+    "status": "Easy",
+    "tone": "accent"
+   },
+   "children": [
+    "Details1",
+    "Counter1",
+    "SectionLabel1",
+    "Checklist1",
+    "SectionLabel2",
+    "Steps1",
+    "Paragraph1",
+    "ActionButton1",
+    "Receipt1"
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icons": [
+     "schedule",
+     "signal_cellular_alt",
+     "back_hand"
+    ]
+   },
+   "bind": {
+    "props.rows": "${= [[\"Total time\",\"50 min\"],[\"Difficulty\",\"Easy\"],[\"Hands-on\",\"15 min\"]]}",
+    "visible": "${= !started}"
+   }
+  },
+  "Counter1": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Servings",
+    "detail": "Amounts scale automatically",
+    "value": "servings",
+    "min": 1,
+    "max": 12
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Ingredients"
+   },
+   "bind": {
+    "props.note": "${= length(ticked)} of 6 ticked",
+    "visible": "${= !started}"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tick off as you gather",
+    "value": "ticked"
+   },
+   "bind": {
+    "props.items": "${= [\"{fixed(servings*0.5,1)} kg chicken thighs\",\"{fixed(servings*0.5,1)} kg baby potatoes\",\"{fixed(servings*0.5,1)} lemons\",\"{fixed(servings*1.5,1)} tbsp olive oil\",\"{fixed(servings*1,0)} garlic cloves\",\"{fixed(servings*0.5,1)} tsp dried oregano\"]}",
+    "visible": "${= !started}"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Method",
+    "note": "4 steps"
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Heat oven to 220°C and halve potatoes",
+     "Toss everything with oil, lemon, garlic, oregano",
+     "Roast chicken and potatoes for 40 min",
+     "Rest 5 min, squeeze over lemon, serve"
+    ],
+    "current": 1
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Step 1: Heat the oven to 220°C and halve the potatoes. Step 2: Toss everything with oil, lemon, garlic and oregano on one tray. Step 3: Roast for 40 minutes until golden. Step 4: Rest 5 minutes and finish with fresh lemon."
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start cooking",
+    "tone": "primary",
+    "icon": "play_arrow"
+   },
+   "bind": {
+    "visible": "${= !started}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "started",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "startCooking",
+       "value": "${servings}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Let's cook!",
+    "tone": "good",
+    "icon": "local_fire_department"
+   },
+   "bind": {
+    "props.message": "Oven to 220°C. Dinner for ${servings} is about 50 minutes away.",
+    "visible": "${= started}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "servings",
+    "type": "integer",
+    "value": 4
+   },
+   {
+    "name": "ticked",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "started",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

@@ -1,0 +1,69 @@
+{"meta":{"ui":"poll","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Run a quick team poll in a card: \"Where should we go for lunch on Friday?\" with four options. Before I vote I only see the options; after I vote I see each option's share as a bar with the percentage, my choice marked, and the total number of votes.","text":"ChatCard \"Team poll\" \"Where should we go for lunch on Friday?\" icon:\"poll\" status:\"Open\" tone:accent w:390\n  state voted=false\n  state choice=\"\"\n  state votes=[{\"name\":\"Ramen bar\",\"n\":8},{\"name\":\"Taco truck\",\"n\":6},{\"name\":\"Salad place\",\"n\":4},{\"name\":\"Pizza slice\",\"n\":5}]\n  if !voted\n    OptionList \"Pick one\" =choice options:[\"Ramen bar\",\"Taco truck\",\"Salad place\",\"Pizza slice\"]\n    ActionButton \"Vote\" tone:primary enabled:=choice!=\"\" -> votes=updateWhere(votes,v=>v.name==choice,v=>with(v,\"n\",v.n+1)); voted=true\n  if voted\n    SectionLabel \"Results\" \"{sum(votes,v=>v.n)} votes\"\n    each v in votes\n      ProgressLine \"{v.name}{v.name==choice?' ✓ your choice':''}\" \"{round(v.n/sum(votes,x=>x.n)*100,0)}%\" value:=v.n/sum(votes,x=>x.n)\n    Callout \"You voted for {choice}\" \"Total votes: {sum(votes,v=>v.n)}\" tone:good icon:\"check_circle\"","usage":{"input_tokens":9251,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":431,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":730,"totalMs":3066}}
+{"tMs":730,"delta":"ChatCard \"Team"}
+{"tMs":1063,"delta":" poll\" \"Where"}
+{"tMs":1063,"delta":" should we go for lunch on"}
+{"tMs":1063,"delta":" Friday?\" icon:"}
+{"tMs":1063,"delta":"\"poll\" status:\""}
+{"tMs":1063,"delta":"Open\" t"}
+{"tMs":1063,"delta":"one:accent w:390"}
+{"tMs":1063,"delta":"\n  state vo"}
+{"tMs":1063,"delta":"ted=false\n  state cho"}
+{"tMs":1063,"delta":"ice=\"\"\n  state votes"}
+{"tMs":1063,"delta":"=[{\"name\":\""}
+{"tMs":1085,"delta":"Ramen b"}
+{"tMs":1115,"delta":"ar\",\"n"}
+{"tMs":1403,"delta":"\":8"}
+{"tMs":1403,"delta":"},{\"name\":\"Ta"}
+{"tMs":1403,"delta":"co tru"}
+{"tMs":1403,"delta":"ck\",\"n\":6"}
+{"tMs":1403,"delta":"},{\"name\":\"Sal"}
+{"tMs":1403,"delta":"ad place"}
+{"tMs":1403,"delta":"\",\"n\":4"}
+{"tMs":1404,"delta":"},{\"name\":\"P"}
+{"tMs":1411,"delta":"izza sl"}
+{"tMs":1445,"delta":"ice\",\"n\":5}]"}
+{"tMs":1481,"delta":"\n  if !voted\n    O"}
+{"tMs":1516,"delta":"ptionList \"Pick one"}
+{"tMs":1740,"delta":"\""}
+{"tMs":1740,"delta":" =choice options:[\""}
+{"tMs":1740,"delta":"Ramen bar\",\"Taco"}
+{"tMs":1740,"delta":" truck\",\"Salad place\",\""}
+{"tMs":1740,"delta":"Pizza slice\"]"}
+{"tMs":1740,"delta":"\n    ActionButton \""}
+{"tMs":1748,"delta":"Vote\" tone:prim"}
+{"tMs":1782,"delta":"ary enabled:=choice"}
+{"tMs":1815,"delta":"!=\"\" -> vot"}
+{"tMs":1849,"delta":"es=updateWhere("}
+{"tMs":1883,"delta":"votes,v"}
+{"tMs":1915,"delta":"=>v.name==choice"}
+{"tMs":2078,"delta":",v=>with(v,"}
+{"tMs":2078,"delta":"\"n\",v.n+1"}
+{"tMs":2078,"delta":")); voted=true\n  "}
+{"tMs":2078,"delta":"if voted\n    Section"}
+{"tMs":2083,"delta":"Label \"Results\" \""}
+{"tMs":2117,"delta":"{s"}
+{"tMs":2150,"delta":"um(votes,v=>"}
+{"tMs":2185,"delta":"v.n)} votes\""}
+{"tMs":2217,"delta":"\n    each v in votes"}
+{"tMs":2259,"delta":"\n      ProgressLine \""}
+{"tMs":2287,"delta":"{v.name}{"}
+{"tMs":2317,"delta":"v.name==choice?"}
+{"tMs":2412,"delta":"'"}
+{"tMs":2412,"delta":" ✓"}
+{"tMs":2415,"delta":" your"}
+{"tMs":2449,"delta":" choice':''}\" \"{"}
+{"tMs":2483,"delta":"round(v.n/sum"}
+{"tMs":2515,"delta":"(votes,x"}
+{"tMs":2549,"delta":"=>x.n)*100"}
+{"tMs":2583,"delta":",0)}%\" value:"}
+{"tMs":2616,"delta":"=v.n/sum("}
+{"tMs":2650,"delta":"votes,x=>x."}
+{"tMs":2685,"delta":"n)\n    Callout \""}
+{"tMs":2716,"delta":"You"}
+{"tMs":3057,"delta":" voted for {cho"}
+{"tMs":3057,"delta":"ice}\" \"Total"}
+{"tMs":3058,"delta":" votes: {sum(vot"}
+{"tMs":3058,"delta":"es,v=>v.n"}
+{"tMs":3058,"delta":")}\" tone:good ic"}
+{"tMs":3058,"delta":"on:\"check_"}
+{"tMs":3058,"delta":"circle\""}

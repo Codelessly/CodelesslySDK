@@ -1,0 +1,81 @@
+{
+ "ui": "tracking",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24168,
+ "turns": [
+  {
+   "input_tokens": 9242,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 260,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 506,
+   "totalMs": 1768,
+   "chars": 557,
+   "lines": 5,
+   "jsonTails": 0,
+   "nodes": 6,
+   "outputTokensPerNode": "43.3",
+   "notationIssues": [
+    "line 2:11: Unknown word \"[\" on a Details. Props are written key:value.",
+    "line 2:12: A Details takes no string: write the rest as key:\"value\".",
+    "line 2:18: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 2:19: A Details takes no string: write the rest as key:\"value\".",
+    "line 2:37: Unknown word \"],[\" on a Details. Props are written key:value.",
+    "line 2:40: A Details takes no string: write the rest as key:\"value\".",
+    "line 2:49: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 2:50: A Details takes no string: write the rest as key:\"value\".",
+    "line 2:62: Unknown word \"],[\" on a Details. Props are written key:value.",
+    "line 2:65: A Details takes no string: write the rest as key:\"value\".",
+    "line 2:75: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 2:76: A Details takes no string: write the rest as key:\"value\".",
+    "line 2:94: Unknown word \"],[\" on a Details. Props are written key:value.",
+    "line 2:97: A Details takes no string: write the rest as key:\"value\".",
+    "line 2:108: Unknown word \",\" on a Details. Props are written key:value.",
+    "line 2:109: A Details takes no string: write the rest as key:\"value\".",
+    "line 2:122: Unknown word \"]\" on a Details. Props are written key:value.",
+    "line 2:3: A Details needs rows: write rows:[\"a\",\"b\"]."
+   ],
+   "errors": [
+    "missing_prop /nodes/Details1/props: Details needs \"rows\" (List<dynamic>): set \"props\": {\"rows\": ...} or bind \"props.rows\"."
+   ]
+  },
+  {
+   "input_tokens": 10078,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 264,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 413,
+   "totalMs": 1087,
+   "chars": 564,
+   "lines": 5,
+   "jsonTails": 0,
+   "nodes": 6,
+   "outputTokensPerNode": "44.0",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

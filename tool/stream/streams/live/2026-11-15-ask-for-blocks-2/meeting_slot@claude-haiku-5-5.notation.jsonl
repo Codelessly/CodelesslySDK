@@ -1,0 +1,82 @@
+{"meta":{"ui":"meeting_slot","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Help me schedule a 30 minute meeting with three colleagues next week: let me pick a day, then one of the free time slots that day (some are taken), show who is attending, and confirm. After confirming the card shows the booked time.","text":"ChatCard \"Schedule a 30-minute meeting\" \"Next week\" icon:\"event\" status:\"Pick a day\" tone:accent\n  SectionLabel \"Day\" \"Next week\"\n  DayPicker =day days:[\"Mon 14\",\"Tue 15\",\"Wed 16\",\"Thu 17\",\"Fri 18\"]\n  if day!=\"\"\n    SectionLabel \"Time\" \"30 minutes\"\n    ChoiceChips =time options:[\"9:00\",\"9:30\",\"10:00\",\"10:30\",\"11:00\",\"11:30\",\"14:00\",\"14:30\",\"15:00\",\"15:30\"] disabled:[\"10:00\",\"14:30\"] columns:4\n    if time!=\"\"\n      SectionLabel \"Attendees\" \"3 colleagues\"\n      Details rows:[[\"Priya Shah\",\"Required\"],[\"Marco Lentz\",\"Required\"],[\"Jun Okafor\",\"Optional\"]]\n      TotalBar \"Meeting\" \"{day} at {time}, 30 minutes\" amount:=time cta:\"Confirm\" icon:\"check\" enabled:=time!=\"\" -> booked=true\n  if booked\n    Receipt \"Meeting booked\" \"{day} at {time}. Invites are on their way to everyone.\" tone:good icon:\"check_circle\"","usage":{"input_tokens":9244,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":400,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":490,"totalMs":2096}}
+{"tMs":490,"delta":"ChatCard \"Sch"}
+{"tMs":576,"delta":"edule a 30-minute"}
+{"tMs":576,"delta":" meeting\" \"Next"}
+{"tMs":577,"delta":" week\" icon:\"event"}
+{"tMs":577,"delta":"\""}
+{"tMs":577,"delta":" status:\"P"}
+{"tMs":583,"delta":"ick a day\" tone:acc"}
+{"tMs":605,"delta":"ent\n  SectionLab"}
+{"tMs":632,"delta":"el \"Day\" \"Next"}
+{"tMs":645,"delta":" week\"\n  "}
+{"tMs":665,"delta":"DayPicker =day"}
+{"tMs":687,"delta":" days:[\"Mon 14"}
+{"tMs":707,"delta":"\",\"Tue 15\",\""}
+{"tMs":728,"delta":"Wed 16\",\"Thu"}
+{"tMs":748,"delta":" 17\",\"Fri 18"}
+{"tMs":769,"delta":"\"]\n  if day!="}
+{"tMs":790,"delta":"\"\"\n    SectionLab"}
+{"tMs":810,"delta":"el \"Time\""}
+{"tMs":832,"delta":" \"30 "}
+{"tMs":850,"delta":"minutes\"\n    Ch"}
+{"tMs":871,"delta":"oiceChips =time"}
+{"tMs":890,"delta":" options:[\"9"}
+{"tMs":911,"delta":":00\",\"9"}
+{"tMs":931,"delta":":30\",\"10:00\",\"10"}
+{"tMs":952,"delta":":30\",\"11:00\",\"11"}
+{"tMs":972,"delta":":30\",\"14:00\",\"14"}
+{"tMs":993,"delta":":30\",\"15:00\",\"15"}
+{"tMs":1014,"delta":":30\"] disabled:"}
+{"tMs":1034,"delta":"[\"10:00\",\"14"}
+{"tMs":1056,"delta":":30\""}
+{"tMs":1074,"delta":"] columns:4"}
+{"tMs":1094,"delta":"\n    "}
+{"tMs":1114,"delta":"if"}
+{"tMs":1135,"delta":" time!=\"\"\n      Sect"}
+{"tMs":1155,"delta":"ionLabel \"Attend"}
+{"tMs":1175,"delta":"ees\" \"3"}
+{"tMs":1196,"delta":" "}
+{"tMs":1215,"delta":"colleagues\"\n      "}
+{"tMs":1240,"delta":"Details rows:[[\"Pri"}
+{"tMs":1256,"delta":"ya"}
+{"tMs":1276,"delta":" Sh"}
+{"tMs":1296,"delta":"ah\",\"Required"}
+{"tMs":1320,"delta":"\"],[\"Mar"}
+{"tMs":1336,"delta":"co"}
+{"tMs":1356,"delta":" L"}
+{"tMs":1376,"delta":"ent"}
+{"tMs":1396,"delta":"z\",\"Required\"],[\""}
+{"tMs":1420,"delta":"Jun"}
+{"tMs":1437,"delta":" Ok"}
+{"tMs":1457,"delta":"afor\",\"Optional\"]"}
+{"tMs":1478,"delta":"]\n      "}
+{"tMs":1497,"delta":"T"}
+{"tMs":1519,"delta":"otalBar \""}
+{"tMs":1538,"delta":"Meeting\" \"{"}
+{"tMs":1558,"delta":"day} at"}
+{"tMs":1580,"delta":" {time},"}
+{"tMs":1600,"delta":" 30 min"}
+{"tMs":1619,"delta":"utes\" amount:"}
+{"tMs":1639,"delta":"="}
+{"tMs":1660,"delta":"time cta:\"Confir"}
+{"tMs":1682,"delta":"m\" ic"}
+{"tMs":1705,"delta":"on:\"check\" enabled"}
+{"tMs":1725,"delta":":=time!"}
+{"tMs":1742,"delta":"=\"\" -> boo"}
+{"tMs":1762,"delta":"ked=true"}
+{"tMs":1782,"delta":"\n  "}
+{"tMs":1803,"delta":"if booked\n    Receip"}
+{"tMs":1828,"delta":"t \"Me"}
+{"tMs":1844,"delta":"eting booked\" \"{"}
+{"tMs":1864,"delta":"day} at {time}."}
+{"tMs":1889,"delta":" Invites"}
+{"tMs":1906,"delta":" are"}
+{"tMs":1926,"delta":" on"}
+{"tMs":1950,"delta":" their"}
+{"tMs":1965,"delta":" way to"}
+{"tMs":1985,"delta":" ever"}
+{"tMs":2008,"delta":"yone.\" t"}
+{"tMs":2025,"delta":"one:good"}
+{"tMs":2045,"delta":" ic"}
+{"tMs":2065,"delta":"on:\"check_"}
+{"tMs":2086,"delta":"circle\""}

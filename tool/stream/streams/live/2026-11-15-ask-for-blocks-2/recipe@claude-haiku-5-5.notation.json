@@ -1,0 +1,341 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lemon Chicken Traybake",
+    "subtitle": "A weeknight dinner for four",
+    "icon": "restaurant",
+    "status": "45 min"
+   },
+   "children": [
+    "row1",
+    "SectionLabel1",
+    "Counter1",
+    "SectionLabel2",
+    "Checklist1",
+    "Paragraph1",
+    "SectionLabel3",
+    "PlanStep1",
+    "PlanStep2",
+    "PlanStep3",
+    "PlanStep4",
+    "ActionButton1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total time",
+    "note": "prep and oven",
+    "value": "45 min",
+    "delta": "",
+    "invert": false,
+    "icon": "schedule"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Difficulty",
+    "note": "one tray",
+    "value": "Easy",
+    "delta": "",
+    "invert": false,
+    "icon": "local_fire_department"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Servings",
+    "note": "scales amounts"
+   }
+  },
+  "Counter1": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Servings",
+    "value": "servings",
+    "min": 1,
+    "max": 12,
+    "step": 1
+   },
+   "bind": {
+    "props.detail": "for ${servings} people"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Ingredients",
+    "note": "tick off as you go"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Shopping and prep",
+    "value": "ticked",
+    "items": [
+     "800 g chicken thighs, bone-in",
+     "2 lemons, sliced",
+     "4 tbsp olive oil",
+     "4 garlic cloves, crushed",
+     "1 tsp dried oregano",
+     "500 g baby potatoes, halved",
+     "1 red onion, wedged",
+     "Salt and black pepper"
+    ]
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.text": "Scaled for ${servings}: double the chicken and potatoes, or halve them for two."
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Method",
+    "note": "4 steps"
+   }
+  },
+  "PlanStep1": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Season",
+    "detail": "Toss chicken with oil, garlic, oregano, salt and pepper.",
+    "index": 0
+   },
+   "bind": {
+    "props.current": "${ticked}"
+   }
+  },
+  "PlanStep2": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Roast the potatoes",
+    "detail": "Spread potatoes and onion on the tray, oven 200 C for 15 min.",
+    "index": 1
+   },
+   "bind": {
+    "props.current": "${ticked}"
+   }
+  },
+  "PlanStep3": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Add the chicken",
+    "detail": "Nestle chicken and lemon among the vegetables, skin up.",
+    "index": 2
+   },
+   "bind": {
+    "props.current": "${ticked}"
+   }
+  },
+  "PlanStep4": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Finish",
+    "detail": "Roast 30 min until golden and cooked through, then rest 5 min.",
+    "index": 3
+   },
+   "bind": {
+    "props.current": "${ticked}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start cooking",
+    "tone": "primary",
+    "icon": "play_arrow"
+   },
+   "bind": {
+    "props.enabled": "${= true}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "startCooking"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "servings",
+    "type": "decimal",
+    "value": 0
+   },
+   {
+    "name": "ticked",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}
