@@ -657,7 +657,12 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   final item = run.text(a.item).trim();
   NodeBox? named() => tree == null
       ? null
-      : (tree.boxOf(id, instance: run.instance) ?? scopedBoxesOf(tree, id, run.instance).lastOrNull ?? tree.boxesAtPath(id).lastOrNull);
+      : (tree.boxOf(id, instance: run.instance) ??
+          scopedBoxesOf(tree, id, run.instance).lastOrNull ??
+          tree.boxesAtPath(id).lastOrNull ??
+          // No node has that id: the one on screen with that name (a
+          // responsive screen's layouts have their own ids, the same names).
+          tree.boxesNamed(id).lastOrNull);
   final box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance)) ?? named();
   if (box == null || !box.attached) {
     // Nothing to reveal: said, not skipped silently (the chain goes on).

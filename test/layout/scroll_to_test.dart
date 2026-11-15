@@ -127,6 +127,39 @@ void main() {
     expect(view.pixels, 340);
   });
 
+  testWidgets('a scroll-to names a node by its name when no node has that id (a responsive layout\'s copies)', (tester) async {
+    // Each breakpoint's layout of a responsive screen has its own ids; a
+    // canvas reaction names the node it means by its name.
+    final screen = await harness.show(tester, {
+      'col': {
+        'type': 'column',
+        'props': {'scrollable': true},
+        'layout': {'width': 200, 'height': 200},
+        'children': ['go', 'gap', 'mark-desktop'],
+      },
+      'go': {
+        'type': 'box',
+        'layout': {'width': 200, 'height': 40},
+        'actions': [
+          {
+            'trigger': {'type': 'click'},
+            'actions': [
+              {'type': 'scrollTo', 'node': 'mark', 'durationMs': 0},
+            ],
+          },
+        ],
+      },
+      'gap': {'type': 'box', 'layout': {'width': 200, 'height': 300}},
+      'mark-desktop': {'type': 'box', 'name': 'mark', 'layout': {'width': 200, 'height': 40}},
+    });
+    final view = viewport(screen.tree);
+    await tester.tapAt(view.localToGlobal(const Offset(100, 20)));
+    await tester.pump();
+    await tester.pump();
+    // 380 px of content in a 200 px view: the mark at the bottom.
+    expect(view.pixels, 180);
+  });
+
   testWidgets('without an item a scroll-to goes to the first copy', (tester) async {
     final screen = await harness.show(tester, page(''), variables: [rows]);
     final view = viewport(screen.tree);
