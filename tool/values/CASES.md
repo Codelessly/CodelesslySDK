@@ -22,7 +22,7 @@ Steps are what the case does; everything is read after the last step.
 | flights | tap the 3rd option (British Airways, £156 a person, 2 adults) | total £312 (`£156 x 2`), and no longer £256 (the first option's total) |
 | weather | press the alert button | "alert ... on" and the forecast numbers still there; the button's old label gone |
 | dashboard | choose 90 days; tap the Subs column header | the 90-day tiles ($221k, 3,905, 3.4%, 14,260 and the four changes), none of the 30 or 7-day figures, and the plan table re-sorted (the order check: Starter or Business now before Pro, whichever direction a first tap sorts) |
-| order_summary | raise bananas to 2; type SAVE10 | subtotal $27.90, promo -$2.79, total $30.10 (not $32.89), "7 items" (not 6) |
+| order_summary | raise bananas to 2; type SAVE10 | subtotal $27.90, promo -$2.79, total $30.10 (not $32.89), 5 items (lines) or 7 (units), not 6 |
 | approval | press Approve | "Approved", 214 still shown, no Approve/Deny button left (locked) |
 | question_flow | Gaming, Big open-world, Back, Competitive esports, $800 to $1,500 | "Volt 16 Gaming" at $1,399, a reason naming "competitive", no "open-world" (Back really went back and the old answer was replaced), no other laptop |
 | reservation | Sun 15, party 2 to 5, 20:00, Confirm | "Table booked" and one line with Sun 15, 5 and 20:00 (the party size was counted up, the day and time carried over); not Sat 14 |
@@ -40,7 +40,7 @@ Steps are what the case does; everything is read after the last step.
 | meeting_slot | Wed 18, 14:00, Confirm | one line with Wed 18, 14:00 and 14:30 (end time worked out: start + 30 minutes), and the three names |
 | now_playing | Next; Like | Golden Hour, JVKE, elapsed 0:0x and remaining 3:2x (from 0:00 of 3:29), the queue Ocean Eyes, Electric Feel, Dreams in that order, "Liked"; no Midnight City |
 | poll | choose Green Bowl (3rd); Vote | 22 %, 35 %, 17 %, 26 % (5, 8, 3+1, 6 of 23), 23 votes, own choice marked |
-| recipe | tick the first ingredient; servings 4 to 6 | 1200 g, 900 g, 3 lemons, 6 tbsp (800 x 6/4 ...), not 800 g, and "1 of 6" ticked (the tick survived the rescaling) |
+| recipe | tick the first ingredient; servings 4 to 6 | 1200 g, 900 g, 3 lemons (any arrangement), 6 tbsp (800 x 6/4 ...), not 800 g, and "1 of 6" ticked (or "5 left") |
 | run_summary | Share | 27:00 total (the splits added), 5:24 average pace (27:00 / 5), 1:15 faster (vs 28:15), "Shared"; not "slower" |
 | subscription | switch to annual billing | $120, $10 a month, save $24 and 17 %, 68 % and 60 % used, Nov 18 |
 | tracking | type delivery instructions; Save | the instructions shown back, "saved", "Stage 3 of 5", "in 3 days" (18 - 15), the tracking number |
@@ -143,6 +143,48 @@ These are lines of the references (`tool/values/reference/`) where the notation 
     texts and are read directly.)
 12. **A base `Checkbox` inside `each`** (`Checkbox#tick "{x.a*servings/4}{x.u} {x.n}" =x.done`) produced no label in the
     text dump at all, so it could not be checked; the `ListRow` version of item 3 is what the case drives.
+
+## Audit against the baselines (2026-11-15)
+
+The cases were checked against what Haiku and Sonnet actually produced
+(`tool/stream/streams/live/2026-11-15-values-{haiku,sonnet}-baseline`). Several cases tested the wording rather than
+the value, so a correct card failed. What changed:
+
+- **The value in any reasonable arrangement.** Expectations that fixed a wording the brief does not quote now accept
+  other arrangements of the same value: recipe `3 lemons` or `Lemons, 3`, `1.2 kg` for 1,200 g; run_summary `1:15` or
+  `1 min 15 s`; comparison `4 of 6`, `4/6` or `4 out of 6`; code_diff `2 kept`, `Kept: 2`, and the same for discarded;
+  image_gallery `4 of 9` or `4/9`; tracking `3 days` without the "in"; plan_progress `0:12` as well as `12 s`;
+  checkout accepts any order number of 3 or more digits (`#10482`, `KB-20417`); subscription `16.7%` as well as `17%`
+  (the brief does not ask for rounding); poll "(yours)" or "mine" as the mark; message_draft lets "Sent" and the
+  address be two texts. Wording the brief quotes is still required as written: "3 of 6" (carousel), "Liked",
+  "Shared", "Table booked", "N of 6 bookings left", "N selected", "Stage 3 of 5", "Size 9".
+- **Ambiguous readings.** order_summary's "number of items" is either the lines (5) or the units (7 after the raise);
+  either is accepted, and only a stale unit count (6) is forbidden.
+- **Steps that also drive cards built differently.** question_flow chooses the budget with `"nth": 3`, the last
+  choosing control, so a card with one OptionList per branch (four in all) is driven as well as one with three.
+  checkout's second Continue no longer also matches a first-step "Continue to shipping" (it tapped a button no longer
+  on screen). subscription drives a Monthly/Annual `Segments` or chips when there is no `ToggleRow`. flights falls back
+  to an option list, comparison to "Choose Max" or the second "Choose" button, code_diff to plain Keep/Discard buttons.
+  The block steps are `optional` and the fallbacks resolve only on cards without the block, so one form never runs
+  after the other.
+- **Text that did not compute.** Every case now forbids `${`, `{name}`, `NaN`, `null` and `undefined` on screen. Sonnet's
+  recipe showed `{servings}`, which nothing caught before.
+
+Re-scored: Sonnet 16 to 19 of 25, Haiku 8 to 12 of 25. The references still score 25 of 25.
+
+Cards the checker still cannot score correctly, all needing a change to `check.py` or the render tool:
+
+- A multi-line `InputField` (`lines:3`) keeps its text in the node `area`, not `field`, so `type` is skipped
+  (tracking, both models).
+- A base `textField` (the notation's `Input`) cannot be typed into at all (Haiku's order_summary).
+- Labels of base buttons (`Button.outline "Like"`) are not text nodes in the layout dump, so Sonnet's "Liked"
+  (shown on screen) cannot be read.
+- Sonnet's comparison shows the "4 of 6, $20 more" recommendation and then replaces it with the confirmation when a
+  plan is chosen. The brief allows that, but texts are only read after the last step.
+- A layout overflow inside a block counts as a render error: `PlaceRow`'s details overflow by 6.6 px in a card
+  `w:390` wide (Sonnet's map_list; the reference fails the same way at that width).
+- recipe's "1 of 6" passes when the `Checklist` lost its tick on rescaling (the count is kept, the row is unticked;
+  item 3 above). A tick is not text.
 
 ## Result
 
