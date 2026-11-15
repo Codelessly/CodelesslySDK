@@ -89,8 +89,6 @@ What to know:
 * A block read from a file is decoded with the catalog:
   `LayoutDocument.fromJson(json, catalog: standardCatalog)`. To use it in another session, call `addBlock` there
   too: a block belongs to the session it was added to until it is stored in the design system's folder.
-* Until `codelessly_api` 31 is on pub.dev, an app outside this repository needs a `pubspec_overrides.yaml` that
-  points `codelessly_api` at a checkout of its master branch (the tools here write one).
 * `applyStream` (below) is the other path: a model that calls the `ui_apply` tool with edit operations. It can
   change a UI already on screen node by node; the notation writes a whole card.
 

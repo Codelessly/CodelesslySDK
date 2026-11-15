@@ -14,9 +14,6 @@ flutter test test/live_test.dart     # three requests, live; writes $ON_DEMAND_R
 flutter test test/render_test.dart   # replays those answers in a CodelesslyView at 420 and 320 wide
 ```
 
-Until `codelessly_api` 31 is on pub.dev, add a `pubspec_overrides.yaml` that points `codelessly_api` at a
-checkout of its master branch (`path: ../../../CodelesslyAPI`).
-
 What it uses: `UiSession.notationInstructions(askForBlocks: true)`, `UiSession.wantedBlocks`,
 `OnDemandBlocks.designWanted()`, `UiSession.applyNotation(answer, replace: true)`; the designer's instructions
 are what `examples/showcase/tool/design_block.py brief` writes. Guide: `docs/guide/18-agent-ui.md`.
