@@ -587,6 +587,9 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   bool yieldsToPinch = false;
   final Set<int> _down = {};
 
+  /// Where each finger down is (local), for a two-finger pinch.
+  final Map<int, Offset> _fingers = {};
+
   /// The visible share (0–1) that counts as in view; null: not watched.
   double? get visibleFraction => _visibleFraction;
   double? _visibleFraction;
@@ -742,9 +745,20 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    if (event is PointerUpEvent || event is PointerCancelEvent) _down.remove(event.pointer);
+    if (event is PointerUpEvent || event is PointerCancelEvent) {
+      _down.remove(event.pointer);
+      _fingers.remove(event.pointer);
+    }
+    if (event is PointerMoveEvent && _fingers.containsKey(event.pointer)) {
+      if (_fingers.length > 1 && _has(TriggerType.pinch)) {
+        _touchPinch(event);
+      } else {
+        _fingers[event.pointer] = event.localPosition;
+      }
+    }
     if (event is PointerDownEvent) {
       _down.add(event.pointer);
+      if (event.kind == PointerDeviceKind.touch) _fingers[event.pointer] = event.localPosition;
       if (yieldsToPinch && _down.length > 1 && _pan != null) {
         // Disposing rejects its pointers in the arena; it is made again on
         // the next first finger.
@@ -787,10 +801,32 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
         'result': {'deltaX': event.scrollDelta.dx, 'deltaY': event.scrollDelta.dy, 'x': event.localPosition.dx, 'y': event.localPosition.dy},
       });
     } else if (event is PointerScaleEvent && _has(TriggerType.pinch)) {
-      _fire(TriggerType.pinch, {'result': {'scale': event.scale}});
+      // A trackpad pinch (or ctrl + wheel on the web): the scale of this
+      // step, about the pointer.
+      _fire(TriggerType.pinch, {
+        'result': {'scale': event.scale, 'x': event.localPosition.dx, 'y': event.localPosition.dy, 'pointerCount': 2},
+      });
     } else if (event is PointerHoverEvent && _has(TriggerType.hover) && _hovering) {
       // Hover fires on entry; moves over the node don't repeat it.
     }
+  }
+
+  /// Two fingers on a touch screen: each move of one fires `pinch` with the
+  /// scale of this step (how much the distance between the first two
+  /// fingers changed) about the point between them, as a trackpad pinch
+  /// does, so one reaction zooms about the pinch point for both.
+  void _touchPinch(PointerMoveEvent event) {
+    final ids = _fingers.keys.take(2).toList();
+    final before = [for (final id in ids) _fingers[id]!];
+    _fingers[event.pointer] = event.localPosition;
+    if (!ids.contains(event.pointer)) return;
+    final after = [for (final id in ids) _fingers[id]!];
+    final d0 = (before[0] - before[1]).distance, d1 = (after[0] - after[1]).distance;
+    if (d0 < 1 || d1 < 1) return;
+    final focal = (after[0] + after[1]) / 2;
+    _fire(TriggerType.pinch, {
+      'result': {'scale': d1 / d0, 'x': focal.dx, 'y': focal.dy, 'pointerCount': _fingers.length},
+    });
   }
 
   // --- mouse ---------------------------------------------------------------------------
