@@ -116,8 +116,10 @@ if (outcomes.any((o) => o.added)) {
 }
 ```
 
-A design is kept only when it is a component of the name asked for, validates against the session's catalog,
-theme and components with no errors, calls no cycle, and passes `check`. A refused design is asked for again
+A design is kept only when it is a component of the name asked for, made of node types the session has, calls
+no cycle, and passes `validate` and `check`. Give `validate` the strict validator of
+`package:codelessly_api/validate.dart` (the session's own code is the core only, so it is the host's to pass;
+the class's comment has the four lines). A refused design is asked for again
 with the problems as `notes`, up to `maxTries`. A block already being designed is not asked for twice. Designing
 one takes a strong model two to four minutes (`examples/showcase/on-demand`); composing with it afterwards
 costs nothing extra.

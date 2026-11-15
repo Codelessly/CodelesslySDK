@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
+import 'package:codelessly_api/validate.dart' show Severity, ValidateOptions, validateDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -38,7 +39,7 @@ void main() {
     final session = UiSession(designSystem: await _cards());
     addTearDown(session.dispose);
     expect(session.notationInstructions(), isNot(contains('Wanted "')));
-    expect(session.notationInstructions(askForBlocks: true), contains('Wanted "Name"'));
+    expect(session.notationInstructions(askForBlocks: true), contains('Wanted "PascalCaseName"'));
   });
 
   test('a wanted block shows from plain parts, is designed once, checked and added', () async {
@@ -53,6 +54,11 @@ void main() {
         // The first design is not a component; the second is the block.
         return asked.length == 1 ? {'schema': 3, 'roots': <String>[], 'nodes': <String, Object?>{}} : _poll();
       },
+      // The strict validator, given by the host: the session's own code is the core only.
+      validate: (json) => [
+        for (final d in validateDocument(json, options: ValidateOptions(theme: session.theme, components: session.designSystem!.components)))
+          if (d.code.severity == Severity.error) '${d.code.name} at ${d.path}: ${d.message}',
+      ],
       onAdded: (wanted, definition) => stored.add(definition.componentType!),
     );
 

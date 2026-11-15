@@ -15,6 +15,8 @@
 //   left as written;
 // * `text_no_color`: a text with no color, or a transparent one;
 // * `component_empty`: a component call that rendered nothing.
+// * `content_overflows`: a child of a row or a column that reaches past
+//   its edge (a warning: it is drawn, clipped or over its neighbor).
 //
 // The text checks are shared with the render command (tool/render), which
 // reports the same codes for a site.
@@ -85,6 +87,46 @@ List<({String code, String message})> paragraphIssues(RenderParagraph p, String 
   return out;
 }
 
+/// Reports [child] when it reaches past the right or bottom edge of
+/// [parent], a row or a column that does not scroll: the content does not
+/// fit where it was put (a block sized for a wider card, a row of fixed
+/// cells). More than a pixel, so rounding is not reported.
+void _checkFits(
+  NodeBox child,
+  NodeBox parent,
+  void Function(EditCode code, String path, String message, {String? nodeId, bool? error}) report,
+  String Function(String id, [String? field]) nodePath,
+  String Function(NodeBox b) nameOf,
+) {
+  final type = parent.node?.type;
+  if ((type != 'row' && type != 'column') || !parent.hasSize || !child.hasSize || !child.attached || !parent.attached) return;
+  // Under a scroller, or moved by a transform, reaching past is meant.
+  for (RenderObject? o = child.parent; o != null && !identical(o, parent); o = o.parent) {
+    if (o is RenderAbstractViewport || o is RenderTransform || o is RenderFittedBox || '${o.runtimeType}'.contains('Scroll')) return;
+  }
+  final double x, y;
+  try {
+    final t = child.getTransformTo(parent).getTranslation();
+    (x, y) = (t.x, t.y);
+  } catch (_) {
+    return;
+  }
+  final right = x + child.size.width - parent.size.width, bottom = y + child.size.height - parent.size.height;
+  final horizontal = right > 1 && right >= bottom;
+  final by = horizontal ? right : bottom;
+  if (by <= 1) return;
+  String px(double v) => v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
+  report(
+    const EditCode('content_overflows', ''),
+    nodePath(child.id, 'layout'),
+    '"${nameOf(child)}" reaches ${px(by)} px past the ${horizontal ? 'right' : 'bottom'} edge of "${nameOf(parent)}" '
+    '(a $type ${px(parent.size.width)} by ${px(parent.size.height)}): its content does not fit there. '
+    'Let it shrink or wrap (a flexible or filling ${horizontal ? 'width' : 'height'}, a text with maxLines), or give the $type room.',
+    nodeId: child.id,
+    error: false,
+  );
+}
+
 /// What the view rendered under [root] shows wrong of [document] (see the
 /// file's comment). [canvas]: the canvas the view shows (null: none was
 /// found); [pending]: the ids the document lists that never arrived.
@@ -126,9 +168,11 @@ List<EditDiagnostic> shownDiagnostics(RenderObject root, LayoutDocument document
       // items may lay out with no height: that is what is reported).
       final placed = shown && o.drawn;
       shown = placed && laid;
+      final parent = box;
       box = o;
       if (n != null && n.type == CanvasProps.spec.type && o.instance == null && (canvas == null || o.id == canvas)) canvasBox ??= o;
       if (n != null && placed) _checkNode(o, n, document, report, nodePath, nameOf);
+      if (n != null && shown && parent != null) _checkFits(o, parent, report, nodePath, nameOf);
       // A leaf that is not a container or a text: an icon, an image, a
       // control, a chart.
       if (shown && n != null && n.type != 'text') {

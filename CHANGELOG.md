@@ -24,6 +24,18 @@ tool's `--type`), and a host that asks "is someone typing?" by looking for a foc
   `notationInstructions({blocks})`, `applyNotation(text, {prelude})` (looks written as the design system's token
   names, so the same answer takes another theme or dark mode unchanged), and `addBlock(definition)`, which gives a
   running session a block designed after it began.
+- **Blocks designed while a session runs** (guide chapter 18, `examples/on_demand_blocks`):
+  `notationInstructions(askForBlocks: true)` has the model name a block where none fits; `UiSession.wantedBlocks`
+  holds what it asked for; `OnDemandBlocks` takes each request to a designer the host supplies, keeps a design
+  only when it is a component of that name, of node types the session has, calling no cycle, and passes the
+  validator and the check the host gives,
+  and adds it with `UiSession.addBlock`; `applyNotation(text, replace: true)` puts the card written again in
+  place of the old one. `OnDemandBlocks.mostlyPlainParts` and `shownProblems()` are a host's two other signals.
+- **`UiSession.shownDiagnostics()` reports `content_overflows`** (a warning): a child of a row or a column that
+  reaches more than a pixel past its right or bottom edge, unless it is under a scroller or a transform.
+- **`isTyping()`** is exported: whether one of the SDK's text fields has the keyboard.
+- **Render tool**: `--design-system <folder>` renders one document with a design system's blocks and theme;
+  `--dump-layout` writes the label a button or chip draws as its text.
 - **`edgeFade`** on scrolling containers and page views: content fades out at an edge it continues past, by
   scroll position, on any background.
 - **A block's children show as they arrive** in a streamed answer (a card frame filled line by line stayed empty
