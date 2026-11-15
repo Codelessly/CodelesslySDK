@@ -1,0 +1,635 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column1": {
+   "type": "column",
+   "children": [
+    "head",
+    "listView1",
+    "row4",
+    "filledButton1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 18
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 26
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "stretch"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "children": [
+    "text1",
+    "text2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 3,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "color": "ink"
+    },
+    "text": "London to Lisbon",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "This Friday · 1 adult · Direct flights",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "children": [
+    "listView1Item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${flights}"
+   }
+  },
+  "listView1Item": {
+   "type": "column",
+   "children": [
+    "column3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "children": [
+    "row1",
+    "row2",
+    "row3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     13,
+     14,
+     13
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.4,
+    "radius": 14
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "stretch"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==item.id ? theme.colors.accentTint : theme.colors.card}",
+    "decoration.strokes[0].color": "${= sel==item.id ? theme.colors.accent : theme.colors.line}",
+    "decoration.radius": "${theme.radii.tile}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "children": [
+    "text3",
+    "text4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "number",
+     "fontSize": 17,
+     "color": "ink"
+    },
+    "text": "${item.dep} → ${item.arr}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "number",
+     "fontSize": 18,
+     "color": "ink"
+    },
+    "text": "£${item.price}",
+    "maxLines": 1
+   }
+  },
+  "row2": {
+   "type": "row",
+   "children": [
+    "text5",
+    "text6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "${item.airline}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "${item.dur}",
+    "maxLines": 1
+   }
+  },
+  "row3": {
+   "type": "row",
+   "children": [
+    "badge1",
+    "badge2",
+    "spacer1",
+    "icon1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "badge1": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "tile",
+    "textColor": "inkSoft",
+    "label": "Direct"
+   }
+  },
+  "badge2": {
+   "type": "badge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "backgroundColor": "goodTint",
+    "textColor": "goodDeep"
+   },
+   "bind": {
+    "props.label": "${item.tag}",
+    "visible": "${= item.tag!=\"\"}"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 20,
+    "color": "accent"
+   },
+   "bind": {
+    "visible": "${= sel==item.id}"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "children": [
+    "text7",
+    "text8"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 18
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Total"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberLarge",
+     "fontSize": 24,
+     "color": "ink"
+    },
+    "text": "£${= flights[sel].price}",
+    "maxLines": 1
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48
+   },
+   "props": {
+    "label": "Confirm flight"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "confirm",
+       "value": "${= flights[sel].id}"
+      },
+      {
+       "type": "showToast",
+       "message": "Flight confirmed"
+      }
+     ]
+    }
+   ]
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "headMark",
+    "column2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "headMark": {
+   "type": "row",
+   "children": [
+    "headIcon"
+   ],
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "radius": 12
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.control}"
+   }
+  },
+  "headIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "flight_takeoff",
+     "style": "rounded"
+    },
+    "size": 20,
+    "color": "accent"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "flights",
+    "type": "list",
+    "value": [
+     {
+      "id": 0,
+      "dep": "07:15",
+      "arr": "09:50",
+      "airline": "TAP Air Portugal",
+      "dur": "2h 35m",
+      "price": 128,
+      "tag": "Best time"
+     },
+     {
+      "id": 1,
+      "dep": "11:40",
+      "arr": "14:20",
+      "airline": "easyJet",
+      "dur": "2h 40m",
+      "price": 84,
+      "tag": "Cheapest"
+     },
+     {
+      "id": 2,
+      "dep": "18:05",
+      "arr": "20:40",
+      "airline": "British Airways",
+      "dur": "2h 35m",
+      "price": 156,
+      "tag": ""
+     }
+    ]
+   }
+  ]
+ }
+}

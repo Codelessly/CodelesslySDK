@@ -3,6 +3,7 @@
 #
 #   tool/notation/notation.sh prompt [--design-system <folder>]
 #   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--id <canvas id>] [--out <file.json>]
+#   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
 #
 # It finds Flutter's dart, makes the SDK use the codelessly_api checked out
 # beside it (../CodelesslyAPI: the notation is newer than the published
@@ -12,8 +13,8 @@ set -e
 sdk="$(cd "$(dirname "$0")/../.." && pwd)"
 cmd="${1:-}"
 case "$cmd" in
-  prompt|expand) shift ;;
-  *) echo "usage: tool/notation/notation.sh prompt|expand [arguments] (see the head of this file)" >&2; exit 2 ;;
+  prompt|expand|apply) shift ;;
+  *) echo "usage: tool/notation/notation.sh prompt|expand|apply [arguments] (see the head of this file)" >&2; exit 2 ;;
 esac
 
 flutter_bin=""
