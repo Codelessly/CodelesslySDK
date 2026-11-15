@@ -476,7 +476,11 @@ class RenderSegmentedButton extends RenderControl implements LabeledControl {
 
   double get _radius {
     final r = node.prop(SegmentedButtonProps.borderRadius);
-    return r?.topLeft ?? _tokens.radius('control', 7);
+    if (r != null) return r.topLeft;
+    // A theme's radius for this height (`radii.controlCompact`...), else
+    // its control radius.
+    final h = hasSize ? size.height : _naturalHeight;
+    return _tokens.theme.radii[_scale(h).radiusName] ?? _tokens.radius('control', 7);
   }
 
   double get _segmentRadius => math.max(0, _radius - _inset);

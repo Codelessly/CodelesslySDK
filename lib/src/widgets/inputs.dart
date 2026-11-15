@@ -43,9 +43,10 @@ void _signature(NodeBuilder b, Node node, List<RenderBox> chain) {
     fontFamily: b.tree.textDefault?.fontFamily ?? theme.fontFamily,
     color: api.Color(roles.onSurface.toARGB32()),
   ).merge(node.behaviors.defaultTextStyle);
+  final shaped = withSignatureCorner(node, theme);
   chain.add(b.obtain<RenderSignaturePad>('signature', RenderSignaturePad.new)
     ..configure(
-      withThemeColors(node, roles),
+      withThemeColors(shaped, roles),
       textDefault: textDefault,
       onChanged: (value) => fireTrigger(b, 'changed', event: {'value': value}),
     ));

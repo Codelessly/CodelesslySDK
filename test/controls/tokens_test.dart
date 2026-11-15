@@ -33,6 +33,22 @@ void main() {
     expect(t.radiusFor(t.scaleFor(28)), 7);
     expect(ControlTokens.resolve(ThemeTokens.fromJson({'buttonRadius': 12}), dark: false).radiusFor(t.scaleFor(24)), 12);
   });
+
+  test('a theme may give each step its own corner, so a 28-high button is not a pill where a 44-high one is round', () {
+    final cards = ControlTokens.resolve(
+        ThemeTokens.fromJson({
+          'radii': {'inner': 9, 'control': 12, 'controlCompact': 8, 'controlSmall': 9, 'controlMedium': 10, 'controlLarge': 12},
+        }),
+        dark: false);
+    expect([for (final h in const <double>[24, 28, 32, 36, 44]) cards.radiusFor(cards.scaleFor(h))], [9, 8, 9, 10, 12]);
+    // A step it does not name takes the kind's radius; buttonRadius still wins.
+    expect(ControlTokens.resolve(ThemeTokens.fromJson({'radii': {'control': 12, 'controlLarge': 14}}), dark: false).radiusFor(cards.scaleFor(28)), 12);
+    expect(
+        ControlTokens.resolve(ThemeTokens.fromJson({'buttonRadius': 4, 'radii': {'controlCompact': 8}}), dark: false).radiusFor(cards.scaleFor(28)), 4);
+    // SSUI names none: 5 at xs, 7 elsewhere, as before.
+    final ssui = ControlTokens.resolve(ThemeTokens.none, dark: false);
+    expect([for (final h in const <double>[24, 28, 32, 36, 44]) ssui.radiusFor(ssui.scaleFor(h))], [5, 7, 7, 7, 7]);
+  });
   test('a theme with its own surface: SSUI\'s neutral names are made from it, so an unstyled field is not SSUI white on navy (test 4)', () {
     final navy = ThemeTokens.fromJson({
       'mode': 'dark', 'primary': 'lime', 'onPrimary': 'navy', 'surface': 'navy', 'onSurface': 'paper',

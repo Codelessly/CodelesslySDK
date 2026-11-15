@@ -96,8 +96,10 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
     final body = tokens.fontFamily == null ? null : TextStyle(fontFamily: tokens.fontFamily);
     return FeedbackTheme(
       bodyStyle: body,
-      buttonStyle: body,
-      titleStyle: tokens.titleFontFamily == null ? body : TextStyle(fontFamily: tokens.titleFontFamily),
+      // Titles and button labels in the theme's font keep their weight (a
+      // style given here replaces the resolved default's semibold).
+      buttonStyle: body?.copyWith(fontWeight: FontWeight.w600),
+      titleStyle: tokens.titleFontFamily == null ? body?.copyWith(fontWeight: FontWeight.w600) : TextStyle(fontFamily: tokens.titleFontFamily, fontWeight: FontWeight.w600),
       primary: color(tokens.primary),
       onPrimary: color(tokens.onPrimary),
       surface: color(tokens.surface),
@@ -105,8 +107,14 @@ class FeedbackTheme extends ThemeExtension<FeedbackTheme> {
       error: color(tokens.error),
       success: color(tokens.success),
       warning: color(tokens.warning),
-      radius: tokens.radius,
-      buttonRadius: tokens.buttonRadius,
+      // A theme's look for what floats (`radii.popup`, `shadows.popup`) and
+      // its large control's corner when it gives no one buttonRadius.
+      radius: tokens.radii['popup'] ?? tokens.radius,
+      buttonRadius: tokens.buttonRadius ?? tokens.radii['controlLarge'],
+      shadows: switch (tokens.shadows['popup']) {
+        final List<api.Effect> e => [for (final s in e) if (s.visible) boxShadow(s)],
+        _ => null,
+      },
     );
   }
 

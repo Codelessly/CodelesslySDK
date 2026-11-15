@@ -1,0 +1,48 @@
+state following=false
+state tab="Posts"
+Column scroll gap:16 pad:16
+  Card gap:12 center
+    Box w:72 h:72 radius:36 fill:#FFE5E7EB center middle
+      Text "AL" size:24 weight:700
+    Column gap:2 center
+      Text.title "Ada Lovelace"
+      Text.muted "Mathematician · London"
+    Row gap:6 center
+      Badge.primary "Pro"
+      Badge "Since 2019"
+    Row gap:8
+      Button following ? "Following" : "Follow" w:fill -> following=!following
+      Button.outline "Message" w:fill -> emit message
+  Grid cols:3 gap:8
+    Card gap:2 center
+      Text.strong "128"
+      Text.caption "Posts"
+    Card gap:2 center
+      Text.strong "4.2k"
+      Text.caption "Followers"
+    Card gap:2 center
+      Text.strong "310"
+      Text.caption "Following"
+  Card gap:8
+    Text.heading "About"
+    Text "Writes about analytical engines, poetry in numbers and the occasional bird. Building notes for the first published algorithm."
+  Card gap:0
+    Text.heading "Details"
+    ListTile "Email" "ada@example.com"
+    Divider
+    ListTile "Website" "ada.example.com"
+    Divider
+    ListTile "Joined" "March 2019"
+  SegmentedButton =tab items:["Posts","Replies","Likes"]
+  Card gap:6
+    Text.strong "Notes on the engine"
+    Text.muted "The engine weaves algebraic patterns just as the loom weaves flowers and leaves."
+    Row gap:12
+      Text.caption "2 days ago"
+      Text.caption "48 likes"
+  Card gap:6
+    Text.strong "On Bernoulli numbers"
+    Text.muted "A worked method, step by step, for the engine to compute them."
+    Row gap:12
+      Text.caption "1 week ago"
+      Text.caption "112 likes"

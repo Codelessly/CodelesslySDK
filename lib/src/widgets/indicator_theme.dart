@@ -7,6 +7,7 @@ import 'package:codelessly_api/core.dart'
         BarChartProps,
         BarcodeProps,
         ChartProps,
+        ChartSeries,
         GaugeMeterProps,
         LineChartProps,
         Node,
@@ -92,6 +93,35 @@ final Map<String, List<(api.PropDef<api.Color?>, _Role)>> themedIndicatorColors 
     (SignatureProps.placeholderColor, _muted),
   ],
 };
+
+/// A series chart's series that set no color of their own, in the theme's
+/// series colors when it names them (`colors.chart1`, `chart2`...: one per
+/// series, in turn), else as they are (the series' own default).
+Node withChartPalette(Node n, api.ThemeTokens theme) {
+  if (n.type != ChartProps.spec.type || theme.colors['chart1'] == null) return n;
+  final palette = [for (var i = 1; theme.colors['chart$i'] != null; i++) theme.colors['chart$i']!];
+  final series = n.prop(ChartProps.series);
+  var changed = false, i = 0;
+  final out = [
+    for (final s in series)
+      if (s.toJson() case final Map<String, Object?> j when !j.containsKey('color'))
+        () {
+          changed = true;
+          return ChartSeries.fromJson({...j, 'color': palette[i++ % palette.length].toJson()}) ?? s;
+        }()
+      else
+        s,
+  ];
+  return changed ? n.withProp(ChartProps.series, out) : n;
+}
+
+/// A signature pad with no corner of its own: the theme's large control
+/// corner when it names one (`radii.controlLarge`), else the pad's own 4.
+Node withSignatureCorner(Node n, api.ThemeTokens theme) {
+  final corner = theme.radii['controlLarge'];
+  if (corner == null || n.type != SignatureProps.spec.type || n.props.has(SignatureProps.borderRadius)) return n;
+  return n.withProp(SignatureProps.borderRadius, api.BorderRadius.circular(corner));
+}
 
 /// [n] with every themed color it leaves unset set from [roles].
 Node withThemeColors(Node n, SurfaceRoles scheme) {

@@ -1,0 +1,36 @@
+state streak=4
+state weeklyGoal=5
+state sessionsThisWeek=3
+state today={"name":"Intervals","rounds":8,"work":40,"rest":20,"minutes":8}
+state weeks=[{"label":"W39","jumps":2100},{"label":"W40","jumps":2650},{"label":"W41","jumps":2400},{"label":"W42","jumps":3180}]
+state sessions=[{"date":"Fri 13 Nov","name":"Intervals","minutes":8,"jumps":912,"best":148},{"date":"Wed 11 Nov","name":"Endurance","minutes":12,"jumps":1304,"best":210},{"date":"Mon 9 Nov","name":"Footwork","minutes":6,"jumps":640,"best":96},{"date":"Sat 7 Nov","name":"Intervals","minutes":8,"jumps":880,"best":131}]
+state streak=4
+state weeklyGoal=5
+state sessionsThisWeek=3
+state today={"name":"Intervals","rounds":8,"work":40,"rest":20,"minutes":8}
+state weeks=[{"label":"W39","jumps":2100},{"label":"W40","jumps":2650},{"label":"W41","jumps":2400},{"label":"W42","jumps":3180}]
+state sessions=[{"date":"Fri 13 Nov","name":"Intervals","minutes":8,"jumps":912,"best":148},{"date":"Wed 11 Nov","name":"Endurance","minutes":12,"jumps":1304,"best":210},{"date":"Mon 9 Nov","name":"Footwork","minutes":6,"jumps":640,"best":96},{"date":"Sat 7 Nov","name":"Intervals","minutes":8,"jumps":880,"best":131}]
+Column scroll gap:16 pad:16
+  Text.pageTitle "Today's jump"
+  Text.bodySecondary "Short and steady. You're building a habit."
+  Card gap:12
+    Row gap:8 middle
+      Icon "timer"
+      Text.sectionTitle "{today.name}: {today.minutes} minutes"
+    Text.body "Jump hard for {today.work} seconds, then rest for {today.rest} seconds. Repeat {today.rounds} times."
+    Button "Start today's session" -> emit start_session
+  Card gap:8
+    Row gap:8 middle
+      Icon "local_fire_department"
+      Text.sectionTitle "{streak} sessions in a row"
+    Text.bodySecondary "Nice work. Keep it going with one short session today."
+  Card gap:8
+    Text.sectionTitle "This week"
+    Text.body "{sessionsThisWeek} of {weeklyGoal} sessions done"
+    Progress =sessionsThisWeek/weeklyGoal
+    Text.caption "Just {weeklyGoal-sessionsThisWeek} more to reach your goal."
+  Card gap:8
+    Text.sectionTitle "Your jumps each week"
+    BarChart values:=map(weeks,w=>w.jumps) labels:=map(weeks,w=>w.label)
+    Text.caption "You jumped more this week than last. Great progress."
+  Button.outline "See my past sessions" -> emit open_history

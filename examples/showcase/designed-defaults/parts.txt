@@ -1,0 +1,135 @@
+state email=""
+state notify=true
+state agree=true
+state volume=40
+state size="M"
+state plan="Pro"
+state pick="Week"
+state tab="a"
+Column gap:16 pad:16
+  Text.caption "TEXT"
+  Card gap:6
+    Text.title "Text.title"
+    Text.heading "Text.heading"
+    Text.strong "Text.strong"
+    Text "Text (body)"
+    Text.muted "Text.muted"
+    Text.small "Text.small"
+    Text.caption "Text.caption"
+    Text.danger "Text.danger"
+    Text.success "Text.success"
+    Text.mono "Text.mono  let x = 42"
+    Text.pageTitle "Text.pageTitle"
+    Text.heading1 "Text.heading1"
+    Text.heading2 "Text.heading2"
+    Text.heading3 "Text.heading3"
+    Text.sectionTitle "Text.sectionTitle"
+    Text.panelTitle "Text.panelTitle"
+    Text.bodySecondary "Text.bodySecondary"
+    Text.fieldLabel "Text.fieldLabel"
+  Text.caption "BUTTONS"
+  Card gap:8
+    Button "Button (primary)"
+    Row gap:8
+      Button.secondary "Secondary"
+      Button.tertiary "Tertiary"
+      Button.outline "Outline"
+    Row gap:8
+      Button.ghost "Ghost"
+      Button.elevated "Elevated"
+      Button.destructive "Destructive"
+    Row gap:8
+      IconButton "favorite"
+      IconButton "share"
+      Button.outline "-"
+      Text.strong "2"
+      Button.outline "+"
+  Text.caption "BUTTONS BY SIZE (h 24, 28, 32, 36, 44)"
+  Card gap:8
+    Row gap:8
+      Button "xs" h:24
+      Button "28" h:28
+      Button "32" h:32
+      Button "36" h:36
+      Button "44" h:44
+    Row gap:8
+      Button.outline "xs" h:24
+      Button.outline "28" h:28
+      Button.outline "32" h:32
+      Button.outline "36" h:36
+      Button.outline "44" h:44
+  Text.caption "BADGES AND CHIPS"
+  Card gap:10
+    Row gap:6
+      Badge "Neutral"
+      Badge.primary "Primary"
+      Badge.info "Info"
+      Badge.success "Success"
+    Row gap:6
+      Badge.warning "Warning"
+      Badge.error "Error"
+      Badge.danger "Danger"
+    Row gap:8
+      ChoiceChip "Day" selected:=pick=="Day" -> pick="Day"
+      ChoiceChip "Week" selected:=pick=="Week" -> pick="Week"
+      ChoiceChip "Month" selected:=pick=="Month" -> pick="Month"
+    Row gap:8
+      Chip "Chip"
+      FilterChip "Filter" selected:true
+      FilterChip "Off"
+  Text.caption "FORM CONTROLS"
+  Card gap:12
+    Input "Email" "you@example.com" =email
+    Select =size items:["S","M","L"]
+    SegmentedButton =plan items:["Free","Pro","Team"]
+    Toggle "Notifications" =notify
+    Checkbox "I agree to the terms" =agree
+    Radio "Option A" value:"a" =tab
+    Slider =volume min:0 max:100
+    Progress 0.62
+    DatePicker
+  Text.caption "LISTS AND DIVIDERS"
+  Card gap:0
+    ListTile "Account" "ada@example.com"
+    Divider
+    ListTile "Billing" "Visa ending 4242"
+    Divider
+    Row between pad:[0,10,0,10]
+      Text "Plain row"
+      Text.strong "$24"
+  List gap:8
+    Box fill:#FFF5F5F5 radius:8 pad:12
+      Row between
+        Text.muted "Folder"
+        Text.strong "Archive"
+    Box fill:#FFF5F5F5 radius:8 pad:12
+      Row between
+        Text.muted "Files"
+        Text.strong "214"
+  Accordion "Accordion"
+    Text "Inside the accordion"
+  Text.caption "GRID TILES"
+  Grid cols:3 gap:8
+    Card
+      Text.caption "Revenue"
+      Text.title "$48k"
+    Card
+      Text.caption "Users"
+      Text.title "2,140"
+    Card
+      Text.caption "Churn"
+      Text.title "1.2%"
+  Text.caption "CHARTS"
+  Card gap:8
+    Text.heading "BarChart"
+    BarChart values:[3,5,4,7,6] labels:["Mon","Tue","Wed","Thu","Fri"]
+    Text.heading "LineChart"
+    LineChart values:[10,12,11,14,13,17]
+  Text.caption "ICONS, IMAGE, PROGRESS"
+  Card gap:8
+    Row gap:12
+      Icon "check_circle"
+      Icon "warning"
+      Icon "star"
+      CircularProgressIndicator
+    Image "https://example.invalid/none.png" h:80

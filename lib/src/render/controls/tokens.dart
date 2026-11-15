@@ -46,6 +46,11 @@ class ControlScale {
     ControlScale('large', 44, 14, 15, 18, 8, 'control'),
   ];
 
+  /// The theme radius of this step alone, when the theme has one
+  /// (`controlXs`, `controlCompact`, `controlSmall`, `controlMedium`,
+  /// `controlLarge`), before [radiusKey].
+  String get radiusName => 'control${name[0].toUpperCase()}${name.substring(1)}';
+
   /// The default step (28).
   static const compact = ControlScale('compact', 28, 10, 12, 14, 6, 'control');
 
@@ -232,9 +237,12 @@ class ControlTokens {
   }
 
   /// The corner radius of a control at [scale]: the document's
-  /// `buttonRadius`, else the `radii` of the step (SSUI: 5 at xs, else 7).
+  /// `buttonRadius`, else the theme's radius for that step by name
+  /// (`radii.controlCompact`, `controlLarge`...: a radius that fits the
+  /// control's height), else the `radii` of the step's kind (SSUI: 5 at xs,
+  /// else 7).
   double radiusFor(ControlScale scale) =>
-      buttonRadius ?? theme.radii[scale.radiusKey] ?? (scale.radiusKey == 'inner' ? 5 : 7);
+      buttonRadius ?? theme.radii[scale.radiusName] ?? theme.radii[scale.radiusKey] ?? (scale.radiusKey == 'inner' ? 5 : 7);
 
   /// The shadows named [name] in the theme (`level3`...), as Flutter's.
   List<BoxShadow> shadows(String name) => [for (final e in theme.shadows[name] ?? const <api.Effect>[]) if (e.visible) boxShadow(e)];

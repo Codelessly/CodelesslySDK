@@ -71,8 +71,8 @@ RenderBox _indicatorFit(NodeBuilder b, Node n) {
 /// The box is drawn again when the theme changes (its mode).
 Node _themed(NodeBuilder b, Node n) {
   b.tree.dependOnTheme(b);
-  return withThemeColors(
-      n, surfaceRoles(b.tree.components?.theme ?? api.ThemeTokens.none, surface: backdropOf(b.source.node, b.source.parentOf, b.id)));
+  final theme = b.tree.components?.theme ?? api.ThemeTokens.none;
+  return withThemeColors(withChartPalette(n, theme), surfaceRoles(theme, surface: backdropOf(b.source.node, b.source.parentOf, b.id)));
 }
 
 void _painted(NodeBuilder b, Node n, List<RenderBox> chain, CustomPainter painter) {

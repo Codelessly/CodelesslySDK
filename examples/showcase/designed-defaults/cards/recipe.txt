@@ -1,0 +1,34 @@
+Card w:390 gap:12
+  state servings=4
+  state ingredients=[{"name":"Chicken thighs, bone-in","qty":8,"unit":"pieces","per":2,"done":false},{"name":"Baby potatoes","qty":800,"unit":"g","per":200,"done":false},{"name":"Lemons","qty":2,"unit":"","per":0.5,"done":false},{"name":"Garlic cloves","qty":6,"unit":"","per":1.5,"done":false},{"name":"Olive oil","qty":4,"unit":"tbsp","per":1,"done":false},{"name":"Fresh thyme","qty":8,"unit":"sprigs","per":2,"done":false}]
+  Text.heading "Lemon Chicken Traybake"
+  Row gap:8 middle
+    Icon "schedule"
+    Text.muted "55 min"
+    Spacer
+    Badge.success "Easy"
+  Divider
+  Row between middle
+    Text.strong "Servings"
+    Row gap:8 middle
+      IconButton "remove" -> servings=max(1,servings-1)
+      Text.strong "{servings}"
+      IconButton "add" -> servings=min(12,servings+1)
+  Text.sectionTitle "Ingredients"
+  each ing in ingredients
+    Checkbox "{round(ing.per*servings,1)} {ing.unit} {ing.name}" =ing.done
+  Divider
+  Text.sectionTitle "Steps"
+  Row gap:8
+    Badge.primary "1"
+    Text "Heat the oven to 220°C (200°C fan)."
+  Row gap:8
+    Badge.primary "2"
+    Text "Toss potatoes, garlic, thyme, oil and lemon wedges on a tray; season well."
+  Row gap:8
+    Badge.primary "3"
+    Text "Nestle in the chicken skin-side up and roast for 40 minutes."
+  Row gap:8
+    Badge.primary "4"
+    Text "Rest for 5 minutes, then squeeze over roasted lemon and serve."
+  Button "Start cooking" -> emit startCooking servings; toast "Happy cooking!"
