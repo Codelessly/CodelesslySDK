@@ -1,0 +1,18 @@
+ChatCard "To-do" "{left} of {tasks.length} left" icon:checklist
+  state tasks = [{"title":"Buy milk","done":true},{"title":"Call the bank","done":false},{"title":"Book the dentist","done":false}]
+  state draft = ""
+  derived left = tasks.count(t => !t.done)
+  derived doneCount = tasks.length - left
+  Row gap:8 bottom
+    InputField "New task" "What needs doing?" value:{draft} grow onChanged:{draft = value}
+    Button "Add" enabled:{draft.trim() != ""} onPressed:{if (draft.trim() != "") { tasks.add({"title": draft.trim(), "done": false}); draft = "" }}
+  for task in tasks
+    Row gap:8 middle
+      Checkbox value:{task.done} onChanged:{task.done = value}
+      Text "{task.title}" grow color:{task.done ? "#FF9AA0A6" : "#FF1F1F1F"}
+      IconButton "delete" onPressed:{tasks.remove(task)}
+  Divider
+  Row between middle
+    Text.meta "{left} of {tasks.length} left"
+    if doneCount > 0
+      Button.ghost "Clear completed" onPressed:{tasks = tasks.filter(t => !t.done)}

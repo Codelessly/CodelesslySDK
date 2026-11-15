@@ -1,0 +1,23 @@
+ChatCard "Invoices" "{matches.length} of {invoices.length} shown" icon:request_quote
+  state invoices = [{"customer":"Acme Co","amount":1250,"status":"Paid"},{"customer":"Birch & Sons","amount":480,"status":"Due"},{"customer":"Cobalt Labs","amount":2300,"status":"Overdue"},{"customer":"Delta Foods","amount":760,"status":"Paid"},{"customer":"Evergreen Ltd","amount":1890,"status":"Due"},{"customer":"Fable Studio","amount":320,"status":"Overdue"},{"customer":"Granite Inc","amount":1475,"status":"Paid"},{"customer":"Harbor Goods","amount":905,"status":"Due"}]
+  state query = ""
+  state status = "All"
+  state sorted = false
+  state sortDesc = false
+  derived matches = invoices.filter(i => i.customer.toLowerCase().contains(query.toLowerCase()) && (status == "All" || i.status == status))
+  derived shown = sorted ? matches.sortBy(i => i.amount, sortDesc) : matches
+  derived sum = matches.sum(i => i.amount)
+  InputField "Search" "Customer name" value:{query} icon:search onChanged:{query = value}
+  ChoiceChips value:{status} options:["All","Paid","Due","Overdue"] columns:4 onChanged:{status = value}
+  Row middle pad:[12,8,12,8]
+    Text.fieldLabel "Customer" grow
+    Text.fieldLabel "Status" w:90
+    Button.ghost "Amount {sorted ? (sortDesc ? '↓' : '↑') : ''}" onPressed:{if (!sorted) { sorted = true; sortDesc = false } else { sortDesc = !sortDesc }}
+  for inv in shown
+    TableRow cells:["{inv.customer}","${inv.amount}"] badge:{inv.status} widths:[2,1]
+  if matches.length == 0
+    Text.muted "No invoices match."
+  Divider
+  Row between
+    Text.meta "{matches.length} matching"
+    Text.strong "${sum.toFixed(2)}"

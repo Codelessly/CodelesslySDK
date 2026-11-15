@@ -1,0 +1,18 @@
+ChatCard "Split the bill" "Tip and share per person" icon:receipt_long
+  state bill = "84.00"
+  state tip = "15%"
+  state people = 2
+  derived amount = parseFloat(bill)
+  derived valid = bill.trim() != "" && !isNaN(amount)
+  derived tipAmount = amount * parseFloat(tip) / 100
+  derived total = amount + tipAmount
+  derived each = total / people
+  InputField "Bill" "0.00" value:{bill} keyboard:number icon:attach_money onChanged:{bill = value}
+  SectionLabel "Tip"
+  ChoiceChips value:{tip} options:["10%","15%","20%","25%"] columns:4 onChanged:{tip = value}
+  Counter "People" "Splitting the total" value:{people} min:1 max:8 step:1 icon:group onChanged:{people = value}
+  if valid
+    Details rows:[["Tip ({tip})","${tipAmount.toFixed(2)}"],["Total","${total.toFixed(2)}"]]
+    TotalBar "Each person pays" "{people} {people == 1 ? 'person' : 'people'}" amount:{each}
+  else
+    Callout "Enter the bill" "Type the bill as a number, like 84.00, to see the split." tone:warning icon:info
