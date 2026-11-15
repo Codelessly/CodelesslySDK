@@ -1,0 +1,105 @@
+{"meta":{"ui":"reservation","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"ChatCard \"Book a table\" \"Trattoria Verde\" icon:\"restaurant\" status:\"Open\" tone:accent w:390\n  state day=\"Sat 14\"\n  state party=2\n  state time=\"\"\n  state done=false\n  if !done\n    SectionLabel \"Day\" \"Next 7 days\"\n    DayPicker =day days:[\"Sat 14\",\"Sun 15\",\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"] -> time=\"\"\n    Counter \"Party size\" \"Guests\" =party min:1 max:8 -> time=\"\"\n    SectionLabel \"Time\" \"{day} · {party} guests\"\n    ChoiceChips =time options:[\"17:30\",\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\",\"21:00\"] columns:4 disabled:=party>6?[\"17:30\",\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\",\"21:00\"]:(party>4?[\"18:00\",\"19:00\",\"19:30\",\"20:30\",\"21:00\"]:(contains([\"Sun 15\",\"Tue 17\",\"Fri 20\"],day)?[\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\"]:[\"18:00\",\"19:30\",\"20:30\"]))\n    if party>6\n      Callout \"No tables online\" \"Parties over 6 need to call the restaurant.\" tone:warn\n    TotalBar \"Your table\" \"{day} · {party} guests\" amount:=time==\"\"?\"Pick a time\":time cta:\"Confirm\" enabled:=time!=\"\" -> done=true\n  if done\n    Receipt \"Table booked\" \"{day} at {time} for {party} guests.\" code:\"TV-4821\" codeLabel:\"Booking number\" tone:good icon:\"check\"","usage":{"input_tokens":7816,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":565,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":842,"totalMs":4304}}
+{"tMs":842,"delta":"ChatCard \""}
+{"tMs":1155,"delta":"Book a table\" \"Tr"}
+{"tMs":1155,"delta":"att"}
+{"tMs":1155,"delta":"oria Ver"}
+{"tMs":1155,"delta":"de"}
+{"tMs":1155,"delta":"\" icon:\"rest"}
+{"tMs":1155,"delta":"aurant\" status:\""}
+{"tMs":1155,"delta":"Open\" tone:acc"}
+{"tMs":1155,"delta":"ent w:390\n  state"}
+{"tMs":1155,"delta":" day=\""}
+{"tMs":1165,"delta":"Sat 14\"\n  "}
+{"tMs":1198,"delta":"state party=2"}
+{"tMs":1233,"delta":"\n  state time=\"\"\n  "}
+{"tMs":1485,"delta":"state done"}
+{"tMs":1485,"delta":"=false\n  if"}
+{"tMs":1485,"delta":" !"}
+{"tMs":1485,"delta":"done\n    SectionLab"}
+{"tMs":1485,"delta":"el \"Day\""}
+{"tMs":1485,"delta":" \"Next "}
+{"tMs":1485,"delta":"7 days\"\n    Day"}
+{"tMs":1499,"delta":"Picker =day days:[\""}
+{"tMs":1533,"delta":"Sat 14\",\"S"}
+{"tMs":1568,"delta":"un 15\",\"Mon "}
+{"tMs":1601,"delta":"16\",\"Tue 17\",\""}
+{"tMs":1635,"delta":"Wed 18\",\"Th"}
+{"tMs":1811,"delta":"u 19\",\"Fri "}
+{"tMs":1811,"delta":"20\"] -> time=\"\""}
+{"tMs":1811,"delta":"\n    Counter \"Party"}
+{"tMs":1811,"delta":" size\" \""}
+{"tMs":1811,"delta":"Guests\" =party min:"}
+{"tMs":1837,"delta":"1 max:8 -"}
+{"tMs":1872,"delta":"> time=\"\"\n    S"}
+{"tMs":1904,"delta":"ectionLabel \"Time"}
+{"tMs":1937,"delta":"\" \"{"}
+{"tMs":1970,"delta":"day"}
+{"tMs":2002,"delta":"}"}
+{"tMs":2035,"delta":" · {"}
+{"tMs":2137,"delta":"party} guests\"\n    "}
+{"tMs":2137,"delta":"ChoiceChips =time"}
+{"tMs":2137,"delta":" options:[\"17"}
+{"tMs":2168,"delta":":30"}
+{"tMs":2202,"delta":"\",\"18:00\",\"18:30"}
+{"tMs":2236,"delta":"\",\"19:00\",\"19:30"}
+{"tMs":2269,"delta":"\",\"20:00\",\"20:30"}
+{"tMs":2302,"delta":"\",\"21:00\""}
+{"tMs":2335,"delta":"] columns:4"}
+{"tMs":2369,"delta":" disabled:=party"}
+{"tMs":2403,"delta":">6?[\"17:30\",\""}
+{"tMs":2436,"delta":"18:00\",\"18:30\",\""}
+{"tMs":2470,"delta":"19:00\",\"19:30\",\""}
+{"tMs":2504,"delta":"20:00\",\"20"}
+{"tMs":2540,"delta":":30\",\"21:00\"]"}
+{"tMs":2570,"delta":":("}
+{"tMs":2603,"delta":"party>4?[\"18:00"}
+{"tMs":2638,"delta":"\",\"19:00\",\"19:30"}
+{"tMs":2670,"delta":"\",\"20:30"}
+{"tMs":2704,"delta":"\",\"21:00\"]:("}
+{"tMs":2737,"delta":"cont"}
+{"tMs":2769,"delta":"ains([\""}
+{"tMs":2803,"delta":"Sun"}
+{"tMs":2836,"delta":" 15\",\"T"}
+{"tMs":2870,"delta":"ue 17\",\"F"}
+{"tMs":2904,"delta":"ri 20\"],day)?"}
+{"tMs":2940,"delta":"[\"18"}
+{"tMs":2968,"delta":":30"}
+{"tMs":3003,"delta":"\",\"19:00\",\"19:30"}
+{"tMs":3035,"delta":"\",\"20:00\",\"20"}
+{"tMs":3069,"delta":":30\"]:[\"18"}
+{"tMs":3102,"delta":":00\",\"19"}
+{"tMs":3135,"delta":":30\",\"20:30"}
+{"tMs":3169,"delta":"\"]))\n    if"}
+{"tMs":3202,"delta":" party>6\n      Callout"}
+{"tMs":3235,"delta":" \"No"}
+{"tMs":3268,"delta":" t"}
+{"tMs":3301,"delta":"ables online"}
+{"tMs":3334,"delta":"\" \"Parties over 6"}
+{"tMs":3368,"delta":" need to"}
+{"tMs":3401,"delta":" call the"}
+{"tMs":3443,"delta":" restaurant.\" tone:"}
+{"tMs":3468,"delta":"warn\n    TotalB"}
+{"tMs":3501,"delta":"ar \"Your"}
+{"tMs":3534,"delta":" table"}
+{"tMs":3576,"delta":"\" \"{day} · {party"}
+{"tMs":3601,"delta":"} guests\" amount:="}
+{"tMs":3636,"delta":"time=="}
+{"tMs":3668,"delta":"\"\"?\""}
+{"tMs":3701,"delta":"P"}
+{"tMs":3734,"delta":"ick a time\":time c"}
+{"tMs":3767,"delta":"ta:\"Confirm\""}
+{"tMs":3801,"delta":" enabled:=time!"}
+{"tMs":3834,"delta":"=\"\" -> done=true"}
+{"tMs":3868,"delta":"\n  if done\n    Receip"}
+{"tMs":3901,"delta":"t \"Table"}
+{"tMs":3934,"delta":" boo"}
+{"tMs":3967,"delta":"ked\" \"{"}
+{"tMs":4004,"delta":"day} at"}
+{"tMs":4034,"delta":" {time}"}
+{"tMs":4077,"delta":" for {party} guests.\" code"}
+{"tMs":4101,"delta":":\"TV"}
+{"tMs":4134,"delta":"-4"}
+{"tMs":4167,"delta":"821\" codeLabel:"}
+{"tMs":4201,"delta":"\"Booking number\" tone"}
+{"tMs":4234,"delta":":good ic"}
+{"tMs":4277,"delta":"on:\"check\""}

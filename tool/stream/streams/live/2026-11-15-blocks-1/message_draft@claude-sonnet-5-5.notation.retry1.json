@@ -1,0 +1,318 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Email to landlord",
+    "subtitle": "Draft, edit before sending",
+    "icon": "mail"
+   },
+   "bind": {
+    "props.status": "${= sent?\"Sent\":\"Draft\"}",
+    "props.tone": "${= sent?\"good\":\"accent\"}"
+   },
+   "children": [
+    "Receipt1",
+    "SectionLabel1",
+    "Segments1",
+    "InputField1",
+    "InputField2",
+    "InputField3",
+    "row1"
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Email sent",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.message": "Your message to ${to} is on its way.",
+    "visible": "${= sent}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Tone"
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "tone",
+    "options": [
+     "Polite",
+     "Firm"
+    ]
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "body",
+       "value": "${= result==\"Polite\"?\"Dear Landlord,\\n\\nI hope you are well. The heating in my flat stopped working a few days ago, and the apartment is getting quite cold. Could you please arrange for someone to take a look at it when convenient?\\n\\nI am happy to provide access at any time that suits. Thank you very much for your help.\\n\\nKind regards\":\"Dear Landlord,\\n\\nThe heating in my flat has been broken for several days. As the property is not currently habitable in this cold, I require a repair to be arranged within 48 hours.\\n\\nPlease confirm the date of the engineer's visit by reply. If I do not hear from you, I will have to consider my options under my tenancy agreement.\\n\\nRegards\"}"
+      }
+     ]
+    }
+   ]
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "To",
+    "placeholder": "name@example.com",
+    "value": "to",
+    "keyboard": "emailAddress"
+   },
+   "bind": {
+    "props.error": "${= trim(to)==\"\"?\"Recipient required\":\"\"}",
+    "visible": "${= !sent}"
+   }
+  },
+  "InputField2": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Subject",
+    "placeholder": "Subject",
+    "value": "subject"
+   },
+   "bind": {
+    "props.error": "${= trim(subject)==\"\"?\"Subject required\":\"\"}",
+    "visible": "${= !sent}"
+   }
+  },
+  "InputField3": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Message",
+    "placeholder": "Write your message",
+    "value": "body",
+    "lines": 9
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= !sent}"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Discard",
+    "tone": "quiet",
+    "icon": "delete"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "to",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "subject",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "body",
+       "value": ""
+      },
+      {
+       "type": "showToast",
+       "message": "Draft discarded"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Send",
+    "tone": "primary",
+    "icon": "send"
+   },
+   "bind": {
+    "props.enabled": "${= trim(to)!=\"\"&&trim(subject)!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sent",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "send"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "tone",
+    "type": "text",
+    "value": "Polite"
+   },
+   {
+    "name": "to",
+    "type": "text",
+    "value": "landlord@example.com"
+   },
+   {
+    "name": "subject",
+    "type": "text",
+    "value": "Heating not working in my flat"
+   },
+   {
+    "name": "body",
+    "type": "text",
+    "value": "Dear Landlord,\n\nI hope you are well. The heating in my flat stopped working a few days ago, and the apartment is getting quite cold. Could you please arrange for someone to take a look at it when convenient?\n\nI am happy to provide access at any time that suits. Thank you very much for your help.\n\nKind regards"
+   }
+  ]
+ }
+}

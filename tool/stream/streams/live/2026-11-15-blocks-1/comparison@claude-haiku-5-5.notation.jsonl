@@ -1,0 +1,50 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"ComparisonTable names:[\"Plan A\",\"Plan B\"] prices:[\"$35/mo\",\"$42/mo\"] rows:[[\"Data\",\"30 GB\",\"Unlimited\",2],[\"Calls\",\"Unlimited\",\"Unlimited\",0],[\"Roaming\",\"$5/day\",\"Included\",2],[\"Contract\",\"24 months\",\"None\",2],[\"Extras\",\"Streaming perks\",\"Hotspot 15 GB\",2]] pick:\"Plan B\" pickLabel:\"Recommended\" cta:\"Choose\" -> emit choosePlan\n  Text.caption \"Recommended: Plan B. Its unlimited data, included roaming and no contract outweigh the $7 monthly difference for most travellers.\"","usage":{"input_tokens":7814,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":226,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":498,"totalMs":1461}}
+{"tMs":498,"delta":"ComparisonTable names"}
+{"tMs":604,"delta":":[\"Plan A\",\""}
+{"tMs":604,"delta":"Plan B\"] prices:"}
+{"tMs":604,"delta":"[\"$35"}
+{"tMs":604,"delta":"/mo\",\"$42"}
+{"tMs":604,"delta":"/mo\"] rows:"}
+{"tMs":611,"delta":"[[\"Data"}
+{"tMs":629,"delta":"\",\"30"}
+{"tMs":649,"delta":" GB\",\""}
+{"tMs":669,"delta":"Unlimited\",2"}
+{"tMs":690,"delta":"],[\"Calls\",\""}
+{"tMs":711,"delta":"Unlimited\",\"Unl"}
+{"tMs":731,"delta":"imited\",0"}
+{"tMs":752,"delta":"],[\"Roaming\",\"$"}
+{"tMs":772,"delta":"5"}
+{"tMs":791,"delta":"/day\",\""}
+{"tMs":810,"delta":"Included\",2"}
+{"tMs":831,"delta":"],[\"Contract\",\""}
+{"tMs":851,"delta":"24"}
+{"tMs":871,"delta":" months\",\"None"}
+{"tMs":891,"delta":"\",2],[\"Extras\",\""}
+{"tMs":911,"delta":"Streaming per"}
+{"tMs":932,"delta":"ks\",\"Hot"}
+{"tMs":952,"delta":"spot "}
+{"tMs":971,"delta":"15"}
+{"tMs":991,"delta":" GB\",2"}
+{"tMs":1013,"delta":"]] pick:\"Pl"}
+{"tMs":1033,"delta":"an B\" pickLabel"}
+{"tMs":1054,"delta":":\"Rec"}
+{"tMs":1077,"delta":"ommended\" cta:\""}
+{"tMs":1095,"delta":"Choose\" -> em"}
+{"tMs":1117,"delta":"it choos"}
+{"tMs":1137,"delta":"ePlan\n  "}
+{"tMs":1155,"delta":"Text"}
+{"tMs":1175,"delta":".ca"}
+{"tMs":1195,"delta":"ption \"Rec"}
+{"tMs":1216,"delta":"ommended: Plan B."}
+{"tMs":1236,"delta":" Its"}
+{"tMs":1257,"delta":" unlimited data,"}
+{"tMs":1276,"delta":" included"}
+{"tMs":1297,"delta":" roaming and no"}
+{"tMs":1317,"delta":" contract out"}
+{"tMs":1337,"delta":"weigh the $"}
+{"tMs":1357,"delta":"7"}
+{"tMs":1377,"delta":" mon"}
+{"tMs":1397,"delta":"thly dif"}
+{"tMs":1418,"delta":"ference for"}
+{"tMs":1437,"delta":" most trav"}
+{"tMs":1458,"delta":"ellers.\""}

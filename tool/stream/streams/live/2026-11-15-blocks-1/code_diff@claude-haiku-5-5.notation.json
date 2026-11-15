@@ -1,0 +1,268 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "text3",
+    "DiffHunk1",
+    "DiffHunk2",
+    "DiffHunk3",
+    "filledButton1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "letterSpacing": -0.2,
+     "height": 1.3,
+     "color": "#FF111827"
+    },
+    "text": "Config change review"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "Keep or discard each hunk. Decided: ${= (h1!=\"\"?1:0)+(h2!=\"\"?1:0)+(h3!=\"\"?1:0)} of 3"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "Kept: ${= (h1==\"keep\"?1:0)+(h2==\"keep\"?1:0)+(h3==\"keep\"?1:0)}"
+   }
+  },
+  "DiffHunk1": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Server port",
+    "detail": "@@ -4,2 +4,2 @@",
+    "value": "h1",
+    "start": 4,
+    "lines": [
+     "-port: 8080",
+     "+port: 9090",
+     " host: localhost"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "hunk1"
+      }
+     ]
+    }
+   ]
+  },
+  "DiffHunk2": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Log level",
+    "detail": "@@ -11,2 +11,2 @@",
+    "value": "h2",
+    "start": 11,
+    "lines": [
+     "-level: info",
+     "+level: debug",
+     " format: json"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "hunk2"
+      }
+     ]
+    }
+   ]
+  },
+  "DiffHunk3": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Timeout",
+    "detail": "@@ -18,2 +18,2 @@",
+    "value": "h3",
+    "start": 18,
+    "lines": [
+     "-timeout: 30",
+     "+timeout: 60",
+     " retries: 3"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "hunk3"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Apply changes"
+   },
+   "bind": {
+    "props.enabled": "${= h1!=\"\"&&h2!=\"\"&&h3!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "apply"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "h1",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h2",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h3",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

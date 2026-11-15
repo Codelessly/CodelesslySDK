@@ -1,0 +1,38 @@
+{"meta":{"ui":"comparison","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"ChatCard \"Compare phone plans\" \"Two plans, side by side\" icon:\"smartphone\" w:390\n  ComparisonTable names:[\"Lite\",\"Max\"] prices:[\"$20/mo\",\"$35/mo\"] pick:\"Max\" pickLabel:\"Best value\" cta:\"Choose\" corner:\"Plan\" rows:[[\"Price\",\"$20\",\"$35\",1],[\"Data\",\"10 GB\",\"Unlimited\",2],[\"Calls\",\"300 min\",\"Unlimited\",2],[\"Roaming\",\"EU only\",\"EU + US\",2],[\"Contract\",\"12 months\",\"Monthly\",2],[\"Extras\",\"None\",\"Streaming + eSIM\",2]] -> toast \"You picked {result}\"; emit choosePlan result\n  Recommendation \"Max is the better value\" \"For $15 more you get unlimited data and calls, wider roaming and no lock-in.\" eyebrow:\"Recommended\"","usage":{"input_tokens":8277,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":289,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":459,"totalMs":1830}}
+{"tMs":459,"delta":"ChatCard \"Comp"}
+{"tMs":771,"delta":"are phone plans\" \""}
+{"tMs":771,"delta":"Two plans, side by side\""}
+{"tMs":771,"delta":" icon:\"smartphone"}
+{"tMs":772,"delta":"\" w:390\n  Com"}
+{"tMs":772,"delta":"parisonTable names:[\""}
+{"tMs":772,"delta":"Lite\",\"Max\"]"}
+{"tMs":772,"delta":" prices:[\"$20/m"}
+{"tMs":772,"delta":"o\",\"$35/mo\""}
+{"tMs":772,"delta":"] pick:\"Max\""}
+{"tMs":792,"delta":" pickLabel:\""}
+{"tMs":828,"delta":"Best value\" cta:\""}
+{"tMs":858,"delta":"Choose\" corner:\""}
+{"tMs":1081,"delta":"Plan\" rows:[[\""}
+{"tMs":1081,"delta":"Price\",\"$20\",\"$35"}
+{"tMs":1081,"delta":"\",1],[\"Data\",\"10"}
+{"tMs":1082,"delta":" GB\",\"Unlim"}
+{"tMs":1082,"delta":"ited\",2],[\"Calls"}
+{"tMs":1082,"delta":"\",\"300 min\",\"Unl"}
+{"tMs":1092,"delta":"imited\",2],[\"Ro"}
+{"tMs":1125,"delta":"aming\",\"EU only"}
+{"tMs":1158,"delta":"\",\"EU + US\",2],"}
+{"tMs":1191,"delta":"[\"Contract\",\"12"}
+{"tMs":1224,"delta":" months\",\"Monthly\","}
+{"tMs":1257,"delta":"2],[\"Extras\",\"None"}
+{"tMs":1820,"delta":"\",\"Streaming + eS"}
+{"tMs":1820,"delta":"IM\",2]] ->"}
+{"tMs":1821,"delta":" toast \"You picked {result"}
+{"tMs":1821,"delta":"}\"; emit chooseP"}
+{"tMs":1821,"delta":"lan result\n  Recomm"}
+{"tMs":1821,"delta":"endation \"Max is the better"}
+{"tMs":1821,"delta":" value\" \"For $15 more"}
+{"tMs":1821,"delta":" you get unlimited data and"}
+{"tMs":1821,"delta":" calls, wider roaming"}
+{"tMs":1821,"delta":" and no lock-in.\" e"}
+{"tMs":1821,"delta":"yebrow:\"Rec"}
+{"tMs":1821,"delta":"ommended\""}

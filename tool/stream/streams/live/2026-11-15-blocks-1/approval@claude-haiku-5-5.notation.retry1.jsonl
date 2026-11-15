@@ -1,0 +1,48 @@
+{"meta":{"ui":"approval","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","text":"ChatCard \"Delete old files\" \"Shared drive\" icon:\"delete_outline\" status:\"Waiting for approval\" tone:danger w:390\n  Paragraph \"Delete 214 files from the Archive 2019 folder. This frees about 3.8 GB of space on the shared drive.\"\n  Callout \"This cannot be undone\" \"Deleted files will not go to the trash and cannot be restored.\" tone:danger icon:\"warning_amber_rounded\"\n  Disclosure \"Show the first few files\" \"Showing 5 of 214. Full list available in the drive.\" lines:[\"Q1-report-draft.docx\",\"budget-2019-old.xlsx\",\"photos-team-offsite-01.jpg\",\"meeting-notes-march.txt\",\"vendor-contract-archive.pdf\"]\n  Details rows:[[\"Folder\",\"Archive 2019\"],[\"Files\",\"214\"],[\"Space freed\",\"3.8 GB\"]]\n  Row gap:10\n    ActionButton \"Deny\" tone:quiet -> decision=\"denied\"\n    ActionButton \"Approve\" tone:danger -> decision=\"approved\"; emit approveDelete","usage":{"input_tokens":8502,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":367,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":454,"totalMs":1396}}
+{"tMs":454,"delta":"ChatCard \"Del"}
+{"tMs":579,"delta":"ete old files\" \"Shared"}
+{"tMs":579,"delta":" drive\" icon:\"del"}
+{"tMs":579,"delta":"ete_outline\" status:\""}
+{"tMs":579,"delta":"Waiting for approval\""}
+{"tMs":579,"delta":" tone:danger w:390"}
+{"tMs":579,"delta":"\n  Paragraph \""}
+{"tMs":596,"delta":"Delete 214 files from"}
+{"tMs":617,"delta":" the Archive 2019 "}
+{"tMs":637,"delta":"folder. This frees about "}
+{"tMs":657,"delta":"3.8 GB of space"}
+{"tMs":679,"delta":" on the shared drive.\""}
+{"tMs":704,"delta":"\n  Callout \"This cann"}
+{"tMs":719,"delta":"ot be undone\" \"De"}
+{"tMs":739,"delta":"leted files will not go to the"}
+{"tMs":759,"delta":" trash and cannot be rest"}
+{"tMs":780,"delta":"ored.\" tone:danger ic"}
+{"tMs":800,"delta":"on:\"warning_amber"}
+{"tMs":820,"delta":"_rounded\"\n  "}
+{"tMs":841,"delta":"Disclosure \"Show the"}
+{"tMs":861,"delta":" first few files\" \"Showing"}
+{"tMs":882,"delta":" 5 of 214."}
+{"tMs":902,"delta":" Full list available in the drive.\""}
+{"tMs":923,"delta":" lines:[\"Q1-"}
+{"tMs":943,"delta":"report-draft.docx\",\""}
+{"tMs":963,"delta":"budget-2019-old."}
+{"tMs":984,"delta":"xlsx\",\"photos-"}
+{"tMs":1004,"delta":"team-offsite-01."}
+{"tMs":1024,"delta":"jpg\",\"meeting-"}
+{"tMs":1045,"delta":"notes-march.txt\",\""}
+{"tMs":1065,"delta":"vendor-contract-arch"}
+{"tMs":1086,"delta":"ive.pdf\"]"}
+{"tMs":1106,"delta":"\n  Details rows:[[\""}
+{"tMs":1127,"delta":"Folder\",\"Archive "}
+{"tMs":1147,"delta":"2019\"],[\"Files\",\""}
+{"tMs":1168,"delta":"214\"],[\"Space freed"}
+{"tMs":1188,"delta":"\",\"3.8 GB\""}
+{"tMs":1208,"delta":"]]\n  Row gap"}
+{"tMs":1229,"delta":":10\n    ActionBut"}
+{"tMs":1249,"delta":"ton \"Deny\" tone"}
+{"tMs":1269,"delta":":qu"}
+{"tMs":1289,"delta":"iet -> decision=\"den"}
+{"tMs":1310,"delta":"ied\"\n    ActionBut"}
+{"tMs":1330,"delta":"ton \"Approve\" tone"}
+{"tMs":1352,"delta":":danger -> decision=\""}
+{"tMs":1371,"delta":"approved\"; emit approve"}
+{"tMs":1392,"delta":"Delete"}

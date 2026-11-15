@@ -1,0 +1,657 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Checkout",
+    "icon": "shopping_bag"
+   },
+   "bind": {
+    "props.subtitle": "Step ${step} of 3"
+   },
+   "children": [
+    "Steps1",
+    "SectionLabel1",
+    "listView1",
+    "TotalBar1",
+    "SectionLabel2",
+    "InputField1",
+    "InputField2",
+    "InputField3",
+    "InputField4",
+    "InputField5",
+    "row1",
+    "SectionLabel3",
+    "OptionList1",
+    "Details1",
+    "TotalBar2",
+    "ActionButton3",
+    "Receipt1"
+   ]
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Cart",
+     "Shipping",
+     "Payment"
+    ]
+   },
+   "bind": {
+    "props.current": "${step}",
+    "visible": "${= step<4}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Your cart"
+   },
+   "bind": {
+    "props.note": "${= sum(items,x=>x.qty)} items",
+    "visible": "${= step==1}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${items}",
+    "visible": "${= step==1}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "CartLine1"
+   ]
+  },
+  "CartLine1": {
+   "type": "CartLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.title}",
+    "props.detail": "${item.detail}",
+    "props.price": "${= money(item.price*item.qty,\"$\",2)}",
+    "props.qty": "${item.qty}",
+    "props.kind": "${item.kind}",
+    "props.tone": "${item.tone}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= updateWhere(items,x=>x.id==item.id,x=>with(x,\"qty\",result))}"
+      }
+     ]
+    }
+   ]
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Subtotal",
+    "note": "Before delivery",
+    "cta": "Continue"
+   },
+   "bind": {
+    "props.amount": "${= money(sum(items,x=>x.price*x.qty),\"$\",2)}",
+    "props.enabled": "${= sum(items,x=>x.qty)>0}",
+    "visible": "${= step==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Shipping details"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   }
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Full name",
+    "placeholder": "Ada Lovelace",
+    "value": "name"
+   },
+   "bind": {
+    "props.error": "${= tried&&length(trim(name))<2?\"Enter your full name\":\"\"}",
+    "props.success": "${= length(trim(name))>=2?\"Looks good\":\"\"}",
+    "visible": "${= step==2}"
+   }
+  },
+  "InputField2": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Address",
+    "placeholder": "12 Main Street",
+    "value": "address"
+   },
+   "bind": {
+    "props.error": "${= tried&&length(trim(address))<5?\"Enter your street address\":\"\"}",
+    "props.success": "${= length(trim(address))>=5?\"Looks good\":\"\"}",
+    "visible": "${= step==2}"
+   }
+  },
+  "InputField3": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "City",
+    "placeholder": "London",
+    "value": "city"
+   },
+   "bind": {
+    "props.error": "${= tried&&length(trim(city))<2?\"Enter your city\":\"\"}",
+    "props.success": "${= length(trim(city))>=2?\"Looks good\":\"\"}",
+    "visible": "${= step==2}"
+   }
+  },
+  "InputField4": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Postcode",
+    "placeholder": "SW1A 1AA",
+    "value": "postcode"
+   },
+   "bind": {
+    "props.error": "${= tried&&length(trim(postcode))<4?\"Enter a valid postcode\":\"\"}",
+    "props.success": "${= length(trim(postcode))>=4?\"Looks good\":\"\"}",
+    "visible": "${= step==2}"
+   }
+  },
+  "InputField5": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Email",
+    "placeholder": "you@example.com",
+    "value": "email",
+    "keyboard": "email"
+   },
+   "bind": {
+    "props.error": "${= tried&&!(contains(email,\"@\")&&contains(email,\".\"))?\"Enter a valid email\":\"\"}",
+    "props.success": "${= contains(email,\"@\")&&contains(email,\".\")?\"Looks good\":\"\"}",
+    "visible": "${= step==2}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Continue"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tried",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= (length(trim(name))>=2&&length(trim(address))>=5&&length(trim(city))>=2&&length(trim(postcode))>=4&&contains(email,\"@\")&&contains(email,\".\"))?3:2}"
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Delivery"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Choose a delivery method",
+    "value": "delivery",
+    "options": [
+     "Standard",
+     "Express"
+    ],
+    "details": [
+     "3-5 days",
+     "Next day"
+    ],
+    "prices": [
+     "$4.99",
+     "$12.99"
+    ]
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Items\",money(sum(items,x=>x.price*x.qty),\"$\",2)],[\"Delivery\",delivery==\"Express\"?\"$12.99\":\"$4.99\"],[\"Ship to\",name+\", \"+city],[\"Receipt to\",email]]}",
+    "visible": "${= step==3}"
+   }
+  },
+  "TotalBar2": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "cta": "Pay now"
+   },
+   "bind": {
+    "props.note": "${delivery} delivery",
+    "props.amount": "${= money(sum(items,x=>x.price*x.qty)+(delivery==\"Express\"?12.99:4.99),\"$\",2)}",
+    "visible": "${= step==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "order",
+       "value": "${= \"ORD-\"+(100000+sum(items,x=>x.price*x.qty)*37+length(name)*11)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton3": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order confirmed",
+    "codeLabel": "Order number",
+    "tone": "good"
+   },
+   "bind": {
+    "props.message": "Thanks ${name}! A receipt is on its way to ${email}.",
+    "props.code": "${order}",
+    "visible": "${= step==4}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "title": "Trail Runner Shoes",
+      "detail": "Size 42",
+      "price": 89,
+      "qty": 1,
+      "kind": "shoe",
+      "tone": "sky"
+     },
+     {
+      "id": 2,
+      "title": "Ceramic Mug",
+      "detail": "350 ml",
+      "price": 18,
+      "qty": 2,
+      "kind": "mug",
+      "tone": "sand"
+     },
+     {
+      "id": 3,
+      "title": "Canvas Tote",
+      "detail": "Natural",
+      "price": 24,
+      "qty": 1,
+      "kind": "tote",
+      "tone": "mint"
+     }
+    ]
+   },
+   {
+    "name": "name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "address",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "city",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "postcode",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "email",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "delivery",
+    "type": "text",
+    "value": "Standard"
+   },
+   {
+    "name": "order",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "tried",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "sub",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

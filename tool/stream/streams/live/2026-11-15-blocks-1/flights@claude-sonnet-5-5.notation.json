@@ -1,0 +1,254 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "London to Lisbon",
+    "subtitle": "Friday · 1 traveller",
+    "icon": "flight_takeoff",
+    "status": "3 flights",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "listView1",
+    "TotalBar1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Fri flights",
+    "note": "all direct"
+   },
+   "bind": {
+    "visible": "${= !done}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${flights}",
+    "visible": "${= !done}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "FlightOption1"
+   ]
+  },
+  "FlightOption1": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "origin": "LHR",
+    "destination": "LIS",
+    "stops": "Direct"
+   },
+   "bind": {
+    "props.name": "${item.name}",
+    "props.depart": "${item.depart}",
+    "props.arrive": "${item.arrive}",
+    "props.duration": "${item.duration}",
+    "props.price": "£${item.price}",
+    "props.tag": "${item.tag}",
+    "props.selected": "${= pick==item.id}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "note": "1 traveller, taxes included",
+    "cta": "Confirm"
+   },
+   "bind": {
+    "props.amount": "${= money(find(flights,x=>x.id==pick).price,\"£\",0)}",
+    "visible": "${= !done}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "confirm",
+       "value": "${pick}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Flight confirmed",
+    "codeLabel": "Selected flight",
+    "tone": "good"
+   },
+   "bind": {
+    "props.message": "You chose ${= find(flights,x=>x.id==pick).name}, departing ${= find(flights,x=>x.id==pick).depart}.",
+    "props.code": "${= upper(pick)}",
+    "visible": "${= done}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "flights",
+    "type": "list",
+    "value": [
+     {
+      "id": "ba",
+      "name": "British Airways",
+      "depart": "07:20",
+      "arrive": "09:55",
+      "duration": "2h 35m",
+      "price": 148,
+      "tag": "Best time"
+     },
+     {
+      "id": "tp",
+      "name": "TAP Air Portugal",
+      "depart": "11:45",
+      "arrive": "14:15",
+      "duration": "2h 30m",
+      "price": 126,
+      "tag": ""
+     },
+     {
+      "id": "fr",
+      "name": "Ryanair",
+      "depart": "18:10",
+      "arrive": "20:50",
+      "duration": "2h 40m",
+      "price": 79,
+      "tag": "Cheapest"
+     }
+    ]
+   },
+   {
+    "name": "pick",
+    "type": "text",
+    "value": "ba"
+   },
+   {
+    "name": "done",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

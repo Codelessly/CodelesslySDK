@@ -1,0 +1,115 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Trip photos",
+    "subtitle": "9 photos from the trip",
+    "icon": "photo_library"
+   },
+   "children": [
+    "PhotoGallery1"
+   ]
+  },
+  "PhotoGallery1": {
+   "type": "PhotoGallery",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "open",
+    "columns": 3,
+    "photos": [
+     {
+      "kind": "mountain",
+      "tone": "dawn",
+      "caption": "Mountain at dawn"
+     },
+     {
+      "kind": "harbor",
+      "tone": "day",
+      "caption": "Harbour at sunrise"
+     },
+     {
+      "kind": "skyline",
+      "tone": "dusk",
+      "caption": "City skyline at dusk"
+     },
+     {
+      "kind": "dunes",
+      "tone": "day",
+      "caption": "Desert dunes"
+     },
+     {
+      "kind": "forest",
+      "tone": "day",
+      "caption": "Quiet forest path"
+     },
+     {
+      "kind": "lagoon",
+      "tone": "day",
+      "caption": "Blue lagoon"
+     },
+     {
+      "kind": "market",
+      "tone": "dusk",
+      "caption": "Evening market"
+     },
+     {
+      "kind": "festival",
+      "tone": "night",
+      "caption": "Lantern festival"
+     },
+     {
+      "kind": "temple",
+      "tone": "dawn",
+      "caption": "Hilltop temple"
+     }
+    ]
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "open",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

@@ -1,0 +1,84 @@
+{"meta":{"ui":"approval","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"You are about to delete 214 old files from my shared drive. Ask me first with an approval card: what will happen, the folder, how many files and how much space, that it cannot be undone, a way to see the first few file names, and approve and deny buttons. After I choose, the card shows the decision and locks.","text":"ChatCard \"Delete old files?\" \"Approval needed\" icon:\"delete_outline\" status:\"Waiting\" tone:warn w:390\n  state decision=\"\"\n  if decision==\"\"\n    Paragraph \"I am about to delete old files from your shared drive to free up space. Nothing is removed until you approve.\"\n    Details rows:=[[\"Folder\",\"/Shared/Archive/2019\"],[\"Files\",\"214 files\"],[\"Space freed\",\"3.2 GB\"]]\n    Callout \"This cannot be undone\" \"Deleted files are removed for everyone and cannot be restored.\" tone:danger\n    Disclosure \"Show first files\" lines:[\"budget_2019_q1.xlsx\",\"meeting_notes_jan.docx\",\"logo_old_v2.png\",\"invoice_0042.pdf\",\"team_photo_2019.jpg\"] note:\"and 209 more\"\n    Row gap:10\n      ActionButton \"Deny\" tone:quiet icon:\"close\" -> decision=\"denied\"\n      ActionButton \"Approve\" tone:danger icon:\"check\" -> decision=\"approved\"\n  if decision==\"approved\"\n    Receipt \"Deletion approved\" \"214 files in /Shared/Archive/2019 are being deleted. 3.2 GB will be freed.\" tone:good icon:\"check\"\n  if decision==\"denied\"\n    Receipt \"Deletion denied\" \"No files were deleted. Your shared drive is unchanged.\" tone:neutral icon:\"close\"","usage":{"input_tokens":7825,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":475,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":657,"totalMs":3416}}
+{"tMs":657,"delta":"ChatCard \"Del"}
+{"tMs":981,"delta":"ete old"}
+{"tMs":981,"delta":" files?"}
+{"tMs":981,"delta":"\" \"Approval"}
+{"tMs":981,"delta":" needed\" icon:\"del"}
+{"tMs":981,"delta":"ete_out"}
+{"tMs":981,"delta":"line\" status:\"Wa"}
+{"tMs":981,"delta":"iting\" tone:war"}
+{"tMs":981,"delta":"n w:390"}
+{"tMs":981,"delta":"\n  state"}
+{"tMs":981,"delta":" decision=\"\"\n  if"}
+{"tMs":999,"delta":" decision=="}
+{"tMs":1032,"delta":"\"\"\n    Paragraph"}
+{"tMs":1291,"delta":" \"I am"}
+{"tMs":1291,"delta":" about to delete old"}
+{"tMs":1291,"delta":" files from your shared drive to"}
+{"tMs":1291,"delta":" free up space."}
+{"tMs":1291,"delta":" N"}
+{"tMs":1291,"delta":"othing is"}
+{"tMs":1291,"delta":" remov"}
+{"tMs":1292,"delta":"ed until you appro"}
+{"tMs":1336,"delta":"ve.\"\n    Details rows"}
+{"tMs":1363,"delta":":=[[\"Folder\",\""}
+{"tMs":1398,"delta":"/Shared/Archive"}
+{"tMs":1430,"delta":"/2019"}
+{"tMs":1641,"delta":"\"],[\"Files\",\"214 "}
+{"tMs":1641,"delta":"files\"],[\"Space fre"}
+{"tMs":1641,"delta":"ed\",\"3"}
+{"tMs":1641,"delta":".2"}
+{"tMs":1641,"delta":" GB\"]]\n    "}
+{"tMs":1642,"delta":"Callout \"This"}
+{"tMs":1668,"delta":" cannot be undone\" \""}
+{"tMs":1731,"delta":"Deleted files are remov"}
+{"tMs":1764,"delta":"ed for"}
+{"tMs":1797,"delta":" ever"}
+{"tMs":1831,"delta":"yone and cannot be rest"}
+{"tMs":1864,"delta":"ored.\" tone:danger"}
+{"tMs":1967,"delta":"\n    Disclosure \""}
+{"tMs":1967,"delta":"Show first files"}
+{"tMs":1967,"delta":"\" l"}
+{"tMs":2001,"delta":"ines:[\"bud"}
+{"tMs":2031,"delta":"get_2019_q1."}
+{"tMs":2064,"delta":"xlsx\",\"me"}
+{"tMs":2098,"delta":"eting_notes_j"}
+{"tMs":2131,"delta":"an.doc"}
+{"tMs":2165,"delta":"x\",\"logo_old"}
+{"tMs":2197,"delta":"_"}
+{"tMs":2230,"delta":"v2.png\",\"inv"}
+{"tMs":2264,"delta":"oice_0"}
+{"tMs":2298,"delta":"042.pdf\",\"team"}
+{"tMs":2336,"delta":"_phot"}
+{"tMs":2377,"delta":"o_2019"}
+{"tMs":2401,"delta":".jpg\"] note"}
+{"tMs":2430,"delta":":\"and"}
+{"tMs":2471,"delta":" 209 more\""}
+{"tMs":2497,"delta":"\n    Row gap:10"}
+{"tMs":2533,"delta":"\n      ActionButton \""}
+{"tMs":2565,"delta":"Deny\" tone:qu"}
+{"tMs":2598,"delta":"iet ic"}
+{"tMs":2632,"delta":"on:\"close\" -> dec"}
+{"tMs":2665,"delta":"ision=\"denied\"\n      "}
+{"tMs":2700,"delta":"ActionButton \"Approve"}
+{"tMs":2735,"delta":"\" tone:danger icon"}
+{"tMs":2767,"delta":":\"check\" -> decision"}
+{"tMs":2801,"delta":"=\"approved\"\n  if dec"}
+{"tMs":2835,"delta":"ision==\"approved\"\n    "}
+{"tMs":2869,"delta":"Receipt \"De"}
+{"tMs":2901,"delta":"letion approved\" \"214"}
+{"tMs":2934,"delta":" files"}
+{"tMs":2968,"delta":" in /Shared/Arch"}
+{"tMs":3002,"delta":"ive/2019 are being de"}
+{"tMs":3035,"delta":"leted."}
+{"tMs":3068,"delta":" 3.2 GB will"}
+{"tMs":3310,"delta":" be freed.\" tone:good"}
+{"tMs":3310,"delta":" icon:\"check\"\n  "}
+{"tMs":3310,"delta":"if decision==\"denied\""}
+{"tMs":3310,"delta":"\n    Receipt \""}
+{"tMs":3310,"delta":"Deletion denied\" \"No"}
+{"tMs":3310,"delta":" files were deleted. Your"}
+{"tMs":3310,"delta":" shared drive is un"}
+{"tMs":3339,"delta":"changed.\" tone:ne"}
+{"tMs":3371,"delta":"utral icon:\"close"}
+{"tMs":3404,"delta":"\""}

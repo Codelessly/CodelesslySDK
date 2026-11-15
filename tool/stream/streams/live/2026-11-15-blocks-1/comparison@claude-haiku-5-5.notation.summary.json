@@ -1,0 +1,62 @@
+{
+ "ui": "comparison",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 20112,
+ "turns": [
+  {
+   "input_tokens": 7814,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 226,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 498,
+   "totalMs": 1461,
+   "chars": 474,
+   "lines": 2,
+   "jsonTails": 0,
+   "nodes": 3,
+   "outputTokensPerNode": "75.3",
+   "notationIssues": [],
+   "errors": [
+    "children_not_allowed /nodes/ComparisonTable1/children: A ComparisonTable takes no children. Wrap it and its neighbors in a row, column or stack instead."
+   ]
+  },
+  {
+   "input_tokens": 8126,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 239,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 1311,
+   "totalMs": 2465,
+   "chars": 497,
+   "lines": 3,
+   "jsonTails": 0,
+   "nodes": 4,
+   "outputTokensPerNode": "59.8",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

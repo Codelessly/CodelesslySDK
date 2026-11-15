@@ -1,0 +1,137 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "text1",
+    "text2",
+    "DayPicker1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "Book a table"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 10.5,
+     "fontWeight": 700,
+     "fontFamily": "Inter",
+     "letterSpacing": 0.9,
+     "height": 1.2,
+     "color": "#FF6B7280"
+    },
+    "text": "Choose a day"
+   }
+  },
+  "DayPicker1": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day"
+   },
+   "bind": {
+    "props.days": "${= [formatDate(today(),\"ddd d\"),formatDate(today()+1,\"ddd d\")]}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "party",
+    "type": "decimal",
+    "value": 0
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

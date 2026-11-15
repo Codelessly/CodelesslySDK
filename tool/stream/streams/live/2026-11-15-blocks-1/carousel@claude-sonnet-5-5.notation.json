@@ -1,0 +1,119 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 390,
+    "padding": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Aero Runner",
+      "price": 120,
+      "rating": 4.8,
+      "tone": "sky",
+      "desc": "Lightweight daily trainer with a breathable mesh upper."
+     },
+     {
+      "id": 2,
+      "name": "Trail Blazer",
+      "price": 140,
+      "rating": 4.6,
+      "tone": "mint",
+      "desc": "Grippy outsole built for muddy trails and rocky climbs."
+     },
+     {
+      "id": 3,
+      "name": "Cloud Stride",
+      "price": 130,
+      "rating": 4.7,
+      "tone": "lilac",
+      "desc": "Soft cushioning for long easy miles."
+     },
+     {
+      "id": 4,
+      "name": "Sprint Pro",
+      "price": 160,
+      "rating": 4.9,
+      "tone": "rose",
+      "desc": "Responsive race shoe with a carbon plate."
+     },
+     {
+      "id": 5,
+      "name": "Daily Mile",
+      "price": 99,
+      "rating": 4.3,
+      "tone": "sand",
+      "desc": "Durable, comfortable and made for everyday runs."
+     },
+     {
+      "id": 6,
+      "name": "Night Owl",
+      "price": 135,
+      "rating": 4.5,
+      "tone": "slate",
+      "desc": "Reflective details for early and late runs."
+     }
+    ]
+   },
+   {
+    "name": "i",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": -1
+   },
+   {
+    "name": "size",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "bag",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

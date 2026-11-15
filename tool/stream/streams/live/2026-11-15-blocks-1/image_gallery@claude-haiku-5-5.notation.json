@@ -1,0 +1,98 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "PhotoGallery1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "PhotoGallery1": {
+   "type": "PhotoGallery",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "open",
+    "photos": [
+     {
+      "kind": "mountain",
+      "tone": "dawn",
+      "caption": "Alpine ridge at dawn"
+     },
+     {
+      "kind": "harbor",
+      "tone": "day",
+      "caption": "Harbour at noon"
+     },
+     {
+      "kind": "skyline",
+      "tone": "dusk",
+      "caption": "City lights at dusk"
+     },
+     {
+      "kind": "dunes",
+      "tone": "day",
+      "caption": "Desert dunes"
+     },
+     {
+      "kind": "forest",
+      "tone": "day",
+      "caption": "Forest trail"
+     },
+     {
+      "kind": "lagoon",
+      "tone": "dawn",
+      "caption": "Turquoise lagoon"
+     },
+     {
+      "kind": "market",
+      "tone": "dusk",
+      "caption": "Night market"
+     },
+     {
+      "kind": "temple",
+      "tone": "day",
+      "caption": "Old temple"
+     },
+     {
+      "kind": "bamboo",
+      "tone": "day",
+      "caption": "Bamboo grove"
+     }
+    ],
+    "columns": 3
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "open",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

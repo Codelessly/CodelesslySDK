@@ -1,0 +1,57 @@
+{"meta":{"ui":"message_draft","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Draft an email to my landlord about the broken heating and show it as an inline card I can edit before it goes: to, subject and body fields filled in, a tone switch between polite and firm that rewrites the body, and send and discard buttons. Sending needs a recipient and a subject, and afterwards the card shows it as sent.","text":"Card w:390 gap:12 pad:16\n  Text.heading \"Draft to landlord\"\n  state to=\"landlord@example.com\"\n  state subject=\"Heating not working\"\n  state body=\"\"\n  state tone=\"polite\"\n  state sent=false\n  if sent==false\n    InputField \"To\" \"landlord@example.com\" =to\n    InputField \"Subject\" \"Subject\" =subject\n    Segments =tone options:[\"polite\",\"firm\"] -> body=tone==\"firm\"?\"The heating in my flat has not worked for over a week, and I have reported it twice already. Please arrange a repair within 48 hours.\":\"Hi, I'm sorry to bother you, but the heating in my flat has stopped working. Could you arrange a repair when you have a chance? Thank you.\"\n    InputField \"Message\" \"Write your message\" =body lines:6\n    Row gap:10\n      ActionButton \"Discard\" tone:quiet icon:\"delete_outline\" enabled:=true -> to=\"landlord@example.com\"; subject=\"Heating not working\"; body=\"\"; tone=\"polite\"\n      ActionButton \"Send\" tone:primary icon:\"send\" enabled:=length(to)>0 && length(subject)>0 -> sent=true; emit send_email\n  if sent\n    Receipt \"Email sent\" \"Sent to {to}\" tone:good icon:\"check_circle\"","usage":{"input_tokens":8422,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":438,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":410,"totalMs":2605}}
+{"tMs":410,"delta":"Card w:390 gap"}
+{"tMs":546,"delta":":12 pad:16"}
+{"tMs":546,"delta":"\n  Text.heading \""}
+{"tMs":546,"delta":"Draft to landlord\""}
+{"tMs":546,"delta":"\n  state to=\"land"}
+{"tMs":546,"delta":"lord@example.com\""}
+{"tMs":546,"delta":"\n  state subject=\"Heating"}
+{"tMs":551,"delta":" not working\"\n  state body"}
+{"tMs":572,"delta":"=\"\"\n  state tone=\""}
+{"tMs":592,"delta":"polite\"\n  state sent"}
+{"tMs":612,"delta":"=false\n  if sent=="}
+{"tMs":634,"delta":"false\n    InputField \"To"}
+{"tMs":654,"delta":"\" \"landlord@example."}
+{"tMs":677,"delta":"com\" =to\n    Input"}
+{"tMs":694,"delta":"Field \"Subject\" \""}
+{"tMs":715,"delta":"Subject\" =subject\n    "}
+{"tMs":735,"delta":"Segments =tone options:"}
+{"tMs":755,"delta":"[\"polite\",\"firm\"]"}
+{"tMs":778,"delta":" -> body=tone==\""}
+{"tMs":797,"delta":"firm\"?\"The heating"}
+{"tMs":817,"delta":" in my flat has not worked"}
+{"tMs":837,"delta":" for over a week, and I have"}
+{"tMs":858,"delta":" reported it twice already."}
+{"tMs":878,"delta":" Please arrange a repair within"}
+{"tMs":899,"delta":" 48 hours.\":\""}
+{"tMs":919,"delta":"Hi, I'm s"}
+{"tMs":940,"delta":"orry to bother you, but"}
+{"tMs":960,"delta":" the heating in my flat has"}
+{"tMs":980,"delta":" stopped working. Could you"}
+{"tMs":1001,"delta":" arrange a repair when you"}
+{"tMs":1021,"delta":" have a chance? Thank"}
+{"tMs":1042,"delta":" you.\"\n    InputField \""}
+{"tMs":1062,"delta":"Message\" \"Write your message"}
+{"tMs":1083,"delta":"\" =body lines:6"}
+{"tMs":1103,"delta":"\n    Row gap:10"}
+{"tMs":1124,"delta":"\n      ActionButton \""}
+{"tMs":1144,"delta":"Discard\" tone:qu"}
+{"tMs":1164,"delta":"iet icon:\"delete"}
+{"tMs":1184,"delta":"_outline\" enabled:"}
+{"tMs":1205,"delta":"=true -> to=\"landl"}
+{"tMs":1226,"delta":"ord@example.com\"; sub"}
+{"tMs":1246,"delta":"ject=\"Heating not working\""}
+{"tMs":1266,"delta":"; body=\"\"; tone=\""}
+{"tMs":1287,"delta":"polite\"\n      Action"}
+{"tMs":1311,"delta":"Button \"Send\" tone"}
+{"tMs":1337,"delta":":primary icon:\"send"}
+{"tMs":1351,"delta":"\" enabled:=length("}
+{"tMs":1368,"delta":"to)>0 && length("}
+{"tMs":1389,"delta":"subject)>0 ->"}
+{"tMs":2601,"delta":" sent=true; emit send"}
+{"tMs":2601,"delta":"_email\n  if sent"}
+{"tMs":2601,"delta":"\n    Receipt \"Email"}
+{"tMs":2601,"delta":" sent\" \"Sent to"}
+{"tMs":2601,"delta":" {to}\" tone:good"}
+{"tMs":2601,"delta":" icon:\"check_circle"}
+{"tMs":2601,"delta":"\""}

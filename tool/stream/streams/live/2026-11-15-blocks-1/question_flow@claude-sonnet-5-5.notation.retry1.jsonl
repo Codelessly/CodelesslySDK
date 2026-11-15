@@ -1,0 +1,100 @@
+{"meta":{"ui":"question_flow","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"ChatCard \"Find your laptop\" \"Three quick questions\" icon:\"laptop_mac\" status:\"Step {step} of 3\" tone:accent w:390\n  state step=1\n  state use=\"\"\n  state detail=\"\"\n  state budget=\"\"\n  if step<4\n    Steps steps:[\"Use\",\"Details\",\"Budget\"] current:=step\n  if step==1\n    OptionList \"What will you use it for?\" =use options:[\"Work and email\",\"Creative work\",\"Gaming\",\"School\"] details:[\"Documents, calls, browsing\",\"Photo, video, design\",\"Modern games, high frame rates\",\"Notes, research, portability\"] -> detail=\"\"; step=2\n  if step==2\n    if use==\"Work and email\"\n      OptionList \"What matters most?\" =detail options:[\"Battery life\",\"Light to carry\",\"Big screen\"] -> step=3\n    if use==\"Creative work\"\n      OptionList \"What do you create?\" =detail options:[\"Photo editing\",\"Video editing\",\"3D and design\"] -> step=3\n    if use==\"Gaming\"\n      OptionList \"What kind of games?\" =detail options:[\"Competitive shooters\",\"Big open-world\",\"Casual and indie\"] -> step=3\n    if use==\"School\"\n      OptionList \"How will you carry it?\" =detail options:[\"All day on campus\",\"Mostly at a desk\",\"Back and forth by bus\"] -> step=3\n    ActionButton \"Back\" tone:quiet -> step=1\n  if step==3\n    OptionList \"What is your budget?\" =budget options:[\"Under $800\",\"$800 to $1,500\",\"Over $1,500\"] -> step=4\n    ActionButton \"Back\" tone:quiet -> step=2\n  if step==4\n    Recommendation \"{use=='Gaming' ? 'Gaming laptop 16' : use=='Creative work' ? 'Creator laptop 16' : use=='School' ? 'Campus laptop 14' : 'Ultrabook 14'}\" \"Best fit for {lower(use)}, focused on {lower(detail)}, in the {budget} range.\" reasons:=[use,detail,budget] eyebrow:\"Top pick\" kind:\"laptop\"\n    Details rows:=[[\"Use\",use],[\"Focus\",detail],[\"Budget\",budget]]\n    ActionButton \"Back\" tone:quiet -> step=3\n    ActionButton \"Start over\" tone:primary -> step=1; use=\"\"; detail=\"\"; budget=\"\"","usage":{"input_tokens":8683,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":781,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":872,"totalMs":4139}}
+{"tMs":873,"delta":"ChatCard \"Find"}
+{"tMs":1181,"delta":" your laptop\" \"Three"}
+{"tMs":1181,"delta":" quick questions\" icon:"}
+{"tMs":1181,"delta":"\"laptop_mac\""}
+{"tMs":1181,"delta":" status:\"Step {step}"}
+{"tMs":1181,"delta":" of 3\" tone:acc"}
+{"tMs":1181,"delta":"ent w:390\n  state step"}
+{"tMs":1181,"delta":"=1\n  state use=\"\""}
+{"tMs":1181,"delta":"\n  state detail=\"\""}
+{"tMs":1181,"delta":"\n  state budget=\"\"\n  "}
+{"tMs":1203,"delta":"if step<4\n    Ste"}
+{"tMs":1236,"delta":"ps steps:[\"Use\",\""}
+{"tMs":1270,"delta":"Details\",\"Budget\"]"}
+{"tMs":1512,"delta":" current:=step\n  if step"}
+{"tMs":1512,"delta":"==1\n    OptionList"}
+{"tMs":1512,"delta":" \"What will you use it for?"}
+{"tMs":1512,"delta":"\" =use options:[\"Work"}
+{"tMs":1512,"delta":" and email\",\"Creative work\",\""}
+{"tMs":1512,"delta":"Gaming\",\"School\"]"}
+{"tMs":1512,"delta":" details:[\"Documents, cal"}
+{"tMs":1536,"delta":"ls, browsing\",\"Phot"}
+{"tMs":1571,"delta":"o, video, design\",\"Mod"}
+{"tMs":1603,"delta":"ern games, high frame rates"}
+{"tMs":1636,"delta":"\",\"Notes, research,"}
+{"tMs":1669,"delta":" portability\"] -> detail"}
+{"tMs":1830,"delta":"=\"\"; step=2\n  "}
+{"tMs":1830,"delta":"if step==2\n    if use"}
+{"tMs":1830,"delta":"==\"Work and email\""}
+{"tMs":1830,"delta":"\n      OptionList \"What mat"}
+{"tMs":1836,"delta":"ters most?\" =detail options"}
+{"tMs":1871,"delta":":[\"Battery life\",\""}
+{"tMs":1903,"delta":"Light to carry\",\"Big scre"}
+{"tMs":1936,"delta":"en\"] -> step=3"}
+{"tMs":1970,"delta":"\n    if use==\"Cre"}
+{"tMs":2004,"delta":"ative work\"\n      Option"}
+{"tMs":2036,"delta":"List \"What do you create?\""}
+{"tMs":2070,"delta":" =detail options:[\"Phot"}
+{"tMs":2168,"delta":"o editing\",\"Video editing"}
+{"tMs":2168,"delta":"\",\"3D and"}
+{"tMs":2169,"delta":" design\"] -> step=3"}
+{"tMs":2203,"delta":"\n    if use==\"G"}
+{"tMs":2236,"delta":"aming\"\n      Option"}
+{"tMs":2270,"delta":"List \"What kind of games?"}
+{"tMs":2303,"delta":"\" =detail options:[\""}
+{"tMs":2336,"delta":"Competitive shooters\",\""}
+{"tMs":2369,"delta":"Big open-world\",\"Casual"}
+{"tMs":2402,"delta":" and indie\"] -> step"}
+{"tMs":2436,"delta":"=3\n    if use==\""}
+{"tMs":2470,"delta":"School\"\n      OptionList"}
+{"tMs":2503,"delta":" \"How will you carry it?"}
+{"tMs":2536,"delta":"\" =detail options:[\"All"}
+{"tMs":2570,"delta":" day on campus\",\"Most"}
+{"tMs":2603,"delta":"ly at a desk\",\"Back"}
+{"tMs":2636,"delta":" and forth by bus\"]"}
+{"tMs":2669,"delta":" -> step=3\n    "}
+{"tMs":2703,"delta":"ActionButton \"Back\""}
+{"tMs":2736,"delta":" tone:quiet ->"}
+{"tMs":2769,"delta":" step=1\n  if step=="}
+{"tMs":2803,"delta":"3\n    OptionList \""}
+{"tMs":2836,"delta":"What is your budget?\" ="}
+{"tMs":2869,"delta":"budget options:[\"Under $"}
+{"tMs":2903,"delta":"800\",\"$800 to $1"}
+{"tMs":2937,"delta":",500\",\"Over $1,"}
+{"tMs":2969,"delta":"500\"] -> step=4"}
+{"tMs":3004,"delta":"\n    ActionButton \""}
+{"tMs":3036,"delta":"Back\" tone:qui"}
+{"tMs":3069,"delta":"et -> step=2\n  "}
+{"tMs":3106,"delta":"if step==4\n    Rec"}
+{"tMs":3136,"delta":"ommendation \"{use=='"}
+{"tMs":3170,"delta":"Gaming' ? "}
+{"tMs":3203,"delta":"'Gaming laptop"}
+{"tMs":3237,"delta":" 16' : use=='"}
+{"tMs":3270,"delta":"Creative work' ? '"}
+{"tMs":3304,"delta":"Creator laptop 16"}
+{"tMs":3336,"delta":"' : use=='School' "}
+{"tMs":3370,"delta":"? 'Campus lapt"}
+{"tMs":3405,"delta":"op 14' : '"}
+{"tMs":3436,"delta":"Ultrabook 14'"}
+{"tMs":3469,"delta":"}\" \"Best fit for"}
+{"tMs":3503,"delta":" {lower(use)},"}
+{"tMs":3537,"delta":" focused on {lower(det"}
+{"tMs":3569,"delta":"ail)}, in the {bud"}
+{"tMs":3603,"delta":"get} range.\" reasons:"}
+{"tMs":3636,"delta":"=["}
+{"tMs":3669,"delta":"use,detail,budget]"}
+{"tMs":3702,"delta":" eyebrow:\""}
+{"tMs":3736,"delta":"Top pick\" kind:\""}
+{"tMs":3772,"delta":"laptop\"\n    Details"}
+{"tMs":3803,"delta":" rows:=[[\"Use"}
+{"tMs":3836,"delta":"\",use],[\"Focus\","}
+{"tMs":3870,"delta":"detail],[\"Budget\","}
+{"tMs":3903,"delta":"budget]]\n    Act"}
+{"tMs":3936,"delta":"ionButton \"Back\" t"}
+{"tMs":3969,"delta":"one:quiet -> step"}
+{"tMs":4002,"delta":"=3\n    ActionBut"}
+{"tMs":4036,"delta":"ton \"Start over\" tone"}
+{"tMs":4069,"delta":":primary -> step=1"}
+{"tMs":4102,"delta":"; use=\"\"; detail="}
+{"tMs":4136,"delta":"\"\"; budget=\"\""}

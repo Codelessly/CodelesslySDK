@@ -1,0 +1,149 @@
+{"meta":{"ui":"order_summary","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show my grocery order as an inline card before you place it: five line items with a picture placeholder, price and a quantity I can raise or lower (removing at zero), a promo code field that takes SAVE10, the subtotal, delivery and total kept up to date, and confirm and cancel buttons that tell you what I decided.","text":"ChatCard \"Your grocery order\" \"Review before placing\" icon:\"shopping_basket\" status:\"Draft\" tone:accent w:390\n  state items=[{\"id\":1,\"name\":\"Bananas\",\"detail\":\"1 bunch\",\"price\":2.49,\"qty\":1,\"kind\":\"banana\",\"tone\":\"sand\"},{\"id\":2,\"name\":\"Whole milk\",\"detail\":\"2 L\",\"price\":3.29,\"qty\":2,\"kind\":\"milk\",\"tone\":\"sky\"},{\"id\":3,\"name\":\"Sourdough bread\",\"detail\":\"1 loaf\",\"price\":4.5,\"qty\":1,\"kind\":\"bread\",\"tone\":\"sand\"},{\"id\":4,\"name\":\"Free-range eggs\",\"detail\":\"12 pack\",\"price\":5.2,\"qty\":1,\"kind\":\"eggs\",\"tone\":\"rose\"},{\"id\":5,\"name\":\"Cheddar cheese\",\"detail\":\"250 g\",\"price\":4.99,\"qty\":1,\"kind\":\"cheese\",\"tone\":\"mint\"}]\n  state promo=\"\"\n  state decision=\"\"\n  if decision==\"\"\n    SectionLabel \"Items\" \"{length(items)} products\"\n    each i in items\n      CartLine \"{i.name}\" \"{i.detail}\" price:=money(i.price*i.qty,\"$\",2) qty:=i.qty kind:=i.kind tone:=i.tone -> items=result==0?removeWhere(items,x=>x.id==i.id):updateWhere(items,x=>x.id==i.id,x=>with(x,\"qty\",result))\n    InputField \"Promo code\" \"Try SAVE10\" =promo success:=upper(trim(promo))==\"SAVE10\"?\"SAVE10 applied: 10% off\":\"\" error:=promo!=\"\"&&upper(trim(promo))!=\"SAVE10\"?\"Code not recognised\":\"\"\n    Details rows:=[[\"Subtotal\",money(sum(items,x=>x.price*x.qty),\"$\",2)],[\"Discount\",upper(trim(promo))==\"SAVE10\"?\"-\"+money(sum(items,x=>x.price*x.qty)*0.1,\"$\",2):\"\"],[\"Delivery\",sum(items,x=>x.qty)==0?\"$0.00\":\"$4.99\"]]\n    TotalBar \"Total\" \"{sum(items,x=>x.qty)} items\" amount:=money(sum(items,x=>x.price*x.qty)*(upper(trim(promo))==\"SAVE10\"?0.9:1)+(sum(items,x=>x.qty)==0?0:4.99),\"$\",2) cta:\"Confirm\" enabled:=length(items)>0 -> decision=\"confirmed\"; emit confirm\n    ActionButton \"Cancel\" tone:quiet -> decision=\"cancelled\"; emit cancel\n  if decision==\"confirmed\"\n    Receipt \"Order placed\" \"Your groceries are on their way.\" tone:good icon:\"check\"\n  if decision==\"cancelled\"\n    Receipt \"Order cancelled\" \"Nothing was charged.\" tone:neutral icon:\"close\"","usage":{"input_tokens":7834,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1003,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1054,"totalMs":5948}}
+{"tMs":1054,"delta":"ChatCard \"Your"}
+{"tMs":1354,"delta":" gr"}
+{"tMs":1354,"delta":"ocery order\" \"Review"}
+{"tMs":1354,"delta":" before placing\" icon:\""}
+{"tMs":1354,"delta":"shopping_bas"}
+{"tMs":1354,"delta":"ket\" status:\"Dra"}
+{"tMs":1354,"delta":"ft\" tone:acc"}
+{"tMs":1354,"delta":"ent w:390"}
+{"tMs":1354,"delta":"\n  state items=[{\"id"}
+{"tMs":1354,"delta":"\":1,\"name"}
+{"tMs":1372,"delta":"\":\"Bananas\",\"det"}
+{"tMs":1405,"delta":"ail\":\"1 b"}
+{"tMs":1439,"delta":"unch\",\"price\":2"}
+{"tMs":1668,"delta":".49"}
+{"tMs":1668,"delta":",\"q"}
+{"tMs":1668,"delta":"ty\":1,\"kind\":"}
+{"tMs":1668,"delta":"\"banana\",\""}
+{"tMs":1668,"delta":"tone\":\"sand"}
+{"tMs":1668,"delta":"\"},{\"id\":2,"}
+{"tMs":1672,"delta":"\"name\":\"Whole mil"}
+{"tMs":1704,"delta":"k\",\"detail\":\"2 "}
+{"tMs":1737,"delta":"L\",\"price\":3"}
+{"tMs":1771,"delta":".29"}
+{"tMs":1804,"delta":",\"qty\":2,\""}
+{"tMs":1837,"delta":"kind\":\"milk\",\"t"}
+{"tMs":1974,"delta":"one\":\"sky\"},{"}
+{"tMs":1974,"delta":"\"id\":3,\"name\":"}
+{"tMs":1974,"delta":"\"Sourdough bread"}
+{"tMs":1974,"delta":"\",\"detail\":\"1 lo"}
+{"tMs":2006,"delta":"af\",\"price\":4.5"}
+{"tMs":2040,"delta":",\"qty\":1,\""}
+{"tMs":2073,"delta":"kind\":\"bread\",\"t"}
+{"tMs":2107,"delta":"one\":\"sand\"},{"}
+{"tMs":2141,"delta":"\"id\":4,\"name\":"}
+{"tMs":2174,"delta":"\"Free-"}
+{"tMs":2207,"delta":"range eggs\",\"detail\":"}
+{"tMs":2240,"delta":"\"12 p"}
+{"tMs":2286,"delta":"ack\",\"price\":5"}
+{"tMs":2306,"delta":".2"}
+{"tMs":2344,"delta":",\"qty\":1,\""}
+{"tMs":2373,"delta":"kind\":\"eggs\",\""}
+{"tMs":2407,"delta":"tone\":\"rose\"},"}
+{"tMs":2440,"delta":"{\"id\":5,\"name"}
+{"tMs":2474,"delta":"\":\"Cheddar c"}
+{"tMs":2507,"delta":"heese\",\"detail\":\"250"}
+{"tMs":2541,"delta":" g\",\"price\":4"}
+{"tMs":2574,"delta":".99"}
+{"tMs":2607,"delta":",\"qty\":1,\""}
+{"tMs":2640,"delta":"kind\":\"cheese\",\""}
+{"tMs":2674,"delta":"tone\":\"mint\"}"}
+{"tMs":2707,"delta":"]\n  state prom"}
+{"tMs":2741,"delta":"o=\"\"\n  state decision"}
+{"tMs":2774,"delta":"=\"\"\n  if"}
+{"tMs":2807,"delta":" decision=="}
+{"tMs":2840,"delta":"\"\"\n    S"}
+{"tMs":2873,"delta":"ectionLabel \"Items"}
+{"tMs":2907,"delta":"\" \"{length"}
+{"tMs":2940,"delta":"(items)} products"}
+{"tMs":2973,"delta":"\"\n    each i in items"}
+{"tMs":3006,"delta":"\n      CartLine \"{i"}
+{"tMs":3040,"delta":".name}\" \"{i."}
+{"tMs":3073,"delta":"detail}\" price:="}
+{"tMs":3106,"delta":"money"}
+{"tMs":3139,"delta":"(i.price*"}
+{"tMs":3173,"delta":"i.qty,\"$\","}
+{"tMs":3206,"delta":"2) q"}
+{"tMs":3239,"delta":"ty:=i.qty k"}
+{"tMs":3273,"delta":"ind:=i.kind t"}
+{"tMs":3306,"delta":"one:=i.tone -"}
+{"tMs":3339,"delta":"> items=result"}
+{"tMs":3373,"delta":"==0?removeWhere"}
+{"tMs":3406,"delta":"(items,x=>x."}
+{"tMs":3441,"delta":"id==i.id):update"}
+{"tMs":3473,"delta":"Where(items,x="}
+{"tMs":3507,"delta":">x.id==i.id"}
+{"tMs":3541,"delta":",x=>with(x,"}
+{"tMs":3574,"delta":"\"qty\",result))\n    "}
+{"tMs":3607,"delta":"InputField \"Promo code"}
+{"tMs":3642,"delta":"\" \""}
+{"tMs":3677,"delta":"Try SAVE10\" ="}
+{"tMs":3707,"delta":"promo success:=up"}
+{"tMs":3741,"delta":"per(tr"}
+{"tMs":3773,"delta":"im(promo))==\"S"}
+{"tMs":3808,"delta":"AVE10\"?\"S"}
+{"tMs":3843,"delta":"AVE10 applied:"}
+{"tMs":3874,"delta":" 10% off\":\"\" error"}
+{"tMs":3908,"delta":":=promo!=\"\""}
+{"tMs":3941,"delta":"&&upper(trim("}
+{"tMs":3974,"delta":"promo))!=\"SAV"}
+{"tMs":4008,"delta":"E10\"?\"Code"}
+{"tMs":4044,"delta":" not recognised"}
+{"tMs":4074,"delta":"\":\"\"\n    Details rows"}
+{"tMs":4108,"delta":":=[[\"Subtot"}
+{"tMs":4141,"delta":"al\",money(sum(items"}
+{"tMs":4174,"delta":",x=>x.price*"}
+{"tMs":4208,"delta":"x.qty),\"$\","}
+{"tMs":4241,"delta":"2)],[\"Discount\","}
+{"tMs":4275,"delta":"upper(trim(promo"}
+{"tMs":4309,"delta":"))==\"SAVE10"}
+{"tMs":4343,"delta":"\"?\"-\"+money("}
+{"tMs":4375,"delta":"sum(items,x=>"}
+{"tMs":4408,"delta":"x.price*x.qty"}
+{"tMs":4445,"delta":")*0.1,\"$"}
+{"tMs":4475,"delta":"\",2):\"\"],[\"Del"}
+{"tMs":4508,"delta":"ivery\","}
+{"tMs":4542,"delta":"sum(items,x=>"}
+{"tMs":4575,"delta":"x.q"}
+{"tMs":4608,"delta":"ty)==0?\"$0"}
+{"tMs":4642,"delta":".00\":\"$4.99"}
+{"tMs":4675,"delta":"\"]]\n    Total"}
+{"tMs":4708,"delta":"Bar \"Total\" \"{"}
+{"tMs":4741,"delta":"s"}
+{"tMs":4775,"delta":"um(items,x=>x"}
+{"tMs":4808,"delta":".qty)} items"}
+{"tMs":4842,"delta":"\" amount:=money(s"}
+{"tMs":4875,"delta":"um(items,x=>x"}
+{"tMs":4908,"delta":".price*x.qty)"}
+{"tMs":4942,"delta":"*(upper(trim("}
+{"tMs":4975,"delta":"promo))==\"SAV"}
+{"tMs":5010,"delta":"E10\"?0.9:"}
+{"tMs":5042,"delta":"1)+(sum(items"}
+{"tMs":5075,"delta":",x=>x.qty"}
+{"tMs":5110,"delta":")==0?0:4."}
+{"tMs":5142,"delta":"99),\"$\","}
+{"tMs":5175,"delta":"2) cta:\"Conf"}
+{"tMs":5209,"delta":"irm\" enabled:="}
+{"tMs":5242,"delta":"length(items)>0 -"}
+{"tMs":5275,"delta":"> decision=\"confirm"}
+{"tMs":5309,"delta":"ed\";"}
+{"tMs":5342,"delta":" emit confirm\n    "}
+{"tMs":5395,"delta":"ActionButton \"Canc"}
+{"tMs":5409,"delta":"el\" tone:quiet"}
+{"tMs":5443,"delta":" -> decision=\"cancel"}
+{"tMs":5476,"delta":"led\"; emit cancel"}
+{"tMs":5509,"delta":"\n  if decision="}
+{"tMs":5545,"delta":"=\"confirmed\"\n    "}
+{"tMs":5576,"delta":"Receipt \"Order plac"}
+{"tMs":5609,"delta":"ed\" \"Your gro"}
+{"tMs":5642,"delta":"ceries are"}
+{"tMs":5675,"delta":" on their way.\" t"}
+{"tMs":5709,"delta":"one:good icon:\"check"}
+{"tMs":5742,"delta":"\"\n  if decision==\""}
+{"tMs":5776,"delta":"cancelled\"\n    "}
+{"tMs":5809,"delta":"Receipt \"Order canc"}
+{"tMs":5842,"delta":"elled\" \""}
+{"tMs":5883,"delta":"Nothing was char"}
+{"tMs":5909,"delta":"ged.\" tone:neutral"}
+{"tMs":5942,"delta":" icon:\"close\""}

@@ -1,0 +1,77 @@
+{
+ "ui": "carousel",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 20112,
+ "turns": [
+  {
+   "input_tokens": 7818,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 822,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 581,
+   "totalMs": 3752,
+   "chars": 1656,
+   "lines": 23,
+   "jsonTails": 0,
+   "nodes": 5,
+   "outputTokensPerNode": "164.4",
+   "notationIssues": [
+    "line 6:1: An \"if\" needs a parent: indent it under a node.",
+    "line 11:1: An \"if\" needs a parent: indent it under a node.",
+    "line 12:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 13:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 14:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 15:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 16:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 17:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 18:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 19:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 20:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 21:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 22:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 23:5: A second root: the first line is the root, everything else is indented under it."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 9052,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 828,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 493,
+   "totalMs": 2756,
+   "chars": 1710,
+   "lines": 23,
+   "jsonTails": 0,
+   "nodes": 16,
+   "outputTokensPerNode": "51.8",
+   "notationIssues": [],
+   "errors": [
+    "unknown_bind_path /nodes/segmentedButton1/bind/props.items: A segmentedButton has no prop \"items\". Its props: segments, selected, multiSelectionEnabled, emptySelectionAllowed, showSelectedIcon, selectedIcon, direction, enabled, textStyle, backgroundColor, selectedBackgroundColor, foregroundColor, selectedForegroundColor, side, borderRadius, padding, segmentHeight, expanded, shrinkTapTarget, variant, trackPadding, selectedShadows, slidingThumb."
+   ]
+  }
+ ]
+}

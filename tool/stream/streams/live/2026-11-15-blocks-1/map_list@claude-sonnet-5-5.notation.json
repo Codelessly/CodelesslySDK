@@ -1,0 +1,274 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Coffee nearby",
+    "subtitle": "5 shops within 1 km",
+    "icon": "local_cafe",
+    "status": "Open now",
+    "tone": "accent"
+   },
+   "children": [
+    "MapPanel1",
+    "SectionLabel1",
+    "PlaceRow1",
+    "PlaceRow2",
+    "PlaceRow3",
+    "PlaceRow4",
+    "PlaceRow5"
+   ]
+  },
+  "MapPanel1": {
+   "type": "MapPanel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178.0
+   },
+   "props": {
+    "value": "pick",
+    "count": 5
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Shops",
+    "note": "tap to see details"
+   }
+  },
+  "PlaceRow1": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Blue Door Coffee",
+    "detail": "Specialty espresso and pastries",
+    "index": 1,
+    "rating": "4.8",
+    "distance": "150 m",
+    "hours": "7:00 – 18:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow2": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Corner Roasters",
+    "detail": "Small-batch roasts, bean shop",
+    "index": 2,
+    "rating": "4.6",
+    "distance": "300 m",
+    "hours": "6:30 – 17:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow3": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Daily Grind",
+    "detail": "Quick takeaway, good flat white",
+    "index": 3,
+    "rating": "4.4",
+    "distance": "450 m",
+    "hours": "6:00 – 20:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow4": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "The Quiet Cup",
+    "detail": "Calm spot with seating to work",
+    "index": 4,
+    "rating": "4.7",
+    "distance": "700 m",
+    "hours": "8:00 – 16:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==4}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow5": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Park Bench Café",
+    "detail": "Garden terrace by the park",
+    "index": 5,
+    "rating": "4.5",
+    "distance": "950 m",
+    "hours": "8:00 – 19:00"
+   },
+   "bind": {
+    "props.selected": "${= pick==5}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 5}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

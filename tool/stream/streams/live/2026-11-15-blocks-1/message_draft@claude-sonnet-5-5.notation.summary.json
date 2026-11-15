@@ -1,0 +1,62 @@
+{
+ "ui": "message_draft",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 20112,
+ "turns": [
+  {
+   "input_tokens": 7835,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 759,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 682,
+   "totalMs": 5468,
+   "chars": 1946,
+   "lines": 17,
+   "jsonTails": 0,
+   "nodes": 11,
+   "outputTokensPerNode": "69.0",
+   "notationIssues": [],
+   "errors": [
+    "invalid_enum /nodes/InputField1/props/keyboard: the text \"email\" is not a String. Allowed: text, emailAddress, number, phone, url."
+   ]
+  },
+  {
+   "input_tokens": 8673,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 763,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 568,
+   "totalMs": 3749,
+   "chars": 1953,
+   "lines": 17,
+   "jsonTails": 0,
+   "nodes": 11,
+   "outputTokensPerNode": "69.4",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

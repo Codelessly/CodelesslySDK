@@ -1,0 +1,331 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "text1",
+    "InputField1",
+    "InputField2",
+    "Segments1",
+    "InputField3",
+    "row1",
+    "Receipt1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "Draft to landlord"
+   }
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "To",
+    "placeholder": "landlord@example.com",
+    "value": "to"
+   },
+   "bind": {
+    "visible": "${= sent==false}"
+   }
+  },
+  "InputField2": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Subject",
+    "placeholder": "Subject",
+    "value": "subject"
+   },
+   "bind": {
+    "visible": "${= sent==false}"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "tone",
+    "options": [
+     "polite",
+     "firm"
+    ]
+   },
+   "bind": {
+    "visible": "${= sent==false}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "body",
+       "value": "${= tone==\"firm\"?\"The heating in my flat has not worked for over a week, and I have reported it twice already. Please arrange a repair within 48 hours.\":\"Hi, I'm sorry to bother you, but the heating in my flat has stopped working. Could you arrange a repair when you have a chance? Thank you.\"}"
+      }
+     ]
+    }
+   ]
+  },
+  "InputField3": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Message",
+    "placeholder": "Write your message",
+    "value": "body",
+    "lines": 6
+   },
+   "bind": {
+    "visible": "${= sent==false}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= sent==false}"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Discard",
+    "tone": "quiet",
+    "icon": "delete_outline"
+   },
+   "bind": {
+    "props.enabled": "${true}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "to",
+       "value": "landlord@example.com"
+      },
+      {
+       "type": "setVariable",
+       "variable": "subject",
+       "value": "Heating not working"
+      },
+      {
+       "type": "setVariable",
+       "variable": "body",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "tone",
+       "value": "polite"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Send",
+    "tone": "primary",
+    "icon": "send"
+   },
+   "bind": {
+    "props.enabled": "${= length(to)>0 && length(subject)>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sent",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "send_email"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Email sent",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.message": "Sent to ${to}",
+    "visible": "${= sent}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "to",
+    "type": "text",
+    "value": "landlord@example.com"
+   },
+   {
+    "name": "subject",
+    "type": "text",
+    "value": "Heating not working"
+   },
+   {
+    "name": "body",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "tone",
+    "type": "text",
+    "value": "polite"
+   },
+   {
+    "name": "sent",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

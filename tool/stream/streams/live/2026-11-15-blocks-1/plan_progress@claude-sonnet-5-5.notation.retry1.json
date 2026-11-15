@@ -1,0 +1,333 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1500,
+      "when": "${= running && done<6}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= done+1}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= running && done<6}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= elapsed+1}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Blog migration",
+    "subtitle": "Six steps to move your blog",
+    "icon": "sync"
+   },
+   "bind": {
+    "props.status": "${= done==6?\"Done\":(running?\"Running\":\"Ready\")}",
+    "props.tone": "${= done==6?\"good\":\"accent\"}"
+   },
+   "children": [
+    "SectionLabel1",
+    "listView1",
+    "ProgressLine1",
+    "row1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Plan"
+   },
+   "bind": {
+    "props.note": "${done} of 6 done"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${steps}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "PlanStep1"
+   ]
+  },
+  "PlanStep1": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.t}",
+    "props.detail": "${item.d}",
+    "props.index": "${item.i}",
+    "props.current": "${done}",
+    "props.running": "${running}",
+    "props.last": "${= item.i==5}"
+   }
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${done} of 6 steps",
+    "props.detail": "${elapsed} s elapsed",
+    "props.value": "${= done/6}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= done<6}"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start",
+    "tone": "primary",
+    "icon": "play_arrow"
+   },
+   "bind": {
+    "props.enabled": "${= !running}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Pause",
+    "tone": "quiet",
+    "icon": "pause"
+   },
+   "bind": {
+    "props.enabled": "${running}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Migration complete",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.message": "All 6 steps finished in ${elapsed} seconds.",
+    "visible": "${= done>=6}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "done",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "running",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "elapsed",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "steps",
+    "type": "list",
+    "value": [
+     {
+      "t": "Back up content",
+      "d": "Export posts, images and settings.",
+      "i": 0
+     },
+     {
+      "t": "Set up new host",
+      "d": "Create the site and install the platform.",
+      "i": 1
+     },
+     {
+      "t": "Import posts",
+      "d": "Bring over articles, tags and comments.",
+      "i": 2
+     },
+     {
+      "t": "Move media",
+      "d": "Upload images and fix their links.",
+      "i": 3
+     },
+     {
+      "t": "Redirect URLs",
+      "d": "Map old addresses to the new ones.",
+      "i": 4
+     },
+     {
+      "t": "Switch DNS",
+      "d": "Point the domain and check HTTPS.",
+      "i": 5
+     }
+    ]
+   }
+  ]
+ }
+}

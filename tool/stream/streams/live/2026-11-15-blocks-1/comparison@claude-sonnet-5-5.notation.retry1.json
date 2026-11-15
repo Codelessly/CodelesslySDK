@@ -1,0 +1,143 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Compare phone plans",
+    "subtitle": "Two plans, side by side",
+    "icon": "smartphone"
+   },
+   "children": [
+    "ComparisonTable1",
+    "Recommendation1"
+   ]
+  },
+  "ComparisonTable1": {
+   "type": "ComparisonTable",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Lite",
+     "Max"
+    ],
+    "prices": [
+     "$20/mo",
+     "$35/mo"
+    ],
+    "pick": "Max",
+    "pickLabel": "Best value",
+    "cta": "Choose",
+    "corner": "Plan",
+    "rows": [
+     [
+      "Price",
+      "$20",
+      "$35",
+      1
+     ],
+     [
+      "Data",
+      "10 GB",
+      "Unlimited",
+      2
+     ],
+     [
+      "Calls",
+      "300 min",
+      "Unlimited",
+      2
+     ],
+     [
+      "Roaming",
+      "EU only",
+      "EU + US",
+      2
+     ],
+     [
+      "Contract",
+      "12 months",
+      "Monthly",
+      2
+     ],
+     [
+      "Extras",
+      "None",
+      "Streaming + eSIM",
+      2
+     ]
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChoose"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "You picked ${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "choosePlan",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Recommendation1": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Max is the better value",
+    "why": "For $15 more you get unlimited data and calls, wider roaming and no lock-in.",
+    "eyebrow": "Recommended"
+   }
+  }
+ }
+}

@@ -1,0 +1,245 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 390,
+    "padding": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Carousel1",
+    "text1"
+   ]
+  },
+  "Carousel1": {
+   "type": "Carousel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "i",
+    "count": 6,
+    "kind": "shoe"
+   },
+   "bind": {
+    "props.thumbs": "${= map(items,x=>x.tone)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "i",
+       "value": "${= i}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "ProductTile1"
+   ]
+  },
+  "ProductTile1": {
+   "type": "ProductTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "detail": "Running shoe",
+    "kind": "shoe"
+   },
+   "bind": {
+    "props.name": "${= items[i].name}",
+    "props.price": "${= items[i].price}",
+    "props.rating": "${= items[i].rating}",
+    "props.tone": "${= items[i].tone}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= i+1}"
+      }
+     ]
+    }
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "Tap a shoe to see details"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "i",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "pick",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "name": "Velocity 3",
+      "price": 129,
+      "rating": 4.6,
+      "tone": "sky",
+      "desc": "Responsive daily trainer with a cushioned midsole.",
+      "sizes": [
+       "8",
+       "9",
+       "10",
+       "11"
+      ]
+     },
+     {
+      "name": "Trail Hawk",
+      "price": 149,
+      "rating": 4.7,
+      "tone": "mint",
+      "desc": "Grippy outsole for muddy and rocky routes.",
+      "sizes": [
+       "8",
+       "9",
+       "10",
+       "11"
+      ]
+     },
+     {
+      "name": "Sprint Pro",
+      "price": 169,
+      "rating": 4.8,
+      "tone": "rose",
+      "desc": "Lightweight racer built for fast tempo runs.",
+      "sizes": [
+       "7",
+       "8",
+       "9",
+       "10"
+      ]
+     },
+     {
+      "name": "Cloud Glide",
+      "price": 119,
+      "rating": 4.4,
+      "tone": "sand",
+      "desc": "Soft, plush ride for long easy miles.",
+      "sizes": [
+       "8",
+       "9",
+       "10",
+       "11",
+       "12"
+      ]
+     },
+     {
+      "name": "Stride Max",
+      "price": 139,
+      "rating": 4.5,
+      "tone": "lilac",
+      "desc": "Stable support with a wide, secure fit.",
+      "sizes": [
+       "9",
+       "10",
+       "11"
+      ]
+     },
+     {
+      "name": "Apex Flow",
+      "price": 159,
+      "rating": 4.6,
+      "tone": "slate",
+      "desc": "Springy carbon-plate shoe for race day.",
+      "sizes": [
+       "8",
+       "9",
+       "10"
+      ]
+     }
+    ]
+   },
+   {
+    "name": "size",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "bag",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

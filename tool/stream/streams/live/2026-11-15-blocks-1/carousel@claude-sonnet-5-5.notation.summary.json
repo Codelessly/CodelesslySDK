@@ -1,0 +1,85 @@
+{
+ "ui": "carousel",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 20112,
+ "turns": [
+  {
+   "input_tokens": 7819,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 824,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 827,
+   "totalMs": 5853,
+   "chars": 1705,
+   "lines": 25,
+   "jsonTails": 0,
+   "nodes": 2,
+   "outputTokensPerNode": "412.0",
+   "notationIssues": [
+    "line 9:1: A second root: the first line is the root, everything else is indented under it.",
+    "line 10:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 11:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 12:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 13:3: An \"if\" needs a parent: indent it under a node.",
+    "line 14:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 15:63: Unknown word \"money(items[i].price,\" on a ProductTile. Props are written key:value.",
+    "line 15:84: A ProductTile takes no more strings (name, detail): write the rest as key:\"value\".",
+    "line 15:87: Unknown word \",0)\" on a ProductTile. Props are written key:value.",
+    "line 15:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 16:3: An \"if\" needs a parent: indent it under a node.",
+    "line 17:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 18:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 19:13: A Media takes no string: write the rest as key:\"value\".",
+    "line 19:7: A Media needs kind: write kind:value.",
+    "line 19:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 20:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 21:9: A second root: the first line is the root, everything else is indented under it.",
+    "line 22:9: A second root: the first line is the root, everything else is indented under it.",
+    "line 23:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 24:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 25:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 26:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 27:7: A second root: the first line is the root, everything else is indented under it."
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 9349,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 813,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 807,
+   "totalMs": 4342,
+   "chars": 1686,
+   "lines": 24,
+   "jsonTails": 0,
+   "nodes": 19,
+   "outputTokensPerNode": "42.8",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

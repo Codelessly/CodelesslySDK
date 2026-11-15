@@ -1,0 +1,148 @@
+{"meta":{"ui":"question_flow","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"ChatCard \"Find your laptop\" \"Three quick questions\" icon:\"laptop_mac\" status:\"Step {step} of 3\" tone:accent w:390\n  state step=1\n  state use=\"\"\n  state detail=\"\"\n  state budget=\"\"\n  if step<4\n    Steps steps:[\"Use\",\"Details\",\"Budget\"] current:=step\n  if step==1\n    OptionList \"What will you use it for?\" =use options:[\"Work and email\",\"Creative work\",\"Gaming\",\"School\"] details:[\"Documents, calls, browsing\",\"Photo, video, design\",\"Modern games, high frame rates\",\"Notes, research, portability\"] -> detail=\"\"; step=2\n  if step==2\n    if use==\"Work and email\"\n      OptionList \"What matters most?\" =detail options:[\"Battery life\",\"Light to carry\",\"Big screen\"] -> step=3\n    if use==\"Creative work\"\n      OptionList \"What do you create?\" =detail options:[\"Photo editing\",\"Video editing\",\"3D and design\"] -> step=3\n    if use==\"Gaming\"\n      OptionList \"What kind of games?\" =detail options:[\"Competitive shooters\",\"Big open-world\",\"Casual and indie\"] -> step=3\n    if use==\"School\"\n      OptionList \"How will you carry it?\" =detail options:[\"All day on campus\",\"Mostly at a desk\",\"Back and forth by bus\"] -> step=3\n    ActionButton \"Back\" tone:quiet -> step=1\n  if step==3\n    OptionList \"What is your budget?\" =budget options:[\"Under $800\",\"$800 to $1,500\",\"Over $1,500\"] -> step=4\n    ActionButton \"Back\" tone:quiet -> step=2\n  if step==4\n    Recommendation \"{use=='Gaming' ? 'Gaming laptop 16' : use=='Creative work' ? 'Creator laptop 16' : use=='School' ? 'Campus laptop 14' : 'Ultrabook 14'}\" \"Best fit for {lower(use)}, focused on {lower(detail)}, in the {budget} range.\" reasons:[use,detail,budget] eyebrow:\"Top pick\" kind:\"laptop\"\n    Details rows:=[[\"Use\",use],[\"Focus\",detail],[\"Budget\",budget]]\n    ActionButton \"Back\" tone:quiet -> step=3\n    ActionButton \"Start over\" tone:primary -> step=1; use=\"\"; detail=\"\"; budget=\"\"","usage":{"input_tokens":7807,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":780,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":709,"totalMs":5607}}
+{"tMs":709,"delta":"ChatCard \""}
+{"tMs":1044,"delta":"Find"}
+{"tMs":1044,"delta":" your"}
+{"tMs":1044,"delta":" laptop\" \"Three"}
+{"tMs":1045,"delta":" qu"}
+{"tMs":1045,"delta":"ick questions\" icon:\""}
+{"tMs":1045,"delta":"laptop_"}
+{"tMs":1045,"delta":"mac\" status:\"Step"}
+{"tMs":1045,"delta":" {"}
+{"tMs":1045,"delta":"step} of 3\" tone"}
+{"tMs":1045,"delta":":accent w:390"}
+{"tMs":1064,"delta":"\n  state step=1\n  "}
+{"tMs":1099,"delta":"state use=\"\"\n  state det"}
+{"tMs":1347,"delta":"ail=\"\"\n  state budget"}
+{"tMs":1347,"delta":"=\"\"\n  if step<"}
+{"tMs":1347,"delta":"4"}
+{"tMs":1347,"delta":"\n    Steps steps:"}
+{"tMs":1347,"delta":"[\"Use"}
+{"tMs":1347,"delta":"\",\"Details"}
+{"tMs":1347,"delta":"\",\"Budget\"] current:"}
+{"tMs":1365,"delta":"="}
+{"tMs":1399,"delta":"step\n  if step==1"}
+{"tMs":1434,"delta":"\n    OptionList \"What will"}
+{"tMs":1468,"delta":" you use it for?\" =use"}
+{"tMs":1501,"delta":" options:[\"Work and"}
+{"tMs":1665,"delta":" email"}
+{"tMs":1665,"delta":"\",\"Cre"}
+{"tMs":1665,"delta":"ative work\",\"Gaming\",\""}
+{"tMs":1665,"delta":"School"}
+{"tMs":1666,"delta":"\"] details:[\"Docum"}
+{"tMs":1699,"delta":"ents, cal"}
+{"tMs":1732,"delta":"ls, brow"}
+{"tMs":1766,"delta":"sing\",\"Phot"}
+{"tMs":1798,"delta":"o"}
+{"tMs":1831,"delta":", video, design\",\"Mod"}
+{"tMs":1864,"delta":"ern games,"}
+{"tMs":1896,"delta":" high"}
+{"tMs":1989,"delta":" fr"}
+{"tMs":1989,"delta":"ame rates"}
+{"tMs":1995,"delta":"\",\"Not"}
+{"tMs":2028,"delta":"es, research,"}
+{"tMs":2061,"delta":" port"}
+{"tMs":2094,"delta":"ability\"] -"}
+{"tMs":2127,"delta":"> det"}
+{"tMs":2160,"delta":"ail=\"\";"}
+{"tMs":2194,"delta":" step=2\n  if step=="}
+{"tMs":2228,"delta":"2\n    if use==\""}
+{"tMs":2262,"delta":"Work and email\"\n      Opt"}
+{"tMs":2295,"delta":"ionList \"What mat"}
+{"tMs":2329,"delta":"ters most?\" =detail options"}
+{"tMs":2363,"delta":":[\"Battery life\",\""}
+{"tMs":2396,"delta":"Light"}
+{"tMs":2429,"delta":" to"}
+{"tMs":2461,"delta":" car"}
+{"tMs":2497,"delta":"ry\",\"Big"}
+{"tMs":2529,"delta":" screen\"] -> step="}
+{"tMs":2562,"delta":"3\n    if use==\""}
+{"tMs":2596,"delta":"Creative work\"\n      Opt"}
+{"tMs":2631,"delta":"ionList \"What do"}
+{"tMs":2663,"delta":" you create?\" =detail options"}
+{"tMs":2697,"delta":":[\"Photo editing\",\""}
+{"tMs":2731,"delta":"Video editing\",\"3"}
+{"tMs":2763,"delta":"D and"}
+{"tMs":2801,"delta":" design\"] -> step=3"}
+{"tMs":2831,"delta":"\n    if use==\"G"}
+{"tMs":2865,"delta":"aming\"\n      Option"}
+{"tMs":2901,"delta":"List \"What k"}
+{"tMs":2931,"delta":"ind of games?"}
+{"tMs":2965,"delta":"\" =detail options:[\""}
+{"tMs":2997,"delta":"Compet"}
+{"tMs":3031,"delta":"itive sh"}
+{"tMs":3064,"delta":"ooters\",\"Big"}
+{"tMs":3098,"delta":" open-world\",\"Cas"}
+{"tMs":3131,"delta":"ual and"}
+{"tMs":3164,"delta":" indie\"] -> step="}
+{"tMs":3198,"delta":"3\n    if use==\"School"}
+{"tMs":3232,"delta":"\"\n      OptionList \""}
+{"tMs":3264,"delta":"How"}
+{"tMs":3297,"delta":" will"}
+{"tMs":3331,"delta":" you carry it?\" =det"}
+{"tMs":3364,"delta":"ail options:[\"All day on"}
+{"tMs":3398,"delta":" campus\",\"M"}
+{"tMs":3431,"delta":"ostly at a"}
+{"tMs":3464,"delta":" desk\",\"Back"}
+{"tMs":3497,"delta":" and forth by"}
+{"tMs":3531,"delta":" b"}
+{"tMs":3564,"delta":"us\"] -> step=3"}
+{"tMs":3598,"delta":"\n    "}
+{"tMs":3631,"delta":"ActionButton \"Back"}
+{"tMs":3665,"delta":"\" tone:qu"}
+{"tMs":3698,"delta":"iet -> step=1"}
+{"tMs":3731,"delta":"\n  if step==3\n    O"}
+{"tMs":3765,"delta":"ptionList \"What is your bud"}
+{"tMs":3799,"delta":"get?\" =budget options:"}
+{"tMs":3832,"delta":"[\""}
+{"tMs":3865,"delta":"Under $800\",\"$"}
+{"tMs":3899,"delta":"800 to $1,500"}
+{"tMs":3932,"delta":"\",\""}
+{"tMs":3966,"delta":"Over $1,500\"] -"}
+{"tMs":4000,"delta":"> step=4\n    Act"}
+{"tMs":4032,"delta":"ionButton \"Back\" t"}
+{"tMs":4065,"delta":"one:quiet -> step"}
+{"tMs":4099,"delta":"=2\n  if step==4"}
+{"tMs":4133,"delta":"\n    Recommendation \""}
+{"tMs":4166,"delta":"{"}
+{"tMs":4199,"delta":"use="}
+{"tMs":4232,"delta":"='Gaming' ?"}
+{"tMs":4266,"delta":" "}
+{"tMs":4299,"delta":"'G"}
+{"tMs":4332,"delta":"aming la"}
+{"tMs":4365,"delta":"ptop "}
+{"tMs":4398,"delta":"16'"}
+{"tMs":4432,"delta":" : use=='Creative work"}
+{"tMs":4466,"delta":"' ? 'Creator"}
+{"tMs":4504,"delta":" la"}
+{"tMs":4531,"delta":"ptop 16"}
+{"tMs":4565,"delta":"' : use=='School' "}
+{"tMs":4598,"delta":"? 'Camp"}
+{"tMs":4632,"delta":"us laptop 14' :"}
+{"tMs":4666,"delta":" 'Ultrabook"}
+{"tMs":4699,"delta":" 14'}\" \""}
+{"tMs":4732,"delta":"Best fit for {l"}
+{"tMs":4766,"delta":"ower(use)}"}
+{"tMs":4800,"delta":", focused on {l"}
+{"tMs":4833,"delta":"ower(detail)}, in"}
+{"tMs":4878,"delta":" the"}
+{"tMs":4899,"delta":" {budget} range.\" reas"}
+{"tMs":4933,"delta":"ons:["}
+{"tMs":4966,"delta":"use,detail,budget]"}
+{"tMs":4999,"delta":" eyebrow:\""}
+{"tMs":5032,"delta":"Top"}
+{"tMs":5065,"delta":" p"}
+{"tMs":5099,"delta":"ick\" kind:\"lapt"}
+{"tMs":5133,"delta":"op\"\n    Details rows"}
+{"tMs":5166,"delta":":="}
+{"tMs":5199,"delta":"[[\"Use\","}
+{"tMs":5253,"delta":"use],[\"Foc"}
+{"tMs":5266,"delta":"us\",detail],[\"Bud"}
+{"tMs":5300,"delta":"get\",budget]]\n    "}
+{"tMs":5335,"delta":"ActionButton \"Back"}
+{"tMs":5366,"delta":"\" tone:qu"}
+{"tMs":5400,"delta":"iet -> step=3"}
+{"tMs":5433,"delta":"\n    ActionButton \""}
+{"tMs":5466,"delta":"Start over\" tone:primary"}
+{"tMs":5500,"delta":" -> step"}
+{"tMs":5533,"delta":"=1; use=\"\"; det"}
+{"tMs":5567,"delta":"ail=\"\"; budget=\"\""}

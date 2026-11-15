@@ -1,0 +1,210 @@
+{"meta":{"ui":"itinerary","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Plan two days in Kyoto as an inline itinerary: a timeline per day with times, places, how to get between them and how long it takes. Each stop expands for details, each day has a checklist of things to book that I can tick off, and a line at the top says how many are left.","text":"ChatCard \"Kyoto in two days\" \"Temples, tea and old streets\" icon:\"temple_buddhist\" status:\"{length(b1)+length(b2)} of 6 booked\" tone:accent w:390\n  state b1=[]\n  state b2=[]\n  Paragraph \"{6-length(b1)-length(b2)} things left to book across both days.\" strong:true\n  DayHeader \"Day 1\" \"Eastern Kyoto\" kind:\"temple\" tone:\"dawn\" tag:\"Temples\"\n    ItineraryStop \"Kiyomizu-dera\" \"Hillside temple with a wooden stage. Arrive at opening to beat the crowds.\" time:\"08:00\" travel:\"Walk to Sannenzaka, 10 min\"\n    ItineraryStop \"Sannenzaka & Ninenzaka\" \"Preserved lanes of tea houses and craft shops. Good for a snack stop.\" time:\"10:00\" travel:\"Walk to Gion, 15 min\"\n    ItineraryStop \"Tea ceremony in Gion\" \"Small-group ceremony with matcha and sweets, about 45 minutes.\" time:\"12:30\" travel:\"Walk to Yasaka Shrine, 10 min\"\n    ItineraryStop \"Yasaka Shrine\" \"Lantern-lit shrine at the end of Gion; lovely at dusk.\" time:\"15:00\" travel:\"Bus 206 to Kyoto Station, 25 min\"\n    ItineraryStop \"Dinner in Pontocho\" \"Narrow lantern alley beside the Kamo River. Reservations advised.\" time:\"18:00\" last:true\n  Checklist \"Book ahead: Day 1\" =b1 items:[\"Tea ceremony in Gion\",\"Dinner in Pontocho\",\"Kiyomizu-dera early entry\"]\n  DayHeader \"Day 2\" \"Arashiyama and north\" kind:\"bamboo\" tone:\"day\" tag:\"Nature\"\n    ItineraryStop \"Arashiyama Bamboo Grove\" \"Go early for quiet paths and soft light.\" time:\"08:00\" travel:\"Walk to Tenryu-ji, 5 min\"\n    ItineraryStop \"Tenryu-ji Garden\" \"UNESCO garden with a pond and mountain backdrop.\" time:\"09:30\" travel:\"Train to Kyoto Station then bus, 50 min\"\n    ItineraryStop \"Kinkaku-ji\" \"The Golden Pavilion reflected in its pond; about an hour.\" time:\"13:00\" travel:\"Bus 205 to Nishijin, 20 min\"\n    ItineraryStop \"Nishiki Market\" \"Food stalls for pickles, tofu and skewers.\" time:\"15:30\" travel:\"Walk to Kamo River, 15 min\"\n    ItineraryStop \"Kaiseki dinner\" \"Seasonal multi-course meal. Book well in advance.\" time:\"18:30\" last:true\n  Checklist \"Book ahead: Day 2\" =b2 items:[\"Tenryu-ji garden ticket\",\"Kinkaku-ji timed entry\",\"Kaiseki dinner\"]","usage":{"input_tokens":7816,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1040,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":736,"totalMs":7649}}
+{"tMs":736,"delta":"ChatCard \"K"}
+{"tMs":1056,"delta":"yoto in two"}
+{"tMs":1056,"delta":" days\" \"Tem"}
+{"tMs":1056,"delta":"ples, t"}
+{"tMs":1056,"delta":"ea and"}
+{"tMs":1056,"delta":" old"}
+{"tMs":1056,"delta":" stre"}
+{"tMs":1056,"delta":"ets\" icon:\"tem"}
+{"tMs":1056,"delta":"ple_bu"}
+{"tMs":1056,"delta":"ddhist\""}
+{"tMs":1056,"delta":" status:\"{"}
+{"tMs":1058,"delta":"length"}
+{"tMs":1089,"delta":"(b"}
+{"tMs":1378,"delta":"1)+"}
+{"tMs":1378,"delta":"length(b2)} of "}
+{"tMs":1378,"delta":"6"}
+{"tMs":1378,"delta":" boo"}
+{"tMs":1378,"delta":"ked\" tone:accent w"}
+{"tMs":1378,"delta":":390"}
+{"tMs":1378,"delta":"\n  state b"}
+{"tMs":1378,"delta":"1=[]\n  state b"}
+{"tMs":1400,"delta":"2=[]\n  Pa"}
+{"tMs":1434,"delta":"ragraph \"{"}
+{"tMs":1464,"delta":"6"}
+{"tMs":1500,"delta":"-length(b1)-length"}
+{"tMs":1701,"delta":"(b2)} things left"}
+{"tMs":1701,"delta":" to book across"}
+{"tMs":1701,"delta":" both days.\""}
+{"tMs":1701,"delta":" strong:"}
+{"tMs":1701,"delta":"true\n  DayHeader"}
+{"tMs":1703,"delta":" \"Day 1\" \""}
+{"tMs":1739,"delta":"Eastern Kyoto"}
+{"tMs":1773,"delta":"\" kind:\"temple\""}
+{"tMs":1808,"delta":" tone:\"dawn\""}
+{"tMs":1843,"delta":" tag:\"Temples\""}
+{"tMs":1875,"delta":"\n    "}
+{"tMs":1909,"delta":"ItineraryStop \""}
+{"tMs":2033,"delta":"Kiyomizu-"}
+{"tMs":2033,"delta":"dera\" \"H"}
+{"tMs":2033,"delta":"ill"}
+{"tMs":2043,"delta":"side temple with a"}
+{"tMs":2077,"delta":" wooden stage. Ar"}
+{"tMs":2110,"delta":"rive at"}
+{"tMs":2143,"delta":" opening to be"}
+{"tMs":2176,"delta":"at the"}
+{"tMs":2210,"delta":" crowds.\" time:\"08"}
+{"tMs":2242,"delta":":00\""}
+{"tMs":2278,"delta":" travel:\"Walk to"}
+{"tMs":2310,"delta":" Sann"}
+{"tMs":2360,"delta":"en"}
+{"tMs":2375,"delta":"za"}
+{"tMs":2407,"delta":"ka, 10"}
+{"tMs":2442,"delta":" min\"\n    Itine"}
+{"tMs":2476,"delta":"raryStop \"Sann"}
+{"tMs":2509,"delta":"enzaka &"}
+{"tMs":2542,"delta":" Ninen"}
+{"tMs":2576,"delta":"zaka\" \"Pre"}
+{"tMs":2609,"delta":"served l"}
+{"tMs":2643,"delta":"anes of t"}
+{"tMs":2675,"delta":"ea hou"}
+{"tMs":2708,"delta":"ses and cra"}
+{"tMs":2742,"delta":"ft shops. Good"}
+{"tMs":2774,"delta":" for a sn"}
+{"tMs":2807,"delta":"ack st"}
+{"tMs":2841,"delta":"op.\" time:\"10"}
+{"tMs":2875,"delta":":00"}
+{"tMs":2908,"delta":"\" travel:\"Walk"}
+{"tMs":2941,"delta":" to Gion"}
+{"tMs":2975,"delta":", 15 min\"\n    "}
+{"tMs":3009,"delta":"ItineraryStop \""}
+{"tMs":3042,"delta":"Tea "}
+{"tMs":3076,"delta":"ceremony in Gion\""}
+{"tMs":3109,"delta":" \"Small"}
+{"tMs":3141,"delta":"-"}
+{"tMs":3174,"delta":"group "}
+{"tMs":3208,"delta":"ceremony with"}
+{"tMs":3241,"delta":" mat"}
+{"tMs":3274,"delta":"cha and"}
+{"tMs":3307,"delta":" sweets,"}
+{"tMs":3340,"delta":" about 45"}
+{"tMs":3374,"delta":" minutes.\" time:\""}
+{"tMs":3407,"delta":"12:30"}
+{"tMs":3441,"delta":"\" travel:\"Walk"}
+{"tMs":3474,"delta":" to Y"}
+{"tMs":3507,"delta":"asa"}
+{"tMs":3540,"delta":"ka"}
+{"tMs":3573,"delta":" Shrine, 10"}
+{"tMs":3607,"delta":" min\"\n    Itine"}
+{"tMs":3641,"delta":"raryStop \"Yas"}
+{"tMs":3674,"delta":"aka Shrine\" \""}
+{"tMs":3708,"delta":"Lant"}
+{"tMs":3742,"delta":"ern-lit shrine at"}
+{"tMs":3774,"delta":" the end"}
+{"tMs":3809,"delta":" of Gion;"}
+{"tMs":3840,"delta":" l"}
+{"tMs":3874,"delta":"ovely at"}
+{"tMs":3908,"delta":" dusk.\" time:\"15"}
+{"tMs":3942,"delta":":00\" travel:\""}
+{"tMs":3975,"delta":"Bus "}
+{"tMs":4008,"delta":"206 to K"}
+{"tMs":4041,"delta":"y"}
+{"tMs":4075,"delta":"oto Station, 25"}
+{"tMs":4109,"delta":" min\"\n    Itine"}
+{"tMs":4142,"delta":"raryStop \"Din"}
+{"tMs":4175,"delta":"ner in P"}
+{"tMs":4208,"delta":"ontoc"}
+{"tMs":4241,"delta":"ho\" \"Nar"}
+{"tMs":4274,"delta":"row l"}
+{"tMs":4308,"delta":"antern alley be"}
+{"tMs":4341,"delta":"side the"}
+{"tMs":4374,"delta":" Kamo"}
+{"tMs":4408,"delta":" River. Reservations adv"}
+{"tMs":4441,"delta":"ised"}
+{"tMs":4478,"delta":".\" time:\"18:00\""}
+{"tMs":4508,"delta":" last:true\n  Checkl"}
+{"tMs":4542,"delta":"ist \"Book"}
+{"tMs":4574,"delta":" ahead:"}
+{"tMs":4608,"delta":" Day 1\" =b1"}
+{"tMs":4642,"delta":" items:[\"Tea "}
+{"tMs":4675,"delta":"ceremony in"}
+{"tMs":4709,"delta":" Gion\",\"Dinner"}
+{"tMs":4742,"delta":" in Pontocho\",\""}
+{"tMs":4776,"delta":"Kiyomizu-"}
+{"tMs":4809,"delta":"dera early entry\"]"}
+{"tMs":4843,"delta":"\n  DayHeader \""}
+{"tMs":4877,"delta":"Day 2\" \"Ar"}
+{"tMs":4910,"delta":"ashiyama and north"}
+{"tMs":4945,"delta":"\" kind:\"bambo"}
+{"tMs":4977,"delta":"o\" tone:\"day"}
+{"tMs":5011,"delta":"\" tag:\"N"}
+{"tMs":5044,"delta":"ature\"\n    Itinera"}
+{"tMs":5078,"delta":"ryStop \"Ar"}
+{"tMs":5111,"delta":"ashiyama Bambo"}
+{"tMs":5145,"delta":"o Grove\" \"Go"}
+{"tMs":5178,"delta":" early for"}
+{"tMs":5211,"delta":" qu"}
+{"tMs":5264,"delta":"iet paths and so"}
+{"tMs":5278,"delta":"ft light.\""}
+{"tMs":5311,"delta":" time:\"08:00\" trav"}
+{"tMs":5345,"delta":"el:\"Wal"}
+{"tMs":5378,"delta":"k to Tenry"}
+{"tMs":5411,"delta":"u-"}
+{"tMs":5445,"delta":"ji, 5"}
+{"tMs":5478,"delta":" min\"\n    Itine"}
+{"tMs":5511,"delta":"raryStop \"Ten"}
+{"tMs":5545,"delta":"ryu-ji"}
+{"tMs":5578,"delta":" Garden\" \"U"}
+{"tMs":5614,"delta":"NESCO gar"}
+{"tMs":5645,"delta":"den with a p"}
+{"tMs":5682,"delta":"ond and"}
+{"tMs":5711,"delta":" m"}
+{"tMs":5744,"delta":"ountain back"}
+{"tMs":5778,"delta":"drop.\" time:\"09"}
+{"tMs":5811,"delta":":30\" travel:\""}
+{"tMs":5845,"delta":"Train to K"}
+{"tMs":5878,"delta":"yoto Station then"}
+{"tMs":5911,"delta":" b"}
+{"tMs":5945,"delta":"us,"}
+{"tMs":5978,"delta":" 50 min\"\n    "}
+{"tMs":6011,"delta":"ItineraryStop \""}
+{"tMs":6045,"delta":"Kinkaku-ji"}
+{"tMs":6078,"delta":"\" \"The"}
+{"tMs":6111,"delta":" Golden P"}
+{"tMs":6145,"delta":"avilion re"}
+{"tMs":6178,"delta":"flected"}
+{"tMs":6213,"delta":" in its pond;"}
+{"tMs":6244,"delta":" about an"}
+{"tMs":6277,"delta":" hour.\""}
+{"tMs":6311,"delta":" time:\"13"}
+{"tMs":6344,"delta":":00"}
+{"tMs":6377,"delta":"\" travel:\"Bus"}
+{"tMs":6411,"delta":" 205"}
+{"tMs":6444,"delta":" to N"}
+{"tMs":6477,"delta":"ishij"}
+{"tMs":6510,"delta":"in"}
+{"tMs":6543,"delta":", 20"}
+{"tMs":6577,"delta":" min\"\n    Itine"}
+{"tMs":6610,"delta":"raryStop \"Nish"}
+{"tMs":6643,"delta":"i"}
+{"tMs":6690,"delta":"ki"}
+{"tMs":6709,"delta":" Market\" \"Food"}
+{"tMs":6746,"delta":" stalls for p"}
+{"tMs":6777,"delta":"ickles"}
+{"tMs":6810,"delta":", tofu and sk"}
+{"tMs":6843,"delta":"ew"}
+{"tMs":6878,"delta":"ers.\""}
+{"tMs":6910,"delta":" time:\"15:30\" trav"}
+{"tMs":6943,"delta":"el:\"Wal"}
+{"tMs":6976,"delta":"k to Kam"}
+{"tMs":7010,"delta":"o River, 15 min\""}
+{"tMs":7043,"delta":"\n    ItinerarySt"}
+{"tMs":7077,"delta":"op \"Kai"}
+{"tMs":7113,"delta":"seki dinner\" \""}
+{"tMs":7143,"delta":"Se"}
+{"tMs":7177,"delta":"asonal multi-course me"}
+{"tMs":7210,"delta":"al. Book"}
+{"tMs":7244,"delta":" well"}
+{"tMs":7276,"delta":" in advance.\" time:\"18"}
+{"tMs":7313,"delta":":30"}
+{"tMs":7345,"delta":"\" last:true"}
+{"tMs":7382,"delta":"\n  Checklist \"Book"}
+{"tMs":7411,"delta":" ahead: Day 2"}
+{"tMs":7446,"delta":"\" =b2 items:[\""}
+{"tMs":7477,"delta":"Tenryu-ji"}
+{"tMs":7511,"delta":" garden "}
+{"tMs":7544,"delta":"ticket\",\"Kinka"}
+{"tMs":7590,"delta":"ku-ji timed ent"}
+{"tMs":7611,"delta":"ry\",\"Kaiseki"}
+{"tMs":7644,"delta":" dinner\"]"}
