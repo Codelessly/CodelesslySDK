@@ -1,0 +1,1 @@
+A three-question quiz card on world capitals, one question at a time with four choices each. After I pick an answer, show whether it was right, show the correct one, and enable Next. Keep a running score. After the last question show "You got N of 3" and a Play again button that starts over.

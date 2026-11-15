@@ -1,0 +1,1 @@
+A small to-do card: a field to type a task and an Add button (ignore an empty entry), the tasks as a list where each can be ticked done or deleted, a line saying how many are left out of how many, and a "Clear completed" button that only shows when at least one is done. Start with three tasks, one already done.
