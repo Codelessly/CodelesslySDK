@@ -2,7 +2,7 @@
 """Are the values on a generated card right after it is used? An automatic answer, so a model and a grammar
 can be compared by a number and not by someone looking at pictures.
 
-    python3 tool/values/check.py <cases.json> <recordings dir> --design-system <folder> [--model claude-haiku-5-5]
+    python3 tool/values/check.py <cases.json> <recordings dir> --design-system <folder> [--model claude-sonnet-5-5]
         [--out <dir>] [--only id,id]
 
 <cases.json> is a list of {"id", "steps", "expect", "forbid"}: the recording `<id>@<model>.notation[.retryN].json`
@@ -121,7 +121,7 @@ def ordered(texts, rule):
 def main():
     cases = json.load(open(sys.argv[1]))
     recordings, ds = sys.argv[2], os.path.abspath(opt('--design-system'))
-    model, out = opt('--model', 'claude-haiku-5-5'), opt('--out', '/tmp/values-check')
+    model, out = opt('--model', 'claude-sonnet-5-5'), opt('--out', '/tmp/values-check')
     only = set(opt('--only', '').split(',')) - {''}
     right = total = 0
     for case in cases:

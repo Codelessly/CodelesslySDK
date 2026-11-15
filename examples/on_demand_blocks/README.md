@@ -21,7 +21,7 @@ What it uses: `UiSession.notationInstructions(askForBlocks: true)`, `UiSession.w
 `OnDemandBlocks.designWanted()`, `UiSession.applyNotation(answer, replace: true)`; the designer's instructions
 are what `examples/showcase/tool/design_block.py brief` writes. Guide: `docs/guide/18-agent-ui.md`.
 
-Measured on 2026-11-15 (Haiku composing, Opus designing): first card in 4 to 6 seconds; a block designed in 71 to
+The composing model is Sonnet. Measured on 2026-11-15 with the smaller model composing and Opus designing: first card in 4 to 6 seconds; a block designed in 71 to
 95 seconds and accepted on the first try; the card replaced 82 to 103 seconds after the request. Haiku named a
 wanted block on two of the three requests. First written by an outside agent from the guide alone (run 9); its
 finding that two accepted blocks overflowed in a real view is why a host should supply `check:` with a layout

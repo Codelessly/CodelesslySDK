@@ -41,7 +41,7 @@ Future<void> main(List<String> args) async {
     stderr.writeln('No brief "$ui". Briefs: ${kBriefs.keys.join(', ')}');
     exit(2);
   }
-  final model = opt('--model') ?? 'claude-haiku-5-5';
+  final model = opt('--model') ?? 'claude-sonnet-5-5';
   final out = opt('--out') ?? 'recordings/$ui@$model.a2ui.jsonl';
   final retries = int.tryParse(opt('--retries') ?? '') ?? 1;
   final dir = File.fromUri(Platform.script).parent.path;

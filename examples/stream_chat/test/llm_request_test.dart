@@ -11,10 +11,12 @@ import 'package:stream_chat/src/llm.dart';
 
 void main() {
   test('the request a live reply streams: full prompt', () {
-    final model = UiModel(apiKey: 'not-a-key', model: kDefaultModel, systemPrompt: File('assets/system_prompt.md').readAsStringSync(), tools: uiToolsForAgent());
+    final model = UiModel(apiKey: 'not-a-key', model: 'claude-haiku-5-5', systemPrompt: File('assets/system_prompt.md').readAsStringSync(), tools: uiToolsForAgent());
     model.messages.add(InputMessage.user(userMessage(kBriefs['flights']!.prompt, 'card')));
     final j = jsonDecode(jsonEncode(model.buildRequest().toJson())) as Map<String, Object?>;
+    // The model a tool call can be forced on (the default is the next tier up).
     expect(j['model'], 'claude-haiku-5-5');
+    expect(kDefaultModel, 'claude-sonnet-5-5');
     final tools = (j['tools']! as List).cast<Map<String, Object?>>();
     expect([for (final t in tools) t['name']], ['ui_apply', 'ui_read']);
     expect(tools.every((t) => t['eager_input_streaming'] == true), isTrue);

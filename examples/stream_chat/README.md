@@ -19,7 +19,7 @@ tool/check.sh                    # what CI runs: the override, analyze with no i
 ```sh
 flutter run                                                   # recorded streams, offline
 flutter run --dart-define=ANTHROPIC_API_KEY=<key> \
-            --dart-define=MODEL=claude-sonnet-5-5              # live (default model: claude-haiku-5-5)
+            --dart-define=MODEL=claude-sonnet-5-5              # live (default model: claude-sonnet-5-5)
 ```
 
 | File | |
@@ -63,8 +63,8 @@ with `--scripts on` (the default): the document's own sandboxed scripts (the `sc
 `script.name(...)`; capabilities `variables.read`, `variables.write`, `clock`), and a base prompt that says when to
 prefer a script. `--scripts off` keeps `TrustProfile.agent`.
 
-Supported models (`MODEL`, `--model`): `claude-haiku-5-5` (default: fast inline answers; thinking off, so the tool
-choice is forced to `any`: a turn cannot end without a tool call), `claude-sonnet-5-5` (thinking off between tools),
+Supported models (`MODEL`, `--model`): `claude-haiku-5-5` (the fastest, and the least reliable where a card holds state; thinking off, so the tool
+choice is forced to `any`: a turn cannot end without a tool call), `claude-sonnet-5-5` (the default; thinking off between tools),
 `claude-opus-5-5` and `claude-fable-5-2` (adaptive thinking; it cannot be turned off). Sonnet 5.5, Opus 5.5 and
 Fable 5.2 reject a forced tool choice, so they get `auto`, and a turn that ends with text only is nudged once
 ("Answer with the ui_apply tool call now"). Effort is low for all.

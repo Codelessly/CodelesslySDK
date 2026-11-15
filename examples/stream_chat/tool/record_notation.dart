@@ -54,7 +54,7 @@ Future<void> main(List<String> args) async {
   // --prelude-file <file>: notation the host puts before the model's answer
   // (the state an app's contract declares), so the model does not restate it.
   final prelude = switch (opt('--prelude-file')) { final String f => '${File(f).readAsStringSync().trimRight()}\n', _ => '' };
-  final model = opt('--model') ?? 'claude-haiku-5-5';
+  final model = opt('--model') ?? 'claude-sonnet-5-5';
   final out = opt('--out') ?? 'recordings/$ui@$model.notation.jsonl';
   final retries = int.tryParse(opt('--retries') ?? '') ?? 1;
   final dsDir = opt('--design-system');
