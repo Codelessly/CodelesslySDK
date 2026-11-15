@@ -1,0 +1,322 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "text1",
+    "text2",
+    "Checklist1",
+    "DayHeader1",
+    "DayHeader2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "Kyoto, two days"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= length(todo)-length(booked)} things left to book"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Book ahead",
+    "value": "booked"
+   },
+   "bind": {
+    "props.items": "${todo}"
+   }
+  },
+  "DayHeader1": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 1",
+    "subtitle": "Eastern temples and Gion",
+    "kind": "temple",
+    "tone": "dawn",
+    "tag": "Walking day"
+   },
+   "children": [
+    "ItineraryStop1",
+    "ItineraryStop2",
+    "ItineraryStop3",
+    "ItineraryStop4"
+   ]
+  },
+  "ItineraryStop1": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Fushimi Inari",
+    "detail": "Walk the torii gates up the mountain, about two hours round trip.",
+    "time": "07:30",
+    "travel": "Taxi to Kiyomizu-dera, 20 min"
+   }
+  },
+  "ItineraryStop2": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kiyomizu-dera",
+    "detail": "The wooden stage over the hillside, best before the crowds.",
+    "time": "10:00",
+    "travel": "Walk through Higashiyama, 15 min"
+   }
+  },
+  "ItineraryStop3": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Ninenzaka and Sannenzaka",
+    "detail": "Old stone lanes lined with tea houses and craft shops.",
+    "time": "11:30",
+    "travel": "Walk to Yasaka Shrine, 10 min"
+   }
+  },
+  "ItineraryStop4": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Gion at dusk",
+    "detail": "Wander the streets where geisha walk to their evening engagements.",
+    "time": "17:30",
+    "last": true
+   }
+  },
+  "DayHeader2": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 2",
+    "subtitle": "Northwest temples and bamboo",
+    "kind": "bamboo",
+    "tone": "day",
+    "tag": "Scenic day"
+   },
+   "children": [
+    "ItineraryStop5",
+    "ItineraryStop6",
+    "ItineraryStop7",
+    "ItineraryStop8"
+   ]
+  },
+  "ItineraryStop5": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kinkaku-ji",
+    "detail": "The gold pavilion over its pond, with a short lakeside path.",
+    "time": "08:30",
+    "travel": "Bus 205 to Ryoan-ji, 30 min"
+   }
+  },
+  "ItineraryStop6": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Ryoan-ji",
+    "detail": "The famous rock garden, quiet in the morning.",
+    "time": "10:30",
+    "travel": "Train to Arashiyama, 15 min"
+   }
+  },
+  "ItineraryStop7": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Arashiyama bamboo grove",
+    "detail": "A walk through tall bamboo along the Hozu river.",
+    "time": "12:00",
+    "travel": "Walk to Tenryu-ji, 5 min"
+   }
+  },
+  "ItineraryStop8": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tenryu-ji",
+    "detail": "A Zen temple garden at the edge of the grove, then lunch nearby.",
+    "time": "13:30",
+    "last": true
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "booked",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "todo",
+    "type": "list",
+    "value": [
+     "Dinner in Gion",
+     "Tea ceremony",
+     "Kinkaku-ji entry",
+     "Arashiyama boat"
+    ]
+   }
+  ]
+ }
+}

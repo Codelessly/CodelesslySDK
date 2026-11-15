@@ -1,0 +1,227 @@
+{"meta":{"ui":"checkout","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Build a small checkout in three steps: my cart (three items with quantities), a shipping form (name, address, city, postcode, email, all checked, with messages under the fields), then a payment summary with a choice of standard or express delivery changing the total, and a confirmation screen with an order number. I can go back a step without losing what I typed.","text":"state step=1\nstate items=[{\"id\":1,\"title\":\"Trail Runner Shoes\",\"detail\":\"Size 42\",\"price\":89,\"qty\":1,\"kind\":\"shoe\",\"tone\":\"sky\"},{\"id\":2,\"title\":\"Ceramic Mug\",\"detail\":\"350 ml\",\"price\":18,\"qty\":2,\"kind\":\"mug\",\"tone\":\"sand\"},{\"id\":3,\"title\":\"Canvas Tote\",\"detail\":\"Natural\",\"price\":24,\"qty\":1,\"kind\":\"tote\",\"tone\":\"mint\"}]\nstate name=\"\"\nstate address=\"\"\nstate city=\"\"\nstate postcode=\"\"\nstate email=\"\"\nstate delivery=\"Standard\"\nstate order=\"\"\nstate tried=false\nstate sub=0\nChatCard \"Checkout\" \"Step {step} of 3\" icon:\"shopping_bag\" w:390\n  if step<4\n    Steps steps:[\"Cart\",\"Shipping\",\"Payment\"] current:=step\n  if step==1\n    SectionLabel \"Your cart\" \"{sum(items,x=>x.qty)} items\"\n    each i in items\n      CartLine \"{i.title}\" \"{i.detail}\" price:=money(i.price*i.qty,\"$\",2) qty:=i.qty kind:=i.kind tone:=i.tone -> items=updateWhere(items,x=>x.id==i.id,x=>with(x,\"qty\",result))\n    TotalBar \"Subtotal\" \"Before delivery\" amount:=money(sum(items,x=>x.price*x.qty),\"$\",2) cta:\"Continue\" enabled:=sum(items,x=>x.qty)>0 -> step=2\n  if step==2\n    SectionLabel \"Shipping details\"\n    InputField \"Full name\" \"Ada Lovelace\" =name error:=tried&&length(trim(name))<2?\"Enter your full name\":\"\" success:=length(trim(name))>=2?\"Looks good\":\"\"\n    InputField \"Address\" \"12 Main Street\" =address error:=tried&&length(trim(address))<5?\"Enter your street address\":\"\" success:=length(trim(address))>=5?\"Looks good\":\"\"\n    InputField \"City\" \"London\" =city error:=tried&&length(trim(city))<2?\"Enter your city\":\"\" success:=length(trim(city))>=2?\"Looks good\":\"\"\n    InputField \"Postcode\" \"SW1A 1AA\" =postcode error:=tried&&length(trim(postcode))<4?\"Enter a valid postcode\":\"\" success:=length(trim(postcode))>=4?\"Looks good\":\"\"\n    InputField \"Email\" \"you@example.com\" =email keyboard:\"email\" error:=tried&&!(contains(email,\"@\")&&contains(email,\".\"))?\"Enter a valid email\":\"\" success:=contains(email,\"@\")&&contains(email,\".\")?\"Looks good\":\"\"\n    Row gap:10\n      ActionButton \"Back\" tone:\"quiet\" -> step=1\n      ActionButton \"Continue\" -> tried=true; step=(length(trim(name))>=2&&length(trim(address))>=5&&length(trim(city))>=2&&length(trim(postcode))>=4&&contains(email,\"@\")&&contains(email,\".\"))?3:2\n  if step==3\n    SectionLabel \"Delivery\"\n    OptionList \"Choose a delivery method\" =delivery options:[\"Standard\",\"Express\"] details:[\"3-5 days\",\"Next day\"] prices:[\"$4.99\",\"$12.99\"]\n    Details rows:=[[\"Items\",money(sum(items,x=>x.price*x.qty),\"$\",2)],[\"Delivery\",delivery==\"Express\"?\"$12.99\":\"$4.99\"],[\"Ship to\",name+\", \"+city],[\"Receipt to\",email]]\n    TotalBar \"Total\" \"{delivery} delivery\" amount:=money(sum(items,x=>x.price*x.qty)+(delivery==\"Express\"?12.99:4.99),\"$\",2) cta:\"Pay now\" -> order=\"ORD-\"+(100000+sum(items,x=>x.price*x.qty)*37+length(name)*11); step=4\n    ActionButton \"Back\" tone:\"quiet\" -> step=2\n  if step==4\n    Receipt \"Order confirmed\" \"Thanks {name}! A receipt is on its way to {email}.\" code:=order codeLabel:\"Order number\" tone:\"good\"","usage":{"input_tokens":7837,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1419,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":869,"totalMs":8466}}
+{"tMs":869,"delta":"state"}
+{"tMs":1189,"delta":" step=1"}
+{"tMs":1189,"delta":"\nstate items=[{\"id\":"}
+{"tMs":1189,"delta":"1,\"title"}
+{"tMs":1189,"delta":"\":\"Tr"}
+{"tMs":1189,"delta":"ail"}
+{"tMs":1189,"delta":" Runner"}
+{"tMs":1190,"delta":" Shoes\",\"detail\":\""}
+{"tMs":1190,"delta":"Size 42\",\"price\":89"}
+{"tMs":1190,"delta":",\"q"}
+{"tMs":1223,"delta":"ty\":1,\"kind\":"}
+{"tMs":1257,"delta":"\"shoe\",\"tone\":"}
+{"tMs":1290,"delta":"\"sky"}
+{"tMs":1500,"delta":"\"},{\"id\":2,"}
+{"tMs":1500,"delta":"\"title\":\"Ceram"}
+{"tMs":1500,"delta":"ic Mug\",\"detail\":"}
+{"tMs":1500,"delta":"\"350"}
+{"tMs":1500,"delta":" "}
+{"tMs":1500,"delta":"ml\",\"price\":18"}
+{"tMs":1524,"delta":",\"qty\":2"}
+{"tMs":1557,"delta":",\"kind\":\"mug"}
+{"tMs":1590,"delta":"\",\"tone\":\"s"}
+{"tMs":1624,"delta":"and\"},{\"id\":3"}
+{"tMs":1658,"delta":",\"title\":\"Canv"}
+{"tMs":1691,"delta":"as Tote\",\"detail\":"}
+{"tMs":1811,"delta":"\"Natural\",\"price\":24"}
+{"tMs":1811,"delta":",\"qty\":1,\""}
+{"tMs":1811,"delta":"kind\":\"tote\",\"t"}
+{"tMs":1824,"delta":"one\":\"mint\"}]"}
+{"tMs":1858,"delta":"\nstate name=\"\"\nstate address"}
+{"tMs":1891,"delta":"=\"\"\nstate city=\"\""}
+{"tMs":1925,"delta":"\nstate postcode=\"\"\nstate"}
+{"tMs":1958,"delta":" email=\"\"\nstate delivery"}
+{"tMs":1991,"delta":"=\""}
+{"tMs":2024,"delta":"Standard\""}
+{"tMs":2058,"delta":"\nstate order=\"\"\nstate t"}
+{"tMs":2092,"delta":"ried=false\nstate"}
+{"tMs":2125,"delta":" s"}
+{"tMs":2158,"delta":"ub=0"}
+{"tMs":2224,"delta":"\nChatCard \""}
+{"tMs":2258,"delta":"Checkout\" \"Step"}
+{"tMs":2291,"delta":" {step}"}
+{"tMs":2324,"delta":" of 3\" icon:\""}
+{"tMs":2357,"delta":"shopping_b"}
+{"tMs":2390,"delta":"ag\" w"}
+{"tMs":2424,"delta":":390"}
+{"tMs":2458,"delta":"\n  if step<4"}
+{"tMs":2491,"delta":"\n    Steps steps:"}
+{"tMs":2526,"delta":"[\"Cart\",\"Ship"}
+{"tMs":2557,"delta":"ping\",\"Payment\""}
+{"tMs":2591,"delta":"] current:="}
+{"tMs":2624,"delta":"step\n  if step==1"}
+{"tMs":2658,"delta":"\n    SectionLabel \""}
+{"tMs":2691,"delta":"Your"}
+{"tMs":2724,"delta":" cart\" \"{sum("}
+{"tMs":2757,"delta":"items,x=>x.q"}
+{"tMs":2791,"delta":"ty)} items\"\n    each"}
+{"tMs":2824,"delta":" i in items\n      CartL"}
+{"tMs":2858,"delta":"ine \"{i.title}\""}
+{"tMs":2891,"delta":" \"{i.detail}\""}
+{"tMs":2925,"delta":" price:="}
+{"tMs":2958,"delta":"money(i.price*"}
+{"tMs":2991,"delta":"i.qty,\"$\","}
+{"tMs":3024,"delta":"2) qty:=i."}
+{"tMs":3058,"delta":"qty kind:="}
+{"tMs":3091,"delta":"i.kind tone:="}
+{"tMs":3124,"delta":"i.tone -> items="}
+{"tMs":3157,"delta":"updateWhere(items,"}
+{"tMs":3191,"delta":"x=>x.id==i"}
+{"tMs":3225,"delta":".id,x=>with("}
+{"tMs":3258,"delta":"x,\"qty\",result))"}
+{"tMs":3291,"delta":"\n    TotalBar \""}
+{"tMs":3324,"delta":"Subtotal\" \""}
+{"tMs":3358,"delta":"Before delivery\" amount:"}
+{"tMs":3391,"delta":"=money(sum(items,"}
+{"tMs":3424,"delta":"x=>x.price"}
+{"tMs":3458,"delta":"*x.qty),\"$"}
+{"tMs":3491,"delta":"\",2) cta:\""}
+{"tMs":3524,"delta":"Contin"}
+{"tMs":3558,"delta":"ue\" enabled:=s"}
+{"tMs":3591,"delta":"um(items,x=>x"}
+{"tMs":3624,"delta":".qty)>0 -"}
+{"tMs":3658,"delta":"> step=2"}
+{"tMs":3692,"delta":"\n  if step==2\n    "}
+{"tMs":3724,"delta":"SectionLabel \""}
+{"tMs":3758,"delta":"Shipping details"}
+{"tMs":3791,"delta":"\"\n    InputField \""}
+{"tMs":3825,"delta":"Full name\" \""}
+{"tMs":3858,"delta":"Ada Lovelace\" ="}
+{"tMs":3891,"delta":"name error:=tried&"}
+{"tMs":3925,"delta":"&length(tr"}
+{"tMs":3958,"delta":"im(name))<2"}
+{"tMs":3992,"delta":"?\"En"}
+{"tMs":4024,"delta":"ter your full"}
+{"tMs":4058,"delta":" name\":\""}
+{"tMs":4091,"delta":"\" success:=length"}
+{"tMs":4126,"delta":"(trim(name))>="}
+{"tMs":4158,"delta":"2?\"Loo"}
+{"tMs":4191,"delta":"ks good\":\"\"\n    Input"}
+{"tMs":4225,"delta":"Field \"Address\" \"12"}
+{"tMs":4258,"delta":" Main"}
+{"tMs":4291,"delta":" Street\" =address error:=t"}
+{"tMs":4325,"delta":"ried&&length(trim("}
+{"tMs":4358,"delta":"address))<5?\"En"}
+{"tMs":4391,"delta":"ter your street"}
+{"tMs":4424,"delta":" address\":\"\" success:=length"}
+{"tMs":4458,"delta":"(trim(address))>="}
+{"tMs":4491,"delta":"5?\"Looks good\":"}
+{"tMs":4525,"delta":"\"\"\n    InputField \"City"}
+{"tMs":4558,"delta":"\" \"London"}
+{"tMs":4591,"delta":"\" =city error:=tried"}
+{"tMs":4624,"delta":"&&length(trim(city"}
+{"tMs":4659,"delta":"))<2?\"Enter"}
+{"tMs":4692,"delta":" your city\":\"\" success:="}
+{"tMs":4725,"delta":"length(trim(city))>"}
+{"tMs":4764,"delta":"=2?\"Looks good"}
+{"tMs":4792,"delta":"\":\"\"\n    InputField \""}
+{"tMs":4825,"delta":"Postcode\" \"S"}
+{"tMs":4858,"delta":"W1A 1AA\""}
+{"tMs":4891,"delta":" =postcode error:=t"}
+{"tMs":4925,"delta":"ried&&length(trim("}
+{"tMs":4958,"delta":"postcode))<4?\""}
+{"tMs":4991,"delta":"Enter a"}
+{"tMs":5025,"delta":" valid postcode\":\"\""}
+{"tMs":5058,"delta":" success:=length(trim("}
+{"tMs":5091,"delta":"postcode))>=4?"}
+{"tMs":5125,"delta":"\"Looks good\":\"\""}
+{"tMs":5158,"delta":"\n    InputField \"Email\""}
+{"tMs":5192,"delta":" \"you@example.com\" ="}
+{"tMs":5225,"delta":"email ke"}
+{"tMs":5278,"delta":"yboard:\""}
+{"tMs":5291,"delta":"email\" error:=tried&"}
+{"tMs":5325,"delta":"&!"}
+{"tMs":5358,"delta":"(contains(email,"}
+{"tMs":5392,"delta":"\"@\")&&cont"}
+{"tMs":5425,"delta":"ains(email,\""}
+{"tMs":5459,"delta":".\"))?\"Enter a"}
+{"tMs":5493,"delta":" valid email\":\"\" success:"}
+{"tMs":5525,"delta":"=contains(email,\"@"}
+{"tMs":5577,"delta":"\")&&contains(email,"}
+{"tMs":5594,"delta":"\".\")?\"Looks good"}
+{"tMs":5625,"delta":"\":\"\"\n    Row gap"}
+{"tMs":5658,"delta":":10\n      ActionBut"}
+{"tMs":5691,"delta":"ton \"Back\" tone:"}
+{"tMs":5725,"delta":"\"quiet\" -> step"}
+{"tMs":5758,"delta":"=1\n      ActionBut"}
+{"tMs":5792,"delta":"ton \"Continue\" -"}
+{"tMs":5825,"delta":"> t"}
+{"tMs":5858,"delta":"ried=true; step=("}
+{"tMs":5891,"delta":"length(trim(name))>"}
+{"tMs":5925,"delta":"=2&&length(trim"}
+{"tMs":5958,"delta":"(address))>=5&&"}
+{"tMs":5992,"delta":"length(trim(city))>"}
+{"tMs":6025,"delta":"=2&&length(trim"}
+{"tMs":6058,"delta":"(postcode))>=4"}
+{"tMs":6092,"delta":"&&contains(email,\""}
+{"tMs":6126,"delta":"@\")&&contains(email"}
+{"tMs":6160,"delta":",\""}
+{"tMs":6192,"delta":".\"))?3"}
+{"tMs":6225,"delta":":2\n  if step==3"}
+{"tMs":6258,"delta":"\n    S"}
+{"tMs":6291,"delta":"ectionLabel \"Del"}
+{"tMs":6324,"delta":"ivery\"\n    Option"}
+{"tMs":6359,"delta":"List \"Choose a"}
+{"tMs":6391,"delta":" del"}
+{"tMs":6425,"delta":"ivery method\" =delivery"}
+{"tMs":6459,"delta":" options:[\"Standard\",\""}
+{"tMs":6491,"delta":"Express\"] details:[\"3"}
+{"tMs":6525,"delta":"-"}
+{"tMs":6558,"delta":"5 days"}
+{"tMs":6591,"delta":"\",\""}
+{"tMs":6658,"delta":"Next day\"] prices:[\""}
+{"tMs":6691,"delta":"$"}
+{"tMs":6725,"delta":"4.99\",\"$12.99"}
+{"tMs":6758,"delta":"\"]\n    Details rows"}
+{"tMs":6795,"delta":":=[[\"Items"}
+{"tMs":6825,"delta":"\",money(sum(items,"}
+{"tMs":6858,"delta":"x=>x.price*x"}
+{"tMs":6891,"delta":".qty),\"$\","}
+{"tMs":6925,"delta":"2)],[\"Delivery"}
+{"tMs":6963,"delta":"\",delivery="}
+{"tMs":6992,"delta":"=\"Express\"?\"$12"}
+{"tMs":7025,"delta":".99\":\"$4.99"}
+{"tMs":7069,"delta":"\"],[\""}
+{"tMs":7092,"delta":"Ship to\",name"}
+{"tMs":7125,"delta":"+\", \"+city],"}
+{"tMs":7160,"delta":"[\"Rece"}
+{"tMs":7191,"delta":"ipt to"}
+{"tMs":7225,"delta":"\",email]]\n    Tot"}
+{"tMs":7258,"delta":"alBar \"Total\" \""}
+{"tMs":7291,"delta":"{delivery} del"}
+{"tMs":7325,"delta":"ivery\" amount:=money"}
+{"tMs":7359,"delta":"(sum(items,x="}
+{"tMs":7392,"delta":">x.price*x.q"}
+{"tMs":7425,"delta":"ty)+(delivery="}
+{"tMs":7458,"delta":"=\"Express\"?12.99"}
+{"tMs":7492,"delta":":4.99),\"$\","}
+{"tMs":7525,"delta":"2) cta:\"P"}
+{"tMs":7558,"delta":"ay now"}
+{"tMs":7592,"delta":"\" -> order=\""}
+{"tMs":7625,"delta":"ORD-\""}
+{"tMs":7658,"delta":"+(100"}
+{"tMs":7692,"delta":"000+sum(items,x"}
+{"tMs":7725,"delta":"=>x.price*x."}
+{"tMs":7758,"delta":"qty)"}
+{"tMs":7791,"delta":"*37"}
+{"tMs":7826,"delta":"+length"}
+{"tMs":7858,"delta":"(name)*11"}
+{"tMs":7891,"delta":"); step=4\n    "}
+{"tMs":7925,"delta":"ActionButton \"Back\""}
+{"tMs":7958,"delta":" tone:\"quiet\""}
+{"tMs":7991,"delta":" -> step=2\n  if"}
+{"tMs":8025,"delta":" step==4\n    Receip"}
+{"tMs":8058,"delta":"t \"Order confirmed"}
+{"tMs":8093,"delta":"\" \"Than"}
+{"tMs":8125,"delta":"ks {"}
+{"tMs":8158,"delta":"name}!"}
+{"tMs":8191,"delta":" A rece"}
+{"tMs":8225,"delta":"ipt is on"}
+{"tMs":8258,"delta":" its"}
+{"tMs":8291,"delta":" way to {email}.\" code:"}
+{"tMs":8324,"delta":"="}
+{"tMs":8358,"delta":"order cod"}
+{"tMs":8391,"delta":"eLabel:\"Order"}
+{"tMs":8424,"delta":" number\" tone:\""}
+{"tMs":8459,"delta":"good\""}

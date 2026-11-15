@@ -1,0 +1,568 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Product dashboard",
+    "subtitle": "This month",
+    "icon": "insights",
+    "status": "Live",
+    "tone": "accent"
+   },
+   "children": [
+    "Segments1",
+    "grid1",
+    "ChartCard1",
+    "ChartCard2",
+    "SectionLabel1",
+    "TableHeader1",
+    "listView1",
+    "listView2"
+   ]
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "range",
+    "options": [
+     "7 days",
+     "30 days",
+     "90 days"
+    ]
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1",
+    "grid1Row2"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Revenue",
+    "note": "vs previous",
+    "icon": "payments"
+   },
+   "bind": {
+    "props.value": "${= data[range].rev}",
+    "props.delta": "${= data[range].revd}"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Sign-ups",
+    "note": "new accounts",
+    "icon": "person_add"
+   },
+   "bind": {
+    "props.value": "${= data[range].su}",
+    "props.delta": "${= data[range].sud}"
+   }
+  },
+  "grid1Row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile3",
+    "StatTile4"
+   ]
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Churn",
+    "note": "monthly",
+    "invert": true,
+    "icon": "trending_down"
+   },
+   "bind": {
+    "props.value": "${= data[range].ch}",
+    "props.delta": "${= data[range].chd}"
+   }
+  },
+  "StatTile4": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Active users",
+    "note": "unique",
+    "icon": "groups"
+   },
+   "bind": {
+    "props.value": "${= data[range].au}",
+    "props.delta": "${= data[range].aud}"
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Revenue",
+    "kind": "line"
+   },
+   "bind": {
+    "props.value": "${= data[range].rev}",
+    "props.values": "${= data[range].line}",
+    "props.labels": "${= data[range].labels}",
+    "props.delta": "${= data[range].revd}"
+   }
+  },
+  "ChartCard2": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Sign-ups by channel",
+    "labels": [
+     "Organic",
+     "Paid",
+     "Referral",
+     "Social"
+    ],
+    "kind": "bars"
+   },
+   "bind": {
+    "props.value": "${= data[range].su}",
+    "props.values": "${= data[range].bars}",
+    "props.delta": "${= data[range].sud}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Top plans",
+    "note": "tap a title to sort"
+   }
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "desc": "desc",
+    "columns": [
+     "Plan",
+     "Subs",
+     "Revenue"
+    ],
+    "keys": [
+     "plan",
+     "subs",
+     "revenue"
+    ]
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= sortByDesc(plans,x=>x[sort])}",
+    "visible": "${= desc}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.cells": "${= [item.plan,item.subs,money(item.revenue,\"$\",0)]}"
+   }
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= sortBy(plans,x=>x[sort])}",
+    "visible": "${= !desc}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow2"
+   ]
+  },
+  "TableRow2": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.cells": "${= [item.plan,item.subs,money(item.revenue,\"$\",0)]}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "range",
+    "type": "text",
+    "value": "30 days"
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "revenue"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "data",
+    "type": "map",
+    "value": {
+     "7 days": {
+      "rev": "$12.4k",
+      "revd": "+3.1%",
+      "su": "412",
+      "sud": "+5.2%",
+      "ch": "1.8%",
+      "chd": "-0.2%",
+      "au": "8,230",
+      "aud": "+1.4%",
+      "line": [
+       1.4,
+       1.6,
+       1.5,
+       1.9,
+       1.8,
+       2.1,
+       2.0
+      ],
+      "labels": [
+       "Mon",
+       "Tue",
+       "Wed",
+       "Thu",
+       "Fri",
+       "Sat",
+       "Sun"
+      ],
+      "bars": [
+       180,
+       110,
+       70,
+       52
+      ]
+     },
+     "30 days": {
+      "rev": "$48.2k",
+      "revd": "+8.5%",
+      "su": "1,840",
+      "sud": "+6.9%",
+      "ch": "2.4%",
+      "chd": "-0.4%",
+      "au": "9,640",
+      "aud": "+4.2%",
+      "line": [
+       9,
+       10.5,
+       11,
+       12.4,
+       11.8,
+       13.2,
+       14
+      ],
+      "labels": [
+       "W1",
+       "W2",
+       "W3",
+       "W4",
+       "W5",
+       "W6",
+       "W7"
+      ],
+      "bars": [
+       760,
+       520,
+       340,
+       220
+      ]
+     },
+     "90 days": {
+      "rev": "$141k",
+      "revd": "+12.3%",
+      "su": "5,320",
+      "sud": "+9.8%",
+      "ch": "2.9%",
+      "chd": "+0.3%",
+      "au": "10,450",
+      "aud": "+7.6%",
+      "line": [
+       30,
+       38,
+       41,
+       45,
+       44,
+       52,
+       56
+      ],
+      "labels": [
+       "P1",
+       "P2",
+       "P3",
+       "P4",
+       "P5",
+       "P6",
+       "P7"
+      ],
+      "bars": [
+       2150,
+       1490,
+       980,
+       700
+      ]
+     }
+    }
+   },
+   {
+    "name": "plans",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "plan": "Pro",
+      "subs": 1240,
+      "revenue": 24800
+     },
+     {
+      "id": 2,
+      "plan": "Team",
+      "subs": 610,
+      "revenue": 18300
+     },
+     {
+      "id": 3,
+      "plan": "Starter",
+      "subs": 2100,
+      "revenue": 10500
+     },
+     {
+      "id": 4,
+      "plan": "Enterprise",
+      "subs": 42,
+      "revenue": 16800
+     },
+     {
+      "id": 5,
+      "plan": "Student",
+      "subs": 980,
+      "revenue": 4900
+     }
+    ]
+   }
+  ]
+ }
+}

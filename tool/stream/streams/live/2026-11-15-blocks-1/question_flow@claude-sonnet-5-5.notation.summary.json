@@ -1,0 +1,64 @@
+{
+ "ui": "question_flow",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 20112,
+ "turns": [
+  {
+   "input_tokens": 7807,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 780,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 709,
+   "totalMs": 5607,
+   "chars": 1833,
+   "lines": 27,
+   "jsonTails": 0,
+   "nodes": 15,
+   "outputTokensPerNode": "52.0",
+   "notationIssues": [
+    "line 24:1: Not valid JSON: [use,detail,budget]"
+   ],
+   "errors": [
+    "wrong_type /nodes/Recommendation1/props/reasons: Expected a list of String, got the text \"[use,detail,budget]\"."
+   ]
+  },
+  {
+   "input_tokens": 8683,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 781,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 872,
+   "totalMs": 4139,
+   "chars": 1834,
+   "lines": 27,
+   "jsonTails": 0,
+   "nodes": 15,
+   "outputTokensPerNode": "52.1",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

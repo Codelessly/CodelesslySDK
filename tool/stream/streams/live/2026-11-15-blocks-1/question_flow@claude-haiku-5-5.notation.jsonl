@@ -1,0 +1,80 @@
+{"meta":{"ui":"question_flow","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"Column gap:12 pad:16\n  Steps steps:[\"Use\",\"Detail\",\"Budget\",\"Pick\"] current:=step+1\n  if step==0\n    OptionList \"What will you use it for?\" =use options:[\"Office and browsing\",\"Creative work\",\"Gaming\",\"Travel and school\"] -> step=1\n  if step==1\n    OptionList \"What matters most?\" =detail options:[\"Battery life\",\"Raw speed\",\"Screen quality\",\"Light weight\"] -> step=2\n  if step==2\n    OptionList \"What is your budget?\" =budget options:[\"Under $700\",\"$700 to $1200\",\"Over $1200\"] -> step=3\n    Row gap:10\n      ActionButton \"Back\" quiet -> step=1\n  if step==3\n    Recommendation \"Your laptop: Aero 14\" \"Light, quick and with a battery that lasts a full day.\" reasons:[\"Fits your use and budget\",\"Strong battery for travel\",\"Light enough to carry daily\"] eyebrow:\"Best match\"\n    ActionButton \"Start over\" primary -> step=0; use=\"\"; detail=\"\"; budget=\"\"","usage":{"input_tokens":7806,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":353,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":893,"totalMs":2492}}
+{"tMs":893,"delta":"Column"}
+{"tMs":1068,"delta":" gap:12"}
+{"tMs":1068,"delta":" p"}
+{"tMs":1068,"delta":"ad:16\n  Steps"}
+{"tMs":1068,"delta":" steps:"}
+{"tMs":1068,"delta":"[\"Use"}
+{"tMs":1068,"delta":"\",\"Det"}
+{"tMs":1069,"delta":"ail\",\"Budget\",\""}
+{"tMs":1069,"delta":"P"}
+{"tMs":1081,"delta":"ick\"] current:=step"}
+{"tMs":1102,"delta":"+1\n  if"}
+{"tMs":1123,"delta":" step==0\n    O"}
+{"tMs":1143,"delta":"ptionList \"What will you use"}
+{"tMs":1265,"delta":" it for?\" =use"}
+{"tMs":1265,"delta":" options:[\"Office and"}
+{"tMs":1265,"delta":" brow"}
+{"tMs":1265,"delta":"sing\",\""}
+{"tMs":1265,"delta":"Creative work\",\"Gaming"}
+{"tMs":1265,"delta":"\",\"Trav"}
+{"tMs":1291,"delta":"el and"}
+{"tMs":1306,"delta":" school"}
+{"tMs":1327,"delta":"\"] -> step=1"}
+{"tMs":1347,"delta":"\n  if step==1\n    O"}
+{"tMs":1368,"delta":"ptionList \"What mat"}
+{"tMs":1388,"delta":"ters most?\" =det"}
+{"tMs":1453,"delta":"ail options:[\"Battery life"}
+{"tMs":1453,"delta":"\",\"Ra"}
+{"tMs":1453,"delta":"w spe"}
+{"tMs":1470,"delta":"ed\",\"Screen qu"}
+{"tMs":1490,"delta":"ality\",\"Light"}
+{"tMs":1511,"delta":" weight\"] -"}
+{"tMs":1532,"delta":"> step=2\n  "}
+{"tMs":1552,"delta":"if step==2\n    O"}
+{"tMs":1572,"delta":"ptionList \"What is your bud"}
+{"tMs":1593,"delta":"get?\" =budget options:"}
+{"tMs":1613,"delta":"[\"Under $700"}
+{"tMs":1634,"delta":"\",\"$700 to"}
+{"tMs":1654,"delta":" $1200"}
+{"tMs":1674,"delta":"\",\""}
+{"tMs":1695,"delta":"Over $1200\"] ->"}
+{"tMs":1715,"delta":" step=3\n    Row g"}
+{"tMs":1736,"delta":"ap:10"}
+{"tMs":1756,"delta":"\n      "}
+{"tMs":1777,"delta":"ActionButton \"Back\""}
+{"tMs":1797,"delta":" qu"}
+{"tMs":1817,"delta":"iet -> step=1"}
+{"tMs":1838,"delta":"\n  if step==3\n    "}
+{"tMs":1859,"delta":"Recommendation \"Your"}
+{"tMs":1879,"delta":" laptop:"}
+{"tMs":1899,"delta":" A"}
+{"tMs":1919,"delta":"ero"}
+{"tMs":1939,"delta":" "}
+{"tMs":1960,"delta":"14\""}
+{"tMs":1981,"delta":" \"Light"}
+{"tMs":2001,"delta":","}
+{"tMs":2021,"delta":" qu"}
+{"tMs":2041,"delta":"ick"}
+{"tMs":2062,"delta":" and with a battery that"}
+{"tMs":2082,"delta":" l"}
+{"tMs":2102,"delta":"asts a"}
+{"tMs":2123,"delta":" full day.\" reasons:"}
+{"tMs":2143,"delta":"[\"F"}
+{"tMs":2163,"delta":"its your use"}
+{"tMs":2184,"delta":" and budget\",\"Str"}
+{"tMs":2204,"delta":"ong battery for trav"}
+{"tMs":2225,"delta":"el\",\"Light"}
+{"tMs":2245,"delta":" enough to"}
+{"tMs":2267,"delta":" carry da"}
+{"tMs":2286,"delta":"ily\"] eyebrow"}
+{"tMs":2306,"delta":":"}
+{"tMs":2327,"delta":"\"Best"}
+{"tMs":2347,"delta":" match"}
+{"tMs":2367,"delta":"\""}
+{"tMs":2388,"delta":"\n    ActionButton \""}
+{"tMs":2408,"delta":"Start over\" primary ->"}
+{"tMs":2429,"delta":" step=0;"}
+{"tMs":2449,"delta":" use=\"\";"}
+{"tMs":2469,"delta":" detail=\"\"; budget="}
+{"tMs":2490,"delta":"\"\""}

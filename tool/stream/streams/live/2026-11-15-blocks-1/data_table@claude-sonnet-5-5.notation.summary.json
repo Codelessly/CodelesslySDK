@@ -1,0 +1,62 @@
+{
+ "ui": "data_table",
+ "kind": "card",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 20112,
+ "turns": [
+  {
+   "input_tokens": 7831,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 588,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 663,
+   "totalMs": 3888,
+   "chars": 1157,
+   "lines": 2,
+   "jsonTails": 0,
+   "nodes": 2,
+   "outputTokensPerNode": "294.0",
+   "notationIssues": [
+    "line 2:1: Not valid JSON: [{\"id\":\"INV-1001\",\"customer\":\"Acme Corp\",\"date\":\"2024-01-05\",\"amount\":1200,\"status\":\"Paid\"},{\"id\":\"INV-1002\",\"customer\":\"Birch & Co\",\"date\":\"2024-01-09\",\"amount\":450,\"status\":\"Due\"},{\"id\":\"INV-1003\",\"customer\":\"Cobalt Labs\",\"date\":\"2024-01-14\",\"amount\":3200,\"status\":\"Overdue\"},{\"id\":\"INV-1004\",\"customer\":\"Delta Foods\",\"date\":\"2024-01-20\",\"amount\":780,\"status\":\"Paid\"},{\"id\":\"INV-1005\",\"customer\":\"Evergreen Ltd\",\"date\":\"2024-02-02\",\"amount\":paid,\"status\":\"Paid\"},{\"id\":\"INV-1006\",\"customer\":\"Fjord Studio\",\"date\":\"2024-02-06\",\"amount\":960,\"status\":\"Due\"},{\"id\":\"INV-1007\",\"customer\":\"Globe Travel\",\"date\":\"2024-02-11\",\"amount\":2150,\"status\":\"Overdue\"},{\"id\":\"INV-1008\",\"customer\":\"Harbor Bank\",\"date\":\"2024-02-18\",\"amount\":5400,\"status\":\"Paid\"},{\"id\":\"INV-1009\",\"customer\":\"Iris Design\",\"date\":\"2024-02-25\",\"amount\":310,\"status\":\"Due\"},{\"id\":\"INV-1010\",\"customer\":\"Juno Media\",\"date\":\"2024-03-03\",\"amount\":1475,\"status\":\"Overdue\"},{\"id\":\"INV-1011\",\"customer\":\"Kite Works\",\"date\":\"2024-03-09\",\"amount\":820,\"status\":\"Paid\"},{\"id\":\"INV-1012\",\"customer\":\"Lumen Energy\",\"date\":\"2024-03-15\",\"amount\":2890,\"status\":\"Due\"}]"
+   ],
+   "errors": []
+  },
+  {
+   "input_tokens": 9024,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1343,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 873,
+   "totalMs": 7102,
+   "chars": 2715,
+   "lines": 17,
+   "jsonTails": 0,
+   "nodes": 11,
+   "outputTokensPerNode": "122.1",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

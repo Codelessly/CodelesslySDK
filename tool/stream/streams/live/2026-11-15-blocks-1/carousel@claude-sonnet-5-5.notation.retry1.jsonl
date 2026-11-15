@@ -1,0 +1,106 @@
+{"meta":{"ui":"carousel","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"state items=[{\"id\":1,\"name\":\"Aero Runner\",\"price\":120,\"rating\":4.8,\"tone\":\"sky\",\"desc\":\"Lightweight daily trainer with a breathable mesh upper.\"},{\"id\":2,\"name\":\"Trail Blazer\",\"price\":140,\"rating\":4.6,\"tone\":\"mint\",\"desc\":\"Grippy outsole built for muddy trails and rocky climbs.\"},{\"id\":3,\"name\":\"Cloud Stride\",\"price\":130,\"rating\":4.7,\"tone\":\"lilac\",\"desc\":\"Soft cushioning for long easy miles.\"},{\"id\":4,\"name\":\"Sprint Pro\",\"price\":160,\"rating\":4.9,\"tone\":\"rose\",\"desc\":\"Responsive race shoe with a carbon plate.\"},{\"id\":5,\"name\":\"Daily Mile\",\"price\":99,\"rating\":4.3,\"tone\":\"sand\",\"desc\":\"Durable, comfortable and made for everyday runs.\"},{\"id\":6,\"name\":\"Night Owl\",\"price\":135,\"rating\":4.5,\"tone\":\"slate\",\"desc\":\"Reflective details for early and late runs.\"}]\nstate i=0\nstate sel=-1\nstate size=\"\"\nstate bag=0\nColumn w:390 gap:12 pad:16\n  Row between middle\n    Text.heading \"Running shoes\"\n    Badge.primary \"Bag {bag}\"\n  if sel<0\n    Carousel =i count:6 thumbs:=map(items,x=>x.tone) kind:\"shoe\"\n      ProductTile \"{items[i].name}\" \"Rated {items[i].rating}\" price:=money(items[i].price,\"$\",0) rating:=items[i].rating kind:\"shoe\" tone:=items[i].tone -> sel=i; size=\"\"\n  if sel>=0\n    Card gap:12\n      Button.ghost \"← Back to carousel\" -> sel=-1\n      Media kind:\"shoe\" tone:=items[sel].tone h:160\n      Row between middle\n        Text.heading \"{items[sel].name}\"\n        Text.strong \"{money(items[sel].price,\"$\",0)}\"\n      Text.muted \"Rating {items[sel].rating} ★\"\n      Text \"{items[sel].desc}\"\n      Text.fieldLabel \"Size\"\n      ChoiceChips =size options:[\"7\",\"8\",\"9\",\"10\",\"11\",\"12\"] columns:6\n      Button \"Add to bag\" enabled:=size!=\"\" -> bag=bag+1; toast \"Added to bag\"; sel=-1","usage":{"input_tokens":9349,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":813,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":807,"totalMs":4342}}
+{"tMs":807,"delta":"state"}
+{"tMs":1127,"delta":" items=[{"}
+{"tMs":1127,"delta":"\"id\":1,\"name\":"}
+{"tMs":1127,"delta":"\"Aero Runner\",\""}
+{"tMs":1127,"delta":"price\":120,\"r"}
+{"tMs":1127,"delta":"ating\":4.8,\"t"}
+{"tMs":1127,"delta":"one\":\"sky\",\"desc"}
+{"tMs":1127,"delta":"\":\"Lightweight da"}
+{"tMs":1127,"delta":"ily trainer with a breath"}
+{"tMs":1135,"delta":"able mesh upper.\"},"}
+{"tMs":1168,"delta":"{\"id\":2,\"name"}
+{"tMs":1204,"delta":"\":\"Trail Blaz"}
+{"tMs":1235,"delta":"er\",\"price\":140,\"r"}
+{"tMs":1447,"delta":"ating\":4.6,\"t"}
+{"tMs":1447,"delta":"one\":\"mint\",\"desc"}
+{"tMs":1447,"delta":"\":\"Grippy outs"}
+{"tMs":1447,"delta":"ole built for muddy trails"}
+{"tMs":1447,"delta":" and rocky climbs.\""}
+{"tMs":1447,"delta":"},{\"id\":3,\""}
+{"tMs":1469,"delta":"name\":\"Cloud"}
+{"tMs":1502,"delta":" Stride\",\"price\":130,\""}
+{"tMs":1536,"delta":"rating\":4.7,\""}
+{"tMs":1569,"delta":"tone\":\"lilac\",\""}
+{"tMs":1602,"delta":"desc\":\"Soft c"}
+{"tMs":1636,"delta":"ushioning for long easy mi"}
+{"tMs":1761,"delta":"les.\"},{\"id\":4"}
+{"tMs":1761,"delta":",\"name\":\"Spr"}
+{"tMs":1761,"delta":"int Pro\",\"price\":160"}
+{"tMs":1770,"delta":",\"rating\":4.9"}
+{"tMs":1802,"delta":",\"tone\":\"r"}
+{"tMs":1836,"delta":"ose\",\"desc\":\"Respon"}
+{"tMs":1869,"delta":"sive race shoe with a"}
+{"tMs":1905,"delta":" carbon plate.\"},{"}
+{"tMs":1935,"delta":"\"id\":5,\"name\":"}
+{"tMs":1969,"delta":"\"Daily Mile\",\""}
+{"tMs":2002,"delta":"price\":99,\"rating\":"}
+{"tMs":2036,"delta":"4.3,\"tone\":"}
+{"tMs":2078,"delta":"\"sand\",\"desc\":\""}
+{"tMs":2102,"delta":"Durable, comfortable"}
+{"tMs":2136,"delta":" and made for everyday runs"}
+{"tMs":2169,"delta":".\"},{\"id\":6,"}
+{"tMs":2203,"delta":"\"name\":\"Night Ow"}
+{"tMs":2236,"delta":"l\",\"price\":135,\"r"}
+{"tMs":2269,"delta":"ating\":4.5,\"t"}
+{"tMs":2303,"delta":"one\":\"slate\",\"desc"}
+{"tMs":2336,"delta":"\":\"Reflective details for"}
+{"tMs":2369,"delta":" early and late runs.\"}]"}
+{"tMs":2402,"delta":"\nstate i=0\nstate s"}
+{"tMs":2436,"delta":"el=-1\nstate size="}
+{"tMs":2469,"delta":"\"\"\nstate bag=0"}
+{"tMs":2502,"delta":"\nColumn w:390 gap"}
+{"tMs":2536,"delta":":12 pad:16"}
+{"tMs":2569,"delta":"\n  Row between middle\n    "}
+{"tMs":2602,"delta":"Text.heading \"Running"}
+{"tMs":2636,"delta":" shoes\"\n    Bad"}
+{"tMs":2669,"delta":"ge.primary \"Bag"}
+{"tMs":2702,"delta":" {bag}\"\n  if"}
+{"tMs":2736,"delta":" sel<0\n    Car"}
+{"tMs":2769,"delta":"ousel =i count:6 "}
+{"tMs":2803,"delta":"thumbs:="}
+{"tMs":2836,"delta":"map(items,x=>x"}
+{"tMs":2869,"delta":".tone) kind:\""}
+{"tMs":2903,"delta":"shoe\"\n      Pro"}
+{"tMs":2936,"delta":"ductTile \"{items[i"}
+{"tMs":2969,"delta":"].name}\" \""}
+{"tMs":3003,"delta":"Rated {items[i].r"}
+{"tMs":3036,"delta":"ating}\" price:=money("}
+{"tMs":3069,"delta":"items[i].price,\"$"}
+{"tMs":3103,"delta":"\",0) rating:=items"}
+{"tMs":3137,"delta":"[i].rating kind:"}
+{"tMs":3169,"delta":"\"shoe\" tone:"}
+{"tMs":3202,"delta":"=items[i].tone -"}
+{"tMs":3236,"delta":"> sel=i; size="}
+{"tMs":3270,"delta":"\"\"\n  if sel>="}
+{"tMs":3303,"delta":"0\n    Card gap:"}
+{"tMs":3336,"delta":"12\n      Button"}
+{"tMs":3369,"delta":".ghost \"← Back"}
+{"tMs":3402,"delta":" to carousel\" -> s"}
+{"tMs":3436,"delta":"el=-1\n      Media"}
+{"tMs":3469,"delta":" kind:\"shoe\""}
+{"tMs":3503,"delta":" tone:=items[sel"}
+{"tMs":3536,"delta":"].tone h:160\n      "}
+{"tMs":3569,"delta":"Row between middle\n        "}
+{"tMs":3602,"delta":"Text.heading \"{items["}
+{"tMs":3635,"delta":"sel].name}\"\n        "}
+{"tMs":3670,"delta":"Text.strong \"{money"}
+{"tMs":3703,"delta":"(items[sel].price,"}
+{"tMs":3736,"delta":"\""}
+{"tMs":3769,"delta":"$\",0)}\"\n      "}
+{"tMs":3802,"delta":"Text.muted \"R"}
+{"tMs":3836,"delta":"ating {items[sel].r"}
+{"tMs":3869,"delta":"ating} ★\"\n      "}
+{"tMs":3902,"delta":"Text \"{items[sel]."}
+{"tMs":3936,"delta":"desc}\"\n      Text"}
+{"tMs":3970,"delta":".fieldLabel \""}
+{"tMs":4003,"delta":"Size\"\n      Cho"}
+{"tMs":4036,"delta":"iceChips =size options:"}
+{"tMs":4069,"delta":"[\"7\",\"8\",\"9\",\"10"}
+{"tMs":4102,"delta":"\",\"11\",\"12\"] columns"}
+{"tMs":4136,"delta":":6\n      Button \""}
+{"tMs":4170,"delta":"Add to bag\" enabled"}
+{"tMs":4205,"delta":":=size!=\"\" ->"}
+{"tMs":4236,"delta":" bag=bag+1;"}
+{"tMs":4269,"delta":" toast \"Added to bag"}
+{"tMs":4303,"delta":"\"; sel=-1"}

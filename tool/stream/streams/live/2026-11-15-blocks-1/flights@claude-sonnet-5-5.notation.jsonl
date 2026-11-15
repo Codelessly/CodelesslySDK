@@ -1,0 +1,98 @@
+{"meta":{"ui":"flights","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"ChatCard \"London to Lisbon\" \"Friday · 1 traveller\" icon:\"flight_takeoff\" status:\"3 flights\" tone:accent w:390\n  state flights=[{\"id\":\"ba\",\"name\":\"British Airways\",\"depart\":\"07:20\",\"arrive\":\"09:55\",\"duration\":\"2h 35m\",\"price\":148,\"tag\":\"Best time\"},{\"id\":\"tp\",\"name\":\"TAP Air Portugal\",\"depart\":\"11:45\",\"arrive\":\"14:15\",\"duration\":\"2h 30m\",\"price\":126,\"tag\":\"\"},{\"id\":\"fr\",\"name\":\"Ryanair\",\"depart\":\"18:10\",\"arrive\":\"20:50\",\"duration\":\"2h 40m\",\"price\":79,\"tag\":\"Cheapest\"}]\n  state pick=\"ba\"\n  state done=false\n  if !done\n    SectionLabel \"Fri flights\" \"all direct\"\n    each f in flights\n      FlightOption \"{f.name}\" depart:\"{f.depart}\" arrive:\"{f.arrive}\" origin:\"LHR\" destination:\"LIS\" duration:\"{f.duration}\" stops:\"Direct\" price:\"£{f.price}\" tag:\"{f.tag}\" selected:=pick==f.id -> pick=f.id\n    TotalBar \"Total\" \"1 traveller, taxes included\" amount:=money(find(flights,x=>x.id==pick).price,\"£\",0) cta:\"Confirm\" -> done=true; emit confirm pick\n  if done\n    Receipt \"Flight confirmed\" \"You chose {find(flights,x=>x.id==pick).name}, departing {find(flights,x=>x.id==pick).depart}.\" code:=upper(pick) codeLabel:\"Selected flight\" tone:good","usage":{"input_tokens":7818,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":561,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":765,"totalMs":3998}}
+{"tMs":765,"delta":"ChatCard \""}
+{"tMs":1081,"delta":"London to Lisbon\""}
+{"tMs":1081,"delta":" \"Friday ·"}
+{"tMs":1081,"delta":" 1"}
+{"tMs":1081,"delta":" tra"}
+{"tMs":1081,"delta":"veller"}
+{"tMs":1081,"delta":"\""}
+{"tMs":1081,"delta":" icon:\"flight_tak"}
+{"tMs":1081,"delta":"eoff\" status:\"3"}
+{"tMs":1081,"delta":" fl"}
+{"tMs":1083,"delta":"ights\" tone:acc"}
+{"tMs":1117,"delta":"ent w:390"}
+{"tMs":1153,"delta":"\n  state flights=[{\""}
+{"tMs":1401,"delta":"id\":\"ba\",\""}
+{"tMs":1401,"delta":"name\":\"British"}
+{"tMs":1401,"delta":" Airways\",\"depart\":\""}
+{"tMs":1401,"delta":"07"}
+{"tMs":1401,"delta":":20\",\"arrive\":\""}
+{"tMs":1401,"delta":"09:55"}
+{"tMs":1401,"delta":"\",\"du"}
+{"tMs":1420,"delta":"ration\":\"2h "}
+{"tMs":1452,"delta":"35m\",\"price"}
+{"tMs":1484,"delta":"\":148"}
+{"tMs":1520,"delta":",\"tag\":\"Best"}
+{"tMs":1553,"delta":" time\"},{\"id\":\""}
+{"tMs":1722,"delta":"tp"}
+{"tMs":1722,"delta":"\",\"name\":\"TAP"}
+{"tMs":1722,"delta":" Air Portugal\",\"depart"}
+{"tMs":1722,"delta":"\":\"11:45"}
+{"tMs":1722,"delta":"\",\"arrive\":\"14"}
+{"tMs":1754,"delta":":15"}
+{"tMs":1788,"delta":"\",\"duration\":\"2h "}
+{"tMs":1822,"delta":"30m\",\"price\":126"}
+{"tMs":1855,"delta":",\"tag\":\"\""}
+{"tMs":1889,"delta":"},{\"id\":\"f"}
+{"tMs":1923,"delta":"r\",\"name\":\""}
+{"tMs":1956,"delta":"Ryanair\",\"depart\":"}
+{"tMs":2042,"delta":"\"18:10"}
+{"tMs":2042,"delta":"\",\"arrive\":\"20:"}
+{"tMs":2056,"delta":"50"}
+{"tMs":2090,"delta":"\",\"duration\":\"2h "}
+{"tMs":2123,"delta":"40m\",\"price\":79"}
+{"tMs":2157,"delta":",\"tag\":\"C"}
+{"tMs":2190,"delta":"heapest\"}]\n  "}
+{"tMs":2224,"delta":"state pick=\"ba\""}
+{"tMs":2258,"delta":"\n  state"}
+{"tMs":2290,"delta":" done"}
+{"tMs":2323,"delta":"=false\n  if"}
+{"tMs":2356,"delta":" !"}
+{"tMs":2389,"delta":"done\n    SectionLab"}
+{"tMs":2422,"delta":"el \"F"}
+{"tMs":2456,"delta":"ri fl"}
+{"tMs":2489,"delta":"ights\" \"all"}
+{"tMs":2522,"delta":" direct\"\n    each f in"}
+{"tMs":2556,"delta":" flights\n      FlightO"}
+{"tMs":2590,"delta":"ption \"{f.name}\""}
+{"tMs":2623,"delta":" depart:\"{"}
+{"tMs":2657,"delta":"f.depart}\" arr"}
+{"tMs":2693,"delta":"ive:\"{f.arr"}
+{"tMs":2724,"delta":"ive}\" origin:\"L"}
+{"tMs":2758,"delta":"HR\" destination:\"L"}
+{"tMs":2793,"delta":"IS\" duration:\"{"}
+{"tMs":2825,"delta":"f.duration}\" stops"}
+{"tMs":2858,"delta":":\"Direct\" price:"}
+{"tMs":2891,"delta":"\"£"}
+{"tMs":2926,"delta":"{f.price}\" tag"}
+{"tMs":2958,"delta":":\"{f.tag}"}
+{"tMs":2992,"delta":"\" selected:=pick=="}
+{"tMs":3026,"delta":"f.id -> pick="}
+{"tMs":3059,"delta":"f.id\n    Total"}
+{"tMs":3093,"delta":"Bar \"Total"}
+{"tMs":3126,"delta":"\" \"1 traveller,"}
+{"tMs":3159,"delta":" taxes included"}
+{"tMs":3193,"delta":"\" amount:=money(find"}
+{"tMs":3227,"delta":"(flights,x"}
+{"tMs":3259,"delta":"=>x.id==pick"}
+{"tMs":3292,"delta":").price,\"£\",0"}
+{"tMs":3327,"delta":") cta:\"Confir"}
+{"tMs":3359,"delta":"m\" -"}
+{"tMs":3395,"delta":"> done"}
+{"tMs":3426,"delta":"=true; emit conf"}
+{"tMs":3461,"delta":"irm p"}
+{"tMs":3493,"delta":"ick\n  if done\n    "}
+{"tMs":3526,"delta":"Receipt \"Fl"}
+{"tMs":3560,"delta":"ight confirmed\" \"You"}
+{"tMs":3593,"delta":" chose {find(flights,"}
+{"tMs":3626,"delta":"x=>x.id==p"}
+{"tMs":3660,"delta":"ick).name}"}
+{"tMs":3693,"delta":", departing {find(flights"}
+{"tMs":3727,"delta":",x=>x.id"}
+{"tMs":3760,"delta":"==pick).depart}.\""}
+{"tMs":3793,"delta":" code:="}
+{"tMs":3826,"delta":"up"}
+{"tMs":3860,"delta":"per(pick) cod"}
+{"tMs":3893,"delta":"eLabel:\""}
+{"tMs":3926,"delta":"Sel"}
+{"tMs":3959,"delta":"ected flight\" tone:good"}

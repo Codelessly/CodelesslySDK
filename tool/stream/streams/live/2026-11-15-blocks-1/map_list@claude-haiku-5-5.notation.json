@@ -1,0 +1,278 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "wrap": true,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "MapPanel1",
+    "column1"
+   ]
+  },
+  "MapPanel1": {
+   "type": "MapPanel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178.0
+   },
+   "props": {
+    "value": "pick",
+    "count": 5
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "PlaceRow1",
+    "PlaceRow2",
+    "PlaceRow3",
+    "PlaceRow4",
+    "PlaceRow5"
+   ]
+  },
+  "PlaceRow1": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Ember & Oak",
+    "detail": "Single-origin pour-over",
+    "index": 1,
+    "rating": "4.8",
+    "distance": "0.3 km",
+    "hours": "7am-6pm"
+   },
+   "bind": {
+    "props.selected": "${= pick==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow2": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Northside Roasters",
+    "detail": "Espresso and pastries",
+    "index": 2,
+    "rating": "4.6",
+    "distance": "0.6 km",
+    "hours": "6am-5pm"
+   },
+   "bind": {
+    "props.selected": "${= pick==2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow3": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Lantern Coffee",
+    "detail": "Cold brew, quiet corners",
+    "index": 3,
+    "rating": "4.7",
+    "distance": "0.8 km",
+    "hours": "8am-7pm"
+   },
+   "bind": {
+    "props.selected": "${= pick==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow4": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Bean & Bridge",
+    "detail": "Filter bar and roastery",
+    "index": 4,
+    "rating": "4.5",
+    "distance": "1.1 km",
+    "hours": "7am-4pm"
+   },
+   "bind": {
+    "props.selected": "${= pick==4}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "PlaceRow5": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Cedar Cup",
+    "detail": "Espresso bar, takeaway",
+    "index": 5,
+    "rating": "4.4",
+    "distance": "1.4 km",
+    "hours": "6:30am-3pm"
+   },
+   "bind": {
+    "props.selected": "${= pick==5}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 5}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

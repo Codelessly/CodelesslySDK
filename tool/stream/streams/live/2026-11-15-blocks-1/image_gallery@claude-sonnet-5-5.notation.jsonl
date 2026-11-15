@@ -1,0 +1,52 @@
+{"meta":{"ui":"image_gallery","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the nine photos from my trip as a gallery grid (use gradients as placeholders, each with a caption). Tapping one opens it large over the page with its caption, next and previous arrows, a counter like 3 of 9 and a close button; the arrow keys and escape work too.","text":"ChatCard \"Trip photos\" \"9 photos from the trip\" icon:\"photo_library\" w:390\n  PhotoGallery =open columns:3 photos:[{\"kind\":\"mountain\",\"tone\":\"dawn\",\"caption\":\"Mountain at dawn\"},{\"kind\":\"harbor\",\"tone\":\"day\",\"caption\":\"Harbour at sunrise\"},{\"kind\":\"skyline\",\"tone\":\"dusk\",\"caption\":\"City skyline at dusk\"},{\"kind\":\"dunes\",\"tone\":\"day\",\"caption\":\"Desert dunes\"},{\"kind\":\"forest\",\"tone\":\"day\",\"caption\":\"Quiet forest path\"},{\"kind\":\"lagoon\",\"tone\":\"day\",\"caption\":\"Blue lagoon\"},{\"kind\":\"market\",\"tone\":\"dusk\",\"caption\":\"Evening market\"},{\"kind\":\"festival\",\"tone\":\"night\",\"caption\":\"Lantern festival\"},{\"kind\":\"temple\",\"tone\":\"dawn\",\"caption\":\"Hilltop temple\"}]","usage":{"input_tokens":7822,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":321,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":676,"totalMs":2403}}
+{"tMs":676,"delta":"ChatCard \"Trip"}
+{"tMs":971,"delta":" photos\" \"9"}
+{"tMs":971,"delta":" phot"}
+{"tMs":971,"delta":"os from the"}
+{"tMs":971,"delta":" trip\" icon:\"phot"}
+{"tMs":971,"delta":"o_library"}
+{"tMs":971,"delta":"\" w"}
+{"tMs":971,"delta":":390"}
+{"tMs":971,"delta":"\n  PhotoGallery"}
+{"tMs":971,"delta":" =open colum"}
+{"tMs":999,"delta":"ns:3 photos:["}
+{"tMs":1033,"delta":"{\"kind\":\"m"}
+{"tMs":1070,"delta":"ountain\",\"tone\":\"d"}
+{"tMs":1284,"delta":"awn\",\"caption\":\""}
+{"tMs":1284,"delta":"M"}
+{"tMs":1284,"delta":"ountain at"}
+{"tMs":1284,"delta":" dawn\"},{\"k"}
+{"tMs":1284,"delta":"ind\":\"harbor\",\"t"}
+{"tMs":1284,"delta":"one\":\"day\",\"caption\":"}
+{"tMs":1309,"delta":"\"Harbour at sun"}
+{"tMs":1343,"delta":"rise\"},{\"kind"}
+{"tMs":1377,"delta":"\":\"skyline\",\"tone"}
+{"tMs":1412,"delta":"\":\"dusk\",\"caption"}
+{"tMs":1445,"delta":"\":\"City skyline at"}
+{"tMs":1480,"delta":" dusk\"},{\"k"}
+{"tMs":1593,"delta":"ind\":\"dunes\",\"t"}
+{"tMs":1593,"delta":"one\":\"day\",\"caption\":"}
+{"tMs":1593,"delta":"\"Des"}
+{"tMs":1614,"delta":"ert dunes\"},{\""}
+{"tMs":1648,"delta":"kind\":\"forest\",\"t"}
+{"tMs":1681,"delta":"one\":\"day\",\"caption\":"}
+{"tMs":1714,"delta":"\"Qu"}
+{"tMs":1747,"delta":"iet forest path"}
+{"tMs":1783,"delta":"\"},{\"kind\":\""}
+{"tMs":1815,"delta":"lagoon\",\"tone\":"}
+{"tMs":1849,"delta":"\"day\",\"caption\":\""}
+{"tMs":1881,"delta":"Bl"}
+{"tMs":1915,"delta":"ue lagoon\"},{"}
+{"tMs":1948,"delta":"\"kind\":\"market\",\"t"}
+{"tMs":1981,"delta":"one\":\"d"}
+{"tMs":2014,"delta":"us"}
+{"tMs":2047,"delta":"k\",\"caption\":\"Ev"}
+{"tMs":2081,"delta":"ening market\"},{\"kind"}
+{"tMs":2115,"delta":"\":\"festival\",\"tone\":"}
+{"tMs":2151,"delta":"\"night\",\"caption\":\""}
+{"tMs":2182,"delta":"Lantern festival\"},{"}
+{"tMs":2216,"delta":"\"kind\":\"temple\",\""}
+{"tMs":2249,"delta":"tone\":\"dawn\",\""}
+{"tMs":2282,"delta":"caption\":\"H"}
+{"tMs":2398,"delta":"il"}
+{"tMs":2398,"delta":"ltop temple\"}]"}

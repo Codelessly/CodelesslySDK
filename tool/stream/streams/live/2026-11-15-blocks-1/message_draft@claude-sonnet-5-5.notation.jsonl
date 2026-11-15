@@ -1,0 +1,145 @@
+{"meta":{"ui":"message_draft","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Draft an email to my landlord about the broken heating and show it as an inline card I can edit before it goes: to, subject and body fields filled in, a tone switch between polite and firm that rewrites the body, and send and discard buttons. Sending needs a recipient and a subject, and afterwards the card shows it as sent.","text":"ChatCard \"Email to landlord\" \"Draft, edit before sending\" icon:\"mail\" status:=sent?\"Sent\":\"Draft\" tone:=sent?\"good\":\"accent\" w:390\n  state sent=false\n  state tone=\"Polite\"\n  state to=\"landlord@example.com\"\n  state subject=\"Heating not working in my flat\"\n  state body=\"Dear Landlord,\\n\\nI hope you are well. The heating in my flat stopped working a few days ago, and the apartment is getting quite cold. Could you please arrange for someone to take a look at it when convenient?\\n\\nI am happy to provide access at any time that suits. Thank you very much for your help.\\n\\nKind regards\"\n  if sent\n    Receipt \"Email sent\" \"Your message to {to} is on its way.\" tone:good icon:\"check\"\n  if !sent\n    SectionLabel \"Tone\"\n    Segments =tone options:[\"Polite\",\"Firm\"] -> body=result==\"Polite\"?\"Dear Landlord,\\n\\nI hope you are well. The heating in my flat stopped working a few days ago, and the apartment is getting quite cold. Could you please arrange for someone to take a look at it when convenient?\\n\\nI am happy to provide access at any time that suits. Thank you very much for your help.\\n\\nKind regards\":\"Dear Landlord,\\n\\nThe heating in my flat has been broken for several days. As the property is not currently habitable in this cold, I require a repair to be arranged within 48 hours.\\n\\nPlease confirm the date of the engineer's visit by reply. If I do not hear from you, I will have to consider my options under my tenancy agreement.\\n\\nRegards\"\n    InputField \"To\" \"name@example.com\" =to keyboard:email error:=trim(to)==\"\"?\"Recipient required\":\"\"\n    InputField \"Subject\" \"Subject\" =subject error:=trim(subject)==\"\"?\"Subject required\":\"\"\n    InputField \"Message\" \"Write your message\" =body lines:9\n    Row gap:10\n      ActionButton \"Discard\" tone:quiet icon:\"delete\" -> to=\"\"; subject=\"\"; body=\"\"; toast \"Draft discarded\"\n      ActionButton \"Send\" tone:primary icon:\"send\" enabled:=trim(to)!=\"\"&&trim(subject)!=\"\" -> sent=true; emit send","usage":{"input_tokens":7835,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":759,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":682,"totalMs":5468}}
+{"tMs":682,"delta":"ChatCard \"Email"}
+{"tMs":995,"delta":" to landlord\" \"Dra"}
+{"tMs":995,"delta":"ft,"}
+{"tMs":995,"delta":" edit before sending\" icon"}
+{"tMs":995,"delta":":\"mail\" status:="}
+{"tMs":995,"delta":"s"}
+{"tMs":995,"delta":"ent?\"Sent\":\""}
+{"tMs":995,"delta":"Draft\" tone:="}
+{"tMs":995,"delta":"sent?\"good"}
+{"tMs":995,"delta":"\":\"accent\" w:390"}
+{"tMs":1001,"delta":"\n  state s"}
+{"tMs":1036,"delta":"ent=false\n  state tone"}
+{"tMs":1066,"delta":"=\""}
+{"tMs":1327,"delta":"Polite\"\n  state to=\""}
+{"tMs":1327,"delta":"landlord@example.com\""}
+{"tMs":1327,"delta":"\n  state subject=\"He"}
+{"tMs":1327,"delta":"ating not working in my"}
+{"tMs":1327,"delta":" fl"}
+{"tMs":1327,"delta":"at\"\n  state body=\""}
+{"tMs":1327,"delta":"D"}
+{"tMs":1331,"delta":"ear Land"}
+{"tMs":1365,"delta":"lord,\\n\\nI"}
+{"tMs":1399,"delta":" hope you are well. The he"}
+{"tMs":1433,"delta":"ating in my flat st"}
+{"tMs":1465,"delta":"opped working a"}
+{"tMs":1654,"delta":" few days ago,"}
+{"tMs":1654,"delta":" and the"}
+{"tMs":1654,"delta":" ap"}
+{"tMs":1654,"delta":"artment is get"}
+{"tMs":1654,"delta":"ting qu"}
+{"tMs":1661,"delta":"ite cold."}
+{"tMs":1693,"delta":" Could"}
+{"tMs":1728,"delta":" you please arrange for some"}
+{"tMs":1759,"delta":"one to take"}
+{"tMs":1792,"delta":" a look at it when"}
+{"tMs":1825,"delta":" conv"}
+{"tMs":1860,"delta":"enient?\\n\\nI"}
+{"tMs":1975,"delta":" am happy to prov"}
+{"tMs":1975,"delta":"ide access at"}
+{"tMs":1975,"delta":" any time that"}
+{"tMs":1990,"delta":" su"}
+{"tMs":2023,"delta":"its."}
+{"tMs":2056,"delta":" Thank you very"}
+{"tMs":2091,"delta":" much for your help.\\n\\"}
+{"tMs":2124,"delta":"nKind regards\""}
+{"tMs":2157,"delta":"\n  if sent"}
+{"tMs":2191,"delta":"\n    Receipt \"Email"}
+{"tMs":2225,"delta":" sent\" \""}
+{"tMs":2258,"delta":"Your message"}
+{"tMs":2292,"delta":" to {to} is"}
+{"tMs":2324,"delta":" on its way.\" t"}
+{"tMs":2357,"delta":"one:good"}
+{"tMs":2391,"delta":" icon:\"check\"\n  "}
+{"tMs":2423,"delta":"if"}
+{"tMs":2457,"delta":" !sent\n    Section"}
+{"tMs":2491,"delta":"Label \"T"}
+{"tMs":2525,"delta":"one\"\n    Segments ="}
+{"tMs":2558,"delta":"tone options:[\"Polite"}
+{"tMs":2593,"delta":"\",\"Firm\"] ->"}
+{"tMs":2626,"delta":" body=result"}
+{"tMs":2659,"delta":"==\"Polite\""}
+{"tMs":2693,"delta":"?\"Dear Landl"}
+{"tMs":2726,"delta":"ord,\\n\\nI h"}
+{"tMs":2760,"delta":"ope you are well. The heating"}
+{"tMs":2797,"delta":" in my flat stopped working"}
+{"tMs":2829,"delta":" a few days ago, and the"}
+{"tMs":2861,"delta":" apartment is getting quite"}
+{"tMs":2895,"delta":" cold. Could you please ar"}
+{"tMs":2929,"delta":"range for someone to take a"}
+{"tMs":2963,"delta":" look at it when convenient?"}
+{"tMs":2996,"delta":"\\n\\nI am happy"}
+{"tMs":3030,"delta":" to provide access at any time that"}
+{"tMs":3063,"delta":" suits. Thank you very"}
+{"tMs":3097,"delta":" much for your help.\\n\\"}
+{"tMs":3131,"delta":"nKind regards\":\""}
+{"tMs":3164,"delta":"Dear Landlord,\\"}
+{"tMs":3198,"delta":"n\\nThe heating in"}
+{"tMs":3231,"delta":" my flat has been broken for"}
+{"tMs":3264,"delta":" several days."}
+{"tMs":3297,"delta":" As the"}
+{"tMs":3330,"delta":" property"}
+{"tMs":3364,"delta":" is"}
+{"tMs":3399,"delta":" not curr"}
+{"tMs":3429,"delta":"ently hab"}
+{"tMs":3462,"delta":"itable in"}
+{"tMs":3495,"delta":" this"}
+{"tMs":3528,"delta":" c"}
+{"tMs":3561,"delta":"old, I require"}
+{"tMs":3594,"delta":" a repair to"}
+{"tMs":3627,"delta":" be arranged within"}
+{"tMs":3661,"delta":" 48 hours."}
+{"tMs":3694,"delta":"\\n\\nP"}
+{"tMs":3727,"delta":"lease conf"}
+{"tMs":3760,"delta":"irm the date of"}
+{"tMs":3793,"delta":" the"}
+{"tMs":3826,"delta":" eng"}
+{"tMs":3860,"delta":"ineer's visit by re"}
+{"tMs":3893,"delta":"ply. If I"}
+{"tMs":3926,"delta":" do not h"}
+{"tMs":3959,"delta":"ear from"}
+{"tMs":3992,"delta":" you, I will have"}
+{"tMs":4025,"delta":" to cons"}
+{"tMs":4059,"delta":"ider my"}
+{"tMs":4091,"delta":" options"}
+{"tMs":4124,"delta":" under"}
+{"tMs":4158,"delta":" my tenancy agreement"}
+{"tMs":4191,"delta":".\\n\\nR"}
+{"tMs":4225,"delta":"egards\"\n    InputField"}
+{"tMs":4258,"delta":" \"To\" \"name"}
+{"tMs":4292,"delta":"@example.com\" =to ke"}
+{"tMs":4325,"delta":"yboard:email"}
+{"tMs":4358,"delta":" error"}
+{"tMs":4391,"delta":":="}
+{"tMs":4424,"delta":"tr"}
+{"tMs":4457,"delta":"im(to)=="}
+{"tMs":4491,"delta":"\"\"?\"Rec"}
+{"tMs":4524,"delta":"ipient required"}
+{"tMs":4559,"delta":"\":\"\"\n    InputField \""}
+{"tMs":4604,"delta":"Subject\" \"Sub"}
+{"tMs":4625,"delta":"ject\" =subject error:="}
+{"tMs":4658,"delta":"trim(subject)==\"\""}
+{"tMs":4692,"delta":"?\"Subject required\":\"\""}
+{"tMs":4726,"delta":"\n    InputField \"Message"}
+{"tMs":4759,"delta":"\" \""}
+{"tMs":4792,"delta":"Write your message"}
+{"tMs":4826,"delta":"\" =body lines:9"}
+{"tMs":4859,"delta":"\n    Row gap:10"}
+{"tMs":4893,"delta":"\n      ActionButton \""}
+{"tMs":4927,"delta":"Discard\" tone:qu"}
+{"tMs":4959,"delta":"iet ic"}
+{"tMs":4993,"delta":"on:\"del"}
+{"tMs":5026,"delta":"ete\" -> to"}
+{"tMs":5059,"delta":"=\"\"; subject=\"\";"}
+{"tMs":5093,"delta":" body=\"\"; to"}
+{"tMs":5126,"delta":"ast \"Dra"}
+{"tMs":5159,"delta":"ft discarded\"\n      "}
+{"tMs":5194,"delta":"ActionButton \"Send\""}
+{"tMs":5228,"delta":" tone:primary icon:"}
+{"tMs":5260,"delta":"\"send\" enabled:="}
+{"tMs":5294,"delta":"trim(to)!="}
+{"tMs":5327,"delta":"\"\"&&trim(subject"}
+{"tMs":5361,"delta":")!=\""}
+{"tMs":5393,"delta":"\" -> sent=true;"}
+{"tMs":5427,"delta":" emit send"}

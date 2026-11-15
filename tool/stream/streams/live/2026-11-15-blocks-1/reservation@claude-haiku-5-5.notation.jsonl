@@ -1,0 +1,96 @@
+{"meta":{"ui":"reservation","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"Card gap:12 pad:16 w:390\n  Text.heading \"Book a table\"\n  Text.eyebrow \"Choose a day\"\n  DayPicker =day days:=[formatDate(today(),\"ddd d\"),formatDate(today()+1,\"ddd d\")]\n\nHere I need the seven days as text, so let me write them out explicitly. The DayPicker takes a list, so the card is:\n\nCard gap:12 pad:16 w:390\n  Text.heading \"Book a table\"\n  Text.eyebrow \"Choose a day\"\n  DayPicker =day days:[\"Mon 1\",\"Tue 2\",\"Wed 3\",\"Thu 4\",\"Fri 5\",\"Sat 6\",\"Sun 7\"]\n  Text.eyebrow \"Party size\"\n  Counter \"Guests\" =party min:1 max:8 step:1\n  Text.eyebrow \"Time\"\n  ChoiceChips =time columns:3 options:=[\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\"] disabled:=day==\"Mon 1\"?[\"18:30\",\"20:00\"]:day==\"Sat 6\"?[\"18:00\",\"18:30\",\"19:00\",\"19:30\"]:party>4?[\"19:00\",\"19:30\"]:[]\n  Text.muted \"Choose a day and time to continue.\"\n  TotalBar \"Your booking\" \"{day}, {party} guests\" amount:=time==\"\" ? \"Pick a time\" : time cta \"Confirm\" enabled:=time!=\"\" -> emit confirm","usage":{"input_tokens":7815,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":487,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":492,"totalMs":2446}}
+{"tMs":492,"delta":"Card"}
+{"tMs":612,"delta":" g"}
+{"tMs":612,"delta":"ap:12"}
+{"tMs":612,"delta":" pad:16 w:"}
+{"tMs":612,"delta":"390\n  Text.heading"}
+{"tMs":612,"delta":" \"Book"}
+{"tMs":621,"delta":" a table\"\n  Text."}
+{"tMs":643,"delta":"eyebrow \"Cho"}
+{"tMs":663,"delta":"ose a day\"\n  Day"}
+{"tMs":684,"delta":"Picker =day days:="}
+{"tMs":704,"delta":"["}
+{"tMs":723,"delta":"form"}
+{"tMs":745,"delta":"atDate(today(),\""}
+{"tMs":765,"delta":"ddd d"}
+{"tMs":785,"delta":"\"),"}
+{"tMs":805,"delta":"formatDate(today()+"}
+{"tMs":826,"delta":"1,\"ddd d\")"}
+{"tMs":846,"delta":"]"}
+{"tMs":866,"delta":"\n\nHere I"}
+{"tMs":887,"delta":" need the se"}
+{"tMs":908,"delta":"ven days as text"}
+{"tMs":928,"delta":", so let me write them out"}
+{"tMs":948,"delta":" explicitly."}
+{"tMs":968,"delta":" The DayPicker tak"}
+{"tMs":989,"delta":"es a"}
+{"tMs":1010,"delta":" list,"}
+{"tMs":1029,"delta":" so the"}
+{"tMs":1049,"delta":" card"}
+{"tMs":1070,"delta":" is:\n\nCard gap:"}
+{"tMs":1091,"delta":"12 pad:16 w"}
+{"tMs":1111,"delta":":390\n  Text.he"}
+{"tMs":1132,"delta":"ading \"Book a table\""}
+{"tMs":1152,"delta":"\n  Text.eyebr"}
+{"tMs":1173,"delta":"ow \"Choose a day\""}
+{"tMs":1194,"delta":"\n  DayPicker ="}
+{"tMs":1214,"delta":"day days:[\"M"}
+{"tMs":1234,"delta":"on 1\",\"Tue "}
+{"tMs":1255,"delta":"2\",\"Wed 3\",\""}
+{"tMs":1276,"delta":"Thu 4\",\"F"}
+{"tMs":1296,"delta":"ri 5\",\"Sat "}
+{"tMs":1316,"delta":"6\",\"Sun 7\""}
+{"tMs":1337,"delta":"]\n  Text"}
+{"tMs":1357,"delta":".eyebrow \""}
+{"tMs":1378,"delta":"Party size\"\n  Counter"}
+{"tMs":1398,"delta":" \""}
+{"tMs":1418,"delta":"Guests\" =party min:"}
+{"tMs":1439,"delta":"1 max:8 step:"}
+{"tMs":1460,"delta":"1\n  Text.ey"}
+{"tMs":1480,"delta":"ebrow \"Time"}
+{"tMs":1504,"delta":"\""}
+{"tMs":1520,"delta":"\n  ChoiceCh"}
+{"tMs":1541,"delta":"ips =time"}
+{"tMs":1561,"delta":" colum"}
+{"tMs":1582,"delta":"ns:3 options:="}
+{"tMs":1602,"delta":"[\"18:00\",\"18:30"}
+{"tMs":1623,"delta":"\",\"19"}
+{"tMs":1643,"delta":":00\",\"19:30\",\"20"}
+{"tMs":1663,"delta":":00\",\"20:30\"]"}
+{"tMs":1684,"delta":" disabled:=day"}
+{"tMs":1704,"delta":"="}
+{"tMs":1725,"delta":"=\"Mon 1\""}
+{"tMs":1745,"delta":"?[\"18:30"}
+{"tMs":1765,"delta":"\",\""}
+{"tMs":1786,"delta":"20:00\"]:day="}
+{"tMs":1806,"delta":"=\"S"}
+{"tMs":1827,"delta":"at 6\"?[\"18"}
+{"tMs":1848,"delta":":00\",\"18"}
+{"tMs":1868,"delta":":30\",\"19:00\",\""}
+{"tMs":1888,"delta":"19"}
+{"tMs":1909,"delta":":30\"]:party"}
+{"tMs":1928,"delta":">4"}
+{"tMs":1949,"delta":"?[\"19"}
+{"tMs":1969,"delta":":00\",\"19"}
+{"tMs":1990,"delta":":30\"]:["}
+{"tMs":2010,"delta":"]\n  Text.mu"}
+{"tMs":2030,"delta":"ted \"Cho"}
+{"tMs":2051,"delta":"ose a day and time"}
+{"tMs":2071,"delta":" to contin"}
+{"tMs":2092,"delta":"ue.\"\n  TotalB"}
+{"tMs":2112,"delta":"ar \"Your"}
+{"tMs":2133,"delta":" boo"}
+{"tMs":2153,"delta":"king\" \"{"}
+{"tMs":2173,"delta":"day}, {party}"}
+{"tMs":2194,"delta":" guests\""}
+{"tMs":2216,"delta":" amount:"}
+{"tMs":2234,"delta":"=time="}
+{"tMs":2255,"delta":"=\"\" ? \"P"}
+{"tMs":2275,"delta":"ick a"}
+{"tMs":2296,"delta":" time\" : time"}
+{"tMs":2316,"delta":" c"}
+{"tMs":2337,"delta":"ta \""}
+{"tMs":2357,"delta":"Confirm\" en"}
+{"tMs":2377,"delta":"abled:=time"}
+{"tMs":2398,"delta":"!=\"\" -> emit conf"}
+{"tMs":2418,"delta":"irm"}

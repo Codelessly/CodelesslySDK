@@ -1,0 +1,120 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ComparisonTable1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ComparisonTable1": {
+   "type": "ComparisonTable",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Plan A",
+     "Plan B"
+    ],
+    "prices": [
+     "$35/mo",
+     "$42/mo"
+    ],
+    "rows": [
+     [
+      "Data",
+      "30 GB",
+      "Unlimited",
+      2
+     ],
+     [
+      "Calls",
+      "Unlimited",
+      "Unlimited",
+      0
+     ],
+     [
+      "Roaming",
+      "$5/day",
+      "Included",
+      2
+     ],
+     [
+      "Contract",
+      "24 months",
+      "None",
+      2
+     ],
+     [
+      "Extras",
+      "Streaming perks",
+      "Hotspot 15 GB",
+      2
+     ]
+    ],
+    "pick": "Plan B",
+    "pickLabel": "Recommended",
+    "cta": "Choose"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChoose"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "choosePlan"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "Recommended: Plan B. Its unlimited data, included roaming and no contract outweigh the $7 monthly difference for most travellers."
+   }
+  }
+ }
+}

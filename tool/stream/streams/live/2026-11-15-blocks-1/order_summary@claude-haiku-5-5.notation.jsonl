@@ -1,0 +1,195 @@
+{"meta":{"ui":"order_summary","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show my grocery order as an inline card before you place it: five line items with a picture placeholder, price and a quantity I can raise or lower (removing at zero), a promo code field that takes SAVE10, the subtotal, delivery and total kept up to date, and confirm and cancel buttons that tell you what I decided.","text":"Card w:390 gap:12 pad:16\n  Text.heading \"Your grocery order\"\n  Text.caption \"Review before we place it\"\n  Column gap:10\n    CartLine \"Organic bananas\" \"1 bunch\" \"$2.49\" qty=bananasQty kind:\"banana\" tone:\"sand\" -> items=updateWhere(items,x=>x.id==i.id,x=>with(x,\"qty\",result))\n  Input \"Promo code\" \"Enter code\" =promo\n  Text.caption \"{promo=='SAVE10' ? 'SAVE10 applied: 10% off' : ''}\"\n\nHmm, the notation above is partial and mixes in invented names, so here is the corrected version using the notation only:\n\nstate bananasQty=1\nstate milkQty=1\nstate breadQty=1\nstate eggsQty=1\nstate cheeseQty=1\nstate promo=\"\"\nstate decided=\"\"\nstate items=[{\"id\":\"bananas\",\"title\":\"Organic bananas\",\"detail\":\"1 bunch\",\"price\":2.49,\"qty\":1,\"kind\":\"banana\",\"tone\":\"sand\"},{\"id\":\"milk\",\"title\":\"Whole milk\",\"detail\":\"1 litre\",\"price\":1.89,\"qty\":1,\"kind\":\"milk\",\"tone\":\"sky\"},{\"id\":\"bread\",\"title\":\"Sourdough loaf\",\"detail\":\"750 g\",\"price\":4.25,\"qty\":1,\"kind\":\"bread\",\"tone\":\"sand\"},{\"id\":\"eggs\",\"title\":\"Free-range eggs\",\"detail\":\"12 pack\",\"price\":3.99,\"qty\":1,\"kind\":\"eggs\",\"tone\":\"rose\"},{\"id\":\"cheese\",\"title\":\"Aged cheddar\",\"detail\":\"300 g\",\"price\":5.49,\"qty\":1,\"kind\":\"cheese\",\"tone\":\"lilac\"}]\nstate subtotal=sum(items,x=>x.price*x.qty)\nstate discount=promo==\"SAVE10\"?subtotal*0.1:0\nstate delivery=3.99\nstate total=subtotal-discount+delivery\n\nCard w:390 gap:12 pad:16\n  Text.heading \"Your grocery order\"\n  Text.caption \"Review before we place it\"\n  Column gap:10\n    each row in items\n      CartLine \"{row.title}\" \"{row.detail}\" \"{row.price}\" qty:=row.qty kind:=row.kind tone:=row.tone -> items=updateWhere(items,x=>x.id==row.id,x=>with(x,\"qty\",result))\n  Input \"Promo code\" \"Enter SAVE10\" =promo\n  Details rows:=[[\"Subtotal\",money(subtotal,\"$\",2)],[\"Discount\",discount>0?money(-discount,\"$\",2):\"\"],[\"Delivery\",money(delivery,\"$\",2)],[\"Total\",money(total,\"$\",2)]]\n  Row gap:10\n    ActionButton \"Cancel\" quiet icon:\"close\" -> decided=\"cancelled\"\n    ActionButton \"Confirm order\" primary icon:\"check\" -> decided=\"confirmed\"\n  if decided==\"confirmed\"\n    Receipt \"Order placed\" \"Your groceries are on the way.\" tone:\"good\" icon:\"check\"\n  if decided==\"cancelled\"\n    Receipt \"Order cancelled\" \"Nothing was charged.\" tone:\"neutral\" icon:\"close\"","usage":{"input_tokens":7833,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1080,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":624,"totalMs":4623}}
+{"tMs":624,"delta":"Card"}
+{"tMs":818,"delta":" w"}
+{"tMs":818,"delta":":390 gap:12 "}
+{"tMs":818,"delta":"pad:16\n  Text"}
+{"tMs":818,"delta":".he"}
+{"tMs":818,"delta":"ading \"Your"}
+{"tMs":818,"delta":" grocery order\"\n  "}
+{"tMs":818,"delta":"Text.ca"}
+{"tMs":818,"delta":"ption \"Review"}
+{"tMs":818,"delta":" before we"}
+{"tMs":833,"delta":" place it\"\n  Column g"}
+{"tMs":853,"delta":"ap:10"}
+{"tMs":874,"delta":"\n    CartLine \""}
+{"tMs":937,"delta":"Organ"}
+{"tMs":937,"delta":"ic b"}
+{"tMs":937,"delta":"ananas\" \"1"}
+{"tMs":955,"delta":" bun"}
+{"tMs":975,"delta":"ch\" \""}
+{"tMs":996,"delta":"$2.49"}
+{"tMs":1017,"delta":"\" qty="}
+{"tMs":1038,"delta":"b"}
+{"tMs":1056,"delta":"ananas"}
+{"tMs":1077,"delta":"Qty k"}
+{"tMs":1097,"delta":"ind:\""}
+{"tMs":1118,"delta":"banana\" tone:\"s"}
+{"tMs":1475,"delta":"and\" -> items"}
+{"tMs":1475,"delta":"=updateWhere(items"}
+{"tMs":1475,"delta":",x=>x.id=="}
+{"tMs":1475,"delta":"i.id,x=>with"}
+{"tMs":1475,"delta":"(x,\"qty\",result"}
+{"tMs":1475,"delta":"))\n  "}
+{"tMs":1475,"delta":"Input"}
+{"tMs":1475,"delta":" \"Prom"}
+{"tMs":1475,"delta":"o code\" \""}
+{"tMs":1475,"delta":"Enter code"}
+{"tMs":1475,"delta":"\" =promo"}
+{"tMs":1475,"delta":"\n  Text"}
+{"tMs":1662,"delta":".ca"}
+{"tMs":1662,"delta":"ption \"{"}
+{"tMs":1662,"delta":"promo="}
+{"tMs":1662,"delta":"='SAVE10' "}
+{"tMs":1662,"delta":"? 'SAVE10"}
+{"tMs":1662,"delta":" applied:"}
+{"tMs":1662,"delta":" 10% off' : ''"}
+{"tMs":1662,"delta":"}\""}
+{"tMs":1662,"delta":"\n\nHmm, the notation above"}
+{"tMs":1662,"delta":" is part"}
+{"tMs":1662,"delta":"ial and m"}
+{"tMs":1662,"delta":"ix"}
+{"tMs":1886,"delta":"es in"}
+{"tMs":1886,"delta":" inv"}
+{"tMs":1886,"delta":"ented names"}
+{"tMs":1886,"delta":","}
+{"tMs":1886,"delta":" so here"}
+{"tMs":1886,"delta":" is the corrected version using"}
+{"tMs":1886,"delta":" the not"}
+{"tMs":1886,"delta":"ation only:\n\nstate"}
+{"tMs":1886,"delta":" b"}
+{"tMs":1886,"delta":"ananasQty=1\nstate"}
+{"tMs":1886,"delta":" milk"}
+{"tMs":1886,"delta":"Qty=1"}
+{"tMs":2254,"delta":"\nstate bre"}
+{"tMs":2254,"delta":"adQty=1\nstate e"}
+{"tMs":2255,"delta":"ggsQty=1\nstate"}
+{"tMs":2255,"delta":" cheeseQty=1"}
+{"tMs":2255,"delta":"\nstate prom"}
+{"tMs":2255,"delta":"o=\"\"\nstate dec"}
+{"tMs":2255,"delta":"ided"}
+{"tMs":2255,"delta":"=\"\"\nstate items"}
+{"tMs":2255,"delta":"=[{\"id"}
+{"tMs":2255,"delta":"\":\""}
+{"tMs":2255,"delta":"b"}
+{"tMs":2255,"delta":"ananas\",\"title"}
+{"tMs":2514,"delta":"\":\"Organic bananas"}
+{"tMs":2514,"delta":"\",\"detail\":\"1 b"}
+{"tMs":2514,"delta":"unch\",\"price\":2.49"}
+{"tMs":2514,"delta":",\"qty\":1,\""}
+{"tMs":2514,"delta":"kind\":\"banana\",\""}
+{"tMs":2514,"delta":"tone\":\"sand\"},"}
+{"tMs":2514,"delta":"{\"id\":\"milk\",\""}
+{"tMs":2514,"delta":"title\":\"Whole milk"}
+{"tMs":2514,"delta":"\",\"detail\":\"1 lit"}
+{"tMs":2514,"delta":"re\",\"price\":1"}
+{"tMs":2514,"delta":".89"}
+{"tMs":2514,"delta":",\"qty\":1,\""}
+{"tMs":2794,"delta":"kind\":\"milk\",\"t"}
+{"tMs":2794,"delta":"one\":\"sky\"},{"}
+{"tMs":2794,"delta":"\"id\":\"bread\",\"title"}
+{"tMs":2794,"delta":"\":\"Sourdough lo"}
+{"tMs":2794,"delta":"af\",\"detail\":\"750"}
+{"tMs":2794,"delta":" "}
+{"tMs":2794,"delta":"g\",\"price\":4"}
+{"tMs":2794,"delta":".25"}
+{"tMs":2794,"delta":",\"qty\":1,\""}
+{"tMs":2794,"delta":"kind\":\"bread\",\"t"}
+{"tMs":2794,"delta":"one\":\"s"}
+{"tMs":2794,"delta":"and\"},{\"id\":\""}
+{"tMs":2980,"delta":"eggs\",\"title\":\""}
+{"tMs":2980,"delta":"Free-"}
+{"tMs":2980,"delta":"range eggs\",\"detail\":"}
+{"tMs":2980,"delta":"\"12 pack"}
+{"tMs":2980,"delta":"\",\"price\":3.99,\""}
+{"tMs":2980,"delta":"qty\":1,\"kind"}
+{"tMs":2980,"delta":"\":\"eggs\",\"tone"}
+{"tMs":2981,"delta":"\":\"r"}
+{"tMs":2981,"delta":"ose\"},{\"id\":\""}
+{"tMs":2981,"delta":"cheese\",\"title\":\""}
+{"tMs":2981,"delta":"Aged cheddar\",\"det"}
+{"tMs":2981,"delta":"ail\":\"300"}
+{"tMs":3255,"delta":" g\",\"price\":5.49"}
+{"tMs":3255,"delta":",\"qty\":1,\""}
+{"tMs":3255,"delta":"kind\":\"cheese\",\""}
+{"tMs":3255,"delta":"tone\":\"l"}
+{"tMs":3255,"delta":"ilac\"}]"}
+{"tMs":3255,"delta":"\nstate"}
+{"tMs":3255,"delta":" sub"}
+{"tMs":3256,"delta":"total=s"}
+{"tMs":3256,"delta":"um(items,x=>x"}
+{"tMs":3256,"delta":".price*x.qty)"}
+{"tMs":3256,"delta":"\nstate discount=prom"}
+{"tMs":3256,"delta":"o==\"SAVE10"}
+{"tMs":3446,"delta":"\"?sub"}
+{"tMs":3446,"delta":"total*0.1:"}
+{"tMs":3446,"delta":"0\nstate delivery=3"}
+{"tMs":3446,"delta":".99\nstate total=subt"}
+{"tMs":3446,"delta":"otal-discount+deliv"}
+{"tMs":3446,"delta":"ery\n\nCard w"}
+{"tMs":3446,"delta":":390 gap:12 "}
+{"tMs":3446,"delta":"pad:16\n  Text"}
+{"tMs":3446,"delta":".heading \"Your groc"}
+{"tMs":3446,"delta":"ery order\"\n  Text"}
+{"tMs":3446,"delta":".caption \"Review before we"}
+{"tMs":3446,"delta":" place it\"\n  Column g"}
+{"tMs":3714,"delta":"ap:10\n    each row"}
+{"tMs":3714,"delta":" in items\n      CartLine"}
+{"tMs":3714,"delta":" \"{row.title}\" \""}
+{"tMs":3714,"delta":"{row.detail}\" \""}
+{"tMs":3714,"delta":"{row"}
+{"tMs":3714,"delta":".price}\" q"}
+{"tMs":3714,"delta":"ty:="}
+{"tMs":3714,"delta":"row.qty kind:="}
+{"tMs":3714,"delta":"row.kind tone:="}
+{"tMs":3714,"delta":"row.tone -> items="}
+{"tMs":3714,"delta":"updateWhere(items,"}
+{"tMs":3714,"delta":"x=>x.id==row"}
+{"tMs":3878,"delta":".id,x=>with("}
+{"tMs":3878,"delta":"x,\"qty\",result))"}
+{"tMs":3879,"delta":"\n  Input \"Promo"}
+{"tMs":3879,"delta":" code\" \"Enter S"}
+{"tMs":3879,"delta":"AVE10\" =promo"}
+{"tMs":3879,"delta":"\n  Details"}
+{"tMs":3879,"delta":" rows:=[[\"Sub"}
+{"tMs":3879,"delta":"total\",money(subt"}
+{"tMs":3879,"delta":"otal,\"$\",2)"}
+{"tMs":3879,"delta":"],[\"Discount\",disc"}
+{"tMs":3879,"delta":"ount>0?money"}
+{"tMs":3879,"delta":"(-discount,\"$\","}
+{"tMs":4043,"delta":"2):\"\""}
+{"tMs":4043,"delta":"],[\"Delivery\","}
+{"tMs":4043,"delta":"money(delivery,\"$"}
+{"tMs":4043,"delta":"\",2)],[\"Total\","}
+{"tMs":4043,"delta":"money(total,\"$\",2"}
+{"tMs":4043,"delta":")]]"}
+{"tMs":4043,"delta":"\n  Row gap:10"}
+{"tMs":4044,"delta":"\n    "}
+{"tMs":4044,"delta":"ActionButton \"Canc"}
+{"tMs":4059,"delta":"el\" qu"}
+{"tMs":4080,"delta":"iet ic"}
+{"tMs":4208,"delta":"on:"}
+{"tMs":4209,"delta":"\"close\" -> decided=\""}
+{"tMs":4209,"delta":"cancelled\"\n    "}
+{"tMs":4209,"delta":"ActionButton \"Confir"}
+{"tMs":4209,"delta":"m order"}
+{"tMs":4209,"delta":"\" primary ic"}
+{"tMs":4223,"delta":"on:\"check\" -> dec"}
+{"tMs":4243,"delta":"ided=\"confirmed\""}
+{"tMs":4264,"delta":"\n  if decided==\"confir"}
+{"tMs":4284,"delta":"med\"\n    Rece"}
+{"tMs":4304,"delta":"ipt \""}
+{"tMs":4327,"delta":"Order placed\" \"Your"}
+{"tMs":4357,"delta":" gro"}
+{"tMs":4365,"delta":"ceries are"}
+{"tMs":4386,"delta":" on the"}
+{"tMs":4406,"delta":" way.\" t"}
+{"tMs":4427,"delta":"one:\""}
+{"tMs":4447,"delta":"good\" icon:\"check\""}
+{"tMs":4467,"delta":"\n  if decided==\"c"}
+{"tMs":4490,"delta":"ancelled\"\n    Rece"}
+{"tMs":4509,"delta":"ipt \"Order cancel"}
+{"tMs":4529,"delta":"led\" \""}
+{"tMs":4549,"delta":"Nothing was char"}
+{"tMs":4571,"delta":"ged.\" tone:\"neut"}
+{"tMs":4590,"delta":"ral\" icon:\"close"}
+{"tMs":4611,"delta":"\""}

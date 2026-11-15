@@ -1,0 +1,35 @@
+{
+ "ui": "code_diff",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 20112,
+ "turns": [
+  {
+   "input_tokens": 7826,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 419,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 1067,
+   "totalMs": 2887,
+   "chars": 685,
+   "lines": 8,
+   "jsonTails": 0,
+   "nodes": 9,
+   "outputTokensPerNode": "46.6",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

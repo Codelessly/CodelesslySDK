@@ -1,0 +1,69 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the change you want to make to my config file as a diff I can review: three separate hunks with line numbers, removed lines in red and added lines in green in a monospace font, keep and discard buttons on each hunk, a count of what is kept, and an apply button that is only enabled once every hunk is decided.","text":"Column gap:12 pad:16 w:390\n  Text.title \"Config change review\"\n  Text.muted \"Keep or discard each hunk. Decided: {(h1!=\\\"\\\"?1:0)+(h2!=\\\"\\\"?1:0)+(h3!=\\\"\\\"?1:0)} of 3\"\n  Text.muted \"Kept: {(h1==\\\"keep\\\"?1:0)+(h2==\\\"keep\\\"?1:0)+(h3==\\\"keep\\\"?1:0)}\"\n  DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" =h1 start:4 lines:[\"-port: 8080\",\"+port: 9090\",\" host: localhost\"] -> emit hunk1\n  DiffHunk \"Log level\" \"@@ -11,2 +11,2 @@\" =h2 start:11 lines:[\"-level: info\",\"+level: debug\",\" format: json\"] -> emit hunk2\n  DiffHunk \"Timeout\" \"@@ -18,2 +18,2 @@\" =h3 start:18 lines:[\"-timeout: 30\",\"+timeout: 60\",\" retries: 3\"] -> emit hunk3\n  Button \"Apply changes\" enabled:=h1!=\"\"&&h2!=\"\"&&h3!=\"\" -> emit apply","usage":{"input_tokens":7826,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":419,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1067,"totalMs":2887}}
+{"tMs":1067,"delta":"Column"}
+{"tMs":1858,"delta":" gap:12 p"}
+{"tMs":1858,"delta":"ad:16 w:390"}
+{"tMs":1858,"delta":"\n  "}
+{"tMs":1858,"delta":"Text.title \"Config change"}
+{"tMs":1858,"delta":" review"}
+{"tMs":1858,"delta":"\"\n  Text.mu"}
+{"tMs":1858,"delta":"ted \"Keep or"}
+{"tMs":1858,"delta":" discard each hunk."}
+{"tMs":1858,"delta":" Decided: {("}
+{"tMs":1858,"delta":"h1!"}
+{"tMs":1858,"delta":"=\\"}
+{"tMs":1858,"delta":"\"\\\""}
+{"tMs":1981,"delta":"?1:0"}
+{"tMs":1981,"delta":")+(h2!=\\"}
+{"tMs":1981,"delta":"\"\\\"?1:0)"}
+{"tMs":1981,"delta":"+(h3!=\\\""}
+{"tMs":1981,"delta":"\\\"?1:0)}"}
+{"tMs":1982,"delta":" of 3\"\n  "}
+{"tMs":1982,"delta":"Text.mu"}
+{"tMs":1982,"delta":"ted \"Kept: {("}
+{"tMs":1982,"delta":"h1==\\\"keep\\"}
+{"tMs":1982,"delta":"\"?1:0)+("}
+{"tMs":1982,"delta":"h2==\\\"keep\\"}
+{"tMs":1982,"delta":"\"?1:0)+("}
+{"tMs":2320,"delta":"h3==\\\"keep\\"}
+{"tMs":2320,"delta":"\"?1:0)}\""}
+{"tMs":2320,"delta":"\n  DiffHunk"}
+{"tMs":2320,"delta":" \""}
+{"tMs":2320,"delta":"Server port\" \"@@"}
+{"tMs":2320,"delta":" -4,2 +4,"}
+{"tMs":2320,"delta":"2 @@\" =h1"}
+{"tMs":2320,"delta":" start:4 lines:"}
+{"tMs":2320,"delta":"[\"-port: 8080\",\""}
+{"tMs":2320,"delta":"+port: 9090\",\""}
+{"tMs":2320,"delta":" host: localhost\"] -"}
+{"tMs":2320,"delta":"> em"}
+{"tMs":2505,"delta":"it h"}
+{"tMs":2505,"delta":"unk1\n  Diff"}
+{"tMs":2505,"delta":"Hunk \"Log level"}
+{"tMs":2505,"delta":"\" \"@@ -11"}
+{"tMs":2505,"delta":",2"}
+{"tMs":2505,"delta":" +11,2 @@"}
+{"tMs":2505,"delta":"\" =h2 start:11"}
+{"tMs":2505,"delta":" lines:[\"-level"}
+{"tMs":2505,"delta":": info"}
+{"tMs":2505,"delta":"\",\"+level: deb"}
+{"tMs":2505,"delta":"ug\",\" format"}
+{"tMs":2505,"delta":": json"}
+{"tMs":2632,"delta":"\"] -> emit hun"}
+{"tMs":2632,"delta":"k2\n  DiffH"}
+{"tMs":2632,"delta":"unk \"Timeout\""}
+{"tMs":2632,"delta":" \"@@ -18,2"}
+{"tMs":2632,"delta":" +18,2 @@"}
+{"tMs":2632,"delta":"\" =h3 start:18"}
+{"tMs":2632,"delta":" lines:[\"-time"}
+{"tMs":2632,"delta":"out: 30\",\""}
+{"tMs":2633,"delta":"+timeout: 60"}
+{"tMs":2633,"delta":"\",\" retries"}
+{"tMs":2633,"delta":": 3\"] -> em"}
+{"tMs":2633,"delta":"it hunk3\n  "}
+{"tMs":2882,"delta":"Button \"Apply chang"}
+{"tMs":2882,"delta":"es\" en"}
+{"tMs":2882,"delta":"abled:=h"}
+{"tMs":2882,"delta":"1!="}
+{"tMs":2882,"delta":"\"\"&&h2!=\"\""}
+{"tMs":2882,"delta":"&&h3!=\""}
+{"tMs":2882,"delta":"\" -> emit apply"}

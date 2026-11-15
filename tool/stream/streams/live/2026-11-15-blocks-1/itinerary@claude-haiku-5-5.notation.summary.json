@@ -1,0 +1,62 @@
+{
+ "ui": "itinerary",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 20112,
+ "turns": [
+  {
+   "input_tokens": 7815,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 764,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 633,
+   "totalMs": 4156,
+   "chars": 1570,
+   "lines": 16,
+   "jsonTails": 0,
+   "nodes": 15,
+   "outputTokensPerNode": "50.9",
+   "notationIssues": [],
+   "errors": [
+    "wrong_type /nodes/Checklist1/props/items: Expected a list of String, got the text \"todo\"."
+   ]
+  },
+  {
+   "input_tokens": 8642,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 765,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 418,
+   "totalMs": 2518,
+   "chars": 1571,
+   "lines": 16,
+   "jsonTails": 0,
+   "nodes": 15,
+   "outputTokensPerNode": "51.0",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

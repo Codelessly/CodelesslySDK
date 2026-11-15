@@ -1,0 +1,99 @@
+{"meta":{"ui":"itinerary","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Plan two days in Kyoto as an inline itinerary: a timeline per day with times, places, how to get between them and how long it takes. Each stop expands for details, each day has a checklist of things to book that I can tick off, and a line at the top says how many are left.","text":"Card gap:14 pad:16 w:390\n  Text.heading \"Kyoto, two days\"\n  state booked=[]\n  state todo=[\"Dinner in Gion\",\"Tea ceremony\",\"Kinkaku-ji entry\",\"Arashiyama boat\"]\n  Text.strong \"{length(todo)-length(booked)} things left to book\"\n  Checklist \"Book ahead\" =booked items:=todo\n  DayHeader \"Day 1\" \"Eastern temples and Gion\" kind:\"temple\" tone:\"dawn\" tag:\"Walking day\"\n    ItineraryStop \"Fushimi Inari\" \"Walk the torii gates up the mountain, about two hours round trip.\" time:\"07:30\" travel:\"Taxi to Kiyomizu-dera, 20 min\"\n    ItineraryStop \"Kiyomizu-dera\" \"The wooden stage over the hillside, best before the crowds.\" time:\"10:00\" travel:\"Walk through Higashiyama, 15 min\"\n    ItineraryStop \"Ninenzaka and Sannenzaka\" \"Old stone lanes lined with tea houses and craft shops.\" time:\"11:30\" travel:\"Walk to Yasaka Shrine, 10 min\"\n    ItineraryStop \"Gion at dusk\" \"Wander the streets where geisha walk to their evening engagements.\" time:\"17:30\" last:true\n  DayHeader \"Day 2\" \"Northwest temples and bamboo\" kind:\"bamboo\" tone:\"day\" tag:\"Scenic day\"\n    ItineraryStop \"Kinkaku-ji\" \"The gold pavilion over its pond, with a short lakeside path.\" time:\"08:30\" travel:\"Bus 205 to Ryoan-ji, 30 min\"\n    ItineraryStop \"Ryoan-ji\" \"The famous rock garden, quiet in the morning.\" time:\"10:30\" travel:\"Train to Arashiyama, 15 min\"\n    ItineraryStop \"Arashiyama bamboo grove\" \"A walk through tall bamboo along the Hozu river.\" time:\"12:00\" travel:\"Walk to Tenryu-ji, 5 min\"\n    ItineraryStop \"Tenryu-ji\" \"A Zen temple garden at the edge of the grove, then lunch nearby.\" time:\"13:30\" last:true","usage":{"input_tokens":8642,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":765,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":418,"totalMs":2518}}
+{"tMs":418,"delta":"Card gap:14 pad"}
+{"tMs":601,"delta":":16 w:390\n  "}
+{"tMs":601,"delta":"Text.heading \"K"}
+{"tMs":601,"delta":"yoto, two days\""}
+{"tMs":601,"delta":"\n  state booked=[]"}
+{"tMs":601,"delta":"\n  state"}
+{"tMs":601,"delta":" todo=[\"Dinner"}
+{"tMs":601,"delta":" in Gion\",\"Tea"}
+{"tMs":602,"delta":" ceremony\",\"Kin"}
+{"tMs":625,"delta":"kaku-ji entry"}
+{"tMs":645,"delta":"\",\"Arashi"}
+{"tMs":668,"delta":"yama boat\"]\n  "}
+{"tMs":689,"delta":"Text.strong \"{length"}
+{"tMs":792,"delta":"(todo)-length(boo"}
+{"tMs":792,"delta":"ked)} things left to book\""}
+{"tMs":792,"delta":"\n  Checklist \""}
+{"tMs":792,"delta":"Book ahead\" =booked"}
+{"tMs":797,"delta":" items:="}
+{"tMs":819,"delta":"todo\n  DayHe"}
+{"tMs":840,"delta":"ader \"Day 1\" \""}
+{"tMs":862,"delta":"Eastern temples and"}
+{"tMs":883,"delta":" Gion\" kind:\"tem"}
+{"tMs":905,"delta":"ple\" tone:\"daw"}
+{"tMs":928,"delta":"n\" tag:\"Wal"}
+{"tMs":948,"delta":"king day\"\n    Itine"}
+{"tMs":981,"delta":"raryStop \"Fush"}
+{"tMs":991,"delta":"imi Inari\" \""}
+{"tMs":1013,"delta":"Walk the torii gates up"}
+{"tMs":1035,"delta":" the mountain, about two h"}
+{"tMs":1056,"delta":"ours round trip.\" time:\""}
+{"tMs":1077,"delta":"07:30\" travel:\""}
+{"tMs":1099,"delta":"Taxi to Ki"}
+{"tMs":1121,"delta":"yomizu-dera,"}
+{"tMs":1142,"delta":" 20 min\"\n    "}
+{"tMs":1164,"delta":"ItineraryStop \""}
+{"tMs":1185,"delta":"Kiyomizu-d"}
+{"tMs":1207,"delta":"era\" \"The wooden st"}
+{"tMs":1228,"delta":"age over the hillside, best"}
+{"tMs":1250,"delta":" before the crowds.\" time:"}
+{"tMs":1271,"delta":"\"10:00\" travel:"}
+{"tMs":1293,"delta":"\"Walk through Higash"}
+{"tMs":1314,"delta":"iyama, 15 min"}
+{"tMs":1336,"delta":"\"\n    Itinerary"}
+{"tMs":1357,"delta":"Stop \"Ninenz"}
+{"tMs":1379,"delta":"aka and Sannenz"}
+{"tMs":1400,"delta":"aka\" \"Old stone"}
+{"tMs":1421,"delta":" lanes lined with tea"}
+{"tMs":1445,"delta":" houses and craft shops.\""}
+{"tMs":1465,"delta":" time:\"11:30\" trav"}
+{"tMs":1486,"delta":"el:\"Walk to"}
+{"tMs":1508,"delta":" Yasaka Shrine"}
+{"tMs":1529,"delta":", 10 min\"\n    "}
+{"tMs":1550,"delta":"ItineraryStop \""}
+{"tMs":1572,"delta":"Gion at dusk\""}
+{"tMs":1594,"delta":" \"Wander the streets where"}
+{"tMs":1615,"delta":" geisha walk to their ev"}
+{"tMs":1636,"delta":"ening engagements.\" time:\""}
+{"tMs":1658,"delta":"17:30\" last:true"}
+{"tMs":1680,"delta":"\n  DayHeader \""}
+{"tMs":1701,"delta":"Day 2\" \"Northw"}
+{"tMs":1722,"delta":"est temples and bamboo"}
+{"tMs":1744,"delta":"\" kind:\"bambo"}
+{"tMs":1765,"delta":"o\" tone:\"day\""}
+{"tMs":1787,"delta":" tag:\"Scenic"}
+{"tMs":1808,"delta":" day\"\n    Itinera"}
+{"tMs":1829,"delta":"ryStop \"Kink"}
+{"tMs":1851,"delta":"aku-ji\" \"The"}
+{"tMs":1873,"delta":" gold pavilion over its"}
+{"tMs":1894,"delta":" pond, with a short lak"}
+{"tMs":1916,"delta":"eside path.\" time:\"08"}
+{"tMs":1937,"delta":":30\" travel:\""}
+{"tMs":1959,"delta":"Bus 205 to "}
+{"tMs":1980,"delta":"Ryoan-ji, "}
+{"tMs":2001,"delta":"30 min\"\n    It"}
+{"tMs":2023,"delta":"ineraryStop \""}
+{"tMs":2044,"delta":"Ryoan-ji\" \""}
+{"tMs":2066,"delta":"The famous rock garden,"}
+{"tMs":2087,"delta":" quiet in the morning.\""}
+{"tMs":2109,"delta":" time:\"10:30\" trav"}
+{"tMs":2131,"delta":"el:\"Train to Ar"}
+{"tMs":2151,"delta":"ashi"}
+{"tMs":2173,"delta":"yama, 15 min\""}
+{"tMs":2194,"delta":"\n    ItinerarySt"}
+{"tMs":2216,"delta":"op \"Arashiyama"}
+{"tMs":2238,"delta":" bamboo grove\" \""}
+{"tMs":2259,"delta":"A walk through tall bam"}
+{"tMs":2280,"delta":"boo along the Hozu"}
+{"tMs":2303,"delta":" river.\" time:\"12:00"}
+{"tMs":2324,"delta":"\" travel:\"Walk"}
+{"tMs":2345,"delta":" to Tenryu-"}
+{"tMs":2366,"delta":"ji, 5 min\""}
+{"tMs":2388,"delta":"\n    ItineraryStop"}
+{"tMs":2410,"delta":" \"Tenryu-"}
+{"tMs":2431,"delta":"ji\" \"A Zen tem"}
+{"tMs":2452,"delta":"ple garden at the edge of"}
+{"tMs":2474,"delta":" the grove, then lunch"}
+{"tMs":2495,"delta":" nearby.\" time:\"13"}
+{"tMs":2517,"delta":":30\" last:true"}

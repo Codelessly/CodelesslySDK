@@ -1,0 +1,111 @@
+{"meta":{"ui":"carousel","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"Root is a single Column, with the carousel and details as conditional children.\n\nstate i=0\nstate pick=0\nstate size=\"\"\nstate bag=0\nstate items=[{\"name\":\"Velocity 3\",\"price\":129,\"rating\":4.6,\"tone\":\"sky\",\"desc\":\"Responsive daily trainer with a cushioned midsole.\",\"sizes\":[\"8\",\"9\",\"10\",\"11\"]},{\"name\":\"Trail Hawk\",\"price\":149,\"rating\":4.7,\"tone\":\"mint\",\"desc\":\"Grippy outsole for muddy and rocky routes.\",\"sizes\":[\"8\",\"9\",\"10\",\"11\"]},{\"name\":\"Sprint Pro\",\"price\":169,\"rating\":4.8,\"tone\":\"rose\",\"desc\":\"Lightweight racer built for fast tempo runs.\",\"sizes\":[\"7\",\"8\",\"9\",\"10\"]},{\"name\":\"Cloud Glide\",\"price\":119,\"rating\":4.4,\"tone\":\"sand\",\"desc\":\"Soft, plush ride for long easy miles.\",\"sizes\":[\"8\",\"9\",\"10\",\"11\",\"12\"]},{\"name\":\"Stride Max\",\"price\":139,\"rating\":4.5,\"tone\":\"lilac\",\"desc\":\"Stable support with a wide, secure fit.\",\"sizes\":[\"9\",\"10\",\"11\"]},{\"name\":\"Apex Flow\",\"price\":159,\"rating\":4.6,\"tone\":\"slate\",\"desc\":\"Springy carbon-plate shoe for race day.\",\"sizes\":[\"8\",\"9\",\"10\"]}]\nColumn w:390 gap:12 pad:16\n  if pick==0\n    Carousel =i count:6 thumbs:=map(items,x=>x.tone) kind:shoe -> i=i\n      ProductTile \"{items[i].name}\" \"Running shoe\" price:=items[i].price rating:=items[i].rating kind:shoe tone:=items[i].tone -> pick=i+1\n    Text.caption \"Tap a shoe to see details\"\n  if pick>0\n    Row\n      Button.ghost \"Back\" -> pick=0\n      Spacer grow\n      Text.strong \"Bag: {bag}\"\n    Media kind:shoe tone:=items[pick-1].tone h:200\n    Text.heading2 \"{items[pick-1].name}\"\n    Text.body \"{items[pick-1].desc}\"\n    Text.strong \"${items[pick-1].price}\"\n    Text.fieldLabel \"Size\"\n    SegmentedButton =size items:=items[pick-1].sizes\n    Button \"Add to bag\" enabled:=size!=\"\" -> bag=bag+1; toast \"Added to bag\"","usage":{"input_tokens":9052,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":828,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":493,"totalMs":2756}}
+{"tMs":493,"delta":"Root"}
+{"tMs":720,"delta":" is"}
+{"tMs":720,"delta":" a single"}
+{"tMs":720,"delta":" Column, with the"}
+{"tMs":720,"delta":" car"}
+{"tMs":720,"delta":"ousel and details as"}
+{"tMs":720,"delta":" con"}
+{"tMs":720,"delta":"ditional children.\n\nstate"}
+{"tMs":720,"delta":" i"}
+{"tMs":720,"delta":"=0\nstate pick=0"}
+{"tMs":724,"delta":"\nstate size=\"\"\nstate b"}
+{"tMs":747,"delta":"ag=0\nstate items=["}
+{"tMs":767,"delta":"{\"name\":\"Veloc"}
+{"tMs":839,"delta":"ity 3\",\"price\":129,"}
+{"tMs":839,"delta":"\"rating\":4.6,"}
+{"tMs":839,"delta":"\"tone\":\"sky\",\""}
+{"tMs":851,"delta":"desc\":\"Responsive"}
+{"tMs":872,"delta":" daily trainer with a c"}
+{"tMs":892,"delta":"ushioned midsole.\",\""}
+{"tMs":913,"delta":"sizes\":[\"8\",\"9"}
+{"tMs":933,"delta":"\",\"10\",\"11\"]},{"}
+{"tMs":954,"delta":"\"name\":\"Trail"}
+{"tMs":974,"delta":" Hawk\",\"price\":149,"}
+{"tMs":995,"delta":"\"rating\":4.7,"}
+{"tMs":1016,"delta":"\"tone\":\"mint\",\""}
+{"tMs":1036,"delta":"desc\":\"Grippy"}
+{"tMs":1056,"delta":" outsole for muddy and"}
+{"tMs":1077,"delta":" rocky routes.\",\"s"}
+{"tMs":1098,"delta":"izes\":[\"8\",\"9\",\""}
+{"tMs":1119,"delta":"10\",\"11\"]},{\""}
+{"tMs":1139,"delta":"name\":\"Sprint"}
+{"tMs":1159,"delta":" Pro\",\"price\":169,\""}
+{"tMs":1179,"delta":"rating\":4.8,\""}
+{"tMs":1200,"delta":"tone\":\"rose\",\"des"}
+{"tMs":1220,"delta":"c\":\"Lightweight"}
+{"tMs":1241,"delta":" racer built for fast temp"}
+{"tMs":1261,"delta":"o runs.\",\"sizes"}
+{"tMs":1282,"delta":"\":[\"7\",\"8\",\"9\",\""}
+{"tMs":1302,"delta":"10\"]},{\"name\":"}
+{"tMs":1323,"delta":"\"Cloud Glide"}
+{"tMs":1343,"delta":"\",\"price\":119,\"rating"}
+{"tMs":1363,"delta":"\":4.4,\"tone"}
+{"tMs":1384,"delta":"\":\"sand\",\"desc\":"}
+{"tMs":1404,"delta":"\"Soft, plush "}
+{"tMs":1425,"delta":"ride for long easy miles."}
+{"tMs":1445,"delta":"\",\"sizes\":[\"8\",\""}
+{"tMs":1465,"delta":"9\",\"10\",\"11\",\"12\""}
+{"tMs":1486,"delta":"]},{\"name\":\""}
+{"tMs":1506,"delta":"Stride Max\",\"price\":139"}
+{"tMs":1527,"delta":",\"rating\":4.5"}
+{"tMs":1547,"delta":",\"tone\":\"lil"}
+{"tMs":1568,"delta":"ac\",\"desc\":\"St"}
+{"tMs":1589,"delta":"able support with a wide, sec"}
+{"tMs":1608,"delta":"ure fit.\",\"sizes"}
+{"tMs":1629,"delta":"\":[\"9\",\"10\",\"11\""}
+{"tMs":1649,"delta":"]},{\"name\":\""}
+{"tMs":1670,"delta":"Apex Flow\",\"price\":"}
+{"tMs":1690,"delta":"159,\"rating\":4."}
+{"tMs":1711,"delta":"6,\"tone\":\"sl"}
+{"tMs":1731,"delta":"ate\",\"desc\":\"Spring"}
+{"tMs":1751,"delta":"y carbon-plate sh"}
+{"tMs":1772,"delta":"oe for race day.\",\"s"}
+{"tMs":1792,"delta":"izes\":[\"8\",\"9\",\""}
+{"tMs":1813,"delta":"10\"]}]\nColumn"}
+{"tMs":1833,"delta":" w:390 gap:12"}
+{"tMs":1854,"delta":" pad:16\n  if"}
+{"tMs":1874,"delta":" pick==0\n    Car"}
+{"tMs":1894,"delta":"ousel =i count:6 "}
+{"tMs":1915,"delta":"thumbs:=map("}
+{"tMs":1935,"delta":"items,x=>x.t"}
+{"tMs":1956,"delta":"one) kind:shoe"}
+{"tMs":1976,"delta":" -> i=i\n      "}
+{"tMs":1996,"delta":"ProductTile \"{items["}
+{"tMs":2017,"delta":"i].name}\" \"Running"}
+{"tMs":2037,"delta":" shoe\" price:=items"}
+{"tMs":2058,"delta":"[i].price rating:="}
+{"tMs":2078,"delta":"items[i].rating kind"}
+{"tMs":2098,"delta":":shoe tone:="}
+{"tMs":2120,"delta":"items[i].tone ->"}
+{"tMs":2139,"delta":" pick=i+1\n    "}
+{"tMs":2160,"delta":"Text.caption \"T"}
+{"tMs":2180,"delta":"ap a shoe to see details"}
+{"tMs":2201,"delta":"\"\n  if pick>0"}
+{"tMs":2221,"delta":"\n    Row\n      Button"}
+{"tMs":2241,"delta":".ghost \"Back\""}
+{"tMs":2262,"delta":" -> pick=0\n      "}
+{"tMs":2282,"delta":"Spacer grow\n      "}
+{"tMs":2302,"delta":"Text.strong \"B"}
+{"tMs":2323,"delta":"ag: {bag}\""}
+{"tMs":2344,"delta":"\n    Media kind:sho"}
+{"tMs":2364,"delta":"e tone:=items[p"}
+{"tMs":2385,"delta":"ick-1].tone h:"}
+{"tMs":2405,"delta":"200\n    Text.heading"}
+{"tMs":2425,"delta":"2 \"{items[pick"}
+{"tMs":2446,"delta":"-1].name}\"\n    "}
+{"tMs":2466,"delta":"Text.body \"{items["}
+{"tMs":2487,"delta":"pick-1].desc}"}
+{"tMs":2507,"delta":"\"\n    Text.strong"}
+{"tMs":2527,"delta":" \"${items[pick-1"}
+{"tMs":2548,"delta":"].price}\"\n    Text"}
+{"tMs":2568,"delta":".fieldLabel \""}
+{"tMs":2592,"delta":"Size\"\n    Segm"}
+{"tMs":2609,"delta":"entedButton =size items:"}
+{"tMs":2631,"delta":"=items[pick-1]."}
+{"tMs":2650,"delta":"sizes\n    Button \""}
+{"tMs":2670,"delta":"Add to bag\" enab"}
+{"tMs":2690,"delta":"led:=size!=\"\" -"}
+{"tMs":2711,"delta":"> bag=bag+1"}
+{"tMs":2731,"delta":"; toast \"Added to b"}
+{"tMs":2752,"delta":"ag\""}

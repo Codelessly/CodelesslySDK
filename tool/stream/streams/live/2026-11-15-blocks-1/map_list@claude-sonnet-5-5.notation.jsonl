@@ -1,0 +1,99 @@
+{"meta":{"ui":"map_list","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"ChatCard \"Coffee nearby\" \"5 shops within 1 km\" icon:\"local_cafe\" status:\"Open now\" tone:accent w:390\n  state pick=0\n  MapPanel =pick count:5\n  SectionLabel \"Shops\" \"tap to see details\"\n  PlaceRow \"Blue Door Coffee\" \"Specialty espresso and pastries\" index:1 rating:\"4.8\" distance:\"150 m\" hours:\"7:00 – 18:00\" selected:=pick==1 -> pick=1\n  PlaceRow \"Corner Roasters\" \"Small-batch roasts, bean shop\" index:2 rating:\"4.6\" distance:\"300 m\" hours:\"6:30 – 17:00\" selected:=pick==2 -> pick=2\n  PlaceRow \"Daily Grind\" \"Quick takeaway, good flat white\" index:3 rating:\"4.4\" distance:\"450 m\" hours:\"6:00 – 20:00\" selected:=pick==3 -> pick=3\n  PlaceRow \"The Quiet Cup\" \"Calm spot with seating to work\" index:4 rating:\"4.7\" distance:\"700 m\" hours:\"8:00 – 16:00\" selected:=pick==4 -> pick=4\n  PlaceRow \"Park Bench Café\" \"Garden terrace by the park\" index:5 rating:\"4.5\" distance:\"950 m\" hours:\"8:00 – 19:00\" selected:=pick==5 -> pick=5","usage":{"input_tokens":7825,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":489,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":689,"totalMs":3908}}
+{"tMs":689,"delta":"ChatCard \""}
+{"tMs":994,"delta":"Coffee n"}
+{"tMs":994,"delta":"earby\" \"5"}
+{"tMs":994,"delta":" shops within"}
+{"tMs":994,"delta":" 1"}
+{"tMs":994,"delta":" km"}
+{"tMs":994,"delta":"\" icon:\"local"}
+{"tMs":994,"delta":"_caf"}
+{"tMs":994,"delta":"e\" status"}
+{"tMs":994,"delta":":\"Open"}
+{"tMs":994,"delta":" now"}
+{"tMs":1026,"delta":"\" tone:accent w:"}
+{"tMs":1061,"delta":"390\n  state"}
+{"tMs":1290,"delta":" pick=0\n  Map"}
+{"tMs":1290,"delta":"Panel =pick count:"}
+{"tMs":1290,"delta":"5\n  S"}
+{"tMs":1290,"delta":"ectionLabel \"Sh"}
+{"tMs":1290,"delta":"ops\" \"t"}
+{"tMs":1290,"delta":"ap to see"}
+{"tMs":1297,"delta":" details"}
+{"tMs":1332,"delta":"\"\n  PlaceR"}
+{"tMs":1365,"delta":"ow \"Bl"}
+{"tMs":1397,"delta":"ue"}
+{"tMs":1429,"delta":" Door"}
+{"tMs":1464,"delta":" Coffee\" \"Spec"}
+{"tMs":1602,"delta":"ialty esp"}
+{"tMs":1602,"delta":"resso and"}
+{"tMs":1602,"delta":" p"}
+{"tMs":1602,"delta":"astries\" index:1 r"}
+{"tMs":1630,"delta":"ating:\"4.8"}
+{"tMs":1664,"delta":"\" distance:\"150"}
+{"tMs":1701,"delta":" m\" hours:\"7"}
+{"tMs":1732,"delta":":00 –"}
+{"tMs":1764,"delta":" 18"}
+{"tMs":1799,"delta":":00\" selected:=p"}
+{"tMs":1833,"delta":"ick==1 -> pick"}
+{"tMs":1867,"delta":"=1\n  Place"}
+{"tMs":1907,"delta":"Row \"Corner Ro"}
+{"tMs":1934,"delta":"as"}
+{"tMs":1967,"delta":"ters\" \"Small"}
+{"tMs":2000,"delta":"-bat"}
+{"tMs":2034,"delta":"ch roasts"}
+{"tMs":2066,"delta":", b"}
+{"tMs":2098,"delta":"ean"}
+{"tMs":2131,"delta":" sh"}
+{"tMs":2165,"delta":"op\" index:2 rating"}
+{"tMs":2199,"delta":":\"4.6\" distance"}
+{"tMs":2232,"delta":":\"300"}
+{"tMs":2266,"delta":" m\" hours:\"6"}
+{"tMs":2300,"delta":":30 – 17"}
+{"tMs":2334,"delta":":00\" selected:=p"}
+{"tMs":2368,"delta":"ick==2 -> pick"}
+{"tMs":2402,"delta":"=2\n  Place"}
+{"tMs":2435,"delta":"Row \"Da"}
+{"tMs":2468,"delta":"ily Gr"}
+{"tMs":2501,"delta":"ind\" \"Qu"}
+{"tMs":2534,"delta":"ick tak"}
+{"tMs":2569,"delta":"e"}
+{"tMs":2600,"delta":"away, good"}
+{"tMs":2633,"delta":" fl"}
+{"tMs":2666,"delta":"at white"}
+{"tMs":2699,"delta":"\" index:3 rating:"}
+{"tMs":2733,"delta":"\"4.4"}
+{"tMs":2766,"delta":"\" distance:\"450 m"}
+{"tMs":2800,"delta":"\" hours:\"6"}
+{"tMs":2834,"delta":":00 – 20:00"}
+{"tMs":2868,"delta":"\" selected:=pick=="}
+{"tMs":2902,"delta":"3 -> pick=3"}
+{"tMs":2935,"delta":"\n  PlaceRow"}
+{"tMs":2968,"delta":" \"The"}
+{"tMs":3001,"delta":" Qu"}
+{"tMs":3034,"delta":"iet Cup"}
+{"tMs":3068,"delta":"\" \"Cal"}
+{"tMs":3101,"delta":"m sp"}
+{"tMs":3135,"delta":"ot with"}
+{"tMs":3167,"delta":" se"}
+{"tMs":3199,"delta":"ating to"}
+{"tMs":3235,"delta":" work\" index:4 rating"}
+{"tMs":3267,"delta":":\"4.7"}
+{"tMs":3302,"delta":"\" distance:\"700"}
+{"tMs":3335,"delta":" m\" hours:\"8"}
+{"tMs":3369,"delta":":00 – 16:00"}
+{"tMs":3401,"delta":"\" selected:=pick=="}
+{"tMs":3435,"delta":"4 -> pick=4"}
+{"tMs":3469,"delta":"\n  PlaceRow"}
+{"tMs":3503,"delta":" \"Park Bench"}
+{"tMs":3536,"delta":" Café"}
+{"tMs":3569,"delta":"\" \"Gar"}
+{"tMs":3601,"delta":"den ter"}
+{"tMs":3635,"delta":"race by"}
+{"tMs":3668,"delta":" the park\" index:5 r"}
+{"tMs":3702,"delta":"ating:\"4.5\" dist"}
+{"tMs":3736,"delta":"ance:\"950 m\" h"}
+{"tMs":3769,"delta":"ours:\"8"}
+{"tMs":3802,"delta":":00 – 19"}
+{"tMs":3837,"delta":":00\" selected:=p"}
+{"tMs":3869,"delta":"ick==5 -> pick"}
+{"tMs":3903,"delta":"=5"}

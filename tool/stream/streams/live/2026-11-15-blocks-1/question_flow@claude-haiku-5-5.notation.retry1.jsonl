@@ -1,0 +1,46 @@
+{"meta":{"ui":"question_flow","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Help me pick a laptop with a short question flow, one question at a time: what I use it for, then a second question that depends on that answer, then budget. Show progress, let me go back, and end on one recommendation with the reasons and a start over button.","text":"Column gap:12 pad:16\n  Steps steps:[\"Use\",\"Detail\",\"Budget\",\"Pick\"] current:=step+1\n  if step==0\n    OptionList \"What will you use it for?\" =use options:[\"Office and browsing\",\"Creative work\",\"Gaming\",\"Travel and school\"] -> step=1\n  if step==1\n    OptionList \"What matters most?\" =detail options:[\"Battery life\",\"Raw speed\",\"Screen quality\",\"Light weight\"] -> step=2\n  if step==2\n    OptionList \"What is your budget?\" =budget options:[\"Under $700\",\"$700 to $1200\",\"Over $1200\"] -> step=3\n    Row gap:10\n      ActionButton \"Back\" tone:quiet -> step=1\n  if step==3\n    Recommendation \"Your laptop: Aero 14\" \"Light, quick and with a battery that lasts a full day.\" reasons:[\"Fits your use and budget\",\"Strong battery for travel\",\"Light enough to carry daily\"] eyebrow:\"Best match\"\n    ActionButton \"Start over\" tone:primary -> step=0; use=\"\"; detail=\"\"; budget=\"\"","usage":{"input_tokens":8252,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":359,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":498,"totalMs":1399}}
+{"tMs":498,"delta":"Column gap:12 p"}
+{"tMs":618,"delta":"ad:16\n  Steps"}
+{"tMs":618,"delta":" steps:[\"Use\",\""}
+{"tMs":618,"delta":"Detail\",\"Budget\",\""}
+{"tMs":618,"delta":"Pick\"] current:=step"}
+{"tMs":618,"delta":"+1\n  if step==0"}
+{"tMs":624,"delta":"\n    OptionList \"What"}
+{"tMs":640,"delta":" will you use it for?\" ="}
+{"tMs":661,"delta":"use options:[\"Office and brow"}
+{"tMs":681,"delta":"sing\",\"Creative work\",\""}
+{"tMs":701,"delta":"Gaming\",\"Travel"}
+{"tMs":722,"delta":" and school\"] -> step="}
+{"tMs":742,"delta":"1\n  if step==1"}
+{"tMs":763,"delta":"\n    OptionList \"What mat"}
+{"tMs":783,"delta":"ters most?\" =detail options"}
+{"tMs":803,"delta":":[\"Battery life\",\""}
+{"tMs":824,"delta":"Raw speed\",\"Screen"}
+{"tMs":845,"delta":" quality\",\"Light weight\""}
+{"tMs":865,"delta":"] -> step=2\n  "}
+{"tMs":885,"delta":"if step==2\n    Opt"}
+{"tMs":906,"delta":"ionList \"What is your budget"}
+{"tMs":926,"delta":"?\" =budget options:[\""}
+{"tMs":946,"delta":"Under $700\",\"$700 "}
+{"tMs":967,"delta":"to $1200\",\"Over $"}
+{"tMs":987,"delta":"1200\"] -> step="}
+{"tMs":1008,"delta":"3\n    Row gap:"}
+{"tMs":1028,"delta":"10\n      ActionButton"}
+{"tMs":1048,"delta":" \"Back\" tone:qu"}
+{"tMs":1069,"delta":"iet -> step=1"}
+{"tMs":1089,"delta":"\n  if step==3\n    "}
+{"tMs":1110,"delta":"Recommendation \"Your la"}
+{"tMs":1130,"delta":"ptop: Aero 14"}
+{"tMs":1151,"delta":"\" \"Light, quick and"}
+{"tMs":1172,"delta":" with a battery that lasts"}
+{"tMs":1191,"delta":" a full day.\" reasons:"}
+{"tMs":1213,"delta":"[\"Fits your use and bud"}
+{"tMs":1232,"delta":"get\",\"Strong battery for"}
+{"tMs":1253,"delta":" travel\",\"Light enough to"}
+{"tMs":1273,"delta":" carry daily\"] ey"}
+{"tMs":1294,"delta":"ebrow:\"Best match"}
+{"tMs":1314,"delta":"\"\n    ActionButton"}
+{"tMs":1339,"delta":" \"Start over\" tone:"}
+{"tMs":1355,"delta":"primary -> step=0;"}
+{"tMs":1375,"delta":" use=\"\"; detail=\"\""}
+{"tMs":1396,"delta":"; budget=\"\""}

@@ -1,0 +1,60 @@
+{"meta":{"ui":"reservation","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Let me book a table at a restaurant as an inline card: pick one of the next seven days, a party size from 1 to 8, then time slots for that day where some are full (different days and bigger parties have different free slots), and a confirm button that tells you the day, size and time.","text":"ChatCard \"Book a table\" \"Pick a day, party size and time\" icon:\"calendar_month\" tone:accent\n  SectionLabel \"Day\" \"Next 7 days\"\n  DayPicker =day days:[\"Mon 1\",\"Tue 2\",\"Wed 3\",\"Thu 4\",\"Fri 5\",\"Sat 6\",\"Sun 7\"]\n  SectionLabel \"Party size\"\n  Counter \"Guests\" \"How many people\" =party min:1 max:8 step:1\n  SectionLabel \"Time\" \"Some slots are full\"\n  ChoiceChips =time columns:3 options:[\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\"] disabled:=day==\"Mon 1\"?[\"18:30\",\"20:00\"]:day==\"Sat 6\"?[\"18:00\",\"18:30\",\"19:00\",\"19:30\"]:party>4?[\"19:00\",\"19:30\"]:[]\n  TotalBar \"Your booking\" note:\"{day}, {party} guests\" amount:=time==\"\" ? \"Pick a time\" : time cta:\"Confirm\" enabled:=time!=\"\" -> emit confirm","usage":{"input_tokens":8643,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":362,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":427,"totalMs":1636}}
+{"tMs":427,"delta":"ChatCard \"Book"}
+{"tMs":453,"delta":" a table\" \"P"}
+{"tMs":545,"delta":"ick a"}
+{"tMs":545,"delta":" day, party"}
+{"tMs":545,"delta":" size and"}
+{"tMs":545,"delta":" time\" icon:"}
+{"tMs":547,"delta":"\"calendar_"}
+{"tMs":564,"delta":"month"}
+{"tMs":581,"delta":"\""}
+{"tMs":604,"delta":" tone:acc"}
+{"tMs":621,"delta":"ent"}
+{"tMs":641,"delta":"\n  S"}
+{"tMs":666,"delta":"ectionLabel \"Day"}
+{"tMs":687,"delta":"\" \"Next"}
+{"tMs":707,"delta":" 7 "}
+{"tMs":732,"delta":"days\"\n  DayPic"}
+{"tMs":751,"delta":"ker =day days"}
+{"tMs":774,"delta":":[\"Mon 1\",\""}
+{"tMs":799,"delta":"Tue 2\",\"W"}
+{"tMs":818,"delta":"ed 3\",\"Thu "}
+{"tMs":840,"delta":"4\",\"Fri 5\",\""}
+{"tMs":861,"delta":"Sat 6\",\"S"}
+{"tMs":883,"delta":"un 7\"]\n  S"}
+{"tMs":904,"delta":"ectionLabel \"Party"}
+{"tMs":923,"delta":" size\""}
+{"tMs":946,"delta":"\n  Counter \"Gu"}
+{"tMs":965,"delta":"ests\" \""}
+{"tMs":985,"delta":"How"}
+{"tMs":1004,"delta":" many people\""}
+{"tMs":1027,"delta":" =party min:1 max:"}
+{"tMs":1046,"delta":"8 step:1\n  S"}
+{"tMs":1067,"delta":"ectionLabel \"Time"}
+{"tMs":1088,"delta":"\" \"Some"}
+{"tMs":1108,"delta":" slots are full\"\n  "}
+{"tMs":1129,"delta":"ChoiceChips =time"}
+{"tMs":1150,"delta":" columns:3 options:[\""}
+{"tMs":1171,"delta":"18:00\",\"18:30\",\""}
+{"tMs":1192,"delta":"19:00\",\"19:30\",\""}
+{"tMs":1215,"delta":"20:00\",\"20:30\""}
+{"tMs":1234,"delta":"] disabled:=day="}
+{"tMs":1254,"delta":"=\"Mon 1\""}
+{"tMs":1275,"delta":"?[\"18:30\",\"20:"}
+{"tMs":1295,"delta":"00\"]:day==\""}
+{"tMs":1316,"delta":"Sat 6\"?[\"18"}
+{"tMs":1336,"delta":":00\",\"18"}
+{"tMs":1357,"delta":":30\",\"19:00\",\"19"}
+{"tMs":1378,"delta":":30\"]:party>4"}
+{"tMs":1399,"delta":"?[\"19:00\",\"19:"}
+{"tMs":1420,"delta":"30\"]:[]\n  "}
+{"tMs":1439,"delta":"TotalBar \"Your"}
+{"tMs":1460,"delta":" booking\" note"}
+{"tMs":1480,"delta":":\""}
+{"tMs":1500,"delta":"{day}, {party} gu"}
+{"tMs":1521,"delta":"ests\" amount:=time="}
+{"tMs":1542,"delta":"=\"\" ? \"Pick"}
+{"tMs":1562,"delta":" a time\" : time cta:"}
+{"tMs":1583,"delta":"\"Confirm\" enab"}
+{"tMs":1605,"delta":"led:=time!=\"\" -"}
+{"tMs":1624,"delta":"> emit confirm"}

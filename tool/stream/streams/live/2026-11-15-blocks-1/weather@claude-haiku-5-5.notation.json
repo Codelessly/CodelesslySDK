@@ -1,0 +1,214 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "WeatherNow1",
+    "WeatherHours1",
+    "row1",
+    "filledButton1"
+   ]
+  },
+  "WeatherNow1": {
+   "type": "WeatherNow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lisbon",
+    "detail": "Mostly clear, light breeze",
+    "temp": "21",
+    "high": "24",
+    "low": "15",
+    "kind": "partly"
+   }
+  },
+  "WeatherHours1": {
+   "type": "WeatherHours",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "hours": [
+     "Now",
+     "14:00",
+     "15:00",
+     "16:00",
+     "17:00"
+    ],
+    "temps": [
+     21,
+     22,
+     23,
+     22,
+     21
+    ],
+    "kinds": [
+     "partly",
+     "sun",
+     "sun",
+     "partly",
+     "cloud"
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "WeatherDay1",
+    "WeatherDay2",
+    "WeatherDay3"
+   ]
+  },
+  "WeatherDay1": {
+   "type": "WeatherDay",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Mon",
+    "low": 15,
+    "high": 24,
+    "kind": "sun",
+    "min": 12,
+    "max": 26
+   }
+  },
+  "WeatherDay2": {
+   "type": "WeatherDay",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Tue",
+    "low": 14,
+    "high": 22,
+    "kind": "partly",
+    "min": 12,
+    "max": 26
+   }
+  },
+  "WeatherDay3": {
+   "type": "WeatherDay",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Wed",
+    "low": 13,
+    "high": 19,
+    "kind": "rain",
+    "min": 12,
+    "max": 26
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Alert me before it rains"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "We'll notify you before rain in Lisbon"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

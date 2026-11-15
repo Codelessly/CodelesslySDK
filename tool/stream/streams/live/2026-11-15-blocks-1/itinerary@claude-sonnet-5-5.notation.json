@@ -1,0 +1,343 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kyoto in two days",
+    "subtitle": "Temples, tea and old streets",
+    "icon": "temple_buddhist",
+    "tone": "accent"
+   },
+   "bind": {
+    "props.status": "${= length(b1)+length(b2)} of 6 booked"
+   },
+   "children": [
+    "Paragraph1",
+    "DayHeader1",
+    "Checklist1",
+    "DayHeader2",
+    "Checklist2"
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "strong": true
+   },
+   "bind": {
+    "props.text": "${= 6-length(b1)-length(b2)} things left to book across both days."
+   }
+  },
+  "DayHeader1": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 1",
+    "subtitle": "Eastern Kyoto",
+    "kind": "temple",
+    "tone": "dawn",
+    "tag": "Temples"
+   },
+   "children": [
+    "ItineraryStop1",
+    "ItineraryStop2",
+    "ItineraryStop3",
+    "ItineraryStop4",
+    "ItineraryStop5"
+   ]
+  },
+  "ItineraryStop1": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kiyomizu-dera",
+    "detail": "Hillside temple with a wooden stage. Arrive at opening to beat the crowds.",
+    "time": "08:00",
+    "travel": "Walk to Sannenzaka, 10 min"
+   }
+  },
+  "ItineraryStop2": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Sannenzaka & Ninenzaka",
+    "detail": "Preserved lanes of tea houses and craft shops. Good for a snack stop.",
+    "time": "10:00",
+    "travel": "Walk to Gion, 15 min"
+   }
+  },
+  "ItineraryStop3": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tea ceremony in Gion",
+    "detail": "Small-group ceremony with matcha and sweets, about 45 minutes.",
+    "time": "12:30",
+    "travel": "Walk to Yasaka Shrine, 10 min"
+   }
+  },
+  "ItineraryStop4": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Yasaka Shrine",
+    "detail": "Lantern-lit shrine at the end of Gion; lovely at dusk.",
+    "time": "15:00",
+    "travel": "Bus 206 to Kyoto Station, 25 min"
+   }
+  },
+  "ItineraryStop5": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Dinner in Pontocho",
+    "detail": "Narrow lantern alley beside the Kamo River. Reservations advised.",
+    "time": "18:00",
+    "last": true
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Book ahead: Day 1",
+    "value": "b1",
+    "items": [
+     "Tea ceremony in Gion",
+     "Dinner in Pontocho",
+     "Kiyomizu-dera early entry"
+    ]
+   }
+  },
+  "DayHeader2": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 2",
+    "subtitle": "Arashiyama and north",
+    "kind": "bamboo",
+    "tone": "day",
+    "tag": "Nature"
+   },
+   "children": [
+    "ItineraryStop6",
+    "ItineraryStop7",
+    "ItineraryStop8",
+    "ItineraryStop9",
+    "ItineraryStop10"
+   ]
+  },
+  "ItineraryStop6": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Arashiyama Bamboo Grove",
+    "detail": "Go early for quiet paths and soft light.",
+    "time": "08:00",
+    "travel": "Walk to Tenryu-ji, 5 min"
+   }
+  },
+  "ItineraryStop7": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tenryu-ji Garden",
+    "detail": "UNESCO garden with a pond and mountain backdrop.",
+    "time": "09:30",
+    "travel": "Train to Kyoto Station then bus, 50 min"
+   }
+  },
+  "ItineraryStop8": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kinkaku-ji",
+    "detail": "The Golden Pavilion reflected in its pond; about an hour.",
+    "time": "13:00",
+    "travel": "Bus 205 to Nishijin, 20 min"
+   }
+  },
+  "ItineraryStop9": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Nishiki Market",
+    "detail": "Food stalls for pickles, tofu and skewers.",
+    "time": "15:30",
+    "travel": "Walk to Kamo River, 15 min"
+   }
+  },
+  "ItineraryStop10": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kaiseki dinner",
+    "detail": "Seasonal multi-course meal. Book well in advance.",
+    "time": "18:30",
+    "last": true
+   }
+  },
+  "Checklist2": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Book ahead: Day 2",
+    "value": "b2",
+    "items": [
+     "Tenryu-ji garden ticket",
+     "Kinkaku-ji timed entry",
+     "Kaiseki dinner"
+    ]
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "b1",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "b2",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

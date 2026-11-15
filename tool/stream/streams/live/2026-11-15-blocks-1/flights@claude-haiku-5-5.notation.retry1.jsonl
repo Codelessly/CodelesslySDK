@@ -1,0 +1,62 @@
+{"meta":{"ui":"flights","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"Card gap:12 pad:16\n  Text.heading \"Flights London to Lisbon, Friday\"\n  state pick=\"f1\"\n  FlightOption \"TAP Air Portugal\" depart:\"07:10\" arrive:\"10:25\" origin:\"LHR\" destination:\"LIS\" duration:\"2h 15m\" stops:\"Direct\" price:\"$118\" tag:\"Cheapest\" selected:=pick==\"f1\" -> pick=\"f1\"\n  FlightOption \"British Airways\" depart:\"12:40\" arrive:\"15:50\" origin:\"LHR\" destination:\"LIS\" duration:\"2h 10m\" stops:\"Direct\" price:\"$146\" tag:\"Best time\" selected:=pick==\"f2\" -> pick=\"f2\"\n  FlightOption \"Iberia\" depart:\"18:05\" arrive:\"23:30\" origin:\"LHR\" destination:\"LIS\" duration:\"3h 25m\" stops:\"1 stop\" price:\"$163\" selected:=pick==\"f3\" -> pick=\"f3\"\n  Row between\n    Text.strong \"Total\"\n    Text.strong \"{coalesce(find([{\\\"id\\\":\\\"f1\\\",\\\"p\\\":118},{\\\"id\\\":\\\"f2\\\",\\\"p\\\":146},{\\\"id\\\":\\\"f3\\\",\\\"p\\\":163}],x=>x.id==pick).p,0)}\"\n  ActionButton \"Confirm flight\" tone:primary -> toast \"You chose {pick}\"","usage":{"input_tokens":8348,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":475,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":461,"totalMs":1756}}
+{"tMs":461,"delta":"Card gap:12 "}
+{"tMs":654,"delta":"pad:16\n  Text"}
+{"tMs":654,"delta":".heading \"Flights London"}
+{"tMs":654,"delta":" to Lisbon,"}
+{"tMs":654,"delta":" Friday\"\n  state pick"}
+{"tMs":654,"delta":"=\"f1\"\n  Fl"}
+{"tMs":654,"delta":"ightOption \"TAP"}
+{"tMs":654,"delta":" Air Portugal\" depart"}
+{"tMs":654,"delta":":\"07:10\" arr"}
+{"tMs":654,"delta":"ive:\"10:25\" orig"}
+{"tMs":677,"delta":"in:\"LHR\" dest"}
+{"tMs":698,"delta":"ination:\"LIS\" du"}
+{"tMs":720,"delta":"ration:\"2h 15m"}
+{"tMs":855,"delta":"\" stops:\"Direct"}
+{"tMs":855,"delta":"\" price:\"$118\" t"}
+{"tMs":855,"delta":"ag:\"Cheapest"}
+{"tMs":855,"delta":"\" selected:=pick="}
+{"tMs":855,"delta":"=\"f1\" -> pick"}
+{"tMs":855,"delta":"=\"f1\"\n  Fl"}
+{"tMs":870,"delta":"ightOption \"British Airways"}
+{"tMs":891,"delta":"\" depart:\"12:40"}
+{"tMs":913,"delta":"\" arrive:\"15:"}
+{"tMs":934,"delta":"50\" origin:\"LH"}
+{"tMs":956,"delta":"R\" destination:\"LI"}
+{"tMs":977,"delta":"S\" duration:\"2h"}
+{"tMs":1055,"delta":" 10m\" stops:\""}
+{"tMs":1055,"delta":"Direct\" price:\"$"}
+{"tMs":1055,"delta":"146\" tag:\"Best"}
+{"tMs":1063,"delta":" time\" selected:=pick"}
+{"tMs":1088,"delta":"==\"f2\" -> p"}
+{"tMs":1106,"delta":"ick=\"f2\"\n  F"}
+{"tMs":1128,"delta":"lightOption \"Iber"}
+{"tMs":1149,"delta":"ia\" depart:\"18:"}
+{"tMs":1171,"delta":"05\" arrive:\"23"}
+{"tMs":1192,"delta":":30\" origin:\"L"}
+{"tMs":1214,"delta":"HR\" destination:\"L"}
+{"tMs":1235,"delta":"IS\" duration:\"3"}
+{"tMs":1257,"delta":"h 25m\" stops:"}
+{"tMs":1278,"delta":"\"1 stop\" price:"}
+{"tMs":1299,"delta":"\"$163\" selected:="}
+{"tMs":1321,"delta":"pick==\"f3\" -"}
+{"tMs":1343,"delta":"> pick=\"f3\""}
+{"tMs":1364,"delta":"\n  Row between\n    Text"}
+{"tMs":1385,"delta":".strong \"Total\""}
+{"tMs":1407,"delta":"\n    Text.strong \"{"}
+{"tMs":1429,"delta":"coalesce(find([{"}
+{"tMs":1450,"delta":"\\\"id\\\":\\\"f"}
+{"tMs":1471,"delta":"1\\\",\\\"p\\\":"}
+{"tMs":1493,"delta":"118},{\\\"id\\\":"}
+{"tMs":1668,"delta":"\\\"f2\\\",\\\""}
+{"tMs":1668,"delta":"p\\\":146},{\\\""}
+{"tMs":1668,"delta":"id\\\":\\\"f3\\"}
+{"tMs":1668,"delta":"\",\\\"p\\\":163}"}
+{"tMs":1668,"delta":"],x=>x.id=="}
+{"tMs":1668,"delta":"pick).p,0)}"}
+{"tMs":1668,"delta":"\"\n  ActionButton"}
+{"tMs":1668,"delta":" \"Confirm flight\""}
+{"tMs":1686,"delta":" tone:prim"}
+{"tMs":1707,"delta":"ary -"}
+{"tMs":1729,"delta":"> toast \"You chose {"}
+{"tMs":1752,"delta":"pick}\""}

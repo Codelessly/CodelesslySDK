@@ -1,0 +1,81 @@
+{"meta":{"ui":"flights","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me the flight options from London to Lisbon this Friday as an inline card I can pick from: three options (times, airline, direct, duration, price, a tag for the cheapest and the best time), the first one selected, a total and a confirm button that tells you which one I chose.","text":"Card gap:12 pad:16\n  Text.heading \"Flights London to Lisbon, Friday\"\n  state pick=\"f1\"\n  FlightOption \"TAP Air Portugal\" depart:\"07:10\" arrive:\"10:25\" origin:\"LHR\" destination:\"LIS\" duration:\"2h 15m\" stops:\"Direct\" price:\"$118\" tag:\"Cheapest\" selected:=pick==\"f1\" -> pick=\"f1\"\n  FlightOption \"British Airways\" depart:\"12:40\" arrive:\"15:50\" origin:\"LHR\" destination:\"LIS\" duration:\"2h 10m\" stops:\"Direct\" price:\"$146\" tag:\"Best time\" selected:=pick==\"f2\" -> pick=\"f2\"\n  FlightOption \"Iberia\" depart:\"18:05\" arrive:\"23:30\" origin:\"LHR\" destination:\"LIS\" duration:\"3h 25m\" stops:\"1 stop\" price:\"$163\" selected:=pick==\"f3\" -> pick=\"f3\"\n  Row between\n    Text.strong \"Total\"\n    Text.strong \"{coalesce(find([{\\\"id\\\":\\\"f1\\\",\\\"p\\\":118},{\\\"id\\\":\\\"f2\\\",\\\"p\\\":146},{\\\"id\\\":\\\"f3\\\",\\\"p\\\":163}],x=>x.id==pick).p,0)}\"\n  ActionButton \"Confirm flight\" primary -> toast \"You chose {pick}\"","usage":{"input_tokens":7817,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":472,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":786,"totalMs":2508}}
+{"tMs":786,"delta":"Card g"}
+{"tMs":1003,"delta":"ap:12 pad:16"}
+{"tMs":1003,"delta":"\n  "}
+{"tMs":1003,"delta":"Text.he"}
+{"tMs":1003,"delta":"ading \"Flights"}
+{"tMs":1003,"delta":" London to"}
+{"tMs":1003,"delta":" Lisbon, Fri"}
+{"tMs":1003,"delta":"day\"\n  state"}
+{"tMs":1003,"delta":" pick=\""}
+{"tMs":1003,"delta":"f1\"\n  Flight"}
+{"tMs":1003,"delta":"Option \"T"}
+{"tMs":1022,"delta":"A"}
+{"tMs":1043,"delta":"P Air"}
+{"tMs":1227,"delta":" Portugal\" depart:\""}
+{"tMs":1227,"delta":"07"}
+{"tMs":1227,"delta":":10"}
+{"tMs":1227,"delta":"\" arrive:\"10"}
+{"tMs":1227,"delta":":25"}
+{"tMs":1227,"delta":"\" origin:\"LHR"}
+{"tMs":1227,"delta":"\" destination:\"LIS"}
+{"tMs":1227,"delta":"\" duration:\"2"}
+{"tMs":1238,"delta":"h 15m\" stops:"}
+{"tMs":1259,"delta":"\"Direct\" price:\""}
+{"tMs":1280,"delta":"$118"}
+{"tMs":1302,"delta":"\" tag:\"Che"}
+{"tMs":1452,"delta":"apest\" selected:=p"}
+{"tMs":1452,"delta":"ick="}
+{"tMs":1453,"delta":"=\"f1\" -> pick"}
+{"tMs":1453,"delta":"=\"f1\"\n  Fl"}
+{"tMs":1453,"delta":"ightOption \"British"}
+{"tMs":1453,"delta":" Airways\" depart:\""}
+{"tMs":1454,"delta":"12:40"}
+{"tMs":1475,"delta":"\" arrive:\"15:"}
+{"tMs":1496,"delta":"50"}
+{"tMs":1518,"delta":"\" origin:\"LHR"}
+{"tMs":1541,"delta":"\" destination:\"LIS"}
+{"tMs":1561,"delta":"\" duration:\"2h "}
+{"tMs":1683,"delta":"10m\" stops:\""}
+{"tMs":1683,"delta":"Direct\" price:\"$146"}
+{"tMs":1683,"delta":"\" tag:\"Best time"}
+{"tMs":1683,"delta":"\" selected:=pick="}
+{"tMs":1683,"delta":"=\"f2\" -> pick"}
+{"tMs":1691,"delta":"=\"f2\"\n  Fl"}
+{"tMs":1712,"delta":"ightOption \""}
+{"tMs":1734,"delta":"I"}
+{"tMs":1755,"delta":"beria\" depart:\"18"}
+{"tMs":1777,"delta":":05"}
+{"tMs":1798,"delta":"\" arrive:\"23"}
+{"tMs":1819,"delta":":30\" origin:\"L"}
+{"tMs":1944,"delta":"HR\" destination:\"L"}
+{"tMs":1944,"delta":"IS\" duration:\"3"}
+{"tMs":1944,"delta":"h 25m\" stops:"}
+{"tMs":1944,"delta":"\"1 stop\" price:"}
+{"tMs":1944,"delta":"\"$163\" selected:="}
+{"tMs":1948,"delta":"pick==\"f3\" -"}
+{"tMs":1970,"delta":"> pick=\"f3\""}
+{"tMs":1992,"delta":"\n  Row between"}
+{"tMs":2013,"delta":"\n    Text.strong \""}
+{"tMs":2034,"delta":"Total\"\n    Text."}
+{"tMs":2056,"delta":"strong \"{co"}
+{"tMs":2077,"delta":"alesce(find"}
+{"tMs":2162,"delta":"(["}
+{"tMs":2162,"delta":"{"}
+{"tMs":2162,"delta":"\\"}
+{"tMs":2163,"delta":"\"id\\\":\\\"f1"}
+{"tMs":2184,"delta":"\\\",\\\"p"}
+{"tMs":2206,"delta":"\\\":118"}
+{"tMs":2227,"delta":"},{\\\"id\\\":\\"}
+{"tMs":2248,"delta":"\"f2\\\",\\\"p"}
+{"tMs":2270,"delta":"\\\":146},{\\\"id"}
+{"tMs":2291,"delta":"\\\":\\\"f3\\\","}
+{"tMs":2313,"delta":"\\\"p\\\":163}],"}
+{"tMs":2336,"delta":"x=>x.id==p"}
+{"tMs":2502,"delta":"ick).p,0)}\""}
+{"tMs":2503,"delta":"\n  ActionButton \""}
+{"tMs":2503,"delta":"Confirm fl"}
+{"tMs":2503,"delta":"ight\" prim"}
+{"tMs":2503,"delta":"ary -"}
+{"tMs":2503,"delta":"> toast \"You chose {"}
+{"tMs":2503,"delta":"pick}\""}

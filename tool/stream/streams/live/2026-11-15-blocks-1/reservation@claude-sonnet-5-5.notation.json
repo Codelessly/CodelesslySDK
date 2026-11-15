@@ -1,0 +1,296 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Book a table",
+    "subtitle": "Trattoria Verde",
+    "icon": "restaurant",
+    "status": "Open",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "DayPicker1",
+    "Counter1",
+    "SectionLabel2",
+    "ChoiceChips1",
+    "Callout1",
+    "TotalBar1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day",
+    "note": "Next 7 days"
+   },
+   "bind": {
+    "visible": "${= !done}"
+   }
+  },
+  "DayPicker1": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day",
+    "days": [
+     "Sat 14",
+     "Sun 15",
+     "Mon 16",
+     "Tue 17",
+     "Wed 18",
+     "Thu 19",
+     "Fri 20"
+    ]
+   },
+   "bind": {
+    "visible": "${= !done}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "Counter1": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Party size",
+    "detail": "Guests",
+    "value": "party",
+    "min": 1,
+    "max": 8
+   },
+   "bind": {
+    "visible": "${= !done}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Time"
+   },
+   "bind": {
+    "props.note": "${day} · ${party} guests",
+    "visible": "${= !done}"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "17:30",
+     "18:00",
+     "18:30",
+     "19:00",
+     "19:30",
+     "20:00",
+     "20:30",
+     "21:00"
+    ],
+    "columns": 4
+   },
+   "bind": {
+    "props.disabled": "${= party>6?[\"17:30\",\"18:00\",\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\",\"21:00\"]:(party>4?[\"18:00\",\"19:00\",\"19:30\",\"20:30\",\"21:00\"]:(contains([\"Sun 15\",\"Tue 17\",\"Fri 20\"],day)?[\"18:30\",\"19:00\",\"19:30\",\"20:00\",\"20:30\"]:[\"18:00\",\"19:30\",\"20:30\"]))}",
+    "visible": "${= !done}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "No tables online",
+    "message": "Parties over 6 need to call the restaurant.",
+    "tone": "warn"
+   },
+   "bind": {
+    "visible": "${= (!done) && (party>6)}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Your table",
+    "cta": "Confirm"
+   },
+   "bind": {
+    "props.note": "${day} · ${party} guests",
+    "props.amount": "${= time==\"\"?\"Pick a time\":time}",
+    "props.enabled": "${= time!=\"\"}",
+    "visible": "${= !done}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Table booked",
+    "code": "TV-4821",
+    "codeLabel": "Booking number",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.message": "${day} at ${time} for ${party} guests.",
+    "visible": "${= done}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": "Sat 14"
+   },
+   {
+    "name": "party",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "done",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

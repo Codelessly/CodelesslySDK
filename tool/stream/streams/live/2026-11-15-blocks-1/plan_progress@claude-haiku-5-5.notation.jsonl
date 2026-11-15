@@ -1,0 +1,77 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"Card gap:12 pad:16\n  Text.heading \"Blog migration plan\"\n  state done=0\n  state running=false\n  state elapsed=0\n  state steps=[\"Export posts from the old CMS\",\"Map categories and tags\",\"Move images to new storage\",\"Rewrite internal links\",\"Set up redirects for old URLs\",\"Verify pages and publish\"]\n  every 1000 when running -> elapsed=elapsed+1; done=min(done+(elapsed%2==1?0:0),6)\n  every 1500 when running -> done=min(done+1,6); running=done+1<6\n  Column gap:8\n    each row in steps\n      PlanStep \"{row}\" \"\" index:0 current:=done running:=running\n  ProgressLine \"Progress\" \"{elapsed} s elapsed\" value:=done/6\n  if done<6\n    Row gap:10\n      ActionButton \"Start\" primary -> running=true\n      ActionButton \"Pause\" quiet -> running=false\n  if done==6\n    Callout \"Migration complete\" \"All six steps finished in {elapsed} s. Your blog is live on the new platform.\" good check","usage":{"input_tokens":7821,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":361,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":541,"totalMs":2126}}
+{"tMs":541,"delta":"Card"}
+{"tMs":670,"delta":" g"}
+{"tMs":670,"delta":"ap:12"}
+{"tMs":670,"delta":" pad:16\n  "}
+{"tMs":670,"delta":"Text.he"}
+{"tMs":670,"delta":"ading \"Bl"}
+{"tMs":670,"delta":"og migration plan\"\n  "}
+{"tMs":690,"delta":"state done=0\n  state"}
+{"tMs":711,"delta":" running=false\n  state elap"}
+{"tMs":732,"delta":"sed=0\n  state ste"}
+{"tMs":753,"delta":"ps=[\""}
+{"tMs":773,"delta":"Export pos"}
+{"tMs":794,"delta":"ts from the old C"}
+{"tMs":813,"delta":"MS\",\"Map"}
+{"tMs":833,"delta":" categ"}
+{"tMs":853,"delta":"ories and t"}
+{"tMs":873,"delta":"ags\",\""}
+{"tMs":893,"delta":"Move"}
+{"tMs":914,"delta":" images to new"}
+{"tMs":934,"delta":" storage\",\"R"}
+{"tMs":955,"delta":"ewrite intern"}
+{"tMs":975,"delta":"al links\",\"Set"}
+{"tMs":995,"delta":" up redirects for"}
+{"tMs":1016,"delta":" old URLs\",\"Ver"}
+{"tMs":1036,"delta":"ify p"}
+{"tMs":1057,"delta":"ages and publ"}
+{"tMs":1077,"delta":"ish\"]\n  every"}
+{"tMs":1098,"delta":" 1000 when"}
+{"tMs":1118,"delta":" running -"}
+{"tMs":1138,"delta":"> elapsed=elap"}
+{"tMs":1159,"delta":"sed+1;"}
+{"tMs":1179,"delta":" done=min"}
+{"tMs":1200,"delta":"(done+("}
+{"tMs":1220,"delta":"el"}
+{"tMs":1240,"delta":"apsed%"}
+{"tMs":1261,"delta":"2==1"}
+{"tMs":1281,"delta":"?0:0"}
+{"tMs":1301,"delta":"),"}
+{"tMs":1322,"delta":"6)\n  every"}
+{"tMs":1342,"delta":" 1500"}
+{"tMs":1363,"delta":" when running -> done=min"}
+{"tMs":1385,"delta":"(done+1,6);"}
+{"tMs":1405,"delta":" running=done"}
+{"tMs":1427,"delta":"+1<6\n  Column"}
+{"tMs":1445,"delta":" gap:8\n    each"}
+{"tMs":1465,"delta":" row"}
+{"tMs":1485,"delta":" in steps\n      Plan"}
+{"tMs":1506,"delta":"Step \"{row}"}
+{"tMs":1526,"delta":"\" \"\" index:0"}
+{"tMs":1547,"delta":" current:="}
+{"tMs":1567,"delta":"done running:=running"}
+{"tMs":1588,"delta":"\n  ProgressLine"}
+{"tMs":1608,"delta":" \"Prog"}
+{"tMs":1628,"delta":"ress\" \"{el"}
+{"tMs":1649,"delta":"apsed}"}
+{"tMs":1669,"delta":" s elapsed\" value:"}
+{"tMs":1690,"delta":"=done/6\n  if"}
+{"tMs":1710,"delta":" done<"}
+{"tMs":1730,"delta":"6\n    Row"}
+{"tMs":1751,"delta":" gap:10"}
+{"tMs":1772,"delta":"\n      ActionButton \""}
+{"tMs":1798,"delta":"Start\" prim"}
+{"tMs":1816,"delta":"ary -> running=true"}
+{"tMs":1837,"delta":"\n      ActionButton \""}
+{"tMs":1853,"delta":"Pause\" qu"}
+{"tMs":1875,"delta":"iet -> running=false"}
+{"tMs":1895,"delta":"\n  if done==6\n    "}
+{"tMs":1918,"delta":"Callout \"Migration complete"}
+{"tMs":1935,"delta":"\" \"All six steps fin"}
+{"tMs":1956,"delta":"ished in {"}
+{"tMs":1977,"delta":"elapsed} s"}
+{"tMs":1997,"delta":"."}
+{"tMs":2017,"delta":" Your blog is live"}
+{"tMs":2037,"delta":" on the new plat"}
+{"tMs":2058,"delta":"form.\" good"}
+{"tMs":2078,"delta":" check"}

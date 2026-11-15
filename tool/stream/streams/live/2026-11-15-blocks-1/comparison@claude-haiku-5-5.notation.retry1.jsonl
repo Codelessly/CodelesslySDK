@@ -1,0 +1,32 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Compare two phone plans side by side for me: price, data, calls, roaming, contract length and extras, with the better value on each row marked, a recommendation at the bottom with one sentence of reasoning, and a choose button under each plan that tells you which I picked.","text":"Column gap:12 pad:16\n  ComparisonTable names:[\"Plan A\",\"Plan B\"] prices:[\"$35/mo\",\"$42/mo\"] rows:[[\"Data\",\"30 GB\",\"Unlimited\",2],[\"Calls\",\"Unlimited\",\"Unlimited\",0],[\"Roaming\",\"$5/day\",\"Included\",2],[\"Contract\",\"24 months\",\"None\",2],[\"Extras\",\"Streaming perks\",\"Hotspot 15 GB\",2]] pick:\"Plan B\" pickLabel:\"Recommended\" cta:\"Choose\" -> emit choosePlan\n  Text.caption \"Recommended: Plan B. Its unlimited data, included roaming and no contract outweigh the $7 monthly difference for most travellers.\"","usage":{"input_tokens":8126,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":239,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1311,"totalMs":2465}}
+{"tMs":1311,"delta":"Column"}
+{"tMs":1730,"delta":" gap:12 p"}
+{"tMs":1730,"delta":"ad:16\n  Compar"}
+{"tMs":1730,"delta":"isonTable names"}
+{"tMs":1730,"delta":":[\"Plan A\",\""}
+{"tMs":1730,"delta":"Plan B\"] prices:"}
+{"tMs":1730,"delta":"[\"$35/mo\",\"$"}
+{"tMs":1730,"delta":"42/mo\"] rows"}
+{"tMs":1730,"delta":":[[\"Data\",\"30 "}
+{"tMs":1730,"delta":"GB\",\"Unlimited"}
+{"tMs":1730,"delta":"\",2],[\"Calls\",\""}
+{"tMs":1730,"delta":"Unlimited\",\"Un"}
+{"tMs":1730,"delta":"limited\",0],[\""}
+{"tMs":1944,"delta":"Roaming\",\"$5/day"}
+{"tMs":1944,"delta":"\",\"Included\",2],[\""}
+{"tMs":1944,"delta":"Contract\",\"24 months\",\"None"}
+{"tMs":1944,"delta":"\",2],[\"Extras\",\""}
+{"tMs":1944,"delta":"Streaming perks\",\""}
+{"tMs":1944,"delta":"Hotspot 15 G"}
+{"tMs":1944,"delta":"B\",2]] pick:"}
+{"tMs":1944,"delta":"\"Plan B\" pick"}
+{"tMs":1944,"delta":"Label:\"Recomm"}
+{"tMs":1944,"delta":"ended\" cta:\"Cho"}
+{"tMs":1944,"delta":"ose\" -> emit choos"}
+{"tMs":1944,"delta":"ePlan\n  Text."}
+{"tMs":2458,"delta":"caption \"Recommended:"}
+{"tMs":2458,"delta":" Plan B. Its un"}
+{"tMs":2458,"delta":"limited data, included roa"}
+{"tMs":2458,"delta":"ming and no contract outweig"}
+{"tMs":2458,"delta":"h the $7 monthly"}
+{"tMs":2458,"delta":" difference for most travellers.\""}

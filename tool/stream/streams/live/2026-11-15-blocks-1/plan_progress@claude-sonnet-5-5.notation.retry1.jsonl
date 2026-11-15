@@ -1,0 +1,75 @@
+{"meta":{"ui":"plan_progress","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"ChatCard \"Blog migration\" \"Six steps to move your blog\" icon:\"sync\" status:=done==6?\"Done\":(running?\"Running\":\"Ready\") tone:=done==6?\"good\":\"accent\" w:390\n  state done=0\n  state running=false\n  state elapsed=0\n  state steps=[{\"t\":\"Back up content\",\"d\":\"Export posts, images and settings.\",\"i\":0},{\"t\":\"Set up new host\",\"d\":\"Create the site and install the platform.\",\"i\":1},{\"t\":\"Import posts\",\"d\":\"Bring over articles, tags and comments.\",\"i\":2},{\"t\":\"Move media\",\"d\":\"Upload images and fix their links.\",\"i\":3},{\"t\":\"Redirect URLs\",\"d\":\"Map old addresses to the new ones.\",\"i\":4},{\"t\":\"Switch DNS\",\"d\":\"Point the domain and check HTTPS.\",\"i\":5}]\n  every 1500 when running && done<6 -> done=done+1\n  every 1s when running && done<6 -> elapsed=elapsed+1\n  SectionLabel \"Plan\" \"{done} of 6 done\"\n  each s in steps\n    PlanStep \"{s.t}\" \"{s.d}\" index:=s.i current:=done running:=running last:=s.i==5\n  ProgressLine \"{done} of 6 steps\" \"{elapsed} s elapsed\" value:=done/6\n  if done<6\n    Row gap:10\n      ActionButton \"Start\" tone:primary icon:\"play_arrow\" enabled:=!running -> running=true\n      ActionButton \"Pause\" tone:quiet icon:\"pause\" enabled:=running -> running=false\n  if done>=6\n    Receipt \"Migration complete\" \"All 6 steps finished in {elapsed} seconds.\" tone:good icon:\"check\"","usage":{"input_tokens":8552,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":579,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":568,"totalMs":3002}}
+{"tMs":568,"delta":"ChatCard \"Bl"}
+{"tMs":880,"delta":"og migration\" \"Six ste"}
+{"tMs":880,"delta":"ps to move your blog\" ic"}
+{"tMs":880,"delta":"on:\"sync\" status:"}
+{"tMs":880,"delta":"=done==6?\""}
+{"tMs":880,"delta":"Done\":("}
+{"tMs":880,"delta":"running?\"Running"}
+{"tMs":880,"delta":"\":\""}
+{"tMs":880,"delta":"Ready\") tone:=done=="}
+{"tMs":880,"delta":"6?\"good\":\"accent"}
+{"tMs":894,"delta":"\" w:390\n  state done"}
+{"tMs":928,"delta":"=0\n  state running=false"}
+{"tMs":962,"delta":"\n  state elapsed="}
+{"tMs":1201,"delta":"0\n  state steps=["}
+{"tMs":1201,"delta":"{\"t\":\"Back up"}
+{"tMs":1201,"delta":" content\",\"d\":\"Export pos"}
+{"tMs":1201,"delta":"ts, images and settings.\",\""}
+{"tMs":1201,"delta":"i\":0},{\"t\":"}
+{"tMs":1201,"delta":"\"Set up new host\",\"d"}
+{"tMs":1201,"delta":"\":\"Create the site and install"}
+{"tMs":1233,"delta":" the platform.\",\"i\":1"}
+{"tMs":1264,"delta":"},{\"t\":\"Import"}
+{"tMs":1298,"delta":" posts\",\"d\":\"B"}
+{"tMs":1331,"delta":"ring over articles, tags and"}
+{"tMs":1364,"delta":" comments.\",\"i\":2},"}
+{"tMs":1512,"delta":"{\"t\":\"Move media"}
+{"tMs":1512,"delta":"\",\"d\":\"Upload images"}
+{"tMs":1512,"delta":" and fix their links.\",\"i"}
+{"tMs":1512,"delta":"\":3},{\"t\":\""}
+{"tMs":1531,"delta":"Redirect URLs\",\""}
+{"tMs":1565,"delta":"d\":\"Map old addres"}
+{"tMs":1598,"delta":"ses to the new ones.\",\""}
+{"tMs":1632,"delta":"i\":4},{\"t\":"}
+{"tMs":1667,"delta":"\"Switch DNS\",\""}
+{"tMs":1699,"delta":"d\":\"Point the domain"}
+{"tMs":1732,"delta":" and check HTTPS."}
+{"tMs":1765,"delta":"\",\"i\":5}]\n  "}
+{"tMs":1814,"delta":"every 1500 when running &&"}
+{"tMs":1832,"delta":" done<6 -> done="}
+{"tMs":1865,"delta":"done+1\n  every 1"}
+{"tMs":1898,"delta":"s when running && done<6 "}
+{"tMs":1932,"delta":"-> elapsed=el"}
+{"tMs":1968,"delta":"apsed+1\n  S"}
+{"tMs":1999,"delta":"ectionLabel \"Pl"}
+{"tMs":2032,"delta":"an\" \"{done} of "}
+{"tMs":2065,"delta":"6 done\"\n  each s"}
+{"tMs":2099,"delta":" in steps\n    Plan"}
+{"tMs":2133,"delta":"Step \"{s.t}"}
+{"tMs":2166,"delta":"\" \"{s.d}\""}
+{"tMs":2199,"delta":" index:=s.i current:"}
+{"tMs":2232,"delta":"=done running:=running last:"}
+{"tMs":2266,"delta":"=s.i==5\n  "}
+{"tMs":2299,"delta":"ProgressLine \"{"}
+{"tMs":2334,"delta":"done} of 6 steps"}
+{"tMs":2366,"delta":"\" \"{elapsed}"}
+{"tMs":2399,"delta":" s elapsed\" value:"}
+{"tMs":2432,"delta":"=done/6\n  if done"}
+{"tMs":2466,"delta":"<6\n    Row gap"}
+{"tMs":2499,"delta":":10\n      ActionBut"}
+{"tMs":2533,"delta":"ton \"Start\" tone:"}
+{"tMs":2566,"delta":"primary icon:\"play_"}
+{"tMs":2599,"delta":"arrow\" enabled:"}
+{"tMs":2633,"delta":"=!running -> running=true"}
+{"tMs":2666,"delta":"\n      ActionButton \""}
+{"tMs":2699,"delta":"Pause\" tone:qu"}
+{"tMs":2732,"delta":"iet icon:\"pause"}
+{"tMs":2766,"delta":"\" enabled:=running -"}
+{"tMs":2799,"delta":"> running=false\n  if done"}
+{"tMs":2832,"delta":">=6\n    Receip"}
+{"tMs":2865,"delta":"t \"Migration complete\""}
+{"tMs":2899,"delta":" \"All 6 steps fin"}
+{"tMs":2932,"delta":"ished in {elapsed}"}
+{"tMs":2966,"delta":" seconds.\" tone:good"}
+{"tMs":2999,"delta":" icon:\"check\""}
