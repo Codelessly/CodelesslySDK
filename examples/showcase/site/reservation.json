@@ -1,0 +1,273 @@
+{
+ "schema": 3,
+ "roots": [
+  "reservation"
+ ],
+ "nodes": {
+  "reservation": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Book a table",
+    "subtitle": "Osteria Lume · this week",
+    "icon": "restaurant_rounded"
+   },
+   "bind": {
+    "props.status": "${= booked?\"Booked\":(length(slots)-length((filter(slots,s=>(indexOf(slots,s)+indexOf(days,day)*2+(party>4?1:0))%3==0||(party>6&&indexOf(slots,s)>4)))))+\" slots free\"}",
+    "props.tone": "${= booked?\"good\":\"accent\"}"
+   },
+   "children": [
+    "days",
+    "party",
+    "SectionLabel1",
+    "slots",
+    "confirm",
+    "Receipt1"
+   ]
+  },
+  "days": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day"
+   },
+   "bind": {
+    "props.days": "${days}",
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "party": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Party size",
+    "detail": "1 to 8 guests",
+    "value": "party",
+    "min": 1,
+    "max": 8
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Time",
+    "note": "Struck-through times are full"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "slots": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "columns": 4
+   },
+   "bind": {
+    "props.options": "${slots}",
+    "props.disabled": "${= (filter(slots,s=>(indexOf(slots,s)+indexOf(days,day)*2+(party>4?1:0))%3==0||(party>6&&indexOf(slots,s)>4)))}",
+    "visible": "${= !booked}"
+   }
+  },
+  "confirm": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cta": "Confirm"
+   },
+   "bind": {
+    "props.label": "${day} · ${party} ${= party==1?\"guest\":\"guests\"}",
+    "props.amount": "${= time==\"\"?\"Pick a time\":time}",
+    "props.enabled": "${= time!=\"\"}",
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "booked",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "book_table",
+       "value": "${= day+\", \"+party+\" guests, \"+time}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Table booked",
+    "code": "LUME-2041",
+    "codeLabel": "Booking"
+   },
+   "bind": {
+    "props.message": "${day} at ${time} for ${party} ${= party==1?\"guest\":\"guests\"} at Osteria Lume.",
+    "visible": "${= booked}"
+   }
+  }
+ },
+ "variables": {
+  "reservation": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": "Sat 14"
+   },
+   {
+    "name": "party",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "booked",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "days",
+    "type": "list",
+    "value": [
+     "Sat 14",
+     "Sun 15",
+     "Mon 16",
+     "Tue 17",
+     "Wed 18",
+     "Thu 19",
+     "Fri 20"
+    ]
+   },
+   {
+    "name": "slots",
+    "type": "list",
+    "value": [
+     "17:30",
+     "18:00",
+     "18:30",
+     "19:00",
+     "19:30",
+     "20:00",
+     "20:30",
+     "21:00"
+    ]
+   }
+  ]
+ }
+}

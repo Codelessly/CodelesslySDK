@@ -1,0 +1,351 @@
+{
+ "schema": 3,
+ "roots": [
+  "question_flow"
+ ],
+ "nodes": {
+  "question_flow": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Find your laptop",
+    "subtitle": "Three quick questions",
+    "icon": "laptop_mac_rounded"
+   },
+   "bind": {
+    "props.status": "${= step>3?\"Your match\":\"Question \"+step+\" of 3\"}",
+    "props.tone": "${= step>3?\"good\":\"accent\"}"
+   },
+   "children": [
+    "Steps1",
+    "q1",
+    "q2",
+    "q3",
+    "Recommendation1",
+    "row1"
+   ]
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Use",
+     "Details",
+     "Budget"
+    ]
+   },
+   "bind": {
+    "props.current": "${step}"
+   }
+  },
+  "q1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "What will you mostly use it for?",
+    "value": "use",
+    "options": [
+     "School or study",
+     "Work and office",
+     "Gaming",
+     "Creative projects"
+    ],
+    "details": [
+     "Notes, research, video calls",
+     "Docs, spreadsheets, meetings",
+     "High frame rates, big GPUs",
+     "Video, photo, music, 3D"
+    ],
+    "icons": [
+     "school_rounded",
+     "work_rounded",
+     "sports_esports_rounded",
+     "palette_rounded"
+    ]
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "focus",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "q2": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "focus"
+   },
+   "bind": {
+    "props.title": "${= use==\"Gaming\"?\"What do you play?\":(use==\"Creative projects\"?\"What do you make?\":\"What matters most day to day?\")}",
+    "props.options": "${= use==\"Gaming\"?[\"Competitive esports\",\"Big open-world titles\"]:(use==\"Creative projects\"?[\"Video and 3D\",\"Photo and design\",\"Music production\"]:[\"All-day battery\",\"A big screen and keyboard\",\"As light as possible\"])}",
+    "visible": "${= step==2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "q3": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "What is your budget?",
+    "value": "budget",
+    "options": [
+     "Under $800",
+     "$800 to $1,500",
+     "Over $1,500"
+    ],
+    "details": [
+     "Solid basics",
+     "The sweet spot",
+     "No compromises"
+    ]
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "Recommendation1": {
+   "type": "Recommendation",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "why": "The best fit for what you told me, at the top of your budget's range.",
+    "kind": "laptop",
+    "eyebrow": "Your match"
+   },
+   "bind": {
+    "props.title": "${= use==\"Gaming\"?\"Volt 16 Gaming\":(use==\"Creative projects\"?\"Studio 14 Pro\":(budget==\"Under $800\"?\"Slate 13\":\"Aero 14\"))}",
+    "props.reasons": "${= [\"Made for \"+lower(use),\"Chosen for: \"+lower(focus),\"Budget: \"+lower(budget)]}",
+    "visible": "${= step==4}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step>1}"
+   },
+   "children": [
+    "back",
+    "again"
+   ]
+  },
+  "back": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back",
+    "tone": "quiet",
+    "icon": "arrow_back_rounded"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= step-1}"
+      }
+     ]
+    }
+   ]
+  },
+  "again": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start over",
+    "tone": "quiet",
+    "icon": "refresh_rounded"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "use",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "focus",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "budget",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "question_flow": [
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "use",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "focus",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "budget",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

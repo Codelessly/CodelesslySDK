@@ -1,0 +1,174 @@
+{
+ "schema": 3,
+ "roots": [
+  "code_diff"
+ ],
+ "nodes": {
+  "code_diff": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Changes to config.yaml",
+    "subtitle": "3 hunks · keep or discard each",
+    "icon": "difference_rounded"
+   },
+   "bind": {
+    "props.status": "${= count([h1,h2,h3],h=>h==\"keep\")} of 3 kept"
+   },
+   "children": [
+    "a",
+    "b",
+    "c",
+    "TotalBar1"
+   ]
+  },
+  "a": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Server port",
+    "detail": "@@ -4,2 +4,2 @@",
+    "value": "h1",
+    "start": 4,
+    "lines": [
+     "-port: 8080",
+     "+port: 9090",
+     " host: localhost"
+    ]
+   }
+  },
+  "b": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Logging",
+    "detail": "@@ -12,3 +12,3 @@",
+    "value": "h2",
+    "start": 12,
+    "lines": [
+     " logging:",
+     "-  level: debug",
+     "-  file: /tmp/app.log",
+     "+  level: warn",
+     "+  file: /var/log/app.log"
+    ]
+   }
+  },
+  "c": {
+   "type": "DiffHunk",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Cache",
+    "detail": "@@ -20,1 +20,3 @@",
+    "value": "h3",
+    "start": 20,
+    "lines": [
+     " cache:",
+     "+  enabled: true",
+     "+  ttl: 300"
+    ]
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cta": "Apply changes",
+    "icon": "check_rounded"
+   },
+   "bind": {
+    "props.label": "${= count([h1,h2,h3],h=>h!=\"\")} of 3 decided",
+    "props.amount": "${= count([h1,h2,h3],h=>h==\"keep\")} kept",
+    "props.enabled": "${= h1!=\"\"&&h2!=\"\"&&h3!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "apply_changes",
+       "value": "${= h1+\",\"+h2+\",\"+h3}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "code_diff": [
+   {
+    "name": "h1",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h2",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "h3",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

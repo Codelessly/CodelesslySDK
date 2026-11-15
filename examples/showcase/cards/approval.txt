@@ -1,0 +1,14 @@
+state decision=""
+ChatCard "Delete 214 old files?" "Shared drive cleanup · needs your approval" icon:"delete_sweep_rounded" tone:"danger" status:=decision==""?"Awaiting you":(decision=="approve"?"Approved":"Denied")
+  Paragraph "I am about to permanently delete old files from your shared drive. Nothing is removed until you approve."
+  Details rows:[["Folder","Shared Drive / Archive / 2019"],["Files","214 files, older than 2020"],["Space freed","3.2 GB"]] icons:["folder_rounded","description_rounded","storage_rounded"]
+  if decision==""
+    Callout "This cannot be undone" "Deleted files skip the trash and cannot be restored." tone:"danger" icon:"warning_rounded"
+    Disclosure#names "Show the first 5 file names" lines:["Q1-2019-budget.xlsx","meeting-notes-2018-03.docx","old-logo-draft-v2.png","onboarding-2017.pdf","team-photo-2016.jpg"] note:"and 209 more"
+    Row gap:10
+      ActionButton#deny "Deny" tone:"quiet" grow -> decision="deny"; emit decision "deny"
+      ActionButton#approve "Approve deletion" tone:"danger" icon:"delete_rounded" grow:2 -> decision="approve"; emit decision "approve"
+  if decision=="approve"
+    Receipt "Deletion approved" "214 files will be deleted from Shared Drive / Archive / 2019. This card is now locked." tone:"danger" icon:"delete_rounded"
+  if decision=="deny"
+    Receipt "Deletion denied" "Nothing was deleted. This card is now locked." tone:"neutral" icon:"block_rounded"

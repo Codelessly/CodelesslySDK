@@ -1,0 +1,16 @@
+state day="Sat 14"
+state party=2
+state time=""
+state booked=false
+state days=["Sat 14","Sun 15","Mon 16","Tue 17","Wed 18","Thu 19","Fri 20"]
+state slots=["17:30","18:00","18:30","19:00","19:30","20:00","20:30","21:00"]
+state full=filter(slots,s=>(indexOf(slots,s)+indexOf(days,day)*2+(party>4?1:0))%3==0||(party>6&&indexOf(slots,s)>4))
+ChatCard "Book a table" "Osteria Lume · this week" icon:"restaurant_rounded" status:"{booked?"Booked":(length(slots)-length(full))+" slots free"}" tone:=booked?"good":"accent"
+  if !booked
+    DayPicker#days =day days:=days -> time=""
+    Counter#party "Party size" "1 to 8 guests" =party min:1 max:8 -> time=""
+    SectionLabel "Time" "Struck-through times are full"
+    ChoiceChips#slots =time options:=slots disabled:=full columns:4
+    TotalBar#confirm "{day} · {party} {party==1?"guest":"guests"}" amount:"{time==""?"Pick a time":time}" cta:"Confirm" enabled:=time!="" -> booked=true; emit book_table day+", "+party+" guests, "+time
+  if booked
+    Receipt "Table booked" "{day} at {time} for {party} {party==1?"guest":"guests"} at Osteria Lume." code:"LUME-2041" codeLabel:"Booking"

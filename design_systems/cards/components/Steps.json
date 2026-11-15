@@ -1,0 +1,229 @@
+{
+ "schema": 3,
+ "id": "Steps",
+ "roots": [
+  "steps"
+ ],
+ "widget": {
+  "type": "Steps",
+  "doc": "Progress through named steps as numbered dots joined by a line: steps is the list of names, current the step the user is on counted from 1 (earlier ones are checked).",
+  "props": [
+   {
+    "key": "steps",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Cart",
+     "Shipping",
+     "Payment"
+    ],
+    "doc": "The step names, in order.",
+    "required": true
+   },
+   {
+    "key": "current",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 1,
+    "doc": "The step the user is on, counted from 1; earlier steps show a check (one more than the count: all done).",
+    "required": true
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Second",
+   "size": [
+    340,
+    54
+   ],
+   "props": {
+    "current": 2
+   }
+  }
+ ],
+ "nodes": {
+  "steps": {
+   "type": "gridView",
+   "children": [
+    "cell"
+   ],
+   "props": {
+    "crossAxisCount": 1,
+    "crossAxisSpacing": 0,
+    "mainAxisSpacing": 0,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.steps}",
+    "props.crossAxisCount": "${= max(1, length(props.steps))}"
+   }
+  },
+  "cell": {
+   "type": "column",
+   "children": [
+    "dot",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "line",
+      "p1": [
+       0,
+       13
+      ],
+      "p2": [
+       "${= size.width / 2 - 18}",
+       13
+      ],
+      "when": "${= index > 0}",
+      "paint": {
+       "color": "${= index < props.current ? theme.colors.accent : theme.colors.lineStrong}",
+       "style": "stroke",
+       "strokeWidth": 2,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "line",
+      "p1": [
+       "${= size.width / 2 + 18}",
+       13
+      ],
+      "p2": [
+       "${= size.width}",
+       13
+      ],
+      "when": "${= index < length(props.steps) - 1}",
+      "paint": {
+       "color": "${= index + 1 < props.current ? theme.colors.accent : theme.colors.lineStrong}",
+       "style": "stroke",
+       "strokeWidth": 2,
+       "strokeCap": "round"
+      }
+     }
+    ]
+   }
+  },
+  "dot": {
+   "type": "row",
+   "children": [
+    "dotCheck",
+    "dotNum"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 13
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= index + 1 < props.current ? theme.colors.accent : index + 1 == props.current ? theme.colors.accentTint : theme.colors.card}",
+    "decoration.strokes[0].color": "${= index + 1 < props.current || index + 1 == props.current ? theme.colors.accent : theme.colors.lineStrong}"
+   }
+  },
+  "dotCheck": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 16,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "visible": "${= index + 1 < props.current}"
+   }
+  },
+  "dotNum": {
+   "type": "text",
+   "props": {
+    "text": "${= index + 1}",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= !(index + 1 < props.current)}",
+    "props.style.color": "${= index + 1 == props.current ? theme.colors.accent : theme.colors.inkFaint}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": "chip",
+    "textAlign": "center",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= index + 1 == props.current ? theme.colors.ink : index + 1 < props.current ? theme.colors.inkSoft : theme.colors.inkFaint}"
+   }
+  }
+ }
+}

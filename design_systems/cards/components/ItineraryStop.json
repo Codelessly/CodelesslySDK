@@ -1,0 +1,382 @@
+{
+ "schema": 3,
+ "id": "ItineraryStop",
+ "roots": [
+  "stop"
+ ],
+ "widget": {
+  "type": "ItineraryStop",
+  "doc": "One stop on a day's timeline: the place (title), time at the left, a detail the stop reveals when tapped (it opens and closes by itself), and travel, how to reach the next stop and how long (\"Walk to Gion, 15 min\"); last:true ends the line. Write the stops one under another.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Fushimi Inari Shrine",
+    "doc": "The place.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The details a tap on the stop reveals (empty: nothing to open)."
+   },
+   {
+    "key": "time",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "08:00",
+    "doc": "When, at the left of the timeline.",
+    "required": true
+   },
+   {
+    "key": "travel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "How to get to the next stop and how long: \"Walk to Gion, 15 min\" (drawn as a pill with a walk, bus, taxi or train icon; empty: none)."
+   },
+   {
+    "key": "last",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True for the last stop of a day: the line ends here."
+   },
+   {
+    "key": "open",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True starts it expanded."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Stop",
+   "size": [
+    360,
+    70
+   ],
+   "props": {
+    "detail": "Thousands of gates.",
+    "travel": "JR Nara Line, 5 min"
+   }
+  }
+ ],
+ "nodes": {
+  "stop": {
+   "type": "row",
+   "children": [
+    "time",
+    "gap",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "line",
+      "p1": [
+       59,
+       26
+      ],
+      "p2": [
+       59,
+       "${= size.height + 2}"
+      ],
+      "when": "${= !props.last}",
+      "paint": {
+       "color": "${theme.colors.lineStrong}",
+       "style": "stroke",
+       "strokeWidth": 1.6,
+       "strokeCap": "round",
+       "dashPattern": [
+        1,
+        5
+       ]
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       59,
+       13
+      ],
+      "radius": 6.5,
+      "paint": "${theme.colors.accentTint}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       59,
+       13
+      ],
+      "radius": 3.5,
+      "paint": "${theme.colors.accent}"
+     }
+    ]
+   }
+  },
+  "time": {
+   "type": "text",
+   "props": {
+    "text": "${props.time}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": 44,
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     0
+    ]
+   }
+  },
+  "gap": {
+   "type": "spacer",
+   "layout": {
+    "width": 30,
+    "height": 1
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "head",
+    "detail",
+    "travel"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     3,
+     0,
+     16
+    ]
+   },
+   "bind": {
+    "layout.padding": "${= props.last ? [0, 3, 0, 2] : [0, 3, 0, 16]}"
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "title",
+    "chev"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "op": "toggle"
+      }
+     ]
+    }
+   ],
+   "states": {
+    "pressed": {
+     "head": {
+      "opacity": 0.82
+     }
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "rowTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "chev": {
+   "type": "icon",
+   "props": {
+    "icon": "expand_more_rounded",
+    "size": 20,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "bind": {
+    "props.icon": "${= open ? 'expand_less_rounded' : 'expand_more_rounded'}",
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": {
+     "from": "lead",
+     "fontSize": 13.5
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= open && props.detail != ''}"
+   }
+  },
+  "travel": {
+   "type": "row",
+   "children": [
+    "travelIcon",
+    "travelText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     5,
+     10,
+     5
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= props.travel != ''}"
+   }
+  },
+  "travelIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "train_rounded",
+    "size": 14,
+    "color": "inkSoft"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "props.icon": "${= contains(lower(props.travel), 'walk') ? 'directions_walk_rounded' : contains(lower(props.travel), 'bus') ? 'directions_bus_rounded' : contains(lower(props.travel), 'taxi') || contains(lower(props.travel), 'car') ? 'local_taxi_rounded' : contains(lower(props.travel), 'bike') || contains(lower(props.travel), 'cycle') ? 'directions_bike_rounded' : 'train_rounded'}"
+   }
+  },
+  "travelText": {
+   "type": "text",
+   "props": {
+    "text": "${props.travel}",
+    "style": {
+     "from": "meta",
+     "fontSize": 12,
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 230
+    }
+   }
+  }
+ },
+ "variables": {
+  "stop": [
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

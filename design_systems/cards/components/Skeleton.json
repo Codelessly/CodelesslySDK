@@ -1,0 +1,86 @@
+{
+ "schema": 3,
+ "id": "Skeleton",
+ "roots": [
+  "block"
+ ],
+ "widget": {
+  "type": "Skeleton",
+  "doc": "A grey placeholder for content still loading: a line of text, a block or a circle, gently pulsing.",
+  "props": [
+   {
+    "key": "variant",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "text",
+      "rectangular",
+      "circular"
+     ]
+    },
+    "default": "text",
+    "doc": "text (radius 4), rectangular (radius 8) or circular."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Line",
+   "size": [
+    200,
+    20
+   ],
+   "props": {}
+  },
+  {
+   "name": "Circle",
+   "size": [
+    48,
+    48
+   ],
+   "props": {
+    "variant": "circular"
+   }
+  }
+ ],
+ "nodes": {
+  "block": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "decoration.radius": "${= props.variant == 'text' ? 4 : (props.variant == 'rectangular' ? 8 : (9999))}"
+   },
+   "animations": [
+    {
+     "id": "pulse",
+     "duration": 1000,
+     "curve": "easeInOut",
+     "repeat": {
+      "reverse": true
+     },
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 1,
+       "to": 0.5
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

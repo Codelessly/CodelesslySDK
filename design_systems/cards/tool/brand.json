@@ -1,0 +1,19 @@
+{
+ "id": "cards",
+ "name": "Cards",
+ "description": "Inline chat cards at full polish: SSUI's neutral grays and black with its blue accent used sparingly, a number-led type scale, soft tinted depth, considered radii, drawn media, and ready-made card blocks for flights, products, carts, tables, charts, plans, diffs, itineraries, maps, drafts, bookings and weather.",
+ "primary": "#2563EB",
+ "primaryDark": "#3B82F6",
+ "ink": "#111827",
+ "surface": "#FFFFFF",
+ "inkDark": "#FFFFFF",
+ "surfaceDark": "#141414",
+ "radius": 12,
+ "density": "regular",
+ "typeScale": 1.0,
+ "success": "#16A34A",
+ "warning": "#EA580C",
+ "error": "#DC2626",
+ "info": "#0891B2",
+ "fontFamily": "Inter"
+}

@@ -1,0 +1,414 @@
+{
+ "schema": 3,
+ "id": "OptionList",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "OptionList",
+  "doc": "A question and its answers as a list of rows with a radio (also a delivery method, a plan): OptionList \"What will you use it for?\" =answer options:[\"A\",\"B\"] keeps the chosen option's text in your variable; details, icons and prices are optional lists alongside; onChanged fires with the choice (-> step=2).",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable: it holds the chosen option."
+   },
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The question, over the options (empty: none)."
+   },
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Standard",
+     "Express"
+    ],
+    "doc": "The options, one row each.",
+    "required": true
+   },
+   {
+    "key": "details",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A quiet second line per option (optional)."
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A Material icon per option (optional)."
+   },
+   {
+    "key": "prices",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A figure at the right of each option, e.g. a price (optional)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "An option was chosen; the value is its text."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Delivery",
+   "size": [
+    340,
+    130
+   ],
+   "props": {
+    "value": "Standard",
+    "details": [
+     "3 to 5 days",
+     "Next day"
+    ],
+    "prices": [
+     "$4.00",
+     "$12.00"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": [
+    "title",
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 17
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     6,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.title != ''}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "opt"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.options}"
+   }
+  },
+  "opt": {
+   "type": "row",
+   "children": [
+    "optIcon",
+    "texts",
+    "trail",
+    "radio"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 14
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.strokes[0].color": "${= props.value == item ? theme.colors.accent : theme.colors.line}",
+    "decoration.fills[0].color": "${= props.value == item ? theme.colors.accentTint : theme.colors.card}"
+   },
+   "states": {
+    "pressed": {
+     "opt": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "optIcon": {
+   "type": "row",
+   "children": [
+    "optIconI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 11
+   },
+   "bind": {
+    "visible": "${= length(props.icons) > index}",
+    "decoration.fills[0].color": "${= props.value == item ? theme.colors.accent : theme.colors.tile}"
+   }
+  },
+  "optIconI": {
+   "type": "icon",
+   "props": {
+    "icon": "circle",
+    "size": 19,
+    "color": "inkSoft"
+   },
+   "layout": {
+    "width": 19,
+    "height": 19
+   },
+   "bind": {
+    "props.icon": "${= length(props.icons) > index ? at(props.icons, index) : 'circle'}",
+    "props.color": "${= props.value == item ? theme.colors.onAccent : theme.colors.inkSoft}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "optTitle",
+    "optDetail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "optTitle": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": "rowTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "optDetail": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.details) > index ? at(props.details, index) : ''}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.details) > index}"
+   }
+  },
+  "trail": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.prices) > index ? at(props.prices, index) : ''}",
+    "style": "numberSmall"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.prices) > index}"
+   }
+  },
+  "radio": {
+   "type": "row",
+   "children": [
+    "radioIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 11
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == item ? theme.colors.accent : theme.colors.card}",
+    "decoration.strokes[0].color": "${= props.value == item ? theme.colors.accent : theme.colors.lineStrong}"
+   }
+  },
+  "radioIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 15,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "visible": "${= props.value == item}"
+   }
+  }
+ }
+}

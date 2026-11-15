@@ -1,0 +1,191 @@
+{
+ "schema": 3,
+ "roots": [
+  "map_list"
+ ],
+ "nodes": {
+  "map_list": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Coffee near you",
+    "subtitle": "Five shops within a 12 minute walk",
+    "icon": "local_cafe_rounded"
+   },
+   "bind": {
+    "props.status": "${= pick>0?shops[pick-1].dist:\"5 shops\"}"
+   },
+   "children": [
+    "map",
+    "listView1"
+   ]
+  },
+  "map": {
+   "type": "MapPanel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178.0
+   },
+   "props": {
+    "value": "pick",
+    "count": 5
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${shops}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "place"
+   ]
+  },
+  "place": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.name": "${item.name}",
+    "props.detail": "${item.what}",
+    "props.index": "${item.n}",
+    "props.rating": "${item.rating}",
+    "props.distance": "${item.dist}",
+    "props.hours": "${item.hours}",
+    "props.selected": "${= pick==item.n}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= pick==item.n?0:item.n}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "map_list": [
+   {
+    "name": "shops",
+    "type": "list",
+    "value": [
+     {
+      "n": 1,
+      "name": "Bean There",
+      "what": "Specialty coffee · Mill Street",
+      "rating": "4.8",
+      "dist": "0.2 mi",
+      "hours": "7:00 to 18:00"
+     },
+     {
+      "n": 2,
+      "name": "Daily Grind",
+      "what": "Espresso bar · Canal Road",
+      "rating": "4.6",
+      "dist": "0.3 mi",
+      "hours": "6:30 to 17:00"
+     },
+     {
+      "n": 3,
+      "name": "Roast & Co",
+      "what": "Roastery and bakery · Park Lane",
+      "rating": "4.7",
+      "dist": "0.4 mi",
+      "hours": "8:00 to 19:00"
+     },
+     {
+      "n": 4,
+      "name": "The Steam Cup",
+      "what": "Cafe with seating · Dock Street",
+      "rating": "4.4",
+      "dist": "0.5 mi",
+      "hours": "7:30 to 20:00"
+     },
+     {
+      "n": 5,
+      "name": "Cafe Lune",
+      "what": "Late-night cafe · River Walk",
+      "rating": "4.5",
+      "dist": "0.6 mi",
+      "hours": "10:00 to 23:00"
+     }
+    ]
+   },
+   {
+    "name": "pick",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

@@ -1,0 +1,717 @@
+{
+ "schema": 3,
+ "id": "FlightOption",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "FlightOption",
+  "doc": "One flight as a selectable option: the airline name, depart and arrive times over origin and destination, the duration and stops on a drawn path, the price, a tag (Cheapest, Best time); selected:=pick==f.id marks it and a tap fires onPressed (-> pick=f.id).",
+  "props": [
+   {
+    "key": "name",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "TAP Air Portugal",
+    "doc": "The airline.",
+    "required": true
+   },
+   {
+    "key": "depart",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "07:15",
+    "doc": "Departure time.",
+    "required": true
+   },
+   {
+    "key": "arrive",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "09:50",
+    "doc": "Arrival time.",
+    "required": true
+   },
+   {
+    "key": "origin",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Where from, small under the departure time (LHR or London)."
+   },
+   {
+    "key": "destination",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Where to, small under the arrival time."
+   },
+   {
+    "key": "duration",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The flight time, over the path (2h 35m)."
+   },
+   {
+    "key": "stops",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Direct",
+    "doc": "Under the path: Direct, or 1 stop."
+   },
+   {
+    "key": "price",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The price, as text (£128)."
+   },
+   {
+    "key": "tag",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small tag such as Cheapest or Best time (empty: none)."
+   },
+   {
+    "key": "selected",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True draws it chosen: accent border, tint and a check."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed",
+    "doc": "The option was tapped."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Selected",
+   "size": [
+    380,
+    130
+   ],
+   "props": {
+    "origin": "LHR",
+    "destination": "LIS",
+    "duration": "2h 35m",
+    "price": "£128",
+    "tag": "Best time",
+    "selected": true
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": [
+    "card"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     10
+    ]
+   }
+  },
+  "card": {
+   "type": "column",
+   "children": [
+    "top",
+    "rule",
+    "bottom"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 18
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.strokes[0].color": "${= props.selected ? theme.colors.accent : theme.colors.line}",
+    "decoration.fills[0].color": "${= props.selected ? theme.colors.accentTint : theme.colors.card}",
+    "decoration.effects": "${= props.selected ? theme.shadows.pick : []}"
+   },
+   "states": {
+    "pressed": {
+     "card": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "top": {
+   "type": "row",
+   "children": [
+    "dep",
+    "mid",
+    "arr"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "dep": {
+   "type": "column",
+   "children": [
+    "depTime",
+    "depCode"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "depTime": {
+   "type": "text",
+   "props": {
+    "text": "${props.depart}",
+    "style": "number"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "depCode": {
+   "type": "text",
+   "props": {
+    "text": "${props.origin}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "mid": {
+   "type": "column",
+   "children": [
+    "dur",
+    "path",
+    "stops"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 3
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "dur": {
+   "type": "text",
+   "props": {
+    "text": "${props.duration}",
+    "style": {
+     "from": "meta",
+     "fontWeight": 600,
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "path": {
+   "type": "stack",
+   "children": [
+    "plane"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 18
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "line",
+      "p1": [
+       6,
+       "${= size.height / 2}"
+      ],
+      "p2": [
+       "${= size.width - 6}",
+       "${= size.height / 2}"
+      ],
+      "paint": {
+       "color": "${theme.colors.lineStrong}",
+       "style": "stroke",
+       "strokeWidth": 1.5,
+       "strokeCap": "round",
+       "dashPattern": [
+        1,
+        5
+       ]
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       4,
+       "${= size.height / 2}"
+      ],
+      "radius": 3.5,
+      "paint": {
+       "color": "${theme.colors.inkGhost}",
+       "style": "stroke",
+       "strokeWidth": 1.5
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       "${= size.width - 4}",
+       "${= size.height / 2}"
+      ],
+      "radius": 3.5,
+      "paint": "${theme.colors.inkGhost}"
+     }
+    ]
+   }
+  },
+  "plane": {
+   "type": "row",
+   "children": [
+    "planeIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": 18,
+    "x": {
+     "align": 0
+    },
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.selected ? theme.colors.accentTint : theme.colors.card}"
+   }
+  },
+  "planeIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "flight_rounded",
+    "size": 16,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "bind": {
+    "props.color": "${= props.selected ? theme.colors.accent : theme.colors.inkFaint}"
+   },
+   "motion": {
+    "rotate": 90
+   }
+  },
+  "stops": {
+   "type": "text",
+   "props": {
+    "text": "${props.stops}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "arr": {
+   "type": "column",
+   "children": [
+    "arrTime",
+    "arrCode"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "arrTime": {
+   "type": "text",
+   "props": {
+    "text": "${props.arrive}",
+    "style": "number"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "arrCode": {
+   "type": "text",
+   "props": {
+    "text": "${props.destination}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "rule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "line"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.selected ? theme.colors.accentLine : theme.colors.line}"
+   }
+  },
+  "bottom": {
+   "type": "row",
+   "children": [
+    "logo",
+    "airline",
+    "tag",
+    "price",
+    "radio"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "logo": {
+   "type": "row",
+   "children": [
+    "logoText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "bar"
+     }
+    ],
+    "radius": 8
+   }
+  },
+  "logoText": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(substring(props.name, 0, 1))}",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "color": "onBar"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "airline": {
+   "type": "text",
+   "props": {
+    "text": "${props.name}",
+    "style": {
+     "from": "meta",
+     "fontWeight": 600,
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "tag": {
+   "type": "row",
+   "children": [
+    "tagText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     4,
+     8,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goodTint"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.chip}",
+    "visible": "${= props.tag != ''}",
+    "decoration.fills[0].color": "${= contains(lower(props.tag), 'cheap') ? theme.colors.goodTint : theme.colors.warnTint}"
+   }
+  },
+  "tagText": {
+   "type": "text",
+   "props": {
+    "text": "${props.tag}",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= contains(lower(props.tag), 'cheap') ? theme.colors.goodDeep : theme.colors.warnDeep}"
+   }
+  },
+  "price": {
+   "type": "text",
+   "props": {
+    "text": "${props.price}",
+    "style": "number"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "radio": {
+   "type": "row",
+   "children": [
+    "radioIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 11
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.selected ? theme.colors.accent : theme.colors.card}",
+    "decoration.strokes[0].color": "${= props.selected ? theme.colors.accent : theme.colors.lineStrong}"
+   }
+  },
+  "radioIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 15,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "visible": "${props.selected}"
+   }
+  }
+ }
+}

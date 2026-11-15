@@ -1,0 +1,343 @@
+{
+ "schema": 3,
+ "id": "PlanStep",
+ "roots": [
+  "step"
+ ],
+ "widget": {
+  "type": "PlanStep",
+  "doc": "One step of a plan that runs: the title and a detail, index (its position from 0), current:=done (how many steps are finished) and running:=running; it draws a tick when finished, a spinner when it is the running one, a number while it waits. Write the steps one under another; last:true ends the line.",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Back up your content",
+    "doc": "The step.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A short description under it."
+   },
+   {
+    "key": "index",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 0,
+    "doc": "Its position, from 0.",
+    "required": true
+   },
+   {
+    "key": "current",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "How many steps are finished (the position of the step now running).",
+    "required": true
+   },
+   {
+    "key": "running",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True while the plan runs: the current step shows a spinner."
+   },
+   {
+    "key": "last",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True for the last step: the line ends here."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Running",
+   "size": [
+    360,
+    60
+   ],
+   "props": {
+    "detail": "Export posts, pages and settings.",
+    "index": 1,
+    "current": 1,
+    "running": true
+   }
+  }
+ ],
+ "nodes": {
+  "step": {
+   "type": "row",
+   "children": [
+    "mark",
+    "texts",
+    "state"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "line",
+      "p1": [
+       13,
+       30
+      ],
+      "p2": [
+       13,
+       "${= size.height + 12}"
+      ],
+      "when": "${= !props.last}",
+      "paint": {
+       "color": "${= props.index < props.current ? theme.colors.good : theme.colors.lineStrong}",
+       "style": "stroke",
+       "strokeWidth": 2,
+       "strokeCap": "round"
+      }
+     }
+    ]
+   }
+  },
+  "mark": {
+   "type": "stack",
+   "children": [
+    "ring",
+    "spin",
+    "check"
+   ],
+   "layout": {
+    "width": 26,
+    "height": 26
+   }
+  },
+  "ring": {
+   "type": "row",
+   "children": [
+    "num"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 13
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.index == props.current && props.running) ? theme.colors.accentTint : theme.colors.card}",
+    "decoration.strokes[0].color": "${= (props.index == props.current && props.running) ? '#00FFFFFF' : theme.colors.lineStrong}",
+    "visible": "${= !(props.index < props.current)}"
+   }
+  },
+  "num": {
+   "type": "text",
+   "props": {
+    "text": "${= props.index + 1}",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= !(props.index == props.current && props.running)}"
+   }
+  },
+  "spin": {
+   "type": "circularProgressIndicator",
+   "props": {
+    "strokeWidth": 2.6,
+    "color": "accent"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26,
+    "x": 0,
+    "y": 0
+   },
+   "bind": {
+    "visible": "${= (props.index == props.current && props.running)}"
+   }
+  },
+  "check": {
+   "type": "row",
+   "children": [
+    "checkIcon"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": 26,
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "good"
+     }
+    ],
+    "radius": 13
+   },
+   "bind": {
+    "visible": "${= props.index < props.current}"
+   }
+  },
+  "checkIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 16,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "title",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     3,
+     0,
+     16
+    ]
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "rowTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.index < props.current || (props.index == props.current && props.running) ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": {
+     "from": "meta",
+     "fontWeight": 400,
+     "fontSize": 13
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "state": {
+   "type": "text",
+   "props": {
+    "text": "${= props.index < props.current ? 'Done' : (props.index == props.current && props.running) ? 'Running' : ''}",
+    "style": {
+     "from": "chip",
+     "fontSize": 11.5
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     5,
+     0,
+     0
+    ]
+   },
+   "bind": {
+    "props.style.color": "${= props.index < props.current ? theme.colors.goodDeep : theme.colors.accent}"
+   }
+  }
+ }
+}

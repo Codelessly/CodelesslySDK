@@ -1,0 +1,815 @@
+{
+ "schema": 3,
+ "id": "WeatherGlyph",
+ "roots": [
+  "glyph"
+ ],
+ "widget": {
+  "type": "WeatherGlyph",
+  "doc": "A drawn weather glyph: kind is sun, partly, cloud, rain, storm, night; size it with w and h.",
+  "props": [
+   {
+    "key": "kind",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "sun",
+      "partly",
+      "cloud",
+      "rain",
+      "storm",
+      "night"
+     ]
+    },
+    "default": "sun",
+    "doc": "The conditions: sun, partly, cloud, rain, storm, night.",
+    "required": true
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "sun",
+   "size": [
+    96,
+    96
+   ],
+   "props": {
+    "kind": "sun"
+   }
+  },
+  {
+   "name": "partly",
+   "size": [
+    96,
+    96
+   ],
+   "props": {
+    "kind": "partly"
+   }
+  },
+  {
+   "name": "cloud",
+   "size": [
+    96,
+    96
+   ],
+   "props": {
+    "kind": "cloud"
+   }
+  },
+  {
+   "name": "rain",
+   "size": [
+    96,
+    96
+   ],
+   "props": {
+    "kind": "rain"
+   }
+  },
+  {
+   "name": "storm",
+   "size": [
+    96,
+    96
+   ],
+   "props": {
+    "kind": "storm"
+   }
+  },
+  {
+   "name": "night",
+   "size": [
+    96,
+    96
+   ],
+   "props": {
+    "kind": "night"
+   }
+  }
+ ],
+ "nodes": {
+  "glyph": {
+   "type": "box",
+   "layout": {
+    "width": 48,
+    "height": 48
+   },
+   "customPaint": {
+    "viewBox": [
+     96,
+     96
+    ],
+    "fit": "contain",
+    "painter": [
+     {
+      "op": "group",
+      "when": "${= props.kind == 'sun'}",
+      "ops": [
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           48,
+           48
+          ],
+          "radius": 34.849999999999994,
+          "paint": "${theme.colors.sunGlow}"
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           48,
+           48
+          ],
+          "radius": 25.5,
+          "paint": "${theme.colors.sunGlow}"
+         }
+        ],
+        "opacity": 0.8
+       },
+       {
+        "op": "line",
+        "p1": [
+         73.5,
+         48.0
+        ],
+        "p2": [
+         81.15,
+         48.0
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         66.03122292025697,
+         66.03122292025697
+        ],
+        "p2": [
+         71.44058979633405,
+         71.44058979633405
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         48.0,
+         73.5
+        ],
+        "p2": [
+         48.0,
+         81.15
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         29.968777079743038,
+         66.03122292025697
+        ],
+        "p2": [
+         24.55941020366595,
+         71.44058979633405
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         22.5,
+         48.0
+        ],
+        "p2": [
+         14.850000000000001,
+         48.00000000000001
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         29.968777079743035,
+         29.968777079743038
+        ],
+        "p2": [
+         24.559410203665944,
+         24.55941020366595
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         47.99999999999999,
+         22.5
+        ],
+        "p2": [
+         47.99999999999999,
+         14.850000000000001
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         66.03122292025697,
+         29.968777079743035
+        ],
+        "p2": [
+         71.44058979633405,
+         24.559410203665944
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "circle",
+        "c": [
+         48,
+         48
+        ],
+        "radius": 17,
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': theme.colors.sun}, {'position': 1, 'color': theme.colors.sunDeep}]}}}"
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'partly'}",
+      "ops": [
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           62,
+           34
+          ],
+          "radius": 28.699999999999996,
+          "paint": "${theme.colors.sunGlow}"
+         }
+        ],
+        "opacity": 0.5
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           62,
+           34
+          ],
+          "radius": 21.0,
+          "paint": "${theme.colors.sunGlow}"
+         }
+        ],
+        "opacity": 0.8
+       },
+       {
+        "op": "line",
+        "p1": [
+         83.0,
+         34.0
+        ],
+        "p2": [
+         89.3,
+         34.0
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         76.8492424049175,
+         48.8492424049175
+        ],
+        "p2": [
+         81.30401512639276,
+         53.30401512639274
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         62.0,
+         55.0
+        ],
+        "p2": [
+         62.0,
+         61.3
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         47.1507575950825,
+         48.8492424049175
+        ],
+        "p2": [
+         42.69598487360726,
+         53.30401512639275
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         41.0,
+         34.0
+        ],
+        "p2": [
+         34.7,
+         34.0
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         47.150757595082496,
+         19.150757595082503
+        ],
+        "p2": [
+         42.695984873607244,
+         14.695984873607255
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         61.99999999999999,
+         13.0
+        ],
+        "p2": [
+         61.99999999999999,
+         6.699999999999999
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         76.84924240491749,
+         19.1507575950825
+        ],
+        "p2": [
+         81.30401512639274,
+         14.695984873607248
+        ],
+        "paint": {
+         "color": "${theme.colors.sun}",
+         "style": "stroke",
+         "strokeWidth": 3.4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "circle",
+        "c": [
+         62,
+         34
+        ],
+        "radius": 14,
+        "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': theme.colors.sun}, {'position': 1, 'color': theme.colors.sunDeep}]}}}"
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "group",
+          "ops": [
+           {
+            "op": "path",
+            "d": "M28 70 C17 70 10 62 10 53 C10 44 17 37 26 37 C28 27 37 20 48 20 C60 20 70 28 72 40 C81 40 88 47 88 56 C88 64 82 70 73 70 Z",
+            "paint": "${theme.colors.artShadow}"
+           }
+          ],
+          "opacity": 0.25
+         }
+        ],
+        "translate": [
+         2,
+         19.44
+        ],
+        "scale": 0.86
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M28 70 C17 70 10 62 10 53 C10 44 17 37 26 37 C28 27 37 20 48 20 C60 20 70 28 72 40 C81 40 88 47 88 56 C88 64 82 70 73 70 Z",
+          "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.3, 'color': theme.colors.cloud}, {'position': 1, 'color': theme.colors.cloudShade}]}}}"
+         }
+        ],
+        "translate": [
+         2,
+         16
+        ],
+        "scale": 0.86
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'cloud'}",
+      "ops": [
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M28 70 C17 70 10 62 10 53 C10 44 17 37 26 37 C28 27 37 20 48 20 C60 20 70 28 72 40 C81 40 88 47 88 56 C88 64 82 70 73 70 Z",
+          "paint": "${theme.colors.cloudDark}"
+         }
+        ],
+        "translate": [
+         30,
+         4
+        ],
+        "scale": 0.62,
+        "opacity": 0.8
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "group",
+          "ops": [
+           {
+            "op": "path",
+            "d": "M28 70 C17 70 10 62 10 53 C10 44 17 37 26 37 C28 27 37 20 48 20 C60 20 70 28 72 40 C81 40 88 47 88 56 C88 64 82 70 73 70 Z",
+            "paint": "${theme.colors.artShadow}"
+           }
+          ],
+          "opacity": 0.25
+         }
+        ],
+        "translate": [
+         0,
+         15.68
+        ],
+        "scale": 0.92
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M28 70 C17 70 10 62 10 53 C10 44 17 37 26 37 C28 27 37 20 48 20 C60 20 70 28 72 40 C81 40 88 47 88 56 C88 64 82 70 73 70 Z",
+          "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.3, 'color': theme.colors.cloud}, {'position': 1, 'color': theme.colors.cloudShade}]}}}"
+         }
+        ],
+        "translate": [
+         0,
+         12
+        ],
+        "scale": 0.92
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'rain'}",
+      "ops": [
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "group",
+          "ops": [
+           {
+            "op": "path",
+            "d": "M28 70 C17 70 10 62 10 53 C10 44 17 37 26 37 C28 27 37 20 48 20 C60 20 70 28 72 40 C81 40 88 47 88 56 C88 64 82 70 73 70 Z",
+            "paint": "${theme.colors.artShadow}"
+           }
+          ],
+          "opacity": 0.25
+         }
+        ],
+        "translate": [
+         4,
+         1.6
+        ],
+        "scale": 0.9
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M28 70 C17 70 10 62 10 53 C10 44 17 37 26 37 C28 27 37 20 48 20 C60 20 70 28 72 40 C81 40 88 47 88 56 C88 64 82 70 73 70 Z",
+          "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.3, 'color': theme.colors.cloudShade}, {'position': 1, 'color': theme.colors.cloudDark}]}}}"
+         }
+        ],
+        "translate": [
+         4,
+         -2
+        ],
+        "scale": 0.9
+       },
+       {
+        "op": "line",
+        "p1": [
+         30,
+         72
+        ],
+        "p2": [
+         25,
+         84
+        ],
+        "paint": {
+         "color": "${theme.colors.rain}",
+         "style": "stroke",
+         "strokeWidth": 4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         48,
+         72
+        ],
+        "p2": [
+         43,
+         88
+        ],
+        "paint": {
+         "color": "${theme.colors.rain}",
+         "style": "stroke",
+         "strokeWidth": 4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         66,
+         72
+        ],
+        "p2": [
+         61,
+         84
+        ],
+        "paint": {
+         "color": "${theme.colors.rain}",
+         "style": "stroke",
+         "strokeWidth": 4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'storm'}",
+      "ops": [
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "group",
+          "ops": [
+           {
+            "op": "path",
+            "d": "M28 70 C17 70 10 62 10 53 C10 44 17 37 26 37 C28 27 37 20 48 20 C60 20 70 28 72 40 C81 40 88 47 88 56 C88 64 82 70 73 70 Z",
+            "paint": "${theme.colors.artShadow}"
+           }
+          ],
+          "opacity": 0.25
+         }
+        ],
+        "translate": [
+         4,
+         1.6
+        ],
+        "scale": 0.9
+       },
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "path",
+          "d": "M28 70 C17 70 10 62 10 53 C10 44 17 37 26 37 C28 27 37 20 48 20 C60 20 70 28 72 40 C81 40 88 47 88 56 C88 64 82 70 73 70 Z",
+          "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0.3, 'color': theme.colors.cloudShade}, {'position': 1, 'color': theme.colors.cloudDark}]}}}"
+         }
+        ],
+        "translate": [
+         4,
+         -2
+        ],
+        "scale": 0.9
+       },
+       {
+        "op": "path",
+        "d": "M50 62 L38 80 L47 80 L42 94 L60 74 L50 74 L56 62 Z",
+        "paint": "${theme.colors.sun}"
+       },
+       {
+        "op": "line",
+        "p1": [
+         26,
+         72
+        ],
+        "p2": [
+         22,
+         82
+        ],
+        "paint": {
+         "color": "${theme.colors.rain}",
+         "style": "stroke",
+         "strokeWidth": 4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       },
+       {
+        "op": "line",
+        "p1": [
+         70,
+         72
+        ],
+        "p2": [
+         66,
+         82
+        ],
+        "paint": {
+         "color": "${theme.colors.rain}",
+         "style": "stroke",
+         "strokeWidth": 4,
+         "strokeCap": "round",
+         "strokeJoin": "round"
+        }
+       }
+      ]
+     },
+     {
+      "op": "group",
+      "when": "${= props.kind == 'night'}",
+      "ops": [
+       {
+        "op": "group",
+        "ops": [
+         {
+          "op": "circle",
+          "c": [
+           52,
+           44
+          ],
+          "radius": 30,
+          "paint": "${theme.colors.sunGlow}"
+         }
+        ],
+        "opacity": 0.35
+       },
+       {
+        "op": "path",
+        "d": "M62 20 C46 22 36 36 38 52 C40 66 52 76 66 76 C74 76 80 73 84 68 C68 70 56 60 56 44 C56 34 58 26 62 20 Z",
+        "paint": "${theme.colors.moon}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         24,
+         28
+        ],
+        "radius": 2,
+        "paint": "${theme.colors.moon}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         76,
+         30
+        ],
+        "radius": 1.6,
+        "paint": "${theme.colors.moon}"
+       },
+       {
+        "op": "circle",
+        "c": [
+         30,
+         66
+        ],
+        "radius": 1.4,
+        "paint": "${theme.colors.moon}"
+       }
+      ]
+     }
+    ]
+   }
+  }
+ }
+}

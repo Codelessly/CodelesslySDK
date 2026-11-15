@@ -1,0 +1,209 @@
+{
+ "schema": 3,
+ "id": "ChoiceChips",
+ "roots": [
+  "chips"
+ ],
+ "widget": {
+  "type": "ChoiceChips",
+  "doc": "A single choice as a grid of chips (time slots, sizes): ChoiceChips =time options:[\"18:00\",\"18:30\"] disabled:[\"18:30\"] keeps the chosen chip's text in your variable; disabled lists the ones that are unavailable (full, sold out); columns sets chips per row.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable: it holds the chosen option."
+   },
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "18:00",
+     "18:30",
+     "19:00",
+     "19:30"
+    ],
+    "doc": "The options, one chip each.",
+    "required": true
+   },
+   {
+    "key": "disabled",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The options that cannot be chosen (full time slots, sizes out of stock): greyed and struck through."
+   },
+   {
+    "key": "columns",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 4,
+    "doc": "Chips per row."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "A chip was chosen; the value is its text."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Slots",
+   "size": [
+    340,
+    40
+   ],
+   "props": {
+    "value": "19:00",
+    "disabled": [
+     "18:30"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "chips": {
+   "type": "gridView",
+   "children": [
+    "chip"
+   ],
+   "props": {
+    "crossAxisCount": 1,
+    "crossAxisSpacing": 8,
+    "mainAxisSpacing": 8,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.options}",
+    "props.crossAxisCount": "${props.columns}"
+   }
+  },
+  "chip": {
+   "type": "row",
+   "children": [
+    "chipText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 12
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.control}",
+    "decoration.fills[0].color": "${= contains(props.disabled, item) ? theme.colors.tile : props.value == item ? theme.colors.accent : theme.colors.card}",
+    "decoration.strokes[0].color": "${= contains(props.disabled, item) ? theme.colors.tile : props.value == item ? theme.colors.accent : theme.colors.lineStrong}",
+    "decoration.effects": "${= props.value == item && !(contains(props.disabled, item)) ? theme.shadows.pick : []}"
+   },
+   "states": {
+    "pressed": {
+     "chip": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= contains(props.disabled, item)}",
+        "op": "isFalse"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "props.value",
+         "value": "${= item}"
+        },
+        {
+         "type": "componentEvent",
+         "event": "onChanged",
+         "value": "${item}"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "chipText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= contains(props.disabled, item) ? theme.colors.inkGhost : props.value == item ? theme.colors.onAccent : theme.colors.ink}",
+    "props.style.decoration": "${= contains(props.disabled, item) ? 'lineThrough' : 'none'}"
+   }
+  }
+ }
+}

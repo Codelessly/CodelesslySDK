@@ -1,0 +1,313 @@
+{
+ "schema": 3,
+ "id": "Checklist",
+ "roots": [
+  "box"
+ ],
+ "widget": {
+  "type": "Checklist",
+  "doc": "A titled list of things to tick off: Checklist \"Book ahead\" =booked items:[\"Dinner in Gion\",\"Tea ceremony\"] keeps the ticked items in your list variable, so what is left is length(items)-length(booked); it shows its own count.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "list",
+      "flutter": "List<String>",
+      "item": {
+       "kind": "string",
+       "flutter": "String"
+      }
+     }
+    },
+    "default": "",
+    "doc": "The name of your list variable: it holds the ticked items."
+   },
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "To do",
+    "doc": "The heading, in small caps."
+   },
+   {
+    "key": "items",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "First",
+     "Second"
+    ],
+    "doc": "The things to tick off.",
+    "required": true
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "An item was ticked or cleared; the value is the list of ticked items."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "List",
+   "size": [
+    360,
+    110
+   ],
+   "props": {
+    "title": "Book ahead"
+   }
+  }
+ ],
+ "nodes": {
+  "box": {
+   "type": "column",
+   "children": [
+    "head",
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     12,
+     14,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 14
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "title",
+    "count"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     4
+    ]
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.title)}",
+    "style": "eyebrow"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "count": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.value)} of ${= length(props.items)}",
+    "style": {
+     "from": "meta",
+     "fontSize": 11.5,
+     "fontWeight": 600
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= length(props.value) >= length(props.items) ? theme.colors.goodDeep : theme.colors.inkFaint}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "item"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.items}"
+   }
+  },
+  "item": {
+   "type": "row",
+   "children": [
+    "tick",
+    "itemText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     7,
+     0,
+     7
+    ]
+   },
+   "states": {
+    "pressed": {
+     "item": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= contains(props.value, item) ? without(props.value, item) : append(props.value, item)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "tick": {
+   "type": "row",
+   "children": [
+    "tickI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 6
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= contains(props.value, item) ? theme.colors.accent : theme.colors.card}",
+    "decoration.strokes[0].color": "${= contains(props.value, item) ? theme.colors.accent : theme.colors.lineStrong}"
+   }
+  },
+  "tickI": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 14,
+    "color": "onAccent"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "visible": "${= contains(props.value, item)}"
+   }
+  },
+  "itemText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "lead",
+     "fontSize": 13.5
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= contains(props.value, item) ? theme.colors.inkFaint : theme.colors.ink}",
+    "props.style.decoration": "${= contains(props.value, item) ? 'lineThrough' : 'none'}"
+   }
+  }
+ }
+}

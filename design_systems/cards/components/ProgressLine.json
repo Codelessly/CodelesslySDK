@@ -1,0 +1,161 @@
+{
+ "schema": 3,
+ "id": "ProgressLine",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "ProgressLine",
+  "doc": "A progress bar with its words: the label at the left (\"3 of 6 steps\"), a detail at the right (\"12 s elapsed\"), and value:=done/total from 0 to 1 (it turns green when full).",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "3 of 6 steps",
+    "doc": "What is counted, at the left.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet note at the right (the time elapsed, how many are left)."
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "The share done, 0 to 1 (green at 1).",
+    "required": true
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Half",
+   "size": [
+    360,
+    40
+   ],
+   "props": {
+    "detail": "12 s elapsed",
+    "value": 0.5
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": [
+    "head",
+    "bar"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "label",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "rowTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "bar": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 8
+   },
+   "customPaint": {
+    "painter": [
+     {
+      "op": "rrect",
+      "rect": [
+       0,
+       0,
+       "${size.width}",
+       8
+      ],
+      "radius": 4,
+      "paint": "${theme.colors.tileDeep}"
+     },
+     {
+      "op": "rrect",
+      "rect": [
+       0,
+       0,
+       "${= max(8, size.width * clamp(props.value, 0, 1))}",
+       8
+      ],
+      "radius": 4,
+      "when": "${= clamp(props.value, 0, 1) > 0}",
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': clamp(props.value, 0, 1) >= 1 ? theme.colors.good : theme.colors.accentBright}, {'position': 1, 'color': clamp(props.value, 0, 1) >= 1 ? theme.colors.good : theme.colors.accent}]}}}"
+     }
+    ]
+   }
+  }
+ }
+}

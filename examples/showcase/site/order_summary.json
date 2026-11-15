@@ -1,0 +1,340 @@
+{
+ "schema": 3,
+ "roots": [
+  "order_summary"
+ ],
+ "nodes": {
+  "order_summary": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your grocery order",
+    "icon": "shopping_basket_rounded"
+   },
+   "bind": {
+    "props.subtitle": "${= sum(items,i=>i.qty)} items · arrives today, 6 to 7 pm",
+    "props.status": "${= decided==\"\"?\"Review\":decided}",
+    "props.tone": "${= decided==\"Cancelled\"?\"neutral\":(decided==\"\"?\"accent\":\"good\")}"
+   },
+   "children": [
+    "listView1",
+    "promo",
+    "Details1",
+    "confirm",
+    "cancel",
+    "Receipt1",
+    "Receipt2"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= filter(items,x=>x.qty>0)}",
+    "visible": "${= decided==\"\"}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "line"
+   ]
+  },
+  "line": {
+   "type": "CartLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.name}",
+    "props.detail": "${item.note} · ${= money(item.price,\"$\",2)} each",
+    "props.price": "${= money(item.price*item.qty,\"$\",2)}",
+    "props.qty": "${item.qty}",
+    "props.kind": "${item.kind}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= updateWhere(items,x=>x.id==item.id,x=>with(x,\"qty\",result))}"
+      }
+     ]
+    }
+   ]
+  },
+  "promo": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Promo code",
+    "placeholder": "Try SAVE10",
+    "value": "code",
+    "icon": "sell_rounded"
+   },
+   "bind": {
+    "props.success": "${= (upper(trim(code))==\"SAVE10\"?(sum(items,i=>i.price*i.qty))*0.1:0)>0?\"SAVE10 applied: 10% off\":\"\"}",
+    "visible": "${= decided==\"\"}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Subtotal\",money((sum(items,i=>i.price*i.qty)),\"$\",2)],[\"Promo SAVE10\",(upper(trim(code))==\"SAVE10\"?(sum(items,i=>i.price*i.qty))*0.1:0)>0?\"-\"+money((upper(trim(code))==\"SAVE10\"?(sum(items,i=>i.price*i.qty))*0.1:0),\"$\",2):\"\"],[\"Delivery\",\"$4.99\"]]}",
+    "visible": "${= decided==\"\"}"
+   }
+  },
+  "confirm": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "cta": "Confirm order"
+   },
+   "bind": {
+    "props.amount": "${= money((sum(items,i=>i.price*i.qty))-(upper(trim(code))==\"SAVE10\"?(sum(items,i=>i.price*i.qty))*0.1:0)+4.99,\"$\",2)}",
+    "props.enabled": "${= (sum(items,i=>i.price*i.qty))>0}",
+    "visible": "${= decided==\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decided",
+       "value": "Confirmed"
+      },
+      {
+       "type": "componentEvent",
+       "event": "order_decision",
+       "value": "confirm"
+      }
+     ]
+    }
+   ]
+  },
+  "cancel": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Cancel order",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= decided==\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decided",
+       "value": "Cancelled"
+      },
+      {
+       "type": "componentEvent",
+       "event": "order_decision",
+       "value": "cancel"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order confirmed",
+    "code": "GR-20418",
+    "codeLabel": "Order"
+   },
+   "bind": {
+    "props.message": "${= sum(items,i=>i.qty)} items, ${= money((sum(items,i=>i.price*i.qty))-(upper(trim(code))==\"SAVE10\"?(sum(items,i=>i.price*i.qty))*0.1:0)+4.99,\"$\",2)}. Arriving today between 6 and 7 pm.",
+    "visible": "${= decided==\"Confirmed\"}"
+   }
+  },
+  "Receipt2": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order cancelled",
+    "message": "Nothing was placed and you were not charged.",
+    "tone": "neutral",
+    "icon": "close_rounded"
+   },
+   "bind": {
+    "visible": "${= decided==\"Cancelled\"}"
+   }
+  }
+ },
+ "variables": {
+  "order_summary": [
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Bananas",
+      "note": "1 kg",
+      "price": 2.5,
+      "qty": 1,
+      "kind": "banana"
+     },
+     {
+      "id": 2,
+      "name": "Whole milk",
+      "note": "2 L",
+      "price": 3.2,
+      "qty": 2,
+      "kind": "milk"
+     },
+     {
+      "id": 3,
+      "name": "Sourdough loaf",
+      "note": "800 g",
+      "price": 4.75,
+      "qty": 1,
+      "kind": "bread"
+     },
+     {
+      "id": 4,
+      "name": "Free-range eggs",
+      "note": "12 pack",
+      "price": 5.4,
+      "qty": 1,
+      "kind": "eggs"
+     },
+     {
+      "id": 5,
+      "name": "Cheddar",
+      "note": "400 g",
+      "price": 6.9,
+      "qty": 1,
+      "kind": "cheese"
+     }
+    ]
+   },
+   {
+    "name": "code",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "decided",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

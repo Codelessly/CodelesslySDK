@@ -1,0 +1,369 @@
+{
+ "schema": 3,
+ "id": "Counter",
+ "roots": [
+  "row"
+ ],
+ "widget": {
+  "type": "Counter",
+  "doc": "A number raised and lowered with minus and plus (a party size, a count): Counter \"Guests\" =party min:1 max:8 keeps it in your number variable; onChanged fires with the new number.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable (declare it with its start: state party=2)."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Guests",
+    "doc": "What is counted.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet line under the label (empty: none)."
+   },
+   {
+    "key": "min",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "The least."
+   },
+   {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 8,
+    "doc": "The most."
+   },
+   {
+    "key": "step",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "How much one tap changes it."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "group_rounded",
+    "doc": "A Material icon before the label (empty: none)."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "The number changed; the value is the new number."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Guests",
+   "size": [
+    340,
+    56
+   ],
+   "props": {
+    "value": 2,
+    "detail": "1 to 8"
+   }
+  }
+ ],
+ "nodes": {
+  "row": {
+   "type": "row",
+   "children": [
+    "icon",
+    "texts",
+    "step"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     14,
+     10,
+     10,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 14
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "icon": {
+   "type": "icon",
+   "props": {
+    "icon": "group_rounded",
+    "size": 20,
+    "color": "inkSoft"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "bind": {
+    "props.icon": "${props.icon}",
+    "visible": "${= props.icon != ''}"
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": [
+    "label",
+    "detail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": "rowTitle"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "detail": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.detail != ''}"
+   }
+  },
+  "stepMinus": {
+   "type": "row",
+   "children": [
+    "stepMinusI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 17.0
+   },
+   "bind": {
+    "opacity": "${= props.value > props.min ? 1 : 0.35}",
+    "decoration.effects": "${theme.shadows.knob}"
+   },
+   "states": {
+    "pressed": {
+     "stepMinus": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= max(props.min, props.value - props.step)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "stepMinusI": {
+   "type": "icon",
+   "props": {
+    "icon": "remove_rounded",
+    "size": 19,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 19,
+    "height": 19
+   },
+   "bind": {
+    "props.icon": "${= 'remove_rounded'}"
+   }
+  },
+  "stepPlus": {
+   "type": "row",
+   "children": [
+    "stepPlusI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 34,
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 17.0
+   },
+   "bind": {
+    "opacity": "${= props.value < props.max ? 1 : 0.35}",
+    "decoration.effects": "${theme.shadows.knob}"
+   },
+   "states": {
+    "pressed": {
+     "stepPlus": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= min(props.max, props.value + props.step)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "stepPlusI": {
+   "type": "icon",
+   "props": {
+    "icon": "add_rounded",
+    "size": 19,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 19,
+    "height": 19
+   }
+  },
+  "stepValue": {
+   "type": "text",
+   "props": {
+    "text": "${= props.value}",
+    "style": "numberSmall",
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": 26,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "step": {
+   "type": "row",
+   "children": [
+    "stepMinus",
+    "stepValue",
+    "stepPlus"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  }
+ }
+}

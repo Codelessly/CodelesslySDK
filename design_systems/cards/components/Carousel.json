@@ -1,0 +1,429 @@
+{
+ "schema": 3,
+ "id": "Carousel",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "Carousel",
+  "doc": "A carousel frame: write Carousel =i count:6 and, indented under it, the one item at position i (ProductTile \"{items[i].name}\" ...); its arrows, its dots and a swipe move i (from 0, wrapping) in your number variable; thumbs:=map(items,x=>x.tone) with kind adds a strip of drawn thumbnails to tap.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "The name of your number variable: the position, from 0."
+   },
+   {
+    "key": "count",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 6,
+    "doc": "How many items there are.",
+    "required": true
+   },
+   {
+    "key": "thumbs",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "Optional: one Media tone per item (sand, rose, mint, sky, lilac, slate) to draw a strip of thumbnails to tap."
+   },
+   {
+    "key": "kind",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "shoe",
+    "doc": "The Media kind the thumbnails draw."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "The position changed; the value is the new position."
+   }
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Bar",
+   "size": [
+    340,
+    50
+   ],
+   "props": {
+    "value": 2
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": [
+    "slot",
+    "thumbs",
+    "bar"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "swipeLeft"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (props.value + 1) % props.count}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "swipeRight"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (props.value - 1 + props.count) % props.count}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "slot": {
+   "type": "slot"
+  },
+  "bar": {
+   "type": "row",
+   "children": [
+    "prev",
+    "dots",
+    "next"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 10,
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "prev": {
+   "type": "row",
+   "children": [
+    "prevI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 38,
+    "height": 38
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 19.0
+   },
+   "states": {
+    "pressed": {
+     "prev": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (props.value - 1 + props.count) % props.count}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "prevI": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_back_rounded",
+    "size": 21,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 21,
+    "height": 21
+   }
+  },
+  "next": {
+   "type": "row",
+   "children": [
+    "nextI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 38,
+    "height": 38
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 19.0
+   },
+   "states": {
+    "pressed": {
+     "next": {
+      "opacity": 0.6
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (props.value + 1) % props.count}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
+  },
+  "nextI": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_forward_rounded",
+    "size": 21,
+    "color": "ink"
+   },
+   "layout": {
+    "width": 21,
+    "height": 21
+   }
+  },
+  "thumbs": {
+   "type": "gridView",
+   "children": [
+    "thumb"
+   ],
+   "props": {
+    "crossAxisCount": 1,
+    "crossAxisSpacing": 8,
+    "mainAxisSpacing": 8,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.thumbs}",
+    "props.crossAxisCount": "${= max(1, length(props.thumbs))}",
+    "visible": "${= length(props.thumbs) > 0}"
+   }
+  },
+  "thumb": {
+   "type": "stack",
+   "children": [
+    "thumbArt"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48
+   },
+   "decoration": {
+    "radius": 13,
+    "strokes": [
+     {
+      "color": "accent"
+     }
+    ],
+    "strokeWidth": 0,
+    "strokeAlign": "outside"
+   },
+   "bind": {
+    "decoration.strokeWidth": "${= index == props.value ? 2.5 : 0}",
+    "opacity": "${= index == props.value ? 1 : 0.72}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= index}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${index}"
+      }
+     ]
+    }
+   ]
+  },
+  "thumbArt": {
+   "type": "Media",
+   "props": {
+    "kind": "shoe"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "x": {
+     "start": 0,
+     "end": 0
+    },
+    "y": {
+     "start": 0,
+     "end": 0
+    }
+   },
+   "bind": {
+    "props.kind": "${props.kind}",
+    "props.tone": "${item}"
+   }
+  },
+  "dots": {
+   "type": "row",
+   "children": [
+    "dotList"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 38
+   }
+  },
+  "dotList": {
+   "type": "listView",
+   "children": [
+    "dot"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 6,
+    "scrollDirection": "horizontal"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 6
+   },
+   "bind": {
+    "data": "${= range(props.count)}"
+   }
+  },
+  "dot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": {
+     "fill": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "layout.width": "${= index == props.value ? 20 : 6}",
+    "decoration.fills[0].color": "${= index == props.value ? theme.colors.accent : theme.colors.lineStrong}"
+   }
+  }
+ }
+}

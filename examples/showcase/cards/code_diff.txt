@@ -1,0 +1,5 @@
+ChatCard "Changes to config.yaml" "3 hunks · keep or discard each" icon:"difference_rounded" status:"{count([h1,h2,h3],h=>h=="keep")} of 3 kept"
+  DiffHunk#a "Server port" "@@ -4,2 +4,2 @@" =h1 start:4 lines:["-port: 8080","+port: 9090"," host: localhost"]
+  DiffHunk#b "Logging" "@@ -12,3 +12,3 @@" =h2 start:12 lines:[" logging:","-  level: debug","-  file: /tmp/app.log","+  level: warn","+  file: /var/log/app.log"]
+  DiffHunk#c "Cache" "@@ -20,1 +20,3 @@" =h3 start:20 lines:[" cache:","+  enabled: true","+  ttl: 300"]
+  TotalBar "{count([h1,h2,h3],h=>h!="")} of 3 decided" amount:"{count([h1,h2,h3],h=>h=="keep")} kept" cta:"Apply changes" icon:"check_rounded" enabled:=h1!=""&&h2!=""&&h3!="" -> emit apply_changes h1+","+h2+","+h3

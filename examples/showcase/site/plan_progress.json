@@ -1,0 +1,249 @@
+{
+ "schema": 3,
+ "roots": [
+  "plan_progress"
+ ],
+ "nodes": {
+  "plan_progress": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= running}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "t",
+       "value": "${= t+1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= min(6,floor(t/2))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= done<6}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Blog migration plan",
+    "subtitle": "Six steps, about two seconds each",
+    "icon": "rocket_launch_rounded"
+   },
+   "bind": {
+    "props.status": "${= done>=6?\"Complete\":(running?\"Running\":(t>0?\"Paused\":\"Ready\"))}",
+    "props.tone": "${= done>=6?\"good\":\"accent\"}"
+   },
+   "children": [
+    "ProgressLine1",
+    "listView1",
+    "go",
+    "Receipt1"
+   ]
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${done} of 6 steps",
+    "props.detail": "${t} s elapsed",
+    "props.value": "${= done/6}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${steps}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "PlanStep1"
+   ]
+  },
+  "PlanStep1": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.t}",
+    "props.detail": "${item.d}",
+    "props.index": "${index}",
+    "props.current": "${done}",
+    "props.running": "${running}",
+    "props.last": "${= index==5}"
+   }
+  },
+  "go": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "bind": {
+    "props.label": "${= running?\"Pause\":(t>0?\"Resume\":\"Start migration\")}",
+    "props.icon": "${= running?\"pause_rounded\":\"play_arrow_rounded\"}",
+    "props.tone": "${= running?\"quiet\":\"primary\"}",
+    "visible": "${= done<6}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= !running}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Migration complete"
+   },
+   "bind": {
+    "props.message": "All six steps finished in ${t} seconds. Your blog is live on the new host.",
+    "visible": "${= done>=6}"
+   }
+  }
+ },
+ "variables": {
+  "plan_progress": [
+   {
+    "name": "done",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "t",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "running",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "steps",
+    "type": "list",
+    "value": [
+     {
+      "t": "Back up your content",
+      "d": "Export posts, pages and settings."
+     },
+     {
+      "t": "Set up the new host",
+      "d": "Create the site and install the theme."
+     },
+     {
+      "t": "Import posts",
+      "d": "Copy articles, tags and categories."
+     },
+     {
+      "t": "Move media",
+      "d": "Upload images and fix their links."
+     },
+     {
+      "t": "Redirect old URLs",
+      "d": "Map old addresses to the new ones."
+     },
+     {
+      "t": "Final checks",
+      "d": "Test links, feeds and the DNS switch."
+     }
+    ]
+   }
+  ]
+ }
+}

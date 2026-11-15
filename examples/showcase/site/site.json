@@ -1,0 +1,23 @@
+{
+ "schema": 3,
+ "pages": [
+  "approval.json",
+  "carousel.json",
+  "checkout.json",
+  "code_diff.json",
+  "comparison.json",
+  "dashboard.json",
+  "data_table.json",
+  "flights.json",
+  "image_gallery.json",
+  "itinerary.json",
+  "map_list.json",
+  "message_draft.json",
+  "order_summary.json",
+  "plan_progress.json",
+  "question_flow.json",
+  "reservation.json",
+  "weather.json"
+ ],
+ "designSystem": "../../../design_systems/cards"
+}

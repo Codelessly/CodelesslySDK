@@ -1,0 +1,420 @@
+{
+ "schema": 3,
+ "id": "ChatCard",
+ "roots": [
+  "shell"
+ ],
+ "widget": {
+  "type": "ChatCard",
+  "doc": "The card itself: put it at the root and write the blocks indented under it (a white rounded card with a header: icon tile, title, subtitle and a status pill; tone colors the tile and pill: accent, good, warn, danger, neutral).",
+  "props": [
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The card title."
+   },
+   {
+    "key": "subtitle",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "One quiet line under the title (empty: none)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon name for the tile before the title (empty: no tile)."
+   },
+   {
+    "key": "status",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small status pill at the right of the header, e.g. Draft or Step 1 of 3 (empty: none)."
+   },
+   {
+    "key": "tone",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "accent",
+      "good",
+      "warn",
+      "danger",
+      "neutral"
+     ]
+    },
+    "default": "accent",
+    "doc": "The color role: accent, good, warn, danger or neutral."
+   }
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Header",
+   "size": [
+    420,
+    120
+   ],
+   "props": {
+    "title": "London to Lisbon",
+    "subtitle": "Fri 20 Nov · 1 adult",
+    "icon": "flight_takeoff_rounded",
+    "status": "3 options"
+   }
+  }
+ ],
+ "nodes": {
+  "shell": {
+   "type": "column",
+   "children": [
+    "card"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     10,
+     10,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "card": {
+   "type": "column",
+   "children": [
+    "head",
+    "content"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 16,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   },
+   "animations": [
+    {
+     "id": "enter",
+     "duration": 360,
+     "delay": 0,
+     "curve": "easeOutCubic",
+     "tracks": [
+      {
+       "path": "opacity",
+       "from": 0,
+       "to": 1
+      },
+      {
+       "path": "motion.translateY",
+       "from": 10,
+       "to": 0
+      }
+     ]
+    }
+   ]
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "mark",
+    "titles",
+    "status"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     18,
+     18,
+     18,
+     0
+    ]
+   },
+   "bind": {
+    "visible": "${= props.title != ''}"
+   }
+  },
+  "mark": {
+   "type": "row",
+   "children": [
+    "markIcon"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "radius": 13
+   },
+   "bind": {
+    "decoration.fills[0].color": "${toneTint}",
+    "visible": "${= props.icon != ''}",
+    "decoration.radius": "${= min(13, theme.radii.tile)}"
+   }
+  },
+  "markIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "auto_awesome_rounded",
+    "size": 21,
+    "color": "accent"
+   },
+   "layout": {
+    "width": 21,
+    "height": 21
+   },
+   "bind": {
+    "props.icon": "${props.icon}",
+    "props.color": "${toneInk}"
+   }
+  },
+  "titles": {
+   "type": "column",
+   "children": [
+    "title",
+    "subtitle"
+   ],
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": "cardTitle",
+    "maxLines": 2,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "subtitle": {
+   "type": "text",
+   "props": {
+    "text": "${props.subtitle}",
+    "style": "meta",
+    "maxLines": 2,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.subtitle != ''}"
+   }
+  },
+  "status": {
+   "type": "row",
+   "children": [
+    "statusDot",
+    "statusText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     9,
+     6,
+     11,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.fills[0].color": "${toneTint}",
+    "visible": "${= props.status != ''}",
+    "decoration.radius": "${theme.radii.chip}"
+   }
+  },
+  "statusDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 3
+   },
+   "bind": {
+    "decoration.fills[0].color": "${toneInk}"
+   }
+  },
+  "statusText": {
+   "type": "text",
+   "props": {
+    "text": "${props.status}",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${toneDeep}"
+   }
+  },
+  "content": {
+   "type": "column",
+   "children": [
+    "slot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 14
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     18,
+     16,
+     18,
+     18
+    ]
+   }
+  },
+  "slot": {
+   "type": "slot"
+  }
+ },
+ "variables": {
+  "shell": [
+   {
+    "name": "toneInk",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.good : props.tone == 'warn' ? theme.colors.warn : props.tone == 'danger' ? theme.colors.bad : props.tone == 'neutral' ? theme.colors.inkSoft : theme.colors.accent"
+   },
+   {
+    "name": "toneDeep",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.goodDeep : props.tone == 'warn' ? theme.colors.warnDeep : props.tone == 'danger' ? theme.colors.badDeep : props.tone == 'neutral' ? theme.colors.ink : theme.colors.accentDeep"
+   },
+   {
+    "name": "toneTint",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.goodTint : props.tone == 'warn' ? theme.colors.warnTint : props.tone == 'danger' ? theme.colors.badTint : props.tone == 'neutral' ? theme.colors.tile : theme.colors.accentTint"
+   },
+   {
+    "name": "toneLine",
+    "type": "text",
+    "formula": "props.tone == 'good' ? theme.colors.goodLine : props.tone == 'warn' ? theme.colors.warnLine : props.tone == 'danger' ? theme.colors.badLine : props.tone == 'neutral' ? theme.colors.lineStrong : theme.colors.accentLine"
+   }
+  ]
+ }
+}

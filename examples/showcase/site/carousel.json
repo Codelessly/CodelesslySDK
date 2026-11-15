@@ -1,0 +1,359 @@
+{
+ "schema": 3,
+ "roots": [
+  "carousel"
+ ],
+ "nodes": {
+  "carousel": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Running shoes",
+    "subtitle": "Six picks for road and trail",
+    "icon": "directions_run_rounded"
+   },
+   "bind": {
+    "props.status": "${= i+1} of 6"
+   },
+   "children": [
+    "car",
+    "ProductTile1",
+    "Paragraph1",
+    "SectionLabel1",
+    "sizes",
+    "row1"
+   ]
+  },
+  "car": {
+   "type": "Carousel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "i",
+    "count": 6
+   },
+   "bind": {
+    "props.thumbs": "${= map(shoes,s=>s.tone)}",
+    "visible": "${= !open}"
+   },
+   "children": [
+    "tile"
+   ]
+  },
+  "tile": {
+   "type": "ProductTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "kind": "shoe",
+    "cta": "Details"
+   },
+   "bind": {
+    "props.name": "${= shoes[i].name}",
+    "props.detail": "${= shoes[i].what}",
+    "props.price": "${= shoes[i].price}",
+    "props.rating": "${= shoes[i].rating}",
+    "props.tone": "${= shoes[i].tone}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "ProductTile1": {
+   "type": "ProductTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "kind": "shoe",
+    "height": 150
+   },
+   "bind": {
+    "props.name": "${= shoes[i].name}",
+    "props.detail": "${= shoes[i].what}",
+    "props.price": "${= shoes[i].price}",
+    "props.rating": "${= shoes[i].rating}",
+    "props.tone": "${= shoes[i].tone}",
+    "visible": "${= open}"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.text": "${= shoes[i].about}",
+    "visible": "${= open}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Size (US)"
+   },
+   "bind": {
+    "props.note": "${= size==\"\"?\"Pick one\":\"Size \"+size}",
+    "visible": "${= open}"
+   }
+  },
+  "sizes": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "size",
+    "options": [
+     "7",
+     "8",
+     "9",
+     "10",
+     "11",
+     "12"
+    ],
+    "disabled": [
+     "8"
+    ],
+    "columns": 6
+   },
+   "bind": {
+    "visible": "${= open}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= open}"
+   },
+   "children": [
+    "back",
+    "ActionButton1"
+   ]
+  },
+  "back": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back",
+    "tone": "quiet",
+    "icon": "arrow_back_rounded"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 2,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Add to bag",
+    "icon": "shopping_bag_rounded"
+   },
+   "bind": {
+    "props.enabled": "${= size!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "add_to_bag",
+       "value": "${= shoes[i].name}"
+      },
+      {
+       "type": "showToast",
+       "message": "Added to bag"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "carousel": [
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "shoes",
+    "type": "list",
+    "value": [
+     {
+      "name": "Aero Runner",
+      "what": "Road · neutral",
+      "price": "$120",
+      "rating": "4.8",
+      "tone": "lilac",
+      "about": "A light daily trainer with a springy foam midsole and a breathable knit upper."
+     },
+     {
+      "name": "Trail Scout",
+      "what": "Trail · grippy",
+      "price": "$135",
+      "rating": "4.6",
+      "tone": "mint",
+      "about": "Deep lugs and a rock plate for wet roots and loose gravel."
+     },
+     {
+      "name": "Tempo Flash",
+      "what": "Speed days",
+      "price": "$150",
+      "rating": "4.7",
+      "tone": "rose",
+      "about": "A snappy plate and a low stack for intervals and race day."
+     },
+     {
+      "name": "Cloud Stride",
+      "what": "Max cushion",
+      "price": "$140",
+      "rating": "4.5",
+      "tone": "sky",
+      "about": "Soft, tall and stable for long easy miles."
+     },
+     {
+      "name": "Daybreak 2",
+      "what": "Everyday",
+      "price": "$95",
+      "rating": "4.4",
+      "tone": "sand",
+      "about": "An honest all-rounder at a friendly price."
+     },
+     {
+      "name": "Night Owl",
+      "what": "Reflective",
+      "price": "$125",
+      "rating": "4.6",
+      "tone": "slate",
+      "about": "Reflective panels all round for runs after dark."
+     }
+    ]
+   },
+   {
+    "name": "i",
+    "type": "decimal",
+    "value": 0
+   },
+   {
+    "name": "size",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

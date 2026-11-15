@@ -1,0 +1,201 @@
+{
+ "schema": 3,
+ "roots": [
+  "flights"
+ ],
+ "nodes": {
+  "flights": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "London to Lisbon",
+    "subtitle": "Fri 20 Nov · 1 adult · direct only",
+    "icon": "flight_takeoff_rounded",
+    "status": "3 options"
+   },
+   "children": [
+    "listView1",
+    "total"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${flights}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "opt"
+   ]
+  },
+  "opt": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "origin": "LHR",
+    "destination": "LIS"
+   },
+   "bind": {
+    "props.name": "${item.air}",
+    "props.depart": "${item.dep}",
+    "props.arrive": "${item.arr}",
+    "props.duration": "${item.dur}",
+    "props.price": "£${item.price}",
+    "props.tag": "${item.tag}",
+    "props.selected": "${= pick==item.id}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "total": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "note": "incl. taxes",
+    "cta": "Confirm flight"
+   },
+   "bind": {
+    "props.label": "Total · ${= (find(flights,f=>f.id==pick)).air}",
+    "props.amount": "£${= (find(flights,f=>f.id==pick)).price}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "confirm_flight",
+       "value": "${= (find(flights,f=>f.id==pick))}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "flights": [
+   {
+    "name": "pick",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "flights",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "dep": "07:15",
+      "arr": "09:50",
+      "air": "TAP Air Portugal",
+      "dur": "2h 35m",
+      "price": 128,
+      "tag": "Best time"
+     },
+     {
+      "id": 2,
+      "dep": "11:40",
+      "arr": "14:20",
+      "air": "easyJet",
+      "dur": "2h 40m",
+      "price": 84,
+      "tag": "Cheapest"
+     },
+     {
+      "id": 3,
+      "dep": "18:05",
+      "arr": "20:40",
+      "air": "British Airways",
+      "dur": "2h 35m",
+      "price": 156,
+      "tag": ""
+     }
+    ]
+   }
+  ]
+ }
+}

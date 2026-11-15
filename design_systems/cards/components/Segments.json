@@ -1,0 +1,189 @@
+{
+ "schema": 3,
+ "id": "Segments",
+ "roots": [
+  "track"
+ ],
+ "widget": {
+  "type": "Segments",
+  "doc": "A switch between two to five options in one track (a period, a tone, a status filter): write Segments =range options:[\"7 days\",\"30 days\"] and it keeps the chosen option's text in your variable; onChanged fires with it.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable: it holds the chosen option (declare it with the starting option)."
+   },
+   {
+    "key": "options",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "7 days",
+     "30 days",
+     "90 days"
+    ],
+    "doc": "Two to five options.",
+    "required": true
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "An option was chosen; the value is its text."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Period",
+   "size": [
+    340,
+    40
+   ],
+   "props": {
+    "value": "30 days"
+   }
+  }
+ ],
+ "nodes": {
+  "track": {
+   "type": "column",
+   "children": [
+    "cells"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.control}"
+   }
+  },
+  "cells": {
+   "type": "gridView",
+   "children": [
+    "cell"
+   ],
+   "props": {
+    "crossAxisCount": 1,
+    "crossAxisSpacing": 2,
+    "mainAxisSpacing": 2,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.options}",
+    "props.crossAxisCount": "${= max(1, length(props.options))}"
+   }
+  },
+  "cell": {
+   "type": "row",
+   "children": [
+    "cellText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.card : '#00FFFFFF'}",
+    "decoration.effects": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.shadows.knob : []}",
+    "decoration.radius": "${= max(0, theme.radii.control - 3)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "cellText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "chip",
+     "fontSize": 13
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  }
+ }
+}

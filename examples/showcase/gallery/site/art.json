@@ -1,0 +1,682 @@
+{
+ "schema": 3,
+ "roots": [
+  "art"
+ ],
+ "nodes": {
+  "art": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Drawn media",
+    "subtitle": "Every kind once",
+    "icon": "palette_rounded"
+   },
+   "children": [
+    "grid1",
+    "grid2",
+    "row1"
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1",
+    "grid1Row2",
+    "grid1Row3",
+    "grid1Row4",
+    "grid1Row5",
+    "grid1Row6"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media1",
+    "Media2"
+   ]
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "mountain"
+   }
+  },
+  "Media2": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "harbor"
+   }
+  },
+  "grid1Row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media3",
+    "Media4"
+   ]
+  },
+  "Media3": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "skyline"
+   }
+  },
+  "Media4": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "dunes"
+   }
+  },
+  "grid1Row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media5",
+    "Media6"
+   ]
+  },
+  "Media5": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "forest"
+   }
+  },
+  "Media6": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "lagoon"
+   }
+  },
+  "grid1Row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media7",
+    "Media8"
+   ]
+  },
+  "Media7": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "market"
+   }
+  },
+  "Media8": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "festival"
+   }
+  },
+  "grid1Row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media9",
+    "Media10"
+   ]
+  },
+  "Media9": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "train"
+   }
+  },
+  "Media10": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "temple"
+   }
+  },
+  "grid1Row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media11",
+    "Media12"
+   ]
+  },
+  "Media11": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "bamboo"
+   }
+  },
+  "Media12": {
+   "type": "Media",
+   "layout": {
+    "height": 150,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "mountain",
+    "tone": "night"
+   }
+  },
+  "grid2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid2Row1",
+    "grid2Row2",
+    "grid2Row3",
+    "grid2Row4"
+   ]
+  },
+  "grid2Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media13",
+    "Media14",
+    "Media15"
+   ]
+  },
+  "Media13": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "shoe"
+   }
+  },
+  "Media14": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "mug"
+   }
+  },
+  "Media15": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "tote"
+   }
+  },
+  "grid2Row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media16",
+    "Media17",
+    "Media18"
+   ]
+  },
+  "Media16": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "box"
+   }
+  },
+  "Media17": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "beans"
+   }
+  },
+  "Media18": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "laptop"
+   }
+  },
+  "grid2Row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media19",
+    "Media20",
+    "Media21"
+   ]
+  },
+  "Media19": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "banana"
+   }
+  },
+  "Media20": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "milk"
+   }
+  },
+  "Media21": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "bread"
+   }
+  },
+  "grid2Row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "Media22",
+    "Media23",
+    "Media24"
+   ]
+  },
+  "Media22": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "eggs"
+   }
+  },
+  "Media23": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "cheese"
+   }
+  },
+  "Media24": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "kind": "apple"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "WeatherGlyph1",
+    "WeatherGlyph2",
+    "WeatherGlyph3",
+    "WeatherGlyph4",
+    "WeatherGlyph5",
+    "WeatherGlyph6"
+   ]
+  },
+  "WeatherGlyph1": {
+   "type": "WeatherGlyph",
+   "layout": {
+    "width": 60,
+    "height": 60
+   },
+   "props": {
+    "kind": "sun"
+   }
+  },
+  "WeatherGlyph2": {
+   "type": "WeatherGlyph",
+   "layout": {
+    "width": 60,
+    "height": 60
+   },
+   "props": {
+    "kind": "partly"
+   }
+  },
+  "WeatherGlyph3": {
+   "type": "WeatherGlyph",
+   "layout": {
+    "width": 60,
+    "height": 60
+   },
+   "props": {
+    "kind": "cloud"
+   }
+  },
+  "WeatherGlyph4": {
+   "type": "WeatherGlyph",
+   "layout": {
+    "width": 60,
+    "height": 60
+   },
+   "props": {
+    "kind": "rain"
+   }
+  },
+  "WeatherGlyph5": {
+   "type": "WeatherGlyph",
+   "layout": {
+    "width": 60,
+    "height": 60
+   },
+   "props": {
+    "kind": "storm"
+   }
+  },
+  "WeatherGlyph6": {
+   "type": "WeatherGlyph",
+   "layout": {
+    "width": 60,
+    "height": 60
+   },
+   "props": {
+    "kind": "night"
+   }
+  }
+ }
+}

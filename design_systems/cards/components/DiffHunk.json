@@ -1,0 +1,617 @@
+{
+ "schema": 3,
+ "id": "DiffHunk",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "DiffHunk",
+  "doc": "One hunk of a diff with its own Keep and Discard buttons: DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" =h1 start:4 lines:[\"-port: 8080\",\"+port: 9090\",\" host: localhost\"] (a line starts with -, + or a space; numbers count from start) sets your text variable to \"keep\" or \"discard\" (empty until decided).",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable: it becomes \"keep\" or \"discard\" (empty until decided)."
+   },
+   {
+    "key": "title",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Change",
+    "doc": "What the hunk changes, in a few words.",
+    "required": true
+   },
+   {
+    "key": "detail",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The range, e.g. @@ -4,2 +4,2 @@."
+   },
+   {
+    "key": "start",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 1,
+    "doc": "The line number of the first line.",
+    "required": true
+   },
+   {
+    "key": "lines",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "-port: 8080",
+     "+port: 9090",
+     " host: localhost"
+    ],
+    "doc": "The lines: each starts with - (removed, red), + (added, green) or a space (unchanged).",
+    "required": true
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "Keep or Discard was tapped; the value is \"keep\" or \"discard\"."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Hunk",
+   "size": [
+    340,
+    170
+   ],
+   "props": {
+    "title": "Server port",
+    "detail": "@@ -4,2 +4,2 @@",
+    "start": 4
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": [
+    "card"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "card": {
+   "type": "column",
+   "children": [
+    "head",
+    "lines",
+    "foot"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 14,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}",
+    "decoration.strokes[0].color": "${= props.value == 'keep' ? theme.colors.goodLine : theme.colors.line}"
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "headIcon",
+    "title",
+    "range"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     9,
+     12,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ]
+   }
+  },
+  "headIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "difference_outlined",
+    "size": 15,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   }
+  },
+  "title": {
+   "type": "text",
+   "props": {
+    "text": "${props.title}",
+    "style": {
+     "from": "rowTitle",
+     "fontSize": 13
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "range": {
+   "type": "text",
+   "props": {
+    "text": "${props.detail}",
+    "style": {
+     "from": "code",
+     "fontSize": 11,
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lines": {
+   "type": "listView",
+   "children": [
+    "line"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.lines}",
+    "opacity": "${= props.value == 'discard' ? 0.45 : 1}"
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "bar",
+    "no",
+    "sign",
+    "code"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 25
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "codeBg"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= startsWith(item, '+') ? theme.colors.goodTint : startsWith(item, '-') ? theme.colors.badTint : theme.colors.codeBg}"
+   }
+  },
+  "bar": {
+   "type": "box",
+   "layout": {
+    "width": 3,
+    "height": {
+     "fill": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "codeBg"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= startsWith(item, '+') ? theme.colors.good : startsWith(item, '-') ? theme.colors.bad : '#00FFFFFF'}"
+   }
+  },
+  "no": {
+   "type": "text",
+   "props": {
+    "text": "${= startsWith(item, '+') ? props.start + count(take(props.lines, index), x => !startsWith(x, '-')) : props.start + count(take(props.lines, index), x => !startsWith(x, '+'))}",
+    "style": {
+     "from": "code",
+     "fontSize": 11,
+     "color": "codeGutter"
+    },
+    "textAlign": "right"
+   },
+   "layout": {
+    "width": 30,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "sign": {
+   "type": "text",
+   "props": {
+    "text": "${= startsWith(item, '+') ? '+' : startsWith(item, '-') ? '-' : ''}",
+    "style": {
+     "from": "code",
+     "fontWeight": 700
+    },
+    "textAlign": "center"
+   },
+   "layout": {
+    "width": 24,
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(item, '+') ? theme.colors.goodDeep : theme.colors.badDeep}"
+   }
+  },
+  "code": {
+   "type": "text",
+   "props": {
+    "text": "${= startsWith(item, '+') || startsWith(item, '-') ? substring(item, 1) : trim(item) == '' ? '' : substring(item, 1)}",
+    "style": "code",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= startsWith(item, '+') ? theme.colors.goodDeep : startsWith(item, '-') ? theme.colors.badDeep : theme.colors.inkSoft}",
+    "props.style.decoration": "${= startsWith(item, '+') && props.value == 'discard' ? 'lineThrough' : 'none'}"
+   }
+  },
+  "foot": {
+   "type": "row",
+   "children": [
+    "state",
+    "keep",
+    "discard"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1,
+    "strokeSides": "top"
+   }
+  },
+  "state": {
+   "type": "text",
+   "props": {
+    "text": "${= props.value == 'keep' ? 'Kept' : props.value == 'discard' ? 'Discarded' : 'Not decided'}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 'keep' ? theme.colors.goodDeep : theme.colors.inkFaint}"
+   }
+  },
+  "keep": {
+   "type": "row",
+   "children": [
+    "keepI",
+    "keepT"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 32,
+    "padding": [
+     10,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 'keep' ? theme.colors.good : theme.colors.card}",
+    "decoration.strokes[0].color": "${= props.value == 'keep' ? theme.colors.good : theme.colors.lineStrong}"
+   },
+   "states": {
+    "pressed": {
+     "keep": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= 'keep'}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "keep"
+      }
+     ]
+    }
+   ]
+  },
+  "keepI": {
+   "type": "icon",
+   "props": {
+    "icon": "check_rounded",
+    "size": 15,
+    "color": "inkSoft"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.color": "${= props.value == 'keep' ? theme.colors.onAccent : theme.colors.inkSoft}"
+   }
+  },
+  "keepT": {
+   "type": "text",
+   "props": {
+    "text": "Keep",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 'keep' ? theme.colors.onAccent : theme.colors.ink}"
+   }
+  },
+  "discard": {
+   "type": "row",
+   "children": [
+    "discardI",
+    "discardT"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 5
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 32,
+    "padding": [
+     10,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= props.value == 'discard' ? theme.colors.bar : theme.colors.card}",
+    "decoration.strokes[0].color": "${= props.value == 'discard' ? theme.colors.bar : theme.colors.lineStrong}"
+   },
+   "states": {
+    "pressed": {
+     "discard": {
+      "opacity": 0.82
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= 'discard'}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "discard"
+      }
+     ]
+    }
+   ]
+  },
+  "discardI": {
+   "type": "icon",
+   "props": {
+    "icon": "close_rounded",
+    "size": 15,
+    "color": "inkSoft"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.color": "${= props.value == 'discard' ? theme.colors.onBar : theme.colors.inkSoft}"
+   }
+  },
+  "discardT": {
+   "type": "text",
+   "props": {
+    "text": "Discard",
+    "style": "chip"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= props.value == 'discard' ? theme.colors.onBar : theme.colors.ink}"
+   }
+  }
+ }
+}

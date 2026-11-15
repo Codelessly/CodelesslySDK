@@ -1,0 +1,175 @@
+{
+ "schema": 3,
+ "id": "BackButton",
+ "roots": [
+  "button"
+ ],
+ "widget": {
+  "type": "BackButton",
+  "doc": "Goes back: a left arrow and a label. Fires onPressed.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Back",
+    "doc": "The words."
+   },
+   {
+    "key": "enabled",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "False: muted, takes no press."
+   }
+  ],
+  "events": [
+   {
+    "key": "onPressed"
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Back",
+   "size": [
+    70,
+    30
+   ],
+   "props": {}
+  }
+ ],
+ "nodes": {
+  "button": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 30
+    },
+    "padding": [
+     8,
+     4,
+     8,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "disabled": "${= !props.enabled}"
+   },
+   "states": {
+    "hovered": {
+     "button": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "subtleFill"
+        }
+       ]
+      }
+     },
+     "glyph": {
+      "props": {
+       "color": "primaryText"
+      }
+     }
+    },
+    "pressed": {
+     "button": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "primaryBorder"
+        }
+       ]
+      }
+     }
+    },
+    "disabled": {
+     "label": {
+      "props": {
+       "style": {
+        "color": "tertiaryText"
+       }
+      }
+     },
+     "glyph": {
+      "props": {
+       "color": "tertiaryText"
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "when": "props.enabled"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onPressed"
+      }
+     ]
+    }
+   ]
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_back",
+    "color": "secondaryText",
+    "size": 16
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "primaryText",
+     "leadingDistribution": "even",
+     "letterSpacing": -0.14
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 34
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  }
+ }
+}

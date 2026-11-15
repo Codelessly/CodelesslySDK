@@ -1,0 +1,108 @@
+{
+ "schema": 3,
+ "id": "SectionLabel",
+ "roots": [
+  "head"
+ ],
+ "widget": {
+  "type": "SectionLabel",
+  "doc": "A small caps heading over a group of blocks, with a quiet note at the right (a count, a unit).",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Section",
+    "doc": "The heading, shown in small caps.",
+    "required": true
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet note at the right, e.g. a count (empty: none)."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Label",
+   "size": [
+    340,
+    24
+   ],
+   "props": {
+    "label": "Next 5 hours",
+    "note": "Lisbon"
+   }
+  }
+ ],
+ "nodes": {
+  "head": {
+   "type": "row",
+   "children": [
+    "label",
+    "note"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 8,
+    "mainAxisAlignment": "spaceBetween"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     0
+    ]
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.label)}",
+    "style": "eyebrow",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "note": {
+   "type": "text",
+   "props": {
+    "text": "${props.note}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  }
+ }
+}

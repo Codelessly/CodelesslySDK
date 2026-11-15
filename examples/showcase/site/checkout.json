@@ -1,0 +1,610 @@
+{
+ "schema": 3,
+ "roots": [
+  "checkout"
+ ],
+ "nodes": {
+  "checkout": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Checkout",
+    "icon": "shopping_cart_rounded"
+   },
+   "bind": {
+    "props.subtitle": "${= sum(cart,c=>c.qty)} items",
+    "props.status": "${= step>3?\"Paid\":\"Step \"+step+\" of 3\"}",
+    "props.tone": "${= step>3?\"good\":\"accent\"}"
+   },
+   "children": [
+    "Steps1",
+    "listView1",
+    "next1",
+    "name",
+    "address",
+    "row1",
+    "email",
+    "row2",
+    "ship",
+    "Details1",
+    "pay",
+    "ActionButton1",
+    "Receipt1"
+   ]
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Cart",
+     "Shipping",
+     "Payment"
+    ]
+   },
+   "bind": {
+    "props.current": "${step}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${cart}",
+    "visible": "${= step==1}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "line"
+   ]
+  },
+  "line": {
+   "type": "CartLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.name}",
+    "props.detail": "${item.note}",
+    "props.price": "${= money(item.price*item.qty,\"$\",2)}",
+    "props.qty": "${item.qty}",
+    "props.kind": "${item.kind}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cart",
+       "value": "${= updateWhere(cart,x=>x.id==item.id,x=>with(x,\"qty\",result))}"
+      }
+     ]
+    }
+   ]
+  },
+  "next1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Subtotal",
+    "cta": "Shipping"
+   },
+   "bind": {
+    "props.amount": "${= money((sum(cart,c=>c.price*c.qty)),\"$\",2)}",
+    "props.enabled": "${= (sum(cart,c=>c.price*c.qty))>0}",
+    "visible": "${= step==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "name": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Full name",
+    "placeholder": "Ada Lovelace",
+    "value": "name"
+   },
+   "bind": {
+    "props.error": "${= tried&&name==\"\"?\"Enter your name\":\"\"}",
+    "visible": "${= step==2}"
+   }
+  },
+  "address": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Address",
+    "placeholder": "12 Analytical Street",
+    "value": "address"
+   },
+   "bind": {
+    "props.error": "${= tried&&address==\"\"?\"Enter your address\":\"\"}",
+    "visible": "${= step==2}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "city",
+    "zip"
+   ]
+  },
+  "city": {
+   "type": "InputField",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "City",
+    "placeholder": "London",
+    "value": "city"
+   },
+   "bind": {
+    "props.error": "${= tried&&city==\"\"?\"Enter a city\":\"\"}"
+   }
+  },
+  "zip": {
+   "type": "InputField",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Postcode",
+    "placeholder": "N1 9GU",
+    "value": "zip"
+   },
+   "bind": {
+    "props.error": "${= tried&&zip==\"\"?\"Enter a postcode\":\"\"}"
+   }
+  },
+  "email": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Email",
+    "placeholder": "you@example.com",
+    "value": "email",
+    "keyboard": "emailAddress"
+   },
+   "bind": {
+    "props.error": "${= tried&&!contains(email,\"@\")?\"Enter a valid email\":\"\"}",
+    "visible": "${= step==2}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "back2",
+    "next2"
+   ]
+  },
+  "back2": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "next2": {
+   "type": "ActionButton",
+   "layout": {
+    "flex": 2,
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Continue to payment"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tried",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= name!=\"\"&&address!=\"\"&&city!=\"\"&&zip!=\"\"&&contains(email,\"@\")?3:2}"
+      }
+     ]
+    }
+   ]
+  },
+  "ship": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Delivery",
+    "value": "ship",
+    "options": [
+     "Standard",
+     "Express"
+    ],
+    "details": [
+     "3 to 5 working days",
+     "Next working day"
+    ],
+    "prices": [
+     "$4.00",
+     "$12.00"
+    ],
+    "icons": [
+     "local_shipping_rounded",
+     "bolt_rounded"
+    ]
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Items\",money((sum(cart,c=>c.price*c.qty)),\"$\",2)],[\"Delivery, \"+lower(ship),money((ship==\"Express\"?12:4),\"$\",2)]]}",
+    "visible": "${= step==3}"
+   }
+  },
+  "pay": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "cta": "Place order"
+   },
+   "bind": {
+    "props.amount": "${= money((sum(cart,c=>c.price*c.qty))+(ship==\"Express\"?12:4),\"$\",2)}",
+    "visible": "${= step==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 4}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "place_order",
+       "value": "${= (sum(cart,c=>c.price*c.qty))+(ship==\"Express\"?12:4)}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back to shipping",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order confirmed",
+    "code": "CL-48213",
+    "codeLabel": "Order"
+   },
+   "bind": {
+    "props.message": "Thanks, ${name}. A receipt is on its way to ${email}.",
+    "visible": "${= step==4}"
+   }
+  }
+ },
+ "variables": {
+  "checkout": [
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "cart",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Espresso beans",
+      "note": "1 kg, whole bean",
+      "price": 24,
+      "qty": 1,
+      "kind": "beans"
+     },
+     {
+      "id": 2,
+      "name": "Ceramic mug",
+      "note": "Sand glaze, 350 ml",
+      "price": 12,
+      "qty": 2,
+      "kind": "mug"
+     },
+     {
+      "id": 3,
+      "name": "Canvas tote",
+      "note": "Forest green",
+      "price": 18,
+      "qty": 1,
+      "kind": "tote"
+     }
+    ]
+   },
+   {
+    "name": "ship",
+    "type": "text",
+    "value": "Standard"
+   },
+   {
+    "name": "tried",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "email",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "address",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "city",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "zip",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

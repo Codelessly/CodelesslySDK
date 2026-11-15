@@ -1,0 +1,337 @@
+{
+ "schema": 3,
+ "id": "Disclosure",
+ "roots": [
+  "wrap"
+ ],
+ "widget": {
+  "type": "Disclosure",
+  "doc": "A link that opens and closes a short list by itself (the first few file names, the fine print): label is the link, lines the list shown in monospace, note a quiet last line.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Show details",
+    "doc": "The link that opens it.",
+    "required": true
+   },
+   {
+    "key": "lines",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The lines it reveals (file names, items), in monospace.",
+    "required": true
+   },
+   {
+    "key": "note",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A quiet last line, e.g. \"and 209 more\" (empty: none)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "insert_drive_file_outlined",
+    "doc": "The icon before each line."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Closed",
+   "size": [
+    340,
+    30
+   ],
+   "props": {
+    "label": "Show the first 5 file names",
+    "lines": [
+     "a.txt",
+     "b.txt"
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": [
+    "head",
+    "body"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "head": {
+   "type": "row",
+   "children": [
+    "chev",
+    "label",
+    "count"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "op": "toggle"
+      }
+     ]
+    }
+   ],
+   "states": {
+    "pressed": {
+     "head": {
+      "opacity": 0.82
+     }
+    }
+   }
+  },
+  "chev": {
+   "type": "icon",
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 20,
+    "color": "accent"
+   },
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "bind": {
+    "props.icon": "${= open ? 'expand_more_rounded' : 'chevron_right_rounded'}"
+   }
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${props.label}",
+    "style": {
+     "from": "rowTitle",
+     "fontSize": 13.5,
+     "color": "accent"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "count": {
+   "type": "text",
+   "props": {
+    "text": "${= length(props.lines)}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= !open}"
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "list",
+    "more"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     4,
+     4,
+     4,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 14
+   },
+   "bind": {
+    "visible": "${open}",
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "list": {
+   "type": "listView",
+   "children": [
+    "line"
+   ],
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.lines}"
+   }
+  },
+  "line": {
+   "type": "row",
+   "children": [
+    "lineIcon",
+    "lineText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 9
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     7,
+     10,
+     7
+    ]
+   }
+  },
+  "lineIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "insert_drive_file_outlined",
+    "size": 15,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.icon": "${props.icon}"
+   }
+  },
+  "lineText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "code",
+     "fontSize": 12,
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "more": {
+   "type": "text",
+   "props": {
+    "text": "${props.note}",
+    "style": "meta"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     34,
+     4,
+     10,
+     8
+    ]
+   },
+   "bind": {
+    "visible": "${= props.note != ''}"
+   }
+  }
+ },
+ "variables": {
+  "wrap": [
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}
