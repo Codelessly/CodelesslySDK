@@ -536,6 +536,16 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
   }
 
   Clip _clip;
+  /// Content continuing past an edge fades out over this many pixels there
+  /// (the end while there is more to scroll to, the start once scrolled).
+  double get edgeFade => _edgeFade;
+  double _edgeFade = 0;
+  set edgeFade(double v) {
+    if (v == _edgeFade) return;
+    _edgeFade = v;
+    markNeedsPaint();
+  }
+
   Clip get clipBehavior => _clip;
   set clipBehavior(Clip v) {
     if (v == _clip) return;
@@ -637,7 +647,45 @@ class RenderDesignScroll extends RenderProxyBox implements MouseTrackerAnnotatio
         s.paintPinned(c, o + at);
       }
     }
-    if (_overflows && _clip != Clip.none) {
+    final max = maxScrollExtent;
+    if (_overflows && _edgeFade > 0 && max > 0) {
+      // Painted into a layer of its own, then the edges where the content
+      // goes on are rubbed out along a gradient: whatever is behind shows
+      // through, so no color of the background needs to be known.
+      _clipLayer.layer = null;
+      final bounds = offset & size;
+      final vertical = _axis == Axis.vertical;
+      final extent = vertical ? size.height : size.width;
+      final fade = _edgeFade.clamp(0.0, extent / 2);
+      final atStart = (_pixels / fade).clamp(0.0, 1.0), atEnd = ((max - _pixels) / fade).clamp(0.0, 1.0);
+      context.canvas.saveLayer(bounds, Paint());
+      context.canvas.save();
+      context.canvas.clipRect(bounds);
+      paintContent(context, offset);
+      context.canvas.restore();
+      void rub(Rect r, Alignment from, Alignment to, double strength) {
+        if (strength <= 0) return;
+        context.canvas.drawRect(
+          r,
+          Paint()
+            ..blendMode = BlendMode.dstOut
+            ..shader = LinearGradient(
+              begin: from,
+              end: to,
+              colors: [const Color(0x00000000), Color.fromRGBO(0, 0, 0, strength)],
+            ).createShader(r),
+        );
+      }
+
+      if (vertical) {
+        rub(Rect.fromLTWH(bounds.left, bounds.top, size.width, fade), Alignment.bottomCenter, Alignment.topCenter, atStart);
+        rub(Rect.fromLTWH(bounds.left, bounds.bottom - fade, size.width, fade), Alignment.topCenter, Alignment.bottomCenter, atEnd);
+      } else {
+        rub(Rect.fromLTWH(bounds.left, bounds.top, fade, size.height), Alignment.centerRight, Alignment.centerLeft, atStart);
+        rub(Rect.fromLTWH(bounds.right - fade, bounds.top, fade, size.height), Alignment.centerLeft, Alignment.centerRight, atEnd);
+      }
+      context.canvas.restore();
+    } else if (_overflows && _clip != Clip.none) {
       _clipLayer.layer = context.pushClipRect(
         needsCompositing,
         offset,

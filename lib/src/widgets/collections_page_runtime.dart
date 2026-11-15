@@ -316,7 +316,7 @@ class _RuntimePageViewState extends State<RuntimePageView> {
         itemBuilder: (context, index) => _item(context, index, vertical),
       );
     }
-    return PageView.builder(
+    final Widget pages = PageView.builder(
       controller: _controller,
       // Page turning is also a desktop interaction. Keep the host's input
       // devices while opting this pager into mouse dragging.
@@ -339,7 +339,24 @@ class _RuntimePageViewState extends State<RuntimePageView> {
       itemCount: data?.length,
       onPageChanged: _reportPage,
       itemBuilder: (context, index) => _item(context, index, vertical),
+    );    // The next page showing at the edge fades out, in place of a hard cut.
+    final fade = _node.prop(api.PageViewProps.edgeFade);
+    if (fade <= 0) return pages;
+    return ShaderMask(
+      blendMode: BlendMode.dstIn,
+      shaderCallback: (bounds) {
+        final extent = vertical ? bounds.height : bounds.width;
+        final stop = extent <= 0 ? 1.0 : (1 - fade / extent).clamp(0.0, 1.0);
+        return LinearGradient(
+          begin: vertical ? Alignment.topCenter : Alignment.centerLeft,
+          end: vertical ? Alignment.bottomCenter : Alignment.centerRight,
+          colors: const [Color(0xFF000000), Color(0xFF000000), Color(0x00000000)],
+          stops: [0, stop, 1],
+        ).createShader(bounds);
+      },
+      child: pages,
     );
+
   }
 }
 
