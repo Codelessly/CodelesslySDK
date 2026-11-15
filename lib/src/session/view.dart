@@ -137,6 +137,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _tree.interactions = _reactions;
     _syncVariables();
     _changes = _session.changes.listen((_) => _documentChanged());
+    _session.blocksAdded.addListener(_blocksAdded);
     _detachProbe = _session.attachLayoutProbe(_sizes);
     _detachShown = _session.attachShownProbe(() {
       final root = mounted ? context.findRenderObject() : null;
@@ -221,6 +222,14 @@ class _CodelesslyViewState extends State<CodelesslyView> {
     _declared = now;
   }
 
+  /// A block added to the session while it is shown: defined here too, so
+  /// calls to it draw.
+  void _blocksAdded() {
+    for (final d in _session.designSystem?.components.definitions.values ?? const <LayoutDocument>[]) {
+      _components.define(d);
+    }
+  }
+
   String? _canvasId() {
     final doc = _session.document;
     final want = _stack.isNotEmpty ? _stack.last : widget.canvas;
@@ -259,6 +268,7 @@ class _CodelesslyViewState extends State<CodelesslyView> {
 
   void _dispose() {
     _changes?.cancel();
+    _session.blocksAdded.removeListener(_blocksAdded);
     _detachProbe?.call();
     _detachShown?.call();
     _detachValues?.call();

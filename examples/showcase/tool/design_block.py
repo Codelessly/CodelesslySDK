@@ -81,8 +81,10 @@ def brief_for(name, ds, manifest):
     """What the designer is told: the system's principles, its theme names, three of its blocks, the notation."""
     theme = manifest['theme']
     examples = '\n\n'.join(f'{n}.json\n' + open(f'{ds}/components/{n}.json').read() for n in ('ProgressLine', 'OptionList', 'StatTile'))
-    _, notation = run(['tool/notation/notation.sh', 'prompt', '--design-system', ds])
-    notation = notation[notation.index('You describe a UI'):]
+    # The prompt alone: what the tool prints while it builds is not part of it.
+    notation = subprocess.run(['tool/notation/notation.sh', 'prompt', '--design-system', ds], cwd=SDK, capture_output=True, text=True).stdout
+    at = notation.find('You describe a UI')
+    notation = notation[at:] if at >= 0 else notation
     # What the engine already draws, so a block uses it and does not draw it again by hand: every node type by
     # name, and the chart nodes in full (a designer left without them draws a chart point by point).
     api_ref = os.path.join(os.path.dirname(SDK), 'CodelesslyAPI', 'docs', 'reference')
@@ -98,7 +100,7 @@ def brief_for(name, ds, manifest):
             if m:
                 charts += m.group(0).strip() + '\n\n'
     system = f"""You are the designer of the "{manifest['name']}" design system: {manifest['description']}
-You add one new block to it, at the same visual bar as the blocks it has. A block is a component document (JSON, schema 3): its declaration under "widget" (type, doc, props with kind and default, events) and its nodes, which read their parameters as ${{props.name}} and the theme as ${{theme.colors.name}}. Colors, text styles, radii and shadows are the theme's names, never literal values, so the block is right in light and dark.
+You add one new block to it, at the same visual bar as the blocks it has. A block is a component document (JSON, schema 3): its declaration under "widget" (type, doc, props with kind and default, events) and its nodes, which read their parameters as ${{props.name}} and the theme as ${{theme.colors.name}}. Colors, text styles, radii and shadows are the theme's names, never literal values, so the block is right in light and dark. Sizes, padding and gaps inside a block are yours to write as numbers, as the blocks below do (the system's rule against writing sizes is for someone composing a card from blocks, not for a block's author); radii and shadows take the theme's names. Where the request leaves a rule open (a week's first day, a currency, how many steps), choose the common case, take it as a parameter with that default, and say so in the block's doc.
 
 THE SYSTEM'S PRINCIPLES
 {open(f'{ds}/DESIGN.md').read()}
