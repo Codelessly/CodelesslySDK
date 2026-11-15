@@ -1,4 +1,6 @@
-## Unreleased
+## 32.0.0
+
+Needs codelessly_api 32.0.0.
 
 - **`DesignPass`**: a design agent you supply restyles a session's UI in place with edit operations, after a
   fast model has written it from plain parts. The instructions are built from the session and its design system;
