@@ -45,3 +45,13 @@ after a vote.
 
 Not shown yet: a judge other than the author of this experiment; the loop inside a live session; what a request
 gets while its block is being made.
+
+## A block with behavior, checked by using it (seat-map)
+
+`seat-map/` is one run on the harness after the outside runs of 2026-11-15, whose most-hit finding was that the
+check saw only a block's first state. The designer (Opus, three rounds, 480 seconds, 35 problems in round one and
+none after) ended its answer with `use.json`: tap an occupied seat, tap 7C and 7D, press Continue; expect "7C, 7D
+are held"; forbid "1A", "Tap a seat" and "Continue". The check drove the card and tested the texts
+(`used.png` is the card after the steps). `light.png`, `dark.png` and `narrow.png` (320 wide) are the card as
+it first appears.
+
