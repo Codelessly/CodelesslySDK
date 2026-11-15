@@ -1,0 +1,51 @@
+Card "October vs November 2026" elevation:2 padding:20 radius:12 width:560
+  Header direction:row align:space-between
+    Column
+      Text "Store performance" style:title
+      Text "October vs November 2026" style:caption color:muted
+    Legend direction:row gap:12
+      LegendItem "Oct" swatch:#9AA5B1
+      LegendItem "Nov" swatch:#2F6FED
+  Divider
+  MetricList gap:16
+    MetricRow
+      Row align:space-between
+        Text "Revenue" style:label
+        Badge "+28.5%" color:green icon:arrow-up tooltip:"Higher than October"
+      BarPair
+        Bar series:"Oct" color:#9AA5B1 value:92400 width:77.8% label:"$92,400"
+        Bar series:"Nov" color:#2F6FED value:118750 width:100% label:"$118,750"
+    MetricRow
+      Row align:space-between
+        Text "Orders" style:label
+        Badge "+24.5%" color:green icon:arrow-up
+      BarPair
+        Bar series:"Oct" color:#9AA5B1 value:1820 width:80.4% label:"1,820"
+        Bar series:"Nov" color:#2F6FED value:2265 width:100% label:"2,265"
+    MetricRow
+      Row align:space-between
+        Text "Avg order value" style:label
+        Badge "+3.3%" color:green icon:arrow-up
+      BarPair
+        Bar series:"Oct" color:#9AA5B1 value:50.77 width:96.8% label:"$50.77"
+        Bar series:"Nov" color:#2F6FED value:52.43 width:100% label:"$52.43"
+    MetricRow
+      Row align:space-between
+        Text "Return rate" style:label
+        Badge "-0.7 pts" color:green icon:arrow-down tooltip:"Lower is better"
+      BarPair
+        Bar series:"Oct" color:#9AA5B1 value:6.1 width:100% label:"6.1%"
+        Bar series:"Nov" color:#2F6FED value:5.4 width:88.5% label:"5.4%"
+    MetricRow
+      Row align:space-between
+        Text "New customers" style:label
+        Badge "+26.9%" color:green icon:arrow-up
+      BarPair
+        Bar series:"Oct" color:#9AA5B1 value:640 width:78.8% label:"640"
+        Bar series:"Nov" color:#2F6FED value:812 width:100% label:"812"
+  Footer
+    Text "Bars are scaled within each metric. Green badges mark improvements." style:caption color:muted
+  Motion
+    on:load target:Bar animate:grow-from-left duration:600ms easing:ease-out stagger:80ms
+    on:load target:Badge animate:fade-in delay:500ms duration:250ms
+    on:hover target:Bar animate:brighten show:tooltip duration:150ms

@@ -1,0 +1,142 @@
+page "Running Shoes" title:"Stride – Running Shoes" background:#fff font:sans-serif max-width:1280 
+
+  navbar sticky:top height:64 background:#fff shadow:on-scroll
+    logo "Stride" weight:bold size:24 link:/
+    nav-links
+      link "Men" active:true
+      link "Women"
+      link "Kids"
+      link "Sale" color:red
+    search placeholder:"Search shoes, brands…" width:360 icon:magnifier
+      state focus: width:480 border:#111 transition:200ms
+      suggestions dropdown appear-on:typing delay:250ms
+    icon-button "Account" icon:user
+    icon-button icon:cart label:"Cart" badge:"3" badge-color:red
+      state hover: scale:1.08 transition:150ms
+      on-add-item: badge bounce duration:300ms
+
+  breadcrumb separator:"/" margin-y:16
+    link "Home" href:/
+    link "Men" href:/men
+    text "Running Shoes" current:true
+
+  heading level:1 "Running Shoes"
+
+  layout columns:"260px 1fr" gap:32
+
+    sidebar filter-panel sticky:top offset:80
+      header
+        text "Filters" weight:bold
+        link "Clear all" color:blue visible-when:filters-active
+      filter-group "Brand" collapsible:true expanded:true
+        checkbox "Nike" count:42
+        checkbox "Adidas" count:36
+        checkbox "Hoka" count:28
+        checkbox "Asics" count:22
+        on-change: update results, show loading overlay on grid, duration:300ms
+      filter-group "Price" collapsible:true expanded:true
+        range-slider min:50 max:250 step:5 value:"50–250" thumbs:2
+          label-left "$50"
+          label-right "$250"
+          tooltip show-on:drag format:"$value"
+      filter-group "Size" collapsible:true expanded:true
+        button-group columns:3 gap:8 selection:multiple
+          button "7"
+          button "8"
+          button "9" selected:true
+          button "10"
+          button "11"
+          button "12" disabled:true tooltip:"Out of stock"
+          state selected: background:#111 color:#fff
+          state hover: border:#111
+      filter-group "Color" collapsible:true expanded:true
+        swatches shape:circle size:28 gap:10 selection:multiple
+          swatch "Black" color:#111
+          swatch "White" color:#fff border:#ccc
+          swatch "Red" color:#d32f2f
+          swatch "Blue" color:#1976d2
+          swatch "Green" color:#388e3c
+          swatch "Grey" color:#9e9e9e
+          swatch "Orange" color:#f57c00
+          state selected: ring:2px #111 checkmark:true
+          state hover: tooltip:color-name
+
+    main
+      toolbar layout:row justify:space-between align:center margin-bottom:16
+        text "128 results" color:#555
+        dropdown label:"Sort by:" value:"Popular"
+          option "Popular" selected:true
+          option "Newest"
+          option "Price: Low to High"
+          option "Price: High to Low"
+          option "Top Rated"
+
+      grid columns:4 gap:24 responsive:"tablet:3, mobile:2"
+        product-card hover:lift shadow:on-hover transition:200ms
+          image "Nike Pegasus 41" ratio:1/1 hover:swap-to-alt-view
+          wishlist-button icon:heart position:top-right toggle:true
+          text "Nike Pegasus 41" weight:600
+          rating value:4.5 max:5 reviews:"(312)"
+          price "$129.00"
+        product-card
+          image "Adidas Ultraboost Light" ratio:1/1
+          badge "Sale" color:red position:top-left
+          wishlist-button icon:heart
+          text "Adidas Ultraboost Light"
+          rating value:4.7 reviews:"(528)"
+          price "$149.00" color:red
+          old-price "$190.00" strikethrough:true color:#888
+        product-card
+          image "Hoka Clifton 9" ratio:1/1
+          wishlist-button icon:heart
+          text "Hoka Clifton 9"
+          rating value:4.8 reviews:"(764)"
+          price "$145.00"
+        product-card
+          image "Asics Gel-Nimbus 26" ratio:1/1
+          badge "Sale" color:red position:top-left
+          wishlist-button icon:heart
+          text "Asics Gel-Nimbus 26"
+          rating value:4.6 reviews:"(401)"
+          price "$119.00" color:red
+          old-price "$160.00" strikethrough:true color:#888
+        product-card
+          image "Nike Invincible 3" ratio:1/1
+          wishlist-button icon:heart
+          text "Nike Invincible 3"
+          rating value:4.4 reviews:"(219)"
+          price "$179.00"
+        product-card
+          image "Adidas Adizero SL" ratio:1/1
+          wishlist-button icon:heart
+          text "Adidas Adizero SL"
+          rating value:4.2 reviews:"(147)"
+          price "$99.00"
+        product-card
+          image "Hoka Mach 6" ratio:1/1
+          badge "Sale" color:red position:top-left
+          wishlist-button icon:heart
+          text "Hoka Mach 6"
+          rating value:4.5 reviews:"(186)"
+          price "$109.00" color:red
+          old-price "$140.00" strikethrough:true color:#888
+        product-card
+          image "Asics Novablast 4" ratio:1/1
+          wishlist-button icon:heart
+          text "Asics Novablast 4"
+          rating value:4.6 reviews:"(293)"
+          price "$139.00"
+
+      loading-overlay visible:false background:rgba(255,255,255,0.7) spinner:true
+        shown-when: filters or sort changing, fade:200ms
+        grid-items animate:skeleton-shimmer
+
+      pagination align:center margin-top:40
+        button "‹ Prev" disabled:true
+        button "1" current:true background:#111 color:#fff
+        button "2"
+        button "3"
+        text "…"
+        button "16"
+        button "Next ›"
+        on-click: scroll-to-top smooth duration:400ms, update grid

@@ -1,0 +1,74 @@
+Column scroll
+  Row between pad:[24,16,24,16] fill:#FFFFFFFF
+    Row gap:8
+      Icon "balance"
+      Text.heading "Harbor Legal"
+    Row gap:4
+      Button.ghost "Home" -> link https://harborlegal.com
+      Button.ghost "Practice areas" -> link https://harborlegal.com/practice
+      Button.ghost "Attorneys" -> link https://harborlegal.com/attorneys
+      Button.ghost "Contact"
+  Divider
+  Column gap:32 pad:24 maxw:1100
+    Column gap:8 animate:fade
+      Text.pageTitle "Get in touch"
+      Text.bodySecondary "Tell us about your matter and an attorney will respond within one business day."
+    Row gap:24 top
+      Card grow gap:12 animate:slide-up
+        Text.panelTitle "Send us a message"
+        Input "Full name" "Jane Doe" =name
+        Input "Email" "you@example.com" =email type:email
+        Input "Phone" "(206) 555-0100" =phone type:phone
+        Text.fieldLabel "Topic"
+        Select =topic items:["General","Billing","Partnership"]
+        Input "Message" "How can we help?" =message multiline
+        Checkbox "I agree to be contacted about my inquiry" =consent
+        Button "Send message" -> emit send; toast "Message sent"
+      Column grow gap:12 animate:slide-up delay:100
+        Card gap:4
+          Row gap:12
+            Icon "place"
+            Column
+              Text.strong "Address"
+              Text.bodySecondary "221 Pier St, Seattle WA"
+        Card gap:4
+          Row gap:12
+            Icon "phone"
+            Column
+              Text.strong "Phone"
+              Text.bodySecondary "(206) 555-0142"
+        Card gap:4
+          Row gap:12
+            Icon "mail"
+            Column
+              Text.strong "Email"
+              Text.bodySecondary "hello@harborlegal.com"
+        Card gap:4
+          Row gap:12
+            Icon "schedule"
+            Column
+              Text.strong "Hours"
+              Text.bodySecondary "Mon-Fri 9-6"
+        node {"type": "Embed", "props": {"url": "https://www.openstreetmap.org/export/embed.html?bbox=-122.3500%2C47.6000%2C-122.3300%2C47.6120&layer=mapnik&marker=47.6062%2C-122.3400", "h": 220, "radius": 12}}
+    Text.heading2 "Our offices"
+    Row gap:16 top
+      Card grow gap:4
+        Text.heading3 "Seattle"
+        Text.bodySecondary "221 Pier St, Seattle WA"
+        Text.bodySecondary "(206) 555-0142"
+      Card grow gap:4
+        Text.heading3 "Portland"
+        Text.bodySecondary "Portland, OR"
+        Text.bodySecondary "By appointment"
+      Card grow gap:4
+        Text.heading3 "San Francisco"
+        Text.bodySecondary "San Francisco, CA"
+        Text.bodySecondary "By appointment"
+  Box fill:#FF1F2937 pad:24 gap:8
+    Row between
+      Text.strong "Harbor Legal" color:#FFFFFFFF
+      Row gap:16
+        Text.small "Privacy" color:#FFD1D5DB
+        Text.small "Terms" color:#FFD1D5DB
+        Text.small "Careers" color:#FFD1D5DB
+    Text.small "© 2025 Harbor Legal LLP. Attorney advertising. Prior results do not guarantee a similar outcome." color:#FF9CA3AF

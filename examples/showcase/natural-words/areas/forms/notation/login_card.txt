@@ -1,0 +1,24 @@
+state email=""
+state pw=""
+state showPw=false
+state remember=false
+state failed=true
+
+Column center pad:24 maxw:420
+  Card gap:16
+    Row gap:8 center
+      Icon "account_balance"
+      Text.heading2 "Harbor Bank"
+    Text.bodySecondary "Sign in to your account"
+    if failed
+      Box fill:#FFFDECEA radius:8 pad:12 border:#FFD93025
+        Row gap:8 center
+          Icon "error" color:#FFD93025
+          Text "Incorrect email or password. 2 attempts left." color:#FF8C1D18 grow
+    Input "Email" hint:"you@example.com" type:email =email
+    Input "Password" password:=!showPw =pw
+    Toggle "Show password" =showPw
+    Row between center
+      Checkbox "Remember me" =remember
+      Button.ghost "Forgot password?" -> link https://harborbank.example/forgot-password
+    Button "Sign in" -> emit signin

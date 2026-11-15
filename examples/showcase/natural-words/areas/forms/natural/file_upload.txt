@@ -1,0 +1,34 @@
+Card "Apply for Senior Designer" width:480 padding:24 radius:12 elevation:2 background:white
+  Header
+    Text "Senior Designer" style:title weight:bold
+    Text "Product Design · Remote" style:caption color:gray
+  Form gap:16 direction:column
+    Field "Full name" type:text placeholder:"Your full name" required:true value:"Maria Alvarez"
+    Field "Email" type:email placeholder:"you@example.com" required:true value:"maria@example.com" keyboard:email autocomplete:email
+    Section "Resume" gap:8
+      Label "Resume" required:true
+      Row "resume-upload" align:center gap:12 padding:12 border:1 radius:8 background:#F7F8FA
+        Icon "file-pdf" size:24 color:red
+        Column grow:1 gap:6
+          Text "maria_resume.pdf · 1.2 MB" style:body truncate:middle
+          ProgressBar value:72 max:100 height:6 radius:3 color:blue track:#E3E6EB state:uploading animate:fill duration:300ms easing:ease-out
+          Text "72% uploaded" style:caption color:gray live:polite
+        IconButton "X" icon:close label:"Remove resume" size:32 hover:background-#E3E6EB action:remove-file
+    Field "Portfolio link" type:url placeholder:"https://yourportfolio.com" keyboard:url helper:"Link to your best work"
+    Section "Cover letter" gap:8
+      Label "Cover letter" optional:true
+      DropZone accept:"application/pdf" height:120 border:dashed 2 radius:8 align:center justify:center direction:column gap:8 background:#FAFBFC
+        Icon "upload-cloud" size:32 color:gray
+        Text "Drag a PDF here or browse" style:body
+          Link "browse" action:open-file-picker
+        states
+          hover border-color:blue background:#F0F6FF
+          dragover border-color:blue background:#E5F0FF scale:1.02 transition:150ms
+          error border-color:red text:"Only PDF files are accepted"
+  Footer margin-top:24
+    Button "Submit application" style:primary width:full height:48 radius:8 action:submit
+      states
+        hover background:darker
+        pressed scale:0.98
+        loading label:"Submitting…" spinner:true disabled:true
+        disabled when:resume-uploading opacity:0.5 tooltip:"Wait for resume upload to finish"

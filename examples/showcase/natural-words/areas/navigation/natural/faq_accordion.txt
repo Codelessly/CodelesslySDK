@@ -1,0 +1,40 @@
+screen "Help Center" background:#F7F7F9 padding:16
+  header
+    text "Help Center" style:title weight:bold size:24
+    text "Gym Membership FAQ" style:subtitle color:#6B7280
+  searchfield placeholder:"Search questions" icon:search margin-top:12
+  accordion id:faq mode:single-open default-open:none gap:8 margin-top:16
+    item id:cancel state:collapsed
+      question "How do I cancel my membership?" icon:chevron-down
+      answer "You can cancel anytime from Account > Membership > Cancel Membership, or at the front desk. Cancellations need 30 days' notice, and you keep full access until the end of your billing period."
+    item id:freeze state:collapsed
+      question "Can I freeze my membership?" icon:chevron-down
+      answer "Yes. Freeze your membership for 1 to 3 months for medical, travel or personal reasons. Go to Account > Membership > Freeze. A small monthly hold fee of $5 applies, and billing resumes automatically afterward."
+    item id:guest-passes state:collapsed
+      question "How do guest passes work?" icon:chevron-down
+      answer "Every member gets 2 free guest passes per month. Each guest must be 16 or older, bring photo ID and sign a waiver at check-in. Passes don't roll over to the next month."
+    item id:hours state:collapsed
+      question "What are your opening hours?" icon:chevron-down
+      answer
+        text "Monday to Friday: 5:00 AM – 11:00 PM"
+        text "Saturday and Sunday: 7:00 AM – 9:00 PM"
+        text "Holidays: 8:00 AM – 6:00 PM" color:#6B7280
+    item id:payment state:collapsed
+      question "How and when am I billed?" icon:chevron-down
+      answer "Memberships are billed monthly on the date you joined, by credit card, debit card or bank transfer. Update your payment method under Account > Billing. Failed payments are retried after 3 days."
+  behavior on:tap target:item.question
+    if item.state:collapsed
+      action collapse all:other-items
+      action expand item
+      animate duration:250ms easing:ease-in-out property:height
+      animate icon rotate:180deg duration:250ms
+    else
+      action collapse item
+      animate icon rotate:0deg duration:250ms
+  style item background:white radius:12 padding:16 border:1px #E5E7EB
+  style item.state:expanded border-color:#4F46E5 shadow:soft
+  style question weight:semibold size:16 color:#111827
+  style answer size:15 color:#374151 line-height:1.5 margin-top:8
+  footer margin-top:24 align:center
+    text "Still need help?" color:#6B7280
+    button "Contact Support" style:primary background:#4F46E5 color:white radius:8

@@ -1,0 +1,78 @@
+screen "Inbox"
+  header
+    title "Inbox"
+    text "5 emails" style:secondary
+  list id:inbox gap:0 divider:inset scroll:vertical
+    row id:stripe swipe-left:delete swipe-right:archive
+      avatar "S"
+      column
+        line
+          text "Stripe" weight:bold
+          spacer
+          text "9:12 AM" style:secondary size:small
+        text "Your payout of $2,430 is on the way" maxLines:2
+    row id:linear swipe-left:delete swipe-right:archive
+      avatar "L"
+      column
+        line
+          text "Linear" weight:bold
+          spacer
+          text "8:47 AM" style:secondary size:small
+        text "3 issues assigned to you" maxLines:2
+    row id:mom swipe-left:delete swipe-right:archive
+      avatar "M"
+      column
+        line
+          text "Mom" weight:bold
+          spacer
+          text "Yesterday" style:secondary size:small
+        text "Sunday dinner?" maxLines:2
+    row id:github swipe-left:delete swipe-right:archive
+      avatar "G"
+      column
+        line
+          text "GitHub" weight:bold
+          spacer
+          text "Yesterday" style:secondary size:small
+        text "PR #212 approved" maxLines:2
+    row id:figma swipe-left:delete swipe-right:archive
+      avatar "F"
+      column
+        line
+          text "Figma" weight:bold
+          spacer
+          text "Mon" style:secondary size:small
+        text "Anna commented on Checkout flow" maxLines:2
+  swipe-actions applies-to:row
+    left-swipe label:"Delete" icon:trash background:red color:white align:right
+      reveal:follows-finger
+      commit-threshold:40% of width
+      commit-also-on:fast-fling
+      on-commit
+        animate:row slides off-screen-left duration:200ms ease:out
+        animate:row collapses height duration:200ms delay:200ms
+        remove row from inbox
+        show snackbar "Email deleted" action:"Undo"
+    right-swipe label:"Archive" icon:archive background:green color:white align:left
+      reveal:follows-finger
+      commit-threshold:40% of width
+      commit-also-on:fast-fling
+      on-commit
+        animate:row slides off-screen-right duration:200ms ease:out
+        animate:row collapses height duration:200ms delay:200ms
+        remove row from inbox
+        show snackbar "Email archived" action:"Undo"
+    below-threshold
+      on-release animate:row springs back duration:250ms ease:spring
+    past-threshold
+      feedback haptic:light
+      animate:icon scales 1.0 to 1.2 duration:100ms
+  snackbar id:undo hidden position:bottom
+    text "{message}"
+    button "Undo"
+      on-tap restore removed row at original position animate:expand-height duration:200ms
+    auto-dismiss after:5s
+  state empty visible-when:inbox.count=0
+    icon inbox size:large
+    text "Inbox zero" weight:bold
+    text "Nothing new right now" style:secondary

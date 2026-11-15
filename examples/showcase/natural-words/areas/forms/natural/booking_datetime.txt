@@ -1,0 +1,83 @@
+card "Osteria Nonna Reservation" width:360 padding:20 radius:16 elevation:2 gap:20
+  header
+    text "Osteria Nonna" style:title
+    text "Reserve a table" style:subtitle color:muted
+  section "Date" gap:8
+    date-picker mode:single selected:"2026-11-21"
+      calendar-header
+        icon-button icon:chevron-left label:"Previous month"
+        text "November 2026" style:subtitle align:center
+        icon-button icon:chevron-right label:"Next month"
+      weekday-row
+        text "Su"
+        text "Mo"
+        text "Tu"
+        text "We"
+        text "Th"
+        text "Fr"
+        text "Sa"
+      week-row
+        day "1"
+        day "2"
+        day "3"
+        day "4"
+        day "5"
+        day "6"
+        day "7"
+      week-row
+        day "8"
+        day "9"
+        day "10"
+        day "11"
+        day "12"
+        day "13"
+        day "14"
+      week-row
+        day "15"
+        day "16"
+        day "17"
+        day "18"
+        day "19"
+        day "20"
+        day "21" state:selected background:accent color:on-accent shape:circle
+      week-row
+        day "22"
+        day "23"
+        day "24"
+        day "25"
+        day "26"
+        day "27"
+        day "28"
+      week-row
+        day "29"
+        day "30"
+        day empty
+        day empty
+        day empty
+        day empty
+        day empty
+      on-select-day: move selection highlight to tapped day, animate:scale-pop duration:150ms
+      on-change-month: slide grid horizontally, animate:slide duration:250ms
+  section "Time" gap:8
+    chip-row wrap:false scroll:horizontal gap:8 selection:single
+      chip "6:00 PM"
+      chip "6:30 PM"
+      chip "7:00 PM" state:selected background:accent color:on-accent
+      chip "7:30 PM"
+      chip "8:00 PM" state:unavailable disabled:true opacity:0.4 text-decoration:line-through
+      on-select-chip: cross-fade fill, animate duration:150ms
+  section "Party size" gap:8
+    stepper value:4 min:1 max:12 step:1
+      icon-button icon:minus label:"Decrease party size"
+      text "4" style:value align:center
+      icon-button icon:plus label:"Increase party size"
+      on-change: animate:number-roll duration:150ms
+      at-min: disable minus
+      at-max: disable plus
+    text "guests" color:muted
+  button "Reserve" variant:primary width:fill height:48
+    enabled-when: date and time and party-size selected
+    on-press: scale:0.97 duration:100ms
+    on-submit: show spinner replacing label, disabled:true
+    on-success: label "Reserved ✓" background:success animate:cross-fade duration:200ms
+  text "Sat, Nov 21 · 7:00 PM · 4 guests" style:caption color:muted align:center

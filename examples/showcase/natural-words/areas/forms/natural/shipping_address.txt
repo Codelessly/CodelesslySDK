@@ -1,0 +1,29 @@
+Card id:shipping-address-form width:480 padding:24 radius:12 elevation:2 background:surface
+  Header
+    Text "Shipping Address" style:title weight:semibold
+    Text "Where should we send your order?" style:caption color:muted
+  Form layout:column gap:16 margin-top:20
+    TextField label:"Full name" name:fullName value:"Maria Gonzalez" autocomplete:name required:true state:valid
+    TextField label:"Street address" name:street placeholder:"123 Main St" autocomplete:street-address required:true
+    TextField label:"Apartment (optional)" name:apartment placeholder:"Apt, suite, unit" autocomplete:address-line2 required:false
+    TextField label:"City" name:city autocomplete:address-level2 required:true
+    Row gap:12 align:start
+      Dropdown label:"State" name:state placeholder:"Select state" width:50% required:true autocomplete:address-level1
+        Option "Alabama" value:AL
+        Option "Arizona" value:AZ
+        Option "California" value:CA
+        Option "Colorado" value:CO
+        Option "Florida" value:FL
+        Option "Illinois" value:IL
+        Option "New York" value:NY
+        Option "Texas" value:TX
+        Option "Washington" value:WA
+        Option "More states…" disabled:true
+      TextField label:"ZIP code" name:zip value:"9021" width:50% inputmode:numeric maxlength:5 autocomplete:postal-code required:true state:error
+        ErrorText "ZIP must be 5 digits" color:danger icon:alert-circle role:alert
+        Animation on:error-appear type:shake duration:300ms
+    TextField label:"Phone" name:phone placeholder:"(555) 123-4567" inputmode:tel autocomplete:tel required:true
+  Footer margin-top:24
+    Button "Save address" variant:primary width:100% height:48 type:submit
+      State pressed scale:0.98 duration:100ms
+      State loading on:submit content:spinner disabled:true

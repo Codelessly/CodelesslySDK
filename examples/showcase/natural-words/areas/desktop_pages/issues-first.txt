@@ -1,0 +1,3 @@
+saas_landing: line 103:12: A Card has no variants: write Card, with props as key:value.
+admin_dashboard: line 57:11: No node type "PieChart". A node line takes the document's own type names (column, row, stack, text, icon, customPaint…): see the reference's nodes page.
+contact_page: line 55:7: No node type "WebView". A node line takes the document's own type names (column, row, stack, text, icon, customPaint…): see the reference's nodes page.

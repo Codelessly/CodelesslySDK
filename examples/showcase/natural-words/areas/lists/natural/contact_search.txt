@@ -1,0 +1,45 @@
+Card width:360 padding:16 radius:12 elevation:2
+  State query:"" visible-contacts:filter(contacts, name or department contains query, ignore-case)
+  SearchBox placeholder:"Search contacts" icon:search value:@query autofocus:true
+    on-input update:query debounce:100ms
+    ClearButton icon:close visible-when:query-not-empty on-tap:set query "" focus:SearchBox
+  Text "{visible-contacts.count} of 6 contacts" style:caption color:muted aria-live:polite
+  List gap:4 scroll:auto max-height:400
+    ListItem name:"Maya Patel" department:"Design"
+      Avatar "MP"
+      Column
+        Text "Maya Patel" style:title
+        Text "Design" style:subtitle color:muted
+    ListItem name:"Jonas Weber" department:"Engineering"
+      Avatar "JW"
+      Column
+        Text "Jonas Weber" style:title
+        Text "Engineering" style:subtitle color:muted
+    ListItem name:"Aiko Tanaka" department:"Marketing"
+      Avatar "AT"
+      Column
+        Text "Aiko Tanaka" style:title
+        Text "Marketing" style:subtitle color:muted
+    ListItem name:"Luis Ortega" department:"Sales"
+      Avatar "LO"
+      Column
+        Text "Luis Ortega" style:title
+        Text "Sales" style:subtitle color:muted
+    ListItem name:"Priya Nair" department:"Engineering"
+      Avatar "PN"
+      Column
+        Text "Priya Nair" style:title
+        Text "Engineering" style:subtitle color:muted
+    ListItem name:"Sam O'Connor" department:"Support"
+      Avatar "SO"
+      Column
+        Text "Sam O'Connor" style:title
+        Text "Support" style:subtitle color:muted
+    Behavior item-filtered-out animate:fade-and-collapse duration:150ms
+    Behavior item-filtered-in animate:fade-and-expand duration:150ms
+    Behavior order:stable
+    Behavior highlight-match:true in:name,department
+  EmptyState visible-when:visible-contacts.count=0 animate:fade-in duration:200ms
+    Icon search-off
+    Text "No contacts match “{query}”"
+    Button "Clear search" style:text on-tap:set query ""
