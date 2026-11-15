@@ -1,0 +1,278 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Schedule a meeting",
+    "subtitle": "30 minutes with three colleagues",
+    "icon": "event",
+    "status": "Next week",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "DayPicker1",
+    "SectionLabel2",
+    "ChoiceChips1",
+    "SectionLabel3",
+    "Details1",
+    "TotalBar1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day",
+    "note": "next week"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "DayPicker1": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day",
+    "days": [
+     "Mon 10",
+     "Tue 11",
+     "Wed 12",
+     "Thu 13",
+     "Fri 14"
+    ]
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Time",
+    "note": "30 min"
+   },
+   "bind": {
+    "visible": "${= (!booked) && (day!=\"\")}"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "09:00",
+     "09:30",
+     "10:00",
+     "10:30",
+     "11:00",
+     "11:30",
+     "14:00",
+     "14:30",
+     "15:00",
+     "15:30"
+    ],
+    "disabled": [
+     "10:00",
+     "14:30"
+    ],
+    "columns": 4
+   },
+   "bind": {
+    "visible": "${= (!booked) && (day!=\"\")}"
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Attendees",
+    "note": "3 people"
+   },
+   "bind": {
+    "visible": "${= (!booked) && (time!=\"\")}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Ada Lovelace",
+      "Organizer"
+     ],
+     [
+      "Grace Hopper",
+      "Required"
+     ],
+     [
+      "Alan Turing",
+      "Required"
+     ]
+    ],
+    "icons": [
+     "person",
+     "person",
+     "person"
+    ]
+   },
+   "bind": {
+    "visible": "${= (!booked) && (time!=\"\")}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Booking",
+    "cta": "Confirm",
+    "icon": "check"
+   },
+   "bind": {
+    "props.note": "${day} at ${time}, 30 min",
+    "props.amount": "${time}",
+    "visible": "${= (!booked) && (time!=\"\")}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "booked",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Meeting booked",
+    "message": "Invitations sent to all three attendees.",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.code": "${= day+\" \"+time}",
+    "visible": "${= booked}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "booked",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

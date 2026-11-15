@@ -1,0 +1,294 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pro plan",
+    "subtitle": "Renews in 3 days",
+    "icon": "workspace_premium",
+    "status": "Active"
+   },
+   "children": [
+    "Details1",
+    "SectionLabel1",
+    "progressBar1",
+    "text1",
+    "progressBar2",
+    "text2",
+    "SectionLabel2",
+    "Segments1",
+    "Callout1",
+    "row1"
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Plan\",\"Pro\"],[\"Price\",\"$12 / month\"],[\"Renews\",\"In 3 days\"]]}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Usage"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": 0.72,
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "Storage: 72 of 100 GB used"
+   }
+  },
+  "progressBar2": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": 0.5,
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "Seats: 5 of 10 used"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Billing"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "billing",
+    "options": [
+     "Monthly",
+     "Annual"
+    ]
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Save $24 a year",
+    "message": "Annual billing is $120 a year instead of $144.",
+    "tone": "good",
+    "icon": "savings"
+   },
+   "bind": {
+    "visible": "${= billing==\"Annual\"}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Manage plan",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "manage_plan"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Cancel renewal",
+    "tone": "danger"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "cancel_renewal"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "billing",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

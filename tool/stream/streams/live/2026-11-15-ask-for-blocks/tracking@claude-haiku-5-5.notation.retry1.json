@@ -1,0 +1,158 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Where is my package?",
+    "subtitle": "Order #48213",
+    "icon": "local_shipping",
+    "status": "In transit",
+    "tone": "accent"
+   },
+   "children": [
+    "Details1",
+    "SectionLabel1",
+    "Steps1",
+    "ActionButton1"
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Item",
+      "Wireless keyboard"
+     ],
+     [
+      "Carrier",
+      "DHL Express"
+     ],
+     [
+      "Tracking",
+      "JD014600006"
+     ],
+     [
+      "Estimated delivery",
+      "Thu, 14 Mar"
+     ]
+    ]
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Shipment",
+    "note": "Stage 3 of 5"
+   }
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Ordered",
+     "Packed",
+     "In transit",
+     "Out for delivery",
+     "Delivered"
+    ]
+   },
+   "bind": {
+    "props.current": "${= 3}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Leave delivery instructions",
+    "tone": "quiet",
+    "icon": "edit_note"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

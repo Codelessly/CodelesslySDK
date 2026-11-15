@@ -1,0 +1,104 @@
+{"meta":{"ui":"recipe","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: total time and difficulty, a servings control that scales the ingredient amounts, the ingredients as a checklist I can tick off, the four steps, and a start cooking button.","text":"ChatCard \"Lemon chicken traybake\" \"Weeknight dinner\" icon:\"restaurant\" status:\"Easy\" tone:accent\n  Row gap:8\n    Badge.neutral \"45 min\"\n    Badge.neutral \"Easy\"\n    Badge.neutral \"Serves {servings}\"\n  SectionLabel \"Servings\" \"scales amounts\"\n  Counter \"Servings\" =servings min:1 max:8 step:1\n  SectionLabel \"Ingredients\" \"tick as you go\"\n  Checklist \"Shopping\" =ticked items:[\"4 chicken thighs (about {servings*120} g)\",\"{servings*2} lemons, halved\",\"{servings*2} tbsp olive oil\",\"{servings*3} garlic cloves, crushed\",\"{servings} tsp dried oregano\",\"Salt and black pepper\"]\n  SectionLabel \"Method\" \"four steps\"\n  Paragraph \"1. Heat the oven to 200 °C. Toss the chicken with oil, garlic, oregano, salt and pepper.\"\n  Paragraph \"2. Lay the chicken skin-side up in a traybake dish, tuck in the lemon halves cut side down.\"\n  Paragraph \"3. Roast for 35 to 40 minutes, until the skin is crisp and the juices run clear.\"\n  Paragraph \"4. Squeeze the roasted lemons over the chicken and rest for five minutes before serving.\"\n  TotalBar \"Total time\" \"45 min, {servings} servings\" amount:\"45 min\" cta:\"Start cooking\" icon:\"play_arrow\" -> emit startCooking","usage":{"input_tokens":9130,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":527,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":530,"totalMs":2598}}
+{"tMs":530,"delta":"ChatCard \"L"}
+{"tMs":635,"delta":"emon chicken traybake"}
+{"tMs":635,"delta":"\" \""}
+{"tMs":635,"delta":"Weeknight d"}
+{"tMs":635,"delta":"inner\" icon:\"rest"}
+{"tMs":635,"delta":"aurant\" status:\""}
+{"tMs":640,"delta":"Easy\" tone:acc"}
+{"tMs":661,"delta":"ent\n  Row gap:"}
+{"tMs":680,"delta":"8\n    Bad"}
+{"tMs":701,"delta":"ge.neutral \"45"}
+{"tMs":722,"delta":" min\"\n    Badge"}
+{"tMs":743,"delta":".neutral \"Eas"}
+{"tMs":763,"delta":"y\"\n    Badge."}
+{"tMs":787,"delta":"neutral \"Serves {"}
+{"tMs":808,"delta":"servings}\"\n  S"}
+{"tMs":825,"delta":"ectionLabel \"Serv"}
+{"tMs":845,"delta":"ings\" \"sc"}
+{"tMs":865,"delta":"ales am"}
+{"tMs":886,"delta":"ounts\"\n  Counter"}
+{"tMs":905,"delta":" \""}
+{"tMs":925,"delta":"Servings\" =servings min"}
+{"tMs":945,"delta":":1 max:8"}
+{"tMs":967,"delta":" step:1\n  Sect"}
+{"tMs":987,"delta":"ionLabel \"Ing"}
+{"tMs":1008,"delta":"redients\" \"t"}
+{"tMs":1026,"delta":"ick as"}
+{"tMs":1047,"delta":" you go\"\n  Checkl"}
+{"tMs":1067,"delta":"ist \"Sh"}
+{"tMs":1087,"delta":"op"}
+{"tMs":1114,"delta":"ping\" =tic"}
+{"tMs":1128,"delta":"ked items:[\"4 ch"}
+{"tMs":1148,"delta":"icken thighs (about"}
+{"tMs":1168,"delta":" {"}
+{"tMs":1192,"delta":"servings*"}
+{"tMs":1207,"delta":"120"}
+{"tMs":1229,"delta":"} g)\",\"{"}
+{"tMs":1248,"delta":"servings*2"}
+{"tMs":1268,"delta":"} l"}
+{"tMs":1288,"delta":"emons, hal"}
+{"tMs":1308,"delta":"ved\",\"{"}
+{"tMs":1341,"delta":"servings*2"}
+{"tMs":1350,"delta":"} tbsp olive o"}
+{"tMs":1374,"delta":"il\",\"{servings*3}"}
+{"tMs":1401,"delta":" gar"}
+{"tMs":1410,"delta":"lic cloves, cr"}
+{"tMs":1431,"delta":"ushed\",\"{servings}"}
+{"tMs":1451,"delta":" tsp d"}
+{"tMs":1471,"delta":"ried o"}
+{"tMs":1492,"delta":"regano\",\""}
+{"tMs":1512,"delta":"Salt and black"}
+{"tMs":1537,"delta":" pepper\"]\n  S"}
+{"tMs":1553,"delta":"ectionLabel \"Method"}
+{"tMs":1574,"delta":"\" \"four steps\"\n  "}
+{"tMs":1594,"delta":"Paragraph \"1"}
+{"tMs":1616,"delta":". Heat the"}
+{"tMs":1635,"delta":" oven to 200 °C"}
+{"tMs":1655,"delta":"."}
+{"tMs":1675,"delta":" To"}
+{"tMs":1701,"delta":"ss the chicken with"}
+{"tMs":1716,"delta":" oil, gar"}
+{"tMs":1737,"delta":"lic, oregano,"}
+{"tMs":1757,"delta":" salt and pepper.\""}
+{"tMs":1778,"delta":"\n  Paragraph \"2"}
+{"tMs":1799,"delta":". L"}
+{"tMs":1829,"delta":"ay the chicken sk"}
+{"tMs":1838,"delta":"in-side"}
+{"tMs":1858,"delta":" up"}
+{"tMs":1879,"delta":" in a tra"}
+{"tMs":1899,"delta":"ybake d"}
+{"tMs":1919,"delta":"ish, t"}
+{"tMs":1940,"delta":"uck in"}
+{"tMs":1965,"delta":" the lemon halves c"}
+{"tMs":1985,"delta":"ut side down.\"\n  Pa"}
+{"tMs":2001,"delta":"ragraph \"3. Ro"}
+{"tMs":2028,"delta":"ast for "}
+{"tMs":2041,"delta":"35"}
+{"tMs":2067,"delta":" "}
+{"tMs":2082,"delta":"to 40 minutes,"}
+{"tMs":2103,"delta":" until the sk"}
+{"tMs":2123,"delta":"in is cr"}
+{"tMs":2143,"delta":"isp and the ju"}
+{"tMs":2165,"delta":"ices run"}
+{"tMs":2186,"delta":" clear.\"\n  Parag"}
+{"tMs":2205,"delta":"raph \"4. Sque"}
+{"tMs":2225,"delta":"eze the ro"}
+{"tMs":2246,"delta":"asted lemons over the ch"}
+{"tMs":2269,"delta":"icken and rest for five"}
+{"tMs":2287,"delta":" minutes before serving.\""}
+{"tMs":2309,"delta":"\n  TotalBar \""}
+{"tMs":2327,"delta":"Total"}
+{"tMs":2349,"delta":" time\" \"45"}
+{"tMs":2368,"delta":" min, {"}
+{"tMs":2388,"delta":"servings}"}
+{"tMs":2410,"delta":" serv"}
+{"tMs":2429,"delta":"ings\" am"}
+{"tMs":2450,"delta":"ount:\""}
+{"tMs":2469,"delta":"45 "}
+{"tMs":2492,"delta":"min\" cta:\"Start"}
+{"tMs":2510,"delta":" cooking\" ic"}
+{"tMs":2531,"delta":"on:\"play"}
+{"tMs":2553,"delta":"_arrow\" -"}
+{"tMs":2571,"delta":"> emit start"}
+{"tMs":2592,"delta":"Cooking"}

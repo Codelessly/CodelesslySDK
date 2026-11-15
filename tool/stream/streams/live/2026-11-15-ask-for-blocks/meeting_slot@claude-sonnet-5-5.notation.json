@@ -1,0 +1,275 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Schedule a meeting",
+    "subtitle": "30 minutes with 3 colleagues",
+    "icon": "event",
+    "status": "Next week",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "DayPicker1",
+    "SectionLabel2",
+    "ChoiceChips1",
+    "SectionLabel3",
+    "Details1",
+    "TotalBar1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day",
+    "note": "Next week"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "DayPicker1": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day",
+    "days": [
+     "Mon 16",
+     "Tue 17",
+     "Wed 18",
+     "Thu 19",
+     "Fri 20"
+    ]
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Free time slots",
+    "note": "Greyed out are taken"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "09:00",
+     "09:30",
+     "10:00",
+     "10:30",
+     "11:00",
+     "13:00",
+     "14:00",
+     "15:30"
+    ],
+    "columns": 4
+   },
+   "bind": {
+    "props.disabled": "${= day==\"Mon 16\"?[\"09:30\",\"10:30\",\"14:00\"]:day==\"Tue 17\"?[\"09:00\",\"11:00\",\"13:00\"]:day==\"Wed 18\"?[\"10:00\",\"14:00\",\"15:30\"]:day==\"Thu 19\"?[\"09:00\",\"09:30\",\"13:00\"]:[\"10:30\",\"11:00\",\"15:30\"]}",
+    "visible": "${= !booked}"
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Attending",
+    "note": "4 people"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icons": [
+     "person",
+     "person",
+     "person",
+     "person"
+    ]
+   },
+   "bind": {
+    "props.rows": "${= [[\"You\",\"Organizer\"],[\"Maya Chen\",\"Invited\"],[\"Luis Ortega\",\"Invited\"],[\"Priya Nair\",\"Invited\"]]}",
+    "visible": "${= !booked}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Meeting time",
+    "note": "30 minutes",
+    "cta": "Confirm"
+   },
+   "bind": {
+    "props.amount": "${= time==\"\"?\"Pick a slot\":day+\", \"+time}",
+    "props.enabled": "${= time!=\"\"}",
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "booked",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Meeting booked",
+    "message": "30 minutes with Maya, Luis and Priya. Invitations sent.",
+    "codeLabel": "Booked time",
+    "tone": "good",
+    "icon": "event_available"
+   },
+   "bind": {
+    "props.code": "${= day+\", \"+time}",
+    "visible": "${= booked}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": "Mon 16"
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "booked",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

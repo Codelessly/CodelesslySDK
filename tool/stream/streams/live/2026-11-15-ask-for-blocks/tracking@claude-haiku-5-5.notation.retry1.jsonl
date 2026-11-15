@@ -1,0 +1,30 @@
+{"meta":{"ui":"tracking","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"ChatCard \"Where is my package?\" \"Order #48213\" icon:\"local_shipping\" status:\"In transit\" tone:\"accent\"\n  Details rows:[[\"Item\",\"Wireless keyboard\"],[\"Carrier\",\"DHL Express\"],[\"Tracking\",\"JD014600006\"],[\"Estimated delivery\",\"Thu, 14 Mar\"]]\n  SectionLabel \"Shipment\" \"Stage 3 of 5\"\n  Steps steps:[\"Ordered\",\"Packed\",\"In transit\",\"Out for delivery\",\"Delivered\"] current:=3\n  ActionButton \"Leave delivery instructions\" tone:\"quiet\" icon:\"edit_note\" -> open=true","usage":{"input_tokens":9522,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":220,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1024,"totalMs":1656}}
+{"tMs":1024,"delta":"ChatCard \"Where"}
+{"tMs":1183,"delta":" is my package?\" \"Order"}
+{"tMs":1183,"delta":" #48213\" icon:\""}
+{"tMs":1183,"delta":"local_shipping\" status:"}
+{"tMs":1183,"delta":"\"In transit\" tone:"}
+{"tMs":1183,"delta":"\"accent\"\n  Details"}
+{"tMs":1183,"delta":" rows:["}
+{"tMs":1183,"delta":"[\"Item\",\"Wireless"}
+{"tMs":1184,"delta":" keyboard\"],[\""}
+{"tMs":1206,"delta":"Carrier\",\"DHL"}
+{"tMs":1227,"delta":" Express\"],[\"Tracking"}
+{"tMs":1246,"delta":"\",\"JD014600006\"],"}
+{"tMs":1267,"delta":"[\"Estimated delivery"}
+{"tMs":1359,"delta":"\",\"Thu, 14 "}
+{"tMs":1359,"delta":"Mar\"]]\n  "}
+{"tMs":1359,"delta":"SectionLabel \""}
+{"tMs":1359,"delta":"Shipment\" \"Stage"}
+{"tMs":1369,"delta":" 3 of 5\""}
+{"tMs":1390,"delta":"\n  Steps steps:[\""}
+{"tMs":1410,"delta":"Ordered\",\"Packed"}
+{"tMs":1431,"delta":"\",\"In transit\",\"Out for"}
+{"tMs":1451,"delta":" delivery\",\"Delivered"}
+{"tMs":1471,"delta":"\"] current:="}
+{"tMs":1491,"delta":"3\n  ActionButton"}
+{"tMs":1512,"delta":" \"Leave delivery inst"}
+{"tMs":1647,"delta":"ructions\" tone:\"qu"}
+{"tMs":1647,"delta":"iet\" icon:\"ed"}
+{"tMs":1647,"delta":"it_note\" -> open="}
+{"tMs":1647,"delta":"true"}

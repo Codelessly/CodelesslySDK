@@ -1,0 +1,102 @@
+{"meta":{"ui":"tracking","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"ChatCard \"Your package\" \"Wireless headphones · Order #48213\" icon:\"local_shipping\" status:\"In transit\" tone:accent w:390\n  Details rows:[[\"Item\",\"Wireless headphones, black\"],[\"Carrier\",\"UPS Ground\"],[\"Tracking number\",\"1Z 999 AA1 01 2345 6784\"],[\"Estimated delivery\",\"Thursday, May 16\"]] icons:[\"inventory_2\",\"local_shipping\",\"tag\",\"event\"]\n  SectionLabel \"Shipment progress\" \"Stage 3 of 5\"\n  Steps steps:[\"Ordered\",\"Packed\",\"Shipped\",\"Out for delivery\",\"Delivered\"] current:3\n  Callout \"Now: Shipped\" \"Left the Memphis, TN hub this morning. Next stop: your local depot.\" tone:accent icon:\"place\"\n  if !sent\n    Disclosure \"Delivery instructions\" \"Applies to the next delivery attempt.\" lines:[\"Leave at front door\",\"Leave with neighbor\",\"Hold at pickup point\"] icon:\"edit_note\"\n    InputField \"Delivery instructions\" \"e.g. Leave behind the gate, ring bell\" =note lines:3\n    ActionButton \"Save instructions\" tone:primary icon:\"check\" enabled:=trim(note)!=\"\" -> sent=true; toast \"Instructions saved\"\n  if sent\n    Receipt \"Instructions saved\" \"{note}\" tone:good icon:\"check\"\n\nstate note=\"\"\nstate sent=false","usage":{"input_tokens":9123,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":489,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":692,"totalMs":4035}}
+{"tMs":692,"delta":"ChatCard \"Your"}
+{"tMs":1014,"delta":" package\" \"W"}
+{"tMs":1014,"delta":"ireless head"}
+{"tMs":1014,"delta":"phones · Order"}
+{"tMs":1014,"delta":" #"}
+{"tMs":1014,"delta":"48"}
+{"tMs":1014,"delta":"213"}
+{"tMs":1014,"delta":"\" icon:\"local_sh"}
+{"tMs":1014,"delta":"ipping\" status:\"In trans"}
+{"tMs":1014,"delta":"it\" tone:acc"}
+{"tMs":1014,"delta":"ent w:390"}
+{"tMs":1023,"delta":"\n  "}
+{"tMs":1060,"delta":"Details rows:[[\"Item"}
+{"tMs":1343,"delta":"\",\"Wireless headphones"}
+{"tMs":1343,"delta":","}
+{"tMs":1343,"delta":" black\"],[\"Carrier"}
+{"tMs":1343,"delta":"\",\"U"}
+{"tMs":1343,"delta":"PS "}
+{"tMs":1344,"delta":"Ground\"],[\"Tracking"}
+{"tMs":1344,"delta":" number\",\"1"}
+{"tMs":1344,"delta":"Z 999"}
+{"tMs":1358,"delta":" A"}
+{"tMs":1390,"delta":"A1"}
+{"tMs":1422,"delta":" 01"}
+{"tMs":1458,"delta":" 2"}
+{"tMs":1682,"delta":"345 6784"}
+{"tMs":1682,"delta":"\"],[\"Estimated del"}
+{"tMs":1682,"delta":"ivery\",\"Thursday,"}
+{"tMs":1682,"delta":" May 16"}
+{"tMs":1682,"delta":"\"]]"}
+{"tMs":1682,"delta":" icons:[\"in"}
+{"tMs":1691,"delta":"ventory_"}
+{"tMs":1724,"delta":"2\",\"local_shipping\",\""}
+{"tMs":1758,"delta":"tag\",\"event"}
+{"tMs":1789,"delta":"\""}
+{"tMs":1825,"delta":"]\n  SectionLab"}
+{"tMs":1858,"delta":"el \"Shipment prog"}
+{"tMs":2012,"delta":"ress\" \""}
+{"tMs":2012,"delta":"St"}
+{"tMs":2012,"delta":"age 3 of 5\""}
+{"tMs":2013,"delta":"\n  Steps steps:"}
+{"tMs":2025,"delta":"[\""}
+{"tMs":2060,"delta":"Ordered\",\"Packed\",\""}
+{"tMs":2096,"delta":"Shipped\",\""}
+{"tMs":2127,"delta":"Out for delivery\",\"Del"}
+{"tMs":2161,"delta":"ivered\"] current:3"}
+{"tMs":2194,"delta":"\n  "}
+{"tMs":2228,"delta":"Callout \"Now:"}
+{"tMs":2262,"delta":" Shipped\" \"Left"}
+{"tMs":2353,"delta":" the"}
+{"tMs":2353,"delta":" Mem"}
+{"tMs":2362,"delta":"phis,"}
+{"tMs":2393,"delta":" TN h"}
+{"tMs":2430,"delta":"ub this"}
+{"tMs":2460,"delta":" morning. Next stop:"}
+{"tMs":2493,"delta":" your"}
+{"tMs":2525,"delta":" local dep"}
+{"tMs":2559,"delta":"ot.\" tone:acc"}
+{"tMs":2592,"delta":"ent icon:\"place"}
+{"tMs":2625,"delta":"\""}
+{"tMs":2658,"delta":"\n  if !"}
+{"tMs":2712,"delta":"sent\n    Disclos"}
+{"tMs":2727,"delta":"ure \"Delivery instruct"}
+{"tMs":2762,"delta":"ions\" \"Appl"}
+{"tMs":2793,"delta":"ies to the"}
+{"tMs":2825,"delta":" next del"}
+{"tMs":2859,"delta":"ivery attempt.\" lines"}
+{"tMs":2893,"delta":":[\"Leave at front"}
+{"tMs":2930,"delta":" door\",\"Leave with ne"}
+{"tMs":2960,"delta":"ighbor\",\"H"}
+{"tMs":2993,"delta":"old at p"}
+{"tMs":3029,"delta":"ickup point"}
+{"tMs":3059,"delta":"\""}
+{"tMs":3097,"delta":"] icon:\"ed"}
+{"tMs":3126,"delta":"it_"}
+{"tMs":3161,"delta":"note\"\n    "}
+{"tMs":3193,"delta":"InputField \"Delivery"}
+{"tMs":3226,"delta":" instructions\" \"e"}
+{"tMs":3261,"delta":".g. Leave beh"}
+{"tMs":3293,"delta":"ind the g"}
+{"tMs":3326,"delta":"ate,"}
+{"tMs":3359,"delta":" "}
+{"tMs":3400,"delta":"ring b"}
+{"tMs":3425,"delta":"ell\""}
+{"tMs":3457,"delta":" =note"}
+{"tMs":3491,"delta":" lines:3"}
+{"tMs":3525,"delta":"\n    ActionButton \""}
+{"tMs":3559,"delta":"Save inst"}
+{"tMs":3591,"delta":"ructions\" tone:primary"}
+{"tMs":3625,"delta":" icon:\"check"}
+{"tMs":3659,"delta":"\" enabled:=tr"}
+{"tMs":3693,"delta":"im(note)!=\"\" -"}
+{"tMs":3727,"delta":"> sent=true; to"}
+{"tMs":3760,"delta":"ast \"Instructions saved"}
+{"tMs":3798,"delta":"\"\n  if sent\n    "}
+{"tMs":3827,"delta":"Receipt \"Inst"}
+{"tMs":3860,"delta":"ructions sa"}
+{"tMs":3972,"delta":"ved\" \"{"}
+{"tMs":3972,"delta":"note}\" tone:good ic"}
+{"tMs":3972,"delta":"on:\"check\"\n\nstate note"}
+{"tMs":3996,"delta":"=\"\"\nstate sent=false"}
