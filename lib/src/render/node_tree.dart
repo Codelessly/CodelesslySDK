@@ -1224,20 +1224,23 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   /// [n] carrying the text direction it lays out in (Flutter's
   /// Directionality: its own `textDirection`, else the nearest one above it),
-  /// with its directional padding and margin (`{"start", "end"}`) resolved to
-  /// sides for that direction, so everything after reads plain insets.
+  /// with its directional padding and margin (`{"start", "end"}`) and stroke
+  /// sides (`start`, `end`, `noStart`, `noEnd`) resolved to sides for that
+  /// direction, so everything after reads physical values.
   Node _withDirection(Node n) {
     final own = n.behaviors.textDirection;
     final dir = own ?? _slot.direction;
     final rtl = dir == api.TextDirection.rtl;
     final layout = n.layout;
     final directional = layout.padding.directional || layout.margin.directional;
-    if (dir == own && !directional) return n;
+    final sides = n.decoration.strokeSides;
+    if (dir == own && !directional && !sides.directional) return n;
     return n.copyWith(
       behaviors: dir == own ? null : n.behaviors.copyWith(textDirection: dir),
       layout: directional
           ? layout.copyWith(padding: layout.padding.resolve(rtl: rtl), margin: layout.margin.resolve(rtl: rtl))
           : null,
+      decoration: sides.directional ? n.decoration.copyWith(strokeSides: sides.resolve(rtl: rtl)) : null,
     );
   }
 
