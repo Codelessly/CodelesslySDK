@@ -140,6 +140,18 @@ void main() {
       expect(registered['Geist glyphs'], [2]);
     });
 
+    test('a later layout\'s new characters for a font already drawn are the next glyph family', () async {
+      // On the web a family's later file of the same weight adds no glyphs:
+      // Tack's shortcuts sheet (← → ⌫) after its board (⇧ ↵ ⌘) drew them in
+      // the platform's font.
+      final fetcher = _Glyphs();
+      final registered = <String>[];
+      final fonts = CodelesslyFonts(fetcher: fetcher, register: (family, _) async => registered.add(family));
+      await fonts.load([const PublishFont(id: 'm5', family: 'Geist Mono', weight: 500)], text: 'Shift ⇧');
+      await fonts.addText('Move ← → ⌫');
+      expect(registered, ['Geist Mono', 'Geist Mono glyphs', 'Geist Mono glyphs 2']);
+    });
+
     test('text of latin characters alone fetches no extra file', () async {
       CodelesslyFonts.resetGlyphs();
       final fetcher = _Glyphs();
@@ -179,8 +191,9 @@ void main() {
     FontDemand.glyphFallback = true;
     addTearDown(() => FontDemand.glyphFallback = false);
     // Tack's "Add an item and press ↵" placeholder drew ↵ as a box.
-    expect(ownStyle(const api.TextStyle(fontFamily: 'Geist')).fontFamilyFallback, ['Geist glyphs']);
-    expect(applyTextStyle(const api.TextStyle(fontFamily: 'Geist'), const TextStyle()).fontFamilyFallback, ['Geist glyphs']);
+    const glyphs = ['Geist glyphs', 'Geist glyphs 2', 'Geist glyphs 3', 'Geist glyphs 4'];
+    expect(ownStyle(const api.TextStyle(fontFamily: 'Geist')).fontFamilyFallback, glyphs);
+    expect(applyTextStyle(const api.TextStyle(fontFamily: 'Geist'), const TextStyle()).fontFamilyFallback, glyphs);
     expect(ownStyle(const api.TextStyle(fontSize: 12)).fontFamilyFallback, isNull);
   });
 }
