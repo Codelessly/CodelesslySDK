@@ -1,0 +1,65 @@
+{
+ "ui": "poll",
+ "kind": "page",
+ "model": "claude-sonnet-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21158,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1368,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 751,
+   "totalMs": 7541,
+   "chars": 3124,
+   "lines": 4,
+   "jsonTails": 0,
+   "nodes": 22,
+   "outputTokensPerNode": "62.2",
+   "notationIssues": [
+    "line 22:34: A control is bound to a variable by its name (=name), or under an each to a field of its element (=row.name): \"(item.pct)\" is neither."
+   ],
+   "notes": [],
+   "messages": 4,
+   "errors": []
+  },
+  {
+   "input_tokens": 22609,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2029,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 845
+   },
+   "ttftMs": 9015,
+   "totalMs": 14272,
+   "chars": 2497,
+   "lines": 3,
+   "jsonTails": 0,
+   "nodes": 14,
+   "outputTokensPerNode": "144.9",
+   "notationIssues": [],
+   "notes": [],
+   "messages": 3,
+   "errors": []
+  }
+ ]
+}

@@ -1,0 +1,107 @@
+{"meta":{"ui":"now_playing","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show what is playing right now as an inline music card: the track, artist and album art, a progress bar with elapsed and remaining time, previous, play or pause and next controls, a like button, and the next three tracks in the queue.","text":"state playing=true\nstate liked=false\nstate elapsed=84\nstate total=215\nstate queue=[{\"t\":\"Midnight City\",\"a\":\"M83\"},{\"t\":\"Electric Feel\",\"a\":\"MGMT\"},{\"t\":\"Genesis\",\"a\":\"Grimes\"}]\nevery 1s when playing -> elapsed=elapsed<total?elapsed+1:0\n\nCard w:390 gap:14 pad:16\n  Row gap:14 middle\n    Media kind:laptop tone:lilac w:84 h:84\n    Column grow gap:4\n      Text.eyebrow \"NOW PLAYING\"\n      Text.heading \"Neon Skyline\"\n      Text.bodySecondary \"The Midnight\"\n      Text.caption \"Album: Endless Summer\"\n    IconButton \"{liked?'favorite':'favorite_border'}\" -> liked=!liked\n  Column gap:6\n    Progress =elapsed/total\n    Row between\n      Text.caption \"{floor(elapsed/60)}:{elapsed%60<10?'0':''}{elapsed%60}\"\n      Text.caption \"-{floor((total-elapsed)/60)}:{(total-elapsed)%60<10?'0':''}{(total-elapsed)%60}\"\n  Row center middle gap:20\n    IconButton \"skip_previous\" -> elapsed=0\n    IconButton \"{playing?'pause_circle':'play_circle'}\" size:48 -> playing=!playing\n    IconButton \"skip_next\" -> elapsed=0\n  Divider\n  Text.eyebrow \"UP NEXT\"\n  each q in queue\n    Row gap:12 middle\n      Icon \"music_note\"\n      Column grow\n        Text.rowTitle \"{q.t}\"\n        Text.caption \"{q.a}\"","usage":{"input_tokens":7976,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":591,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":630,"totalMs":4228}}
+{"tMs":630,"delta":"state"}
+{"tMs":935,"delta":" playing=true"}
+{"tMs":935,"delta":"\nstate li"}
+{"tMs":935,"delta":"ked=false\nstate elaps"}
+{"tMs":935,"delta":"ed=84"}
+{"tMs":935,"delta":"\nstate total"}
+{"tMs":935,"delta":"=215"}
+{"tMs":935,"delta":"\nstate queue=[{\""}
+{"tMs":935,"delta":"t"}
+{"tMs":950,"delta":"\":\"Mid"}
+{"tMs":983,"delta":"night City"}
+{"tMs":1017,"delta":"\",\"a\":\"M"}
+{"tMs":1051,"delta":"83\"},{\"t\":\""}
+{"tMs":1257,"delta":"Elect"}
+{"tMs":1257,"delta":"ric Fe"}
+{"tMs":1257,"delta":"el\",\"a\":\"M"}
+{"tMs":1257,"delta":"GM"}
+{"tMs":1257,"delta":"T\"},{\"t\":\""}
+{"tMs":1257,"delta":"Gen"}
+{"tMs":1285,"delta":"esis\",\"a\":\"Gr"}
+{"tMs":1326,"delta":"im"}
+{"tMs":1351,"delta":"es\"}]\nevery 1"}
+{"tMs":1385,"delta":"s when playing -"}
+{"tMs":1418,"delta":"> elapsed=el"}
+{"tMs":1452,"delta":"apsed<total?elap"}
+{"tMs":1579,"delta":"sed+1:0"}
+{"tMs":1579,"delta":"\n\nCard w:390 g"}
+{"tMs":1585,"delta":"ap:14"}
+{"tMs":1618,"delta":" "}
+{"tMs":1651,"delta":"pad:16\n  Row"}
+{"tMs":1685,"delta":" g"}
+{"tMs":1718,"delta":"ap:14"}
+{"tMs":1751,"delta":" middle\n    Media k"}
+{"tMs":1787,"delta":"ind:la"}
+{"tMs":1818,"delta":"ptop t"}
+{"tMs":1851,"delta":"one:l"}
+{"tMs":1893,"delta":"ilac w:84"}
+{"tMs":1919,"delta":" h:84\n    Column"}
+{"tMs":1951,"delta":" gr"}
+{"tMs":1986,"delta":"ow gap:4"}
+{"tMs":2018,"delta":"\n      Text.eyeb"}
+{"tMs":2052,"delta":"row \"N"}
+{"tMs":2085,"delta":"OW PLAYING\""}
+{"tMs":2118,"delta":"\n      Text.he"}
+{"tMs":2152,"delta":"ading \""}
+{"tMs":2185,"delta":"Ne"}
+{"tMs":2221,"delta":"on Sk"}
+{"tMs":2251,"delta":"y"}
+{"tMs":2285,"delta":"line\"\n      Text.b"}
+{"tMs":2318,"delta":"odySecondary \"The"}
+{"tMs":2352,"delta":" Mid"}
+{"tMs":2385,"delta":"night\""}
+{"tMs":2418,"delta":"\n      Text.ca"}
+{"tMs":2451,"delta":"ption \"Album"}
+{"tMs":2485,"delta":": End"}
+{"tMs":2518,"delta":"less Summ"}
+{"tMs":2552,"delta":"er\"\n    IconButton"}
+{"tMs":2589,"delta":" \"{"}
+{"tMs":2622,"delta":"li"}
+{"tMs":2651,"delta":"ked?'favorite':"}
+{"tMs":2685,"delta":"'favorite_border'}"}
+{"tMs":2718,"delta":"\" -> li"}
+{"tMs":2752,"delta":"ked=!liked\n  "}
+{"tMs":2786,"delta":"Column gap:6\n    "}
+{"tMs":2818,"delta":"Progress =elapsed/"}
+{"tMs":2852,"delta":"total\n    Row between"}
+{"tMs":2885,"delta":"\n      Text.ca"}
+{"tMs":2919,"delta":"ption \"{flo"}
+{"tMs":2952,"delta":"or(elapsed/60"}
+{"tMs":2985,"delta":")}:{el"}
+{"tMs":3022,"delta":"apsed%60<10?"}
+{"tMs":3054,"delta":"'0':''"}
+{"tMs":3089,"delta":"}{elapsed%60"}
+{"tMs":3120,"delta":"}\"\n      Text.ca"}
+{"tMs":3152,"delta":"ption \"-{floor((total"}
+{"tMs":3185,"delta":"-elapsed)/60"}
+{"tMs":3219,"delta":")}:{(total-el"}
+{"tMs":3252,"delta":"apsed)%60<10"}
+{"tMs":3286,"delta":"?'0':''}{("}
+{"tMs":3319,"delta":"total-elapsed)%"}
+{"tMs":3352,"delta":"60}\"\n  Row center"}
+{"tMs":3386,"delta":" middle gap:20"}
+{"tMs":3419,"delta":"\n    IconButton \"sk"}
+{"tMs":3452,"delta":"ip_previous\" -> el"}
+{"tMs":3486,"delta":"apsed=0\n    I"}
+{"tMs":3519,"delta":"conButton \"{playing?"}
+{"tMs":3553,"delta":"'pause_circle':'"}
+{"tMs":3586,"delta":"play_circle'}\" size"}
+{"tMs":3619,"delta":":48"}
+{"tMs":3653,"delta":" -> playing=!play"}
+{"tMs":3686,"delta":"ing\n    IconButton \""}
+{"tMs":3719,"delta":"skip_next\" -> el"}
+{"tMs":3753,"delta":"apsed=0\n  "}
+{"tMs":3790,"delta":"Divider\n  Text.e"}
+{"tMs":3820,"delta":"yebrow \"U"}
+{"tMs":3853,"delta":"P NEXT\"\n  "}
+{"tMs":3900,"delta":"each q"}
+{"tMs":3920,"delta":" in queue\n    "}
+{"tMs":3953,"delta":"Row gap:12"}
+{"tMs":3987,"delta":" middle\n      Ic"}
+{"tMs":4019,"delta":"on \"music_note\"\n      "}
+{"tMs":4053,"delta":"Column grow\n        Text"}
+{"tMs":4086,"delta":".rowTitle \"{"}
+{"tMs":4119,"delta":"q.t}\"\n        "}
+{"tMs":4153,"delta":"Text.caption \"{q."}
+{"tMs":4186,"delta":"a}\""}

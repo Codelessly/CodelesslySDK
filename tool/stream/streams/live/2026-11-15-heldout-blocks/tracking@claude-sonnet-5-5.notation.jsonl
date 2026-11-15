@@ -1,0 +1,110 @@
+{"meta":{"ui":"tracking","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"ChatCard \"Wireless Headphones\" \"Order #48213 · Arriving Thursday\" icon:\"local_shipping\" status:\"In transit\" tone:accent w:390\n  Details rows:[[\"Carrier\",\"UPS Ground\"],[\"Tracking\",\"1Z999AA10123456784\"],[\"Estimated delivery\",\"Thursday, May 16\"]]\n  SectionLabel \"Shipment progress\" \"Stage 3 of 5\"\n  Steps steps:[\"Ordered\",\"Packed\",\"Shipped\",\"Out for delivery\",\"Delivered\"] current:3\n  Details rows:[[\"Ordered\",\"May 12 · 9:14 AM\"],[\"Packed\",\"May 12 · 4:40 PM\"],[\"Shipped\",\"May 13 · Louisville, KY\"],[\"Out for delivery\",\"Pending\"],[\"Delivered\",\"Pending\"]]\n  Callout \"Currently: Shipped\" \"Your package left the Louisville hub and is on its way to your local facility.\" tone:accent icon:\"local_shipping\"\n  state showNote=false\n  state note=\"\"\n  state saved=false\n  if saved\n    Receipt \"Instructions saved\" \"The driver will see your note.\" tone:good\n  if !saved\n    Disclosure \"Delivery instructions\" \"Optional\" lines:[\"Leave at front door\",\"Ring the bell\",\"Leave with neighbor\"]\n    ActionButton \"Leave delivery instructions\" tone:quiet icon:\"edit\" -> showNote=!showNote\n    if showNote\n      InputField \"Instructions\" \"e.g. Leave behind the gate\" =note lines:3\n      ActionButton \"Save instructions\" tone:primary enabled:=length(note)>0 -> saved=true; toast \"Saved\"","usage":{"input_tokens":7977,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":561,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":768,"totalMs":4378}}
+{"tMs":768,"delta":"ChatCard \"W"}
+{"tMs":1097,"delta":"ireless Head"}
+{"tMs":1097,"delta":"phones\" \"Order"}
+{"tMs":1097,"delta":" #48"}
+{"tMs":1097,"delta":"213"}
+{"tMs":1097,"delta":" · Ar"}
+{"tMs":1097,"delta":"ri"}
+{"tMs":1097,"delta":"ving"}
+{"tMs":1097,"delta":" Thursday\" icon:\""}
+{"tMs":1097,"delta":"local_shipping\" status:"}
+{"tMs":1097,"delta":"\"In transit\" tone:"}
+{"tMs":1102,"delta":"accent w"}
+{"tMs":1137,"delta":":390\n  Details"}
+{"tMs":1404,"delta":" rows:[[\"Car"}
+{"tMs":1404,"delta":"rier\",\"U"}
+{"tMs":1404,"delta":"PS "}
+{"tMs":1404,"delta":"Ground\"],[\"Tracking"}
+{"tMs":1404,"delta":"\",\"1"}
+{"tMs":1404,"delta":"Z999"}
+{"tMs":1404,"delta":"A"}
+{"tMs":1404,"delta":"A10"}
+{"tMs":1432,"delta":"123456784"}
+{"tMs":1468,"delta":"\"],[\"Estimated del"}
+{"tMs":1503,"delta":"ivery\",\"Thursday,"}
+{"tMs":1536,"delta":" May 16"}
+{"tMs":1723,"delta":"\"]]\n  Section"}
+{"tMs":1723,"delta":"Label \"Sh"}
+{"tMs":1723,"delta":"ipment prog"}
+{"tMs":1723,"delta":"ress\" \"St"}
+{"tMs":1723,"delta":"age 3 of 5\""}
+{"tMs":1740,"delta":"\n  Steps steps:"}
+{"tMs":1772,"delta":"[\""}
+{"tMs":1806,"delta":"Ordered\",\"Packed"}
+{"tMs":1839,"delta":"\",\"Sh"}
+{"tMs":1872,"delta":"ipped\",\"Out for"}
+{"tMs":1907,"delta":" delivery\",\"Delivered"}
+{"tMs":1941,"delta":"\"] current:3\n  "}
+{"tMs":2045,"delta":"Details"}
+{"tMs":2045,"delta":" rows:[[\""}
+{"tMs":2045,"delta":"Ordered\",\"May"}
+{"tMs":2073,"delta":" 12"}
+{"tMs":2106,"delta":" · 9:14"}
+{"tMs":2141,"delta":" AM\"],[\"Pack"}
+{"tMs":2175,"delta":"ed\",\"May 12 · "}
+{"tMs":2207,"delta":"4"}
+{"tMs":2239,"delta":":40"}
+{"tMs":2274,"delta":" PM\"],[\"Sh"}
+{"tMs":2308,"delta":"ipped\",\"May 13 ·"}
+{"tMs":2340,"delta":" Lou"}
+{"tMs":2400,"delta":"isville, KY\"],[\""}
+{"tMs":2408,"delta":"Out for delivery\",\""}
+{"tMs":2442,"delta":"Pending\"],[\"Deliv"}
+{"tMs":2476,"delta":"ered\",\"Pending\"]]"}
+{"tMs":2510,"delta":"\n  Callout \"Curr"}
+{"tMs":2542,"delta":"ently:"}
+{"tMs":2575,"delta":" Sh"}
+{"tMs":2609,"delta":"ipped\" \"Your package left"}
+{"tMs":2642,"delta":" the"}
+{"tMs":2707,"delta":" Louisville h"}
+{"tMs":2740,"delta":"ub and"}
+{"tMs":2774,"delta":" is on its way to"}
+{"tMs":2807,"delta":" your local facility.\" tone:"}
+{"tMs":2841,"delta":"accent icon:\"local"}
+{"tMs":2875,"delta":"_shipping\"\n  state"}
+{"tMs":2907,"delta":" show"}
+{"tMs":2940,"delta":"N"}
+{"tMs":2974,"delta":"ote=false\n  state note"}
+{"tMs":3007,"delta":"=\"\"\n  state"}
+{"tMs":3041,"delta":" sa"}
+{"tMs":3074,"delta":"ved=false\n  if sa"}
+{"tMs":3107,"delta":"ved"}
+{"tMs":3140,"delta":"\n    Receipt \"Inst"}
+{"tMs":3174,"delta":"ructions saved\" \"The"}
+{"tMs":3207,"delta":" driver will see"}
+{"tMs":3240,"delta":" your"}
+{"tMs":3275,"delta":" note.\" tone:good"}
+{"tMs":3307,"delta":"\n  if"}
+{"tMs":3340,"delta":" !saved\n    "}
+{"tMs":3374,"delta":"Disclosure \"Del"}
+{"tMs":3408,"delta":"ivery instructions\" \""}
+{"tMs":3441,"delta":"Optional\""}
+{"tMs":3474,"delta":" lines:[\"Leave at"}
+{"tMs":3508,"delta":" front door\",\""}
+{"tMs":3540,"delta":"Ring the"}
+{"tMs":3574,"delta":" bell\",\"Le"}
+{"tMs":3607,"delta":"ave with ne"}
+{"tMs":3640,"delta":"ighbor\"]"}
+{"tMs":3674,"delta":"\n    ActionButton \""}
+{"tMs":3707,"delta":"Le"}
+{"tMs":3741,"delta":"ave delivery instructions\""}
+{"tMs":3774,"delta":" tone:quiet icon"}
+{"tMs":3808,"delta":":\"edit\" -> show"}
+{"tMs":3841,"delta":"Note=!"}
+{"tMs":3875,"delta":"showNote\n    if showN"}
+{"tMs":3909,"delta":"ote\n      InputField \""}
+{"tMs":3943,"delta":"Instructions\" \"e.g"}
+{"tMs":3975,"delta":"."}
+{"tMs":4132,"delta":" Leave beh"}
+{"tMs":4132,"delta":"ind the gate\" =note l"}
+{"tMs":4132,"delta":"ines:3"}
+{"tMs":4132,"delta":"\n      ActionButton \""}
+{"tMs":4141,"delta":"Save inst"}
+{"tMs":4175,"delta":"ructions\" tone:primary"}
+{"tMs":4209,"delta":" enabled:="}
+{"tMs":4242,"delta":"length(note)>0 -"}
+{"tMs":4275,"delta":"> sa"}
+{"tMs":4309,"delta":"ved=true;"}
+{"tMs":4342,"delta":" toast \"Sa"}
+{"tMs":4375,"delta":"ved\""}

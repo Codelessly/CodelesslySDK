@@ -1,0 +1,1 @@
+I have four expenses waiting for my approval from one report. Show them in a card with merchant, category, date and amount, flag the one missing a receipt, let me approve or reject each, and show the approved total and a submit button.

@@ -1,0 +1,75 @@
+{"meta":{"ui":"recipe","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: total time and difficulty, a servings control that scales the ingredient amounts, the ingredients as a checklist I can tick off, the four steps, and a start cooking button.","text":"Card w:390 gap:14 pad:16\n  state servings=4\n  state have=[]\n  state started=false\n  Media kind:bread tone:sand h:140\n  Text.heading2 \"Weeknight Lemon Chicken Traybake\"\n  Row gap:8\n    Badge.info \"45 min\"\n    Badge.success \"Easy\"\n  Counter \"Servings\" \"Amounts scale automatically\" =servings min:1 max:12\n  SectionLabel \"Ingredients\" \"{length(have)} of 6 ticked\"\n  Checklist \"Gather\" =have items:=[round(servings*0.5,1)+\" kg chicken thighs\",servings*0.5+\" lemons\",round(servings*0.75,1)+\" tbsp olive oil\",servings*200+\" g baby potatoes\",servings+\" garlic cloves\",round(servings*0.5,1)+\" tsp dried oregano\"]\n  SectionLabel \"Method\" \"4 steps\"\n  Steps steps:[\"Prep\",\"Roast\",\"Add lemon\",\"Rest\"] current:1\n  Column gap:8\n    Paragraph \"1. Heat the oven to 220°C. Toss potatoes with oil, oregano and salt on a large tray.\"\n    Paragraph \"2. Nestle the chicken among the potatoes, skin side up, and roast for 20 minutes.\"\n    Paragraph \"3. Add lemon wedges and garlic, then roast 15 minutes more until golden.\"\n    Paragraph \"4. Rest for 5 minutes, spoon over the pan juices and serve.\"\n  if started\n    Callout \"Cooking started\" \"Oven on at 220°C. Follow the four steps above.\" tone:good\n  ActionButton \"Start cooking\" tone:primary icon:\"play_arrow\" -> started=true; emit startCooking","usage":{"input_tokens":8652,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":591,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":623,"totalMs":3098}}
+{"tMs":623,"delta":"Card w:390 gap"}
+{"tMs":916,"delta":":14 pad:16"}
+{"tMs":916,"delta":"\n  state servings=4\n  "}
+{"tMs":916,"delta":"state have=[]\n  state"}
+{"tMs":916,"delta":" started=false\n  Media k"}
+{"tMs":916,"delta":"ind:bread tone:s"}
+{"tMs":916,"delta":"and h:140\n  Text"}
+{"tMs":916,"delta":".heading2 \"We"}
+{"tMs":916,"delta":"eknight Lemon"}
+{"tMs":922,"delta":" Chicken Traybake\""}
+{"tMs":956,"delta":"\n  Row gap:8"}
+{"tMs":989,"delta":"\n    Badge.info \""}
+{"tMs":1023,"delta":"45 min\"\n    Bad"}
+{"tMs":1234,"delta":"ge.success \"Easy\""}
+{"tMs":1234,"delta":"\n  Counter \"Serv"}
+{"tMs":1234,"delta":"ings\" \"Amounts sc"}
+{"tMs":1234,"delta":"ale automatically\" =servings"}
+{"tMs":1234,"delta":" min:1 max:12"}
+{"tMs":1234,"delta":"\n  SectionLabel"}
+{"tMs":1256,"delta":" \"Ingredients\" \""}
+{"tMs":1289,"delta":"{length(have)} of "}
+{"tMs":1322,"delta":"6 ticked\"\n  "}
+{"tMs":1356,"delta":"Checklist \"Gather"}
+{"tMs":1389,"delta":"\" =have items:=[round"}
+{"tMs":1422,"delta":"(servings*0.5,"}
+{"tMs":1551,"delta":"1)+\" kg chic"}
+{"tMs":1551,"delta":"ken thighs\",serv"}
+{"tMs":1551,"delta":"ings*0.5+\" l"}
+{"tMs":1555,"delta":"emons\",round(servings*"}
+{"tMs":1588,"delta":"0.75,1)+\""}
+{"tMs":1622,"delta":" tbsp olive oil"}
+{"tMs":1655,"delta":"\",servings*200+\" g"}
+{"tMs":1688,"delta":" baby potatoes\",serv"}
+{"tMs":1722,"delta":"ings+\" garlic clo"}
+{"tMs":1758,"delta":"ves\",round(servings*0"}
+{"tMs":1791,"delta":".5,1)+\" t"}
+{"tMs":1822,"delta":"sp dried oregano\""}
+{"tMs":1876,"delta":"]\n  SectionLab"}
+{"tMs":1889,"delta":"el \"Method\" \"4 "}
+{"tMs":1922,"delta":"steps\"\n  Steps"}
+{"tMs":1955,"delta":" steps:[\"Prep\",\""}
+{"tMs":1989,"delta":"Roast\",\"Add lem"}
+{"tMs":2022,"delta":"on\",\"Rest\"] current"}
+{"tMs":2056,"delta":":1\n  Column gap"}
+{"tMs":2090,"delta":":8\n    Paragra"}
+{"tMs":2122,"delta":"ph \"1. Heat the"}
+{"tMs":2155,"delta":" oven to 220°C."}
+{"tMs":2189,"delta":" Toss potatoes with"}
+{"tMs":2223,"delta":" oil, oregano and sal"}
+{"tMs":2255,"delta":"t on a large tray.\""}
+{"tMs":2289,"delta":"\n    Paragraph \"2"}
+{"tMs":2322,"delta":". Nestle the chic"}
+{"tMs":2355,"delta":"ken among the potatoes,"}
+{"tMs":2389,"delta":" skin side up, and roast"}
+{"tMs":2422,"delta":" for 20 minutes.\""}
+{"tMs":2456,"delta":"\n    Paragraph \""}
+{"tMs":2489,"delta":"3. Add lemon w"}
+{"tMs":2522,"delta":"edges and garlic, then"}
+{"tMs":2556,"delta":" roast 15 minutes"}
+{"tMs":2589,"delta":" more until golden.\"\n    "}
+{"tMs":2623,"delta":"Paragraph \"4."}
+{"tMs":2656,"delta":" Rest for 5 minut"}
+{"tMs":2689,"delta":"es, spoon over the p"}
+{"tMs":2723,"delta":"an juices and serve.\""}
+{"tMs":2756,"delta":"\n  if started\n    Callout"}
+{"tMs":2789,"delta":" \"Cooking started\" \""}
+{"tMs":2822,"delta":"Oven on at 220°"}
+{"tMs":2856,"delta":"C. Follow the four ste"}
+{"tMs":2889,"delta":"ps above.\" tone:good"}
+{"tMs":2922,"delta":"\n  ActionButton \""}
+{"tMs":2956,"delta":"Start cooking\" tone:"}
+{"tMs":2990,"delta":"primary icon:\"play_"}
+{"tMs":3023,"delta":"arrow\" -> started="}
+{"tMs":3056,"delta":"true; emit startCooking"}

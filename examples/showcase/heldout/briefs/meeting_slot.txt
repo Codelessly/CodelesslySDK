@@ -1,0 +1,1 @@
+Help me schedule a 30 minute meeting with three colleagues next week: let me pick a day, then one of the free time slots that day (some are taken), show who is attending, and confirm. After confirming the card shows the booked time.

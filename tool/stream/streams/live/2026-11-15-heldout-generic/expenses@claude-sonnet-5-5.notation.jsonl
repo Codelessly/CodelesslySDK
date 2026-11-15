@@ -1,0 +1,141 @@
+{"meta":{"ui":"expenses","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"I have four expenses waiting for my approval from one report. Show them in a card with merchant, category, date and amount, flag the one missing a receipt, let me approve or reject each, and show the approved total and a submit button.","text":"state expenses=[{\"id\":1,\"merchant\":\"Delta Airlines\",\"category\":\"Travel\",\"date\":\"Mar 4\",\"amount\":412.50,\"receipt\":true,\"status\":\"pending\"},{\"id\":2,\"merchant\":\"Marriott Downtown\",\"category\":\"Lodging\",\"date\":\"Mar 5\",\"amount\":289.00,\"receipt\":true,\"status\":\"pending\"},{\"id\":3,\"merchant\":\"Uber\",\"category\":\"Transport\",\"date\":\"Mar 5\",\"amount\":36.80,\"receipt\":false,\"status\":\"pending\"},{\"id\":4,\"merchant\":\"Blue Door Bistro\",\"category\":\"Meals\",\"date\":\"Mar 6\",\"amount\":74.25,\"receipt\":true,\"status\":\"pending\"}]\nCard w:390 gap:12\n  Row between middle\n    Column gap:2\n      Text.heading \"Expense approvals\"\n      Text.muted \"{count(expenses,e=>e.status=='pending')} of {length(expenses)} waiting\"\n    Badge.info \"{length(expenses)} items\"\n  Divider\n  each e in expenses\n    Column gap:8\n      Row between top\n        Column gap:2 grow\n          Text.strong \"{e.merchant}\"\n          Text.caption \"{e.category} · {e.date}\"\n        Text.strong \"{money(e.amount,'$',2)}\"\n      if !e.receipt\n        Row gap:4 middle\n          Icon \"warning\" color:#FFB45309\n          Text.small \"Missing receipt\" color:#FFB45309\n      Row gap:8 middle\n        if e.status==\"pending\"\n          Button.outline \"Reject\" -> expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,\"status\",\"rejected\"))\n          Button \"Approve\" -> expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,\"status\",\"approved\"))\n        if e.status==\"approved\"\n          Badge.success \"Approved\"\n          Spacer grow\n          Button.ghost \"Undo\" -> expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,\"status\",\"pending\"))\n        if e.status==\"rejected\"\n          Badge.error \"Rejected\"\n          Spacer grow\n          Button.ghost \"Undo\" -> expenses=updateWhere(expenses,x=>x.id==e.id,x=>with(x,\"status\",\"pending\"))\n      Divider\n  Row between middle\n    Text \"Approved total\"\n    Text.heading \"{money(sum(filter(expenses,e=>e.status=='approved'),e=>e.amount),'$',2)}\"\n  Button \"Submit\" enabled:=count(expenses,e=>e.status=='pending')==0 -> emit submit; toast \"Report submitted\"","usage":{"input_tokens":3214,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":914,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":918,"totalMs":5572}}
+{"tMs":918,"delta":"state"}
+{"tMs":1214,"delta":" expenses=[{\"id"}
+{"tMs":1214,"delta":"\":1,\"merchant\":"}
+{"tMs":1214,"delta":"\"Delta Airlines"}
+{"tMs":1214,"delta":"\",\"category\":\"Trav"}
+{"tMs":1214,"delta":"el\",\"date\":\"Mar"}
+{"tMs":1214,"delta":" 4\",\"am"}
+{"tMs":1214,"delta":"ount\":412"}
+{"tMs":1214,"delta":".50,\"receipt\":"}
+{"tMs":1233,"delta":"true,\"status\":\"pending"}
+{"tMs":1266,"delta":"\"},{\"id\":2,"}
+{"tMs":1300,"delta":"\"merchant\":\"Mar"}
+{"tMs":1332,"delta":"riott Down"}
+{"tMs":1520,"delta":"town\",\"category\":\"L"}
+{"tMs":1520,"delta":"odging\",\"date\":\"M"}
+{"tMs":1520,"delta":"ar 5\",\"amount\":289"}
+{"tMs":1520,"delta":".00"}
+{"tMs":1520,"delta":",\"receipt\":true,"}
+{"tMs":1533,"delta":"\"status\":\"pending\"},"}
+{"tMs":1566,"delta":"{\"id\":3,\"mer"}
+{"tMs":1599,"delta":"chant\":\""}
+{"tMs":1632,"delta":"Uber\",\""}
+{"tMs":1666,"delta":"category\":\"Trans"}
+{"tMs":1700,"delta":"port\",\"date\":\"Mar"}
+{"tMs":1732,"delta":" 5"}
+{"tMs":1829,"delta":"\",\"amount\":36"}
+{"tMs":1829,"delta":".80,\"receipt\":"}
+{"tMs":1832,"delta":"false,\"status\":\"pending"}
+{"tMs":1866,"delta":"\"},{\"id\":4,"}
+{"tMs":1899,"delta":"\"merchant\":\"Bl"}
+{"tMs":1933,"delta":"ue Door"}
+{"tMs":1965,"delta":" B"}
+{"tMs":1999,"delta":"istro\",\"category\":\"Me"}
+{"tMs":2032,"delta":"als\",\"date\":\"Mar"}
+{"tMs":2067,"delta":" 6\",\"amount\":74"}
+{"tMs":2101,"delta":".25,\"receipt\":"}
+{"tMs":2136,"delta":"true,\"status\":\"pending"}
+{"tMs":2167,"delta":"\"}]\nCard w:"}
+{"tMs":2199,"delta":"390 gap:12"}
+{"tMs":2232,"delta":"\n  Row"}
+{"tMs":2266,"delta":" between midd"}
+{"tMs":2299,"delta":"le\n    Column"}
+{"tMs":2332,"delta":" gap:2"}
+{"tMs":2366,"delta":"\n      Text.heading \""}
+{"tMs":2399,"delta":"Expense"}
+{"tMs":2432,"delta":" appro"}
+{"tMs":2465,"delta":"v"}
+{"tMs":2499,"delta":"als\"\n      Text.mu"}
+{"tMs":2532,"delta":"ted \"{count(expenses"}
+{"tMs":2566,"delta":",e=>e.status="}
+{"tMs":2599,"delta":"='pending')} of {"}
+{"tMs":2632,"delta":"length(expenses)} wa"}
+{"tMs":2665,"delta":"iting\"\n    Bad"}
+{"tMs":2699,"delta":"ge.info \"{"}
+{"tMs":2732,"delta":"length(expenses)}"}
+{"tMs":2765,"delta":" items\"\n  "}
+{"tMs":2799,"delta":"Divider\n  each e"}
+{"tMs":2832,"delta":" in expenses\n    Column"}
+{"tMs":2866,"delta":" gap:8"}
+{"tMs":2899,"delta":"\n      Row between"}
+{"tMs":2932,"delta":" top"}
+{"tMs":2965,"delta":"\n        Column gap:2"}
+{"tMs":2999,"delta":" grow\n          Text."}
+{"tMs":3038,"delta":"strong \"{e.merch"}
+{"tMs":3066,"delta":"ant}\"\n          Text."}
+{"tMs":3099,"delta":"ca"}
+{"tMs":3133,"delta":"ption \"{e.category} ·"}
+{"tMs":3166,"delta":" {e.date}\"\n        "}
+{"tMs":3199,"delta":"Text.str"}
+{"tMs":3232,"delta":"ong \"{money(e.am"}
+{"tMs":3266,"delta":"ount,'$',2)}"}
+{"tMs":3299,"delta":"\"\n      if !e.rece"}
+{"tMs":3333,"delta":"ipt\n        Row"}
+{"tMs":3366,"delta":" gap:4 "}
+{"tMs":3399,"delta":"middle\n          Icon \""}
+{"tMs":3432,"delta":"warning\" color:#FF"}
+{"tMs":3465,"delta":"B"}
+{"tMs":3499,"delta":"45"}
+{"tMs":3532,"delta":"309"}
+{"tMs":3565,"delta":"\n          Text.small"}
+{"tMs":3598,"delta":" \""}
+{"tMs":3632,"delta":"Missing receipt\" color"}
+{"tMs":3665,"delta":":#FFB45309"}
+{"tMs":3709,"delta":"\n      Row gap:8 "}
+{"tMs":3733,"delta":"middle\n        if"}
+{"tMs":3765,"delta":" e.status==\"p"}
+{"tMs":3799,"delta":"ending\"\n          Button"}
+{"tMs":3832,"delta":".outline \"Re"}
+{"tMs":3865,"delta":"ject\" -> expenses="}
+{"tMs":3899,"delta":"updateWhere(expen"}
+{"tMs":3932,"delta":"ses,x=>x.id"}
+{"tMs":3965,"delta":"==e.id,x=>"}
+{"tMs":3999,"delta":"with(x,\"status\",\"r"}
+{"tMs":4032,"delta":"ejected\"))\n          Button"}
+{"tMs":4066,"delta":" \"Approve\" -> exp"}
+{"tMs":4099,"delta":"enses=updateWhere"}
+{"tMs":4132,"delta":"(expenses,x=>"}
+{"tMs":4166,"delta":"x.id==e.id,"}
+{"tMs":4199,"delta":"x=>with(x,\""}
+{"tMs":4232,"delta":"status\",\"approved\"))\n        "}
+{"tMs":4266,"delta":"if e.status==\"approved"}
+{"tMs":4299,"delta":"\"\n          Badge.success"}
+{"tMs":4333,"delta":" \"Approved\"\n          "}
+{"tMs":4365,"delta":"Spacer grow\n          "}
+{"tMs":4399,"delta":"Button.ghost \"Und"}
+{"tMs":4433,"delta":"o\" -> expenses="}
+{"tMs":4465,"delta":"updateWhere(expen"}
+{"tMs":4499,"delta":"ses,x=>x.id"}
+{"tMs":4533,"delta":"==e.id,x=>"}
+{"tMs":4566,"delta":"with(x,\"status\",\"p"}
+{"tMs":4599,"delta":"ending\"))\n        if e."}
+{"tMs":4637,"delta":"status==\"rejected\""}
+{"tMs":4666,"delta":"\n          Badge.error \""}
+{"tMs":4699,"delta":"Rejected\"\n          Sp"}
+{"tMs":4732,"delta":"acer grow\n          Button"}
+{"tMs":4766,"delta":".ghost \"Undo"}
+{"tMs":4799,"delta":"\" -> expenses=upd"}
+{"tMs":4832,"delta":"ateWhere(expenses"}
+{"tMs":4866,"delta":",x=>x.id=="}
+{"tMs":4902,"delta":"e.id,x=>with"}
+{"tMs":4933,"delta":"(x,\"status\",\"pending"}
+{"tMs":4966,"delta":"\"))\n      Divider"}
+{"tMs":4999,"delta":"\n  Row between midd"}
+{"tMs":5033,"delta":"le\n    Text \"Appro"}
+{"tMs":5066,"delta":"ved total\"\n    Text."}
+{"tMs":5100,"delta":"heading \""}
+{"tMs":5132,"delta":"{money(sum(filter"}
+{"tMs":5168,"delta":"(expenses,e"}
+{"tMs":5199,"delta":"=>e.status=='appro"}
+{"tMs":5232,"delta":"ved'),e"}
+{"tMs":5285,"delta":"=>e.amount),'"}
+{"tMs":5299,"delta":"$',2)}\"\n  "}
+{"tMs":5332,"delta":"Button \""}
+{"tMs":5366,"delta":"Submit\" en"}
+{"tMs":5399,"delta":"abled:=count(expen"}
+{"tMs":5433,"delta":"ses,e=>e.status"}
+{"tMs":5466,"delta":"=='pending')==0 "}
+{"tMs":5499,"delta":"-> emit submit; to"}
+{"tMs":5532,"delta":"ast \"Report"}
+{"tMs":5566,"delta":" submitted\""}

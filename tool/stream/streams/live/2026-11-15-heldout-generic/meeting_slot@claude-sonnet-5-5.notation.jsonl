@@ -1,0 +1,121 @@
+{"meta":{"ui":"meeting_slot","model":"claude-sonnet-5-5","form":"notation","turn":"generate","prompt":"Help me schedule a 30 minute meeting with three colleagues next week: let me pick a day, then one of the free time slots that day (some are taken), show who is attending, and confirm. After confirming the card shows the booked time.","text":"state day=\"\"\nstate slot=\"\"\nstate booked=false\nstate slots=[{\"t\":\"9:00 AM\",\"free\":true},{\"t\":\"9:30 AM\",\"free\":false},{\"t\":\"10:00 AM\",\"free\":true},{\"t\":\"10:30 AM\",\"free\":true},{\"t\":\"11:00 AM\",\"free\":false},{\"t\":\"1:00 PM\",\"free\":true},{\"t\":\"1:30 PM\",\"free\":true},{\"t\":\"2:00 PM\",\"free\":false},{\"t\":\"3:00 PM\",\"free\":true}]\nCard w:390 gap:12\n  Row between middle\n    Text.title \"Team sync\"\n    Badge.info \"30 min\"\n  if !booked\n    Text.fieldLabel \"Attendees\"\n    Row gap:8\n      Chip \"Ana\"\n      Chip \"Ben\"\n      Chip \"Chloe\"\n    Divider\n    Text.fieldLabel \"Pick a day (next week)\"\n    Row gap:8 scroll\n      ChoiceChip \"Mon\" selected:=day==\"Mon\" -> day=\"Mon\"; slot=\"\"\n      ChoiceChip \"Tue\" selected:=day==\"Tue\" -> day=\"Tue\"; slot=\"\"\n      ChoiceChip \"Wed\" selected:=day==\"Wed\" -> day=\"Wed\"; slot=\"\"\n      ChoiceChip \"Thu\" selected:=day==\"Thu\" -> day=\"Thu\"; slot=\"\"\n      ChoiceChip \"Fri\" selected:=day==\"Fri\" -> day=\"Fri\"; slot=\"\"\n    if day!=\"\"\n      Text.fieldLabel \"Available times on {day}\"\n      Grid cols:3 gap:8\n        each s in slots\n          ChoiceChip \"{s.t}\" selected:=slot==s.t enabled:=s.free -> slot=s.t\n      Text.caption \"Greyed-out times are already taken.\"\n    Button \"Confirm meeting\" enabled:=day!=\"\" && slot!=\"\" -> booked=true; emit confirm slot; toast \"Meeting booked\"\n  if booked\n    Row gap:8 middle\n      Icon \"check_circle\"\n      Text.strong \"Meeting booked\"\n    Text.heading \"{day}, {slot}\"\n    Text.muted \"30 minutes with Ana, Ben and Chloe\"\n    Button.outline \"Reschedule\" -> booked=false","usage":{"input_tokens":3218,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":771,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":582,"totalMs":4571}}
+{"tMs":582,"delta":"state"}
+{"tMs":889,"delta":" day=\"\"\nstate slot="}
+{"tMs":889,"delta":"\"\"\nstate booked=false"}
+{"tMs":889,"delta":"\nstate slots=[{\"t"}
+{"tMs":889,"delta":"\":\"9"}
+{"tMs":889,"delta":":00 "}
+{"tMs":889,"delta":"AM\",\"free"}
+{"tMs":889,"delta":"\":true},{\"t\":\""}
+{"tMs":890,"delta":"9:30 AM\",\"free"}
+{"tMs":900,"delta":"\":false"}
+{"tMs":934,"delta":"},{\"t\":\"10:"}
+{"tMs":969,"delta":"00 AM\",\"free\":true"}
+{"tMs":1003,"delta":"},{\"t\":\"10:"}
+{"tMs":1206,"delta":"30 AM\",\"free\":true"}
+{"tMs":1206,"delta":"},{\"t\":\"11:"}
+{"tMs":1206,"delta":"00 AM\",\"free\":false"}
+{"tMs":1206,"delta":"},{\"t\":\"1:"}
+{"tMs":1206,"delta":"00 PM\",\"free\":true"}
+{"tMs":1206,"delta":"},{\"t\":\"1"}
+{"tMs":1236,"delta":":30 PM\",\"free\":"}
+{"tMs":1268,"delta":"true},{\"t\":\"2"}
+{"tMs":1302,"delta":":00 PM\",\"free\":"}
+{"tMs":1336,"delta":"false},"}
+{"tMs":1368,"delta":"{\"t\":\"3:00"}
+{"tMs":1402,"delta":" PM\",\"free\":true}"}
+{"tMs":1521,"delta":"]\nCard w:390"}
+{"tMs":1521,"delta":" gap:12"}
+{"tMs":1521,"delta":"\n  "}
+{"tMs":1534,"delta":"Row"}
+{"tMs":1568,"delta":" between midd"}
+{"tMs":1601,"delta":"le\n    Text.title \""}
+{"tMs":1635,"delta":"Team"}
+{"tMs":1668,"delta":" s"}
+{"tMs":1702,"delta":"ync\"\n    Badge."}
+{"tMs":1735,"delta":"info \"30"}
+{"tMs":1768,"delta":" min\"\n  if"}
+{"tMs":1801,"delta":" !booked\n    Text."}
+{"tMs":1853,"delta":"fieldLabel \""}
+{"tMs":1874,"delta":"Att"}
+{"tMs":1902,"delta":"endees\"\n    Row g"}
+{"tMs":1935,"delta":"ap:8\n      Ch"}
+{"tMs":1970,"delta":"ip \"Ana\""}
+{"tMs":2003,"delta":"\n      Chip \""}
+{"tMs":2035,"delta":"Ben\"\n      Chip \""}
+{"tMs":2068,"delta":"Chlo"}
+{"tMs":2101,"delta":"e\"\n    Div"}
+{"tMs":2135,"delta":"ider\n    Text.fie"}
+{"tMs":2168,"delta":"ldLabel \"Pick"}
+{"tMs":2201,"delta":" a day ("}
+{"tMs":2236,"delta":"next week)\"\n    Row"}
+{"tMs":2268,"delta":" gap:8 "}
+{"tMs":2301,"delta":"scroll\n      Cho"}
+{"tMs":2334,"delta":"iceChip \"Mon"}
+{"tMs":2368,"delta":"\" selected:=day==\""}
+{"tMs":2401,"delta":"Mon\" -> day=\""}
+{"tMs":2434,"delta":"Mon\"; slot="}
+{"tMs":2468,"delta":"\"\"\n      Choice"}
+{"tMs":2501,"delta":"Chip \"Tue\" sel"}
+{"tMs":2534,"delta":"ected:=day==\"T"}
+{"tMs":2568,"delta":"ue\" -> day=\"T"}
+{"tMs":2601,"delta":"ue\"; slot=\"\""}
+{"tMs":2634,"delta":"\n      ChoiceChip"}
+{"tMs":2668,"delta":" \"Wed\" selected:"}
+{"tMs":2701,"delta":"=day==\"Wed\""}
+{"tMs":2735,"delta":" -> day=\"Wed\""}
+{"tMs":2768,"delta":"; slot=\"\"\n      "}
+{"tMs":2801,"delta":"ChoiceChip \""}
+{"tMs":2835,"delta":"Thu\" selected:=day"}
+{"tMs":2868,"delta":"==\"Thu\" ->"}
+{"tMs":2902,"delta":" day=\"Thu\"; sl"}
+{"tMs":2935,"delta":"ot=\"\"\n      Cho"}
+{"tMs":2968,"delta":"iceChip \"Fri"}
+{"tMs":3002,"delta":"\" selected:=day==\""}
+{"tMs":3035,"delta":"Fri\" -> day=\""}
+{"tMs":3068,"delta":"Fri\"; slot="}
+{"tMs":3102,"delta":"\"\"\n    if day!="}
+{"tMs":3135,"delta":"\"\"\n      Text.fie"}
+{"tMs":3168,"delta":"ldLabel \"Available"}
+{"tMs":3202,"delta":" times on {day}\"\n      "}
+{"tMs":3235,"delta":"Grid cols:3 "}
+{"tMs":3269,"delta":"gap:8\n        each"}
+{"tMs":3303,"delta":" s"}
+{"tMs":3335,"delta":" in slots\n          "}
+{"tMs":3369,"delta":"ChoiceChip \"{"}
+{"tMs":3402,"delta":"s.t}\" selected:"}
+{"tMs":3435,"delta":"=slot==s.t en"}
+{"tMs":3469,"delta":"abled:=s.free -"}
+{"tMs":3502,"delta":"> slot=s.t"}
+{"tMs":3535,"delta":"\n      Text.ca"}
+{"tMs":3568,"delta":"ption \"Gre"}
+{"tMs":3601,"delta":"yed-"}
+{"tMs":3635,"delta":"out times are already"}
+{"tMs":3668,"delta":" taken.\"\n    Button \""}
+{"tMs":3701,"delta":"Confirm me"}
+{"tMs":3736,"delta":"eting\" en"}
+{"tMs":3768,"delta":"abled:=day"}
+{"tMs":3802,"delta":"!=\"\" && slot!=\""}
+{"tMs":3835,"delta":"\" -> booked=true;"}
+{"tMs":3868,"delta":" emit confirm sl"}
+{"tMs":3902,"delta":"ot;"}
+{"tMs":3938,"delta":" toast \"Me"}
+{"tMs":3968,"delta":"eting booked\"\n  if"}
+{"tMs":4002,"delta":" booked\n    Row gap"}
+{"tMs":4035,"delta":":8 middle\n      "}
+{"tMs":4069,"delta":"Icon \"check_"}
+{"tMs":4102,"delta":"circle\"\n      Text."}
+{"tMs":4142,"delta":"strong \"Me"}
+{"tMs":4168,"delta":"eting boo"}
+{"tMs":4202,"delta":"ked\"\n    Text"}
+{"tMs":4235,"delta":".he"}
+{"tMs":4268,"delta":"ading \""}
+{"tMs":4302,"delta":"{day}"}
+{"tMs":4335,"delta":", {slot}\"\n    "}
+{"tMs":4369,"delta":"Text.mu"}
+{"tMs":4401,"delta":"ted \"30 minutes with"}
+{"tMs":4435,"delta":" Ana, Ben and"}
+{"tMs":4468,"delta":" Chloe\"\n    "}
+{"tMs":4501,"delta":"Button.outline \"Resch"}
+{"tMs":4536,"delta":"edule\" -> booked="}
+{"tMs":4568,"delta":"false"}

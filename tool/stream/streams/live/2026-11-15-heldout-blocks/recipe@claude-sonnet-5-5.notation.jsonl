@@ -1,0 +1,113 @@
+{"meta":{"ui":"recipe","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: total time and difficulty, a servings control that scales the ingredient amounts, the ingredients as a checklist I can tick off, the four steps, and a start cooking button.","text":"Card w:390 gap:14 pad:16\n  state servings=4\n  state have=[]\n  state started=false\n  Media kind:bread tone:sand h:140\n  Text.heading2 \"Weeknight Lemon Chicken Traybake\"\n  Row gap:8\n    Badge.info \"45 min\"\n    Badge.success \"Easy\"\n  Counter \"Servings\" \"Amounts scale automatically\" =servings min:1 max:12\n  SectionLabel \"Ingredients\" \"{length(have)} of 6 ticked\"\n  Checklist \"Gather\" =have items:[\"{round(servings*0.5,1)} kg chicken thighs\",\"{servings*0.5} lemons\",\"{round(servings*0.75,1)} tbsp olive oil\",\"{servings*200} g baby potatoes\",\"{servings} garlic cloves\",\"{round(servings*0.5,1)} tsp dried oregano\"]\n  SectionLabel \"Method\" \"4 steps\"\n  Steps steps:[\"Prep\",\"Roast\",\"Add lemon\",\"Rest\"] current:1\n  Column gap:8\n    Paragraph \"1. Heat the oven to 220°C. Toss potatoes with oil, oregano and salt on a large tray.\"\n    Paragraph \"2. Nestle the chicken among the potatoes, skin side up, and roast for 20 minutes.\"\n    Paragraph \"3. Add lemon wedges and garlic, then roast 15 minutes more until golden.\"\n    Paragraph \"4. Rest for 5 minutes, spoon over the pan juices and serve.\"\n  if started\n    Callout \"Cooking started\" \"Oven on at 220°C. Follow the four steps above.\" tone:good\n  ActionButton \"Start cooking\" tone:primary icon:\"play_arrow\" -> started=true; emit startCooking","usage":{"input_tokens":7985,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":590,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1004,"totalMs":4744}}
+{"tMs":1004,"delta":"Card w:"}
+{"tMs":1326,"delta":"390 gap:14"}
+{"tMs":1326,"delta":" "}
+{"tMs":1327,"delta":"pad:16\n  state"}
+{"tMs":1327,"delta":" servings=4"}
+{"tMs":1327,"delta":"\n  state have"}
+{"tMs":1327,"delta":"=[]\n  state started"}
+{"tMs":1327,"delta":"=false\n  Media"}
+{"tMs":1327,"delta":" kind:b"}
+{"tMs":1327,"delta":"read tone:s"}
+{"tMs":1337,"delta":"and h:140"}
+{"tMs":1370,"delta":"\n  Text"}
+{"tMs":1406,"delta":".heading2 \"We"}
+{"tMs":1667,"delta":"eknight Lemon"}
+{"tMs":1667,"delta":" Chicken Traybake\""}
+{"tMs":1667,"delta":"\n  Row gap:8"}
+{"tMs":1667,"delta":"\n    Badge.info"}
+{"tMs":1667,"delta":" \"45"}
+{"tMs":1667,"delta":" min\"\n    Badge"}
+{"tMs":1667,"delta":".success \"Easy\""}
+{"tMs":1676,"delta":"\n  Counter \"Servings"}
+{"tMs":1710,"delta":"\" \""}
+{"tMs":1774,"delta":"Am"}
+{"tMs":1807,"delta":"ounts scale autom"}
+{"tMs":1841,"delta":"atically\" =servings min:"}
+{"tMs":1980,"delta":"1 max:12"}
+{"tMs":1980,"delta":"\n  SectionLabel \""}
+{"tMs":1980,"delta":"Ingredients\" \"{"}
+{"tMs":1980,"delta":"length"}
+{"tMs":2008,"delta":"(have)} of "}
+{"tMs":2040,"delta":"6"}
+{"tMs":2074,"delta":" ticked\"\n  "}
+{"tMs":2108,"delta":"Checklist \"G"}
+{"tMs":2141,"delta":"ather\" =have"}
+{"tMs":2174,"delta":" items:[\""}
+{"tMs":2206,"delta":"{round"}
+{"tMs":2240,"delta":"(servings*0.5"}
+{"tMs":2294,"delta":",1"}
+{"tMs":2306,"delta":")} k"}
+{"tMs":2340,"delta":"g chicken th"}
+{"tMs":2376,"delta":"ighs\",\"{servings*0"}
+{"tMs":2407,"delta":".5"}
+{"tMs":2440,"delta":"} lemons\",\"{round"}
+{"tMs":2473,"delta":"(servings*0.75,"}
+{"tMs":2507,"delta":"1)} t"}
+{"tMs":2540,"delta":"bsp ol"}
+{"tMs":2573,"delta":"ive oil\",\"{servings*"}
+{"tMs":2606,"delta":"200"}
+{"tMs":2639,"delta":"} g"}
+{"tMs":2673,"delta":" baby potatoes\",\"{"}
+{"tMs":2706,"delta":"servings} gar"}
+{"tMs":2740,"delta":"lic cloves\",\"{round"}
+{"tMs":2774,"delta":"(servings*0.5,"}
+{"tMs":2807,"delta":"1)} tsp d"}
+{"tMs":2841,"delta":"ried oregano\"]\n  "}
+{"tMs":2874,"delta":"SectionLabel \""}
+{"tMs":2909,"delta":"Method\""}
+{"tMs":2941,"delta":" \"4 steps\"\n  "}
+{"tMs":2975,"delta":"Ste"}
+{"tMs":3007,"delta":"ps steps:[\""}
+{"tMs":3040,"delta":"Pr"}
+{"tMs":3073,"delta":"ep\",\"Ro"}
+{"tMs":3107,"delta":"ast\",\"Add"}
+{"tMs":3140,"delta":" lemon\",\"Rest\""}
+{"tMs":3174,"delta":"] current:1\n  Column"}
+{"tMs":3207,"delta":" gap:8\n    Pa"}
+{"tMs":3241,"delta":"ragraph \"1. He"}
+{"tMs":3274,"delta":"at the"}
+{"tMs":3307,"delta":" oven to 220"}
+{"tMs":3341,"delta":"°"}
+{"tMs":3374,"delta":"C."}
+{"tMs":3407,"delta":" Toss pot"}
+{"tMs":3440,"delta":"atoes with"}
+{"tMs":3473,"delta":" oil, o"}
+{"tMs":3506,"delta":"regano and salt on"}
+{"tMs":3540,"delta":" a large"}
+{"tMs":3573,"delta":" tray.\"\n    Parag"}
+{"tMs":3607,"delta":"raph \"2. N"}
+{"tMs":3640,"delta":"est"}
+{"tMs":3673,"delta":"le the chicken among"}
+{"tMs":3707,"delta":" the potatoes, sk"}
+{"tMs":3740,"delta":"in side up"}
+{"tMs":3773,"delta":","}
+{"tMs":3806,"delta":" and roast for"}
+{"tMs":3840,"delta":" 20 minutes.\""}
+{"tMs":3873,"delta":"\n    Paragraph \"3"}
+{"tMs":3907,"delta":". Add lemon w"}
+{"tMs":3940,"delta":"edges and garlic,"}
+{"tMs":3973,"delta":" then roast "}
+{"tMs":4007,"delta":"15 min"}
+{"tMs":4040,"delta":"utes more until golden.\""}
+{"tMs":4074,"delta":"\n    Paragraph \""}
+{"tMs":4107,"delta":"4. Rest for 5"}
+{"tMs":4140,"delta":" minutes, spo"}
+{"tMs":4173,"delta":"on over"}
+{"tMs":4213,"delta":" the p"}
+{"tMs":4245,"delta":"an juices and"}
+{"tMs":4274,"delta":" serve.\"\n  if started"}
+{"tMs":4307,"delta":"\n    Callout \"Coo"}
+{"tMs":4340,"delta":"king started"}
+{"tMs":4373,"delta":"\" \"Oven on"}
+{"tMs":4407,"delta":" at"}
+{"tMs":4441,"delta":" 220°C. Follow"}
+{"tMs":4473,"delta":" the four"}
+{"tMs":4507,"delta":" steps above.\" tone:good"}
+{"tMs":4540,"delta":"\n  "}
+{"tMs":4573,"delta":"ActionButton \"Start c"}
+{"tMs":4607,"delta":"ooking\" tone:primary"}
+{"tMs":4640,"delta":" icon:\"play"}
+{"tMs":4674,"delta":"_arrow\" -> started"}
+{"tMs":4707,"delta":"=true; emit start"}
+{"tMs":4740,"delta":"Cooking"}

@@ -1,0 +1,175 @@
+{"meta":{"ui":"meeting_slot","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Help me schedule a 30 minute meeting with three colleagues next week: let me pick a day, then one of the free time slots that day (some are taken), show who is attending, and confirm. After confirming the card shows the booked time.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"scheduler\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"main\"},{\"id\":\"main\",\"component\":\"Column\",\"children\":[\"title\",\"subtitle\",\"div1\",\"dayPicker\",\"slotPicker\",\"div2\",\"attLabel\",\"attRow\",\"div3\",\"summary\",\"confirmBtn\",\"bookedMsg\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Schedule team meeting\"},{\"id\":\"subtitle\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"30 minutes · next week · 3 colleagues\"},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"dayPicker\",\"component\":\"ChoicePicker\",\"label\":\"Pick a day\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"chips\",\"options\":[{\"label\":\"Mon\",\"value\":\"mon\"},{\"label\":\"Tue\",\"value\":\"tue\"},{\"label\":\"Wed\",\"value\":\"wed\"},{\"label\":\"Thu\",\"value\":\"thu\"},{\"label\":\"Fri\",\"value\":\"fri\"}],\"value\":{\"@path\":\"/selectedDay\"}},{\"id\":\"slotPicker\",\"component\":\"ChoicePicker\",\"label\":\"Free time slots (taken slots are not listed)\",\"variant\":\"mutuallyExclusive\",\"displayStyle\":\"chips\",\"options\":[{\"label\":\"9:00 AM\",\"value\":\"9:00 AM\"},{\"label\":\"10:30 AM\",\"value\":\"10:30 AM\"},{\"label\":\"1:00 PM\",\"value\":\"1:00 PM\"},{\"label\":\"2:30 PM\",\"value\":\"2:30 PM\"},{\"label\":\"4:00 PM\",\"value\":\"4:00 PM\"}],\"value\":{\"@path\":\"/selectedSlot\"}},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"attLabel\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Attending\"},{\"id\":\"attRow\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"a1\",\"a2\",\"a3\",\"a4\"]},{\"id\":\"a1\",\"component\":\"Text\",\"text\":\"You\"},{\"id\":\"a2\",\"component\":\"Text\",\"text\":\"Priya\"},{\"id\":\"a3\",\"component\":\"Text\",\"text\":\"Marcus\"},{\"id\":\"a4\",\"component\":\"Text\",\"text\":\"Elena\"},{\"id\":\"div3\",\"component\":\"Divider\"},{\"id\":\"summary\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Selected: ${/selectedDay} at ${/selectedSlot}\"}}},{\"id\":\"confirmBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"confirmTxt\",\"action\":{\"event\":{\"name\":\"confirm_meeting\",\"userMessage\":\"Confirm meeting\",\"context\":{\"day\":{\"@path\":\"/selectedDay\"},\"slot\":{\"@path\":\"/selectedSlot\"}}}},\"@checks\":[{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/selectedDay\"}}},\"message\":\"Pick a day first.\"},{\"condition\":{\"@call\":\"required\",\"args\":{\"value\":{\"@path\":\"/selectedSlot\"}}},\"message\":\"Pick a time slot.\"}]},{\"id\":\"confirmTxt\",\"component\":\"Text\",\"text\":\"Confirm meeting\"},{\"id\":\"bookedMsg\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${/bookedStatus}\"}}}],\"dataModel\":{\"selectedDay\":[],\"selectedSlot\":[],\"bookedStatus\":\"\"}}}","usage":{"input_tokens":21152,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1194,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":990,"totalMs":6750}}
+{"tMs":990,"delta":"{\"version\":\"1.0"}
+{"tMs":1283,"delta":"\",\"createSurface\":{\""}
+{"tMs":1283,"delta":"surfaceId\":\"sc"}
+{"tMs":1283,"delta":"heduler\",\"catalogId"}
+{"tMs":1283,"delta":"\":\"https://a2ui"}
+{"tMs":1283,"delta":".org/specification/v1"}
+{"tMs":1283,"delta":"_0/catalogs/"}
+{"tMs":1284,"delta":"basic/catalog.json"}
+{"tMs":1284,"delta":"\",\"components\":[{\"id\":"}
+{"tMs":1284,"delta":"\"root\",\"component\":\"Card"}
+{"tMs":1313,"delta":"\",\"child\":\"main"}
+{"tMs":1346,"delta":"\"},{\"id\":\"main"}
+{"tMs":1380,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1594,"delta":"\":[\"title\",\"sub"}
+{"tMs":1594,"delta":"title\",\"div"}
+{"tMs":1594,"delta":"1\",\"d"}
+{"tMs":1594,"delta":"ayP"}
+{"tMs":1594,"delta":"icker\",\"slotP"}
+{"tMs":1594,"delta":"icker\",\"div"}
+{"tMs":1606,"delta":"2\",\"attL"}
+{"tMs":1640,"delta":"abel\",\"attR"}
+{"tMs":1672,"delta":"ow\",\"div"}
+{"tMs":1705,"delta":"3\",\"summ"}
+{"tMs":1738,"delta":"ary\",\"confirm"}
+{"tMs":1770,"delta":"Btn\",\""}
+{"tMs":1907,"delta":"b"}
+{"tMs":1907,"delta":"ookedM"}
+{"tMs":1907,"delta":"sg\"]},{\"id"}
+{"tMs":1907,"delta":"\":\"title\",\"component\":\""}
+{"tMs":1935,"delta":"Text\",\"text\":\"Sch"}
+{"tMs":1968,"delta":"edule team"}
+{"tMs":2002,"delta":" meeting\"},{\"id"}
+{"tMs":2036,"delta":"\":\"subtitle\",\"component"}
+{"tMs":2071,"delta":"\":\"Text\",\"vari"}
+{"tMs":2103,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":2137,"delta":"\"30 minutes · next"}
+{"tMs":2169,"delta":" week ·"}
+{"tMs":2224,"delta":" 3 colleagues\""}
+{"tMs":2236,"delta":"},{\"id\":\"div1"}
+{"tMs":2270,"delta":"\",\"component\":\"Divider\""}
+{"tMs":2304,"delta":"},{\"id\":\"day"}
+{"tMs":2338,"delta":"Picker\",\"component\":\""}
+{"tMs":2372,"delta":"ChoicePicker\",\"label"}
+{"tMs":2404,"delta":"\":\"P"}
+{"tMs":2438,"delta":"ick a day\",\"variant\":\""}
+{"tMs":2474,"delta":"mutuallyExclus"}
+{"tMs":2505,"delta":"ive\",\"displayStyle\":"}
+{"tMs":2539,"delta":"\"chips\",\"options\":[{"}
+{"tMs":2572,"delta":"\"label\":\"Mon\",\""}
+{"tMs":2606,"delta":"value\":\"mon\"},{"}
+{"tMs":2642,"delta":"\"label\":\"Tue\",\""}
+{"tMs":2672,"delta":"value\":\"tue\"},{"}
+{"tMs":2709,"delta":"\"label\":\"Wed\",\""}
+{"tMs":2740,"delta":"value\":\"wed\"},{"}
+{"tMs":2775,"delta":"\"label\":\"Thu\",\""}
+{"tMs":2807,"delta":"value\":\"thu\"},{"}
+{"tMs":2841,"delta":"\"label\":\"Fri\",\""}
+{"tMs":2875,"delta":"value\":\"fri\"}],"}
+{"tMs":2907,"delta":"\"value\":{"}
+{"tMs":2940,"delta":"\"@path\":\"/select"}
+{"tMs":2974,"delta":"edDay\"}},{\""}
+{"tMs":3007,"delta":"id\":\"slotPicker"}
+{"tMs":3040,"delta":"\",\"component\":\"Choic"}
+{"tMs":3074,"delta":"ePicker\",\"label\":\""}
+{"tMs":3108,"delta":"Free time"}
+{"tMs":3141,"delta":" slots (taken sl"}
+{"tMs":3173,"delta":"ots are not"}
+{"tMs":3206,"delta":" list"}
+{"tMs":3240,"delta":"ed)\",\"variant\":\"m"}
+{"tMs":3273,"delta":"utuallyExclusive"}
+{"tMs":3306,"delta":"\",\"displayStyle\":\""}
+{"tMs":3340,"delta":"chips\",\"options\":[{\""}
+{"tMs":3373,"delta":"label\":\"9"}
+{"tMs":3407,"delta":":00 AM\",\"value\":"}
+{"tMs":3440,"delta":"\"9:00 AM\""}
+{"tMs":3473,"delta":"},{\"label\":\"10:"}
+{"tMs":3507,"delta":"30 AM\",\"value\":\""}
+{"tMs":3545,"delta":"10:30 AM\"},"}
+{"tMs":3574,"delta":"{\"label\":\"1"}
+{"tMs":3607,"delta":":00 PM\",\"value\":"}
+{"tMs":3641,"delta":"\"1:00 PM\""}
+{"tMs":3674,"delta":"},{\"label\":\"2"}
+{"tMs":3711,"delta":":30 PM\",\"value\":"}
+{"tMs":3742,"delta":"\"2:30 PM\""}
+{"tMs":3774,"delta":"},{\"label\":\"4:"}
+{"tMs":3808,"delta":"00 PM\",\"value\":\""}
+{"tMs":3841,"delta":"4:00 PM\"}"}
+{"tMs":3874,"delta":"],\"value\":{\"@path"}
+{"tMs":3907,"delta":"\":\"/sel"}
+{"tMs":3941,"delta":"ectedSlot\"}},"}
+{"tMs":3974,"delta":"{\"id\":\"div2\",\""}
+{"tMs":4008,"delta":"component\":\"Divider\"},"}
+{"tMs":4042,"delta":"{\"id\":\"attLab"}
+{"tMs":4075,"delta":"el\",\"component\":\"Text\",\""}
+{"tMs":4108,"delta":"variant\":\"caption\",\"text"}
+{"tMs":4142,"delta":"\":\"Attending\"},{"}
+{"tMs":4175,"delta":"\"id\":\"attRow\",\""}
+{"tMs":4208,"delta":"component\":\""}
+{"tMs":4241,"delta":"Row\",\"just"}
+{"tMs":4275,"delta":"ify\":\"sp"}
+{"tMs":4309,"delta":"aceBetween\",\"children\":"}
+{"tMs":4341,"delta":"[\"a"}
+{"tMs":4374,"delta":"1\",\"a2\",\"a3\",\""}
+{"tMs":4410,"delta":"a4\"]},{\"id"}
+{"tMs":4441,"delta":"\":\"a1\",\"component\":\""}
+{"tMs":4474,"delta":"Text\",\"text\":\"You\""}
+{"tMs":4508,"delta":"},{\"id\":\"a2"}
+{"tMs":4542,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":4575,"delta":"\":\"Pri"}
+{"tMs":4608,"delta":"ya\""}
+{"tMs":4641,"delta":"},{\"id\":\"a3"}
+{"tMs":4674,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":4708,"delta":"\":\"Marcus\"},"}
+{"tMs":4741,"delta":"{\"id\":\"a4\",\""}
+{"tMs":4774,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":4807,"delta":"\"El"}
+{"tMs":4841,"delta":"ena\"},{\"id\":\""}
+{"tMs":4875,"delta":"div3\",\"component\":\"Div"}
+{"tMs":4908,"delta":"ider\"},{\"id\":\""}
+{"tMs":4941,"delta":"summary\",\"component\":\"Text"}
+{"tMs":4975,"delta":"\",\"text\":{\"@call"}
+{"tMs":5008,"delta":"\":\"formatString\",\"args\":"}
+{"tMs":5041,"delta":"{\"value\":\"Selected"}
+{"tMs":5075,"delta":": ${/"}
+{"tMs":5107,"delta":"selectedDay} at"}
+{"tMs":5141,"delta":" ${/selectedSl"}
+{"tMs":5175,"delta":"ot}\"}}},{\""}
+{"tMs":5208,"delta":"id\":\"confirmBt"}
+{"tMs":5241,"delta":"n"}
+{"tMs":5295,"delta":"\",\"component\":\"Button\",\"vari"}
+{"tMs":5308,"delta":"ant\":\"primary\",\"child\":"}
+{"tMs":5341,"delta":"\"confirmT"}
+{"tMs":5375,"delta":"xt\",\"action\":{\"event"}
+{"tMs":5408,"delta":"\":{\"name\":\"confir"}
+{"tMs":5442,"delta":"m"}
+{"tMs":5474,"delta":"_meeting\",\"userMess"}
+{"tMs":5508,"delta":"age\":\"Confirm me"}
+{"tMs":5541,"delta":"eting\",\"context\":{\"day"}
+{"tMs":5575,"delta":"\":{\"@path\":\"/"}
+{"tMs":5608,"delta":"selectedDay\"},\""}
+{"tMs":5641,"delta":"slot\":{\"@path\":"}
+{"tMs":5675,"delta":"\"/selectedSlot"}
+{"tMs":5708,"delta":"\"}"}
+{"tMs":5741,"delta":"}}},\"@checks\":"}
+{"tMs":5775,"delta":"[{\"condition\":{\""}
+{"tMs":5808,"delta":"@call\":\"required\",\"args\":"}
+{"tMs":5841,"delta":"{\"value\":{\"@path"}
+{"tMs":5875,"delta":"\":\"/selectedDay"}
+{"tMs":5909,"delta":"\"}}},\"message\":\""}
+{"tMs":5941,"delta":"Pick a day first.\"},"}
+{"tMs":5975,"delta":"{\"condition\":{\"@"}
+{"tMs":6008,"delta":"call\":\"required\",\"args\":{"}
+{"tMs":6042,"delta":"\"value\":{\"@path\":"}
+{"tMs":6075,"delta":"\"/selectedSlot"}
+{"tMs":6108,"delta":"\"}}},\"message\":\""}
+{"tMs":6142,"delta":"Pick a time slot.\""}
+{"tMs":6175,"delta":"}]},{\"id\":\""}
+{"tMs":6209,"delta":"confirmTxt\",\"component"}
+{"tMs":6243,"delta":"\":\"Text"}
+{"tMs":6275,"delta":"\",\"text\":\"Confirm"}
+{"tMs":6308,"delta":" meeting\"},{\"id"}
+{"tMs":6342,"delta":"\":\"bookedMsg"}
+{"tMs":6375,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":6409,"delta":"\":{\"@call\":\"form"}
+{"tMs":6442,"delta":"atString\",\"args\":{\"value"}
+{"tMs":6475,"delta":"\":\"${"}
+{"tMs":6508,"delta":"/b"}
+{"tMs":6542,"delta":"ookedStatus}\"}"}
+{"tMs":6575,"delta":"}}],\"dataModel"}
+{"tMs":6609,"delta":"\":{\"selectedDay"}
+{"tMs":6642,"delta":"\":[],\"selectedS"}
+{"tMs":6675,"delta":"lot\":[],\"book"}
+{"tMs":6708,"delta":"edStatus\":\"\""}
+{"tMs":6742,"delta":"}}}"}

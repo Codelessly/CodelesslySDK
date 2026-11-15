@@ -1,0 +1,39 @@
+{
+ "ui": "tracking",
+ "kind": "page",
+ "model": "claude-sonnet-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21150,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1335,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 770,
+   "totalMs": 7289,
+   "chars": 3071,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 22,
+   "outputTokensPerNode": "60.7",
+   "notationIssues": [],
+   "notes": [
+    "Modal \"instrModal\": only its trigger is drawn.",
+    "Button \"instrBtn\": a function call action is not run."
+   ],
+   "messages": 1,
+   "errors": []
+  }
+ ]
+}

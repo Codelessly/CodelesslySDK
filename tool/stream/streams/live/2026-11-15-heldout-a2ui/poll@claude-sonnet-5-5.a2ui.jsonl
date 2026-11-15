@@ -1,0 +1,206 @@
+{"meta":{"ui":"poll","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Run a quick team poll in a card: \"Where should we go for lunch on Friday?\" with four options. Before I vote I only see the options; after I vote I see each option's share as a bar with the percentage, my choice marked, and the total number of votes.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"lunchPoll\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"content\"},{\"id\":\"content\",\"component\":\"Column\",\"children\":[\"title\",\"voteSection\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Where should we go for lunch on Friday?\"},{\"id\":\"voteSection\",\"component\":\"Column\",\"children\":[\"picker\",\"submit\"]},{\"id\":\"picker\",\"component\":\"ChoicePicker\",\"label\":\"Pick one\",\"variant\":\"mutuallyExclusive\",\"options\":[{\"label\":\"Taco Truck\",\"value\":\"tacos\"},{\"label\":\"Sushi Bar\",\"value\":\"sushi\"},{\"label\":\"Pizza Place\",\"value\":\"pizza\"},{\"label\":\"Salad Cafe\",\"value\":\"salad\"}],\"value\":{\"@path\":\"/myVote\"}},{\"id\":\"submitText\",\"component\":\"Text\",\"text\":\"Submit vote\"},{\"id\":\"submit\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"submitText\",\"action\":{\"event\":{\"name\":\"submitVote\",\"userMessage\":\"Vote submitted\",\"context\":{\"choice\":{\"@path\":\"/myVote\"}}}}}],\"dataModel\":{\"myVote\":[]}}}\n\nWait — I must output only valid lines; the above is the single message but it lacks the results view and total. Corrected full surface follows.\n\n{\"version\":\"1.0\",\"deleteSurface\":{\"surfaceId\":\"lunchPoll\"}}\n{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"lunchPoll2\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"content\"},{\"id\":\"content\",\"component\":\"Column\",\"children\":[\"title\",\"voteSection\",\"results\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":\"Where should we go for lunch on Friday?\"},{\"id\":\"voteSection\",\"component\":\"Column\",\"children\":[\"picker\",\"submit\"]},{\"id\":\"picker\",\"component\":\"ChoicePicker\",\"label\":\"Pick one\",\"variant\":\"mutuallyExclusive\",\"options\":[{\"label\":\"Taco Truck\",\"value\":\"tacos\"},{\"label\":\"Sushi Bar\",\"value\":\"sushi\"},{\"label\":\"Pizza Place\",\"value\":\"pizza\"},{\"label\":\"Salad Cafe\",\"value\":\"salad\"}],\"value\":{\"@path\":\"/myVote\"}},{\"id\":\"submitText\",\"component\":\"Text\",\"text\":\"Submit vote\"},{\"id\":\"submit\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"submitText\",\"action\":{\"event\":{\"name\":\"submitVote\",\"userMessage\":\"Vote submitted\",\"context\":{\"choice\":{\"@path\":\"/myVote\"}}}}},{\"id\":\"results\",\"component\":\"Column\",\"children\":[\"resList\",\"total\"]},{\"id\":\"resList\",\"component\":\"List\",\"children\":{\"path\":\"/options\",\"componentId\":\"resRow\"}},{\"id\":\"resRow\",\"component\":\"Column\",\"children\":[\"resHead\",\"resBar\"]},{\"id\":\"resHead\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"resLabel\",\"resPct\"]},{\"id\":\"resLabel\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${label}${mark}\"}}},{\"id\":\"resPct\",\"component\":\"Text\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"${pct}%\"}}},{\"id\":\"resBar\",\"component\":\"Slider\",\"max\":100,\"min\":0,\"value\":{\"@path\":\"pct\"}},{\"id\":\"total\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"Total votes: ${/total}\"}}}],\"dataModel\":{\"myVote\":[],\"total\":0,\"options\":[{\"label\":\"Taco Truck\",\"pct\":0,\"mark\":\"\"},{\"label\":\"Sushi Bar\",\"pct\":0,\"mark\":\"\"},{\"label\":\"Pizza Place\",\"pct\":0,\"mark\":\"\"},{\"label\":\"Salad Cafe\",\"pct\":0,\"mark\":\"\"}]}}}","usage":{"input_tokens":21158,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1368,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":751,"totalMs":7541}}
+{"tMs":751,"delta":"{\"version\":\"1.0"}
+{"tMs":1051,"delta":"\",\"createSurface\":{\""}
+{"tMs":1051,"delta":"surfaceId\":\"l"}
+{"tMs":1051,"delta":"unch"}
+{"tMs":1051,"delta":"Poll\",\"catalogId"}
+{"tMs":1051,"delta":"\":\"https://a2ui"}
+{"tMs":1052,"delta":".org/specification/v1"}
+{"tMs":1052,"delta":"_0/catalogs/"}
+{"tMs":1052,"delta":"basic/catalog.json"}
+{"tMs":1052,"delta":"\",\"components\":[{\"id\":"}
+{"tMs":1071,"delta":"\"root\",\"component\":\"Card"}
+{"tMs":1105,"delta":"\",\"child\":\"content"}
+{"tMs":1137,"delta":"\"},{\"id\":\"content"}
+{"tMs":1374,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":1374,"delta":"\":[\"title\",\"vo"}
+{"tMs":1374,"delta":"teS"}
+{"tMs":1374,"delta":"ection\""}
+{"tMs":1374,"delta":"]},{\"id\":\"title"}
+{"tMs":1374,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":1374,"delta":"\":\"Where should we go for"}
+{"tMs":1401,"delta":" lunch on Friday?"}
+{"tMs":1433,"delta":"\"},"}
+{"tMs":1467,"delta":"{\"id\":\"voteS"}
+{"tMs":1500,"delta":"ection\",\"component\":\""}
+{"tMs":1533,"delta":"Column\",\"children\":[\"pic"}
+{"tMs":1701,"delta":"ker\",\"submit\""}
+{"tMs":1701,"delta":"]},{\"id\":\"pic"}
+{"tMs":1701,"delta":"ker\",\"component\":\"Cho"}
+{"tMs":1701,"delta":"icePicker\",\"label\":\""}
+{"tMs":1701,"delta":"P"}
+{"tMs":1732,"delta":"ick one"}
+{"tMs":1764,"delta":"\",\""}
+{"tMs":1800,"delta":"variant\":\"mutuall"}
+{"tMs":1832,"delta":"yExclusive\",\"options\":"}
+{"tMs":1865,"delta":"[{\"label\":\"Ta"}
+{"tMs":1898,"delta":"co Tru"}
+{"tMs":1932,"delta":"ck\",\"value\":\"t"}
+{"tMs":2021,"delta":"acos\"},{\"label\":"}
+{"tMs":2021,"delta":"\"S"}
+{"tMs":2031,"delta":"ushi B"}
+{"tMs":2064,"delta":"ar\",\"value\":\"sushi"}
+{"tMs":2099,"delta":"\"},{\"label\":\""}
+{"tMs":2132,"delta":"Pizza Place\",\"value\":"}
+{"tMs":2165,"delta":"\"pizza\"},{\""}
+{"tMs":2198,"delta":"label\":\"Sal"}
+{"tMs":2231,"delta":"ad C"}
+{"tMs":2265,"delta":"afe\",\"value\":\"salad"}
+{"tMs":2298,"delta":"\"}],\"value\":{\""}
+{"tMs":2331,"delta":"@path\":\"/my"}
+{"tMs":2364,"delta":"V"}
+{"tMs":2397,"delta":"ote\"}},{"}
+{"tMs":2431,"delta":"\"id\":\"submit"}
+{"tMs":2464,"delta":"Text\",\"component\":\"Text"}
+{"tMs":2497,"delta":"\",\"text\":\"Subm"}
+{"tMs":2531,"delta":"it vote\"},{\"id"}
+{"tMs":2564,"delta":"\":\"submit\",\"component\":\""}
+{"tMs":2598,"delta":"Button\",\"variant\":\"prim"}
+{"tMs":2631,"delta":"ary\",\"child\":\"submitText"}
+{"tMs":2667,"delta":"\",\"action\":{\"event\":{"}
+{"tMs":2698,"delta":"\"name\":\"subm"}
+{"tMs":2732,"delta":"itVote\",\"userMessage"}
+{"tMs":2766,"delta":"\":\"Vote submitted"}
+{"tMs":2798,"delta":"\",\"context\":{\"cho"}
+{"tMs":2832,"delta":"ice\":{\"@path\":\""}
+{"tMs":2865,"delta":"/myVote\"}}}"}
+{"tMs":2899,"delta":"}}],"}
+{"tMs":2932,"delta":"\"dataModel\":{\""}
+{"tMs":2965,"delta":"myVote\":[]}}"}
+{"tMs":2999,"delta":"}"}
+{"tMs":3032,"delta":"\n\nWait —"}
+{"tMs":3065,"delta":" I must output"}
+{"tMs":3097,"delta":" only val"}
+{"tMs":3130,"delta":"id l"}
+{"tMs":3163,"delta":"ines;"}
+{"tMs":3196,"delta":" the above"}
+{"tMs":3229,"delta":" is the single"}
+{"tMs":3262,"delta":" message but"}
+{"tMs":3296,"delta":" it lacks the results view"}
+{"tMs":3328,"delta":" and"}
+{"tMs":3362,"delta":" total"}
+{"tMs":3395,"delta":". Cor"}
+{"tMs":3428,"delta":"rected full"}
+{"tMs":3460,"delta":" surface foll"}
+{"tMs":3493,"delta":"ows."}
+{"tMs":3526,"delta":"\n\n{"}
+{"tMs":3560,"delta":"\"version\":\"1.0\",\""}
+{"tMs":3596,"delta":"de"}
+{"tMs":3626,"delta":"leteSurface\":{"}
+{"tMs":3660,"delta":"\"surfaceId\":\""}
+{"tMs":3693,"delta":"lunchPoll\"}"}
+{"tMs":3726,"delta":"}"}
+{"tMs":3760,"delta":"\n{\"version\":\"1.0"}
+{"tMs":3794,"delta":"\",\"createSurface\":{\""}
+{"tMs":3827,"delta":"surfaceId\":\"l"}
+{"tMs":3861,"delta":"unchPoll2\",\"cat"}
+{"tMs":3894,"delta":"alogId\":\"https://a"}
+{"tMs":3927,"delta":"2ui.org/specification"}
+{"tMs":3961,"delta":"/v1_0/catal"}
+{"tMs":3995,"delta":"ogs/basic/catal"}
+{"tMs":4028,"delta":"og.json\",\"components\":[{"}
+{"tMs":4062,"delta":"\"id\":\"root\",\"component\":"}
+{"tMs":4095,"delta":"\"Card\",\"child\":\"content"}
+{"tMs":4128,"delta":"\"},{\"id\":\"content"}
+{"tMs":4162,"delta":"\",\"component\":\"Column\",\"children"}
+{"tMs":4195,"delta":"\":[\"title\",\"voteSection"}
+{"tMs":4229,"delta":"\",\"results\"]},{\"id"}
+{"tMs":4262,"delta":"\":\"title\",\"component\":\""}
+{"tMs":4296,"delta":"Text\",\"text\":\"Where should"}
+{"tMs":4329,"delta":" we go for lunch on"}
+{"tMs":4363,"delta":" Friday?\"},{\"id"}
+{"tMs":4396,"delta":"\":\"voteSection\",\"component"}
+{"tMs":4430,"delta":"\":\"Column\",\"children\":[\""}
+{"tMs":4464,"delta":"picker\",\"submit\"]},"}
+{"tMs":4496,"delta":"{\"id\":\"picker\",\""}
+{"tMs":4530,"delta":"component\":\"ChoiceP"}
+{"tMs":4563,"delta":"icker\",\"label\":\"P"}
+{"tMs":4598,"delta":"ick one\",\"variant\":\"m"}
+{"tMs":4630,"delta":"utuallyExclusive"}
+{"tMs":4664,"delta":"\",\"options\":[{\"label\":"}
+{"tMs":4697,"delta":"\"Taco Truck\",\""}
+{"tMs":4730,"delta":"value\":\"tacos\"},"}
+{"tMs":4764,"delta":"{\"label\":\"Sush"}
+{"tMs":4797,"delta":"i Bar\",\"value\":\""}
+{"tMs":4831,"delta":"sushi\"},{\"label"}
+{"tMs":4864,"delta":"\":\"Pizza Place"}
+{"tMs":4898,"delta":"\",\"value\":\"pizza\""}
+{"tMs":4931,"delta":"},{\"label\":\"Sal"}
+{"tMs":4965,"delta":"ad Cafe\",\"value\":"}
+{"tMs":4998,"delta":"\"salad\"}],\"value"}
+{"tMs":5032,"delta":"\":{\"@path\":\"/"}
+{"tMs":5067,"delta":"myVote\"}},{\""}
+{"tMs":5098,"delta":"id\":\"submitText\",\"component"}
+{"tMs":5132,"delta":"\":\"Text\",\"text\":\""}
+{"tMs":5165,"delta":"Submit vote\"},{"}
+{"tMs":5198,"delta":"\"id\":\"submit\",\"component"}
+{"tMs":5232,"delta":"\":\"Button\",\"variant\":"}
+{"tMs":5265,"delta":"\"primary\",\"child\":\"subm"}
+{"tMs":5318,"delta":"itText\",\"action\":{\"event"}
+{"tMs":5332,"delta":"\":{\"name\":\"submit"}
+{"tMs":5366,"delta":"Vote\",\"userMessage\":"}
+{"tMs":5399,"delta":"\"Vote submitted\",\""}
+{"tMs":5432,"delta":"context\":{\"choice\":{"}
+{"tMs":5466,"delta":"\"@path\":\"/myV"}
+{"tMs":5499,"delta":"ote\"}}}}},{"}
+{"tMs":5532,"delta":"\"id\":\"results\",\"component\":"}
+{"tMs":5566,"delta":"\"Column\",\"children\":[\"res"}
+{"tMs":5599,"delta":"List"}
+{"tMs":5633,"delta":"\",\"total"}
+{"tMs":5666,"delta":"\"]},{\"id\":\""}
+{"tMs":5699,"delta":"resList\",\"component\":\"List\",\""}
+{"tMs":5733,"delta":"children\":{\"path\":\"/"}
+{"tMs":5766,"delta":"options\",\"componentId\":\"res"}
+{"tMs":5799,"delta":"Row\"}"}
+{"tMs":5833,"delta":"},{\"id\":\"resR"}
+{"tMs":5866,"delta":"ow\",\"component\":\"Column\",\""}
+{"tMs":5899,"delta":"children\":[\"resH"}
+{"tMs":5934,"delta":"ead\",\"resB"}
+{"tMs":5965,"delta":"ar\"]},{\"id\":"}
+{"tMs":6000,"delta":"\"resHead\",\"component\":\""}
+{"tMs":6033,"delta":"Row\",\"just"}
+{"tMs":6066,"delta":"ify\":\"sp"}
+{"tMs":6099,"delta":"aceBetween\",\"children\":"}
+{"tMs":6132,"delta":"[\"resLabel\",\"resP"}
+{"tMs":6166,"delta":"ct\"]},{\"id\":"}
+{"tMs":6199,"delta":"\"resLabel\",\"component\":"}
+{"tMs":6232,"delta":"\"Text\",\"text\":{\""}
+{"tMs":6266,"delta":"@call\":\"formatString\",\""}
+{"tMs":6299,"delta":"args\":{\"value\":\""}
+{"tMs":6332,"delta":"${label}${m"}
+{"tMs":6366,"delta":"ark}\"}}},{\""}
+{"tMs":6400,"delta":"id\":\"resPct\",\"component"}
+{"tMs":6433,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":6467,"delta":"\"@call\":\"formatString"}
+{"tMs":6499,"delta":"\",\"args\":{\"value\":\""}
+{"tMs":6533,"delta":"${pct}%\"}}"}
+{"tMs":6566,"delta":"},{\"id\":\"resB"}
+{"tMs":6600,"delta":"ar\",\"component\":\"Slider"}
+{"tMs":6633,"delta":"\",\"max\":100,\"min"}
+{"tMs":6667,"delta":"\":0,\"value\":{\""}
+{"tMs":6700,"delta":"@path\":\"pct\"}"}
+{"tMs":6734,"delta":"},{\"id\":\"total\",\""}
+{"tMs":6767,"delta":"component\":\"Text\",\"vari"}
+{"tMs":6800,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":6833,"delta":"{\"@call\":\"format"}
+{"tMs":6867,"delta":"String\",\"args\":{\"value\":"}
+{"tMs":6900,"delta":"\"Total votes: ${"}
+{"tMs":6933,"delta":"/"}
+{"tMs":6966,"delta":"total"}
+{"tMs":7000,"delta":"}\"}}}],\"d"}
+{"tMs":7033,"delta":"ataModel\":{\"my"}
+{"tMs":7067,"delta":"Vote\":[],\"total\":"}
+{"tMs":7100,"delta":"0,\"options\":[{\""}
+{"tMs":7134,"delta":"label\":\"Taco Tru"}
+{"tMs":7167,"delta":"ck\",\"p"}
+{"tMs":7200,"delta":"ct\":0,\"mark\":"}
+{"tMs":7234,"delta":"\"\"},{\"label\":\""}
+{"tMs":7267,"delta":"Sushi Bar\",\"p"}
+{"tMs":7300,"delta":"ct\":0,\"mark\":"}
+{"tMs":7333,"delta":"\"\"},{\"label\":\""}
+{"tMs":7369,"delta":"Pizza Place\",\"pct"}
+{"tMs":7400,"delta":"\":0,\"mark\":\"\""}
+{"tMs":7433,"delta":"},{\"label\":\"Sal"}
+{"tMs":7467,"delta":"ad Cafe\",\"pct"}
+{"tMs":7500,"delta":"\":0,\"mark\":\"\""}
+{"tMs":7534,"delta":"}]}}}"}

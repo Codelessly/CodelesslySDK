@@ -1,0 +1,257 @@
+{"meta":{"ui":"run_summary","model":"claude-sonnet-5-5","form":"a2ui","turn":"generate","prompt":"Summarize this morning's run as a card: distance, time, average pace and calories, a chart of pace per kilometer, the splits as a small table, how it compares with my last run, and a share button.","text":"{\"version\":\"1.0\",\"createSurface\":{\"surfaceId\":\"run\",\"catalogId\":\"https://a2ui.org/specification/v1_0/catalogs/basic/catalog.json\",\"components\":[{\"id\":\"root\",\"component\":\"Card\",\"child\":\"main\"},{\"id\":\"main\",\"component\":\"Column\",\"children\":[\"title\",\"stats\",\"div1\",\"chartTitle\",\"chartList\",\"div2\",\"splitsTitle\",\"splitsHeader\",\"splitsList\",\"div3\",\"compareTitle\",\"compareRow\",\"shareBtn\"]},{\"id\":\"title\",\"component\":\"Text\",\"text\":{\"@path\":\"/title\"}},{\"id\":\"stats\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"s1\",\"s2\",\"s3\",\"s4\"]},{\"id\":\"s1\",\"component\":\"Column\",\"align\":\"center\",\"children\":[\"s1v\",\"s1l\"]},{\"id\":\"s1v\",\"component\":\"Text\",\"text\":{\"@path\":\"/distance\"}},{\"id\":\"s1l\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Distance\"},{\"id\":\"s2\",\"component\":\"Column\",\"align\":\"center\",\"children\":[\"s2v\",\"s2l\"]},{\"id\":\"s2v\",\"component\":\"Text\",\"text\":{\"@path\":\"/time\"}},{\"id\":\"s2l\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Time\"},{\"id\":\"s3\",\"component\":\"Column\",\"align\":\"center\",\"children\":[\"s3v\",\"s3l\"]},{\"id\":\"s3v\",\"component\":\"Text\",\"text\":{\"@path\":\"/pace\"}},{\"id\":\"s3l\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Avg pace\"},{\"id\":\"s4\",\"component\":\"Column\",\"align\":\"center\",\"children\":[\"s4v\",\"s4l\"]},{\"id\":\"s4v\",\"component\":\"Text\",\"text\":{\"@path\":\"/calories\"}},{\"id\":\"s4l\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Calories\"},{\"id\":\"div1\",\"component\":\"Divider\"},{\"id\":\"chartTitle\",\"component\":\"Text\",\"text\":\"Pace per kilometer (min/km)\"},{\"id\":\"chartList\",\"component\":\"List\",\"children\":{\"path\":\"/splits\",\"componentId\":\"chartRow\"}},{\"id\":\"chartRow\",\"component\":\"Row\",\"align\":\"center\",\"children\":[\"cLabel\",\"cBar\",\"cVal\"]},{\"id\":\"cLabel\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@call\":\"formatString\",\"args\":{\"value\":\"km ${km}\"}}},{\"id\":\"cBar\",\"component\":\"Slider\",\"min\":4,\"max\":7,\"value\":{\"@path\":\"paceNum\"},\"weight\":1},{\"id\":\"cVal\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":{\"@path\":\"pace\"}},{\"id\":\"div2\",\"component\":\"Divider\"},{\"id\":\"splitsTitle\",\"component\":\"Text\",\"text\":\"Splits\"},{\"id\":\"splitsHeader\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"h1\",\"h2\",\"h3\"]},{\"id\":\"h1\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Km\",\"weight\":1},{\"id\":\"h2\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Pace\",\"weight\":1},{\"id\":\"h3\",\"component\":\"Text\",\"variant\":\"caption\",\"text\":\"Heart rate\",\"weight\":1},{\"id\":\"splitsList\",\"component\":\"List\",\"children\":{\"path\":\"/splits\",\"componentId\":\"splitRow\"}},{\"id\":\"splitRow\",\"component\":\"Row\",\"justify\":\"spaceBetween\",\"children\":[\"r1\",\"r2\",\"r3\"]},{\"id\":\"r1\",\"component\":\"Text\",\"text\":{\"@path\":\"km\"},\"weight\":1},{\"id\":\"r2\",\"component\":\"Text\",\"text\":{\"@path\":\"pace\"},\"weight\":1},{\"id\":\"r3\",\"component\":\"Text\",\"text\":{\"@path\":\"hr\"},\"weight\":1},{\"id\":\"div3\",\"component\":\"Divider\"},{\"id\":\"compareTitle\",\"component\":\"Text\",\"text\":\"Compared with your last run\"},{\"id\":\"compareRow\",\"component\":\"Column\",\"children\":[\"cmp1\",\"cmp2\",\"cmp3\"]},{\"id\":\"cmp1\",\"component\":\"Text\",\"text\":{\"@path\":\"/compare/distance\"}},{\"id\":\"cmp2\",\"component\":\"Text\",\"text\":{\"@path\":\"/compare/pace\"}},{\"id\":\"cmp3\",\"component\":\"Text\",\"text\":{\"@path\":\"/compare/calories\"}},{\"id\":\"shareBtn\",\"component\":\"Button\",\"variant\":\"primary\",\"child\":\"shareTxt\",\"action\":{\"event\":{\"name\":\"share_run\",\"userMessage\":\"Share this morning's run\",\"context\":{\"run\":\"morning_run\"}}}},{\"id\":\"shareTxt\",\"component\":\"Text\",\"text\":\"Share run\"}],\"dataModel\":{\"title\":\"Morning run\",\"distance\":\"5.0 km\",\"time\":\"27:35\",\"pace\":\"5:31 /km\",\"calories\":\"342 kcal\",\"splits\":[{\"km\":\"1\",\"pace\":\"5:48\",\"paceNum\":5.8,\"hr\":\"148 bpm\"},{\"km\":\"2\",\"pace\":\"5:35\",\"paceNum\":5.58,\"hr\":\"156 bpm\"},{\"km\":\"3\",\"pace\":\"5:28\",\"paceNum\":5.47,\"hr\":\"160 bpm\"},{\"km\":\"4\",\"pace\":\"5:24\",\"paceNum\":5.4,\"hr\":\"164 bpm\"},{\"km\":\"5\",\"pace\":\"5:20\",\"paceNum\":5.33,\"hr\":\"168 bpm\"}],\"compare\":{\"distance\":\"Distance: +0.5 km vs last run\",\"pace\":\"Pace: 12 sec/km faster\",\"calories\":\"Calories: +38 kcal\"}}}}","usage":{"input_tokens":21140,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1799,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":739,"totalMs":9260}}
+{"tMs":739,"delta":"{\"version\":\"1.0"}
+{"tMs":1038,"delta":"\",\"createSurface\":{\""}
+{"tMs":1039,"delta":"surfaceId\":\"run"}
+{"tMs":1039,"delta":"\",\"catalogId\":\"https"}
+{"tMs":1039,"delta":"://a2ui.org/"}
+{"tMs":1039,"delta":"specification/v1_0/"}
+{"tMs":1039,"delta":"catalogs/basic/"}
+{"tMs":1039,"delta":"catalog.json\",\"components\":"}
+{"tMs":1039,"delta":"[{\"id\":\"root\",\""}
+{"tMs":1039,"delta":"component\":\"Card\",\"child\":"}
+{"tMs":1061,"delta":"\"main\"},{\"id\":"}
+{"tMs":1094,"delta":"\"main\",\"component\":\"Column"}
+{"tMs":1128,"delta":"\",\"children\":[\"title\",\"stats"}
+{"tMs":1358,"delta":"\",\""}
+{"tMs":1358,"delta":"div"}
+{"tMs":1358,"delta":"1\",\"ch"}
+{"tMs":1359,"delta":"artTitle\",\"ch"}
+{"tMs":1359,"delta":"art"}
+{"tMs":1359,"delta":"List\",\"div2\",\"split"}
+{"tMs":1359,"delta":"sTitle\",\"splits"}
+{"tMs":1387,"delta":"Header\",\"splitsList"}
+{"tMs":1420,"delta":"\",\"div3\",\"comp"}
+{"tMs":1454,"delta":"areTitle\",\"compareR"}
+{"tMs":1487,"delta":"ow\",\"shareBtn\""}
+{"tMs":1521,"delta":"]},{\"id\":\"title"}
+{"tMs":1679,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":1679,"delta":"\":{"}
+{"tMs":1679,"delta":"\"@path"}
+{"tMs":1679,"delta":"\":\"/title"}
+{"tMs":1686,"delta":"\"}},{\"id\":\""}
+{"tMs":1720,"delta":"stats\",\"component\":\"Row"}
+{"tMs":1752,"delta":"\",\"just"}
+{"tMs":1785,"delta":"ify\":\"sp"}
+{"tMs":1818,"delta":"aceBetween\",\"children"}
+{"tMs":1851,"delta":"\":[\"s"}
+{"tMs":1884,"delta":"1\",\"s2\",\"s3\",\""}
+{"tMs":1918,"delta":"s4\"]},{\"id"}
+{"tMs":1999,"delta":"\":\"s1\",\"component\":\""}
+{"tMs":1999,"delta":"Column\",\"align"}
+{"tMs":2017,"delta":"\":\"center"}
+{"tMs":2051,"delta":"\",\"children\":[\"s"}
+{"tMs":2084,"delta":"1v\",\"s1l\"]"}
+{"tMs":2118,"delta":"},{\"id\":\"s1"}
+{"tMs":2152,"delta":"v\",\"component\":\"Text\",\""}
+{"tMs":2185,"delta":"text\":{\"@path\":\""}
+{"tMs":2221,"delta":"/distance\"}},{\""}
+{"tMs":2253,"delta":"id\":\"s1l\",\"component"}
+{"tMs":2286,"delta":"\":\"Text\",\"vari"}
+{"tMs":2320,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":2353,"delta":"\"Distance\"},{\""}
+{"tMs":2387,"delta":"id\":\"s2\",\"component\":"}
+{"tMs":2420,"delta":"\"Column\",\"align\":\"center"}
+{"tMs":2455,"delta":"\",\"children\":[\"s2v\",\""}
+{"tMs":2489,"delta":"s2l\"]},{\""}
+{"tMs":2521,"delta":"id\":\"s2v\",\"component"}
+{"tMs":2554,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":2587,"delta":"\"@path\":\"/time\""}
+{"tMs":2621,"delta":"}},{\"id\":\"s"}
+{"tMs":2654,"delta":"2l\",\"component\":\"Text"}
+{"tMs":2688,"delta":"\",\"variant\":\"caption\",\""}
+{"tMs":2721,"delta":"text\":\"Time\"},{"}
+{"tMs":2755,"delta":"\"id\":\"s3\",\"component"}
+{"tMs":2788,"delta":"\":\"Column\",\"align\":\""}
+{"tMs":2822,"delta":"center\",\"children\":[\"s3v"}
+{"tMs":2855,"delta":"\",\"s3l\"]},{"}
+{"tMs":2888,"delta":"\"id\":\"s3v\",\""}
+{"tMs":2922,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":2955,"delta":"{\"@path\":\"/p"}
+{"tMs":2989,"delta":"ace\"}},{\"id\":"}
+{"tMs":3022,"delta":"\"s3l\",\"component\":\""}
+{"tMs":3056,"delta":"Text\",\"variant\":\"ca"}
+{"tMs":3089,"delta":"ption\",\"text\":\"Avg"}
+{"tMs":3123,"delta":" pace\"},{\"id\":"}
+{"tMs":3156,"delta":"\"s4\",\"component\":\""}
+{"tMs":3189,"delta":"Column\",\"align\":\"center\",\"children"}
+{"tMs":3222,"delta":"\":[\"s4v\",\"s4"}
+{"tMs":3256,"delta":"l\"]},{\"id\":"}
+{"tMs":3289,"delta":"\"s4v\",\"component\":\""}
+{"tMs":3324,"delta":"Text\",\"text\":{\"@"}
+{"tMs":3356,"delta":"path\":\"/calories\"}"}
+{"tMs":3390,"delta":"},{\"id\":\"s4"}
+{"tMs":3423,"delta":"l\",\"component\":\"Text\",\""}
+{"tMs":3456,"delta":"variant\":\"caption\",\"text"}
+{"tMs":3490,"delta":"\":\"Calories\"},{"}
+{"tMs":3523,"delta":"\"id\":\"div1\",\"component"}
+{"tMs":3557,"delta":"\":\"Divider\"},{"}
+{"tMs":3590,"delta":"\"id\":\"chartTit"}
+{"tMs":3623,"delta":"le\",\"component\":\"Text\",\""}
+{"tMs":3657,"delta":"text\":\"Pace per k"}
+{"tMs":3690,"delta":"ilometer (min/km"}
+{"tMs":3723,"delta":")\"},{\"id\":\""}
+{"tMs":3757,"delta":"chartList\",\"component\":\"List"}
+{"tMs":3790,"delta":"\",\"children\":{\"path"}
+{"tMs":3823,"delta":"\":\"/splits\",\"component"}
+{"tMs":3857,"delta":"Id\":\"ch"}
+{"tMs":3899,"delta":"artRow\"}"}
+{"tMs":3930,"delta":"},{\"id\":\"chart"}
+{"tMs":3962,"delta":"Row\",\"component\":\"Row"}
+{"tMs":3997,"delta":"\",\"align\":\"center"}
+{"tMs":4023,"delta":"\",\"children\":[\""}
+{"tMs":4056,"delta":"c"}
+{"tMs":4089,"delta":"L"}
+{"tMs":4122,"delta":"abel\",\"cBar\",\"c"}
+{"tMs":4156,"delta":"Val\"]},{\"id"}
+{"tMs":4189,"delta":"\":\"cLabel\",\"component"}
+{"tMs":4222,"delta":"\":\"Text\",\"vari"}
+{"tMs":4256,"delta":"ant\":\"caption\",\"text\":"}
+{"tMs":4289,"delta":"{\"@call"}
+{"tMs":4322,"delta":"\":\"formatString\",\"args"}
+{"tMs":4356,"delta":"\":{\"value\":\"km"}
+{"tMs":4389,"delta":" ${km"}
+{"tMs":4422,"delta":"}\"}}},{\"id"}
+{"tMs":4457,"delta":"\":\"cBar\",\"component\":"}
+{"tMs":4489,"delta":"\"Slider\",\"min"}
+{"tMs":4522,"delta":"\":4"}
+{"tMs":4555,"delta":",\"max\":7"}
+{"tMs":4588,"delta":",\"value\":{\"@path"}
+{"tMs":4621,"delta":"\":\"pa"}
+{"tMs":4655,"delta":"ceN"}
+{"tMs":4688,"delta":"um\"},\"weight\":1"}
+{"tMs":4721,"delta":"},{\"id\":\"cV"}
+{"tMs":4755,"delta":"al\",\"component\":\"Text\",\""}
+{"tMs":4788,"delta":"variant\":\"caption\",\"text"}
+{"tMs":4822,"delta":"\":{\"@path\":\"p"}
+{"tMs":4855,"delta":"ace\"}},{\"id\":"}
+{"tMs":4888,"delta":"\"div2\",\"component\":\""}
+{"tMs":4922,"delta":"Divider\"},{\"id\":"}
+{"tMs":4955,"delta":"\"splitsTitle\",\""}
+{"tMs":4989,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":5022,"delta":"\"Splits\"},{\""}
+{"tMs":5055,"delta":"id\":\"splitsHe"}
+{"tMs":5090,"delta":"ader\",\"component\":\"Row\",\""}
+{"tMs":5122,"delta":"justify\":\"spaceB"}
+{"tMs":5155,"delta":"etween\",\"children\":[\"h"}
+{"tMs":5189,"delta":"1\",\"h2\",\"h3\""}
+{"tMs":5222,"delta":"]},{\"id\":\"h"}
+{"tMs":5276,"delta":"1\",\"component\":\"Text\",\""}
+{"tMs":5291,"delta":"variant\":\"caption\",\"text"}
+{"tMs":5322,"delta":"\":\"Km\",\"weight\":"}
+{"tMs":5356,"delta":"1},{\"id\":\"h"}
+{"tMs":5394,"delta":"2\",\"component\":\"Text\",\""}
+{"tMs":5423,"delta":"variant\":\"caption\",\"text"}
+{"tMs":5459,"delta":"\":\"Pace\",\"weight"}
+{"tMs":5489,"delta":"\":1},{\"id\":\""}
+{"tMs":5523,"delta":"h3\",\"component\":\"Text"}
+{"tMs":5556,"delta":"\",\"variant\":\"caption\",\""}
+{"tMs":5589,"delta":"text\":\"He"}
+{"tMs":5623,"delta":"art rate\",\"weight\":1"}
+{"tMs":5656,"delta":"},{\"id\":\"split"}
+{"tMs":5689,"delta":"sList\",\"component\":\"List\",\""}
+{"tMs":5723,"delta":"children\":{\"path\":\"/"}
+{"tMs":5756,"delta":"splits\",\"componentId\":\""}
+{"tMs":5790,"delta":"splitRow\"}},{"}
+{"tMs":5823,"delta":"\"id\":\"splitRow"}
+{"tMs":5856,"delta":"\",\"component\":\"Row\",\"just"}
+{"tMs":5890,"delta":"ify\":\"spaceBet"}
+{"tMs":5923,"delta":"ween\",\"children\":[\"r1\",\""}
+{"tMs":5958,"delta":"r2\",\"r3\"]},"}
+{"tMs":5991,"delta":"{\"id\":\"r1\",\""}
+{"tMs":6023,"delta":"component\":\"Text\",\"text\":"}
+{"tMs":6057,"delta":"{\"@path\":\"km\""}
+{"tMs":6090,"delta":"},\"weight\":1},{"}
+{"tMs":6123,"delta":"\"id\":\"r2\",\"component"}
+{"tMs":6157,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":6190,"delta":"\"@path\":\"pace\""}
+{"tMs":6223,"delta":"},\"weight\":1},{"}
+{"tMs":6257,"delta":"\"id\":\"r3\",\"component"}
+{"tMs":6290,"delta":"\":\"Text\",\"text\":{"}
+{"tMs":6323,"delta":"\"@path\":\"hr\""}
+{"tMs":6357,"delta":"},\"weight\":1},{"}
+{"tMs":6390,"delta":"\"id\":\"div3\",\"component"}
+{"tMs":6423,"delta":"\":\"Divider\"},{"}
+{"tMs":6457,"delta":"\"id\":\"compareTit"}
+{"tMs":6490,"delta":"le\",\"component\":\"Text"}
+{"tMs":6524,"delta":"\",\"text\":\"Compared with"}
+{"tMs":6557,"delta":" your"}
+{"tMs":6590,"delta":" last run\"},{\"id\":"}
+{"tMs":6624,"delta":"\"compareRow\",\"component\":"}
+{"tMs":6657,"delta":"\"Column\",\"children\":[\"c"}
+{"tMs":6691,"delta":"m"}
+{"tMs":6723,"delta":"p1\",\"cmp2\",\""}
+{"tMs":6756,"delta":"cmp3\"]},{"}
+{"tMs":6790,"delta":"\"id\":\"cmp1"}
+{"tMs":6823,"delta":"\",\"component\":\"Text\",\"text"}
+{"tMs":6857,"delta":"\":{\"@path\":\"/"}
+{"tMs":6890,"delta":"compare/distance\"}},"}
+{"tMs":6924,"delta":"{\"id\":\"cmp"}
+{"tMs":6957,"delta":"2\",\"component\":\"Text\",\""}
+{"tMs":6990,"delta":"text\":{\"@path\":\""}
+{"tMs":7024,"delta":"/compare/pace\"}"}
+{"tMs":7057,"delta":"},{\"id\":\"cm"}
+{"tMs":7090,"delta":"p3\",\"component\":\"Text"}
+{"tMs":7123,"delta":"\",\"text\":{\"@path\":"}
+{"tMs":7157,"delta":"\"/compare/calories\""}
+{"tMs":7190,"delta":"}},{\"id\":\"sh"}
+{"tMs":7224,"delta":"areBtn\",\"component\":\""}
+{"tMs":7257,"delta":"Button\",\"variant\":\"prim"}
+{"tMs":7291,"delta":"ary\",\"child\":\"sh"}
+{"tMs":7323,"delta":"areT"}
+{"tMs":7356,"delta":"xt\",\"action\":{\"event"}
+{"tMs":7390,"delta":"\":{\"name\":\"share_"}
+{"tMs":7423,"delta":"run\",\"userMessage\":\""}
+{"tMs":7457,"delta":"Share this morning's run\",\""}
+{"tMs":7490,"delta":"context\":{\"run"}
+{"tMs":7523,"delta":"\":\"mor"}
+{"tMs":7557,"delta":"ning_run\"}}}},"}
+{"tMs":7590,"delta":"{\"id\":\"shareT"}
+{"tMs":7623,"delta":"xt\",\"component\":\"Text"}
+{"tMs":7657,"delta":"\",\"text\":\"Share run"}
+{"tMs":7690,"delta":"\"}],\"dataModel"}
+{"tMs":7723,"delta":"\":{\"title\":\"Mor"}
+{"tMs":7757,"delta":"ning run"}
+{"tMs":7790,"delta":"\",\""}
+{"tMs":7823,"delta":"distance\":\"5.0 "}
+{"tMs":7857,"delta":"km\",\"time\":\"27"}
+{"tMs":7889,"delta":":35"}
+{"tMs":7923,"delta":"\",\"pace\":\"5"}
+{"tMs":7956,"delta":":31"}
+{"tMs":7989,"delta":" /"}
+{"tMs":8023,"delta":"km\",\"calories\":\"342"}
+{"tMs":8056,"delta":" kcal\",\"splits\":"}
+{"tMs":8089,"delta":"[{\"km\":\""}
+{"tMs":8123,"delta":"1\",\"p"}
+{"tMs":8156,"delta":"ace\":\"5:48"}
+{"tMs":8189,"delta":"\",\"paceNum\":5."}
+{"tMs":8222,"delta":"8,\"hr\":\"148"}
+{"tMs":8256,"delta":" bpm\"},{\""}
+{"tMs":8290,"delta":"km\":\"2\",\"pace\":"}
+{"tMs":8322,"delta":"\"5:35"}
+{"tMs":8356,"delta":"\",\"paceNum\":5."}
+{"tMs":8390,"delta":"58,\"hr\":\"156"}
+{"tMs":8423,"delta":" bpm\"},{\""}
+{"tMs":8456,"delta":"km\":\"3\",\"pace\":"}
+{"tMs":8489,"delta":"\"5:28\",\"paceN"}
+{"tMs":8523,"delta":"um\":5.47"}
+{"tMs":8556,"delta":",\"hr\":\"160"}
+{"tMs":8589,"delta":" bpm\"},{\""}
+{"tMs":8623,"delta":"km\":\"4\",\"pace\":"}
+{"tMs":8656,"delta":"\"5:24"}
+{"tMs":8690,"delta":"\",\"paceNum\":5."}
+{"tMs":8723,"delta":"4,\"hr\":\"164"}
+{"tMs":8756,"delta":" bpm\"},{\""}
+{"tMs":8790,"delta":"km\":\"5\",\"pace\":"}
+{"tMs":8823,"delta":"\"5:20\",\"paceN"}
+{"tMs":8856,"delta":"um\":5.33,\"h"}
+{"tMs":8889,"delta":"r\":\"168 bpm"}
+{"tMs":8923,"delta":"\"}],\"compare\":{"}
+{"tMs":8956,"delta":"\"distance\":\""}
+{"tMs":8990,"delta":"Distance:"}
+{"tMs":9023,"delta":" +0.5 km vs"}
+{"tMs":9056,"delta":" last"}
+{"tMs":9090,"delta":" run\",\"pace\":\"P"}
+{"tMs":9122,"delta":"ace: 12 sec/"}
+{"tMs":9156,"delta":"km faster\",\"calories\":\""}
+{"tMs":9189,"delta":"Calories: +38 k"}
+{"tMs":9223,"delta":"cal\"}}}}"}

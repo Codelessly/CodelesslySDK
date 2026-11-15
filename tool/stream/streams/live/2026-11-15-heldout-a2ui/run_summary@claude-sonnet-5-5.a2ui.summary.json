@@ -1,0 +1,71 @@
+{
+ "ui": "run_summary",
+ "kind": "page",
+ "model": "claude-sonnet-5-5",
+ "form": "a2ui",
+ "systemPromptChars": 64411,
+ "turns": [
+  {
+   "input_tokens": 21140,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 1799,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 739,
+   "totalMs": 9260,
+   "chars": 3874,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 46,
+   "outputTokensPerNode": "39.1",
+   "notationIssues": [
+    "line 32:30: A control is bound to a variable by its name (=name), or under an each to a field of its element (=row.name): \"(item.paceNum)\" is neither."
+   ],
+   "notes": [],
+   "messages": 1,
+   "errors": []
+  },
+  {
+   "input_tokens": 23024,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 2779,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 360
+   },
+   "ttftMs": 4068,
+   "totalMs": 14882,
+   "chars": 5125,
+   "lines": 1,
+   "jsonTails": 0,
+   "nodes": 60,
+   "outputTokensPerNode": "46.3",
+   "notationIssues": [
+    "line 31:28: A control is bound to a variable by its name (=name), or under an each to a field of its element (=row.name): \"(splits[0].paceNum)\" is neither.",
+    "line 35:28: A control is bound to a variable by its name (=name), or under an each to a field of its element (=row.name): \"(splits[1].paceNum)\" is neither.",
+    "line 39:28: A control is bound to a variable by its name (=name), or under an each to a field of its element (=row.name): \"(splits[2].paceNum)\" is neither.",
+    "line 43:28: A control is bound to a variable by its name (=name), or under an each to a field of its element (=row.name): \"(splits[3].paceNum)\" is neither.",
+    "line 47:28: A control is bound to a variable by its name (=name), or under an each to a field of its element (=row.name): \"(splits[4].paceNum)\" is neither."
+   ],
+   "notes": [],
+   "messages": 1,
+   "errors": []
+  }
+ ]
+}
