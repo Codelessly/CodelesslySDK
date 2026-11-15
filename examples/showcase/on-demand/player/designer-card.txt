@@ -1,0 +1,11 @@
+state tracks=[{"title":"Midnight City","artist":"M83 · Hurry Up, We're Dreaming","kind":"vinyl","tone":"lilac","len":243,"dur":"4:03"},{"title":"Golden Hour","artist":"JVKE","kind":"sunset","tone":"rose","len":209,"dur":"3:29"},{"title":"Ocean Eyes","artist":"Billie Eilish","kind":"waves","tone":"sky","len":200,"dur":"3:20"},{"title":"Electric Feel","artist":"MGMT","kind":"vinyl","tone":"mint","len":229,"dur":"3:49"},{"title":"Dreams","artist":"Fleetwood Mac","kind":"sunset","tone":"sand","len":257,"dur":"4:17"}]
+state i=0
+state t=74
+state playing=true
+state liked=false
+every 1s when playing && t<tracks[i].len -> t=t+1
+ChatCard "Living room speaker" "From your Daily Mix" icon:"speaker_rounded" status:=playing?"Playing":"Paused" tone:=playing?"accent":"neutral"
+  NowPlaying =playing title:=tracks[i].title artist:=tracks[i].artist kind:=tracks[i].kind tone:=tracks[i].tone elapsed:=t length:=tracks[i].len -> i=result=="next"?min(i+1,length(tracks)-1):(t>3?i:max(0,i-1)); t=0
+  SectionLabel "Up next" "{length(slice(tracks,i+1,i+4))} tracks"
+  Details rows:=map(slice(tracks,i+1,i+4),q=>[q.title+" · "+q.artist,q.dur]) icons:=map(slice(tracks,i+1,i+4),q=>"queue_music_rounded")
+  ActionButton "{liked?'In your Liked Songs':'Add to Liked Songs'}" tone:"quiet" icon:=liked?"favorite_rounded":"favorite_border_rounded" -> liked=!liked; emit like tracks[i].title

@@ -205,9 +205,9 @@
      {
       "op": "rect",
       "rect": [
-       "${= size.width - 28}",
+       "${= size.width - 12}",
        0,
-       28,
+       12,
        "${size.height}"
       ],
       "when": "${= (length(props.names) > 2) && props.fade}",
@@ -389,7 +389,7 @@
     "scrollable": true,
     "scrollDirection": "horizontal",
     "crossAxisAlignment": "start",
-    "edgeFade": 28
+    "edgeFade": 12
    },
    "layout": {
     "width": {
@@ -400,7 +400,7 @@
     }
    },
    "bind": {
-    "props.edgeFade": "${= props.fade ? 28 : 0}"
+    "props.edgeFade": "${= props.fade ? 12 : 0}"
    }
   },
   "strip": {

@@ -1,0 +1,3 @@
+/tmp/claude-0/-home-user/d11c2670-1755-578e-aaa9-037ed813c978/scratchpad/ondemand/player/round1/card.txt: line 8:146: Unknown action "onPrevious:". Actions: name=value, emit <event>, toast "…", open <id>, close, go <screen>, link <url>, or JSON.
+ERROR   expression_syntax [card] /nodes/NowPlaying1/actions/0/actions/0/value
+        The formula "${= 0 -> onNext: i=min(i+1,length(tracks)-1)}" does not parse: Unexpected ">" at 4.

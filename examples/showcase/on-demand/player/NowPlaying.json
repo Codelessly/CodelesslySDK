@@ -1,0 +1,201 @@
+{
+ "schema": 3,
+ "id": "NowPlaying",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "NowPlaying",
+  "doc": "A music player with drawn album art: NowPlaying =playing title:\"Midnight City\" artist:\"M83\" kind:\"vinyl\" tone:\"lilac\" elapsed:=t length:243 -> i=result==\"next\"?i+1:i-1 (the center button flips your playing variable; onSkip reports \"previous\" or \"next\"; advance elapsed yourself with an every 1s when playing line).",
+  "props": [
+   {"key": "playing", "type": {"kind": "variable", "of": {"kind": "boolean", "flutter": "bool"}}, "default": false, "doc": "The name of your true/false variable: the center button flips it between play and pause."},
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Midnight City", "doc": "The track.", "required": true},
+   {"key": "artist", "type": {"kind": "string", "flutter": "String"}, "default": "M83", "doc": "The artist (and album), under the track."},
+   {"key": "kind", "type": {"kind": "string", "flutter": "String"}, "default": "vinyl", "doc": "The drawn art: vinyl, sunset or waves."},
+   {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "lilac", "doc": "The art's palette: sand, rose, mint, sky, lilac or slate."},
+   {"key": "elapsed", "type": {"kind": "number", "flutter": "double"}, "default": 0, "doc": "Seconds played.", "required": true},
+   {"key": "length", "type": {"kind": "number", "flutter": "double"}, "default": 240, "doc": "The track's length in seconds.", "required": true}
+  ],
+  "events": [
+   {"key": "onSkip", "doc": "Previous or next was tapped; the value is \"previous\" or \"next\"."},
+   {"key": "onPrevious", "doc": "The previous button was tapped."},
+   {"key": "onNext", "doc": "The next button was tapped."},
+   {"key": "onToggle", "doc": "Play or pause was tapped."}
+  ]
+ },
+ "previews": [
+  {"name": "Playing", "size": [360, 250], "props": {"playing": true, "title": "Midnight City", "artist": "M83 · Hurry Up, We're Dreaming", "kind": "vinyl", "tone": "lilac", "elapsed": 74, "length": 243}},
+  {"name": "Paused sunset", "size": [360, 250], "props": {"playing": false, "title": "Golden Hour", "artist": "JVKE · this is what ____ feels like", "kind": "sunset", "tone": "rose", "elapsed": 131, "length": 209}}
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": ["top", "progress", "times", "transport"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "top": {
+   "type": "row",
+   "children": ["art", "texts"],
+   "props": {"crossAxisAlignment": "center", "spacing": 14},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 0, 0, 18]}
+  },
+  "art": {
+   "type": "box",
+   "layout": {"width": 92, "height": 92},
+   "customPaint": {
+    "painter": [
+     {"op": "rrect", "rect": [0, 0, 92, 92], "radius": 14,
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': props.tone == 'sand' ? theme.colors.sandA : props.tone == 'rose' ? theme.colors.roseA : props.tone == 'mint' ? theme.colors.mintA : props.tone == 'sky' ? theme.colors.skyA : props.tone == 'slate' ? theme.colors.slateA : theme.colors.lilacA}, {'position': 1, 'color': props.tone == 'sand' ? theme.colors.sandB : props.tone == 'rose' ? theme.colors.roseB : props.tone == 'mint' ? theme.colors.mintB : props.tone == 'sky' ? theme.colors.skyB : props.tone == 'slate' ? theme.colors.slateB : theme.colors.lilacB}]}}}"},
+
+     {"op": "rrect", "rect": [14, 16, 64, 64], "radius": 32, "when": "${= props.kind != 'sunset' && props.kind != 'waves'}", "paint": "${theme.colors.artShadow}"},
+     {"op": "rrect", "rect": [14, 14, 64, 64], "radius": 32, "when": "${= props.kind != 'sunset' && props.kind != 'waves'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandInk : props.tone == 'rose' ? theme.colors.roseInk : props.tone == 'mint' ? theme.colors.mintInk : props.tone == 'sky' ? theme.colors.skyInk : props.tone == 'slate' ? theme.colors.slateInk : theme.colors.lilacInk}"},
+     {"op": "rrect", "rect": [23, 23, 46, 46], "radius": 23, "when": "${= props.kind != 'sunset' && props.kind != 'waves'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandMid : props.tone == 'rose' ? theme.colors.roseMid : props.tone == 'mint' ? theme.colors.mintMid : props.tone == 'sky' ? theme.colors.skyMid : props.tone == 'slate' ? theme.colors.slateMid : theme.colors.lilacMid}"},
+     {"op": "rrect", "rect": [26, 26, 40, 40], "radius": 20, "when": "${= props.kind != 'sunset' && props.kind != 'waves'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandInk : props.tone == 'rose' ? theme.colors.roseInk : props.tone == 'mint' ? theme.colors.mintInk : props.tone == 'sky' ? theme.colors.skyInk : props.tone == 'slate' ? theme.colors.slateInk : theme.colors.lilacInk}"},
+     {"op": "rrect", "rect": [36, 36, 20, 20], "radius": 10, "when": "${= props.kind != 'sunset' && props.kind != 'waves'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandA : props.tone == 'rose' ? theme.colors.roseA : props.tone == 'mint' ? theme.colors.mintA : props.tone == 'sky' ? theme.colors.skyA : props.tone == 'slate' ? theme.colors.slateA : theme.colors.lilacA}"},
+     {"op": "rrect", "rect": [43, 43, 6, 6], "radius": 3, "when": "${= props.kind != 'sunset' && props.kind != 'waves'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandInk : props.tone == 'rose' ? theme.colors.roseInk : props.tone == 'mint' ? theme.colors.mintInk : props.tone == 'sky' ? theme.colors.skyInk : props.tone == 'slate' ? theme.colors.slateInk : theme.colors.lilacInk}"},
+
+     {"op": "rrect", "rect": [26, 18, 40, 40], "radius": 20, "when": "${= props.kind == 'sunset'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandMid : props.tone == 'rose' ? theme.colors.roseMid : props.tone == 'mint' ? theme.colors.mintMid : props.tone == 'sky' ? theme.colors.skyMid : props.tone == 'slate' ? theme.colors.slateMid : theme.colors.lilacMid}"},
+     {"op": "rrect", "rect": [18, 42, 56, 3], "radius": 1.5, "when": "${= props.kind == 'sunset'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandA : props.tone == 'rose' ? theme.colors.roseA : props.tone == 'mint' ? theme.colors.mintA : props.tone == 'sky' ? theme.colors.skyA : props.tone == 'slate' ? theme.colors.slateA : theme.colors.lilacA}"},
+     {"op": "rrect", "rect": [18, 49, 56, 3], "radius": 1.5, "when": "${= props.kind == 'sunset'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandA : props.tone == 'rose' ? theme.colors.roseA : props.tone == 'mint' ? theme.colors.mintA : props.tone == 'sky' ? theme.colors.skyA : props.tone == 'slate' ? theme.colors.slateA : theme.colors.lilacA}"},
+     {"op": "rrect", "rect": [0, 58, 92, 34], "radius": 14, "when": "${= props.kind == 'sunset'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandInk : props.tone == 'rose' ? theme.colors.roseInk : props.tone == 'mint' ? theme.colors.mintInk : props.tone == 'sky' ? theme.colors.skyInk : props.tone == 'slate' ? theme.colors.slateInk : theme.colors.lilacInk}"},
+     {"op": "rrect", "rect": [0, 58, 92, 16], "radius": 0, "when": "${= props.kind == 'sunset'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandInk : props.tone == 'rose' ? theme.colors.roseInk : props.tone == 'mint' ? theme.colors.mintInk : props.tone == 'sky' ? theme.colors.skyInk : props.tone == 'slate' ? theme.colors.slateInk : theme.colors.lilacInk}"},
+     {"op": "rrect", "rect": [30, 66, 32, 3], "radius": 1.5, "when": "${= props.kind == 'sunset'}", "paint": "${theme.colors.artShine}"},
+
+     {"op": "rrect", "rect": [62, 14, 14, 14], "radius": 7, "when": "${= props.kind == 'waves'}", "paint": "${theme.colors.artWhite}"},
+     {"op": "rrect", "rect": [10, 34, 70, 10], "radius": 5, "when": "${= props.kind == 'waves'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandMid : props.tone == 'rose' ? theme.colors.roseMid : props.tone == 'mint' ? theme.colors.mintMid : props.tone == 'sky' ? theme.colors.skyMid : props.tone == 'slate' ? theme.colors.slateMid : theme.colors.lilacMid}"},
+     {"op": "rrect", "rect": [20, 50, 62, 10], "radius": 5, "when": "${= props.kind == 'waves'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandInk : props.tone == 'rose' ? theme.colors.roseInk : props.tone == 'mint' ? theme.colors.mintInk : props.tone == 'sky' ? theme.colors.skyInk : props.tone == 'slate' ? theme.colors.slateInk : theme.colors.lilacInk}"},
+     {"op": "rrect", "rect": [10, 66, 50, 10], "radius": 5, "when": "${= props.kind == 'waves'}",
+      "paint": "${= props.tone == 'sand' ? theme.colors.sandMid : props.tone == 'rose' ? theme.colors.roseMid : props.tone == 'mint' ? theme.colors.mintMid : props.tone == 'sky' ? theme.colors.skyMid : props.tone == 'slate' ? theme.colors.slateMid : theme.colors.lilacMid}"}
+    ]
+   }
+  },
+  "texts": {
+   "type": "column",
+   "children": ["eyebrow", "title", "artist"],
+   "props": {"crossAxisAlignment": "start", "spacing": 3},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "eyebrow": {
+   "type": "text",
+   "props": {"text": "${= props.playing ? 'NOW PLAYING' : 'PAUSED'}", "style": {"from": "eyebrow", "color": "accent"}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 0, 0, 2]},
+   "bind": {"props.style.color": "${= props.playing ? theme.colors.accent : theme.colors.inkFaint}"}
+  },
+  "title": {
+   "type": "text",
+   "props": {"text": "${props.title}", "style": {"from": "cardTitle", "fontSize": 18}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "artist": {
+   "type": "text",
+   "props": {"text": "${props.artist}", "style": {"from": "meta", "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.artist != ''}"}
+  },
+  "progress": {
+   "type": "box",
+   "layout": {"width": {"fill": 0}, "height": 14},
+   "customPaint": {
+    "painter": [
+     {"op": "rrect", "rect": [0, 5, "${size.width}", 4], "radius": 2, "paint": "${theme.colors.tileDeep}"},
+     {"op": "rrect", "rect": [0, 5, "${= max(4, size.width * clamp(props.elapsed / max(1, props.length), 0, 1))}", 4], "radius": 2,
+      "when": "${= props.elapsed > 0}",
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': theme.colors.accentBright}, {'position': 1, 'color': theme.colors.accent}]}}}"},
+     {"op": "rrect", "rect": ["${= clamp(size.width * clamp(props.elapsed / max(1, props.length), 0, 1) - 7, 0, size.width - 14)}", 0, 14, 14], "radius": 7, "paint": "${theme.colors.accent}"},
+     {"op": "rrect", "rect": ["${= clamp(size.width * clamp(props.elapsed / max(1, props.length), 0, 1) - 7, 0, size.width - 14) + 4}", 4, 6, 6], "radius": 3, "paint": "${theme.colors.onAccent}"}
+    ]
+   }
+  },
+  "times": {
+   "type": "row",
+   "children": ["elapsed", "remaining"],
+   "props": {"mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [1, 6, 1, 12]}
+  },
+  "elapsed": {
+   "type": "text",
+   "props": {
+    "text": "${= '' + floor(clamp(props.elapsed, 0, props.length) / 60) + ':' + (floor(clamp(props.elapsed, 0, props.length) % 60) < 10 ? '0' : '') + floor(clamp(props.elapsed, 0, props.length) % 60)}",
+    "style": {"from": "numberSmall", "fontSize": 12, "color": "inkSoft"}
+   },
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "remaining": {
+   "type": "text",
+   "props": {
+    "text": "${= '-' + floor(max(0, props.length - props.elapsed) / 60) + ':' + (floor(max(0, props.length - props.elapsed) % 60) < 10 ? '0' : '') + floor(max(0, props.length - props.elapsed) % 60)}",
+    "style": {"from": "numberSmall", "fontSize": 12, "color": "inkFaint"}
+   },
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "transport": {
+   "type": "row",
+   "children": ["prev", "play", "next"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 28},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "prev": {
+   "type": "row",
+   "children": ["prevIcon"],
+   "props": {"mainAxisAlignment": "center"},
+   "layout": {"width": 46, "height": 46},
+   "decoration": {"fills": [{"color": "tile"}], "radius": 23},
+   "states": {"pressed": {"prev": {"opacity": 0.6}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [
+    {"type": "componentEvent", "event": "onSkip", "value": "previous"},
+    {"type": "componentEvent", "event": "onPrevious"}
+   ]}]
+  },
+  "prevIcon": {
+   "type": "icon",
+   "props": {"icon": "skip_previous_rounded", "size": 26, "color": "ink"},
+   "layout": {"width": 26, "height": 26}
+  },
+  "play": {
+   "type": "row",
+   "children": ["playIcon"],
+   "props": {"mainAxisAlignment": "center"},
+   "layout": {"width": 62, "height": 62},
+   "decoration": {"fills": [{"color": "accent"}], "radius": 31},
+   "states": {"pressed": {"play": {"opacity": 0.82}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [
+    {"type": "setVariable", "variable": "props.playing", "value": "${= !props.playing}"},
+    {"type": "componentEvent", "event": "onToggle"}
+   ]}]
+  },
+  "playIcon": {
+   "type": "icon",
+   "props": {"icon": "play_arrow_rounded", "size": 34, "color": "onAccent"},
+   "layout": {"width": 34, "height": 34},
+   "bind": {"props.icon": "${= props.playing ? 'pause_rounded' : 'play_arrow_rounded'}"}
+  },
+  "next": {
+   "type": "row",
+   "children": ["nextIcon"],
+   "props": {"mainAxisAlignment": "center"},
+   "layout": {"width": 46, "height": 46},
+   "decoration": {"fills": [{"color": "tile"}], "radius": 23},
+   "states": {"pressed": {"next": {"opacity": 0.6}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [
+    {"type": "componentEvent", "event": "onSkip", "value": "next"},
+    {"type": "componentEvent", "event": "onNext"}
+   ]}]
+  },
+  "nextIcon": {
+   "type": "icon",
+   "props": {"icon": "skip_next_rounded", "size": 26, "color": "ink"},
+   "layout": {"width": 26, "height": 26}
+  }
+ }
+}

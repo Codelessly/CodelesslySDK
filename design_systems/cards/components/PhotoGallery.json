@@ -265,7 +265,7 @@
    "props": {
     "scrollable": true,
     "scrollDirection": "horizontal",
-    "edgeFade": 28
+    "edgeFade": 12
    },
    "layout": {
     "width": {
@@ -275,7 +275,7 @@
    },
    "bind": {
     "visible": "${= props.layout == 'strip' && props.value <= 0}",
-    "props.edgeFade": "${= props.fade ? 28 : 0}"
+    "props.edgeFade": "${= props.fade ? 12 : 0}"
    }
   },
   "stripList": {
