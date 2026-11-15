@@ -1292,13 +1292,16 @@ class RenderDropTarget extends RenderProxyBox {
   /// Places the pointer at [position] among the items of the target's list.
   void _place(DragSession session, Offset position) {
     final items = _listItems();
-    // Over a target beside the list (a column's tab): at the end.
-    if (_ownList == null && _remoteList != null) {
+    // Over a target beside the list (a column's tab): at the end. The copy
+    // it drops into may not be built yet (a phone board shows the column's
+    // page only once the card has been held over its tab), so the slot is
+    // at the end of whatever copy shows it, not before an index counted now.
+    if (_box != null && _model.listNodeId.isNotEmpty && !_holdsList) {
       session
         ..index = items.where((i) => !session.ids.contains(dragItemId(i.value))).length
         ..before = null
         ..beforeId = ''
-        ..rawBefore = items.isEmpty ? 0 : items.map((e) => e.index).reduce(math.max) + 1;
+        ..rawBefore = _atListEnd;
       return;
     }
     final list = _box!.source.node(_model.listNodeId);
@@ -1326,6 +1329,9 @@ class RenderDropTarget extends RenderProxyBox {
     session.beforeId = before == null ? '' : dragItemId(before.value);
     session.rawBefore = before?.index ?? (items.isEmpty ? 0 : items.map((e) => e.index).reduce(math.max) + 1);
   }
+
+  /// A slot index past any list's last item: its end (the list clamps it).
+  static const _atListEnd = 1 << 30;
 
   /// The box of the list this target drops into: the copy in its own list
   /// item; else, for a target outside the list's repeat (a column's tab),
