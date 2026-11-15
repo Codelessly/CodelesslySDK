@@ -1,0 +1,178 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Workshop poll",
+    "subtitle": "Which session should we run?",
+    "icon": "how_to_vote",
+    "status": "Open"
+   },
+   "children": [
+    "OptionList1",
+    "Paragraph1",
+    "ActionButton1",
+    "PollResults1"
+   ]
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "choice",
+    "options": [
+     "Prototyping",
+     "Accessibility",
+     "Animation"
+    ]
+   },
+   "bind": {
+    "visible": "${= !voted}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "choice",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Results update after voting."
+   },
+   "bind": {
+    "visible": "${= !voted}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Confirm vote",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= choice!=\"\"}",
+    "visible": "${= !voted}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "voted",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "PollResults1": {
+   "type": "PollResults",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "options": [
+     "Prototyping",
+     "Accessibility",
+     "Animation"
+    ],
+    "votes": [
+     3,
+     10,
+     5
+    ],
+    "note": "Results update after voting"
+   },
+   "bind": {
+    "props.choice": "${choice}",
+    "visible": "${= voted}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "choice",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "voted",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

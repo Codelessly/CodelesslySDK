@@ -1,0 +1,262 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Movie night",
+    "subtitle": "Pick the film for Saturday",
+    "icon": "movie",
+    "status": "Voting open"
+   },
+   "children": [
+    "text1",
+    "OptionList1",
+    "text2",
+    "Details1",
+    "progressBar1",
+    "progressBar2",
+    "progressBar3",
+    "text3",
+    "Callout1"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "Cast one vote below."
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Which film?",
+    "value": "vote",
+    "options": [
+     "Spirited Away",
+     "Arrival",
+     "Knives Out"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "votes",
+       "value": "${= with(votes,vote,votes[vote]+1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "You voted for ${vote}."
+   },
+   "bind": {
+    "visible": "${= vote!=\"\"}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Spirited Away\",fixed(100*votes[\"Spirited Away\"]/sum([\"Spirited Away\",\"Arrival\",\"Knives Out\"],x=>votes[x]),0)+\"%  ·  \"+votes[\"Spirited Away\"]+\" votes\"],[\"Arrival\",fixed(100*votes[\"Arrival\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"]),0)+\"%  ·  \"+votes[\"Arrival\"]+\" votes\"],[\"Knives Out\",fixed(100*votes[\"Knives Out\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"]),0)+\"%  ·  \"+votes[\"Knives Out\"]+\" votes\"]]}"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   },
+   "bind": {
+    "props.value": "${= votes[\"Spirited Away\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"])}"
+   }
+  },
+  "progressBar2": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   },
+   "bind": {
+    "props.value": "${= votes[\"Arrival\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"])}"
+   }
+  },
+  "progressBar3": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   },
+   "bind": {
+    "props.value": "${= votes[\"Knives Out\"]/(votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"])}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "Total votes: ${= votes[\"Spirited Away\"]+votes[\"Arrival\"]+votes[\"Knives Out\"]}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Screening Saturday",
+    "message": "Spirited Away leads so far; the winner screens Saturday.",
+    "tone": "accent",
+    "icon": "event"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "vote",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "votes",
+    "type": "map",
+    "value": {
+     "Spirited Away": 11,
+     "Arrival": 8,
+     "Knives Out": 6
+    }
+   }
+  ]
+ }
+}

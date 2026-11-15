@@ -1,0 +1,16 @@
+{"meta":{"ui":"player_mgmt","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Make a listening card for ‘Electric Feel’ by MGMT, with mint vinyl art. It is paused 1:05 into a 3:49 song. Show title, artist, progress, time labels, and back/play/next controls. When I tap play, the card should show the playing state and retain the correct track and time information.","text":"ChatCard \"Now listening\" \"Electric Feel\" icon:\"music_note\" status:\"paused\"\n  NowPlaying =playing title:\"Electric Feel\" artist:\"MGMT\" kind:\"vinyl\" tone:\"mint\" elapsed:=t length:229 -> i=result==\"next\"?i+1:i-1","usage":{"input_tokens":9294,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":109,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":532,"totalMs":835}}
+{"tMs":532,"delta":"ChatCard \"Now"}
+{"tMs":649,"delta":" list"}
+{"tMs":649,"delta":"ening\" \"Electric Fe"}
+{"tMs":649,"delta":"el\" icon:\"music"}
+{"tMs":649,"delta":"_note\" status:\"paused"}
+{"tMs":649,"delta":"\"\n  NowPla"}
+{"tMs":649,"delta":"ying =playing title:\""}
+{"tMs":668,"delta":"Electric Feel\" artist"}
+{"tMs":686,"delta":":\"MGMT\" k"}
+{"tMs":707,"delta":"ind:\"vinyl\""}
+{"tMs":728,"delta":" tone:\"mint\" el"}
+{"tMs":749,"delta":"apsed:=t length:"}
+{"tMs":769,"delta":"229 -> i=result"}
+{"tMs":799,"delta":"==\"next\"?i+1"}
+{"tMs":809,"delta":":i-1"}

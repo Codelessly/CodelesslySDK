@@ -1,0 +1,51 @@
+{"meta":{"ui":"player_fleetwood","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Create an inline music card for ‘Dreams’ by Fleetwood Mac, with sand-toned sunset art. Start paused at 3:02 of a 4:17 track. Show progress and time labels with previous, play/pause, and next. Tapping the main control should play the same track and show no missing values.","text":"Column w:390 pad:16\n  NowPlaying =playing title:\"Dreams\" artist:\"Fleetwood Mac\" kind:\"dusk\" tone:\"sand\" elapsed:=elapsed length:257 -> skip=result\n\nstate playing=false\nstate elapsed=182\nstate skip=\"\"\nevery 1s when playing -> elapsed=min(257,elapsed+1)\n\nEach NowPlaying line above is the card: NowPlaying is one node, so the notation above should be read as a single node with these props. Final form:\n\nstate playing=false\nstate elapsed=182\nstate skip=\"\"\nevery 1s when playing -> elapsed=min(257,elapsed+1)\nColumn w:390 pad:16\n  NowPlaying =playing title:\"Dreams\" artist:\"Fleetwood Mac\" kind:\"dusk\" tone:\"sand\" elapsed:=elapsed length:257 -> skip=result","usage":{"input_tokens":9292,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":296,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1553,"totalMs":2607}}
+{"tMs":1553,"delta":"Column"}
+{"tMs":1682,"delta":" w"}
+{"tMs":1683,"delta":":390 p"}
+{"tMs":1683,"delta":"ad:16\n  NowP"}
+{"tMs":1683,"delta":"laying =playing title:"}
+{"tMs":1683,"delta":"\"Dreams\" artist"}
+{"tMs":1702,"delta":":\"Fleetwood"}
+{"tMs":1723,"delta":" Mac\" kind:\""}
+{"tMs":1744,"delta":"dusk\" tone:\""}
+{"tMs":1765,"delta":"sand\" elapsed:"}
+{"tMs":1785,"delta":"=el"}
+{"tMs":1805,"delta":"apsed length:257"}
+{"tMs":1826,"delta":" -> sk"}
+{"tMs":1845,"delta":"ip=result"}
+{"tMs":1865,"delta":"\n\nstate"}
+{"tMs":1885,"delta":" play"}
+{"tMs":1906,"delta":"ing=false\nstate elaps"}
+{"tMs":1926,"delta":"ed=182"}
+{"tMs":1946,"delta":"\nstate"}
+{"tMs":1967,"delta":" skip=\"\"\nevery 1"}
+{"tMs":1988,"delta":"s when playing -> elap"}
+{"tMs":2009,"delta":"sed=min(257"}
+{"tMs":2029,"delta":",elapsed+1)"}
+{"tMs":2049,"delta":"\n\nEach N"}
+{"tMs":2070,"delta":"owPlaying line above"}
+{"tMs":2090,"delta":" is the card"}
+{"tMs":2111,"delta":": N"}
+{"tMs":2131,"delta":"owPlaying is one"}
+{"tMs":2151,"delta":" node, so the"}
+{"tMs":2173,"delta":" notation above should"}
+{"tMs":2192,"delta":" be read"}
+{"tMs":2213,"delta":" as a single node with these props"}
+{"tMs":2233,"delta":". Final"}
+{"tMs":2256,"delta":" form:\n\nstate"}
+{"tMs":2274,"delta":" playing=false\nstate"}
+{"tMs":2295,"delta":" elapsed=182\nstate"}
+{"tMs":2315,"delta":" skip=\"\"\nevery 1"}
+{"tMs":2335,"delta":"s when playing -> elap"}
+{"tMs":2355,"delta":"sed=min(257,el"}
+{"tMs":2376,"delta":"apsed+1)"}
+{"tMs":2397,"delta":"\nColumn w:390 "}
+{"tMs":2417,"delta":"pad:16\n  Now"}
+{"tMs":2437,"delta":"Playing =playing title"}
+{"tMs":2458,"delta":":\"Dreams\" art"}
+{"tMs":2479,"delta":"ist:\"Fleetw"}
+{"tMs":2499,"delta":"ood Mac\" kind:"}
+{"tMs":2519,"delta":"\"dusk\" tone:"}
+{"tMs":2540,"delta":"\"sand\" elapsed"}
+{"tMs":2560,"delta":":=elapsed length:"}
+{"tMs":2581,"delta":"257 -> skip=result"}

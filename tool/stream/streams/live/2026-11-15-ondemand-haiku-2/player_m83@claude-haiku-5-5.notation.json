@@ -1,0 +1,131 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= playing}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "t",
+       "value": "${= min(243,t+1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Now playing",
+    "subtitle": "M83",
+    "icon": "music_note",
+    "status": "Live"
+   },
+   "children": [
+    "NowPlaying1",
+    "ProgressLine1"
+   ]
+  },
+  "NowPlaying1": {
+   "type": "NowPlaying",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "playing": "playing",
+    "title": "Midnight City",
+    "artist": "M83",
+    "kind": "vinyl",
+    "tone": "lilac",
+    "length": 243
+   },
+   "bind": {
+    "props.elapsed": "${t}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onSkip"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "t",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${= formatTime(t)}",
+    "props.detail": "${= formatTime(243)}",
+    "props.value": "${= t/243}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "playing",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "t",
+    "type": "integer",
+    "value": 74
+   }
+  ]
+ }
+}

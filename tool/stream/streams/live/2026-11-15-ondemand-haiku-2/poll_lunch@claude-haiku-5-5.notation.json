@@ -1,0 +1,216 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Where should we eat Friday?",
+    "subtitle": "Team lunch vote",
+    "icon": "restaurant",
+    "status": "Open"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "vote"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "SectionLabel1",
+    "OptionList1",
+    "ActionButton1",
+    "PollResults1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Choose one",
+    "note": "one vote each"
+   },
+   "bind": {
+    "visible": "${= !voted}"
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "pick",
+    "options": [
+     "Pho",
+     "Tacos",
+     "Pizza",
+     "Salads"
+    ]
+   },
+   "bind": {
+    "visible": "${= !voted}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Cast vote",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= pick!=\"\"}",
+    "visible": "${= !voted}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "voted",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "counts",
+       "value": "${= with(counts,pick,counts[pick]+1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "vote",
+       "value": "${pick}"
+      }
+     ]
+    }
+   ]
+  },
+  "PollResults1": {
+   "type": "PollResults",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "options": [
+     "Pho",
+     "Tacos",
+     "Pizza",
+     "Salads"
+    ],
+    "note": "votes are anonymous"
+   },
+   "bind": {
+    "props.votes": "${= [counts.Pho,counts.Tacos,counts.Pizza,counts.Salads]}",
+    "props.choice": "${pick}",
+    "visible": "${= voted}"
+   }
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Vote cast",
+    "tone": "good",
+    "icon": "check_rounded"
+   },
+   "bind": {
+    "props.message": "You voted for ${pick}. Votes are anonymous.",
+    "visible": "${= voted}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "voted",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "counts",
+    "type": "map",
+    "value": {
+     "Pho": 8,
+     "Tacos": 5,
+     "Pizza": 6,
+     "Salads": 3
+    }
+   }
+  ]
+ }
+}

@@ -1,0 +1,197 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Book club: next month",
+    "subtitle": "Vote for our next read",
+    "icon": "menu_book_rounded",
+    "status": "Open"
+   },
+   "children": [
+    "OptionList1",
+    "Paragraph1",
+    "ActionButton1",
+    "PollResults1",
+    "Receipt1"
+   ]
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "choice"
+   },
+   "bind": {
+    "props.options": "${books}",
+    "visible": "${= voted==false}"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Closes Thursday"
+   },
+   "bind": {
+    "visible": "${= voted==false}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Submit vote",
+    "tone": "primary",
+    "icon": "how_to_vote_rounded"
+   },
+   "bind": {
+    "props.enabled": "${= choice!=\"\"}",
+    "visible": "${= voted==false}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "voted",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "votes",
+       "value": "${= updateWhere(votes,x=>x==votes[0],x=>x+1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "PollResults1": {
+   "type": "PollResults",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "note": "Closes Thursday"
+   },
+   "bind": {
+    "props.options": "${books}",
+    "props.votes": "${votes}",
+    "props.choice": "${choice}",
+    "visible": "${= voted==true}"
+   }
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Vote recorded",
+    "code": "",
+    "tone": "good",
+    "icon": "check_rounded"
+   },
+   "bind": {
+    "props.message": "Your vote for ${choice} is counted.",
+    "visible": "${= voted==true}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "choice",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "voted",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "books",
+    "type": "list",
+    "value": [
+     "The Left Hand of Darkness",
+     "Piranesi",
+     "Kindred"
+    ]
+   },
+   {
+    "name": "votes",
+    "type": "list",
+    "value": [
+     12,
+     9,
+     7
+    ]
+   }
+  ]
+ }
+}

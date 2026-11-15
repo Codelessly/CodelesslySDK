@@ -1,0 +1,53 @@
+{"meta":{"ui":"poll_book","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Make a book-club poll card for next month. Choices: The Left Hand of Darkness (12 votes), Piranesi (9), Kindred (7). I should choose a book and submit my vote; afterward show the results as percentage bars, my selected book, and the new total. Add ‘Closes Thursday’ as a small note.","text":"ChatCard \"Book club: next month\" \"Vote for our next read\" icon:\"menu_book_rounded\" status:\"Open\"\n  state choice=\"\"\n  state voted=false\n  state books=[\"The Left Hand of Darkness\",\"Piranesi\",\"Kindred\"]\n  state votes=[12,9,7]\n  if voted==false\n    OptionList =choice options:=books\n    Paragraph \"Closes Thursday\"\n    ActionButton \"Submit vote\" primary icon:\"how_to_vote_rounded\" enabled:=choice!=\"\" -> voted=true; votes=updateWhere(votes,x=>x==votes[0],x=>x+1)\n  if voted==true\n    PollResults options:=books votes:=votes choice:=choice note:\"Closes Thursday\"\n    Receipt \"Vote recorded\" \"Your vote for {choice} is counted.\" code:\"\" tone:good icon:\"check_rounded\"","usage":{"input_tokens":9299,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":299,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":462,"totalMs":1563}}
+{"tMs":462,"delta":"ChatCard \"Book"}
+{"tMs":681,"delta":" club:"}
+{"tMs":681,"delta":" next month\" \"V"}
+{"tMs":681,"delta":"ote for our"}
+{"tMs":682,"delta":" next"}
+{"tMs":682,"delta":" read"}
+{"tMs":682,"delta":"\" ic"}
+{"tMs":682,"delta":"on:\"men"}
+{"tMs":682,"delta":"u_book_"}
+{"tMs":682,"delta":"rounded\" status:\""}
+{"tMs":682,"delta":"Open\"\n  state cho"}
+{"tMs":682,"delta":"ice=\"\"\n  state vo"}
+{"tMs":697,"delta":"ted=false\n  state books"}
+{"tMs":889,"delta":"=[\"The Left Hand"}
+{"tMs":889,"delta":" of Darkness\",\"Pi"}
+{"tMs":889,"delta":"ranesi\",\"Kindred"}
+{"tMs":889,"delta":"\"]\n  state votes="}
+{"tMs":889,"delta":"[12,9,7]"}
+{"tMs":889,"delta":"\n  if"}
+{"tMs":889,"delta":" voted=="}
+{"tMs":889,"delta":"false\n    OptionList ="}
+{"tMs":896,"delta":"choice options:="}
+{"tMs":917,"delta":"books"}
+{"tMs":937,"delta":"\n    "}
+{"tMs":960,"delta":"Paragraph \"Clos"}
+{"tMs":1098,"delta":"es Thursday\"\n    "}
+{"tMs":1098,"delta":"ActionButton \"Subm"}
+{"tMs":1098,"delta":"it vote\" primary icon"}
+{"tMs":1098,"delta":":\"how"}
+{"tMs":1098,"delta":"_to_vote_roun"}
+{"tMs":1098,"delta":"ded\" enabled:=cho"}
+{"tMs":1112,"delta":"ice!=\"\" -> voted"}
+{"tMs":1134,"delta":"=true; votes=upd"}
+{"tMs":1157,"delta":"ateWhere(votes,"}
+{"tMs":1177,"delta":"x=>x==vot"}
+{"tMs":1199,"delta":"es[0],x=>x"}
+{"tMs":1224,"delta":"+1)\n  if voted"}
+{"tMs":1304,"delta":"==true\n    P"}
+{"tMs":1304,"delta":"ollResults options:="}
+{"tMs":1304,"delta":"books"}
+{"tMs":1307,"delta":" votes:=votes choice"}
+{"tMs":1328,"delta":":=choice note:\""}
+{"tMs":1350,"delta":"Closes Thursday\""}
+{"tMs":1373,"delta":"\n    Receipt \"V"}
+{"tMs":1394,"delta":"ote recorded\" \"Your"}
+{"tMs":1414,"delta":" vote for"}
+{"tMs":1437,"delta":" {choice} is counted.\""}
+{"tMs":1457,"delta":" code"}
+{"tMs":1480,"delta":":\"\""}
+{"tMs":1550,"delta":" tone:good"}
+{"tMs":1550,"delta":" icon:\"check_r"}
+{"tMs":1550,"delta":"ounded\""}

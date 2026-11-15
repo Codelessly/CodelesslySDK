@@ -1,0 +1,98 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Now playing",
+    "subtitle": "Golden Hour · JVKE",
+    "icon": "music_note",
+    "status": "Paused"
+   },
+   "children": [
+    "NowPlaying1"
+   ]
+  },
+  "NowPlaying1": {
+   "type": "NowPlaying",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "playing": "playing",
+    "title": "Golden Hour",
+    "artist": "JVKE",
+    "kind": "dusk",
+    "tone": "rose",
+    "length": 209
+   },
+   "bind": {
+    "props.elapsed": "${t}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onSkip"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "t",
+       "value": "t"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "playing",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "t",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

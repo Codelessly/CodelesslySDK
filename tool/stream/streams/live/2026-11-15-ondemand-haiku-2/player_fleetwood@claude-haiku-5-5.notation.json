@@ -1,0 +1,129 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= playing}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= min(257,elapsed+1)}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= playing}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= min(257,elapsed+1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 390,
+    "padding": 16,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "NowPlaying1"
+   ]
+  },
+  "NowPlaying1": {
+   "type": "NowPlaying",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "playing": "playing",
+    "title": "Dreams",
+    "artist": "Fleetwood Mac",
+    "kind": "dusk",
+    "tone": "sand",
+    "length": 257
+   },
+   "bind": {
+    "props.elapsed": "${elapsed}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onSkip"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "skip",
+       "value": "${= result}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "playing",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "skip",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "elapsed",
+    "type": "integer",
+    "value": 182
+   }
+  ]
+ }
+}

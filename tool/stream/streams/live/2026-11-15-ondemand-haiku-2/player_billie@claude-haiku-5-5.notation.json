@@ -1,0 +1,94 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "NowPlaying1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= playing}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "t",
+       "value": "${= min(200,t+1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "NowPlaying1": {
+   "type": "NowPlaying",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "playing": "playing",
+    "title": "Ocean Eyes",
+    "artist": "Billie Eilish",
+    "kind": "waves",
+    "tone": "sky",
+    "length": 200
+   },
+   "bind": {
+    "props.elapsed": "${t}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onSkip"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "t",
+       "value": "${= result==\"next\"?t+10:t-10}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "playing",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "t",
+    "type": "integer",
+    "value": 42
+   }
+  ]
+ }
+}
