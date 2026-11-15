@@ -29,13 +29,19 @@ content in a centered column) and `App` with `Sidebar`, `Main`, `Pane` (a window
 scrolling by itself), plus `NavItem`, `Link` and `Heading`. They are written out as plain lines before they are
 read, so everything inside a frame is written as on a card. The prompt teaches them from 700 wide on.
 
-## The loop (cycle 1 of at least ten)
+## From scratch first (owner, 2026-11-15)
 
-1. A strong model writes each page as well as it can (`opus/`).
-2. The design pass restyles it in place (`reference/`: `<page>.png`, `-before.png`, `-dark.png`, `-narrow.png`,
-   the document and the run's summary). These are the references.
-3. Each reusable part of a reference becomes a block of the design system (`blocks/briefs.json`, eighteen to
-   start: the block, what it shows, and the page it is a part of; `blocks/run.sh` runs the block designer on
-   each at 1280 and 768 with the reference shown).
-4. The fast model writes the pages again with the blocks; what it still builds by hand, and where its pages fall
-   short of the references, is the next cycle's list.
+The arms above start from the Cards components and their style, which were made for a 420-wide chat card: the
+pages they give are a card's language made wider. The components are therefore cut out of the desktop
+pipeline until there are desktop-native layouts to make blocks from:
+
+1. **`native/`**: Opus designs each page from scratch at the full API (`tool/native.py`): no design system, no
+   components, the API's reference, one paragraph of style, the request. It sees its page at 1280 and 768 and
+   revises it as its own art director, three rounds. These are the references.
+2. A design pass over each reference.
+3. Each reusable part of a reference becomes a block; the library is compared with the next cycle's pages, and
+   what a block lacks to serve them is the list for the next cycle. At least ten cycles, as the inline blocks took.
+
+`reference/` (Opus in the notation with Cards, then the design pass) and `blocks/` (eighteen block briefs for
+the block designer, six of which were designed before the change of method) are kept as the record of the first
+attempt, and are not part of the design system.
