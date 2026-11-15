@@ -7,6 +7,12 @@ is, before any block is made from them.
 
     ANTHROPIC_API_KEY=... python3 examples/showcase/tool/native.py --out examples/showcase/desktop/native \
         [--only a,b] [--model claude-opus-5-5] [--rounds 3] [--width 1280] [--narrow 768] [--style <file>]
+        [--theme-of design_systems/cards]
+
+--theme-of gives the model a design system's theme and nothing else of it (its token names and values, its
+"In brief" as the paragraph of style; none of its components): the page is written with the theme's names, and
+every value the page needed that the theme does not have is listed after the document under MISSING TOKENS.
+That list is what the theme lacks to be a desktop's as well.
 
 Each round: the answer's document is validated and rendered at --width (a website to its end, an app window at
 the window's size) and at --narrow; the pictures and everything reported go back, and the model answers with
@@ -21,6 +27,7 @@ from design_block import SDK, crop, image, opt, run  # noqa: E402
 API = os.path.join(os.path.dirname(SDK), 'CodelesslyAPI', 'docs', 'reference')
 PAGES = ('STARTER', 'layout', 'decoration', 'interaction', 'charts', 'lists')
 FONTS = os.path.join(SDK, 'design_systems', 'cards', 'fonts')
+LOOKS = ['--fonts', FONTS]  # or a design system: its theme and fonts
 
 STYLE = ('A calm, confident product design. A light neutral page (#FFF6F7F9) with white surfaces; near-black ink (#FF0F172A) with two quieter '
          'grays for secondary and tertiary text; one accent (#FF2563EB) used sparingly for the primary action, links and the selected state, and '
@@ -30,7 +37,39 @@ STYLE = ('A calm, confident product design. A light neutral page (#FFF6F7F9) wit
          'spacing is generous and on an 8 px rhythm; pictures are drawn from shapes and gradients, never photos or image URLs. Code is JetBrains Mono.')
 
 
-def system_prompt(width, narrow, style):
+def theme_section(ds):
+    """A design system's theme as the model is to use it, and its one paragraph of style."""
+    m = json.load(open(f'{ds}/design_system.json'))
+    t = m['theme']
+    design = open(f'{ds}/DESIGN.md').read() if os.path.exists(f'{ds}/DESIGN.md') else ''
+    brief = re.search(r'^## In brief\s*\n(.*?)(?=^## )', design, re.S | re.M)
+    style = ' '.join(brief.group(1).split()) if brief else m.get('description', '')
+    # The paragraph is about the look; what it says about composing the system's blocks does not apply here.
+    style = re.sub(r'A card closes on[^.]*\.|Write no colors[^.]*\.[^.]*\.?$|compose the blocks\.?', '', style).strip()
+    styles = '\n'.join(f'  {k}: ' + ', '.join(f'{a} {v[a]}' for a in ('fontFamily', 'fontSize', 'fontWeight', 'height', 'letterSpacing') if a in v)
+                       for k, v in t['textStyles'].items() if isinstance(v, dict))
+    example = open(f'{ds}/components/StatTile.json').read()
+    section = f"""
+
+THE THEME ({m['name']})
+The document is rendered with this theme. Use its names wherever one fits, so the page is right in light and dark and is one system with everything else drawn with it:
+- a color is a theme color's name as the value ("color": "ink"), or ${{theme.colors.name}} in an expression
+- a text's "style" is {{"from": "<text style>"}}, with overrides beside it when needed ({{"from": "body", "color": "inkSoft"}})
+- a radius is "${{theme.radii.name}}", a shadow "${{theme.shadows.name}}", spacing ${{theme.spacing.n}}
+colors: {', '.join(k for k, v in t['colors'].items())}
+text styles:
+{styles}
+radii: {json.dumps(t.get('radii'))}
+spacing: {json.dumps(t.get('spacing'))}
+shadows: {', '.join(t.get('shadows', {}))}
+How the names are written, in one of the system's own parts (for the syntax only: you have no components, and this part was drawn for a small card, not a page):
+{example}
+
+This theme was made for a chat card about 420 wide. Where it has no value that is right for a desktop page (a display size for a page's title, a lead paragraph, a section's spacing, a surface's corner on a page, a gray it lacks), do not bend the design to the theme: write the literal value, and after the document list each one under the heading MISSING TOKENS, a line each: the name you would give it, its value, and where the page uses it. Where a theme value is wrong for a desktop (too small, too round), say so there too."""
+    return style, section
+
+
+def system_prompt(width, narrow, style, theme=''):
     reference = '\n\n'.join(open(f'{API}/{p}.md').read() for p in PAGES)
     return [
         {'type': 'text', 'text': f"""You are a senior product designer who builds what you design. You write one screen as a Codelessly layout document (JSON, schema 3), directly at the API described below: there is no design system and there are no ready-made components, so every part is yours to compose from the node types, with literal colors, sizes and text styles.
@@ -40,10 +79,10 @@ It is a desktop screen: a window {width} wide. Design it as a desktop-native lay
 Fonts available (no others): "Inter" (400, 500, 600, 700), "Inter Display" (600, 700, 800), "JetBrains Mono" (400, 500, 700). Icons are Material icon names. Pictures are drawn (gradients, shapes, customPaint), never image URLs.
 
 STYLE
-{style}
+{style}{theme}
 
 ANSWER FORMAT
-Two or three sentences on the layout decisions (the grid, the hierarchy, what makes it desktop-native). Then the whole document in one ```json fence: one canvas, its design size {width} wide (a website page as tall as its content and scrolling; an app window as tall as the window, 800, with its panes scrolling by themselves), state and actions real (what the request says can be done works). Keep it under about 60,000 characters: repeat rows from a list variable (a listView or gridView over data) rather than writing each out.
+Two or three sentences on the layout decisions (the grid, the hierarchy, what makes it desktop-native). Then the whole document in one ```json fence: one canvas, its design size {width} wide (a website page as tall as its content and scrolling; an app window as tall as the window, 800, with its panes scrolling by themselves), state and actions real (what the request says can be done works). Keep it under about 50,000 characters: repeat rows from a list variable (a listView or gridView over data) rather than writing each out.
 
 THE API
 """},
@@ -99,7 +138,7 @@ def check(d, text, width, narrow, app):
     for name, w in (('light', width), ('narrow', narrow)):
         folder = f'{d}/raw-{name}'
         shutil.rmtree(folder, ignore_errors=True)
-        code, log = run(['tool/render/render.sh', f'{d}/doc.json', '--out', folder, '--sizes', f'{w}x800', '--fonts', FONTS] + whole)
+        code, log = run(['tool/render/render.sh', f'{d}/doc.json', '--out', folder, '--sizes', f'{w}x800'] + LOOKS + whole)
         found = reported(log)
         if code and not found:
             found = [f'The render stopped: {log[-400:]}']
@@ -166,8 +205,12 @@ def main():
     out = os.path.abspath(opt('--out', os.path.join(SDK, 'examples', 'showcase', 'desktop', 'native')))
     os.makedirs(out, exist_ok=True)
     width, narrow = int(opt('--width', '1280')), int(opt('--narrow', '768'))
-    style = open(opt('--style')).read().strip() if opt('--style') else STYLE
-    system = system_prompt(width, narrow, style)
+    style, theme = open(opt('--style')).read().strip() if opt('--style') else STYLE, ''
+    if opt('--theme-of'):
+        ds = os.path.join(SDK, opt('--theme-of'))
+        style, theme = theme_section(ds)
+        LOOKS[:] = ['--design-system', ds]
+    system = system_prompt(width, narrow, style, theme)
     open(f'{out}/prompt.txt', 'w').write(system[0]['text'] + f'(the reference pages: {", ".join(PAGES)})\n')
     requests = json.load(open(opt('--requests', os.path.join(SDK, 'examples', 'showcase', 'desktop', 'requests.json'))))
     only = opt('--only')
