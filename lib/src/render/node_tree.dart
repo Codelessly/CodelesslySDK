@@ -1237,8 +1237,13 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
     if (dir == own && !directional && !sides.directional) return n;
     return n.copyWith(
       behaviors: dir == own ? null : n.behaviors.copyWith(textDirection: dir),
+      // Padding is inside the node, in its own direction; margin is space
+      // in its parent's flow, in the parent's (as Flutter's
+      // Padding(EdgeInsetsDirectional) around a Directionality).
       layout: directional
-          ? layout.copyWith(padding: layout.padding.resolve(rtl: rtl), margin: layout.margin.resolve(rtl: rtl))
+          ? layout.copyWith(
+              padding: layout.padding.resolve(rtl: rtl),
+              margin: layout.margin.resolve(rtl: _slot.direction == api.TextDirection.rtl))
           : null,
       decoration: sides.directional ? n.decoration.copyWith(strokeSides: sides.resolve(rtl: rtl)) : null,
     );

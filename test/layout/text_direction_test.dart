@@ -4,6 +4,7 @@
 // bound direction re-lays the subtree when its value changes.
 import 'package:codelessly_api/core.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
+import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField;
 import 'package:codelessly_sdk/src/render/paint/icon_glyph.dart' show IconSources, RenderIconGlyph;
 import 'package:flutter/material.dart' hide Axis;
 import 'package:flutter/rendering.dart';
@@ -242,6 +243,24 @@ void main() {
       expect(rel(t, tester, 'a').right, 288);
     });
 
+    testWidgets('a node with its own direction takes its margin from its parent\'s direction', (tester) async {
+      final t = await pump(tester, {
+        'w': {
+          'type': 'column',
+          'children': ['a'],
+          'layout': {'width': 300, 'height': 100},
+          'props': {'crossAxisAlignment': 'start'},
+        },
+        'a': {
+          'type': 'box',
+          'textDirection': 'ltr',
+          'layout': {'width': 50, 'height': 20, 'margin': {'start': 12}},
+        },
+      });
+      // The column is right to left: the start margin is on the right.
+      expect(rel(t, tester, 'a').right, 288);
+    });
+
     test('EdgeInsets reads and writes the directional form', () {
       final e = api.EdgeInsets.fromJson({'start': 20, 'top': 1, 'end': 4, 'bottom': 2});
       expect(e.directional, isTrue);
@@ -373,6 +392,46 @@ void main() {
     final rights = [for (final b in s.tree.boxesOf('it')) b.localToGlobal(Offset(b.size.width, 0)).dx - listLeft]..sort();
     expect(rights.last, moreOrLessEquals(300));
     expect(rights, hasLength(3));
+  });
+
+  group('text fields', () {
+    Map<String, Object?> field({Object? own}) => {
+          'w': {
+            'type': 'textField',
+            'layout': {'width': 300, 'height': 48},
+            if (own != null) 'textDirection': own,
+            'props': {
+              'initialValue': 'شكرا',
+              'decoration': {
+                'hintText': 'بحث',
+                'prefixIcon': {'icon': {'type': 'MATERIAL_ICON', 'name': 'search'}, 'size': 24},
+              },
+            },
+          },
+        };
+
+    RenderTextField fieldOf(NodeTree t) {
+      RenderTextField? found;
+      void visit(RenderObject o) {
+        if (o is RenderTextField) found ??= o;
+        o.visitChildren(visit);
+      }
+
+      visit(t.boxOf('w')!);
+      return found!;
+    }
+
+    testWidgets('under right to left its text runs from the right and the prefix is on the right', (tester) async {
+      final f = fieldOf(await pump(tester, field()));
+      expect(f.textDirection, TextDirection.rtl);
+      expect(f.contentRect.right, greaterThan(f.size.width / 2));
+      expect(f.contentRect.left, lessThan(30), reason: 'the content starts after the prefix, from the right');
+    });
+
+    testWidgets('its own direction wins over the one it inherits', (tester) async {
+      expect(fieldOf(await pump(tester, field(own: 'rtl'), dir: 'ltr')).textDirection, TextDirection.rtl);
+      expect(fieldOf(await pump(tester, field(own: 'ltr'))).textDirection, TextDirection.ltr);
+    });
   });
 
   testWidgets('a bound direction mirrors its subtree and follows the variable', (tester) async {

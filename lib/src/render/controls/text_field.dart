@@ -84,6 +84,7 @@ void textFieldRecipe(NodeBuilder b, Node n, List<RenderBox> chain, {TextFieldSer
   final box = b.obtain<RenderTextField>('textField', RenderTextField.new);
   box
     ..builder = b
+    ..textDirection = n.behaviors.textDirection == api.TextDirection.rtl ? TextDirection.rtl : TextDirection.ltr
     ..services = interactive ? services : null
     ..interactive = interactive
     ..config = TextFieldConfig.of(n, tokens, inherited: b.slot.textDefault, interactive: interactive)
@@ -464,6 +465,13 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
 
   TextFieldConfig? _config;
   TextFieldConfig get config => _config!;
+  @override
+  set textDirection(TextDirection v) {
+    if (v == textDirection) return;
+    super.textDirection = v;
+    _editable.textDirection = v;
+  }
+
   set config(TextFieldConfig c) {
     if (c == _config) return;
     final old = _config;
@@ -720,6 +728,9 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         _focusEvent('editingComplete');
       }
     }
+    // Off the tree (its screen torn down while it had the focus), there is
+    // nothing to show: it lays out again when it is attached.
+    if (!attached) return;
     _editable.selectionColor = on ? config.tokens.primary.withValues(alpha: .25) : null;
     _syncText();
     markNeedsLayout();
@@ -896,7 +907,7 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         fontFamily: c.valueStyle.fontFamily,
         fontSize: c.valueStyle.fontSize,
         fontWeight: c.valueStyle.fontWeight,
-        textDirection: TextDirection.ltr,
+        textDirection: textDirection,
         textAlign: c.textAlign,
         letterSpacing: c.valueStyle.letterSpacing,
       ));
