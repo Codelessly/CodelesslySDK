@@ -802,6 +802,8 @@ Future<void> _renderAll(
               'y': _rectOf(b).top.round(),
               'w': double.parse(b.size.width.toStringAsFixed(1)),
               'h': double.parse(b.size.height.toStringAsFixed(1)),
+              // What a text shows, as drawn: a check reads values from it.
+              if (_shownText(b) case final String text) 'text': text,
             },
         ];
         File(file.replaceFirst(RegExp(r'\.png$'), '.layout.json'))
@@ -2311,5 +2313,22 @@ Map<String, List<String>> _fontUsers(Map<String, api.Json> docs, api.ThemeTokens
       }
     }
   }
+  return out;
+}
+
+/// The text [box] itself draws (not its child nodes'): null for a node that
+/// draws none.
+String? _shownText(NodeBox box) {
+  String? out;
+  void visit(RenderObject o) {
+    if (out != null || (o is NodeBox && !identical(o, box))) return;
+    if (o is RenderParagraph) {
+      out = o.text.toPlainText();
+      return;
+    }
+    o.visitChildren(visit);
+  }
+
+  visit(box);
   return out;
 }
