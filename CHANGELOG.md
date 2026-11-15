@@ -1,3 +1,14 @@
+## Unreleased
+
+- **`DesignPass`**: a design agent you supply restyles a session's UI in place with edit operations, after a
+  fast model has written it from plain parts. The instructions are built from the session and its design system;
+  an answer that is rejected, or that changes what the UI says or does, is undone and asked for again; a kept
+  pass is one undo step. See the guide, "The design pass".
+- **Designed defaults**: with a design system whose theme defines them, plain cards, badges, bar charts, popups,
+  dialogs and chart series take its look, and a control's corner follows its height (`radii.controlXs` …
+  `controlLarge`). The bundled look is unchanged.
+- A spinner holds still when the host's tickers are off (a design canvas) and paints in its own layer.
+
 ## 31.0.1
 
 - **A text field with a limit shows its count again.** A `textField` with `maxLength` draws how much of the limit

@@ -122,6 +122,40 @@ with the problems as `notes`, up to `maxTries`. A block already being designed i
 one takes a strong model two to four minutes (`examples/showcase/on-demand`); composing with it afterwards
 costs nothing extra.
 
+### The design pass: fast first, then designed
+
+A card written from plain parts shows within seconds and looks generic. `DesignPass` takes it to a design agent
+you supply (a stronger model), which answers with edit operations that restyle the card where it stands. The
+card is not written again: its texts, state, bindings and actions stay.
+
+```dart
+await session.applyNotation(answerStream);            // the plain card shows now
+final pass = DesignPass(
+  session,
+  design: (request) async {
+    // request.instructions is the system message, built from the session and its design system: the role,
+    // what must not change, DESIGN.md, the theme's names, the edit operations and the card's nodes.
+    // Show the model the card as a picture too when you can. On a later round, request.problems says what
+    // the last answer was refused for. Return its text, {"ops": [...]}, or the list.
+    return await myModel(system: request.instructions, problems: request.problems);
+  },
+  check: () async {
+    await WidgetsBinding.instance.endOfFrame;         // let the view lay it out
+    return [for (final d in session.shownDiagnostics()) d.message];
+  },
+);
+final outcome = await pass.run(request: 'three flights to choose from');
+```
+
+* An answer is applied as one batch by the author `DesignPass.author`. It is refused, undone and asked for again
+  (up to `maxRounds`, 2) when an operation is rejected, when it changed what the card says or does (a text, a
+  label, an action, a data binding, a variable, a node that showed content: `DesignPass.changedMeaning`), or when
+  your `check` reports a problem. With no answer that passes, the plain card stays.
+* A kept pass is one undo step: `session.undo(author: DesignPass.author)` puts the plain card back.
+* The session needs a design system with a `DESIGN.md` and a theme that names its colors, text styles, radii and
+  shadows. It needs no blocks beyond one to show the agent how a node is written.
+* `pass.instructions()` returns the system message alone, to read or to send yourself.
+
 ## How a streaming UI renders
 
 * Nothing paints until a root canvas has content.
