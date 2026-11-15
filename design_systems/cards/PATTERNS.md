@@ -10,7 +10,10 @@ card short. A block that holds a choice or a quantity takes your variable with `
 one event (`-> pick=f.id`, `-> emit confirm chosen`); inside it `result` is what the block reports (the new
 quantity, the chosen name). States are `if` lines around blocks, and the end state is a `Receipt`. Repeat rows with
 `each x in list` directly under the card or a block: row blocks stack by themselves. Text parameters are text:
-format money with `money(n,"$",2)`. Pictures are `Media kind:"…"`, never a URL.
+format money with `money(n,"$",2)`. Pictures are `Media kind:"…"`, never a URL. A block given a list
+draws its own rows from the records and takes nothing indented under it: `Carousel =i items:=shoes` (records with
+name, detail, price, rating), `PhotoGallery =open photos:=photos`, `ComparisonTable names:[…] rows:[…]`. Inside
+`each x in list` a record's field is read through its name (`{x.price}`), never bare.
 
 ## Pick one of several (flights, places, plans)
 

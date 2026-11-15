@@ -1,0 +1,128 @@
+{"meta":{"ui":"carousel","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"ChatCard \"Running shoes\" \"Six picks for the road\" icon:\"directions_run\" status:\"Browsing\"\n  state i=0\n  state open=false\n  state size=\"\"\n  if open==false\n    Carousel =i items:[{\"name\":\"Velocity 3\",\"detail\":\"Lightweight daily trainer\",\"price\":\"$120\",\"rating\":4.6,\"kind\":\"shoe\",\"tone\":\"sky\"},{\"name\":\"Trail Ridge\",\"detail\":\"Grippy all-terrain shoe\",\"price\":\"$140\",\"rating\":4.4,\"kind\":\"shoe\",\"tone\":\"mint\"},{\"name\":\"Stride Pro\",\"detail\":\"Cushioned long-run comfort\",\"price\":\"$160\",\"rating\":4.8,\"kind\":\"shoe\",\"tone\":\"sand\"},{\"name\":\"Sprint Lite\",\"detail\":\"Fast and responsive racer\",\"price\":\"$130\",\"rating\":4.5,\"kind\":\"shoe\",\"tone\":\"rose\"},{\"name\":\"Cloud Step\",\"detail\":\"Soft, plush everyday pair\",\"price\":\"$110\",\"rating\":4.3,\"kind\":\"shoe\",\"tone\":\"lilac\"},{\"name\":\"Peak Grip\",\"detail\":\"Stable support for hills\",\"price\":\"$150\",\"rating\":4.7,\"kind\":\"shoe\",\"tone\":\"slate\"}] dots arrows peek:0.86 -> open=true\n  if open\n    Media kind:\"shoe\" tone:\"sky\" h:160\n    Text.heading \"Velocity 3\"\n    Text.body \"A lightweight daily trainer with a responsive midsole and a breathable knit upper, built for steady miles.\"\n    SectionLabel \"Size\"\n    SegmentedButton =size items:[\"7\",\"8\",\"9\",\"10\",\"11\"]\n    Row between\n      Text.strong \"$120\"\n      Text.muted \"Rated 4.6\"\n    ActionButton \"Add to bag\" primary \"bag\" enabled:=size!=\"\" -> emit addToBag\n    ActionButton \"Back to carousel\" quiet -> open=false","usage":{"input_tokens":9008,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":650,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":670,"totalMs":3232}}
+{"tMs":670,"delta":"ChatCard \"Running"}
+{"tMs":796,"delta":" shoes\" \"Six"}
+{"tMs":796,"delta":" pic"}
+{"tMs":796,"delta":"ks for"}
+{"tMs":796,"delta":" the road"}
+{"tMs":797,"delta":"\" icon:\"direct"}
+{"tMs":797,"delta":"ions_run"}
+{"tMs":797,"delta":"\" status:\"Brow"}
+{"tMs":807,"delta":"s"}
+{"tMs":828,"delta":"ing\"\n  state"}
+{"tMs":848,"delta":" i=0"}
+{"tMs":872,"delta":"\n  state open=false\n  state"}
+{"tMs":892,"delta":" size=\"\""}
+{"tMs":943,"delta":"\n  if"}
+{"tMs":943,"delta":" open=="}
+{"tMs":950,"delta":"false\n    Car"}
+{"tMs":972,"delta":"ousel =i items:["}
+{"tMs":994,"delta":"{\"name\":\"Vel"}
+{"tMs":1014,"delta":"ocity "}
+{"tMs":1034,"delta":"3"}
+{"tMs":1054,"delta":"\",\"detail\":\"Light"}
+{"tMs":1075,"delta":"weight da"}
+{"tMs":1099,"delta":"ily tr"}
+{"tMs":1116,"delta":"ainer\",\"price\":\"$120"}
+{"tMs":1137,"delta":"\",\"rating\":4"}
+{"tMs":1156,"delta":".6"}
+{"tMs":1178,"delta":",\"kind\":\"sh"}
+{"tMs":1200,"delta":"oe\",\"tone\":\"s"}
+{"tMs":1218,"delta":"ky"}
+{"tMs":1240,"delta":"\"},{\"name\":\""}
+{"tMs":1260,"delta":"Trail "}
+{"tMs":1279,"delta":"Rid"}
+{"tMs":1300,"delta":"ge\",\""}
+{"tMs":1320,"delta":"detail\":\"Gr"}
+{"tMs":1340,"delta":"ipp"}
+{"tMs":1360,"delta":"y all"}
+{"tMs":1380,"delta":"-terrain sh"}
+{"tMs":1402,"delta":"oe\",\"price\":\"$140"}
+{"tMs":1423,"delta":"\",\"rating\":4.4"}
+{"tMs":1444,"delta":",\"kind\":\"sho"}
+{"tMs":1464,"delta":"e\",\"tone\":\"m"}
+{"tMs":1486,"delta":"int\"},{\"name\":\""}
+{"tMs":1506,"delta":"Stride"}
+{"tMs":1527,"delta":" Pro\",\"detail\":\""}
+{"tMs":1548,"delta":"Cushioned long"}
+{"tMs":1568,"delta":"-run"}
+{"tMs":1588,"delta":" com"}
+{"tMs":1608,"delta":"fort\",\"price\":\"$160"}
+{"tMs":1629,"delta":"\",\"rating\":4.8"}
+{"tMs":1650,"delta":",\"kind\":\"sho"}
+{"tMs":1670,"delta":"e\",\"tone\":\"sand"}
+{"tMs":1694,"delta":"\"},{\"name\":\""}
+{"tMs":1713,"delta":"Sprint L"}
+{"tMs":1733,"delta":"ite\",\"detail\":\"F"}
+{"tMs":1753,"delta":"ast and"}
+{"tMs":1772,"delta":" respon"}
+{"tMs":1793,"delta":"sive rac"}
+{"tMs":1814,"delta":"er\",\"price\":\"$130"}
+{"tMs":1835,"delta":"\",\"rating\":4.5,"}
+{"tMs":1855,"delta":"\"kind\":\"shoe"}
+{"tMs":1877,"delta":"\",\"tone\":\"rose\""}
+{"tMs":1897,"delta":"},{\"name\":\"C"}
+{"tMs":1918,"delta":"lo"}
+{"tMs":1937,"delta":"ud Step"}
+{"tMs":1957,"delta":"\",\"detail\":\"So"}
+{"tMs":1977,"delta":"ft, plush ever"}
+{"tMs":1998,"delta":"yday p"}
+{"tMs":2018,"delta":"air\",\"price\":\"$110"}
+{"tMs":2039,"delta":"\",\"rating\":4.3"}
+{"tMs":2060,"delta":",\"kind\":\"sho"}
+{"tMs":2080,"delta":"e\",\"tone\":\"lil"}
+{"tMs":2102,"delta":"ac\"},{\"name\":\""}
+{"tMs":2121,"delta":"Peak Gr"}
+{"tMs":2141,"delta":"ip"}
+{"tMs":2162,"delta":"\",\"detail\":\"Stable"}
+{"tMs":2182,"delta":" support"}
+{"tMs":2202,"delta":" for"}
+{"tMs":2224,"delta":" hills\",\"price\":\"$150"}
+{"tMs":2244,"delta":"\",\"rating\":4.7,"}
+{"tMs":2264,"delta":"\"kind\":\"shoe"}
+{"tMs":2286,"delta":"\",\"tone\":\"slate\""}
+{"tMs":2307,"delta":"}] dots arrows pe"}
+{"tMs":2327,"delta":"ek:0.86 ->"}
+{"tMs":2348,"delta":" open=true\n  "}
+{"tMs":2367,"delta":"if open"}
+{"tMs":2388,"delta":"\n    Media kind:\"sh"}
+{"tMs":2408,"delta":"oe\" tone:\"s"}
+{"tMs":2428,"delta":"ky"}
+{"tMs":2448,"delta":"\" h:160\n    Text"}
+{"tMs":2468,"delta":".he"}
+{"tMs":2489,"delta":"ading \"Vel"}
+{"tMs":2509,"delta":"ocity 3\"\n    "}
+{"tMs":2530,"delta":"Text.body"}
+{"tMs":2550,"delta":" \"A"}
+{"tMs":2570,"delta":" lightweight daily train"}
+{"tMs":2591,"delta":"er with a"}
+{"tMs":2611,"delta":" responsive mid"}
+{"tMs":2631,"delta":"sole and a bre"}
+{"tMs":2652,"delta":"athable kn"}
+{"tMs":2672,"delta":"it upper,"}
+{"tMs":2693,"delta":" built"}
+{"tMs":2712,"delta":" for ste"}
+{"tMs":2732,"delta":"ady mi"}
+{"tMs":2753,"delta":"les.\"\n    S"}
+{"tMs":2773,"delta":"ectionLabel \"Size"}
+{"tMs":2794,"delta":"\"\n    S"}
+{"tMs":2815,"delta":"egmentedButton =size"}
+{"tMs":2836,"delta":" items:[\"7\",\"8\",\"9"}
+{"tMs":2857,"delta":"\",\"10\",\"11\""}
+{"tMs":2876,"delta":"]\n    Row"}
+{"tMs":2898,"delta":" between"}
+{"tMs":2917,"delta":"\n      Text"}
+{"tMs":2937,"delta":".strong \"$120\""}
+{"tMs":2957,"delta":"\n      Text"}
+{"tMs":2978,"delta":".mu"}
+{"tMs":2998,"delta":"ted \"Rated"}
+{"tMs":3021,"delta":" 4.6\"\n    "}
+{"tMs":3039,"delta":"ActionButton \"Add to"}
+{"tMs":3060,"delta":" bag\" prim"}
+{"tMs":3080,"delta":"ary \""}
+{"tMs":3101,"delta":"bag\" en"}
+{"tMs":3121,"delta":"abled:=size!"}
+{"tMs":3142,"delta":"=\"\" -> emit add"}
+{"tMs":3162,"delta":"ToBag\n    Action"}
+{"tMs":3184,"delta":"Button \"Back to carous"}
+{"tMs":3204,"delta":"el\" quiet -> open"}
+{"tMs":3224,"delta":"=false"}

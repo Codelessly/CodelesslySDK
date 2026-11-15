@@ -1,0 +1,418 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Running shoes",
+    "subtitle": "Six picks for the road",
+    "icon": "directions_run",
+    "status": "Browsing"
+   },
+   "children": [
+    "Carousel1",
+    "Media1",
+    "text1",
+    "text2",
+    "SectionLabel1",
+    "segmentedButton1",
+    "row1",
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "Carousel1": {
+   "type": "Carousel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "i",
+    "items": [
+     {
+      "name": "Velocity 3",
+      "detail": "Lightweight daily trainer",
+      "price": "$120",
+      "rating": 4.6,
+      "kind": "shoe",
+      "tone": "sky"
+     },
+     {
+      "name": "Trail Ridge",
+      "detail": "Grippy all-terrain shoe",
+      "price": "$140",
+      "rating": 4.4,
+      "kind": "shoe",
+      "tone": "mint"
+     },
+     {
+      "name": "Stride Pro",
+      "detail": "Cushioned long-run comfort",
+      "price": "$160",
+      "rating": 4.8,
+      "kind": "shoe",
+      "tone": "sand"
+     },
+     {
+      "name": "Sprint Lite",
+      "detail": "Fast and responsive racer",
+      "price": "$130",
+      "rating": 4.5,
+      "kind": "shoe",
+      "tone": "rose"
+     },
+     {
+      "name": "Cloud Step",
+      "detail": "Soft, plush everyday pair",
+      "price": "$110",
+      "rating": 4.3,
+      "kind": "shoe",
+      "tone": "lilac"
+     },
+     {
+      "name": "Peak Grip",
+      "detail": "Stable support for hills",
+      "price": "$150",
+      "rating": 4.7,
+      "kind": "shoe",
+      "tone": "slate"
+     }
+    ],
+    "dots": true,
+    "arrows": true,
+    "peek": 0.86
+   },
+   "bind": {
+    "visible": "${= open==false}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 160,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "kind": "shoe",
+    "tone": "sky"
+   },
+   "bind": {
+    "visible": "${= open}"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "Velocity 3"
+   },
+   "bind": {
+    "visible": "${= open}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "A lightweight daily trainer with a responsive midsole and a breathable knit upper, built for steady miles."
+   },
+   "bind": {
+    "visible": "${= open}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Size"
+   },
+   "bind": {
+    "visible": "${= open}"
+   }
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "7",
+      "label": "7"
+     },
+     {
+      "value": "8",
+      "label": "8"
+     },
+     {
+      "value": "9",
+      "label": "9"
+     },
+     {
+      "value": "10",
+      "label": "10"
+     },
+     {
+      "value": "11",
+      "label": "11"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [size]}",
+    "visible": "${= open}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "size",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= open}"
+   },
+   "children": [
+    "text3",
+    "text4"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "$120"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "Rated 4.6"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Add to bag",
+    "tone": "primary",
+    "icon": "bag"
+   },
+   "bind": {
+    "props.enabled": "${= size!=\"\"}",
+    "visible": "${= open}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addToBag"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back to carousel",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= open}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "i",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "size",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

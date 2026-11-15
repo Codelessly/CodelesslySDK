@@ -1,0 +1,429 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Carousel1",
+    "PageDots1",
+    "row1",
+    "Media1",
+    "text2",
+    "text3",
+    "text4",
+    "segmentedButton1",
+    "filledButton1"
+   ]
+  },
+  "Carousel1": {
+   "type": "Carousel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "i",
+    "height": 300,
+    "dots": true,
+    "arrows": true
+   },
+   "bind": {
+    "props.items": "${shoes}",
+    "visible": "${= open==false}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "PageDots1": {
+   "type": "PageDots",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 22.0
+   },
+   "props": {
+    "value": "i"
+   },
+   "bind": {
+    "props.count": "${= length(shoes)}",
+    "visible": "${= open==false}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= open==true}"
+   },
+   "children": [
+    "textButton1",
+    "text1"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= shoes[i].name}"
+   }
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 180,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "kind": "shoe"
+   },
+   "bind": {
+    "props.tone": "${= shoes[i].tone}",
+    "visible": "${= open==true}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${= shoes[i].detail}"
+   },
+   "bind": {
+    "visible": "${= open==true}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= shoes[i].price}"
+   },
+   "bind": {
+    "visible": "${= open==true}"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "Sizes"
+   },
+   "bind": {
+    "visible": "${= open==true}"
+   }
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "7",
+      "label": "7"
+     },
+     {
+      "value": "8",
+      "label": "8"
+     },
+     {
+      "value": "9",
+      "label": "9"
+     },
+     {
+      "value": "10",
+      "label": "10"
+     },
+     {
+      "value": "11",
+      "label": "11"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [size]}",
+    "visible": "${= open==true}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "size",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Add to bag"
+   },
+   "bind": {
+    "visible": "${= open==true}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addToBag",
+       "value": "${= shoes[i].id}"
+      },
+      {
+       "type": "showToast",
+       "message": "Added to bag"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "i",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "size",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "shoes",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Velocity Runner",
+      "detail": "Lightweight daily trainer",
+      "price": "$120",
+      "rating": 4.6,
+      "kind": "shoe",
+      "tone": "sky"
+     },
+     {
+      "id": 2,
+      "name": "Trail Blaze",
+      "detail": "Grip for rough ground",
+      "price": "$135",
+      "rating": 4.8,
+      "kind": "shoe",
+      "tone": "mint"
+     },
+     {
+      "id": 3,
+      "name": "Cloud Stride",
+      "detail": "Plush cushioning for long miles",
+      "price": "$150",
+      "rating": 4.7,
+      "kind": "shoe",
+      "tone": "sand"
+     },
+     {
+      "id": 4,
+      "name": "Sprint Pro",
+      "detail": "Race-day speed and light weight",
+      "price": "$165",
+      "rating": 4.5,
+      "kind": "shoe",
+      "tone": "rose"
+     },
+     {
+      "id": 5,
+      "name": "Urban Glide",
+      "detail": "Everyday comfort for city walks",
+      "price": "$110",
+      "rating": 4.4,
+      "kind": "shoe",
+      "tone": "lilac"
+     },
+     {
+      "id": 6,
+      "name": "Peak Summit",
+      "detail": "Stable support for hiking routes",
+      "price": "$145",
+      "rating": 4.9,
+      "kind": "shoe",
+      "tone": "slate"
+     }
+    ]
+   }
+  ]
+ }
+}
