@@ -1,0 +1,86 @@
+{"meta":{"ui":"now_playing","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show what is playing right now as an inline music card: the track, artist and album art, a progress bar with elapsed and remaining time, previous, play or pause and next controls, a like button, and the next three tracks in the queue.","text":"Box w:390 fill:#FFFFFFFF radius:16 pad:16\n  Column gap:14\n    Row gap:12\n      Media kind:\"mountain\" tone:\"dusk\" w:56 h:56 radius:8\n      Column gap:2 grow\n        Text.rowTitle \"Midnight Harbour\"\n        Text.bodySecondary \"Nora Vale · Tidewater\"\n      IconButton \"favorite_border\" -> liked=!liked\n    state liked=false\n    Column gap:6\n      Progress =progress\n      Row between\n        Text.caption \"{fixed(progress*214,0)}s\"\n        Text.caption \"-{fixed(214-progress*214,0)}s\"\n    Row center gap:24\n      IconButton \"skip_previous\" -> progress=0\n      IconButton \"play_arrow\" -> playing=!playing\n      IconButton \"skip_next\" -> progress=0\n    Divider\n    Column gap:10\n      Text.sectionTitle \"Up next\"\n      each t in queue\n        Row gap:12\n          Media kind:\"dunes\" tone:\"sand\" w:36 h:36 radius:6\n          Column grow\n            Text.body \"{t.title}\"\n            Text.caption \"{t.artist}\"\n          Text.caption \"{t.length}\"","usage":{"input_tokens":9121,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":421,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":600,"totalMs":2348}}
+{"tMs":600,"delta":"Box"}
+{"tMs":601,"delta":" w"}
+{"tMs":702,"delta":":390"}
+{"tMs":702,"delta":" fill:#F"}
+{"tMs":702,"delta":"FFFFFFF rad"}
+{"tMs":702,"delta":"ius:16 pad:16"}
+{"tMs":722,"delta":"\n  Column"}
+{"tMs":745,"delta":" gap:14"}
+{"tMs":764,"delta":"\n    Row gap:12"}
+{"tMs":785,"delta":"\n      Media kind:\""}
+{"tMs":805,"delta":"m"}
+{"tMs":825,"delta":"ountain\" t"}
+{"tMs":847,"delta":"one:\"d"}
+{"tMs":895,"delta":"usk\" w:56"}
+{"tMs":895,"delta":" h:56 "}
+{"tMs":907,"delta":"radius:8"}
+{"tMs":928,"delta":"\n      Column gap:2"}
+{"tMs":948,"delta":" grow"}
+{"tMs":969,"delta":"\n        Text.rowTit"}
+{"tMs":992,"delta":"le \"Midnight Har"}
+{"tMs":1010,"delta":"bour\"\n        Text."}
+{"tMs":1031,"delta":"bodySecondary \""}
+{"tMs":1052,"delta":"Nora V"}
+{"tMs":1072,"delta":"ale ·"}
+{"tMs":1092,"delta":" T"}
+{"tMs":1112,"delta":"id"}
+{"tMs":1132,"delta":"ew"}
+{"tMs":1153,"delta":"ater\"\n      I"}
+{"tMs":1173,"delta":"conButton \"fav"}
+{"tMs":1193,"delta":"or"}
+{"tMs":1213,"delta":"ite_border"}
+{"tMs":1234,"delta":"\" -> li"}
+{"tMs":1254,"delta":"ked=!"}
+{"tMs":1274,"delta":"liked\n    state"}
+{"tMs":1295,"delta":" liked=false\n    "}
+{"tMs":1315,"delta":"Column"}
+{"tMs":1336,"delta":" gap:6"}
+{"tMs":1357,"delta":"\n      Progress ="}
+{"tMs":1377,"delta":"progress\n      Row"}
+{"tMs":1399,"delta":" between\n        Text.caption"}
+{"tMs":1417,"delta":" \"{"}
+{"tMs":1438,"delta":"f"}
+{"tMs":1458,"delta":"ixed(prog"}
+{"tMs":1481,"delta":"ress*214"}
+{"tMs":1499,"delta":",0"}
+{"tMs":1519,"delta":")}s\"\n        Text"}
+{"tMs":1540,"delta":".caption \"-{fix"}
+{"tMs":1560,"delta":"ed(214-progress*214"}
+{"tMs":1581,"delta":",0)}s\"\n    "}
+{"tMs":1601,"delta":"Row center"}
+{"tMs":1622,"delta":" gap:24"}
+{"tMs":1642,"delta":"\n      IconButton \"sk"}
+{"tMs":1663,"delta":"ip_previ"}
+{"tMs":1683,"delta":"ous\" -> prog"}
+{"tMs":1704,"delta":"ress=0\n      I"}
+{"tMs":1725,"delta":"conButton \"play_"}
+{"tMs":1745,"delta":"arrow\" -> play"}
+{"tMs":1765,"delta":"ing=!playing\n      I"}
+{"tMs":1785,"delta":"conButton \"sk"}
+{"tMs":1807,"delta":"ip_next\" -> progress"}
+{"tMs":1826,"delta":"=0\n    "}
+{"tMs":1847,"delta":"Div"}
+{"tMs":1867,"delta":"ider\n    "}
+{"tMs":1888,"delta":"Column gap:10"}
+{"tMs":1908,"delta":"\n      Text.s"}
+{"tMs":1928,"delta":"ectionTitle \"Up"}
+{"tMs":1952,"delta":" next\"\n      each"}
+{"tMs":1971,"delta":" t"}
+{"tMs":1991,"delta":" in que"}
+{"tMs":2011,"delta":"ue\n        Row gap:"}
+{"tMs":2030,"delta":"12\n          Media kind:"}
+{"tMs":2051,"delta":"\""}
+{"tMs":2071,"delta":"d"}
+{"tMs":2096,"delta":"unes\" tone:\"s"}
+{"tMs":2113,"delta":"and\" w:36"}
+{"tMs":2134,"delta":" h:36 radius:"}
+{"tMs":2153,"delta":"6\n          Column"}
+{"tMs":2173,"delta":" gr"}
+{"tMs":2193,"delta":"ow"}
+{"tMs":2214,"delta":"\n            Text.body"}
+{"tMs":2240,"delta":" \"{t.title}"}
+{"tMs":2255,"delta":"\"\n            Text.ca"}
+{"tMs":2275,"delta":"ption \"{t.artist}"}
+{"tMs":2297,"delta":"\"\n          Text.caption"}
+{"tMs":2317,"delta":" \"{t.length}\""}

@@ -1,0 +1,475 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Morning run",
+    "subtitle": "Today",
+    "icon": "directions_run",
+    "status": "Done",
+    "tone": "good"
+   },
+   "children": [
+    "grid1",
+    "ChartCard1",
+    "SectionLabel1",
+    "TableHeader1",
+    "TableRow1",
+    "TableRow2",
+    "TableRow3",
+    "TableRow4",
+    "TableRow5",
+    "TableRow6",
+    "TableRow7",
+    "TableRow8",
+    "Callout1",
+    "ActionButton1"
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1",
+    "grid1Row2"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Distance",
+    "note": "Today",
+    "value": "8.4 km",
+    "delta": "+0.6 km",
+    "icon": "route"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Time",
+    "note": "Today",
+    "value": "42:18",
+    "delta": "-1:05",
+    "invert": true,
+    "icon": "timer"
+   }
+  },
+  "grid1Row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile3",
+    "StatTile4"
+   ]
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Avg pace",
+    "note": "Per km",
+    "value": "5:02",
+    "delta": "-0:08",
+    "invert": true,
+    "icon": "speed"
+   }
+  },
+  "StatTile4": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Calories",
+    "note": "Burned",
+    "value": "512",
+    "delta": "+38",
+    "icon": "local_fire_department"
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pace per km",
+    "value": "5:02 avg",
+    "values": [
+     5.1,
+     5.0,
+     4.9,
+     5.2,
+     5.3,
+     4.8,
+     4.7,
+     4.9
+    ],
+    "labels": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "8"
+    ],
+    "kind": "line",
+    "delta": "-0:08"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Splits",
+    "note": "per km"
+   }
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "Km",
+     "Pace",
+     "Elev"
+    ],
+    "keys": [
+     "km",
+     "pace",
+     "elev"
+    ]
+   },
+   "bind": {
+    "props.desc": "${sortDesc}"
+   }
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "1",
+     "5:06",
+     "+4 m"
+    ]
+   }
+  },
+  "TableRow2": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "2",
+     "5:01",
+     "+6 m"
+    ]
+   }
+  },
+  "TableRow3": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "3",
+     "4:55",
+     "+2 m"
+    ]
+   }
+  },
+  "TableRow4": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "4",
+     "5:12",
+     "+9 m"
+    ]
+   }
+  },
+  "TableRow5": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "5",
+     "5:18",
+     "+8 m"
+    ]
+   }
+  },
+  "TableRow6": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "6",
+     "4:48",
+     "-3 m"
+    ]
+   }
+  },
+  "TableRow7": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "7",
+     "4:42",
+     "+1 m"
+    ]
+   }
+  },
+  "TableRow8": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "8",
+     "4:54",
+     "-5 m"
+    ]
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Compared with last run",
+    "message": "Faster by 8 s per km and 0.6 km farther. Your heart rate stayed lower on the hills.",
+    "tone": "good",
+    "icon": "trending_up"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Share run",
+    "icon": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "share_run"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "km"
+   },
+   {
+    "name": "sortDesc",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

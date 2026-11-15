@@ -1,0 +1,444 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Morning run",
+    "subtitle": "Today, 6:52 AM",
+    "icon": "directions_run",
+    "status": "Completed",
+    "tone": "good"
+   },
+   "children": [
+    "grid1",
+    "ChartCard1",
+    "SectionLabel1",
+    "TableHeader1",
+    "TableRow1",
+    "TableRow2",
+    "TableRow3",
+    "TableRow4",
+    "TableRow5",
+    "SectionLabel2",
+    "Details1",
+    "Callout1",
+    "ActionButton1"
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1",
+    "grid1Row2"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Distance",
+    "value": "5.0 km",
+    "icon": "route"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Time",
+    "value": "27:35",
+    "icon": "timer"
+   }
+  },
+  "grid1Row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile3",
+    "StatTile4"
+   ]
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Avg pace",
+    "value": "5:31 /km",
+    "icon": "speed"
+   }
+  },
+  "StatTile4": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Calories",
+    "value": "342 kcal",
+    "icon": "local_fire_department"
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pace per kilometer",
+    "value": "5:31",
+    "values": [
+     5.62,
+     5.55,
+     5.48,
+     5.35,
+     5.15
+    ],
+    "labels": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5"
+    ],
+    "kind": "bars",
+    "delta": "-0:09"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Splits",
+    "note": "min/km"
+   }
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "columns": [
+     "Km",
+     "Pace",
+     "Time"
+    ],
+    "keys": [
+     "km",
+     "pace",
+     "time"
+    ],
+    "widths": [
+     1,
+     2,
+     2
+    ]
+   }
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "1",
+     "5:37",
+     "5:37"
+    ],
+    "widths": [
+     1,
+     2,
+     2
+    ]
+   }
+  },
+  "TableRow2": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "2",
+     "5:33",
+     "11:10"
+    ],
+    "widths": [
+     1,
+     2,
+     2
+    ]
+   }
+  },
+  "TableRow3": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "3",
+     "5:29",
+     "16:39"
+    ],
+    "widths": [
+     1,
+     2,
+     2
+    ]
+   }
+  },
+  "TableRow4": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "4",
+     "5:21",
+     "22:00"
+    ],
+    "widths": [
+     1,
+     2,
+     2
+    ]
+   }
+  },
+  "TableRow5": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "cells": [
+     "5",
+     "5:09",
+     "27:35"
+    ],
+    "widths": [
+     1,
+     2,
+     2
+    ]
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Versus last run",
+    "note": "Sunday"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Distance\",\"+0.4 km\"],[\"Avg pace\",\"9 s/km faster\"],[\"Time\",\"+1:05\"],[\"Calories\",\"+31 kcal\"]]}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Negative split",
+    "message": "You got faster every kilometer, finishing 28 s/km quicker than you started.",
+    "tone": "good",
+    "icon": "trending_up"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Share run",
+    "tone": "primary",
+    "icon": "share"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "share"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

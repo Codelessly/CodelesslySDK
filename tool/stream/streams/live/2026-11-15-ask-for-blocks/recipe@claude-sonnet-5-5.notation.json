@@ -1,0 +1,303 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Lemon chicken traybake",
+    "subtitle": "Weeknight dinner, one tray",
+    "icon": "restaurant",
+    "status": "45 min · Easy",
+    "tone": "accent"
+   },
+   "children": [
+    "Media1",
+    "Details1",
+    "Counter1",
+    "SectionLabel1",
+    "Checklist1",
+    "SectionLabel2",
+    "Paragraph1",
+    "Paragraph2",
+    "Paragraph3",
+    "Paragraph4",
+    "ActionButton1",
+    "Receipt1"
+   ]
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 120,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "kind": "bread",
+    "tone": "sand"
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Total time\",\"45 min\"],[\"Difficulty\",\"Easy\"],[\"Serves\",\"{servings}\"]]}",
+    "visible": "${= !started}"
+   }
+  },
+  "Counter1": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Servings",
+    "detail": "Amounts scale to match",
+    "value": "servings",
+    "min": 1,
+    "max": 12
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Ingredients"
+   },
+   "bind": {
+    "props.note": "${= length(got)} of 6 ticked",
+    "visible": "${= !started}"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tick off as you gather",
+    "value": "got"
+   },
+   "bind": {
+    "props.items": "${= [\"{round(servings*0.5*2,1)} chicken thighs\",\"{round(servings*0.5,1)} lemon\",\"{round(servings*200,0)} g baby potatoes\",\"{round(servings*0.5,1)} red onion\",\"{round(servings*1,1)} tbsp olive oil\",\"{round(servings*0.5,1)} tsp dried oregano\"]}",
+    "visible": "${= !started}"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Method",
+    "note": "4 steps"
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "1. Heat the oven to 220°C and toss potatoes and onion with oil on a large tray."
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "Paragraph2": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "2. Rub the chicken with oil, oregano, salt and lemon zest, then nestle it among the vegetables."
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "Paragraph3": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "3. Roast for 25 minutes, add lemon wedges and roast 15 more until the skin is golden."
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "Paragraph4": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "4. Rest for 5 minutes, spoon over the tray juices and serve."
+   },
+   "bind": {
+    "visible": "${= !started}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start cooking",
+    "tone": "primary",
+    "icon": "play_arrow"
+   },
+   "bind": {
+    "visible": "${= !started}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "started",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Let's cook",
+    "message": "Oven on at 220°C. Step 1: toss potatoes and onion with oil on the tray.",
+    "tone": "good",
+    "icon": "local_fire_department"
+   },
+   "bind": {
+    "visible": "${= started}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "servings",
+    "type": "integer",
+    "value": 4
+   },
+   {
+    "name": "got",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "started",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

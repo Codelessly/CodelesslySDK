@@ -1,0 +1,52 @@
+{"meta":{"ui":"tracking","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Show a tracking card: the item, the carrier and tracking number, the estimated delivery day, the shipment's five stages as a timeline with the current one marked, and an option to leave delivery instructions.","text":"ChatCard \"Where is my package?\" \"Order #48213\" icon:\"local_shipping\" status:\"In transit\" tone:\"accent\"\n  Details rows!:=[[\"Item\",\"Wireless keyboard\"],[\"Carrier\",\"DHL Express\"],[\"Tracking\",\"JD014600006\"],[\"Estimated delivery\",\"Thu, 14 Mar\"]]\n  SectionLabel \"Shipment\" \"Stage 3 of 5\"\n  Steps steps:[\"Ordered\",\"Packed\",\"In transit\",\"Out for delivery\",\"Delivered\"] current:=3\n  ActionButton \"Leave delivery instructions\" tone:\"quiet\" icon:\"edit_note\" -> open=true","usage":{"input_tokens":9122,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":222,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":589,"totalMs":1615}}
+{"tMs":589,"delta":"ChatCard \"Where"}
+{"tMs":754,"delta":" is my package?\" \"Order"}
+{"tMs":754,"delta":" #48"}
+{"tMs":754,"delta":"213"}
+{"tMs":754,"delta":"\" icon:\"local"}
+{"tMs":754,"delta":"_sh"}
+{"tMs":754,"delta":"ipping\""}
+{"tMs":754,"delta":" status:\"In"}
+{"tMs":754,"delta":" transit\""}
+{"tMs":755,"delta":" tone:\"acc"}
+{"tMs":770,"delta":"ent\"\n  Details"}
+{"tMs":788,"delta":" r"}
+{"tMs":807,"delta":"ows!"}
+{"tMs":923,"delta":":="}
+{"tMs":923,"delta":"[[\"Item\",\"W"}
+{"tMs":924,"delta":"ire"}
+{"tMs":924,"delta":"less ke"}
+{"tMs":924,"delta":"yboard\""}
+{"tMs":931,"delta":"],[\"Carrier\",\"D"}
+{"tMs":953,"delta":"HL Express\"],[\""}
+{"tMs":977,"delta":"Tracking\",\"J"}
+{"tMs":994,"delta":"D014"}
+{"tMs":1012,"delta":"600"}
+{"tMs":1031,"delta":"006"}
+{"tMs":1050,"delta":"\""}
+{"tMs":1095,"delta":"],"}
+{"tMs":1095,"delta":"[\"Estimated delivery"}
+{"tMs":1111,"delta":"\",\"Th"}
+{"tMs":1133,"delta":"u, "}
+{"tMs":1152,"delta":"14"}
+{"tMs":1171,"delta":" M"}
+{"tMs":1193,"delta":"ar\"]]\n  S"}
+{"tMs":1215,"delta":"ectionLabel \"Sh"}
+{"tMs":1236,"delta":"ipment\" \"Stage "}
+{"tMs":1258,"delta":"3 of 5\"\n  "}
+{"tMs":1278,"delta":"Steps ste"}
+{"tMs":1298,"delta":"ps:[\""}
+{"tMs":1345,"delta":"Ordered\",\"Pack"}
+{"tMs":1361,"delta":"ed\",\"In transit\",\"Out"}
+{"tMs":1384,"delta":" for"}
+{"tMs":1401,"delta":" delivery\",\"Delivered"}
+{"tMs":1423,"delta":"\"] current:=3\n  "}
+{"tMs":1442,"delta":"Act"}
+{"tMs":1464,"delta":"ionButton \"Leave del"}
+{"tMs":1485,"delta":"ivery instructions\" tone"}
+{"tMs":1504,"delta":":"}
+{"tMs":1525,"delta":"\"qu"}
+{"tMs":1546,"delta":"iet\" icon:\"ed"}
+{"tMs":1569,"delta":"it_note"}
+{"tMs":1586,"delta":"\" -> open"}
+{"tMs":1607,"delta":"=true"}

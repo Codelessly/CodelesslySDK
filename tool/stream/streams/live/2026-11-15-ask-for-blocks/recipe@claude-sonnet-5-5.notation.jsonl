@@ -1,0 +1,127 @@
+{"meta":{"ui":"recipe","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: total time and difficulty, a servings control that scales the ingredient amounts, the ingredients as a checklist I can tick off, the four steps, and a start cooking button.","text":"ChatCard \"Lemon chicken traybake\" \"Weeknight dinner, one tray\" icon:\"restaurant\" status:\"45 min · Easy\" tone:accent w:390\n  state servings=4\n  state got=[]\n  state started=false\n  if !started\n    Media kind:\"bread\" tone:\"sand\" h:120\n    Details rows:=[[\"Total time\",\"45 min\"],[\"Difficulty\",\"Easy\"],[\"Serves\",\"{servings}\"]]\n    Counter \"Servings\" \"Amounts scale to match\" =servings min:1 max:12\n    SectionLabel \"Ingredients\" \"{length(got)} of 6 ticked\"\n    Checklist \"Tick off as you gather\" =got items:=[\"{round(servings*0.5*2,1)} chicken thighs\",\"{round(servings*0.5,1)} lemon\",\"{round(servings*200,0)} g baby potatoes\",\"{round(servings*0.5,1)} red onion\",\"{round(servings*1,1)} tbsp olive oil\",\"{round(servings*0.5,1)} tsp dried oregano\"]\n    SectionLabel \"Method\" \"4 steps\"\n    Paragraph \"1. Heat the oven to 220°C and toss potatoes and onion with oil on a large tray.\"\n    Paragraph \"2. Rub the chicken with oil, oregano, salt and lemon zest, then nestle it among the vegetables.\"\n    Paragraph \"3. Roast for 25 minutes, add lemon wedges and roast 15 more until the skin is golden.\"\n    Paragraph \"4. Rest for 5 minutes, spoon over the tray juices and serve.\"\n    ActionButton \"Start cooking\" tone:primary icon:\"play_arrow\" -> started=true\n  if started\n    Receipt \"Let's cook\" \"Oven on at 220°C. Step 1: toss potatoes and onion with oil on the tray.\" tone:good icon:\"local_fire_department\"","usage":{"input_tokens":9131,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":630,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":839,"totalMs":4982}}
+{"tMs":839,"delta":"ChatCard \"L"}
+{"tMs":1151,"delta":"emon chicken traybake"}
+{"tMs":1151,"delta":"\" \"Weeknight d"}
+{"tMs":1151,"delta":"inner,"}
+{"tMs":1151,"delta":" one t"}
+{"tMs":1151,"delta":"ray\" icon:\"rest"}
+{"tMs":1151,"delta":"aurant\""}
+{"tMs":1151,"delta":" status:\"45"}
+{"tMs":1152,"delta":" min ·"}
+{"tMs":1152,"delta":" Easy\" tone:acc"}
+{"tMs":1152,"delta":"ent w:390"}
+{"tMs":1181,"delta":"\n  state servings=4"}
+{"tMs":1213,"delta":"\n  state got"}
+{"tMs":1481,"delta":"=[]\n  state started"}
+{"tMs":1481,"delta":"=false\n  if"}
+{"tMs":1481,"delta":" !"}
+{"tMs":1481,"delta":"started\n    Media k"}
+{"tMs":1481,"delta":"ind:\"b"}
+{"tMs":1481,"delta":"read\" tone:\"s"}
+{"tMs":1481,"delta":"and\" h:120"}
+{"tMs":1482,"delta":"\n    Details rows:="}
+{"tMs":1513,"delta":"[[\""}
+{"tMs":1547,"delta":"Total time\",\"45 min\"],"}
+{"tMs":1581,"delta":"[\"Difficulty\",\""}
+{"tMs":1614,"delta":"Easy\"],[\"Ser"}
+{"tMs":1808,"delta":"ves\",\"{servings}\"]"}
+{"tMs":1808,"delta":"]\n    Counter \""}
+{"tMs":1808,"delta":"Servings\" \""}
+{"tMs":1808,"delta":"Am"}
+{"tMs":1808,"delta":"ounts scale to match"}
+{"tMs":1815,"delta":"\" =servings min:1 "}
+{"tMs":1852,"delta":"max:12"}
+{"tMs":1882,"delta":"\n    SectionLabel \""}
+{"tMs":1916,"delta":"Ingredients\" \"{"}
+{"tMs":1948,"delta":"length"}
+{"tMs":1981,"delta":"(got)} of "}
+{"tMs":2015,"delta":"6"}
+{"tMs":2142,"delta":" ticked\"\n    "}
+{"tMs":2142,"delta":"Checklist \"T"}
+{"tMs":2142,"delta":"ick off as"}
+{"tMs":2146,"delta":" you g"}
+{"tMs":2180,"delta":"ather\" =got items:="}
+{"tMs":2213,"delta":"[\"{"}
+{"tMs":2245,"delta":"round"}
+{"tMs":2281,"delta":"(servings*0"}
+{"tMs":2311,"delta":".5*"}
+{"tMs":2344,"delta":"2"}
+{"tMs":2378,"delta":",1)} ch"}
+{"tMs":2410,"delta":"icken th"}
+{"tMs":2474,"delta":"ighs\",\""}
+{"tMs":2476,"delta":"{round(servings*0."}
+{"tMs":2509,"delta":"5"}
+{"tMs":2543,"delta":",1)} lemon\",\""}
+{"tMs":2577,"delta":"{round(servings*200"}
+{"tMs":2609,"delta":",0"}
+{"tMs":2643,"delta":")} g"}
+{"tMs":2676,"delta":" baby potatoes\",\"{"}
+{"tMs":2710,"delta":"round(servings*0.5"}
+{"tMs":2744,"delta":",1)} red onion\",\""}
+{"tMs":2778,"delta":"{round(servings*1"}
+{"tMs":2811,"delta":",1)} tbsp"}
+{"tMs":2846,"delta":" olive oil\",\"{round("}
+{"tMs":2879,"delta":"servings*0.5,1"}
+{"tMs":2914,"delta":")} ts"}
+{"tMs":2980,"delta":"p d"}
+{"tMs":2980,"delta":"ried oregano\"]\n    "}
+{"tMs":3015,"delta":"SectionLabel \""}
+{"tMs":3045,"delta":"Method"}
+{"tMs":3079,"delta":"\" \"4 steps\""}
+{"tMs":3113,"delta":"\n    Paragraph \"1"}
+{"tMs":3146,"delta":". Heat the"}
+{"tMs":3179,"delta":" oven to 220"}
+{"tMs":3212,"delta":"°"}
+{"tMs":3245,"delta":"C and"}
+{"tMs":3278,"delta":" toss pot"}
+{"tMs":3312,"delta":"atoes and"}
+{"tMs":3345,"delta":" onion with o"}
+{"tMs":3378,"delta":"il on a large tray.\""}
+{"tMs":3412,"delta":"\n    Paragraph \"2"}
+{"tMs":3446,"delta":". R"}
+{"tMs":3479,"delta":"ub the chicken with o"}
+{"tMs":3511,"delta":"il, o"}
+{"tMs":3545,"delta":"regano, salt and lem"}
+{"tMs":3578,"delta":"on z"}
+{"tMs":3611,"delta":"est, then"}
+{"tMs":3644,"delta":" n"}
+{"tMs":3677,"delta":"estle it among"}
+{"tMs":3711,"delta":" the vegetables.\"\n    "}
+{"tMs":3749,"delta":"Paragraph \"3."}
+{"tMs":3778,"delta":" Roast for 25 min"}
+{"tMs":3811,"delta":"utes, add"}
+{"tMs":3845,"delta":" l"}
+{"tMs":3880,"delta":"emon wedges and roast"}
+{"tMs":3911,"delta":" "}
+{"tMs":3944,"delta":"15"}
+{"tMs":3977,"delta":" more until"}
+{"tMs":4010,"delta":" the"}
+{"tMs":4043,"delta":" sk"}
+{"tMs":4076,"delta":"in is gol"}
+{"tMs":4110,"delta":"den.\"\n    Paragra"}
+{"tMs":4143,"delta":"ph \"4. Rest for"}
+{"tMs":4176,"delta":" 5 minutes, sp"}
+{"tMs":4210,"delta":"oon over"}
+{"tMs":4244,"delta":" the t"}
+{"tMs":4276,"delta":"ray juices and serve.\""}
+{"tMs":4311,"delta":"\n    ActionButton \""}
+{"tMs":4346,"delta":"Start cooking\" tone:"}
+{"tMs":4377,"delta":"primary icon:\"play"}
+{"tMs":4410,"delta":"_arrow\" -> started"}
+{"tMs":4444,"delta":"=true\n  if started\n    "}
+{"tMs":4478,"delta":"Receipt \"Let"}
+{"tMs":4524,"delta":"'s cook\""}
+{"tMs":4547,"delta":" \"O"}
+{"tMs":4577,"delta":"ven on"}
+{"tMs":4610,"delta":" at"}
+{"tMs":4643,"delta":" 220°C."}
+{"tMs":4677,"delta":" Step"}
+{"tMs":4710,"delta":" 1:"}
+{"tMs":4743,"delta":" toss pot"}
+{"tMs":4777,"delta":"atoes and onion with o"}
+{"tMs":4813,"delta":"il on the"}
+{"tMs":4843,"delta":" tray.\" tone:good ic"}
+{"tMs":4885,"delta":"on:\"local"}
+{"tMs":4909,"delta":"_f"}
+{"tMs":4943,"delta":"ire_department"}
+{"tMs":4976,"delta":"\""}

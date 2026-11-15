@@ -1,0 +1,323 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Team poll",
+    "subtitle": "Where should we go for lunch on Friday?",
+    "icon": "poll",
+    "status": "Open",
+    "tone": "accent"
+   },
+   "children": [
+    "OptionList1",
+    "ActionButton1",
+    "SectionLabel1",
+    "listView1",
+    "Callout1"
+   ]
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Pick one",
+    "value": "choice",
+    "details": [
+     "Noodles and broth",
+     "Quick and spicy",
+     "Light and fresh",
+     "Slices to share"
+    ]
+   },
+   "bind": {
+    "props.options": "${options}",
+    "visible": "${= !voted}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Submit vote",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= choice!=\"\"}",
+    "visible": "${= !voted}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "votes",
+       "value": "${= map(range(4),i=>options[i]==choice?votes[i]+1:votes[i])}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "voted",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Results"
+   },
+   "bind": {
+    "props.note": "${= sum(votes,v=>v)} votes",
+    "visible": "${= voted}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= range(4)}",
+    "visible": "${= voted}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column1"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "progressBar1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= options[item]}${= options[item]==choice?'  ✓ your choice':''}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= round(votes[item]/sum(votes,v=>v)*100,0)}%"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   },
+   "bind": {
+    "props.value": "${= votes[item]/sum(votes,v=>v)}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.title": "Your vote: ${choice}",
+    "props.message": "Thanks for voting. ${= sum(votes,v=>v)} votes in total.",
+    "visible": "${= voted}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "options",
+    "type": "list",
+    "value": [
+     "Ramen bar",
+     "Taco truck",
+     "Salad place",
+     "Pizzeria"
+    ]
+   },
+   {
+    "name": "votes",
+    "type": "list",
+    "value": [
+     8,
+     6,
+     3,
+     5
+    ]
+   },
+   {
+    "name": "choice",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "voted",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

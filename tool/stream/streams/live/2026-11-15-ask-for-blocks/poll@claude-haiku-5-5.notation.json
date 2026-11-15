@@ -1,0 +1,286 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Team lunch",
+    "subtitle": "Friday",
+    "icon": "restaurant",
+    "status": "Open",
+    "tone": "accent"
+   },
+   "children": [
+    "Paragraph1",
+    "OptionList1",
+    "listView1",
+    "text3"
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Where should we go for lunch on Friday?"
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "answer",
+    "options": [
+     "Thai place",
+     "Pizza by the park",
+     "Sushi bar",
+     "Burger joint"
+    ]
+   },
+   "bind": {
+    "visible": "${= pick<0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= indexOf([\"Thai place\",\"Pizza by the park\",\"Sushi bar\",\"Burger joint\"],answer)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "votes",
+       "value": "${= setAt(votes,pick,votes[pick]+1)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "total",
+       "value": "${= total+1}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= [\"Thai place\",\"Pizza by the park\",\"Sushi bar\",\"Burger joint\"]}",
+    "visible": "${= pick>=0}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "progressBar1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 12,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${item}${= indexOf(['Thai place','Pizza by the park','Sushi bar','Burger joint'],item)==pick?'  (your vote)':''}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= round(votes[indexOf(['Thai place','Pizza by the park','Sushi bar','Burger joint'],item)]*100/total,0)}%"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   },
+   "bind": {
+    "props.value": "${= votes[indexOf(['Thai place','Pizza by the park','Sushi bar','Burger joint'],item)]/total}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 400,
+     "height": 1.4,
+     "color": "#FF9CA3AF"
+    },
+    "text": "${total} votes in total"
+   },
+   "bind": {
+    "visible": "${= pick>=0}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "votes",
+    "type": "list",
+    "value": [
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   {
+    "name": "pick",
+    "type": "integer",
+    "value": -1
+   },
+   {
+    "name": "total",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "answer",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

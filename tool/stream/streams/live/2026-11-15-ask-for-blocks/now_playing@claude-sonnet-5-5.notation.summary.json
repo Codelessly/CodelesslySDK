@@ -1,0 +1,63 @@
+{
+ "ui": "now_playing",
+ "kind": "page",
+ "model": "claude-sonnet-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 23827,
+ "turns": [
+  {
+   "input_tokens": 9122,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 584,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 836,
+   "totalMs": 4315,
+   "chars": 1159,
+   "lines": 23,
+   "jsonTails": 0,
+   "nodes": 21,
+   "outputTokensPerNode": "27.8",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/iconButton3/props/size: A iconButton has no prop \"size\". Its props: icon, enabled, style, autofocus, loading.",
+    "unknown_bind_path /nodes/listTile1/bind/props.trailing: A listTile has no prop \"trailing\". Its props: dense, isThreeLine, visualDensity, shape, selected, enabled, autofocus, enableFeedback, tileColor, selectedTileColor, selectedColor, iconColor, textColor, hoverColor, focusColor, contentPadding, horizontalTitleGap, minVerticalPadding, minLeadingWidth, minTileHeight, titleAlignment."
+   ]
+  },
+  {
+   "input_tokens": 9956,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 620,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 954,
+   "totalMs": 3934,
+   "chars": 1263,
+   "lines": 27,
+   "jsonTails": 0,
+   "nodes": 23,
+   "outputTokensPerNode": "27.0",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

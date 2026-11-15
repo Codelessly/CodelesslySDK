@@ -1,0 +1,77 @@
+{"meta":{"ui":"now_playing","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show what is playing right now as an inline music card: the track, artist and album art, a progress bar with elapsed and remaining time, previous, play or pause and next controls, a like button, and the next three tracks in the queue.","text":"state playing=true\nstate liked=false\nstate progress=0.35\nstate queue=[{\"title\":\"Glass Bridge\",\"artist\":\"Nora Vale\",\"length\":\"3:42\"},{\"title\":\"Low Tide\",\"artist\":\"Ellis Park\",\"length\":\"4:10\"},{\"title\":\"Paper Moon\",\"artist\":\"Nora Vale\",\"length\":\"2:58\"}]\n\nBox w:390 fill:#FFFFFFFF radius:16 pad:16\n  Column gap:14\n    Row gap:12\n      Media kind:\"mountain\" tone:\"dusk\" w:56 h:56 radius:8\n      Column gap:2 grow\n        Text.rowTitle \"Midnight Harbour\"\n        Text.bodySecondary \"Nora Vale · Tidewater\"\n      IconButton \"favorite_border\" -> liked=!liked\n    Column gap:6\n      Progress =progress\n      Row between\n        Text.caption \"{fixed(progress*214,0)}s\"\n        Text.caption \"-{fixed(214-progress*214,0)}s\"\n    Row center gap:24\n      IconButton \"skip_previous\" -> progress=0\n      IconButton \"play_arrow\" -> playing=!playing\n      IconButton \"skip_next\" -> progress=0\n    Divider\n    Column gap:10\n      Text.sectionTitle \"Up next\"\n      each t in queue\n        Row gap:12\n          Media kind:\"dunes\" tone:\"sand\" w:36 h:36 radius:6\n          Column grow\n            Text.body \"{t.title}\"\n            Text.caption \"{t.artist}\"\n          Text.caption \"{t.length}\"","usage":{"input_tokens":9798,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":534,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":570,"totalMs":2121}}
+{"tMs":570,"delta":"state"}
+{"tMs":705,"delta":" play"}
+{"tMs":705,"delta":"ing=true\nstate li"}
+{"tMs":705,"delta":"ked=false\nstate progress="}
+{"tMs":705,"delta":"0.35"}
+{"tMs":705,"delta":"\nstate que"}
+{"tMs":707,"delta":"ue=[{\"title\":\""}
+{"tMs":727,"delta":"Gl"}
+{"tMs":747,"delta":"ass"}
+{"tMs":768,"delta":" Bridge\",\"artist\":"}
+{"tMs":792,"delta":"\"Nora Vale\",\""}
+{"tMs":810,"delta":"length\":\"3:42\"},"}
+{"tMs":830,"delta":"{\"title\":\"Low"}
+{"tMs":851,"delta":" T"}
+{"tMs":872,"delta":"ide\",\"artist\":\""}
+{"tMs":892,"delta":"Ellis"}
+{"tMs":911,"delta":" Park"}
+{"tMs":932,"delta":"\",\"length\":\"4:10"}
+{"tMs":953,"delta":"\"},{\"title\":\""}
+{"tMs":973,"delta":"Paper Mo"}
+{"tMs":996,"delta":"on\",\"artist\":\"N"}
+{"tMs":1014,"delta":"ora Vale\",\"length\":\""}
+{"tMs":1034,"delta":"2"}
+{"tMs":1055,"delta":":58\"}]\n\nBox"}
+{"tMs":1076,"delta":" w:390 fill:#"}
+{"tMs":1114,"delta":"FFFFFFFF"}
+{"tMs":1118,"delta":" radius:16 pad:"}
+{"tMs":1137,"delta":"16\n  Column gap:"}
+{"tMs":1157,"delta":"14\n    Row gap:"}
+{"tMs":1178,"delta":"12\n      Media kind:"}
+{"tMs":1199,"delta":"\"mountain\" tone:"}
+{"tMs":1219,"delta":"\"dusk\" w:56"}
+{"tMs":1242,"delta":" h:56 radius:"}
+{"tMs":1259,"delta":"8\n      Column gap:"}
+{"tMs":1280,"delta":"2 grow\n        Text"}
+{"tMs":1301,"delta":".rowTitle \""}
+{"tMs":1321,"delta":"Midnight Harbour\""}
+{"tMs":1341,"delta":"\n        Text.bodyS"}
+{"tMs":1362,"delta":"econdary \"Nora"}
+{"tMs":1382,"delta":" Vale · Tidewater"}
+{"tMs":1403,"delta":"\"\n      IconButton \""}
+{"tMs":1423,"delta":"favorite_border\" ->"}
+{"tMs":1445,"delta":" liked=!liked\n    "}
+{"tMs":1464,"delta":"Column gap:6\n      "}
+{"tMs":1484,"delta":"Progress =progress\n      "}
+{"tMs":1505,"delta":"Row between\n        Text."}
+{"tMs":1525,"delta":"caption \"{fixed("}
+{"tMs":1545,"delta":"progress*214,0)}"}
+{"tMs":1566,"delta":"s\"\n        Text.ca"}
+{"tMs":1586,"delta":"ption \"-{fixed("}
+{"tMs":1607,"delta":"214-progress*214,0"}
+{"tMs":1627,"delta":")}s\"\n    Row"}
+{"tMs":1648,"delta":" center gap:24\n      I"}
+{"tMs":1672,"delta":"conButton \"skip_previ"}
+{"tMs":1689,"delta":"ous\" -> progress=0"}
+{"tMs":1712,"delta":"\n      IconButton \"play"}
+{"tMs":1729,"delta":"_arrow\" -> play"}
+{"tMs":1750,"delta":"ing=!playing\n      I"}
+{"tMs":1770,"delta":"conButton \"skip_next"}
+{"tMs":1792,"delta":"\" -> progress=0"}
+{"tMs":1811,"delta":"\n    Divider\n    Column"}
+{"tMs":1832,"delta":" gap:10\n      Text"}
+{"tMs":1857,"delta":".sectionTitle \""}
+{"tMs":1872,"delta":"Up next\"\n      each t"}
+{"tMs":1893,"delta":" in queue\n        Row g"}
+{"tMs":1913,"delta":"ap:12\n          Media k"}
+{"tMs":1936,"delta":"ind:\"dunes\" t"}
+{"tMs":1962,"delta":"one:\"sand\" w:"}
+{"tMs":1974,"delta":"36 h:36 radius"}
+{"tMs":1995,"delta":":6\n          Column grow"}
+{"tMs":2015,"delta":"\n            Text.body \"{"}
+{"tMs":2036,"delta":"t.title}\"\n            "}
+{"tMs":2056,"delta":"Text.caption \"{t."}
+{"tMs":2076,"delta":"artist}\"\n          Text"}
+{"tMs":2097,"delta":".caption \"{t.length"}
+{"tMs":2117,"delta":"}\""}

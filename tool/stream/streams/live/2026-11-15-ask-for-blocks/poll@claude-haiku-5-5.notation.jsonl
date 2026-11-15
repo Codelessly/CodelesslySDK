@@ -1,0 +1,75 @@
+{"meta":{"ui":"poll","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Run a quick team poll in a card: \"Where should we go for lunch on Friday?\" with four options. Before I vote I only see the options; after I vote I see each option's share as a bar with the percentage, my choice marked, and the total number of votes.","text":"ChatCard \"Team lunch\" \"Friday\" icon:\"restaurant\" status:\"Open\" tone:accent\n  Paragraph \"Where should we go for lunch on Friday?\"\n  state votes=[0,0,0,0]\n  state pick=-1\n  state total=0\n  if pick<0\n    OptionList =answer options:[\"Thai place\",\"Pizza by the park\",\"Sushi bar\",\"Burger joint\"] -> pick=indexOf([\"Thai place\",\"Pizza by the park\",\"Sushi bar\",\"Burger joint\"],answer); votes=setAt(votes,pick,votes[pick]+1); total=total+1\n  if pick>=0\n    each o in [\"Thai place\",\"Pizza by the park\",\"Sushi bar\",\"Burger joint\"]\n      Row between\n        Text.bodySecondary \"{o}{indexOf(['Thai place','Pizza by the park','Sushi bar','Burger joint'],o)==pick?'  (your vote)':''}\"\n        Text.strong \"{round(votes[indexOf(['Thai place','Pizza by the park','Sushi bar','Burger joint'],o)]*100/total,0)}%\"\n      Progress =votes[indexOf(['Thai place','Pizza by the park','Sushi bar','Burger joint'],o)]/total\n    Text.caption \"{total} votes in total\"","usage":{"input_tokens":9130,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":441,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":476,"totalMs":1988}}
+{"tMs":476,"delta":"ChatCard \"Team"}
+{"tMs":583,"delta":" lunch\" \"Friday"}
+{"tMs":583,"delta":"\""}
+{"tMs":583,"delta":" icon:\"rest"}
+{"tMs":583,"delta":"aurant\""}
+{"tMs":583,"delta":" status:\"Open"}
+{"tMs":583,"delta":"\" tone:acc"}
+{"tMs":602,"delta":"ent\n  "}
+{"tMs":625,"delta":"Paragraph \"Where should"}
+{"tMs":647,"delta":" we go for lunch on"}
+{"tMs":668,"delta":" Friday?\"\n  state vot"}
+{"tMs":687,"delta":"es=["}
+{"tMs":709,"delta":"0,0,0,0]"}
+{"tMs":730,"delta":"\n  state pick=-"}
+{"tMs":750,"delta":"1\n  state total"}
+{"tMs":771,"delta":"=0\n  if pick<"}
+{"tMs":791,"delta":"0\n    O"}
+{"tMs":811,"delta":"ptionList =answ"}
+{"tMs":831,"delta":"er options:[\"Th"}
+{"tMs":851,"delta":"ai place"}
+{"tMs":870,"delta":"\",\"P"}
+{"tMs":893,"delta":"izza by"}
+{"tMs":912,"delta":" the park"}
+{"tMs":930,"delta":"\",\"S"}
+{"tMs":949,"delta":"ushi b"}
+{"tMs":970,"delta":"ar\",\"Bur"}
+{"tMs":991,"delta":"ger joint\"] -> p"}
+{"tMs":1032,"delta":"ick=ind"}
+{"tMs":1032,"delta":"exOf([\""}
+{"tMs":1052,"delta":"Thai place\",\"Piz"}
+{"tMs":1075,"delta":"za by the park\",\"Sush"}
+{"tMs":1094,"delta":"i bar\",\"Burger jo"}
+{"tMs":1115,"delta":"int\"],answer);"}
+{"tMs":1135,"delta":" votes=set"}
+{"tMs":1155,"delta":"At(votes,p"}
+{"tMs":1177,"delta":"ick,votes[pick]"}
+{"tMs":1197,"delta":"+1); total=total+1"}
+{"tMs":1217,"delta":"\n  "}
+{"tMs":1238,"delta":"if pick>=0\n    "}
+{"tMs":1258,"delta":"each o"}
+{"tMs":1278,"delta":" in [\"Thai place\",\""}
+{"tMs":1299,"delta":"Pizza by the park\",\""}
+{"tMs":1320,"delta":"Sushi bar\",\""}
+{"tMs":1340,"delta":"Burger joint\"]"}
+{"tMs":1361,"delta":"\n      Row between"}
+{"tMs":1401,"delta":"\n        Text.b"}
+{"tMs":1422,"delta":"odySecondary \"{o"}
+{"tMs":1442,"delta":"}{"}
+{"tMs":1462,"delta":"ind"}
+{"tMs":1482,"delta":"exOf(['"}
+{"tMs":1503,"delta":"Thai place','Piz"}
+{"tMs":1523,"delta":"za by the park','Sush"}
+{"tMs":1544,"delta":"i bar','Burger jo"}
+{"tMs":1568,"delta":"int'],o)=="}
+{"tMs":1586,"delta":"pick?'  "}
+{"tMs":1607,"delta":"(your v"}
+{"tMs":1626,"delta":"ote)':''}\"\n        "}
+{"tMs":1647,"delta":"Text.str"}
+{"tMs":1667,"delta":"ong \"{round(votes["}
+{"tMs":1687,"delta":"indexOf(['Th"}
+{"tMs":1711,"delta":"ai place','Pizza by"}
+{"tMs":1729,"delta":" the park','Sushi b"}
+{"tMs":1749,"delta":"ar','Burger joint'"}
+{"tMs":1770,"delta":"],o)]*100/"}
+{"tMs":1790,"delta":"total,0)}%\""}
+{"tMs":1811,"delta":"\n      Progress ="}
+{"tMs":1831,"delta":"votes[indexOf("}
+{"tMs":1851,"delta":"['Thai place','P"}
+{"tMs":1872,"delta":"izza by the park','S"}
+{"tMs":1893,"delta":"ushi bar','Burger"}
+{"tMs":1913,"delta":" joint'],o)]/"}
+{"tMs":1934,"delta":"total\n    Text.ca"}
+{"tMs":1955,"delta":"ption \"{total} votes in"}
+{"tMs":1975,"delta":" total\""}

@@ -1,0 +1,113 @@
+{"meta":{"ui":"run_summary","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Summarize this morning's run as a card: distance, time, average pace and calories, a chart of pace per kilometer, the splits as a small table, how it compares with my last run, and a share button.","text":"ChatCard \"Morning run\" \"Today, 6:52 AM\" icon:\"directions_run\" status:\"Completed\" tone:good w:390\n  Grid cols:2 gap:10\n    StatTile \"Distance\" value:\"5.0 km\" icon:\"route\"\n    StatTile \"Time\" value:\"27:35\" icon:\"timer\"\n    StatTile \"Avg pace\" value:\"5:31 /km\" icon:\"speed\"\n    StatTile \"Calories\" value:\"342 kcal\" icon:\"local_fire_department\"\n  ChartCard \"Pace per kilometer\" \"5:31\" values:[5.62,5.55,5.48,5.35,5.15] labels:[\"1\",\"2\",\"3\",\"4\",\"5\"] kind:\"bars\" delta:\"-0:09\"\n  SectionLabel \"Splits\" \"min/km\"\n  TableHeader columns:[\"Km\",\"Pace\",\"Time\"] keys:[\"km\",\"pace\",\"time\"] widths:[1,2,2]\n  TableRow cells:[\"1\",\"5:37\",\"5:37\"] widths:[1,2,2]\n  TableRow cells:[\"2\",\"5:33\",\"11:10\"] widths:[1,2,2]\n  TableRow cells:[\"3\",\"5:29\",\"16:39\"] widths:[1,2,2]\n  TableRow cells:[\"4\",\"5:21\",\"22:00\"] widths:[1,2,2]\n  TableRow cells:[\"5\",\"5:09\",\"27:35\"] widths:[1,2,2]\n  SectionLabel \"Versus last run\" \"Sunday\"\n  Details rows:=[[\"Distance\",\"+0.4 km\"],[\"Avg pace\",\"9 s/km faster\"],[\"Time\",\"+1:05\"],[\"Calories\",\"+31 kcal\"]]\n  Callout \"Negative split\" \"You got faster every kilometer, finishing 28 s/km quicker than you started.\" tone:good icon:\"trending_up\"\n  ActionButton \"Share run\" tone:primary icon:\"share\" -> emit share","usage":{"input_tokens":9113,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":628,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":954,"totalMs":4673}}
+{"tMs":954,"delta":"ChatCard \"Mor"}
+{"tMs":1283,"delta":"ning run"}
+{"tMs":1283,"delta":"\" \"Today"}
+{"tMs":1284,"delta":", 6:"}
+{"tMs":1284,"delta":"52 AM\" icon:"}
+{"tMs":1284,"delta":"\"directions_run\" status:"}
+{"tMs":1284,"delta":"\"Complet"}
+{"tMs":1284,"delta":"ed\" tone:good"}
+{"tMs":1284,"delta":" w:390"}
+{"tMs":1284,"delta":"\n  Grid cols:"}
+{"tMs":1284,"delta":"2 gap:10\n    "}
+{"tMs":1302,"delta":"StatTile \"Distance"}
+{"tMs":1332,"delta":"\" value"}
+{"tMs":1624,"delta":":\"5.0 km\""}
+{"tMs":1624,"delta":" icon:\"route"}
+{"tMs":1624,"delta":"\"\n    StatTile \""}
+{"tMs":1624,"delta":"Time\" value:\"27"}
+{"tMs":1624,"delta":":35"}
+{"tMs":1624,"delta":"\" ic"}
+{"tMs":1624,"delta":"on:\"timer\"\n    "}
+{"tMs":1624,"delta":"StatTile \"Av"}
+{"tMs":1635,"delta":"g pace\" value:\"5"}
+{"tMs":1667,"delta":":31"}
+{"tMs":1701,"delta":" /km\" icon:\""}
+{"tMs":1733,"delta":"spe"}
+{"tMs":1971,"delta":"ed\"\n    StatTile"}
+{"tMs":1971,"delta":" \"Calories\" value:\""}
+{"tMs":1971,"delta":"342"}
+{"tMs":1971,"delta":" "}
+{"tMs":1971,"delta":"kcal\" icon:\""}
+{"tMs":1971,"delta":"local_fire_department"}
+{"tMs":1971,"delta":"\"\n  ChartCard"}
+{"tMs":2003,"delta":" \"Pace per kilomet"}
+{"tMs":2033,"delta":"er\" \""}
+{"tMs":2066,"delta":"5:31"}
+{"tMs":2099,"delta":"\" values:["}
+{"tMs":2131,"delta":"5.62"}
+{"tMs":2309,"delta":",5.55,5.48"}
+{"tMs":2309,"delta":",5.35,5.15"}
+{"tMs":2309,"delta":"] labels:[\"1\",\"2"}
+{"tMs":2309,"delta":"\",\"3\",\"4\",\"5\"]"}
+{"tMs":2309,"delta":" kind:\"bars\""}
+{"tMs":2334,"delta":" delta:\"-0:"}
+{"tMs":2366,"delta":"09"}
+{"tMs":2399,"delta":"\""}
+{"tMs":2433,"delta":"\n  SectionLabel"}
+{"tMs":2468,"delta":" \"Splits\" \"min"}
+{"tMs":2500,"delta":"/km\"\n  "}
+{"tMs":2534,"delta":"T"}
+{"tMs":2647,"delta":"ableHeader colum"}
+{"tMs":2647,"delta":"ns:[\"Km\",\"P"}
+{"tMs":2647,"delta":"ace\",\"Time"}
+{"tMs":2666,"delta":"\"] keys:[\"km"}
+{"tMs":2703,"delta":"\",\"pace\",\"time\"] wid"}
+{"tMs":2733,"delta":"ths:[1,2"}
+{"tMs":2766,"delta":",2]\n  T"}
+{"tMs":2800,"delta":"ableRow cells:[\""}
+{"tMs":2835,"delta":"1\",\"5:37"}
+{"tMs":2866,"delta":"\",\"5:37"}
+{"tMs":2899,"delta":"\"]"}
+{"tMs":2933,"delta":" widths:[1,2,"}
+{"tMs":2984,"delta":"2]\n  TableRow"}
+{"tMs":3000,"delta":" cells:[\"2\",\"5:"}
+{"tMs":3033,"delta":"33\",\"11"}
+{"tMs":3066,"delta":":10"}
+{"tMs":3100,"delta":"\"] widths:[1,"}
+{"tMs":3134,"delta":"2,2]\n  Table"}
+{"tMs":3167,"delta":"Row cells:[\"3\",\""}
+{"tMs":3200,"delta":"5:29\",\"16:39"}
+{"tMs":3235,"delta":"\"] widths:[1,"}
+{"tMs":3267,"delta":"2,2]\n  Table"}
+{"tMs":3301,"delta":"Row cells:[\"4\",\""}
+{"tMs":3335,"delta":"5:21\",\"22:00"}
+{"tMs":3368,"delta":"\"] widths:[1,"}
+{"tMs":3402,"delta":"2,2]\n  Table"}
+{"tMs":3437,"delta":"Row cells:[\"5\",\""}
+{"tMs":3469,"delta":"5:09\",\"27:35\""}
+{"tMs":3502,"delta":"] widths:[1,2"}
+{"tMs":3536,"delta":",2]\n  Section"}
+{"tMs":3570,"delta":"Label \""}
+{"tMs":3602,"delta":"Vers"}
+{"tMs":3636,"delta":"us last run\" \"S"}
+{"tMs":3669,"delta":"unday\"\n  Details r"}
+{"tMs":3703,"delta":"ows:=[[\"Dist"}
+{"tMs":3739,"delta":"ance\",\"+0"}
+{"tMs":3771,"delta":".4"}
+{"tMs":3803,"delta":" km\"],[\"Av"}
+{"tMs":3835,"delta":"g pace\",\"9"}
+{"tMs":3868,"delta":" s/"}
+{"tMs":3902,"delta":"km faster\"],[\"Time"}
+{"tMs":3935,"delta":"\",\"+"}
+{"tMs":3968,"delta":"1"}
+{"tMs":4002,"delta":":05\"],[\"Calories"}
+{"tMs":4034,"delta":"\",\"+31"}
+{"tMs":4068,"delta":" kcal\"]]"}
+{"tMs":4102,"delta":"\n  Callout \"Neg"}
+{"tMs":4134,"delta":"ative split"}
+{"tMs":4167,"delta":"\" \"You got"}
+{"tMs":4200,"delta":" faster every"}
+{"tMs":4235,"delta":" k"}
+{"tMs":4266,"delta":"ilometer, fin"}
+{"tMs":4302,"delta":"ishing 28"}
+{"tMs":4333,"delta":" s/"}
+{"tMs":4366,"delta":"km qu"}
+{"tMs":4399,"delta":"icker than you"}
+{"tMs":4433,"delta":" started.\" tone:good ic"}
+{"tMs":4466,"delta":"on:\"tr"}
+{"tMs":4500,"delta":"ending_up\"\n  Act"}
+{"tMs":4534,"delta":"ionButton \"Share run"}
+{"tMs":4567,"delta":"\" tone:primary icon"}
+{"tMs":4603,"delta":":\"share\" -> emit"}
+{"tMs":4633,"delta":" share"}
