@@ -1,0 +1,147 @@
+{"meta":{"ui":"missing_quiz","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a quiz question chat card with four answer choices, a submitted answer, correct and incorrect marking, explanation, and score earned.","text":"ChatCard \"Quiz: Question 3 of 10\" \"Science\" icon:\"quiz\" status:\"Graded\" tone:good w:390\n  state answer=\"Mars\"\n  state correct=\"Jupiter\"\n  state submitted=true\n  state score=7\n  Wanted \"QuizQuestion\" \"a question with answer choices, the submitted choice, correct and incorrect marking on each, an explanation, and points earned\"\n    Paragraph \"Which planet in our solar system has the most moons?\" strong:true\n    SectionLabel \"Your answer\" \"4 choices\"\n    each o in [\"Mars\",\"Jupiter\",\"Saturn\",\"Venus\"]\n      Row gap:10 middle pad:[12,10,12,10] radius:12 fill:=o==correct?\"#FFE6F6EC\":(o==answer?\"#FFFDE8E8\":\"#FFF5F5F7\")\n        Icon =o==correct?\"check_circle\":(o==answer?\"cancel\":\"radio_button_unchecked\") color:=o==correct?\"#FF1E8E4E\":(o==answer?\"#FFD93025\":\"#FF888888\")\n        Text \"{o}\" grow\n        if o==answer && o!=correct\n          Badge.error \"Your answer\"\n        if o==correct && o==answer\n          Badge.success \"Your answer\"\n        if o==correct && o!=answer\n          Badge.success \"Correct\"\n  Callout \"Incorrect\" \"You chose Mars, but the correct answer is Jupiter.\" tone:danger icon:\"close\"\n  Callout \"Explanation\" \"Jupiter has the most confirmed moons, but Saturn has recently overtaken it in counts as new small moons are discovered; check the current tally for the latest numbers.\" tone:accent icon:\"lightbulb\"\n  Details rows:[[\"Points earned\",\"0 of 1\"],[\"Running score\",\"{score} of 10\"]]\n  ProgressLine \"Score\" \"{score} of 10 correct\" value:=score/10\n  Row gap:10\n    ActionButton \"Review\" tone:quiet\n    ActionButton \"Next question\" tone:primary icon:\"arrow_forward\"","usage":{"input_tokens":9306,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":696,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":832,"totalMs":5673}}
+{"tMs":832,"delta":"ChatCard \"Qu"}
+{"tMs":1184,"delta":"iz:"}
+{"tMs":1184,"delta":" Question"}
+{"tMs":1184,"delta":" 3"}
+{"tMs":1184,"delta":" of 10"}
+{"tMs":1185,"delta":"\" \"Science"}
+{"tMs":1185,"delta":"\" icon:\"quiz"}
+{"tMs":1185,"delta":"\" status:\"Graded\""}
+{"tMs":1185,"delta":" tone:good"}
+{"tMs":1185,"delta":" w:390\n  state"}
+{"tMs":1185,"delta":" answ"}
+{"tMs":1185,"delta":"er=\""}
+{"tMs":1229,"delta":"Mars\"\n  state correct"}
+{"tMs":1526,"delta":"=\"J"}
+{"tMs":1526,"delta":"upiter\"\n  state"}
+{"tMs":1526,"delta":" submitted=true\n  state"}
+{"tMs":1526,"delta":" score=7"}
+{"tMs":1526,"delta":"\n  Wanted \"Q"}
+{"tMs":1526,"delta":"uizQuestion\" \""}
+{"tMs":1526,"delta":"a"}
+{"tMs":1526,"delta":" question with answ"}
+{"tMs":1539,"delta":"er choices, the"}
+{"tMs":1571,"delta":" submitted cho"}
+{"tMs":1602,"delta":"ice,"}
+{"tMs":1634,"delta":" correct and"}
+{"tMs":1854,"delta":" incorrect marking on"}
+{"tMs":1854,"delta":" each, an"}
+{"tMs":1854,"delta":" explanation, and points earned"}
+{"tMs":1854,"delta":"\"\n    "}
+{"tMs":1854,"delta":"Paragraph \"Which"}
+{"tMs":1855,"delta":" planet in"}
+{"tMs":1864,"delta":" our"}
+{"tMs":1899,"delta":" solar system has the most"}
+{"tMs":1931,"delta":" mo"}
+{"tMs":1964,"delta":"ons?\" strong:"}
+{"tMs":1998,"delta":"true\n    "}
+{"tMs":2032,"delta":"SectionLabel \""}
+{"tMs":2187,"delta":"Your answer\" \"4 cho"}
+{"tMs":2187,"delta":"ices\"\n    each o in "}
+{"tMs":2187,"delta":"[\"M"}
+{"tMs":2187,"delta":"ars\",\"Jupiter\",\""}
+{"tMs":2202,"delta":"Saturn\",\"Ven"}
+{"tMs":2236,"delta":"us\"]\n      Row g"}
+{"tMs":2269,"delta":"ap:10"}
+{"tMs":2302,"delta":" middle p"}
+{"tMs":2335,"delta":"ad:["}
+{"tMs":2367,"delta":"12"}
+{"tMs":2400,"delta":",10"}
+{"tMs":2432,"delta":",12"}
+{"tMs":2524,"delta":",10] rad"}
+{"tMs":2524,"delta":"ius:12"}
+{"tMs":2532,"delta":" fill:=o==corre"}
+{"tMs":2566,"delta":"ct?\"#FFE"}
+{"tMs":2599,"delta":"6"}
+{"tMs":2632,"delta":"F6"}
+{"tMs":2664,"delta":"E"}
+{"tMs":2697,"delta":"C\":("}
+{"tMs":2731,"delta":"o==answer?"}
+{"tMs":2764,"delta":"\"#FFF"}
+{"tMs":2797,"delta":"D"}
+{"tMs":2830,"delta":"E8"}
+{"tMs":2864,"delta":"E8\":\"#FFF"}
+{"tMs":2898,"delta":"5"}
+{"tMs":2929,"delta":"F5"}
+{"tMs":2963,"delta":"F7\")\n        Icon"}
+{"tMs":2996,"delta":" ="}
+{"tMs":3030,"delta":"o==correct?\"check_"}
+{"tMs":3063,"delta":"circle\":("}
+{"tMs":3106,"delta":"o==answer?\"canc"}
+{"tMs":3131,"delta":"el\":\"rad"}
+{"tMs":3164,"delta":"io_button_"}
+{"tMs":3197,"delta":"unchecked\")"}
+{"tMs":3231,"delta":" color:=o==correct?"}
+{"tMs":3265,"delta":"\"#FF1"}
+{"tMs":3297,"delta":"E"}
+{"tMs":3335,"delta":"8E"}
+{"tMs":3368,"delta":"4"}
+{"tMs":3396,"delta":"E\":(o==answer?"}
+{"tMs":3430,"delta":"\"#FFD93"}
+{"tMs":3463,"delta":"025"}
+{"tMs":3496,"delta":"\":\"#F"}
+{"tMs":3529,"delta":"F888"}
+{"tMs":3563,"delta":"888\")\n        Text \"{"}
+{"tMs":3597,"delta":"o}\" grow"}
+{"tMs":3630,"delta":"\n        if o==answ"}
+{"tMs":3663,"delta":"er &&"}
+{"tMs":3697,"delta":" o!=correct\n          "}
+{"tMs":3731,"delta":"Badge.error"}
+{"tMs":3764,"delta":" \"Your answer\""}
+{"tMs":3798,"delta":"\n        if o==correct &&"}
+{"tMs":3832,"delta":" o==answer\n          Bad"}
+{"tMs":3865,"delta":"ge.success \"Your answer"}
+{"tMs":3898,"delta":"\""}
+{"tMs":3933,"delta":"\n        if o==correct &&"}
+{"tMs":3967,"delta":" o!=answer\n          "}
+{"tMs":4004,"delta":"Badge.success \"Correct"}
+{"tMs":4034,"delta":"\"\n  Callout \""}
+{"tMs":4067,"delta":"Incorrect\""}
+{"tMs":4104,"delta":" \"You ch"}
+{"tMs":4133,"delta":"ose Mars,"}
+{"tMs":4167,"delta":" but the correct answer is"}
+{"tMs":4201,"delta":" Jupiter.\" tone:"}
+{"tMs":4235,"delta":"danger icon:\"close"}
+{"tMs":4268,"delta":"\"\n  Call"}
+{"tMs":4301,"delta":"out \"Explanation\" \""}
+{"tMs":4335,"delta":"Jupiter has the"}
+{"tMs":4368,"delta":" most"}
+{"tMs":4401,"delta":" conf"}
+{"tMs":4434,"delta":"irmed moons, but"}
+{"tMs":4468,"delta":" Saturn has"}
+{"tMs":4501,"delta":" recently over"}
+{"tMs":4535,"delta":"taken it in"}
+{"tMs":4567,"delta":" counts as"}
+{"tMs":4601,"delta":" new"}
+{"tMs":4633,"delta":" small"}
+{"tMs":4667,"delta":" moons are discovered; check"}
+{"tMs":4700,"delta":" the current t"}
+{"tMs":4734,"delta":"ally for"}
+{"tMs":4767,"delta":" the lat"}
+{"tMs":4799,"delta":"est num"}
+{"tMs":4833,"delta":"bers.\" tone:acc"}
+{"tMs":4886,"delta":"ent icon:\"l"}
+{"tMs":4904,"delta":"ightbulb\"\n  "}
+{"tMs":4940,"delta":"Details rows:["}
+{"tMs":4967,"delta":"[\"Points"}
+{"tMs":5001,"delta":" earned\",\"0"}
+{"tMs":5034,"delta":" of"}
+{"tMs":5066,"delta":" 1"}
+{"tMs":5099,"delta":"\"],[\"Running score"}
+{"tMs":5133,"delta":"\",\"{"}
+{"tMs":5167,"delta":"score} of"}
+{"tMs":5199,"delta":" 10\"]]\n  "}
+{"tMs":5233,"delta":"ProgressLine \"Score"}
+{"tMs":5266,"delta":"\" \"{"}
+{"tMs":5300,"delta":"score} of"}
+{"tMs":5333,"delta":" 10 "}
+{"tMs":5365,"delta":"corre"}
+{"tMs":5399,"delta":"ct\" value:="}
+{"tMs":5433,"delta":"score/10\n  Row g"}
+{"tMs":5467,"delta":"ap:10\n    Action"}
+{"tMs":5500,"delta":"Button \"Review"}
+{"tMs":5533,"delta":"\" tone:quiet"}
+{"tMs":5568,"delta":"\n    ActionButton \""}
+{"tMs":5600,"delta":"Next question\" tone:primary"}
+{"tMs":5634,"delta":" icon:\"ar"}
+{"tMs":5668,"delta":"row_forward\""}

@@ -1,0 +1,117 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Choose a plan",
+    "subtitle": "Compare features",
+    "icon": "star",
+    "status": "Recommended: Plus"
+   },
+   "children": [
+    "ComparisonTable1"
+   ]
+  },
+  "ComparisonTable1": {
+   "type": "ComparisonTable",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "names": [
+     "Basic",
+     "Plus",
+     "Pro"
+    ],
+    "prices": [
+     "$9/mo",
+     "$19/mo",
+     "$39/mo"
+    ],
+    "pick": "2",
+    "pickLabel": "Best value",
+    "cta": "Choose",
+    "rows": [
+     [
+      "Users",
+      1,
+      3,
+      10,
+      0
+     ],
+     [
+      "Storage",
+      "5 GB",
+      "50 GB",
+      "500 GB",
+      0
+     ],
+     [
+      "Analytics",
+      "No",
+      "Yes",
+      "Yes",
+      2
+     ],
+     [
+      "Priority support",
+      "No",
+      "No",
+      "Yes",
+      2
+     ]
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChoose"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "choosePlan"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

@@ -1,0 +1,181 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your cart",
+    "subtitle": "2 items",
+    "icon": "shopping_cart",
+    "status": "Ready"
+   },
+   "children": [
+    "listView1",
+    "TotalBar1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${cart}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "CartLine1"
+   ]
+  },
+  "CartLine1": {
+   "type": "CartLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.title}",
+    "props.detail": "${item.detail}",
+    "props.price": "${item.price}",
+    "props.qty": "${item.qty}",
+    "props.kind": "${item.kind}",
+    "props.tone": "${item.tone}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cart",
+       "value": "${= updateWhere(cart,x=>x.id==item.id,x=>with(x,\"qty\",result))}"
+      }
+     ]
+    }
+   ]
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "note": "Taxes calculated at checkout",
+    "cta": "Checkout",
+    "icon": "lock"
+   },
+   "bind": {
+    "props.amount": "${= money(sum(cart,x=>x.price*x.qty),\"$\",2)}",
+    "props.enabled": "${= length(cart)>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "checkout"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "cart",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "title": "Trail running shoes",
+      "detail": "Size 10, blue",
+      "price": 89,
+      "qty": 1,
+      "kind": "shoe",
+      "tone": "sky"
+     },
+     {
+      "id": 2,
+      "title": "Insulated water bottle",
+      "detail": "750 ml, matte black",
+      "price": 28,
+      "qty": 2,
+      "kind": "mug",
+      "tone": "slate"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,75 @@
+{"meta":{"ui":"covered_comparison","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a chat card comparing Basic, Plus, and Pro subscription plans in a feature comparison table with a highlighted recommendation.","text":"ChatCard \"Choose your plan\" \"Compare Basic, Plus and Pro\" icon:\"workspace_premium\" status:\"3 plans\" tone:accent w:390\n  Recommendation \"Plus is the best fit\" \"It covers most teams' needs at less than half the price of Pro.\" reasons:[\"Unlimited projects\",\"100 GB storage\",\"Priority email support\"] eyebrow:\"Recommended\"\n  SectionLabel \"Feature comparison\" \"per month\"\n  ComparisonTable names:[\"Basic\",\"Plus\",\"Pro\"] prices:[\"$5\",\"$12\",\"$29\"] pick:\"Plus\" pickLabel:\"Best value\" cta:\"Choose\" rows:[[\"Projects\",\"3\",\"Unlimited\",\"Unlimited\",2],[\"Storage\",\"10 GB\",\"100 GB\",\"1 TB\",3],[\"Team members\",\"1\",\"5\",\"25\",3],[\"Priority support\",\"No\",\"Yes\",\"Yes\",0],[\"Analytics\",\"Basic\",\"Advanced\",\"Advanced + export\",3],[\"Custom domain\",\"No\",\"Yes\",\"Yes\",0]] -> emit choosePlan result\n  Callout \"Try Plus free for 14 days\" \"Cancel anytime before the trial ends and you won't be charged.\" tone:good icon:\"redeem\"","usage":{"input_tokens":9308,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":405,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":692,"totalMs":3239}}
+{"tMs":692,"delta":"ChatCard \"Cho"}
+{"tMs":1019,"delta":"ose your plan\" \"Comp"}
+{"tMs":1019,"delta":"are Basic, Plus"}
+{"tMs":1019,"delta":" and"}
+{"tMs":1019,"delta":" Pro\" icon:\""}
+{"tMs":1019,"delta":"work"}
+{"tMs":1019,"delta":"space_"}
+{"tMs":1019,"delta":"premium\" status:\"3"}
+{"tMs":1019,"delta":" plans\" t"}
+{"tMs":1019,"delta":"one:accent w:390"}
+{"tMs":1019,"delta":"\n  Recommendation \""}
+{"tMs":1042,"delta":"Plus is the best fit\""}
+{"tMs":1073,"delta":" \"It"}
+{"tMs":1361,"delta":" covers most te"}
+{"tMs":1361,"delta":"ams'"}
+{"tMs":1361,"delta":" needs at"}
+{"tMs":1361,"delta":" less"}
+{"tMs":1361,"delta":" than half the price of"}
+{"tMs":1361,"delta":" Pro.\" re"}
+{"tMs":1361,"delta":"asons:[\"Un"}
+{"tMs":1361,"delta":"limited proj"}
+{"tMs":1365,"delta":"ects\",\"100 G"}
+{"tMs":1400,"delta":"B storage\",\"Priority email"}
+{"tMs":1435,"delta":" support\"] eyebrow"}
+{"tMs":1469,"delta":":\"Recommended\""}
+{"tMs":1693,"delta":"\n  S"}
+{"tMs":1693,"delta":"ectionLabel \"Fe"}
+{"tMs":1693,"delta":"ature comparison\" \"per"}
+{"tMs":1693,"delta":" month"}
+{"tMs":1693,"delta":"\"\n  Comparison"}
+{"tMs":1693,"delta":"Table names:[\"Basic"}
+{"tMs":1704,"delta":"\",\"Plus\",\"Pro"}
+{"tMs":1738,"delta":"\"] prices:[\"$5"}
+{"tMs":1772,"delta":"\",\"$12\",\"$29\"]"}
+{"tMs":1806,"delta":" pick:\"Plus\""}
+{"tMs":1840,"delta":" pickLabel:\""}
+{"tMs":1872,"delta":"Best value"}
+{"tMs":2033,"delta":"\" cta:\"Choose"}
+{"tMs":2033,"delta":"\" rows:[[\"Proj"}
+{"tMs":2033,"delta":"ects\",\""}
+{"tMs":2033,"delta":"3\",\""}
+{"tMs":2039,"delta":"Unlimited\",\"Un"}
+{"tMs":2073,"delta":"limited\",2],[\""}
+{"tMs":2106,"delta":"Storage\",\"10 GB\",\""}
+{"tMs":2140,"delta":"100 GB\",\"1"}
+{"tMs":2173,"delta":" TB\",3"}
+{"tMs":2207,"delta":"],[\"Team members\",\"1"}
+{"tMs":2239,"delta":"\",\"5\",\"25"}
+{"tMs":2272,"delta":"\",3"}
+{"tMs":2376,"delta":"],[\"Pri"}
+{"tMs":2376,"delta":"ority support\",\"No"}
+{"tMs":2376,"delta":"\",\"Yes\",\"Yes"}
+{"tMs":2405,"delta":"\",0"}
+{"tMs":2438,"delta":"],[\"Analytics\",\""}
+{"tMs":2474,"delta":"Basic\",\"Advanced\",\""}
+{"tMs":2505,"delta":"Advanced +"}
+{"tMs":2538,"delta":" export"}
+{"tMs":2571,"delta":"\",3"}
+{"tMs":2604,"delta":"],[\"Custom dom"}
+{"tMs":2637,"delta":"ain\",\"No\",\""}
+{"tMs":2675,"delta":"Yes\",\"Yes\",0"}
+{"tMs":2747,"delta":"]] -> em"}
+{"tMs":2747,"delta":"it choos"}
+{"tMs":2771,"delta":"ePlan result\n  Call"}
+{"tMs":2804,"delta":"out \"Try"}
+{"tMs":2870,"delta":" Plus free for"}
+{"tMs":2904,"delta":" 14 days\" \"C"}
+{"tMs":2937,"delta":"ancel anytime before"}
+{"tMs":2969,"delta":" the tr"}
+{"tMs":3003,"delta":"ial ends and"}
+{"tMs":3036,"delta":" you won't be charged.\" t"}
+{"tMs":3069,"delta":"one:good ic"}
+{"tMs":3103,"delta":"on:\"red"}
+{"tMs":3227,"delta":"eem\""}

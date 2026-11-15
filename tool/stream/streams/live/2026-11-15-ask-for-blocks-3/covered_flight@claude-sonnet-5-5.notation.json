@@ -1,0 +1,221 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Chicago to Seattle",
+    "subtitle": "Fri, Mar 14 · 1 adult",
+    "icon": "flight",
+    "status": "2 options"
+   },
+   "children": [
+    "SectionLabel1",
+    "FlightOption1",
+    "FlightOption2",
+    "Details1",
+    "row1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Choose a flight",
+    "note": "Prices per person"
+   }
+  },
+  "FlightOption1": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "United",
+    "depart": "7:15 AM",
+    "arrive": "9:45 AM",
+    "origin": "ORD",
+    "destination": "SEA",
+    "duration": "4h 30m",
+    "stops": "Nonstop",
+    "price": "$289",
+    "tag": "Best time"
+   },
+   "bind": {
+    "props.selected": "${= pick==\"ua\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "ua"
+      }
+     ]
+    }
+   ]
+  },
+  "FlightOption2": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Alaska",
+    "depart": "11:40 AM",
+    "arrive": "3:35 PM",
+    "origin": "ORD",
+    "destination": "SEA",
+    "duration": "5h 55m",
+    "stops": "1 stop · DEN",
+    "price": "$218",
+    "tag": "Cheapest"
+   },
+   "bind": {
+    "props.selected": "${= pick==\"as\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "as"
+      }
+     ]
+    }
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Selected\",pick==\"ua\"?\"United 7:15 AM\":\"Alaska 11:40 AM\"],[\"Fare\",pick==\"ua\"?\"$289\":\"$218\"]]}",
+    "visible": "${= pick!=\"\"}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Select flight",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= pick!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "select",
+       "value": "${pick}"
+      },
+      {
+       "type": "showToast",
+       "message": "Flight selected"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

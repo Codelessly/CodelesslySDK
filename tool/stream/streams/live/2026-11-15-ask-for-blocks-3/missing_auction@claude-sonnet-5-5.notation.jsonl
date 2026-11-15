@@ -1,0 +1,134 @@
+{"meta":{"ui":"missing_auction","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a live auction bid card with current price, countdown timer, bidder count, minimum next bid, bid history, and a prominent place-bid action.","text":"ChatCard \"Vintage Leica M3 Camera\" \"Lot 214 · Live auction\" icon:\"gavel\" status:\"Live\" tone:warn w:390\n  state price=1250\n  state secs=754\n  state bidders=9\n  state history=[{\"who\":\"Maya R.\",\"amt\":1250,\"ago\":\"1 min ago\"},{\"who\":\"Daniel K.\",\"amt\":1200,\"ago\":\"3 min ago\"},{\"who\":\"Priya S.\",\"amt\":1150,\"ago\":\"6 min ago\"}]\n  state placed=false\n  every 1s when secs>0 -> secs=secs-1\n  Media kind:\"laptop\" tone:\"slate\" h:120\n  Row between middle\n    Column gap:2\n      Text.eyebrow \"CURRENT BID\"\n      Text.numberLarge \"{money(price,'$',0)}\"\n    Column gap:2 end\n      Text.eyebrow \"ENDS IN\"\n      Text.numberLarge \"{duration(secs)}\" color:=secs<60?\"#FFD32F2F\":\"#FF1B1B1B\"\n  Details rows:=[[\"Bidders\",\"{bidders} active\"],[\"Minimum next bid\",money(price+50,\"$\",0)]] icons:[\"group\",\"trending_up\"]\n  if placed\n    Callout \"You're the highest bidder\" \"Your bid of {money(price,'$',0)} leads. We'll notify you if you're outbid.\" tone:good icon:\"check_circle\"\n  SectionLabel \"Bid history\" \"{length(history)} recent\"\n  each h in history\n    Row between pad:[0,4,0,4]\n      Column gap:2\n        Text.strong \"{h.who}\"\n        Text.caption \"{h.ago}\"\n      Text.strong \"{money(h.amt,'$',0)}\"\n  ActionButton \"Place bid · {money(price+50,'$',0)}\" tone:primary icon:\"gavel\" enabled:=secs>0 -> price=price+50; bidders=bidders+1; history=take(append([{\"who\":\"You\",\"amt\":price+50,\"ago\":\"just now\"}],history),4); placed=true; toast \"Bid placed\"","usage":{"input_tokens":9309,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":704,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":924,"totalMs":5307}}
+{"tMs":924,"delta":"ChatCard \"V"}
+{"tMs":1250,"delta":"intage"}
+{"tMs":1250,"delta":" Le"}
+{"tMs":1250,"delta":"ica M"}
+{"tMs":1250,"delta":"3 Camera\" \""}
+{"tMs":1250,"delta":"Lot 214"}
+{"tMs":1250,"delta":" "}
+{"tMs":1250,"delta":"· Live auction\" icon"}
+{"tMs":1250,"delta":":\"gavel\" status:"}
+{"tMs":1250,"delta":"\"Live\" tone:war"}
+{"tMs":1250,"delta":"n w:390"}
+{"tMs":1264,"delta":"\n  state price"}
+{"tMs":1295,"delta":"=1"}
+{"tMs":1586,"delta":"250"}
+{"tMs":1586,"delta":"\n  state sec"}
+{"tMs":1586,"delta":"s=754"}
+{"tMs":1586,"delta":"\n  state bid"}
+{"tMs":1586,"delta":"ders=9"}
+{"tMs":1586,"delta":"\n  state history=[{\""}
+{"tMs":1587,"delta":"who\":\"Ma"}
+{"tMs":1587,"delta":"ya R"}
+{"tMs":1593,"delta":".\",\"amt\":1250,"}
+{"tMs":1625,"delta":"\""}
+{"tMs":1659,"delta":"ago\":\"1"}
+{"tMs":1690,"delta":" min "}
+{"tMs":1923,"delta":"ago\"},{\"who\":\""}
+{"tMs":1923,"delta":"Daniel K.\",\"am"}
+{"tMs":1923,"delta":"t\":1200,\"ago"}
+{"tMs":1923,"delta":"\":\"3 min ago\""}
+{"tMs":1923,"delta":"},{\"who\":\"Pri"}
+{"tMs":1923,"delta":"ya S.\",\"amt\":1"}
+{"tMs":1933,"delta":"150,\"ago\":\"6"}
+{"tMs":1968,"delta":" min ago\"}"}
+{"tMs":2001,"delta":"]\n  state"}
+{"tMs":2032,"delta":" plac"}
+{"tMs":2066,"delta":"ed=false\n  every 1"}
+{"tMs":2100,"delta":"s when secs>0 "}
+{"tMs":2266,"delta":"-> secs=secs-"}
+{"tMs":2266,"delta":"1\n  Media k"}
+{"tMs":2266,"delta":"ind:\"la"}
+{"tMs":2266,"delta":"ptop\" tone:\"sl"}
+{"tMs":2271,"delta":"ate\" h:120\n  "}
+{"tMs":2305,"delta":"Row between midd"}
+{"tMs":2334,"delta":"le\n    Column"}
+{"tMs":2368,"delta":" g"}
+{"tMs":2400,"delta":"ap:2"}
+{"tMs":2434,"delta":"\n      Text.eyeb"}
+{"tMs":2467,"delta":"row \"C"}
+{"tMs":2501,"delta":"URRENT BID\""}
+{"tMs":2598,"delta":"\n      Text.numberLar"}
+{"tMs":2598,"delta":"ge \"{money"}
+{"tMs":2602,"delta":"(price,'$',0"}
+{"tMs":2639,"delta":")}\"\n    Column"}
+{"tMs":2669,"delta":" gap:2 "}
+{"tMs":2708,"delta":"end"}
+{"tMs":2735,"delta":"\n      Text.e"}
+{"tMs":2769,"delta":"yebrow \""}
+{"tMs":2801,"delta":"ENDS I"}
+{"tMs":2835,"delta":"N\"\n      Text.num"}
+{"tMs":2869,"delta":"berLarge \"{duration"}
+{"tMs":2903,"delta":"(secs)}\" color:"}
+{"tMs":2937,"delta":"="}
+{"tMs":2968,"delta":"sec"}
+{"tMs":3005,"delta":"s<60"}
+{"tMs":3034,"delta":"?\"#FF"}
+{"tMs":3067,"delta":"D"}
+{"tMs":3100,"delta":"32"}
+{"tMs":3134,"delta":"F2F\":\"#FF"}
+{"tMs":3166,"delta":"1B"}
+{"tMs":3200,"delta":"1B1B\"\n  "}
+{"tMs":3233,"delta":"Details"}
+{"tMs":3267,"delta":" rows:="}
+{"tMs":3300,"delta":"[[\"B"}
+{"tMs":3333,"delta":"idders\",\"{bidders}"}
+{"tMs":3365,"delta":" active"}
+{"tMs":3400,"delta":"\"],[\"Minimum next"}
+{"tMs":3433,"delta":" bid\","}
+{"tMs":3466,"delta":"money(price+50"}
+{"tMs":3499,"delta":",\"$\",0"}
+{"tMs":3533,"delta":")]"}
+{"tMs":3565,"delta":"]"}
+{"tMs":3600,"delta":" icons:[\"group"}
+{"tMs":3631,"delta":"\",\"tr"}
+{"tMs":3665,"delta":"ending_up\"]\n  if"}
+{"tMs":3699,"delta":" placed\n    Callout \""}
+{"tMs":3732,"delta":"You're"}
+{"tMs":3764,"delta":" the high"}
+{"tMs":3798,"delta":"est bidder\" \""}
+{"tMs":3832,"delta":"Your bid of {money(price"}
+{"tMs":3865,"delta":",'$',0)} le"}
+{"tMs":3898,"delta":"ads."}
+{"tMs":3931,"delta":" We"}
+{"tMs":3966,"delta":"'ll notify you if you"}
+{"tMs":3999,"delta":"'re outbid.\" tone:"}
+{"tMs":4032,"delta":"good icon:\"check_"}
+{"tMs":4066,"delta":"circle\"\n  Section"}
+{"tMs":4099,"delta":"Label \"Bid history"}
+{"tMs":4132,"delta":"\" \"{"}
+{"tMs":4166,"delta":"length(history)} rec"}
+{"tMs":4200,"delta":"ent\"\n  each h"}
+{"tMs":4233,"delta":" in history\n    Row"}
+{"tMs":4266,"delta":" between p"}
+{"tMs":4299,"delta":"ad:["}
+{"tMs":4332,"delta":"0"}
+{"tMs":4365,"delta":",4,0"}
+{"tMs":4399,"delta":",4]\n      Column g"}
+{"tMs":4433,"delta":"ap:2\n        Text."}
+{"tMs":4466,"delta":"strong \"{h.who}"}
+{"tMs":4500,"delta":"\"\n        Text.caption"}
+{"tMs":4533,"delta":" \"{h.ago}\""}
+{"tMs":4567,"delta":"\n      Text.strong \""}
+{"tMs":4600,"delta":"{money(h.amt,"}
+{"tMs":4634,"delta":"'$',0)}\""}
+{"tMs":4667,"delta":"\n  "}
+{"tMs":4700,"delta":"ActionButton \"Place b"}
+{"tMs":4734,"delta":"id ·"}
+{"tMs":4767,"delta":" {money(price+50,'"}
+{"tMs":4800,"delta":"$',0)}\" tone"}
+{"tMs":4834,"delta":":primary icon:\"g"}
+{"tMs":4867,"delta":"avel\" enabled:="}
+{"tMs":4901,"delta":"secs>0 -> price"}
+{"tMs":5084,"delta":"=price+50; b"}
+{"tMs":5084,"delta":"idders=bidders+1"}
+{"tMs":5084,"delta":"; history=take"}
+{"tMs":5084,"delta":"(append(["}
+{"tMs":5084,"delta":"{\"who\":\"You"}
+{"tMs":5101,"delta":"\",\"amt\":price"}
+{"tMs":5135,"delta":"+50,\"ago\":\""}
+{"tMs":5168,"delta":"just now\"}],history"}
+{"tMs":5201,"delta":"),4"}
+{"tMs":5234,"delta":"); placed=true; toast"}
+{"tMs":5270,"delta":" \"Bid plac"}
+{"tMs":5303,"delta":"ed\""}

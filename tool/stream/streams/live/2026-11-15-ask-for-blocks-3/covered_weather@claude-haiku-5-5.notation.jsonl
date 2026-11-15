@@ -1,0 +1,41 @@
+{"meta":{"ui":"covered_weather","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a compact chat card with the current weather in Chicago, the next four hourly temperatures, and a three-day forecast.","text":"ChatCard \"Chicago\" \"Right now\" icon:\"cloud\" status:\"Live\"\n  WeatherNow \"Chicago\" \"Partly cloudy\" temp:58 high:63 low:47 kind:partly\n  WeatherHours hours:[\"2 PM\",\"3 PM\",\"4 PM\",\"5 PM\"] temps:[59,60,58,56] kinds:[partly,partly,cloud,cloud]\n  SectionLabel \"3-day forecast\"\n  WeatherDay \"Today\" low:47 high:63 kind:partly min:47 max:66\n  WeatherDay \"Tomorrow\" low:49 high:66 kind:sun min:47 max:66\n  WeatherDay \"Friday\" low:51 high:60 kind:rain min:47 max:66","usage":{"input_tokens":9301,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":254,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":504,"totalMs":1362}}
+{"tMs":504,"delta":"ChatCard \"Ch"}
+{"tMs":701,"delta":"icago\" \"Right"}
+{"tMs":701,"delta":" now\" icon:\"c"}
+{"tMs":701,"delta":"loud\""}
+{"tMs":701,"delta":" status:\"Live"}
+{"tMs":701,"delta":"\"\n  WeatherN"}
+{"tMs":701,"delta":"ow \"Chicago\" \""}
+{"tMs":701,"delta":"Partly cloudy\""}
+{"tMs":701,"delta":" temp:58"}
+{"tMs":701,"delta":" high:63"}
+{"tMs":706,"delta":" low:47"}
+{"tMs":728,"delta":" kind:part"}
+{"tMs":750,"delta":"ly\n  WeatherH"}
+{"tMs":910,"delta":"ours hours:[\"2 "}
+{"tMs":910,"delta":"PM\",\"3 PM\",\""}
+{"tMs":910,"delta":"4 PM\",\"5 P"}
+{"tMs":910,"delta":"M\"] temps:[59"}
+{"tMs":910,"delta":",60,58"}
+{"tMs":910,"delta":",56"}
+{"tMs":910,"delta":"] kinds:[partly"}
+{"tMs":921,"delta":",part"}
+{"tMs":943,"delta":"ly,cloud,c"}
+{"tMs":965,"delta":"loud]\n  S"}
+{"tMs":986,"delta":"ectionLabel \"3"}
+{"tMs":1008,"delta":"-day forecast\"\n  "}
+{"tMs":1113,"delta":"W"}
+{"tMs":1113,"delta":"eatherDay \"Today"}
+{"tMs":1113,"delta":"\" low:47 high:63"}
+{"tMs":1113,"delta":" kind:partly min:"}
+{"tMs":1115,"delta":"47 max:66"}
+{"tMs":1137,"delta":"\n  WeatherDay"}
+{"tMs":1159,"delta":" \"Tomorrow\""}
+{"tMs":1180,"delta":" low:49"}
+{"tMs":1201,"delta":" high:66 kind:"}
+{"tMs":1223,"delta":"sun min:47 max:"}
+{"tMs":1245,"delta":"66\n  WeatherD"}
+{"tMs":1267,"delta":"ay \"Friday\" low:"}
+{"tMs":1357,"delta":"51 high:60"}
+{"tMs":1357,"delta":" kind:rain min:"}
+{"tMs":1357,"delta":"47 max:66"}

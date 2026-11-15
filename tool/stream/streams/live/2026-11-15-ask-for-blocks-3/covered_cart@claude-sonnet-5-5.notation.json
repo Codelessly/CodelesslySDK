@@ -1,0 +1,252 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your cart",
+    "subtitle": "2 products",
+    "icon": "shopping_cart",
+    "status": "Open",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "listView1",
+    "Details1",
+    "TotalBar1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Items"
+   },
+   "bind": {
+    "props.note": "${= sum(items,i=>i.qty)} total",
+    "visible": "${= !done}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${items}",
+    "visible": "${= !done}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "CartLine1"
+   ]
+  },
+  "CartLine1": {
+   "type": "CartLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.name}",
+    "props.detail": "${item.detail} · Line total ${= money(item.price*item.qty,\"$\",2)}",
+    "props.price": "${= money(item.price,\"$\",2)}",
+    "props.qty": "${item.qty}",
+    "props.kind": "${item.kind}",
+    "props.tone": "${item.tone}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= updateWhere(items,x=>x.id==item.id,x=>with(x,\"qty\",result))}"
+      }
+     ]
+    }
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Subtotal\",money(sum(items,i=>i.price*i.qty),\"$\",2)],[\"Delivery\",\"Free\"]]}",
+    "visible": "${= !done}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "note": "Free delivery",
+    "cta": "Checkout",
+    "icon": "lock"
+   },
+   "bind": {
+    "props.amount": "${= money(sum(items,i=>i.price*i.qty),\"$\",2)}",
+    "props.enabled": "${= length(items)>0}",
+    "visible": "${= !done}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= true}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "checkout"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order placed",
+    "message": "Thanks for your purchase.",
+    "code": "#48213",
+    "codeLabel": "Order number",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "visible": "${= done}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Trail Runner",
+      "detail": "Size 42 · Sand",
+      "price": 89,
+      "qty": 1,
+      "kind": "shoe",
+      "tone": "sand"
+     },
+     {
+      "id": 2,
+      "name": "Ceramic Mug",
+      "detail": "350 ml · Mint",
+      "price": 18,
+      "qty": 2,
+      "kind": "mug",
+      "tone": "mint"
+     }
+    ]
+   },
+   {
+    "name": "done",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

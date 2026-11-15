@@ -1,0 +1,177 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Dinner at Marlow & Sons",
+    "subtitle": "Table 12 · Fri 7:45 PM",
+    "icon": "receipt_long",
+    "status": "Unpaid",
+    "tone": "warn"
+   },
+   "children": [
+    "SectionLabel1",
+    "Details1",
+    "SectionLabel2",
+    "ChoiceChips1",
+    "Details2",
+    "TotalBar1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Your order",
+    "note": "3 items"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"1 × Burrata & heirloom tomato\",\"$14.00\"],[\"1 × Pan-roasted halibut\",\"$32.00\"],[\"2 × Olive oil cake\",\"$18.00\"]]}"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Tip",
+    "note": "on subtotal"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "tip",
+    "options": [
+     "15%",
+     "18%",
+     "20%",
+     "25%"
+    ],
+    "columns": 4
+   }
+  },
+  "Details2": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Subtotal\",\"$64.00\"],[\"Tax (8.875%)\",\"$5.68\"],[(\"Tip (\" + (tip) + \")\"),money(64*(tip==\"15%\"?0.15:tip==\"18%\"?0.18:tip==\"20%\"?0.2:0.25),\"$\",2)]]}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "note": "Includes tax and tip",
+    "cta": "Pay now",
+    "icon": "payments"
+   },
+   "bind": {
+    "props.amount": "${= money(64+5.68+64*(tip==\"15%\"?0.15:tip==\"18%\"?0.18:tip==\"20%\"?0.2:0.25),\"$\",2)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "pay"
+      },
+      {
+       "type": "showToast",
+       "message": "Payment sent"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "tip",
+    "type": "text",
+    "value": "18%"
+   }
+  ]
+ }
+}

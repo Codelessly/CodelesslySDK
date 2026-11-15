@@ -1,0 +1,88 @@
+{"meta":{"ui":"missing_medication","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a medication schedule chat card with morning, afternoon and evening doses, pill images, dose instructions, and taken or missed status for each dose.","text":"ChatCard \"Medication schedule\" \"Today\" icon:\"medication\" status:\"2 of 6 taken\"\n  SectionLabel \"Morning\" \"8:00\"\n  each d in morning\n    Row gap:10\n      Media kind:\"capsule\" tone:\"sky\" h:40\n      Column grow gap:2\n        Text.rowTitle \"{d.name} {d.dose}\"\n        Text.meta \"{d.instructions}\"\n      Badge.success \"Taken\" hidden:=d.status!=\"taken\"\n      Badge.error \"Missed\" hidden:=d.status!=\"missed\"\n      Badge.neutral \"Due\" hidden:=d.status!=\"due\"\n  SectionLabel \"Afternoon\" \"13:00\"\n  each d in afternoon\n    Row gap:10\n      Media kind:\"capsule\" tone:\"sky\" h:40\n      Column grow gap:2\n        Text.rowTitle \"{d.name} {d.dose}\"\n        Text.meta \"{d.instructions}\"\n      Badge.success \"Taken\" hidden:=d.status!=\"taken\"\n      Badge.error \"Missed\" hidden:=d.status!=\"missed\"\n      Badge.neutral \"Due\" hidden:=d.status!=\"due\"\n  SectionLabel \"Evening\" \"20:00\"\n  each d in evening\n    Row gap:10\n      Media kind:\"capsule\" tone:\"sky\" h:40\n      Column grow gap:2\n        Text.rowTitle \"{d.name} {d.dose}\"\n        Text.meta \"{d.instructions}\"\n      Badge.success \"Taken\" hidden:=d.status!=\"taken\"\n      Badge.error \"Missed\" hidden:=d.status!=\"missed\"\n      Badge.neutral \"Due\" hidden:=d.status!=\"due\"","usage":{"input_tokens":9309,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":579,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":773,"totalMs":2523}}
+{"tMs":773,"delta":"ChatCard \"Med"}
+{"tMs":900,"delta":"ication schedule\" \"Today"}
+{"tMs":901,"delta":"\" icon:\"med"}
+{"tMs":901,"delta":"ication"}
+{"tMs":901,"delta":"\""}
+{"tMs":901,"delta":" status:\"2"}
+{"tMs":901,"delta":" of 6"}
+{"tMs":901,"delta":" taken\"\n  S"}
+{"tMs":923,"delta":"ectionLabel \"Mor"}
+{"tMs":939,"delta":"ning\" \"8"}
+{"tMs":959,"delta":":00\"\n  "}
+{"tMs":978,"delta":"each d"}
+{"tMs":996,"delta":" in mor"}
+{"tMs":1033,"delta":"ning\n    Row gap:"}
+{"tMs":1038,"delta":"10"}
+{"tMs":1060,"delta":"\n      Media kind:\"cap"}
+{"tMs":1080,"delta":"sule\" t"}
+{"tMs":1099,"delta":"one:\"s"}
+{"tMs":1121,"delta":"ky\" h:40"}
+{"tMs":1142,"delta":"\n      Column"}
+{"tMs":1159,"delta":" gr"}
+{"tMs":1185,"delta":"ow g"}
+{"tMs":1200,"delta":"ap:2"}
+{"tMs":1223,"delta":"\n        Text.r"}
+{"tMs":1240,"delta":"owTitle \""}
+{"tMs":1262,"delta":"{d.name}"}
+{"tMs":1282,"delta":" {d.dose}\""}
+{"tMs":1303,"delta":"\n        Text.me"}
+{"tMs":1324,"delta":"ta \"{d.instructions"}
+{"tMs":1346,"delta":"}\"\n      Badge."}
+{"tMs":1365,"delta":"success \""}
+{"tMs":1386,"delta":"Taken\" h"}
+{"tMs":1406,"delta":"idden:=d.status!"}
+{"tMs":1432,"delta":"=\"taken\"\n      "}
+{"tMs":1455,"delta":"Badge.error \"Miss"}
+{"tMs":1469,"delta":"ed\" hidden:=d"}
+{"tMs":1490,"delta":".status!=\"missed\""}
+{"tMs":1511,"delta":"\n      Badge.ne"}
+{"tMs":1531,"delta":"utral \"Due"}
+{"tMs":1552,"delta":"\" hidden:=d."}
+{"tMs":1573,"delta":"status!=\"due\"\n  S"}
+{"tMs":1597,"delta":"ectionLabel \"Af"}
+{"tMs":1614,"delta":"ternoon\" \"13"}
+{"tMs":1653,"delta":":00\"\n  each d in"}
+{"tMs":1655,"delta":" afternoon\n    Row"}
+{"tMs":1676,"delta":" gap:10\n      Media"}
+{"tMs":1696,"delta":" kind:\"capsule\""}
+{"tMs":1718,"delta":" tone:\"sky\" h"}
+{"tMs":1738,"delta":":40\n      Column grow"}
+{"tMs":1759,"delta":" gap:2\n        Text"}
+{"tMs":1779,"delta":".rowTitle \"{"}
+{"tMs":1800,"delta":"d.name} {d.d"}
+{"tMs":1820,"delta":"ose}\"\n        Text."}
+{"tMs":1841,"delta":"meta \"{d.instruct"}
+{"tMs":1861,"delta":"ions}\"\n      Badge"}
+{"tMs":1882,"delta":".success \"Taken\" h"}
+{"tMs":1903,"delta":"idden:=d.status!"}
+{"tMs":1923,"delta":"=\"taken\"\n      Bad"}
+{"tMs":1944,"delta":"ge.error \"Missed\""}
+{"tMs":1964,"delta":" hidden:=d.status"}
+{"tMs":1985,"delta":"!=\"missed\"\n      "}
+{"tMs":2006,"delta":"Badge.neutral \""}
+{"tMs":2026,"delta":"Due\" hidden:=d"}
+{"tMs":2047,"delta":".status!=\"due\"\n  "}
+{"tMs":2068,"delta":"SectionLabel \""}
+{"tMs":2092,"delta":"Evening\" \"20:00\""}
+{"tMs":2108,"delta":"\n  each d in evening"}
+{"tMs":2129,"delta":"\n    Row gap:10"}
+{"tMs":2149,"delta":"\n      Media kind:\"cap"}
+{"tMs":2172,"delta":"sule\" tone:\"s"}
+{"tMs":2190,"delta":"ky\" h:40\n      "}
+{"tMs":2213,"delta":"Column grow gap:2"}
+{"tMs":2236,"delta":"\n        Text.rowTit"}
+{"tMs":2251,"delta":"le \"{d.name} {"}
+{"tMs":2272,"delta":"d.dose}\"\n        "}
+{"tMs":2293,"delta":"Text.meta \"{d"}
+{"tMs":2313,"delta":".instructions}\"\n      "}
+{"tMs":2334,"delta":"Badge.success \"Ta"}
+{"tMs":2354,"delta":"ken\" hidden:=d"}
+{"tMs":2374,"delta":".status!=\"taken\""}
+{"tMs":2395,"delta":"\n      Badge.error \""}
+{"tMs":2415,"delta":"Missed\" hidden:="}
+{"tMs":2437,"delta":"d.status!=\"missed\""}
+{"tMs":2457,"delta":"\n      Badge.neut"}
+{"tMs":2477,"delta":"ral \"Due\" hidden"}
+{"tMs":2497,"delta":":=d.status!=\"due"}
+{"tMs":2522,"delta":"\""}

@@ -1,0 +1,38 @@
+{"meta":{"ui":"covered_receipt","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show a restaurant receipt chat card with three itemized purchases, subtotal, tax, tip, total, and a pay action.","text":"ChatCard \"Dinner receipt\" \"Table 7, server Ana\" icon:\"receipt_long\" status:\"Open\"\n  Details rows:=[[\"Margherita pizza\",money(18,\"$\",2)],[\"Caesar salad\",money(9,\"$\",2)],[\"Sparkling water\",money(4,\"$\",2)],[\"Subtotal\",money(31,\"$\",2)],[\"Tax (8%)\",money(2.48,\"$\",2)]]\n  state tip=\"15%\"\n  Row between\n    Text.strong \"Tip\"\n    Segments =tip options:[\"10%\",\"15%\",\"20%\"]\n  TotalBar \"Total\" \"Includes tax and tip\" amount:=money(31+2.48+(tip==\"10%\"?3.1:tip==\"15%\"?4.65:6.2),\"$\",2) cta:\"Pay\" icon:\"payments\" -> emit pay","usage":{"input_tokens":9645,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":281,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":691,"totalMs":1482}}
+{"tMs":691,"delta":"ChatCard \"Din"}
+{"tMs":721,"delta":"ner receipt\" \"Table"}
+{"tMs":745,"delta":" 7, server Ana\""}
+{"tMs":769,"delta":" icon:\"receipt_"}
+{"tMs":791,"delta":"long\" status:\"Open\""}
+{"tMs":810,"delta":"\n  "}
+{"tMs":832,"delta":"Details rows:=[[\""}
+{"tMs":856,"delta":"Margherita pizza\",money"}
+{"tMs":876,"delta":"(18,\"$\",2)"}
+{"tMs":932,"delta":"],[\"Caesar salad"}
+{"tMs":1177,"delta":"\",money(9,\"$\","}
+{"tMs":1177,"delta":"2)],[\"Spark"}
+{"tMs":1177,"delta":"ling water\",money(4,\""}
+{"tMs":1177,"delta":"$\",2)],[\"Sub"}
+{"tMs":1177,"delta":"total\",money(31,"}
+{"tMs":1177,"delta":"\"$\",2)],[\""}
+{"tMs":1177,"delta":"Tax (8%)\",money"}
+{"tMs":1177,"delta":"(2.48,\"$\","}
+{"tMs":1177,"delta":"2)]]\n  state t"}
+{"tMs":1177,"delta":"ip=\"15"}
+{"tMs":1177,"delta":"%\"\n  Row between"}
+{"tMs":1177,"delta":"\n    Text.strong \""}
+{"tMs":1454,"delta":"Tip\"\n    Segments"}
+{"tMs":1454,"delta":" =tip options:[\"10%"}
+{"tMs":1454,"delta":"\",\"15%\",\"20%\"]"}
+{"tMs":1454,"delta":"\n  TotalBar \""}
+{"tMs":1454,"delta":"Total\" \"Includes t"}
+{"tMs":1454,"delta":"ax and tip\" amount:"}
+{"tMs":1454,"delta":"=money(31+2.48"}
+{"tMs":1455,"delta":"+(tip==\"10%"}
+{"tMs":1455,"delta":"\"?3.1:tip"}
+{"tMs":1455,"delta":"==\"15"}
+{"tMs":1455,"delta":"%\"?4.65:6"}
+{"tMs":1455,"delta":".2),\"$\",2)"}
+{"tMs":1455,"delta":" cta:\"Pay\""}
+{"tMs":1458,"delta":" icon:\"payments\" -"}
+{"tMs":1480,"delta":"> emit pay"}

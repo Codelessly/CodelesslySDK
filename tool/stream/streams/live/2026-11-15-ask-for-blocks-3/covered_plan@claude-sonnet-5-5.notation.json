@@ -1,0 +1,284 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Website relaunch",
+    "subtitle": "Three-step project plan",
+    "icon": "checklist",
+    "status": "In progress",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "PlanStep1",
+    "PlanStep2",
+    "PlanStep3",
+    "ProgressLine1",
+    "SectionLabel2",
+    "Checklist1",
+    "row1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Plan"
+   },
+   "bind": {
+    "props.note": "${done} of 3 done"
+   }
+  },
+  "PlanStep1": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Define scope",
+    "detail": "Agree goals, pages and owners",
+    "index": 0
+   },
+   "bind": {
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "PlanStep2": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Design and build",
+    "detail": "Wireframes, visuals and development",
+    "index": 1
+   },
+   "bind": {
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "PlanStep3": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Test and launch",
+    "detail": "QA, fixes and go-live",
+    "index": 2,
+    "last": true
+   },
+   "bind": {
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Progress"
+   },
+   "bind": {
+    "props.detail": "${= round(done/3*100,0)}%",
+    "props.value": "${= done/3}"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next actions"
+   },
+   "bind": {
+    "props.note": "${= length(next)} ticked"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "This week",
+    "value": "next",
+    "items": [
+     "Confirm sitemap with stakeholders",
+     "Share wireframes for review",
+     "Book QA testers",
+     "Draft launch announcement"
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Advance step",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= done<3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= min(3,done+1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Reset",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "done",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "running",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "next",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}

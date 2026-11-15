@@ -1,0 +1,141 @@
+{"meta":{"ui":"missing_score","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a live basketball score chat card with the two teams, scores, period, game clock, possession indicator, and a compact scoring timeline.","text":"ChatCard \"Live game\" \"Q3 · Downtown Arena\" icon:\"sports_basketball\" status:\"LIVE\" tone:danger w:390\n  state home=78\n  state away=74\n  state clock=272\n  state poss=\"home\"\n  state plays=[{\"t\":\"2:14\",\"team\":\"HOM\",\"txt\":\"Reyes 3-pointer\",\"pts\":3},{\"t\":\"3:02\",\"team\":\"AWY\",\"txt\":\"Cole layup\",\"pts\":2},{\"t\":\"4:40\",\"team\":\"HOM\",\"txt\":\"Park free throws\",\"pts\":2},{\"t\":\"5:31\",\"team\":\"AWY\",\"txt\":\"Cole dunk\",\"pts\":2}]\n  every 1s when clock>0 -> clock=clock-1\n  Box fill:#FF111827 radius:16 pad:16 gap:12\n    Row between middle\n      Column gap:4 center\n        Text.caption \"HOMETOWN HAWKS\" color:#FFCBD5E1\n        Text.numberHero \"{home}\" color:#FFFFFFFF\n        Row gap:4 middle center\n          Icon \"sports_basketball\" size:16 color:#FFF59E0B visible:=poss==\"home\"\n          Text.caption \"Possession\" color:#FFF59E0B visible:=poss==\"home\"\n      Column gap:4 center\n        Text.badge \"Q3\" color:#FFFFFFFF\n        Text.numberLarge \"{floor(clock/60)}:{clock%60<10?'0':''}{clock%60}\" color:#FFFFFFFF\n      Column gap:4 center\n        Text.caption \"AWAY WOLVES\" color:#FFCBD5E1\n        Text.numberHero \"{away}\" color:#FFFFFFFF\n        Row gap:4 middle center\n          Icon \"sports_basketball\" size:16 color:#FFF59E0B visible:=poss==\"away\"\n          Text.caption \"Possession\" color:#FFF59E0B visible:=poss==\"away\"\n  SectionLabel \"Scoring timeline\" \"Q3\"\n  each p in plays\n    Row gap:10 middle\n      Text.mono \"{p.t}\"\n      Badge.primary \"{p.team}\"\n      Text \"{p.txt}\" grow\n      Text.strong \"+{p.pts}\"\n  Row gap:10\n    ActionButton \"Home ball\" tone:quiet -> poss=\"home\"\n    ActionButton \"Away ball\" tone:quiet -> poss=\"away\"","usage":{"input_tokens":9306,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":811,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":617,"totalMs":5581}}
+{"tMs":617,"delta":"ChatCard \""}
+{"tMs":841,"delta":"Live game"}
+{"tMs":841,"delta":"\" \"Q"}
+{"tMs":841,"delta":"3"}
+{"tMs":841,"delta":" ·"}
+{"tMs":841,"delta":" Downtown Arena\" ic"}
+{"tMs":841,"delta":"on:\"sports_bas"}
+{"tMs":854,"delta":"ketball\" status:\"LI"}
+{"tMs":892,"delta":"VE\" tone:danger"}
+{"tMs":929,"delta":" w:390\n  state home"}
+{"tMs":962,"delta":"=78"}
+{"tMs":998,"delta":"\n  state away=74"}
+{"tMs":1035,"delta":"\n  state clock="}
+{"tMs":1068,"delta":"272"}
+{"tMs":1103,"delta":"\n  state po"}
+{"tMs":1141,"delta":"ss=\"home\"\n  state pl"}
+{"tMs":1175,"delta":"ays=[{"}
+{"tMs":1210,"delta":"\"t"}
+{"tMs":1244,"delta":"\":\"2"}
+{"tMs":1280,"delta":":14\",\"team"}
+{"tMs":1315,"delta":"\":\"H"}
+{"tMs":1349,"delta":"OM"}
+{"tMs":1387,"delta":"\",\"tx"}
+{"tMs":1420,"delta":"t\":\""}
+{"tMs":1454,"delta":"Re"}
+{"tMs":1489,"delta":"y"}
+{"tMs":1525,"delta":"es 3-point"}
+{"tMs":1561,"delta":"er\",\"pts\":3"}
+{"tMs":1605,"delta":"},{\"t\":\"3"}
+{"tMs":1632,"delta":":02"}
+{"tMs":1671,"delta":"\",\"team\":\"A"}
+{"tMs":1704,"delta":"WY"}
+{"tMs":1740,"delta":"\",\"txt\":\"C"}
+{"tMs":1776,"delta":"ole layup\",\""}
+{"tMs":1812,"delta":"pts\":2},{\"t"}
+{"tMs":1848,"delta":"\":\"4:40"}
+{"tMs":1885,"delta":"\",\"team\":\"HOM\",\""}
+{"tMs":1922,"delta":"txt\":\"Park free thro"}
+{"tMs":1958,"delta":"ws\",\"pts\":2},{"}
+{"tMs":1995,"delta":"\"t\":\"5:31"}
+{"tMs":2031,"delta":"\",\"team\":\"AWY\",\""}
+{"tMs":2067,"delta":"txt\":\"C"}
+{"tMs":2103,"delta":"ole dunk\",\"pts\":"}
+{"tMs":2139,"delta":"2}]\n  every 1"}
+{"tMs":2175,"delta":"s when cl"}
+{"tMs":2211,"delta":"ock>0 -> clock"}
+{"tMs":2248,"delta":"=clock-1\n  "}
+{"tMs":2283,"delta":"Box"}
+{"tMs":2317,"delta":" f"}
+{"tMs":2352,"delta":"ill:#"}
+{"tMs":2388,"delta":"FF111"}
+{"tMs":2424,"delta":"827 radius:16"}
+{"tMs":2460,"delta":" pad:16 gap"}
+{"tMs":2497,"delta":":12\n    Row between midd"}
+{"tMs":2533,"delta":"le\n      Column gap:"}
+{"tMs":2569,"delta":"4 center\n        Text."}
+{"tMs":2605,"delta":"ca"}
+{"tMs":2639,"delta":"ption \"H"}
+{"tMs":2675,"delta":"OM"}
+{"tMs":2709,"delta":"ET"}
+{"tMs":2747,"delta":"OWN H"}
+{"tMs":2781,"delta":"A"}
+{"tMs":2816,"delta":"WKS\" color:#F"}
+{"tMs":2853,"delta":"FCBD5E1"}
+{"tMs":2892,"delta":"\n        Text.num"}
+{"tMs":2929,"delta":"berHero \"{home}\""}
+{"tMs":2966,"delta":" color:#FFFFF"}
+{"tMs":3010,"delta":"FFF\n        Row g"}
+{"tMs":3033,"delta":"ap:4"}
+{"tMs":3067,"delta":" midd"}
+{"tMs":3103,"delta":"le center"}
+{"tMs":3139,"delta":"\n          Icon \"s"}
+{"tMs":3175,"delta":"ports_basketball\" size"}
+{"tMs":3210,"delta":":16"}
+{"tMs":3246,"delta":" color:#FFF"}
+{"tMs":3282,"delta":"59E0B visible:="}
+{"tMs":3318,"delta":"poss==\"home\"\n          "}
+{"tMs":3354,"delta":"Text."}
+{"tMs":3390,"delta":"caption \""}
+{"tMs":3425,"delta":"Possession\" color:#FF"}
+{"tMs":3463,"delta":"F"}
+{"tMs":3497,"delta":"59E0B visible:="}
+{"tMs":3533,"delta":"poss==\"home\"\n      "}
+{"tMs":3570,"delta":"Column gap:4 center"}
+{"tMs":3605,"delta":"\n        Text.bad"}
+{"tMs":3641,"delta":"ge \"Q3\" color:"}
+{"tMs":3678,"delta":"#FFFFFFF"}
+{"tMs":3713,"delta":"F\n        Text.number"}
+{"tMs":3749,"delta":"Large \"{floor("}
+{"tMs":3785,"delta":"clock/60)}:{"}
+{"tMs":3820,"delta":"cl"}
+{"tMs":3856,"delta":"ock%60<10?'0"}
+{"tMs":3892,"delta":"':''"}
+{"tMs":3927,"delta":"}{clock%60}\""}
+{"tMs":3963,"delta":" color:#FFFFF"}
+{"tMs":3999,"delta":"FFF\n      "}
+{"tMs":4035,"delta":"Column gap:4 center"}
+{"tMs":4071,"delta":"\n        Text.caption \""}
+{"tMs":4106,"delta":"A"}
+{"tMs":4141,"delta":"WAY W"}
+{"tMs":4178,"delta":"O"}
+{"tMs":4213,"delta":"LVES\" color:#F"}
+{"tMs":4254,"delta":"FCBD5E1"}
+{"tMs":4285,"delta":"\n        Text.numberHero"}
+{"tMs":4321,"delta":" \"{away}\" color:#"}
+{"tMs":4357,"delta":"FFFFFFFF"}
+{"tMs":4393,"delta":"\n        Row gap:4"}
+{"tMs":4428,"delta":" middle center\n          Ic"}
+{"tMs":4464,"delta":"on \"sports_basketball"}
+{"tMs":4500,"delta":"\" size:16 color:#"}
+{"tMs":4535,"delta":"FF"}
+{"tMs":4571,"delta":"F59E0B visible:"}
+{"tMs":4607,"delta":"=poss==\"away\""}
+{"tMs":4643,"delta":"\n          Text.caption \""}
+{"tMs":4679,"delta":"Possession\" color:#FF"}
+{"tMs":4715,"delta":"F59E0B visible:"}
+{"tMs":4751,"delta":"=poss==\"away\""}
+{"tMs":4787,"delta":"\n  SectionLabel \""}
+{"tMs":4822,"delta":"Scoring timeline\""}
+{"tMs":4858,"delta":" \"Q3\""}
+{"tMs":4894,"delta":"\n  each p"}
+{"tMs":4934,"delta":" in plays\n    Row g"}
+{"tMs":4966,"delta":"ap:10 middle\n      "}
+{"tMs":5002,"delta":"Text.mono \"{p"}
+{"tMs":5038,"delta":".t}\"\n      Bad"}
+{"tMs":5073,"delta":"ge.prim"}
+{"tMs":5109,"delta":"ary \"{p.team}\""}
+{"tMs":5145,"delta":"\n      Text \""}
+{"tMs":5181,"delta":"{p.txt}\" gr"}
+{"tMs":5216,"delta":"ow\n      Text.strong"}
+{"tMs":5254,"delta":" \"+{p.pts}"}
+{"tMs":5287,"delta":"\"\n  Row gap:"}
+{"tMs":5323,"delta":"10\n    "}
+{"tMs":5359,"delta":"ActionButton \"Home "}
+{"tMs":5395,"delta":"ball\" tone:quiet"}
+{"tMs":5431,"delta":" -> poss=\"home\""}
+{"tMs":5466,"delta":"\n    ActionButton \""}
+{"tMs":5505,"delta":"Away ball\" tone:qu"}
+{"tMs":5539,"delta":"iet -> poss=\"away"}
+{"tMs":5575,"delta":"\""}

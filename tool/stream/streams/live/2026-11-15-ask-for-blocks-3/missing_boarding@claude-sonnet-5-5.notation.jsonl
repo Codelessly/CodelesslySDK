@@ -1,0 +1,140 @@
+{"meta":{"ui":"missing_boarding","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a scannable airline boarding pass chat card with passenger, flight, gate, seat, boarding group and time, plus a large QR code and tear-off ticket layout.","text":"ChatCard \"Boarding pass\" \"Skyline Air · SK 482\" icon:\"flight\" status:\"Checked in\" tone:good w:390\n  Wanted \"BoardingPass\" \"a tear-off airline ticket: route, passenger, flight, gate, seat, group and boarding time on the main stub, a perforated divider, and a large scannable QR code on the tear-off part\"\n    Row between middle\n      Column\n        Text.eyebrow \"FROM\"\n        Text size:36 weight:700 \"SFO\"\n        Text.caption \"San Francisco\"\n      Icon \"flight_takeoff\"\n      Column right\n        Text.eyebrow \"TO\"\n        Text size:36 weight:700 \"JFK\"\n        Text.caption \"New York\"\n    Details rows:[[\"Passenger\",\"Ada Lovelace\"],[\"Flight\",\"SK 482 · Sat 14 Jun\"],[\"Boarding time\",\"10:35\"],[\"Departure\",\"11:05\"]]\n    Row gap:8\n      Box grow fill:#FFEEF2FF radius:12 pad:12\n        Text.eyebrow \"GATE\"\n        Text size:28 weight:700 \"B12\"\n      Box grow fill:#FFEEF2FF radius:12 pad:12\n        Text.eyebrow \"SEAT\"\n        Text size:28 weight:700 \"14A\"\n      Box grow fill:#FFEEF2FF radius:12 pad:12\n        Text.eyebrow \"GROUP\"\n        Text size:28 weight:700 \"3\"\n    Row middle\n      Box w:16 h:16 radius:8 fill:#FFF3F4F6\n      Box grow h:1 fill:#FFD1D5DB\n      Box w:16 h:16 radius:8 fill:#FFF3F4F6\n    Column center gap:8\n      node {\"type\":\"Image\",\"props\":{\"src\":\"qr\",\"w\":200,\"h\":200,\"alt\":\"Boarding pass QR code\"}}\n      Text.caption \"Scan at the gate · SK482-14A-ADA\"\n  Paragraph \"Be at the gate 30 minutes before departure. Gate closes at 10:50.\"\n  Row gap:10\n    ActionButton \"Add to wallet\" tone:primary icon:\"wallet\" -> toast \"Added to wallet\"\n    ActionButton \"Share\" tone:quiet icon:\"share\" -> emit share","usage":{"input_tokens":9318,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":782,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":885,"totalMs":5481}}
+{"tMs":885,"delta":"ChatCard \"Bo"}
+{"tMs":1216,"delta":"arding pass\" \"Sk"}
+{"tMs":1216,"delta":"yline"}
+{"tMs":1216,"delta":" Air"}
+{"tMs":1216,"delta":" · SK"}
+{"tMs":1216,"delta":" 482"}
+{"tMs":1217,"delta":"\" icon:\"fl"}
+{"tMs":1217,"delta":"ight\""}
+{"tMs":1217,"delta":" status:\"Checked in"}
+{"tMs":1217,"delta":"\" tone:good"}
+{"tMs":1217,"delta":" w:390\n  Wan"}
+{"tMs":1227,"delta":"ted \"BoardingPass"}
+{"tMs":1260,"delta":"\" \"a t"}
+{"tMs":1552,"delta":"ear-off air"}
+{"tMs":1552,"delta":"line "}
+{"tMs":1552,"delta":"ticket: route,"}
+{"tMs":1552,"delta":" passenger, flight, g"}
+{"tMs":1552,"delta":"ate, seat, group"}
+{"tMs":1552,"delta":" and bo"}
+{"tMs":1552,"delta":"arding time on"}
+{"tMs":1552,"delta":" the main stub, a"}
+{"tMs":1558,"delta":" perforated div"}
+{"tMs":1592,"delta":"ider, and a large sc"}
+{"tMs":1627,"delta":"annable QR code on the t"}
+{"tMs":1659,"delta":"ear-"}
+{"tMs":1890,"delta":"off part"}
+{"tMs":1890,"delta":"\"\n    Row between"}
+{"tMs":1890,"delta":" midd"}
+{"tMs":1890,"delta":"le\n      Column"}
+{"tMs":1890,"delta":"\n        Text.eyebr"}
+{"tMs":1890,"delta":"ow \"F"}
+{"tMs":1891,"delta":"ROM\"\n        Text size"}
+{"tMs":1924,"delta":":36"}
+{"tMs":1959,"delta":" weight:700 \"S"}
+{"tMs":1992,"delta":"FO\"\n        "}
+{"tMs":2026,"delta":"Text.caption \"San"}
+{"tMs":2061,"delta":" Francisco\"\n      "}
+{"tMs":2235,"delta":"Icon \"flight_"}
+{"tMs":2235,"delta":"takeoff\""}
+{"tMs":2235,"delta":"\n      Column right"}
+{"tMs":2235,"delta":"\n        Text.eyeb"}
+{"tMs":2235,"delta":"row \"TO\"\n        "}
+{"tMs":2262,"delta":"Text size:36 weight"}
+{"tMs":2296,"delta":":700 \"JFK\""}
+{"tMs":2330,"delta":"\n        Text.caption \""}
+{"tMs":2364,"delta":"New York\"\n    Details r"}
+{"tMs":2398,"delta":"ows:[[\"Passenger"}
+{"tMs":2432,"delta":"\",\"Ada Lovel"}
+{"tMs":2466,"delta":"ace\"],[\"Flight\",\""}
+{"tMs":2587,"delta":"SK 482 · S"}
+{"tMs":2587,"delta":"at 14 J"}
+{"tMs":2587,"delta":"un\"],[\"Bo"}
+{"tMs":2601,"delta":"arding time\",\"10:35"}
+{"tMs":2635,"delta":"\""}
+{"tMs":2666,"delta":"],[\"Depart"}
+{"tMs":2699,"delta":"ure\",\"11"}
+{"tMs":2732,"delta":":05\"]]\n    "}
+{"tMs":2770,"delta":"Row gap:8\n      "}
+{"tMs":2799,"delta":"Box gr"}
+{"tMs":2833,"delta":"ow fill:#FFE"}
+{"tMs":2865,"delta":"EF2"}
+{"tMs":2940,"delta":"FF"}
+{"tMs":2940,"delta":" rad"}
+{"tMs":2963,"delta":"ius:12"}
+{"tMs":2997,"delta":" pad:12"}
+{"tMs":3030,"delta":"\n        Text.e"}
+{"tMs":3064,"delta":"yebrow \"GATE"}
+{"tMs":3098,"delta":"\"\n        Text size:28"}
+{"tMs":3132,"delta":" weight:700 \"B"}
+{"tMs":3165,"delta":"12\"\n      Box grow"}
+{"tMs":3199,"delta":" fill:#FFEE"}
+{"tMs":3233,"delta":"F2FF radius:12"}
+{"tMs":3267,"delta":" pad:12\n        "}
+{"tMs":3300,"delta":"Text.eyebrow \""}
+{"tMs":3334,"delta":"SEAT\"\n        "}
+{"tMs":3367,"delta":"Text size:28 weight:"}
+{"tMs":3400,"delta":"700 \"14A\"\n      "}
+{"tMs":3434,"delta":"Box grow fill:#"}
+{"tMs":3468,"delta":"FFEEF2FF"}
+{"tMs":3501,"delta":" radius:12 pad:"}
+{"tMs":3535,"delta":"12\n        Text.ey"}
+{"tMs":3568,"delta":"ebrow \"GROUP"}
+{"tMs":3601,"delta":"\"\n        Text size:28"}
+{"tMs":3635,"delta":" weight:700 \"3"}
+{"tMs":3668,"delta":"\"\n    Row midd"}
+{"tMs":3702,"delta":"le\n      Box"}
+{"tMs":3735,"delta":" w:16"}
+{"tMs":3768,"delta":" h:16 rad"}
+{"tMs":3802,"delta":"ius:8"}
+{"tMs":3835,"delta":" fill:#FFF"}
+{"tMs":3868,"delta":"3"}
+{"tMs":3901,"delta":"F4F6\n      Box"}
+{"tMs":3934,"delta":" grow h"}
+{"tMs":3969,"delta":":1 fill:#F"}
+{"tMs":4001,"delta":"FD"}
+{"tMs":4034,"delta":"1D5DB"}
+{"tMs":4068,"delta":"\n      Box w:16 "}
+{"tMs":4101,"delta":"h:16 radius:8"}
+{"tMs":4136,"delta":" fill:#FFF"}
+{"tMs":4168,"delta":"3F4F6\n    "}
+{"tMs":4202,"delta":"Column center g"}
+{"tMs":4235,"delta":"ap:8"}
+{"tMs":4267,"delta":"\n      node"}
+{"tMs":4301,"delta":" {\"type\":\""}
+{"tMs":4333,"delta":"Image"}
+{"tMs":4367,"delta":"\",\"props\":{\"src"}
+{"tMs":4400,"delta":"\":\"q"}
+{"tMs":4434,"delta":"r\",\"w\":200"}
+{"tMs":4467,"delta":",\"h\":200,\"al"}
+{"tMs":4500,"delta":"t\":\""}
+{"tMs":4533,"delta":"Boarding p"}
+{"tMs":4567,"delta":"ass QR code\"}}"}
+{"tMs":4600,"delta":"\n      Text.caption \""}
+{"tMs":4638,"delta":"Scan at the gate ·"}
+{"tMs":4667,"delta":" SK482"}
+{"tMs":4700,"delta":"-"}
+{"tMs":4733,"delta":"14"}
+{"tMs":4766,"delta":"A-"}
+{"tMs":4800,"delta":"ADA"}
+{"tMs":4832,"delta":"\"\n  "}
+{"tMs":4866,"delta":"Paragraph \"Be"}
+{"tMs":4899,"delta":" at the gate "}
+{"tMs":4932,"delta":"30"}
+{"tMs":4965,"delta":" minutes before depart"}
+{"tMs":4998,"delta":"ure."}
+{"tMs":5032,"delta":" Gate closes at"}
+{"tMs":5065,"delta":" 10:50"}
+{"tMs":5098,"delta":".\"\n  "}
+{"tMs":5132,"delta":"Row gap:10\n    "}
+{"tMs":5166,"delta":"ActionButton \"Add to"}
+{"tMs":5200,"delta":" wallet\" tone:prim"}
+{"tMs":5233,"delta":"ary icon:\"wallet"}
+{"tMs":5266,"delta":"\" -> to"}
+{"tMs":5301,"delta":"ast \"Added to"}
+{"tMs":5333,"delta":" wallet\"\n    Act"}
+{"tMs":5366,"delta":"ionButton \"Share\" t"}
+{"tMs":5400,"delta":"one:quiet icon:"}
+{"tMs":5432,"delta":"\"share"}
+{"tMs":5471,"delta":"\" -> emit share"}

@@ -1,0 +1,49 @@
+{"meta":{"ui":"covered_diff","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a code review chat card with a small two-line before/after diff hunk and an approve action.","text":"ChatCard \"Code review\" \"config.yaml · 1 change\" icon:\"rate_review\" status:\"Pending\" tone:warn w:390\n  SectionLabel \"Changes\" \"1 hunk\"\n  DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" =h1 start:4 lines:[\"-port: 8080\",\"+port: 9090\",\" host: localhost\"]\n  if h1==\"discard\"\n    Callout \"Change discarded\" \"This hunk will stay as it was.\" tone:neutral\n  if h1==\"keep\"\n    Callout \"Change kept\" \"The port change is ready to approve.\" tone:good\n  Row gap:10\n    ActionButton \"Request changes\" tone:quiet -> emit requestChanges\n    ActionButton \"Approve\" tone:primary icon:\"check\" enabled:=h1!=\"\" -> emit approve h1","usage":{"input_tokens":9291,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":285,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":917,"totalMs":2693}}
+{"tMs":917,"delta":"ChatCard \"Code"}
+{"tMs":1247,"delta":" review\" \"config"}
+{"tMs":1247,"delta":".y"}
+{"tMs":1247,"delta":"aml ·"}
+{"tMs":1247,"delta":" 1"}
+{"tMs":1247,"delta":" change\" icon:\"r"}
+{"tMs":1247,"delta":"ate_review"}
+{"tMs":1247,"delta":"\" status:\"Pending\""}
+{"tMs":1247,"delta":" t"}
+{"tMs":1247,"delta":"one:war"}
+{"tMs":1247,"delta":"n w:390\n  Sect"}
+{"tMs":1253,"delta":"ionLabel \"Chang"}
+{"tMs":1288,"delta":"es\" \"1 h"}
+{"tMs":1592,"delta":"unk\"\n  "}
+{"tMs":1592,"delta":"DiffHunk \""}
+{"tMs":1592,"delta":"Server port\" \"@@ -"}
+{"tMs":1592,"delta":"4,2 +4,2"}
+{"tMs":1592,"delta":" @@\" =h1 "}
+{"tMs":1592,"delta":"start:4 lines:[\""}
+{"tMs":1593,"delta":"-port: 8080\",\"+"}
+{"tMs":1593,"delta":"port: 9090\",\""}
+{"tMs":1604,"delta":" host: localhost\"]"}
+{"tMs":1631,"delta":"\n  if h1="}
+{"tMs":1666,"delta":"=\"discard\"\n    Call"}
+{"tMs":1700,"delta":"out \"Change"}
+{"tMs":1928,"delta":" discarded\" \"This hun"}
+{"tMs":1928,"delta":"k will st"}
+{"tMs":1928,"delta":"ay as it"}
+{"tMs":1928,"delta":" was.\""}
+{"tMs":1928,"delta":" tone:neutral\n  "}
+{"tMs":1928,"delta":"if h"}
+{"tMs":1929,"delta":"1==\"keep\"\n    "}
+{"tMs":1963,"delta":"Callout \"Change kept"}
+{"tMs":1997,"delta":"\" \"The port change is "}
+{"tMs":2031,"delta":"ready to approve.\" tone:"}
+{"tMs":2065,"delta":"good\n  Row gap:"}
+{"tMs":2098,"delta":"10\n    ActionButton"}
+{"tMs":2686,"delta":" \"Request changes\" tone"}
+{"tMs":2686,"delta":":quiet -> em"}
+{"tMs":2686,"delta":"it requ"}
+{"tMs":2686,"delta":"estChanges\n    Act"}
+{"tMs":2686,"delta":"ionButton \"Approve\""}
+{"tMs":2686,"delta":" tone:prim"}
+{"tMs":2686,"delta":"ary icon:\""}
+{"tMs":2686,"delta":"check\" enabled:="}
+{"tMs":2686,"delta":"h1!=\"\" -> em"}
+{"tMs":2686,"delta":"it approve h"}
+{"tMs":2687,"delta":"1"}

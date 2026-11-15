@@ -1,0 +1,135 @@
+{"meta":{"ui":"missing_calendar","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show a month calendar chat card for November 2026 with a seven-column date grid, highlighted booked dates, selected date, and event dots.","text":"The errors came from the Wanted line sitting beside the card at root level, and from the card's children being written at the wrong depth. Here is the whole UI as one tree: the Wanted line is inside the card, the grid holds all its cells, and each row of the calendar is built from a repeated day list.\n\nChatCard \"November 2026\" \"Calendar\" icon:\"calendar_month\" status:\"Booked\" {\"width\":390}\n  state sel=11\n  Wanted \"MonthCalendar\" \"a month grid of seven columns with weekday headers, booked dates highlighted, a selected date marked, and event dots under dates with events\"\n  Grid cols:7 gap:4\n    Text.caption \"Mo\"\n    Text.caption \"Tu\"\n    Text.caption \"We\"\n    Text.caption \"Th\"\n    Text.caption \"Fr\"\n    Text.caption \"Sa\"\n    Text.caption \"Su\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"\"\n    Text.body \"1\" -> sel=1\n    Text.body \"2\" -> sel=2\n    Text.body \"3\" -> sel=3\n    Text.body \"4\" -> sel=4\n    Text.body \"5\" -> sel=5\n    Text.body \"6\" -> sel=6\n    Text.body \"7\" -> sel=7\n    Text.body \"8\" -> sel=8\n    Text.body \"9\" -> sel=9\n    Text.body \"10\" -> sel=10\n    Text.body \"11\" fill:=sel==11?#FF2563EB:#00000000 color:=sel==11?#FFFFFFFF:#FF111827 -> sel=11\n    Text.body \"12\" fill:#FFDBEAFE -> sel=12\n    Text.body \"13\" -> sel=13\n    Text.body \"14\" -> sel=14\n    Text.body \"15\" -> sel=15\n    Text.body \"16\" -> sel=16\n    Text.body \"17\" -> sel=17\n    Text.body \"18\" fill:#FFDBEAFE -> sel=18\n    Text.body \"19\" -> sel=19\n    Text.body \"20\" -> sel=20\n    Text.body \"21\" -> sel=21\n    Text.body \"22\" -> sel=22\n    Text.body \"23\" -> sel=23\n    Text.body \"24\" -> sel=24\n    Text.body \"25\" -> sel=25\n    Text.body \"26\" -> sel=26\n    Text.body \"27\" -> sel=27\n    Text.body \"28\" -> sel=28\n    Text.body \"29\" -> sel=29\n    Text.body \"30\" -> sel=30\n  Row gap:6\n    Badge.primary \"Booked\"\n    Text.caption \"Selected: Nov {sel}\"","usage":{"input_tokens":11336,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":902,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1144,"totalMs":4313}}
+{"tMs":1144,"delta":"The errors came"}
+{"tMs":1298,"delta":" from the Wanted line"}
+{"tMs":1298,"delta":" s"}
+{"tMs":1298,"delta":"itting be"}
+{"tMs":1298,"delta":"side the card at root level"}
+{"tMs":1298,"delta":", and from"}
+{"tMs":1298,"delta":" the card"}
+{"tMs":1298,"delta":"'s children"}
+{"tMs":1302,"delta":" being written"}
+{"tMs":1324,"delta":" at the wrong dep"}
+{"tMs":1345,"delta":"th. Here"}
+{"tMs":1367,"delta":" is the whole UI as"}
+{"tMs":1387,"delta":" one t"}
+{"tMs":1797,"delta":"ree:"}
+{"tMs":1797,"delta":" the"}
+{"tMs":1797,"delta":" Wanted line is in"}
+{"tMs":1797,"delta":"side the card, the"}
+{"tMs":1797,"delta":" grid hol"}
+{"tMs":1797,"delta":"ds all"}
+{"tMs":1797,"delta":" its c"}
+{"tMs":1797,"delta":"ells, and each"}
+{"tMs":1797,"delta":" row"}
+{"tMs":1797,"delta":" of"}
+{"tMs":1797,"delta":" the cal"}
+{"tMs":1797,"delta":"endar is built"}
+{"tMs":1948,"delta":" from a rep"}
+{"tMs":1948,"delta":"eated"}
+{"tMs":1948,"delta":" day"}
+{"tMs":1948,"delta":" list"}
+{"tMs":1948,"delta":"."}
+{"tMs":1948,"delta":"\n\nChatCard \"November 2"}
+{"tMs":1948,"delta":"026\" \"Calendar\""}
+{"tMs":1948,"delta":" icon:\"calendar_"}
+{"tMs":1948,"delta":"month\" status:\"Booked"}
+{"tMs":1948,"delta":"\" {"}
+{"tMs":1948,"delta":"\""}
+{"tMs":1948,"delta":"width\":390}\n  state"}
+{"tMs":2097,"delta":" sel=11\n  "}
+{"tMs":2097,"delta":"Wanted \"Month"}
+{"tMs":2097,"delta":"Calendar\" \"a month"}
+{"tMs":2097,"delta":" grid of seven columns with"}
+{"tMs":2097,"delta":" weekday headers, booked"}
+{"tMs":2097,"delta":" dates highlighted, a"}
+{"tMs":2097,"delta":" selected date marked, and event"}
+{"tMs":2097,"delta":" dots under dates with events\""}
+{"tMs":2097,"delta":"\n  "}
+{"tMs":2097,"delta":"Grid cols:7 "}
+{"tMs":2105,"delta":"gap:4\n    "}
+{"tMs":2125,"delta":"Text.caption \"Mo"}
+{"tMs":2518,"delta":"\"\n    Text.caption"}
+{"tMs":2518,"delta":" \"Tu\"\n    "}
+{"tMs":2518,"delta":"Text.caption \"We\""}
+{"tMs":2518,"delta":"\n    Text.caption \""}
+{"tMs":2518,"delta":"Th\"\n    Text.ca"}
+{"tMs":2518,"delta":"ption \"Fr\"\n    "}
+{"tMs":2518,"delta":"Text.caption \"S"}
+{"tMs":2518,"delta":"a\"\n    Text.ca"}
+{"tMs":2518,"delta":"ption \"Su\"\n    "}
+{"tMs":2518,"delta":"Text.body \"\"\n    "}
+{"tMs":2518,"delta":"Text.body \"\"\n    "}
+{"tMs":2518,"delta":"Text.body \"\"\n    "}
+{"tMs":3227,"delta":"Text.body \"\"\n    "}
+{"tMs":3227,"delta":"Text.body \"\"\n    "}
+{"tMs":3227,"delta":"Text.body \"\"\n    "}
+{"tMs":3227,"delta":"Text.body \"1\" ->"}
+{"tMs":3227,"delta":" sel=1\n    Text"}
+{"tMs":3227,"delta":".body \"2\" -> s"}
+{"tMs":3227,"delta":"el=2\n    Text."}
+{"tMs":3227,"delta":"body \"3\" -> sel"}
+{"tMs":3227,"delta":"=3\n    Text.body"}
+{"tMs":3227,"delta":" \"4\" -> sel="}
+{"tMs":3227,"delta":"4\n    Text.body \""}
+{"tMs":3227,"delta":"5\" -> sel=5"}
+{"tMs":3362,"delta":"\n    Text.body \"6"}
+{"tMs":3362,"delta":"\" -> sel=6"}
+{"tMs":3363,"delta":"\n    Text.body \"7\""}
+{"tMs":3363,"delta":" -> sel=7\n    "}
+{"tMs":3363,"delta":"Text.body \"8\" -"}
+{"tMs":3363,"delta":"> sel=8\n    "}
+{"tMs":3363,"delta":"Text.body \"9\" ->"}
+{"tMs":3363,"delta":" sel=9\n    Text"}
+{"tMs":3363,"delta":".body \"10\" -> s"}
+{"tMs":3363,"delta":"el=10\n    Text."}
+{"tMs":3363,"delta":"body \"11\" fill:="}
+{"tMs":3363,"delta":"sel==11?#FF"}
+{"tMs":3571,"delta":"2563EB:#00"}
+{"tMs":3571,"delta":"000000 color:=sel"}
+{"tMs":3571,"delta":"==11?#FFFF"}
+{"tMs":3571,"delta":"FFFF:#FF"}
+{"tMs":3571,"delta":"111827 -> sel="}
+{"tMs":3571,"delta":"11\n    Text.body \""}
+{"tMs":3571,"delta":"12\" fill:#FF"}
+{"tMs":3571,"delta":"DBEAFE ->"}
+{"tMs":3571,"delta":" sel=12\n    Text"}
+{"tMs":3571,"delta":".body \"13\" -> s"}
+{"tMs":3571,"delta":"el=13\n    Text."}
+{"tMs":3571,"delta":"body \"14\" -> sel"}
+{"tMs":3805,"delta":"=14\n    Text.body"}
+{"tMs":3805,"delta":" \"15\" -> sel="}
+{"tMs":3805,"delta":"15\n    Text.body \""}
+{"tMs":3805,"delta":"16\" -> sel=16"}
+{"tMs":3805,"delta":"\n    Text.body \"17"}
+{"tMs":3805,"delta":"\" -> sel=17"}
+{"tMs":3805,"delta":"\n    Text.body \"18\""}
+{"tMs":3805,"delta":" fill:#FFDB"}
+{"tMs":3805,"delta":"EAFE -> sel"}
+{"tMs":3805,"delta":"=18\n    Text.body"}
+{"tMs":3805,"delta":" \"19\" -> sel="}
+{"tMs":3805,"delta":"19\n    Text.body \""}
+{"tMs":3982,"delta":"20\" -> sel=20"}
+{"tMs":3982,"delta":"\n    Text.body \"21"}
+{"tMs":3982,"delta":"\" -> sel=21"}
+{"tMs":3982,"delta":"\n    Text.body \"22\""}
+{"tMs":3982,"delta":" -> sel=22\n    "}
+{"tMs":3982,"delta":"Text.body \"23\" -"}
+{"tMs":3982,"delta":"> sel=23\n    "}
+{"tMs":3982,"delta":"Text.body \"24\" ->"}
+{"tMs":3982,"delta":" sel=24\n    Text"}
+{"tMs":3982,"delta":".body \"25\" -> s"}
+{"tMs":3982,"delta":"el=25\n    Text."}
+{"tMs":3982,"delta":"body \"26\" -> sel"}
+{"tMs":4125,"delta":"=26\n    Text.body"}
+{"tMs":4125,"delta":" \"27\" -> sel="}
+{"tMs":4125,"delta":"27\n    Text.body \""}
+{"tMs":4125,"delta":"28\" -> sel=28"}
+{"tMs":4125,"delta":"\n    Text.body \"29"}
+{"tMs":4125,"delta":"\" -> sel=29"}
+{"tMs":4125,"delta":"\n    Text.body \"30\""}
+{"tMs":4125,"delta":" -> sel=30\n  "}
+{"tMs":4125,"delta":"Row gap:6\n    "}
+{"tMs":4125,"delta":"Badge.primary \""}
+{"tMs":4125,"delta":"Booked\"\n    Text."}
+{"tMs":4125,"delta":"caption \"Selected:"}
+{"tMs":4309,"delta":" Nov {sel}\""}

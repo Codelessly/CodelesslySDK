@@ -1,0 +1,50 @@
+{"meta":{"ui":"missing_transit","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a transit departure board chat card with three arriving trains, route badges, destinations, platform numbers, live delay status, and minutes until arrival.","text":"ChatCard \"Departures\" \"Central Station · Platform view\" icon:\"train\" status:\"Live\"\n  each t in trains\n    Row gap:12 between\n      Row gap:10\n        Badge.primary \"{t.line}\"\n        Column gap:2\n          Text.strong \"{t.destination}\"\n          Text.caption \"Platform {t.platform}\"\n      Column gap:2 right\n        Text.strong \"{t.minutes} min\"\n        Badge.warning \"{t.status}\"\n\nstate trains=[{\"line\":\"R1\",\"destination\":\"Harbour Quay\",\"platform\":\"2\",\"minutes\":3,\"status\":\"On time\"},{\"line\":\"B4\",\"destination\":\"Westfield Park\",\"platform\":\"5\",\"minutes\":7,\"status\":\"Delayed 4 min\"},{\"line\":\"R3\",\"destination\":\"Airport Express\",\"platform\":\"1\",\"minutes\":12,\"status\":\"On time\"}]","usage":{"input_tokens":9309,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":288,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":659,"totalMs":1672}}
+{"tMs":659,"delta":"ChatCard \"Depart"}
+{"tMs":785,"delta":"ures\" \"Central Station"}
+{"tMs":785,"delta":" · Platform view"}
+{"tMs":785,"delta":"\" icon:\"train"}
+{"tMs":785,"delta":"\" status:\"Live\""}
+{"tMs":785,"delta":"\n  each t"}
+{"tMs":785,"delta":" in trains\n    Row"}
+{"tMs":790,"delta":" gap:12"}
+{"tMs":811,"delta":" between\n      Row"}
+{"tMs":830,"delta":" gap:10"}
+{"tMs":869,"delta":"\n        Badge.prim"}
+{"tMs":890,"delta":"ary \"{t.line"}
+{"tMs":1059,"delta":"}\"\n        Column"}
+{"tMs":1059,"delta":" gap:2"}
+{"tMs":1059,"delta":"\n          Text.strong \""}
+{"tMs":1059,"delta":"{t.dest"}
+{"tMs":1059,"delta":"ination}\"\n          Text."}
+{"tMs":1059,"delta":"caption \"Platform {t"}
+{"tMs":1059,"delta":".platform}\"\n      "}
+{"tMs":1059,"delta":"Column gap:2"}
+{"tMs":1074,"delta":" right"}
+{"tMs":1095,"delta":"\n        Text.strong \""}
+{"tMs":1115,"delta":"{t.min"}
+{"tMs":1136,"delta":"utes} min\"\n        "}
+{"tMs":1222,"delta":"Badge.war"}
+{"tMs":1222,"delta":"ning \"{t.status"}
+{"tMs":1222,"delta":"}\""}
+{"tMs":1222,"delta":"\n\nstate trains=[{"}
+{"tMs":1238,"delta":"\"line\":\"R1"}
+{"tMs":1258,"delta":"\",\"destination\":\"Harb"}
+{"tMs":1278,"delta":"our Qu"}
+{"tMs":1299,"delta":"ay\",\"platform\":\"2"}
+{"tMs":1319,"delta":"\",\"minutes\":3"}
+{"tMs":1341,"delta":",\"status\":\"On"}
+{"tMs":1360,"delta":" time\"},{\"line\":\""}
+{"tMs":1380,"delta":"B4"}
+{"tMs":1401,"delta":"\",\"destination\":\"West"}
+{"tMs":1421,"delta":"f"}
+{"tMs":1441,"delta":"ield Park\",\"platform\":\""}
+{"tMs":1462,"delta":"5\",\"minutes\":7,"}
+{"tMs":1483,"delta":"\"status\":\"Delayed"}
+{"tMs":1503,"delta":" 4 min\"},{\""}
+{"tMs":1523,"delta":"line\":\"R"}
+{"tMs":1543,"delta":"3"}
+{"tMs":1564,"delta":"\",\"destination\":\"Airport"}
+{"tMs":1584,"delta":" Express"}
+{"tMs":1605,"delta":"\",\"platform\":\"1\",\"min"}
+{"tMs":1626,"delta":"utes\":12,\"status\":"}
+{"tMs":1646,"delta":"\"On time\"}]"}

@@ -1,0 +1,521 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Quiz: Question 3 of 10",
+    "subtitle": "Science",
+    "icon": "quiz",
+    "status": "Graded",
+    "tone": "good"
+   },
+   "children": [
+    "column1",
+    "Callout1",
+    "Callout2",
+    "Details1",
+    "ProgressLine1",
+    "row5"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Paragraph1",
+    "SectionLabel1",
+    "listView1"
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Which planet in our solar system has the most moons?",
+    "strong": true
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Your answer",
+    "note": "4 choices"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= [\"Mars\",\"Jupiter\",\"Saturn\",\"Venus\"]}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 12,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item==correct?\"#FFE6F6EC\":(item==answer?\"#FFFDE8E8\":\"#FFF5F5F7\")}"
+   },
+   "children": [
+    "icon1",
+    "text1",
+    "row2",
+    "row3",
+    "row4"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.icon": "${= item==correct?\"check_circle\":(item==answer?\"cancel\":\"radio_button_unchecked\")}",
+    "props.color": "${= item==correct?\"#FF1E8E4E\":(item==answer?\"#FFD93025\":\"#FF888888\")}"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF111827"
+    }
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1ADC2626"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#47DC2626"
+     }
+    ],
+    "radius": 5
+   },
+   "bind": {
+    "visible": "${= item==answer && item!=correct}"
+   },
+   "children": [
+    "text2"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Your answer",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FFDC2626"
+    }
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1A16A34A"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#4716A34A"
+     }
+    ],
+    "radius": 5
+   },
+   "bind": {
+    "visible": "${= item==correct && item==answer}"
+   },
+   "children": [
+    "text3"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Your answer",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF16A34A"
+    }
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 20,
+    "padding": [
+     8,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1A16A34A"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#4716A34A"
+     }
+    ],
+    "radius": 5
+   },
+   "bind": {
+    "visible": "${= item==correct && item!=answer}"
+   },
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Correct",
+    "style": {
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF16A34A"
+    }
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Incorrect",
+    "message": "You chose Mars, but the correct answer is Jupiter.",
+    "tone": "danger",
+    "icon": "close"
+   }
+  },
+  "Callout2": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Explanation",
+    "message": "Jupiter has the most confirmed moons, but Saturn has recently overtaken it in counts as new small moons are discovered; check the current tally for the latest numbers.",
+    "tone": "accent",
+    "icon": "lightbulb"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Points earned\", \"0 of 1\"], [\"Running score\", (\"\" + (score) + \" of 10\")]]}"
+   }
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Score"
+   },
+   "bind": {
+    "props.detail": "${score} of 10 correct",
+    "props.value": "${= score/10}"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Review",
+    "tone": "quiet"
+   }
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Next question",
+    "tone": "primary",
+    "icon": "arrow_forward"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "answer",
+    "type": "text",
+    "value": "Mars"
+   },
+   {
+    "name": "correct",
+    "type": "text",
+    "value": "Jupiter"
+   },
+   {
+    "name": "submitted",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "score",
+    "type": "integer",
+    "value": 7
+   }
+  ]
+ }
+}

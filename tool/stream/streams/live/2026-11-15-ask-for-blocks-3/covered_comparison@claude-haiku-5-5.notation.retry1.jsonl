@@ -1,0 +1,26 @@
+{"meta":{"ui":"covered_comparison","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show a chat card comparing Basic, Plus, and Pro subscription plans in a feature comparison table with a highlighted recommendation.","text":"ChatCard \"Choose a plan\" \"Compare features\" icon:\"star\" status:\"Recommended: Plus\"\n  ComparisonTable names:[\"Basic\",\"Plus\",\"Pro\"] prices:[\"$9/mo\",\"$19/mo\",\"$39/mo\"] pick:2 pickLabel:\"Best value\" cta:\"Choose\" rows:[[\"Users\",1,3,10,0],[\"Storage\",\"5 GB\",\"50 GB\",\"500 GB\",0],[\"Analytics\",\"No\",\"Yes\",\"Yes\",2],[\"Priority support\",\"No\",\"No\",\"Yes\",2]] -> emit choosePlan","usage":{"input_tokens":9675,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":193,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1551,"totalMs":2069}}
+{"tMs":1551,"delta":"ChatCard \"Choose"}
+{"tMs":1718,"delta":" a plan\" \"Compare"}
+{"tMs":1718,"delta":" features\" icon:\"star\""}
+{"tMs":1718,"delta":" status:\"Recommended:"}
+{"tMs":1718,"delta":" Plus\"\n  Com"}
+{"tMs":1718,"delta":"parisonTable names:[\""}
+{"tMs":1718,"delta":"Basic\",\"Plus\",\""}
+{"tMs":1718,"delta":"Pro\"] prices:"}
+{"tMs":1729,"delta":"[\"$9/mo\",\"$"}
+{"tMs":1749,"delta":"19/mo\",\"$39/"}
+{"tMs":1770,"delta":"mo\"] pick:2"}
+{"tMs":1790,"delta":" pickLabel:\""}
+{"tMs":1811,"delta":"Best value\" cta:\""}
+{"tMs":2062,"delta":"Choose\" r"}
+{"tMs":2062,"delta":"ows:["}
+{"tMs":2062,"delta":"[\"Users\",1,3,"}
+{"tMs":2062,"delta":"10,0],[\"Storage"}
+{"tMs":2062,"delta":"\",\"5 GB\",\"50 "}
+{"tMs":2062,"delta":"GB\",\"500 GB\","}
+{"tMs":2062,"delta":"0],[\"Analytics\",\""}
+{"tMs":2062,"delta":"No\",\"Yes\",\"Y"}
+{"tMs":2062,"delta":"es\",2],[\"Priority"}
+{"tMs":2062,"delta":" support\",\"No\",\"No\",\"Y"}
+{"tMs":2062,"delta":"es\",2]] -> em"}
+{"tMs":2062,"delta":"it choosePlan"}

@@ -1,0 +1,60 @@
+{"meta":{"ui":"missing_score","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show a live basketball score chat card with the two teams, scores, period, game clock, possession indicator, and a compact scoring timeline.","text":"state plays=[{\"clock\":\"Q3 6:42\",\"team\":\"LAL\",\"desc\":\"Three-pointer\",\"pts\":3},{\"clock\":\"Q3 7:58\",\"team\":\"BOS\",\"desc\":\"Layup\",\"pts\":2},{\"clock\":\"Q3 9:10\",\"team\":\"LAL\",\"desc\":\"Free throw\",\"pts\":1}]\n\nChatCard \"Live · Game 4\" \"Q3 · 6:42 remaining\" icon:\"sports_basketball\" status:\"LIVE\" tone:danger\n  Row between\n    Column gap:4\n      Text.heading2 \"Lakers\"\n      Text.numberLarge \"78\"\n    Column gap:4 right\n      Text.heading2 \"Celtics\"\n      Text.numberLarge \"74\"\n  Row between\n    Text.caption \"Possession: Lakers\"\n    Text.strong \"⬤ LAL\"\n  Divider\n  Text.eyebrow \"Scoring timeline\"\n  Row gap:8\n    Badge.info \"Q1 3–2\"\n    Badge.neutral \"Q2 0–4\"\n    Badge.success \"Q3 2–0\"\n  each play in plays\n    Row between\n      Text.caption \"{play.clock}\"\n      Text.body \"{play.team} {play.desc}\"\n      Text.strong \"+{play.pts}\"","usage":{"input_tokens":9769,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":429,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":435,"totalMs":1653}}
+{"tMs":435,"delta":"state"}
+{"tMs":620,"delta":" plays=[{\"cl"}
+{"tMs":620,"delta":"ock\":\"Q3 6"}
+{"tMs":620,"delta":":42\",\"team\":\"L"}
+{"tMs":620,"delta":"AL\",\"desc\":\""}
+{"tMs":620,"delta":"Three"}
+{"tMs":620,"delta":"-p"}
+{"tMs":620,"delta":"ointer\",\"pts\":3},"}
+{"tMs":620,"delta":"{\"clock\":\"Q"}
+{"tMs":635,"delta":"3 7"}
+{"tMs":655,"delta":":58"}
+{"tMs":675,"delta":"\",\"team\":\"B"}
+{"tMs":696,"delta":"OS\",\"desc\":\""}
+{"tMs":806,"delta":"Layup\",\"pts\":2},"}
+{"tMs":806,"delta":"{\"clock\":\"Q"}
+{"tMs":806,"delta":"3 9"}
+{"tMs":806,"delta":":10\",\"team\":\"LA"}
+{"tMs":806,"delta":"L\",\"desc\":\"Free"}
+{"tMs":819,"delta":" throw\",\"pts\":1"}
+{"tMs":839,"delta":"}]\n\nChatCard"}
+{"tMs":859,"delta":" \"Live · Game 4"}
+{"tMs":880,"delta":"\" \"Q3 · "}
+{"tMs":900,"delta":"6:42 remaining\""}
+{"tMs":921,"delta":" icon:\"sports_bas"}
+{"tMs":941,"delta":"ketball\" status:\"LI"}
+{"tMs":993,"delta":"VE\" tone:danger"}
+{"tMs":993,"delta":"\n  Row between\n    "}
+{"tMs":1002,"delta":"Column gap:4\n      "}
+{"tMs":1023,"delta":"Text.heading2 \""}
+{"tMs":1043,"delta":"Lakers\"\n      Text"}
+{"tMs":1064,"delta":".numberLarge \"78"}
+{"tMs":1084,"delta":"\"\n    Column gap:"}
+{"tMs":1104,"delta":"4 right\n      Text."}
+{"tMs":1126,"delta":"heading2 \"Celt"}
+{"tMs":1145,"delta":"ics\"\n      Text.num"}
+{"tMs":1166,"delta":"berLarge \"74\""}
+{"tMs":1186,"delta":"\n  Row between\n    Text"}
+{"tMs":1207,"delta":".caption \"Possession:"}
+{"tMs":1227,"delta":" Lakers\"\n    "}
+{"tMs":1248,"delta":"Text.strong \"⬤"}
+{"tMs":1268,"delta":" LAL\"\n  "}
+{"tMs":1288,"delta":"Divider\n  Text.e"}
+{"tMs":1309,"delta":"yebrow \"Sco"}
+{"tMs":1331,"delta":"ring timeline\"\n  "}
+{"tMs":1350,"delta":"Row gap:8\n    "}
+{"tMs":1370,"delta":"Badge.info \"Q1"}
+{"tMs":1391,"delta":" 3–2\"\n    "}
+{"tMs":1411,"delta":"Badge.neutral \""}
+{"tMs":1431,"delta":"Q2 0–4\""}
+{"tMs":1616,"delta":"\n    Badge.success \""}
+{"tMs":1616,"delta":"Q3 2–0\""}
+{"tMs":1616,"delta":"\n  each play in plays\n    "}
+{"tMs":1616,"delta":"Row between\n      Text."}
+{"tMs":1616,"delta":"caption \"{play.clock"}
+{"tMs":1616,"delta":"}\"\n      Text.body"}
+{"tMs":1616,"delta":" \"{play.team} {play"}
+{"tMs":1616,"delta":".desc}\"\n      "}
+{"tMs":1616,"delta":"Text.strong \"+{play"}
+{"tMs":1637,"delta":".pts}\""}

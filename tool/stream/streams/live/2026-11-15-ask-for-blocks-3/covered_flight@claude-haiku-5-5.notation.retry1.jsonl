@@ -1,0 +1,55 @@
+{"meta":{"ui":"covered_flight","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show a chat card comparing two flight options from Chicago to Seattle, with departure and arrival times, stops, duration, price, and a select action.","text":"state flights=[{\"id\":\"ua\",\"name\":\"United\",\"depart\":\"7:05 AM\",\"arrive\":\"9:20 AM\",\"duration\":\"4h 15m\",\"stops\":\"Nonstop\",\"price\":\"$289\"},{\"id\":\"dl\",\"name\":\"Delta\",\"depart\":\"11:40 AM\",\"arrive\":\"4:10 PM\",\"duration\":\"5h 30m\",\"stops\":\"1 stop\",\"price\":\"$241\"}]\nstate pick=\"\"\nChatCard \"Chicago to Seattle\" \"Compare two flights\" icon:\"flight\" status:\"Choose one\"\n  SectionLabel \"Options\" \"2 flights\"\n  each f in flights\n    FlightOption \"{f.name}\" depart:\"{f.depart}\" arrive:\"{f.arrive}\" origin:\"ORD\" destination:\"SEA\" duration:\"{f.duration}\" stops:\"{f.stops}\" price:\"{f.price}\" selected:=pick==f.id -> pick=f.id\n  TotalBar \"Selected\" amount:\"{pick!=\\\"\\\" ? pick : \\\"None\\\"}\" note:\"{pick!=\\\"\\\" ? \\\"Flight chosen\\\" : \\\"Pick a flight\\\"}\" cta:\"Select\" icon:\"check\" enabled:=pick!=\"\" -> emit select pick","usage":{"input_tokens":9900,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":413,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":452,"totalMs":1575}}
+{"tMs":452,"delta":"state"}
+{"tMs":554,"delta":" flights=[{\"id\":"}
+{"tMs":554,"delta":"\"ua\",\"name\":\"United"}
+{"tMs":554,"delta":"\",\"depart\":\"7:05"}
+{"tMs":554,"delta":" AM\",\"arrive\":"}
+{"tMs":571,"delta":"\"9:20 AM\",\""}
+{"tMs":591,"delta":"duration\":\"4h 15"}
+{"tMs":612,"delta":"m\",\"stops\":\"N"}
+{"tMs":633,"delta":"onstop\",\"price\":\"$"}
+{"tMs":653,"delta":"289\"},{\"id\":\""}
+{"tMs":674,"delta":"dl\",\"name\":\"Del"}
+{"tMs":694,"delta":"ta\",\"depart\":\"11:"}
+{"tMs":714,"delta":"40 AM\",\"arrive"}
+{"tMs":734,"delta":"\":\"4:10 PM"}
+{"tMs":755,"delta":"\",\"duration\":\"5h "}
+{"tMs":775,"delta":"30m\",\"stops\":\"1"}
+{"tMs":795,"delta":" stop\",\"price\":\"$"}
+{"tMs":816,"delta":"241\"}]\nstate"}
+{"tMs":836,"delta":" pick=\"\"\nChat"}
+{"tMs":860,"delta":"Card \"Chicago to"}
+{"tMs":878,"delta":" Seattle\" \"Comp"}
+{"tMs":897,"delta":"are two flights"}
+{"tMs":918,"delta":"\" icon:\"flight\""}
+{"tMs":938,"delta":" status:\"Choose one\""}
+{"tMs":960,"delta":"\n  SectionLabel"}
+{"tMs":979,"delta":" \"Options\" \"2 fl"}
+{"tMs":999,"delta":"ights\"\n  each f in fl"}
+{"tMs":1020,"delta":"ights\n    FlightOption"}
+{"tMs":1040,"delta":" \"{f.name}\" dep"}
+{"tMs":1061,"delta":"art:\"{f.depart"}
+{"tMs":1081,"delta":"}\" arrive:\"{"}
+{"tMs":1101,"delta":"f.arrive}\" orig"}
+{"tMs":1122,"delta":"in:\"ORD\" dest"}
+{"tMs":1142,"delta":"ination:\"SEA\" du"}
+{"tMs":1163,"delta":"ration:\"{f.duration"}
+{"tMs":1183,"delta":"}\" stops:\"{f"}
+{"tMs":1204,"delta":".stops}\" price:\""}
+{"tMs":1225,"delta":"{f.price}\" selected"}
+{"tMs":1245,"delta":":=pick==f.id"}
+{"tMs":1266,"delta":" -> pick=f.id"}
+{"tMs":1287,"delta":"\n  TotalBar \""}
+{"tMs":1306,"delta":"Selected\" am"}
+{"tMs":1327,"delta":"ount:\"{pick!="}
+{"tMs":1347,"delta":"\\\"\\\" ? p"}
+{"tMs":1367,"delta":"ick : \\\"None"}
+{"tMs":1387,"delta":"\\\"}\" note:\"{"}
+{"tMs":1408,"delta":"pick!=\\\"\\\""}
+{"tMs":1430,"delta":" ? \\\"Flight ch"}
+{"tMs":1449,"delta":"osen\\\" : \\\""}
+{"tMs":1469,"delta":"Pick a flight\\\"}"}
+{"tMs":1489,"delta":"\" cta:\"Select\""}
+{"tMs":1510,"delta":" icon:\"check\" enab"}
+{"tMs":1531,"delta":"led:=pick!=\""}
+{"tMs":1551,"delta":"\" -> emit select pick"}

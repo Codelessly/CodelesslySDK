@@ -1,0 +1,153 @@
+{"meta":{"ui":"missing_orderbook","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a stock order book chat card with grouped bid and ask price levels, sizes, colored depth bars, spread, and last trade price.","text":"ChatCard \"AAPL Order Book\" \"Level 2 · grouped by $0.05\" icon:\"candlestick_chart\" status:\"Live\" tone:accent w:390\n  state grouping=\"0.05\"\n  state asks=[{\"p\":189.45,\"s\":1200,\"d\":0.9},{\"p\":189.40,\"s\":850,\"d\":0.65},{\"p\":189.35,\"s\":600,\"d\":0.45},{\"p\":189.30,\"s\":400,\"d\":0.3}]\n  state bids=[{\"p\":189.25,\"s\":500,\"d\":0.38},{\"p\":189.20,\"s\":750,\"d\":0.58},{\"p\":189.15,\"s\":1100,\"d\":0.85},{\"p\":189.10,\"s\":1300,\"d\":1}]\n  state last=189.28\n  Segments =grouping options:[\"0.01\",\"0.05\",\"0.10\"]\n  Wanted \"OrderBookLadder\" \"bid and ask price levels with size and a colored depth bar behind each row, spread in the middle, last trade price\"\n    Row between pad:[8,0,8,0]\n      Text.caption \"PRICE\"\n      Text.caption \"SIZE\"\n    each a in asks\n      Stack h:30\n        Row left\n          Box fill:#33E53935 w:{a.d*340} h:30\n        Row between middle pad:[8,0,8,0]\n          Text.strong \"{fixed(a.p,2)}\" color:#FFD32F2F\n          Text \"{a.s}\"\n    Box fill:#FFF4F5F7 radius:8 pad:10\n      Row between middle\n        Column\n          Text.caption \"LAST TRADE\"\n          Text.numberSmall \"${fixed(last,2)}\"\n        Column end\n          Text.caption \"SPREAD\"\n          Text.strong \"${fixed(asks[3].p-bids[0].p,2)}\"\n    each b in bids\n      Stack h:30\n        Row left\n          Box fill:#3343A047 w:{b.d*340} h:30\n        Row between middle pad:[8,0,8,0]\n          Text.strong \"{fixed(b.p,2)}\" color:#FF2E7D32\n          Text \"{b.s}\"\n  Details rows:=[[\"Total bid size\",sum(bids,x=>x.s)],[\"Total ask size\",sum(asks,x=>x.s)]]\n  Row gap:10\n    ActionButton \"Buy\" tone:good\n    ActionButton \"Sell\" tone:danger","usage":{"input_tokens":9306,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":805,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":889,"totalMs":5944}}
+{"tMs":889,"delta":"ChatCard \"A"}
+{"tMs":1240,"delta":"APL Order"}
+{"tMs":1240,"delta":" Book\" \"Level"}
+{"tMs":1240,"delta":" 2"}
+{"tMs":1240,"delta":" ·"}
+{"tMs":1240,"delta":" grouped by"}
+{"tMs":1240,"delta":" $0.05"}
+{"tMs":1240,"delta":"\" icon:\"cand"}
+{"tMs":1240,"delta":"lestick_ch"}
+{"tMs":1240,"delta":"art\" status:\""}
+{"tMs":1240,"delta":"Live\" tone:acc"}
+{"tMs":1240,"delta":"ent w:390"}
+{"tMs":1266,"delta":"\n  state gr"}
+{"tMs":1578,"delta":"ouping=\""}
+{"tMs":1578,"delta":"0.05\"\n  state as"}
+{"tMs":1578,"delta":"ks=[{"}
+{"tMs":1578,"delta":"\"p"}
+{"tMs":1578,"delta":"\":189"}
+{"tMs":1578,"delta":".45"}
+{"tMs":1578,"delta":",\"s\":1"}
+{"tMs":1578,"delta":"200,\"d"}
+{"tMs":1578,"delta":"\":0.9"}
+{"tMs":1597,"delta":"},{\"p\":189.40"}
+{"tMs":1630,"delta":",\"s\":850"}
+{"tMs":1665,"delta":",\"d\":0.65"}
+{"tMs":1931,"delta":"},{\"p\":189.35"}
+{"tMs":1931,"delta":",\"s\":600"}
+{"tMs":1931,"delta":",\"d\":0.45"}
+{"tMs":1931,"delta":"},{\"p\":189.30"}
+{"tMs":1931,"delta":",\"s\":400,\"d"}
+{"tMs":1931,"delta":"\":0.3}"}
+{"tMs":1931,"delta":"]\n  state bids=["}
+{"tMs":1937,"delta":"{\"p\":189.25,"}
+{"tMs":1971,"delta":"\"s\":500"}
+{"tMs":2004,"delta":",\"d\":0.38"}
+{"tMs":2039,"delta":"},{\"p\":189.20"}
+{"tMs":2078,"delta":",\"s\":750,\"d"}
+{"tMs":2281,"delta":"\":0.58"}
+{"tMs":2281,"delta":"},{\"p\":189.15"}
+{"tMs":2281,"delta":",\"s\":1100,\""}
+{"tMs":2281,"delta":"d\":0.85"}
+{"tMs":2281,"delta":"},{\"p\":189.10"}
+{"tMs":2281,"delta":",\"s\":1300"}
+{"tMs":2309,"delta":",\"d\":1}"}
+{"tMs":2340,"delta":"]\n  state"}
+{"tMs":2374,"delta":" last=189.28"}
+{"tMs":2406,"delta":"\n  "}
+{"tMs":2439,"delta":"Segments ="}
+{"tMs":2473,"delta":"grouping options:[\"0"}
+{"tMs":2636,"delta":".01\",\"0.05\",\"0"}
+{"tMs":2636,"delta":".10\"]\n  "}
+{"tMs":2636,"delta":"W"}
+{"tMs":2636,"delta":"anted \"O"}
+{"tMs":2639,"delta":"rderBookL"}
+{"tMs":2672,"delta":"adder\" \"b"}
+{"tMs":2706,"delta":"id and ask price levels with"}
+{"tMs":2740,"delta":" size and a"}
+{"tMs":2774,"delta":" colored depth bar beh"}
+{"tMs":2806,"delta":"ind each row"}
+{"tMs":2839,"delta":", spread in"}
+{"tMs":2872,"delta":" the middle, last trade price"}
+{"tMs":2981,"delta":"\"\n    Row between"}
+{"tMs":2981,"delta":" p"}
+{"tMs":2981,"delta":"ad:["}
+{"tMs":3005,"delta":"8"}
+{"tMs":3037,"delta":",0"}
+{"tMs":3070,"delta":",8"}
+{"tMs":3104,"delta":",0]\n      Text."}
+{"tMs":3138,"delta":"caption \"P"}
+{"tMs":3172,"delta":"RICE\""}
+{"tMs":3204,"delta":"\n      Text.caption \""}
+{"tMs":3238,"delta":"SIZE\"\n    each"}
+{"tMs":3270,"delta":" a"}
+{"tMs":3326,"delta":" in asks\n      Stack"}
+{"tMs":3337,"delta":" h"}
+{"tMs":3370,"delta":":30"}
+{"tMs":3403,"delta":"\n        Row left"}
+{"tMs":3470,"delta":"\n          Box fill:#33"}
+{"tMs":3503,"delta":"E"}
+{"tMs":3536,"delta":"53935 w:{a."}
+{"tMs":3569,"delta":"d*"}
+{"tMs":3603,"delta":"340"}
+{"tMs":3637,"delta":"} h:30\n        Row"}
+{"tMs":3669,"delta":" between midd"}
+{"tMs":3702,"delta":"le pad:["}
+{"tMs":3736,"delta":"8,0,8,0]"}
+{"tMs":3770,"delta":"\n          Text.strong \""}
+{"tMs":3802,"delta":"{f"}
+{"tMs":3837,"delta":"ixed(a.p,2"}
+{"tMs":3870,"delta":")}\" color:#FF"}
+{"tMs":3903,"delta":"D"}
+{"tMs":3941,"delta":"32F2F\n          Text"}
+{"tMs":3970,"delta":" \""}
+{"tMs":4003,"delta":"{a.s}\"\n    "}
+{"tMs":4037,"delta":"Box f"}
+{"tMs":4070,"delta":"ill:#FFF4F"}
+{"tMs":4105,"delta":"5"}
+{"tMs":4136,"delta":"F7"}
+{"tMs":4169,"delta":" rad"}
+{"tMs":4202,"delta":"ius:8 pad:10"}
+{"tMs":4236,"delta":"\n      Row"}
+{"tMs":4269,"delta":" between midd"}
+{"tMs":4303,"delta":"le\n        Column"}
+{"tMs":4336,"delta":"\n          Text.ca"}
+{"tMs":4369,"delta":"ption \"L"}
+{"tMs":4402,"delta":"AST TRADE\""}
+{"tMs":4436,"delta":"\n          Text.numberS"}
+{"tMs":4469,"delta":"mall \"${"}
+{"tMs":4502,"delta":"f"}
+{"tMs":4536,"delta":"ixed(last,2)}"}
+{"tMs":4569,"delta":"\""}
+{"tMs":4602,"delta":"\n        Column end"}
+{"tMs":4635,"delta":"\n          Text.caption \""}
+{"tMs":4670,"delta":"SPREAD\"\n          "}
+{"tMs":4703,"delta":"Text.strong \"${"}
+{"tMs":4736,"delta":"fixed(as"}
+{"tMs":4770,"delta":"ks[3"}
+{"tMs":4803,"delta":"].p-bids[0]."}
+{"tMs":4837,"delta":"p,2)}\"\n    "}
+{"tMs":4870,"delta":"each b in bids\n      "}
+{"tMs":4904,"delta":"Stack h:30\n        "}
+{"tMs":4937,"delta":"Row left\n          Box fill"}
+{"tMs":4970,"delta":":#3"}
+{"tMs":5003,"delta":"343"}
+{"tMs":5036,"delta":"A"}
+{"tMs":5070,"delta":"047 w:{b.d"}
+{"tMs":5103,"delta":"*340} h:30\n        "}
+{"tMs":5137,"delta":"Row between middle pad:"}
+{"tMs":5170,"delta":"[8,0,8,0"}
+{"tMs":5204,"delta":"]\n          Text.strong"}
+{"tMs":5238,"delta":" \"{fixed(b."}
+{"tMs":5271,"delta":"p,2)}\" color:"}
+{"tMs":5304,"delta":"#F"}
+{"tMs":5338,"delta":"F2"}
+{"tMs":5371,"delta":"E7D32\n          Text"}
+{"tMs":5404,"delta":" \"{b.s}\""}
+{"tMs":5439,"delta":"\n  Details"}
+{"tMs":5471,"delta":" r"}
+{"tMs":5504,"delta":"ows:=[[\"Total"}
+{"tMs":5538,"delta":" bid size"}
+{"tMs":5571,"delta":"\",sum(bids,"}
+{"tMs":5604,"delta":"x"}
+{"tMs":5656,"delta":"=>x.s)],[\""}
+{"tMs":5670,"delta":"Total ask size\",sum"}
+{"tMs":5717,"delta":"(asks,x=>x"}
+{"tMs":5741,"delta":".s)]]\n  "}
+{"tMs":5771,"delta":"Row gap:10\n    "}
+{"tMs":5805,"delta":"ActionButton \"Buy"}
+{"tMs":5838,"delta":"\" tone:good"}
+{"tMs":5871,"delta":"\n    ActionButton \""}
+{"tMs":5905,"delta":"Sell\" tone:dan"}
+{"tMs":5938,"delta":"ger"}

@@ -1,0 +1,140 @@
+{"meta":{"ui":"missing_medication","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a medication schedule chat card with morning, afternoon and evening doses, pill images, dose instructions, and taken or missed status for each dose.","text":"ChatCard \"Today's medications\" \"3 doses scheduled\" icon:\"medication\" status:\"1 of 3 taken\" tone:accent w:390\n  state doses=[{\"id\":1,\"slot\":\"Morning\",\"time\":\"8:00 AM\",\"name\":\"Metformin 500 mg\",\"how\":\"1 tablet with breakfast\",\"kind\":\"box\",\"tone\":\"sky\",\"status\":\"taken\"},{\"id\":2,\"slot\":\"Afternoon\",\"time\":\"1:00 PM\",\"name\":\"Lisinopril 10 mg\",\"how\":\"1 tablet with water, before lunch\",\"kind\":\"box\",\"tone\":\"rose\",\"status\":\"missed\"},{\"id\":3,\"slot\":\"Evening\",\"time\":\"8:00 PM\",\"name\":\"Atorvastatin 20 mg\",\"how\":\"1 tablet after dinner\",\"kind\":\"box\",\"tone\":\"mint\",\"status\":\"pending\"}]\n  SectionLabel \"Schedule\" \"{count(doses,d=>d.status==\\\"taken\\\")} taken · {count(doses,d=>d.status==\\\"missed\\\")} missed\"\n  ProgressLine \"Doses taken\" \"{count(doses,d=>d.status==\\\"taken\\\")} of {length(doses)}\" value:=count(doses,d=>d.status==\"taken\")/length(doses)\n  each d in doses\n    Card gap:10\n      Row gap:12 middle\n        Media kind:\"{d.kind}\" tone:\"{d.tone}\" w:56 h:56 round\n        Column grow gap:2\n          Text.eyebrow \"{d.slot} · {d.time}\"\n          Text.rowTitle \"{d.name}\"\n          Text.meta \"{d.how}\"\n        if d.status==\"taken\"\n          Badge.success \"Taken\"\n        if d.status==\"missed\"\n          Badge.error \"Missed\"\n        if d.status==\"pending\"\n          Badge.warning \"Due\"\n      if d.status==\"pending\"\n        Row gap:10\n          ActionButton \"Mark taken\" tone:good icon:\"check\" -> doses=updateWhere(doses,x=>x.id==d.id,x=>with(x,\"status\",\"taken\"))\n          ActionButton \"Skip\" tone:quiet -> doses=updateWhere(doses,x=>x.id==d.id,x=>with(x,\"status\",\"missed\"))\n      if d.status==\"missed\"\n        Callout \"Dose missed\" \"Take it now if it is under 4 hours late, otherwise skip it.\" tone:warn\n        ActionButton \"Take now\" tone:primary -> doses=updateWhere(doses,x=>x.id==d.id,x=>with(x,\"status\",\"taken\"))","usage":{"input_tokens":9310,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":856,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":749,"totalMs":5321}}
+{"tMs":749,"delta":"ChatCard \"Today"}
+{"tMs":1120,"delta":"'s medications"}
+{"tMs":1120,"delta":"\" \"3"}
+{"tMs":1120,"delta":" doses sc"}
+{"tMs":1120,"delta":"heduled\" icon:\""}
+{"tMs":1120,"delta":"medication\""}
+{"tMs":1120,"delta":" status:\"1"}
+{"tMs":1120,"delta":" of 3 "}
+{"tMs":1120,"delta":"taken\" t"}
+{"tMs":1120,"delta":"one:acc"}
+{"tMs":1120,"delta":"ent w:390\n  state do"}
+{"tMs":1120,"delta":"ses=[{\"id"}
+{"tMs":1120,"delta":"\":1"}
+{"tMs":1421,"delta":",\"sl"}
+{"tMs":1421,"delta":"ot\":\"Morning\",\"time"}
+{"tMs":1421,"delta":"\":\"8"}
+{"tMs":1421,"delta":":00 AM\",\"name\":"}
+{"tMs":1421,"delta":"\"Metformin 500 "}
+{"tMs":1421,"delta":"mg\",\"how"}
+{"tMs":1421,"delta":"\":\"1"}
+{"tMs":1421,"delta":" tablet with bre"}
+{"tMs":1421,"delta":"akfast\",\"kind\":\""}
+{"tMs":1442,"delta":"box\",\"t"}
+{"tMs":1474,"delta":"one\":\"sky"}
+{"tMs":1508,"delta":"\",\"status\":\"taken\"},"}
+{"tMs":1768,"delta":"{\"id\":2,\"sl"}
+{"tMs":1768,"delta":"ot\":\"Afternoon"}
+{"tMs":1768,"delta":"\",\"time\":\"1:00 "}
+{"tMs":1768,"delta":"PM\",\"name\":\"L"}
+{"tMs":1768,"delta":"isinopril 10"}
+{"tMs":1768,"delta":" mg\",\"how\":\"1"}
+{"tMs":1768,"delta":" tablet with water"}
+{"tMs":1778,"delta":", before"}
+{"tMs":1810,"delta":" l"}
+{"tMs":1844,"delta":"unch\",\"kind\":\"box"}
+{"tMs":1878,"delta":"\",\"tone\":\"r"}
+{"tMs":1912,"delta":"ose\",\"status\":\"missed\""}
+{"tMs":2116,"delta":"},{\"id\":3,\""}
+{"tMs":2116,"delta":"slot\":\"Evening\",\""}
+{"tMs":2116,"delta":"time\":\"8"}
+{"tMs":2116,"delta":":00 PM\",\"name\":"}
+{"tMs":2116,"delta":"\"Atorvastatin"}
+{"tMs":2116,"delta":" 20 mg\",\"how\":"}
+{"tMs":2147,"delta":"\"1"}
+{"tMs":2180,"delta":" tablet after dinner"}
+{"tMs":2214,"delta":"\",\"kind\":\"box\",\"t"}
+{"tMs":2248,"delta":"one\":\"mint\",\"status\":"}
+{"tMs":2282,"delta":"\"pending\"}]\n  "}
+{"tMs":2315,"delta":"SectionLabel \""}
+{"tMs":2466,"delta":"Sch"}
+{"tMs":2466,"delta":"edule\" \"{count("}
+{"tMs":2466,"delta":"doses,d=>d."}
+{"tMs":2466,"delta":"status=="}
+{"tMs":2480,"delta":"\\"}
+{"tMs":2514,"delta":"\"taken\\\")} taken"}
+{"tMs":2547,"delta":" ·"}
+{"tMs":2581,"delta":" {count(doses,d="}
+{"tMs":2614,"delta":">d.status=="}
+{"tMs":2682,"delta":"\\\"missed\\\")} miss"}
+{"tMs":2683,"delta":"ed\"\n  Progress"}
+{"tMs":2717,"delta":"Line \"Do"}
+{"tMs":2805,"delta":"ses taken\" \"{count("}
+{"tMs":2805,"delta":"doses,d=>d."}
+{"tMs":2814,"delta":"status=="}
+{"tMs":2848,"delta":"\\\"taken\\\")} of"}
+{"tMs":2881,"delta":" {"}
+{"tMs":2914,"delta":"length(doses)}\" value"}
+{"tMs":2948,"delta":":=count(doses,d"}
+{"tMs":2981,"delta":"=>d.status==\"ta"}
+{"tMs":3015,"delta":"ken\")/length(doses)"}
+{"tMs":3050,"delta":"\n  each d in doses"}
+{"tMs":3088,"delta":"\n    Card"}
+{"tMs":3115,"delta":" gap:10"}
+{"tMs":3151,"delta":"\n      Row gap:12"}
+{"tMs":3182,"delta":" middle\n        Media k"}
+{"tMs":3215,"delta":"ind:\""}
+{"tMs":3248,"delta":"{d.kind}\" t"}
+{"tMs":3281,"delta":"one:\""}
+{"tMs":3316,"delta":"{d.tone}\" w"}
+{"tMs":3348,"delta":":56"}
+{"tMs":3381,"delta":" h:56 round\n        "}
+{"tMs":3415,"delta":"Column grow g"}
+{"tMs":3448,"delta":"ap:2"}
+{"tMs":3485,"delta":"\n          Text.e"}
+{"tMs":3515,"delta":"yebrow \"{d."}
+{"tMs":3548,"delta":"slot} · {d.time"}
+{"tMs":3581,"delta":"}\"\n          Text.r"}
+{"tMs":3615,"delta":"owTitle \"{d."}
+{"tMs":3649,"delta":"name}\"\n          Text"}
+{"tMs":3682,"delta":".me"}
+{"tMs":3715,"delta":"ta \"{d.how}\""}
+{"tMs":3748,"delta":"\n        if"}
+{"tMs":3782,"delta":" d.status==\"taken\""}
+{"tMs":3815,"delta":"\n          Badge.success \""}
+{"tMs":3849,"delta":"Taken\"\n        if d"}
+{"tMs":3883,"delta":".status==\"missed\""}
+{"tMs":3915,"delta":"\n          Badge.error \""}
+{"tMs":3950,"delta":"Missed\"\n        if d."}
+{"tMs":3983,"delta":"status==\"pending\"\n          "}
+{"tMs":4016,"delta":"Badge.warning \""}
+{"tMs":4050,"delta":"Due\"\n      if d.status"}
+{"tMs":4083,"delta":"==\"pending\"\n        "}
+{"tMs":4116,"delta":"Row gap:10"}
+{"tMs":4154,"delta":"\n          ActionButton \""}
+{"tMs":4184,"delta":"Mark taken\" tone:"}
+{"tMs":4218,"delta":"good icon:\"check\" -"}
+{"tMs":4250,"delta":"> doses=updateWh"}
+{"tMs":4283,"delta":"ere(doses,x"}
+{"tMs":4317,"delta":"=>x.id==d."}
+{"tMs":4350,"delta":"id,x=>with(x"}
+{"tMs":4384,"delta":",\"status\",\"taken\"))"}
+{"tMs":4418,"delta":"\n          ActionButton \""}
+{"tMs":4451,"delta":"Skip\" tone:qu"}
+{"tMs":4484,"delta":"iet -> doses=upd"}
+{"tMs":4517,"delta":"ateWhere(doses,"}
+{"tMs":4551,"delta":"x=>x.id==d"}
+{"tMs":4585,"delta":".id,x=>with("}
+{"tMs":4618,"delta":"x,\"status\",\"missed\""}
+{"tMs":4651,"delta":"))\n      if d.status="}
+{"tMs":4685,"delta":"=\"missed\"\n        "}
+{"tMs":4718,"delta":"Callout \"D"}
+{"tMs":4751,"delta":"ose missed\" \"Take it"}
+{"tMs":4785,"delta":" now"}
+{"tMs":4817,"delta":" if it"}
+{"tMs":4851,"delta":" is"}
+{"tMs":4883,"delta":" under"}
+{"tMs":4917,"delta":" 4"}
+{"tMs":4950,"delta":" hours late"}
+{"tMs":4984,"delta":", otherwise sk"}
+{"tMs":5016,"delta":"ip it"}
+{"tMs":5051,"delta":".\" tone:warn\n        "}
+{"tMs":5085,"delta":"ActionButton \"Take"}
+{"tMs":5118,"delta":" now\" tone:prim"}
+{"tMs":5150,"delta":"ary -"}
+{"tMs":5183,"delta":"> doses=updateWh"}
+{"tMs":5217,"delta":"ere(doses,x=>"}
+{"tMs":5250,"delta":"x.id==d.id,"}
+{"tMs":5284,"delta":"x=>with(x,\""}
+{"tMs":5317,"delta":"status\",\"taken\"))"}

@@ -1,0 +1,73 @@
+{"meta":{"ui":"missing_orderbook","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show a stock order book chat card with grouped bid and ask price levels, sizes, colored depth bars, spread, and last trade price.","text":"ChatCard \"AAPL order book\" \"Level 2 · top 5 levels\" icon:\"show_chart\" status:\"Live\" tone:accent\n  SectionLabel \"Bids\" \"size\"\n  each b in bids\n    Row between\n      Text.success \"{b.price}\"\n      Text.body \"{b.size}\"\n    Box fill:#2200C853 h:6 w:=b.depth*3 radius:3\n  Divider\n  SectionLabel \"Asks\" \"size\"\n  each a in asks\n    Row between\n      Text.danger \"{a.price}\"\n      Text.body \"{a.size}\"\n    Box fill:#22D50000 h:6 w:=a.depth*3 radius:3\n  Details rows:=[[\"Spread\",fixed(spread,2)],[\"Last trade\",fixed(last,2)]]\n  TotalBar \"Last trade\" amount:=fixed(last,2) note:=\"spread {fixed(spread,2)}\" cta:\"Trade\" icon:\"bolt\" enabled:=true -> emit trade\n\nstate bids=[{\"price\":\"189.40\",\"size\":1200,\"depth\":90},{\"price\":\"189.39\",\"size\":800,\"depth\":60},{\"price\":\"189.38\",\"size\":450,\"depth\":35},{\"price\":\"189.37\",\"size\":300,\"depth\":22},{\"price\":\"189.36\",\"size\":150,\"depth\":12}]\nstate asks=[{\"price\":\"189.42\",\"size\":500,\"depth\":40},{\"price\":\"189.43\",\"size\":700,\"depth\":55},{\"price\":\"189.44\",\"size\":950,\"depth\":72},{\"price\":\"189.45\",\"size\":1100,\"depth\":85},{\"price\":\"189.46\",\"size\":400,\"depth\":30}]\nstate spread=0.02\nstate last=189.41","usage":{"input_tokens":10202,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":556,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":490,"totalMs":1859}}
+{"tMs":490,"delta":"ChatCard \"A"}
+{"tMs":511,"delta":"APL order book\" \""}
+{"tMs":511,"delta":"Level 2 · top 5"}
+{"tMs":511,"delta":" levels\" icon:\""}
+{"tMs":511,"delta":"show_chart\" status:\""}
+{"tMs":511,"delta":"Live\" tone:accent"}
+{"tMs":528,"delta":"\n  SectionLabel"}
+{"tMs":549,"delta":" \"Bids\" \"size\""}
+{"tMs":569,"delta":"\n  each b in bids"}
+{"tMs":590,"delta":"\n    Row between\n      Text"}
+{"tMs":611,"delta":".success \"{b.price}"}
+{"tMs":631,"delta":"\"\n      Text.body \""}
+{"tMs":652,"delta":"{b.size}\"\n    "}
+{"tMs":672,"delta":"Box fill:#2200"}
+{"tMs":729,"delta":"C853 h:6 w"}
+{"tMs":730,"delta":":=b.depth*3"}
+{"tMs":733,"delta":" radius:3\n  "}
+{"tMs":754,"delta":"Divider\n  SectionL"}
+{"tMs":775,"delta":"abel \"Asks\" \""}
+{"tMs":797,"delta":"size\"\n  each a in as"}
+{"tMs":815,"delta":"ks\n    Row between\n      "}
+{"tMs":835,"delta":"Text.danger \"{a"}
+{"tMs":856,"delta":".price}\"\n      Text"}
+{"tMs":876,"delta":".body \"{a.size}"}
+{"tMs":904,"delta":"\"\n    Box fill:"}
+{"tMs":917,"delta":"#22D50"}
+{"tMs":938,"delta":"000 h:6 w:"}
+{"tMs":958,"delta":"=a.depth*3 "}
+{"tMs":978,"delta":"radius:3\n  Details"}
+{"tMs":999,"delta":" rows:=[[\"Sp"}
+{"tMs":1019,"delta":"read\",fixed(spread"}
+{"tMs":1040,"delta":",2)],[\"Last tr"}
+{"tMs":1059,"delta":"ade\",fixed(last,"}
+{"tMs":1081,"delta":"2)]]"}
+{"tMs":1100,"delta":"\n  TotalBar \""}
+{"tMs":1121,"delta":"Last trade\" am"}
+{"tMs":1142,"delta":"ount:=fixed(last"}
+{"tMs":1162,"delta":",2) note:=\""}
+{"tMs":1182,"delta":"spread {fixed(sp"}
+{"tMs":1202,"delta":"read,2)}\" cta"}
+{"tMs":1222,"delta":":\"Trade\" icon"}
+{"tMs":1243,"delta":":\"bolt\" en"}
+{"tMs":1263,"delta":"abled:=true -> em"}
+{"tMs":1284,"delta":"it trade\n\nstate bids="}
+{"tMs":1304,"delta":"[{\"price\":\"189."}
+{"tMs":1325,"delta":"40\",\"size\":1200,\""}
+{"tMs":1345,"delta":"depth\":90},{\"price"}
+{"tMs":1365,"delta":"\":\"189.39\",\"size\":"}
+{"tMs":1386,"delta":"800,\"depth\":60},"}
+{"tMs":1407,"delta":"{\"price\":\"189.38"}
+{"tMs":1429,"delta":"\",\"size\":450,\"depth"}
+{"tMs":1448,"delta":"\":35},{\"price\":\""}
+{"tMs":1468,"delta":"189.37\",\"size\":300,"}
+{"tMs":1488,"delta":"\"depth\":22},{\""}
+{"tMs":1511,"delta":"price\":\"189.36\",\"size"}
+{"tMs":1531,"delta":"\":150,\"depth\":12"}
+{"tMs":1553,"delta":"}]\nstate as"}
+{"tMs":1570,"delta":"ks=[{\"price\":\""}
+{"tMs":1590,"delta":"189.42\",\"size\":500,"}
+{"tMs":1611,"delta":"\"depth\":40},{\""}
+{"tMs":1632,"delta":"price\":\"189.43\",\"size"}
+{"tMs":1651,"delta":"\":700,\"depth\":55"}
+{"tMs":1672,"delta":"},{\"price\":\"189."}
+{"tMs":1693,"delta":"44\",\"size\":950,\"dep"}
+{"tMs":1712,"delta":"th\":72},{\"price\":"}
+{"tMs":1733,"delta":"\"189.45\",\"size\":1"}
+{"tMs":1753,"delta":"100,\"depth\":85},"}
+{"tMs":1774,"delta":"{\"price\":\"189.46"}
+{"tMs":1795,"delta":"\",\"size\":400,\"depth"}
+{"tMs":1815,"delta":"\":30}]\nstate spread"}
+{"tMs":1838,"delta":"=0.02\nstate last="}
+{"tMs":1855,"delta":"189.41"}

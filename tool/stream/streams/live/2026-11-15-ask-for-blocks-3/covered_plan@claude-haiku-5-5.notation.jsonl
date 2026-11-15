@@ -1,0 +1,41 @@
+{"meta":{"ui":"covered_plan","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a chat card with a three-step project plan, progress through the plan, and a checklist of next actions.","text":"ChatCard \"Project plan\" \"Website relaunch\" icon:\"assignment\" status:\"In progress\"\n  Steps steps:[\"Scope\",\"Build\",\"Launch\"] current:=stage\n  ProgressLine \"Progress\" value:=stage/3\n  SectionLabel \"Next actions\" \"2 open\"\n  Checklist \"Next actions\" =done items:[\"Confirm scope with client\",\"Draft launch checklist\",\"Schedule QA review\"]\n  TotalBar \"Stage\" \"Step {stage} of 3\" amount:=stage cta \"Advance\" -> stage=min(3,stage+1)","usage":{"input_tokens":9294,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":195,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":726,"totalMs":1508}}
+{"tMs":726,"delta":"ChatCard \"Project"}
+{"tMs":881,"delta":" plan\" \"Website"}
+{"tMs":881,"delta":" rel"}
+{"tMs":881,"delta":"aunch\" icon:\""}
+{"tMs":881,"delta":"assignment\""}
+{"tMs":881,"delta":" status:\"In"}
+{"tMs":881,"delta":" progress\"\n  Steps"}
+{"tMs":881,"delta":" steps:[\"Sc"}
+{"tMs":881,"delta":"ope\",\"Build\",\"Laun"}
+{"tMs":894,"delta":"ch\"] current:="}
+{"tMs":912,"delta":"st"}
+{"tMs":932,"delta":"age\n  "}
+{"tMs":954,"delta":"ProgressLine \"Prog"}
+{"tMs":1051,"delta":"ress\" value"}
+{"tMs":1051,"delta":":=stage/3\n  "}
+{"tMs":1051,"delta":"S"}
+{"tMs":1051,"delta":"ectionLabel \"Next"}
+{"tMs":1055,"delta":" actions\" \"2"}
+{"tMs":1074,"delta":" open"}
+{"tMs":1094,"delta":"\"\n  "}
+{"tMs":1114,"delta":"Checklist \""}
+{"tMs":1134,"delta":"Next"}
+{"tMs":1155,"delta":" actions\" ="}
+{"tMs":1175,"delta":"done items:[\"Confirm"}
+{"tMs":1196,"delta":" scope with"}
+{"tMs":1215,"delta":" client\",\"Dra"}
+{"tMs":1234,"delta":"ft laun"}
+{"tMs":1254,"delta":"ch chec"}
+{"tMs":1276,"delta":"klist\",\"Schedule Q"}
+{"tMs":1297,"delta":"A review\"]\n  Tot"}
+{"tMs":1317,"delta":"alBar \"St"}
+{"tMs":1338,"delta":"age\" \"Step"}
+{"tMs":1358,"delta":" {stage}"}
+{"tMs":1378,"delta":" of 3\" am"}
+{"tMs":1399,"delta":"ount:=stage c"}
+{"tMs":1423,"delta":"ta \""}
+{"tMs":1439,"delta":"Adv"}
+{"tMs":1463,"delta":"ance\" -> stage=min"}
+{"tMs":1480,"delta":"(3"}
+{"tMs":1501,"delta":",stage+1)"}

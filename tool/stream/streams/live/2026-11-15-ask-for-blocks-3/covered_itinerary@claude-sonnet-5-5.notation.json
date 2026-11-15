@@ -1,0 +1,213 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Weekend in Kyoto",
+    "subtitle": "2 days · 4 stops",
+    "icon": "map",
+    "status": "Planned",
+    "tone": "accent"
+   },
+   "children": [
+    "DayHeader1",
+    "DayHeader2",
+    "SectionLabel1",
+    "MapPanel1",
+    "Details1"
+   ]
+  },
+  "DayHeader1": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 1",
+    "subtitle": "Higashiyama and Gion",
+    "kind": "temple",
+    "tone": "dawn",
+    "tag": "Sat"
+   },
+   "children": [
+    "ItineraryStop1",
+    "ItineraryStop2"
+   ]
+  },
+  "ItineraryStop1": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Kiyomizu-dera",
+    "detail": "Arrive early for soft light and fewer crowds.",
+    "time": "09:00",
+    "travel": "Walk to Gion, 20 min"
+   }
+  },
+  "ItineraryStop2": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Gion evening stroll",
+    "detail": "Wooden teahouses and lantern-lit lanes.",
+    "time": "17:30",
+    "last": true
+   }
+  },
+  "DayHeader2": {
+   "type": "DayHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Day 2",
+    "subtitle": "Arashiyama",
+    "kind": "bamboo",
+    "tone": "day",
+    "tag": "Sun"
+   },
+   "children": [
+    "ItineraryStop3",
+    "ItineraryStop4"
+   ]
+  },
+  "ItineraryStop3": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Bamboo Grove",
+    "detail": "Walk the main path before the tour groups arrive.",
+    "time": "08:30",
+    "travel": "Walk to Tenryu-ji, 10 min"
+   }
+  },
+  "ItineraryStop4": {
+   "type": "ItineraryStop",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Tenryu-ji garden",
+    "detail": "Finish with a quiet pond garden and lunch nearby.",
+    "time": "11:00",
+    "last": true
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Map preview",
+    "note": "4 pins"
+   }
+  },
+  "MapPanel1": {
+   "type": "MapPanel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178.0
+   },
+   "props": {
+    "value": "pick",
+    "count": 4
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Day 1\",\"Kiyomizu-dera, Gion\"],[\"Day 2\",\"Bamboo Grove, Tenryu-ji\"]]}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

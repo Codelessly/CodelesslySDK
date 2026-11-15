@@ -1,0 +1,72 @@
+{"meta":{"ui":"covered_flight","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a chat card comparing two flight options from Chicago to Seattle, with departure and arrival times, stops, duration, price, and a select action.","text":"ChatCard \"Chicago to Seattle\" \"Compare two flights\" icon:\"flight\" status:\"Choose one\"\n  SectionLabel \"Options\" \"2 flights\"\n  state pick=\"\"\n  each f in flights\n    FlightOption \"{f.name}\" depart:\"{f.depart}\" arrive:\"{f.arrive}\" origin:\"ORD\" destination:\"SEA\" duration:\"{f.duration}\" stops:\"{f.stops}\" price:\"{f.price}\" selected:=pick==f.id -> pick=f.id\n  TotalBar \"Selected\" \"{pick!=\\\"\\\" ? \\\"Flight chosen\\\" : \\\"Pick a flight\\\"}\" amount!:\"{pick}\" cta:\"Select\" icon:\"check\" enabled:=pick!=\"\" -> emit select pick\n\nstate flights=[{\"id\":\"ua\",\"name\":\"United\",\"depart\":\"7:05 AM\",\"arrive\":\"9:20 AM\",\"duration\":\"4h 15m\",\"stops\":\"Nonstop\",\"price\":\"$289\"},{\"id\":\"dl\",\"name\":\"Delta\",\"depart\":\"11:40 AM\",\"arrive\":\"4:10 PM\",\"duration\":\"5h 30m\",\"stops\":\"1 stop\",\"price\":\"$241\"}]","usage":{"input_tokens":9308,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":397,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":468,"totalMs":1890}}
+{"tMs":468,"delta":"ChatCard \"Ch"}
+{"tMs":567,"delta":"icago to"}
+{"tMs":567,"delta":" Seattle\" \"Comp"}
+{"tMs":567,"delta":"are two flights\" icon:"}
+{"tMs":567,"delta":"\"flight\" status:\""}
+{"tMs":567,"delta":"Choose one"}
+{"tMs":577,"delta":"\"\n  S"}
+{"tMs":598,"delta":"ectionLabel \"Options"}
+{"tMs":617,"delta":"\" \"2"}
+{"tMs":636,"delta":" fl"}
+{"tMs":655,"delta":"ights\"\n  "}
+{"tMs":674,"delta":"state"}
+{"tMs":692,"delta":" p"}
+{"tMs":714,"delta":"ick=\"\"\n  each f in"}
+{"tMs":733,"delta":" fl"}
+{"tMs":755,"delta":"ights\n    FlightOption"}
+{"tMs":776,"delta":" \"{f.name}\" dep"}
+{"tMs":797,"delta":"art:\"{f.depart"}
+{"tMs":819,"delta":"}\" arrive:\"{"}
+{"tMs":840,"delta":"f.arrive}\" orig"}
+{"tMs":863,"delta":"in:\"ORD\" dest"}
+{"tMs":882,"delta":"ination:\"SEA\" du"}
+{"tMs":903,"delta":"ration:\"{f.duration"}
+{"tMs":924,"delta":"}\" stops:\"{f"}
+{"tMs":945,"delta":".stops}\" price:\""}
+{"tMs":965,"delta":"{f.price}\" sel"}
+{"tMs":986,"delta":"ected:=pick==f."}
+{"tMs":1006,"delta":"id -> p"}
+{"tMs":1027,"delta":"ick=f.id\n  T"}
+{"tMs":1047,"delta":"otalBar \"Sel"}
+{"tMs":1067,"delta":"ected\" \"{"}
+{"tMs":1088,"delta":"pick!"}
+{"tMs":1107,"delta":"=\\"}
+{"tMs":1127,"delta":"\"\\\" ? \\"}
+{"tMs":1147,"delta":"\"Fl"}
+{"tMs":1168,"delta":"ight chosen\\\" : \\"}
+{"tMs":1188,"delta":"\"P"}
+{"tMs":1210,"delta":"ick a flight\\\"}\""}
+{"tMs":1229,"delta":" amount!"}
+{"tMs":1250,"delta":":\"{pick}"}
+{"tMs":1270,"delta":"\" cta:\"Select\""}
+{"tMs":1290,"delta":" ic"}
+{"tMs":1311,"delta":"on:\"check\" enabled"}
+{"tMs":1331,"delta":":=pick!=\""}
+{"tMs":1352,"delta":"\" -> emit select pick"}
+{"tMs":1373,"delta":"\n\nstate flights=[{\""}
+{"tMs":1393,"delta":"id\":\""}
+{"tMs":1417,"delta":"ua\",\"name\":\"United\",\""}
+{"tMs":1434,"delta":"depart\":\"7"}
+{"tMs":1455,"delta":":05"}
+{"tMs":1474,"delta":" AM\",\"arrive\":"}
+{"tMs":1495,"delta":"\"9"}
+{"tMs":1514,"delta":":20"}
+{"tMs":1534,"delta":" A"}
+{"tMs":1556,"delta":"M\",\"duration\":\"4"}
+{"tMs":1576,"delta":"h 15"}
+{"tMs":1596,"delta":"m\",\"stops\":\"N"}
+{"tMs":1617,"delta":"onstop\",\"price\":\"$"}
+{"tMs":1636,"delta":"289"}
+{"tMs":1657,"delta":"\"},{\"id\":\"d"}
+{"tMs":1677,"delta":"l\",\"name\":\"Delta"}
+{"tMs":1698,"delta":"\",\"depart\":\"11"}
+{"tMs":1718,"delta":":40"}
+{"tMs":1739,"delta":" AM\",\"arrive\":"}
+{"tMs":1759,"delta":"\"4"}
+{"tMs":1779,"delta":":10"}
+{"tMs":1800,"delta":" PM\",\"duration\":\""}
+{"tMs":1820,"delta":"5h 30"}
+{"tMs":1841,"delta":"m\",\"stops\":\"1 "}
+{"tMs":1861,"delta":"stop\",\"price\":\"$241"}
+{"tMs":1882,"delta":"\"}]"}

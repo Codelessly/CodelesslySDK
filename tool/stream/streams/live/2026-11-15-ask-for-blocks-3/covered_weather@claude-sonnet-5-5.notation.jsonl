@@ -1,0 +1,51 @@
+{"meta":{"ui":"covered_weather","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a compact chat card with the current weather in Chicago, the next four hourly temperatures, and a three-day forecast.","text":"ChatCard \"Chicago weather\" \"Updated just now\" icon:\"wb_sunny\" status:\"Now\" tone:accent w:390\n  WeatherNow \"Chicago\" \"Partly cloudy\" temp:68 high:72 low:58 kind:\"partly\"\n  SectionLabel \"Next hours\" \"°F\"\n  WeatherHours hours:[\"1 PM\",\"2 PM\",\"3 PM\",\"4 PM\"] temps:[69,71,72,70] kinds:[\"partly\",\"sun\",\"sun\",\"cloud\"]\n  SectionLabel \"3-day forecast\" \"°F\"\n  WeatherDay \"Tomorrow\" low:57 high:74 kind:\"sun\" min:54 max:74\n  WeatherDay \"Thursday\" low:54 high:66 kind:\"rain\" min:54 max:74\n  WeatherDay \"Friday\" low:55 high:70 kind:\"cloud\" min:54 max:74","usage":{"input_tokens":9302,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":302,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":658,"totalMs":2513}}
+{"tMs":658,"delta":"ChatCard \"Ch"}
+{"tMs":985,"delta":"icago we"}
+{"tMs":985,"delta":"ather\" \"Upd"}
+{"tMs":985,"delta":"ated just"}
+{"tMs":985,"delta":" now\" icon:\"w"}
+{"tMs":985,"delta":"b_sunny\" status:"}
+{"tMs":985,"delta":"\"Now\" t"}
+{"tMs":985,"delta":"one:accent w:390"}
+{"tMs":985,"delta":"\n  WeatherNow \""}
+{"tMs":985,"delta":"Chicago\" \"Part"}
+{"tMs":985,"delta":"ly cloudy\" temp"}
+{"tMs":1005,"delta":":68"}
+{"tMs":1040,"delta":" high:72 low:58"}
+{"tMs":1324,"delta":" kind:\""}
+{"tMs":1324,"delta":"partly\"\n  Section"}
+{"tMs":1324,"delta":"Label \"Next hours"}
+{"tMs":1324,"delta":"\" \"°"}
+{"tMs":1324,"delta":"F\"\n  Weather"}
+{"tMs":1325,"delta":"Hours hours:[\"1 "}
+{"tMs":1325,"delta":"PM\",\"2 PM\",\""}
+{"tMs":1325,"delta":"3 PM\",\"4 P"}
+{"tMs":1349,"delta":"M\"] temps:[69"}
+{"tMs":1374,"delta":",71"}
+{"tMs":1407,"delta":",72,70"}
+{"tMs":1441,"delta":"] kinds:[\"part"}
+{"tMs":1664,"delta":"ly\",\"sun\",\"sun\",\""}
+{"tMs":1664,"delta":"c"}
+{"tMs":1664,"delta":"loud\"]\n  Sect"}
+{"tMs":1664,"delta":"ionLabel \"3-"}
+{"tMs":1664,"delta":"day forecast\" \"°F"}
+{"tMs":1664,"delta":"\"\n  WeatherD"}
+{"tMs":1674,"delta":"ay \"T"}
+{"tMs":1706,"delta":"om"}
+{"tMs":1739,"delta":"orrow\" low:57"}
+{"tMs":1772,"delta":" high:74"}
+{"tMs":1807,"delta":" kind:\"sun\""}
+{"tMs":1840,"delta":" min:54"}
+{"tMs":2004,"delta":" max:74"}
+{"tMs":2005,"delta":"\n  WeatherDay"}
+{"tMs":2005,"delta":" \"Th"}
+{"tMs":2005,"delta":"urs"}
+{"tMs":2005,"delta":"day\" low:54 high:"}
+{"tMs":2037,"delta":"66"}
+{"tMs":2071,"delta":" kind:\"r"}
+{"tMs":2104,"delta":"ain\" min:54 max:"}
+{"tMs":2142,"delta":"74\n  WeatherD"}
+{"tMs":2172,"delta":"ay \"Friday\" low:"}
+{"tMs":2205,"delta":"55 high:70"}
+{"tMs":2238,"delta":" kind:\"cloud"}
+{"tMs":2506,"delta":"\" min:54 max:74"}

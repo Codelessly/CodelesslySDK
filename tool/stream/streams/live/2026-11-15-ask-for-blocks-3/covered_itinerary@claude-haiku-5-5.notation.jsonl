@@ -1,0 +1,162 @@
+{"meta":{"ui":"covered_itinerary","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show a weekend trip itinerary chat card with day headings, four timed stops, and a compact map preview.","text":"ChatCard \"Weekend in Kyoto\" \"Sat 14 – Sun 15\" icon:\"map\" status:\"Planned\"\n  DayHeader \"Day 1\" \"Gion and the old streets\" kind:\"temple\" tone:\"dusk\" tag:\"Sat 14\"\n    ItineraryStop \"Fushimi Inari\" \"Walk the torii gates up the mountain\" time:\"08:30\" travel:\"Taxi to Gion, 20 min\"\n    ItineraryStop \"Nishiki Market\" \"Street food and tea shops\" time:\"11:00\" travel:\"Walk, 10 min\"\n    ItineraryStop \"Kiyomizu-dera\" \"Temple with a view over the city\" time:\"14:00\" travel:\"Walk to Gion, 25 min\"\n    ItineraryStop \"Gion evening walk\" \"Lantern-lit lanes and dinner\" time:\"18:30\" last:true\n  DayHeader \"Day 2\" \"Arashiyama and the bamboo\" kind:\"bamboo\" tone:\"day\" tag:\"Sun 15\"\n    ItineraryStop \"Bamboo Grove\" \"Early walk before the crowds\" time:\"08:00\" travel:\"Train to Arashiyama, 15 min\"\n    ItineraryStop \"Tenryu-ji\" \"Garden temple by the river\" time:\"10:30\" travel:\"Walk, 5 min\"\n    ItineraryStop \"Togetsukyo Bridge\" \"Riverside lunch and photos\" time:\"12:30\" travel:\"Train to Kyoto, 20 min\"\n    ItineraryStop \"Pontocho\" \"Last stroll along the river\" time:\"17:00\" last:true\n  MapPanel =pick count:4\n  PlaceRow \"Fushimi Inari\" \"Torii gate trail\" index:1 rating:4.8 distance:\"4 km\" hours:\"Open 24 h\" selected:=pick==1 -> pick=1\n  PlaceRow \"Nishiki Market\" \"Food and snacks\" index:2 rating:4.6 distance:\"2 km\" hours:\"09:00–18:00\" selected:=pick==2 -> pick=2\n  PlaceRow \"Kiyomizu-dera\" \"Hilltop temple\" index:3 rating:4.7 distance:\"3 km\" hours:\"06:00–18:00\" selected:=pick==3 -> pick=3\n  PlaceRow \"Arashiyama\" \"Bamboo grove and river\" index:4 rating:4.7 distance:\"9 km\" hours:\"Open 24 h\" selected:=pick==4 -> pick=4","usage":{"input_tokens":9296,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":856,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":455,"totalMs":3882}}
+{"tMs":455,"delta":"ChatCard \"We"}
+{"tMs":646,"delta":"ekend in"}
+{"tMs":646,"delta":" Kyoto\" \""}
+{"tMs":646,"delta":"S"}
+{"tMs":646,"delta":"at "}
+{"tMs":646,"delta":"14 – Sun 15"}
+{"tMs":646,"delta":"\""}
+{"tMs":646,"delta":" icon:\"map"}
+{"tMs":646,"delta":"\" status:\"Planned\""}
+{"tMs":647,"delta":"\n  DayHeader \""}
+{"tMs":655,"delta":"Day 1\" \"G"}
+{"tMs":674,"delta":"ion"}
+{"tMs":693,"delta":" and"}
+{"tMs":840,"delta":" the"}
+{"tMs":840,"delta":" old stre"}
+{"tMs":840,"delta":"ets\" kind:\"tem"}
+{"tMs":840,"delta":"ple\" tone:\"d"}
+{"tMs":840,"delta":"usk\" tag:\""}
+{"tMs":840,"delta":"S"}
+{"tMs":841,"delta":"at "}
+{"tMs":864,"delta":"14\"\n    Itinera"}
+{"tMs":887,"delta":"ryStop \"Fushim"}
+{"tMs":907,"delta":"i"}
+{"tMs":929,"delta":" Inari\" \"Wal"}
+{"tMs":950,"delta":"k the tor"}
+{"tMs":1054,"delta":"ii g"}
+{"tMs":1054,"delta":"ates up the mountain\" time"}
+{"tMs":1054,"delta":":\"08"}
+{"tMs":1054,"delta":":30"}
+{"tMs":1057,"delta":"\" travel:\"Ta"}
+{"tMs":1080,"delta":"xi to Gion, "}
+{"tMs":1102,"delta":"20 min\"\n    It"}
+{"tMs":1124,"delta":"ineraryStop \"N"}
+{"tMs":1145,"delta":"ishiki"}
+{"tMs":1167,"delta":" Market\" \"Street"}
+{"tMs":1188,"delta":" food and tea sh"}
+{"tMs":1211,"delta":"ops\" time:\"11:00"}
+{"tMs":1262,"delta":"\" travel:\"Walk"}
+{"tMs":1262,"delta":","}
+{"tMs":1275,"delta":" 10 min\"\n    "}
+{"tMs":1297,"delta":"ItineraryStop \""}
+{"tMs":1319,"delta":"Kiyom"}
+{"tMs":1339,"delta":"izu-"}
+{"tMs":1361,"delta":"dera\" \"Tem"}
+{"tMs":1381,"delta":"ple with"}
+{"tMs":1403,"delta":" a view over"}
+{"tMs":1425,"delta":" the city\" time:\"14"}
+{"tMs":1447,"delta":":00\" travel:\""}
+{"tMs":1467,"delta":"Wal"}
+{"tMs":1488,"delta":"k to"}
+{"tMs":1517,"delta":" Gion, 25"}
+{"tMs":1538,"delta":" min\"\n    Itine"}
+{"tMs":1559,"delta":"raryStop \"Gion"}
+{"tMs":1580,"delta":" ev"}
+{"tMs":1596,"delta":"ening wal"}
+{"tMs":1617,"delta":"k\" \"L"}
+{"tMs":1639,"delta":"ant"}
+{"tMs":1659,"delta":"ern-"}
+{"tMs":1680,"delta":"lit l"}
+{"tMs":1702,"delta":"anes and"}
+{"tMs":1723,"delta":" dinner"}
+{"tMs":1745,"delta":"\" time:\"18"}
+{"tMs":1767,"delta":":30\" last:true\n  "}
+{"tMs":1788,"delta":"DayHeader \"Day"}
+{"tMs":1810,"delta":" 2\" \"Arash"}
+{"tMs":1831,"delta":"i"}
+{"tMs":1853,"delta":"yama and the bamboo"}
+{"tMs":1874,"delta":"\" kind:\"bambo"}
+{"tMs":1896,"delta":"o\" tone:\"day\""}
+{"tMs":1918,"delta":" tag:\"Sun "}
+{"tMs":1940,"delta":"15\"\n    Itinera"}
+{"tMs":1962,"delta":"ryStop \"Bambo"}
+{"tMs":1984,"delta":"o Grove\" \"Early"}
+{"tMs":2004,"delta":" wal"}
+{"tMs":2025,"delta":"k before"}
+{"tMs":2047,"delta":" the cr"}
+{"tMs":2069,"delta":"owds\" time:\"08:"}
+{"tMs":2090,"delta":"00\" travel:\"Train"}
+{"tMs":2112,"delta":" to"}
+{"tMs":2133,"delta":" Arashiyama, "}
+{"tMs":2155,"delta":"15 min\"\n    It"}
+{"tMs":2177,"delta":"ineraryStop \"T"}
+{"tMs":2198,"delta":"en"}
+{"tMs":2219,"delta":"ry"}
+{"tMs":2241,"delta":"u-ji\" \"Gar"}
+{"tMs":2265,"delta":"den tem"}
+{"tMs":2283,"delta":"ple by"}
+{"tMs":2304,"delta":" the river\" time:\"10"}
+{"tMs":2326,"delta":":30\" travel:\""}
+{"tMs":2349,"delta":"Walk, 5 min\""}
+{"tMs":2370,"delta":"\n    ItinerarySt"}
+{"tMs":2395,"delta":"op \"Tog"}
+{"tMs":2412,"delta":"et"}
+{"tMs":2433,"delta":"suk"}
+{"tMs":2454,"delta":"yo"}
+{"tMs":2476,"delta":" Bridge\" \"Ri"}
+{"tMs":2498,"delta":"verside l"}
+{"tMs":2521,"delta":"unch and phot"}
+{"tMs":2540,"delta":"os\" time:\"12:30"}
+{"tMs":2562,"delta":"\" travel:\"Train"}
+{"tMs":2583,"delta":" to K"}
+{"tMs":2606,"delta":"yoto, 20 min"}
+{"tMs":2632,"delta":"\"\n    Itinerary"}
+{"tMs":2649,"delta":"Stop \"P"}
+{"tMs":2670,"delta":"ontoc"}
+{"tMs":2691,"delta":"ho\" \"Last"}
+{"tMs":2712,"delta":" st"}
+{"tMs":2734,"delta":"ro"}
+{"tMs":2755,"delta":"ll along"}
+{"tMs":2779,"delta":" the river\" time:\"17:"}
+{"tMs":2799,"delta":"00\" last:true\n  M"}
+{"tMs":2819,"delta":"apPanel =pick count"}
+{"tMs":2841,"delta":":4"}
+{"tMs":2862,"delta":"\n  "}
+{"tMs":2884,"delta":"PlaceRow \""}
+{"tMs":2905,"delta":"Fushimi Inari\""}
+{"tMs":2927,"delta":" \"Tor"}
+{"tMs":2948,"delta":"ii gate"}
+{"tMs":2970,"delta":" trail\" index:1 r"}
+{"tMs":2991,"delta":"ating:4.8"}
+{"tMs":3013,"delta":" distance:\"4"}
+{"tMs":3034,"delta":" "}
+{"tMs":3056,"delta":"km\" hours:\""}
+{"tMs":3077,"delta":"Open 24 "}
+{"tMs":3099,"delta":"h"}
+{"tMs":3121,"delta":"\" selected:=pick=="}
+{"tMs":3142,"delta":"1 "}
+{"tMs":3167,"delta":"-> pick=1\n  "}
+{"tMs":3184,"delta":"PlaceRow \""}
+{"tMs":3206,"delta":"Nishiki Market\" \""}
+{"tMs":3227,"delta":"Food and sn"}
+{"tMs":3249,"delta":"acks\" index:2 r"}
+{"tMs":3271,"delta":"ating:4.6"}
+{"tMs":3292,"delta":" distance:\"2"}
+{"tMs":3313,"delta":" km\" hours:\"09"}
+{"tMs":3335,"delta":":00–18"}
+{"tMs":3357,"delta":":00\" selected:=p"}
+{"tMs":3378,"delta":"ick==2 -> pick"}
+{"tMs":3400,"delta":"=2\n  Place"}
+{"tMs":3421,"delta":"Row \"Kiyom"}
+{"tMs":3443,"delta":"izu-dera\" \""}
+{"tMs":3464,"delta":"Hil"}
+{"tMs":3486,"delta":"ltop temple\" index:3"}
+{"tMs":3508,"delta":" rating:4.7"}
+{"tMs":3529,"delta":" distance:\"3 km"}
+{"tMs":3551,"delta":"\" hours:\"06:00"}
+{"tMs":3572,"delta":"–18"}
+{"tMs":3595,"delta":":00"}
+{"tMs":3615,"delta":"\" selected:=pick=="}
+{"tMs":3636,"delta":"3 -> pick=3"}
+{"tMs":3658,"delta":"\n  PlaceRow"}
+{"tMs":3679,"delta":" \"Ar"}
+{"tMs":3701,"delta":"ashiyama\" \"B"}
+{"tMs":3722,"delta":"amboo grove and river"}
+{"tMs":3744,"delta":"\" index:4 rating:"}
+{"tMs":3765,"delta":"4.7 distance:\""}
+{"tMs":3787,"delta":"9 km\" hours:\""}
+{"tMs":3808,"delta":"Open 24"}
+{"tMs":3830,"delta":" h\" selected:=p"}
+{"tMs":3879,"delta":"ick==4 -> pick"}
+{"tMs":3879,"delta":"=4"}

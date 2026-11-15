@@ -1,0 +1,76 @@
+{"meta":{"ui":"missing_poll","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show results of a live poll in a chat card: four answers with vote-share bars, vote counts, the leading option marked, and my selected answer marked.","text":"ChatCard \"Team offsite poll\" \"Live results\" icon:\"poll\" status:\"Live\" tone:accent w:390\n  state options=[{\"name\":\"Lisbon\",\"votes\":42},{\"name\":\"Berlin\",\"votes\":31},{\"name\":\"Prague\",\"votes\":19},{\"name\":\"Vienna\",\"votes\":8}]\n  state mine=\"Berlin\"\n  SectionLabel \"Where should we go?\" \"{sum(options,o=>o.votes)} votes\"\n  Wanted \"PollResults\" \"each option with its share of the votes as a bar, vote count, the leader and my choice marked\"\n    each o in options\n      Column gap:4\n        Row between middle\n          Row gap:6 middle\n            Text.strong \"{o.name}\"\n            Badge.success \"Leading\" visible:=o.votes==max(max(options[0].votes,options[1].votes),max(options[2].votes,options[3].votes))\n            Badge.primary \"My vote\" visible:=mine==o.name\n          Text.muted \"{o.votes} · {round(o.votes*100/sum(options,x=>x.votes),0)}%\"\n        Progress value:=o.votes/sum(options,x=>x.votes)\n  Callout \"Your answer\" \"You voted for {mine}.\" tone:accent icon:\"check_circle\"","usage":{"input_tokens":9309,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":424,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":858,"totalMs":3495}}
+{"tMs":858,"delta":"ChatCard \"Team"}
+{"tMs":1187,"delta":" off"}
+{"tMs":1187,"delta":"site poll\" \"Live"}
+{"tMs":1187,"delta":" results"}
+{"tMs":1187,"delta":"\""}
+{"tMs":1187,"delta":" icon:\"po"}
+{"tMs":1187,"delta":"ll\" status"}
+{"tMs":1187,"delta":":\"Live"}
+{"tMs":1187,"delta":"\" tone:acc"}
+{"tMs":1187,"delta":"ent w:390\n  state"}
+{"tMs":1188,"delta":" options=["}
+{"tMs":1193,"delta":"{\"name\":\"L"}
+{"tMs":1223,"delta":"is"}
+{"tMs":1552,"delta":"bon\",\"votes\":42"}
+{"tMs":1552,"delta":"},{\"name\":\"Ber"}
+{"tMs":1552,"delta":"lin\",\"votes\":31"}
+{"tMs":1552,"delta":"},{\"name\":\"Pr"}
+{"tMs":1552,"delta":"ague\",\"votes\":19"}
+{"tMs":1552,"delta":"},{\"name\":\"V"}
+{"tMs":1552,"delta":"ienna\",\"votes\":8}"}
+{"tMs":1552,"delta":"]\n  state mine=\""}
+{"tMs":1552,"delta":"Ber"}
+{"tMs":1570,"delta":"lin\"\n  Section"}
+{"tMs":1604,"delta":"Label \"Where"}
+{"tMs":1636,"delta":" should"}
+{"tMs":1898,"delta":" we go?\" \"{s"}
+{"tMs":1898,"delta":"um(options,o"}
+{"tMs":1898,"delta":"=>o.votes)}"}
+{"tMs":1898,"delta":" votes\"\n  Wan"}
+{"tMs":1898,"delta":"ted \"PollResults\" \""}
+{"tMs":1898,"delta":"each option with its share of the vot"}
+{"tMs":1898,"delta":"es as a bar, v"}
+{"tMs":1907,"delta":"ote count, the leader"}
+{"tMs":1939,"delta":" and"}
+{"tMs":1974,"delta":" my choice marked\"\n    "}
+{"tMs":2007,"delta":"each o in options\n      "}
+{"tMs":2040,"delta":"Column gap:4"}
+{"tMs":2270,"delta":"\n        Row between"}
+{"tMs":2270,"delta":" middle\n          Row"}
+{"tMs":2270,"delta":" gap:6 "}
+{"tMs":2270,"delta":"middle\n            Text.str"}
+{"tMs":2270,"delta":"ong \""}
+{"tMs":2270,"delta":"{o.name}\"\n            "}
+{"tMs":2305,"delta":"Badge.success"}
+{"tMs":2338,"delta":" \"Le"}
+{"tMs":2371,"delta":"ading\" vis"}
+{"tMs":2404,"delta":"ible:=o.votes=="}
+{"tMs":2437,"delta":"max(max"}
+{"tMs":2470,"delta":"(options["}
+{"tMs":2618,"delta":"0].votes,options[1"}
+{"tMs":2618,"delta":"].votes),max(options["}
+{"tMs":2618,"delta":"2].votes,options[3"}
+{"tMs":2618,"delta":"].votes))\n            Bad"}
+{"tMs":2639,"delta":"ge.prim"}
+{"tMs":2672,"delta":"ary \"My"}
+{"tMs":2704,"delta":" v"}
+{"tMs":2738,"delta":"ote\" visible:=m"}
+{"tMs":2771,"delta":"ine==o.name\n          "}
+{"tMs":2804,"delta":"Text.mu"}
+{"tMs":2838,"delta":"ted \"{o.votes}"}
+{"tMs":2871,"delta":" ·"}
+{"tMs":2971,"delta":" {round(o.votes*"}
+{"tMs":2971,"delta":"100/sum(options,x"}
+{"tMs":2971,"delta":"=>x.votes),0"}
+{"tMs":3006,"delta":")}%\"\n        Prog"}
+{"tMs":3039,"delta":"ress value"}
+{"tMs":3073,"delta":":=o.votes/s"}
+{"tMs":3106,"delta":"um(options,x=>x"}
+{"tMs":3140,"delta":".votes)\n  Call"}
+{"tMs":3173,"delta":"out \"Your"}
+{"tMs":3206,"delta":" answer\" \"You"}
+{"tMs":3242,"delta":" voted for {"}
+{"tMs":3272,"delta":"mine}.\" tone:acc"}
+{"tMs":3490,"delta":"ent icon:\"check_"}
+{"tMs":3490,"delta":"circle\""}

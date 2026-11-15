@@ -1,0 +1,164 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Chicago",
+    "subtitle": "Right now",
+    "icon": "cloud",
+    "status": "Live"
+   },
+   "children": [
+    "WeatherNow1",
+    "WeatherHours1",
+    "SectionLabel1",
+    "WeatherDay1",
+    "WeatherDay2",
+    "WeatherDay3"
+   ]
+  },
+  "WeatherNow1": {
+   "type": "WeatherNow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Chicago",
+    "detail": "Partly cloudy",
+    "temp": "58",
+    "high": "63",
+    "low": "47",
+    "kind": "partly"
+   }
+  },
+  "WeatherHours1": {
+   "type": "WeatherHours",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "hours": [
+     "2 PM",
+     "3 PM",
+     "4 PM",
+     "5 PM"
+    ],
+    "temps": [
+     59,
+     60,
+     58,
+     56
+    ]
+   },
+   "bind": {
+    "props.kinds": "${= [partly,partly,cloud,cloud]}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "3-day forecast"
+   }
+  },
+  "WeatherDay1": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Today",
+    "low": 47,
+    "high": 63,
+    "kind": "partly",
+    "min": 47,
+    "max": 66
+   }
+  },
+  "WeatherDay2": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Tomorrow",
+    "low": 49,
+    "high": 66,
+    "kind": "sun",
+    "min": 47,
+    "max": 66
+   }
+  },
+  "WeatherDay3": {
+   "type": "WeatherDay",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 30.0
+   },
+   "props": {
+    "label": "Friday",
+    "low": 51,
+    "high": 60,
+    "kind": "rain",
+    "min": 47,
+    "max": 66
+   }
+  }
+ }
+}
