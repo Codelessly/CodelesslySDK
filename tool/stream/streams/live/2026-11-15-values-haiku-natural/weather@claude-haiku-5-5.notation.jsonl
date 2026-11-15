@@ -1,0 +1,63 @@
+{"meta":{"ui":"weather","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the weather in Lisbon as an inline card. Now: 22° and partly cloudy, high 24°, low 15°. The next five hours: 1 PM 23° sunny, 2 PM 24° sunny, 3 PM 24° partly cloudy, 4 PM 23° cloudy, 5 PM 21° rain. The next three days with a temperature range bar: Tue rain 14° to 20°, Wed partly cloudy 13° to 18°, Thu sunny 15° to 25°. Add a button \"Alert me before it rains\" that, once I press it, reads \"Rain alert is on\" and shows the alert as switched on.","text":"ChatCard \"Lisbon weather\" \"Right now\" icon:\"cloud\" status:\"Live\"\n  WeatherNow \"Lisbon\" \"Partly cloudy\" temp:22 high:24 low:15 kind:\"partly\"\n  SectionLabel \"Next hours\"\n  WeatherHours hours:[\"1 PM\",\"2 PM\",\"3 PM\",\"4 PM\",\"5 PM\"] temps:[23,24,24,23,21] kinds:[\"sun\",\"sun\",\"partly\",\"cloud\",\"rain\"]\n  SectionLabel \"Next three days\"\n  WeatherDay \"Tue\" low:14 high:20 kind:\"rain\" min:13 max:25\n  WeatherDay \"Wed\" low:13 high:18 kind:\"partly\" min:13 max:25\n  WeatherDay \"Thu\" low:15 high:25 kind:\"sun\" min:13 max:25\n  state alert=false\n  if alert\n    Callout \"Rain alert is on\" \"We will tell you before rain arrives.\" tone:good icon:\"notifications_active\"\n  if !alert\n    ActionButton \"Alert me before it rains\" tone:primary icon:\"notifications\" -> alert=true","usage":{"input_tokens":9434,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":381,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":574,"totalMs":1801}}
+{"tMs":574,"delta":"ChatCard \"L"}
+{"tMs":697,"delta":"isbon we"}
+{"tMs":697,"delta":"ather\" \"Right"}
+{"tMs":697,"delta":" now\" icon:\"c"}
+{"tMs":697,"delta":"loud\" status:\""}
+{"tMs":697,"delta":"Live\"\n  Weather"}
+{"tMs":697,"delta":"Now \"L"}
+{"tMs":697,"delta":"isbon\" \""}
+{"tMs":712,"delta":"Partly cloudy\" tem"}
+{"tMs":733,"delta":"p:22 high:24 "}
+{"tMs":754,"delta":"low:15 kind:\""}
+{"tMs":775,"delta":"partly\"\n  Section"}
+{"tMs":795,"delta":"Label \"Next"}
+{"tMs":846,"delta":" hours\""}
+{"tMs":846,"delta":"\n  "}
+{"tMs":854,"delta":"WeatherHours hours"}
+{"tMs":875,"delta":":[\"1 PM\",\"2"}
+{"tMs":896,"delta":" PM\",\"3 PM"}
+{"tMs":917,"delta":"\",\"4 PM\",\"5 "}
+{"tMs":938,"delta":"PM\"] temps:["}
+{"tMs":958,"delta":"23,24,24,23,"}
+{"tMs":979,"delta":"21] kinds:[\"s"}
+{"tMs":999,"delta":"un\",\"sun\",\"partly\",\""}
+{"tMs":1020,"delta":"cloud\",\"rain\"]"}
+{"tMs":1040,"delta":"\n  SectionLabel"}
+{"tMs":1061,"delta":" \"Next three days\"\n  "}
+{"tMs":1080,"delta":"W"}
+{"tMs":1144,"delta":"eatherDay \"T"}
+{"tMs":1144,"delta":"ue\" low:14"}
+{"tMs":1144,"delta":" high:20 kind:"}
+{"tMs":1163,"delta":"\"rain\" min:13"}
+{"tMs":1183,"delta":" max:25\n  We"}
+{"tMs":1204,"delta":"atherDay \"Wed"}
+{"tMs":1224,"delta":"\" low:13 high:18"}
+{"tMs":1244,"delta":" kind:\"partly\""}
+{"tMs":1265,"delta":" min:13 max:25"}
+{"tMs":1285,"delta":"\n  WeatherDay \""}
+{"tMs":1306,"delta":"Thu\" low:15 "}
+{"tMs":1327,"delta":"high:25 kind:\""}
+{"tMs":1347,"delta":"sun\" min:13 max"}
+{"tMs":1368,"delta":":25\n  state alert"}
+{"tMs":1388,"delta":"=false\n  if al"}
+{"tMs":1409,"delta":"ert"}
+{"tMs":1428,"delta":"\n    Call"}
+{"tMs":1450,"delta":"out \"Rain alert is"}
+{"tMs":1470,"delta":" on\" \"We"}
+{"tMs":1490,"delta":" will"}
+{"tMs":1509,"delta":" tell you before"}
+{"tMs":1542,"delta":" r"}
+{"tMs":1549,"delta":"ain arrives.\" tone:"}
+{"tMs":1570,"delta":"good"}
+{"tMs":1589,"delta":" icon:\"not"}
+{"tMs":1611,"delta":"if"}
+{"tMs":1630,"delta":"ications_active\"\n  if"}
+{"tMs":1650,"delta":" !alert\n    Action"}
+{"tMs":1672,"delta":"Button \"Al"}
+{"tMs":1691,"delta":"ert me before it rains\" t"}
+{"tMs":1712,"delta":"one:prim"}
+{"tMs":1732,"delta":"ary ic"}
+{"tMs":1752,"delta":"on:\"not"}
+{"tMs":1772,"delta":"ifications\""}
+{"tMs":1793,"delta":" -> alert=true"}

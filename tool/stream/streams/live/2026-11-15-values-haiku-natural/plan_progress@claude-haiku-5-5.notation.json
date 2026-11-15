@@ -1,0 +1,294 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= running}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= elapsed + (1)}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 2000,
+      "when": "${= running}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= min(6, done + 1)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= (done + 1 >= 6) ? (false) : running}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Blog migration",
+    "subtitle": "Six steps, about 12 seconds",
+    "icon": "swap_horiz",
+    "status": "Ready"
+   },
+   "children": [
+    "listView1",
+    "ProgressLine1",
+    "Callout1",
+    "row1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= [\"Back up your content\",\"Set up the new host\",\"Import posts\",\"Move media\",\"Redirect old URLs\",\"Final checks\"]}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "PlanStep1"
+   ]
+  },
+  "PlanStep1": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "index": 0
+   },
+   "bind": {
+    "props.title": "${item}",
+    "props.detail": "Step ${index}",
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${= min(done,6)} of 6 steps",
+    "props.detail": "${elapsed} s elapsed",
+    "props.value": "${= done/6}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Migration complete",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.message": "Total time: ${elapsed} seconds",
+    "visible": "${= done >= 6}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= {!running && done < 6}}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "started",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Pause",
+    "tone": "quiet"
+   },
+   "bind": {
+    "props.enabled": "${= {running}}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "done",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "running",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "elapsed",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "started",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "total",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

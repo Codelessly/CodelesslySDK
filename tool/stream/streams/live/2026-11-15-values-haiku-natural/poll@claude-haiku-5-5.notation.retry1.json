@@ -1,0 +1,299 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Team lunch poll",
+    "subtitle": "Friday, where should we go?",
+    "icon": "how_to_vote",
+    "status": "Open"
+   },
+   "children": [
+    "Paragraph1",
+    "OptionList1",
+    "ActionButton1",
+    "Paragraph2",
+    "listView1",
+    "TotalBar1"
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Where should we go for lunch on Friday? Pick one option and vote."
+   },
+   "bind": {
+    "visible": "${= pick==\"\"}"
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Where should we go for lunch on Friday?",
+    "value": "pick",
+    "options": [
+     "Pho Saigon",
+     "Taqueria Luz",
+     "Green Bowl",
+     "Napoli Pizza"
+    ]
+   },
+   "bind": {
+    "visible": "${= pick==\"\"}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Vote",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= pick!=\"\"}",
+    "visible": "${= pick==\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "votes",
+       "value": "${= with(votes,pick,votes[pick]+1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "Paragraph2": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.text": "Thanks, your vote for ${pick} is counted.",
+    "visible": "${= pick!=\"\"}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= [\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"]}",
+    "visible": "${= pick!=\"\"}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "progressBar1"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${item}${= item==pick ? ' (your vote)' : ''}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${= round(votes[item]*100/(sum(map([\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"], n => votes[n]))),0)}%"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total votes",
+    "cta": true,
+    "icon": "Done"
+   },
+   "bind": {
+    "props.note": "${= (sum(map([\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"], n => votes[n])))} votes so far",
+    "props.amount": "${= (sum(map([\"Pho Saigon\",\"Taqueria Luz\",\"Green Bowl\",\"Napoli Pizza\"], n => votes[n])))}",
+    "props.enabled": "${= false}",
+    "visible": "${= pick!=\"\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "votes",
+    "type": "map",
+    "value": {
+     "Pho Saigon": 5,
+     "Taqueria Luz": 8,
+     "Green Bowl": 3,
+     "Napoli Pizza": 6
+    }
+   }
+  ]
+ }
+}

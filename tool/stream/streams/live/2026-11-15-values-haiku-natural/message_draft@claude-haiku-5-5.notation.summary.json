@@ -1,0 +1,106 @@
+{
+ "ui": "message_draft",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24214,
+ "turns": [
+  {
+   "input_tokens": 9451,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 421,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 632,
+   "totalMs": 2105,
+   "chars": 964,
+   "lines": 24,
+   "jsonTails": 1,
+   "nodes": 16,
+   "outputTokensPerNode": "26.3",
+   "notationIssues": [],
+   "errors": [
+    "unknown_prop /nodes/Card1/props/width: A Card has no prop \"width\" (it is layout.width). Its props: title, subtitle, elevated.",
+    "unknown_prop /nodes/Card1/props/gap: A Card has no prop \"gap\". Its props: title, subtitle, elevated.",
+    "unknown_prop /nodes/Card1/props/pad: A Card has no prop \"pad\". Its props: title, subtitle, elevated."
+   ]
+  },
+  {
+   "input_tokens": 10048,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 437,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 509,
+   "totalMs": 1828,
+   "chars": 1044,
+   "lines": 25,
+   "jsonTails": 0,
+   "nodes": 2,
+   "outputTokensPerNode": "218.5",
+   "notationIssues": [
+    "line 1:6: Unknown word \"is\" on a Card. Props are written key:value.",
+    "line 1:9: Unknown word \"a\" on a Card. Props are written key:value.",
+    "line 1:11: Unknown word \"padded,\" on a Card. Props are written key:value.",
+    "line 1:19: Unknown word \"bordered\" on a Card. Props are written key:value.",
+    "line 1:28: Unknown word \"Column,\" on a Card. Props are written key:value.",
+    "line 1:36: Unknown word \"so\" on a Card. Props are written key:value.",
+    "line 1:39: Unknown word \"I'll\" on a Card. Props are written key:value.",
+    "line 1:44: Unknown word \"drop\" on a Card. Props are written key:value.",
+    "line 1:49: Unknown word \"the\" on a Card. Props are written key:value.",
+    "line 1:53: Unknown word \"props\" on a Card. Props are written key:value.",
+    "line 1:59: Unknown word \"it\" on a Card. Props are written key:value.",
+    "line 1:62: Unknown word \"does\" on a Card. Props are written key:value.",
+    "line 1:67: Unknown word \"not\" on a Card. Props are written key:value.",
+    "line 1:71: Unknown word \"take\" on a Card. Props are written key:value.",
+    "line 1:76: Unknown word \"and\" on a Card. Props are written key:value.",
+    "line 1:80: Unknown word \"set\" on a Card. Props are written key:value.",
+    "line 1:84: Unknown word \"its\" on a Card. Props are written key:value.",
+    "line 1:88: Unknown word \"width\" on a Card. Props are written key:value.",
+    "line 1:94: Unknown word \"with\" on a Card. Props are written key:value.",
+    "line 1:99: Unknown word \"the\" on a Card. Props are written key:value.",
+    "line 1:103: Unknown word \"notation's\" on a Card. Props are written key:value.",
+    "line 1:114: Unknown word \"own\" on a Card. Props are written key:value.",
+    "line 1:118: Unknown word \"key\" on a Card. Props are written key:value.",
+    "line 1:122: Unknown word \"instead.\" on a Card. Props are written key:value.",
+    "line 11:1: A second root: the first line is the root, everything else is indented under it.",
+    "line 12:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 13:3: A second root: the first line is the root, everything else is indented under it.",
+    "line 14:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 15:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 16:3: An \"if\" needs a parent: indent it under a node.",
+    "line 17:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 18:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 19:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 20:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 21:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 22:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 23:7: A second root: the first line is the root, everything else is indented under it.",
+    "line 24:3: An \"if\" needs a parent: indent it under a node.",
+    "line 25:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 26:5: A second root: the first line is the root, everything else is indented under it.",
+    "line 27:5: A second root: the first line is the root, everything else is indented under it."
+   ],
+   "errors": []
+  }
+ ]
+}

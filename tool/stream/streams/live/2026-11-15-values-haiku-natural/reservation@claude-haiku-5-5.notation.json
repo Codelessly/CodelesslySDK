@@ -1,0 +1,300 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Book a table",
+    "subtitle": "Osteria Lume",
+    "icon": "restaurant",
+    "status": "Booking"
+   },
+   "children": [
+    "Receipt1",
+    "SectionLabel1",
+    "DayPicker1",
+    "SectionLabel2",
+    "Counter1",
+    "SectionLabel3",
+    "ChoiceChips1",
+    "TotalBar1"
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Table booked",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.message": "${day}, party of ${party}, at ${time}",
+    "visible": "${= booked}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day",
+    "note": "next 7 days"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "DayPicker1": {
+   "type": "DayPicker",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "day",
+    "days": [
+     "Sat 14",
+     "Sun 15",
+     "Mon 16",
+     "Tue 17",
+     "Wed 18",
+     "Thu 19",
+     "Fri 20"
+    ]
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Party size",
+    "note": "1 to 8"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "Counter1": {
+   "type": "Counter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Guests",
+    "value": "party",
+    "min": 1,
+    "max": 8,
+    "step": 1
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Time",
+    "note": "pick a slot"
+   },
+   "bind": {
+    "visible": "${= !booked}"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "columns": 4
+   },
+   "bind": {
+    "props.options": "${slots}",
+    "props.disabled": "${= union((day == \"Sat 14\" ? [\"18:00\",\"20:00\"] : day == \"Sun 15\" ? [\"17:30\",\"19:00\"] : []),(party >= 5 ? [\"20:30\",\"21:00\"] : []))}",
+    "visible": "${= !booked}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Booking",
+    "cta": "Confirm",
+    "icon": "check"
+   },
+   "bind": {
+    "props.note": "${day}, party of ${party}",
+    "props.amount": "${time}",
+    "props.enabled": "${= time != \"\"}",
+    "visible": "${= !booked}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "booked",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": "Sat 14"
+   },
+   {
+    "name": "party",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "booked",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "slots",
+    "type": "list",
+    "value": [
+     "17:30",
+     "18:00",
+     "18:30",
+     "19:00",
+     "19:30",
+     "20:00",
+     "20:30",
+     "21:00"
+    ]
+   }
+  ]
+ }
+}

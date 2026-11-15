@@ -1,0 +1,85 @@
+{"meta":{"ui":"code_diff","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the change you want to make to my config.yaml as a diff I can review, in three separate hunks with line numbers, removed lines red and added lines green in a monospace font. Hunk 1 (Server port, lines 4 to 5): -port: 8080 +port: 9090. Hunk 2 (Logging, lines 12 to 15): -level: debug -file: /tmp/app.log +level: warn +file: /var/log/app.log. Hunk 3 (Cache, lines 20 to 22): +enabled: true +ttl: 300. Keep and Discard buttons on each hunk, a count of how many are decided and how many kept, and an Apply button that only works once all three are decided; after Apply the card says how many hunks were kept and how many discarded.","text":"Using DiffHunk components with a decided-state variable per hunk; Apply is enabled only when all three are decided. The notation is written in the format given, starting with state declarations.\n\nstate h1=\"\"\nstate h2=\"\"\nstate h3=\"\"\nstate applied=false\nlet decided = (h1!=\"\" ? 1 : 0) + (h2!=\"\" ? 1 : 0) + (h3!=\"\" ? 1 : 0)\nlet kept = (h1==\"keep\" ? 1 : 0) + (h2==\"keep\" ? 1 : 0) + (h3==\"keep\" ? 1 : 0)\nlet discarded = decided - kept\nCard gap:12 w:390\n  Text.sectionTitle \"config.yaml\"\n  Text.muted \"{decided} of 3 decided, {kept} kept\"\n  if applied\n    Receipt \"Changes applied\" \"{kept} kept, {discarded} discarded\" tone:good icon:\"check_circle\"\n  if !applied\n    DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" =h1 start:4 lines:[\"-port: 8080\",\"+port: 9090\"]\n    DiffHunk \"Logging\" \"@@ -12,4 +12,4 @@\" =h2 start:12 lines:[\"-level: debug\",\"-file: /tmp/app.log\",\"+level: warn\",\"+file: /var/log/app.log\"]\n    DiffHunk \"Cache\" \"@@ -20,3 +20,5 @@\" =h3 start:20 lines:[\"+enabled: true\",\"+ttl: 300\"]\n    ActionButton \"Apply\" primary icon:\"done_all\" enabled:{decided==3} -> applied=true","usage":{"input_tokens":9467,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":543,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":469,"totalMs":2285}}
+{"tMs":469,"delta":"Using D"}
+{"tMs":675,"delta":"iffHunk components"}
+{"tMs":675,"delta":" with a"}
+{"tMs":675,"delta":" dec"}
+{"tMs":675,"delta":"ided-"}
+{"tMs":675,"delta":"state vari"}
+{"tMs":675,"delta":"able per hunk;"}
+{"tMs":675,"delta":" Apply is en"}
+{"tMs":675,"delta":"abled only when all three are dec"}
+{"tMs":682,"delta":"ided. The not"}
+{"tMs":705,"delta":"ation is written in the format given"}
+{"tMs":726,"delta":", starting with state"}
+{"tMs":749,"delta":" declarations.\n\nstate h1"}
+{"tMs":918,"delta":"=\"\"\nstate h2=\"\""}
+{"tMs":918,"delta":"\nstate h3=\"\"\nstate"}
+{"tMs":918,"delta":" applied=false\nlet"}
+{"tMs":918,"delta":" decided = ("}
+{"tMs":918,"delta":"h1!=\"\" "}
+{"tMs":918,"delta":"? 1 : 0)"}
+{"tMs":919,"delta":" + (h2!=\"\" "}
+{"tMs":924,"delta":"? 1 : 0)"}
+{"tMs":947,"delta":" + (h3!=\"\" "}
+{"tMs":967,"delta":"? 1 : 0)"}
+{"tMs":989,"delta":"\nlet kept = (h1"}
+{"tMs":1011,"delta":"==\"keep\" ? "}
+{"tMs":1119,"delta":"1 : 0) + ("}
+{"tMs":1119,"delta":"h2==\"keep\" "}
+{"tMs":1119,"delta":"? 1 : 0)"}
+{"tMs":1119,"delta":" + (h3==\"keep"}
+{"tMs":1120,"delta":"\" ? 1 : "}
+{"tMs":1141,"delta":"0)\nlet"}
+{"tMs":1161,"delta":" discarded = decided - k"}
+{"tMs":1183,"delta":"ept"}
+{"tMs":1204,"delta":"\nCard gap:12 w"}
+{"tMs":1226,"delta":":390\n  "}
+{"tMs":1248,"delta":"Text"}
+{"tMs":1268,"delta":".s"}
+{"tMs":1339,"delta":"ectionTitle \"config"}
+{"tMs":1339,"delta":".yaml\"\n  "}
+{"tMs":1339,"delta":"Text.muted \"{decided"}
+{"tMs":1356,"delta":"} of 3 dec"}
+{"tMs":1382,"delta":"ided,"}
+{"tMs":1398,"delta":" {kept} kept\""}
+{"tMs":1422,"delta":"\n  if applied\n    Rece"}
+{"tMs":1466,"delta":"ipt \"Chang"}
+{"tMs":1466,"delta":"es applied\" \"{"}
+{"tMs":1483,"delta":"kept} kept, {disc"}
+{"tMs":1505,"delta":"arded} discarded\" t"}
+{"tMs":1526,"delta":"one:good icon:\"check"}
+{"tMs":1571,"delta":"_circle\""}
+{"tMs":1571,"delta":"\n  if"}
+{"tMs":1591,"delta":" !applied\n    Diff"}
+{"tMs":1612,"delta":"Hunk \"Server port\""}
+{"tMs":1634,"delta":" \"@@ -4,2"}
+{"tMs":1655,"delta":" +4,2 @@"}
+{"tMs":1677,"delta":"\" =h1 start:4"}
+{"tMs":1698,"delta":" lines:[\"-port:"}
+{"tMs":1720,"delta":" 8080\",\"+port: "}
+{"tMs":1741,"delta":"9090\"]\n    Di"}
+{"tMs":1763,"delta":"ffHunk \"Logging"}
+{"tMs":1788,"delta":"\" \"@@ -12,"}
+{"tMs":1805,"delta":"4 +12,4 @"}
+{"tMs":1827,"delta":"@\" =h2 start:"}
+{"tMs":1849,"delta":"12 lines:[\"-level"}
+{"tMs":1871,"delta":": debug\",\"-file: /"}
+{"tMs":1892,"delta":"tmp/app.log\",\""}
+{"tMs":1918,"delta":"+level: warn\",\"+file"}
+{"tMs":1935,"delta":": /var/log/app."}
+{"tMs":1957,"delta":"log\"]\n    Diff"}
+{"tMs":1977,"delta":"Hunk \"Cache\""}
+{"tMs":1999,"delta":" \"@@ -20,3"}
+{"tMs":2020,"delta":" +20,5"}
+{"tMs":2042,"delta":" @@\" =h3 "}
+{"tMs":2190,"delta":"start:20 lines:[\""}
+{"tMs":2190,"delta":"+enabled: true\",\"+"}
+{"tMs":2190,"delta":"ttl: 300\"]"}
+{"tMs":2190,"delta":"\n    "}
+{"tMs":2190,"delta":"ActionButton \"Apply"}
+{"tMs":2190,"delta":"\" prim"}
+{"tMs":2192,"delta":"ary icon:\"done"}
+{"tMs":2214,"delta":"_"}
+{"tMs":2236,"delta":"all\" enabled:{dec"}
+{"tMs":2257,"delta":"ided==3} -> applied"}
+{"tMs":2278,"delta":"=true"}

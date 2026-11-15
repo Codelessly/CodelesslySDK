@@ -1,0 +1,54 @@
+{"meta":{"ui":"comparison","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Compare two phone plans side by side. Lite: $25 a month, 10 GB data, 500 minutes of calls, roaming not included, monthly contract, no extras. Max: $45 a month, unlimited data, unlimited calls, roaming in the EU and US, 24-month contract, streaming and 5G included. Mark the better plan on each row (cheaper price, more data, more calls, roaming, shorter contract, more extras). Under the table a recommendation with one sentence that says how many of the six rows the recommended plan wins and how much more it costs per month, and a Choose button under each plan; once I choose, the card says which plan I picked.","text":"ChatCard \"Phone plans\" \"Lite against Max\" icon:\"compare_arrows\" status:\"Compare\"\n  ComparisonTable names:[\"Lite\",\"Max\"] prices:[\"$25/mo\",\"$45/mo\"] pick:1 pickLabel:\"Best value\" cta:\"Choose\" rows:[[\"Data\",\"10 GB\",\"Unlimited\",2],[\"Calls\",\"500 min\",\"Unlimited\",2],[\"Roaming\",\"Not included\",\"EU and US\",2],[\"Contract\",\"Monthly\",\"24 months\",1],[\"Extras\",\"None\",\"Streaming and 5G\",2],[\"Price\",\"$25/mo\",\"$45/mo\",1]] -> pick=1\n  if pick==0\n    Receipt \"Lite chosen\" \"You picked the Lite plan at $25 a month.\" tone:good icon:\"check_rounded\"\n  if pick==2\n    Receipt \"Max chosen\" \"You picked the Max plan at $45 a month.\" tone:good icon:\"check_rounded\"","usage":{"input_tokens":9430,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":317,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1199,"totalMs":2292}}
+{"tMs":1199,"delta":"ChatCard \"Ph"}
+{"tMs":1383,"delta":"one plans\" \"L"}
+{"tMs":1383,"delta":"ite against"}
+{"tMs":1383,"delta":" Max\" icon:\"comp"}
+{"tMs":1383,"delta":"are_"}
+{"tMs":1383,"delta":"arrows\" status:\""}
+{"tMs":1383,"delta":"Compare\"\n  Compar"}
+{"tMs":1383,"delta":"isonTable names"}
+{"tMs":1384,"delta":":[\"Lite\",\"Max"}
+{"tMs":1384,"delta":"\"] prices:[\"$25"}
+{"tMs":1388,"delta":"/mo\",\"$45/m"}
+{"tMs":1408,"delta":"o\"] p"}
+{"tMs":1427,"delta":"ick:1"}
+{"tMs":1537,"delta":" p"}
+{"tMs":1537,"delta":"ickLabel:\"Best"}
+{"tMs":1537,"delta":" value"}
+{"tMs":1537,"delta":"\" c"}
+{"tMs":1537,"delta":"ta:\"Choose\" r"}
+{"tMs":1556,"delta":"ows:[[\"Data\",\"10"}
+{"tMs":1569,"delta":" GB\",\""}
+{"tMs":1588,"delta":"Unlimited\",2"}
+{"tMs":1609,"delta":"],[\"Calls\",\"500 "}
+{"tMs":1632,"delta":"min\",\"Unlimited\","}
+{"tMs":1651,"delta":"2],[\"Roaming\",\""}
+{"tMs":1683,"delta":"Not included\",\"EU and US"}
+{"tMs":1728,"delta":"\",2"}
+{"tMs":1728,"delta":"],[\"Contract\",\"Mon"}
+{"tMs":1736,"delta":"thly\",\"24 months\",1"}
+{"tMs":1755,"delta":"],[\"Ext"}
+{"tMs":1773,"delta":"ras\",\"None"}
+{"tMs":1794,"delta":"\",\"Streaming and 5"}
+{"tMs":1814,"delta":"G\",2],[\"Price\",\""}
+{"tMs":1835,"delta":"$25/mo\",\"$45"}
+{"tMs":1856,"delta":"/mo\",1]] -"}
+{"tMs":1875,"delta":"> p"}
+{"tMs":1897,"delta":"ick=1\n  if p"}
+{"tMs":1916,"delta":"ick==0\n    Rece"}
+{"tMs":1937,"delta":"ipt \"Lite ch"}
+{"tMs":1958,"delta":"osen\" \"You"}
+{"tMs":1977,"delta":" pic"}
+{"tMs":1997,"delta":"ked the"}
+{"tMs":2018,"delta":" Lite plan at $25"}
+{"tMs":2039,"delta":" a month.\" t"}
+{"tMs":2058,"delta":"one:good"}
+{"tMs":2078,"delta":" ic"}
+{"tMs":2099,"delta":"on:\"check_"}
+{"tMs":2120,"delta":"rounded\"\n  "}
+{"tMs":2140,"delta":"if pick==2\n    "}
+{"tMs":2162,"delta":"Receipt \"Max chos"}
+{"tMs":2234,"delta":"en\" \"You picked the"}
+{"tMs":2234,"delta":" Max plan at $45 a"}
+{"tMs":2234,"delta":" month.\" tone:good icon"}
+{"tMs":2247,"delta":":\"check_rounded\""}

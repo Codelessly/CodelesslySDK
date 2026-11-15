@@ -1,0 +1,94 @@
+{"meta":{"ui":"run_summary","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Summarize this morning's run as a card: 5.0 km, with splits per kilometer of 5:30, 5:25, 5:35, 5:20 and 5:10, and 380 calories. Show the distance, the total time and the average pace per km (work them out from the splits), a chart of pace per kilometer, the splits as a small table, and how it compares with my last run, which was 5.0 km in 28:15: say how much faster or slower I was, in minutes and seconds. And a Share button that, once pressed, reads \"Shared\".","text":"state sort=\"km\"\nstate desc=false\nstate shared=false\nstate lastRun=1695\nlet total = 1620\nlet avgPace = 324\n\nChatCard \"Morning run\" \"5.0 km · today\" icon:\"directions_run\" status:\"Done\" tone:\"good\"\n  Row gap:8\n    StatTile \"Distance\" \"km\" value:\"5.0\" delta:\"+0%\"\n    StatTile \"Total time\" \"mm:ss\" value:\"27:00\" delta:\"+0%\"\n  Row gap:8\n    StatTile \"Avg pace\" \"per km\" value:\"5:24\" delta:\"+0%\"\n    StatTile \"Calories\" \"kcal\" value:\"380\" delta:\"+0%\"\n  ChartCard \"Pace per km\" value:\"5:24\" values:[330,325,335,320,310] labels:[\"1\",\"2\",\"3\",\"4\",\"5\"] kind:\"line\"\n  SectionLabel \"Splits\" \"per km\"\n  TableHeader =sort desc:=desc columns:[\"km\",\"Pace\",\"Time\"] keys:[\"km\",\"pace\",\"time\"] widths:[60,120,120]\n  TableRow cells:[\"1\",\"5:30\",\"5:30\"] widths:[60,120,120]\n  TableRow cells:[\"2\",\"5:25\",\"10:55\"] widths:[60,120,120]\n  TableRow cells:[\"3\",\"5:35\",\"16:30\"] widths:[60,120,120]\n  TableRow cells:[\"4\",\"5:20\",\"21:50\"] widths:[60,120,120]\n  TableRow cells:[\"5\",\"5:10\",\"27:00\"] widths:[60,120,120]\n  Callout \"Versus last run\" \"Last run: 5.0 km in 28:15. Today: 27:00. You were 1:15 faster.\" tone:\"good\" icon:\"trending_down\"\n  if shared\n    Receipt \"Shared\" \"Your run was shared.\" tone:\"good\" icon:\"check\"\n  if !shared\n    ActionButton \"Share\" tone:\"primary\" icon:\"share\" -> shared=true; toast \"Shared\"","usage":{"input_tokens":9980,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":647,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":563,"totalMs":2602}}
+{"tMs":563,"delta":"state"}
+{"tMs":596,"delta":" sort=\""}
+{"tMs":673,"delta":"km"}
+{"tMs":673,"delta":"\"\nstate desc=false"}
+{"tMs":673,"delta":"\nstate sh"}
+{"tMs":685,"delta":"ared=false"}
+{"tMs":707,"delta":"\nstate lastRun=1"}
+{"tMs":735,"delta":"695\nlet"}
+{"tMs":749,"delta":" total"}
+{"tMs":770,"delta":" = "}
+{"tMs":793,"delta":"1620"}
+{"tMs":814,"delta":"\nlet avgPace = "}
+{"tMs":835,"delta":"324"}
+{"tMs":878,"delta":"\n\nChatCard \"Mor"}
+{"tMs":900,"delta":"ning run\" \"5.0 "}
+{"tMs":922,"delta":"km · today\" icon:\""}
+{"tMs":944,"delta":"directions_run\" status:\""}
+{"tMs":966,"delta":"Done\" tone:\"good"}
+{"tMs":987,"delta":"\"\n  Row gap:"}
+{"tMs":1009,"delta":"8\n    StatTile \""}
+{"tMs":1031,"delta":"Distance\" \"km\" value"}
+{"tMs":1052,"delta":":\"5.0\" delta"}
+{"tMs":1074,"delta":":\"+0%\"\n    "}
+{"tMs":1095,"delta":"StatTile \"Total time"}
+{"tMs":1116,"delta":"\" \"mm:ss\""}
+{"tMs":1138,"delta":" value:\"27:00\" del"}
+{"tMs":1159,"delta":"ta:\"+0%\""}
+{"tMs":1181,"delta":"\n  Row gap:8"}
+{"tMs":1203,"delta":"\n    StatTile \"Av"}
+{"tMs":1224,"delta":"g pace\" \"per km\""}
+{"tMs":1246,"delta":" value:\"5:24\" del"}
+{"tMs":1267,"delta":"ta:\"+0%\""}
+{"tMs":1289,"delta":"\n    StatTile \"Cal"}
+{"tMs":1310,"delta":"ories\" \"kcal\" value"}
+{"tMs":1331,"delta":":\"380\" delta:\""}
+{"tMs":1353,"delta":"+0%\"\n  Ch"}
+{"tMs":1374,"delta":"artCard \"Pace per"}
+{"tMs":1396,"delta":" km\" value:\"5:24"}
+{"tMs":1417,"delta":"\" values:[330,325,"}
+{"tMs":1439,"delta":"335,320,310] labels"}
+{"tMs":1461,"delta":":[\"1\",\"2\",\"3\",\""}
+{"tMs":1482,"delta":"4\",\"5\"] kind:"}
+{"tMs":1503,"delta":"\"line\"\n  Section"}
+{"tMs":1525,"delta":"Label \"Splits\""}
+{"tMs":1546,"delta":" \"per km\"\n  Table"}
+{"tMs":1568,"delta":"Header =sort desc"}
+{"tMs":1589,"delta":":="}
+{"tMs":1611,"delta":"desc columns:[\"km\",\""}
+{"tMs":1632,"delta":"Pace\",\"Time\"]"}
+{"tMs":1654,"delta":" keys:[\"km\",\"pace"}
+{"tMs":1675,"delta":"\",\"time\"] widths:["}
+{"tMs":1696,"delta":"60,120,120]\n  "}
+{"tMs":1718,"delta":"TableRow cells:[\""}
+{"tMs":1739,"delta":"1\",\"5:30\",\"5:"}
+{"tMs":1761,"delta":"30\"]"}
+{"tMs":1783,"delta":" widths:[60,120,"}
+{"tMs":1804,"delta":"120]\n  TableRow"}
+{"tMs":1825,"delta":" cells:[\"2\",\"5:"}
+{"tMs":1847,"delta":"25\",\"10:55\"] wid"}
+{"tMs":1869,"delta":"ths:[60,120,120"}
+{"tMs":1890,"delta":"]\n  TableRow c"}
+{"tMs":1911,"delta":"ells:[\"3\",\"5:35"}
+{"tMs":1933,"delta":"\",\"16:30\"] widths"}
+{"tMs":1954,"delta":":[60,120,120]"}
+{"tMs":1976,"delta":"\n  TableRow cells"}
+{"tMs":1997,"delta":":[\"4\",\"5:20\",\""}
+{"tMs":2019,"delta":"21:50\"] widths:"}
+{"tMs":2040,"delta":"[60,120,120]"}
+{"tMs":2061,"delta":"\n  TableRow cells:"}
+{"tMs":2083,"delta":"[\"5\",\"5:10\",\"27"}
+{"tMs":2105,"delta":":00\"] widths:["}
+{"tMs":2126,"delta":"60,120,120]\n  "}
+{"tMs":2148,"delta":"Callout \"Versus last"}
+{"tMs":2169,"delta":" run\" \"Last run: "}
+{"tMs":2190,"delta":"5.0 km in 28"}
+{"tMs":2211,"delta":":15. Today: 27"}
+{"tMs":2233,"delta":":00. You were 1:"}
+{"tMs":2254,"delta":"15 faster.\" tone:"}
+{"tMs":2276,"delta":"\"good\" icon:\"tr"}
+{"tMs":2297,"delta":"ending_down\"\n  if sh"}
+{"tMs":2320,"delta":"ared"}
+{"tMs":2341,"delta":"\n    Rece"}
+{"tMs":2366,"delta":"ipt \"Shared\" \""}
+{"tMs":2385,"delta":"Your run was shared.\" t"}
+{"tMs":2405,"delta":"one:\"good\" icon:"}
+{"tMs":2427,"delta":"\"check"}
+{"tMs":2448,"delta":"\"\n  if"}
+{"tMs":2469,"delta":" !shared\n    Action"}
+{"tMs":2491,"delta":"Button \"Share\" tone"}
+{"tMs":2512,"delta":":\"primary\" icon:"}
+{"tMs":2534,"delta":"\"share\" -"}
+{"tMs":2555,"delta":"> shared=true;"}
+{"tMs":2577,"delta":" toast \"Shared\""}

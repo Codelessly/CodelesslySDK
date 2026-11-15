@@ -1,0 +1,68 @@
+{"meta":{"ui":"recipe","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show me a recipe card for a weeknight lemon chicken traybake: 45 minutes, Easy, serves 4 to start, with a servings control from 2 to 8 that scales the ingredient amounts. Ingredients for 4: chicken thighs 800 g, baby potatoes 600 g, lemons 2, olive oil 4 tbsp, garlic cloves 4, dried oregano 2 tsp. The ingredients as a checklist I can tick off (ticks stay when I change the servings), the four steps (Heat the oven to 220C; Toss everything in the oil, lemon and oregano; Roast 35 minutes, turning once; Rest 5 minutes and serve) and a Start cooking button.","text":"ChatCard \"Lemon chicken traybake\" \"Weeknight dinner · 45 min · Easy\" icon:\"restaurant_rounded\" status:\"Easy\" w:390\n  state servings=4\n  state done=[]\n  Row between\n    Text.strong \"Serves {servings}\"\n    Counter \"Servings\" =servings min:2 max:8 step:1\n  Checklist \"Ingredients\" =done items:=[\"Chicken thighs, \"+round(800*servings/4,0)+\" g\", \"Baby potatoes, \"+round(600*servings/4,0)+\" g\", \"Lemons, \"+ceil(2*servings/4), \"Olive oil, \"+round(4*servings/4,0)+\" tbsp\", \"Garlic cloves, \"+round(4*servings/4,0), \"Dried oregano, \"+round(2*servings/4,1)+\" tsp\"]\n  SectionLabel \"Method\" \"4 steps\"\n  Column gap:6\n    Row gap:8\n      Text.strong \"1.\"\n      Paragraph \"Heat the oven to 220C.\"\n    Row gap:8\n      Text.strong \"2.\"\n      Paragraph \"Toss everything in the oil, lemon and oregano.\"\n    Row gap:8\n      Text.strong \"3.\"\n      Paragraph \"Roast 35 minutes, turning once.\"\n    Row gap:8\n      Text.strong \"4.\"\n      Paragraph \"Rest 5 minutes and serve.\"\n  ActionButton \"Start cooking\" primary icon:\"play_arrow_rounded\" enabled:true -> emit start_cooking","usage":{"input_tokens":10043,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":516,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":514,"totalMs":1862}}
+{"tMs":514,"delta":"ChatCard \"L"}
+{"tMs":535,"delta":"emon chicken traybake"}
+{"tMs":552,"delta":"\" \"Weeknight d"}
+{"tMs":637,"delta":"inner · 45 min ·"}
+{"tMs":637,"delta":" Easy\" icon:\""}
+{"tMs":637,"delta":"restaurant_rounded"}
+{"tMs":637,"delta":"\" status:\"Easy\""}
+{"tMs":655,"delta":" w:390\n  state servings"}
+{"tMs":675,"delta":"=4\n  state done=["}
+{"tMs":695,"delta":"]\n  Row between\n    "}
+{"tMs":716,"delta":"Text.strong \"Ser"}
+{"tMs":736,"delta":"ves {servings}\"\n    "}
+{"tMs":756,"delta":"Counter \"Servings\""}
+{"tMs":777,"delta":" =servings min:2 max"}
+{"tMs":797,"delta":":8 step:1\n  "}
+{"tMs":817,"delta":"Checklist \"Ing"}
+{"tMs":841,"delta":"redients\" =done items:="}
+{"tMs":857,"delta":"[\""}
+{"tMs":878,"delta":"Chicken thighs,"}
+{"tMs":898,"delta":" \"+round(800*servings"}
+{"tMs":919,"delta":"/4,0)+\" g"}
+{"tMs":943,"delta":"\", \"Baby potato"}
+{"tMs":961,"delta":"es, \"+round(600*"}
+{"tMs":981,"delta":"servings/4,0)+"}
+{"tMs":1000,"delta":"\" g\", \"L"}
+{"tMs":1032,"delta":"emons, \"+ceil"}
+{"tMs":1042,"delta":"(2*servings/4),"}
+{"tMs":1062,"delta":" \""}
+{"tMs":1081,"delta":"Olive oil, \"+round"}
+{"tMs":1103,"delta":"(4*servings/4,"}
+{"tMs":1122,"delta":"0)+\" tbsp"}
+{"tMs":1143,"delta":"\", \"Garlic clo"}
+{"tMs":1163,"delta":"ves, \"+round(4*"}
+{"tMs":1183,"delta":"servings/4,0), \""}
+{"tMs":1212,"delta":"Dried oregano, \""}
+{"tMs":1224,"delta":"+round(2*servings/"}
+{"tMs":1245,"delta":"4,1)+\" ts"}
+{"tMs":1265,"delta":"p\"]\n  Section"}
+{"tMs":1286,"delta":"Label \"Method\" \""}
+{"tMs":1306,"delta":"4 steps\"\n  "}
+{"tMs":1327,"delta":"Column gap:6\n    "}
+{"tMs":1347,"delta":"Row gap:8\n      "}
+{"tMs":1376,"delta":"Text.strong \"1.\""}
+{"tMs":1388,"delta":"\n      Paragraph \""}
+{"tMs":1408,"delta":"Heat the oven to 220"}
+{"tMs":1429,"delta":"C.\"\n    Row gap"}
+{"tMs":1450,"delta":":8\n      Text.str"}
+{"tMs":1470,"delta":"ong \"2.\"\n      Pa"}
+{"tMs":1555,"delta":"ragraph \"Toss ever"}
+{"tMs":1556,"delta":"ything in the oil, lem"}
+{"tMs":1556,"delta":"on and oregano.\"\n    "}
+{"tMs":1556,"delta":"Row gap:8\n      "}
+{"tMs":1572,"delta":"Text.strong \"3.\""}
+{"tMs":1848,"delta":"\n      Paragraph \""}
+{"tMs":1848,"delta":"Roast 35 minut"}
+{"tMs":1848,"delta":"es, turning once.\"\n    "}
+{"tMs":1848,"delta":"Row gap:8\n      "}
+{"tMs":1849,"delta":"Text.strong \"4.\""}
+{"tMs":1849,"delta":"\n      Paragraph \""}
+{"tMs":1849,"delta":"Rest 5 minut"}
+{"tMs":1849,"delta":"es and serve.\"\n  "}
+{"tMs":1849,"delta":"ActionButton \"Start c"}
+{"tMs":1849,"delta":"ooking\" primary icon:"}
+{"tMs":1849,"delta":"\"play_arrow_r"}
+{"tMs":1849,"delta":"ounded\" enabled:true"}
+{"tMs":1849,"delta":" -> emit start_coo"}
+{"tMs":1857,"delta":"king"}

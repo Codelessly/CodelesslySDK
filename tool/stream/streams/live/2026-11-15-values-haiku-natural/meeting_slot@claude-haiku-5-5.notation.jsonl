@@ -1,0 +1,117 @@
+{"meta":{"ui":"meeting_slot","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Help me schedule a 30 minute meeting with three colleagues (Priya, Marcus and Elena) next week. Let me pick a day (Mon 16, Tue 17, Wed 18, Thu 19, Fri 20 Nov), then one of that day's time slots: 09:00, 10:00, 11:00, 13:00, 14:00 or 15:00, where some are taken: Mon 10:00 and 13:00; Tue 09:00 and 14:00; Wed 11:00 and 15:00; Thu 09:00, 10:00 and 13:00; Fri 11:00 and 14:00. Show who is attending and a confirm button. After confirming the card says the meeting is booked, with the day and the time it runs from and to (for example Wed 18 Nov, 14:00 to 14:30).","text":"state day=\"\"\nstate time=\"\"\nstate booked=false\nlet slots = day==\"Mon 16\" ? [\"09:00\",\"11:00\",\"14:00\",\"15:00\"] : day==\"Tue 17\" ? [\"10:00\",\"11:00\",\"13:00\",\"15:00\"] : day==\"Wed 18\" ? [\"09:00\",\"10:00\",\"13:00\",\"14:00\"] : day==\"Thu 19\" ? [\"11:00\",\"14:00\",\"15:00\"] : day==\"Fri 20\" ? [\"09:00\",\"10:00\",\"13:00\",\"15:00\"] : [\"09:00\",\"10:00\",\"11:00\",\"13:00\",\"14:00\",\"15:00\"]\nlet endTime = time==\"09:00\" ? \"09:30\" : time==\"10:00\" ? \"10:30\" : time==\"11:00\" ? \"11:30\" : time==\"13:00\" ? \"13:30\" : time==\"14:00\" ? \"14:30\" : \"15:30\"\nChatCard \"Schedule a meeting\" \"30 minutes with Priya, Marcus and Elena\" icon:\"event\" status:\"Next week\" tone:\"accent\" {w:390}\n  if booked==false\n    SectionLabel \"Day\" \"Next week\"\n    SegmentedButton =day items:[\"Mon 16\",\"Tue 17\",\"Wed 18\",\"Thu 19\",\"Fri 20\"] -> time=\"\"\n    if day!=\"\"\n      SectionLabel \"Time\" \"Free slots\"\n      ChoiceChips =time options:[\"09:00\",\"10:00\",\"11:00\",\"13:00\",\"14:00\",\"15:00\"] disabled:[\"10:00\",\"13:00\"] columns:3\n    SectionLabel \"Attendees\" \"3 people\"\n    Details rows:[[\"Priya\",\"Invited\"],[\"Marcus\",\"Invited\"],[\"Elena\",\"Invited\"]]\n    ActionButton \"Confirm\" tone:\"primary\" icon:\"check\" enabled:{day!=\"\" and time!=\"\"} -> booked=true\n  if booked\n    Receipt \"Meeting booked\" \"{day} Nov, {time} to {endTime}, with Priya, Marcus and Elena.\" code:\"30 min\" tone:\"good\" icon:\"check\"","usage":{"input_tokens":9488,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":679,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":579,"totalMs":2934}}
+{"tMs":579,"delta":"state"}
+{"tMs":699,"delta":" day=\"\""}
+{"tMs":699,"delta":"\nstate time=\"\"\nstate"}
+{"tMs":699,"delta":" booked=false\nlet"}
+{"tMs":699,"delta":" sl"}
+{"tMs":699,"delta":"ots = day"}
+{"tMs":699,"delta":"="}
+{"tMs":704,"delta":"=\"Mon 16\" "}
+{"tMs":724,"delta":"? [\"09"}
+{"tMs":746,"delta":":00\",\"11"}
+{"tMs":765,"delta":":00\",\"14"}
+{"tMs":788,"delta":":00\",\"15:00\"]"}
+{"tMs":806,"delta":" : day==\"Tue "}
+{"tMs":848,"delta":"17\" ? [\"10"}
+{"tMs":848,"delta":":00\",\"11:00\",\"13"}
+{"tMs":868,"delta":":00\",\"15:00\"]"}
+{"tMs":889,"delta":" : day==\"Wed "}
+{"tMs":909,"delta":"18\" ? [\"09:"}
+{"tMs":930,"delta":"00\",\"10:00\",\"13:"}
+{"tMs":950,"delta":"00\",\"14:00\"] :"}
+{"tMs":972,"delta":" day==\"Thu 19"}
+{"tMs":992,"delta":"\" ? [\"11"}
+{"tMs":1016,"delta":":00\",\"14:00\",\"15"}
+{"tMs":1033,"delta":":00\"] : day==\""}
+{"tMs":1052,"delta":"Fri 20\" ?"}
+{"tMs":1076,"delta":" [\"09:00\",\"10"}
+{"tMs":1095,"delta":":00\",\"13:00\",\"15"}
+{"tMs":1113,"delta":":00\"] : [\"09"}
+{"tMs":1134,"delta":":00\",\"10:00\",\"11"}
+{"tMs":1159,"delta":":00\",\"13:00\",\"14"}
+{"tMs":1180,"delta":":00\",\"15:00\"]"}
+{"tMs":1212,"delta":"\nlet end"}
+{"tMs":1215,"delta":"Time"}
+{"tMs":1241,"delta":" = time==\"09:00\""}
+{"tMs":1259,"delta":" ? \"09:30\" :"}
+{"tMs":1277,"delta":" time==\"10:00\" "}
+{"tMs":1300,"delta":"? \"10:30\" : time"}
+{"tMs":1318,"delta":"==\"11:00\" ?"}
+{"tMs":1338,"delta":" \"11:30\" : time="}
+{"tMs":1361,"delta":"=\"13:00\" ? \""}
+{"tMs":1380,"delta":"13:30\" : time==\""}
+{"tMs":1400,"delta":"14:00\" ? \"14"}
+{"tMs":1420,"delta":":30\" : \"15:30"}
+{"tMs":1441,"delta":"\"\nChatCard \""}
+{"tMs":1461,"delta":"Schedule a meeting"}
+{"tMs":1481,"delta":"\" \"30 minutes with"}
+{"tMs":1507,"delta":" Priya, Marcus"}
+{"tMs":1522,"delta":" and Elena\" icon:"}
+{"tMs":1543,"delta":"\"event"}
+{"tMs":1563,"delta":"\""}
+{"tMs":1584,"delta":" status:\"Next week\" t"}
+{"tMs":1613,"delta":"one:\"accent\""}
+{"tMs":1630,"delta":" {w"}
+{"tMs":1645,"delta":":390"}
+{"tMs":1665,"delta":"}\n  if booked=="}
+{"tMs":1687,"delta":"false\n    S"}
+{"tMs":1708,"delta":"ectionLabel \"Day"}
+{"tMs":1726,"delta":"\""}
+{"tMs":1746,"delta":" \"Next"}
+{"tMs":1767,"delta":" week\"\n    "}
+{"tMs":1787,"delta":"S"}
+{"tMs":1809,"delta":"egmentedButton ="}
+{"tMs":1828,"delta":"day items"}
+{"tMs":1852,"delta":":[\"Mon 16\",\""}
+{"tMs":1869,"delta":"Tue 17\",\"W"}
+{"tMs":1889,"delta":"ed 18\",\"Thu "}
+{"tMs":1910,"delta":"19\",\"Fri 20\""}
+{"tMs":1930,"delta":"]"}
+{"tMs":1952,"delta":" -> time"}
+{"tMs":1971,"delta":"=\"\"\n    if"}
+{"tMs":1991,"delta":" day!"}
+{"tMs":2015,"delta":"=\"\"\n      SectionL"}
+{"tMs":2032,"delta":"abel \"Time\""}
+{"tMs":2052,"delta":" \"Free"}
+{"tMs":2073,"delta":" slots\"\n      Cho"}
+{"tMs":2093,"delta":"iceChips =time"}
+{"tMs":2114,"delta":" options"}
+{"tMs":2134,"delta":":[\""}
+{"tMs":2155,"delta":"09:00\",\"10"}
+{"tMs":2176,"delta":":00\",\"11:00\",\"13"}
+{"tMs":2196,"delta":":00\",\"14:00\",\"15"}
+{"tMs":2216,"delta":":00\"] disabled:"}
+{"tMs":2236,"delta":"[\"10"}
+{"tMs":2256,"delta":":00\",\"13:00\""}
+{"tMs":2277,"delta":"] columns:3"}
+{"tMs":2298,"delta":"\n    SectionLabel"}
+{"tMs":2318,"delta":" \"Attend"}
+{"tMs":2338,"delta":"ees\" \"3"}
+{"tMs":2358,"delta":" "}
+{"tMs":2379,"delta":"people\"\n    Details rows"}
+{"tMs":2399,"delta":":[[\"Priya\",\""}
+{"tMs":2419,"delta":"Inv"}
+{"tMs":2442,"delta":"ited\"],[\"Marcus"}
+{"tMs":2462,"delta":"\",\"Invited\"],[\""}
+{"tMs":2481,"delta":"Elena\",\"Invited\"]"}
+{"tMs":2501,"delta":"]\n    ActionButton"}
+{"tMs":2522,"delta":" \"Confirm\" t"}
+{"tMs":2544,"delta":"one:\"primary\" ic"}
+{"tMs":2565,"delta":"on:\"check\" enabled"}
+{"tMs":2583,"delta":":{day!=\""}
+{"tMs":2604,"delta":"\" and time!=\"\"} -"}
+{"tMs":2624,"delta":"> booked="}
+{"tMs":2647,"delta":"true\n  "}
+{"tMs":2665,"delta":"if booked"}
+{"tMs":2685,"delta":"\n    Rece"}
+{"tMs":2705,"delta":"ipt \"Me"}
+{"tMs":2728,"delta":"eting booked\" \"{"}
+{"tMs":2747,"delta":"day}"}
+{"tMs":2768,"delta":" Nov, {"}
+{"tMs":2788,"delta":"time} to {endTime}"}
+{"tMs":2807,"delta":", with"}
+{"tMs":2828,"delta":" Priya, Marcus"}
+{"tMs":2849,"delta":" and Elena.\" code"}
+{"tMs":2869,"delta":":\"30"}
+{"tMs":2892,"delta":" min\" tone:\"good"}
+{"tMs":2912,"delta":"\" icon:\"check\""}

@@ -1,0 +1,62 @@
+{
+ "ui": "run_summary",
+ "kind": "page",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 24217,
+ "turns": [
+  {
+   "input_tokens": 9394,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 509,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 462,
+   "totalMs": 2251,
+   "chars": 972,
+   "lines": 17,
+   "jsonTails": 0,
+   "nodes": 18,
+   "outputTokensPerNode": "28.3",
+   "notationIssues": [],
+   "errors": [
+    "unknown_variable /nodes/TableHeader1/props/desc: No variable \"desc\" to pass as \"desc\": declare it in this document (or the project)."
+   ]
+  },
+  {
+   "input_tokens": 9980,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 647,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 563,
+   "totalMs": 2602,
+   "chars": 1285,
+   "lines": 26,
+   "jsonTails": 0,
+   "nodes": 19,
+   "outputTokensPerNode": "34.1",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

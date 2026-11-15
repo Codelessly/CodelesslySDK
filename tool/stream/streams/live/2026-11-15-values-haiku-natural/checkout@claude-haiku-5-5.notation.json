@@ -1,0 +1,970 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 18
+   },
+   "children": [
+    "row1",
+    "progressBar1",
+    "text3",
+    "listView1",
+    "divider1",
+    "row4",
+    "filledButton1",
+    "text9",
+    "InputField1",
+    "InputField2",
+    "InputField3",
+    "InputField4",
+    "InputField5",
+    "row5",
+    "text10",
+    "OptionList1",
+    "Details1",
+    "row6",
+    "Receipt1",
+    "Details2"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF111827"
+    },
+    "text": "Checkout"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "Step ${step} of 3"
+   }
+  },
+  "progressBar1": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "max": 1,
+    "borderRadius": 2,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFE5E7EB"
+   },
+   "bind": {
+    "props.value": "${step}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "letterSpacing": -0.2,
+     "height": 1.3,
+     "color": "#FF111827"
+    },
+    "text": "Your cart"
+   },
+   "bind": {
+    "visible": "${= step == 1}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${items}",
+    "visible": "${= step == 1}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column2",
+    "row3"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text4",
+    "text5"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "$${item.price} each"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "iconButton1",
+    "text6",
+    "iconButton2"
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "remove"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= updateWhere(items, x => x.id == item.id, x => with(x, \"qty\", max(0, x.qty - 1)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${item.qty}"
+   }
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= updateWhere(items, x => x.id == item.id, x => with(x, \"qty\", x.qty + 1))}"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= step == 1}"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step == 1}"
+   },
+   "children": [
+    "text7",
+    "text8"
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "Subtotal"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "$${= fixed((sum(map(items, i => i.qty * i.price))), 2)}"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Continue to shipping"
+   },
+   "bind": {
+    "props.enabled": "${= length(items) > 0}",
+    "visible": "${= step == 1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "letterSpacing": -0.2,
+     "height": 1.3,
+     "color": "#FF111827"
+    },
+    "text": "Shipping"
+   },
+   "bind": {
+    "visible": "${= step == 2}"
+   }
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Full name",
+    "placeholder": "Jane Doe",
+    "value": "name"
+   },
+   "bind": {
+    "props.error": "${= (trim(name) == \"\" ? \"Name is required\" : \"\")}",
+    "visible": "${= step == 2}"
+   }
+  },
+  "InputField2": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Address",
+    "placeholder": "12 High Street",
+    "value": "address"
+   },
+   "bind": {
+    "props.error": "${= (trim(address) == \"\" ? \"Address is required\" : \"\")}",
+    "visible": "${= step == 2}"
+   }
+  },
+  "InputField3": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "City",
+    "placeholder": "London",
+    "value": "city"
+   },
+   "bind": {
+    "props.error": "${= (trim(city) == \"\" ? \"City is required\" : \"\")}",
+    "visible": "${= step == 2}"
+   }
+  },
+  "InputField4": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Postcode",
+    "placeholder": "SW1A 1AA",
+    "value": "postcode"
+   },
+   "bind": {
+    "props.error": "${= (trim(postcode) == \"\" ? \"Postcode is required\" : \"\")}",
+    "visible": "${= step == 2}"
+   }
+  },
+  "InputField5": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Email",
+    "placeholder": "you@example.com",
+    "value": "email"
+   },
+   "bind": {
+    "props.error": "${= (trim(email) == \"\" ? \"Email is required\" : (contains(email, \"@\") ? \"\" : \"Enter a valid email\"))}",
+    "visible": "${= step == 2}"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step == 2}"
+   },
+   "children": [
+    "outlinedButton1",
+    "filledButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Continue"
+   },
+   "bind": {
+    "props.enabled": "${= ((trim(name) == \"\" ? \"Name is required\" : \"\") == \"\" && (trim(address) == \"\" ? \"Address is required\" : \"\") == \"\" && (trim(city) == \"\" ? \"City is required\" : \"\") == \"\" && (trim(postcode) == \"\" ? \"Postcode is required\" : \"\") == \"\" && (trim(email) == \"\" ? \"Email is required\" : (contains(email, \"@\") ? \"\" : \"Enter a valid email\")) == \"\")}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 20,
+     "fontWeight": 600,
+     "letterSpacing": -0.2,
+     "height": 1.3,
+     "color": "#FF111827"
+    },
+    "text": "Payment summary"
+   },
+   "bind": {
+    "visible": "${= step == 3}"
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Delivery",
+    "value": "delivery",
+    "options": [
+     "Standard",
+     "Express"
+    ],
+    "details": [
+     "3 to 5 working days",
+     "Next working day"
+    ],
+    "prices": [
+     "$4",
+     "$12"
+    ]
+   },
+   "bind": {
+    "visible": "${= step == 3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Subtotal\", \"${fixed((sum(map(items, i => i.qty * i.price))), 2)}\"],[\"Delivery\", \"${fixed((delivery == \"Express\" ? 12 : 4), 2)}\"],[\"Total\", \"${fixed(((sum(map(items, i => i.qty * i.price))) + (delivery == \"Express\" ? 12 : 4)), 2)}\"]]}",
+    "visible": "${= step == 3}"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= step == 3}"
+   },
+   "children": [
+    "outlinedButton2",
+    "filledButton3"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Place order"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order confirmed",
+    "codeLabel": "Order number",
+    "tone": "good"
+   },
+   "bind": {
+    "props.message": "Thanks ${name}. A confirmation is on its way to ${email}.",
+    "props.code": "${= (\"ORD-\" + replace(upper(name), \" \", \"\") + \"-\" + round(((sum(map(items, i => i.qty * i.price))) + (delivery == \"Express\" ? 12 : 4)), 0))}",
+    "visible": "${= step == 4}"
+   }
+  },
+  "Details2": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Name\", \"{name}\"],[\"Email\", \"{email}\"],[\"Total paid\", \"${fixed(((sum(map(items, i => i.qty * i.price))) + (delivery == \"Express\" ? 12 : 4)), 2)}\"]]}",
+    "visible": "${= step == 4}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": "beans",
+      "name": "Espresso beans",
+      "price": 24,
+      "qty": 1
+     },
+     {
+      "id": "mug",
+      "name": "Ceramic mug",
+      "price": 12,
+      "qty": 2
+     },
+     {
+      "id": "tote",
+      "name": "Canvas tote",
+      "price": 18,
+      "qty": 1
+     }
+    ]
+   },
+   {
+    "name": "name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "address",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "city",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "postcode",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "email",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "delivery",
+    "type": "text",
+    "value": "Standard"
+   }
+  ]
+ }
+}

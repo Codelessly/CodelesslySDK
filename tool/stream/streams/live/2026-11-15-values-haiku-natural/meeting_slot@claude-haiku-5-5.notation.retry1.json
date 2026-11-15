@@ -1,0 +1,307 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Schedule a meeting",
+    "subtitle": "30 minutes with Priya, Marcus and Elena",
+    "icon": "event",
+    "status": "Next week",
+    "tone": "accent"
+   },
+   "children": [
+    "SectionLabel1",
+    "segmentedButton1",
+    "SectionLabel2",
+    "ChoiceChips1",
+    "SectionLabel3",
+    "Details1",
+    "ActionButton1",
+    "Receipt1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Day",
+    "note": "Next week"
+   },
+   "bind": {
+    "visible": "${= booked==false}"
+   }
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "Mon 16",
+      "label": "Mon 16"
+     },
+     {
+      "value": "Tue 17",
+      "label": "Tue 17"
+     },
+     {
+      "value": "Wed 18",
+      "label": "Wed 18"
+     },
+     {
+      "value": "Thu 19",
+      "label": "Thu 19"
+     },
+     {
+      "value": "Fri 20",
+      "label": "Fri 20"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [day]}",
+    "visible": "${= booked==false}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "day",
+       "value": "${result[0]}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "time",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Time",
+    "note": "Pick a free slot"
+   },
+   "bind": {
+    "visible": "${= (booked==false) && (day!=\"\")}"
+   }
+  },
+  "ChoiceChips1": {
+   "type": "ChoiceChips",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "time",
+    "options": [
+     "09:00",
+     "10:00",
+     "11:00",
+     "13:00",
+     "14:00",
+     "15:00"
+    ],
+    "disabled": [
+     "10:00",
+     "13:00"
+    ],
+    "columns": 3
+   },
+   "bind": {
+    "visible": "${= (booked==false) && (day!=\"\")}"
+   }
+  },
+  "SectionLabel3": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Attendees",
+    "note": "3 people"
+   },
+   "bind": {
+    "visible": "${= booked==false}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Priya",
+      "Invited"
+     ],
+     [
+      "Marcus",
+      "Invited"
+     ],
+     [
+      "Elena",
+      "Invited"
+     ]
+    ]
+   },
+   "bind": {
+    "visible": "${= booked==false}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Confirm",
+    "tone": "primary",
+    "icon": "check"
+   },
+   "bind": {
+    "props.enabled": "${= day!=\"\" && time!=\"\"}",
+    "visible": "${= booked==false}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "booked",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Meeting booked",
+    "code": "30 min",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.message": "${day} Nov, ${time} to ${= (time==\"09:00\" ? \"09:30\" : time==\"10:00\" ? \"10:30\" : time==\"11:00\" ? \"11:30\" : time==\"13:00\" ? \"13:30\" : time==\"14:00\" ? \"14:30\" : time==\"15:00\" ? \"15:30\" : \"\")}, with Priya, Marcus and Elena.",
+    "visible": "${= booked}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "day",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "time",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "booked",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

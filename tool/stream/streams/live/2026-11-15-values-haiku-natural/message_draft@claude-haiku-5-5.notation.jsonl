@@ -1,0 +1,71 @@
+{"meta":{"ui":"message_draft","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Draft an email to my landlord, Mr Alvarez, about the broken heating in apartment 4B and show it as an inline card I can edit before it goes. To: landlord@example.com; Subject: Heating not working in apartment 4B; the body starts \"Dear Mr. Alvarez,\" and is signed Alex. A tone switch between Polite and Firm rewrites the body: the Polite one asks \"Could you please arrange for someone to take a look this week?\", the Firm one says \"Please confirm by Thursday when a repair will be carried out.\" Send and Discard buttons; Send needs a recipient and a subject, and afterwards the card shows \"Sent to\" the address with the subject and the body as it was sent.","text":"state to=\"landlord@example.com\"\nstate subject=\"Heating not working in apartment 4B\"\nstate tone=\"Polite\"\nstate sent=false\nlet ask = tone == \"Polite\" ? \"Could you please arrange for someone to take a look this week?\" : \"Please confirm by Thursday when a repair will be carried out.\"\nlet body = \"Dear Mr. Alvarez,\\n\\nThe heating in apartment 4B has not been working for several days. \" + ask + \"\\n\\nThank you,\\nAlex\"\nlet canSend = to != \"\" and subject != \"\"\n\nnode {\"type\": \"Card\", \"props\": {\"width\": 390, \"gap\": 12, \"pad\": 16}}\n  Text.heading \"New email\"\n  Row gap:8\n    Text.muted \"Tone\"\n    Segments =tone options:[\"Polite\",\"Firm\"]\n  if !sent\n    Input \"To\" =to\n    Input \"Subject\" =subject\n    Text.body \"{body}\"\n    Row gap:8\n      Button.outline \"Discard\" -> to=\"\"; subject=\"\"; tone=\"Polite\"\n      Spacer grow\n      Button \"Send\" enabled:{canSend} -> sent=true; emit send\n  if sent\n    Text.strong \"Sent to {to}\"\n    Text.muted \"{subject}\"\n    Text.body \"{body}\"","usage":{"input_tokens":9451,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":421,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":632,"totalMs":2105}}
+{"tMs":632,"delta":"state"}
+{"tMs":786,"delta":" to"}
+{"tMs":786,"delta":"=\""}
+{"tMs":786,"delta":"landlord@example.com\""}
+{"tMs":786,"delta":"\nstate subject=\"Heating"}
+{"tMs":787,"delta":" not working in apartment 4"}
+{"tMs":787,"delta":"B\"\nstate tone=\""}
+{"tMs":787,"delta":"Polite\"\nstate s"}
+{"tMs":937,"delta":"ent=false\nlet "}
+{"tMs":938,"delta":"ask = tone == \"Pol"}
+{"tMs":938,"delta":"ite\" ? \"Could you"}
+{"tMs":939,"delta":" please arrange for someone to"}
+{"tMs":939,"delta":" take a look this week?\" :"}
+{"tMs":939,"delta":" \"Please confirm by"}
+{"tMs":940,"delta":" Thursday when a repair will"}
+{"tMs":988,"delta":" be carried out.\"\nlet body"}
+{"tMs":988,"delta":" = \"Dear Mr"}
+{"tMs":992,"delta":". Alvarez,\\"}
+{"tMs":1084,"delta":"n\\nThe heating in"}
+{"tMs":1085,"delta":" apartment 4B has not"}
+{"tMs":1085,"delta":" been"}
+{"tMs":1085,"delta":" working for"}
+{"tMs":1093,"delta":" several"}
+{"tMs":1181,"delta":" days. \""}
+{"tMs":1181,"delta":" + ask + \"\\n\\"}
+{"tMs":1182,"delta":"nThank you,\\n"}
+{"tMs":1182,"delta":"Alex\"\nlet can"}
+{"tMs":1218,"delta":"Send = to !="}
+{"tMs":1218,"delta":" \"\" and subject != \"\""}
+{"tMs":1237,"delta":"\n\nnode"}
+{"tMs":1297,"delta":" {\"type\": \""}
+{"tMs":1297,"delta":"Card\", \"props"}
+{"tMs":1297,"delta":"\": {\"width\": 390,"}
+{"tMs":1338,"delta":" \"gap\": 12,"}
+{"tMs":1338,"delta":" \"pad\": 16}}"}
+{"tMs":1636,"delta":"\n  "}
+{"tMs":1636,"delta":"Text"}
+{"tMs":1637,"delta":".he"}
+{"tMs":1637,"delta":"ading \"New"}
+{"tMs":1637,"delta":" email\"\n  Row gap"}
+{"tMs":1637,"delta":":8\n    Text.mu"}
+{"tMs":1637,"delta":"ted \"Tone\"\n    "}
+{"tMs":1638,"delta":"Segments =tone options"}
+{"tMs":1638,"delta":":[\"Polite\",\""}
+{"tMs":1638,"delta":"Firm\"]\n  if"}
+{"tMs":1638,"delta":" !sent\n    Input"}
+{"tMs":1638,"delta":" \"To\""}
+{"tMs":1639,"delta":" ="}
+{"tMs":1639,"delta":"to\n    Input \"Sub"}
+{"tMs":1817,"delta":"ject\" =subject\n    "}
+{"tMs":1818,"delta":"Text.body"}
+{"tMs":1818,"delta":" \"{body}\"\n    "}
+{"tMs":1818,"delta":"Row gap:8\n      "}
+{"tMs":1818,"delta":"Button.outline \"Disc"}
+{"tMs":1819,"delta":"ard\" -> to"}
+{"tMs":1819,"delta":"=\"\";"}
+{"tMs":1819,"delta":" subject=\"\"; tone=\""}
+{"tMs":1819,"delta":"Polite\"\n      Sp"}
+{"tMs":1834,"delta":"acer grow\n      Button"}
+{"tMs":2014,"delta":" \"Send\" en"}
+{"tMs":2015,"delta":"abled:{canSend}"}
+{"tMs":2015,"delta":" -> s"}
+{"tMs":2015,"delta":"ent=true; em"}
+{"tMs":2015,"delta":"it send\n  if sent"}
+{"tMs":2015,"delta":"\n    Text.str"}
+{"tMs":2016,"delta":"ong \"Sent to {to"}
+{"tMs":2016,"delta":"}\"\n    Text.mu"}
+{"tMs":2016,"delta":"ted \"{"}
+{"tMs":2047,"delta":"subject}\"\n    Text"}
+{"tMs":2051,"delta":".body \"{body}\""}
