@@ -5,6 +5,7 @@
 #       [--set name=json] [--scroll id=px] [--drag id=dx,dy] [--navigate screen?param=value] [--wait ms] [--now time]
 #       [--label text] [--compare png|dir] [--compare-map screen=name] [--validate-only]
 #       [--component Type [--props json] [--slots file]]
+#       [--design-system folder]   (with one document: render it with that design system's blocks and theme)
 # Exit status: 0 no errors (warnings allowed), 1 errors, 2 bad arguments or a crash.
 set -u
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -20,7 +21,15 @@ fi
 args=()
 out=""
 expect_path=0
+want_ds=0
+design_system=""
 for a in "$@"; do
+  if [ $want_ds = 1 ]; then
+    case "$a" in /*) ;; *) a="$PWD/$a" ;; esac
+    design_system="$a"
+    want_ds=0
+    continue
+  fi
   if [ $expect_path = 1 ]; then
     # `--fonts system` names the system's font directories, not a path.
     if [ "${prev:-}" != "--fonts" ] || [ "$a" != "system" ]; then
@@ -34,6 +43,7 @@ for a in "$@"; do
   fi
   case "$a" in
     --out|--fonts|--slots|--compare) expect_path=1; prev="$a"; args+=("$a") ;;
+    --design-system) want_ds=1 ;;
     --*) args+=("$a") ;;
     *)
       # A positional argument right after a value-taking option is that option's value.
@@ -51,6 +61,27 @@ if [ -z "$out" ]; then
   exit 2
 fi
 mkdir -p "$out"
+
+# --design-system <folder> with one document: the document is rendered as a
+# site of its own that uses that design system (its blocks and its theme),
+# which is what a card expanded from the notation needs.
+if [ -n "$design_system" ]; then
+  doc=""
+  for i in "${!args[@]}"; do
+    case "${args[$i]}" in *.json) if [ -f "${args[$i]}" ]; then doc="$i"; break; fi ;; esac
+  done
+  if [ -z "$doc" ] || [ ! -f "$design_system/design_system.json" ]; then
+    echo "--design-system <folder> goes with one document (.json) and a folder that holds design_system.json." >&2
+    exit 2
+  fi
+  site="$out/.site"
+  rm -rf "$site" && mkdir -p "$site"
+  cp "${args[$doc]}" "$site/$(basename "${args[$doc]}")"
+  # The manifest names the design system relative to itself.
+  rel="$(realpath --relative-to="$site" "$design_system" 2>/dev/null || python3 -c 'import os,sys; print(os.path.relpath(sys.argv[1], sys.argv[2]))' "$design_system" "$site")"
+  printf '{"schema": 3, "pages": ["%s"], "designSystem": "%s"}\n' "$(basename "${args[$doc]}")" "$rel" > "$site/site.json"
+  args[$doc]="$site"
+fi
 
 # Flutter: $FLUTTER (the flutter command), else $FLUTTER_ROOT/bin/flutter,
 # else flutter on the PATH, else the usual install places.

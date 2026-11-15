@@ -73,5 +73,7 @@ the scores are in codelessly_api `docs/design/15-the-middle-and-generated-apps.m
    22 seconds; the speed table was wrong as first drafted (corrected above from the recorded medians); the
    judge's scores are means in a design note, with no itemized scores in the repository; "on every platform"
    hides that loading by project token does not work on Linux desktop; and rendering the example needs a site
-   folder that names the design system, which the draft did not say (the render tool should take
-   `--design-system` for a single document).
+   folder that names the design system, which the draft did not say. The render tool now takes
+   `--design-system <folder>` with a single document, so the example is two commands:
+   `tool/notation/notation.sh expand card.txt --design-system design_systems/cards --out card.json` and
+   `tool/render/render.sh card.json --out out --design-system design_systems/cards`.
