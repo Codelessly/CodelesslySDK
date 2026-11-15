@@ -1,0 +1,414 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Grocery order",
+    "subtitle": "5 items",
+    "icon": "shopping_cart",
+    "status": "Review",
+    "tone": "accent"
+   },
+   "children": [
+    "listView1",
+    "row1",
+    "Callout1",
+    "Details1",
+    "row2",
+    "Receipt1",
+    "Receipt2"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${items}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "CartLine1"
+   ]
+  },
+  "CartLine1": {
+   "type": "CartLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.title}",
+    "props.detail": "${item.detail}",
+    "props.price": "${item.price}",
+    "props.qty": "${item.qty}",
+    "props.kind": "${item.kind}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= updateWhere(items,x=>x.id==item.id,x=>with(x,\"qty\",result))}"
+      }
+     ]
+    }
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "InputField1",
+    "ActionButton1"
+   ]
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Promo code",
+    "placeholder": "Enter code",
+    "value": "promo"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Apply",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "applied",
+       "value": "${= upper(trim(promo))==\"SAVE10\"}"
+      }
+     ]
+    }
+   ]
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Promo applied",
+    "message": "SAVE10 takes 10% off the subtotal.",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "visible": "${= applied}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Subtotal\",money(sum(items,x=>x.price*x.qty),\"$\",2)],[\"Discount\",applied?money(-0.1*sum(items,x=>x.price*x.qty),\"$\",2):\"\"],[\"Delivery\",\"$3.99\"],[\"Total\",money(sum(items,x=>x.price*x.qty)*(applied?0.9:1)+3.99,\"$\",2)]]}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= decided==\"\"}"
+   },
+   "children": [
+    "ActionButton2",
+    "ActionButton3"
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Cancel",
+    "tone": "quiet",
+    "icon": "close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decided",
+       "value": "cancelled"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton3": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Confirm order",
+    "tone": "primary",
+    "icon": "check"
+   },
+   "bind": {
+    "props.enabled": "${= length(items)>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decided",
+       "value": "confirmed"
+      },
+      {
+       "type": "componentEvent",
+       "event": "placeOrder"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order placed",
+    "message": "Your groceries are on the way.",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "visible": "${= decided==\"confirmed\"}"
+   }
+  },
+  "Receipt2": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order cancelled",
+    "message": "Nothing was charged.",
+    "tone": "neutral",
+    "icon": "cancel"
+   },
+   "bind": {
+    "visible": "${= decided==\"cancelled\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "title": "Bananas",
+      "detail": "1 bunch",
+      "price": 2.4,
+      "qty": 1,
+      "kind": "banana"
+     },
+     {
+      "id": 2,
+      "title": "Whole milk",
+      "detail": "1 L",
+      "price": 1.6,
+      "qty": 1,
+      "kind": "milk"
+     },
+     {
+      "id": 3,
+      "title": "Sourdough loaf",
+      "detail": "Bakery",
+      "price": 4.5,
+      "qty": 1,
+      "kind": "bread"
+     },
+     {
+      "id": 4,
+      "title": "Free range eggs",
+      "detail": "12 pack",
+      "price": 3.8,
+      "qty": 1,
+      "kind": "eggs"
+     },
+     {
+      "id": 5,
+      "title": "Cheddar",
+      "detail": "400 g",
+      "price": 5.2,
+      "qty": 1,
+      "kind": "cheese"
+     }
+    ]
+   },
+   {
+    "name": "promo",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "applied",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "decided",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

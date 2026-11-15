@@ -1,0 +1,205 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Coffee near you",
+    "subtitle": "Five shops within walking distance",
+    "icon": "coffee",
+    "status": "Nearby",
+    "tone": "accent"
+   },
+   "children": [
+    "MapPanel1",
+    "listView1"
+   ]
+  },
+  "MapPanel1": {
+   "type": "MapPanel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 178.0
+   },
+   "props": {
+    "value": "pick",
+    "count": 5
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= pick}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${shops}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "PlaceRow1"
+   ]
+  },
+  "PlaceRow1": {
+   "type": "PlaceRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.name": "${item.name}",
+    "props.detail": "${item.detail}",
+    "props.index": "${item.n}",
+    "props.rating": "${item.rating}",
+    "props.distance": "${item.distance}",
+    "props.hours": "${item.hours}",
+    "props.selected": "${= pick==item.n}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= item.n}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "shops",
+    "type": "list",
+    "value": [
+     {
+      "n": 1,
+      "name": "Blue Bottle Corner",
+      "detail": "Single-origin pour-overs",
+      "rating": "4.7",
+      "distance": "120 m",
+      "hours": "7:00 to 18:00"
+     },
+     {
+      "n": 2,
+      "name": "Harbor Roasters",
+      "detail": "Espresso and cold brew",
+      "rating": "4.5",
+      "distance": "240 m",
+      "hours": "6:30 to 17:00"
+     },
+     {
+      "n": 3,
+      "name": "Little Cup Café",
+      "detail": "Pastries and quiet tables",
+      "rating": "4.8",
+      "distance": "310 m",
+      "hours": "8:00 to 20:00"
+     },
+     {
+      "n": 4,
+      "name": "Grind House",
+      "detail": "Filter coffee, takeaway",
+      "rating": "4.2",
+      "distance": "450 m",
+      "hours": "7:30 to 16:00"
+     },
+     {
+      "n": 5,
+      "name": "North Street Beans",
+      "detail": "Roasted in house",
+      "rating": "4.6",
+      "distance": "620 m",
+      "hours": "7:00 to 19:00"
+     }
+    ]
+   }
+  ]
+ }
+}

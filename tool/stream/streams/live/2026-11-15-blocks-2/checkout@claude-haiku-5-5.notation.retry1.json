@@ -1,0 +1,692 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "stack1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "stack1": {
+   "type": "stack",
+   "layout": {
+    "width": 390,
+    "height": 600
+   },
+   "children": [
+    "ChatCard1",
+    "ChatCard2",
+    "ChatCard3",
+    "ChatCard4"
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your cart",
+    "subtitle": "3 items",
+    "icon": "shopping_bag",
+    "status": "Step 1 of 3"
+   },
+   "bind": {
+    "visible": "${= step==1}"
+   },
+   "children": [
+    "listView1",
+    "Details1",
+    "ActionButton1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${cart}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "CartLine1"
+   ]
+  },
+  "CartLine1": {
+   "type": "CartLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "detail": ""
+   },
+   "bind": {
+    "props.title": "${item.name}",
+    "props.price": "${= item.price*item.qty}",
+    "props.qty": "${item.qty}",
+    "props.kind": "${item.kind}",
+    "props.tone": "${item.tone}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cart",
+       "value": "${= updateWhere(cart,x=>x.id==item.id,x=>with(x,\"qty\",result))}"
+      }
+     ]
+    }
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Subtotal\",money((sum(cart,x=>x.price*x.qty)),\"$\",2)],[\"Shipping\",money((delivery==\"Express\"?12:4),\"$\",2)]]}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Continue to shipping",
+    "tone": "primary",
+    "icon": "arrow_forward"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard2": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Shipping",
+    "subtitle": "Where should we send it?",
+    "icon": "local_shipping",
+    "status": "Step 2 of 3"
+   },
+   "bind": {
+    "visible": "${= step==2}"
+   },
+   "children": [
+    "InputField1",
+    "InputField2",
+    "row1",
+    "InputField5",
+    "row2"
+   ]
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Full name",
+    "placeholder": "Ada Lovelace",
+    "value": "name"
+   },
+   "bind": {
+    "props.error": "${= tried&&trim(name)==\"\"?\"Please enter your name\":\"\"}"
+   }
+  },
+  "InputField2": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Address",
+    "placeholder": "12 Market Street",
+    "value": "addr"
+   },
+   "bind": {
+    "props.error": "${= tried&&trim(addr)==\"\"?\"Please enter your address\":\"\"}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "InputField3",
+    "InputField4"
+   ]
+  },
+  "InputField3": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "City",
+    "placeholder": "Leeds",
+    "value": "city"
+   },
+   "bind": {
+    "props.error": "${= tried&&trim(city)==\"\"?\"Required\":\"\"}"
+   }
+  },
+  "InputField4": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Postcode",
+    "placeholder": "LS1 4AP",
+    "value": "post"
+   },
+   "bind": {
+    "props.error": "${= tried&&trim(post)==\"\"?\"Required\":\"\"}"
+   }
+  },
+  "InputField5": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Email",
+    "placeholder": "you@example.com",
+    "value": "email",
+    "keyboard": "emailAddress"
+   },
+   "bind": {
+    "props.error": "${= tried&&!contains(email,\"@\")?\"Enter a valid email\":\"\"}"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton2",
+    "ActionButton3"
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back",
+    "tone": "quiet",
+    "icon": "arrow_back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton3": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Continue",
+    "tone": "primary",
+    "icon": "arrow_forward"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tried",
+       "value": "${= true}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= trim(name)!=\"\"&&trim(addr)!=\"\"&&trim(city)!=\"\"&&trim(post)!=\"\"&&contains(email,\"@\")?3:2}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard3": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Payment",
+    "subtitle": "Review and pay",
+    "icon": "credit_card",
+    "status": "Step 3 of 3"
+   },
+   "bind": {
+    "visible": "${= step==3}"
+   },
+   "children": [
+    "OptionList1",
+    "Details2",
+    "TotalBar1",
+    "row3"
+   ]
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Delivery",
+    "value": "delivery",
+    "options": [
+     "Standard",
+     "Express"
+    ],
+    "details": [
+     "3 to 5 days",
+     "Next day"
+    ],
+    "prices": [
+     "$4.00",
+     "$12.00"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": []
+    }
+   ]
+  },
+  "Details2": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Items\",money((sum(cart,x=>x.price*x.qty)),\"$\",2)],[\"Shipping\",money((delivery==\"Express\"?12:4),\"$\",2)]]}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "cta": "Place order",
+    "icon": "lock"
+   },
+   "bind": {
+    "props.note": "Delivered to ${addr}",
+    "props.amount": "${= money(((sum(cart,x=>x.price*x.qty))+(delivery==\"Express\"?12:4)),\"$\",2)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "orderNo",
+       "value": "${= \"SH-\"+string(floor(random()*9000+1000))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton4"
+   ]
+  },
+  "ActionButton4": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Back",
+    "tone": "quiet",
+    "icon": "arrow_back"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "step",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard4": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order placed",
+    "icon": "check",
+    "status": "Confirmed"
+   },
+   "bind": {
+    "props.subtitle": "Thank you, ${name}",
+    "visible": "${= step==4}"
+   },
+   "children": [
+    "Receipt1"
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order confirmed",
+    "codeLabel": "Order number",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.message": "A confirmation is on its way to ${email}.",
+    "props.code": "${orderNo}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "step",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "cart",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Espresso beans, 1 kg",
+      "price": 24,
+      "qty": 1,
+      "kind": "box",
+      "tone": "sand"
+     },
+     {
+      "id": 2,
+      "name": "Ceramic mug",
+      "price": 12,
+      "qty": 2,
+      "kind": "mug",
+      "tone": "rose"
+     },
+     {
+      "id": 3,
+      "name": "Canvas tote",
+      "price": 18,
+      "qty": 1,
+      "kind": "tote",
+      "tone": "mint"
+     }
+    ]
+   },
+   {
+    "name": "name",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "addr",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "city",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "post",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "email",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "delivery",
+    "type": "text",
+    "value": "Standard"
+   },
+   {
+    "name": "orderNo",
+    "type": "text",
+    "value": "SH-4821"
+   },
+   {
+    "name": "tried",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}

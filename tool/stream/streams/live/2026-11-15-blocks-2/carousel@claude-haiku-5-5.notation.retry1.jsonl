@@ -1,0 +1,100 @@
+{"meta":{"ui":"carousel","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show six running shoes as a carousel I can swipe or step through with arrows, with dots for the position: each has a picture placeholder, name, price and rating. Tapping one opens its details in place (description, sizes to pick, add to bag) with a way back to the carousel.","text":"state shoes=[{\"id\":1,\"name\":\"Velocity Runner\",\"detail\":\"Lightweight daily trainer\",\"price\":\"$129\",\"rating\":4.6,\"kind\":\"shoe\",\"tone\":\"sand\"},{\"id\":2,\"name\":\"Trail Blaze\",\"detail\":\"Grippy all-terrain shoe\",\"price\":\"$149\",\"rating\":4.4,\"kind\":\"shoe\",\"tone\":\"mint\"},{\"id\":3,\"name\":\"Court Pro\",\"detail\":\"Cushioned court shoe\",\"price\":\"$119\",\"rating\":4.7,\"kind\":\"shoe\",\"tone\":\"sky\"},{\"id\":4,\"name\":\"Sprint Lite\",\"detail\":\"Race-day speed trainer\",\"price\":\"$159\",\"rating\":4.8,\"kind\":\"shoe\",\"tone\":\"rose\"},{\"id\":5,\"name\":\"Cloud Step\",\"detail\":\"Plush everyday comfort\",\"price\":\"$139\",\"rating\":4.5,\"kind\":\"shoe\",\"tone\":\"lilac\"},{\"id\":6,\"name\":\"Urban Flex\",\"detail\":\"Street-style flexible fit\",\"price\":\"$109\",\"rating\":4.3,\"kind\":\"shoe\",\"tone\":\"slate\"}]\nstate i=0\nstate open=false\nstate size=\"\"\nstate bag=0\nChatCard \"Running shoes\" \"Six models\" icon:\"directions_run\" status:\"Shop\" tone:accent\n  if !open\n    Column gap:8\n      Carousel =i items:=shoes peek:0.86 dots arrows counter -> open=true\n      each r in shoes\n        ProductTile \"{r.name}\" \"{r.detail}\" price:=r.price rating:=r.rating kind:=r.kind tone:=r.tone\n  if open\n    Row between\n      Button.ghost \"Back to carousel\" -> open=false\n      Text.muted \"{shoes[i].name}\"\n    Media kind:=shoes[i].kind tone:=shoes[i].tone h:160\n    Text.strong \"{shoes[i].name}\"\n    Paragraph \"{shoes[i].detail}. Rated {shoes[i].rating} by runners.\"\n    OptionList \"Choose your size\" =size options:[\"7\",\"8\",\"9\",\"10\",\"11\"]\n    ActionButton \"Add to bag\" primary icon:\"shopping_bag\" enabled:=size!=\"\" -> bag=bag+1; toast \"Added to bag\"","usage":{"input_tokens":10585,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":765,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":367,"totalMs":2407}}
+{"tMs":367,"delta":"state"}
+{"tMs":508,"delta":" shoes=[{\"id"}
+{"tMs":508,"delta":"\":1,\"name\":\""}
+{"tMs":508,"delta":"Velocity Runner\",\"det"}
+{"tMs":508,"delta":"ail\":\"Lightweight"}
+{"tMs":508,"delta":" daily trainer\",\"price\":"}
+{"tMs":508,"delta":"\"$129\",\"rating\":4"}
+{"tMs":526,"delta":".6,\"kind\":\""}
+{"tMs":547,"delta":"shoe\",\"tone\":\""}
+{"tMs":566,"delta":"sand\"},{\"id\":"}
+{"tMs":587,"delta":"2,\"name\":\"Tr"}
+{"tMs":607,"delta":"ail Blaze\",\"detail"}
+{"tMs":628,"delta":"\":\"Grippy all-"}
+{"tMs":649,"delta":"terrain shoe\",\"price"}
+{"tMs":668,"delta":"\":\"$149\",\"rating\":"}
+{"tMs":690,"delta":"4.4,\"kind\":"}
+{"tMs":709,"delta":"\"shoe\",\"tone\":"}
+{"tMs":730,"delta":"\"mint\"},{\"id"}
+{"tMs":751,"delta":"\":3,\"name\":\""}
+{"tMs":771,"delta":"Court Pro\",\"detail\":"}
+{"tMs":791,"delta":"\"Cushioned court sh"}
+{"tMs":814,"delta":"oe\",\"price\":\"$119"}
+{"tMs":832,"delta":"\",\"rating\":4.7,"}
+{"tMs":853,"delta":"\"kind\":\"shoe"}
+{"tMs":873,"delta":"\",\"tone\":\"sky\""}
+{"tMs":894,"delta":"},{\"id\":4,\""}
+{"tMs":913,"delta":"name\":\"Sprint"}
+{"tMs":934,"delta":" Lite\",\"detail\":\""}
+{"tMs":954,"delta":"Race-day speed trainer"}
+{"tMs":974,"delta":"\",\"price\":\"$159\",\"r"}
+{"tMs":995,"delta":"ating\":4.8,\"k"}
+{"tMs":1017,"delta":"ind\":\"shoe\",\"t"}
+{"tMs":1036,"delta":"one\":\"rose\"},{"}
+{"tMs":1056,"delta":"\"id\":5,\"name\":"}
+{"tMs":1077,"delta":"\"Cloud Step\",\""}
+{"tMs":1097,"delta":"detail\":\"Plush ever"}
+{"tMs":1118,"delta":"yday comfort\",\"price\":"}
+{"tMs":1138,"delta":"\"$139\",\"rating\":4"}
+{"tMs":1159,"delta":".5,\"kind\":\""}
+{"tMs":1179,"delta":"shoe\",\"tone\":\""}
+{"tMs":1199,"delta":"lilac\"},{\"id"}
+{"tMs":1219,"delta":"\":6,\"name\":\""}
+{"tMs":1240,"delta":"Urban Flex\",\"detail"}
+{"tMs":1261,"delta":"\":\"Street-style flex"}
+{"tMs":1281,"delta":"ible fit\",\"price\":\"$"}
+{"tMs":1302,"delta":"109\",\"rating\":4.3"}
+{"tMs":1322,"delta":",\"kind\":\"sho"}
+{"tMs":1342,"delta":"e\",\"tone\":\"slate"}
+{"tMs":1363,"delta":"\"}]\nstate i=0"}
+{"tMs":1383,"delta":"\nstate open=false\nstate size"}
+{"tMs":1403,"delta":"=\"\"\nstate bag=0"}
+{"tMs":1444,"delta":"\nChatCard \"Running sh"}
+{"tMs":1465,"delta":"oes\" \"Six models\""}
+{"tMs":1485,"delta":" icon:\"directions_run"}
+{"tMs":1506,"delta":"\" status:\"Shop\""}
+{"tMs":1526,"delta":" tone:accent\n  if"}
+{"tMs":1546,"delta":" !open\n    Column gap"}
+{"tMs":1567,"delta":":8\n      Carousel"}
+{"tMs":1587,"delta":" =i items:="}
+{"tMs":1608,"delta":"shoes peek:0."}
+{"tMs":1628,"delta":"86 dots arrows coun"}
+{"tMs":1649,"delta":"ter -"}
+{"tMs":1669,"delta":"> open=true\n      "}
+{"tMs":1689,"delta":"each r in"}
+{"tMs":1709,"delta":" shoes\n        Product"}
+{"tMs":1730,"delta":"Tile \""}
+{"tMs":1751,"delta":"{r.name}\" \"{"}
+{"tMs":1771,"delta":"r.detail}\" price:"}
+{"tMs":1791,"delta":"=r.price rating:="}
+{"tMs":1812,"delta":"r.rating kind:="}
+{"tMs":1832,"delta":"r.kind tone:="}
+{"tMs":1852,"delta":"r.tone\n  if open"}
+{"tMs":1873,"delta":"\n    Row between\n      "}
+{"tMs":1893,"delta":"Button.ghost \"Back"}
+{"tMs":1914,"delta":" to carousel\" -> open"}
+{"tMs":1934,"delta":"=false\n      Text.mu"}
+{"tMs":1954,"delta":"ted \"{shoes[i"}
+{"tMs":1975,"delta":"].name}\"\n    Media"}
+{"tMs":1995,"delta":" kind:=shoes["}
+{"tMs":2016,"delta":"i].kind tone:="}
+{"tMs":2036,"delta":"shoes[i].tone"}
+{"tMs":2056,"delta":" h:160\n    Text."}
+{"tMs":2077,"delta":"strong \"{shoes["}
+{"tMs":2097,"delta":"i].name}\"\n    "}
+{"tMs":2117,"delta":"Paragraph \"{sho"}
+{"tMs":2138,"delta":"es[i].detail}."}
+{"tMs":2159,"delta":" Rated {shoes["}
+{"tMs":2179,"delta":"i].rating} by runners"}
+{"tMs":2199,"delta":".\"\n    OptionList \""}
+{"tMs":2220,"delta":"Choose your size\" =size"}
+{"tMs":2240,"delta":" options:[\"7\",\"8\",\"9"}
+{"tMs":2262,"delta":"\",\"10\",\"11\"]\n    "}
+{"tMs":2281,"delta":"ActionButton \"Add"}
+{"tMs":2302,"delta":" to bag\" primary icon"}
+{"tMs":2322,"delta":":\"shopping_bag"}
+{"tMs":2342,"delta":"\" enabled:=size!"}
+{"tMs":2363,"delta":"=\"\" -> bag=b"}
+{"tMs":2383,"delta":"ag+1; toast \""}
+{"tMs":2403,"delta":"Added to bag\""}

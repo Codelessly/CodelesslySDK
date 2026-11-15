@@ -1,0 +1,88 @@
+{"meta":{"ui":"map_list","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show five coffee shops near me as a list beside a simple drawn map (streets as lines, no real map tiles) with a numbered pin for each. Tapping a shop or its pin highlights both and shows its rating, distance and opening hours. On a narrow screen the map goes above the list.","text":"ChatCard \"Coffee near you\" \"Five shops within walking distance\" icon:\"coffee\" status:\"Nearby\" tone:accent\n  MapPanel =pick count:5 -> pick=pick\n  each shop in shops\n    PlaceRow shop.name shop.detail index:shop.n rating:shop.rating distance:shop.distance hours:shop.hours selected:=pick==shop.n -> pick=shop.n\n\nstate pick=0\nstate shops=[{\"n\":1,\"name\":\"Blue Bottle Corner\",\"detail\":\"Single-origin pour-overs\",\"rating\":\"4.7\",\"distance\":\"120 m\",\"hours\":\"7:00 to 18:00\"},{\"n\":2,\"name\":\"Harbor Roasters\",\"detail\":\"Espresso and cold brew\",\"rating\":\"4.5\",\"distance\":\"240 m\",\"hours\":\"6:30 to 17:00\"},{\"n\":3,\"name\":\"Little Cup Café\",\"detail\":\"Pastries and quiet tables\",\"rating\":\"4.8\",\"distance\":\"310 m\",\"hours\":\"8:00 to 20:00\"},{\"n\":4,\"name\":\"Grind House\",\"detail\":\"Filter coffee, takeaway\",\"rating\":\"4.2\",\"distance\":\"450 m\",\"hours\":\"7:30 to 16:00\"},{\"n\":5,\"name\":\"North Street Beans\",\"detail\":\"Roasted in house\",\"rating\":\"4.6\",\"distance\":\"620 m\",\"hours\":\"7:00 to 19:00\"}]","usage":{"input_tokens":8886,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":472,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":615,"totalMs":2414}}
+{"tMs":615,"delta":"ChatCard \"Coff"}
+{"tMs":625,"delta":"ee near"}
+{"tMs":792,"delta":" you"}
+{"tMs":792,"delta":"\" \"Five"}
+{"tMs":792,"delta":" shops within"}
+{"tMs":792,"delta":" walking distance\" icon:"}
+{"tMs":792,"delta":"\"co"}
+{"tMs":792,"delta":"ffee\" status:\"N"}
+{"tMs":792,"delta":"earby\" tone:acc"}
+{"tMs":792,"delta":"ent\n  M"}
+{"tMs":815,"delta":"apPanel =pick count"}
+{"tMs":837,"delta":":5 "}
+{"tMs":860,"delta":"-> p"}
+{"tMs":872,"delta":"ick=p"}
+{"tMs":978,"delta":"ick\n  each"}
+{"tMs":978,"delta":" shop in"}
+{"tMs":978,"delta":" shops\n    P"}
+{"tMs":978,"delta":"laceRow sh"}
+{"tMs":978,"delta":"op.name sh"}
+{"tMs":996,"delta":"op.detail index:shop"}
+{"tMs":1016,"delta":".n"}
+{"tMs":1037,"delta":" rating:shop.r"}
+{"tMs":1059,"delta":"ating distance:shop.dist"}
+{"tMs":1081,"delta":"ance hours:shop.h"}
+{"tMs":1101,"delta":"ours selected:="}
+{"tMs":1122,"delta":"pick==shop.n -"}
+{"tMs":1177,"delta":"> pick=shop.n"}
+{"tMs":1177,"delta":"\n\nstate p"}
+{"tMs":1185,"delta":"ick=0\nstate shops="}
+{"tMs":1206,"delta":"[{\"n\":1,\""}
+{"tMs":1226,"delta":"name\":\"Bl"}
+{"tMs":1246,"delta":"ue B"}
+{"tMs":1266,"delta":"ottle Cor"}
+{"tMs":1287,"delta":"ner\",\"detail\":\"Single"}
+{"tMs":1307,"delta":"-orig"}
+{"tMs":1327,"delta":"in pour-"}
+{"tMs":1346,"delta":"over"}
+{"tMs":1367,"delta":"s\",\"rating\":\""}
+{"tMs":1387,"delta":"4.7"}
+{"tMs":1408,"delta":"\",\"distance\":\"120"}
+{"tMs":1429,"delta":" m\",\"hours\":\"7"}
+{"tMs":1451,"delta":":00 to"}
+{"tMs":1469,"delta":" 18"}
+{"tMs":1490,"delta":":00\"},{\"n\":"}
+{"tMs":1511,"delta":"2,\"name\":\"Har"}
+{"tMs":1531,"delta":"bor Ro"}
+{"tMs":1551,"delta":"as"}
+{"tMs":1572,"delta":"ters\",\"detail\":\"Esp"}
+{"tMs":1592,"delta":"resso and cold br"}
+{"tMs":1613,"delta":"ew\",\"rating\":\"4."}
+{"tMs":1634,"delta":"5\",\"distance\":\"240"}
+{"tMs":1655,"delta":" m\",\"hours\":\"6"}
+{"tMs":1675,"delta":":30 to 17"}
+{"tMs":1696,"delta":":00\"},{\"n\":"}
+{"tMs":1716,"delta":"3,\"name\":\"Little"}
+{"tMs":1737,"delta":" Cup"}
+{"tMs":1777,"delta":" Café"}
+{"tMs":1797,"delta":"\",\"detail\":\"P"}
+{"tMs":1817,"delta":"astries and qu"}
+{"tMs":1838,"delta":"iet t"}
+{"tMs":1858,"delta":"ables\",\"rating\":\"4."}
+{"tMs":1878,"delta":"8"}
+{"tMs":1899,"delta":"\",\"distance\":\"310"}
+{"tMs":1920,"delta":" m\",\"hours\":\"8"}
+{"tMs":1941,"delta":":00 to 20:00"}
+{"tMs":1961,"delta":"\"},{\"n\":4,"}
+{"tMs":1982,"delta":"\"name\":\"Grind"}
+{"tMs":2001,"delta":" House"}
+{"tMs":2022,"delta":"\",\"detail\":\"Filter"}
+{"tMs":2043,"delta":" coffee, tak"}
+{"tMs":2064,"delta":"eaway\",\"rating\":\""}
+{"tMs":2083,"delta":"4.2"}
+{"tMs":2104,"delta":"\",\"distance\":\"450"}
+{"tMs":2125,"delta":" m\",\"hours\":\"7"}
+{"tMs":2145,"delta":":30"}
+{"tMs":2165,"delta":" to 16"}
+{"tMs":2186,"delta":":00\"},{\"n\":"}
+{"tMs":2207,"delta":"5,\"name\":\"North"}
+{"tMs":2227,"delta":" Street Be"}
+{"tMs":2247,"delta":"ans\",\"detail\":\"Ro"}
+{"tMs":2267,"delta":"asted in"}
+{"tMs":2288,"delta":" house"}
+{"tMs":2308,"delta":"\",\"rating\":\"4.6"}
+{"tMs":2330,"delta":"\",\"distance\":\"620"}
+{"tMs":2349,"delta":" m\",\"hours\":\"7"}
+{"tMs":2370,"delta":":00 to 19:00"}
+{"tMs":2390,"delta":"\"}]"}

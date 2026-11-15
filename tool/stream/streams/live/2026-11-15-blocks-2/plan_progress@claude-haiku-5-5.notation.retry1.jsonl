@@ -1,0 +1,60 @@
+{"meta":{"ui":"plan_progress","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"retry","prompt":"Show the plan for migrating my blog as steps: six steps with a short description each. A start button runs them one after another (a second or two each) with a spinner on the running step, ticks on the finished ones, a progress bar and the time elapsed, a pause button, and a summary when all are done.","text":"ChatCard \"Blog migration\" \"Six steps, run one after another\" icon:\"swap_horiz\" status:\"Ready\"\n  each s in steps\n    PlanStep title:=s.title detail:=s.detail index:=s.i current:=done running:=running\n  ProgressLine \"Progress\" \"\" value:=done/6\n  Row gap:10\n    ActionButton \"Start\" primary icon:\"play_arrow\" enabled:=!running -> running=true; done=0\n    ActionButton \"Pause\" quiet icon:\"pause\" enabled:=running -> running=false\n\nstate running=false\nstate done=0\nstate elapsed=0\nevery 1000 -> elapsed=elapsed+1\nevery 1s when running -> done=min(6,done+1); running=done<5\n\nstate steps=[{\"i\":0,\"title\":\"Export posts\",\"detail\":\"Download all posts and drafts from the old platform.\"},{\"i\":1,\"title\":\"Convert format\",\"detail\":\"Turn HTML content into Markdown with metadata.\"},{\"i\":2,\"title\":\"Move media\",\"detail\":\"Copy images and attachments to the new storage.\"},{\"i\":3,\"title\":\"Fix links\",\"detail\":\"Rewrite internal URLs and set up redirects.\"},{\"i\":4,\"title\":\"Restore comments\",\"detail\":\"Import comments and map them to their posts.\"},{\"i\":5,\"title\":\"Verify and switch DNS\",\"detail\":\"Check every page, then point the domain at the new site.\"}]","usage":{"input_tokens":9517,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":469,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":398,"totalMs":1598}}
+{"tMs":398,"delta":"ChatCard \"Blog"}
+{"tMs":519,"delta":" migration\" \"Six steps"}
+{"tMs":519,"delta":", run one after another\" icon"}
+{"tMs":519,"delta":":\"swap_hori"}
+{"tMs":519,"delta":"z\" status:\"Ready"}
+{"tMs":519,"delta":"\"\n  each s in steps"}
+{"tMs":530,"delta":"\n    PlanStep title"}
+{"tMs":550,"delta":":=s.title det"}
+{"tMs":571,"delta":"ail:=s.detail index"}
+{"tMs":592,"delta":":=s.i current:="}
+{"tMs":612,"delta":"done running:=running\n  "}
+{"tMs":633,"delta":"ProgressLine \"Prog"}
+{"tMs":655,"delta":"ress\" \"\" value:=done"}
+{"tMs":674,"delta":"/6\n  Row gap"}
+{"tMs":695,"delta":":10\n    ActionBut"}
+{"tMs":715,"delta":"ton \"Start\" primary ic"}
+{"tMs":736,"delta":"on:\"play_arrow"}
+{"tMs":756,"delta":"\" enabled:=!running"}
+{"tMs":777,"delta":" -> running=true; done="}
+{"tMs":797,"delta":"0\n    ActionButton"}
+{"tMs":818,"delta":" \"Pause\" quiet"}
+{"tMs":838,"delta":" icon:\"pause\" en"}
+{"tMs":862,"delta":"abled:=running -> running"}
+{"tMs":881,"delta":"=false\n\nstate running=false"}
+{"tMs":900,"delta":"\nstate done=0\nstate elap"}
+{"tMs":920,"delta":"sed=0\nevery 1"}
+{"tMs":940,"delta":"000 -> elapsed"}
+{"tMs":961,"delta":"=elapsed+1"}
+{"tMs":981,"delta":"\nevery 1s when running ->"}
+{"tMs":1001,"delta":" done=min(6,done+"}
+{"tMs":1022,"delta":"1); running=done<5"}
+{"tMs":1043,"delta":"\n\nstate steps=[{\"i"}
+{"tMs":1063,"delta":"\":0,\"title\":\""}
+{"tMs":1084,"delta":"Export posts\",\"detail\":\""}
+{"tMs":1104,"delta":"Download all posts and draf"}
+{"tMs":1125,"delta":"ts from the old platform.\"},"}
+{"tMs":1145,"delta":"{\"i\":1,\"title"}
+{"tMs":1165,"delta":"\":\"Convert format\",\"det"}
+{"tMs":1185,"delta":"ail\":\"Turn HT"}
+{"tMs":1206,"delta":"ML content into Markdown with"}
+{"tMs":1227,"delta":" metadata.\"},{\"i"}
+{"tMs":1247,"delta":"\":2,\"title\":\""}
+{"tMs":1267,"delta":"Move media\",\"detail\":\""}
+{"tMs":1288,"delta":"Copy images and attachments to"}
+{"tMs":1308,"delta":" the new storage.\"},{\""}
+{"tMs":1328,"delta":"i\":3,\"title\":\""}
+{"tMs":1349,"delta":"Fix links\",\"detail\":"}
+{"tMs":1369,"delta":"\"Rewrite internal"}
+{"tMs":1390,"delta":" URLs and set up redir"}
+{"tMs":1412,"delta":"ects.\"},{\"i\":4"}
+{"tMs":1431,"delta":",\"title\":\"Restore"}
+{"tMs":1451,"delta":" comments\",\"detail\":\""}
+{"tMs":1472,"delta":"Import comments and map them to their"}
+{"tMs":1492,"delta":" posts.\"},{\"i\":"}
+{"tMs":1512,"delta":"5,\"title\":\"Ver"}
+{"tMs":1533,"delta":"ify and switch DNS\",\""}
+{"tMs":1553,"delta":"detail\":\"Check every page"}
+{"tMs":1574,"delta":", then point the domain at the"}
+{"tMs":1594,"delta":" new site.\"}]"}

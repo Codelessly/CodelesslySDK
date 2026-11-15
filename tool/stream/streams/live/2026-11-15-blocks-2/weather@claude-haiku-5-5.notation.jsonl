@@ -1,0 +1,55 @@
+{"meta":{"ui":"weather","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the weather in Lisbon as an inline card: now (temperature, conditions, high and low), the next five hours, the next three days with a temperature range bar, and a button to alert me before it rains.","text":"ChatCard \"Lisbon\" \"Forecast\" icon:\"cloud\" status:\"Live\" tone:accent\n  WeatherNow \"Lisbon\" \"Partly cloudy\" temp:22 high:25 low:16 kind:partly\n  SectionLabel \"Next hours\" \"5 hours\"\n  WeatherHours hours:[\"14:00\",\"15:00\",\"16:00\",\"17:00\",\"18:00\"] temps:[22,23,22,21,19] kinds:[\"sun\",\"sun\",\"partly\",\"partly\",\"rain\"]\n  SectionLabel \"Next 3 days\" \"Range\"\n  WeatherDay \"Today\" low:16 high:25 kind:partly min:14 max:26\n  WeatherDay \"Tomorrow\" low:15 high:23 kind:rain min:14 max:26\n  WeatherDay \"Saturday\" low:17 high:27 kind:sun min:14 max:26\n  ActionButton \"Alert me before it rains\" tone:primary icon:\"notifications\" -> emit alert_before_rain","usage":{"input_tokens":8857,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":332,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":875,"totalMs":2340}}
+{"tMs":875,"delta":"ChatCard \"L"}
+{"tMs":1547,"delta":"isbon\" \"For"}
+{"tMs":1547,"delta":"ecast\" icon:\"c"}
+{"tMs":1547,"delta":"loud\" status:\""}
+{"tMs":1547,"delta":"Live\" tone:acc"}
+{"tMs":1547,"delta":"ent\n  WeatherN"}
+{"tMs":1547,"delta":"ow \"Lisbon\""}
+{"tMs":1547,"delta":" \"Partly cloudy"}
+{"tMs":1547,"delta":"\""}
+{"tMs":1547,"delta":" temp:22 high:25"}
+{"tMs":1548,"delta":" low:16"}
+{"tMs":1548,"delta":" kind:part"}
+{"tMs":1548,"delta":"ly\n  S"}
+{"tMs":1724,"delta":"ectionLabel \"Next"}
+{"tMs":1724,"delta":" hours\" \"5"}
+{"tMs":1724,"delta":" hours\"\n  We"}
+{"tMs":1724,"delta":"atherHours hours:[\""}
+{"tMs":1724,"delta":"14"}
+{"tMs":1724,"delta":":00\",\"15:00\",\"16"}
+{"tMs":1725,"delta":":00\",\"17:00\",\"18"}
+{"tMs":1725,"delta":":00\"] temps:["}
+{"tMs":1725,"delta":"22,23"}
+{"tMs":1725,"delta":",22,21,19"}
+{"tMs":1725,"delta":"] kinds:[\"sun"}
+{"tMs":1725,"delta":"\",\"s"}
+{"tMs":1886,"delta":"un\",\"partly\",\"partly\",\""}
+{"tMs":1886,"delta":"r"}
+{"tMs":1886,"delta":"ain\"]\n  Section"}
+{"tMs":1886,"delta":"Label \"Next 3"}
+{"tMs":1886,"delta":" days\" \""}
+{"tMs":1886,"delta":"Range\"\n  Weather"}
+{"tMs":1886,"delta":"Day \"Today"}
+{"tMs":1886,"delta":"\" low:16 high:25"}
+{"tMs":1886,"delta":" kind:part"}
+{"tMs":1886,"delta":"ly min:14"}
+{"tMs":1886,"delta":" max:26\n  We"}
+{"tMs":1886,"delta":"atherDay \"Tom"}
+{"tMs":2059,"delta":"orrow\" low:15 "}
+{"tMs":2059,"delta":"high:23 kind:r"}
+{"tMs":2059,"delta":"ain min:14 max:26"}
+{"tMs":2059,"delta":"\n  WeatherDay"}
+{"tMs":2059,"delta":" \"Saturday\" low:"}
+{"tMs":2059,"delta":"17 high:27"}
+{"tMs":2059,"delta":" kind:sun min:"}
+{"tMs":2059,"delta":"14 max:26\n  "}
+{"tMs":2059,"delta":"ActionButton \"Alert"}
+{"tMs":2059,"delta":" me before it rains\" tone"}
+{"tMs":2059,"delta":":primary ic"}
+{"tMs":2059,"delta":"on:\"not"}
+{"tMs":2331,"delta":"ifications\""}
+{"tMs":2331,"delta":" -> emit al"}
+{"tMs":2331,"delta":"ert"}
+{"tMs":2331,"delta":"_before"}
+{"tMs":2331,"delta":"_rain"}

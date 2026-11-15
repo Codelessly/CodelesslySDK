@@ -1,0 +1,68 @@
+{
+ "ui": "carousel",
+ "kind": "card",
+ "model": "claude-haiku-5-5",
+ "form": "notation",
+ "designSystem": "cards",
+ "systemPromptChars": 23058,
+ "turns": [
+  {
+   "input_tokens": 8880,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 737,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 791,
+   "totalMs": 3403,
+   "chars": 1506,
+   "lines": 18,
+   "jsonTails": 0,
+   "nodes": 12,
+   "outputTokensPerNode": "61.4",
+   "notationIssues": [],
+   "errors": [
+    "children_not_allowed /nodes/Carousel1/children: A Carousel takes no children. Wrap it and its neighbors in a row, column or stack instead.",
+    "unknown_name /nodes/ProductTile1/bind/props.name: \"name\" is not a variable: it is a field of the records of \"shoes\". An item's field is read through the item, as a lambda's parameter: filter(shoes, r => r.name == x), map(shoes, r => r.name), sortBy(shoes, 'name'). A condition written without one (filter(shoes, name == x)) is computed once, outside the list, and matches no item.",
+    "unknown_name /nodes/ProductTile1/bind/props.detail: \"detail\" is not a variable: it is a field of the records of \"shoes\". An item's field is read through the item, as a lambda's parameter: filter(shoes, r => r.detail == x), map(shoes, r => r.detail), sortBy(shoes, 'detail'). A condition written without one (filter(shoes, detail == x)) is computed once, outside the list, and matches no item.",
+    "unknown_name /nodes/ProductTile1/bind/props.price: \"price\" is not a variable: it is a field of the records of \"shoes\". An item's field is read through the item, as a lambda's parameter: filter(shoes, r => r.price == x), map(shoes, r => r.price), sortBy(shoes, 'price'). A condition written without one (filter(shoes, price == x)) is computed once, outside the list, and matches no item.",
+    "unknown_name /nodes/ProductTile1/bind/props.rating: \"rating\" is not a variable: it is a field of the records of \"shoes\". An item's field is read through the item, as a lambda's parameter: filter(shoes, r => r.rating == x), map(shoes, r => r.rating), sortBy(shoes, 'rating'). A condition written without one (filter(shoes, rating == x)) is computed once, outside the list, and matches no item.",
+    "unknown_name /nodes/ProductTile1/bind/props.kind: \"kind\" is not a variable: it is a field of the records of \"shoes\". An item's field is read through the item, as a lambda's parameter: filter(shoes, r => r.kind == x), map(shoes, r => r.kind), sortBy(shoes, 'kind'). A condition written without one (filter(shoes, kind == x)) is computed once, outside the list, and matches no item.",
+    "unknown_name /nodes/ProductTile1/bind/props.tone: \"tone\" is not a variable: it is a field of the records of \"shoes\". An item's field is read through the item, as a lambda's parameter: filter(shoes, r => r.tone == x), map(shoes, r => r.tone), sortBy(shoes, 'tone'). A condition written without one (filter(shoes, tone == x)) is computed once, outside the list, and matches no item."
+   ]
+  },
+  {
+   "input_tokens": 10585,
+   "cache_creation_input_tokens": 0,
+   "cache_read_input_tokens": 0,
+   "cache_creation": {
+    "ephemeral_5m_input_tokens": 0,
+    "ephemeral_1h_input_tokens": 0
+   },
+   "output_tokens": 765,
+   "service_tier": "standard",
+   "inference_geo": "global",
+   "speed": "standard",
+   "output_tokens_details": {
+    "thinking_tokens": 0
+   },
+   "ttftMs": 367,
+   "totalMs": 2407,
+   "chars": 1561,
+   "lines": 20,
+   "jsonTails": 0,
+   "nodes": 15,
+   "outputTokensPerNode": "51.0",
+   "notationIssues": [],
+   "errors": []
+  }
+ ]
+}

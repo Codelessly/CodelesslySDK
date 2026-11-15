@@ -1,0 +1,438 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Running shoes",
+    "subtitle": "Six models",
+    "icon": "directions_run",
+    "status": "Shop",
+    "tone": "accent"
+   },
+   "children": [
+    "column1",
+    "row1",
+    "Media1",
+    "text2",
+    "Paragraph1",
+    "OptionList1",
+    "ActionButton1"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= !open}"
+   },
+   "children": [
+    "Carousel1",
+    "listView1"
+   ]
+  },
+  "Carousel1": {
+   "type": "Carousel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "i",
+    "peek": 0.86,
+    "dots": true,
+    "arrows": true,
+    "counter": true
+   },
+   "bind": {
+    "props.items": "${shoes}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${shoes}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ProductTile1"
+   ]
+  },
+  "ProductTile1": {
+   "type": "ProductTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.name": "${item.name}",
+    "props.detail": "${item.detail}",
+    "props.price": "${item.price}",
+    "props.rating": "${item.rating}",
+    "props.kind": "${item.kind}",
+    "props.tone": "${item.tone}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= open}"
+   },
+   "children": [
+    "textButton1",
+    "text1"
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Back to carousel"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "open",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 400,
+     "height": 1.5,
+     "color": "#FF4B5563"
+    },
+    "text": "${= shoes[i].name}"
+   }
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "height": 160,
+    "width": {
+     "fill": 0
+    }
+   },
+   "bind": {
+    "props.kind": "${= shoes[i].kind}",
+    "props.tone": "${= shoes[i].tone}",
+    "visible": "${= open}"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "fontSize": 13,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF111827"
+    },
+    "text": "${= shoes[i].name}"
+   },
+   "bind": {
+    "visible": "${= open}"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.text": "${= shoes[i].detail}. Rated ${= shoes[i].rating} by runners.",
+    "visible": "${= open}"
+   }
+  },
+  "OptionList1": {
+   "type": "OptionList",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Choose your size",
+    "value": "size",
+    "options": [
+     "7",
+     "8",
+     "9",
+     "10",
+     "11"
+    ]
+   },
+   "bind": {
+    "visible": "${= open}"
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Add to bag",
+    "tone": "primary",
+    "icon": "shopping_bag"
+   },
+   "bind": {
+    "props.enabled": "${= size!=\"\"}",
+    "visible": "${= open}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "bag",
+       "value": "${= bag+1}"
+      },
+      {
+       "type": "showToast",
+       "message": "Added to bag"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "shoes",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Velocity Runner",
+      "detail": "Lightweight daily trainer",
+      "price": "$129",
+      "rating": 4.6,
+      "kind": "shoe",
+      "tone": "sand"
+     },
+     {
+      "id": 2,
+      "name": "Trail Blaze",
+      "detail": "Grippy all-terrain shoe",
+      "price": "$149",
+      "rating": 4.4,
+      "kind": "shoe",
+      "tone": "mint"
+     },
+     {
+      "id": 3,
+      "name": "Court Pro",
+      "detail": "Cushioned court shoe",
+      "price": "$119",
+      "rating": 4.7,
+      "kind": "shoe",
+      "tone": "sky"
+     },
+     {
+      "id": 4,
+      "name": "Sprint Lite",
+      "detail": "Race-day speed trainer",
+      "price": "$159",
+      "rating": 4.8,
+      "kind": "shoe",
+      "tone": "rose"
+     },
+     {
+      "id": 5,
+      "name": "Cloud Step",
+      "detail": "Plush everyday comfort",
+      "price": "$139",
+      "rating": 4.5,
+      "kind": "shoe",
+      "tone": "lilac"
+     },
+     {
+      "id": 6,
+      "name": "Urban Flex",
+      "detail": "Street-style flexible fit",
+      "price": "$109",
+      "rating": 4.3,
+      "kind": "shoe",
+      "tone": "slate"
+     }
+    ]
+   },
+   {
+    "name": "i",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "open",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "size",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "bag",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

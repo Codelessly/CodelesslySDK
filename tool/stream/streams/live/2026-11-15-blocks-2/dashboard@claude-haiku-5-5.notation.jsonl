@@ -1,0 +1,135 @@
+{"meta":{"ui":"dashboard","model":"claude-haiku-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me how the product did this month as an inline dashboard: four stat tiles (revenue, sign-ups, churn, active users) each with its change, a line chart of revenue, a bar chart of sign-ups by channel, a toggle between 7, 30 and 90 days that changes the numbers, and a table of the top five plans I can sort by any column.","text":"ChatCard \"This month\" \"Product health\" icon:\"bar_chart\" status:\"Live\" pad:16 gap:14\n  Segments =range options:[\"7 days\",\"30 days\",\"90 days\"]\n  Grid cols:2 gap:10\n    StatTile \"Revenue\" \"vs last period\" value:\"$48.2k\" delta:\"+8.5%\"\n    StatTile \"Sign-ups\" \"vs last period\" value:\"1,284\" delta:\"+12.1%\"\n    StatTile \"Churn\" \"vs last period\" value:\"2.4%\" delta:\"-0.4%\" invert:true\n    StatTile \"Active users\" \"vs last period\" value:\"9,730\" delta:\"+3.2%\"\n  ChartCard \"Revenue\" value:\"$48.2k\" values:[32,35,31,38,42,40,46,48] labels:[\"W1\",\"W2\",\"W3\",\"W4\",\"W5\",\"W6\",\"W7\",\"W8\"] kind:\"line\" delta:\"+8.5%\"\n  ChartCard \"Sign-ups by channel\" value:\"1,284\" values:[520,310,250,204] labels:[\"Search\",\"Referral\",\"Social\",\"Email\"] kind:\"bars\" delta:\"+12.1%\"\n  TableHeader =sort desc:desc columns:[\"Plan\",\"Subscribers\",\"Revenue\",\"Status\"] keys:[\"plan\",\"subs\",\"revenue\",\"status\"] widths:[120,90,90,80]\n  each r in take(sortByDesc(rows,sort),5)\n    TableRow cells:=[r.plan,r.subs,money(r.revenue,\"$\",0),r.status] widths:[120,90,90,80] badge:r.status\n  state range=\"30 days\"\n  state sort=\"revenue\"\n  state desc=true\n  state rows=[{\"plan\":\"Team\",\"subs\":412,\"revenue\":19800,\"status\":\"Paid\"},{\"plan\":\"Pro\",\"subs\":688,\"revenue\":16512,\"status\":\"Paid\"},{\"plan\":\"Starter\",\"subs\":1904,\"revenue\":9520,\"status\":\"Paid\"},{\"plan\":\"Business\",\"subs\":96,\"revenue\":7680,\"status\":\"Due\"},{\"plan\":\"Trial\",\"subs\":311,\"revenue\":0,\"status\":\"Overdue\"}]","usage":{"input_tokens":8906,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":719,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":638,"totalMs":3343}}
+{"tMs":638,"delta":"ChatCard \"This"}
+{"tMs":763,"delta":" month\""}
+{"tMs":763,"delta":" \"Product"}
+{"tMs":763,"delta":" health"}
+{"tMs":763,"delta":"\" icon:\"b"}
+{"tMs":763,"delta":"ar_chart\" status:\""}
+{"tMs":763,"delta":"Live"}
+{"tMs":763,"delta":"\" p"}
+{"tMs":777,"delta":"ad:16"}
+{"tMs":798,"delta":" gap:14"}
+{"tMs":821,"delta":"\n  Segments =range options"}
+{"tMs":844,"delta":":[\"7 days\",\"30 "}
+{"tMs":866,"delta":"days\",\"90 days\"]"}
+{"tMs":888,"delta":"\n  Grid cols:2"}
+{"tMs":908,"delta":" gap:10"}
+{"tMs":930,"delta":"\n    StatTile \""}
+{"tMs":951,"delta":"Revenue\" \"v"}
+{"tMs":970,"delta":"s last period"}
+{"tMs":990,"delta":"\" value"}
+{"tMs":1010,"delta":":\"$48."}
+{"tMs":1031,"delta":"2k\" delta:\""}
+{"tMs":1052,"delta":"+8.5%\""}
+{"tMs":1073,"delta":"\n    StatTile \""}
+{"tMs":1094,"delta":"Sign-ups\" \"v"}
+{"tMs":1115,"delta":"s last period\" value:\"1"}
+{"tMs":1135,"delta":",284\" delta:\"+"}
+{"tMs":1157,"delta":"12.1%\"\n    St"}
+{"tMs":1180,"delta":"atTile \"Churn\""}
+{"tMs":1198,"delta":" \"vs last period\" value:"}
+{"tMs":1229,"delta":"\"2.4"}
+{"tMs":1245,"delta":"%\" delta:\"-0"}
+{"tMs":1259,"delta":".4%\" invert:true"}
+{"tMs":1280,"delta":"\n    StatTile \""}
+{"tMs":1301,"delta":"Active users\" \"vs last period"}
+{"tMs":1321,"delta":"\" value:\"9,730"}
+{"tMs":1342,"delta":"\" delta:\"+3"}
+{"tMs":1362,"delta":".2%\"\n  Ch"}
+{"tMs":1383,"delta":"artCard \"Revenue"}
+{"tMs":1403,"delta":"\" value"}
+{"tMs":1424,"delta":":\"$48.2k\""}
+{"tMs":1444,"delta":" values:[32"}
+{"tMs":1464,"delta":",35"}
+{"tMs":1484,"delta":",31"}
+{"tMs":1503,"delta":",38"}
+{"tMs":1524,"delta":",42,40"}
+{"tMs":1547,"delta":",46"}
+{"tMs":1564,"delta":","}
+{"tMs":1584,"delta":"48"}
+{"tMs":1604,"delta":"] labels:[\"W"}
+{"tMs":1624,"delta":"1"}
+{"tMs":1645,"delta":"\",\"W2\",\"W3\",\"W"}
+{"tMs":1666,"delta":"4\",\"W5\",\"W6\",\""}
+{"tMs":1686,"delta":"W7\",\"W8\"] k"}
+{"tMs":1707,"delta":"ind:\"line\" delta:"}
+{"tMs":1727,"delta":"\"+8.5%\""}
+{"tMs":1748,"delta":"\n  "}
+{"tMs":1768,"delta":"ChartCard \"Sign"}
+{"tMs":1791,"delta":"-ups by channel\" value"}
+{"tMs":1809,"delta":":\"1,284\" values:"}
+{"tMs":1829,"delta":"[520"}
+{"tMs":1850,"delta":",310"}
+{"tMs":1869,"delta":",250"}
+{"tMs":1890,"delta":",204"}
+{"tMs":1910,"delta":"] labels:[\"Search\",\""}
+{"tMs":1931,"delta":"Refer"}
+{"tMs":1951,"delta":"ral\",\"Social\",\"Email"}
+{"tMs":1972,"delta":"\"] kind:\"bars"}
+{"tMs":1992,"delta":"\""}
+{"tMs":2012,"delta":" delta:\"+12"}
+{"tMs":2033,"delta":".1%\"\n  Table"}
+{"tMs":2053,"delta":"Header =s"}
+{"tMs":2074,"delta":"ort desc:des"}
+{"tMs":2095,"delta":"c columns:[\""}
+{"tMs":2115,"delta":"Plan\",\"Sub"}
+{"tMs":2135,"delta":"sc"}
+{"tMs":2155,"delta":"ribers\",\"Revenue\",\""}
+{"tMs":2176,"delta":"Status\"] keys:[\""}
+{"tMs":2196,"delta":"plan\",\"subs\",\"reven"}
+{"tMs":2217,"delta":"ue\",\"status\"] wid"}
+{"tMs":2237,"delta":"ths:["}
+{"tMs":2257,"delta":"120,90"}
+{"tMs":2278,"delta":",90,80"}
+{"tMs":2298,"delta":"]\n  "}
+{"tMs":2318,"delta":"each r"}
+{"tMs":2338,"delta":" in take"}
+{"tMs":2361,"delta":"(s"}
+{"tMs":2379,"delta":"ortByDesc(rows"}
+{"tMs":2402,"delta":",sort),5"}
+{"tMs":2420,"delta":")\n    TableRow c"}
+{"tMs":2441,"delta":"ells:="}
+{"tMs":2461,"delta":"[r.plan,r."}
+{"tMs":2481,"delta":"subs,money(r.rev"}
+{"tMs":2502,"delta":"enue,\"$\",0),"}
+{"tMs":2522,"delta":"r.status] widths:["}
+{"tMs":2543,"delta":"120,90,90,80]"}
+{"tMs":2563,"delta":" badge:r.status\n  "}
+{"tMs":2584,"delta":"state range"}
+{"tMs":2604,"delta":"=\""}
+{"tMs":2624,"delta":"30"}
+{"tMs":2645,"delta":" days\"\n  state sort"}
+{"tMs":2666,"delta":"=\""}
+{"tMs":2686,"delta":"revenue\"\n  state des"}
+{"tMs":2706,"delta":"c=true"}
+{"tMs":2726,"delta":"\n  state rows=[{"}
+{"tMs":2748,"delta":"\"plan\":\"Team"}
+{"tMs":2767,"delta":"\",\"sub"}
+{"tMs":2789,"delta":"s\":412"}
+{"tMs":2808,"delta":",\"revenue\":19"}
+{"tMs":2829,"delta":"800"}
+{"tMs":2849,"delta":",\"status\":\"Pa"}
+{"tMs":2872,"delta":"id\"},{\"plan\":"}
+{"tMs":2896,"delta":"\"Pro\",\"subs\":"}
+{"tMs":2910,"delta":"688"}
+{"tMs":2930,"delta":",\"revenue\":16"}
+{"tMs":2951,"delta":"512"}
+{"tMs":2971,"delta":",\"status\":\"Paid"}
+{"tMs":2992,"delta":"\"},{\"plan\":\""}
+{"tMs":3012,"delta":"Starter\",\"subs\":1"}
+{"tMs":3033,"delta":"904"}
+{"tMs":3054,"delta":",\"revenue\":9"}
+{"tMs":3073,"delta":"520"}
+{"tMs":3094,"delta":",\"status\":\"Paid"}
+{"tMs":3114,"delta":"\"},{\"plan\":\""}
+{"tMs":3134,"delta":"Business"}
+{"tMs":3155,"delta":"\",\"subs\":96"}
+{"tMs":3175,"delta":",\"revenue\":7"}
+{"tMs":3195,"delta":"680"}
+{"tMs":3216,"delta":",\"status\":\"Due\""}
+{"tMs":3236,"delta":"},{\"plan\":\""}
+{"tMs":3257,"delta":"Tr"}
+{"tMs":3277,"delta":"ial\",\"subs\":311"}
+{"tMs":3298,"delta":",\"revenue\":0"}
+{"tMs":3318,"delta":",\"status\":\"Overd"}
+{"tMs":3339,"delta":"ue\"}]"}

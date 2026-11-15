@@ -1,0 +1,414 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "This month",
+    "subtitle": "Product health",
+    "icon": "bar_chart",
+    "status": "Live"
+   },
+   "children": [
+    "Segments1",
+    "grid1",
+    "ChartCard1",
+    "ChartCard2",
+    "TableHeader1",
+    "listView1"
+   ]
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "range",
+    "options": [
+     "7 days",
+     "30 days",
+     "90 days"
+    ]
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1",
+    "grid1Row2"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Revenue",
+    "note": "vs last period",
+    "value": "$48.2k",
+    "delta": "+8.5%"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Sign-ups",
+    "note": "vs last period",
+    "value": "1,284",
+    "delta": "+12.1%"
+   }
+  },
+  "grid1Row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile3",
+    "StatTile4"
+   ]
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Churn",
+    "note": "vs last period",
+    "value": "2.4%",
+    "delta": "-0.4%",
+    "invert": true
+   }
+  },
+  "StatTile4": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Active users",
+    "note": "vs last period",
+    "value": "9,730",
+    "delta": "+3.2%"
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Revenue",
+    "value": "$48.2k",
+    "values": [
+     32,
+     35,
+     31,
+     38,
+     42,
+     40,
+     46,
+     48
+    ],
+    "labels": [
+     "W1",
+     "W2",
+     "W3",
+     "W4",
+     "W5",
+     "W6",
+     "W7",
+     "W8"
+    ],
+    "kind": "line",
+    "delta": "+8.5%"
+   }
+  },
+  "ChartCard2": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Sign-ups by channel",
+    "value": "1,284",
+    "values": [
+     520,
+     310,
+     250,
+     204
+    ],
+    "labels": [
+     "Search",
+     "Referral",
+     "Social",
+     "Email"
+    ],
+    "kind": "bars",
+    "delta": "+12.1%"
+   }
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "desc": "desc",
+    "columns": [
+     "Plan",
+     "Subscribers",
+     "Revenue",
+     "Status"
+    ],
+    "keys": [
+     "plan",
+     "subs",
+     "revenue",
+     "status"
+    ],
+    "widths": [
+     120,
+     90,
+     90,
+     80
+    ]
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= take(sortByDesc(rows,sort),5)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "widths": [
+     120,
+     90,
+     90,
+     80
+    ]
+   },
+   "bind": {
+    "props.cells": "${= [item.plan,item.subs,money(item.revenue,\"$\",0),item.status]}",
+    "props.badge": "${item.status}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "range",
+    "type": "text",
+    "value": "30 days"
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "revenue"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "rows",
+    "type": "list",
+    "value": [
+     {
+      "plan": "Team",
+      "subs": 412,
+      "revenue": 19800,
+      "status": "Paid"
+     },
+     {
+      "plan": "Pro",
+      "subs": 688,
+      "revenue": 16512,
+      "status": "Paid"
+     },
+     {
+      "plan": "Starter",
+      "subs": 1904,
+      "revenue": 9520,
+      "status": "Paid"
+     },
+     {
+      "plan": "Business",
+      "subs": 96,
+      "revenue": 7680,
+      "status": "Due"
+     },
+     {
+      "plan": "Trial",
+      "subs": 311,
+      "revenue": 0,
+      "status": "Overdue"
+     }
+    ]
+   }
+  ]
+ }
+}

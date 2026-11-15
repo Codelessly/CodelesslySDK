@@ -1,0 +1,229 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Flights to Lisbon",
+    "subtitle": "London to Lisbon, this Friday",
+    "icon": "flight",
+    "status": "3 options",
+    "tone": "accent"
+   },
+   "children": [
+    "FlightOption1",
+    "FlightOption2",
+    "FlightOption3",
+    "Details1",
+    "TotalBar1"
+   ]
+  },
+  "FlightOption1": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "TAP Air Portugal",
+    "depart": "07:10",
+    "arrive": "10:25",
+    "origin": "LHR",
+    "destination": "LIS",
+    "duration": "3h 15m",
+    "stops": "Direct",
+    "price": "£148",
+    "tag": "Cheapest"
+   },
+   "bind": {
+    "props.selected": "${= pick==1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "FlightOption2": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "easyJet",
+    "depart": "11:40",
+    "arrive": "15:05",
+    "origin": "LGW",
+    "destination": "LIS",
+    "duration": "3h 25m",
+    "stops": "Direct",
+    "price": "£162",
+    "tag": "Best time"
+   },
+   "bind": {
+    "props.selected": "${= pick==2}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "FlightOption3": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "British Airways",
+    "depart": "16:20",
+    "arrive": "19:50",
+    "origin": "LHR",
+    "destination": "LIS",
+    "duration": "3h 30m",
+    "stops": "Direct",
+    "price": "£205"
+   },
+   "bind": {
+    "props.selected": "${= pick==3}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Fare\",pick==1?\"£148\":pick==2?\"£162\":\"£205\"],[\"Taxes and fees\",\"Included\"]]}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "note": "One adult, economy",
+    "cta": "Confirm",
+    "icon": "check"
+   },
+   "bind": {
+    "props.amount": "${= pick==1?\"£148\":pick==2?\"£162\":\"£205\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "confirm",
+       "value": "${pick}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "integer",
+    "value": 1
+   }
+  ]
+ }
+}
