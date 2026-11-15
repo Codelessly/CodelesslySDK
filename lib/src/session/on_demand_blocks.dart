@@ -52,7 +52,7 @@ final class BlockOutcome {
 /// // it again and apply the answer with applyNotation(answer, replace: true).
 /// ```
 final class OnDemandBlocks {
-  OnDemandBlocks(this.session, {required this.design, this.validate, this.check, this.onAdded, this.maxTries = 2});
+  OnDemandBlocks(this.session, {required this.design, this.validate, this.check, this.onAdded, this.store, this.maxTries = 2});
 
   final UiSession session;
   final BlockDesigner design;
@@ -76,6 +76,23 @@ final class OnDemandBlocks {
 
   /// Called with each block added: where a host stores it.
   final void Function(WantedBlock wanted, LayoutDocument definition)? onAdded;
+
+  /// Stores each block added, so the sessions that follow start with it:
+  /// called with the files that hold it in the design system's folder, by
+  /// reference relative to the manifest (the block's definition and the
+  /// manifest that now lists it: [DesignSystem.componentFiles]). The host
+  /// writes them where it keeps the design system:
+  ///
+  /// ```dart
+  /// store: (files) async {
+  ///   for (final e in files.entries) {
+  ///     await (File('$folder/${e.key}')..createSync(recursive: true)).writeAsString(e.value);
+  ///   }
+  /// },
+  /// ```
+  ///
+  /// A failure to store is not a failure to add: the session has the block.
+  final FutureOr<void> Function(Map<String, String> files)? store;
 
   /// How many designs to ask for before giving up on a request.
   final int maxTries;
@@ -146,6 +163,11 @@ final class OnDemandBlocks {
         if (definition != null && problems.isEmpty) {
           session.addBlock(definition);
           onAdded?.call(wanted, definition);
+          if (store != null) {
+            try {
+              await store!(session.designSystem!.componentFiles(wanted.name)!);
+            } catch (_) {}
+          }
           return BlockOutcome(wanted, definition: definition, tries: tries);
         }
         notes = problems;

@@ -91,6 +91,46 @@ void main() {
     expect(await blocks.designWanted(), isEmpty);
   });
 
+  test('an added block is stored: a session started from the folder afterwards calls it', () async {
+    final folder = Directory.systemTemp.createTempSync('cards');
+    addTearDown(() => folder.deleteSync(recursive: true));
+    for (final f in Directory('design_systems/cards').listSync(recursive: true).whereType<File>()) {
+      final to = File('${folder.path}/${f.path.substring('design_systems/cards/'.length)}')..createSync(recursive: true);
+      to.writeAsBytesSync(f.readAsBytesSync());
+    }
+    Future<api.DesignSystem> load() => api.DesignSystem.load((ref) async {
+          final f = File('${folder.path}/$ref');
+          return f.existsSync() ? f.readAsStringSync() : null;
+        });
+
+    final session = UiSession(designSystem: await load());
+    addTearDown(session.dispose);
+    await session.applyNotation(Stream.value(_first));
+    final blocks = OnDemandBlocks(
+      session,
+      design: (wanted, session, notes) async => _poll(),
+      store: (files) {
+        for (final e in files.entries) {
+          (File('${folder.path}/${e.key}')..createSync(recursive: true)).writeAsStringSync(e.value);
+        }
+      },
+    );
+    expect((await blocks.designWanted()).single.added, isTrue);
+    expect(File('${folder.path}/components/PollResults.json').existsSync(), isTrue);
+
+    // A second session, started from the folder: it has the block and calls it.
+    final later = UiSession(designSystem: await load());
+    addTearDown(later.dispose);
+    expect(later.designSystem!.components['PollResults'], isNotNull);
+    expect(later.notationInstructions(), contains('PollResults'));
+    final result = await later.applyNotation(Stream.value(_second));
+    expect(result.errors, isEmpty, reason: '${result.errors}');
+    expect(later.notationIssues, isEmpty, reason: '${later.notationIssues}');
+    expect(later.document.nodes.values.where((n) => n.type == 'PollResults'), hasLength(1));
+    // Every block it had before is still there.
+    expect(later.designSystem!.components.definitions.length, session.designSystem!.components.definitions.length);
+  });
+
   test('a design under another name, or one a host check refuses, is not added', () async {
     final session = UiSession(designSystem: await _cards());
     addTearDown(session.dispose);

@@ -102,7 +102,13 @@ final blocks = OnDemandBlocks(
   session,
   design: (wanted, session, notes) => myService.design(wanted.name, wanted.purpose, notes), // a component document, or null
   check: (wanted, definition) => myRenderCheck(definition), // your own gate: problems, none to pass
-  onAdded: (wanted, definition) => library.store(definition),
+  // Keeps the block for the sessions that follow: the files that hold it in the design system's folder (its
+  // definition, and the manifest that now lists it), written wherever you keep the design system.
+  store: (files) async {
+    for (final e in files.entries) {
+      await (File('$folder/${e.key}')..createSync(recursive: true)).writeAsString(e.value);
+    }
+  },
 );
 
 final system = session.notationInstructions(askForBlocks: true);
