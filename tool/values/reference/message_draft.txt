@@ -1,0 +1,19 @@
+state to="landlord@example.com"
+state subject="Heating not working in apartment 4B"
+state tone="Polite"
+state polite="Dear Mr. Alvarez,\n\nI hope you are well. The heating in my apartment (4B) stopped working on Monday and the flat is getting very cold.\n\nCould you please arrange for someone to take a look this week? I am happy to work around your schedule for access.\n\nThank you very much,\nAlex"
+state firm="Dear Mr. Alvarez,\n\nThe heating in apartment 4B has been broken since Monday and the flat is now below a livable temperature.\n\nPlease confirm by Thursday when a repair will be carried out. If I do not hear back I will arrange it myself and deduct the cost from next month's rent.\n\nRegards,\nAlex"
+state body=polite
+state sent=false
+ChatCard "Email to your landlord" "Edit anything before it goes" icon:"mail_rounded" status:=sent?"Sent":"Draft" tone:=sent?"good":"accent"
+  if !sent
+    InputField#to "To" "name@example.com" =to keyboard:"emailAddress" error:=to==""?"Add a recipient to send":""
+    InputField#subject "Subject" "What is it about?" =subject error:=subject==""?"Add a subject to send":""
+    Segments#tone =tone options:["Polite","Firm"] -> body=result=="Firm"?firm:polite
+    InputField#body "Message" =body lines:11
+    Row gap:10
+      ActionButton#discard "Discard" tone:"quiet" grow -> emit discard_draft
+      ActionButton#send "Send" icon:"send_rounded" enabled:=to!=""&&subject!="" grow:2 -> sent=true; emit send_email body
+  if sent
+    Receipt "Sent to {to}" "{subject}" icon:"send_rounded"
+    Paragraph "{body}"

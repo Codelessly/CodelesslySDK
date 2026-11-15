@@ -1,0 +1,7 @@
+state pick=1
+state flights=[{"id":1,"dep":"07:15","arr":"09:50","air":"TAP Air Portugal","dur":"2h 35m","price":128,"tag":"Best time"},{"id":2,"dep":"11:40","arr":"14:20","air":"easyJet","dur":"2h 40m","price":84,"tag":"Cheapest"},{"id":3,"dep":"18:05","arr":"20:40","air":"British Airways","dur":"2h 35m","price":156,"tag":""}]
+state chosen=find(flights,f=>f.id==pick)
+ChatCard "London to Lisbon" "Fri 20 Nov · 2 adults · direct only · fares per person" icon:"flight_takeoff_rounded" status:"3 options"
+  each f in flights
+    FlightOption#opt "{f.air}" depart:"{f.dep}" arrive:"{f.arr}" origin:"LHR" destination:"LIS" duration:"{f.dur}" price:"£{f.price}" tag:"{f.tag}" selected:=pick==f.id -> pick=f.id
+  TotalBar#total "Total for 2 · {chosen.air}" amount:"£{chosen.price*2}" note:"£{chosen.price} each, incl. taxes" cta:"Confirm flight" -> emit confirm_flight chosen
