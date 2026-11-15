@@ -55,8 +55,15 @@ def render(card, ds, d, width=420, narrow=320):
     problems the renderer reported (light, at 420 and at 320) and the texts on the card."""
     os.makedirs(d, exist_ok=True)
     problems, texts = [], []
-    for name, extra in (('light', ['--sizes', f'{width}x1400', '--dump-layout']), ('dark', ['--sizes', f'{width}x1400', '--theme', 'dark']),
-                        ('narrow', ['--sizes', f'{narrow}x1400'])):
+    # A card is captured in a tall window; a page (a desktop width) to its end, and an app window (a canvas
+    # as tall as its window) at the window's size.
+    tall, whole = 1400, []
+    if width >= 700:
+        doc = json.load(open(card))
+        height = doc['nodes'][doc['roots'][0]].get('layout', {}).get('height')
+        tall, whole = 800, ([] if isinstance(height, dict) and 'fill' in height else ['--full-page'])
+    for name, extra in (('light', ['--sizes', f'{width}x{tall}', '--dump-layout'] + whole), ('dark', ['--sizes', f'{width}x{tall}', '--theme', 'dark'] + whole),
+                        ('narrow', ['--sizes', f'{narrow}x{tall}'] + whole)):
         folder = f'{d}/raw-{name}'
         shutil.rmtree(folder, ignore_errors=True)
         code, log = run(['tool/render/render.sh', card, '--out', folder, '--design-system', ds] + extra)

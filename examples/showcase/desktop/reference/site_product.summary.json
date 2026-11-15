@@ -1,0 +1,35 @@
+{
+ "model": "claude-opus-5-5",
+ "card": "examples/showcase/desktop/opus/site_product.doc.json",
+ "designSystem": "design_systems/cards",
+ "blocks": false,
+ "blockPictures": [],
+ "before": {
+  "problems": 0,
+  "texts": 62
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 48.2,
+   "checkAndRenderSeconds": 137.4,
+   "problems": 1,
+   "ops": 90,
+   "input_tokens": 33035,
+   "output_tokens": 6238
+  },
+  {
+   "round": 2,
+   "modelSeconds": 34.0,
+   "checkAndRenderSeconds": 144.3,
+   "problems": 1,
+   "ops": 90,
+   "input_tokens": 45571,
+   "output_tokens": 5074
+  }
+ ],
+ "totalSeconds": 503.2,
+ "final": 2,
+ "problems": 1,
+ "status": "failed"
+}

@@ -1,0 +1,1607 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_dashboard"
+ ],
+ "nodes": {
+  "app_dashboard": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280,
+    "height": {
+     "fill": 800
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "children": [
+    "column1",
+    "column3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column1": {
+   "type": "column",
+   "children": [
+    "row2",
+    "row3",
+    "row4",
+    "row5",
+    "row6",
+    "row7",
+    "row8",
+    "spacer1",
+    "row9"
+   ],
+   "layout": {
+    "width": 216,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     20,
+     12,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "children": [
+    "logoMark",
+    "text1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     6,
+     0,
+     6,
+     18
+    ]
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": 17,
+    "height": 17
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "sailing",
+     "style": "filled"
+    },
+    "size": 17,
+    "color": "onAccent"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 18,
+     "color": "ink"
+    },
+    "text": "Harbor"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "children": [
+    "icon2",
+    "text2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"overview\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "overview"
+      }
+     ]
+    }
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "dashboard",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "accent"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Overview",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "row4": {
+   "type": "row",
+   "children": [
+    "icon3",
+    "text3",
+    "text4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"orders\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "orders"
+      }
+     ]
+    }
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "receipt_long",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Orders",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true,
+    "padding": [
+     7,
+     2,
+     7,
+     2
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "chip",
+     "fontSize": 11.5,
+     "color": "inkSoft"
+    },
+    "text": "12"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "children": [
+    "icon4",
+    "text5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"inventory\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "inventory"
+      }
+     ]
+    }
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "inventory_2",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Inventory",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "children": [
+    "icon5",
+    "text6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"customers\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "customers"
+      }
+     ]
+    }
+   ]
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "group",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Customers",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "children": [
+    "icon6",
+    "text7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"reports\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "reports"
+      }
+     ]
+    }
+   ]
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "bar_chart",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Reports",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "row8": {
+   "type": "row",
+   "children": [
+    "icon7",
+    "text8"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     12,
+     10,
+     12,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"settings\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "settings"
+      }
+     ]
+    }
+   ]
+  },
+  "icon7": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "settings",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Settings",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "row9": {
+   "type": "row",
+   "children": [
+    "Avatar1",
+    "column2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     12,
+     10,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 14
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Sam Patel"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "children": [
+    "text9",
+    "text10"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Sam Patel"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "Operations lead"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "children": [
+    "row10",
+    "toolRow",
+    "divider1",
+    "column4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "row10": {
+   "type": "row",
+   "children": [
+    "text11",
+    "row11"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     22,
+     24,
+     10
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 16
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 26,
+     "color": "ink"
+    },
+    "text": "Overview"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "children": [
+    "filledButton1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": 180,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "range",
+    "options": [
+     "7d",
+     "30d",
+     "90d"
+    ]
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Search",
+     "hintText": "Orders, customers…"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "New order"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "newOrder"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "children": [
+    "grid1",
+    "row12",
+    "column6",
+    "column7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     20,
+     24,
+     32
+    ]
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "children": [
+    "grid1Row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid1Row1": {
+   "type": "row",
+   "children": [
+    "StatTile1",
+    "StatTile2",
+    "StatTile3",
+    "StatTile4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Revenue",
+    "value": "$128,400",
+    "delta": "+8.2%",
+    "icon": "payments"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Orders",
+    "value": "1,942",
+    "delta": "+3.1%",
+    "icon": "receipt_long"
+   }
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Returns",
+    "value": "2.4%",
+    "delta": "-0.6%",
+    "invert": true,
+    "icon": "undo"
+   }
+  },
+  "StatTile4": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Avg. order",
+    "value": "$66.10",
+    "delta": "+1.9%",
+    "icon": "shopping_cart"
+   }
+  },
+  "row12": {
+   "type": "row",
+   "children": [
+    "column5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "children": [
+    "ChartCard1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Revenue, last 12 weeks",
+    "value": "$128,400",
+    "delta": "+8.2%",
+    "values": [
+     8200.0,
+     8900.0,
+     8600.0,
+     9400.0,
+     9800.0,
+     9500.0,
+     10300.0,
+     10800.0,
+     10400.0,
+     11200.0,
+     11900.0,
+     12600.0
+    ],
+    "labels": [
+     "W1",
+     "W2",
+     "W3",
+     "W4",
+     "W5",
+     "W6",
+     "W7",
+     "W8",
+     "W9",
+     "W10",
+     "W11",
+     "W12"
+    ]
+   }
+  },
+  "column6": {
+   "type": "column",
+   "children": [
+    "ChartCard2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "ChartCard2": {
+   "type": "ChartCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Revenue by channel",
+    "value": "4 channels",
+    "kind": "bars",
+    "values": [
+     54.0,
+     22.0,
+     15.0,
+     9.0
+    ],
+    "labels": [
+     "Online",
+     "Retail",
+     "Wholesale",
+     "Marketplace"
+    ]
+   }
+  },
+  "column7": {
+   "type": "column",
+   "children": [
+    "row13",
+    "TableHeader1",
+    "listView1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     20,
+     18,
+     20,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "row13": {
+   "type": "row",
+   "children": [
+    "text12",
+    "text13"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     2,
+     0,
+     2,
+     4
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Latest orders"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "View all",
+    "style": {
+     "from": "chip",
+     "color": "accent"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "orders"
+      }
+     ]
+    }
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "Order",
+     "Customer",
+     "Total",
+     "Date",
+     "Status"
+    ],
+    "keys": [
+     "id",
+     "customer",
+     "total",
+     "date",
+     "status"
+    ]
+   },
+   "bind": {
+    "props.desc": "${desc}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "children": [
+    "listView1Item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${= desc ? sortByDesc(orders,x=>x[sort]) : sortBy(orders,x=>x[sort])}"
+   }
+  },
+  "listView1Item": {
+   "type": "column",
+   "children": [
+    "TableRow1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.cells": "${= [item.id,item.customer,money(item.total,\"$\",2),item.date]}",
+    "props.badge": "${item.status}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openOrder",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "logoMark": {
+   "type": "row",
+   "children": [
+    "icon1"
+   ],
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 10
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.control}"
+   }
+  },
+  "toolRow": {
+   "type": "row",
+   "children": [
+    "Segments1",
+    "textField1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     0,
+     24,
+     16
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "end",
+    "spacing": 12
+   }
+  }
+ },
+ "variables": {
+  "app_dashboard": [
+   {
+    "name": "tab",
+    "type": "text",
+    "value": "overview"
+   },
+   {
+    "name": "range",
+    "type": "text",
+    "value": "30d"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "date"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "orders",
+    "type": "list",
+    "value": [
+     {
+      "id": "#10482",
+      "customer": "Maya Reyes",
+      "status": "Paid",
+      "total": 184.2,
+      "date": "Jun 14"
+     },
+     {
+      "id": "#10481",
+      "customer": "Liam Chen",
+      "status": "Due",
+      "total": 62.5,
+      "date": "Jun 14"
+     },
+     {
+      "id": "#10480",
+      "customer": "Sofia Rossi",
+      "status": "Paid",
+      "total": 129.0,
+      "date": "Jun 13"
+     },
+     {
+      "id": "#10479",
+      "customer": "Noah Becker",
+      "status": "Overdue",
+      "total": 48.75,
+      "date": "Jun 13"
+     },
+     {
+      "id": "#10478",
+      "customer": "Ava Thompson",
+      "status": "Paid",
+      "total": 215.4,
+      "date": "Jun 12"
+     },
+     {
+      "id": "#10477",
+      "customer": "Kenji Sato",
+      "status": "Due",
+      "total": 89.9,
+      "date": "Jun 12"
+     },
+     {
+      "id": "#10476",
+      "customer": "Elena García",
+      "status": "Paid",
+      "total": 34.6,
+      "date": "Jun 11"
+     },
+     {
+      "id": "#10475",
+      "customer": "Omar Haddad",
+      "status": "Overdue",
+      "total": 156.3,
+      "date": "Jun 11"
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,1380 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_settings"
+ ],
+ "nodes": {
+  "app_settings": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1280.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row1",
+    "divider2",
+    "row6"
+   ]
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column2",
+    "column3"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": 260,
+    "padding": [
+     12,
+     20,
+     12,
+     20
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ]
+   },
+   "children": [
+    "Sidebar1"
+   ]
+  },
+  "Sidebar1": {
+   "type": "Sidebar",
+   "layout": {
+    "width": 256.0,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "value": "section",
+    "brand": "Plume",
+    "sectionLabel": "Settings",
+    "items": [
+     "Profile",
+     "Account",
+     "Notifications",
+     "Appearance",
+     "Billing",
+     "Team"
+    ],
+    "icons": [
+     "person",
+     "lock",
+     "notifications",
+     "palette",
+     "credit_card",
+     "group"
+    ]
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": [
+     40,
+     32,
+     40,
+     32
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column4"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "constraints": {
+     "maxWidth": 720
+    },
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column5",
+    "row2",
+    "textField1",
+    "textField2",
+    "column7",
+    "column8",
+    "ToggleRow1",
+    "divider1",
+    "column9",
+    "column10",
+    "column11",
+    "EmptyState1"
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= section==\"Profile\"}"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "titleWide"
+    },
+    "text": "Profile"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "bodySecondary"
+    },
+    "text": "How you appear to readers and collaborators on Plume."
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= section==\"Profile\"}"
+   },
+   "children": [
+    "Avatar1",
+    "column6"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "large"
+   },
+   "bind": {
+    "props.name": "${name}"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "outlinedButton1",
+    "text3"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Change"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Choose a new picture"
+      }
+     ]
+    }
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "JPG or PNG, up to 4 MB"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Name"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${name}",
+    "visible": "${= section==\"Profile\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "textField2": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Username"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${username}",
+    "visible": "${= section==\"Profile\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "username",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= section==\"Profile\"}"
+   },
+   "children": [
+    "textField3",
+    "row3"
+   ]
+  },
+  "textField3": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Bio",
+     "hintText": "Tell readers a little about you"
+    },
+    "minLines": 3,
+    "maxLines": 6
+   },
+   "bind": {
+    "props.initialValue": "${bio}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "bio",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${= length(bio)}/160"
+   },
+   "bind": {
+    "props.style.color": "${= length(bio)>160?theme.error:theme.colors.secondaryText}"
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= section==\"Profile\"}"
+   },
+   "children": [
+    "text5",
+    "dropdown1"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "fieldLabel"
+    },
+    "text": "Time zone"
+   }
+  },
+  "dropdown1": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "UTC-08:00 Los Angeles",
+     "UTC-05:00 New York",
+     "UTC+00:00 London",
+     "UTC+01:00 Paris",
+     "UTC+05:30 Mumbai",
+     "UTC+09:00 Tokyo"
+    ]
+   },
+   "bind": {
+    "props.value": "${tz}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tz",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "ToggleRow1": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Public profile",
+    "description": "Anyone with the link can read your profile and published pieces.",
+    "value": "pub"
+   },
+   "bind": {
+    "visible": "${= section==\"Profile\"}"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "visible": "${= section==\"Profile\"}"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= section==\"Profile\"}"
+   },
+   "children": [
+    "text6",
+    "text7"
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "sectionTitle"
+    },
+    "text": "Notifications"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "bodySecondary"
+    },
+    "text": "Choose what Plume tells you about."
+   }
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= section==\"Profile\"}"
+   },
+   "children": [
+    "ToggleRow2",
+    "ToggleRow3",
+    "ToggleRow4",
+    "ToggleRow5",
+    "ToggleRow6"
+   ]
+  },
+  "ToggleRow2": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Comments",
+    "description": "When someone comments on one of your drafts or posts.",
+    "value": "n1"
+   }
+  },
+  "ToggleRow3": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Mentions",
+    "description": "When a collaborator mentions you with @.",
+    "value": "n2"
+   }
+  },
+  "ToggleRow4": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "New followers",
+    "description": "When a reader starts following you.",
+    "value": "n3"
+   }
+  },
+  "ToggleRow5": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Weekly summary",
+    "description": "A Monday email with your writing streak and word count.",
+    "value": "n4"
+   }
+  },
+  "ToggleRow6": {
+   "type": "ToggleRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Product updates",
+    "description": "News about new features and improvements.",
+    "value": "n5"
+   }
+  },
+  "column11": {
+   "type": "column",
+   "layout": {
+    "padding": 20,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ],
+    "radius": 12,
+    "strokes": [
+     {
+      "color": "warningTintBorder"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= section==\"Profile\"}"
+   },
+   "children": [
+    "text8",
+    "text9",
+    "row4",
+    "Callout1",
+    "row5"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "color": "#FFB3261E"
+    },
+    "text": "Danger zone"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "bodySecondary"
+    },
+    "text": "Deleting your account removes all drafts, published pieces and followers. This cannot be undone."
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= !confirmDelete}"
+   },
+   "children": [
+    "ActionButton1"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Delete account",
+    "tone": "danger"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "confirmDelete",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Delete your account?",
+    "message": "All your writing will be permanently erased.",
+    "tone": "danger"
+   },
+   "bind": {
+    "visible": "${= confirmDelete}"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= confirmDelete}"
+   },
+   "children": [
+    "ActionButton2",
+    "ActionButton3"
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Keep my account",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "confirmDelete",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton3": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Yes, delete it",
+    "tone": "danger"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "deleteAccount"
+      },
+      {
+       "type": "setVariable",
+       "variable": "confirmDelete",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "EmptyState1": {
+   "type": "EmptyState",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "message": "These settings are not part of this view yet.",
+    "icon": "settings"
+   },
+   "bind": {
+    "props.title": "${section}",
+    "visible": "${= section!=\"Profile\"}"
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     40,
+     14,
+     40,
+     14
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ]
+   },
+   "children": [
+    "text10",
+    "spacer1",
+    "row7"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "You have unsaved changes."
+   },
+   "bind": {
+    "visible": "${= !(!(name!=sName || username!=sUsername || bio!=sBio || tz!=sTz || pub!=sPub || n1!=s1 || n2!=s2 || n3!=s3 || n4!=s4 || n5!=s5))}"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "ActionButton4",
+    "ActionButton5"
+   ]
+  },
+  "ActionButton4": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Cancel",
+    "tone": "quiet"
+   },
+   "bind": {
+    "props.enabled": "${= (name!=sName || username!=sUsername || bio!=sBio || tz!=sTz || pub!=sPub || n1!=s1 || n2!=s2 || n3!=s3 || n4!=s4 || n5!=s5)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "name",
+       "value": "${= sName}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "username",
+       "value": "${= sUsername}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "bio",
+       "value": "${= sBio}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "tz",
+       "value": "${= sTz}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "pub",
+       "value": "${= sPub}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "n1",
+       "value": "${= s1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "n2",
+       "value": "${= s2}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "n3",
+       "value": "${= s3}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "n4",
+       "value": "${= s4}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "n5",
+       "value": "${= s5}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton5": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Save changes",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= (name!=sName || username!=sUsername || bio!=sBio || tz!=sTz || pub!=sPub || n1!=s1 || n2!=s2 || n3!=s3 || n4!=s4 || n5!=s5)&&length(bio)<=160}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sName",
+       "value": "${= name}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sUsername",
+       "value": "${= username}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sBio",
+       "value": "${= bio}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sTz",
+       "value": "${= tz}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sPub",
+       "value": "${= pub}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "s1",
+       "value": "${= n1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "s2",
+       "value": "${= n2}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "s3",
+       "value": "${= n3}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "s4",
+       "value": "${= n4}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "s5",
+       "value": "${= n5}"
+      },
+      {
+       "type": "showToast",
+       "message": "Changes saved"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "app_settings": [
+   {
+    "name": "section",
+    "type": "text",
+    "value": "Profile"
+   },
+   {
+    "name": "name",
+    "type": "text",
+    "value": "Maya Reyes"
+   },
+   {
+    "name": "username",
+    "type": "text",
+    "value": "maya"
+   },
+   {
+    "name": "bio",
+    "type": "text",
+    "value": "Writing about slow software and long walks."
+   },
+   {
+    "name": "tz",
+    "type": "text",
+    "value": "UTC+01:00 Paris"
+   },
+   {
+    "name": "pub",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "n1",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "n2",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "n3",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "n4",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "n5",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "sName",
+    "type": "text",
+    "value": "Maya Reyes"
+   },
+   {
+    "name": "sUsername",
+    "type": "text",
+    "value": "maya"
+   },
+   {
+    "name": "sBio",
+    "type": "text",
+    "value": "Writing about slow software and long walks."
+   },
+   {
+    "name": "sTz",
+    "type": "text",
+    "value": "UTC+01:00 Paris"
+   },
+   {
+    "name": "sPub",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "s1",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "s2",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "s3",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "s4",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "s5",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "confirmDelete",
+    "type": "boolean",
+    "value": false
+   }
+  ]
+ }
+}
