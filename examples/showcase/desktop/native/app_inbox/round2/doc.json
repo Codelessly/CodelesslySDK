@@ -1,0 +1,3772 @@
+{
+ "schema": 3,
+ "roots": [
+  "inbox"
+ ],
+ "nodes": {
+  "inbox": {
+   "type": "canvas",
+   "name": "Relaydesk \u00b7 Inbox",
+   "slots": {
+    "body": "app"
+   },
+   "layout": {
+    "width": 1280,
+    "height": 800
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF6F7F9"
+     }
+    ]
+   }
+  },
+  "app": {
+   "type": "row",
+   "children": [
+    "rail",
+    "listPane",
+    "threadPane"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "rail": {
+   "type": "column",
+   "children": [
+    "brand",
+    "composeBtn",
+    "composeIcon",
+    "folderLabel",
+    "folderList",
+    "railSpacer",
+    "me"
+   ],
+   "layout": {
+    "width": 200,
+    "height": {
+     "fill": 800
+    },
+    "padding": [
+     16,
+     20,
+     16,
+     16
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF6F7F9"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "layout": {
+       "width": 72,
+       "padding": [
+        12,
+        20,
+        12,
+        16
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "brand": {
+   "type": "row",
+   "children": [
+    "logo",
+    "brandName"
+   ],
+   "layout": {
+    "width": {
+     "fill": 168
+    },
+    "height": {
+     "hug": 32
+    },
+    "margin": [
+     4,
+     0,
+     0,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 10
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "layout": {
+       "margin": [
+        0,
+        0,
+        0,
+        12
+       ]
+      },
+      "props": {
+       "mainAxisAlignment": "center"
+      }
+     }
+    }
+   ]
+  },
+  "logo": {
+   "type": "stack",
+   "children": [
+    "logoBg",
+    "logoMark"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   }
+  },
+  "logoBg": {
+   "type": "box",
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF3B82F6"
+       },
+       {
+        "position": 1,
+        "color": "#FF1D4ED8"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "logoMark": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18,
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "icon": "forum_rounded",
+    "color": "#FFFFFFFF",
+    "size": 18
+   }
+  },
+  "brandName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Relaydesk",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 18,
+     "fontWeight": 700,
+     "letterSpacing": -0.36,
+     "color": "#FF0F172A"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "composeBtn": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "fill": 168
+    },
+    "height": 40
+   },
+   "props": {
+    "label": "New conversation",
+    "icon": "edit_outlined",
+    "style": {
+     "backgroundColor": "#FF2563EB",
+     "foregroundColor": "#FFFFFFFF",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "New conversation draft started"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "composeIcon": {
+   "type": "iconButton",
+   "visible": false,
+   "tooltip": "New conversation",
+   "layout": {
+    "width": 48,
+    "height": 40
+   },
+   "props": {
+    "icon": "edit_outlined",
+    "style": {
+     "backgroundColor": "#FF2563EB",
+     "foregroundColor": "#FFFFFFFF"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "New conversation draft started"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": true
+     }
+    }
+   ]
+  },
+  "folderLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 168
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     12,
+     16,
+     0,
+     4
+    ]
+   },
+   "props": {
+    "text": "FOLDERS",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "folderList": {
+   "type": "listView",
+   "children": [
+    "folderItem"
+   ],
+   "layout": {
+    "width": {
+     "fill": 168
+    },
+    "height": {
+     "hug": 176
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 2
+   },
+   "bind": {
+    "data": "${folders}"
+   }
+  },
+  "folderItem": {
+   "type": "row",
+   "children": [
+    "fIcon",
+    "fLabel",
+    "fCountPill"
+   ],
+   "tooltip": "${item.label}",
+   "layout": {
+    "width": {
+     "fill": 168
+    },
+    "height": 40,
+    "padding": [
+     12,
+     0,
+     10,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item.id == folder ? '#FFE6EEFD' : '#00FFFFFF'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "layout": {
+       "padding": 0
+      },
+      "props": {
+       "mainAxisAlignment": "center"
+      }
+     }
+    }
+   ]
+  },
+  "fIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "inbox",
+    "size": 20,
+    "color": "#FF64748B"
+   },
+   "bind": {
+    "props.icon": "${item.icon}",
+    "props.color": "${= item.id == folder ? '#FF2563EB' : '#FF64748B'}"
+   }
+  },
+  "fLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.label}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF334155"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.id == folder ? '#FF1D4ED8' : '#FF334155'}",
+    "props.style.fontWeight": "${= item.id == folder ? 600 : 500}"
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "fCountPill": {
+   "type": "row",
+   "children": [
+    "fCount"
+   ],
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     8,
+     2,
+     8,
+     2
+    ]
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "#FFE9ECF1"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= item.count != ''}",
+    "decoration.fills[0].color": "${= item.id == folder ? '#FF2563EB' : '#FFE9ECF1'}"
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "fCount": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 12
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.count}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF475569"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.id == folder ? '#FFFFFFFF' : '#FF475569'}"
+   }
+  },
+  "railSpacer": {
+   "type": "spacer"
+  },
+  "me": {
+   "type": "row",
+   "children": [
+    "meAv",
+    "meText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 168
+    },
+    "height": {
+     "hug": 48
+    },
+    "padding": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "decoration": {
+    "radius": 12,
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "layout": {
+       "padding": 4
+      },
+      "props": {
+       "mainAxisAlignment": "center"
+      },
+      "decoration": {
+       "strokes": []
+      }
+     }
+    }
+   ]
+  },
+  "meAv": {
+   "type": "stack",
+   "children": [
+    "meAvBg",
+    "meAvTx",
+    "meOnline"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   }
+  },
+  "meAvBg": {
+   "type": "box",
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     },
+     {
+      "type": "radial",
+      "center": [
+       -0.4,
+       -0.5
+      ],
+      "radius": 0.9,
+      "stops": [
+       {
+        "position": 0,
+        "color": "#55FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "meAvTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 14
+    },
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "text": "MC",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 700,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "meOnline": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10,
+    "x": {
+     "end": 0
+    },
+    "y": {
+     "end": 0
+    }
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF22C55E"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokeWidth": 2
+   }
+  },
+  "meText": {
+   "type": "column",
+   "children": [
+    "meName",
+    "meStatus"
+   ],
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 34
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "meName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Maya Chen",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "meStatus": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Online \u00b7 Support",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "listPane": {
+   "type": "column",
+   "children": [
+    "listHead",
+    "searchBox",
+    "emptyNote",
+    "convList"
+   ],
+   "layout": {
+    "width": 320,
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "layout": {
+       "width": 280
+      }
+     }
+    }
+   ]
+  },
+  "listHead": {
+   "type": "row",
+   "children": [
+    "listTitleCol",
+    "unreadBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 68
+    },
+    "padding": [
+     20,
+     20,
+     12,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "listTitleCol": {
+   "type": "column",
+   "children": [
+    "listTitle",
+    "listSub"
+   ],
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 48
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   }
+  },
+  "listTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "text": "${folderTitle}",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 22,
+     "fontWeight": 700,
+     "letterSpacing": -0.44,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "listSub": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= length(shown) + ' conversations \u00b7 ' + count(shown, c => c.unread) + ' unread'}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "unreadBtn": {
+   "type": "iconButton",
+   "tooltip": "Show unread only",
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "props": {
+    "icon": "filter_list",
+    "style": {
+     "foregroundColor": "#FF475569"
+    }
+   },
+   "bind": {
+    "selected": "${unreadOnly}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "unreadOnly",
+       "op": "toggle"
+      }
+     ]
+    }
+   ]
+  },
+  "searchBox": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 40
+    },
+    "margin": [
+     16,
+     0,
+     16,
+     12
+    ]
+   },
+   "props": {
+    "decoration": {
+     "hintText": "Search name or subject",
+     "prefixIcon": {
+      "icon": "search",
+      "size": 18
+     }
+    }
+   },
+   "bind": {
+    "props.initialValue": "${search}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "search",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "emptyNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 40
+    },
+    "margin": [
+     24,
+     32,
+     24,
+     0
+    ]
+   },
+   "props": {
+    "text": "Nothing here. Enjoy the quiet.",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF94A3B8"
+    }
+   },
+   "bind": {
+    "visible": "${= length(shown) == 0}"
+   }
+  },
+  "convList": {
+   "type": "listView",
+   "children": [
+    "convItem"
+   ],
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "fill": 660
+    }
+   },
+   "props": {
+    "alwaysScroll": false
+   },
+   "bind": {
+    "data": "${shown}"
+   }
+  },
+  "convItem": {
+   "type": "row",
+   "children": [
+    "cAvatar",
+    "cBody"
+   ],
+   "layout": {
+    "width": {
+     "fill": 320
+    },
+    "height": {
+     "hug": 92
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     14
+    ]
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFF1F2F4"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item.id == sel ? '#FFEFF4FF' : '#00FFFFFF'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${item.id}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "conversations",
+       "value": "${= map(conversations, c => c.id == item.id ? set(c, 'unread', false) : c)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "cAvatar": {
+   "type": "stack",
+   "children": [
+    "cAvBg",
+    "cAvTx"
+   ],
+   "layout": {
+    "width": 40,
+    "height": 40
+   }
+  },
+  "cAvBg": {
+   "type": "box",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF94A3B8"
+     },
+     {
+      "type": "radial",
+      "center": [
+       -0.4,
+       -0.5
+      ],
+      "radius": 0.9,
+      "stops": [
+       {
+        "position": 0,
+        "color": "#55FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   }
+  },
+  "cAvTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 18
+    },
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "text": "${item.initials}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "cBody": {
+   "type": "column",
+   "children": [
+    "cTop",
+    "cSubject",
+    "cPreview"
+   ],
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 62
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 3
+   }
+  },
+  "cTop": {
+   "type": "row",
+   "children": [
+    "cName",
+    "cDot",
+    "cTime"
+   ],
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "cName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.name}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   },
+   "bind": {
+    "props.style.fontWeight": "${= item.unread ? 700 : 600}"
+   }
+  },
+  "cDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${item.unread}"
+   }
+  },
+  "cTime": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.time}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "cSubject": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.subject}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FF1E293B"
+    }
+   },
+   "bind": {
+    "props.style.fontWeight": "${= item.unread ? 600 : 500}"
+   }
+  },
+  "cPreview": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 220
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.preview}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "threadPane": {
+   "type": "row",
+   "children": [
+    "thread",
+    "details"
+   ],
+   "layout": {
+    "width": {
+     "fill": 760
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "thread": {
+   "type": "column",
+   "children": [
+    "tHead",
+    "tScroll",
+    "composer"
+   ],
+   "layout": {
+    "width": {
+     "fill": 496
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "tHead": {
+   "type": "column",
+   "children": [
+    "tTitleRow",
+    "tMeta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 496
+    },
+    "height": {
+     "hug": 104
+    },
+    "padding": [
+     24,
+     20,
+     20,
+     16
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "tTitleRow": {
+   "type": "row",
+   "children": [
+    "tSubject",
+    "moreBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 452
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "tSubject": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "text": "${current.subject}",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 22,
+     "fontWeight": 700,
+     "height": 1.25,
+     "letterSpacing": -0.44,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "moreBtn": {
+   "type": "iconButton",
+   "tooltip": "More actions",
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "props": {
+    "icon": "more_horiz",
+    "style": {
+     "foregroundColor": "#FF475569"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Merge, snooze and print are in the menu"
+      }
+     ]
+    }
+   ]
+  },
+  "tMeta": {
+   "type": "row",
+   "children": [
+    "statusPill",
+    "ticketId",
+    "sep1",
+    "assignee",
+    "sep2",
+    "channel"
+   ],
+   "layout": {
+    "width": {
+     "fill": 452
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "wrap": true,
+    "spacing": 10,
+    "runSpacing": 8,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "statusPill": {
+   "type": "row",
+   "children": [
+    "statusDot",
+    "statusTx"
+   ],
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     10,
+     4,
+     10,
+     4
+    ]
+   },
+   "props": {
+    "spacing": 6
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "#FFDCFCE7"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${statusBg}"
+   }
+  },
+  "statusDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF166534"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${statusFg}"
+   }
+  },
+  "statusTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${current.status}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF166534"
+    }
+   },
+   "bind": {
+    "props.style.color": "${statusFg}"
+   }
+  },
+  "ticketId": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= '#' + (4811 + current.id)}",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "sep1": {
+   "type": "box",
+   "layout": {
+    "width": 3,
+    "height": 3
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FFCBD5E1"
+     }
+    ]
+   }
+  },
+  "assignee": {
+   "type": "row",
+   "children": [
+    "asIcon",
+    "asTx"
+   ],
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "asIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "account_circle",
+    "size": 16,
+    "color": "#FF2563EB"
+   }
+  },
+  "asTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${= 'Assigned to ' + current.assignee}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "sep2": {
+   "type": "box",
+   "layout": {
+    "width": 3,
+    "height": 3
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FFCBD5E1"
+     }
+    ]
+   }
+  },
+  "channel": {
+   "type": "row",
+   "children": [
+    "chIcon",
+    "chTx"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "chIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "icon": "mail_outline",
+    "size": 14,
+    "color": "#FF64748B"
+   }
+  },
+  "chTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Email",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "tScroll": {
+   "type": "column",
+   "children": [
+    "dayRule",
+    "msgList",
+    "tEnd"
+   ],
+   "layout": {
+    "width": {
+     "fill": 496
+    },
+    "height": {
+     "fill": 520
+    },
+    "padding": [
+     24,
+     24,
+     24,
+     24
+    ]
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 16
+   }
+  },
+  "dayRule": {
+   "type": "row",
+   "children": [
+    "ruleL",
+    "dayTx",
+    "ruleR"
+   ],
+   "layout": {
+    "width": {
+     "fill": 448
+    },
+    "height": {
+     "hug": 16
+    },
+    "constraints": {
+     "maxWidth": 720
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "ruleL": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   }
+  },
+  "dayTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Today",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "ruleR": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   }
+  },
+  "msgList": {
+   "type": "listView",
+   "children": [
+    "msg"
+   ],
+   "layout": {
+    "width": {
+     "fill": 448
+    },
+    "height": {
+     "hug": 600
+    },
+    "constraints": {
+     "maxWidth": 720
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${thread}"
+   }
+  },
+  "msg": {
+   "type": "column",
+   "children": [
+    "mHead",
+    "mBody"
+   ],
+   "layout": {
+    "width": {
+     "fill": 448
+    },
+    "height": {
+     "hug": 120
+    },
+    "padding": [
+     18,
+     16,
+     18,
+     18
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "decoration": {
+    "radius": 16,
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16
+     }
+    ]
+   },
+   "bind": {
+    "layout.margin": "${= item.kind == 'customer' ? [0, 0, 40, 0] : [40, 0, 0, 0]}",
+    "decoration.fills[0].color": "${= item.kind == 'note' ? '#FFFFFBEB' : item.kind == 'agent' ? '#FFF5F8FF' : '#FFFFFFFF'}",
+    "decoration.strokes[0].color": "${= item.kind == 'note' ? '#FFFDE68A' : item.kind == 'agent' ? '#FFDBE6FE' : '#FFE5E7EB'}"
+   }
+  },
+  "mHead": {
+   "type": "row",
+   "children": [
+    "mAv",
+    "mWho",
+    "mTime"
+   ],
+   "layout": {
+    "width": {
+     "fill": 412
+    },
+    "height": {
+     "hug": 34
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "mAv": {
+   "type": "stack",
+   "children": [
+    "mAvBg",
+    "mAvTx"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   }
+  },
+  "mAvBg": {
+   "type": "box",
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF94A3B8"
+     },
+     {
+      "type": "radial",
+      "center": [
+       -0.4,
+       -0.5
+      ],
+      "radius": 0.9,
+      "stops": [
+       {
+        "position": 0,
+        "color": "#55FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   }
+  },
+  "mAvTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 14
+    },
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "text": "${item.initials}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 700,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "mWho": {
+   "type": "column",
+   "children": [
+    "mName",
+    "mMeta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 34
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   }
+  },
+  "mName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.author}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "mMeta": {
+   "type": "row",
+   "children": [
+    "mLock",
+    "mMetaTx"
+   ],
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "mLock": {
+   "type": "icon",
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "props": {
+    "icon": "lock",
+    "size": 12,
+    "color": "#FFB45309"
+   },
+   "bind": {
+    "visible": "${= item.kind == 'note'}"
+   }
+  },
+  "mMetaTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= item.kind == 'note' ? 'Internal note \u00b7 only your team can see this' : item.kind == 'agent' ? 'Replied by email' : 'via email'}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF64748B"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.kind == 'note' ? '#FFB45309' : '#FF64748B'}"
+   }
+  },
+  "mTime": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.time}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "mBody": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 412
+    },
+    "height": {
+     "hug": 48
+    }
+   },
+   "props": {
+    "text": "${item.body}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF1E293B"
+    }
+   }
+  },
+  "tEnd": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 448
+    },
+    "height": 1
+   }
+  },
+  "composer": {
+   "type": "column",
+   "children": [
+    "cmpRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 496
+    },
+    "height": {
+     "hug": 190
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     18
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= mode == 'note' ? '#FFFFFBEB' : '#FFFFFFFF'}"
+   }
+  },
+  "cmpRail": {
+   "type": "column",
+   "children": [
+    "cmpTabs",
+    "cmpTo",
+    "cmpField",
+    "cmpBar"
+   ],
+   "layout": {
+    "width": {
+     "fill": 448
+    },
+    "height": {
+     "hug": 160
+    },
+    "constraints": {
+     "maxWidth": 720
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 10
+   }
+  },
+  "cmpTabs": {
+   "type": "row",
+   "children": [
+    "tabReply",
+    "tabNote"
+   ],
+   "layout": {
+    "width": {
+     "fill": 448
+    },
+    "height": {
+     "hug": 30
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "tabReply": {
+   "type": "row",
+   "children": [
+    "trIcon",
+    "trTx"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 30
+    },
+    "padding": [
+     10,
+     6,
+     12,
+     6
+    ]
+   },
+   "props": {
+    "spacing": 6
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FFEFF4FF"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= mode == 'reply' ? '#FFEFF4FF' : '#00FFFFFF'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "mode",
+       "value": "reply"
+      }
+     ]
+    }
+   ]
+  },
+  "trIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "reply",
+    "size": 16,
+    "color": "#FF2563EB"
+   },
+   "bind": {
+    "props.color": "${= mode == 'reply' ? '#FF2563EB' : '#FF64748B'}"
+   }
+  },
+  "trTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Reply",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF1D4ED8"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= mode == 'reply' ? '#FF1D4ED8' : '#FF64748B'}"
+   }
+  },
+  "tabNote": {
+   "type": "row",
+   "children": [
+    "tnIcon",
+    "tnTx"
+   ],
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 30
+    },
+    "padding": [
+     10,
+     6,
+     12,
+     6
+    ]
+   },
+   "props": {
+    "spacing": 6
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= mode == 'note' ? '#FFFEF3C7' : '#00FFFFFF'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "mode",
+       "value": "note"
+      }
+     ]
+    }
+   ]
+  },
+  "tnIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "lock_outline",
+    "size": 16,
+    "color": "#FF64748B"
+   },
+   "bind": {
+    "props.color": "${= mode == 'note' ? '#FFB45309' : '#FF64748B'}"
+   }
+  },
+  "tnTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Internal note",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF64748B"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= mode == 'note' ? '#FF92400E' : '#FF64748B'}"
+   }
+  },
+  "cmpTo": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 448
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= mode == 'note' ? 'Only teammates see notes. Mention someone with @' : 'To: ' + current.name + ' <' + current.email + '>'}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "cmpField": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 448
+    },
+    "height": {
+     "hug": 72
+    }
+   },
+   "props": {
+    "maxLines": 4,
+    "keyboardType": "multiline",
+    "decoration": {
+     "hintText": "Write a reply\u2026"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${reply}",
+    "props.decoration.hintText": "${= mode == 'note' ? 'Add a note for your team\u2026' : 'Write a reply to ' + current.name + '\u2026'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "cmpBar": {
+   "type": "row",
+   "children": [
+    "cmpTools",
+    "cmpSpacer",
+    "sendClose",
+    "send"
+   ],
+   "layout": {
+    "width": {
+     "fill": 448
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "cmpTools": {
+   "type": "row",
+   "children": [
+    "attachBtn",
+    "macroBtn"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": 36
+   },
+   "props": {
+    "spacing": 2
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "attachBtn": {
+   "type": "iconButton",
+   "tooltip": "Attach a file",
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "props": {
+    "icon": "attach_file",
+    "style": {
+     "foregroundColor": "#FF64748B"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Choose a file to attach"
+      }
+     ]
+    }
+   ]
+  },
+  "macroBtn": {
+   "type": "iconButton",
+   "tooltip": "Insert a saved reply",
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "props": {
+    "icon": "bolt",
+    "style": {
+     "foregroundColor": "#FF64748B"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": "${= reply + 'Thanks for your patience \u2014 I have looked into this and '}"
+      }
+     ]
+    }
+   ]
+  },
+  "cmpSpacer": {
+   "type": "spacer"
+  },
+  "sendClose": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": 150,
+    "height": 40
+   },
+   "props": {
+    "label": "Send and close",
+    "style": {
+     "foregroundColor": "#FF0F172A",
+     "side": {
+      "color": "#FFE5E7EB"
+     },
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "messages",
+       "op": "add",
+       "value": "${= {conv: sel, kind: mode == 'note' ? 'note' : 'agent', author: 'Maya Chen', initials: 'MC', color: '#FF2563EB', time: 'Just now', body: reply}}",
+       "when": {
+        "left": "${reply}",
+        "op": "isNotEmpty"
+       }
+      },
+      {
+       "type": "setVariable",
+       "variable": "conversations",
+       "value": "${= map(conversations, c => c.id == sel ? set(set(c, 'status', 'Closed'), 'unread', false) : c)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": ""
+      },
+      {
+       "type": "setVariable",
+       "variable": "mode",
+       "value": "reply"
+      },
+      {
+       "type": "scrollTo",
+       "node": "tEnd",
+       "alignment": 1
+      },
+      {
+       "type": "showToast",
+       "message": "${= 'Sent and closed \u00b7 ' + current.name}"
+      }
+     ]
+    }
+   ]
+  },
+  "send": {
+   "type": "filledButton",
+   "layout": {
+    "width": 100,
+    "height": 40
+   },
+   "props": {
+    "label": "Send",
+    "icon": "send",
+    "style": {
+     "backgroundColor": "#FF2563EB",
+     "foregroundColor": "#FFFFFFFF",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "bind": {
+    "props.label": "${= mode == 'note' ? 'Add note' : 'Send'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${reply}",
+        "op": "isNotEmpty"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "messages",
+         "op": "add",
+         "value": "${= {conv: sel, kind: mode == 'note' ? 'note' : 'agent', author: 'Maya Chen', initials: 'MC', color: '#FF2563EB', time: 'Just now', body: reply}}"
+        },
+        {
+         "type": "setVariable",
+         "variable": "conversations",
+         "value": "${= mode == 'note' ? conversations : map(conversations, c => c.id == sel ? set(set(c, 'status', 'Waiting'), 'preview', 'You: ' + reply) : c)}"
+        },
+        {
+         "type": "setVariable",
+         "variable": "reply",
+         "value": ""
+        },
+        {
+         "type": "scrollTo",
+         "node": "tEnd",
+         "alignment": 1
+        },
+        {
+         "type": "showToast",
+         "message": "${= mode == 'note' ? 'Note added for your team' : 'Reply sent \u00b7 waiting on customer'}"
+        }
+       ],
+       "else": [
+        {
+         "type": "showToast",
+         "message": "Write something first"
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "details": {
+   "type": "column",
+   "children": [
+    "dHead",
+    "dLabel1",
+    "dRows",
+    "dLabel2",
+    "orderCard",
+    "dLabel3",
+    "tagList",
+    "dActions"
+   ],
+   "layout": {
+    "width": 264,
+    "height": {
+     "fill": 800
+    },
+    "padding": [
+     20,
+     24,
+     20,
+     24
+    ]
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "media": [
+    {
+     "maxWidth": 1099,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "dHead": {
+   "type": "column",
+   "children": [
+    "dAv",
+    "dName",
+    "dEmail",
+    "dLoc"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 150
+    },
+    "margin": [
+     0,
+     0,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "dAv": {
+   "type": "stack",
+   "children": [
+    "dAvBg",
+    "dAvTx"
+   ],
+   "layout": {
+    "width": 64,
+    "height": 64,
+    "margin": [
+     0,
+     0,
+     0,
+     8
+    ]
+   }
+  },
+  "dAvBg": {
+   "type": "box",
+   "layout": {
+    "width": 64,
+    "height": 64
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF94A3B8"
+     },
+     {
+      "type": "radial",
+      "center": [
+       -0.4,
+       -0.5
+      ],
+      "radius": 0.9,
+      "stops": [
+       {
+        "position": 0,
+        "color": "#66FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${current.color}"
+   }
+  },
+  "dAvTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 26
+    },
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "text": "${current.initials}",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 22,
+     "fontWeight": 700,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "dName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "${current.name}",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 18,
+     "fontWeight": 700,
+     "letterSpacing": -0.36,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "dEmail": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${current.email}",
+    "textAlign": "center",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "dLoc": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${current.location}",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "dLabel1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "CUSTOMER",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "dRows": {
+   "type": "listView",
+   "children": [
+    "dRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 140
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${detailRows}"
+   }
+  },
+  "dRow": {
+   "type": "row",
+   "children": [
+    "dK",
+    "dV"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFF1F2F4"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "dK": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.k}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "dV": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.v}",
+    "textAlign": "right",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "dLabel2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "LAST ORDER",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "orderCard": {
+   "type": "row",
+   "children": [
+    "oIcon",
+    "oText",
+    "oAmt"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 60
+    },
+    "padding": 12
+   },
+   "props": {
+    "spacing": 10
+   },
+   "decoration": {
+    "radius": 12,
+    "fills": [
+     {
+      "color": "#FFF8FAFC"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   }
+  },
+  "oIcon": {
+   "type": "stack",
+   "children": [
+    "oIconBg",
+    "oIconGlyph"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   }
+  },
+  "oIconBg": {
+   "type": "box",
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#FFE6EEFD"
+     }
+    ]
+   }
+  },
+  "oIconGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16,
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "icon": "receipt_long",
+    "size": 16,
+    "color": "#FF2563EB"
+   }
+  },
+  "oText": {
+   "type": "column",
+   "children": [
+    "oId",
+    "oDate"
+   ],
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 34
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   }
+  },
+  "oId": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${current.orderId}",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "oDate": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${current.orderDate}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "oAmt": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${current.orderAmt}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 700,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "dLabel3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 16
+    },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "TAGS",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "tagList": {
+   "type": "listView",
+   "children": [
+    "tag"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "wrap": true,
+    "scrollDirection": "horizontal",
+    "wrapSpacing": 6,
+    "runSpacing": 6
+   },
+   "bind": {
+    "data": "${current.tags}"
+   }
+  },
+  "tag": {
+   "type": "row",
+   "children": [
+    "tagTx"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     10,
+     4,
+     10,
+     4
+    ]
+   },
+   "decoration": {
+    "radius": 999,
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   }
+  },
+  "tagTx": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "dActions": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": 36,
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "label": "View full profile",
+    "icon": "open_in_new",
+    "style": {
+     "foregroundColor": "#FF2563EB",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 13,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "${= 'Opening ' + current.name + ' in Customers'}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "inbox": [
+   {
+    "name": "folder",
+    "type": "text",
+    "value": "inbox"
+   },
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "search",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "unreadOnly",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "mode",
+    "type": "text",
+    "value": "reply"
+   },
+   {
+    "name": "reply",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "folders",
+    "type": "list",
+    "value": [
+     {
+      "id": "inbox",
+      "label": "Inbox",
+      "icon": "inbox",
+      "count": "12"
+     },
+     {
+      "id": "mine",
+      "label": "Assigned to me",
+      "icon": "person_outline",
+      "count": "4"
+     },
+     {
+      "id": "waiting",
+      "label": "Waiting",
+      "icon": "schedule",
+      "count": "7"
+     },
+     {
+      "id": "closed",
+      "label": "Closed",
+      "icon": "check_circle_outline",
+      "count": ""
+     }
+    ]
+   },
+   {
+    "name": "conversations",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Marcus Webb",
+      "initials": "MW",
+      "color": "#FF6366F1",
+      "email": "marcus@northpeak.co",
+      "location": "Denver, US",
+      "subject": "Can't connect Shopify after the update",
+      "preview": "The store sync shows 'token expired' every time I try to reconnect.",
+      "time": "10:42",
+      "unread": true,
+      "status": "Open",
+      "mine": false,
+      "assignee": "Unassigned",
+      "plan": "Growth",
+      "since": "Aug 2022",
+      "ltv": "$4,180",
+      "convs": "9",
+      "orderId": "#A-20877",
+      "orderDate": "Feb 28 \u00b7 Annual renewal",
+      "orderAmt": "$1,188",
+      "tags": [
+       "Shopify",
+       "Integration",
+       "Priority"
+      ]
+     },
+     {
+      "id": 2,
+      "name": "Priya Raman",
+      "initials": "PR",
+      "color": "#FFEC4899",
+      "email": "priya@lumenlabs.io",
+      "location": "Bengaluru, IN",
+      "subject": "Charged twice for the March invoice",
+      "preview": "Thanks Maya! Will I get a confirmation email once the refund goes through?",
+      "time": "10:05",
+      "unread": false,
+      "status": "Open",
+      "mine": true,
+      "assignee": "Maya Chen",
+      "plan": "Business",
+      "since": "Mar 2021",
+      "ltv": "$12,640",
+      "convs": "14",
+      "orderId": "#A-22910",
+      "orderDate": "Mar 3 \u00b7 Monthly invoice",
+      "orderAmt": "$348.00",
+      "tags": [
+       "Billing",
+       "Refund",
+       "VIP"
+      ]
+     },
+     {
+      "id": 3,
+      "name": "Elena Sokolova",
+      "initials": "ES",
+      "color": "#FF14B8A6",
+      "email": "elena@fernhill.eu",
+      "location": "Tallinn, EE",
+      "subject": "Bulk export stuck at 87%",
+      "preview": "Started the CSV export an hour ago and it hasn't moved since.",
+      "time": "9:58",
+      "unread": true,
+      "status": "Open",
+      "mine": true,
+      "assignee": "Maya Chen",
+      "plan": "Growth",
+      "since": "Jan 2023",
+      "ltv": "$2,310",
+      "convs": "3",
+      "orderId": "#A-22102",
+      "orderDate": "Mar 1 \u00b7 Monthly invoice",
+      "orderAmt": "$99.00",
+      "tags": [
+       "Export",
+       "Bug",
+       "Data"
+      ]
+     },
+     {
+      "id": 4,
+      "name": "Tom Becker",
+      "initials": "TB",
+      "color": "#FFF59E0B",
+      "email": "tom@becker.studio",
+      "location": "Hamburg, DE",
+      "subject": "Request: dark mode for the agent app",
+      "preview": "Our night shift would love a darker theme. Is it on the roadmap?",
+      "time": "9:31",
+      "unread": false,
+      "status": "Waiting",
+      "mine": false,
+      "assignee": "Daniel Okafor",
+      "plan": "Starter",
+      "since": "Nov 2023",
+      "ltv": "$540",
+      "convs": "2",
+      "orderId": "#A-21988",
+      "orderDate": "Feb 26 \u00b7 Monthly invoice",
+      "orderAmt": "$29.00",
+      "tags": [
+       "Feature request",
+       "UI",
+       "Roadmap"
+      ]
+     },
+     {
+      "id": 5,
+      "name": "Aisha Bello",
+      "initials": "AB",
+      "color": "#FF8B5CF6",
+      "email": "aisha@kora.ng",
+      "location": "Lagos, NG",
+      "subject": "How do I add a second admin?",
+      "preview": "I can invite teammates but there's no option to make them an admin.",
+      "time": "Yesterday",
+      "unread": true,
+      "status": "Open",
+      "mine": false,
+      "assignee": "Unassigned",
+      "plan": "Business",
+      "since": "Jun 2022",
+      "ltv": "$6,920",
+      "convs": "6",
+      "orderId": "#A-21540",
+      "orderDate": "Feb 20 \u00b7 Seat add-on",
+      "orderAmt": "$120.00",
+      "tags": [
+       "Permissions",
+       "How-to",
+       "Onboarding"
+      ]
+     },
+     {
+      "id": 6,
+      "name": "Jonas Lindqvist",
+      "initials": "JL",
+      "color": "#FF0EA5E9",
+      "email": "jonas@arkiv.se",
+      "location": "Malm\u00f6, SE",
+      "subject": "SSO login loops back to the start",
+      "preview": "After the Okta prompt it sends me straight back to the sign-in page.",
+      "time": "Yesterday",
+      "unread": false,
+      "status": "Open",
+      "mine": true,
+      "assignee": "Maya Chen",
+      "plan": "Enterprise",
+      "since": "Apr 2020",
+      "ltv": "$48,200",
+      "convs": "22",
+      "orderId": "#A-19004",
+      "orderDate": "Jan 15 \u00b7 Annual contract",
+      "orderAmt": "$18,000",
+      "tags": [
+       "SSO",
+       "Okta",
+       "Enterprise"
+      ]
+     },
+     {
+      "id": 7,
+      "name": "Hana Sato",
+      "initials": "HS",
+      "color": "#FF10B981",
+      "email": "hana@kumo.jp",
+      "location": "Osaka, JP",
+      "subject": "Invoice address needs updating",
+      "preview": "We moved offices. Can future invoices show the new address?",
+      "time": "Mon",
+      "unread": false,
+      "status": "Waiting",
+      "mine": false,
+      "assignee": "Daniel Okafor",
+      "plan": "Growth",
+      "since": "Sep 2022",
+      "ltv": "$3,450",
+      "convs": "5",
+      "orderId": "#A-21877",
+      "orderDate": "Feb 24 \u00b7 Monthly invoice",
+      "orderAmt": "$99.00",
+      "tags": [
+       "Billing",
+       "Account",
+       "Admin"
+      ]
+     },
+     {
+      "id": 8,
+      "name": "Diego Alvarez",
+      "initials": "DA",
+      "color": "#FFEF4444",
+      "email": "diego@ruta.mx",
+      "location": "Monterrey, MX",
+      "subject": "Webhook retries are firing twice",
+      "preview": "Each failed delivery gets retried twice at the same timestamp.",
+      "time": "Mon",
+      "unread": true,
+      "status": "Open",
+      "mine": true,
+      "assignee": "Maya Chen",
+      "plan": "Business",
+      "since": "Feb 2021",
+      "ltv": "$9,870",
+      "convs": "11",
+      "orderId": "#A-22050",
+      "orderDate": "Mar 1 \u00b7 Monthly invoice",
+      "orderAmt": "$249.00",
+      "tags": [
+       "API",
+       "Webhooks",
+       "Bug"
+      ]
+     },
+     {
+      "id": 9,
+      "name": "Sofia Marin",
+      "initials": "SM",
+      "color": "#FF64748B",
+      "email": "sofia@marin.design",
+      "location": "Lisbon, PT",
+      "subject": "Thanks, all sorted!",
+      "preview": "The import worked perfectly after your fix. Have a great weekend.",
+      "time": "Fri",
+      "unread": false,
+      "status": "Closed",
+      "mine": false,
+      "assignee": "Daniel Okafor",
+      "plan": "Starter",
+      "since": "Dec 2023",
+      "ltv": "$290",
+      "convs": "1",
+      "orderId": "#A-21002",
+      "orderDate": "Feb 12 \u00b7 Monthly invoice",
+      "orderAmt": "$29.00",
+      "tags": [
+       "Import",
+       "Resolved",
+       "Happy"
+      ]
+     }
+    ]
+   },
+   {
+    "name": "messages",
+    "type": "list",
+    "value": [
+     {
+      "conv": 1,
+      "kind": "customer",
+      "author": "Marcus Webb",
+      "initials": "MW",
+      "color": "#FF6366F1",
+      "time": "10:42",
+      "body": "Since this morning's update the Shopify sync shows 'token expired' every time I try to reconnect. I've revoked and re-added the app twice. Orders aren't coming through."
+     },
+     {
+      "conv": 2,
+      "kind": "customer",
+      "author": "Priya Raman",
+      "initials": "PR",
+      "color": "#FFEC4899",
+      "time": "9:12",
+      "body": "Hi, my card was charged twice for invoice INV-2291 ($348) on March 3rd. Could you refund the duplicate? I've attached a screenshot of the statement."
+     },
+     {
+      "conv": 2,
+      "kind": "agent",
+      "author": "Maya Chen",
+      "initials": "MC",
+      "color": "#FF2563EB",
+      "time": "9:40",
+      "body": "Hi Priya, sorry about that. I can see two captures a few seconds apart from our payment processor. I've requested a refund of the duplicate; it usually lands in 3\u20135 business days."
+     },
+     {
+      "conv": 2,
+      "kind": "note",
+      "author": "Daniel Okafor",
+      "initials": "DO",
+      "color": "#FFF59E0B",
+      "time": "9:44",
+      "body": "Third double capture from the Stripe retry this week. Filed BILL-1142 with payments engineering, so link any new ones there."
+     },
+     {
+      "conv": 2,
+      "kind": "customer",
+      "author": "Priya Raman",
+      "initials": "PR",
+      "color": "#FFEC4899",
+      "time": "10:05",
+      "body": "Thanks Maya! Will I get a confirmation email once the refund goes through? Our finance team needs it for reconciliation."
+     },
+     {
+      "conv": 2,
+      "kind": "agent",
+      "author": "Maya Chen",
+      "initials": "MC",
+      "color": "#FF2563EB",
+      "time": "10:11",
+      "body": "Yes, a receipt from billing@relaydesk.com goes out as soon as it settles. I'll keep this conversation open until you have it."
+     },
+     {
+      "conv": 3,
+      "kind": "customer",
+      "author": "Elena Sokolova",
+      "initials": "ES",
+      "color": "#FF14B8A6",
+      "time": "9:58",
+      "body": "I started the CSV export of all contacts an hour ago and it hasn't moved past 87%. Is it safe to cancel and restart?"
+     },
+     {
+      "conv": 4,
+      "kind": "customer",
+      "author": "Tom Becker",
+      "initials": "TB",
+      "color": "#FFF59E0B",
+      "time": "9:31",
+      "body": "Our night shift would love a darker theme for the agent app. Is it on the roadmap?"
+     },
+     {
+      "conv": 5,
+      "kind": "customer",
+      "author": "Aisha Bello",
+      "initials": "AB",
+      "color": "#FF8B5CF6",
+      "time": "Yesterday",
+      "body": "I can invite teammates but there's no option to make one of them an admin. Where do I find it?"
+     },
+     {
+      "conv": 6,
+      "kind": "customer",
+      "author": "Jonas Lindqvist",
+      "initials": "JL",
+      "color": "#FF0EA5E9",
+      "time": "Yesterday",
+      "body": "After the Okta prompt it sends me straight back to the sign-in page. Happens in Chrome and Safari."
+     },
+     {
+      "conv": 7,
+      "kind": "customer",
+      "author": "Hana Sato",
+      "initials": "HS",
+      "color": "#FF10B981",
+      "time": "Mon",
+      "body": "We moved offices. Can future invoices show our new address in Kita-ku, Osaka?"
+     },
+     {
+      "conv": 8,
+      "kind": "customer",
+      "author": "Diego Alvarez",
+      "initials": "DA",
+      "color": "#FFEF4444",
+      "time": "Mon",
+      "body": "Each failed webhook delivery gets retried twice with the same timestamp, so our handler processes orders twice."
+     },
+     {
+      "conv": 9,
+      "kind": "customer",
+      "author": "Sofia Marin",
+      "initials": "SM",
+      "color": "#FF64748B",
+      "time": "Fri",
+      "body": "The import worked perfectly after your fix. Have a great weekend!"
+     }
+    ]
+   },
+   {
+    "name": "shown",
+    "type": "list",
+    "formula": "filter(conversations, c => (folder == 'inbox' ? c.status != 'Closed' : folder == 'mine' ? (c.mine && c.status != 'Closed') : folder == 'waiting' ? c.status == 'Waiting' : c.status == 'Closed') && (!unreadOnly || c.unread) && contains(lower(c.name + ' ' + c.subject), lower(search)))"
+   },
+   {
+    "name": "current",
+    "type": "map",
+    "formula": "filter(conversations, c => c.id == sel)[0]"
+   },
+   {
+    "name": "thread",
+    "type": "list",
+    "formula": "filter(messages, m => m.conv == sel)"
+   },
+   {
+    "name": "folderTitle",
+    "type": "text",
+    "formula": "folder == 'inbox' ? 'Inbox' : folder == 'mine' ? 'Assigned to me' : folder == 'waiting' ? 'Waiting' : 'Closed'"
+   },
+   {
+    "name": "statusBg",
+    "type": "color",
+    "formula": "current.status == 'Open' ? '#FFDCFCE7' : current.status == 'Waiting' ? '#FFFEF3C7' : '#FFF1F5F9'"
+   },
+   {
+    "name": "statusFg",
+    "type": "color",
+    "formula": "current.status == 'Open' ? '#FF166534' : current.status == 'Waiting' ? '#FF92400E' : '#FF475569'"
+   },
+   {
+    "name": "detailRows",
+    "type": "list",
+    "formula": "[{k: 'Plan', v: current.plan}, {k: 'Customer since', v: current.since}, {k: 'Lifetime value', v: current.ltv}, {k: 'Conversations', v: current.convs}]"
+   }
+  ]
+ }
+}

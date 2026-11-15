@@ -1,0 +1,2629 @@
+{
+ "schema": 3,
+ "roots": [
+  "pricing"
+ ],
+ "nodes": {
+  "pricing": {
+   "type": "canvas",
+   "name": "Pricing",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 1280,
+    "height": 800
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF6F7F9"
+     }
+    ]
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "nav",
+    "hero",
+    "compare",
+    "faqBand",
+    "footer"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "scrollable": true
+   }
+  },
+  "nav": {
+   "type": "column",
+   "children": [
+    "navRail"
+   ],
+   "sticky": {
+    "offset": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     32,
+     0,
+     32,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "navRail": {
+   "type": "row",
+   "children": [
+    "brand",
+    "navLinks",
+    "navRight"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": 72,
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "brand": {
+   "type": "row",
+   "children": [
+    "brandMark",
+    "brandName"
+   ],
+   "layout": {
+    "width": {
+     "hug": 130
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "brandMark": {
+   "type": "row",
+   "children": [
+    "brandIcon"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 9,
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF2563EB"
+       },
+       {
+        "position": 1,
+        "color": "#FF60A5FA"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "brandIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "receipt_long",
+    "color": "#FFFFFFFF",
+    "size": 18
+   }
+  },
+  "brandName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 26
+    }
+   },
+   "props": {
+    "text": "Ledgerly",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 20,
+     "fontWeight": 700,
+     "letterSpacing": -0.4,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "navLinks": {
+   "type": "row",
+   "children": [
+    "nl1",
+    "nl2",
+    "nl3",
+    "nl4"
+   ],
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "spacing": 32
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "nl1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Product",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "nl2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Pricing",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "nl3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Customers",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "nl4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Resources",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "navRight": {
+   "type": "row",
+   "children": [
+    "signIn",
+    "trialBtn"
+   ],
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 20
+   }
+  },
+  "signIn": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Sign in",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "trialBtn": {
+   "type": "row",
+   "children": [
+    "trialLbl"
+   ],
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 40
+    },
+    "padding": [
+     16,
+     10,
+     16,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ],
+    "radius": 10
+   },
+   "states": {
+    "hovered": {
+     "trialBtn": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FF1D4ED8"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "plansGrid",
+       "offset": 96,
+       "durationMs": 500
+      }
+     ]
+    }
+   ]
+  },
+  "trialLbl": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Start free trial",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "hero": {
+   "type": "column",
+   "children": [
+    "heroRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 1000
+    },
+    "padding": [
+     32,
+     80,
+     32,
+     96
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF6F7F9"
+     },
+     {
+      "type": "radial",
+      "center": [
+       0,
+       -1
+      ],
+      "radius": 0.9,
+      "stops": [
+       {
+        "position": 0,
+        "color": "#1F2563EB"
+       },
+       {
+        "position": 1,
+        "color": "#002563EB"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "heroRail": {
+   "type": "column",
+   "children": [
+    "heroHead",
+    "plansGrid"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 900
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 56
+   }
+  },
+  "heroHead": {
+   "type": "column",
+   "children": [
+    "eyebrow",
+    "title",
+    "subtitle",
+    "toggle"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 260
+    }
+   },
+   "props": {
+    "spacing": 16
+   }
+  },
+  "eyebrow": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "PRICING",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "letterSpacing": 1.5,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 760
+    },
+    "height": {
+     "hug": 62
+    },
+    "constraints": {
+     "maxWidth": 760
+    }
+   },
+   "props": {
+    "text": "Simple pricing for every stage",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 56,
+     "fontWeight": 700,
+     "height": 1.1,
+     "letterSpacing": -1.12,
+     "color": "#FF0F172A"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 44,
+        "letterSpacing": -0.88
+       }
+      }
+     }
+    }
+   ]
+  },
+  "subtitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 560
+    },
+    "height": {
+     "hug": 56
+    },
+    "constraints": {
+     "maxWidth": 560
+    }
+   },
+   "props": {
+    "text": "Start free for 14 days. No credit card, no setup fees, and you can switch plans or cancel any time.",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 18,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "toggle": {
+   "type": "row",
+   "children": [
+    "segM",
+    "segY"
+   ],
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 44
+    },
+    "padding": 4,
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 12,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       4
+      ],
+      "blurRadius": 16
+     }
+    ]
+   }
+  },
+  "segM": {
+   "type": "row",
+   "children": [
+    "segMLbl"
+   ],
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     18,
+     8,
+     18,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "selected": "${= !yearly}"
+   },
+   "states": {
+    "selected": {
+     "segM": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FF2563EB"
+        }
+       ]
+      }
+     },
+     "segMLbl": {
+      "props": {
+       "style": {
+        "color": "#FFFFFFFF"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "yearly",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  },
+  "segMLbl": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Monthly",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "segY": {
+   "type": "row",
+   "children": [
+    "segYLbl",
+    "saveBadge"
+   ],
+   "layout": {
+    "width": {
+     "hug": 150
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     18,
+     8,
+     12,
+     8
+    ]
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "selected": "${= yearly}"
+   },
+   "states": {
+    "selected": {
+     "segY": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FF2563EB"
+        }
+       ]
+      }
+     },
+     "segYLbl": {
+      "props": {
+       "style": {
+        "color": "#FFFFFFFF"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "yearly",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "segYLbl": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Yearly",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "saveBadge": {
+   "type": "row",
+   "children": [
+    "saveTxt"
+   ],
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     8,
+     2,
+     8,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDCFCE7"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "saveTxt": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 56
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Save 20%",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF15803D"
+    }
+   }
+  },
+  "plansGrid": {
+   "type": "gridView",
+   "children": [
+    "plan"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 620
+    }
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "shrinkWrapRows": true,
+    "physics": "never",
+    "crossAxisSpacing": 24,
+    "mainAxisSpacing": 24
+   },
+   "bind": {
+    "data": "${plans}"
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "props": {
+       "crossAxisCount": 1
+      }
+     }
+    }
+   ]
+  },
+  "plan": {
+   "type": "column",
+   "children": [
+    "planTop",
+    "planDesc",
+    "priceRow",
+    "billed",
+    "planBtn",
+    "planRule",
+    "featList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 357
+    },
+    "height": {
+     "fill": 600
+    },
+    "padding": 32
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 20,
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeWidth": 1,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 32
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= item.popular ? '#FF2563EB' : '#FFE5E7EB'}",
+    "decoration.strokeWidth": "${= item.popular ? 2 : 1}",
+    "decoration.effects[0].color": "${= item.popular ? '#262563EB' : '#0A0F172A'}"
+   }
+  },
+  "planTop": {
+   "type": "row",
+   "children": [
+    "planName",
+    "popBadge"
+   ],
+   "layout": {
+    "width": {
+     "fill": 293
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "planName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 26
+    }
+   },
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 22,
+     "fontWeight": 700,
+     "letterSpacing": -0.44,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "popBadge": {
+   "type": "row",
+   "children": [
+    "popTxt"
+   ],
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     10,
+     4,
+     10,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEFF6FF"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= item.popular}"
+   }
+  },
+  "popTxt": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Most popular",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "planDesc": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 293
+    },
+    "height": {
+     "hug": 46
+    }
+   },
+   "props": {
+    "text": "${item.desc}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "priceRow": {
+   "type": "row",
+   "children": [
+    "price",
+    "per"
+   ],
+   "layout": {
+    "width": {
+     "fill": 293
+    },
+    "height": {
+     "hug": 56
+    },
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "price": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 56
+    }
+   },
+   "props": {
+    "text": "${= '$' + (yearly ? item.year : item.month)}",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 52,
+     "fontWeight": 700,
+     "height": 1.05,
+     "letterSpacing": -1.04,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "per": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 30
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     6
+    ]
+   },
+   "props": {
+    "text": "/mo",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "fontWeight": 500,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "billed": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 293
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${= yearly ? 'Billed $' + item.yearTotal + ' per year' : 'Billed monthly, cancel any time'}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "planBtn": {
+   "type": "row",
+   "children": [
+    "planBtnLbl"
+   ],
+   "layout": {
+    "width": {
+     "fill": 293
+    },
+    "height": 48,
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFD1D5DB"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item.popular ? '#FF2563EB' : '#FFFFFFFF'}",
+    "decoration.strokes[0].color": "${= item.popular ? '#FF2563EB' : '#FFD1D5DB'}"
+   },
+   "states": {
+    "hovered": {
+     "planBtn": {
+      "opacity": 0.88
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "${= item.cta == 'Talk to sales' ? 'Our sales team will be in touch shortly.' : 'Your ' + item.name + ' trial is ready: 14 days free.'}"
+      }
+     ]
+    }
+   ]
+  },
+  "planBtnLbl": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "${item.cta}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.popular ? '#FFFFFFFF' : '#FF0F172A'}"
+   }
+  },
+  "planRule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 293
+    },
+    "height": 1,
+    "margin": [
+     0,
+     8,
+     0,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   }
+  },
+  "featList": {
+   "type": "listView",
+   "children": [
+    "feat"
+   ],
+   "layout": {
+    "width": {
+     "fill": 293
+    },
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${item.features}"
+   }
+  },
+  "feat": {
+   "type": "row",
+   "children": [
+    "featIcon",
+    "featTxt"
+   ],
+   "layout": {
+    "width": {
+     "fill": 293
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "featIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 22
+   },
+   "props": {
+    "icon": "check_circle_rounded",
+    "color": "#FF16A34A",
+    "size": 18
+   }
+  },
+  "featTxt": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 265
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.45,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "compare": {
+   "type": "column",
+   "children": [
+    "cmpRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 640
+    },
+    "padding": [
+     32,
+     0,
+     32,
+     96
+    ]
+   }
+  },
+  "cmpRail": {
+   "type": "column",
+   "children": [
+    "cmpHead",
+    "cmpCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 620
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32
+   }
+  },
+  "cmpHead": {
+   "type": "column",
+   "children": [
+    "cmpTitle",
+    "cmpSub"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 80
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "cmpTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 44
+    }
+   },
+   "props": {
+    "text": "Compare every plan",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 36,
+     "fontWeight": 700,
+     "height": 1.2,
+     "letterSpacing": -0.72,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "cmpSub": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "All plans include bank-level security, daily backups and the Ledgerly mobile app.",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "cmpCard": {
+   "type": "column",
+   "children": [
+    "cmpHeader",
+    "cmpRows"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 480
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 20,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 32
+     }
+    ]
+   }
+  },
+  "cmpHeader": {
+   "type": "row",
+   "children": [
+    "cmpHLabel",
+    "cmpHPlans"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": 64,
+    "padding": [
+     28,
+     0,
+     28,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF8FAFC"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "cmpHLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 20
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "Features",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "cmpHPlans": {
+   "type": "gridView",
+   "children": [
+    "cmpHCell"
+   ],
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": 64,
+    "flex": 3
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisExtent": 64,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${plans}"
+   }
+  },
+  "cmpHCell": {
+   "type": "row",
+   "children": [
+    "cmpHName"
+   ],
+   "layout": {
+    "width": {
+     "fill": 213
+    },
+    "height": {
+     "fill": 64
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "cmpHName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 700,
+     "color": "#FF0F172A"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.popular ? '#FF2563EB' : '#FF0F172A'}"
+   }
+  },
+  "cmpRows": {
+   "type": "listView",
+   "children": [
+    "cmpRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 416
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${compare}"
+   }
+  },
+  "cmpRow": {
+   "type": "row",
+   "children": [
+    "cmpLabel",
+    "cmpCells"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": 52,
+    "padding": [
+     28,
+     0,
+     28,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= index % 2 == 1 ? '#FFFBFCFD' : '#FFFFFFFF'}",
+    "decoration.strokes[0].color": "${= index == length(compare) - 1 ? '#00FFFFFF' : '#FFF1F5F9'}"
+   }
+  },
+  "cmpLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 22
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "${item.label}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "cmpCells": {
+   "type": "gridView",
+   "children": [
+    "cmpCell"
+   ],
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": 52,
+    "flex": 3
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisExtent": 52,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${item.values}"
+   }
+  },
+  "cmpCell": {
+   "type": "row",
+   "children": [
+    "cYes",
+    "cNo",
+    "cTxt"
+   ],
+   "layout": {
+    "width": {
+     "fill": 213
+    },
+    "height": {
+     "fill": 52
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "cYes": {
+   "type": "row",
+   "children": [
+    "cYesIcon"
+   ],
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDCFCE7"
+     }
+    ],
+    "shape": "circle"
+   },
+   "bind": {
+    "visible": "${= item == 'yes'}"
+   }
+  },
+  "cYesIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "check_rounded",
+    "color": "#FF16A34A",
+    "size": 16
+   }
+  },
+  "cNo": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "remove_rounded",
+    "color": "#FFCBD5E1",
+    "size": 20
+   },
+   "bind": {
+    "visible": "${= item == 'no'}"
+   }
+  },
+  "cTxt": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   },
+   "bind": {
+    "visible": "${= item != 'yes' && item != 'no'}"
+   }
+  },
+  "faqBand": {
+   "type": "column",
+   "children": [
+    "faqRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 420
+    },
+    "padding": [
+     32,
+     0,
+     32,
+     96
+    ]
+   }
+  },
+  "faqRail": {
+   "type": "flex",
+   "children": [
+    "faqIntro",
+    "faqList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 400
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 64,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "spacing": 32
+      }
+     }
+    }
+   ]
+  },
+  "faqIntro": {
+   "type": "column",
+   "children": [
+    "faqTitle",
+    "faqText",
+    "faqLink"
+   ],
+   "layout": {
+    "width": 340,
+    "height": {
+     "hug": 220
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 704
+       }
+      }
+     }
+    }
+   ]
+  },
+  "faqTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 84
+    }
+   },
+   "props": {
+    "text": "Frequently asked questions",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 36,
+     "fontWeight": 700,
+     "height": 1.15,
+     "letterSpacing": -0.72,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "faqText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 340
+    },
+    "height": {
+     "hug": 75
+    }
+   },
+   "props": {
+    "text": "Everything you need to know about plans and billing. Still unsure? Our team answers within one business day.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "faqLink": {
+   "type": "row",
+   "children": [
+    "faqLinkTxt",
+    "faqLinkIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "spacing": 6
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openLink",
+       "url": "mailto:support@ledgerly.com"
+      }
+     ]
+    }
+   ]
+  },
+  "faqLinkTxt": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Contact support",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "faqLinkIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "arrow_forward_rounded",
+    "color": "#FF2563EB",
+    "size": 18
+   }
+  },
+  "faqList": {
+   "type": "listView",
+   "children": [
+    "faq"
+   ],
+   "layout": {
+    "width": {
+     "fill": 716
+    },
+    "height": {
+     "hug": 360
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${faqs}"
+   }
+  },
+  "faq": {
+   "type": "column",
+   "children": [
+    "faqQRow",
+    "faqA"
+   ],
+   "layout": {
+    "width": {
+     "fill": 716
+    },
+    "height": {
+     "hug": 68
+    },
+    "padding": [
+     24,
+     20,
+     24,
+     20
+    ]
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 16
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= openFaq == index ? '#FFBFDBFE' : '#FFE5E7EB'}"
+   },
+   "states": {
+    "hovered": {
+     "faq": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFFBFCFE"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "openFaq",
+       "value": "${= openFaq == index ? -1 : index}"
+      }
+     ]
+    }
+   ]
+  },
+  "faqQRow": {
+   "type": "row",
+   "children": [
+    "faqQ",
+    "faqIcon"
+   ],
+   "layout": {
+    "width": {
+     "fill": 668
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "spacing": 16
+   }
+  },
+  "faqQ": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 628
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "${item.q}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "fontWeight": 600,
+     "height": 1.5,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "faqIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "props": {
+    "icon": "add_rounded",
+    "color": "#FF475569",
+    "size": 22
+   },
+   "bind": {
+    "props.icon": "${= openFaq == index ? 'remove_rounded' : 'add_rounded'}"
+   }
+  },
+  "faqA": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 668
+    },
+    "height": {
+     "hug": 46
+    }
+   },
+   "props": {
+    "text": "${item.a}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   },
+   "bind": {
+    "visible": "${= openFaq == index}"
+   }
+  },
+  "footer": {
+   "type": "column",
+   "children": [
+    "footRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 320
+    },
+    "padding": [
+     32,
+     64,
+     32,
+     40
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "footRail": {
+   "type": "column",
+   "children": [
+    "footTop",
+    "footRule",
+    "footBottom"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 260
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "footTop": {
+   "type": "row",
+   "children": [
+    "footBrand",
+    "footLinks"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "wrap": true,
+    "spacing": 64,
+    "runSpacing": 40,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "footBrand": {
+   "type": "column",
+   "children": [
+    "footName",
+    "footTag"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 100
+    },
+    "basis": 300
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "footName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 26
+    }
+   },
+   "props": {
+    "text": "Ledgerly",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 20,
+     "fontWeight": 700,
+     "letterSpacing": -0.4,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "footTag": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 46
+    },
+    "constraints": {
+     "maxWidth": 320
+    }
+   },
+   "props": {
+    "text": "Accounting software for small businesses that would rather be doing business.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "footLinks": {
+   "type": "gridView",
+   "children": [
+    "footGroup"
+   ],
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": {
+     "hug": 150
+    },
+    "basis": 420,
+    "flex": 2
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "shrinkWrapRows": true,
+    "physics": "never",
+    "crossAxisSpacing": 32
+   },
+   "bind": {
+    "data": "${footerGroups}"
+   }
+  },
+  "footGroup": {
+   "type": "column",
+   "children": [
+    "fgTitle",
+    "fgList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "fill": 150
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "fgTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.title}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "fgList": {
+   "type": "listView",
+   "children": [
+    "fgLink"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 110
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${item.links}"
+   }
+  },
+  "fgLink": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "footRule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   }
+  },
+  "footBottom": {
+   "type": "row",
+   "children": [
+    "copy",
+    "legal"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1120
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "copy": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "\u00a9 2025 Ledgerly, Inc. All rights reserved.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "legal": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Privacy  \u00b7  Terms  \u00b7  Security",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF94A3B8"
+    }
+   }
+  }
+ },
+ "variables": {
+  "pricing": [
+   {
+    "name": "yearly",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "openFaq",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "plans",
+    "type": "list",
+    "value": [
+     {
+      "name": "Solo",
+      "month": "9",
+      "year": "7.20",
+      "yearTotal": "86.40",
+      "popular": false,
+      "cta": "Start free trial",
+      "desc": "For freelancers and sole traders keeping their own books.",
+      "features": [
+       "1 user",
+       "Unlimited invoices & quotes",
+       "Automatic bank feeds",
+       "Receipt capture by photo",
+       "Email support"
+      ]
+     },
+     {
+      "name": "Team",
+      "month": "29",
+      "year": "23.20",
+      "yearTotal": "278.40",
+      "popular": true,
+      "cta": "Start free trial",
+      "desc": "For growing businesses that share the books with a team.",
+      "features": [
+       "Up to 5 users",
+       "Everything in Solo",
+       "Multi-currency accounts",
+       "Payroll for up to 10 staff",
+       "Priority chat support"
+      ]
+     },
+     {
+      "name": "Scale",
+      "month": "79",
+      "year": "63.20",
+      "yearTotal": "758.40",
+      "popular": false,
+      "cta": "Talk to sales",
+      "desc": "For established companies that need controls and volume.",
+      "features": [
+       "Unlimited users",
+       "Everything in Team",
+       "Approval workflows",
+       "Custom roles & API access",
+       "Dedicated account manager"
+      ]
+     }
+    ]
+   },
+   {
+    "name": "compare",
+    "type": "list",
+    "value": [
+     {
+      "label": "Users",
+      "values": [
+       "1",
+       "5",
+       "Unlimited"
+      ]
+     },
+     {
+      "label": "Bank feeds & reconciliation",
+      "values": [
+       "yes",
+       "yes",
+       "yes"
+      ]
+     },
+     {
+      "label": "Invoicing & receipt capture",
+      "values": [
+       "yes",
+       "yes",
+       "yes"
+      ]
+     },
+     {
+      "label": "Multi-currency",
+      "values": [
+       "no",
+       "yes",
+       "yes"
+      ]
+     },
+     {
+      "label": "Payroll",
+      "values": [
+       "no",
+       "yes",
+       "yes"
+      ]
+     },
+     {
+      "label": "Approval workflows",
+      "values": [
+       "no",
+       "no",
+       "yes"
+      ]
+     },
+     {
+      "label": "API access",
+      "values": [
+       "no",
+       "yes",
+       "yes"
+      ]
+     },
+     {
+      "label": "Support",
+      "values": [
+       "Email",
+       "Priority",
+       "Dedicated"
+      ]
+     }
+    ]
+   },
+   {
+    "name": "faqs",
+    "type": "list",
+    "value": [
+     {
+      "q": "Can I switch plans later?",
+      "a": "Yes. Upgrade or downgrade from Settings at any time. Changes apply immediately and we prorate the difference on your next invoice."
+     },
+     {
+      "q": "How does the yearly discount work?",
+      "a": "Pay for a year up front and every plan is 20% cheaper: Solo comes to $86.40, Team to $278.40 and Scale to $758.40 per year."
+     },
+     {
+      "q": "Is my financial data secure?",
+      "a": "Your data is encrypted in transit and at rest, backed up hourly, and hosted in SOC 2 Type II certified data centers. We never sell or share it."
+     },
+     {
+      "q": "What happens after the free trial?",
+      "a": "Nothing, unless you choose a plan. The 14-day trial needs no credit card; when it ends, pick a plan and keep everything you've set up."
+     }
+    ]
+   },
+   {
+    "name": "footerGroups",
+    "type": "list",
+    "value": [
+     {
+      "title": "Product",
+      "links": [
+       "Features",
+       "Pricing",
+       "Integrations",
+       "Mobile app"
+      ]
+     },
+     {
+      "title": "Company",
+      "links": [
+       "About",
+       "Customers",
+       "Careers",
+       "Press"
+      ]
+     },
+     {
+      "title": "Resources",
+      "links": [
+       "Help center",
+       "Guides",
+       "API docs",
+       "Status"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

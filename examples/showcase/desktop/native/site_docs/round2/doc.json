@@ -1,0 +1,3173 @@
+{
+ "schema": 3,
+ "roots": [
+  "docs"
+ ],
+ "nodes": {
+  "docs": {
+   "type": "canvas",
+   "name": "Beacon Docs: Quickstart",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 1280,
+    "height": 800
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF6F7F9"
+     }
+    ]
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "header",
+    "shell"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "header": {
+   "type": "row",
+   "children": [
+    "menuBtn",
+    "logo",
+    "search",
+    "hdrSpacer",
+    "navLinks",
+    "version",
+    "cta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": 64,
+    "padding": [
+     24,
+     0,
+     24,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "menuBtn": {
+   "type": "iconButton",
+   "visible": false,
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "props": {
+    "icon": "menu",
+    "style": {
+     "foregroundColor": "#FF0F172A"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "visible": true
+     }
+    }
+   ],
+   "bind": {
+    "props.icon": "${= menuOpen ? 'close' : 'menu'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "menuOpen",
+       "op": "toggle"
+      }
+     ]
+    }
+   ]
+  },
+  "logo": {
+   "type": "row",
+   "children": [
+    "logoMark",
+    "logoText",
+    "logoTag"
+   ],
+   "layout": {
+    "width": {
+     "hug": 150
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "spacing": 10
+   },
+   "media": [
+    {
+     "minWidth": 900,
+     "patch": {
+      "layout": {
+       "width": 256
+      }
+     }
+    }
+   ]
+  },
+  "logoMark": {
+   "type": "row",
+   "children": [
+    "logoIcon"
+   ],
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF2563EB"
+       },
+       {
+        "position": 1,
+        "color": "#FF60A5FA"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "logoIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "wifi_tethering",
+    "size": 16,
+    "color": "#FFFFFFFF"
+   }
+  },
+  "logoText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Beacon",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 19,
+     "fontWeight": 700,
+     "letterSpacing": -0.38,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "logoTag": {
+   "type": "row",
+   "children": [
+    "logoTagText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     8,
+     2,
+     8,
+     2
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ],
+    "radius": 6
+   }
+  },
+  "logoTagText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Docs",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "search": {
+   "type": "textField",
+   "layout": {
+    "width": 400,
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "decoration": {
+     "hintText": "Search the docs",
+     "prefixIcon": {
+      "icon": "search",
+      "size": 18
+     },
+     "filled": true,
+     "fillColor": "#FFF6F7F9",
+     "isDense": true
+    },
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF0F172A"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "layout": {
+       "width": {
+        "flexible": 360
+       }
+      }
+     }
+    }
+   ],
+   "bind": {
+    "props.initialValue": "${query}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "hdrSpacer": {
+   "type": "spacer"
+  },
+  "navLinks": {
+   "type": "row",
+   "children": [
+    "nav1",
+    "nav2",
+    "nav3"
+   ],
+   "visible": false,
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 24
+   },
+   "media": [
+    {
+     "minWidth": 1100,
+     "patch": {
+      "visible": true
+     }
+    }
+   ]
+  },
+  "nav1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Guides",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   },
+   "states": {
+    "hovered": {
+     "nav1": {
+      "props": {
+       "style": {
+        "color": "#FF0F172A"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "Tracking events"
+      }
+     ]
+    }
+   ]
+  },
+  "nav2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "API reference",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   },
+   "states": {
+    "hovered": {
+     "nav2": {
+      "props": {
+       "style": {
+        "color": "#FF0F172A"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "Beacon client"
+      }
+     ]
+    }
+   ]
+  },
+  "nav3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Changelog",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   },
+   "states": {
+    "hovered": {
+     "nav3": {
+      "props": {
+       "style": {
+        "color": "#FF0F172A"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openLink",
+       "url": "https://beacon.dev/changelog"
+      }
+     ]
+    }
+   ]
+  },
+  "version": {
+   "type": "dropdown",
+   "layout": {
+    "width": 96,
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "items": [
+     "v2.4",
+     "v2.3",
+     "v1.9"
+    ],
+    "value": "v2.4",
+    "isExpanded": true
+   },
+   "bind": {
+    "props.value": "${version}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": []
+    },
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "version",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "cta": {
+   "type": "filledButton",
+   "visible": false,
+   "layout": {
+    "width": 128,
+    "height": 40
+   },
+   "props": {
+    "label": "Get API key",
+    "style": {
+     "backgroundColor": "#FF2563EB",
+     "foregroundColor": "#FFFFFFFF",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "media": [
+    {
+     "minWidth": 900,
+     "patch": {
+      "visible": true
+     }
+    }
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openLink",
+       "url": "https://beacon.dev/settings/keys"
+      }
+     ]
+    }
+   ]
+  },
+  "shell": {
+   "type": "row",
+   "children": [
+    "sidebar",
+    "main"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 736
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "sidebar": {
+   "type": "column",
+   "children": [
+    "sideScroll"
+   ],
+   "layout": {
+    "width": 256,
+    "height": {
+     "fill": 736
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "bind": {
+       "visible": "${menuOpen}"
+      }
+     }
+    }
+   ]
+  },
+  "sideScroll": {
+   "type": "column",
+   "children": [
+    "groupsList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 256
+    },
+    "height": {
+     "fill": 736
+    },
+    "padding": [
+     16,
+     24,
+     16,
+     24
+    ]
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "groupsList": {
+   "type": "listView",
+   "children": [
+    "group"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 600
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 24
+   },
+   "bind": {
+    "data": "${groups}"
+   }
+  },
+  "group": {
+   "type": "column",
+   "children": [
+    "groupHead",
+    "linkList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 180
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 4
+   },
+   "bind": {
+    "visible": "${= length(filter(item.links, l => contains(lower(l), lower(query)))) > 0}"
+   }
+  },
+  "groupHead": {
+   "type": "row",
+   "children": [
+    "groupIcon",
+    "groupName"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     12,
+     0,
+     12,
+     6
+    ]
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "groupIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "folder",
+    "size": 16,
+    "color": "#FF94A3B8"
+   },
+   "bind": {
+    "props.icon": "${item.icon}"
+   }
+  },
+  "groupName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= upper(item.name)}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "linkList": {
+   "type": "listView",
+   "children": [
+    "link"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 150
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 2
+   },
+   "bind": {
+    "data": "${= filter(item.links, l => contains(lower(l), lower(query)))}"
+   }
+  },
+  "link": {
+   "type": "row",
+   "children": [
+    "linkText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 224
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     12,
+     8,
+     12,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 8
+   },
+   "bind": {
+    "selected": "${= item == page}"
+   },
+   "states": {
+    "hovered": {
+     "link": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFF1F5F9"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "link": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFEFF4FF"
+        }
+       ]
+      }
+     },
+     "linkText": {
+      "props": {
+       "style": {
+        "color": "#FF2563EB",
+        "fontWeight": 600
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${item}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "menuOpen",
+       "value": "${= false}"
+      },
+      {
+       "type": "scrollTo",
+       "node": "crumbs",
+       "durationMs": 300
+      }
+     ]
+    }
+   ]
+  },
+  "linkText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 400,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "main": {
+   "type": "column",
+   "children": [
+    "mainRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1024
+    },
+    "height": {
+     "fill": 736
+    },
+    "padding": [
+     40,
+     40,
+     40,
+     72
+    ]
+   },
+   "props": {
+    "scrollable": true
+   },
+   "media": [
+    {
+     "maxWidth": 899,
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        32,
+        32,
+        56
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "mainRow": {
+   "type": "row",
+   "children": [
+    "article",
+    "toc"
+   ],
+   "layout": {
+    "width": {
+     "fill": 944
+    },
+    "height": {
+     "hug": 2000
+    },
+    "constraints": {
+     "maxWidth": 1040
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 48
+   }
+  },
+  "article": {
+   "type": "column",
+   "children": [
+    "crumbs",
+    "titleBlock",
+    "versionNote",
+    "qsContent",
+    "stub"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 2000
+    },
+    "constraints": {
+     "maxWidth": 720
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 32
+   }
+  },
+  "crumbs": {
+   "type": "row",
+   "children": [
+    "crumb1",
+    "chev1",
+    "crumb2",
+    "chev2",
+    "crumb3"
+   ],
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "crumb1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Docs",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "chev1": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "chevron_right",
+    "size": 16,
+    "color": "#FFCBD5E1"
+   }
+  },
+  "crumb2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${pageGroup}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "chev2": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "chevron_right",
+    "size": 16,
+    "color": "#FFCBD5E1"
+   }
+  },
+  "crumb3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${page}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "titleBlock": {
+   "type": "column",
+   "children": [
+    "title",
+    "lead",
+    "meta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 14
+   }
+  },
+  "title": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 52
+    }
+   },
+   "props": {
+    "text": "${page}",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 44,
+     "fontWeight": 700,
+     "height": 1.1,
+     "letterSpacing": -0.88,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "lead": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 54
+    }
+   },
+   "props": {
+    "text": "Send your first event to Beacon in under five minutes. You will install the SDK, create a client with your project key and track a completed checkout from your app.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 17,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   },
+   "bind": {
+    "visible": "${= page == 'Quickstart'}"
+   }
+  },
+  "meta": {
+   "type": "row",
+   "children": [
+    "metaIcon",
+    "metaText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 6
+   },
+   "bind": {
+    "visible": "${= page == 'Quickstart'}"
+   }
+  },
+  "metaIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "props": {
+    "icon": "schedule",
+    "size": 15,
+    "color": "#FF94A3B8"
+   }
+  },
+  "metaText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "5 min read  \u00b7  Updated for SDK ${version}  \u00b7  Node 18+",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "versionNote": {
+   "type": "row",
+   "children": [
+    "vnIcon",
+    "vnText",
+    "vnBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     16,
+     10,
+     10,
+     10
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFBEB"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFFDE68A"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "visible": "${= version != 'v2.4'}"
+   }
+  },
+  "vnIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "history",
+    "size": 20,
+    "color": "#FFB45309"
+   }
+  },
+  "vnText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 480
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "You are reading the docs for ${version}. The latest release is v2.4.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "height": 1.5,
+     "color": "#FF92400E"
+    }
+   }
+  },
+  "vnBtn": {
+   "type": "textButton",
+   "layout": {
+    "width": 130,
+    "height": 36
+   },
+   "props": {
+    "label": "Switch to v2.4",
+    "style": {
+     "foregroundColor": "#FFB45309",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "version",
+       "value": "v2.4"
+      }
+     ]
+    }
+   ]
+  },
+  "qsContent": {
+   "type": "column",
+   "children": [
+    "callout",
+    "stepsList",
+    "optionsSection",
+    "prevNext",
+    "feedback"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 1600
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 40
+   },
+   "bind": {
+    "visible": "${= page == 'Quickstart'}"
+   }
+  },
+  "callout": {
+   "type": "row",
+   "children": [
+    "calloutIcon",
+    "calloutBody"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 80
+    },
+    "padding": [
+     20,
+     16,
+     20,
+     16
+    ]
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEFF6FF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFBFDBFE"
+     }
+    ],
+    "radius": 12
+   }
+  },
+  "calloutIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 22
+   },
+   "props": {
+    "icon": "info_outline",
+    "size": 20,
+    "color": "#FF2563EB"
+   }
+  },
+  "calloutBody": {
+   "type": "column",
+   "children": [
+    "calloutTitle",
+    "calloutText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 600
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 4
+   }
+  },
+  "calloutTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 600
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Before you begin",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "height": 1.45,
+     "color": "#FF1E3A8A"
+    }
+   }
+  },
+  "calloutText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 600
+    },
+    "height": {
+     "hug": 44
+    }
+   },
+   "props": {
+    "text": "You need a Beacon project and its secret key. Create one under Settings, API keys, then store it as BEACON_KEY in your environment so it never lands in source control.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "height": 1.55,
+     "color": "#FF1E40AF"
+    }
+   }
+  },
+  "stepsList": {
+   "type": "listView",
+   "children": [
+    "stepCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 900
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 40
+   },
+   "bind": {
+    "data": "${steps}"
+   }
+  },
+  "stepCard": {
+   "type": "row",
+   "children": [
+    "stepNum",
+    "stepBody"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 280
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "stepNum": {
+   "type": "column",
+   "children": [
+    "stepNumText"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEFF4FF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFBFDBFE"
+     }
+    ],
+    "radius": 16
+   }
+  },
+  "stepNumText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 10
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.n}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "stepBody": {
+   "type": "column",
+   "children": [
+    "stepTitle",
+    "stepText",
+    "code"
+   ],
+   "layout": {
+    "width": {
+     "fill": 636
+    },
+    "height": {
+     "hug": 280
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 10
+   }
+  },
+  "stepTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 636
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": [
+     0,
+     3,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "${item.title}",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 21,
+     "fontWeight": 700,
+     "height": 1.3,
+     "letterSpacing": -0.42,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "stepText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 636
+    },
+    "height": {
+     "hug": 46
+    }
+   },
+   "props": {
+    "text": "${item.body}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "code": {
+   "type": "column",
+   "children": [
+    "codeHead",
+    "codeText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 636
+    },
+    "height": {
+     "hug": 160
+    },
+    "margin": [
+     0,
+     6,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF0F172A"
+     }
+    ],
+    "radius": 12,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#140F172A",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 24
+     }
+    ]
+   }
+  },
+  "codeHead": {
+   "type": "row",
+   "children": [
+    "codeLangIcon",
+    "codeLang",
+    "codeSpacer",
+    "copyBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 636
+    },
+    "height": 42,
+    "padding": [
+     16,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF1E293B"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "codeLangIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "icon": "terminal",
+    "size": 14,
+    "color": "#FF64748B"
+   },
+   "bind": {
+    "props.icon": "${item.icon}"
+   }
+  },
+  "codeLang": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.file}",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "codeSpacer": {
+   "type": "spacer"
+  },
+  "copyBtn": {
+   "type": "row",
+   "children": [
+    "copyIcon",
+    "copyLabel"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     10,
+     6,
+     10,
+     6
+    ]
+   },
+   "props": {
+    "spacing": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 8
+   },
+   "tooltip": "Copy to clipboard",
+   "states": {
+    "hovered": {
+     "copyBtn": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FF1E293B"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "copyToClipboard",
+       "text": "${item.code}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "copied",
+       "value": "${index}"
+      },
+      {
+       "type": "showToast",
+       "message": "Copied to clipboard"
+      }
+     ]
+    }
+   ]
+  },
+  "copyIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "icon": "content_copy",
+    "size": 14,
+    "color": "#FFCBD5E1"
+   },
+   "bind": {
+    "props.icon": "${= copied == index ? 'check' : 'content_copy'}",
+    "props.color": "${= copied == index ? '#FF4ADE80' : '#FFCBD5E1'}"
+   }
+  },
+  "copyLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= copied == index ? 'Copied' : 'Copy'}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#FFCBD5E1"
+    }
+   }
+  },
+  "codeText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 636
+    },
+    "height": {
+     "hug": 100
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     16
+    ]
+   },
+   "props": {
+    "text": "${item.code}",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 13,
+     "height": 1.65,
+     "color": "#FFE2E8F0"
+    }
+   }
+  },
+  "optionsSection": {
+   "type": "column",
+   "children": [
+    "optHeading",
+    "optIntro",
+    "optTable"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 400
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   }
+  },
+  "optHeading": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "text": "Configuration options",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 26,
+     "fontWeight": 700,
+     "height": 1.25,
+     "letterSpacing": -0.52,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "optIntro": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 24
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "text": "Pass these options to new Beacon(). Only apiKey is required; the rest have sensible defaults.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "optTable": {
+   "type": "column",
+   "children": [
+    "optHead",
+    "optRows"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 300
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 16,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 32
+     }
+    ]
+   }
+  },
+  "optHead": {
+   "type": "row",
+   "children": [
+    "hName",
+    "hType",
+    "hDefault",
+    "hDesc"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 40
+    },
+    "padding": [
+     20,
+     12,
+     20,
+     12
+    ]
+   },
+   "props": {
+    "spacing": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF8FAFC"
+     }
+    ]
+   }
+  },
+  "hName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    },
+    "flex": 3
+   },
+   "props": {
+    "text": "NAME",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "letterSpacing": 0.6,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "hType": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 16
+    },
+    "flex": 4
+   },
+   "props": {
+    "text": "TYPE",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "letterSpacing": 0.6,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "hDefault": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 80
+    },
+    "height": {
+     "hug": 16
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "DEFAULT",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "letterSpacing": 0.6,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "hDesc": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 16
+    },
+    "flex": 5
+   },
+   "props": {
+    "text": "DESCRIPTION",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "letterSpacing": 0.6,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "optRows": {
+   "type": "listView",
+   "children": [
+    "optRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 240
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${options}"
+   }
+  },
+  "optRow": {
+   "type": "row",
+   "children": [
+    "oName",
+    "oType",
+    "oDefault",
+    "oDesc"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 60
+    },
+    "padding": [
+     20,
+     16,
+     20,
+     16
+    ]
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFEEF0F3"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "oName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 20
+    },
+    "flex": 3
+   },
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "height": 1.6,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "oType": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 20
+    },
+    "flex": 4
+   },
+   "props": {
+    "text": "${item.type}",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "height": 1.75,
+     "color": "#FF7C3AED"
+    }
+   }
+  },
+  "oDefault": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 80
+    },
+    "height": {
+     "hug": 20
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "${item.def}",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "height": 1.75,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "oDesc": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 40
+    },
+    "flex": 5
+   },
+   "props": {
+    "text": "${item.desc}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "prevNext": {
+   "type": "row",
+   "children": [
+    "prevCard",
+    "nextCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 80
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "prevCard": {
+   "type": "column",
+   "children": [
+    "prevLabel",
+    "prevRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 76
+    },
+    "padding": [
+     20,
+     16,
+     20,
+     16
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 16
+   },
+   "states": {
+    "hovered": {
+     "prevCard": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "#FF2563EB"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "Introduction"
+      },
+      {
+       "type": "scrollTo",
+       "node": "crumbs",
+       "durationMs": 300
+      }
+     ]
+    }
+   ]
+  },
+  "prevLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Previous",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "prevRow": {
+   "type": "row",
+   "children": [
+    "prevIcon",
+    "prevTitle"
+   ],
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "prevIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "arrow_back",
+    "size": 16,
+    "color": "#FF2563EB"
+   }
+  },
+  "prevTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Introduction",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "nextCard": {
+   "type": "column",
+   "children": [
+    "nextLabel",
+    "nextRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 76
+    },
+    "padding": [
+     20,
+     16,
+     20,
+     16
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 16
+   },
+   "states": {
+    "hovered": {
+     "nextCard": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "#FF2563EB"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "Installation"
+      },
+      {
+       "type": "scrollTo",
+       "node": "crumbs",
+       "durationMs": 300
+      }
+     ]
+    }
+   ]
+  },
+  "nextLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Next",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "nextRow": {
+   "type": "row",
+   "children": [
+    "nextTitle",
+    "nextIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "nextTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Installation",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 16,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "nextIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "size": 16,
+    "color": "#FF2563EB"
+   }
+  },
+  "feedback": {
+   "type": "row",
+   "children": [
+    "fbText",
+    "fbYes",
+    "fbNo",
+    "fbThanks"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 60
+    },
+    "padding": [
+     0,
+     24,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "fbText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Was this page helpful?",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "fbYes": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": 88,
+    "height": 36
+   },
+   "props": {
+    "label": "Yes",
+    "icon": "thumb_up_outlined",
+    "style": {
+     "foregroundColor": "#FF334155",
+     "side": {
+      "color": "#FFE5E7EB"
+     },
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 500
+     }
+    }
+   },
+   "bind": {
+    "visible": "${= feedback == ''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "feedback",
+       "value": "yes"
+      }
+     ]
+    }
+   ]
+  },
+  "fbNo": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": 88,
+    "height": 36
+   },
+   "props": {
+    "label": "No",
+    "icon": "thumb_down_outlined",
+    "style": {
+     "foregroundColor": "#FF334155",
+     "side": {
+      "color": "#FFE5E7EB"
+     },
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 500
+     }
+    }
+   },
+   "bind": {
+    "visible": "${= feedback == ''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "feedback",
+       "value": "no"
+      }
+     ]
+    }
+   ]
+  },
+  "fbThanks": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Thanks, your feedback helps us improve.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF15803D"
+    }
+   },
+   "bind": {
+    "visible": "${= feedback != ''}"
+   }
+  },
+  "stub": {
+   "type": "column",
+   "children": [
+    "stubIcon",
+    "stubText",
+    "stubBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 688
+    },
+    "height": {
+     "hug": 200
+    },
+    "padding": 32
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 14
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 16
+   },
+   "bind": {
+    "visible": "${= page != 'Quickstart'}"
+   }
+  },
+  "stubIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "icon": "menu_book",
+    "size": 28,
+    "color": "#FF2563EB"
+   }
+  },
+  "stubText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 624
+    },
+    "height": {
+     "hug": 48
+    }
+   },
+   "props": {
+    "text": "${page} is not part of this preview yet. Start with the Quickstart to send your first event in a few minutes.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "stubBtn": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": 180,
+    "height": 40
+   },
+   "props": {
+    "label": "Back to Quickstart",
+    "icon": "arrow_back",
+    "style": {
+     "foregroundColor": "#FF2563EB",
+     "side": {
+      "color": "#FFBFDBFE"
+     },
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "Quickstart"
+      }
+     ]
+    }
+   ]
+  },
+  "toc": {
+   "type": "column",
+   "children": [
+    "tocTitle",
+    "tocList",
+    "tocEdit"
+   ],
+   "visible": false,
+   "layout": {
+    "width": 208,
+    "height": {
+     "hug": 320
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "sticky": {
+    "offset": 0
+   },
+   "media": [
+    {
+     "minWidth": 1100,
+     "patch": {
+      "bind": {
+       "visible": "${= page == 'Quickstart'}"
+      }
+     }
+    }
+   ]
+  },
+  "tocTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 208
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "ON THIS PAGE",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "tocList": {
+   "type": "listView",
+   "children": [
+    "tocItem"
+   ],
+   "layout": {
+    "width": {
+     "fill": 208
+    },
+    "height": {
+     "hug": 230
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${toc}"
+   }
+  },
+  "tocItem": {
+   "type": "row",
+   "children": [
+    "tocText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 208
+    },
+    "height": {
+     "hug": 32
+    },
+    "padding": [
+     14,
+     6,
+     8,
+     6
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "left",
+    "strokeWidth": 2
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= activeToc == index ? '#FF2563EB' : '#FFE5E7EB'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "activeToc",
+       "value": "${index}"
+      },
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= item.step >= 0}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "scrollTo",
+         "node": "stepCard",
+         "item": "${item.step}",
+         "offset": 24,
+         "durationMs": 400
+        }
+       ],
+       "else": [
+        {
+         "type": "scrollTo",
+         "node": "${item.node}",
+         "offset": 24,
+         "durationMs": 400
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "tocText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 186
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.label}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13.5,
+     "height": 1.45,
+     "color": "#FF64748B"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= activeToc == index ? '#FF2563EB' : '#FF64748B'}",
+    "props.style.fontWeight": "${= activeToc == index ? 600 : 400}"
+   }
+  },
+  "tocEdit": {
+   "type": "row",
+   "children": [
+    "tocEditIcon",
+    "tocEditText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 208
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     0,
+     16,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openLink",
+       "url": "https://github.com/beacon/docs/edit/main/quickstart.md"
+      }
+     ]
+    }
+   ]
+  },
+  "tocEditIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "props": {
+    "icon": "edit_outlined",
+    "size": 15,
+    "color": "#FF94A3B8"
+   }
+  },
+  "tocEditText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Edit this page",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  }
+ },
+ "variables": {
+  "docs": [
+   {
+    "name": "page",
+    "type": "text",
+    "value": "Quickstart"
+   },
+   {
+    "name": "query",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "version",
+    "type": "text",
+    "value": "v2.4"
+   },
+   {
+    "name": "menuOpen",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "copied",
+    "type": "integer",
+    "value": -1
+   },
+   {
+    "name": "activeToc",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "feedback",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "groups",
+    "type": "list",
+    "value": [
+     {
+      "name": "Start",
+      "icon": "rocket_launch_outlined",
+      "links": [
+       "Introduction",
+       "Quickstart",
+       "Installation",
+       "Core concepts"
+      ]
+     },
+     {
+      "name": "Guides",
+      "icon": "explore_outlined",
+      "links": [
+       "Tracking events",
+       "Identifying users",
+       "Batching and retries",
+       "Testing locally"
+      ]
+     },
+     {
+      "name": "Reference",
+      "icon": "data_object",
+      "links": [
+       "Beacon client",
+       "track()",
+       "identify()",
+       "Configuration"
+      ]
+     }
+    ]
+   },
+   {
+    "name": "pageGroup",
+    "type": "text",
+    "formula": "filter(groups, g => length(filter(g.links, l => l == page)) > 0)[0].name"
+   },
+   {
+    "name": "steps",
+    "type": "list",
+    "value": [
+     {
+      "n": 1,
+      "title": "Install the SDK",
+      "body": "Add the package with your package manager. Beacon ships its own TypeScript types and runs on Node 18 or later and in every modern browser.",
+      "file": "Terminal",
+      "icon": "terminal",
+      "code": "npm install @beacon/sdk"
+     },
+     {
+      "n": 2,
+      "title": "Initialize the client",
+      "body": "Create one client when your app starts and reuse it everywhere. Read the key from the environment rather than writing it into your code.",
+      "file": "src/beacon.ts",
+      "icon": "description_outlined",
+      "code": "import { Beacon } from '@beacon/sdk';\n\nexport const beacon = new Beacon({\n  apiKey: process.env.BEACON_KEY,\n  region: 'eu-west',\n});"
+     },
+     {
+      "n": 3,
+      "title": "Send your first event",
+      "body": "Call track with an event name and its properties. Events are batched and sent every five seconds, or right away when the page closes.",
+      "file": "src/checkout.ts",
+      "icon": "description_outlined",
+      "code": "import { beacon } from './beacon';\n\nawait beacon.track('checkout_completed', {\n  orderId: 'ord_1042',\n  total: 89.5,\n  currency: 'EUR',\n});"
+     }
+    ]
+   },
+   {
+    "name": "options",
+    "type": "list",
+    "value": [
+     {
+      "name": "apiKey",
+      "type": "string",
+      "def": "required",
+      "desc": "Your project's secret key, from Settings, API keys."
+     },
+     {
+      "name": "region",
+      "type": "'us-east' | 'eu-west'",
+      "def": "'us-east'",
+      "desc": "Where events are stored and processed, for data residency."
+     },
+     {
+      "name": "flushInterval",
+      "type": "number",
+      "def": "5000",
+      "desc": "Milliseconds between batch uploads. Lower values send sooner."
+     },
+     {
+      "name": "debug",
+      "type": "boolean",
+      "def": "false",
+      "desc": "Logs every event and request to the console while you develop."
+     }
+    ]
+   },
+   {
+    "name": "toc",
+    "type": "list",
+    "value": [
+     {
+      "label": "Overview",
+      "node": "titleBlock",
+      "step": -1
+     },
+     {
+      "label": "Before you begin",
+      "node": "callout",
+      "step": -1
+     },
+     {
+      "label": "1. Install the SDK",
+      "node": "",
+      "step": 0
+     },
+     {
+      "label": "2. Initialize the client",
+      "node": "",
+      "step": 1
+     },
+     {
+      "label": "3. Send your first event",
+      "node": "",
+      "step": 2
+     },
+     {
+      "label": "Configuration options",
+      "node": "optionsSection",
+      "step": -1
+     },
+     {
+      "label": "Next steps",
+      "node": "prevNext",
+      "step": -1
+     }
+    ]
+   }
+  ]
+ }
+}

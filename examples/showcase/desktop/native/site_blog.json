@@ -1,0 +1,4255 @@
+{
+ "schema": 3,
+ "roots": [
+  "article"
+ ],
+ "nodes": {
+  "article": {
+   "type": "canvas",
+   "name": "Article",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 1280,
+    "height": 900
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF6F7F9"
+     }
+    ]
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "nav",
+    "hero",
+    "cover",
+    "body",
+    "related",
+    "footer"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 900
+    }
+   },
+   "props": {
+    "scrollable": true
+   }
+  },
+  "nav": {
+   "type": "column",
+   "children": [
+    "navRail"
+   ],
+   "sticky": {
+    "offset": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     64,
+     0,
+     64,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#F2FFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        0,
+        32,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "navRail": {
+   "type": "row",
+   "children": [
+    "logo",
+    "navSpacer",
+    "navLinks",
+    "navSubscribe"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": 72,
+    "constraints": {
+     "maxWidth": 1152
+    }
+   },
+   "props": {
+    "spacing": 32
+   }
+  },
+  "logo": {
+   "type": "row",
+   "children": [
+    "logoMark",
+    "logoText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 180
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "logoMark": {
+   "type": "stack",
+   "children": [
+    "logoIcon"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF0F172A"
+     }
+    ],
+    "radius": 9
+   }
+  },
+  "logoIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20,
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "icon": "graphic_eq",
+    "color": "#FFFFFFFF",
+    "size": 20
+   }
+  },
+  "logoText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Signal & Noise",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 19,
+     "fontWeight": 700,
+     "letterSpacing": -0.38,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "navSpacer": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1
+   }
+  },
+  "navLinks": {
+   "type": "row",
+   "children": [
+    "navL1",
+    "navL2",
+    "navL3",
+    "navL4"
+   ],
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 28
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "navL1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Articles",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "navL2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Infrastructure",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "navL3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Data",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "navL4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "About",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "navSubscribe": {
+   "type": "filledButton",
+   "layout": {
+    "width": 132,
+    "height": 42
+   },
+   "props": {
+    "label": "Subscribe",
+    "icon": "mail_outline",
+    "style": {
+     "backgroundColor": "#FF2563EB",
+     "foregroundColor": "#FFFFFFFF",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 15,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "newsletter",
+       "offset": 96,
+       "durationMs": 500
+      }
+     ]
+    }
+   ]
+  },
+  "hero": {
+   "type": "column",
+   "children": [
+    "heroRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 360
+    },
+    "padding": [
+     64,
+     64,
+     64,
+     40
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        40,
+        32,
+        32
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "heroRail": {
+   "type": "column",
+   "children": [
+    "tagRow",
+    "title",
+    "dek",
+    "meta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 320
+    },
+    "constraints": {
+     "maxWidth": 1152
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 20
+   }
+  },
+  "tagRow": {
+   "type": "row",
+   "children": [
+    "tag",
+    "tagCrumb"
+   ],
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "tag": {
+   "type": "row",
+   "children": [
+    "tagText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     12,
+     6,
+     12,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFEFF6FF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFDBEAFE"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "tagText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "INFRASTRUCTURE",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 0.96,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "tagCrumb": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Messaging \u00b7 Reliability",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "title": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 700
+    },
+    "height": {
+     "hug": 120
+    },
+    "constraints": {
+     "maxWidth": 700
+    }
+   },
+   "props": {
+    "text": "What we learned moving 40 services to one queue",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 52,
+     "fontWeight": 700,
+     "height": 1.08,
+     "letterSpacing": -1.04,
+     "color": "#FF0F172A"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "constraints": {
+        "maxWidth": 560
+       }
+      },
+      "props": {
+       "style": {
+        "fontSize": 40,
+        "letterSpacing": -0.8
+       }
+      }
+     }
+    }
+   ]
+  },
+  "dek": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 760
+    },
+    "height": {
+     "hug": 60
+    },
+    "constraints": {
+     "maxWidth": 760
+    }
+   },
+   "props": {
+    "text": "Consolidating six message brokers onto a single partitioned log cut our on-call pages by 60 percent. It also broke three things we didn't know were load-bearing.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 19,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "meta": {
+   "type": "row",
+   "children": [
+    "avatar",
+    "author",
+    "metaDot1",
+    "date",
+    "metaDot2",
+    "readTime",
+    "copyLink"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 48
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 14,
+    "wrap": true,
+    "runSpacing": 12
+   }
+  },
+  "avatar": {
+   "type": "stack",
+   "children": [
+    "avatarArt"
+   ],
+   "layout": {
+    "width": 48,
+    "height": 48
+   },
+   "decoration": {
+    "shape": "circle",
+    "clip": "antiAlias",
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF93C5FD"
+       },
+       {
+        "position": 1,
+        "color": "#FF2563EB"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "avatarArt": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 48
+    },
+    "height": {
+     "fill": 48
+    },
+    "x": 0,
+    "y": 0
+   },
+   "customPaint": {
+    "viewBox": [
+     48,
+     48
+    ],
+    "painter": [
+     {
+      "op": "circle",
+      "c": [
+       24,
+       19
+      ],
+      "radius": 8,
+      "paint": "#E6FFFFFF"
+     },
+     {
+      "op": "path",
+      "d": "M7 50 C9 34 39 34 41 50 Z",
+      "paint": "#E6FFFFFF"
+     }
+    ]
+   }
+  },
+  "author": {
+   "type": "column",
+   "children": [
+    "authorName",
+    "authorRole"
+   ],
+   "layout": {
+    "width": {
+     "hug": 180
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   }
+  },
+  "authorName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Priya Raman",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "authorRole": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Staff Engineer, Platform",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "metaDot1": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFCBD5E1"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "date": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "March 12, 2025",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "metaDot2": {
+   "type": "box",
+   "layout": {
+    "width": 4,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFCBD5E1"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "readTime": {
+   "type": "row",
+   "children": [
+    "readIcon",
+    "readText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "readIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "schedule",
+    "color": "#FF94A3B8",
+    "size": 16
+   }
+  },
+  "readText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "9 min read",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "copyLink": {
+   "type": "textButton",
+   "layout": {
+    "width": 124,
+    "height": 36
+   },
+   "props": {
+    "label": "Copy link",
+    "icon": "link",
+    "style": {
+     "foregroundColor": "#FF2563EB",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "copyToClipboard",
+       "text": "https://signalandnoise.dev/posts/one-queue"
+      },
+      {
+       "type": "showToast",
+       "message": "Link copied to clipboard"
+      }
+     ]
+    }
+   ]
+  },
+  "cover": {
+   "type": "column",
+   "children": [
+    "coverRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 440
+    },
+    "padding": [
+     64,
+     0,
+     64,
+     56
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        0,
+        32,
+        40
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "coverRail": {
+   "type": "column",
+   "children": [
+    "coverFrame",
+    "coverCaption"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 430
+    },
+    "constraints": {
+     "maxWidth": 1152
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 12
+   }
+  },
+  "coverFrame": {
+   "type": "column",
+   "children": [
+    "coverArt"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 400
+    }
+   },
+   "decoration": {
+    "radius": 24,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#140F172A",
+      "offset": [
+       0,
+       16
+      ],
+      "blurRadius": 48
+     }
+    ]
+   }
+  },
+  "coverArt": {
+   "type": "stack",
+   "children": [
+    "coverDiagram",
+    "coverLegend",
+    "coverBadge"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": 400
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "height": 300
+      }
+     }
+    }
+   ],
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF0F172A"
+       },
+       {
+        "position": 0.6,
+        "color": "#FF1E3A8A"
+       },
+       {
+        "position": 1,
+        "color": "#FF2563EB"
+       }
+      ]
+     },
+     {
+      "type": "radial",
+      "center": [
+       0.2,
+       0
+      ],
+      "radius": 0.9,
+      "stops": [
+       {
+        "position": 0,
+        "color": "#333B82F6"
+       },
+       {
+        "position": 1,
+        "color": "#003B82F6"
+       }
+      ]
+     },
+     {
+      "type": "linear",
+      "begin": "topCenter",
+      "end": "bottomCenter",
+      "length": 40,
+      "tileMode": "repeated",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#0FFFFFFF"
+       },
+       {
+        "position": 0.025,
+        "color": "#0FFFFFFF"
+       },
+       {
+        "position": 0.025,
+        "color": "#00FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     },
+     {
+      "type": "linear",
+      "begin": "centerLeft",
+      "end": "centerRight",
+      "length": 40,
+      "tileMode": "repeated",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#0FFFFFFF"
+       },
+       {
+        "position": 0.025,
+        "color": "#0FFFFFFF"
+       },
+       {
+        "position": 0.025,
+        "color": "#00FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "coverDiagram": {
+   "type": "row",
+   "children": [
+    "prodCol",
+    "arrowIn",
+    "logCol",
+    "arrowOut",
+    "consCol"
+   ],
+   "layout": {
+    "width": {
+     "hug": 760
+    },
+    "height": {
+     "hug": 240
+    },
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "spacing": 24
+   }
+  },
+  "prodCol": {
+   "type": "column",
+   "children": [
+    "prodLabel",
+    "prodList"
+   ],
+   "layout": {
+    "width": 156,
+    "height": {
+     "hug": 240
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   }
+  },
+  "prodLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 156
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "40 PRODUCERS",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 700,
+     "letterSpacing": 1.1,
+     "color": "#B3BFDBFE"
+    }
+   }
+  },
+  "prodList": {
+   "type": "listView",
+   "children": [
+    "pill"
+   ],
+   "layout": {
+    "width": {
+     "fill": 156
+    },
+    "height": {
+     "hug": 200
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${coverProducers}"
+   }
+  },
+  "pill": {
+   "type": "row",
+   "children": [
+    "pillDot",
+    "pillText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 156
+    },
+    "height": 32,
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#14FFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#33FFFFFF"
+     }
+    ],
+    "radius": 8
+   }
+  },
+  "pillDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF60A5FA"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "pillText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 110
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "color": "#FFE2E8F0"
+    }
+   }
+  },
+  "arrowIn": {
+   "type": "icon",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#99BFDBFE",
+    "size": 28
+   }
+  },
+  "logCol": {
+   "type": "column",
+   "children": [
+    "logLabel",
+    "logTrack",
+    "logSub"
+   ],
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   }
+  },
+  "logLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "ONE PARTITIONED LOG",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 700,
+     "letterSpacing": 1.1,
+     "color": "#B3BFDBFE"
+    }
+   }
+  },
+  "logTrack": {
+   "type": "row",
+   "children": [
+    "m1",
+    "m2",
+    "m3",
+    "m4",
+    "m5",
+    "m6",
+    "m7",
+    "m8"
+   ],
+   "layout": {
+    "width": {
+     "hug": 300
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": 12
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1FFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#66BFDBFE"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 14,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#403B82F6",
+      "offset": [
+       0,
+       0
+      ],
+      "blurRadius": 40
+     }
+    ]
+   }
+  },
+  "m1": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 7
+   }
+  },
+  "m2": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFBFDBFE"
+     }
+    ],
+    "radius": 7
+   }
+  },
+  "m3": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 7
+   }
+  },
+  "m4": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF93C5FD"
+     }
+    ],
+    "radius": 7
+   }
+  },
+  "m5": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 7
+   }
+  },
+  "m6": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFBFDBFE"
+     }
+    ],
+    "radius": 7
+   }
+  },
+  "m7": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#80FFFFFF"
+     }
+    ],
+    "radius": 7
+   }
+  },
+  "m8": {
+   "type": "box",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#33FFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#80FFFFFF"
+     }
+    ],
+    "dashPattern": [
+     3,
+     3
+    ],
+    "radius": 7
+   }
+  },
+  "logSub": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 280
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "events.v1 \u00b7 64 partitions \u00b7 key = tenant",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "color": "#99CBD5E1"
+    }
+   }
+  },
+  "arrowOut": {
+   "type": "icon",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#99BFDBFE",
+    "size": 28
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "consCol": {
+   "type": "column",
+   "children": [
+    "consLabel",
+    "consList"
+   ],
+   "layout": {
+    "width": 156,
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "consLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 156
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "CONSUMERS",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 700,
+     "letterSpacing": 1.1,
+     "color": "#B3BFDBFE"
+    }
+   }
+  },
+  "consList": {
+   "type": "listView",
+   "children": [
+    "cpill"
+   ],
+   "layout": {
+    "width": {
+     "fill": 156
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${coverConsumers}"
+   }
+  },
+  "cpill": {
+   "type": "row",
+   "children": [
+    "cpillIcon",
+    "cpillText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 156
+    },
+    "height": 32,
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "radius": 8
+   }
+  },
+  "cpillIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "icon": "check_circle",
+    "color": "#FF059669",
+    "size": 14
+   }
+  },
+  "cpillText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 110
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "coverLegend": {
+   "type": "column",
+   "children": [
+    "legendNum",
+    "legendText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 56
+    },
+    "x": {
+     "start": 32
+    },
+    "y": {
+     "end": 28
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "legendNum": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "text": "1.8B",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 28,
+     "fontWeight": 700,
+     "letterSpacing": -0.56,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "legendText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "messages a day, one runbook",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#B3CBD5E1"
+    }
+   }
+  },
+  "coverBadge": {
+   "type": "row",
+   "children": [
+    "badgeDot",
+    "badgeText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 28
+    },
+    "padding": [
+     12,
+     6,
+     12,
+     6
+    ],
+    "x": {
+     "end": 28
+    },
+    "y": {
+     "start": 28
+    }
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#1FFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#33FFFFFF"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "badgeDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF34D399"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "badgeText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "p99 lag 140 ms",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "color": "#FFE2E8F0"
+    }
+   }
+  },
+  "coverCaption": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Forty producers, one partitioned log. Illustration by the author.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": [
+    "bodyRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 2000
+    },
+    "padding": [
+     64,
+     8,
+     64,
+     96
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        8,
+        32,
+        64
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "bodyRail": {
+   "type": "flex",
+   "children": [
+    "articleCol",
+    "sidebar"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 2000
+    },
+    "constraints": {
+     "maxWidth": 1152
+    }
+   },
+   "props": {
+    "direction": "horizontal",
+    "crossAxisAlignment": "stretch",
+    "spacing": 96
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "spacing": 48
+      }
+     }
+    }
+   ]
+  },
+  "articleCol": {
+   "type": "column",
+   "children": [
+    "lede",
+    "p1",
+    "sec1",
+    "p2",
+    "quote",
+    "p3",
+    "code",
+    "p4",
+    "sec2",
+    "p5",
+    "bullets",
+    "p6",
+    "signoff"
+   ],
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 2000
+    },
+    "constraints": {
+     "maxWidth": 720
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 24
+   }
+  },
+  "lede": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "props": {
+    "text": "Two years ago, a single customer import could wake up four teams. Each of our 40 services had picked its own broker at the time it was written: RabbitMQ here, SQS there, a Redis list that started as a prototype and never stopped being one. Every outage looked different, and none of them were anyone's fault.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 20,
+     "height": 1.65,
+     "color": "#FF0F172A"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "enterViewport",
+      "visibleFraction": 0.6
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "active",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "p1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 90
+    }
+   },
+   "props": {
+    "text": "So we made a bet: every asynchronous message in the company would flow through one partitioned log, owned by the platform team, with one set of dashboards and one runbook. This post is about what that migration taught us, including the parts we would do differently.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 17,
+     "height": 1.7,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "sec1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     0,
+     24,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "One queue, many shapes of work",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 30,
+     "fontWeight": 700,
+     "height": 1.2,
+     "letterSpacing": -0.6,
+     "color": "#FF0F172A"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "enterViewport",
+      "visibleFraction": 1
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "active",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "p2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "props": {
+    "text": "The first surprise was how little our messages had in common. Billing events were tiny and strictly ordered per account. Search reindex jobs were enormous and didn't care about order at all. Notification fan-out was bursty: nothing for an hour, then two million messages in ninety seconds. A single queue had to treat all of them fairly without letting one starve the rest.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 17,
+     "height": 1.7,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "quote": {
+   "type": "column",
+   "children": [
+    "quoteText",
+    "quoteBy"
+   ],
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 140
+    },
+    "padding": [
+     28,
+     8,
+     0,
+     8
+    ],
+    "margin": [
+     0,
+     8,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 12
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF2563EB"
+     }
+    ],
+    "strokeWidth": 3,
+    "strokeSides": "left"
+   }
+  },
+  "quoteText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 690
+    },
+    "height": {
+     "hug": 100
+    }
+   },
+   "props": {
+    "text": "Consolidation doesn't remove complexity. It moves it to one place, where you can finally see it.",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 28,
+     "fontWeight": 600,
+     "height": 1.3,
+     "letterSpacing": -0.56,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "quoteBy": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 690
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "From our migration retro, week 14",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "p3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 90
+    }
+   },
+   "props": {
+    "text": "The fix was to stop partitioning by producer. Ordering only ever mattered within a tenant, so we hashed on the tenant id and gave every message a time budget. A consumer that blows its budget hands the message to a dead-letter partition instead of holding up everything behind it.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 17,
+     "height": 1.7,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "code": {
+   "type": "column",
+   "children": [
+    "codeHead",
+    "codeText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 320
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF0F172A"
+     }
+    ],
+    "radius": 16,
+    "clip": "antiAlias",
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#1A0F172A",
+      "offset": [
+       0,
+       12
+      ],
+      "blurRadius": 32
+     }
+    ]
+   }
+  },
+  "codeHead": {
+   "type": "row",
+   "children": [
+    "codeDots",
+    "codeFile",
+    "codeSpacer",
+    "codeCopy"
+   ],
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 48
+    },
+    "padding": [
+     20,
+     6,
+     8,
+     6
+    ]
+   },
+   "props": {
+    "spacing": 14
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FF1E293B"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "codeDots": {
+   "type": "row",
+   "children": [
+    "cd1",
+    "cd2",
+    "cd3"
+   ],
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": 10
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "cd1": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF334155"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "cd2": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF334155"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "cd3": {
+   "type": "box",
+   "layout": {
+    "width": 10,
+    "height": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF334155"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "codeFile": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "consumer/router.ts",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 13,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "codeSpacer": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1
+   }
+  },
+  "codeCopy": {
+   "type": "textButton",
+   "layout": {
+    "width": 104,
+    "height": 36
+   },
+   "props": {
+    "label": "Copy",
+    "icon": "content_copy",
+    "style": {
+     "foregroundColor": "#FFCBD5E1",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 13,
+      "fontWeight": 600
+     }
+    }
+   },
+   "bind": {
+    "props.label": "${= copied ? 'Copied' : 'Copy'}",
+    "props.icon": "${= copied ? 'check' : 'content_copy'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "copyToClipboard",
+       "text": "${codeSample}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "copied",
+       "value": "${= true}"
+      },
+      {
+       "type": "showToast",
+       "message": "Code copied to clipboard"
+      }
+     ]
+    }
+   ]
+  },
+  "codeText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 260
+    },
+    "padding": [
+     20,
+     18,
+     20,
+     22
+    ]
+   },
+   "props": {
+    "text": "",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 14,
+     "height": 1.7,
+     "color": "#FFE2E8F0"
+    }
+   },
+   "bind": {
+    "props.text": "${codeSample}"
+   }
+  },
+  "p4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 90
+    }
+   },
+   "props": {
+    "text": "Twelve lines of routing replaced roughly four thousand lines of per-broker glue. The interesting work moved into the budget: picking it per message type, and alerting when a type spends more than half of it on a normal day.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 17,
+     "height": 1.7,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "sec2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     0,
+     24,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "What we'd tell ourselves two years ago",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 30,
+     "fontWeight": 700,
+     "height": 1.2,
+     "letterSpacing": -0.6,
+     "color": "#FF0F172A"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "enterViewport",
+      "visibleFraction": 1
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "active",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "p5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "text": "The migration took eleven months, not the four we planned. If we started over tomorrow, three rules would come first:",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 17,
+     "height": 1.7,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "bullets": {
+   "type": "listView",
+   "children": [
+    "bullet"
+   ],
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 200
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 14
+   },
+   "bind": {
+    "data": "${bullets}"
+   }
+  },
+  "bullet": {
+   "type": "row",
+   "children": [
+    "bulletDot",
+    "bulletText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 56
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 16
+   }
+  },
+  "bulletDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8,
+    "margin": [
+     4,
+     11,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "bulletText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 690
+    },
+    "height": {
+     "hug": 56
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 17,
+     "height": 1.7,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "p6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 90
+    }
+   },
+   "props": {
+    "text": "Today the queue moves about 1.8 billion messages a day. Most weeks nobody thinks about it, which was the whole point. Next month we'll write about the part we skipped here: replaying a week of traffic to prove the new system matched the old one.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 17,
+     "height": 1.7,
+     "color": "#FF334155"
+    }
+   }
+  },
+  "signoff": {
+   "type": "row",
+   "children": [
+    "signIcon",
+    "signText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 720
+    },
+    "height": {
+     "hug": 56
+    },
+    "padding": [
+     20,
+     16,
+     20,
+     16
+    ],
+    "margin": [
+     0,
+     16,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 14
+   }
+  },
+  "signIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "forum_outlined",
+    "color": "#FF2563EB",
+    "size": 20
+   }
+  },
+  "signText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "Questions or war stories of your own? Reply to the newsletter; Priya reads every one.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "sidebar": {
+   "type": "column",
+   "children": [
+    "sideStick"
+   ],
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 600
+    },
+    "constraints": {
+     "maxWidth": 336
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "constraints": {
+        "maxWidth": 900
+       }
+      }
+     }
+    }
+   ]
+  },
+  "sideStick": {
+   "type": "column",
+   "children": [
+    "toc",
+    "newsletter"
+   ],
+   "sticky": {
+    "offset": 96
+   },
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 600
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 24
+   }
+  },
+  "toc": {
+   "type": "column",
+   "children": [
+    "tocTitle",
+    "tocList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 220
+    },
+    "padding": 24
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 14
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 20
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "tocTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "ON THIS PAGE",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 1.2,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "tocList": {
+   "type": "listView",
+   "children": [
+    "tocRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 4
+   },
+   "bind": {
+    "data": "${toc}"
+   }
+  },
+  "tocRow": {
+   "type": "row",
+   "children": [
+    "tocBar",
+    "tocLabel"
+   ],
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     0,
+     6,
+     8,
+     6
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "states": {
+    "hovered": {
+     "tocRow": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFF6F7F9"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "active",
+       "value": "${index}"
+      },
+      {
+       "type": "scrollTo",
+       "node": "${item.node}",
+       "offset": 96,
+       "durationMs": 500
+      }
+     ]
+    }
+   ]
+  },
+  "tocBar": {
+   "type": "box",
+   "layout": {
+    "width": 3,
+    "height": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= active == index ? '#FF2563EB' : '#FFE5E7EB'}"
+   }
+  },
+  "tocLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 250
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.label}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "height": 1.4,
+     "color": "#FF475569"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= active == index ? '#FF0F172A' : '#FF475569'}",
+    "props.style.fontWeight": "${= active == index ? 600 : 500}"
+   }
+  },
+  "newsletter": {
+   "type": "column",
+   "children": [
+    "nlIcon",
+    "nlTitle",
+    "nlBody",
+    "nlForm",
+    "nlDone",
+    "nlFine"
+   ],
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 340
+    },
+    "padding": 24
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 12
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topCenter",
+      "end": "bottomCenter",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FFEFF6FF"
+       },
+       {
+        "position": 1,
+        "color": "#FFFFFFFF"
+       }
+      ]
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFDBEAFE"
+     }
+    ],
+    "radius": 20,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0F2563EB",
+      "offset": [
+       0,
+       12
+      ],
+      "blurRadius": 40
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": 32
+      }
+     }
+    }
+   ]
+  },
+  "nlIcon": {
+   "type": "stack",
+   "children": [
+    "nlIconGlyph"
+   ],
+   "layout": {
+    "width": 40,
+    "height": 40,
+    "align": "centerLeft"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ],
+    "radius": 12
+   }
+  },
+  "nlIconGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20,
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "icon": "mail_outline",
+    "color": "#FFFFFFFF",
+    "size": 20
+   }
+  },
+  "nlTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 26
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "text": "Get the next deep dive",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 20,
+     "fontWeight": 700,
+     "letterSpacing": -0.4,
+     "color": "#FF0F172A"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 24,
+        "letterSpacing": -0.48
+       }
+      }
+     }
+    }
+   ]
+  },
+  "nlBody": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 44
+    }
+   },
+   "props": {
+    "text": "One email a month with our newest engineering write-up. Read by 18,000 engineers.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 15
+       }
+      }
+     }
+    }
+   ]
+  },
+  "nlForm": {
+   "type": "column",
+   "children": [
+    "nlInputRow",
+    "nlError"
+   ],
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 110
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   },
+   "bind": {
+    "visible": "${= !subscribed}"
+   }
+  },
+  "nlInputRow": {
+   "type": "flex",
+   "children": [
+    "emailField",
+    "nlButton"
+   ],
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 102
+    }
+   },
+   "props": {
+    "direction": "vertical",
+    "crossAxisAlignment": "stretch",
+    "spacing": 10
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "direction": "horizontal",
+       "crossAxisAlignment": "center",
+       "spacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "emailField": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": 46
+   },
+   "props": {
+    "keyboardType": "emailAddress",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "color": "#FF0F172A"
+    },
+    "decoration": {
+     "hintText": "you@company.com",
+     "hintStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 15,
+      "color": "#FF94A3B8"
+     },
+     "contentPadding": [
+      12,
+      13,
+      12,
+      13
+     ],
+     "prefixIcon": {
+      "icon": "alternate_email",
+      "size": 18
+     }
+    }
+   },
+   "bind": {
+    "props.initialValue": "${email}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "email",
+       "value": "${result}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "emailError",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "nlButton": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": 46
+   },
+   "props": {
+    "label": "Subscribe",
+    "style": {
+     "backgroundColor": "#FF2563EB",
+     "foregroundColor": "#FFFFFFFF",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 15,
+      "fontWeight": 600
+     }
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "width": 160
+      }
+     }
+    }
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= contains(email, '@') && contains(email, '.') && length(email) > 5}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "setVariable",
+         "variable": "subscribed",
+         "value": "${= true}"
+        },
+        {
+         "type": "showToast",
+         "message": "Subscribed. Welcome to Signal & Noise."
+        }
+       ],
+       "else": [
+        {
+         "type": "setVariable",
+         "variable": "emailError",
+         "value": "Enter a valid email address."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "nlError": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${emailError}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FFDC2626"
+    }
+   },
+   "bind": {
+    "visible": "${= emailError != ''}"
+   }
+  },
+  "nlDone": {
+   "type": "row",
+   "children": [
+    "nlDoneIcon",
+    "nlDoneText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 64
+    },
+    "padding": 14
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFECFDF5"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFA7F3D0"
+     }
+    ],
+    "radius": 12
+   },
+   "bind": {
+    "visible": "${subscribed}"
+   }
+  },
+  "nlDoneIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "check_circle",
+    "color": "#FF059669",
+    "size": 20
+   }
+  },
+  "nlDoneText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "text": "You're in. The next issue goes to ${email}.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "height": 1.5,
+     "color": "#FF065F46"
+    }
+   }
+  },
+  "nlFine": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 288
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "No spam. Unsubscribe in one click.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "related": {
+   "type": "column",
+   "children": [
+    "relRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 520
+    },
+    "padding": [
+     64,
+     80,
+     64,
+     96
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        56,
+        32,
+        64
+       ]
+      }
+     }
+    }
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "enterViewport",
+      "visibleFraction": 0.3
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "active",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "relRail": {
+   "type": "column",
+   "children": [
+    "relHead",
+    "relGrid"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 440
+    },
+    "constraints": {
+     "maxWidth": 1152
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 32
+   }
+  },
+  "relHead": {
+   "type": "row",
+   "children": [
+    "relTitle",
+    "relAll"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "relTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "text": "Keep reading",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 32,
+     "fontWeight": 700,
+     "letterSpacing": -0.64,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "relAll": {
+   "type": "row",
+   "children": [
+    "relAllText",
+    "relAllIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "spacing": 6
+   },
+   "states": {
+    "hovered": {
+     "relAllText": {
+      "props": {
+       "style": {
+        "decoration": "underline"
+       }
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Opening the archive"
+      }
+     ]
+    }
+   ]
+  },
+  "relAllText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "All articles",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "relAllIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "arrow_forward",
+    "color": "#FF2563EB",
+    "size": 18
+   }
+  },
+  "relGrid": {
+   "type": "gridView",
+   "children": [
+    "relCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 380
+    }
+   },
+   "props": {
+    "physics": "never",
+    "crossAxisCount": 3,
+    "shrinkWrapRows": true,
+    "crossAxisSpacing": 24,
+    "mainAxisSpacing": 20
+   },
+   "bind": {
+    "data": "${relatedPosts}"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "crossAxisCount": 1
+      }
+     }
+    }
+   ]
+  },
+  "relCard": {
+   "type": "flex",
+   "children": [
+    "relArt",
+    "relText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 368
+    },
+    "height": {
+     "hug": 380
+    },
+    "padding": 16
+   },
+   "props": {
+    "direction": "vertical",
+    "crossAxisAlignment": "stretch",
+    "spacing": 18
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "radius": 20
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "direction": "horizontal",
+       "spacing": 24
+      }
+     }
+    }
+   ],
+   "states": {
+    "hovered": {
+     "relCard": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "#FFBFDBFE"
+        }
+       ],
+       "effects": [
+        {
+         "type": "dropShadow",
+         "color": "#140F172A",
+         "offset": [
+          0,
+          16
+         ],
+         "blurRadius": 40
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Opening \u201c${item.title}\u201d"
+      }
+     ]
+    }
+   ]
+  },
+  "relArt": {
+   "type": "stack",
+   "children": [
+    "relArtIcon"
+   ],
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": 168
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "width": 200,
+       "height": 140
+      }
+     }
+    }
+   ],
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFDBEAFE"
+     },
+     {
+      "type": "radial",
+      "center": [
+       0.7,
+       -0.6
+      ],
+      "radius": 1.2,
+      "stops": [
+       {
+        "position": 0,
+        "color": "#66FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ],
+    "radius": 14
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.tint}"
+   }
+  },
+  "relArtIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 44,
+    "height": 44,
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "icon": "bolt",
+    "color": "#CCFFFFFF",
+    "size": 44
+   },
+   "bind": {
+    "props.icon": "${item.icon}"
+   }
+  },
+  "relText": {
+   "type": "column",
+   "children": [
+    "relTag",
+    "relCardTitle",
+    "relDek",
+    "relMeta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 170
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        0,
+        8,
+        8,
+        8
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "relTag": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.tag}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 700,
+     "letterSpacing": 0.96,
+     "color": "#FF2563EB"
+    }
+   }
+  },
+  "relCardTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 52
+    }
+   },
+   "props": {
+    "text": "${item.title}",
+    "maxLines": 2,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 21,
+     "fontWeight": 700,
+     "height": 1.25,
+     "letterSpacing": -0.42,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "relDek": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 46
+    }
+   },
+   "props": {
+    "text": "${item.dek}",
+    "maxLines": 2,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "relMeta": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 336
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.author} \u00b7 ${item.read}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "footer": {
+   "type": "column",
+   "children": [
+    "footRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 220
+    },
+    "padding": [
+     64,
+     56,
+     64,
+     48
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF0F172A"
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        32,
+        48,
+        32,
+        40
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "footRail": {
+   "type": "column",
+   "children": [
+    "footTop",
+    "footRule",
+    "footBottom"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 160
+    },
+    "constraints": {
+     "maxWidth": 1152
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 32
+   }
+  },
+  "footTop": {
+   "type": "row",
+   "children": [
+    "footBrand",
+    "footLinks"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "start",
+    "wrap": true,
+    "runSpacing": 24,
+    "spacing": 48
+   }
+  },
+  "footBrand": {
+   "type": "column",
+   "children": [
+    "footLogo",
+    "footTag"
+   ],
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 56
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 8
+   }
+  },
+  "footLogo": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Signal & Noise",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 20,
+     "fontWeight": 700,
+     "letterSpacing": -0.4,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "footTag": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 320
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "How the Relay engineering team builds and breaks things.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "footLinks": {
+   "type": "row",
+   "children": [
+    "fl1",
+    "fl2",
+    "fl3",
+    "fl4"
+   ],
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 28
+   }
+  },
+  "fl1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Articles",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FFCBD5E1"
+    }
+   }
+  },
+  "fl2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "RSS",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FFCBD5E1"
+    }
+   }
+  },
+  "fl3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Careers",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FFCBD5E1"
+    }
+   }
+  },
+  "fl4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "GitHub",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FFCBD5E1"
+    }
+   }
+  },
+  "footRule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FF1E293B"
+     }
+    ]
+   }
+  },
+  "footBottom": {
+   "type": "row",
+   "children": [
+    "footCopy",
+    "footMade"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1152
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "wrap": true,
+    "runSpacing": 8
+   }
+  },
+  "footCopy": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "\u00a9 2025 Relay Labs, Inc.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "footMade": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Written by engineers, edited by humans.",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF64748B"
+    }
+   }
+  }
+ },
+ "variables": {
+  "article": [
+   {
+    "name": "email",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "emailError",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "subscribed",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "copied",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "active",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "coverProducers",
+    "type": "list",
+    "value": [
+     "billing-api",
+     "search-indexer",
+     "notify-fanout",
+     "imports-worker",
+     "+ 36 more"
+    ]
+   },
+   {
+    "name": "coverConsumers",
+    "type": "list",
+    "value": [
+     "ledger",
+     "reindex",
+     "push-gateway"
+    ]
+   },
+   {
+    "name": "codeSample",
+    "type": "text",
+    "value": "// Route every message by tenant, not by producer.\nexport function partitionFor(msg: Envelope): number {\n  const key = msg.tenantId ?? msg.producer;\n  return murmur3(key) % PARTITIONS;\n}\n\nqueue.consume(async (msg) => {\n  const handler = registry.get(msg.type);\n  if (!handler) return msg.deadLetter(\"no-handler\");\n  await withDeadline(handler(msg), msg.budgetMs);\n});"
+   },
+   {
+    "name": "toc",
+    "type": "list",
+    "value": [
+     {
+      "label": "Why one queue",
+      "node": "lede"
+     },
+     {
+      "label": "One queue, many shapes of work",
+      "node": "sec1"
+     },
+     {
+      "label": "What we'd tell ourselves",
+      "node": "sec2"
+     },
+     {
+      "label": "Keep reading",
+      "node": "related"
+     }
+    ]
+   },
+   {
+    "name": "bullets",
+    "type": "list",
+    "value": [
+     "Partition by what must stay in order, not by who sent the message. For us that was always the tenant.",
+     "Give every message type a time budget on day one, and alert on how much of it a normal day spends.",
+     "Migrate the noisiest producer first. Its edge cases become everyone's test suite for free."
+    ]
+   },
+   {
+    "name": "relatedPosts",
+    "type": "list",
+    "value": [
+     {
+      "tag": "RELIABILITY",
+      "title": "Replaying a week of production traffic",
+      "dek": "How we proved the new queue behaved like the old six, message for message.",
+      "author": "Marcus Lee",
+      "read": "12 min read",
+      "tint": "#FF6366F1",
+      "icon": "replay"
+     },
+     {
+      "tag": "DATA",
+      "title": "Dead letters are a product, not a bin",
+      "dek": "Treating failed messages as a queue of their own, with owners and an SLA.",
+      "author": "Ana Torres",
+      "read": "7 min read",
+      "tint": "#FF0EA5E9",
+      "icon": "mark_email_unread_outlined"
+     },
+     {
+      "tag": "ON-CALL",
+      "title": "The on-call rotation that paged nobody",
+      "dek": "What changed when one runbook replaced eleven, and what we still get woken up for.",
+      "author": "Priya Raman",
+      "read": "6 min read",
+      "tint": "#FF10B981",
+      "icon": "notifications_off_outlined"
+     }
+    ]
+   }
+  ]
+ }
+}

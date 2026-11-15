@@ -1,0 +1,36 @@
+{
+ "name": "site_landing",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 283.4,
+   "problems": 1,
+   "errors": 1,
+   "input_tokens": 236,
+   "cached": 123465,
+   "output_tokens": 32000
+  },
+  {
+   "round": 2,
+   "modelSeconds": 140.3,
+   "problems": 0,
+   "errors": 0,
+   "input_tokens": 16637,
+   "cached": 123465,
+   "output_tokens": 20146
+  },
+  {
+   "round": 3,
+   "modelSeconds": 153.2,
+   "problems": 4,
+   "errors": 4,
+   "input_tokens": 24762,
+   "cached": 123465,
+   "output_tokens": 21953
+  }
+ ],
+ "final": 2,
+ "errors": 0,
+ "problems": 0
+}
