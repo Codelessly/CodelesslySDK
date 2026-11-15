@@ -275,6 +275,19 @@ PublishBundle decodeBundleJson(Object? json) {
       }
     }
   }
+  // A large layout's nodes are gzipped in `compressedNodes` (the editor's
+  // publish writes it so, under Firestore's document limit); the bundle
+  // the site assembles from them keeps them so. Expanded here as a stored
+  // layout's are, or the screen has no nodes and draws nothing.
+  if (json is Map && json['layouts'] is Map) {
+    json = {
+      ...json.cast<String, Object?>(),
+      'layouts': {
+        for (final e in (json['layouts'] as Map).entries)
+          e.key: e.value is Map ? expandStoredLayout((e.value as Map).cast<String, Object?>()) : e.value,
+      },
+    };
+  }
   return PublishBundle.fromJson(json, catalog: standardCatalog);
 }
 
