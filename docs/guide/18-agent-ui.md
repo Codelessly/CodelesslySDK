@@ -60,7 +60,7 @@ final session = UiSession(designSystem: cards);
 final system = session.notationInstructions(blocks: {'ChatCard', 'Details', 'OptionList', 'ActionButton', 'Receipt'});
 
 // 2. The model's answer, as it streams (a Stream<String> of text deltas), is applied line by line.
-final result = await session.applyNotation(answerText);
+final result = await session.applyNotation(answerDeltas); // or Stream.value(wholeAnswer)
 
 // 3. In the chat. No canvas is named: the view shows the session's first canvas.
 CodelesslyView(session: session);
@@ -73,6 +73,8 @@ CodelesslyView(session: session);
 | `applyNotation(text, {options, prelude, author, onOp})` | Applies a streamed answer: each line becomes nodes the moment it is complete, one revision and one undo step for the whole answer. Returns the `EditResult`. |
 | `prelude` | Notation the host puts before the answer: state that must be right and is not the model's to write (`state cart=[...]`, a clock). |
 | `addBlock(definition)` | Adds a block (a component document) to the session's design system while it runs, or replaces the one of that type: the next `notationInstructions()` lists it, the next answer may call it, and a view already on screen draws it. For a block designed after the session began because none fitted a request. |
+| `notationInstructions(askForBlocks: true)`, `wantedBlocks` | The model is told to name a block where none fits (`Wanted "PollResults" "each option with its share"`, the part built from plain types under it). The part shows as written; what was asked for is in `wantedBlocks` after the answer. |
+| `applyNotation(text, replace: true)` | The answer takes the place of the UI the session holds, in one revision: a card written again once its block exists. Without it a session that has a UI refuses a second one. |
 | `notationIssues` | What the notation could not read in the last answer, by line and column: send these back to the model for a second try. |
 
 What to know:
@@ -84,8 +86,41 @@ What to know:
 * Events a card emits (`-> emit confirm order`) arrive on `session.events`, as with any session.
 * Looks are written as the design system's token names, so the same answer shown under another design system
   with the same names, or in dark mode, takes that look with nothing rewritten.
+* A block read from a file is decoded with the catalog:
+  `LayoutDocument.fromJson(json, catalog: standardCatalog)`. To use it in another session, call `addBlock` there
+  too: a block belongs to the session it was added to until it is stored in the design system's folder.
+* Until `codelessly_api` 31 is on pub.dev, an app outside this repository needs a `pubspec_overrides.yaml` that
+  points `codelessly_api` at a checkout of its master branch (the tools here write one).
 * `applyStream` (below) is the other path: a model that calls the `ui_apply` tool with edit operations. It can
   change a UI already on screen node by node; the notation writes a whole card.
+
+### Blocks designed while the session runs
+
+`OnDemandBlocks` takes what the answers ask for to a designer you supply (a stronger model, a service, a lookup in
+a library), checks what comes back, and adds it to the session:
+
+```dart
+final blocks = OnDemandBlocks(
+  session,
+  design: (wanted, session, notes) => myService.design(wanted.name, wanted.purpose, notes), // a component document, or null
+  check: (wanted, definition) => myRenderCheck(definition), // your own gate: problems, none to pass
+  onAdded: (wanted, definition) => library.store(definition),
+);
+
+final system = session.notationInstructions(askForBlocks: true);
+await session.applyNotation(firstAnswer);        // the card shows now, the wanted part from plain types
+final outcomes = await blocks.designWanted();    // minutes, in the background
+if (outcomes.any((o) => o.added)) {
+  // The next answer calls the block by name. To swap the card on screen, ask the model again and:
+  await session.applyNotation(secondAnswer, replace: true);
+}
+```
+
+A design is kept only when it is a component of the name asked for, validates against the session's catalog,
+theme and components with no errors, calls no cycle, and passes `check`. A refused design is asked for again
+with the problems as `notes`, up to `maxTries`. A block already being designed is not asked for twice. Designing
+one takes a strong model two to four minutes (`examples/showcase/on-demand`); composing with it afterwards
+costs nothing extra.
 
 ## How a streaming UI renders
 
