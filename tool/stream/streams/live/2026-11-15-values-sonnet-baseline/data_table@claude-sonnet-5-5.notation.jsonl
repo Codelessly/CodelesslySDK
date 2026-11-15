@@ -1,0 +1,237 @@
+{"meta":{"ui":"data_table","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the twelve invoices you found as a table with number, customer, date, amount and status: #1001 Acme Corp May 02 $1,200 Paid; #1002 Globex May 05 $860 Due; #1003 Initech May 09 $430 Overdue; #1004 Umbrella May 12 $2,250 Paid; #1005 Hooli May 15 $975 Due; #1006 Stark Ltd May 16 $3,100 Overdue; #1007 Wayne Co May 18 $640 Paid; #1008 Wonka May 20 $1,480 Due; #1009 Soylent May 22 $300 Overdue; #1010 Cyberdyne May 24 $5,200 Paid; #1011 Tyrell May 27 $760 Due; #1012 Aperture May 29 $1,890 Paid. I can sort by any column (date first), filter by status (All, Paid, Due, Overdue), type to search the customer, page through five at a time, and tick rows (and tick all on the page). When anything is ticked a bar shows \"N selected\" with the total of the ticked amounts and a button to send reminders.","text":"ChatCard \"Invoices\" \"12 found\" icon:\"receipt_long\" status:\"Open\" tone:accent w:390\n  state rows=[{\"id\":1001,\"num\":\"#1001\",\"cust\":\"Acme Corp\",\"date\":\"May 02\",\"d\":2,\"amt\":1200,\"st\":\"Paid\"},{\"id\":1002,\"num\":\"#1002\",\"cust\":\"Globex\",\"date\":\"May 05\",\"d\":5,\"amt\":860,\"st\":\"Due\"},{\"id\":1003,\"num\":\"#1003\",\"cust\":\"Initech\",\"date\":\"May 09\",\"d\":9,\"amt\":430,\"st\":\"Overdue\"},{\"id\":1004,\"num\":\"#1004\",\"cust\":\"Umbrella\",\"date\":\"May 12\",\"d\":12,\"amt\":2250,\"st\":\"Paid\"},{\"id\":1005,\"num\":\"#1005\",\"cust\":\"Hooli\",\"date\":\"May 15\",\"d\":15,\"amt\":975,\"st\":\"Due\"},{\"id\":1006,\"num\":\"#1006\",\"cust\":\"Stark Ltd\",\"date\":\"May 16\",\"d\":16,\"amt\":3100,\"st\":\"Overdue\"},{\"id\":1007,\"num\":\"#1007\",\"cust\":\"Wayne Co\",\"date\":\"May 18\",\"d\":18,\"amt\":640,\"st\":\"Paid\"},{\"id\":1008,\"num\":\"#1008\",\"cust\":\"Wonka\",\"date\":\"May 20\",\"d\":20,\"amt\":1480,\"st\":\"Due\"},{\"id\":1009,\"num\":\"#1009\",\"cust\":\"Soylent\",\"date\":\"May 22\",\"d\":22,\"amt\":300,\"st\":\"Overdue\"},{\"id\":1010,\"num\":\"#1010\",\"cust\":\"Cyberdyne\",\"date\":\"May 24\",\"d\":24,\"amt\":5200,\"st\":\"Paid\"},{\"id\":1011,\"num\":\"#1011\",\"cust\":\"Tyrell\",\"date\":\"May 27\",\"d\":27,\"amt\":760,\"st\":\"Due\"},{\"id\":1012,\"num\":\"#1012\",\"cust\":\"Aperture\",\"date\":\"May 29\",\"d\":29,\"amt\":1890,\"st\":\"Paid\"}]\n  state sort=\"d\"\n  state desc=false\n  state status=\"All\"\n  state q=\"\"\n  state page=0\n  state picked=[]\n  InputField \"Search customer\" \"Type a name\" =q icon:\"search_rounded\" -> page=0\n  Segments =status options:[\"All\",\"Paid\",\"Due\",\"Overdue\"] -> page=0\n  WideScroll width:520\n    TableHeader =sort desc:desc columns:[\"#\",\"Customer\",\"Date\",\"Amount\",\"Status\"] keys:[\"num\",\"cust\",\"d\",\"amt\",\"st\"] selectable:true checked:=length(picked)>0 && all(take(slice(desc?sortByDesc(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]):sortBy(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]),page*5,page*5+5),5),r=>contains(picked,r.id)) -> picked=all(slice(desc?sortByDesc(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]):sortBy(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]),page*5,page*5+5),r=>contains(picked,r.id))?[]:map(slice(desc?sortByDesc(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]):sortBy(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]),page*5,page*5+5),r=>r.id)\n    each r in slice(desc?sortByDesc(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]):sortBy(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]),page*5,page*5+5)\n      TableRow cells:=[r.num,r.cust,r.date,money(r.amt,\"$\",0)] badge:=r.st selectable:true checked:=contains(picked,r.id) -> picked=contains(picked,r.id)?without(picked,r.id):append(picked,r.id)\n  Pager \"Page\" =page count:=max(1,ceil(length(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))))/5))\n  if length(picked)>0\n    TotalBar \"{length(picked)} selected\" \"Total of ticked invoices\" amount:=money(sum(filter(rows,r=>contains(picked,r.id)),r=>r.amt),\"$\",0) cta:\"Send reminders\" icon:\"send\" -> emit remind picked; toast \"Reminders sent\"","usage":{"input_tokens":9295,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":1703,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":792,"totalMs":8631}}
+{"tMs":792,"delta":"ChatCard \""}
+{"tMs":1113,"delta":"Invoices\" \"12"}
+{"tMs":1113,"delta":" found"}
+{"tMs":1113,"delta":"\" icon:\"rece"}
+{"tMs":1113,"delta":"ipt_"}
+{"tMs":1114,"delta":"long\" status:\"Open\""}
+{"tMs":1114,"delta":" tone:acc"}
+{"tMs":1114,"delta":"ent w:390"}
+{"tMs":1114,"delta":"\n  state r"}
+{"tMs":1114,"delta":"ows=[{\"id\":1"}
+{"tMs":1114,"delta":"001,\"num\":\"#"}
+{"tMs":1148,"delta":"1001\",\"cust\":\""}
+{"tMs":1182,"delta":"Acme Corp\",\"date\":"}
+{"tMs":1440,"delta":"\"May 02\",\"d"}
+{"tMs":1440,"delta":"\":2"}
+{"tMs":1441,"delta":",\"amt"}
+{"tMs":1441,"delta":"\":1200,\"st"}
+{"tMs":1441,"delta":"\":\"Paid\"},{"}
+{"tMs":1441,"delta":"\"id\":1002,\"num"}
+{"tMs":1441,"delta":"\":\"#1002\",\"cust"}
+{"tMs":1450,"delta":"\":\"Globex\",\"date\":"}
+{"tMs":1484,"delta":"\"May 05\",\"d\":5"}
+{"tMs":1518,"delta":",\"amt\":860,\""}
+{"tMs":1553,"delta":"st\":\"Due\"},{"}
+{"tMs":1585,"delta":"\"id\":1003,\"num"}
+{"tMs":1771,"delta":"\":\"#1003\",\"cust"}
+{"tMs":1771,"delta":"\":\"Initech\",\"date\":"}
+{"tMs":1771,"delta":"\"May 09\",\"d\":9"}
+{"tMs":1771,"delta":",\"amt\":430,\""}
+{"tMs":1771,"delta":"st\":\"Overdue\""}
+{"tMs":1787,"delta":"},{\"id\":1004,"}
+{"tMs":1820,"delta":"\"num\":\"#1004\",\""}
+{"tMs":1854,"delta":"cust\":\"Umbr"}
+{"tMs":1887,"delta":"ella\",\"date\":\"May 12"}
+{"tMs":1921,"delta":"\",\"d\":12,\"amt"}
+{"tMs":1954,"delta":"\":2250,\"st\":\""}
+{"tMs":1988,"delta":"Paid\"},{\"id"}
+{"tMs":2105,"delta":"\":1005,\"num\":\""}
+{"tMs":2105,"delta":"#1005\",\"cust\":\""}
+{"tMs":2105,"delta":"Hooli\",\"date\":\""}
+{"tMs":2122,"delta":"May 15\",\"d\":15,"}
+{"tMs":2155,"delta":"\"amt\":975,\"st"}
+{"tMs":2189,"delta":"\":\"Due\"},{\""}
+{"tMs":2223,"delta":"id\":1006,\"num\":"}
+{"tMs":2256,"delta":"\"#1006\",\"cust\":"}
+{"tMs":2288,"delta":"\"Stark Ltd"}
+{"tMs":2322,"delta":"\",\"date\":\"May 16\",\""}
+{"tMs":2355,"delta":"d\":16,\"amt\":"}
+{"tMs":2389,"delta":"3100,\"st\":\""}
+{"tMs":2427,"delta":"Overdue\"},{\"id"}
+{"tMs":2459,"delta":"\":1007,\"num\":\""}
+{"tMs":2489,"delta":"#1007\",\"cust\":\""}
+{"tMs":2522,"delta":"Wayne Co\",\"date"}
+{"tMs":2556,"delta":"\":\"May 18\",\"d\":"}
+{"tMs":2589,"delta":"18,\"amt\":640,"}
+{"tMs":2622,"delta":"\"st\":\"Paid\""}
+{"tMs":2656,"delta":"},{\"id\":1008,"}
+{"tMs":2690,"delta":"\"num\":\"#1008\",\""}
+{"tMs":2723,"delta":"cust\":\"Wonka"}
+{"tMs":2756,"delta":"\",\"date\":\"May 20\",\""}
+{"tMs":2789,"delta":"d\":20,\"amt\":"}
+{"tMs":2823,"delta":"1480,\"st\":\""}
+{"tMs":2856,"delta":"Due\"},{\"id\":1"}
+{"tMs":2890,"delta":"009,\"num\":\"#1"}
+{"tMs":2923,"delta":"009\",\"cust\":\"So"}
+{"tMs":2957,"delta":"ylent\",\"date\":\"May "}
+{"tMs":2990,"delta":"22\",\"d\":22,\"am"}
+{"tMs":3023,"delta":"t\":300,\"st\":\""}
+{"tMs":3057,"delta":"Overdue\"},{\""}
+{"tMs":3090,"delta":"id\":1010,\"num\":"}
+{"tMs":3123,"delta":"\"#1010\",\"cust\":"}
+{"tMs":3157,"delta":"\"Cyberdyne"}
+{"tMs":3190,"delta":"\",\"date\":\"May 24\",\""}
+{"tMs":3223,"delta":"d\":24,\"amt\":"}
+{"tMs":3256,"delta":"5200,\"st\":\""}
+{"tMs":3290,"delta":"Paid\"},{\"id\":"}
+{"tMs":3323,"delta":"1011,\"num\":\"#"}
+{"tMs":3357,"delta":"1011\",\"cust\":\""}
+{"tMs":3390,"delta":"Tyrell\",\"date\":\""}
+{"tMs":3423,"delta":"May 27\",\"d\":27,"}
+{"tMs":3457,"delta":"\"amt\":760,\"st"}
+{"tMs":3490,"delta":"\":\"Due\"},{\""}
+{"tMs":3524,"delta":"id\":1012,\"num\":"}
+{"tMs":3557,"delta":"\"#"}
+{"tMs":3591,"delta":"1012\",\"cust\":\""}
+{"tMs":3623,"delta":"Aperture\",\"date\":\"May"}
+{"tMs":3657,"delta":" 29\",\"d\":29,\""}
+{"tMs":3690,"delta":"amt\":1890,\"st"}
+{"tMs":3723,"delta":"\":\"Paid\"}]"}
+{"tMs":3757,"delta":"\n  state sort=\"d\""}
+{"tMs":3790,"delta":"\n  state desc=false"}
+{"tMs":3824,"delta":"\n  state status"}
+{"tMs":3857,"delta":"=\"All\"\n  state q"}
+{"tMs":3890,"delta":"=\"\"\n  state page=0"}
+{"tMs":3924,"delta":"\n  state picked=[]"}
+{"tMs":3957,"delta":"\n  InputField \"Search"}
+{"tMs":3990,"delta":" customer\" \""}
+{"tMs":4024,"delta":"Type"}
+{"tMs":4057,"delta":" a"}
+{"tMs":4089,"delta":" name"}
+{"tMs":4123,"delta":"\" =q icon:\"search"}
+{"tMs":4156,"delta":"_rounded\" -> page"}
+{"tMs":4189,"delta":"=0\n  Segments ="}
+{"tMs":4223,"delta":"status options:[\"All\",\"Pa"}
+{"tMs":4256,"delta":"id\",\"Due\",\"Overd"}
+{"tMs":4289,"delta":"ue\"] -> page=0"}
+{"tMs":4323,"delta":"\n  WideScroll width"}
+{"tMs":4356,"delta":":520"}
+{"tMs":4389,"delta":"\n    TableHeader ="}
+{"tMs":4423,"delta":"sort desc:desc colum"}
+{"tMs":4456,"delta":"ns:[\"#"}
+{"tMs":4490,"delta":"\",\"Customer\",\"Date\",\""}
+{"tMs":4522,"delta":"Amount\",\"Status\"]"}
+{"tMs":4556,"delta":" keys:[\"num\",\"c"}
+{"tMs":4589,"delta":"ust\",\"d\",\"amt\",\"st"}
+{"tMs":4622,"delta":"\"] selectable:true chec"}
+{"tMs":4656,"delta":"ked:=length"}
+{"tMs":4689,"delta":"(pic"}
+{"tMs":4722,"delta":"ked)>0 && all("}
+{"tMs":4756,"delta":"take"}
+{"tMs":4789,"delta":"(sl"}
+{"tMs":4822,"delta":"ice(des"}
+{"tMs":4855,"delta":"c?"}
+{"tMs":4889,"delta":"sortByDesc(fil"}
+{"tMs":4922,"delta":"ter(rows,r"}
+{"tMs":4956,"delta":"=>(status==\"All\""}
+{"tMs":4988,"delta":"||r"}
+{"tMs":5024,"delta":".st==status)&&cont"}
+{"tMs":5055,"delta":"ains(lower(r.c"}
+{"tMs":5089,"delta":"ust),lower(q))),"}
+{"tMs":5122,"delta":"r"}
+{"tMs":5155,"delta":"=>r["}
+{"tMs":5188,"delta":"sort]):"}
+{"tMs":5221,"delta":"sortBy(filter("}
+{"tMs":5255,"delta":"rows,r=>(status"}
+{"tMs":5288,"delta":"==\"All\"||r.st"}
+{"tMs":5322,"delta":"==status)&&contains("}
+{"tMs":5355,"delta":"lower(r.cust),"}
+{"tMs":5388,"delta":"lower(q))),r="}
+{"tMs":5421,"delta":">r[sort]),page"}
+{"tMs":5455,"delta":"*5,page*5+5"}
+{"tMs":5488,"delta":"),5),r"}
+{"tMs":5522,"delta":"=>contains(picked,"}
+{"tMs":5555,"delta":"r.id)) -> pic"}
+{"tMs":5588,"delta":"ked=all"}
+{"tMs":5622,"delta":"(slice(desc?s"}
+{"tMs":5655,"delta":"ortByDesc(filter"}
+{"tMs":5688,"delta":"(rows,r=>("}
+{"tMs":5724,"delta":"status==\"All\"||r."}
+{"tMs":5755,"delta":"st==status)&&contains"}
+{"tMs":5788,"delta":"(lower(r.cust"}
+{"tMs":5822,"delta":"),lower(q))),r"}
+{"tMs":5855,"delta":"=>r[sort]):"}
+{"tMs":5889,"delta":"sortBy(filter("}
+{"tMs":5922,"delta":"rows,r=>(status"}
+{"tMs":5955,"delta":"==\"All\"||r.st"}
+{"tMs":5989,"delta":"==status)&&contains("}
+{"tMs":6021,"delta":"lower(r.cust),"}
+{"tMs":6055,"delta":"lower(q))),r="}
+{"tMs":6088,"delta":">r[sort]),page"}
+{"tMs":6122,"delta":"*5,page*5+5"}
+{"tMs":6155,"delta":"),r=>contains(pic"}
+{"tMs":6189,"delta":"ked,r.id))?["}
+{"tMs":6222,"delta":"]:map"}
+{"tMs":6255,"delta":"(slice(desc?s"}
+{"tMs":6288,"delta":"ortByDesc(filter"}
+{"tMs":6324,"delta":"(rows,r=>("}
+{"tMs":6356,"delta":"status==\"All\"||r."}
+{"tMs":6389,"delta":"st==status)&&contains"}
+{"tMs":6422,"delta":"(lower(r.cust"}
+{"tMs":6455,"delta":"),lower(q))),r"}
+{"tMs":6489,"delta":"=>r[sort]):"}
+{"tMs":6522,"delta":"sortBy(filter("}
+{"tMs":6555,"delta":"rows,r=>(status"}
+{"tMs":6588,"delta":"==\"All\"||r.st"}
+{"tMs":6622,"delta":"==status)&&contains("}
+{"tMs":6656,"delta":"lower(r.cust),"}
+{"tMs":6689,"delta":"lower(q))),r="}
+{"tMs":6722,"delta":">r[sort]),page"}
+{"tMs":6756,"delta":"*5,page*5+5"}
+{"tMs":6789,"delta":"),r=>r.id)"}
+{"tMs":6822,"delta":"\n    each r in slice("}
+{"tMs":6855,"delta":"desc?sortByDes"}
+{"tMs":6889,"delta":"c(filter(rows,"}
+{"tMs":6923,"delta":"r=>(status==\"All"}
+{"tMs":6956,"delta":"\"||r.st==status)"}
+{"tMs":6989,"delta":"&&contains(lower("}
+{"tMs":7022,"delta":"r.cust),lower("}
+{"tMs":7055,"delta":"q))),r=>r["}
+{"tMs":7089,"delta":"sort]):sortBy"}
+{"tMs":7122,"delta":"(filter(rows,r"}
+{"tMs":7155,"delta":"=>(status==\"All\""}
+{"tMs":7189,"delta":"||r.st==status)&"}
+{"tMs":7222,"delta":"&contains(lower(r"}
+{"tMs":7255,"delta":".cust),lower(q"}
+{"tMs":7289,"delta":"))),r=>r[s"}
+{"tMs":7322,"delta":"ort]),page*5,page"}
+{"tMs":7356,"delta":"*5+5)\n      T"}
+{"tMs":7389,"delta":"ableRow cells:=["}
+{"tMs":7422,"delta":"r.num,r.cust"}
+{"tMs":7456,"delta":",r.date,money(r"}
+{"tMs":7489,"delta":".amt,\"$\",0"}
+{"tMs":7523,"delta":")] badge:="}
+{"tMs":7556,"delta":"r.st selectable:true"}
+{"tMs":7589,"delta":" checked:=contains(pic"}
+{"tMs":7623,"delta":"ked,r.id) ->"}
+{"tMs":7657,"delta":" picked=contains(picked"}
+{"tMs":7689,"delta":",r.id)?without("}
+{"tMs":7723,"delta":"picked,r.id):append"}
+{"tMs":7756,"delta":"(picked,r.id)"}
+{"tMs":7789,"delta":"\n  Pager \"Page"}
+{"tMs":7823,"delta":"\" =page count:=max"}
+{"tMs":7856,"delta":"(1,ceil(length"}
+{"tMs":7889,"delta":"(filter(rows,r"}
+{"tMs":7922,"delta":"=>(status==\"All\""}
+{"tMs":7956,"delta":"||r.st==status)&"}
+{"tMs":7990,"delta":"&contains(lower(r"}
+{"tMs":8023,"delta":".cust),lower(q"}
+{"tMs":8056,"delta":"))))/5))\n  if"}
+{"tMs":8089,"delta":" length(picked)>0"}
+{"tMs":8122,"delta":"\n    TotalBar \"{"}
+{"tMs":8156,"delta":"length(picked)} selected"}
+{"tMs":8189,"delta":"\" \""}
+{"tMs":8223,"delta":"Total of ticked inv"}
+{"tMs":8256,"delta":"oices\" amount:=money"}
+{"tMs":8290,"delta":"(sum(filter(r"}
+{"tMs":8322,"delta":"ows,r=>contains("}
+{"tMs":8356,"delta":"picked,r.id)),"}
+{"tMs":8390,"delta":"r"}
+{"tMs":8422,"delta":"=>r.amt),\""}
+{"tMs":8456,"delta":"$\",0) cta:\""}
+{"tMs":8489,"delta":"Send reminders\" icon"}
+{"tMs":8523,"delta":":\"send"}
+{"tMs":8556,"delta":"\" -> emit rem"}
+{"tMs":8595,"delta":"ind picked; toast \""}
+{"tMs":8624,"delta":"Reminders sent\""}

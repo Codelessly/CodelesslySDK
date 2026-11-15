@@ -1,0 +1,56 @@
+{"meta":{"ui":"weather","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show the weather in Lisbon as an inline card. Now: 22° and partly cloudy, high 24°, low 15°. The next five hours: 1 PM 23° sunny, 2 PM 24° sunny, 3 PM 24° partly cloudy, 4 PM 23° cloudy, 5 PM 21° rain. The next three days with a temperature range bar: Tue rain 14° to 20°, Wed partly cloudy 13° to 18°, Thu sunny 15° to 25°. Add a button \"Alert me before it rains\" that, once I press it, reads \"Rain alert is on\" and shows the alert as switched on.","text":"ChatCard \"Lisbon\" \"Weather\" icon:\"wb_sunny\" w:390\n  state alert=false\n  WeatherNow \"Lisbon\" \"Partly cloudy\" temp:22 high:24 low:15 kind:\"partly\"\n  SectionLabel \"Next hours\" \"5 hours\"\n  WeatherHours hours:[\"1 PM\",\"2 PM\",\"3 PM\",\"4 PM\",\"5 PM\"] temps:[23,24,24,23,21] kinds:[\"sun\",\"sun\",\"partly\",\"cloud\",\"rain\"]\n  SectionLabel \"Next days\" \"°C\"\n  WeatherDay \"Tue\" low:14 high:20 kind:\"rain\" min:13 max:25\n  WeatherDay \"Wed\" low:13 high:18 kind:\"partly\" min:13 max:25\n  WeatherDay \"Thu\" low:15 high:25 kind:\"sun\" min:13 max:25\n  if !alert\n    ActionButton \"Alert me before it rains\" tone:\"primary\" icon:\"notifications\" -> alert=true\n  if alert\n    ActionButton \"Rain alert is on\" tone:\"good\" icon:\"notifications_active\" enabled:=false","usage":{"input_tokens":9134,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":387,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":686,"totalMs":2594}}
+{"tMs":686,"delta":"ChatCard \"L"}
+{"tMs":1003,"delta":"isbon\" \"Weather"}
+{"tMs":1003,"delta":"\""}
+{"tMs":1003,"delta":" icon:\"w"}
+{"tMs":1003,"delta":"b_sunny\" w"}
+{"tMs":1003,"delta":":390"}
+{"tMs":1003,"delta":"\n  state alert"}
+{"tMs":1003,"delta":"=false\n  Weather"}
+{"tMs":1003,"delta":"Now \"Lisbon"}
+{"tMs":1003,"delta":"\" \"Partly cloud"}
+{"tMs":1005,"delta":"y\" temp:22 high"}
+{"tMs":1039,"delta":":24 low:15 k"}
+{"tMs":1074,"delta":"ind:\"partly\"\n  "}
+{"tMs":1329,"delta":"SectionLabel \""}
+{"tMs":1329,"delta":"Next hours\" \"5"}
+{"tMs":1329,"delta":" hours\"\n  We"}
+{"tMs":1329,"delta":"atherHours hours:[\""}
+{"tMs":1329,"delta":"1 PM\",\"2 P"}
+{"tMs":1329,"delta":"M\",\"3 PM\",\"4"}
+{"tMs":1329,"delta":" PM\",\"5 PM"}
+{"tMs":1342,"delta":"\"] temps:[23"}
+{"tMs":1376,"delta":",24,24,23,21"}
+{"tMs":1410,"delta":"] kinds:[\"sun"}
+{"tMs":1443,"delta":"\",\"sun\",\"partly\",\"c"}
+{"tMs":1477,"delta":"loud\",\"rain\"]"}
+{"tMs":1659,"delta":"\n  SectionLabel \""}
+{"tMs":1659,"delta":"Next days"}
+{"tMs":1659,"delta":"\" \"°"}
+{"tMs":1659,"delta":"C\"\n  Weather"}
+{"tMs":1659,"delta":"Day \"Tue\" low"}
+{"tMs":1676,"delta":":14 high:20 k"}
+{"tMs":1710,"delta":"ind:\"rain\" min:"}
+{"tMs":1742,"delta":"13 max:25"}
+{"tMs":1776,"delta":"\n  WeatherDay"}
+{"tMs":1810,"delta":" \"Wed\" low:13"}
+{"tMs":1843,"delta":" high:18 kind:"}
+{"tMs":1877,"delta":"\"partly\" min:13 "}
+{"tMs":1988,"delta":"max:25\n  Weat"}
+{"tMs":1988,"delta":"herDay \"Thu\""}
+{"tMs":1988,"delta":" low:15 high:25 "}
+{"tMs":2011,"delta":"kind:\"sun\" min"}
+{"tMs":2044,"delta":":13 max:25\n  "}
+{"tMs":2077,"delta":"if !alert\n    Act"}
+{"tMs":2113,"delta":"ionButton \"Alert me"}
+{"tMs":2144,"delta":" before it rains\" tone:"}
+{"tMs":2178,"delta":"\"primary\" icon:\""}
+{"tMs":2211,"delta":"notifications\""}
+{"tMs":2244,"delta":" -> alert=true\n  "}
+{"tMs":2278,"delta":"if alert\n    Action"}
+{"tMs":2588,"delta":"Button \"Rain alert"}
+{"tMs":2588,"delta":" is on\" tone:\"good"}
+{"tMs":2588,"delta":"\" icon:\"notifications"}
+{"tMs":2588,"delta":"_active\""}
+{"tMs":2588,"delta":" enabled:="}
+{"tMs":2588,"delta":"false"}

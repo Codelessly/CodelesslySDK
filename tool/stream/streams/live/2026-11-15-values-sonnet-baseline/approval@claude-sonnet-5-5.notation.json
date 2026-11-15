@@ -1,0 +1,270 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Delete 214 old files?",
+    "subtitle": "Approval needed",
+    "icon": "delete_outline",
+    "status": "Waiting",
+    "tone": "warn"
+   },
+   "children": [
+    "Paragraph1",
+    "Details1",
+    "Callout1",
+    "Disclosure1",
+    "row1",
+    "Receipt1",
+    "Receipt2"
+   ]
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "I will permanently delete 214 old files from your shared drive to free up space. Nothing is deleted until you approve."
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Folder",
+      "Shared Drive / Archive / 2019"
+     ],
+     [
+      "Files",
+      "214, all older than 2020"
+     ],
+     [
+      "Space freed",
+      "3.2 GB"
+     ]
+    ]
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "This cannot be undone",
+    "message": "Deleted files are removed for good and cannot be restored.",
+    "tone": "danger"
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "Disclosure1": {
+   "type": "Disclosure",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "See the first five file names",
+    "lines": [
+     "Q1-2019-budget.xlsx",
+     "meeting-notes-2018-03.docx",
+     "old-logo-draft-v2.png",
+     "onboarding-2017.pdf",
+     "team-photo-2016.jpg",
+     "and 209 more"
+    ]
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Deny",
+    "tone": "quiet"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "denied"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Approve",
+    "tone": "danger"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "approved"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Approved",
+    "message": "214 files in Shared Drive / Archive / 2019 are being deleted. 3.2 GB will be freed.",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "visible": "${= decision==\"approved\"}"
+   }
+  },
+  "Receipt2": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Denied",
+    "message": "Nothing was deleted. The 214 files are still in Shared Drive / Archive / 2019.",
+    "tone": "neutral",
+    "icon": "close"
+   },
+   "bind": {
+    "visible": "${= decision==\"denied\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "decision",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

@@ -1,0 +1,365 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "timer",
+      "intervalMs": 1000,
+      "when": "${= running}"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= elapsed+1}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= min(6,floor((elapsed)/2))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= elapsed<12}"
+      }
+     ]
+    }
+   ]
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Blog migration",
+    "subtitle": "Six steps, about 2 seconds each",
+    "icon": "sync"
+   },
+   "bind": {
+    "props.status": "${= done==6?\"Complete\":(running?\"Running\":\"Ready\")}",
+    "props.tone": "${= done==6?\"good\":\"accent\"}"
+   },
+   "children": [
+    "ProgressLine1",
+    "SectionLabel1",
+    "PlanStep1",
+    "PlanStep2",
+    "PlanStep3",
+    "PlanStep4",
+    "PlanStep5",
+    "PlanStep6",
+    "Receipt1",
+    "row1"
+   ]
+  },
+  "ProgressLine1": {
+   "type": "ProgressLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${done} of 6 steps",
+    "props.detail": "${elapsed} s elapsed",
+    "props.value": "${= done/6}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Plan",
+    "note": "6 steps"
+   }
+  },
+  "PlanStep1": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Back up your content",
+    "detail": "Export posts, pages and settings",
+    "index": 0
+   },
+   "bind": {
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "PlanStep2": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Set up the new host",
+    "detail": "Install the platform and configure the domain",
+    "index": 1
+   },
+   "bind": {
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "PlanStep3": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Import posts",
+    "detail": "Bring over articles, tags and comments",
+    "index": 2
+   },
+   "bind": {
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "PlanStep4": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Move media",
+    "detail": "Copy images and downloads to the new storage",
+    "index": 3
+   },
+   "bind": {
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "PlanStep5": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Redirect old URLs",
+    "detail": "Point the old addresses to the new ones",
+    "index": 4
+   },
+   "bind": {
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "PlanStep6": {
+   "type": "PlanStep",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Final checks",
+    "detail": "Test links, feeds and page speed",
+    "index": 5,
+    "last": true
+   },
+   "bind": {
+    "props.current": "${done}",
+    "props.running": "${running}"
+   }
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Migration complete",
+    "tone": "good",
+    "icon": "check"
+   },
+   "bind": {
+    "props.message": "Total time: ${elapsed} seconds",
+    "visible": "${= done==6}"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "bind": {
+    "visible": "${= done<6}"
+   },
+   "children": [
+    "ActionButton1",
+    "ActionButton2"
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Start",
+    "tone": "primary",
+    "icon": "play_arrow"
+   },
+   "bind": {
+    "props.enabled": "${= !running}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "elapsed",
+       "value": "${= done*2}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= true}"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton2": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Pause",
+    "tone": "quiet",
+    "icon": "pause"
+   },
+   "bind": {
+    "props.enabled": "${running}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "running",
+       "value": "${= false}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "done",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "running",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "elapsed",
+    "type": "integer",
+    "value": 0
+   }
+  ]
+ }
+}

@@ -1,0 +1,116 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Trip photos",
+    "subtitle": "9 photos from the road",
+    "icon": "photo_library"
+   },
+   "children": [
+    "PhotoGallery1"
+   ]
+  },
+  "PhotoGallery1": {
+   "type": "PhotoGallery",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "open",
+    "layout": "grid",
+    "columns": 3,
+    "photos": [
+     {
+      "kind": "harbor",
+      "tone": "dawn",
+      "caption": "Harbour at sunrise"
+     },
+     {
+      "kind": "market",
+      "tone": "day",
+      "caption": "Old town market"
+     },
+     {
+      "kind": "forest",
+      "tone": "day",
+      "caption": "Forest trail"
+     },
+     {
+      "kind": "dunes",
+      "tone": "dusk",
+      "caption": "Desert dunes"
+     },
+     {
+      "kind": "skyline",
+      "tone": "dusk",
+      "caption": "Evening skyline"
+     },
+     {
+      "kind": "lagoon",
+      "tone": "day",
+      "caption": "Hidden lagoon"
+     },
+     {
+      "kind": "mountain",
+      "tone": "dawn",
+      "caption": "Mountain hut"
+     },
+     {
+      "kind": "festival",
+      "tone": "night",
+      "caption": "Street festival"
+     },
+     {
+      "kind": "train",
+      "tone": "night",
+      "caption": "Night train"
+     }
+    ]
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "open",
+    "type": "decimal",
+    "value": 0
+   }
+  ]
+ }
+}

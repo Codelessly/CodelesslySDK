@@ -1,0 +1,73 @@
+{"meta":{"ui":"subscription","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"My Pro plan renews in 3 days, on Nov 18. Show a card with the plan and its price ($12 a month), how much of my storage (68 of 100 GB) and seats (3 of 5) I have used as percentages with bars, a switch to annual billing ($120 a year) that shows the yearly price, the price per month and what I would save compared with paying monthly (in dollars and as a percentage), and Manage plan and Cancel renewal buttons.","text":"ChatCard \"Pro plan\" \"Renews in 3 days, on Nov 18\" icon:\"workspace_premium\" status:\"Active\" tone:accent w:390\n  state annual=false\n  Details rows:=[[\"Plan\",\"Pro\"],[\"Price\",annual?\"$120 a year\":\"$12 a month\"],[\"Next renewal\",\"Nov 18\"]]\n  SectionLabel \"Usage\" \"this month\"\n  ProgressLine \"Storage: 68%\" \"68 of 100 GB\" value:=68/100\n  ProgressLine \"Seats: 60%\" \"3 of 5 used\" value:=3/5\n  SectionLabel \"Billing\" \"choose a cycle\"\n  Segments =cycle options:[\"Monthly\",\"Annual\"] -> annual=result==\"Annual\"\n  if annual\n    Details rows:=[[\"Yearly price\",\"$120\"],[\"Per month\",\"$10.00\"],[\"You save\",\"$24 a year (16.7%)\"]]\n    Callout \"Save $24 a year\" \"Annual billing costs $10 a month instead of $12, which is 16.7% less.\" tone:good icon:\"savings\"\n  Row gap:10\n    ActionButton \"Manage plan\" tone:primary -> emit manage\n    ActionButton \"Cancel renewal\" tone:danger -> emit cancel","usage":{"input_tokens":9071,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":424,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":1223,"totalMs":3709}}
+{"tMs":1223,"delta":"ChatCard \""}
+{"tMs":1553,"delta":"Pro plan\" \""}
+{"tMs":1553,"delta":"Renews in"}
+{"tMs":1553,"delta":" 3 days,"}
+{"tMs":1553,"delta":" on Nov 18\" ic"}
+{"tMs":1553,"delta":"on:\"work"}
+{"tMs":1553,"delta":"space_"}
+{"tMs":1553,"delta":"premium\" status:\""}
+{"tMs":1554,"delta":"Active\" tone:acc"}
+{"tMs":1554,"delta":"ent w:390"}
+{"tMs":1554,"delta":"\n  state ann"}
+{"tMs":1577,"delta":"ual=false\n  "}
+{"tMs":1611,"delta":"Details rows:="}
+{"tMs":1891,"delta":"[[\"Plan\",\""}
+{"tMs":1891,"delta":"Pro\"],[\"Price"}
+{"tMs":1891,"delta":"\","}
+{"tMs":1891,"delta":"annual?"}
+{"tMs":1891,"delta":"\"$120 a year\":\""}
+{"tMs":1891,"delta":"$12 a month\"],"}
+{"tMs":1891,"delta":"[\"Next"}
+{"tMs":1891,"delta":" renewal\",\""}
+{"tMs":1911,"delta":"Nov 18\"]]"}
+{"tMs":1944,"delta":"\n  SectionLabel"}
+{"tMs":1978,"delta":" \"Usage\" \"this"}
+{"tMs":2012,"delta":" month\"\n  Progress"}
+{"tMs":2243,"delta":"Line \"Storage:"}
+{"tMs":2243,"delta":" 68%"}
+{"tMs":2243,"delta":"\" \"68 of 100 "}
+{"tMs":2243,"delta":"GB\" value:=68"}
+{"tMs":2243,"delta":"/100\n  Progress"}
+{"tMs":2243,"delta":"Line \"Seats: "}
+{"tMs":2247,"delta":"60%\" \"3 of "}
+{"tMs":2280,"delta":"5 used"}
+{"tMs":2314,"delta":"\" value:=3/5"}
+{"tMs":2347,"delta":"\n  SectionLabel \""}
+{"tMs":2380,"delta":"Billing\" \"cho"}
+{"tMs":2413,"delta":"ose a"}
+{"tMs":2595,"delta":" cycle\"\n  Seg"}
+{"tMs":2595,"delta":"ments =c"}
+{"tMs":2595,"delta":"ycle options:[\"Month"}
+{"tMs":2595,"delta":"ly\",\"Annual\"] -"}
+{"tMs":2595,"delta":"> ann"}
+{"tMs":2612,"delta":"ual=result"}
+{"tMs":2646,"delta":"="}
+{"tMs":2679,"delta":"=\"Annual\"\n  if"}
+{"tMs":2713,"delta":" annual\n    Details rows"}
+{"tMs":2746,"delta":":=[[\"Yearly"}
+{"tMs":2780,"delta":" price\",\"$120\"],[\""}
+{"tMs":2813,"delta":"Per month\",\"$10."}
+{"tMs":2994,"delta":"00\"],[\"You save\",\"$"}
+{"tMs":2994,"delta":"24 a"}
+{"tMs":2994,"delta":" year (16"}
+{"tMs":2995,"delta":"."}
+{"tMs":2995,"delta":"7%)\"]]\n    "}
+{"tMs":3012,"delta":"Callout \"Save"}
+{"tMs":3046,"delta":" $24 a year\" \""}
+{"tMs":3080,"delta":"Ann"}
+{"tMs":3113,"delta":"ual billing costs $10 "}
+{"tMs":3146,"delta":"a month inst"}
+{"tMs":3179,"delta":"ead of $12, which"}
+{"tMs":3213,"delta":" is 16.7% less.\""}
+{"tMs":3698,"delta":" tone:good ic"}
+{"tMs":3698,"delta":"on:\"sav"}
+{"tMs":3698,"delta":"ings\"\n  Row gap"}
+{"tMs":3698,"delta":":10\n    ActionBut"}
+{"tMs":3698,"delta":"ton \"Manage plan\""}
+{"tMs":3698,"delta":" tone:primary -> em"}
+{"tMs":3698,"delta":"it manage"}
+{"tMs":3698,"delta":"\n    ActionButton \""}
+{"tMs":3698,"delta":"Cancel renewal\" t"}
+{"tMs":3698,"delta":"one:danger -> emit"}
+{"tMs":3698,"delta":" cancel"}

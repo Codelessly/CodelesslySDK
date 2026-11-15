@@ -1,0 +1,219 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Package tracking",
+    "subtitle": "DHL Express · JD014600003SE",
+    "icon": "local_shipping",
+    "status": "In transit",
+    "tone": "accent"
+   },
+   "children": [
+    "Details1",
+    "SectionLabel1",
+    "Steps1",
+    "SectionLabel2",
+    "InputField1",
+    "ActionButton1",
+    "Callout1"
+   ]
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Item",
+      "Nikon Z fc camera body"
+     ],
+     [
+      "Carrier",
+      "DHL Express"
+     ],
+     [
+      "Tracking number",
+      "JD014600003SE"
+     ],
+     [
+      "Estimated delivery",
+      "Tue 18 Nov"
+     ],
+     [
+      "Days away",
+      "3 days"
+     ]
+    ]
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Shipment progress",
+    "note": "Stage 3 of 5"
+   }
+  },
+  "Steps1": {
+   "type": "Steps",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "steps": [
+     "Label created · Nov 12",
+     "Picked up · Nov 13",
+     "In transit · Nov 14 (current)",
+     "Out for delivery",
+     "Delivered"
+    ],
+    "current": 3
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Delivery instructions"
+   }
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Instructions",
+    "placeholder": "e.g. Leave with the neighbour at no. 4",
+    "value": "instructions",
+    "lines": 3
+   }
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Save",
+    "tone": "primary"
+   },
+   "bind": {
+    "props.enabled": "${= trim(instructions)!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "saved",
+       "value": "${= trim(instructions)}"
+      }
+     ]
+    }
+   ]
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Saved instructions",
+    "tone": "good",
+    "icon": "check_circle"
+   },
+   "bind": {
+    "props.message": "${saved}",
+    "visible": "${= saved!=\"\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "instructions",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "saved",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

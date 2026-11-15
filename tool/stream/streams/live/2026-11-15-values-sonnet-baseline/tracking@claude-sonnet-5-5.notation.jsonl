@@ -1,0 +1,60 @@
+{"meta":{"ui":"tracking","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Where is my package? Today is Sat 15 Nov. Show a tracking card: the item (Nikon Z fc camera body), carrier DHL Express, tracking number JD014600003SE, estimated delivery Tue 18 Nov and how many days away that is, and the shipment's five stages as a timeline with the current one marked: Label created (Nov 12), Picked up (Nov 13), In transit (Nov 14, current), Out for delivery, Delivered. Say which stage it is at (\"Stage 3 of 5\"). And a field where I can type delivery instructions and a Save button; once saved the card shows them back to me as saved.","text":"ChatCard \"Package tracking\" \"DHL Express · JD014600003SE\" icon:\"local_shipping\" status:\"In transit\" tone:accent w:390\n  state instructions=\"\"\n  state saved=\"\"\n  Details rows:[[\"Item\",\"Nikon Z fc camera body\"],[\"Carrier\",\"DHL Express\"],[\"Tracking number\",\"JD014600003SE\"],[\"Estimated delivery\",\"Tue 18 Nov\"],[\"Days away\",\"3 days\"]]\n  SectionLabel \"Shipment progress\" \"Stage 3 of 5\"\n  Steps steps:[\"Label created · Nov 12\",\"Picked up · Nov 13\",\"In transit · Nov 14 (current)\",\"Out for delivery\",\"Delivered\"] current:3\n  SectionLabel \"Delivery instructions\"\n  InputField \"Instructions\" \"e.g. Leave with the neighbour at no. 4\" =instructions lines:3\n  ActionButton \"Save\" tone:primary enabled:=trim(instructions)!=\"\" -> saved=trim(instructions)\n  if saved!=\"\"\n    Callout \"Saved instructions\" \"{saved}\" tone:good icon:\"check_circle\"","usage":{"input_tokens":9131,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":380,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":833,"totalMs":2901}}
+{"tMs":833,"delta":"ChatCard \""}
+{"tMs":1162,"delta":"Package tracking"}
+{"tMs":1162,"delta":"\" \"DHL Express ·"}
+{"tMs":1162,"delta":" JD014600003SE\""}
+{"tMs":1162,"delta":" icon:\"local_ship"}
+{"tMs":1162,"delta":"ping\" status:\"In transit"}
+{"tMs":1162,"delta":"\" tone:acc"}
+{"tMs":1162,"delta":"ent w:390"}
+{"tMs":1162,"delta":"\n  state instructions=\"\""}
+{"tMs":1162,"delta":"\n  state saved=\"\""}
+{"tMs":1162,"delta":"\n  Details"}
+{"tMs":1196,"delta":" rows:[[\"Item"}
+{"tMs":1234,"delta":"\",\"Nikon Z f"}
+{"tMs":1493,"delta":"c camera body\"],[\""}
+{"tMs":1493,"delta":"Carrier\",\"DHL"}
+{"tMs":1493,"delta":" Express\"],[\"Tracking"}
+{"tMs":1493,"delta":" number\",\"JD014600003S"}
+{"tMs":1493,"delta":"E\"],[\"Estimated"}
+{"tMs":1493,"delta":" delivery\",\"Tue "}
+{"tMs":1493,"delta":"18 Nov\"],"}
+{"tMs":1499,"delta":"[\"Days away\",\"3 days"}
+{"tMs":1532,"delta":"\"]]\n  Section"}
+{"tMs":1565,"delta":"Label \"Sh"}
+{"tMs":1598,"delta":"ipment prog"}
+{"tMs":1631,"delta":"ress\" \"Stage 3"}
+{"tMs":1822,"delta":" of 5\"\n  "}
+{"tMs":1822,"delta":"Steps steps:[\"Label"}
+{"tMs":1822,"delta":" created ·"}
+{"tMs":1822,"delta":" Nov 12\",\"Pic"}
+{"tMs":1822,"delta":"ked up · Nov 13"}
+{"tMs":1831,"delta":"\",\"In transit · Nov"}
+{"tMs":1865,"delta":" 14 (current)\",\""}
+{"tMs":1899,"delta":"Out for delivery\",\"Del"}
+{"tMs":1932,"delta":"ivered\"] current:3"}
+{"tMs":1965,"delta":"\n  SectionLabel \""}
+{"tMs":1999,"delta":"Delivery instructions\""}
+{"tMs":2032,"delta":"\n  InputField \"Inst"}
+{"tMs":2156,"delta":"ructions\" \"e"}
+{"tMs":2156,"delta":".g. Leave with"}
+{"tMs":2156,"delta":" the"}
+{"tMs":2164,"delta":" neighbour at"}
+{"tMs":2197,"delta":" no"}
+{"tMs":2230,"delta":". 4"}
+{"tMs":2265,"delta":"\" =instructions lines:"}
+{"tMs":2297,"delta":"3\n  ActionButton"}
+{"tMs":2330,"delta":" \"Save\" tone:prim"}
+{"tMs":2364,"delta":"ary enabled:="}
+{"tMs":2397,"delta":"tr"}
+{"tMs":2442,"delta":"im(instructions)!=\""}
+{"tMs":2896,"delta":"\" -> sa"}
+{"tMs":2896,"delta":"ved=tr"}
+{"tMs":2896,"delta":"im(instructions)"}
+{"tMs":2896,"delta":"\n  if saved!=\"\""}
+{"tMs":2896,"delta":"\n    Callout \"Sa"}
+{"tMs":2896,"delta":"ved inst"}
+{"tMs":2896,"delta":"ructions\" \"{"}
+{"tMs":2896,"delta":"saved}\" tone:good"}
+{"tMs":2896,"delta":" ic"}
+{"tMs":2896,"delta":"on:\"check_circle\""}

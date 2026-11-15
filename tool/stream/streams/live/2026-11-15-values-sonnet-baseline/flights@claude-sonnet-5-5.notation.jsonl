@@ -1,0 +1,70 @@
+{"meta":{"ui":"flights","model":"claude-sonnet-5-5","form":"notation","designSystem":"cards","turn":"generate","prompt":"Show me the flights from London to Lisbon this Friday (20 Nov) as an inline card I can pick from. There are two of us flying, 2 adults, and the prices are per person. Three direct options: TAP Air Portugal 07:15 to 09:50, 2h 35m, £128, tagged Best time; easyJet 11:40 to 14:20, 2h 40m, £84, tagged Cheapest; British Airways 18:05 to 20:40, 2h 35m, £156. The first one is selected to start, the total is for both of us and follows my choice, and the confirm button tells you which flight I chose.","text":"ChatCard \"London to Lisbon\" \"Fri 20 Nov · 2 adults · prices per person\" icon:\"flight_takeoff\" status:\"Direct\" w:390\n  state pick=\"tap\"\n  state flights=[{\"id\":\"tap\",\"name\":\"TAP Air Portugal\",\"depart\":\"07:15\",\"arrive\":\"09:50\",\"duration\":\"2h 35m\",\"price\":128,\"tag\":\"Best time\"},{\"id\":\"ezy\",\"name\":\"easyJet\",\"depart\":\"11:40\",\"arrive\":\"14:20\",\"duration\":\"2h 40m\",\"price\":84,\"tag\":\"Cheapest\"},{\"id\":\"ba\",\"name\":\"British Airways\",\"depart\":\"18:05\",\"arrive\":\"20:40\",\"duration\":\"2h 35m\",\"price\":156,\"tag\":\"\"}]\n  SectionLabel \"Direct flights\" \"per person\"\n  each f in flights\n    FlightOption \"{f.name}\" depart:\"{f.depart}\" arrive:\"{f.arrive}\" origin:\"LHR\" destination:\"LIS\" duration:\"{f.duration}\" stops:\"Direct\" price:\"£{f.price}\" tag:\"{f.tag}\" selected:=pick==f.id -> pick=f.id\n  TotalBar \"Total for 2 adults\" \"£{find(flights,x=>x.id==pick).price} per person\" amount:=\"£\"+(find(flights,x=>x.id==pick).price*2) cta:\"Confirm\" -> emit confirm find(flights,x=>x.id==pick).name","usage":{"input_tokens":9123,"cache_creation_input_tokens":0,"cache_read_input_tokens":0,"cache_creation":{"ephemeral_5m_input_tokens":0,"ephemeral_1h_input_tokens":0},"output_tokens":489,"service_tier":"standard","inference_geo":"global","speed":"standard","output_tokens_details":{"thinking_tokens":0}},"ttftMs":716,"totalMs":3038}}
+{"tMs":716,"delta":"ChatCard \"London"}
+{"tMs":1032,"delta":" to Lisbon\" \""}
+{"tMs":1032,"delta":"Fri 20 N"}
+{"tMs":1032,"delta":"ov · 2 adults ·"}
+{"tMs":1032,"delta":" pr"}
+{"tMs":1032,"delta":"ices per person\" icon:\""}
+{"tMs":1032,"delta":"flight_tak"}
+{"tMs":1032,"delta":"eoff\" status:\""}
+{"tMs":1032,"delta":"Direct\" w:390"}
+{"tMs":1032,"delta":"\n  state pick=\""}
+{"tMs":1038,"delta":"tap\"\n  state flights"}
+{"tMs":1071,"delta":"=[{\"id\":\"t"}
+{"tMs":1104,"delta":"ap\",\"name\":\"TAP"}
+{"tMs":1364,"delta":" Air Portugal\",\"dep"}
+{"tMs":1364,"delta":"art\":\"07:15\",\"ar"}
+{"tMs":1364,"delta":"rive\":\"09:50\",\""}
+{"tMs":1364,"delta":"duration\":\"2h 35"}
+{"tMs":1364,"delta":"m\",\"price\":128,\"t"}
+{"tMs":1364,"delta":"ag\":\"Best time\"},"}
+{"tMs":1364,"delta":"{\"id\":\"ez"}
+{"tMs":1372,"delta":"y"}
+{"tMs":1410,"delta":"\",\"name\":\"easyJet"}
+{"tMs":1439,"delta":"\",\"depart\":\"11:40"}
+{"tMs":1473,"delta":"\",\"arrive\":\"14:"}
+{"tMs":1506,"delta":"20\",\"duration\":\"2h"}
+{"tMs":1695,"delta":" 40m\",\"price\":84,"}
+{"tMs":1695,"delta":"\"tag\":\"Che"}
+{"tMs":1695,"delta":"apest\"},{\"id\":"}
+{"tMs":1695,"delta":"\"ba\",\"name\":\"British"}
+{"tMs":1695,"delta":" Airways\",\"depart\":\""}
+{"tMs":1706,"delta":"18:05\",\"arrive\":"}
+{"tMs":1742,"delta":"\"20:40\",\"duration\":"}
+{"tMs":1773,"delta":"\"2h 35m\",\"price"}
+{"tMs":1806,"delta":"\":156,\"tag\":\"\""}
+{"tMs":1840,"delta":"}]\n  SectionL"}
+{"tMs":1880,"delta":"abel \"Dire"}
+{"tMs":1906,"delta":"ct flights\" \"per"}
+{"tMs":2027,"delta":" person\"\n  each f in fl"}
+{"tMs":2027,"delta":"ights\n    FlightOption"}
+{"tMs":2027,"delta":" \"{"}
+{"tMs":2042,"delta":"f.name}\" depart:"}
+{"tMs":2073,"delta":"\"{f.depart}\""}
+{"tMs":2108,"delta":" arrive:\"{f."}
+{"tMs":2140,"delta":"arrive}\" origin:"}
+{"tMs":2174,"delta":"\"LHR\" destination:"}
+{"tMs":2206,"delta":"\"LIS\" duration:"}
+{"tMs":2240,"delta":"\"{f.duration}\""}
+{"tMs":2274,"delta":" stops:\"Direct\""}
+{"tMs":2307,"delta":" price:\""}
+{"tMs":2365,"delta":"£{f.price}\" t"}
+{"tMs":2373,"delta":"ag:\"{f.tag"}
+{"tMs":2407,"delta":"}\" selected:=pick"}
+{"tMs":2440,"delta":"==f.id -> p"}
+{"tMs":2473,"delta":"ick=f.id\n  T"}
+{"tMs":2507,"delta":"otalBar \"Total for"}
+{"tMs":2540,"delta":" 2 adults\" \"£"}
+{"tMs":2573,"delta":"{find(flights,x"}
+{"tMs":2606,"delta":"=>x.id==pick"}
+{"tMs":2639,"delta":").price}"}
+{"tMs":2674,"delta":" per person\" amount:=\"£"}
+{"tMs":2706,"delta":"\"+"}
+{"tMs":3032,"delta":"("}
+{"tMs":3032,"delta":"find(flights,x=>"}
+{"tMs":3032,"delta":"x.id==pick).price"}
+{"tMs":3032,"delta":"*2) cta:\""}
+{"tMs":3032,"delta":"Confirm\" -> emit"}
+{"tMs":3032,"delta":" confirm find(flights,"}
+{"tMs":3032,"delta":"x=>x.id==p"}
+{"tMs":3032,"delta":"ick).name"}

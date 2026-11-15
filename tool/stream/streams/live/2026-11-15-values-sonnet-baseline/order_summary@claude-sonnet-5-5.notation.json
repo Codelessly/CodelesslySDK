@@ -1,0 +1,359 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Your grocery order",
+    "icon": "shopping_basket",
+    "status": "Review",
+    "tone": "accent"
+   },
+   "bind": {
+    "props.subtitle": "${= count(items,i=>i.qty>0)} items"
+   },
+   "children": [
+    "SectionLabel1",
+    "listView1",
+    "InputField1",
+    "Details1",
+    "TotalBar1",
+    "ActionButton1",
+    "Receipt1",
+    "Receipt2"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Items"
+   },
+   "bind": {
+    "props.note": "${= sum(items,i=>i.qty)} total units",
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${items}",
+    "visible": "${= decision==\"\"}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "CartLine1"
+   ]
+  },
+  "CartLine1": {
+   "type": "CartLine",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.name}",
+    "props.detail": "${item.detail}",
+    "props.price": "${= money(item.price,\"$\",2)}",
+    "props.qty": "${item.qty}",
+    "props.kind": "${item.kind}",
+    "props.tone": "${item.tone}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "items",
+       "value": "${= removeWhere(updateWhere(items,x=>x.id==item.id,x=>with(x,\"qty\",result)),x=>x.qty<=0)}"
+      }
+     ]
+    }
+   ]
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Promo code",
+    "placeholder": "Try SAVE10",
+    "value": "code"
+   },
+   "bind": {
+    "props.success": "${= upper(trim(code))==\"SAVE10\"?\"SAVE10 applied: 10% off\":\"\"}",
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Subtotal\",money(sum(items,i=>i.price*i.qty),\"$\",2)],[\"Promo\",upper(trim(code))==\"SAVE10\"?\"-\"+money(sum(items,i=>i.price*i.qty)*0.1,\"$\",2):\"$0.00\"],[\"Delivery\",\"$4.99\"]]}",
+    "visible": "${= decision==\"\"}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total",
+    "cta": "Confirm"
+   },
+   "bind": {
+    "props.note": "${= sum(items,i=>i.qty)} units, delivery included",
+    "props.amount": "${= money(sum(items,i=>i.price*i.qty)*(upper(trim(code))==\"SAVE10\"?0.9:1)+4.99,\"$\",2)}",
+    "props.enabled": "${= length(items)>0}",
+    "visible": "${= decision==\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "confirmed"
+      },
+      {
+       "type": "componentEvent",
+       "event": "confirm"
+      }
+     ]
+    }
+   ]
+  },
+  "ActionButton1": {
+   "type": "ActionButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 46.0
+   },
+   "props": {
+    "label": "Cancel",
+    "tone": "quiet"
+   },
+   "bind": {
+    "visible": "${= decision==\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "decision",
+       "value": "cancelled"
+      },
+      {
+       "type": "componentEvent",
+       "event": "cancel"
+      }
+     ]
+    }
+   ]
+  },
+  "Receipt1": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order confirmed",
+    "message": "Your groceries are on their way.",
+    "tone": "good"
+   },
+   "bind": {
+    "visible": "${= decision==\"confirmed\"}"
+   }
+  },
+  "Receipt2": {
+   "type": "Receipt",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Order cancelled",
+    "message": "Nothing was placed.",
+    "tone": "neutral"
+   },
+   "bind": {
+    "visible": "${= decision==\"cancelled\"}"
+   }
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "items",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Bananas",
+      "detail": "1 kg",
+      "price": 2.5,
+      "qty": 1,
+      "kind": "banana",
+      "tone": "sand"
+     },
+     {
+      "id": 2,
+      "name": "Whole milk",
+      "detail": "2 L",
+      "price": 3.2,
+      "qty": 2,
+      "kind": "milk",
+      "tone": "sky"
+     },
+     {
+      "id": 3,
+      "name": "Sourdough loaf",
+      "detail": "Fresh baked",
+      "price": 4.5,
+      "qty": 1,
+      "kind": "bread",
+      "tone": "sand"
+     },
+     {
+      "id": 4,
+      "name": "Free-range eggs",
+      "detail": "Dozen",
+      "price": 5.0,
+      "qty": 1,
+      "kind": "eggs",
+      "tone": "rose"
+     },
+     {
+      "id": 5,
+      "name": "Cheddar",
+      "detail": "Mature",
+      "price": 7.0,
+      "qty": 1,
+      "kind": "cheese",
+      "tone": "sand"
+     }
+    ]
+   },
+   {
+    "name": "code",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "decision",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

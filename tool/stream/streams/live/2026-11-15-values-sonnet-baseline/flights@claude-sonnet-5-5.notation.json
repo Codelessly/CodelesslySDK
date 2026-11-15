@@ -1,0 +1,216 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "London to Lisbon",
+    "subtitle": "Fri 20 Nov · 2 adults · prices per person",
+    "icon": "flight_takeoff",
+    "status": "Direct"
+   },
+   "children": [
+    "SectionLabel1",
+    "listView1",
+    "TotalBar1"
+   ]
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Direct flights",
+    "note": "per person"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${flights}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "FlightOption1"
+   ]
+  },
+  "FlightOption1": {
+   "type": "FlightOption",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "origin": "LHR",
+    "destination": "LIS",
+    "stops": "Direct"
+   },
+   "bind": {
+    "props.name": "${item.name}",
+    "props.depart": "${item.depart}",
+    "props.arrive": "${item.arrive}",
+    "props.duration": "${item.duration}",
+    "props.price": "£${item.price}",
+    "props.tag": "${item.tag}",
+    "props.selected": "${= pick==item.id}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "pick",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Total for 2 adults",
+    "cta": "Confirm"
+   },
+   "bind": {
+    "props.note": "£${= find(flights,x=>x.id==pick).price} per person",
+    "props.amount": "${= \"£\"+(find(flights,x=>x.id==pick).price*2)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "confirm",
+       "value": "${= find(flights,x=>x.id==pick).name}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "pick",
+    "type": "text",
+    "value": "tap"
+   },
+   {
+    "name": "flights",
+    "type": "list",
+    "value": [
+     {
+      "id": "tap",
+      "name": "TAP Air Portugal",
+      "depart": "07:15",
+      "arrive": "09:50",
+      "duration": "2h 35m",
+      "price": 128,
+      "tag": "Best time"
+     },
+     {
+      "id": "ezy",
+      "name": "easyJet",
+      "depart": "11:40",
+      "arrive": "14:20",
+      "duration": "2h 40m",
+      "price": 84,
+      "tag": "Cheapest"
+     },
+     {
+      "id": "ba",
+      "name": "British Airways",
+      "depart": "18:05",
+      "arrive": "20:40",
+      "duration": "2h 35m",
+      "price": 156,
+      "tag": ""
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,459 @@
+{
+ "schema": 3,
+ "roots": [
+  "screen"
+ ],
+ "nodes": {
+  "screen": {
+   "type": "canvas",
+   "slots": {
+    "body": "ChatCard1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ]
+   }
+  },
+  "ChatCard1": {
+   "type": "ChatCard",
+   "layout": {
+    "width": 390,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Invoices",
+    "subtitle": "12 found",
+    "icon": "receipt_long",
+    "status": "Open",
+    "tone": "accent"
+   },
+   "children": [
+    "InputField1",
+    "Segments1",
+    "WideScroll1",
+    "Pager1",
+    "TotalBar1"
+   ]
+  },
+  "InputField1": {
+   "type": "InputField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Search customer",
+    "placeholder": "Type a name",
+    "value": "q",
+    "icon": "search_rounded"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "status",
+    "options": [
+     "All",
+     "Paid",
+     "Due",
+     "Overdue"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onChanged"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "WideScroll1": {
+   "type": "WideScroll",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "width": 520
+   },
+   "children": [
+    "TableHeader1",
+    "listView1"
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "#",
+     "Customer",
+     "Date",
+     "Amount",
+     "Status"
+    ],
+    "keys": [
+     "num",
+     "cust",
+     "d",
+     "amt",
+     "st"
+    ],
+    "selectable": true
+   },
+   "bind": {
+    "props.desc": "${desc}",
+    "props.checked": "${= length(picked)>0 && all(take(slice(desc?sortByDesc(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]):sortBy(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]),page*5,page*5+5),5),r=>contains(picked,r.id))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onToggleAll"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= all(slice(desc?sortByDesc(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]):sortBy(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]),page*5,page*5+5),r=>contains(picked,r.id))?[]:map(slice(desc?sortByDesc(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]):sortBy(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]),page*5,page*5+5),r=>r.id)}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${= slice(desc?sortByDesc(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]):sortBy(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))),r=>r[sort]),page*5,page*5+5)}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "selectable": true
+   },
+   "bind": {
+    "props.cells": "${= [item.num,item.cust,item.date,money(item.amt,\"$\",0)]}",
+    "props.badge": "${item.st}",
+    "props.checked": "${= contains(picked,item.id)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= contains(picked,item.id)?without(picked,item.id):append(picked,item.id)}"
+      }
+     ]
+    }
+   ]
+  },
+  "Pager1": {
+   "type": "Pager",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Page",
+    "value": "page"
+   },
+   "bind": {
+    "props.count": "${= max(1,ceil(length(filter(rows,r=>(status==\"All\"||r.st==status)&&contains(lower(r.cust),lower(q))))/5))}"
+   }
+  },
+  "TotalBar1": {
+   "type": "TotalBar",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "note": "Total of ticked invoices",
+    "cta": "Send reminders",
+    "icon": "send"
+   },
+   "bind": {
+    "props.label": "${= length(picked)} selected",
+    "props.amount": "${= money(sum(filter(rows,r=>contains(picked,r.id)),r=>r.amt),\"$\",0)}",
+    "visible": "${= length(picked)>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "remind",
+       "value": "${picked}"
+      },
+      {
+       "type": "showToast",
+       "message": "Reminders sent"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "screen": [
+   {
+    "name": "rows",
+    "type": "list",
+    "value": [
+     {
+      "id": 1001,
+      "num": "#1001",
+      "cust": "Acme Corp",
+      "date": "May 02",
+      "d": 2,
+      "amt": 1200,
+      "st": "Paid"
+     },
+     {
+      "id": 1002,
+      "num": "#1002",
+      "cust": "Globex",
+      "date": "May 05",
+      "d": 5,
+      "amt": 860,
+      "st": "Due"
+     },
+     {
+      "id": 1003,
+      "num": "#1003",
+      "cust": "Initech",
+      "date": "May 09",
+      "d": 9,
+      "amt": 430,
+      "st": "Overdue"
+     },
+     {
+      "id": 1004,
+      "num": "#1004",
+      "cust": "Umbrella",
+      "date": "May 12",
+      "d": 12,
+      "amt": 2250,
+      "st": "Paid"
+     },
+     {
+      "id": 1005,
+      "num": "#1005",
+      "cust": "Hooli",
+      "date": "May 15",
+      "d": 15,
+      "amt": 975,
+      "st": "Due"
+     },
+     {
+      "id": 1006,
+      "num": "#1006",
+      "cust": "Stark Ltd",
+      "date": "May 16",
+      "d": 16,
+      "amt": 3100,
+      "st": "Overdue"
+     },
+     {
+      "id": 1007,
+      "num": "#1007",
+      "cust": "Wayne Co",
+      "date": "May 18",
+      "d": 18,
+      "amt": 640,
+      "st": "Paid"
+     },
+     {
+      "id": 1008,
+      "num": "#1008",
+      "cust": "Wonka",
+      "date": "May 20",
+      "d": 20,
+      "amt": 1480,
+      "st": "Due"
+     },
+     {
+      "id": 1009,
+      "num": "#1009",
+      "cust": "Soylent",
+      "date": "May 22",
+      "d": 22,
+      "amt": 300,
+      "st": "Overdue"
+     },
+     {
+      "id": 1010,
+      "num": "#1010",
+      "cust": "Cyberdyne",
+      "date": "May 24",
+      "d": 24,
+      "amt": 5200,
+      "st": "Paid"
+     },
+     {
+      "id": 1011,
+      "num": "#1011",
+      "cust": "Tyrell",
+      "date": "May 27",
+      "d": 27,
+      "amt": 760,
+      "st": "Due"
+     },
+     {
+      "id": 1012,
+      "num": "#1012",
+      "cust": "Aperture",
+      "date": "May 29",
+      "d": 29,
+      "amt": 1890,
+      "st": "Paid"
+     }
+    ]
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "d"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "status",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "picked",
+    "type": "list",
+    "value": []
+   }
+  ]
+ }
+}
