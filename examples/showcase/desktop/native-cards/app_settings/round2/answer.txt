@@ -1,0 +1,801 @@
+Five weakest things:
+
+1. **Mismatched control heights.** The text inputs render about 28 px tall, while the buttons are 36, the dropdown about 28 and the bio 64. The form has no single control height, and the `plume.app/` prefix leaves a double gap before the handle.
+2. **Two "Public profile" headings.** The section title and the visibility switch carry the same name, so the hierarchy reads twice.
+3. **Notifications leads to a dead end.** The Notifications item in the left list opens an empty placeholder, while the five switches live elsewhere on the Profile page.
+4. **Save changes disappears when disabled.** Its pale fill barely shows against the white bar, so the one action of the screen looks missing rather than waiting.
+5. **Section titles sit off the cards.** The left titles hang about 12 px below the top of each card instead of lining up with its first row. The avatar's glossy highlight is also more toy than tool.
+
+```json
+{
+  "schema": 3,
+  "id": "PlumeSettings",
+  "roots": ["settings"],
+  "nodes": {
+    "settings": {
+      "type": "canvas",
+      "name": "Settings",
+      "slots": {"body": "shell"},
+      "layout": {"width": 1280, "height": 800},
+      "decoration": {"fills": [{"color": "page"}]}
+    },
+    "shell": {
+      "type": "row",
+      "children": ["side", "main"],
+      "layout": {"width": {"fill": 1280}, "height": {"fill": 800}},
+      "props": {"crossAxisAlignment": "stretch"}
+    },
+
+    "side": {
+      "type": "column",
+      "children": ["brand", "sideEyebrow", "navList", "sideSpacer", "me"],
+      "layout": {"width": 248, "height": {"fill": 800}, "padding": [14, 20, 14, 14]},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 2},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeSides": "right"},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"width": 76, "padding": [12, 20, 12, 14]}}}]
+    },
+    "brand": {
+      "type": "row",
+      "children": ["logo", "brandName"],
+      "layout": {"width": {"fill": 220}, "height": {"hug": 30}, "padding": [8, 0, 8, 20]},
+      "props": {"spacing": 10, "crossAxisAlignment": "center"},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [0, 0, 0, 20]}, "props": {"mainAxisAlignment": "center"}}}]
+    },
+    "logo": {
+      "type": "row",
+      "children": ["logoIcon"],
+      "layout": {"width": 30, "height": 30},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "ink"}], "radius": 9}
+    },
+    "logoIcon": {
+      "type": "icon",
+      "layout": {"width": 17, "height": 17},
+      "props": {"icon": "history_edu_rounded", "size": 17, "color": "card"}
+    },
+    "brandName": {
+      "type": "text",
+      "layout": {"width": {"hug": 60}, "height": {"hug": 22}},
+      "props": {"text": "Plume", "style": {"from": "title", "fontSize": 18, "color": "ink"}},
+      "media": [{"maxWidth": 900, "patch": {"visible": false}}]
+    },
+    "sideEyebrow": {
+      "type": "text",
+      "layout": {"width": {"fill": 220}, "height": {"hug": 14}, "padding": [10, 4, 10, 8]},
+      "props": {"text": "SETTINGS", "style": {"from": "eyebrow", "color": "inkFaint"}},
+      "media": [{"maxWidth": 900, "patch": {"visible": false}}]
+    },
+    "navList": {
+      "type": "listView",
+      "children": ["navItem"],
+      "layout": {"width": {"fill": 220}, "height": {"hug": 230}},
+      "props": {"scrollable": false, "spacing": 2},
+      "bind": {"data": "${sections}"}
+    },
+    "navItem": {
+      "type": "row",
+      "children": ["navIcon", "navLabel", "navCount"],
+      "layout": {"width": {"fill": 220}, "height": 36, "padding": [10, 0, 10, 0]},
+      "props": {"spacing": 10, "crossAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#00000000"}], "strokeWidth": 1.2, "radius": 9},
+      "inkWell": {"hoverColor": "hoverOverlay"},
+      "tooltip": "${item.name}",
+      "bind": {
+        "decoration.fills[0].color": "${= section == item.name ? theme.colors.tile : '#00000000'}",
+        "decoration.strokes[0].color": "${= section == item.name ? theme.colors.accentLine : '#00000000'}"
+      },
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "section", "value": "${item.name}"}
+      ]}],
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [0, 0, 0, 0]}, "props": {"mainAxisAlignment": "center"}}}]
+    },
+    "navIcon": {
+      "type": "icon",
+      "layout": {"width": 18, "height": 18},
+      "props": {"icon": "person_outline_rounded", "size": 18, "color": "inkSoft"},
+      "bind": {
+        "props.icon": "${item.icon}",
+        "props.color": "${= section == item.name ? theme.colors.accent : theme.colors.inkSoft}"
+      }
+    },
+    "navLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 140}, "height": {"hug": 16}},
+      "props": {"text": "${item.name}", "maxLines": 1, "style": {"from": "controlMedium", "color": "ink"}},
+      "bind": {"props.style.fontWeight": "${= section == item.name ? 600 : 500}"},
+      "media": [{"maxWidth": 900, "patch": {"visible": false}}]
+    },
+    "navCount": {
+      "type": "text",
+      "layout": {"width": {"hug": 24}, "height": {"hug": 14}},
+      "props": {"text": "${= notifOn + '/5'}", "style": {"fontFamily": "Inter", "fontSize": 11.5, "fontWeight": 500, "height": 1.2, "color": "inkFaint"}},
+      "bind": {"visible": "${= item.name == 'Notifications'}"},
+      "media": [{"maxWidth": 900, "patch": {"visible": false, "bind": {"visible": null}}}]
+    },
+    "sideSpacer": {"type": "spacer"},
+    "me": {
+      "type": "row",
+      "children": ["meAvatar", "meText"],
+      "layout": {"width": {"fill": 220}, "height": {"hug": 44}, "padding": [8, 14, 8, 2]},
+      "props": {"spacing": 10, "crossAxisAlignment": "center"},
+      "decoration": {"strokes": [{"color": "line"}], "strokeSides": "top"},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [0, 14, 0, 2]}, "props": {"mainAxisAlignment": "center"}}}]
+    },
+    "meAvatar": {
+      "type": "row",
+      "children": ["meInitials"],
+      "layout": {"width": 30, "height": 30},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "lilacMid"}], "shape": "circle"},
+      "bind": {"decoration.fills[0].color": "${= sAvatar == 0 ? theme.colors.lilacMid : sAvatar == 1 ? theme.colors.skyMid : sAvatar == 2 ? theme.colors.mintMid : theme.colors.sandMid}"}
+    },
+    "meInitials": {
+      "type": "text",
+      "layout": {"width": {"hug": 12}, "height": {"hug": 14}},
+      "props": {"text": "${= upper(substring(sName, 0, 1))}", "style": {"from": "chip", "fontSize": 12.5, "color": "ink"}}
+    },
+    "meText": {
+      "type": "column",
+      "children": ["meName", "meMail"],
+      "layout": {"width": {"fill": 160}, "height": {"hug": 34}},
+      "props": {"crossAxisAlignment": "start", "spacing": 1},
+      "media": [{"maxWidth": 900, "patch": {"visible": false}}]
+    },
+    "meName": {
+      "type": "text",
+      "layout": {"width": {"fill": 160}, "height": {"hug": 17}},
+      "props": {"text": "${sName}", "maxLines": 1, "overflow": "ellipsis", "style": {"from": "panelTitle", "fontSize": 13, "color": "ink"}}
+    },
+    "meMail": {
+      "type": "text",
+      "layout": {"width": {"fill": 160}, "height": {"hug": 16}},
+      "props": {"text": "maya@plume.app", "maxLines": 1, "overflow": "ellipsis", "style": {"from": "bodySecondary", "color": "inkFaint"}}
+    },
+
+    "main": {
+      "type": "column",
+      "children": ["scroll", "bar"],
+      "layout": {"width": {"fill": 1032}, "height": {"fill": 800}},
+      "props": {"crossAxisAlignment": "stretch"}
+    },
+    "scroll": {
+      "type": "column",
+      "children": ["rail"],
+      "layout": {"width": {"fill": 1032}, "height": {"fill": 736}, "padding": [40, 36, 40, 56]},
+      "props": {"scrollable": true, "crossAxisAlignment": "center"},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [24, 28, 24, 40]}}}]
+    },
+    "rail": {
+      "type": "column",
+      "children": ["head", "formView", "otherView"],
+      "layout": {"width": {"fill": 952}, "height": {"hug": 1200}, "constraints": {"maxWidth": 960}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 36}
+    },
+    "head": {
+      "type": "column",
+      "children": ["crumb", "title", "lead"],
+      "layout": {"width": {"fill": 952}, "height": {"hug": 80}},
+      "props": {"crossAxisAlignment": "start", "spacing": 6}
+    },
+    "crumb": {
+      "type": "text",
+      "layout": {"width": {"fill": 952}, "height": {"hug": 17}},
+      "props": {"text": "Settings  /  ${section}", "style": {"from": "meta", "color": "inkFaint"}}
+    },
+    "title": {
+      "type": "text",
+      "layout": {"width": {"fill": 952}, "height": {"hug": 32}},
+      "props": {"text": "${section}", "style": {"fontFamily": "Inter Display", "fontSize": 26, "fontWeight": 700, "height": 1.2, "letterSpacing": -0.5, "color": "ink"}}
+    },
+    "lead": {
+      "type": "text",
+      "layout": {"width": {"fill": 952}, "height": {"hug": 20}},
+      "props": {"text": "${current.lead}", "style": {"from": "lead", "color": "inkSoft"}}
+    },
+
+    "formView": {
+      "type": "column",
+      "children": ["secProfile", "secNotif", "secDanger"],
+      "layout": {"width": {"fill": 952}, "height": {"hug": 1000}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 40},
+      "bind": {"visible": "${= section == 'Profile' || section == 'Notifications'}"}
+    },
+
+    "secProfile": {
+      "type": "flex",
+      "children": ["infoProfile", "cardProfile"],
+      "layout": {"width": {"fill": 952}, "height": {"hug": 560}},
+      "props": {"direction": "horizontal", "spacing": 32, "crossAxisAlignment": "start"},
+      "bind": {"visible": "${= section == 'Profile'}"},
+      "media": [{"maxWidth": 1100, "patch": {"props": {"direction": "vertical", "spacing": 14}}}]
+    },
+    "infoProfile": {
+      "type": "column",
+      "children": ["infoProfileT", "infoProfileD"],
+      "layout": {"width": 240, "height": {"hug": 60}, "padding": [0, 24, 0, 0]},
+      "props": {"crossAxisAlignment": "start", "spacing": 4},
+      "media": [{"maxWidth": 1100, "patch": {"layout": {"width": {"fill": 640}, "padding": [0, 0, 0, 0]}}}]
+    },
+    "infoProfileT": {
+      "type": "text",
+      "layout": {"width": {"fill": 240}, "height": {"hug": 20}},
+      "props": {"text": "Identity", "style": {"from": "blockTitle", "color": "ink"}}
+    },
+    "infoProfileD": {
+      "type": "text",
+      "layout": {"width": {"fill": 240}, "height": {"hug": 36}},
+      "props": {"text": "Your name, handle and bio appear on published pieces and in shared drafts.", "style": {"from": "bodySecondary", "color": "inkSoft"}}
+    },
+    "cardProfile": {
+      "type": "column",
+      "children": ["avatarRow", "rule0", "nameRow", "bioGroup", "tzGroup", "rule1", "publicRow"],
+      "layout": {"width": {"fill": 680}, "height": {"hug": 560}, "padding": 24},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 20},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "radius": 12}
+    },
+    "avatarRow": {
+      "type": "row",
+      "children": ["avatar", "avatarText", "changeBtn"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 64}},
+      "props": {"spacing": 16, "crossAxisAlignment": "center"}
+    },
+    "avatar": {
+      "type": "row",
+      "children": ["avatarInitials"],
+      "layout": {"width": 64, "height": 64},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {
+        "shape": "circle",
+        "fills": [{"color": "lilacMid"}],
+        "strokes": [{"color": "line"}],
+        "strokeWidth": 1
+      },
+      "bind": {"decoration.fills[0].color": "${= avatar == 0 ? theme.colors.lilacMid : avatar == 1 ? theme.colors.skyMid : avatar == 2 ? theme.colors.mintMid : theme.colors.sandMid}"}
+    },
+    "avatarInitials": {
+      "type": "text",
+      "layout": {"width": {"hug": 24}, "height": {"hug": 28}},
+      "props": {"text": "${= upper(substring(name, 0, 1))}", "style": {"fontFamily": "Inter Display", "fontSize": 26, "fontWeight": 700, "height": 1.05, "color": "lilacInk"}},
+      "bind": {"props.style.color": "${= avatar == 0 ? theme.colors.lilacInk : avatar == 1 ? theme.colors.skyInk : avatar == 2 ? theme.colors.mintInk : theme.colors.sandInk}"}
+    },
+    "avatarText": {
+      "type": "column",
+      "children": ["avatarTitle", "avatarHint"],
+      "layout": {"width": {"fill": 400}, "height": {"hug": 40}},
+      "props": {"crossAxisAlignment": "start", "spacing": 2}
+    },
+    "avatarTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 400}, "height": {"hug": 19}},
+      "props": {"text": "Profile picture", "style": {"from": "rowTitle", "fontSize": 14, "color": "ink"}}
+    },
+    "avatarHint": {
+      "type": "text",
+      "layout": {"width": {"fill": 400}, "height": {"hug": 18}},
+      "props": {"text": "A monogram from your name. Change picks another ground.", "style": {"from": "bodySecondary", "color": "inkSoft"}}
+    },
+    "changeBtn": {
+      "type": "outlinedButton",
+      "layout": {"width": {"hug": 96}, "height": 36},
+      "props": {"label": "Change", "icon": "palette_outlined", "style": {"foregroundColor": "ink", "side": {"color": "lineStrong", "width": 1}, "textStyle": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "avatar", "value": "${= (avatar + 1) % 4}"}
+      ]}]
+    },
+    "rule0": {
+      "type": "box",
+      "layout": {"width": {"fill": 632}, "height": 1},
+      "decoration": {"fills": [{"color": "line"}]}
+    },
+    "nameRow": {
+      "type": "row",
+      "children": ["nameGroup", "userGroup"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 86}},
+      "props": {"spacing": 16, "crossAxisAlignment": "start"}
+    },
+    "nameGroup": {
+      "type": "column",
+      "children": ["nameLabel", "nameField", "nameHint"],
+      "layout": {"width": {"fill": 308}, "height": {"hug": 86}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 6}
+    },
+    "nameLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 308}, "height": {"hug": 15}},
+      "props": {"text": "Display name", "style": {"from": "fieldLabel", "color": "inkSoft"}}
+    },
+    "nameField": {
+      "type": "textField",
+      "layout": {"width": {"fill": 308}, "height": {"hug": 40}},
+      "props": {"initialValue": "Maya Alvarez", "style": {"from": "inputText", "color": "ink"}, "decoration": {"hintText": "Your name", "contentPadding": [12, 12, 12, 12]}},
+      "bind": {"props.initialValue": "${name}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "name", "value": "${result}"}]}]
+    },
+    "nameHint": {
+      "type": "text",
+      "layout": {"width": {"fill": 308}, "height": {"hug": 18}},
+      "props": {"text": "As it appears on bylines.", "style": {"from": "bodySecondary", "color": "inkFaint"}},
+      "bind": {
+        "props.text": "${= name == '' ? 'A display name is required.' : 'As it appears on bylines.'}",
+        "props.style.color": "${= name == '' ? theme.colors.bad : theme.colors.inkFaint}"
+      }
+    },
+    "userGroup": {
+      "type": "column",
+      "children": ["userLabel", "userField", "userHint"],
+      "layout": {"width": {"fill": 308}, "height": {"hug": 86}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 6}
+    },
+    "userLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 308}, "height": {"hug": 15}},
+      "props": {"text": "Username", "style": {"from": "fieldLabel", "color": "inkSoft"}}
+    },
+    "userField": {
+      "type": "textField",
+      "layout": {"width": {"fill": 308}, "height": {"hug": 40}},
+      "props": {"initialValue": "maya", "style": {"from": "inputText", "color": "ink"}, "decoration": {"hintText": "handle", "contentPadding": [12, 12, 12, 12]}},
+      "bind": {"props.initialValue": "${username}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "username", "value": "${result}"}]}]
+    },
+    "userHint": {
+      "type": "text",
+      "layout": {"width": {"fill": 308}, "height": {"hug": 18}},
+      "props": {"text": "plume.app/${username}", "maxLines": 1, "overflow": "ellipsis", "style": {"fontFamily": "JetBrains Mono", "fontSize": 11.5, "fontWeight": 400, "height": 1.5, "color": "inkFaint"}}
+    },
+    "bioGroup": {
+      "type": "column",
+      "children": ["bioHead", "bioField", "bioHint"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 140}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 6}
+    },
+    "bioHead": {
+      "type": "row",
+      "children": ["bioLabel", "bioCount"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 16}},
+      "props": {"mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center"}
+    },
+    "bioLabel": {
+      "type": "text",
+      "layout": {"width": {"hug": 40}, "height": {"hug": 15}},
+      "props": {"text": "Bio", "style": {"from": "fieldLabel", "color": "inkSoft"}}
+    },
+    "bioCount": {
+      "type": "text",
+      "layout": {"width": {"hug": 60}, "height": {"hug": 15}},
+      "props": {"text": "${= length(bio) + '/160'}", "style": {"fontFamily": "JetBrains Mono", "fontSize": 11.5, "fontWeight": 500, "height": 1.3, "color": "inkFaint"}},
+      "bind": {"props.style.color": "${= length(bio) > 160 ? theme.colors.bad : length(bio) > 140 ? theme.colors.warn : theme.colors.inkFaint}"}
+    },
+    "bioField": {
+      "type": "textField",
+      "layout": {"width": {"fill": 632}, "height": {"hug": 92}},
+      "props": {"initialValue": "", "keyboardType": "multiline", "maxLines": 4, "minLines": 3, "style": {"from": "inputText", "color": "ink", "height": 1.45}, "decoration": {"hintText": "A line or two about what you write", "contentPadding": [12, 12, 12, 12]}},
+      "bind": {"props.initialValue": "${bio}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "bio", "value": "${result}"}]}]
+    },
+    "bioHint": {
+      "type": "text",
+      "layout": {"width": {"fill": 632}, "height": {"hug": 18}},
+      "props": {"text": "Shown under your name on every published piece. Plain text, no links.", "style": {"from": "bodySecondary", "color": "inkFaint"}},
+      "bind": {
+        "props.text": "${= length(bio) > 160 ? 'Trim ' + (length(bio) - 160) + ' characters to save.' : 'Shown under your name on every published piece. Plain text, no links.'}",
+        "props.style.color": "${= length(bio) > 160 ? theme.colors.bad : theme.colors.inkFaint}"
+      }
+    },
+    "tzGroup": {
+      "type": "column",
+      "children": ["tzLabel", "tzPick", "tzHint"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 84}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 6}
+    },
+    "tzLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 632}, "height": {"hug": 15}},
+      "props": {"text": "Time zone", "style": {"from": "fieldLabel", "color": "inkSoft"}}
+    },
+    "tzPick": {
+      "type": "dropdown",
+      "layout": {"width": {"fill": 632}, "height": 40},
+      "props": {"items": ["(GMT-08:00) Pacific Time", "(GMT-05:00) Eastern Time", "(GMT+00:00) London", "(GMT+01:00) Berlin", "(GMT+05:30) Mumbai", "(GMT+09:00) Tokyo"], "isExpanded": true, "hint": "Choose a time zone"},
+      "bind": {"props.value": "${tz}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "tz", "value": "${result}"}]}]
+    },
+    "tzHint": {
+      "type": "text",
+      "layout": {"width": {"fill": 632}, "height": {"hug": 18}},
+      "props": {"text": "Used for scheduled publishing and the time on your digest emails.", "style": {"from": "bodySecondary", "color": "inkFaint"}}
+    },
+    "rule1": {
+      "type": "box",
+      "layout": {"width": {"fill": 632}, "height": 1},
+      "decoration": {"fills": [{"color": "line"}]}
+    },
+    "publicRow": {
+      "type": "row",
+      "children": ["publicText", "publicSwitch"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 40}},
+      "props": {"spacing": 24, "crossAxisAlignment": "center"}
+    },
+    "publicText": {
+      "type": "column",
+      "children": ["publicTitle", "publicDesc"],
+      "layout": {"width": {"fill": 560}, "height": {"hug": 40}},
+      "props": {"crossAxisAlignment": "start", "spacing": 2}
+    },
+    "publicTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 560}, "height": {"hug": 19}},
+      "props": {"text": "Public profile", "style": {"from": "rowTitle", "fontSize": 14, "color": "ink"}}
+    },
+    "publicDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 560}, "height": {"hug": 18}},
+      "props": {"text": "Anyone can find plume.app/maya and read what you have published.", "style": {"from": "bodySecondary", "color": "inkSoft"}},
+      "bind": {"props.text": "${= isPublic ? 'Anyone can find plume.app/' + username + ' and read what you have published.' : 'Only people you share drafts with can see your profile.'}"}
+    },
+    "publicSwitch": {
+      "type": "switch",
+      "props": {"value": true, "activeTrackColor": "accent"},
+      "bind": {"props.value": "${isPublic}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "isPublic", "value": "${result}"}]}]
+    },
+
+    "secNotif": {
+      "type": "flex",
+      "children": ["infoNotif", "cardNotif"],
+      "layout": {"width": {"fill": 952}, "height": {"hug": 380}},
+      "props": {"direction": "horizontal", "spacing": 32, "crossAxisAlignment": "start"},
+      "media": [{"maxWidth": 1100, "patch": {"props": {"direction": "vertical", "spacing": 14}}}]
+    },
+    "infoNotif": {
+      "type": "column",
+      "children": ["infoNotifT", "infoNotifD"],
+      "layout": {"width": 240, "height": {"hug": 60}, "padding": [0, 20, 0, 0]},
+      "props": {"crossAxisAlignment": "start", "spacing": 4},
+      "media": [{"maxWidth": 1100, "patch": {"layout": {"width": {"fill": 640}, "padding": [0, 0, 0, 0]}}}]
+    },
+    "infoNotifT": {
+      "type": "text",
+      "layout": {"width": {"fill": 240}, "height": {"hug": 20}},
+      "props": {"text": "Email alerts", "style": {"from": "blockTitle", "color": "ink"}}
+    },
+    "infoNotifD": {
+      "type": "text",
+      "layout": {"width": {"fill": 240}, "height": {"hug": 36}},
+      "props": {"text": "${= notifOn + ' of ' + length(notifs) + ' on. Sent to maya@plume.app.'}", "style": {"from": "bodySecondary", "color": "inkSoft"}}
+    },
+    "cardNotif": {
+      "type": "column",
+      "children": ["notifList"],
+      "layout": {"width": {"fill": 680}, "height": {"hug": 360}, "padding": [24, 4, 24, 4]},
+      "props": {"crossAxisAlignment": "stretch"},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "radius": 12}
+    },
+    "notifList": {
+      "type": "listView",
+      "children": ["notifRow"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 350}},
+      "props": {"scrollable": false, "separator": "divider", "spacing": 1, "dividerThickness": 1, "dividerColor": "line"},
+      "bind": {"data": "${notifs}"}
+    },
+    "notifRow": {
+      "type": "row",
+      "children": ["notifText", "notifSwitch"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 68}, "padding": [0, 15, 0, 15]},
+      "props": {"spacing": 24, "crossAxisAlignment": "center"}
+    },
+    "notifText": {
+      "type": "column",
+      "children": ["notifTitle", "notifDesc"],
+      "layout": {"width": {"fill": 560}, "height": {"hug": 40}},
+      "props": {"crossAxisAlignment": "start", "spacing": 2}
+    },
+    "notifTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 560}, "height": {"hug": 19}},
+      "props": {"text": "${item.title}", "style": {"from": "rowTitle", "fontSize": 14, "color": "ink"}}
+    },
+    "notifDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 560}, "height": {"hug": 18}},
+      "props": {"text": "${item.desc}", "style": {"from": "bodySecondary", "color": "inkSoft"}}
+    },
+    "notifSwitch": {
+      "type": "switch",
+      "props": {"value": false, "activeTrackColor": "accent"},
+      "bind": {"props.value": "${item.on}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [
+        {"type": "setVariable", "variable": "notifs", "value": "${= setAt(notifs, index, set(item, 'on', result))}"}
+      ]}]
+    },
+
+    "secDanger": {
+      "type": "flex",
+      "children": ["infoDanger", "cardDanger"],
+      "layout": {"width": {"fill": 952}, "height": {"hug": 160}},
+      "props": {"direction": "horizontal", "spacing": 32, "crossAxisAlignment": "start"},
+      "bind": {"visible": "${= section == 'Profile'}"},
+      "media": [{"maxWidth": 1100, "patch": {"props": {"direction": "vertical", "spacing": 14}}}]
+    },
+    "infoDanger": {
+      "type": "column",
+      "children": ["infoDangerT", "infoDangerD"],
+      "layout": {"width": 240, "height": {"hug": 60}, "padding": [0, 24, 0, 0]},
+      "props": {"crossAxisAlignment": "start", "spacing": 4},
+      "media": [{"maxWidth": 1100, "patch": {"layout": {"width": {"fill": 640}, "padding": [0, 0, 0, 0]}}}]
+    },
+    "infoDangerT": {
+      "type": "text",
+      "layout": {"width": {"fill": 240}, "height": {"hug": 20}},
+      "props": {"text": "Danger zone", "style": {"from": "blockTitle", "color": "bad"}}
+    },
+    "infoDangerD": {
+      "type": "text",
+      "layout": {"width": {"fill": 240}, "height": {"hug": 36}},
+      "props": {"text": "Actions here are permanent. Export your writing first from Account.", "style": {"from": "bodySecondary", "color": "inkSoft"}}
+    },
+    "cardDanger": {
+      "type": "column",
+      "children": ["dangerRow", "confirmBox"],
+      "layout": {"width": {"fill": 680}, "height": {"hug": 100}, "padding": 24},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 16},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "badLine"}], "radius": 12}
+    },
+    "dangerRow": {
+      "type": "row",
+      "children": ["dangerText", "deleteBtn"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 40}},
+      "props": {"spacing": 24, "crossAxisAlignment": "center"}
+    },
+    "dangerText": {
+      "type": "column",
+      "children": ["dangerTitle", "dangerDesc"],
+      "layout": {"width": {"fill": 460}, "height": {"hug": 40}},
+      "props": {"crossAxisAlignment": "start", "spacing": 2}
+    },
+    "dangerTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 460}, "height": {"hug": 19}},
+      "props": {"text": "Delete account", "style": {"from": "rowTitle", "fontSize": 14, "color": "ink"}}
+    },
+    "dangerDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 460}, "height": {"hug": 18}},
+      "props": {"text": "Removes your profile, 214 drafts and 3 published collections.", "style": {"from": "bodySecondary", "color": "inkSoft"}}
+    },
+    "deleteBtn": {
+      "type": "outlinedButton",
+      "layout": {"width": {"hug": 140}, "height": 36},
+      "props": {"label": "Delete account", "icon": "delete_outline_rounded", "style": {"foregroundColor": "bad", "side": {"color": "badLine", "width": 1}, "textStyle": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600}}},
+      "bind": {"props.enabled": "${= !confirmDelete}"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "confirmText", "value": ""},
+        {"type": "setVariable", "variable": "confirmDelete", "value": "${= true}"}
+      ]}]
+    },
+    "confirmBox": {
+      "type": "column",
+      "children": ["confirmMsg", "confirmRow"],
+      "layout": {"width": {"fill": 632}, "height": {"hug": 96}, "padding": 16},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 12},
+      "decoration": {"fills": [{"color": "tile"}], "strokes": [{"color": "line"}], "radius": 10},
+      "visible": false,
+      "bind": {"visible": "${confirmDelete}"}
+    },
+    "confirmMsg": {
+      "type": "text",
+      "layout": {"width": {"fill": 600}, "height": {"hug": 20}},
+      "props": {"text": "Are you sure? Type DELETE to confirm. Your writing is removed after 7 days and can't be recovered.", "style": {"from": "body", "color": "ink"}}
+    },
+    "confirmRow": {
+      "type": "row",
+      "children": ["confirmField", "keepBtn", "killBtn"],
+      "layout": {"width": {"fill": 600}, "height": {"hug": 40}},
+      "props": {"spacing": 10, "crossAxisAlignment": "center"}
+    },
+    "confirmField": {
+      "type": "textField",
+      "layout": {"width": {"fill": 260}, "height": {"hug": 40}},
+      "props": {"initialValue": "", "style": {"fontFamily": "JetBrains Mono", "fontSize": 12.5, "color": "ink"}, "decoration": {"hintText": "DELETE", "contentPadding": [12, 12, 12, 12]}},
+      "bind": {"props.initialValue": "${confirmText}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "confirmText", "value": "${result}"}]}]
+    },
+    "keepBtn": {
+      "type": "textButton",
+      "layout": {"width": {"hug": 110}, "height": 36},
+      "props": {"label": "Keep account", "style": {"foregroundColor": "ink", "textStyle": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "confirmDelete", "value": "${= false}"},
+        {"type": "setVariable", "variable": "confirmText", "value": ""}
+      ]}]
+    },
+    "killBtn": {
+      "type": "filledButton",
+      "layout": {"width": {"hug": 160}, "height": 36},
+      "props": {"label": "Delete permanently", "style": {"backgroundColor": "tileDeep", "foregroundColor": "inkSoft", "textStyle": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600}}},
+      "bind": {
+        "props.enabled": "${= confirmText == 'DELETE'}",
+        "props.style.backgroundColor": "${= confirmText == 'DELETE' ? theme.colors.bad : theme.colors.tileDeep}",
+        "props.style.foregroundColor": "${= confirmText == 'DELETE' ? theme.colors.onAccent : theme.colors.inkSoft}"
+      },
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "confirmDelete", "value": "${= false}"},
+        {"type": "setVariable", "variable": "confirmText", "value": ""},
+        {"type": "showToast", "message": "Account scheduled for deletion. We emailed maya@plume.app a link to undo it."}
+      ]}]
+    },
+
+    "otherView": {
+      "type": "column",
+      "children": ["otherMark", "otherTitle", "otherText", "otherBack"],
+      "layout": {"width": {"fill": 952}, "height": {"hug": 280}, "padding": [32, 56, 32, 56]},
+      "props": {"crossAxisAlignment": "center", "spacing": 10},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "radius": 12},
+      "visible": false,
+      "bind": {"visible": "${= section != 'Profile' && section != 'Notifications'}"}
+    },
+    "otherMark": {
+      "type": "row",
+      "children": ["otherIcon"],
+      "layout": {"width": 48, "height": 48, "margin": [0, 0, 0, 6]},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "tile"}], "radius": 14}
+    },
+    "otherIcon": {
+      "type": "icon",
+      "layout": {"width": 22, "height": 22},
+      "props": {"icon": "tune_rounded", "size": 22, "color": "inkSoft"},
+      "bind": {"props.icon": "${current.icon}"}
+    },
+    "otherTitle": {
+      "type": "text",
+      "layout": {"width": {"hug": 200}, "height": {"hug": 20}},
+      "props": {"text": "${section} settings", "textAlign": "center", "style": {"from": "blockTitle", "color": "ink"}}
+    },
+    "otherText": {
+      "type": "text",
+      "layout": {"width": {"fill": 420}, "height": {"hug": 40}, "constraints": {"maxWidth": 420}},
+      "props": {"text": "${current.empty}", "textAlign": "center", "style": {"from": "body", "color": "inkSoft"}}
+    },
+    "otherBack": {
+      "type": "textButton",
+      "layout": {"width": {"hug": 140}, "height": 36},
+      "props": {"label": "Back to Profile", "icon": "arrow_back_rounded", "style": {"foregroundColor": "accent", "textStyle": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "section", "value": "Profile"}]}]
+    },
+
+    "bar": {
+      "type": "column",
+      "children": ["barInner"],
+      "layout": {"width": {"fill": 1032}, "height": 64, "padding": [40, 0, 40, 0]},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeSides": "top"},
+      "media": [{"maxWidth": 900, "patch": {"layout": {"padding": [28, 0, 28, 0]}}}]
+    },
+    "barInner": {
+      "type": "row",
+      "children": ["barDot", "barText", "cancelBtn", "saveBtn"],
+      "layout": {"width": {"fill": 952}, "height": {"hug": 36}, "constraints": {"maxWidth": 960}},
+      "props": {"spacing": 10, "crossAxisAlignment": "center"}
+    },
+    "barDot": {
+      "type": "box",
+      "layout": {"width": 8, "height": 8},
+      "decoration": {"fills": [{"color": "good"}], "shape": "circle"},
+      "bind": {"decoration.fills[0].color": "${= (length(bio) > 160 || name == '') ? theme.colors.bad : dirty ? theme.colors.warn : theme.colors.good}"}
+    },
+    "barText": {
+      "type": "text",
+      "layout": {"width": {"fill": 500}, "height": {"hug": 17}},
+      "props": {"text": "All changes saved", "maxLines": 1, "overflow": "ellipsis", "style": {"from": "meta", "color": "inkSoft"}},
+      "bind": {
+        "props.text": "${= length(bio) > 160 ? 'Bio is over 160 characters' : name == '' ? 'Display name is required' : dirty ? 'You have unsaved changes' : 'All changes saved'}",
+        "props.style.color": "${= dirty ? theme.colors.ink : theme.colors.inkSoft}"
+      }
+    },
+    "cancelBtn": {
+      "type": "outlinedButton",
+      "layout": {"width": {"hug": 84}, "height": 36},
+      "props": {"label": "Cancel", "style": {"foregroundColor": "ink", "side": {"color": "lineStrong", "width": 1}, "textStyle": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600}}},
+      "bind": {"props.enabled": "${dirty}"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "name", "value": "${sName}"},
+        {"type": "setVariable", "variable": "username", "value": "${sUsername}"},
+        {"type": "setVariable", "variable": "bio", "value": "${sBio}"},
+        {"type": "setVariable", "variable": "tz", "value": "${sTz}"},
+        {"type": "setVariable", "variable": "isPublic", "value": "${sPublic}"},
+        {"type": "setVariable", "variable": "avatar", "value": "${sAvatar}"},
+        {"type": "setVariable", "variable": "notifs", "value": "${sNotifs}"}
+      ]}]
+    },
+    "saveBtn": {
+      "type": "filledButton",
+      "layout": {"width": {"hug": 128}, "height": 36},
+      "props": {"label": "Save changes", "style": {"backgroundColor": "tileDeep", "foregroundColor": "inkFaint", "side": {"color": "line", "width": 1}, "textStyle": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600}}},
+      "bind": {
+        "props.enabled": "${canSave}",
+        "props.style.backgroundColor": "${= canSave ? theme.colors.accent : theme.colors.tileDeep}",
+        "props.style.foregroundColor": "${= canSave ? theme.colors.onAccent : theme.colors.inkFaint}"
+      },
+      "actions": [{"trigger": {"type": "click"}, "actions": [
+        {"type": "setVariable", "variable": "sName", "value": "${name}"},
+        {"type": "setVariable", "variable": "sUsername", "value": "${username}"},
+        {"type": "setVariable", "variable": "sBio", "value": "${bio}"},
+        {"type": "setVariable", "variable": "sTz", "value": "${tz}"},
+        {"type": "setVariable", "variable": "sPublic", "value": "${isPublic}"},
+        {"type": "setVariable", "variable": "sAvatar", "value": "${avatar}"},
+        {"type": "setVariable", "variable": "sNotifs", "value": "${notifs}"},
+        {"type": "showToast", "message": "Changes saved"}
+      ]}]
+    }
+  },
+  "variables": {
+    "settings": [
+      {"name": "section", "type": "text", "value": "Profile"},
+      {"name": "sections", "type": "list", "value": [
+        {"name": "Profile", "icon": "person_outline_rounded", "lead": "How you appear to readers and collaborators on Plume.", "empty": ""},
+        {"name": "Account", "icon": "lock_outline_rounded", "lead": "Email, password, sign-in methods and exports.", "empty": "Your email, password and two-step sign-in will be managed here."},
+        {"name": "Notifications", "icon": "notifications_none_rounded", "lead": "Which moments in your writing reach your inbox.", "empty": ""},
+        {"name": "Appearance", "icon": "palette_outlined", "lead": "Theme, editor font and line width.", "empty": "Light or dark, serif or sans in the editor, and how wide a line runs."},
+        {"name": "Billing", "icon": "credit_card_rounded", "lead": "Plan, payment method and invoices.", "empty": "You're on Plume Pro, billed yearly. Invoices and the card on file will live here."},
+        {"name": "Team", "icon": "group_outlined", "lead": "Members, roles and shared collections.", "empty": "Invite editors, set roles and decide who can publish to shared collections."}
+      ]},
+      {"name": "current", "type": "map", "formula": "filter(sections, s => s.name == section)[0]"},
+
+      {"name": "name", "type": "text", "value": "Maya Alvarez"},
+      {"name": "username", "type": "text", "value": "maya"},
+      {"name": "bio", "type": "text", "value": "Essayist and editor. Writing about cities, rivers and the people who keep them running."},
+      {"name": "tz", "type": "text", "value": "(GMT-08:00) Pacific Time"},
+      {"name": "isPublic", "type": "boolean", "value": true},
+      {"name": "avatar", "type": "integer", "value": 0},
+      {"name": "notifs", "type": "list", "value": [
+        {"title": "Comments on your drafts", "desc": "When a collaborator leaves a comment or a suggestion.", "on": true},
+        {"title": "Mentions", "desc": "When someone @mentions you in a document or a thread.", "on": true},
+        {"title": "New followers", "desc": "When a reader follows your public profile.", "on": false},
+        {"title": "Weekly writing digest", "desc": "A Monday summary of words written, streaks and reads.", "on": true},
+        {"title": "Product updates", "desc": "Occasional news about new Plume features.", "on": false}
+      ]},
+
+      {"name": "sName", "type": "text", "value": "Maya Alvarez"},
+      {"name": "sUsername", "type": "text", "value": "maya"},
+      {"name": "sBio", "type": "text", "value": "Essayist and editor. Writing about cities, rivers and the people who keep them running."},
+      {"name": "sTz", "type": "text", "value": "(GMT-08:00) Pacific Time"},
+      {"name": "sPublic", "type": "boolean", "value": true},
+      {"name": "sAvatar", "type": "integer", "value": 0},
+      {"name": "sNotifs", "type": "list", "value": [
+        {"title": "Comments on your drafts", "desc": "When a collaborator leaves a comment or a suggestion.", "on": true},
+        {"title": "Mentions", "desc": "When someone @mentions you in a document or a thread.", "on": true},
+        {"title": "New followers", "desc": "When a reader follows your public profile.", "on": false},
+        {"title": "Weekly writing digest", "desc": "A Monday summary of words written, streaks and reads.", "on": true},
+        {"title": "Product updates", "desc": "Occasional news about new Plume features.", "on": false}
+      ]},
+
+      {"name": "notifKey", "type": "text", "formula": "join(map(notifs, n => n.on ? '1' : '0'), '')"},
+      {"name": "sNotifKey", "type": "text", "formula": "join(map(sNotifs, n => n.on ? '1' : '0'), '')"},
+      {"name": "notifOn", "type": "integer", "formula": "count(notifs, n => n.on)"},
+      {"name": "dirty", "type": "boolean", "formula": "name != sName || username != sUsername || bio != sBio || tz != sTz || isPublic != sPublic || avatar != sAvatar || notifKey != sNotifKey"},
+      {"name": "canSave", "type": "boolean", "formula": "dirty && length(bio) <= 160 && name != ''"},
+
+      {"name": "confirmDelete", "type": "boolean", "value": false},
+      {"name": "confirmText", "type": "text", "value": ""}
+    ]
+  }
+}
+```
+
+MISSING TOKENS
+- `pageHeading`: Inter Display 26 / 700, height 1.2, letterSpacing -0.5. The content pane's title. `pageTitle` (Inter 20/600) is too small for a desktop page head.
+- `radii.surface`: 12. The settings cards, the confirmation box and the empty-section card. `card` (26), `dialog` (21) and `panel` (18) are too round for large desktop surfaces.
+- `radii.button`: 9. The 36 px bar and card buttons; `cta` (14) is too round at that height.
+- `size.control`: 40. The desktop field height (text fields, dropdown), which needs a 12 px inner padding to reach it. The theme's controls render about 28 px.
+- `size.button`: 36. The bar, card and confirmation buttons.
+- `size.sidebar`: 248, the section pane's width; `size.sidebarCollapsed`: 76, its icon rail at 900 px and below.
+- `size.content`: 960, the content rail's max width, shared by the scroll rail and the save bar's inner row.
+- `size.sectionInfo`: 240, the description column of each settings section.
+- `spacing.gutterDesktop`: 40 horizontal and 36 top in the content pane; `spacing.gutterCompact`: 28 at 900 px and below.
+- `spacing.sectionGap`: 40 between settings sections; `spacing.columnGap`: 32 between a section's description and its card.
+- `spacing.infoOffset`: 24, which drops a section title to the first row of its card.
+- `size.bar`: 64, the bottom action bar.
+- `size.avatarLarge`: 64, the profile monogram; `size.avatarSmall`: 30, the sidebar user's monogram.
+- `size.navRow`: 36, a sidebar row at desktop density.
+- `breakpoint.paneCollapse`: 900, where the sidebar becomes an icon rail; `breakpoint.sectionStack`: 1100, where the description column stacks above its card.

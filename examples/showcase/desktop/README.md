@@ -46,6 +46,30 @@ Cycle 1, `native/` (2026-11-15): all ten pages render with no error at 1280 and 
 seven were kept at their second round and three at their third. `<page>.png` and `<page>-narrow.png` are the
 pictures, `<page>.json` the document, `<page>/round<n>/` each round with what was reported.
 
+## One system for the card and the page? (`native-cards/`)
+
+The same from-scratch run with the Cards theme and nothing else of Cards (`native.py --theme-of
+design_systems/cards`: its token names and values and its "In brief" as the style; no components), on six of the
+pages, two rounds; the model wrote the theme's names where one fit, a literal value where none did, and listed
+those after the document (`<page>/round<n>/answer.txt`, under MISSING TOKENS). Five of six pages rendered with no
+error (the inbox ran out of output twice) and are laid out as the pages of `native/` are. What every list asks for:
+
+| Missing | Asked for | Cards has |
+|---|---|---|
+| A page's display title | Inter Display 44 to 56 / 800 (a website), 26 (an app screen) | `titleWide` 28, `heading1` 30, `pageTitle` 20 |
+| A section's title | Inter Display 32 to 40 | none between 30 and 46 |
+| A lead paragraph | Inter 17 to 18 | `lead` 14 |
+| A page surface's corner | 12 to 20 (14 in an app, 18 to 20 on a website) | `card` 26, `panel` 18 |
+| A button's corner at 36 to 48 high | 9 to 12 | `cta` 14 |
+| The content width and the side gutter | 1120 to 1200; 24 (an app) to 64 | none |
+| The space between a website's bands | 72 to 104 | spacing stops at 64 |
+| A sidebar, a top bar, a table row, a control's height | 232 to 248, 64, 48, 36 to 40 | `topBar` 44, `tableRow` 36 |
+| A page card's shadow | a soft wide one | card-sized ones |
+| Tabular figures | on the number styles | no setting |
+
+The colors, the ink and hairlines, the accent's use, the status tints, the fonts and the drawn pictures were
+used as they are. So the look is one system; what is missing is a page's scale, as about a dozen names.
+
 `reference/` (Opus in the notation with Cards, then the design pass) and `blocks/` (eighteen block briefs for
 the block designer, six of which were designed before the change of method) are kept as the record of the first
 attempt, and are not part of the design system.
