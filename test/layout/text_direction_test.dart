@@ -183,6 +183,29 @@ void main() {
     });
   });
 
+  group('stroke sides', () {
+    Future<api.StrokeSides> sidesOf(WidgetTester tester, String sides, {String dir = 'rtl'}) async {
+      final t = await pump(tester, {
+        'w': {
+          'type': 'box',
+          'layout': {'width': 100, 'height': 40},
+          'decoration': {
+            'strokes': [{'color': '#FF000000'}],
+            'strokeSides': sides,
+          },
+        },
+      }, dir: dir);
+      return t.boxOf('w')!.node!.decoration.strokeSides;
+    }
+
+    testWidgets('an end stroke is the left side under right to left, the right under left to right', (tester) async {
+      expect(await sidesOf(tester, 'end'), api.StrokeSides.left);
+      expect(await sidesOf(tester, 'end', dir: 'ltr'), api.StrokeSides.right);
+      expect(await sidesOf(tester, 'noStart'), api.StrokeSides.noRight);
+      expect(await sidesOf(tester, 'top'), api.StrokeSides.top);
+    });
+  });
+
   group('text', () {
     Map<String, Object?> text(String align) => {
           'w': {
