@@ -13,9 +13,21 @@ notation's `Column center` reads differently: see its changelog).
   text, bindings and actions.
 - **`OnDemandBlocks(store:)`**: called with a new block's files so the host can save them; a later session
   started from that folder has the block.
+- **Markdown**: a text with `markdown` draws bold, italic, code, links, @mentions and lists without the markers;
+  a text field with `markdown` styles what is typed as it goes, markers dimmed.
+- **A text field's reactions read `${field.value}`, `${field.word}`, `${field.cursor}`,
+  `${field.selectionStart}` and `${field.selectionEnd}`** (`field.word` is the word ending at the cursor).
+- **`"render": "glyph"` on a Material icon** draws the font glyph exactly as Flutter's `Icon` draws `Icons.*`,
+  and loads no SVG.
 - **Designed defaults**: with a design system whose theme defines them, plain cards, badges, bar charts, popups,
   dialogs and chart series take its look, and a control's corner follows its height (`radii.controlXs` …
   `controlLarge`). The bundled look is unchanged.
+
+### Changed
+
+- **`editText` edits a field as typing does**: its changed reactions run, it is one undo step, and the field
+  keeps the keyboard.
+- **A node at opacity 0 takes no taps**, like a hidden one. A scrim waiting to fade in no longer swallows taps.
 
 ### Fixed
 
