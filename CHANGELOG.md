@@ -1,10 +1,11 @@
 ## 31.0.0
 
-**Breaking: the library an app imports is smaller.** Thirty-six types that are the SDK's own machinery (bound
+**Breaking: the library an app imports is smaller.** Thirty-five types that are the SDK's own machinery (bound
 values and the tree's bindings, the viewport's boxes, route and transition internals, the session view's sources,
 the managed-component resolver) are no longer exported from `package:codelessly_sdk/codelessly_sdk.dart`. They are
 in `package:codelessly_sdk/internals.dart`, which promises no stability. None is named in the guide or used by the
-examples, the tools, CodelesslySite or CodelesslyEditor; an app that used one adds that import. Moved:
+examples, the tools or CodelesslySite; one CodelesslyEditor test named two (`ManagedComponentSource`,
+`ManagedComponentResolver`) and now imports it. An app that used one adds that import. Moved:
 `BackGuard`, `BoundNode`, `BoundSource`, `BoundValues`, `BoundVariable`, `CanvasBox`, `CanvasLocationMatch`,
 `CanvasSizingScope`, `CanvasViewport`, `CodelesslyPageTransitionRoute`, `CodelesslyRouteTransitionRoute`,
 `CodelesslyTranslucentRoute`, `ExpressionValues`, `FocusManagerKeyboard`, `FontRegistrationCache`,
@@ -13,6 +14,11 @@ examples, the tools, CodelesslySite or CodelesslyEditor; an app that used one ad
 `RenderNodeView`, `RouteDragDismiss`, `ScreenActionContext`, `ScreenIdentity`,
 `SeeThroughZoomPageTransitionsBuilder`, `SessionValues`, `ThemedSource`, `TransitionPhysics`,
 `TransitionSideView`, `TreeBindings`.
+
+**Breaking for tests and hosts that look for `EditableText`.** A `textField` is a render object: there is no
+`EditableText` widget under it. A test finds the field's `RenderEditable` in the render tree (or uses the render
+tool's `--type`), and a host that asks "is someone typing?" by looking for a focused `EditableText` calls
+`isTyping()`, now exported, which is true while one of the SDK's fields has the keyboard.
 
 - **A model's answer in the notation, with a design system** (guide chapter 18): `UiSession(designSystem: ...)`,
   `notationInstructions({blocks})`, `applyNotation(text, {prelude})` (looks written as the design system's token
