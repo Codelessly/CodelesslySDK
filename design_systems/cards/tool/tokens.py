@@ -161,9 +161,9 @@ PLAIN = {
     # on its line in a column: full width, 46 high. A bar chart: rounded bars at most 28 wide, 10 apart.
     # A control's corner by its height (a 28-high button 8, not the 12 of the 44-high action button).
     # What floats (dialogs, sheets, menus, pickers, toasts): radii.popup, shadows.popup.
-    'radii': {'popup': 20, 'badge': 999, 'bar': 6, 'controlXs': 6, 'controlCompact': 8, 'controlSmall': 9, 'controlMedium': 10, 'controlLarge': 12},
-    'sizes': {'cta': 46, 'badge': 22, 'bar': 28},
-    'spacing': {'card': 18, 'tile': 14, 'badge': 9, 'bar': 10},
+    'radii': {'popup': 20, 'badge': 999, 'progress': 999, 'bar': 6, 'controlXs': 6, 'controlCompact': 8, 'controlSmall': 9, 'controlMedium': 10, 'controlLarge': 12},
+    'sizes': {'cta': 46, 'badge': 22, 'bar': 28, 'progress': 8},
+    'spacing': {'card': 18, 'tile': 14, 'badge': 9, 'bar': 10, 'cardGap': 12},
     'shadows': {'popup': [{'type': 'dropShadow', 'color': '#24000000', 'offset': [0, 16], 'blurRadius': 40, 'spreadRadius': -8},
                           {'type': 'dropShadow', 'color': '#0F000000', 'offset': [0, 2], 'blurRadius': 6}]},
 }
