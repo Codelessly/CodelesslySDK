@@ -1,0 +1,9 @@
+Card gap:12
+  Row between middle
+    Text.heading "Speed"
+    Badge.success "Within limit"
+  Gauge 72 min:0 max:180 limit:100 unit:"km/h"
+  Row between
+    Text.caption "0"
+    Text.caption "Limit 100 km/h"
+    Text.caption "180"

@@ -1,0 +1,3 @@
+budget_donut: line 6:5: No node type "PieChart". A node line takes the document's own type names (column, row, stack, text, icon, customPaint…): see the reference's nodes page.
+sales_leaderboard: line 39:26: Unknown word "center" on a Text. Props are written key:value.
+sales_leaderboard: line 49:26: Unknown word "center" on a Text. Props are written key:value.

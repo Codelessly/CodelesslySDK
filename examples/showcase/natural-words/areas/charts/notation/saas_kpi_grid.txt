@@ -1,0 +1,41 @@
+Card gap:16 pad:16
+  Row between
+    Text.heading "Key metrics"
+    Text.caption "Last 30 days"
+  Grid cols:3 gap:12
+    Box pad:12 gap:6 radius:12 fill:#FFF5F7FA
+      Text.caption "MRR"
+      Text "$284,500" size:22 weight:700
+      Row between
+        Text "▲ +6.2%" size:13 weight:600 color:#FF2E7D32
+        Sparkline values:[238,246,251,259,264,271,284] color:#FF2E7D32 w:56 h:28
+    Box pad:12 gap:6 radius:12 fill:#FFF5F7FA
+      Text.caption "Active users"
+      Text "18,420" size:22 weight:700
+      Row between
+        Text "▲ +3.1%" size:13 weight:600 color:#FF2E7D32
+        Sparkline values:[16.9,17.1,17.4,17.6,17.9,18.1,18.4] color:#FF2E7D32 w:56 h:28
+    Box pad:12 gap:6 radius:12 fill:#FFF5F7FA
+      Text.caption "Churn rate"
+      Text "2.4%" size:22 weight:700
+      Row between
+        Text "▼ -0.3 pts" size:13 weight:600 color:#FF2E7D32
+        Sparkline values:[3.1,2.9,2.9,2.7,2.6,2.5,2.4] color:#FF2E7D32 w:56 h:28
+    Box pad:12 gap:6 radius:12 fill:#FFF5F7FA
+      Text.caption "ARPU"
+      Text "$15.44" size:22 weight:700
+      Row between
+        Text "▲ +2.9%" size:13 weight:600 color:#FF2E7D32
+        Sparkline values:[14.6,14.8,14.7,15.0,15.1,15.3,15.44] color:#FF2E7D32 w:56 h:28
+    Box pad:12 gap:6 radius:12 fill:#FFF5F7FA
+      Text.caption "Trial conversion"
+      Text "18.7%" size:22 weight:700
+      Row between
+        Text "▼ -1.2 pts" size:13 weight:600 color:#FFC62828
+        Sparkline values:[20.4,20.1,19.8,19.5,19.2,19.0,18.7] color:#FFC62828 w:56 h:28
+    Box pad:12 gap:6 radius:12 fill:#FFF5F7FA
+      Text.caption "NPS"
+      Text "46" size:22 weight:700
+      Row between
+        Text "▲ +4" size:13 weight:600 color:#FF2E7D32
+        Sparkline values:[42,41,43,44,44,45,46] color:#FF2E7D32 w:56 h:28

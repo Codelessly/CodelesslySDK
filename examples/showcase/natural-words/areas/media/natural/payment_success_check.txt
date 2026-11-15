@@ -1,0 +1,48 @@
+Screen "Payment success" background:white padding:24 align:center
+  Stack align:center spacing:24 width:fill
+    Spacer height:48
+    Group name:"success-animation" size:160x160 align:center
+      Circle name:"check-circle" size:120 stroke:green-500 stroke-width:6 fill:green-50
+        animation: draw-stroke from:0% to:100% duration:600ms easing:ease-out start:on-appear
+        animation: scale from:0.8 to:1.0 duration:600ms easing:spring start:on-appear
+      Path name:"check-mark" shape:checkmark stroke:green-600 stroke-width:8 stroke-cap:round stroke-join:round fit-in:check-circle
+        animation: draw-stroke from:0% to:100% duration:400ms easing:ease-in-out start:on-appear delay:500ms
+      ParticleEmitter name:"confetti" type:burst origin:center count:40 spread:360deg
+        colors:[green-400, yellow-400, blue-400, pink-400, orange-400]
+        shapes:[rect, circle, ribbon]
+        size:6-10 velocity:200-400 gravity:600 rotation:random
+        lifetime:1400ms fade-out:last-400ms repeat:none
+        start:on-appear delay:800ms
+        pointer-events:none
+    Stack align:center spacing:8
+      Text "Payment sent!" style:title-large weight:bold color:gray-900
+        animation: fade-in + slide-up from:12 duration:400ms delay:1000ms
+      Text "$1,249.00 to Northwind Electric" style:body-large color:gray-700
+        animation: fade-in duration:400ms delay:1100ms
+    Card width:fill padding:16 corner-radius:16 background:gray-50 border:gray-200
+      animation: fade-in + slide-up from:16 duration:400ms delay:1200ms
+      Stack spacing:12
+        Row justify:space-between
+          Text "Transaction ID" color:gray-600 style:body
+          Text "TX-90314" weight:semibold color:gray-900 selectable:true style:monospace
+        Divider color:gray-200
+        Row justify:space-between
+          Text "Date" color:gray-600 style:body
+          Text "{current date and time}" weight:semibold color:gray-900
+        Divider color:gray-200
+        Row justify:space-between
+          Text "Amount" color:gray-600 style:body
+          Text "$1,249.00" weight:semibold color:gray-900
+        Divider color:gray-200
+        Row justify:space-between
+          Text "Paid to" color:gray-600 style:body
+          Text "Northwind Electric" weight:semibold color:gray-900
+    Spacer flex:1
+    Stack width:fill spacing:12
+      animation: fade-in duration:400ms delay:1400ms
+      Button "View receipt" variant:outlined width:fill height:52 corner-radius:26 color:green-600 action:open-receipt(id:"TX-90314") accessibility-label:"View receipt for transaction TX-90314"
+      Button "Done" variant:filled width:fill height:52 corner-radius:26 background:green-600 text-color:white action:dismiss-to-home autofocus:false
+        state pressed: background:green-700 scale:0.98
+    Spacer height:16
+  Accessibility announce:"Payment sent. 1,249 dollars to Northwind Electric. Transaction ID TX-90314." on-appear
+  Haptic type:success on-appear delay:800ms

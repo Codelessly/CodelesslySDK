@@ -134,9 +134,8 @@ class UiSession implements NodeSource {
   void addBlock(LayoutDocument definition) {
     final ds = _designSystem;
     if (ds == null) throw StateError('addBlock needs a session with a design system.');
-    final added = ComponentLibrary.of([definition]);
-    final library = ComponentLibrary({...ds.components.definitions, ...added.definitions});
-    _designSystem = DesignSystem(manifest: ds.manifest, design: ds.design, patterns: ds.patterns, components: library);
+    _designSystem = ds.withComponent(definition);
+    final library = _designSystem!.components;
     _catalog = _designSystem!.catalogOver(_baseCatalog);
     _profile = _baseProfile.withComponents(library);
     blocksAdded.value++;

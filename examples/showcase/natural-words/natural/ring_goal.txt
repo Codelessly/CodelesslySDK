@@ -1,0 +1,10 @@
+Card width:360 padding:20 radius:16 background:surface elevation:1 direction:row align:center gap:20
+  Ring size:96 stroke:10 value:7240 max:10000 progress:72% color:accent track-color:muted start-angle:-90 linecap:round animate:"sweep from 0 to value" duration:800ms easing:ease-out
+    Text "72%" size:22 weight:bold align:center position:center color:primary
+  Column gap:4 grow:1
+    Text "Daily steps" size:13 color:secondary transform:uppercase letter-spacing:0.5
+    Row align:baseline gap:6
+      Text "7,240" size:28 weight:bold color:primary animate:"count up" duration:800ms
+      Text "/ 10,000" size:14 color:secondary
+    Text "2,760 steps to go" size:13 color:secondary
+    Badge "On track" color:success variant:subtle size:small radius:full padding:4,10 state:"shown when progress >= 50%"

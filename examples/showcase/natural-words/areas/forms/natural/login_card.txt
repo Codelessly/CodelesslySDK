@@ -1,0 +1,25 @@
+screen background:#F3F6FA align:center padding:24
+  card width:400 padding:32 radius:12 shadow:medium background:white gap:20
+    header align:center gap:8
+      icon "anchor" size:32 color:#0B3D6B
+      text "Harbor Bank" style:brand weight:700 size:20 color:#0B3D6B
+      heading "Sign in" level:1 size:24
+      text "Welcome back. Enter your details to continue." style:muted
+    banner "Incorrect email or password. 2 attempts left." kind:error icon:alert-circle role:alert live:assertive dismissible:false
+      enter motion:slide-down+fade duration:200ms
+      emphasis motion:shake-x duration:300ms once
+    form gap:16 on-submit:authenticate
+      field label:"Email" name:email type:email value:"alex.morgan@example.com" autocomplete:username state:error
+        hint "Check your email address" style:error
+      field label:"Password" name:password type:password value:"" autocomplete:current-password state:error focus:true
+        trailing icon-button label:"Show password" icon:eye pressed:false
+          on-press toggle:password-visibility swap-icon:eye-off swap-label:"Hide password"
+        hint "Re-enter your password" style:error
+      row justify:space-between align:center
+        checkbox "Remember me" checked:false
+        link "Forgot password?" href:/forgot-password color:#0B5CAD
+      button "Sign in" variant:primary width:full height:44 type:submit
+        state:loading label:"Signing in…" spinner:left disabled:true
+        press motion:scale-0.98 duration:100ms
+    footer align:center
+      text "Protected by 256-bit encryption" icon:lock style:caption color:#6B7785

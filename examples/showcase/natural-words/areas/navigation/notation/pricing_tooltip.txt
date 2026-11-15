@@ -1,0 +1,24 @@
+Column pad:16 gap:16 maxw:480
+  state showTip=false
+  Text.pageTitle "Checkout"
+  Card gap:12
+    Row between
+      Column gap:2
+        Text.heading "Pro plan"
+        Text.muted "Billed monthly"
+      Text.strong "$12/month"
+    Divider
+    Row between
+      Row center gap:4
+        Text "Service fee"
+        IconButton "info" tooltip:"Covers payment processing and support" -> showTip=!showTip
+      Text "$1.50"
+    if showTip
+      Box fill:#FF323232 radius:8 pad:10 animate:fade duration:200
+        Text "Covers payment processing and support" color:#FFFFFFFF size:13
+    Divider
+    Row between
+      Text.heading "Total today"
+      Text.heading "$13.50"
+  Button "Subscribe" -> emit subscribe; toast "Welcome to Pro"
+  Text.caption "Cancel anytime. Renews monthly at $13.50." center

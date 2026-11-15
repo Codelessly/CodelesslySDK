@@ -1,0 +1,96 @@
+state tab=0
+Column h:fill
+  Column grow scroll pad:16 gap:16
+    if tab==0
+      Text.pageTitle "Home"
+      Box fill:#FF1565C0 radius:16 pad:20 gap:8
+        Text "Summer Sale" size:24 weight:700 color:#FFFFFFFF
+        Text "Up to 40% off selected items" color:#FFFFFFFF
+        Button.secondary "Shop now" -> tab=1
+      Text.sectionTitle "Categories"
+      Row scroll gap:8
+        Chip "Shoes"
+        Chip "Jackets"
+        Chip "Bags"
+        Chip "Watches"
+        Chip "Beauty"
+      Text.sectionTitle "Popular"
+      Grid cols:2 gap:12
+        Card gap:8
+          Icon "checkroom"
+          Text.strong "Denim Jacket"
+          Text.muted "$79"
+        Card gap:8
+          Icon "hiking"
+          Text.strong "Trail Shoes"
+          Text.muted "$120"
+        Card gap:8
+          Icon "watch"
+          Text.strong "Classic Watch"
+          Text.muted "$199"
+        Card gap:8
+          Icon "backpack"
+          Text.strong "Daypack"
+          Text.muted "$59"
+    if tab==1
+      Text.pageTitle "Search"
+      Input "Search products" "Shoes, jackets, bags…" =query
+      Text.sectionTitle "Trending searches"
+      Row gap:8
+        Chip "Sneakers"
+        Chip "Sunglasses"
+        Chip "Hoodies"
+      if query!=""
+        Text.muted "Showing results for \"{query}\""
+    if tab==2
+      Text.pageTitle "Cart"
+      Card gap:12
+        Row between middle
+          Column
+            Text.strong "Denim Jacket"
+            Text.muted "$79"
+          Text.body "x1"
+        Divider
+        Row between middle
+          Column
+            Text.strong "Trail Shoes"
+            Text.muted "$120"
+          Text.body "x1"
+        Divider
+        Row between middle
+          Column
+            Text.strong "Daypack"
+            Text.muted "$59"
+          Text.body "x1"
+      Row between
+        Text.heading "Total"
+        Text.heading "$258"
+      Button "Checkout" -> toast "Proceeding to checkout"
+    if tab==3
+      Text.pageTitle "Profile"
+      Row gap:12 middle
+        Avatar "Maya Reyes" size:56
+        Column
+          Text.heading "Maya Reyes"
+          Text.muted "maya@example.com"
+      ListTile "Orders"
+      ListTile "Wishlist"
+      ListTile "Addresses"
+      ListTile "Settings"
+  Divider
+  Row around pad:[8,8,8,8]
+    Column center gap:2 grow -> tab=0
+      Icon "home" color:=tab==0?'#FF1565C0':'#FF757575'
+      Text.caption "Home" color:=tab==0?'#FF1565C0':'#FF757575'
+    Column center gap:2 grow -> tab=1
+      Icon "search" color:=tab==1?'#FF1565C0':'#FF757575'
+      Text.caption "Search" color:=tab==1?'#FF1565C0':'#FF757575'
+    Column center gap:2 grow -> tab=2
+      Stack w:48 h:24 center middle
+        Icon "shopping_cart" color:=tab==2?'#FF1565C0':'#FF757575'
+        Row end top
+          Badge.danger "3"
+      Text.caption "Cart" color:=tab==2?'#FF1565C0':'#FF757575'
+    Column center gap:2 grow -> tab=3
+      Icon "person" color:=tab==3?'#FF1565C0':'#FF757575'
+      Text.caption "Profile" color:=tab==3?'#FF1565C0':'#FF757575'

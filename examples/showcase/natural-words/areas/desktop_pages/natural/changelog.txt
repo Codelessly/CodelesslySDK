@@ -1,0 +1,152 @@
+page "Relay Changelog" background:#ffffff font:Inter color:#111827 max-width:1120 align:center
+
+  header sticky:top padding:16,24 border-bottom:"1px solid #e5e7eb" background:#ffffff layout:row justify:space-between align:center
+    logo "Relay" weight:700 size:20 color:#4f46e5
+    nav layout:row gap:24
+      link "Product" href:/product
+      link "Pricing" href:/pricing
+      link "Docs" href:/docs
+      link "Changelog" href:/changelog active:true weight:600 color:#4f46e5 underline:2px
+      link "Blog" href:/blog
+    button "Subscribe to updates" style:primary background:#4f46e5 color:#ffffff radius:8 padding:10,16 icon:bell-left
+      state hover background:#4338ca
+      state focus outline:"2px solid #a5b4fc"
+      action click opens:modal#subscribe
+
+  main padding:64,24 layout:column gap:40
+
+    section#intro layout:column gap:12
+      heading "Changelog" level:1 size:44 weight:800
+      text "New features, improvements and fixes shipped to Relay. Follow along as we build." size:18 color:#6b7280 max-width:560
+
+    tabs#filters layout:row gap:8 border-bottom:"1px solid #e5e7eb" selected:"All"
+      tab "All" selected:true filter:all
+      tab "Features" filter:new
+      tab "Improvements" filter:improved
+      tab "Fixes" filter:fixed
+      style tab padding:10,16 color:#6b7280 weight:500
+      style tab-selected color:#4f46e5 border-bottom:"2px solid #4f46e5" weight:600
+      state tab-hover color:#111827
+      behavior on:tab-select transition:fade duration:200ms effect:"show only releases whose tag matches filter; hide others"
+
+    timeline#releases layout:column line:"2px solid #e5e7eb" line-position:left-column
+      style entry layout:row gap:48 padding-bottom:56
+      style entry-meta width:160 layout:column gap:4 position:sticky top:96
+      style entry-marker shape:circle size:12 background:#4f46e5 border:"3px solid #e0e7ff" on:timeline-line
+      style entry-body flex:1 layout:column gap:16
+      style tag radius:999 padding:4,10 size:12 weight:600
+      behavior on:scroll-into-view animation:fade-up duration:400ms stagger:80ms
+
+      entry#v4-2-0 tag:new
+        meta
+          marker
+          date "Nov 3, 2026" color:#6b7280 size:14
+          version "v4.2.0" weight:700 size:20
+        body
+          row layout:row gap:12 align:center
+            heading "Shared inboxes with live presence" level:2 size:24 weight:700
+            tag "New" background:#dcfce7 color:#166534
+          paragraph "Teams can now work from a single shared inbox and see who is viewing or replying to a conversation in real time, so nobody answers the same message twice." color:#374151
+          list style:bullet gap:6
+            item "Shared inboxes with per-team permissions"
+            item "Live presence avatars on every conversation"
+            item "Collision warnings when two people reply at once"
+            item "New keyboard shortcut (G then I) to jump to inboxes"
+          image "Screenshot of the Relay shared inbox showing presence avatars" src:shared-inbox.png radius:12 border:"1px solid #e5e7eb" shadow:md width:100% aspect:16/9 lazy:true
+
+      entry#v4-1-2 tag:fixed
+        meta
+          marker
+          date "Oct 21, 2026"
+          version "v4.1.2"
+        body
+          row
+            heading "Notification and sync fixes" level:2
+            tag "Fixed" background:#fee2e2 color:#991b1b
+          paragraph "A maintenance release resolving several reliability issues reported by the community."
+          list style:bullet
+            item "Fixed duplicate push notifications on mobile"
+            item "Resolved a sync delay affecting large workspaces"
+            item "Corrected timezone display in scheduled messages"
+
+      entry#v4-1-0 tag:improved
+        meta
+          marker
+          date "Oct 2, 2026"
+          version "v4.1.0"
+        body
+          row
+            heading "Faster search and smarter filters" level:2
+            tag "Improved" background:#dbeafe color:#1e40af
+          paragraph "Search is now up to 3x faster and supports saved filters for the queries you run most."
+          list style:bullet
+            item "Instant results as you type"
+            item "Saved filters appear in the sidebar"
+            item "Improved ranking for recent conversations"
+
+      entry#v4-0-0 tag:new
+        meta
+          marker
+          date "Sep 8, 2026"
+          version "v4.0.0"
+        body
+          row
+            heading "Relay 4.0: a redesigned workspace" level:2
+            tag "New" background:#dcfce7 color:#166534
+          paragraph "A ground-up refresh of the interface with a new navigation model, dark mode and a public API."
+          list style:bullet
+            item "Redesigned sidebar and command menu"
+            item "Dark mode with automatic system detection"
+            item "Public REST API in open beta"
+            item "Updated onboarding for new teams"
+
+      entry#v3-9-5 tag:fixed
+        meta
+          marker
+          date "Aug 19, 2026"
+          version "v3.9.5"
+        body
+          row
+            heading "Stability patch" level:2
+            tag "Fixed" background:#fee2e2 color:#991b1b
+          paragraph "Small but important fixes ahead of the 4.0 launch."
+          list style:bullet
+            item "Fixed crash when attaching files over 100 MB"
+            item "Resolved login loop with SSO on Safari"
+            item "Improved error messages for failed uploads"
+
+    row layout:row justify:center
+      button "Load older releases" style:secondary border:"1px solid #d1d5db" radius:8 padding:12,24 weight:600
+        state hover background:#f9fafb
+        state loading label:"Loading…" spinner:left disabled:true
+        action click fetch:older-releases append-to:timeline#releases animation:fade-up
+        state empty label:"You're all caught up" disabled:true
+
+  footer background:#f9fafb border-top:"1px solid #e5e7eb" padding:48,24 layout:column gap:32
+    row layout:row justify:space-between wrap:true gap:32
+      column gap:8 max-width:280
+        logo "Relay" weight:700 color:#4f46e5
+        text "Messaging that keeps your team in sync." color:#6b7280
+      column gap:8
+        text "Product" weight:600
+        link "Features"
+        link "Pricing"
+        link "Integrations"
+      column gap:8
+        text "Resources" weight:600
+        link "Docs"
+        link "API"
+        link "Status"
+      column gap:8
+        text "Company" weight:600
+        link "About"
+        link "Careers"
+        link "Contact"
+    text "© 2026 Relay, Inc. All rights reserved." size:13 color:#9ca3af
+
+  modal#subscribe hidden:true overlay:"rgba(17,24,39,0.5)" animation:fade-scale duration:200ms width:420 radius:16 padding:32 background:#ffffff
+    heading "Subscribe to updates" level:3
+    text "Get release notes delivered to your inbox." color:#6b7280
+    input type:email placeholder:"you@company.com" required:true
+    button "Subscribe" style:primary
+    button "Cancel" style:ghost action:close

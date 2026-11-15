@@ -1,0 +1,27 @@
+Card w:390 gap:12
+  state day=0
+  state party=2
+  state time=""
+  state days=[{"i":0,"l":"Today"},{"i":1,"l":"Tomorrow"},{"i":2,"l":"In 2 days"},{"i":3,"l":"In 3 days"},{"i":4,"l":"In 4 days"},{"i":5,"l":"In 5 days"},{"i":6,"l":"In 6 days"}]
+  state sizes=[1,2,3,4,5,6,7,8]
+  state slots=[{"i":0,"t":"17:30"},{"i":1,"t":"18:00"},{"i":2,"t":"18:30"},{"i":3,"t":"19:00"},{"i":4,"t":"19:30"},{"i":5,"t":"20:00"},{"i":6,"t":"20:30"},{"i":7,"t":"21:00"},{"i":8,"t":"21:30"}]
+  Text.title "Book a table"
+  Text.strong "Day"
+  Grid cols:3 gap:8
+    each d in days
+      ChoiceChip "{d.l}" selected:=day==d.i -> day=d.i; time=""
+  Text.strong "Party size"
+  Grid cols:4 gap:8
+    each p in sizes
+      ChoiceChip "{p}" selected:=party==p -> party=p; time=""
+  Text.strong "Time"
+  Grid cols:3 gap:8
+    each s in slots
+      ChoiceChip "{s.t}" selected:=time==s.t enabled:=(day*3+s.i*5+party*2)%4!=0&&!(party>6&&s.i%2==0) -> time=s.t
+  Text.caption "Greyed-out times are full."
+  Divider
+  if time==""
+    Text.muted "Choose a day, party size and time."
+  if time!=""
+    Text "{days[day].l} · party of {party} · {time}"
+    Button "Confirm booking" -> emit book time; toast "Booked: {days[day].l}, table for {party} at {time}"

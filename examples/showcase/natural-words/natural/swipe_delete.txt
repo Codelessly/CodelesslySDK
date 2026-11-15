@@ -1,0 +1,59 @@
+card "Today" width:fill radius:16 padding:16 elevation:1 background:surface
+  header direction:row align:center justify:between
+    text "To-do" style:title
+    text "2 of 4 done" style:caption color:muted bind:completedCount
+  list id:todos gap:0 divider:inset
+    row id:task1 height:56 swipe:left overflow:hidden
+      layer:behind background:danger align:right padding-right:20
+        icon "trash" color:onDanger
+        text "Delete" color:onDanger style:label
+      layer:front background:surface direction:row align:center gap:12 padding-x:4
+        checkbox checked:false
+        text "Buy groceries" style:body
+    row id:task2 height:56 swipe:left overflow:hidden
+      layer:behind background:danger align:right padding-right:20
+        icon "trash" color:onDanger
+        text "Delete" color:onDanger style:label
+      layer:front background:surface direction:row align:center gap:12 padding-x:4
+        checkbox checked:true
+        text "Email Sam" style:body decoration:strikethrough color:muted
+    row id:task3 height:56 swipe:left overflow:hidden
+      layer:behind background:danger align:right padding-right:20
+        icon "trash" color:onDanger
+        text "Delete" color:onDanger style:label
+      layer:front background:surface direction:row align:center gap:12 padding-x:4
+        checkbox checked:false
+        text "Book dentist" style:body
+    row id:task4 height:56 swipe:left overflow:hidden
+      layer:behind background:danger align:right padding-right:20
+        icon "trash" color:onDanger
+        text "Delete" color:onDanger style:label
+      layer:front background:surface direction:row align:center gap:12 padding-x:4
+        checkbox checked:true
+        text "Water plants" style:body decoration:strikethrough color:muted
+  behavior on:swipe-left target:row
+    track:front follows:finger axis:x range:0..-100% resistance:none
+    reveal:behind progress:with-drag
+    state:resting when:release distance<40%
+      motion:front returnTo:0 duration:200ms easing:ease-out
+    state:committed when:release distance>=40% or velocity>800px/s
+      motion:front slideTo:-100% duration:180ms easing:ease-in
+      then motion:row height:56->0 opacity:1->0 duration:200ms easing:ease-in-out
+      then remove:row
+      then motion:siblings slideUp duration:200ms
+      then update:completedCount
+    haptic:light at:threshold-cross
+    swipe:right ignored
+    only-one-row-active:true
+  empty-state visible:when todos.count=0 align:center padding:24
+    icon "check-circle" size:40 color:muted
+    text "All clear" style:body color:muted
+    motion:enter fade-in duration:200ms delay:200ms
+  toast "Task deleted" position:bottom-inline visible:false
+    action "Undo" color:accent
+    on:row-removed show duration:4s motion:enter slide-up+fade 150ms, exit fade 150ms
+    on:tap(Undo) restore:row at:original-index motion:row height:0->56 opacity:0->1 duration:200ms hide:toast
+  footer direction:row align:center gap:8 margin-top:8
+    input placeholder:"Add a task" flex:1 submit:enter
+    button "Add" style:filled enabled:when input.text.length>0
+      on:tap append:row to:todos motion:enter height:0->56 opacity:0->1 duration:200ms clear:input

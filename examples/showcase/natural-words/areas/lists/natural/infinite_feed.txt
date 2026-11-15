@@ -1,0 +1,59 @@
+screen "Activity" layout:column background:surface
+  header "Activity" style:title sticky:true
+  list id:feed gap:8 padding:16 aria-live:polite
+    item id:post-1 layout:row gap:12
+      avatar "L" label:"Lena" size:40
+      column
+        text "Lena shared 'Trip to Lisbon'" style:body
+        text "12 photos" style:secondary
+      text "2h" style:caption align:end
+    item id:post-2 layout:row gap:12
+      avatar "O" label:"Omar" size:40
+      column
+        text "Omar commented 'Congrats on the launch!'" style:body
+      text "3h" style:caption align:end
+    item id:post-3 layout:row gap:12
+      avatar icon:team label:"Team Alpha" size:40
+      column
+        text "Team Alpha hit 1,000 signups" style:body
+      text "5h" style:caption align:end
+    item id:post-4 layout:row gap:12
+      avatar "C" label:"Chris" size:40
+      column
+        text "Chris started following you" style:body
+      text "6h" style:caption align:end
+    item id:post-5 layout:row gap:12
+      avatar "N" label:"Nadia" size:40
+      column
+        text "Nadia posted 'New recipe: miso ramen'" style:body
+      text "8h" style:caption align:end
+    footer id:load-more-area layout:column align:center padding:16
+      button "Load more" id:load-more style:secondary width:fill
+        state idle visible:true enabled:true
+        state loading text:"Loading…" enabled:false opacity:0.6
+        state exhausted visible:false
+        state error text:"Retry" style:danger
+      spinner id:load-spinner size:24 visible:false label:"Loading more posts"
+        state loading visible:true animation:rotate duration:800ms repeat:infinite
+      text "You're all caught up" style:caption visible:false
+        state exhausted visible:true
+      text "Couldn't load posts" style:caption color:error visible:false
+        state error visible:true
+
+  behavior on:tap target:load-more
+    step set state:loading
+    step fetch count:5 order:newest-after-last timeout:10s
+    on:success
+      step append target:feed items:5
+        enter animation:fade-slide-up duration:250ms stagger:60ms
+      step set state:idle
+      step scroll-into-view first-new-item behavior:smooth
+      step if:no-more-results set state:exhausted
+    on:failure
+      step set state:error
+      step keep existing-items
+  behavior on:tap target:load-more state:error
+    step repeat fetch
+  behavior on:new-items-added
+    step move target:load-more-area below:last-item
+    step announce "5 more posts loaded" for:screen-reader

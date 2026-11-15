@@ -1,0 +1,18 @@
+Card padding:20 radius:12 border:"1px solid #e5e7eb" background:white width:320 shadow:soft
+  Row align:center justify:space-between
+    Text "Monthly Revenue" size:14 weight:medium color:#6b7280
+    Badge "+12.4%" size:12 color:#15803d background:#dcfce7 radius:999 padding:"2 8"
+  Text "$0" id:revenueValue size:36 weight:bold color:#111827 margin-top:12 font-features:tabular-nums
+    Animation type:count-up trigger:on-appear(once) from:0 to:48200 duration:1.6s easing:ease-out delay:0.2s
+      format:currency currency:USD decimals:0 separator:","
+      final-text:"$48,200"
+      respects:reduced-motion fallback:show-final-value
+  Text "vs. $42,880 last month" size:12 color:#9ca3af margin-top:4
+    Animation type:fade-in trigger:after(revenueValue) duration:0.4s
+  Sparkline margin-top:16 height:40 color:#4f46e5 data:[22,28,25,32,30,38,36,44,48]
+    Animation type:draw-line trigger:on-appear(once) duration:1.6s easing:ease-out
+  Row margin-top:16 align:center gap:6
+    Dot size:8 color:#22c55e
+      Animation type:pulse trigger:while(revenueValue counting) repeat:infinite duration:0.8s
+    Text "Updated just now" size:12 color:#6b7280
+  Animation type:fade-up trigger:on-appear(once) duration:0.3s distance:8

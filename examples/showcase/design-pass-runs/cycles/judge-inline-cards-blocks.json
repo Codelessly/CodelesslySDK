@@ -1,0 +1,584 @@
+{
+ "what": "The 17 inline cards: plain parts in the Cards defaults from a fresh expansion (plain), the recorded pass applied to the recorded card (recorded), the pass with --blocks on the fresh expansion (blocks), the same request written with blocks, examples/showcase/site (blockcards). The recorded column is not a fair one: those cards were expanded by an older notation and carry faults it had then (unread values, an empty gallery).",
+ "judges": "Judges: Opus and Sonnet subagents of a Claude Code session, shown the versions unlabeled and shuffled (ways.py pack); not judge.py, because no API key was at hand.",
+ "judgments": [
+  {
+   "case": "approval",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "recorded",
+    "blocks",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 8,
+    "recorded": 7,
+    "blocks": 6,
+    "plain": 4
+   },
+   "why": "B has the richest, best-balanced hierarchy with status pill and explained warning; C is clean but plain; A bleeds to the frame edges; D is underdesigned with weak, tiny actions."
+  },
+  {
+   "case": "approval",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blocks": 8,
+    "blockcards": 8,
+    "recorded": 6,
+    "plain": 4
+   },
+   "why": "B and A have clear hierarchy, icons and a strong danger callout; D is cramped with tiny buttons."
+  },
+  {
+   "case": "carousel",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 7,
+    "recorded": 5,
+    "plain": 4
+   },
+   "why": "D is a polished, shipped-looking carousel with peek, thumbnails and clear hierarchy; B is clean with a strong hero; A is serviceable but plain; C uses a generic placeholder image and weak type."
+  },
+  {
+   "case": "carousel",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "recorded": 6,
+    "blocks": 8,
+    "plain": 4,
+    "blockcards": 9
+   },
+   "why": "D is rich with peek of next card, thumbnails and details; B has a real illustration; C has a gray placeholder."
+  },
+  {
+   "case": "checkout",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 7,
+    "plain": 5,
+    "recorded": 4
+   },
+   "why": "A is richly crafted with stepper, product art and a strong sticky footer; B is tidy and consistent; C has misaligned steppers and flat hierarchy; D shows an unfilled progress bar and uneven insets."
+  },
+  {
+   "case": "checkout",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 7,
+    "plain": 6,
+    "recorded": 4
+   },
+   "why": "A has stepper, product thumbnails and a strong subtotal/CTA bar; D has an empty progress track and tiny steppers."
+  },
+  {
+   "case": "code_diff",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 8,
+    "plain": 4,
+    "recorded": 2
+   },
+   "why": "A is a polished diff reviewer with named hunks, gutters and a summary footer; B is close but slightly plainer; C renders code in a proportional font with weak structure; D leaks template code in the subtitle and has a label-less apply button."
+  },
+  {
+   "case": "code_diff",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 8,
+    "plain": 5,
+    "recorded": 2
+   },
+   "why": "A has file context, clear hunk titles and a status footer; D has garbled count text and a blank button."
+  },
+  {
+   "case": "comparison",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 7,
+    "recorded": 6,
+    "plain": 5
+   },
+   "why": "C uses a highlighted winner column, checkmarks and in-column CTAs for the clearest comparison; B is solid with a strong recommendation block; A is tidy but small buttons; D has oversized row labels and weak value emphasis."
+  },
+  {
+   "case": "comparison",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "recorded": 6,
+    "blocks": 7,
+    "blockcards": 9,
+    "plain": 5
+   },
+   "why": "C uses a highlighted winner column with checkmarks and compact rows; D repeats noisy badges with weak hierarchy."
+  },
+  {
+   "case": "dashboard",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 6,
+    "plain": 4,
+    "recorded": 2
+   },
+   "why": "D is a complete, polished dashboard with populated table and annotated charts; C looks good but its table is empty; A has an empty table and crude charts; B shows broken template characters in place of every KPI and revenue value."
+  },
+  {
+   "case": "dashboard",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "plain": 4,
+    "recorded": 2,
+    "blocks": 6,
+    "blockcards": 9
+   },
+   "why": "D is complete, polished with icons, axis labels, data-filled table; B shows broken KPI and revenue values, A and C have empty tables."
+  },
+  {
+   "case": "data_table",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 6,
+    "recorded": 6,
+    "plain": 4
+   },
+   "why": "A is a clean, aligned table with proper search, tabs and status pills; C and D share a missing-glyph header and headers that do not match the stacked columns, C framing it slightly better; B adds gray status pills and the weakest hierarchy."
+  },
+  {
+   "case": "data_table",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "plain": 5,
+    "blocks": 6,
+    "recorded": 6
+   },
+   "why": "A is a clean aligned real table with search and status chips; others have a broken sort glyph and misaligned headers over stacked rows."
+  },
+  {
+   "case": "flights",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 7,
+    "plain": 6,
+    "recorded": 5
+   },
+   "why": "C is a polished boarding-pass style list with airport codes and a rich footer; A shares that design but the card is narrower and truncates the airline name; D is clean but generic; B has a squat confirm button and a cramped total row."
+  },
+  {
+   "case": "flights",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blocks": 7,
+    "recorded": 6,
+    "blockcards": 9,
+    "plain": 5
+   },
+   "why": "C has airport codes, route visuals and a strong footer without truncation; A truncates the airline name and sits narrow; D is plain."
+  },
+  {
+   "case": "image_gallery",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 6,
+    "plain": 5,
+    "recorded": 1
+   },
+   "why": "B has illustrated thumbnails and a full header for a shipped feel; D is tidy with gradient placeholders; C uses flat color blocks with tight edge padding; A renders no gallery at all."
+  },
+  {
+   "case": "image_gallery",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "recorded": 1,
+    "blockcards": 10,
+    "plain": 5,
+    "blocks": 6
+   },
+   "why": "B has real illustrated tiles and a count pill; A renders only a title with no gallery."
+  },
+  {
+   "case": "itinerary",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 7,
+    "plain": 6,
+    "recorded": 3
+   },
+   "why": "B uses a clear timeline with illustrated day headers and grouped booking lists; D adds art but is looser; A is plain but tidy; C is excessively long with heavy expanded cards and is clipped at the bottom."
+  },
+  {
+   "case": "itinerary",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "plain": 6,
+    "blockcards": 9,
+    "recorded": 4,
+    "blocks": 7
+   },
+   "why": "B has a clear timeline with time column, day hero banners and tidy booking cards; C is overlong with everything expanded and runs off the frame."
+  },
+  {
+   "case": "map_list",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 8,
+    "recorded": 4,
+    "plain": 3
+   },
+   "why": "A pairs a detailed map with rich list rows and a header pill; B is similar with less detail; D and C have misaligned chevrons that wander across rows, with C also using low-contrast brown pins and a weak title."
+  },
+  {
+   "case": "map_list",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 8,
+    "plain": 4,
+    "recorded": 5
+   },
+   "why": "A has a realistic map with pins, subtitles and ratings; C and D have crude maps and misaligned chevrons."
+  },
+  {
+   "case": "message_draft",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 7,
+    "recorded": 6,
+    "plain": 5
+   },
+   "why": "D has comfortable inputs, clear header and a strong primary action; C is solid with full-width segmented control and good buttons; A is neat but compact with small actions; B is the plainest with weak title and cramped controls."
+  },
+  {
+   "case": "message_draft",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "recorded": 6,
+    "plain": 5,
+    "blocks": 8,
+    "blockcards": 9
+   },
+   "why": "D has comfortable spacing, a full-width tone toggle and a prominent Send; A and B have tiny actions and a cramped toggle."
+  },
+  {
+   "case": "order_summary",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 7,
+    "recorded": 6,
+    "plain": 4
+   },
+   "why": "C has illustrated items, rich metadata and a strong total footer; A is clean with balanced buttons; B has a squat, unbalanced action row; D uses generic placeholders, a misaligned Apply button and uneven steppers."
+  },
+  {
+   "case": "order_summary",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blocks": 7,
+    "recorded": 6,
+    "blockcards": 9,
+    "plain": 5
+   },
+   "why": "C has product illustrations, line totals and a strong total/CTA bar; D has placeholder images and tiny buttons."
+  },
+  {
+   "case": "plan_progress",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 8,
+    "plain": 5,
+    "recorded": 4
+   },
+   "why": "A has a full header with status pill and a clean numbered timeline; B is nearly as polished; C uses bare system radios and flat hierarchy; D over-weights Elapsed and has a squat, thin start button."
+  },
+  {
+   "case": "plan_progress",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 8,
+    "plain": 5,
+    "recorded": 6
+   },
+   "why": "A has numbered stepper with connectors, status pill and clear CTA; C is plain and D has a small, weak button."
+  },
+  {
+   "case": "question_flow",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 7,
+    "plain": 5,
+    "recorded": 4
+   },
+   "why": "D has a labeled stepper and rich option cards with icons and descriptions; B has clear full-width options and a strong Next; C mixes small chips with a big button; A has an unfilled progress bar and a tiny Next button."
+  },
+  {
+   "case": "question_flow",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "plain",
+    "recorded"
+   ],
+   "scores": {
+    "recorded": 4,
+    "blocks": 7,
+    "plain": 5,
+    "blockcards": 9
+   },
+   "why": "D has a stepper, icon option cards with descriptions and radios; A has tiny pill options and a weak Next button."
+  },
+  {
+   "case": "reservation",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "recorded",
+    "blocks",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "recorded": 6,
+    "blocks": 6,
+    "plain": 4
+   },
+   "why": "D is a compact, purpose-built picker with date strip, stepper and summary footer; A and C are near-identical chip grids with A slightly more refined in its hint; B has floating undersized chips and no visual containment."
+  },
+  {
+   "case": "reservation",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "recorded",
+    "blocks",
+    "plain"
+   ],
+   "scores": {
+    "recorded": 6,
+    "plain": 4,
+    "blocks": 5,
+    "blockcards": 9
+   },
+   "why": "D uses a date strip, stepper and time grid with a summary/confirm bar; others are long, ragged chip grids with uneven columns."
+  },
+  {
+   "case": "weather",
+   "judge": "opus",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "blockcards": 9,
+    "blocks": 8,
+    "recorded": 5,
+    "plain": 4
+   },
+   "why": "C and B both have vivid hero and gradient range bars, C edging ahead with the rain callout and tighter rhythm; D has empty range bars; A uses monochrome icons, a small temperature and an hourly row that runs to the edge."
+  },
+  {
+   "case": "weather",
+   "judge": "sonnet",
+   "rank": [
+    "blockcards",
+    "blocks",
+    "recorded",
+    "plain"
+   ],
+   "scores": {
+    "plain": 4,
+    "blocks": 8,
+    "blockcards": 9,
+    "recorded": 5
+   },
+   "why": "C has a polished hero with illustrated icons, rain hint and gradient range bars; D has empty range bars and A uses crude glyph icons."
+  }
+ ]
+}

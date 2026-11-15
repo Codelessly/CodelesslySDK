@@ -1,0 +1,34 @@
+Screen "Profile Settings" background:#F2F2F7 scroll:vertical
+  Header "Settings" style:largeTitle sticky:true behavior:collapses-to-inline-title-on-scroll
+  ProfileCard elevation:1 radius:16 padding:16 margin:16 enter:fade-up 300ms
+    Row align:center gap:12
+      Avatar src:user.photo size:64 shape:circle fallback:"JR" loading:shimmer
+      Column flex:1
+        Text "Jordan Rivera" style:headline weight:600
+        Text "jordan.rivera@mail.com" style:subtitle color:secondary truncate:end
+      Button "Edit" variant:outlined size:small onTap:navigate(EditProfile) pressed:scale(0.96) 100ms
+  Section "Account" enter:fade-up 300ms delay:60ms
+    Group radius:12 background:surface
+      Row "Personal info" icon:user chevron:true onTap:navigate pressed:highlight
+      Row "Password & security" icon:lock chevron:true onTap:navigate pressed:highlight
+      Row "Linked accounts" icon:link chevron:true onTap:navigate pressed:highlight
+  Section "Preferences" enter:fade-up 300ms delay:120ms
+    Group radius:12 background:surface
+      Row "Dark mode" icon:moon
+        Toggle value:off onChange:apply-theme transition:crossfade 250ms thumb:slide 200ms haptic:light
+      Row "Notifications" icon:bell
+        Toggle value:on onChange:request-permission-if-needed thumb:slide 200ms haptic:light
+      Row "Language" icon:globe value:"English" valueColor:secondary chevron:true onTap:open-bottom-sheet(LanguagePicker)
+  Section "Support" enter:fade-up 300ms delay:180ms
+    Group radius:12 background:surface
+      Row "Help center" icon:help chevron:true onTap:navigate pressed:highlight
+      Row "Privacy policy" icon:shield chevron:true onTap:navigate pressed:highlight
+  Section enter:fade-up 300ms delay:240ms
+    Group radius:12 background:surface
+      Row "Log out" icon:logout color:red align:center chevron:false onTap:confirm-dialog("Log out of your account?") pressed:highlight-red-tint
+  Text "Version 3.4.1" style:caption color:tertiary align:center margin-top:24 margin-bottom:24
+  TabBar position:bottom fixed:true safeArea:true background:surface border-top:hairline
+    Tab "Home" icon:home
+    Tab "Activity" icon:chart badge:none
+    Tab "Messages" icon:chat badge:3
+    Tab "Settings" icon:gear selected:true color:accent indicator:pill transition:150ms

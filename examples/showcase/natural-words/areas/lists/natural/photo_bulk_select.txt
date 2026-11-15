@@ -1,0 +1,49 @@
+Screen "Uploaded files"
+  Header
+    Checkbox label:"Select all" state:indeterminate
+    Text "Files" style:title
+    Text "6 files" style:secondary
+  List name:files selection:multiple
+    Row selected:false
+      Checkbox checked:false
+      Icon name:image
+      Text "beach_sunset.jpg" style:primary
+      Text "4.2 MB" style:secondary align:right
+    Row selected:false
+      Checkbox checked:false
+      Icon name:pdf
+      Text "receipt_march.pdf" style:primary
+      Text "180 KB" style:secondary align:right
+    Row selected:true highlight:subtle
+      Checkbox checked:true
+      Icon name:image
+      Text "team_photo.png" style:primary
+      Text "3.1 MB" style:secondary align:right
+    Row selected:false
+      Checkbox checked:false
+      Icon name:text
+      Text "notes.txt" style:primary
+      Text "2 KB" style:secondary align:right
+    Row selected:true highlight:subtle
+      Checkbox checked:true
+      Icon name:pdf
+      Text "invoice_2291.pdf" style:primary
+      Text "96 KB" style:secondary align:right
+    Row selected:true highlight:subtle
+      Checkbox checked:true
+      Icon name:vector
+      Text "logo_final.svg" style:primary
+      Text "14 KB" style:secondary align:right
+  BulkActionBar position:bottom-fixed elevation:high visible-when:"selected_count > 0"
+    enter:slide-up duration:200ms easing:ease-out
+    exit:slide-down duration:150ms easing:ease-in
+    IconButton icon:close label:"Clear selection" action:deselect-all
+    Text "3 selected" bind:"{selected_count} selected" live:polite
+    Spacer
+    Button "Move" icon:folder variant:text
+    Button "Download" icon:download variant:text
+    Button "Delete" icon:trash variant:text tone:danger confirm:"Delete 3 files?"
+  Behavior
+    on:checkbox-toggle update:selected_count transition:count-change 100ms
+    on:select-all-toggle set:all-rows-selected
+    on:selected_count==0 hide:BulkActionBar

@@ -1,0 +1,84 @@
+Page "Harbor Legal – Contact" theme:light font:serif-sans max-width:1200 background:#fafaf7
+
+  Navbar sticky:top elevation:low background:white
+    Brand "Harbor Legal" icon:anchor weight:bold color:#14304a href:/
+    NavLinks align:right gap:24
+      Link "Home" href:/
+      Link "Practice Areas" href:/practice
+      Link "Attorneys" href:/attorneys
+      Link "Insights" href:/insights
+      Link "Contact" href:/contact state:active underline:true
+    Button "Free consultation" style:primary size:small href:/consult
+    MenuButton icon:hamburger visible:below-768px toggles:NavLinks transition:slide-down 200ms
+
+  Header align:center padding:64/32 background:#14304a color:white
+    Heading "Get in touch" level:1 size:40 animate:fade-up 400ms
+    Text "Tell us about your matter and an attorney will respond within one business day." color:#cfd8e3 max-width:560 animate:fade-up 400ms delay:100ms
+
+  Section layout:two-column columns:3fr/2fr gap:48 padding:48 stack-below:900px
+
+    Column name:left
+      Form id:contact action:submit validate:on-blur
+        Field "Full name" type:text required:true placeholder:"Jane Doe" autocomplete:name
+          Error "Please enter your name" show-when:invalid
+        Field "Email" type:email required:true placeholder:"jane@example.com" autocomplete:email
+          Error "Enter a valid email address" show-when:invalid
+        Field "Phone" type:tel placeholder:"(206) 555-0100" hint:"Optional" autocomplete:tel
+        Select "Topic" required:true placeholder:"Choose a topic"
+          Option "General" value:general
+          Option "Billing" value:billing
+          Option "Partnership" value:partnership
+        Textarea "Message" rows:6 required:true maxlength:1000 placeholder:"How can we help?"
+          Counter format:"{n}/1000" align:right
+        Checkbox "I agree to be contacted about my inquiry and accept the Privacy Policy." required:true
+          Link "Privacy Policy" href:/privacy
+          Error "Consent is required to send your message" show-when:submitted-unchecked
+        Button "Send message" type:submit style:primary full-width:true
+          State loading: label:"Sending…" spinner:true disabled:true
+          State disabled-until:required-fields-valid
+          Hover: background:darken 8% transition:150ms
+        Banner type:success "Thank you. Your message has been sent." show-when:submitted-ok role:status animate:fade-in dismiss:auto 6s
+        Banner type:error "Something went wrong. Please try again or call us." show-when:submit-failed role:alert
+
+    Column name:right gap:16
+      Card title:"Seattle Office" icon:building
+        InfoRow icon:pin label:"Address" text:"221 Pier St, Seattle, WA"
+        InfoRow icon:phone label:"Phone" text:"(206) 555-0142" href:tel:+12065550142
+        InfoRow icon:mail label:"Email" text:"hello@harborlegal.com" href:mailto:hello@harborlegal.com
+        InfoRow icon:clock label:"Hours" text:"Mon–Fri 9–6"
+      Map height:280 radius:8 provider:embedded zoom:15 interactive:true lazy-load:true
+        Marker "Harbor Legal" at:"221 Pier St, Seattle, WA" popup:open-on-click
+        Controls zoom:true fullscreen:true
+        Link "Get directions" href:maps-directions position:bottom-right
+
+  Section padding:48 background:white
+    Heading "Our offices" level:2 align:center
+    Grid columns:3 gap:24 stack-below:800px
+      Card title:"Seattle" hover:lift transition:200ms animate:fade-up stagger:100ms
+        Text "221 Pier St, Seattle, WA"
+        Text "(206) 555-0142"
+        Link "View on map" href:#map action:pan-map-to:seattle
+      Card title:"Portland"
+        Text "Address on request"
+        Text "Hours Mon–Fri 9–5"
+        Link "Get directions" href:/offices/portland
+      Card title:"San Francisco"
+        Text "Address on request"
+        Text "Hours Mon–Fri 9–5"
+        Link "Get directions" href:/offices/san-francisco
+
+  Footer background:#0d2236 color:#cfd8e3 padding:40
+    Row justify:space-between stack-below:700px
+      Column
+        Brand "Harbor Legal" color:white
+        Text "Counsel you can trust, on every shore."
+      Column title:"Firm"
+        Link "Practice Areas" href:/practice
+        Link "Attorneys" href:/attorneys
+        Link "Contact" href:/contact
+      Column title:"Legal"
+        Link "Privacy Policy" href:/privacy
+        Link "Terms" href:/terms
+        Link "Disclaimer" href:/disclaimer
+    Divider
+    Text "© 2025 Harbor Legal LLP. Attorney advertising. Prior results do not guarantee a similar outcome." size:small

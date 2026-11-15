@@ -1,0 +1,46 @@
+App "News" theme:light
+  State
+    drawerOpen type:boolean default:false
+    activeSection default:"Top Stories"
+  TopBar position:top elevation:2 height:56
+    IconButton icon:hamburger label:"Open menu" align:left
+      onTap: set drawerOpen=true
+    Title "News" align:center
+    IconButton icon:search label:"Search" align:right
+  Content scroll:vertical
+    Header "Top Stories" style:headline
+    ArticleList
+      ArticleCard
+        Image src:"thumbnail" ratio:16:9
+        Headline "Headline text"
+        Meta "Source · 2h ago" style:caption
+      ArticleCard
+        Image src:"thumbnail" ratio:16:9
+        Headline "Headline text"
+        Meta "Source · 4h ago" style:caption
+  Scrim id:scrim visible:drawerOpen color:black opacity:0.5 fill:screen
+    onTap: set drawerOpen=false
+    transition: fade duration:200ms
+  Drawer id:sideDrawer side:left width:80% maxWidth:320 visible:drawerOpen elevation:16
+    transition: slide-in-from-left duration:250ms easing:ease-out
+    onSwipeLeft: set drawerOpen=false
+    onBackPress: set drawerOpen=false
+    Header background:primary padding:16
+      Avatar src:"user-photo" shape:circle size:64 fallback:initials("SO")
+      Text "Sam Ortiz" style:title weight:bold
+    NavList
+      NavItem "Top Stories" icon:newspaper selected:activeSection=="Top Stories"
+        onTap: set activeSection="Top Stories"; set drawerOpen=false
+      NavItem "World" icon:globe selected:activeSection=="World"
+        onTap: set activeSection="World"; set drawerOpen=false
+      NavItem "Tech" icon:chip selected:activeSection=="Tech"
+        onTap: set activeSection="Tech"; set drawerOpen=false
+      NavItem "Sports" icon:trophy selected:activeSection=="Sports"
+        onTap: set activeSection="Sports"; set drawerOpen=false
+      NavItem "Bookmarks" icon:bookmark selected:activeSection=="Bookmarks"
+        onTap: set activeSection="Bookmarks"; set drawerOpen=false
+      NavItem "Settings" icon:gear selected:activeSection=="Settings"
+        onTap: set activeSection="Settings"; set drawerOpen=false
+    Divider
+    NavItem "Sign out" icon:logout color:danger
+      onTap: confirm "Sign out of your account?" then signOut

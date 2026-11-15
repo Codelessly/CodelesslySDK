@@ -1,0 +1,1 @@
+An inline chat card for a clinic lab pickup. Show that a blood test kit is ready at the North Hall desk, the pickup window today, the short pickup code, and a button that tells the host the user will collect it. Let the user choose whether to get a reminder.

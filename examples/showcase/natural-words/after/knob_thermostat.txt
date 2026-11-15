@@ -1,0 +1,16 @@
+state temp=21
+state mode="Heat"
+Card gap:12
+  Row between middle
+    Column
+      Text.heading "Living room"
+      Text.caption "Target temperature"
+    Badge.warning "{mode}" visible:=mode=="Heat"
+    Badge.info "{mode}" visible:=mode=="Cool"
+  Row center
+    Gauge =temp min:16 max:28 unit:"°C"
+  Row center middle gap:16
+    IconButton "remove" -> temp=max(16,temp-1)
+    Text.heading "{temp}°C"
+    IconButton "add" -> temp=min(28,temp+1)
+  SegmentedButton =mode items:["Heat","Cool"]

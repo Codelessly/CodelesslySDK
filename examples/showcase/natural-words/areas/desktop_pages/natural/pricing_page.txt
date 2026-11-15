@@ -1,0 +1,157 @@
+Page "Notely Pricing" background:#FAFAF9 font:Inter max-width:1120 align:center padding:0 24
+  Header sticky:top height:64 background:white border-bottom:1px #E7E5E4
+    Logo "Notely" weight:700 size:20
+    Nav direction:row gap:24
+      Link "Features"
+      Link "Pricing" active:true
+      Link "Help"
+    Row gap:12 align:right
+      Button "Log in" style:text
+      Button "Get started" style:primary
+
+  Section hero align:center padding:72 0 32
+    Heading "Simple pricing for the way you think" level:1 size:44 weight:700
+    Text "Start free. Upgrade when your ideas outgrow it." color:#78716C size:18
+
+    Toggle id:billing name:"Billing period" default:annual margin-top:32
+      Option "Monthly" value:monthly
+      Option "Annual" value:annual
+        Badge "Save 20%" color:green background:#DCFCE7
+      State selected: thumb:pill background:white shadow:sm
+      Motion thumb:slide duration:250ms easing:spring
+      Behavior on-change: swap all Price values, prices roll vertically 200ms with cross-fade
+      Keyboard arrows:switch focus-ring:visible
+
+  Section plans id:plans
+    Grid columns:3 gap:24 stack-below:900
+      Card plan:free padding:32 radius:16 border:1px #E7E5E4 background:white
+        Heading "Free" level:3
+        Text "For jotting things down" color:#78716C
+        Price monthly:"$0" annual:"$0" suffix:"/forever" size:48
+        Button "Get started free" style:outline full-width:true
+        List icon:check icon-color:green gap:12
+          Item "Up to 100 notes"
+          Item "1 GB storage"
+          Item "2 collaborators"
+          Item "Sync on 2 devices"
+          Item "Basic search"
+      Card plan:pro featured:true padding:32 radius:16 border:2px #4F46E5 background:white shadow:lg
+        Badge "Most popular" position:top-center color:white background:#4F46E5
+        Heading "Pro" level:3
+        Text "For people who live in their notes" color:#78716C
+        Price monthly:"$12" annual:"$115" suffix-monthly:"/mo" suffix-annual:"/yr" size:48
+        Text monthly:"Billed monthly" annual:"$9.58/mo, billed annually" size:13 color:#78716C
+        Button "Start 14-day free trial" style:primary full-width:true
+        List icon:check icon-color:green gap:12
+          Item "Everything in Free, plus:" weight:600
+          Item "Unlimited notes"
+          Item "50 GB storage"
+          Item "10 collaborators"
+          Item "30-day version history"
+          Item "Unlimited devices and offline access"
+      Card plan:business padding:32 radius:16 border:1px #E7E5E4 background:white
+        Heading "Business" level:3
+        Text "For teams that need control" color:#78716C
+        Price monthly:"$29" annual:"$278" suffix-monthly:"/mo" suffix-annual:"/yr" size:48
+        Text monthly:"Billed monthly, per user" annual:"$23.17/mo per user, billed annually" size:13 color:#78716C
+        Button "Contact sales" style:dark full-width:true
+        List icon:check icon-color:green gap:12
+          Item "Everything in Pro, plus:" weight:600
+          Item "1 TB storage"
+          Item "Unlimited collaborators"
+          Item "Unlimited version history"
+          Item "SSO and admin controls"
+          Item "Priority support"
+      Motion on-load: cards fade-up 24px stagger:100ms duration:400ms
+      Motion hover: card lift 4px shadow:md duration:150ms
+      State Button loading: spinner replaces label, disabled:true
+
+  Section comparison margin-top:96
+    Heading "Compare all features" level:2 align:center
+    Table sticky-header:true scroll-x:below-720 radius:12 border:1px #E7E5E4 background:white
+      Header
+        Cell ""
+        Cell "Free"
+        Cell "Pro" highlight:true background:#EEF2FF
+        Cell "Business"
+      Group "Essentials" style:subheading
+      Row
+        Cell "Notes" align:left
+        Cell "100"
+        Cell "Unlimited" highlight:true
+        Cell "Unlimited"
+      Row
+        Cell "Storage"
+        Cell "1 GB"
+        Cell "50 GB" highlight:true
+        Cell "1 TB"
+      Row
+        Cell "Devices"
+        Cell "2"
+        Cell "Unlimited" highlight:true
+        Cell "Unlimited"
+      Group "Collaboration" style:subheading
+      Row
+        Cell "Collaborators"
+        Cell "2"
+        Cell "10" highlight:true
+        Cell "Unlimited"
+      Row
+        Cell "Version history"
+        Cell icon:dash label:"Not included" color:#A8A29E
+        Cell "30 days" highlight:true
+        Cell "Unlimited"
+      Row
+        Cell "Shared workspaces"
+        Cell icon:dash label:"Not included" color:#A8A29E
+        Cell icon:check label:"Included" color:green highlight:true
+        Cell icon:check label:"Included" color:green
+      Group "Security and support" style:subheading
+      Row
+        Cell "SSO"
+        Cell icon:dash label:"Not included" color:#A8A29E
+        Cell icon:dash label:"Not included" color:#A8A29E highlight:true
+        Cell icon:check label:"Included" color:green
+      Row
+        Cell "Admin controls"
+        Cell icon:dash label:"Not included" color:#A8A29E
+        Cell icon:dash label:"Not included" color:#A8A29E highlight:true
+        Cell icon:check label:"Included" color:green
+      Row
+        Cell "Priority support"
+        Cell icon:dash label:"Not included" color:#A8A29E
+        Cell icon:dash label:"Not included" color:#A8A29E highlight:true
+        Cell icon:check label:"Included" color:green
+      Footer
+        Cell ""
+        Cell Button "Get started" style:outline size:small
+        Cell Button "Start trial" style:primary size:small highlight:true
+        Cell Button "Contact sales" style:dark size:small
+      Behavior row:hover background:#FAFAF9
+      Behavior mobile: first column pinned left while scrolling
+
+  Section faq margin-top:96 max-width:720 align:center
+    Heading "Frequently asked questions" level:2
+    Accordion mode:single-open default-open:none divider:1px #E7E5E4
+      Item
+        Question "Can I switch plans at any time?"
+        Answer "Yes. Upgrade instantly, or downgrade at the end of your billing period. We prorate any difference."
+      Item
+        Question "How does annual billing save me 20%?"
+        Answer "Annual plans are billed once a year at a 20% discount compared with paying monthly. Pro is $115/yr and Business is $278/yr."
+      Item
+        Question "What happens to my notes if I downgrade to Free?"
+        Answer "Nothing is deleted. Notes over the limit become read-only until you upgrade or remove some."
+      Item
+        Question "Do you offer discounts for students or nonprofits?"
+        Answer "Yes. Students and registered nonprofits get 50% off Pro. Contact support to apply."
+      State item-open: chevron rotated:180deg question weight:600
+      Motion expand: height auto duration:250ms easing:ease-out, chevron rotate 200ms
+      Keyboard enter/space:toggle arrows:move-focus
+
+  Footer margin-top:96 padding:32 0 border-top:1px #E7E5E4 color:#78716C size:14
+    Text "© 2025 Notely, Inc."
+    Row gap:16
+      Link "Privacy"
+      Link "Terms"
+      Link "Contact"

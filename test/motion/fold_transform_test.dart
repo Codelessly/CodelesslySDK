@@ -170,5 +170,7 @@ void main() {
     final notes = said.where((m) => m.contains('30.0.0\'s spelling')).toList();
     expect(notes, hasLength(1));
     expect(notes.single, contains('motion.scale'));
+    // Restored in the body: the binding checks debug variables before teardowns run.
+    debugPrint = before;
   });
 }

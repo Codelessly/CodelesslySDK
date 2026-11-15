@@ -1,0 +1,18 @@
+Card gap:12
+  Text.title "Split the bill"
+  Row between
+    Text.muted "Bill"
+    Text.strong "{money(84,'$',2)}"
+  Row between
+    Text.muted "Tip"
+    Text.strong "{round(tip,0)}%"
+  Slider =tip min:0 max:30
+  Divider
+  Row between
+    Text.muted "Tip amount"
+    Text.strong "{money(84*tip/100,'$',2)}"
+  Row between
+    Text.heading "Total"
+    Text.heading "{money(84*(1+tip/100),'$',2)}"
+
+state tip=15

@@ -1,0 +1,44 @@
+Card id:signup-state-submitted width:420 padding:32 radius:16 elevation:2 background:surface
+  Header align:center gap:8
+    Logo "Lumen Notes" icon:lumen-bulb size:32
+    Heading "Create your account" level:1
+    Text "Start capturing ideas in seconds" color:muted
+  Form id:signup-form gap:16 state:submitted validation:failed
+    Field id:name gap:4
+      Label "Full name"
+      TextInput value:"Maya Okafor" placeholder:"Your full name" autocomplete:name state:valid
+    Field id:email gap:4 state:error
+      Label "Email"
+      TextInput value:"" placeholder:"you@example.com" type:email autocomplete:email border-color:red focus:true aria-invalid:true
+        Motion on:error type:shake duration:300ms
+      ErrorText "Email is required" color:red size:12 icon:alert-circle
+        Motion on:appear type:fade-slide-down duration:200ms
+    Field id:password gap:4 state:valid
+      Label "Password"
+      TextInput value:"lumen2024" type:password autocomplete:new-password
+        Action "Show password" type:toggle-visibility icon:eye position:trailing
+      StrengthMeter level:fair value:2 max:3 gap:4
+        Segment state:filled color:orange
+        Segment state:filled color:orange
+        Segment state:empty color:border
+        Text "Fair" color:orange size:12
+        Motion on:change type:animate-fill duration:250ms
+      HelperText "Use 12+ characters with numbers and symbols for a strong password" color:muted size:12
+    Field id:confirm gap:4 state:error
+      Label "Confirm password"
+      TextInput value:"lumen2025" type:password autocomplete:new-password border-color:red aria-invalid:true
+        Action "Show password" type:toggle-visibility icon:eye position:trailing
+        Motion on:error type:shake duration:300ms
+      ErrorText "Passwords don't match" color:red size:12 icon:alert-circle
+        Motion on:appear type:fade-slide-down duration:200ms delay:50ms
+    Checkbox id:terms checked:true
+      Text "I agree to the "
+        Link "Terms of Service" href:/terms
+        Text " and "
+        Link "Privacy Policy" href:/privacy
+    Button "Create account" variant:primary fullWidth:true size:large type:submit state:enabled
+      Motion on:press type:scale to:0.98 duration:100ms
+      Behavior on:click validate:true onInvalid:focus-first-error
+  Footer align:center
+    Text "Already have an account?" color:muted
+    Link "Log in" href:/login

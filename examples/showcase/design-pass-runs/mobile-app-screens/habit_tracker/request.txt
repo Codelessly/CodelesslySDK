@@ -1,0 +1,1 @@
+A habit tracker's today screen: the date with a week strip of seven days, a progress summary (4 of 6 done), six habits each with an icon, name, streak count and a check control, a card with this week's completion chart, and an Add habit button.

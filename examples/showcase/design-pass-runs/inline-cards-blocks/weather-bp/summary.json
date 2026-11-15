@@ -1,0 +1,47 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/ic/weather.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [
+  "WeatherDay",
+  "Segments",
+  "WeatherNow"
+ ],
+ "before": {
+  "problems": 0,
+  "texts": 27
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 26.1,
+   "problems": 3,
+   "ops": 11
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 24.6,
+   "problems": 1,
+   "ops": 11
+  }
+ ],
+ "final": 2,
+ "problems": 1,
+ "status": "failed",
+ "firstCheck": {
+  "status": "failed",
+  "final": 2,
+  "rounds": [
+   [
+    1,
+    9
+   ],
+   [
+    2,
+    1
+   ]
+  ],
+  "note": "As first checked; then checked again after two faults of the checks were fixed (a required prop equal to its default was dropped; a text a block shows in pieces counted as gone)."
+ }
+}

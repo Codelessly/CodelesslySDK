@@ -5,7 +5,10 @@ actions stay as they were; only how it looks changes. The experiment for "fast, 
 
     ANTHROPIC_API_KEY=... python3 examples/showcase/tool/style_pass.py --card <document.json> --out <dir> \
         [--request <file: what the user asked for>] [--model claude-opus-5-5] [--rounds 2] \
-        [--design-system design_systems/cards] [--width 420] [--narrow 320]
+        [--design-system design_systems/cards] [--width 420] [--narrow 320] [--blocks]
+
+--blocks tells the agent of the design system's own blocks (each one's purpose, props and events, and the three
+closest to the request as written) and lets it put a block in place of plain nodes that show the same thing.
 
 --width and --narrow are the widths it is rendered at (a full page on a desktop: --width 1280 --narrow 768).
 
@@ -18,8 +21,22 @@ fewest problems is kept. Writes <out>/before/, <out>/round<n>/ (answer.txt, ops.
 dark.png, narrow.png, problems.txt), <out>/after.json and <out>/summary.json (seconds and tokens per round).
 The key is read from the environment and never written.
 
+--block-pictures <dir> (with --blocks) also shows the agent pictures of those three blocks: <dir>/<Type>.png, which
+`style_pass.py block-pictures --out <dir>` renders from each block's first preview.
+
     python3 examples/showcase/tool/style_pass.py brief --card <document.json> --out <dir>
         writes <dir>/brief.txt: the instructions the agent gets, word for word (no model is called)
+
+With no key at hand the design agent can be any agent that reads files and pictures; the tool does the rest:
+
+    style_pass.py prepare --card <document.json> --out <dir> [the options above]
+        renders the card (before/light.png, dark.png, narrow.png), writes brief.txt and, with --block-pictures,
+        copies the closest blocks' pictures to <dir>/blocks/
+    style_pass.py check --out <dir> --round <n>
+        reads <dir>/round<n>/answer.txt (the agent's answer), applies and renders it and writes
+        round<n>/problems.txt and the three pictures, as a round of the run does
+    style_pass.py finish --out <dir>
+        keeps the round with the fewest problems: after.json and summary.json
 """
 import json, os, shutil, sys, time
 
@@ -54,7 +71,53 @@ def render(card, ds, d, width=420, narrow=320):
     return problems, texts
 
 
-def brief_for(ds, doc, request):
+NEAR = []  # the closest blocks of the last brief, by type
+
+
+def own_blocks(ds, manifest):
+    """The design system's own blocks (not the stock controls it copies from its base), as their documents."""
+    base = os.path.join(os.path.dirname(ds), 'ssui', 'components')
+    stock = set(os.listdir(base)) if os.path.isdir(base) and os.path.basename(ds) != 'ssui' else set()
+    out = []
+    for ref in manifest['components']:
+        if os.path.basename(ref) in stock or not os.path.exists(f'{ds}/{ref}'):
+            continue
+        d = json.load(open(f'{ds}/{ref}'))
+        if isinstance(d.get('widget'), dict):
+            out.append(d)
+    return out
+
+
+def blocks_section(ds, manifest, doc, request, exemplars=3):
+    """What the agent is told of the system's blocks: each one's purpose, props and events, and the few closest
+    to this request as written, so it sees the bar and can use a block where one fits."""
+    blocks = own_blocks(ds, manifest)
+    if not blocks:
+        return ''
+    words = lambda t: {w for w in ''.join(c.lower() if c.isalnum() else ' ' for c in t).split() if len(w) > 3}
+    said = words(request + ' ' + ' '.join(str((n.get('props') or {}).get('text', '')) for n in doc['nodes'].values()))
+    lines = []
+    for d in blocks:
+        w = d['widget']
+        props = ', '.join(f"{p['key']} ({(p.get('type') or {}).get('kind', '?')}{', required' if p.get('required') else ''})" for p in w.get('props', []))
+        events = ', '.join(e['key'] for e in w.get('events', []))
+        root = (d['nodes'].get((d.get('roots') or [''])[0]) or {}).get('layout') or {}
+        size = json.dumps({k: root[k] for k in ('width', 'height') if k in root})
+        lines.append(f"{w['type']}: {w.get('doc', '')}\n    props: {props or 'none'}{'; events: ' + events if events else ''}{'; takes children' if w.get('slots') else ''}\n    layout: {size}")
+    near = sorted(blocks, key=lambda d: -len(said & words(d['widget'].get('doc', '') + ' ' + d['widget']['type'])))[:exemplars]
+    shown = '\n\n'.join(f"{d['widget']['type']}\n{json.dumps(d['nodes'], indent=1)}" for d in near)
+    NEAR[:] = [d['widget']['type'] for d in near]
+    return f"""
+THE SYSTEM'S BLOCKS (the bar; use one where it fits)
+A block is a designed part. Where a group of plain nodes shows what a block shows, put the block in their place: set a node whose "type" is the block's name under the same parent ("props" for fixed values; "bind": {{"props.name": "${{…}}"}} for a value that was bound; an event as "actions": [{{"trigger": {{"type": "event", "event": "onPressed"}}, "actions": [the same actions the plain node had]}}]), then remove the plain nodes it replaces. Everything those nodes said, every binding and every action must be carried into the block; if a block cannot show all of it, do not use it there. A block node has no size of its own in the document: write its "layout" with the width and height listed for it below (a block 46 high is {{"height": 46}}, never {{"hug": 0}} and never left out, or it is drawn flat); its width may be {{"fill": n}} or {{"hug": 0}} where the row needs it. Two blocks side by side must both fit at the narrow width with their labels and icons: stack them or drop an icon if they do not. Where no block fits, build at the same bar from plain nodes.
+{chr(10).join(lines)}
+
+THE CLOSEST BLOCKS, AS WRITTEN (this is the level of composition to reach: a focal element, drawn detail, grouped facts)
+{shown}
+"""
+
+
+def brief_for(ds, doc, request, blocks=False):
     manifest = json.load(open(f'{ds}/design_system.json'))
     theme = manifest['theme']
     code, ops = run(['tool/notation/notation.sh', 'apply', '--reference'])
@@ -65,7 +128,7 @@ A fast model has just written a card from plain parts (rows, columns, texts, the
 
 WHAT MUST NOT CHANGE
 - What the card says: every text, number and label, and every binding ("bind", "${{…}}" in a value), stays as it is. Do not rewrite copy.
-- What the card does: every "actions" list, every variable, every node id and every node's type. Do not remove a node that shows content or takes input.
+- What the card does: every "actions" list, every variable, every node id and every node's type. Do not remove a node that shows content or takes input{', unless a block takes its place and carries what it said and did' if blocks else ''}.
 - The order of its content, unless the layout needs it.
 
 WHAT YOU MAY CHANGE
@@ -88,6 +151,7 @@ A color is written as one of the names above, exactly, or as #AARRGGBB; prefer n
 HOW NODES OF THIS SYSTEM ARE WRITTEN (one of its blocks, for the shape of layout, decoration and text style)
 {json.dumps(example, indent=1)}
 
+{blocks_section(ds, manifest, doc, request) if blocks else ''}
 THE EDIT OPERATIONS
 {ops.strip()}
 
@@ -98,15 +162,101 @@ ANSWER
 Two or three sentences on what you change and why. Then one ```json fence holding {{"ops": [...]}}: every op in the order it is applied. Patch what exists; set only what is new."""
 
 
+def check_round(out, ds, n, text, problems0, texts0, width, narrow):
+    """Applies and renders the answer of round <n>; writes its problems. Returns (problems, how many ops)."""
+    d = f'{out}/round{n}'
+    os.makedirs(d, exist_ok=True)
+    open(f'{d}/answer.txt', 'w').write(text)
+    ops = fenced(text, 'json')
+    problems = []
+    if not ops:
+        problems = ['The answer must hold a ```json fence with {"ops": [...]}.']
+    else:
+        open(f'{d}/ops.json', 'w').write(ops)
+        # Each round's ops are applied to the card as it was before the pass: a round replaces the last, it does not stack on it.
+        code, log = run(['tool/notation/notation.sh', 'apply', f'{out}/before.json', f'{d}/ops.json', '--design-system', ds, '--out', f'{d}/card.json'])
+        problems += [l for l in log.splitlines() if l.startswith('ERROR')]
+        if os.path.exists(f'{d}/card.json'):
+            rendered, texts = render(f'{d}/card.json', ds, d, width, narrow)
+            problems += [l for l in rendered if l not in problems0]
+            shown = ' '.join(texts)
+            # With a block in place of plain nodes a text may be drawn in parts or joined with another: it is
+            # gone only when what it said is nowhere on the card.
+            # ...or in pieces (a block draws "07:15" and "09:50" where the card said "07:15 → 09:50"): every
+            # word of it that holds a letter or a digit must still be on the card.
+            words = lambda t: [w for w in t.split() if any(c.isalnum() for c in w)]
+            gone = [t for t in texts0 if t not in texts and t not in shown and not all(w in shown for w in words(t))]
+            problems += [f'A text the card showed is gone: "{t[:80]}". The pass must not change what the card says.' for t in gone[:12]]
+    open(f'{d}/problems.txt', 'w').write('\n'.join(problems) + '\n')
+    try:
+        count = len(json.loads(ops).get('ops', [])) if ops else 0
+    except Exception:
+        count = 0
+    return problems, count
+
+
+def finish(out, summary):
+    checked = [r for r in summary['rounds'] if 'problems' in r and os.path.exists(f"{out}/round{r['round']}/card.json")]
+    if checked:
+        best = min(checked, key=lambda r: (r['problems'], -r['round']))
+        summary['final'], summary['problems'] = best['round'], best['problems']
+        summary['status'] = 'passed' if best['problems'] == 0 else 'failed'
+        shutil.copy(f"{out}/round{best['round']}/card.json", f'{out}/after.json')
+        shutil.copy(f"{out}/round{best['round']}/ops.json", f'{out}/ops.json')
+    else:
+        summary['status'] = 'failed'
+    json.dump(summary, open(f'{out}/summary.json', 'w'), indent=1)
+    print(json.dumps({k: summary.get(k) for k in ('final', 'status', 'problems', 'totalSeconds')}))
+
+
+def block_pictures(ds, out):
+    """Each own block's first preview, rendered alone: <out>/<Type>.png."""
+    manifest = json.load(open(f'{ds}/design_system.json'))
+    site = f'{out}/.site'
+    os.makedirs(site, exist_ok=True)
+    json.dump({'schema': 3, 'roots': ['c'], 'nodes': {'c': {'type': 'canvas', 'children': []}}}, open(f'{site}/empty.json', 'w'))
+    json.dump({'schema': 3, 'pages': ['empty.json'], 'designSystem': os.path.relpath(ds, site)}, open(f'{site}/site.json', 'w'))
+    for d in own_blocks(ds, manifest):
+        t = d['widget']['type']
+        raw = f'{out}/.raw'
+        shutil.rmtree(raw, ignore_errors=True)
+        run(['tool/render/render.sh', site, '--component', t, '--out', raw])
+        shots = sorted(f for f in os.listdir(raw) if f.endswith('.png')) if os.path.isdir(raw) else []
+        if shots:
+            crop(f'{raw}/{shots[0]}', f'{out}/{t}.png')
+        print(t, 'ok' if shots else 'no picture', flush=True)
+        shutil.rmtree(raw, ignore_errors=True)
+    shutil.rmtree(site, ignore_errors=True)
+
+
 def main():
-    card, out = os.path.abspath(opt('--card')), os.path.abspath(opt('--out'))
-    ds = os.path.join(SDK, opt('--design-system', 'design_systems/cards'))
     mode = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('--') else 'run'
+    out = os.path.abspath(opt('--out'))
     os.makedirs(out, exist_ok=True)
+    ds = os.path.join(SDK, opt('--design-system', 'design_systems/cards'))
+    if mode == 'block-pictures':
+        return block_pictures(ds, out)
+    if mode in ('check', 'finish'):
+        st = json.load(open(f'{out}/state.json'))
+        if mode == 'check':
+            n = int(opt('--round'))
+            t0 = time.time()
+            problems, count = check_round(out, st['ds'], n, open(f'{out}/round{n}/answer.txt').read(), st['problems0'], st['texts0'], st['width'], st['narrow'])
+            st['rounds'] = [r for r in st['rounds'] if r['round'] != n] + [{'round': n, 'checkAndRenderSeconds': round(time.time() - t0, 1), 'problems': len(problems), 'ops': count}]
+            json.dump(st, open(f'{out}/state.json', 'w'), indent=1)
+            print(f'round {n}: {count} operations, {len(problems)} problem(s). Pictures: {out}/round{n}/light.png, dark.png, narrow.png')
+            print('\n'.join(problems) if problems else 'No problems were reported.')
+        else:
+            finish(out, {'model': st.get('model'), 'card': st['card'], 'designSystem': os.path.relpath(st['ds'], SDK), 'blocks': st['blocks'], 'blockPictures': st['pictures'],
+                         'before': {'problems': len(st['problems0']), 'texts': len(st['texts0'])}, 'rounds': sorted(st['rounds'], key=lambda r: r['round'])})
+        return
+    card = os.path.abspath(opt('--card'))
     doc = json.load(open(card))
     request = open(opt('--request')).read().strip() if opt('--request') else ''
     width, narrow = int(opt('--width', '420')), int(opt('--narrow', '320'))
-    system = brief_for(ds, doc, request)
+    blocks, pictures = '--blocks' in sys.argv, opt('--block-pictures')
+    system = brief_for(ds, doc, request, blocks=blocks)
+    shots = [(t, f'{os.path.abspath(pictures)}/{t}.png') for t in NEAR if os.path.exists(f'{os.path.abspath(pictures)}/{t}.png')] if blocks and pictures else []
     if width != 420:
         system = system.replace('a card', 'a screen').replace('The card', 'The screen').replace('the card', 'the screen').replace('THE CARD', 'THE SCREEN').replace('in a 320-wide column', f'at {narrow} wide').replace('It is correct', f'It is shown {width} wide. It is correct')
     if mode == 'brief':
@@ -117,63 +267,52 @@ def main():
     shutil.copy(card, f'{out}/before.json')
     t_all = time.time()
     problems0, texts0 = render(f'{out}/before.json', ds, f'{out}/before', width, narrow)
-    summary = {'model': model, 'card': os.path.relpath(card, SDK), 'designSystem': os.path.relpath(ds, SDK),
+    if mode == 'prepare':
+        open(f'{out}/brief.txt', 'w').write(system)
+        os.makedirs(f'{out}/blocks', exist_ok=True)
+        for t, f in shots:
+            shutil.copy(f, f'{out}/blocks/{t}.png')
+        json.dump({'ds': ds, 'card': os.path.relpath(card, SDK), 'width': width, 'narrow': narrow, 'problems0': problems0, 'texts0': texts0, 'blocks': blocks,
+                   'pictures': [t for t, _ in shots], 'model': opt('--model', ''), 'rounds': []}, open(f'{out}/state.json', 'w'), indent=1)
+        print(f'{out}: brief.txt, before/, {len(shots)} block picture(s)')
+        return
+    summary = {'model': model, 'card': os.path.relpath(card, SDK), 'designSystem': os.path.relpath(ds, SDK), 'blocks': blocks, 'blockPictures': [t for t, _ in shots],
                'before': {'problems': len(problems0), 'texts': len(texts0)}, 'rounds': []}
     shown = [{'type': 'text', 'text': 'The card as it is on screen now: light, dark, and narrow.'}]
     shown += [image(f'{out}/before/{m}.png') for m in ('light', 'dark', 'narrow') if os.path.exists(f'{out}/before/{m}.png')]
+    if shots:
+        shown.append({'type': 'text', 'text': 'The closest blocks of the system as they are drawn (the bar to reach): ' + ', '.join(t for t, _ in shots) + ', in that order.'})
+        shown += [image(f) for _, f in shots]
     messages = [{'role': 'user', 'content': shown}]
     for n in range(1, rounds + 1):
         text, seconds, usage = ask(model, system, messages)
         d = f'{out}/round{n}'
-        os.makedirs(d, exist_ok=True)
-        open(f'{d}/answer.txt', 'w').write(text)
         if n > 1 and text.strip().upper().startswith('SHIP') and '```' not in text:
+            os.makedirs(d, exist_ok=True)
+            open(f'{d}/answer.txt', 'w').write(text)
             summary['rounds'].append({'round': n, 'modelSeconds': seconds, 'kept': n - 1, 'input_tokens': usage.get('input_tokens'), 'output_tokens': usage.get('output_tokens')})
             print(json.dumps(summary['rounds'][-1]))
             break
-        ops = fenced(text, 'json')
-        problems = []
         t0 = time.time()
-        if not ops:
-            problems = ['The answer must hold a ```json fence with {"ops": [...]}.']
-        else:
-            open(f'{d}/ops.json', 'w').write(ops)
-            # Each round's ops are applied to the card as it was before the pass: a round replaces the last, it does not stack on it.
-            code, log = run(['tool/notation/notation.sh', 'apply', f'{out}/before.json', f'{d}/ops.json', '--design-system', ds, '--out', f'{d}/card.json'])
-            problems += [l for l in log.splitlines() if l.startswith('ERROR')]
-            if os.path.exists(f'{d}/card.json'):
-                rendered, texts = render(f'{d}/card.json', ds, d, width, narrow)
-                problems += [l for l in rendered if l not in problems0]
-                gone = [t for t in texts0 if t not in texts]
-                problems += [f'A text the card showed is gone: "{t[:80]}". The pass must not change what the card says.' for t in gone[:12]]
-        open(f'{d}/problems.txt', 'w').write('\n'.join(problems) + '\n')
-        summary['rounds'].append({'round': n, 'modelSeconds': seconds, 'checkAndRenderSeconds': round(time.time() - t0, 1), 'problems': len(problems),
-                                  'ops': len(json.loads(ops).get('ops', [])) if ops and ops.strip().startswith('{') else 0,
+        problems, count = check_round(out, ds, n, text, problems0, texts0, width, narrow)
+        summary['rounds'].append({'round': n, 'modelSeconds': seconds, 'checkAndRenderSeconds': round(time.time() - t0, 1), 'problems': len(problems), 'ops': count,
                                   'input_tokens': usage.get('input_tokens'), 'output_tokens': usage.get('output_tokens')})
         print(json.dumps(summary['rounds'][-1]))
         if n == rounds:
             break
         back = [{'type': 'text', 'text': 'This is the card with your operations applied: light, dark, and narrow.'}]
         back += [image(f'{d}/{m}.png') for m in ('light', 'dark', 'narrow') if os.path.exists(f'{d}/{m}.png')]
-        back.append({'type': 'text', 'text': ('Problems reported:\n' + '\n'.join(problems) + '\n\n' if problems else 'No problems were reported.\n\n') +
-                     'Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the system, and whether anything is broken, clipped or empty. '
-                     'If it is right, answer with the single word SHIP. Otherwise answer with the WHOLE list of operations again, corrected '
-                     '(it replaces your last list and is applied to the card as it was at the start), in a ```json fence.'})
+        back.append({'type': 'text', 'text': ('Problems reported:\n' + '\n'.join(problems) + '\n\n' if problems else 'No problems were reported.\n\n') + SECOND_LOOK})
         messages += [{'role': 'assistant', 'content': text}, {'role': 'user', 'content': back}]
-    checked = [r for r in summary['rounds'] if 'problems' in r and os.path.exists(f"{out}/round{r['round']}/card.json")]
-    if checked:
-        best = min(checked, key=lambda r: (r['problems'], -r['round']))
-        summary['final'], summary['problems'] = best['round'], best['problems']
-        summary['status'] = 'passed' if best['problems'] == 0 else 'failed'
-        shutil.copy(f"{out}/round{best['round']}/card.json", f'{out}/after.json')
-    else:
-        summary['status'] = 'failed'
     summary['totalSeconds'] = round(time.time() - t_all, 1)
-    json.dump(summary, open(f'{out}/summary.json', 'w'), indent=1)
-    print(json.dumps({k: summary.get(k) for k in ('final', 'status', 'problems', 'totalSeconds')}))
+    finish(out, summary)
     if summary['status'] == 'failed':
         sys.exit(1)
 
+
+SECOND_LOOK = ('Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the system, and whether anything is broken, clipped or empty. '
+               'If it is right, answer with the single word SHIP. Otherwise answer with the WHOLE list of operations again, corrected '
+               '(it replaces your last list and is applied to the card as it was at the start), in a ```json fence.')
 
 if __name__ == '__main__':
     main()

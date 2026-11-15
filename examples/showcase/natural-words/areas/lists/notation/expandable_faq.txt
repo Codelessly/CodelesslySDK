@@ -1,0 +1,10 @@
+Column gap:8 pad:16
+  Text.heading1 "Shipping FAQ"
+  Accordion "How long does shipping take?"
+    Text.bodySecondary "Orders in the US arrive in 3-5 business days."
+  Accordion "Do you ship internationally?"
+    Text.bodySecondary "Yes, we ship to 40 countries. International delivery takes 7-14 days."
+  Accordion "Can I change my address?"
+    Text.bodySecondary "Yes, within 2 hours of placing your order."
+  Accordion "What if my package is lost?"
+    Text.bodySecondary "We reship it free after 10 days."

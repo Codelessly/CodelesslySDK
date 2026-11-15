@@ -1,0 +1,422 @@
+{
+ "what": "Four requests that use no new part (slide_rows, meter_storage, slider_tip, reorder), four draws each from Sonnet with the notation prompt before the new words (oldprompt) and after (newprompt), paired by draw.",
+ "judges": "judge.py (claude-opus-5-5 and claude-sonnet-5-5 by the API), versions shown together, unlabeled and shuffled.",
+ "judgments": [
+  {
+   "case": "meter_storage0",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "oldprompt": 8,
+    "newprompt": 4
+   },
+   "why": "A shows usage at a glance with a segmented bar, an aligned legend and clear title/summary hierarchy, while B has no bar, leaves an awkward empty gap under the header, and wraps a cramped legend into two uneven rows that reads unfinished."
+  },
+  {
+   "case": "meter_storage0",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "newprompt": 4,
+    "oldprompt": 7
+   },
+   "why": "B adds a segmented usage bar that makes the storage breakdown readable at a glance, with a clear title/summary header and consistent legend, though the orphaned '74 GB free' line wraps awkwardly and legend spacing is uneven; A is only a plain text legend with no visualization, a wasted gap under the header, an unbalanced 2x2 grid, and a faint 'Free' dot that nearly vanishes."
+  },
+  {
+   "case": "meter_storage1",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "oldprompt": 8,
+    "newprompt": 4
+   },
+   "why": "A shows the breakdown at a glance with a clean stacked bar, a tidy inline legend, and consistent spacing, while B has no visualization, values that drift out of alignment, inconsistent weights between the Free row and the others, and an awkward empty gap under the header."
+  },
+  {
+   "case": "meter_storage1",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "newprompt": 3,
+    "oldprompt": 8
+   },
+   "why": "B adds a segmented storage bar that shows proportions at a glance, with a tidy legend, consistent type, and tight spacing; A is a loose list with misaligned values (94, 58, 30, and 74 GB sit at different x-positions), an awkward gap under the header, a faint 'Free' dot, and no visualization, so it looks unfinished."
+  },
+  {
+   "case": "meter_storage2",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 7,
+    "oldprompt": 4
+   },
+   "why": "A has a clear title hierarchy and a tidy inline legend; its only flaw is the 'Other' item wrapping onto its own line, whereas B's value column is visibly misaligned, mixes weights inconsistently ('Free 74 GB' is lighter and offset), and floats in an awkward middle gap, so it looks unfinished."
+  },
+  {
+   "case": "meter_storage2",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 7,
+    "oldprompt": 5
+   },
+   "why": "A has a clear hierarchy, consistent legend styling and a tidy footer, despite the slightly awkward legend wrap, while B's concept of a legend with a Free row is good but its values are visibly misaligned and inconsistent in weight and position, which looks unfinished."
+  },
+  {
+   "case": "meter_storage3",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "oldprompt": 8,
+    "newprompt": 4
+   },
+   "why": "A's compact inline legend is evenly spaced, consistently styled, and reads as polished shipped UI. B's legend values are ragged and misaligned, and Free switches to a lighter weight at a different x-position, which breaks the column hierarchy and looks unfinished despite the clearer purple for Other."
+  },
+  {
+   "case": "meter_storage3",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "newprompt": 5,
+    "oldprompt": 7
+   },
+   "why": "B's compact legend keeps each label and value together and uses a consistent muted style, with 'Other' in neutral gray and 'free' as a quiet footnote, so it reads as shipped; A's value column is misaligned (84, 62, 36 GB sit at different x positions and 74 GB is a smaller, different size), and its bold numbers sit far from their labels, making the card feel unpolished despite a clearer row-based structure."
+  },
+  {
+   "case": "reorder0",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "oldprompt": 7,
+    "newprompt": 6
+   },
+   "why": "B's subtle dividers make each row a clear, discrete drag target and give the list more structure and polish, whereas A's rows float without separation; B's stray divider after the last item is a minor flaw."
+  },
+  {
+   "case": "reorder0",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "newprompt": 6,
+    "oldprompt": 7.5
+   },
+   "why": "B adds subtle hairline dividers between rows, which makes the list read as discrete, scannable, draggable items and look more finished, while A's rows float with no separation, so the structure is weaker; otherwise the typography, spacing, and handle/note icons are identical, with both sharing the same small, low-affordance drag handle."
+  },
+  {
+   "case": "reorder1",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 8,
+    "oldprompt": 6
+   },
+   "why": "A has the richer, more scannable hierarchy, with track numbers, right-aligned durations, and a tidy count badge, though the first title sits slightly out of line; B is cleanly aligned but leans on a repeated music-note icon that adds no information and leaves the right column feeling decorative and empty."
+  },
+  {
+   "case": "reorder1",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "oldprompt": 6,
+    "newprompt": 8
+   },
+   "why": "B adds track numbers, right-aligned durations, and a pill badge for the song count, which gives a clearer hierarchy and more useful, scannable information, while A's identical decorative music-note icons on every row add noise without value and the plain count text is weaker, though A's spacing is clean and consistent."
+  },
+  {
+   "case": "reorder2",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 7,
+    "oldprompt": 5
+   },
+   "why": "Both share a clean drag-handle list layout, but A's unexplained, identical '4' in every row reads like a truncated duration or data bug, while B adds a useful song-count badge and a clearer swap instruction; its repeated music-note icons are only harmless decoration."
+  },
+  {
+   "case": "reorder2",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 8,
+    "oldprompt": 5
+   },
+   "why": "A has a clear hierarchy with a title, a 'songs' count pill, a helpful instruction line, and a music-note icon that suits each row, while B repeats a meaningless '4' on every row that looks like a rendering bug, has no summary badge, and gives less context, even though the two share the same spacing and drag-handle treatment."
+  },
+  {
+   "case": "reorder3",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "oldprompt": 8,
+    "newprompt": 7
+   },
+   "why": "B uses the standard dotted grip handle, a header divider, and a song-count meta for a more polished, shipped feel, while A has a stronger title but uses ambiguous hamburger-style handles and lacks structural separation between header and list."
+  },
+  {
+   "case": "reorder3",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "newprompt": 6,
+    "oldprompt": 8
+   },
+   "why": "B uses a six-dot grip icon that clearly signals draggability, adds a divider and a '6 songs' count for useful context and structure, and has tighter, more even row rhythm, while A's equals-sign handle looks like a hamburger/menu glyph, its large title is heavy, and its looser spacing feels less refined, though it is clean and legible."
+  },
+  {
+   "case": "slide_rows0",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 8,
+    "oldprompt": 7
+   },
+   "why": "Both are clean, consistent lists with good title/timestamp hierarchy, but B's header divider and trailing chevrons give clearer structure and tap affordance, so it reads more like a finished, shipped component than A's plainer rows."
+  },
+  {
+   "case": "slide_rows0",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 8,
+    "oldprompt": 7
+   },
+   "why": "A has chevrons that signal each row is tappable, plus a clear header divider and generous row spacing; its icons match the content (cart for the order, device for the update). B has inter-row dividers that read cleanly, but it has no affordance cues, its header and list sit tighter, and the dividers cut through the list without any tap or disclosure signals, so it looks less like an interactive notification center."
+  },
+  {
+   "case": "slide_rows1",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "newprompt": 7,
+    "oldprompt": 8
+   },
+   "why": "B's subtle dividers give the list clearer row separation and its truck icon better matches 'order shipped'; A's chevrons add tap affordance, but its undivided rows feel slightly looser and the cart icon is a weaker semantic fit."
+  },
+  {
+   "case": "slide_rows1",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "newprompt": 6,
+    "oldprompt": 8
+   },
+   "why": "B's hairline dividers separate the rows cleanly, and its spacing and padding are more even, with consistent relative timestamps and a fitting truck icon for shipping. A's chevrons suggest tappable rows, but with no dividers it feels looser and less structured, and the cart icon and mixed timestamp wording are less polished."
+  },
+  {
+   "case": "slide_rows2",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "oldprompt": 8,
+    "newprompt": 6
+   },
+   "why": "B reads more like a shipped product: consistent icons, a clear two-line title/timestamp hierarchy and even rhythm make it scannable, while A's rows are indented from the heading and divider, and its heavy title over plain rows feels less refined."
+  },
+  {
+   "case": "slide_rows2",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "oldprompt": 8,
+    "newprompt": 6
+   },
+   "why": "A pairs each notification with a meaningful icon, a clear title/timestamp stack and even spacing, so it scans quickly and looks like a shipped product, while B has a stronger header and a tidy right-aligned timestamp column but no icons, uniformly bold rows that flatten the hierarchy, and a header divider that sits tight against the card's top edge."
+  },
+  {
+   "case": "slide_rows3",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 8,
+    "oldprompt": 6
+   },
+   "why": "A has trailing chevrons that make the rows read as tappable, plus a slightly more generous left inset and even rhythm, so it feels like a finished, interactive list; B is clean but has no affordance cues and reads as a flat, static list."
+  },
+  {
+   "case": "slide_rows3",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 8,
+    "oldprompt": 6
+   },
+   "why": "A has chevrons that signal each row is tappable, slightly larger titles with clearer hierarchy, and more consistent row rhythm, while B is clean but has no affordance cues, tighter and flatter hierarchy, and a less distinct timestamp treatment, so it looks less like an interactive shipped product."
+  },
+  {
+   "case": "slider_tip0",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 7,
+    "oldprompt": 6
+   },
+   "why": "A's larger, bolder title gives the card a clear entry point and stronger hierarchy, while B's undersized heading is barely distinguishable from the row labels and the Total, which flattens the layout. Otherwise the two share the same clean spacing and polish."
+  },
+  {
+   "case": "slider_tip0",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 8,
+    "oldprompt": 6.5
+   },
+   "why": "A has a larger, bolder title that sets a clear hierarchy, slightly more generous vertical spacing between rows, and a more distinct Total row, while B's smaller title and tighter spacing make the card feel cramped and flatter, with less separation between heading and data."
+  },
+  {
+   "case": "slider_tip1",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "oldprompt": 6,
+    "newprompt": 8
+   },
+   "why": "B gives the Total a larger type size, so the key answer clearly stands out, while A sets Total at nearly the same size as every other row and leaves the hierarchy flat even though the spacing and polish are otherwise identical."
+  },
+  {
+   "case": "slider_tip1",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "oldprompt": 6,
+    "newprompt": 7
+   },
+   "why": "B makes the Total a clear focal point with a larger size and weight, giving stronger hierarchy and a more finished summary, while A's Total barely stands out from the secondary rows; both have a minor baseline misalignment between Tip and 15%."
+  },
+  {
+   "case": "slider_tip2",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 8,
+    "oldprompt": 6
+   },
+   "why": "A's larger, bolder title sets a clear hierarchy above the Total row, while B's undersized title competes with the body text and leaves the card feeling flat, with otherwise identical spacing and polish."
+  },
+  {
+   "case": "slider_tip2",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 8,
+    "oldprompt": 6.5
+   },
+   "why": "A has a larger, bolder title that sets a clearer hierarchy, plus slightly more generous vertical spacing that lets the rows breathe, while B's smaller title and tighter spacing make it feel cramped and flatter, though both share the same clean structure and slider treatment."
+  },
+  {
+   "case": "slider_tip3",
+   "judge": "claude-opus-5-5",
+   "rank": [
+    "oldprompt",
+    "newprompt"
+   ],
+   "scores": {
+    "oldprompt": 7,
+    "newprompt": 7
+   },
+   "why": "The two renderings look visually identical: both are clean, well-aligned cards with a clear title, consistent label/value rows, and a tidy divider, but the Total is barely emphasized over the other rows and the slider's midpoint position doesn't obviously read as 15%, so neither stands out over the other."
+  },
+  {
+   "case": "slider_tip3",
+   "judge": "claude-sonnet-5-5",
+   "rank": [
+    "newprompt",
+    "oldprompt"
+   ],
+   "scores": {
+    "newprompt": 7,
+    "oldprompt": 7
+   },
+   "why": "The two renderings look identical in layout, typography, spacing, and slider treatment, so neither has a design advantage; both have a clear title, aligned label/value rows, a well-placed divider, and a bolder Total, though the slider has no tick marks or value-context and the Total could carry more emphasis."
+  }
+ ]
+}

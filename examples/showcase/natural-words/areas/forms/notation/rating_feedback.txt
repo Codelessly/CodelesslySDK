@@ -1,0 +1,24 @@
+state rating=4
+state tags=["On time","Fresh produce"]
+state comment=""
+Card gap:16 pad:16 maxw:480
+  Column gap:4
+    Text.heading "How was your delivery?"
+    Text.muted "Green Basket"
+  Column gap:8
+    Text.fieldLabel "Rate your delivery"
+    Row gap:4
+      IconButton "star" color:=rating>=1?"#FFF5B301":"#FFCCCCCC" -> rating=1
+      IconButton "star" color:=rating>=2?"#FFF5B301":"#FFCCCCCC" -> rating=2
+      IconButton "star" color:=rating>=3?"#FFF5B301":"#FFCCCCCC" -> rating=3
+      IconButton "star" color:=rating>=4?"#FFF5B301":"#FFCCCCCC" -> rating=4
+      IconButton "star" color:=rating>=5?"#FFF5B301":"#FFCCCCCC" -> rating=5
+  Column gap:8
+    Text.fieldLabel "What went well?"
+    Grid cols:2 gap:8
+      FilterChip "On time" selected:=contains(tags,"On time") -> tags=contains(tags,"On time")?without(tags,"On time"):append(tags,"On time")
+      FilterChip "Fresh produce" selected:=contains(tags,"Fresh produce") -> tags=contains(tags,"Fresh produce")?without(tags,"Fresh produce"):append(tags,"Fresh produce")
+      FilterChip "Friendly driver" selected:=contains(tags,"Friendly driver") -> tags=contains(tags,"Friendly driver")?without(tags,"Friendly driver"):append(tags,"Friendly driver")
+      FilterChip "Good packaging" selected:=contains(tags,"Good packaging") -> tags=contains(tags,"Good packaging")?without(tags,"Good packaging"):append(tags,"Good packaging")
+  Input "Comment (optional)" "Tell us more about your delivery" multiline =comment
+  Button "Send feedback" -> emit sendFeedback; toast "Thanks for your feedback!"
