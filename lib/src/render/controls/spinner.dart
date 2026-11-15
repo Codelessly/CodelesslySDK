@@ -124,6 +124,10 @@ class RenderSpinner extends RenderBox {
     markNeedsPaint();
   }
 
+  /// Whether tickers run where this is shown (the host's `TickerMode`): a
+  /// design canvas with them off holds the spinner still. Null: they run.
+  bool Function()? tickersEnabled;
+
   String? semanticsLabel;
 
   Ticker? _ticker;
@@ -146,7 +150,7 @@ class RenderSpinner extends RenderBox {
 
   void _tick(Duration elapsed) {
     final us = period.inMicroseconds;
-    if (us <= 0) return;
+    if (us <= 0 || !(tickersEnabled?.call() ?? true)) return;
     _turns = (elapsed.inMicroseconds % us) / us;
     markNeedsPaint();
   }
@@ -169,6 +173,10 @@ class RenderSpinner extends RenderBox {
     _ticker = null;
     super.dispose();
   }
+
+  // Its own layer: a turn repaints the spinner, not the screen it is on.
+  @override
+  bool get isRepaintBoundary => true;
 
   @override
   bool get sizedByParent => true;
