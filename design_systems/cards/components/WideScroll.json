@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "WideScroll",
-  "doc": "A frame that scrolls sideways for content wider than the card (a table with many columns): write WideScroll width:640 and the wide blocks indented under it (TableHeader, each row, TableRow) are laid out that wide and scroll together; a fade at the right edge shows there is more.",
+  "doc": "A frame that scrolls sideways for content wider than the card (a table with many columns): write WideScroll width:640 and the wide blocks indented under it (TableHeader, each row, TableRow) are laid out that wide and scroll together; its edges fade where there is more to scroll to (fade:false turns that off).",
   "props": [
    {
     "key": "width",
@@ -25,7 +25,7 @@
      "flutter": "bool"
     },
     "default": true,
-    "doc": "A soft fade at the right edge that says there is more."
+    "doc": "The edges fade where there is more to scroll to (false: a hard edge)."
    }
   ],
   "children": "list"
@@ -57,21 +57,6 @@
     "height": {
      "hug": 0
     }
-   },
-   "customPaint": {
-    "foregroundPainter": [
-     {
-      "op": "rect",
-      "rect": [
-       "${= size.width - 28}",
-       0,
-       28,
-       "${size.height}"
-      ],
-      "when": "${props.fade}",
-      "paint": "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"
-     }
-    ]
    }
   },
   "scroller": {
@@ -82,7 +67,8 @@
    "props": {
     "scrollable": true,
     "scrollDirection": "horizontal",
-    "crossAxisAlignment": "start"
+    "crossAxisAlignment": "start",
+    "edgeFade": 28
    },
    "layout": {
     "width": {
@@ -91,6 +77,9 @@
     "height": {
      "hug": 0
     }
+   },
+   "bind": {
+    "props.edgeFade": "${= props.fade ? 28 : 0}"
    }
   },
   "inner": {
@@ -106,13 +95,7 @@
     "width": 640,
     "height": {
      "hug": 0
-    },
-    "padding": [
-     0,
-     0,
-     20,
-     0
-    ]
+    }
    },
    "bind": {
     "layout.width": "${props.width}"

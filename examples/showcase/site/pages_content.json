@@ -57,6 +57,7 @@
    },
    "props": {
     "viewportFraction": 0.9,
+    "edgeFade": 28,
     "scrollDirection": "horizontal",
     "padEnds": false
    },

@@ -116,6 +116,15 @@
     },
     "default": 124,
     "doc": "The width of a column when there are more than two (they then scroll sideways)."
+   },
+   {
+    "key": "fade",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The scrolling columns fade at the edge where there are more (false: a hard edge)."
    }
   ],
   "events": [
@@ -157,15 +166,11 @@
  ],
  "nodes": {
   "table": {
-   "type": "row",
+   "type": "stack",
    "children": [
-    "labels",
-    "scrollBox"
+    "scrollCol",
+    "labels"
    ],
-   "props": {
-    "crossAxisAlignment": "start",
-    "spacing": 0
-   },
    "layout": {
     "width": {
      "fill": 0
@@ -175,20 +180,91 @@
     }
    }
   },
+  "scrollCol": {
+   "type": "column",
+   "children": [
+    "scroller"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "clip": "hardEdge"
+   },
+   "customPaint": {
+    "foregroundPainter": [
+     {
+      "op": "rect",
+      "rect": [
+       "${= size.width - 28}",
+       0,
+       28,
+       "${size.height}"
+      ],
+      "when": "${= (length(props.names) > 2) && props.fade}",
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"
+     }
+    ]
+   }
+  },
   "labels": {
    "type": "column",
    "children": [
     "corner",
-    "labelRows"
+    "labelRows",
+    "labelFoot"
    ],
    "props": {
     "crossAxisAlignment": "stretch"
    },
    "layout": {
-    "width": 84,
+    "width": 98,
     "height": {
      "hug": 0
-    }
+    },
+    "x": 0,
+    "y": 0,
+    "padding": [
+     0,
+     0,
+     14,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "centerLeft",
+      "end": "centerRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "card"
+       },
+       {
+        "position": 0.857,
+        "color": "card"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].stops[2].color": "${= alpha(theme.colors.card, 0)}"
    }
   },
   "corner": {
@@ -226,6 +302,13 @@
     "height": {
      "hug": 0
     }
+   }
+  },
+  "labelFoot": {
+   "type": "spacer",
+   "layout": {
+    "width": 1,
+    "height": 58
    }
   },
   "labelRows": {
@@ -297,53 +380,16 @@
     }
    }
   },
-  "scrollBox": {
-   "type": "column",
-   "children": [
-    "scroller"
-   ],
-   "props": {
-    "crossAxisAlignment": "stretch"
-   },
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    },
-    "flex": 1
-   },
-   "customPaint": {
-    "foregroundPainter": [
-     {
-      "op": "rect",
-      "rect": [
-       "${= size.width - 26}",
-       0,
-       26,
-       "${size.height}"
-      ],
-      "when": "${= (length(props.names) > 2)}",
-      "paint": "${= {'shader': {'type': 'linear', 'begin': 'centerLeft', 'end': 'centerRight', 'stops': [{'position': 0, 'color': alpha(theme.colors.card, 0)}, {'position': 1, 'color': theme.colors.card}]}}}"
-     }
-    ]
-   }
-  },
   "scroller": {
    "type": "row",
    "children": [
-    "k0",
-    "k1",
-    "k2",
-    "k3",
-    "k4",
-    "tail"
+    "strip"
    ],
    "props": {
     "scrollable": true,
     "scrollDirection": "horizontal",
-    "crossAxisAlignment": "start"
+    "crossAxisAlignment": "start",
+    "edgeFade": 28
    },
    "layout": {
     "width": {
@@ -352,12 +398,45 @@
     "height": {
      "hug": 0
     }
+   },
+   "bind": {
+    "props.edgeFade": "${= props.fade ? 28 : 0}"
+   }
+  },
+  "strip": {
+   "type": "row",
+   "children": [
+    "lead",
+    "k0",
+    "k1",
+    "k2",
+    "k3",
+    "k4",
+    "tail"
+   ],
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "lead": {
+   "type": "spacer",
+   "layout": {
+    "width": 84,
+    "height": 1
    }
   },
   "tail": {
    "type": "spacer",
    "layout": {
-    "width": 18,
+    "width": 20,
     "height": 1
    },
    "bind": {

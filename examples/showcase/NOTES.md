@@ -163,8 +163,15 @@ Five more cards show the sliding and wide blocks: `comparison_wide` (four plans,
 18. **A bound width is a number**, so `ComparisonTable`'s two-column form uses 140 px columns (it fills a 420 card
     exactly; a wider card leaves room at the right). Its rows have a fixed height (two lines of text at most) so
     the pinned labels and the scrolling columns line up.
-19. **The edge fade is constant**: it does not go away at the end of the scroll (no scroll position to read).
-    A wide table's first column is not pinned; only `ComparisonTable` keeps its labels in place.
+19. **Sideways scrollers fade at their edges with the engine's `edgeFade`** (28 px, by scroll position; `fade:false`
+    turns it off): `Carousel`, `PhotoGallery`'s strip and `WideScroll`. **In `ComparisonTable` the same property has
+    no effect**: the scrolling row neither fades nor clips its columns (they drew over the card's padding), with
+    `edgeFade: 28` written statically, with or without a binding, as a direct child of a stack, of a column, or of a
+    flex column, and with or without the opacity-bound chip. I did not find which node of its content causes it. The
+    block therefore clips its frame, lays the label column over the scrolling columns (so nothing shows under it)
+    and paints a trailing fade in the card color, which is constant and assumes the card surface. A wide table's
+    first column is not pinned; only `ComparisonTable` keeps its labels in place. `PhotoGallery`'s `pages` layout
+    has no fade: its pages are full width, so nothing is cut.
 
 ## Honest self-critique
 
