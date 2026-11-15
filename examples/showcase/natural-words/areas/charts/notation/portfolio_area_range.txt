@@ -1,0 +1,20 @@
+state range="1M"
+state w=[46800,47200,47650,47400,47108,48312]
+state m=[44100,45200,44800,46500,47108,48312]
+state q=[41200,43800,42900,45600,47108,48312]
+state y=[36500,39800,38200,43100,47108,48312]
+state a=[12000,21500,30800,39000,47108,48312]
+state wl=["Mon","Tue","Wed","Thu","Fri","Today"]
+state ml=["W1","W2","W3","W4","W5","Today"]
+state ql=["Jan","Feb","Mar","Apr","May","Today"]
+state yl=["Q1","Q2","Q3","Q4","Q1","Today"]
+state al=["2019","2020","2021","2022","2023","Today"]
+Card gap:16 pad:20
+  Column gap:4
+    Text.caption "Portfolio value"
+    Text "$48,312.55" size:32 weight:700
+    Row gap:4 start
+      Icon "trending_up" color:#FF2E7D32
+      Text.success "+$1,204.10 (+2.56%) today"
+  AreaChart values:=range=="1W"?w:range=="1M"?m:range=="3M"?q:range=="1Y"?y:a labels:=range=="1W"?wl:range=="1M"?ml:range=="3M"?ql:range=="1Y"?yl:al h:180
+  SegmentedButton =range items:["1W","1M","3M","1Y","All"]

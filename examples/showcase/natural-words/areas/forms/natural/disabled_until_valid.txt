@@ -1,0 +1,25 @@
+Card width:400 padding:24 radius:12 elevation:2 background:white
+  Column gap:20
+    Text "Change password" style:title weight:semibold
+    Text "Choose a strong password you don't use anywhere else." style:caption color:gray-600
+    Column gap:6
+      Label "Current password"
+      PasswordField placeholder:"Enter current password" value:"••••••••••" showToggle:true state:default
+    Column gap:6
+      Label "New password"
+      PasswordField placeholder:"Enter new password" value:"••••••••••" showToggle:true state:focused
+      Checklist gap:6 margin-top:4 aria-label:"Password requirements"
+        ChecklistItem "At least 8 characters" status:met icon:check-circle iconColor:green-600 textColor:green-700
+        ChecklistItem "One number" status:met icon:check-circle iconColor:green-600 textColor:green-700
+        ChecklistItem "One uppercase letter" status:unmet icon:circle-outline iconColor:gray-400 textColor:gray-600
+        ChecklistItem "Passwords match" status:unmet icon:circle-outline iconColor:gray-400 textColor:gray-600
+    Column gap:6
+      Label "Confirm new password"
+      PasswordField placeholder:"Re-enter new password" value:"••••••••" showToggle:true state:default
+    Button "Update password" variant:primary fullWidth:true height:44 enabled:false background:gray-300 textColor:gray-500 cursor:not-allowed opacity:0.6 shadow:none aria-disabled:true
+    Behavior
+      Rule when:"all checklist items are met" then:"Button enabled:true background:blue-600 textColor:white opacity:1 cursor:pointer"
+      Rule when:"any checklist item is unmet" then:"Button enabled:false"
+      Rule on:"input change" then:"re-evaluate checklist items live"
+      Transition target:ChecklistItem trigger:"status changes to met" animation:"icon crossfade circle-outline to check-circle, color gray to green" duration:200ms
+      Transition target:Button trigger:"enabled changes" animation:"background and opacity fade" duration:200ms

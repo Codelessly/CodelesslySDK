@@ -1,0 +1,182 @@
+Column scroll
+  Row between center pad:[48,16,48,16]
+    Row gap:8 center
+      Icon "bolt" color:#FF4F46E5
+      Text "Fluxboard" size:22 weight:700
+    Row gap:32 center
+      Text.body "Product"
+      Text.body "Pricing"
+      Text.body "Docs"
+      Text.body "Blog"
+    Button "Start free trial" -> emit trial
+  Divider
+  Column center gap:20 pad:[48,80,48,56] fill:#FFF5F6FF
+    Badge.primary "New: Sprint forecasts 2.0"
+    Text.pageTitle "Ship faster with real-time project insights" center size:52 weight:800 maxw:820
+    Text.bodySecondary "Fluxboard connects your tasks, repos and calendars into one live dashboard, so you always know what is on track, what is slipping and what to do next." center maxw:640 size:18
+    Row gap:12 center
+      Button "Start free trial" -> emit trial
+      Button.outline "Watch demo" -> emit demo
+    Text.caption "No credit card required · 14-day free trial"
+    Card gap:16 maxw:960 pad:20 animate:slide-up
+      Row gap:6
+        Box w:12 h:12 radius:6 fill:#FFEF4444
+        Box w:12 h:12 radius:6 fill:#FFF59E0B
+        Box w:12 h:12 radius:6 fill:#FF22C55E
+      Row between center
+        Text.heading "Sprint 24 overview"
+        Badge.success "On track"
+      Row gap:12
+        Card grow gap:4
+          Text.caption "Velocity"
+          Text "42 pts" size:28 weight:700
+        Card grow gap:4
+          Text.caption "Open issues"
+          Text "128" size:28 weight:700
+        Card grow gap:4
+          Text.caption "Cycle time"
+          Text "3.2 days" size:28 weight:700
+        Card grow gap:4
+          Text.caption "Forecast"
+          Text "Jun 14" size:28 weight:700
+      Row gap:16
+        Card grow gap:8
+          Text.strong "Burndown"
+          AreaChart labels:["Mon","Tue","Wed","Thu","Fri","Sat"] values:[60,52,45,33,20,8]
+        Card grow gap:8
+          Text.strong "Issues closed"
+          BarChart labels:["Mon","Tue","Wed","Thu","Fri"] values:[8,12,9,15,11]
+  Column center gap:20 pad:[48,40,48,40]
+    Text.caption "TRUSTED BY TEAMS AT" center
+    Row gap:56 center
+      Text "Northwind" size:22 weight:700 color:#FF94A3B8
+      Text "Acmeworks" size:22 weight:700 color:#FF94A3B8
+      Text "Globex" size:22 weight:700 color:#FF94A3B8
+      Text "Initech" size:22 weight:700 color:#FF94A3B8
+      Text "Umbra Labs" size:22 weight:700 color:#FF94A3B8
+  Column center gap:12 pad:[48,56,48,24]
+    Text.heading1 "Everything your team needs to stay on track" center
+    Text.bodySecondary "Powerful features, zero spreadsheet wrangling." center
+  Column pad:[48,16,48,56] center
+    Grid cols:3 gap:20 maxw:1120
+      Card gap:10
+        Icon "dashboard" color:#FF4F46E5 size:32
+        Text.heading3 "Live dashboards"
+        Text.bodySecondary "Real-time views of every project, updated the moment work changes."
+      Card gap:10
+        Icon "trending_up" color:#FF4F46E5 size:32
+        Text.heading3 "Sprint forecasts"
+        Text.bodySecondary "Predict delivery dates from your actual velocity, not wishful thinking."
+      Card gap:10
+        Icon "notifications_active" color:#FF4F46E5 size:32
+        Text.heading3 "Slack alerts"
+        Text.bodySecondary "Get notified in the channels you already use when risks appear."
+      Card gap:10
+        Icon "description" color:#FF4F46E5 size:32
+        Text.heading3 "Custom reports"
+        Text.bodySecondary "Build and schedule reports for stakeholders in a few clicks."
+      Card gap:10
+        Icon "lock" color:#FF4F46E5 size:32
+        Text.heading3 "SSO"
+        Text.bodySecondary "SAML single sign-on and SCIM provisioning for secure access."
+      Card gap:10
+        Icon "code" color:#FF4F46E5 size:32
+        Text.heading3 "API access"
+        Text.bodySecondary "A well-documented REST API and webhooks to extend Fluxboard."
+  Column center gap:12 pad:[48,56,48,24] fill:#FFF8FAFC
+    Text.heading1 "Simple, transparent pricing" center
+    Text.bodySecondary "Start free and scale as your team grows." center
+  Column center pad:[48,16,48,72] fill:#FFF8FAFC
+    Row gap:20 maxw:1040 stretch
+      Card grow gap:14 pad:24
+        Text.heading2 "Starter"
+        Row gap:4 bottom
+          Text "$0" size:44 weight:800
+          Text.muted "forever"
+        Text.bodySecondary "For individuals and small side projects."
+        Divider
+        Row gap:8 center
+          Icon "check" color:#FF22C55E
+          Text "Up to 3 projects"
+        Row gap:8 center
+          Icon "check" color:#FF22C55E
+          Text "Live dashboards"
+        Row gap:8 center
+          Icon "check" color:#FF22C55E
+          Text "Community support"
+        Spacer grow
+        Button.outline "Get started" -> emit plan "starter"
+      Box grow gap:14 pad:24 radius:12 fill:#FF4F46E5
+        Row between center
+          Text.heading2 "Team" color:#FFFFFFFF
+          Badge.warning "Most popular"
+        Row gap:4 bottom
+          Text "$24" size:44 weight:800 color:#FFFFFFFF
+          Text "per user / month" color:#FFE0E7FF
+        Text "For growing teams that need forecasting and alerts." color:#FFE0E7FF
+        Divider
+        Row gap:8 center
+          Icon "check" color:#FFFFFFFF
+          Text "Unlimited projects" color:#FFFFFFFF
+        Row gap:8 center
+          Icon "check" color:#FFFFFFFF
+          Text "Sprint forecasts" color:#FFFFFFFF
+        Row gap:8 center
+          Icon "check" color:#FFFFFFFF
+          Text "Slack alerts and custom reports" color:#FFFFFFFF
+        Row gap:8 center
+          Icon "check" color:#FFFFFFFF
+          Text "Priority support" color:#FFFFFFFF
+        Spacer grow
+        Button.elevated "Start free trial" -> emit plan "team"
+      Card grow gap:14 pad:24
+        Text.heading2 "Enterprise"
+        Text "Custom" size:44 weight:800
+        Text.bodySecondary "For organizations with advanced security needs."
+        Divider
+        Row gap:8 center
+          Icon "check" color:#FF22C55E
+          Text "SSO and SCIM"
+        Row gap:8 center
+          Icon "check" color:#FF22C55E
+          Text "Full API access"
+        Row gap:8 center
+          Icon "check" color:#FF22C55E
+          Text "Dedicated success manager"
+        Row gap:8 center
+          Icon "check" color:#FF22C55E
+          Text "99.9% uptime SLA"
+        Spacer grow
+        Button.outline "Contact sales" -> emit plan "enterprise"
+  Column gap:32 pad:[48,56,48,32] fill:#FF0F172A
+    Row gap:32 top
+      Column grow gap:10
+        Row gap:8 center
+          Icon "bolt" color:#FF818CF8
+          Text "Fluxboard" size:20 weight:700 color:#FFFFFFFF
+        Text "Real-time project analytics for modern teams." color:#FFCBD5E1
+      Column grow gap:10
+        Text.strong "Product" color:#FFFFFFFF
+        Text "Features" color:#FFCBD5E1
+        Text "Pricing" color:#FFCBD5E1
+        Text "Integrations" color:#FFCBD5E1
+        Text "Changelog" color:#FFCBD5E1
+      Column grow gap:10
+        Text.strong "Company" color:#FFFFFFFF
+        Text "About" color:#FFCBD5E1
+        Text "Careers" color:#FFCBD5E1
+        Text "Blog" color:#FFCBD5E1
+        Text "Contact" color:#FFCBD5E1
+      Column grow gap:10
+        Text.strong "Resources" color:#FFFFFFFF
+        Text "Documentation" color:#FFCBD5E1
+        Text "API reference" color:#FFCBD5E1
+        Text "Help center" color:#FFCBD5E1
+        Text "Status" color:#FFCBD5E1
+    Divider
+    Row between center
+      Text.caption "© 2026 Fluxboard, Inc. All rights reserved." color:#FF94A3B8
+      Row gap:20
+        Text.caption "Privacy" color:#FF94A3B8
+        Text.caption "Terms" color:#FF94A3B8
+        Text.caption "Security" color:#FF94A3B8

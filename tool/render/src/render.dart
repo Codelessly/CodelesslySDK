@@ -398,6 +398,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   final svgSources = <String, String>{};
   final svgUsers = <String, Set<String>>{};
   SvgFonts.onFamily = (family, url) => svgUsers.putIfAbsent(family.toLowerCase(), () => {}).add(svgSources[url] ?? url);
+  // An SVG family no font file has is drawn in the next one, or the site's.
+  final hadFamilies = {for (final f in faces) f.family.toLowerCase()};
+  SvgFonts.isAvailable = (family) => hadFamilies.contains(family.toLowerCase());
   for (final e in docs.entries) {
     // Relative image paths start from the site's folder (as at run time),
     // else from the document's.

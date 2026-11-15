@@ -1,0 +1,999 @@
+{
+ "schema": 3,
+ "roots": [
+  "food_order"
+ ],
+ "nodes": {
+  "food_order": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 390.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "fill": 0
+    },
+    "width": 390
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column2",
+    "row6"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "box1",
+    "column3",
+    "row3",
+    "column4"
+   ]
+  },
+  "box1": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 180
+   },
+   "decoration": {
+    "fills": [
+     {
+      "image": {
+       "url": "https://images.unsplash.com/photo-1513104890138-7c749659a591?w=780",
+       "fit": "cover"
+      }
+     }
+    ]
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "row1",
+    "row2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "pageTitle"
+    },
+    "text": "Trattoria Bella Napoli"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "Italian · Pizza · Pasta · Desserts"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text3",
+    "text4",
+    "text5",
+    "icon2",
+    "text6"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "star",
+    "color": "#FFF5A623"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "4.8"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "(2,300+)"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "·"
+   }
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "schedule"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "25–35 min",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon3",
+    "text7"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "delivery_dining"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "muted"
+    },
+    "text": "$1.99 delivery fee · Min. order $15"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     16,
+     0,
+     16,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "scrollDirection": "horizontal",
+    "spacing": 8,
+    "crossAxisAlignment": "center",
+    "edgeFade": 12
+   },
+   "children": [
+    "choiceChip1",
+    "choiceChip2",
+    "choiceChip3",
+    "choiceChip4",
+    "choiceChip5"
+   ]
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "All"
+   },
+   "bind": {
+    "props.selected": "${= cat==\"All\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cat",
+       "value": "All"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip2": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Pizza"
+   },
+   "bind": {
+    "props.selected": "${= cat==\"Pizza\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cat",
+       "value": "Pizza"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip3": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Pasta"
+   },
+   "bind": {
+    "props.selected": "${= cat==\"Pasta\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cat",
+       "value": "Pasta"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip4": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Salads"
+   },
+   "bind": {
+    "props.selected": "${= cat==\"Salads\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cat",
+       "value": "Salads"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip5": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Desserts"
+   },
+   "bind": {
+    "props.selected": "${= cat==\"Desserts\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cat",
+       "value": "Desserts"
+      }
+     ]
+    }
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text8",
+    "listView1"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "sectionTitle"
+    },
+    "text": "Menu"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${dishes}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column5"
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": 18,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 18,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#14000000",
+      "offset": [
+       0,
+       18
+      ],
+      "spreadRadius": -14,
+      "blurRadius": 40
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${= cat==\"All\"||item.cat==cat}"
+   },
+   "children": [
+    "row4"
+   ]
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column6",
+    "column7"
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text9",
+    "text10",
+    "text11"
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "bodySecondary"
+    },
+    "text": "${item.desc}"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "${= money(item.price,'$',2)}"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "outlinedButton1",
+    "row5"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "dishes",
+       "value": "${= updateWhere(dishes,d=>d.id==item.id,d=>with(d,\"qty\",d.qty+1))}"
+      }
+     ]
+    }
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= item.qty>0}"
+   },
+   "children": [
+    "text12"
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.qty} in cart",
+    "style": {
+     "from": "badge",
+     "color": "primary"
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryText"
+     }
+    ]
+   },
+   "children": [
+    "column8",
+    "filledButton1"
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text13",
+    "text14"
+   ]
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= sum(dishes,d=>d.qty)} items",
+    "style": {
+     "from": "body",
+     "color": "onPrimary",
+     "fontWeight": 700
+    }
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= money(sum(dishes,d=>d.qty*d.price),'$',2)}",
+    "style": {
+     "from": "body",
+     "color": "#FFD1D5DB"
+    }
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "View cart"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "viewCart"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "food_order": [
+   {
+    "name": "cat",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "dishes",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "cat": "Pizza",
+      "name": "Margherita Pizza",
+      "desc": "San Marzano tomato, fresh mozzarella, basil and olive oil",
+      "price": 14.5,
+      "qty": 0
+     },
+     {
+      "id": 2,
+      "cat": "Pizza",
+      "name": "Spicy Salami Pizza",
+      "desc": "Calabrian chili, cured salami, mozzarella, hot honey",
+      "price": 17,
+      "qty": 0
+     },
+     {
+      "id": 3,
+      "cat": "Pasta",
+      "name": "Truffle Tagliatelle",
+      "desc": "Fresh egg pasta, black truffle cream, parmesan",
+      "price": 19.5,
+      "qty": 0
+     },
+     {
+      "id": 4,
+      "cat": "Pasta",
+      "name": "Spaghetti Pomodoro",
+      "desc": "Slow-cooked tomato sauce, garlic, basil",
+      "price": 13,
+      "qty": 0
+     },
+     {
+      "id": 5,
+      "cat": "Salads",
+      "name": "Burrata Caprese",
+      "desc": "Creamy burrata, heirloom tomatoes, pesto, toasted pine nuts",
+      "price": 12.5,
+      "qty": 0
+     },
+     {
+      "id": 6,
+      "cat": "Desserts",
+      "name": "Tiramisu",
+      "desc": "Espresso-soaked ladyfingers, mascarpone, cocoa",
+      "price": 8,
+      "qty": 0
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,38 @@
+Screen "Coffee near you" layout:column
+  SearchBar placeholder:"Search downtown Portland" icon:search
+  Map region:"Downtown Portland, OR" center:[45.5231,-122.6765] zoom:15 height:55%
+    UserLocation position:[45.5202,-122.6742] style:blue-dot pulse:slow-loop
+    Pin "1" label:"Stumptown" position:[45.5226,-122.6733] state:default color:gray-dark
+    Pin "2" label:"Heart Coffee" position:[45.5236,-122.6789] state:selected color:accent scale:1.3 elevation:high callout:"Heart Coffee · 0.5 mi"
+    Pin "3" label:"Coava" position:[45.5155,-122.6648] state:default color:gray-dark
+    Pin "4" label:"Barista" position:[45.5247,-122.6812] state:default color:gray-dark
+    MapControls position:top-right
+      Button icon:plus
+      Button icon:minus
+      Button icon:recenter
+  List title:"4 coffee shops nearby" scroll:vertical
+    ListItem selected:false pin:"1"
+      Badge "1" color:gray-dark
+      Text "Stumptown" style:title
+      Text "0.2 mi" style:secondary
+      Rating value:4.5 icon:star text:"4.5"
+    ListItem selected:true pin:"2" background:accent-tint border-left:accent
+      Badge "2" color:accent
+      Text "Heart Coffee" style:title
+      Text "0.5 mi" style:secondary
+      Rating value:4.7 icon:star text:"4.7"
+    ListItem selected:false pin:"3"
+      Badge "3" color:gray-dark
+      Text "Coava" style:title
+      Text "1.1 mi" style:secondary
+      Rating value:4.6 icon:star text:"4.6"
+    ListItem selected:false pin:"4"
+      Badge "4" color:gray-dark
+      Text "Barista" style:title
+      Text "0.4 mi" style:secondary
+      Rating value:4.4 icon:star text:"4.4"
+  Behavior
+    onTap Pin: select pin, deselect others, scroll list to matching item, highlight it
+    onTap ListItem: select item, pan map to its pin duration:300ms ease:in-out
+    onSelect: pin scale 1→1.3 duration:200ms ease:spring; previous pin scale back to 1; callout fade-in 150ms
+    onTap Map empty area: hide callout, keep selection

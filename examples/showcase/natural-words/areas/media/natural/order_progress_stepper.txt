@@ -1,0 +1,30 @@
+Screen "Order tracking"
+  Header
+    Text "Order #48213" style:title
+  Stepper orientation:horizontal steps:5 current:4 align:center
+    Step "Ordered" state:done
+      Icon "check-circle" color:blue
+      Label "Ordered"
+      Caption "Nov 10" color:grey
+    Connector state:done style:solid fill:blue thickness:2
+    Step "Packed" state:done
+      Icon "check-circle" color:blue
+      Label "Packed"
+      Caption "Nov 11" color:grey
+    Connector state:done style:solid fill:blue thickness:2
+    Step "Shipped" state:done
+      Icon "check-circle" color:blue
+      Label "Shipped"
+      Caption "Nov 12" color:grey
+    Connector state:upcoming style:dashed color:grey thickness:2
+    Step "Out for delivery" state:current
+      Icon "circle-dot" color:blue
+      Label "Out for delivery" weight:bold
+      Animation type:pulse target:icon scale:1..1.25 opacity:1..0.6 duration:1.4s repeat:infinite easing:ease-in-out
+    Connector state:upcoming style:dashed color:grey thickness:2
+    Step "Delivered" state:upcoming
+      Icon "circle-outline" color:grey
+      Label "Delivered" color:grey
+  Transition on:step-complete
+    Connector fill:blue direction:left-to-right duration:0.4s
+    Icon swap:"check-circle" animation:pop duration:0.2s

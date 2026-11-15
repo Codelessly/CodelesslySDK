@@ -1,0 +1,15 @@
+state recording=false
+state secs=0
+state pulse=false
+every 1s when recording -> secs=secs+1
+every 500 when recording -> pulse=!pulse
+
+Card gap:12
+  Row between middle
+    Text.title "Voice memo"
+    Badge.error "REC" visible:=recording
+  Row center middle
+    Box w:=recording&&pulse?96:76 h:=recording&&pulse?96:76 radius:48 center middle fill:=recording?(pulse?"#55E53935":"#22E53935"):"#00000000"
+      IconButton "{recording?'stop':'mic'}" -> secs=recording?secs:0; pulse=false; recording=!recording
+  Text.heading2 "{secs}s" size:32 weight:700
+  Text.muted "{recording?'Recording…':'Tap the mic to start'}"

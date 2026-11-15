@@ -1,0 +1,28 @@
+{
+ "model": "Opus subagent (Claude Code), not the API",
+ "card": "../../../tmp/claude-0/-home-user/857ab018-eb2e-5034-a67f-dd7d3ba578d0/scratchpad/run10/06-ferry-ticket/before.json",
+ "designSystem": "design_systems/cards",
+ "blocks": true,
+ "blockPictures": [],
+ "before": {
+  "problems": 0,
+  "texts": 16
+ },
+ "rounds": [
+  {
+   "round": 1,
+   "checkAndRenderSeconds": 229.6,
+   "problems": 2,
+   "ops": 48
+  },
+  {
+   "round": 2,
+   "checkAndRenderSeconds": 207.0,
+   "problems": 0,
+   "ops": 48
+  }
+ ],
+ "final": 2,
+ "problems": 0,
+ "status": "passed"
+}

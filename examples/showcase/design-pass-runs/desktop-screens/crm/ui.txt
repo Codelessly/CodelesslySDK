@@ -1,0 +1,41 @@
+state contacts=[{"id":1,"name":"Priya Raman","company":"Lumen Analytics","role":"VP Operations","owner":"Dana Cole","last":"2 days ago","value":48000,"stage":"Qualified","email":"priya.raman@lumenanalytics.com","phone":"+1 415 555 0142","notes":"Evaluating us against two other vendors. Wants a pilot with the ops team before Q3 budget lock.","steps":["Send pilot scope document","Book demo with ops leads","Share security questionnaire"]},{"id":2,"name":"Marcus Hale","company":"Brightway Logistics","role":"Director of Procurement","owner":"Sam Ortiz","last":"Today","value":125000,"stage":"Negotiation","email":"m.hale@brightway.io","phone":"+1 312 555 0187","notes":"Legal is reviewing the MSA. Marcus asked for a 12% volume discount and quarterly billing.","steps":["Reply to redline on clause 7","Get discount approval from finance","Schedule signing call for Friday"]},{"id":3,"name":"Elena Petrova","company":"Fjord & Co.","role":"Head of Growth","owner":"Dana Cole","last":"Yesterday","value":72500,"stage":"Proposal","email":"elena@fjordco.com","phone":"+1 206 555 0113","notes":"Liked the reporting module. Proposal sent Monday, waiting on feedback from her CFO.","steps":["Follow up on proposal","Prepare ROI one-pager"]},{"id":4,"name":"Tomás Aguirre","company":"Solera Foods","role":"Operations Manager","owner":"Jin Park","last":"1 week ago","value":18000,"stage":"Lead","email":"tomas.aguirre@solerafoods.com","phone":"+1 512 555 0166","notes":"Inbound from the webinar. Small team, price sensitive, interested in the starter plan.","steps":["Send intro email","Qualify budget and timeline"]},{"id":5,"name":"Hannah Wu","company":"Kestrel Health","role":"Chief of Staff","owner":"Sam Ortiz","last":"3 days ago","value":96000,"stage":"Won","email":"hannah.wu@kestrelhealth.org","phone":"+1 617 555 0129","notes":"Signed a 2-year agreement. Onboarding kicks off next week with 40 seats.","steps":["Hand off to customer success","Schedule kickoff call","Request case study in 90 days"]},{"id":6,"name":"Oliver Grant","company":"Peakline Outdoors","role":"E-commerce Lead","owner":"Jin Park","last":"5 days ago","value":33400,"stage":"Qualified","email":"oliver.grant@peaklineoutdoors.com","phone":"+1 303 555 0175","notes":"Needs Shopify integration. Budget confirmed, decision expected end of month.","steps":["Confirm integration requirements","Send technical overview"]},{"id":7,"name":"Amara Okafor","company":"Delta Freight","role":"COO","owner":"Dana Cole","last":"4 days ago","value":61200,"stage":"Proposal","email":"amara.okafor@deltafreight.com","phone":"+1 404 555 0198","notes":"Strong champion internally. Concerned about migration effort from their legacy system.","steps":["Draft migration plan","Introduce implementation lead"]},{"id":8,"name":"Liam Becker","company":"Northgate Realty","role":"Managing Partner","owner":"Sam Ortiz","last":"2 weeks ago","value":9800,"stage":"Lead","email":"liam@northgaterealty.com","phone":"+1 720 555 0104","notes":"Cold outreach got a reply. Interested but busy until after the spring season.","steps":["Check in after April 15","Send lightweight case study"]}]
+state sel=contacts[1]
+state q=""
+state sort="name"
+state desc=false
+Row w:1280 h:800 stretch fill:#FFF5F6F8
+  Sidebar =nav brand:"Northwind CRM" sectionLabel:"Workspace" items:["Dashboard","Contacts","Companies","Deals","Reports"] icons:["dashboard","people","business","handshake","bar_chart"] badges:["","8","","5",""]
+  Column grow gap:16 pad:24
+    Row gap:12 middle
+      Text.pageTitle "Contacts"
+      Spacer grow
+      SearchBar "Search contacts, companies…" =q
+      Button "Add contact" -> emit addContact
+    Row gap:8
+      Text.muted "{length(contacts)} contacts"
+      Text.muted "·"
+      Text.muted "Pipeline value {money(sum(contacts,c=>c.value),"$",0)}"
+    Card gap:0 pad:0
+      TableHeader =sort desc:desc columns:["Name","Company","Owner","Last contact","Deal value","Stage"] keys:["name","company","owner","last","value","stage"]
+      each c in filter(contacts,c=>contains(lower(c.name),lower(q))||contains(lower(c.company),lower(q)))
+        TableRow cells:=[c.name,c.company,c.owner,c.last,money(c.value,"$",0)] badge:=c.stage -> sel=c
+  Box w:340 fill:#FFFFFFFF pad:20
+    Column gap:14 scroll
+      Row gap:12 middle
+        Avatar "{sel.name}" size:48
+        Column grow gap:2
+          Text.heading "{sel.name}"
+          Text.muted "{sel.role}, {sel.company}"
+      StatusBadge "{sel.stage}" tone:info
+      Details rows:=[["Email",sel.email],["Phone",sel.phone],["Owner",sel.owner],["Last contact",sel.last],["Deal value",money(sel.value,"$",0)]]
+      SectionLabel "Notes"
+      Paragraph "{sel.notes}"
+      SectionLabel "Next steps" "{length(sel.steps)} open"
+      Column gap:8
+        each s in sel.steps
+          Row gap:8 middle
+            Icon "radio_button_unchecked"
+            Text "{s}"
+      Row gap:10
+        ActionButton "Log note" tone:quiet icon:"edit_note" -> emit logNote sel.id
+        ActionButton "Email" tone:primary icon:"mail" -> emit email sel.id

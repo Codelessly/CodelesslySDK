@@ -1,0 +1,36 @@
+Card "Portfolio value" padding:20 radius:16 width:480 background:surface elevation:1
+  Header layout:row justify:space-between align:start
+    Column gap:4
+      Label "Portfolio value" style:caption color:muted
+      Heading "$48,312.55" style:display weight:bold animate:count-up duration:600ms ease:out
+      Row gap:6 align:center
+        Icon "arrow-up-right" color:positive size:16
+        Text "+$1,204.10 (+2.56%)" color:positive weight:medium
+        Text "today" color:muted
+    Badge "Live" color:positive style:dot-pulse animate:pulse interval:2s
+
+  SegmentedControl name:range value:"1M" margin-top:16 size:small
+    Button "1W" selected:false
+    Button "1M" selected:true background:accent color:on-accent
+    Button "3M" selected:false
+    Button "1Y" selected:false
+    Button "All" selected:false
+    on:select action:load-range transition:chart-morph indicator:slide duration:200ms
+
+  AreaChart height:220 margin-top:16 range:"1M" smooth:true
+    Series name:"Portfolio" color:accent line-width:2
+      Fill type:gradient from:accent opacity:0.28 to:accent opacity:0
+      Data "47108 46850 46320 46590 47010 47420 47200 46980 47650 48010 47840 47390 47720 48150 48420 48090 47760 47500 47980 48230 47108 48312.55" format:currency
+    XAxis labels:"Date" ticks:5 gridlines:false color:muted
+    YAxis position:right ticks:4 format:"$#,###" gridlines:dashed color:muted
+    Marker at:last shape:circle color:accent pulse:true
+    Crosshair on:hover style:vertical-line
+    Tooltip on:hover follow:cursor content:"date, value, change vs. start of range"
+    animate:draw-in duration:700ms ease:out
+    state loading: show:skeleton
+    state empty: text "No data for this range" color:muted
+    state error: text "Couldn't load chart" action:Button "Retry"
+
+  Footer layout:row justify:space-between margin-top:12
+    Text "1M change" color:muted style:caption
+    Text "+$3,980.22 (+8.98%)" color:positive style:caption weight:medium

@@ -1,0 +1,43 @@
+{"ops": [
+{"op":"patch","id":"column1","patch":{"props":{"spacing":14},"layout":{"padding":[18,18,18,18]},"decoration":{"strokes":[{"color":"line"}],"effects":null},"bind":{"decoration.radius":"${theme.radii.card}","decoration.effects":"${theme.shadows.card}"}}},
+
+{"op":"patch","id":"icon1","patch":{"props":{"icon":"check_circle_rounded","size":24,"color":"good"},"layout":{"width":24,"height":24}}},
+{"op":"patch","id":"text1","patch":{"props":{"style":{"from":"cardTitle"}}}},
+{"op":"patch","id":"row1","patch":{"props":{"spacing":10}}},
+
+{"op":"set","id":"sentPanel","parent":"column1","index":1,"node":{"type":"column","children":[],"props":{"spacing":6,"crossAxisAlignment":"stretch"},"layout":{"width":{"fill":0},"height":{"hug":0},"padding":[14,13,14,14]},"decoration":{"fills":[{"color":"tile"}],"radius":18},"bind":{"decoration.radius":"${theme.radii.panel}","visible":"${= sent}"}}},
+{"op":"move","id":"text2","parent":"sentPanel"},
+{"op":"move","id":"text3","parent":"sentPanel"},
+{"op":"move","id":"text4","parent":"sentPanel"},
+{"op":"patch","id":"text2","patch":{"props":{"style":{"from":"meta","color":"inkSoft"}}}},
+{"op":"patch","id":"text3","patch":{"props":{"style":{"from":"rowTitle","color":"ink"}}}},
+{"op":"patch","id":"text4","patch":{"props":{"style":{"from":"lead","color":"inkSoft"}}}},
+
+{"op":"patch","id":"row2","patch":{"props":{"spacing":10}}},
+{"op":"patch","id":"icon2","patch":{"props":{"icon":"delete_outline_rounded","size":24,"color":"inkFaint"},"layout":{"width":24,"height":24}}},
+{"op":"patch","id":"text5","patch":{"props":{"style":{"from":"cardTitle"}}}},
+
+{"op":"set","id":"startOverBtn","parent":"column1","index":3,"node":{"type":"ActionButton","props":{"label":"Start over","tone":"quiet","icon":"restart_alt_rounded","enabled":true},"layout":{"width":{"fill":0},"height":46},"bind":{"visible":"${= discarded}"},"actions":[{"trigger":{"type":"event","event":"onPressed"},"actions":[{"type":"setVariable","variable":"discarded","value":"${= false}"}]}]}},
+{"op":"remove","ids":["outlinedButton1"]},
+
+{"op":"set","id":"headLeft","parent":"row3","index":0,"node":{"type":"row","children":[],"props":{"spacing":10,"crossAxisAlignment":"center"},"layout":{"width":{"fill":0},"height":{"hug":0}}}},
+{"op":"set","id":"headMark","parent":"headLeft","node":{"type":"row","children":[],"props":{"mainAxisAlignment":"center","crossAxisAlignment":"center"},"layout":{"width":34,"height":34},"decoration":{"fills":[{"color":"accentTint"}],"radius":10}}},
+{"op":"set","id":"headMarkIcon","parent":"headMark","node":{"type":"icon","props":{"icon":"edit_note_rounded","size":20,"color":"accent"},"layout":{"width":20,"height":20}}},
+{"op":"move","id":"text6","parent":"headLeft"},
+{"op":"patch","id":"text6","patch":{"props":{"style":{"from":"cardTitle"}}}},
+{"op":"patch","id":"row3","patch":{"props":{"spacing":10},"layout":{"padding":[0,0,0,4]}}},
+{"op":"patch","id":"row4","patch":{"layout":{"height":24,"padding":[10,0,10,0]},"decoration":{"fills":[{"color":"tile"}],"strokes":[{"color":"line"}]}}},
+{"op":"patch","id":"text7","patch":{"props":{"style":{"from":"chip","color":"inkSoft"}}}},
+
+{"op":"patch","id":"segmentedButton1","patch":{"layout":{"width":{"fill":0}}}},
+
+{"op":"set","id":"errRow","parent":"column1","index":9,"node":{"type":"row","children":[],"props":{"spacing":6,"crossAxisAlignment":"center"},"layout":{"width":{"fill":0},"height":{"hug":0}},"bind":{"visible":"${= (!sent && !discarded) && (trim(to)==\"\" || trim(subject)==\"\")}"}}},
+{"op":"set","id":"errIcon","parent":"errRow","node":{"type":"icon","props":{"icon":"error_outline_rounded","size":16,"color":"bad"},"layout":{"width":16,"height":16}}},
+{"op":"move","id":"text8","parent":"errRow"},
+{"op":"patch","id":"text8","patch":{"props":{"style":{"from":"meta","fontWeight":600,"color":"bad"}}}},
+
+{"op":"patch","id":"row5","patch":{"props":{"spacing":10,"mainAxisAlignment":"start"},"layout":{"padding":[0,4,0,0]}}},
+{"op":"set","id":"discardBtn","parent":"row5","index":0,"node":{"type":"ActionButton","props":{"label":"Discard","tone":"quiet","enabled":true},"layout":{"width":{"fill":0},"height":46},"actions":[{"trigger":{"type":"event","event":"onPressed"},"actions":[{"type":"setVariable","variable":"discarded","value":"${= true}"}]}]}},
+{"op":"set","id":"sendBtn","parent":"row5","index":1,"node":{"type":"ActionButton","props":{"label":"Send","tone":"primary","icon":"send_rounded"},"layout":{"width":{"fill":0},"height":46},"bind":{"props.enabled":"${= trim(to)!=\"\"&&trim(subject)!=\"\"}"},"actions":[{"trigger":{"type":"event","event":"onPressed"},"actions":[{"type":"setVariable","variable":"sent","value":"${= true}"},{"type":"componentEvent","event":"send"},{"type":"showToast","message":"Email sent"}]}]}},
+{"op":"remove","ids":["textButton1","filledButton1"]}
+]}

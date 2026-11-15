@@ -1,0 +1,36 @@
+AudioPlayer state:paused-or-playing(playing) duration:"38:20" position:"12:47"
+  Artwork src:"the-daily-build-ep47.jpg" alt:"The Daily Build cover art" size:240x240 radius:16 shadow:soft
+    Motion on:play scale:1.0 on:pause scale:0.96 duration:200ms easing:ease-out
+  Header align:center
+    Text "The Daily Build" role:podcast-name style:caption color:secondary
+    Text "Ep. 47 · Shipping on Fridays" role:title style:title max-lines:2 overflow:ellipsis
+  Scrubber type:waveform role:slider value:767s min:0 max:2300s progress:33.3%
+    aria-label:"Seek" aria-valuetext:"12 minutes 47 seconds of 38 minutes 20 seconds"
+    Waveform bars:90 height:48 bar-width:3 gap:2 bar-radius:2
+      PlayedBars range:0-33.3% color:accent
+      UnplayedBars range:33.3%-100% color:grey
+    Playhead position:33.3% shape:circle size:14 color:accent
+      Motion on:drag scale:1.3 duration:120ms
+    Interaction tap:seek-to-point drag:scrub-live
+      Behavior while:playing position:advances-in-realtime rate:speed-multiplier
+      Behavior on:drag-start preview-time-tooltip:true
+      Behavior on:drag-end resume-previous-state
+    Row justify:space-between
+      Text "12:47" role:current-time style:caption monospace-digits:true
+        Behavior while:playing updates:every-1s
+      Text "38:20" role:duration style:caption color:secondary
+  Controls layout:row justify:space-evenly align:center
+    IconButton icon:skip-back label:"Back 15 seconds" badge:"15" action:seek-by(-15s) size:44
+      Motion on:tap icon-rotate:-30deg duration:200ms
+    IconButton icon:play label:"Play" role:primary shape:circle size:72 color:accent
+      State paused icon:play label:"Play"
+      State playing icon:pause label:"Pause"
+      State buffering icon:spinner label:"Loading" disabled:true
+      Action toggle-playback
+      Motion on:state-change icon-morph:play<->pause duration:180ms
+      Motion on:press scale:0.92 duration:100ms
+    IconButton icon:skip-forward label:"Forward 30 seconds" badge:"30" action:seek-by(+30s) size:44
+      Motion on:tap icon-rotate:30deg duration:200ms
+    Button "1.5x" label:"Playback speed" style:pill size:44 state:active
+      Action cycle-speed values:[1x,1.25x,1.5x,1.75x,2x] wrap:true
+      Motion on:change text-crossfade duration:150ms

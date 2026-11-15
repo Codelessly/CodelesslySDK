@@ -1,0 +1,24 @@
+screen "Edit Profile" background:white padding:16
+  header "Edit Profile" style:title align:left
+  form id:profileForm layout:vertical gap:16
+    field id:name label:"Name" type:text value:"Jordan Lee" placeholder:"Your full name" required:true autocapitalize:words
+    field id:email label:"Email" type:email value:"" placeholder:"you@example.com" required:true keyboard:email autocapitalize:none validate:email
+    field id:bio label:"Bio" type:textarea value:"" placeholder:"Tell us about yourself" lines:4 maxLength:280 counter:true
+    button id:save "Save" style:primary width:fill state:enabled
+      on tap:
+        set save.state:loading
+        action submit target:profileForm
+        on success:
+          set save.state:enabled
+          show toast
+        on error:
+          set save.state:enabled
+          show errorMessage "Couldn't save profile"
+  toast id:savedToast "Profile saved" position:bottom offset:24 style:success icon:check
+    visible:false
+    when shown:
+      enter animation:slide-up+fade-in duration:200ms
+      stay duration:3s
+      exit animation:slide-down+fade-out duration:200ms
+      then set visible:false
+    accessibility role:status live:polite

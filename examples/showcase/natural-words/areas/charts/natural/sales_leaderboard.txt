@@ -1,0 +1,55 @@
+Card "Sales Leaderboard" width:420 padding:20 radius:16 elevation:2 background:surface
+  Header layout:row align:center justify:space-between
+    Column
+      Text "Sales Leaderboard" style:title weight:bold
+      Text "November" style:caption color:muted
+    Badge "Target $200K" color:primary variant:soft
+  Divider
+  List spacing:12 padding-top:12
+    ListItem rank:1 layout:row align:center gap:12 highlight:true background:gold-tint radius:12 padding:10
+      Medal "🥇" tier:gold size:28
+      Avatar "JM" size:44 shape:circle background:gold color:on-gold
+      Column grow:1
+        Text "Jordan Miles" weight:semibold
+        Text "32 deals" style:caption color:muted
+        ProgressBar value:184300 max:200000 height:6 radius:3 color:gold track:muted-light animate:fill duration:800ms easing:ease-out
+      Text "$184,300" weight:bold align:end
+    ListItem rank:2 layout:row align:center gap:12 padding:10
+      Medal "🥈" tier:silver size:28
+      Avatar "SA" size:44 shape:circle background:silver color:on-silver
+      Column grow:1
+        Text "Sofia Alvarez" weight:semibold
+        Text "29 deals" style:caption color:muted
+        ProgressBar value:171950 max:200000 height:6 radius:3 color:silver track:muted-light animate:fill duration:800ms delay:100ms easing:ease-out
+      Text "$171,950" weight:bold align:end
+    ListItem rank:3 layout:row align:center gap:12 padding:10
+      Medal "🥉" tier:bronze size:28
+      Avatar "KW" size:44 shape:circle background:bronze color:on-bronze
+      Column grow:1
+        Text "Kenji Watanabe" weight:semibold
+        Text "27 deals" style:caption color:muted
+        ProgressBar value:158400 max:200000 height:6 radius:3 color:bronze track:muted-light animate:fill duration:800ms delay:200ms easing:ease-out
+      Text "$158,400" weight:bold align:end
+    ListItem rank:4 layout:row align:center gap:12 padding:10
+      Text "4" width:28 align:center weight:semibold color:muted
+      Avatar "RO" size:44 shape:circle background:blue-tint color:blue
+      Column grow:1
+        Text "Rachel Okafor" weight:semibold
+        Text "25 deals" style:caption color:muted
+        ProgressBar value:142800 max:200000 height:6 radius:3 color:primary track:muted-light animate:fill duration:800ms delay:300ms easing:ease-out
+      Text "$142,800" weight:bold align:end
+    ListItem rank:5 layout:row align:center gap:12 padding:10
+      Text "5" width:28 align:center weight:semibold color:muted
+      Avatar "LO" size:44 shape:circle background:green-tint color:green
+      Column grow:1
+        Text "Liam O'Connor" weight:semibold
+        Text "22 deals" style:caption color:muted
+        ProgressBar value:133100 max:200000 height:6 radius:3 color:primary track:muted-light animate:fill duration:800ms delay:400ms easing:ease-out
+      Text "$133,100" weight:bold align:end
+  Divider
+  Footer padding-top:12 spacing:6
+    Row justify:space-between
+      Text "Top performer vs. $200K target" style:caption color:muted
+      Text "92%" style:caption weight:semibold
+    ProgressBar value:184300 max:200000 height:10 radius:5 color:primary track:muted-light label:"$15,700 to go" animate:fill duration:1000ms easing:ease-out
+    Text "$15,700 to go" style:caption color:muted align:end

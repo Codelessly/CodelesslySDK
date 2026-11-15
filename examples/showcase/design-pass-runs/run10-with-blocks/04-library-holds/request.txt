@@ -1,0 +1,1 @@
+Design a full phone screen for library holds at 390 px wide. Show a page title, pickup branch, a featured hold ready now with its deadline and shelf code, two upcoming holds with their queue positions, an option to receive pickup notifications, and an action to open pickup details.

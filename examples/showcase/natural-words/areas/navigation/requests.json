@@ -1,0 +1,12 @@
+{
+  "profile_tabs": "A profile screen for photographer Maya Chen with tabs Posts, Saved and Tagged; tapping a tab switches the grid below it (Posts shows 6 photos, Saved shows 3, Tagged shows an empty state 'No tagged photos yet').",
+  "shop_bottom_nav": "A shopping app home screen with a bottom navigation bar with icons for Home, Search, Cart and Profile; the Cart icon shows a red badge with 3, and tapping each item switches the screen content.",
+  "orders_segmented": "An orders screen with a segmented control 'Active | Completed' at the top; Active lists 2 orders (#1042 arriving Tuesday, #1043 processing) and Completed lists 3 past orders with dates and totals.",
+  "faq_accordion": "A help center FAQ with 5 collapsible questions about a gym membership (cancel, freeze, guest passes, opening hours, payment); tapping a question expands its answer and collapses the others.",
+  "delete_confirm_dialog": "A notes list with 4 notes where each row has a delete icon; tapping it opens a modal dialog 'Delete \"Grocery list\"? This can't be undone.' with Cancel and a red Delete button that removes the note.",
+  "share_bottom_sheet": "A photo detail screen with a '...' button that opens a bottom sheet with options: Share, Save to album, Copy link, Report, and Cancel; the sheet slides up over a dimmed background.",
+  "save_toast": "A profile edit form (name 'Jordan Lee', email, bio) with a Save button; after tapping Save, a toast 'Profile saved' appears at the bottom for 3 seconds.",
+  "pricing_tooltip": "A subscription checkout screen showing Pro plan $12/month with a small info icon next to 'Service fee $1.50'; tapping or hovering the icon shows a tooltip 'Covers payment processing and support'.",
+  "drawer_menu": "A news app with a hamburger icon in the top bar that opens a side drawer menu with the user's avatar and name 'Sam Ortiz', links Top Stories, World, Tech, Sports, Bookmarks, Settings and Sign out; tapping outside closes it.",
+  "signup_wizard": "A 3-step account setup wizard: step 1 name and email, step 2 choose interests (Travel, Food, Music, Sports chips), step 3 review and finish; with a step indicator '1 of 3', Back and Next buttons, Back hidden on step 1 and Next becomes Finish on step 3."
+}

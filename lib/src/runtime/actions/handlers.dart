@@ -10,7 +10,7 @@ import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show MatrixUtils, Rect, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
-import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, TextEditingValue, TextSelection;
+import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, SelectionChangedCause, TextEditingValue, TextSelection;
 import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
 
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
@@ -547,39 +547,47 @@ void _editText(EditTextAction a, ActionRun run) {
   final v = c.value;
   final sel = v.selection.isValid ? v.selection : TextSelection.collapsed(offset: v.text.length);
   String text(String t) => run.text(t);
+  // An edit is made as typing would make it: the field's changed reactions
+  // run (a draft bound to it follows a mention picked from a popup), it is
+  // one undo step, and the field keeps the keyboard, so a toolbar button
+  // (bold, a list) leaves the user typing where they were.
+  void set(TextEditingValue value) {
+    c.userUpdateTextEditingValue(value, SelectionChangedCause.keyboard);
+    if (!handle.focusNode.hasFocus) handle.focusNode.requestFocus();
+  }
   TextEditingValue replace(int start, int end, String with_, {int? cursor}) => TextEditingValue(
         text: v.text.replaceRange(start, end, with_),
         selection: TextSelection.collapsed(offset: cursor ?? start + with_.length),
       );
   switch (a.operation) {
     case EditTextOperation.insert:
-      c.value = replace(sel.start, sel.end, text(a.text));
+      set(replace(sel.start, sel.end, text(a.text)));
     case EditTextOperation.setText:
-      c.value = TextEditingValue(text: text(a.text), selection: TextSelection.collapsed(offset: text(a.text).length));
+      set(TextEditingValue(text: text(a.text), selection: TextSelection.collapsed(offset: text(a.text).length)));
     case EditTextOperation.clear:
-      c.clear();
+      set(TextEditingValue.empty);
     case EditTextOperation.focus:
       handle.focusNode.requestFocus();
     case EditTextOperation.wrap:
       final before = text(a.before), after = text(a.after ?? a.before);
       final inner = v.text.substring(sel.start, sel.end);
-      c.value = TextEditingValue(
+      set(TextEditingValue(
         text: v.text.replaceRange(sel.start, sel.end, '$before$inner$after'),
         selection: TextSelection(baseOffset: sel.start + before.length, extentOffset: sel.start + before.length + inner.length),
-      );
+      ));
     case EditTextOperation.replaceWord:
       var start = sel.start;
       while (start > 0 && !RegExp(r'\s').hasMatch(v.text[start - 1])) {
         start--;
       }
-      c.value = replace(start, sel.end, text(a.text));
+      set(replace(start, sel.end, text(a.text)));
     case EditTextOperation.toggleList:
       final lineStart = v.text.lastIndexOf('\n', sel.start == 0 ? 0 : sel.start - 1) + 1;
       final marker = a.numbered ? '1. ' : '- ';
       final listed = v.text.startsWith(marker, lineStart);
-      c.value = listed
+      set(listed
           ? replace(lineStart, lineStart + marker.length, '', cursor: (sel.start - marker.length).clamp(lineStart, v.text.length))
-          : replace(lineStart, lineStart, marker, cursor: sel.start + marker.length);
+          : replace(lineStart, lineStart, marker, cursor: sel.start + marker.length));
   }
 }
 
@@ -657,7 +665,12 @@ Future<void> _scrollTo(ScrollToAction a, ActionRun run) async {
   final item = run.text(a.item).trim();
   NodeBox? named() => tree == null
       ? null
-      : (tree.boxOf(id, instance: run.instance) ?? scopedBoxesOf(tree, id, run.instance).lastOrNull ?? tree.boxesAtPath(id).lastOrNull);
+      : (tree.boxOf(id, instance: run.instance) ??
+          scopedBoxesOf(tree, id, run.instance).lastOrNull ??
+          tree.boxesAtPath(id).lastOrNull ??
+          // No node has that id: the one on screen with that name (a
+          // responsive screen's layouts have their own ids, the same names).
+          tree.boxesNamed(id).lastOrNull);
   final box = tree == null ? null : (item.isEmpty ? named() : repeatOf(tree, id, item, instance: run.instance)) ?? named();
   if (box == null || !box.attached) {
     // Nothing to reveal: said, not skipped silently (the chain goes on).

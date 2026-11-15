@@ -1,0 +1,27 @@
+Card "Monthly budget" padding:24 radius:16 elevation:2 width:420
+  Header
+    Text "Household budget" style:title
+    Text "This month" style:caption color:muted
+  DonutChart size:240 thickness:36 gap:2 start-angle:-90 align:center
+    Slice "Rent" value:1650 label:"39.3%" color:#4F46E5
+    Slice "Groceries" value:720 label:"17.1%" color:#10B981
+    Slice "Transport" value:380 label:"9.0%" color:#F59E0B
+    Slice "Utilities" value:290 label:"6.9%" color:#06B6D4
+    Slice "Dining out" value:460 label:"11.0%" color:#EF4444
+    Slice "Savings" value:700 label:"16.7%" color:#8B5CF6
+    Center
+      Text "$4,200" style:headline weight:bold
+      Text "Total budget" style:caption color:muted
+    Label-style position:on-slice color:white size:12 weight:medium
+    Animation on:load type:sweep duration:800ms easing:ease-out stagger:80ms
+    Interaction hover:slice effect:grow-6px
+    Tooltip on:hover-slice text:"{name}: ${value}"
+    Interaction hover:slice center-text:"${value}" center-caption:"{name}" restore-on:leave
+  Legend layout:grid columns:2 gap:12 margin-top:16
+    LegendItem swatch:#4F46E5 text:"Rent" value:"$1,650"
+    LegendItem swatch:#10B981 text:"Groceries" value:"$720"
+    LegendItem swatch:#F59E0B text:"Transport" value:"$380"
+    LegendItem swatch:#06B6D4 text:"Utilities" value:"$290"
+    LegendItem swatch:#EF4444 text:"Dining out" value:"$460"
+    LegendItem swatch:#8B5CF6 text:"Savings" value:"$700"
+    Interaction hover:item highlight-slice:true

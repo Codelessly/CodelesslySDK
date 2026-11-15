@@ -1,0 +1,40 @@
+Column center pad:24 gap:16 maxw:480
+  Row center gap:10 h:24
+    Box w:8 h:8 radius:2 fill:#FFF5B700 animate:pop delay:500
+    Box w:6 h:12 radius:2 fill:#FFEF476F animate:pop delay:600
+    Box w:10 h:10 radius:5 fill:#FF118AB2 animate:pop delay:550
+    Box w:6 h:6 radius:3 fill:#FF2E9E5B animate:pop delay:700
+    Box w:8 h:14 radius:2 fill:#FFFF9F1C animate:pop delay:650
+    Box w:10 h:10 radius:5 fill:#FFEF476F animate:pop delay:750
+    Box w:6 h:12 radius:2 fill:#FF118AB2 animate:pop delay:600
+    Box w:8 h:8 radius:2 fill:#FFF5B700 animate:pop delay:700
+  Stack center middle w:120 h:120
+    Ring 1 color:#FF2E9E5B animate:fade duration:900
+    Icon "check" size:64 color:#FF2E9E5B animate:scale delay:600 duration:400
+  Row center gap:14 h:20
+    Box w:6 h:10 radius:2 fill:#FF2E9E5B animate:pop delay:800
+    Box w:8 h:8 radius:4 fill:#FFFF9F1C animate:pop delay:700
+    Box w:10 h:6 radius:2 fill:#FFEF476F animate:pop delay:850
+    Box w:6 h:6 radius:3 fill:#FF118AB2 animate:pop delay:750
+    Box w:8 h:12 radius:2 fill:#FFF5B700 animate:pop delay:900
+  Text.pageTitle "Payment sent!" center animate:slide-up delay:700
+  Text.bodySecondary "You paid $1,249.00 to Northwind Electric" center animate:slide-up delay:800
+  Card gap:12 animate:fade delay:900
+    Row between
+      Text.muted "Amount"
+      Text.strong "$1,249.00"
+    Divider
+    Row between
+      Text.muted "To"
+      Text.strong "Northwind Electric"
+    Divider
+    Row between
+      Text.muted "Transaction ID"
+      Text.mono "TX-90314"
+    Divider
+    Row between
+      Text.muted "Date"
+      Text.strong "{formatDate(today(),"MMM d, yyyy")}"
+  Column gap:8 animate:fade delay:1000
+    Button "View receipt" -> emit viewReceipt "TX-90314"
+    Button.outline "Done" -> emit done

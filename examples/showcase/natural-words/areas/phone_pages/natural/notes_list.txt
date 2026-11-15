@@ -1,0 +1,75 @@
+Screen "Notes" background:surface safe-area:true
+  AppBar
+    LargeTitle "Notes" style:display weight:bold
+      behavior: collapses to small centered title on scroll, duration:200ms easing:standard
+    IconButton icon:sort label:"Sort notes" align:end
+  SearchBar placeholder:"Search notes" icon:search-leading shape:pill height:48
+    state:focused border:accent width:2 transition:150ms
+    state:typing show:clear-button
+    behavior: on focus, tabs hide and Cancel text button slides in from right 200ms
+  ChipRow scroll:horizontal gap:8 padding-x:16 selection:single
+    Chip "All" selected:true fill:accent text:on-accent
+    Chip "Pinned" icon:pin selected:false
+    Chip "Work" selected:false dot-color:blue
+    Chip "Personal" selected:false dot-color:green
+    behavior: tap selects chip, fill animates 150ms, list cross-fades 200ms
+  ScrollList id:notes-list scroll:vertical padding-bottom:96 pull-to-refresh:true
+    Section "Pinned" icon:pin collapsible:true
+      NoteCard title:"Q3 roadmap review" pinned:true elevation:1 radius:16
+        Preview lines:2 "Key milestones for the next quarter, including the mobile redesign, API migration and hiring plan for the platform team."
+        Meta
+          Text "Today" style:caption
+          TagDot color:blue label:"Work"
+      NoteCard title:"Grocery list" pinned:true elevation:1 radius:16
+        Preview lines:2 "Oat milk, spinach, lemons, pasta, olive oil, fresh basil, and something sweet for the weekend dinner."
+        Meta
+          Text "Yesterday" style:caption
+          TagDot color:green label:"Personal"
+    Section "All notes"
+      NoteRow title:"Meeting notes: design sync"
+        Preview lines:2 "Agreed on the new spacing scale and updated button variants. Follow up with engineering about token naming."
+        Meta
+          Text "Mon" style:caption
+          TagDot color:blue
+      NoteRow title:"Book recommendations"
+        Preview lines:2 "The Overstory, Piranesi, and A Psalm for the Wild-Built. Ask Maya about her list of nonfiction picks too."
+        Meta
+          Text "Sun" style:caption
+          TagDot color:green
+      NoteRow title:"Client feedback summary"
+        Preview lines:2 "Overall positive response to the prototype. Main concerns are onboarding length and the clarity of pricing tiers."
+        Meta
+          Text "Mar 14" style:caption
+          TagDot color:blue
+      NoteRow title:"Trip ideas: Lisbon"
+        Preview lines:2 "Stay in Alfama, day trip to Sintra, try pastéis de nata at the old bakery, and book the sunset tram ride."
+        Meta
+          Text "Mar 10" style:caption
+          TagDot color:orange
+      NoteRow title:"Workout plan"
+        Preview lines:2 "Three strength days, two runs, one long walk. Increase squat weight by five pounds and track sleep quality."
+        Meta
+          Text "Mar 6" style:caption
+          TagDot color:green
+      NoteRow title:"Team offsite agenda"
+        Preview lines:2 "Morning workshop, lunch at the park, afternoon planning session, and a retrospective before the group dinner."
+        Meta
+          Text "Feb 28" style:caption
+          TagDot color:blue
+    NoteRow states
+      state:pressed overlay:ripple opacity:8%
+      gesture:swipe-left reveals actions:[Pin color:amber, Delete color:red] threshold:40%
+      gesture:long-press enters multi-select mode with haptic:light
+      behavior: tap opens note with shared-element transition on title 300ms
+    EmptyState visible:false when:no-results
+      Illustration "empty-notes"
+      Text "No notes found"
+  FloatingActionButton icon:plus label:"Add note" position:bottom-end offset:16 above:tabbar size:56 color:accent
+    behavior: shrinks and fades out when scrolling down, returns on scroll up, duration:200ms
+    state:pressed scale:0.95
+    behavior: tap morphs into new note editor full screen, 300ms container-transform
+  TabBar position:bottom height:64 active:Notes
+    Tab "Notes" icon:note selected:true color:accent
+    Tab "Folders" icon:folder selected:false
+    Tab "Settings" icon:gear selected:false
+    behavior: tab switch cross-fades content 200ms, icon scales 1.1 on select

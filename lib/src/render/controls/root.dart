@@ -116,15 +116,11 @@ class RenderControlRoot extends RenderProxyBox {
   @override
   void detach() {
     focus.keyboard?.detach(handleKeyEvent);
+    focus.releaseOnDetach();
     super.detach();
     for (final e in _overlay) {
       e.detach();
     }
-    // Drops the focus once its fields are off the tree: a screen torn down
-    // in the middle of another render object's layout (a LayoutBuilder
-    // rebuilding, the editor's preview closing) must not have a focused
-    // field mark itself for layout there.
-    focus.hostTookFocus();
   }
 
   @override

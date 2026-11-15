@@ -1,0 +1,102 @@
+Page "Checkout – Lumen Home" background:#FAF8F5 font:Inter color:#1F1F1F
+  Header height:64 background:white border-bottom:1px solid #E8E4DE padding-x:32
+    Row justify:space-between align:center max-width:1200 center
+      Logo "Lumen Home" icon:lightbulb weight:600 size:20 link:/
+      Label "Secure checkout" icon:lock size:13 color:#5E6B5A
+  Stepper aria-label:"Checkout progress" max-width:640 center margin-y:24
+    Step "Cart" state:complete icon:check link:/cart
+    Connector state:complete
+    Step "Shipping" state:complete icon:check link:/checkout/shipping
+    Connector state:complete
+    Step "Payment" state:current accent:#C8841A weight:600
+    Connector state:upcoming
+    Step "Review" state:upcoming color:#9A948B
+  Layout columns:2 ratio:60/40 gap:48 max-width:1200 center padding-x:32 responsive:stack-below-900
+    Column name:form gap:32
+      Section "Contact"
+        Field label:"Email" type:email name:email placeholder:"you@example.com" autocomplete:email required:true
+        Checkbox "Email me about order updates and offers" checked:true
+      Section "Shipping address"
+        Row gap:16
+          Field label:"First name" name:first-name autocomplete:given-name required:true
+          Field label:"Last name" name:last-name autocomplete:family-name required:true
+        Field label:"Address" name:address autocomplete:street-address required:true
+        Field label:"Apartment, suite, etc. (optional)"
+        Row gap:16
+          Field label:"City" name:city flex:2 required:true
+          Dropdown label:"State" name:state placeholder:"Select" flex:1 required:true
+            Option "California"
+            Option "New York"
+            Option "Texas"
+            Option "Washington"
+            Option "More states…"
+          Field label:"ZIP code" name:zip inputmode:numeric maxlength:10 flex:1 required:true
+      Section "Shipping method"
+        RadioGroup name:shipping value:standard
+          Radio "Standard" value:standard selected:true
+            Text "5–7 business days" color:#6B665F
+            Price "Free" weight:600 color:#5E6B5A
+          Radio "Express" value:express
+            Text "2–3 business days" color:#6B665F
+            Price "$12.99" weight:600
+      Section "Payment"
+        Text "All transactions are encrypted." icon:lock size:13 color:#6B665F
+        Card padding:20 border:1px solid #E8E4DE radius:8 background:white
+          Field label:"Card number" name:cc-number inputmode:numeric placeholder:"1234 5678 9012 3456" icon-end:credit-card autocomplete:cc-number format:groups-of-4
+          Row gap:16
+            Field label:"Expiry" name:cc-exp placeholder:"MM / YY" autocomplete:cc-exp format:"MM / YY"
+            Field label:"CVC" name:cc-csc placeholder:"123" maxlength:4 icon-end:help tooltip:"3 or 4 digit code on your card" autocomplete:cc-csc
+        Checkbox "Billing address same as shipping" checked:true
+      Row justify:space-between align:center
+        Link "‹ Return to shipping" href:/checkout/shipping
+        Button "Continue to review" style:secondary
+    Column name:summary position:sticky top:24 align-self:start
+      Card padding:24 background:white border:1px solid #E8E4DE radius:12 gap:20
+        Heading "Order summary" level:2
+        List gap:16
+          Item
+            Thumbnail src:lamp.jpg size:64 radius:8 alt:"Arc table lamp" badge:"1"
+            Stack
+              Text "Arc Table Lamp" weight:500
+              Text "Qty 1" size:13 color:#6B665F
+            Price "$98.00" align:end
+          Item
+            Thumbnail src:throw.jpg size:64 radius:8 alt:"Wool throw blanket" badge:"2"
+            Stack
+              Text "Wool Throw Blanket" weight:500
+              Text "Qty 2" size:13 color:#6B665F
+            Price "$96.00" align:end
+          Item
+            Thumbnail src:candle.jpg size:64 radius:8 alt:"Soy candle" badge:"1"
+            Stack
+              Text "Amber Soy Candle" weight:500
+              Text "Qty 1" size:13 color:#6B665F
+            Price "$20.00" align:end
+        Divider
+        Row gap:8
+          Field placeholder:"Discount code" name:discount flex:1
+          Button "Apply" style:secondary
+            state disabled:true until:field-has-text
+            state loading:spinner while:validating
+          Message type:error "Invalid code" visible:false on:invalid-code
+          Message type:success visible:false on:valid-code
+        Divider
+        Rows gap:8
+          Row "Subtotal" value:"$214.00"
+          Row "Shipping" value:"Free" note:"Standard"
+            update value:"$12.99" when:shipping=express
+          Row "Estimated tax" value:"$17.12"
+        Divider
+        Row "Total" value:"$231.12" weight:700 size:20 currency:USD
+          transition type:count duration:300ms on:change
+        Button "Place order" style:primary full-width height:52 background:#C8841A color:white icon-start:lock
+          state loading:spinner label:"Processing…" disabled:true while:submitting
+          state hover background:#B07414
+          state focus outline:2px solid #C8841A
+        Text "By placing your order you agree to our Terms and Privacy Policy." size:12 color:#6B665F align:center
+  Footer padding:32 align:center
+    Links gap:24 size:13 color:#6B665F
+      Link "Refund policy"
+      Link "Shipping"
+      Link "Privacy"
+      Link "Terms"

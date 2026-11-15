@@ -1,0 +1,242 @@
+[
+ {
+  "page": "fitness_home",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "pass": 8,
+   "ssui": 4,
+   "designed": 6
+  },
+  "why": "A reads like a shipped product, with clear typographic hierarchy, icon-anchored stat cards, a prominent full-width Start CTA and a proper icon tab bar; C has decent card polish but a text-only, unevenly spaced nav and weaker stat cards; B is flat and cramped, with a tiny CTA, faint labels and a bare, misaligned text nav (all three also show an empty progress bar despite 72%)."
+ },
+ {
+  "page": "fitness_home",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "pass": 9,
+   "ssui": 5,
+   "designed": 6.5
+  },
+  "why": "A has the strongest hierarchy and the most finished feel: a large hero number, a clear primary Start button, icons on the stat cards, tidy list rows, and a proper bottom nav with icons and an active state. C is clean and consistent but its bottom nav is text-only with misaligned labels, and the cards feel generic. B is flat and cramped, with a tiny Start button, low-contrast stat labels, and a text-only nav that sits awkwardly mid-screen, so it looks unfinished."
+ },
+ {
+  "page": "banking",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 6,
+   "pass": 8,
+   "ssui": 4
+  },
+  "why": "B has the strongest hierarchy and polish: the balance and sections sit in cards, Send stands out as the primary action, the $1,842 spending total is emphasized, and transaction icons have consistent containers. A is clean but flatter, with bare icons and an awkwardly wrapped chart title. C feels cramped, with touching chart bars, tiny low-contrast metadata and tight row spacing."
+ },
+ {
+  "page": "banking",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "pass": 9,
+   "ssui": 5,
+   "designed": 6.5
+  },
+  "why": "A has the strongest hierarchy and polish: a hero balance card, consistent card containers, tidy action tiles, a well-proportioned chart with gaps between bars, and clean transaction rows with icon tiles. C is clean and consistent but flatter, with bare icons and no container around the transactions. B is weakest: the chart bars are fat and nearly touching, the spacing is cramped, and the elements look inconsistent."
+ },
+ {
+  "page": "food_order",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 6,
+   "ssui": 5,
+   "pass": 7
+  },
+  "why": "C reads most like a shipped product, with a hero header, a clear price hierarchy and a floating cart bar, despite its repetitive placeholder icons and oversized $0.00; A is clean and well-spaced but leaves a large dead area at the top, and B shares that gap while also feeling cramped and flat, with tight bordered cards."
+ },
+ {
+  "page": "food_order",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 6,
+   "pass": 8,
+   "ssui": 5
+  },
+  "why": "B has the strongest hierarchy and the most shipped-product polish, with a hero banner, food icon tiles, a floating cart bar and bold prices, though the placeholder hero and repeated identical icons are generic; A is clean and roomy with comfortable card spacing but plain and imageless, with a full-bleed cart bar; C is cramped, with tight cards, small type, a white background that reads as unfinished, and little visual separation."
+ },
+ {
+  "page": "habit_tracker",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "ssui": 4,
+   "pass": 8,
+   "designed": 7
+  },
+  "why": "B has the strongest hierarchy, with a bold progress headline, icon tiles, orange streak flames, rounded bars and a full-width CTA, so it reads as a polished shipped product; C is clean but flatter and less distinctive; A's flat outlined cards, blocky edge-to-edge chart bars and tiny left-aligned button feel unfinished."
+ },
+ {
+  "page": "habit_tracker",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 7,
+   "pass": 8.5,
+   "ssui": 5
+  },
+  "why": "B has the clearest hierarchy, with a bold '4 of 6 done' summary, icon tiles, orange streak flames, a week strip in its own card, and generous spacing, so it reads as a shipped product; A is clean and consistent but flatter, with monochrome icons and a weaker summary; C is cramped, its bars are fused into a block, the Add habit button is small and left-aligned, and the cards feel dense and unpolished."
+ },
+ {
+  "page": "travel_booking",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "pass": 8,
+   "designed": 6,
+   "ssui": 5
+  },
+  "why": "A has the strongest hierarchy, with bold flight times, a tinted gate/seat panel, icon chips and a highlighted total, plus generous, consistent spacing that feels like a shipped product; B is clean but flatter, with weak muted times and a small Manage booking button; C is cramped, with tight padding, faint gray text, uneven type sizes and boxy outlined cards that look less polished."
+ },
+ {
+  "page": "travel_booking",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 7,
+   "pass": 8,
+   "ssui": 5
+  },
+  "why": "B has the strongest hierarchy and polish, with bold times and prices, tinted icon chips, inset panels for gate/boarding/seat, the address and the total, and a clear gap before the 'Your plan' label, so it reads as a shipped product; A is clean and consistent with soft shadows and comfortable spacing but flatter and less distinctive; C is cramped, with thin borders, low-contrast gray times and a small faint date, and tight spacing that makes it feel like a wireframe."
+ },
+ {
+  "page": "chat_settings",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 7,
+   "pass": 8,
+   "ssui": 5
+  },
+  "why": "B has the most refined hierarchy, with small-caps section labels, a prominent storage figure, tiled device icons and a restrained destructive action, though its Log out card is almost too faint; A is clean and consistent but flatter, with an overly loud red Log out; C feels cramped and unfinished, with tiny low-contrast metadata, a shrunken Manage button and an undersized Log out chip."
+ },
+ {
+  "page": "chat_settings",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "designed",
+   "pass",
+   "ssui"
+  ],
+  "scores": {
+   "ssui": 4,
+   "designed": 8,
+   "pass": 7
+  },
+  "why": "B has the clearest hierarchy, with roomy padding, soft card shadows, a full-width Manage button and a prominent Log out that reads as a shipped product; C has refined typography and tidy device icons but a weak, nearly invisible Log out button, tiny letter-spaced section labels, and slightly heavy values; A is cramped, with a small stray Log out button, a white background that blends with the cards, flat borders and tight spacing."
+ },
+ {
+  "page": "ecommerce_product",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "ssui",
+   "designed"
+  ],
+  "scores": {
+   "designed": 5,
+   "pass": 8,
+   "ssui": 6
+  },
+  "why": "B shows the clearest grouping and polish: a defined image placeholder, sectioned cards, struck-through original price, icon containers and an anchored action bar. C is clean and consistent but flat and a bit cramped. A leaves the image area as an undefined void and mixes heavy shadowed review cards with otherwise unstructured content."
+ },
+ {
+  "page": "ecommerce_product",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 6,
+   "pass": 8,
+   "ssui": 5
+  },
+  "why": "B groups content into clear cards with a visible image placeholder, a strikethrough old price, icon tiles and a sticky-style action bar, so the hierarchy reads well and it looks closest to a shipped product; A is clean but flat, with the same blank hero and an unstruck price; C is the most bare, with faint brand text, tight review cards and weak separation between sections."
+ },
+ {
+  "page": "learning",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "ssui": 5,
+   "pass": 8,
+   "designed": 6
+  },
+  "why": "B is the most cohesive and shipped-looking, with a strong dark hero card, consistent blue accents, pill badges for the stats, and a proper icon tab bar; C adds nicer card elevation but has a clashing black button on the green hero and a text-only nav, while A is the flattest and most cramped, with weak tab-bar affordance."
+ },
+ {
+  "page": "learning",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "pass",
+   "designed",
+   "ssui"
+  ],
+  "scores": {
+   "designed": 6,
+   "pass": 8,
+   "ssui": 5
+  },
+  "why": "B has the clearest hierarchy and the most shipped-looking polish: pill stat chips, tinted icon wells in the unit cards, a proper tab bar with icons, and consistent blue accents. A is roomy and readable but its text-only nav and big green icons feel less refined, though its spacing is generous. C is cramped and its low-contrast gray captions, tight card spacing and text-only nav make it feel the least finished."
+ }
+]

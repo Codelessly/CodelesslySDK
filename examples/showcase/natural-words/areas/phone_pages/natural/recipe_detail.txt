@@ -1,0 +1,54 @@
+Screen "Recipe Detail" background:surface
+  Scroll direction:vertical padding-bottom:96 bounce:true
+    Hero height:320 parallax:0.5
+      Image src:"lemon-garlic-butter-salmon.jpg" fit:cover alt:"Pan-seared salmon fillets with lemon slices and dill" placeholder:blur
+      Gradient direction:top-to-bottom from:#00000066 to:transparent height:120
+      Row align:space-between padding:16 safe-area:top
+        IconButton icon:back label:"Back" shape:circle background:#ffffffe6 size:44 on-tap:navigate-back
+        IconButton icon:heart label:"Favorite" shape:circle background:#ffffffe6 size:44 toggle:true state:unselected selected-icon:heart-filled selected-color:red on-tap:toggle animation:pop-scale haptic:light
+    Column padding:20 gap:16
+      Text "Lemon Garlic Butter Salmon" style:headline-large weight:bold
+      Row gap:8 align:center
+        Rating value:4.8 max:5 icon:star color:amber size:18 readonly:true
+        Text "4.8" weight:semibold
+        Text "(1,203 reviews)" color:secondary on-tap:open-reviews
+      Row gap:8 wrap:true
+        Chip icon:clock "25 min"
+        Chip icon:people "4 servings" bind:servings
+        Chip icon:flame "520 kcal" note:per-serving
+      Divider
+      Row align:space-between align-items:center
+        Text "Servings" style:title-medium
+        Stepper value:4 min:1 max:12 step:1 on-change:rescale-ingredients
+          IconButton icon:minus label:"Decrease servings" disabled-when:value<=1
+          Text bind:value min-width:32 align:center transition:number-roll
+          IconButton icon:plus label:"Increase servings" disabled-when:value>=12
+      Section
+        Row align:space-between align-items:baseline
+          Text "Ingredients" style:title-large weight:bold
+          Text "0 of 7 checked" color:secondary bind:checked-count
+        Checklist gap:4 persist:true
+          Checkbox "4 salmon fillets" checked:false scales:true
+          Checkbox "3 tbsp butter" checked:false scales:true
+          Checkbox "4 cloves garlic" checked:false scales:true
+          Checkbox "1 lemon" checked:false scales:true
+          Checkbox "Fresh dill" checked:false
+          Checkbox "Salt" checked:false
+          Checkbox "Pepper" checked:false
+          on-check text-style:strikethrough color:secondary animation:fade 150ms haptic:selection
+      Section
+        Text "Steps" style:title-large weight:bold
+        List ordered:true numbering:circle gap:16
+          Step number:1 "Pat the salmon fillets dry and season both sides with salt and pepper."
+          Step number:2 "Melt the butter in a large skillet over medium-high heat."
+          Step number:3 "Sear the salmon skin-side up for 4 minutes until golden, then flip."
+          Step number:4 "Add the minced garlic and cook for 30 seconds, until fragrant."
+          Step number:5 "Squeeze in the lemon juice and spoon the butter sauce over the fillets for 3 to 4 minutes."
+          Step number:6 "Sprinkle with fresh dill and serve hot with lemon slices."
+  BottomBar sticky:true position:bottom elevation:8 background:surface padding:16 safe-area:bottom
+    Button "Start Cooking" icon:play style:filled width:fill height:56 radius:28 color:primary on-tap:open-cooking-mode pressed-animation:scale-0.97 haptic:medium
+  Behavior
+    Hero on-scroll image-scale:1.0-to-1.15 overlay-buttons:pin-then-fade-into-top-bar
+    TopBar appears-after-scroll:240 title:"Lemon Garlic Butter Salmon" animation:fade-slide-down 200ms
+    Stepper on-change ingredient-quantities:animate-crossfade 200ms
+    Favorite on-tap Snackbar "Saved to favorites" duration:2000 action:"Undo"

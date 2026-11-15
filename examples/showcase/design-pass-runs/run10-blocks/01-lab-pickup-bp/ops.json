@@ -1,0 +1,20 @@
+{"ops": [
+{"op":"patch","id":"column1","patch":{"layout":{"padding":[18,18,18,18]},"props":{"spacing":14,"crossAxisAlignment":"stretch"},"decoration":{"strokes":[{"color":"line"}],"strokeWidth":1,"effects":null},"bind":{"decoration.radius":"${theme.radii.card}","decoration.effects":"${theme.shadows.card}"}}},
+{"op":"set","id":"header","parent":"column1","index":0,"node":{"type":"row","children":[],"props":{"crossAxisAlignment":"center","spacing":12},"layout":{"width":{"fill":0},"height":{"hug":0}}}},
+{"op":"set","id":"headMark","parent":"header","node":{"type":"row","children":[],"props":{"mainAxisAlignment":"center","crossAxisAlignment":"center"},"layout":{"width":42,"height":42},"decoration":{"fills":[{"color":"accentTint"}],"radius":14},"bind":{"decoration.radius":"${theme.radii.tile}"}}},
+{"op":"set","id":"headIcon","parent":"headMark","node":{"type":"icon","props":{"icon":"science_rounded","size":22,"color":"accent"},"layout":{"width":22,"height":22}}},
+{"op":"set","id":"headText","parent":"header","node":{"type":"column","children":[],"props":{"crossAxisAlignment":"start","spacing":2},"layout":{"width":{"fill":0},"height":{"hug":0}}}},
+{"op":"move","id":"text1","parent":"headText"},
+{"op":"move","id":"text2","parent":"headText"},
+{"op":"patch","id":"text1","patch":{"props":{"style":{"from":"cardTitle"}}}},
+{"op":"patch","id":"text2","patch":{"props":{"style":{"from":"meta","color":"inkSoft"}}}},
+{"op":"patch","id":"row1","patch":{"layout":{"padding":[16,14,16,14]},"props":{"spacing":12,"crossAxisAlignment":"center"},"decoration":{"fills":[{"color":"tile"}],"strokes":[{"color":"lineStrong"}],"strokeWidth":1,"dashPattern":[4,3],"radius":18},"bind":{"decoration.radius":"${theme.radii.panel}"}}},
+{"op":"patch","id":"text3","patch":{"props":{"style":{"from":"eyebrow"}}}},
+{"op":"patch","id":"text4","patch":{"props":{"style":{"from":"numberLarge","fontSize":26},"maxLines":1}}},
+{"op":"set","id":"idNote","parent":"column1","index":2,"node":{"type":"row","children":[],"props":{"crossAxisAlignment":"center","spacing":8},"layout":{"width":{"fill":0},"height":{"hug":0},"padding":[2,0,0,0]}}},
+{"op":"set","id":"idIcon","parent":"idNote","node":{"type":"icon","props":{"icon":"badge_rounded","size":18,"color":"inkFaint"},"layout":{"width":18,"height":18}}},
+{"op":"move","id":"text5","parent":"idNote"},
+{"op":"patch","id":"text5","patch":{"props":{"style":{"from":"meta","color":"inkSoft"}}}},
+{"op":"set","id":"pickupBtn","parent":"column1","node":{"type":"ActionButton","props":{"label":"I'll pick it up","tone":"primary","icon":"check_rounded","enabled":true},"layout":{"width":{"fill":0},"height":46},"actions":[{"trigger":{"type":"event","event":"onPressed"},"actions":[{"type":"componentEvent","event":"collectKit"},{"type":"showToast","message":"Pickup noted"}]}]}},
+{"op":"remove","ids":["filledButton1"]}
+]}

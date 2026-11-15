@@ -1,0 +1,60 @@
+Screen "Messages" background:#FFFFFF layout:column
+
+  Header height:64 layout:row align:center padding:12 background:#FFFFFF border-bottom:1 #E5E5EA elevation:1
+    IconButton icon:arrow-left label:"Back" action:navigate-back size:44
+    Avatar image:maya-chen.jpg size:40 shape:circle
+      StatusDot color:#34C759 position:bottom-right size:10 border:2 #FFFFFF
+    Column grow:1 margin-left:10
+      Text "Maya Chen" style:title weight:600 size:17
+      Text "Active now" style:caption color:#34C759 size:13
+    IconButton icon:phone label:"Voice call" action:start-call size:44
+    IconButton icon:video label:"Video call" action:start-video-call size:44
+
+  ScrollView id:thread grow:1 layout:column padding:16 gap:8 scroll-anchor:bottom background:#FFFFFF
+
+    DateSeparator "Today" align:center color:#8E8E93 size:12 weight:500 margin-vertical:8
+
+    Message direction:incoming align:left
+      Avatar image:maya-chen.jpg size:28 shape:circle align:bottom
+      Bubble background:#E9E9EB color:#000000 radius:18 padding:10,14 max-width:75%
+        Text "Hey! Are we still on for the hike this weekend?"
+      Timestamp "9:41 AM" color:#8E8E93 size:11
+
+    Message direction:outgoing align:right
+      Bubble background:#0A84FF color:#FFFFFF radius:18 padding:10,14 max-width:75%
+        Text "Absolutely! I checked the forecast, Saturday looks perfect ☀️"
+      Timestamp "9:43 AM" color:#8E8E93 size:11
+
+    Message direction:incoming align:left
+      Avatar image:maya-chen.jpg size:28 shape:circle align:bottom
+      Bubble background:#E9E9EB color:#000000 radius:18 padding:10,14 max-width:75%
+        Text "Yay! Here's the trail I was telling you about"
+      Timestamp "9:44 AM" color:#8E8E93 size:11
+
+    Message direction:incoming align:left type:photo
+      Avatar image:maya-chen.jpg size:28 shape:circle align:bottom
+      Bubble background:#E9E9EB radius:18 padding:4 max-width:75%
+        Image source:trail-photo.jpg width:240 height:300 radius:14 fit:cover action:open-fullscreen label:"Shared photo: mountain trail"
+      Timestamp "9:44 AM" color:#8E8E93 size:11
+
+    Message direction:outgoing align:right
+      Bubble background:#0A84FF color:#FFFFFF radius:18 padding:10,14 max-width:75%
+        Text "Wow, that view is unreal. I'm in! Should I bring snacks?"
+      Timestamp "9:46 AM" color:#8E8E93 size:11
+      ReadReceipt "Seen" color:#8E8E93 size:11 align:right
+
+    TypingIndicator direction:incoming align:left visible:true
+      Avatar image:maya-chen.jpg size:28 shape:circle align:bottom
+      Bubble background:#E9E9EB radius:18 padding:12,16
+        Row gap:4
+          Dot size:8 color:#8E8E93 radius:4 animation:bounce duration:1200ms delay:0ms repeat:infinite
+          Dot size:8 color:#8E8E93 radius:4 animation:bounce duration:1200ms delay:150ms repeat:infinite
+          Dot size:8 color:#8E8E93 radius:4 animation:bounce duration:1200ms delay:300ms repeat:infinite
+      transition:fade-in-slide-up duration:200ms
+
+  Composer layout:row align:center gap:8 padding:8,12 background:#FFFFFF border-top:1 #E5E5EA keyboard-avoiding:true
+    IconButton icon:plus label:"Add attachment" action:open-attachments size:40 color:#0A84FF background:#F2F2F7 shape:circle
+    TextField placeholder:"Message…" grow:1 min-height:40 max-lines:5 radius:20 padding:10,16 background:#F2F2F7 autogrow:true
+    IconButton icon:send label:"Send" action:send-message size:40 shape:circle background:#0A84FF color:#FFFFFF
+      state:disabled when:field-empty opacity:0.4
+      state:enabled when:field-has-text transition:scale-in duration:150ms

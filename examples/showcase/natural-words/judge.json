@@ -1,0 +1,418 @@
+[
+ {
+  "case": "count_up",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "before": 7,
+   "after": 4
+  },
+  "why": "A is a clean, internally consistent card with a clear label, value, and period hierarchy, while B's stronger visual polish is undercut by a green +12.4% badge beside $34,704 vs. $42,880 last month, which is really a ~19% drop, plus a progress bar with no clear meaning, making it misleading."
+ },
+ {
+  "case": "count_up",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 7,
+   "before": 5
+  },
+  "why": "A has a strong hierarchy with a large figure, a status badge and a progress bar for context, so it looks like a shipped dashboard card, though its green +12.4% contradicts a value below last month's $42,880; B is clean but generic, with a small figure, weak hierarchy, no comparison or visual interest, and a lot of dead space."
+ },
+ {
+  "case": "countdown",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 6
+  },
+  "why": "B centers the large time display over the centered Start/Reset controls, giving one clean axis and a stronger title hierarchy, while A's left-aligned timer clashes with its centered buttons and looks less resolved."
+ },
+ {
+  "case": "countdown",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 7,
+   "before": 6
+  },
+  "why": "A centers the timer over a centered progress bar and buttons, so the card reads as one coherent, balanced unit with a bolder title anchoring the hierarchy, whereas B left-aligns the title and timer but centers the buttons, which feels inconsistent, and its lighter title is weaker."
+ },
+ {
+  "case": "dial_battery",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 4
+  },
+  "why": "A is a polished, well-balanced card with a complete ring, a clear time-to-full hierarchy, and tidy labels, while B's ring has no track and its '64%' label collides with the arc, giving it a broken, unfinished look despite a compact layout."
+ },
+ {
+  "case": "dial_battery",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 4
+  },
+  "why": "A has a clean, balanced layout where the ring's center holds the percentage and charge icon, with a clear 'time to full' hierarchy and a well-aligned progress bar with labels; B has the '64%' text overflowing the ring and colliding with the stroke, a cramped, misaligned layout, and a ring that looks clipped, so it feels unpolished."
+ },
+ {
+  "case": "fill_bar",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 6
+  },
+  "why": "B visibly communicates upload progress with a filled blue bar and an inline percentage, while A's empty track at 0% reads as stalled, though its right-aligned percentage is a clean touch."
+ },
+ {
+  "case": "fill_bar",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 7,
+   "before": 5
+  },
+  "why": "A shows a visible blue progress fill at 10% with clear status text, so the upload state reads at a glance, while B's empty 0% track with a detached percentage on the right looks inactive and has less visual feedback, even though its right-aligned percentage is a tidy touch."
+ },
+ {
+  "case": "flip_card",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "after": 6,
+   "before": 8
+  },
+  "why": "B keeps its centered alignment consistent and has a clear Previous/Next navigation layout, while A mixes a centered label and hint with a left-aligned question and crams small centered buttons, which reads as less polished."
+ },
+ {
+  "case": "flip_card",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "after": 5,
+   "before": 7
+  },
+  "why": "B has a cleaner, consistent hierarchy: the question is centered and prominent, the hint sits left-aligned below the card, and Previous/Next navigation is clear and conventional. A mixes alignments (a centered 'QUESTION' label over a left-aligned heading, with the hint centered at an odd offset) and has cramped card padding, and its 'Still learning / Got it' buttons are centered while the header is left-aligned, so it feels less cohesive, though the self-assessment actions are a nice idea."
+ },
+ {
+  "case": "gauge_speed",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "after": 5,
+   "before": 6
+  },
+  "why": "B is clean and well-centered with strong numeric hierarchy, though its 0/Limit/180 scale labels are orphaned without a bar, while A's gauge is off-center in the card with a floating limit tick and bottom labels that don't align to the arc ends, so it looks unpolished despite offering more visual context."
+ },
+ {
+  "case": "gauge_speed",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "before": 5,
+   "after": 6
+  },
+  "why": "B adds a real gauge arc with a limit tick that makes the 0\u2013180 scale and limit meaningful, despite being off-center with a detached tick, while A is clean but has only a number and orphaned scale labels with no visual."
+ },
+ {
+  "case": "knob_thermostat",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "before": 4,
+   "after": 7
+  },
+  "why": "B's gauge has a proper track with a progress arc and a clean, compact stepper, so it reads as a polished, shipped thermostat; A's trackless half-arc looks broken, the extra slider duplicates the control, and the orange temperature, blue arc and teal badge clash."
+ },
+ {
+  "case": "knob_thermostat",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 7,
+   "before": 5
+  },
+  "why": "A has a clear, conventional gauge with a large centered value, a consistent unit, and tidy stepper and mode controls, though the arc is thin, the stepper duplicates the value and floats a bit far below the dial. B is more colorful but inconsistent: the arc is oddly heavy and its start and end don't read as a gauge, the orange number clashes with the blue arc and teal pill, and the small stepper buttons sit awkwardly beside the dial while the slider duplicates the dial's function and its fill (about 40%) disagrees with the arc."
+ },
+ {
+  "case": "meter_storage",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "after": 5,
+   "before": 8
+  },
+  "why": "B's compact inline legend with consistent label-value pairs and a quiet 'free' line reads cleanly and looks shipped, whereas A's GB values are ragged and misaligned across rows, with an inconsistent lighter Free row that looks unfinished."
+ },
+ {
+  "case": "meter_storage",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "after": 5,
+   "before": 7
+  },
+  "why": "B reads as a tidy, consistent card with a compact legend and a clear header, though the 'free' line is a little orphaned below it; A's list is more readable in principle, but the GB values sit at ragged x-positions and mix heavy and light weights, which looks unpolished."
+ },
+ {
+  "case": "pulse_button",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "before": 3,
+   "after": 7
+  },
+  "why": "B is a compact, polished card whose clear primary Record button and tidy title/subtitle hierarchy feel shippable, while A asks the user to tap a tiny, unaffordanced mic icon floating in a sea of empty space above an oversized '0s', making it look unfinished."
+ },
+ {
+  "case": "pulse_button",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 4
+  },
+  "why": "A is a compact, well-aligned card with a clear title, helper text and an obvious blue Record button, so the primary action is easy to find; B scatters its content, with a tiny, low-contrast mic icon floating in empty space, a large '0s' timer that competes with the title, and no clear affordance to start recording, so it feels unfinished."
+ },
+ {
+  "case": "reorder",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 4
+  },
+  "why": "A is a clean, well-spaced playlist with proper m:ss durations and a header divider, while B's right column shows only a bare \"4\" on every row, which reads as broken or truncated data and undermines an otherwise similar layout."
+ },
+ {
+  "case": "reorder",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 5
+  },
+  "why": "A has clear hierarchy, generous row spacing, a divider under the header, and believable right-aligned durations (4:08, 3:49, etc.), so it reads like a shipped product; B has tighter spacing and no divider, and its durations are truncated to a bare '4', which looks broken and hurts credibility even though the layout is otherwise similar."
+ },
+ {
+  "case": "ring_goal",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 7,
+   "before": 5
+  },
+  "why": "A has a centered ring with a visible gray track that makes the remaining 28% readable, plus a balanced footer, while B drops the track and pushes the ring left, leaving half the card empty and lopsided despite its stronger 72% figure and nicer '7,240 / 10,000' formatting."
+ },
+ {
+  "case": "ring_goal",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "before": 5,
+   "after": 8
+  },
+  "why": "B has a visible track behind the progress arc, a centered ring, and a balanced footer with steps on the left and goal on the right, so it reads as a finished progress ring, while A's ring has no track, sits off-center to the left with a large empty area on the right, and its arc looks incomplete, though A's larger 72% and the '7,240 / 10,000 steps' line give clearer emphasis and formatting."
+ },
+ {
+  "case": "skeleton",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "after": 3,
+   "before": 8
+  },
+  "why": "B delivers real article titles with clear title/meta hierarchy, consistent icon tiles and chevron affordances in a polished list, while A is only a skeleton loading state that shows none of the requested content."
+ },
+ {
+  "case": "skeleton",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "after": 2,
+   "before": 9
+  },
+  "why": "B shows the actual article titles, read-time and category metadata, icons and chevrons with clear hierarchy and consistent spacing, while A is only a skeleton/loading placeholder that shows none of the requested latest articles."
+ },
+ {
+  "case": "slide_rows",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "after": 5,
+   "before": 8
+  },
+  "why": "B reads like a shipped notification list, with consistent icons, a clear title-over-timestamp hierarchy, and even rhythm, while A's right-aligned detail column makes it feel like a table, wraps 'New message from Ada' awkwardly, and leaves the eye bouncing between columns."
+ },
+ {
+  "case": "slide_rows",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "after": 4,
+   "before": 8
+  },
+  "why": "B reads as a real notification list: icons, a clear title/timestamp hierarchy, consistent left alignment and even spacing, while A is a two-column table with cramped wrapping ('New message from Ada'), right-aligned detail text that is hard to scan, no icons or timestamps, and uneven row rhythm."
+ },
+ {
+  "case": "slider_tip",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "before": 6,
+   "after": 6
+  },
+  "why": "The two renderings are visually identical: both have a clean, consistent layout with a clear tip slider, but the Total is barely emphasized, the 'Split the bill' title promises a per-person split that neither card shows, and the bottom padding feels slightly cramped, so neither can be preferred on design grounds."
+ },
+ {
+  "case": "slider_tip",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "before",
+   "after"
+  ],
+  "scores": {
+   "before": 7,
+   "after": 7
+  },
+  "why": "The two renderings look pixel-identical, with the same hierarchy, spacing, slider styling and bold total, so neither has a real advantage and the tie order is arbitrary."
+ },
+ {
+  "case": "sparkline",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 5
+  },
+  "why": "A reads like a shipped product, with a clear ticker/name and price/change hierarchy, color-coded gains and losses, sparklines that add useful context, and generous, even spacing; B is flatter and less scannable, leaving changes uncolored, demoting the price to tiny gray text, and adding a stray divider under the last row."
+ },
+ {
+  "case": "sparkline",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 5
+  },
+  "why": "A gives a clear hierarchy with ticker, company name, price, sparkline and color-coded change, with generous spacing and consistent alignment, so it looks like a shipped watchlist; B is cramped and bare, with price as small gray text under the ticker, no color cue on the change, tight dividers touching the text, and little to scan."
+ },
+ {
+  "case": "swipe_delete",
+  "judge": "claude-opus-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 7,
+   "before": 5
+  },
+  "why": "B reads as a more complete, shipped to-do card: a clear title with a '2 left' badge, an inline add-task field, tidy dividers, swipe chevrons as affordances and the hint placed as a footnote; A is clean but sparse, with loose row spacing, no completed-state styling and a lot of dead space, so it feels like a stub."
+ },
+ {
+  "case": "swipe_delete",
+  "judge": "claude-sonnet-5-5",
+  "rank": [
+   "after",
+   "before"
+  ],
+  "scores": {
+   "after": 8,
+   "before": 6
+  },
+  "why": "A is a more complete to-do card: it has an add-task input with a clear primary button, a remaining-count badge, dividers, and chevrons that hint at swipe-to-delete, and its hierarchy is clear and consistent. B is clean but sparse, with no way to add tasks and no row affordance, and its swipe hint sits awkwardly under the title, so it feels less like a shipped product."
+ }
+]

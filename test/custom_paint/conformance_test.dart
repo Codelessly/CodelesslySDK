@@ -130,6 +130,20 @@ final _cases = <_Case>[
     )..layout();
     tp.paint(c, const Offset(30, 30) - Offset(tp.width / 2, tp.height / 2));
   }),
+  _c('paragraph whose font size and letter spacing are expressions (a label that grows with the zoom)', {
+    'painter': [
+      {
+        'op': 'paragraph', 'text': 'T13', 'offset': [30, 30], 'anchor': [0, 0],
+        'style': {'fontSize': r'${= zoom * 8}', 'letterSpacing': r'${= zoom / 2}', 'color': '#FF212121'},
+      },
+    ],
+  }, (c, s) {
+    final tp = TextPainter(
+      text: TextSpan(text: 'T13', style: textStyle(const api.TextStyle(fontSize: 16, letterSpacing: 1, color: api.Color(0xFF212121)))),
+      textDirection: TextDirection.ltr,
+    )..layout();
+    tp.paint(c, const Offset(30, 30) - Offset(tp.width / 2, tp.height / 2));
+  }, variables: [const Variable(name: 'zoom', type: VariableType.decimal, value: 2)]),
   _c('linear gradient shader (Gradient.linear over the shape)', {
     'painter': [
       {'op': 'rect', 'rect': [10, 10, 40, 40], 'paint': {'shader': {'type': 'linear', 'stops': [{'position': 0, 'color': '#FFE53935'}, {'position': 1, 'color': '#FF1E88E5'}]}}},

@@ -1,0 +1,25 @@
+Card width:360 padding:16 radius:12 border:"1px #E5E7EB" background:#FFFFFF
+  Row align:center gap:12
+    Icon name:file-document size:32 color:#6B7280
+    Column grow:1 gap:2
+      Text "quarterly-report.pdf" weight:600 size:14 color:#111827 ellipsis:true
+      Text "{uploaded} of {size}" size:12 color:#6B7280
+        when state:done text:"Upload complete" color:#16A34A
+    Row align:center gap:6
+      Text "{percent}%" size:13 weight:600 color:#374151 tabular-numbers:true
+        when state:done hidden:true
+      Icon name:check-circle size:20 color:#16A34A hidden:true
+        when state:done visible:true animate:"scale-in from:0.5 duration:250ms easing:ease-out"
+  ProgressBar value:{percent} min:0 max:100 height:8 radius:4 track:#E5E7EB fill:#2563EB margin-top:12
+    animate property:value duration:300ms easing:ease-out
+    when state:done fill:#16A34A transition:"fill-color duration:400ms"
+  Row justify:space-between margin-top:12
+    Text "{speed} · {timeRemaining} left" size:12 color:#6B7280
+      when state:done hidden:true
+    Button "Cancel" variant:text size:12 color:#DC2626 action:cancelUpload
+      when state:done hidden:true
+    Button "Remove" variant:text size:12 color:#6B7280 action:removeFile hidden:true
+      when state:done visible:true
+  State name:percent type:number initial:0 range:0-100
+  State name:state values:[uploading, done] initial:uploading
+    transition uploading→done when:percent==100 delay:300ms

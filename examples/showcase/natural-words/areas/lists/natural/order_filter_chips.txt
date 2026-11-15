@@ -1,0 +1,30 @@
+Screen "Recent Orders" background:surface
+  AppBar "Recent Orders" elevation:0
+  State filter:"All" options:[All, Pending, Shipped, Delivered]
+  ChipRow scroll:horizontal spacing:8 padding:16
+    Chip "All" selected:{filter==All} onTap:set(filter,"All")
+    Chip "Pending" selected:{filter==Pending} onTap:set(filter,"Pending")
+    Chip "Shipped" selected:{filter==Shipped} onTap:set(filter,"Shipped")
+    Chip "Delivered" selected:{filter==Delivered} onTap:set(filter,"Delivered")
+    style selected:filled,accent,checkmark unselected:outlined
+    motion selection:color-fade 150ms
+  Text "{count} orders" style:caption color:secondary
+  List id:orders divider:inset padding:16 filter:{filter=="All" or item.status==filter}
+    motion on:filter-change enter:fade-in+slide-up 200ms exit:fade-out 150ms reorder:animate 200ms
+    Order id:"4821" title:"Wireless Earbuds" price:"$59.99" status:"Shipped"
+    Order id:"4819" title:"Desk Lamp" price:"$34.50" status:"Delivered"
+    Order id:"4815" title:"USB-C Hub" price:"$27.00" status:"Pending"
+    Order id:"4810" title:"Running Shoes" price:"$89.00" status:"Delivered"
+    Order id:"4807" title:"Coffee Grinder" price:"$45.25" status:"Shipped"
+    template Order
+      Row onTap:open(order) pressed:ripple
+        Icon "package" size:40 background:tint(status)
+        Column grow:1
+          Text "#{id}" style:caption color:secondary
+          Text "{title}" style:title
+        Column align:end
+          Text "{price}" style:title weight:bold
+          Badge "{status}" color:{Pending:amber, Shipped:blue, Delivered:green}
+  EmptyState visible:{orders.count==0} icon:"inbox"
+    Text "No {filter} orders"
+    Button "Show all" style:text onTap:set(filter,"All")

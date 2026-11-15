@@ -1,0 +1,44 @@
+Screen "Notes"
+  state notes:[n1,n2,n3,n4] pendingDelete:none
+  AppBar "Notes"
+  List items:notes
+    NoteRow id:n1
+      Text "Grocery list" style:title
+      Text "Milk, eggs, bread, coffee" style:subtitle color:gray
+      IconButton icon:trash label:"Delete Grocery list" color:gray
+        on:tap set pendingDelete:n1, show:DeleteDialog
+    NoteRow id:n2
+      Text "Meeting notes" style:title
+      Text "Q3 roadmap discussion" style:subtitle color:gray
+      IconButton icon:trash label:"Delete Meeting notes" color:gray
+        on:tap set pendingDelete:n2, show:DeleteDialog
+    NoteRow id:n3
+      Text "Book ideas" style:title
+      Text "Three possible plots to expand" style:subtitle color:gray
+      IconButton icon:trash label:"Delete Book ideas" color:gray
+        on:tap set pendingDelete:n3, show:DeleteDialog
+    NoteRow id:n4
+      Text "Trip packing" style:title
+      Text "Passport, charger, adapters" style:subtitle color:gray
+      IconButton icon:trash label:"Delete Trip packing" color:gray
+        on:tap set pendingDelete:n4, show:DeleteDialog
+    remove-animation collapse-height duration:200ms easing:ease-out, fade-out duration:150ms
+
+  Modal id:DeleteDialog visible:pendingDelete!=none dismissOnScrimTap:true dismissOnBack:true focus:Cancel
+    Scrim color:black opacity:0.5
+      enter fade-in duration:150ms
+      exit fade-out duration:100ms
+    Dialog width:280 radius:12 background:white align:center
+      enter scale-from:0.9 fade-in duration:150ms easing:ease-out
+      exit fade-out duration:100ms
+      Text "Delete \"{pendingDelete.title}\"?" style:headline role:title
+      Text "This can't be undone." style:body color:gray
+      Row align:end spacing:8
+        Button "Cancel" style:text
+          on:tap set pendingDelete:none, hide:DeleteDialog
+        Button "Delete" style:filled background:red color:white
+          on:tap remove note:pendingDelete from:notes, set pendingDelete:none, hide:DeleteDialog, show:Toast "Note deleted"
+
+  Toast id:Toast text:"Note deleted" duration:2500ms position:bottom
+    enter slide-up duration:200ms
+    exit fade-out duration:150ms

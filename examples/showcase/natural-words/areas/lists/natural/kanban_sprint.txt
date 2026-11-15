@@ -1,0 +1,46 @@
+Screen "Sprint 14 Board" layout:column padding:24 background:#f4f5f7
+  Header "Sprint 14" size:title weight:bold
+  Board layout:row gap:16 align:start scroll:horizontal
+    Column "To Do" id:todo width:300 dropzone:true accepts:card
+      ColumnHeader layout:row justify:space-between
+        Title "To Do" weight:semibold
+        Badge text:count(todo) style:pill color:gray live:true
+      CardList layout:column gap:8 min-height:80 reorder:true
+        Card id:c1 draggable:true
+          Text "Fix login timeout"
+          Tag "bug" color:red
+        Card id:c2 draggable:true
+          Text "Add dark mode toggle"
+    Column "In Progress" id:doing width:300 dropzone:true accepts:card
+      ColumnHeader layout:row justify:space-between
+        Title "In Progress" weight:semibold
+        Badge text:count(doing) style:pill color:blue live:true
+      CardList layout:column gap:8 min-height:80 reorder:true
+        Card id:c3 draggable:true
+          Text "Payment retry logic"
+          Avatar "Ravi" size:24 shows:initials
+        Card id:c4 draggable:true
+          Text "Search indexing"
+          Avatar "Elena" size:24 shows:initials
+    Column "Done" id:done width:300 dropzone:true accepts:card
+      ColumnHeader layout:row justify:space-between
+        Title "Done" weight:semibold
+        Badge text:count(done) style:pill color:green live:true
+      CardList layout:column gap:8 min-height:80 reorder:true
+        Card id:c5 draggable:true state:complete
+          Text "Upgrade to Node 22"
+        Card id:c6 draggable:true state:complete
+          Text "Remove legacy API"
+
+  Behavior
+    Card on:dragstart lift:true shadow:large scale:1.03 rotate:2deg opacity:0.9 cursor:grabbing
+    Card on:dragstart placeholder:true placeholder-style:dashed-outline
+    Column on:dragover highlight:true background:#e8f0fe border:dashed
+    Column on:dragover shows:insertion-line at:nearest-gap
+    Card on:drop move-to:column animate:settle duration:200ms easing:ease-out
+    Card on:drop-outside return-to:origin animate:snap-back duration:250ms
+    Badge on:count-change animate:pop duration:150ms
+    Card on:enter-column "Done" set-state:complete
+    Card on:leave-column "Done" clear-state:complete
+    Card on:keyboard keys:space,arrows move:true announce:"Moved to {column}"
+    Card state:complete style:muted text-decoration:line-through

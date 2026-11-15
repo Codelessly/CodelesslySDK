@@ -1,7 +1,7 @@
 // Expands a UI written in the compact notation
 // (package:codelessly_api/notation.dart) into a layout document.
 //
-//   dart run tool/notation/expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--out <file.json>]
+//   dart run tool/notation/expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--out <file.json>]
 //
 // With --design-system (a folder holding design_system.json) the notation
 // may call that design system's components by name and takes its looks.
@@ -23,7 +23,7 @@ Future<void> main(List<String> args) async {
 
   final file = args.where((a) => !a.startsWith('--')).firstOrNull;
   if (file == null || !File(file).existsSync()) {
-    stderr.writeln('usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--out <file.json>]');
+    stderr.writeln('usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--out <file.json>]');
     exit(2);
   }
   DesignSystem? ds;
@@ -40,7 +40,10 @@ Future<void> main(List<String> args) async {
   }
   final catalog = ds?.catalogOver(standardCatalog) ?? standardCatalog;
   final screen = opt('--id') ?? 'screen';
-  final options = ds == null ? NotationOptions(screen: screen) : NotationOptions.fromDesignSystem(ds, screen: screen, named: args.contains('--named'));
+  final width = double.tryParse(opt('--width') ?? '') ?? 390;
+  final options = ds == null
+      ? NotationOptions(screen: screen, width: width)
+      : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'));
   final result = Catalog.run(catalog, () => parseNotation(File(file).readAsStringSync(), catalog: catalog, options: options));
   for (final issue in result.issues) {
     stderr.writeln('$file: $issue');
