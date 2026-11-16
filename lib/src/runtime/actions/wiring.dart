@@ -538,13 +538,15 @@ class _BoxReactions {
     final repeat = e is KeyRepeatEvent;
     final down = e is KeyDownEvent || repeat;
     final type = down ? TriggerType.keyDown : TriggerType.keyUp;
-    // Keys belong to the field being typed in, except Escape, which leaves
-    // it (`${result.typing}` tells the actions), and the field's own key
-    // reactions (ArrowDown in a search field moves through its results).
+    // Plain keys belong to the focused field. A canvas shortcut with Ctrl,
+    // Cmd or Alt still runs while typing (for example Mod+K opens search).
+    // The field's own ArrowDown and Escape reactions continue to work.
     final typing = isTyping();
-    if (typing && e.logicalKey != LogicalKeyboardKey.escape && !_ownsFocusedField()) return false;
     final keys = HardwareKeyboard.instance;
     final meta = keys.isMetaPressed || keys.isControlPressed;
+    final modified = meta || keys.isAltPressed;
+    final fieldOwns = typing && _ownsFocusedField();
+    if (typing && e.logicalKey != LogicalKeyboardKey.escape && !fieldOwns && !(n.type == 'canvas' && modified)) return false;
     final label = e.logicalKey.keyLabel;
     final character = e.character;
     // A key that types text goes to a focused text field, not a shortcut.
@@ -555,6 +557,11 @@ class _BoxReactions {
       // A held key's repeats reach only keyDown reactions that ask for them.
       if (repeat && !r.trigger.repeat) continue;
       final combo = r.trigger.keyCombo;
+      // A wildcard or a bare letter must never steal input from a field.
+      if (typing && !fieldOwns && e.logicalKey != LogicalKeyboardKey.escape &&
+          (combo == null || (!combo.meta && !combo.alt))) {
+        continue;
+      }
       if (!runtimeKeyEventMatches(combo, label,
           character: character, meta: meta, shift: keys.isShiftPressed, alt: keys.isAltPressed)) {
         continue;

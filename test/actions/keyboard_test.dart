@@ -1,10 +1,13 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/runtime/actions/key_matching.dart';
+import 'package:codelessly_sdk/src/render/shortcut_hint.dart';
+import 'package:flutter/rendering.dart' show RenderParagraph, RenderObject, SemanticsNode;
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../lists/support.dart' as lists;
 import '../support/fields.dart';
+import '../support/keyboard.dart';
 
 // A screen's key shortcuts don't take keys that type into a focused text
 // field.
@@ -111,6 +114,64 @@ void main() {
   }
 
   group('while typing', () {
+    testWidgets('Mod+K runs on the canvas with a focused field; pointer and semantics still work', (tester) async {
+      final semantics = tester.ensureSemantics();
+      final s = await lists.show(tester, {
+        'page': {
+          'type': 'canvas', 'slots': {'body': 'col'}, 'layout': {'width': 390, 'height': 700},
+          'actions': [lists.reaction('keyDown', [
+            {'type': 'setVariable', 'variable': 'hits', 'op': 'add', 'value': '1'}
+          ], extra: {'key': 'Mod+k'})],
+        },
+        'col': {'type': 'column', 'children': ['field', 'button', 'hint'], 'layout': {'width': 390, 'height': {'hug': 180}}},
+        'field': {'type': 'textField', 'layout': {'width': 300, 'height': 48}},
+        'button': {'type': 'textButton', 'layout': {'width': 150, 'height': 48},
+          'props': {'text': 'Search'}, 'actions': [lists.reaction('click', [
+            {'type': 'setVariable', 'variable': 'hits', 'op': 'add', 'value': '1'}
+          ])]},
+        'hint': {'type': 'text', 'layout': {'width': {'hug': 0}, 'height': {'hug': 0}},
+          'props': {'text': 'Search', 'shortcut': 'mod+k'}},
+      }, root: 'page', variables: [lists.v('hits', 0, VariableType.integer)]);
+      await tester.pumpAndSettle();
+      await tester.tapAt(s.center('button'));
+      await tester.pumpAndSettle();
+      expect(s['hits'], 1);
+      await tapField(tester, textField(tester));
+      await tester.pumpAndSettle();
+      final keys = Keyboard(tester);
+      expect(keys.semantics?.isTextField, isTrue);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      expect(s['hits'], 2);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.metaLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.metaLeft);
+      await tester.pumpAndSettle();
+      expect(s['hits'], 3, reason: 'Mod also matches Command on Mac');
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+      await tester.pumpAndSettle();
+      expect(s['hits'], 3, reason: 'a bare letter still belongs to the field');
+      expect(shortcutHint('mod+k', platform: TargetPlatform.windows), 'Ctrl K');
+      expect(shortcutHint('mod+k', platform: TargetPlatform.macOS), '⌘K');
+      final texts = <String>[];
+      void visit(RenderObject o) {
+        if (o is RenderParagraph) texts.add(o.text.toPlainText());
+        o.visitChildren(visit);
+      }
+      visit(s.tree.boxOf('hint')!);
+      expect(texts.single, contains('Ctrl K'));
+      final labels = <String>[];
+      bool semanticLabels(SemanticsNode n) {
+        labels.add(n.getSemanticsData().label);
+        n.visitChildren(semanticLabels);
+        return true;
+      }
+      semanticLabels(tester.binding.renderViews.single.owner!.semanticsOwner!.rootSemanticsNode!);
+      expect(labels, contains('Search · Ctrl K'));
+      semantics.dispose();
+    });
     testWidgets('a letter shortcut waits while a text field has focus, and Escape still runs', (tester) async {
       final s = await lists.show(
         tester,

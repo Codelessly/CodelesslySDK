@@ -38,6 +38,7 @@ import 'layout/list_measure.dart';
 import 'layout/text_box.dart';
 import 'layout/wrap.dart';
 import 'paint/icon_glyph.dart';
+import 'shortcut_hint.dart';
 import 'paint/node_paint.dart';
 import 'islands.dart';
 import 'paint/spread_shadow.dart';
@@ -2463,6 +2464,8 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout,
   /// over the text's base style.
   TextSpan _textSpan(Node n) {
     var text = n.prop(TextProps.text);
+    final shortcut = n.prop(TextProps.shortcut);
+    if (shortcut.isNotEmpty) text = '$text · ${shortcutHint(shortcut)}';
     final inherited = n.behaviors.defaultTextStyle;
     var base = inherited == null ? n.prop(TextProps.style) : inherited.merge(n.prop(TextProps.style));
     var runs = n.prop(TextProps.runs);
