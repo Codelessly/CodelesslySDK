@@ -156,7 +156,24 @@
     "height": {
      "hug": 13
     }
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 12
+       }
+      },
+      "layout": {
+       "height": {
+        "hug": 16
+       }
+      }
+     }
+    }
+   ]
   },
   "content": {
    "type": "slot"

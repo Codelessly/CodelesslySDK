@@ -150,6 +150,24 @@
       }
      ]
     }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "height": {
+        "hug": 44
+       },
+       "padding": [
+        8,
+        8,
+        8,
+        8
+       ]
+      }
+     }
+    }
    ]
   },
   "glyph": {
@@ -186,7 +204,19 @@
     "height": {
      "hug": 15
     }
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "height": {
+        "hug": 34
+       }
+      }
+     }
+    }
+   ]
   },
   "title": {
    "type": "text",
@@ -212,7 +242,24 @@
    },
    "bind": {
     "props.style.color": "${= props.tone == 'danger' ? theme.error : theme.colors.primaryText}"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 13
+       }
+      },
+      "layout": {
+       "height": {
+        "hug": 18
+       }
+      }
+     }
+    }
+   ]
   },
   "subtitle": {
    "type": "text",
@@ -238,7 +285,24 @@
    },
    "bind": {
     "visible": "${= props.subtitle != ''}"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 11
+       }
+      },
+      "layout": {
+       "height": {
+        "hug": 15
+       }
+      }
+     }
+    }
+   ]
   },
   "trailing": {
    "type": "text",
