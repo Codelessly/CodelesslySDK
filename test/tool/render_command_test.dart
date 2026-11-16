@@ -196,6 +196,24 @@ void main() {
       expect(diag(dead, 'tap_no_reaction').map((d) => d['nodeId']), ['bare', 'tile']);
     });
 
+    testWidgets('a screen with nothing painted behind part of it is reported; a canvas with a fill is not', (tester) async {
+      Directory('${out.path}/bg').createSync(recursive: true);
+      String doc(bool fill) => jsonEncode({
+            'schema': 3, 'roots': ['c'],
+            'nodes': {
+              'c': {'type': 'canvas', 'layout': {'width': 390, 'height': 844}, 'slots': {'body': 'b'},
+                if (fill) 'decoration': {'fills': [{'color': '#FFFFFFFF'}]}},
+              'b': {'type': 'box', 'layout': {'width': 100, 'height': 100}, 'decoration': {'fills': [{'color': '#FF336699'}]}},
+            },
+          });
+      File('${out.path}/bg/bare.json').writeAsStringSync(doc(false));
+      File('${out.path}/bg/filled.json').writeAsStringSync(doc(true));
+      final bare = await runRender(tester, RenderArgs(inputs: ['${out.path}/bg/bare.json'], out: '${out.path}/bg/o1', sizes: const [Size(390, 844)]));
+      expect(diag(bare, 'transparent_background').map((d) => d['nodeId']), ['c']);
+      final filled = await runRender(tester, RenderArgs(inputs: ['${out.path}/bg/filled.json'], out: '${out.path}/bg/o2', sizes: const [Size(390, 844)]));
+      expect(diag(filled, 'transparent_background'), isEmpty);
+    });
+
     testWidgets('a part of a control is tapped with @n: the second segment is chosen, and a part that is not there is named (test 4: seven builds)', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)],
           steps: const [Step('tap', 'seg@1')], label: 'part', dumpLayout: true));

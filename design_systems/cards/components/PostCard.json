@@ -104,13 +104,15 @@
    "type": "row",
    "children": ["tagText"],
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [10, 4, 10, 4]},
+   "media": [{"minWidth": 700, "maxWidth": 1023, "patch": {"layout": {"width": {"fill": 0}}}}],
    "decoration": {"fills": [{"color": "primaryTint"}], "strokes": [{"color": "primaryTintBorder"}], "strokeWidth": 1, "radius": 999},
    "bind": {"visible": "${= props.tag != ''}"}
   },
   "tagText": {
    "type": "text",
    "props": {"text": "${= upper(props.tag)}", "style": {"from": "eyebrowWide", "color": "accent"}, "maxLines": 1},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "squeezable": true},
+   "media": [{"minWidth": 700, "maxWidth": 1023, "patch": {"props": {"maxLines": 2}, "layout": {"width": {"fill": 0}}}}]
   },
   "title": {
    "type": "text",
@@ -119,6 +121,7 @@
   },
   "excerpt": {
    "type": "text",
+   "media": [{"maxWidth": 699, "patch": {"props": {"maxLines": 2}}}],
    "props": {"text": "${props.excerpt}", "style": "mutedWide", "maxLines": 1, "overflow": "ellipsis"},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
    "bind": {"visible": "${= props.excerpt != ''}"}

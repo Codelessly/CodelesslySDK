@@ -9,13 +9,16 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// A scratch layout: `<root>/sdk/tool/render/render.sh` (this checkout's
-/// script), `<root>/sdk/pubspec.yaml`, and a stand-in flutter at
+/// A scratch layout: `<root>/sdk/tool/render/render.sh` and
+/// `<root>/sdk/tool/lib/env.sh` (this checkout's scripts), `<root>/sdk/pubspec.yaml`, and a stand-in flutter at
 /// `<root>/flutter/bin/flutter`.
 class Layout {
   Layout() : root = Directory.systemTemp.createTempSync('render_script_test').path {
     Directory('$sdk/tool/render').createSync(recursive: true);
     File('tool/render/render.sh').copySync('$sdk/tool/render/render.sh');
+    File('tool/render/serve.sh').copySync('$sdk/tool/render/serve.sh');
+    Directory('$sdk/tool/lib').createSync(recursive: true);
+    File('tool/lib/env.sh').copySync('$sdk/tool/lib/env.sh');
     File('$sdk/pubspec.yaml').writeAsStringSync('name: codelessly_sdk\n');
     Directory('$root/flutter/bin').createSync(recursive: true);
     // Records each call; `pub get` writes the package config; `test` writes
@@ -150,4 +153,38 @@ void main() {
     expect([for (final t in times) t[0]], ['start', 'end', 'start', 'end', 'start', 'end']);
     expect(runs.where((r) => '${r.stderr}'.contains('waiting')), isNotEmpty);
   });
+
+  test('with the render server up, a run is a request to it; after a change to the SDK it is stopped and runs go the usual way', () async {
+    await l.run({'FLUTTER_ROOT': '${l.root}/flutter'}); // resolve first
+    final tests = l.callLines.where((c) => c.contains(' test ')).length;
+    // A stand-in server: answers each request with a report and a status, as render_harness.dart's loop does.
+    final dir = Directory('${l.sdk}/build/.render-server')..createSync(recursive: true);
+    final server = await Process.start('bash', ['-c', r'''
+      while true; do
+        for r in "$0"/*.req; do
+          [ -f "$r" ] || continue
+          a="$(cat "$r")"; rm -f "$r"
+          echo "served by the server" > "$a.report"; echo 0 > "$a.status"
+        done
+        sleep 0.05
+      done''', dir.path]);
+    addTearDown(server.kill);
+    File('${dir.path}/pid').writeAsStringSync('${server.pid}');
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
+    File('${dir.path}/ready').writeAsStringSync('${server.pid}');
+    var r = await l.run({'FLUTTER_ROOT': '${l.root}/flutter'});
+    expect(r.exitCode, 0, reason: '${r.stderr}');
+    expect('${r.stdout}', contains('served by the server'));
+    expect('${r.stderr}', contains('the render server'));
+    expect(l.callLines.where((c) => c.contains(' test ')), hasLength(tests), reason: 'no flutter test of its own');
+    // The SDK changes: the server serves older code; it is stopped and the run goes the usual way.
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
+    File('${l.sdk}/pubspec.yaml').writeAsStringSync('name: codelessly_sdk\n# changed\n');
+    r = await l.run({'FLUTTER_ROOT': '${l.root}/flutter'});
+    expect(r.exitCode, 0, reason: '${r.stderr}');
+    expect('${r.stderr}', contains('serves older code'));
+    expect(l.callLines.where((c) => c.contains(' test ')), hasLength(tests + 1));
+    expect(dir.existsSync(), isFalse, reason: 'serve.sh --stop cleared it');
+  });
+
 }
