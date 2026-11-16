@@ -20,6 +20,7 @@ import 'package:codelessly_api/core.dart' show NavigationMode;
 import 'viewport.dart' show CanvasSizing, CanvasSizingScope;
 import 'ui/confirm_dialog.dart';
 import 'ui/feedback_theme.dart';
+import 'ui/modal_focus.dart';
 import 'ui/presentation_route.dart';
 import 'ui/presentation_scope.dart';
 import 'ui/route_transition.dart';
@@ -295,8 +296,9 @@ Future<Object?> showScreenModal(
   bool cover = false,
 }) {
   final scrim = barrierColor == null ? null : Color(barrierColor.value);
-  // A toast on screen goes under the modal's barrier.
-  content = ToastBelowRoute(child: content);
+  // A toast on screen goes under the modal's barrier. The keyboard stays
+  // in the modal while it is open (ui/modal_focus.dart).
+  content = ModalFocus(dismissible: barrierDismissible, child: ToastBelowRoute(child: content));
   final width = MediaQuery.maybeSizeOf(context)?.width;
   final narrow = width == null || width < sheetBelowWidth;
   final sheet = presentation == ModalPresentation.bottomSheet || (presentation == ModalPresentation.adaptive && narrow);
@@ -416,7 +418,10 @@ Future<Object?> showAnchoredModal(
     useSafeArea: false,
     builder: (_) => CustomSingleChildLayout(
       delegate: PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset, reserve: reserve),
-      child: Material(type: MaterialType.transparency, child: content),
+      child: Material(
+        type: MaterialType.transparency,
+        child: ModalFocus(dismissible: barrierDismissible, popover: true, child: content),
+      ),
     ),
   );
 }

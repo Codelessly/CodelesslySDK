@@ -11,6 +11,7 @@ import '../../render/convert.dart';
 import '../../render/paint/icon_names.dart';
 import 'feedback_icon.dart';
 import 'feedback_theme.dart';
+import 'modal_focus.dart';
 import 'presentation_route.dart';
 import 'toast.dart';
 
@@ -222,7 +223,11 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
   final layout = confirmLayoutOf(action, bound);
   final presentation = resolvePresentation(action.presentation, MediaQuery.maybeSizeOf(context)?.width,
       sheetBelowWidth: sheetBelowWidth ?? defaultSheetBelowWidth(api.Breakpoints.defaults));
-  Widget buildDialog(BuildContext context) => ToastBelowRoute(
+  // Named by its title; Escape answers no unless the action blocks it.
+  Widget buildDialog(BuildContext context) => ModalFocus(
+      dismissible: action.barrierDismissible,
+      label: request.title.trim().isEmpty ? null : request.title.trim(),
+      child: ToastBelowRoute(
         child: ThemedConfirmDialog(
           width: layout.width,
           maxWidth: layout.maxWidth,
@@ -282,7 +287,7 @@ Future<bool> showConfirmDialog(BuildContext context, ConfirmRequest request, {do
           actionsGap: gap('actionsGap') ?? 20,
           buttonGap: gap('buttonGap'),
         ),
-      );
+      ));
 
   if (presentation != ModalPresentation.dialog) {
     final answer = await Navigator.of(context).push<Object?>(PresentationRoute<Object?>(
