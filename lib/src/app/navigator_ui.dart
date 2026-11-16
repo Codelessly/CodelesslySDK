@@ -117,7 +117,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
         ? inherited
         : Padding(
             padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
-            child: action.presentation == ModalPresentation.fullScreen || action.cover ? inherited : popupSurface(c, inherited),
+            child: action.presentation == ModalPresentation.fullScreen || action.cover ? inherited : popupSurface(c, inherited, menu: action.presentation == ModalPresentation.popover),
           );
     final pointer = RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero;
     final anchor = switch (action.anchor) {
@@ -253,9 +253,13 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
 /// [content] (a dialog's or popover's screen) with the corners and shadow
 /// the project's theme gives what floats (`radii.popup`, `shadows.popup`),
 /// when it names them; else as the screen draws itself.
-Widget popupSurface(BuildContext context, Widget content) {
+///
+/// A [menu] (a popover: what opens by its button) takes `radii.menu` where
+/// the theme names it: a menu is of the control family, and a dialog's
+/// corner on a surface three rows tall reads as a bubble.
+Widget popupSurface(BuildContext context, Widget content, {bool menu = false}) {
   final own = Theme.of(context).extension<CodelesslyThemeTokens>();
-  final radius = own?.tokens.radii['popup'];
+  final radius = (menu ? own?.tokens.radii['menu'] : null) ?? own?.tokens.radii['popup'];
   if (own == null || radius == null) return content;
   final tokens = own.tokens.forBrightness(dark: own.brightness == Brightness.dark);
   final r = BorderRadius.circular(radius);
