@@ -6,6 +6,7 @@
  "nodes": {
   "s": {
    "type": "canvas",
+   "decoration": {"fills": [{"color": "#FFFFFFFF"}]},
    "slots": {
     "body": "col"
    },

@@ -37,9 +37,16 @@ done
 # Default fonts: the reference apps' font files next to the SDK, when present.
 if [ $fonts = 0 ] && [ -d "$sdk/../references" ]; then args+=(--fonts "$sdk/../references"); fi
 mkdir -p "$out"
-flutter_bin="${FLUTTER:-$(command -v flutter || echo /opt/flutter/bin/flutter)}"
+# Flutter, the sibling codelessly_api, dependencies and the per-checkout lock
+# (flutter test rewrites build/): tool/lib/env.sh, as render.sh uses it.
+. "$sdk/tool/lib/env.sh"
+codelessly_find_flutter "tool/stream/replay.sh <stream.jsonl> --out <dir>" || exit 2
+codelessly_take_lock
+codelessly_find_api
+codelessly_write_api_override
+codelessly_pub_get || exit 2
 work="$(mktemp -d "$out/.replay.XXXXXX")"
-trap 'rm -rf "$work"' EXIT
+trap 'rm -rf "$work"; codelessly_release_lock' EXIT
 printf '%s\n' "${args[@]}" > "$work/args"
 ( cd "$sdk" && CODELESSLY_REPLAY_ARGS="$work/args" "$flutter_bin" test --no-pub tool/stream/replay_harness.dart > "$work/flutter.log" 2>&1 )
 if [ ! -f "$work/args.report" ]; then
