@@ -1,0 +1,98 @@
+# The SDK's tools
+
+Codelessly UIs are data: a JSON layout document (codelessly_api's `docs/reference/STARTER.md` describes it) that
+this SDK renders straight to render objects. Because the renderer runs headless under `flutter test`, a document
+can be checked and *seen* in a few seconds, without building or launching an app, an editor or a browser. These
+tools are that loop, for the agents (and people) who write documents. Everything below runs from a fresh checkout
+with Flutter installed; `codelessly_api` comes from the `CodelesslyAPI` checkout beside this one when there is one.
+
+## Start here: `tool/codelessly`
+
+One entry point for the authoring loop. `tool/codelessly help` lists the commands; each has `--help`.
+
+```
+                    ┌──────────────── fix what it reports ────────────────┐
+                    v                                                     │
+ docs ──> write JSON (or a nested tree ─> flatten) ──> validate ──> render --outline ──> look at the PNGs / sheet
+ (look up                                                           (problems per node,     │
+  a section)                                                         boxes, texts)          v
+                                                                              states: every state, compared
+                                                                              with its reference, worst first
+```
+
+| Command | What it does | When |
+|---|---|---|
+| `doctor [--warm]` | Says what the toolkit finds: Flutter, the API checkout, the reference, Pillow/ImageMagick, QuickJS. `--warm` compiles the render harness so the first render is fast. | Once per machine or session; when a command can't find something. |
+| `docs [query]` | The API reference from the shell: no query lists the pages; an anchor (`forms-validation-and-an-error-state`), a name (`row`, `navigate`, `textField`) or words (`sticky header`) print the best section and other matches. `--starter` prints the base's path. | Before writing a feature you haven't used; when a validation code names a field you don't know. |
+| `flatten <tree.json>` | A nested node tree, trees per breakpoint (`{"trees": {"mobile": ..., "desktop": ...}}`, as the editor's `layouts.createResponsive` takes them) or a document with nested children, to a flat layout document. `key` names a node; `"@key"` elsewhere becomes its id. | You (or a generator) write screens as nested trees; render them headless before installing them in the editor. |
+| `validate <doc \| site>...` | Strict validation only: every problem with a code, a JSON pointer and a suggestion. Exit 1 on errors. | After every edit; fastest check. |
+| `render <doc \| site>... --out <dir>` | Validates, publishes as the editor would, renders every screen at each size (`--sizes`, default phone, tablet, desktop) with `CodelesslyWidget`, after optional steps (`--tap`, `--type`, `--navigate`, `--hover`, `--drag`, `--set`, `--now`...), and reports what only rendering shows (overflow, clipped text, failed taps, missing fonts and images). `--outline` prints every capture's outline; `--sheet` writes `<out>/sheet.png`; `--compare` diffs against reference screenshots. All other options: [render/README.md](render/README.md). | Every time you want to see the result or check an interaction. |
+| `outline <out> <doc \| site>...` | What a render drew, as text: each node's type, id, box and text, indented as the tree, with its problems. Zero-size nodes are marked. | Read before the PNG: most layout mistakes show as numbers. |
+| `states <states.json>` | Renders every state a manifest lists (screen, steps, sizes, reference), compares each with its reference, writes `summary.md`/`summary.json` worst first and one `sheet.png`. Exit 1 when a state has errors or matches its reference less than `minMatch`. | Recreating an app screen by screen; checking a whole site after a change. |
+| `sheet <png \| dir>... --out <png>` | Captures on one labelled image, one row per state, narrowest size first. | Showing a model (or a person) many captures at once. |
+| `notation prompt\|expand\|apply` | The compact authoring notation ([notation/notation.sh](notation/notation.sh)): the prompt a model gets, a notation text expanded to a document, ops applied to a document. | Generating UI with a model in the notation instead of JSON. |
+| `replay <stream.jsonl> --out <dir>` | A recorded `ui_apply` stream replayed headless: video, contact sheet, metrics ([stream/README.md](stream/README.md)). | Working on streaming generative UI. |
+| `mcp` | All of the above as an MCP server on stdio: `codelessly_docs`, `codelessly_validate`, `codelessly_render` (report, outline and PNGs in one answer), `codelessly_flatten`, `codelessly_states`. | Giving any MCP client (Claude Code, an IDE agent, your own) the render loop as tool calls. |
+
+Register the MCP server with a client, e.g. a project's `.mcp.json`:
+
+```json
+{"mcpServers": {"codelessly": {"command": "/path/to/CodelesslySDK/tool/codelessly", "args": ["mcp"]}}}
+```
+
+A typical session:
+
+```sh
+tool/codelessly doctor --warm
+tool/codelessly docs                                   # what's where
+tool/codelessly docs "a row that becomes a column"     # the section for a need
+tool/codelessly render site/ --out out/ --outline      # problems, boxes, texts; PNGs in out/
+tool/codelessly render site/ --out out/ --screen contact --tap submit --label errors --outline
+tool/codelessly states states.json                     # every state vs its reference: out/states/summary.md
+```
+
+Speed: a render takes about 5 seconds once the harness is compiled (the first after an SDK change takes 20 to 60
+seconds, `doctor --warm` does it up front) plus about half a second per screen and size. Runs on one checkout take
+turns (a lock in `build/`); use git worktrees for runs in parallel.
+
+## Every tool here
+
+### The authoring loop (for agents)
+
+| Path | What | Docs |
+|---|---|---|
+| `codelessly` | The entry point above. | this file |
+| `cli/` | The entry point's Python commands: `docs.py`, `flatten.py`, `outline.py`, `states.py`, `sheet.py`, `run_render.py` (render/validate with `--outline`/`--sheet`), `mcp_server.py`. `test_cli.py` tests them without Flutter. | each file's docstring |
+| `lib/env.sh` | Shared by every launcher: finds Flutter, points the SDK at the sibling `codelessly_api` (a `pubspec_overrides.yaml` marked as written by the tools), resolves dependencies when stale, the per-checkout lock. | its header |
+| `render/` | The render command: `render.sh` (launcher), `render_harness.dart` (the `flutter test` entry), `src/` (arguments, site loading, publishing, fonts, rendering, steps, checks, compare). | [render/README.md](render/README.md), codelessly_api `docs/reference/render.md` |
+| `notation/` | The compact notation's tools: `prompt.dart`, `expand.dart`, `apply.dart`, launched by `notation.sh`. | `notation.sh` header |
+
+### Measuring generative UI (research)
+
+| Path | What | Docs |
+|---|---|---|
+| `stream/` | Streaming: `make_streams.dart` (synthetic streams), `replay.sh`/`replay_harness.dart` (replay), `run_all.sh`, `compose.py` (video), `summary.py`, `live_summary.py`, `arms_sheet.py`/`arms_table.py` (head-to-head of recording arms), `interactions/` (scripted interactions), `ui/` and `streams/` (fixtures). | [stream/README.md](stream/README.md) |
+| `values/` | Are a generated card's values right after it is used: `check.py` renders recordings, drives each case's steps and reads the texts; `elicit.py`/`tally.py`/`reexpand.py` study how models write state. Cases in `cases.json`, `on_demand_cases.json`. | [values/README.md](values/README.md), `CASES.md` |
+| `../examples/stream_chat/tool/` | Recording live model streams (`record.dart`, `record_all.sh`, the notation and A2UI arms). | that folder |
+| `../design_systems/tool/new_design_system.py` | Scaffolds a design system folder. | [design_systems/README.md](../design_systems/README.md) |
+
+### Maintaining the SDK (generators, fixtures)
+
+| Path | What |
+|---|---|
+| `build_quickjs.sh` | Builds the QuickJS library the SDK's scripts run on under `flutter test` (renders run documents' scripts with it when present). |
+| `controls/bundle_ssui.dart` | Bundles SSUI's tokens as the unstyled controls' defaults (`ssui_defaults.g.dart`). |
+| `reference/extract_formulas.sh` | Writes the formula function table codelessly_api's reference generator reads. |
+| `gen_material_icon_codepoints.dart`, `gen_material_icon_versions.py`, `generate_directional_icons.py`, `export_cupertino_svg.py` | Icon tables and glyphs, regenerated after a Flutter or font upgrade. |
+| `render_docs_images.sh` | The developer guide's images. |
+| `media_fixture.cjs`, `verify_embedded_player.cjs` | Local media transport and the embedded player's browser test. |
+
+## Related tools elsewhere
+
+- **codelessly_api** (`CodelesslyAPI/`): `tool/reference/generate.dart` generates `docs/reference` (the base, the
+  pages, `index.json`, `catalog.json`, `document.schema.json`, the `ui_apply`/`ui_read` tool schemas) from the
+  declarations; `tool/migrate.dart` and the migration corpus upgrade older documents; `tool/name_conformance.dart`
+  checks names.
+- **The editor** (`CodelesslyEditor/`): the editor MCP server (`packages/codelessly_editor_mcp`, with `ed.mjs` and
+  `bridge.mjs` for shells) drives a live editor: projects, pages, publishing. Its `docs/ai_tools.md` inventories
+  every tool across the repositories, including the reference-app parity workflow.
