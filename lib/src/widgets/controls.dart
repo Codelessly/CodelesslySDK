@@ -29,6 +29,7 @@ import '../render/controls/navigation_bar.dart';
 import '../render/controls/pickers.dart';
 import '../render/controls/segmented.dart';
 import '../render/controls/slider.dart';
+import '../render/controls/splitter.dart';
 import '../render/controls/tab_bar.dart';
 import '../render/controls/text_field.dart';
 import '../render/controls/tile.dart';
@@ -86,6 +87,7 @@ final Map<String, WidgetRecipe> toggleRecipes = {
   'switch': switchRecipe,
   'radio': radioRecipe,
   'slider': sliderRecipe,
+  'splitter': splitterRecipe,
   'segmentedButton': segmentedRecipe,
 };
 
