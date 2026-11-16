@@ -24,6 +24,12 @@ abstract final class SvgFonts {
   /// the SVG's URL: a tool lists the images that use a family it lacks.
   static void Function(String family, String url)? onFamily;
 
+  /// Whether the engine has [family], when the caller knows (the render tool
+  /// knows its font files). A family it lacks is still asked for and reported
+  /// ([onFamily]) but not drawn with: the text takes the next family the list
+  /// names, or the site's font. Null: every named family is taken as had.
+  static bool Function(String family)? isAvailable;
+
   static final _attribute = RegExp(r'''font-family\s*=\s*("([^"]*)"|'([^']*)')''');
   static final _property = RegExp(r'''(font-family\s*:\s*)([^;"}<>]+)''');
   static final _weight = RegExp(r'''font-weight\s*[=:]\s*["']?\s*([a-z0-9]+)''');
@@ -58,7 +64,7 @@ abstract final class SvgFonts {
         if (generic.contains(part.toLowerCase())) {
           out.add(defaultFamily ?? part);
         } else {
-          out.add(part);
+          if (isAvailable?.call(part) ?? true) out.add(part);
           if (asked.add(part)) {
             onFamily?.call(part, url ?? '');
             for (final w in weights) {
@@ -68,8 +74,10 @@ abstract final class SvgFonts {
         }
       }
       if (defaultFamily != null) out.add(defaultFamily);
-      // Unquoted: flutter_svg splits the list at commas and trims each name.
-      return {...out}.join(', ');
+      // One family: vector_graphics draws the text with the attribute as a
+      // single family name (no fallback list), so "A, B" would name a font
+      // nothing has. The first the list resolves to is drawn.
+      return out.isEmpty ? list.trim() : out.first;
     }
 
     var s = svg.replaceAllMapped(_attribute, (m) => 'font-family="${families(m.group(2) ?? m.group(3)!)}"');

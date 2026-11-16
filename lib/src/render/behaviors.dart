@@ -463,6 +463,17 @@ class RenderPose extends RenderProxyBox {
     markNeedsPaint();
   }
 
+  /// Keeps the opacity layer at full opacity too, as Flutter's Opacity
+  /// widget does: a node whose opacity is bound (it can change).
+  bool _keepOpacityLayer = false;
+  set keepOpacityLayer(bool v) {
+    if (v == _keepOpacityLayer) return;
+    final composited = alwaysNeedsCompositing;
+    _keepOpacityLayer = v;
+    if (composited != alwaysNeedsCompositing) markNeedsCompositingBitsUpdate();
+    markNeedsPaint();
+  }
+
   double _blur = 0;
   set blur(double v) {
     if (v == _blur) return;
@@ -477,7 +488,8 @@ class RenderPose extends RenderProxyBox {
   /// too: an ancestor that scales or clips with the canvas alone (a fitted
   /// board, a clip) would otherwise leave the layer unscaled and unclipped.
   @override
-  bool get alwaysNeedsCompositing => child != null && ((_opacity > 0 && _opacity < 1) || _blur > 0);
+  bool get alwaysNeedsCompositing =>
+      child != null && ((_opacity > 0 && (_opacity < 1 || _keepOpacityLayer)) || _blur > 0);
 
   /// Hidden while its back faces the viewer (through every transform above).
   bool _backfaceHidden = false;
@@ -537,7 +549,7 @@ class RenderPose extends RenderProxyBox {
       return;
     }
     void content(PaintingContext context, Offset offset) {
-      if (_opacity < 1) {
+      if (_opacity < 1 || _keepOpacityLayer) {
         _opacityLayer.layer = context.pushOpacity(
           offset,
           (_opacity * 255).round(),

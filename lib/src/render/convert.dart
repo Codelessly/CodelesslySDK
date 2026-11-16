@@ -91,7 +91,26 @@ abstract final class FontDemand {
   /// The family holding [family]'s characters beyond `latin`. On the web a
   /// family's later files don't add glyphs to its first (the engine draws
   /// the first's empty glyph), so they are a family of their own.
-  static String glyphFamily(String family) => '$family glyphs';
+  ///
+  /// A later file of the same weight can't join the first either (a layout
+  /// shown later brings characters the first didn't hold), so each is the
+  /// next family: `<family> glyphs`, `<family> glyphs 2`... A style falls
+  /// back to the first [glyphBatches] of them, registered or not (a name
+  /// not registered yet is skipped, and the text lays out again once it is).
+  static String glyphFamily(String family, [int batch = 0]) =>
+      batch == 0 ? '$family glyphs' : '$family glyphs ${batch + 1}';
+
+  /// How many glyph families a style falls back to ([glyphFamily]).
+  static const glyphBatches = 4;
+
+  /// The fallback families of a style in [family] with its own [fallback]:
+  /// its glyph family first when [glyphFallback] (every text style built
+  /// from a document's, not only a text node's: a field's hint, a chart's
+  /// labels, a toast). Null when there are none.
+  static List<String>? fallbackOf(String? family, List<String> fallback) =>
+      glyphFallback && family != null && family.isNotEmpty
+          ? [for (var i = 0; i < glyphBatches; i++) glyphFamily(family, i), ...fallback]
+          : (fallback.isEmpty ? null : fallback);
 
   /// Completes once the fonts asked for so far have loaded (or failed):
   /// what something drawn once, as an SVG's text is, waits for. Installed
@@ -116,9 +135,7 @@ TextStyle textStyle(api.TextStyle style, [api.TextStyle? inherited]) {
   }
   return kTextBase.merge(TextStyle(
     fontFamily: style.fontFamily,
-      fontFamilyFallback: FontDemand.glyphFallback && style.fontFamily != null
-          ? [FontDemand.glyphFamily(style.fontFamily!), ...style.fontFamilyFallback]
-          : style.fontFamilyFallback,
+      fontFamilyFallback: FontDemand.fallbackOf(style.fontFamily, style.fontFamilyFallback) ?? const <String>[],
     fontWeight: weight == null ? null : FontWeight.values[(weight ~/ 100 - 1).clamp(0, 8)],
     fontStyle: style.fontStyle == null ? null : FontStyle.values.byName(style.fontStyle!.name),
     fontSize: style.fontSize,

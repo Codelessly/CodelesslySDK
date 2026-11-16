@@ -182,6 +182,20 @@ Future<TestGesture> dragTo(WidgetTester tester, Offset start, Offset to, {bool r
 // the handle starts the drag.
 
 void main() {
+  for (final shows in [true, false]) {
+    testWidgets('a refused drag ${shows ? 'opens' : 'opens no'} slot in the list (slotWhenRefused: $shows)', (tester) async {
+      final b = await pump(tester, bTarget: {'acceptIf': r'${= false}', 'slotWhenRefused': shows});
+      final four = textRect(tester, 'Four').topCenter;
+      final gesture = await dragTo(tester, textRect(tester, 'One').center, four + const Offset(0, 4), release: false);
+      expect(b.drag['over'], 'b');
+      expect(b.drag['accepted'], isFalse, reason: 'styled as blocked by \${drag.accepted}');
+      expect(dropSlotOf(b.tree, 'list_b')!.size, shows ? const Size(160, 40) : Size.zero);
+      await gesture.up();
+      await tester.pumpAndSettle();
+      expect(b.lane('b'), ['c4'], reason: 'refused: nothing moves');
+    });
+  }
+
   testWidgets('a card dragged into another column lands before the card under the pointer', (tester) async {
     final b = await pump(tester);
     final start = textRect(tester, 'One').center;
@@ -655,5 +669,89 @@ void main() {
       await g.cancel();
       await tester.pumpAndSettle();
     });
+  });
+
+  for (final edgeScroll in [true, false]) {
+    testWidgets('a drag held near a list\'s edge ${edgeScroll ? 'scrolls it' : 'leaves it (dragEdgeScroll: false)'}', (tester) async {
+      final s = await harness.show(
+        tester,
+        {
+          'col': {'type': 'column', 'children': ['card', 'tabs'], 'layout': {'width': 300, 'height': 300}},
+          'card': {
+            'type': 'text',
+            'layout': {'width': 300, 'height': 60},
+            'props': {'text': 'Drag me'},
+            'draggable': {'group': 'card', 'data': 'c1', 'start': 'press'},
+          },
+          // A strip of tabs, wider than the screen.
+          'tabs': {
+            'type': 'listView',
+            'children': ['tab'],
+            'layout': {'width': 300, 'height': 40},
+            'bind': {'data': r'${items}'},
+            'props': {'scrollDirection': 'horizontal', 'dragEdgeScroll': edgeScroll},
+          },
+          'tab': {'type': 'text', 'layout': {'width': 80, 'height': 40}, 'props': {'text': r'${item}'}},
+        },
+        variables: [harness.v('items', ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], VariableType.list)],
+      );
+      await tester.pumpAndSettle();
+      final g = await tester.startGesture(textRect(tester, 'Drag me').center);
+      await tester.pump(const Duration(milliseconds: 100));
+      await g.moveTo(const Offset(150, 40));
+      await tester.pump();
+      // Over the strip, 10 px from its right edge.
+      await g.moveTo(const Offset(290, 80));
+      for (var i = 0; i < 30; i++) {
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      expect(DragAndDrop.of(s.tree).value['active'], isTrue);
+      double pixels() {
+        double p = 0;
+        void visit(RenderObject o) {
+          if (o is RenderViewportBase) p = (o.offset as ScrollPosition).pixels;
+          o.visitChildren(visit);
+        }
+        visit(s.tree.boxOf('tabs')!);
+        return p;
+      }
+      expect(pixels(), edgeScroll ? greaterThan(10) : 0);
+      await g.up();
+      await tester.pumpAndSettle();
+    });
+  }
+
+  testWidgets('a tab whose list shows only after the drag enters it opens the slot at the list\'s end', (tester) async {
+    // Column b's list is hidden until the drag enters the tab, as a phone
+    // board shows a column's page once a card is held over its tab.
+    final b = lane('b');
+    (b['list_b']! as Map<String, Object?>)['bind'] = {
+      'data': "\${= filter(cards, c => c.lane == 'b')}",
+      'visible': r'${= length(log) > 0}',
+    };
+    final board = await pump(tester, extraNodes: {
+      ...b,
+      'board': {'type': 'row', 'children': ['list_a', 'list_b', 'tab'], 'layout': {'width': 400, 'height': 400}},
+      'tab': {
+        'type': 'box',
+        'layout': {'width': 80, 'height': 40},
+        'dropTarget': {'accepts': ['card'], 'key': 'b', 'listNodeId': 'list_b', 'slot': 'gap'},
+        'actions': [
+          {'trigger': {'type': 'dragEnter'}, 'actions': [log('entered')]},
+        ],
+      },
+    });
+    final tab = board.tree.boxOf('tab')!;
+    final at = tab.localToGlobal(tab.size.center(Offset.zero));
+    final gesture = await dragTo(tester, textRect(tester, 'One').center, at, release: false);
+    await tester.pump();
+    await tester.pump();
+    expect(board.drag['over'], 'b');
+    expect(paragraphs(tester, 'Four'), 1, reason: 'column b shows now');
+    // At the end of column b (after Four), not before its first card.
+    expect(dropSlotOf(board.tree, 'list_b')!.before, greaterThanOrEqualTo(1));
+    await gesture.up();
+    await tester.pumpAndSettle();
+    expect(board.lane('b'), ['c4', 'c1']);
   });
 }

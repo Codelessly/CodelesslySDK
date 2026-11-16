@@ -174,6 +174,20 @@ double? _itemMain(Node list, Node item) {
   return null;
 }
 
+/// Whether [n] lays out right to left (its resolved `textDirection`).
+bool _rtl(Node n) => n.behaviors.textDirection == api.TextDirection.rtl;
+
+/// A collection's `reverse` as it lays out: a horizontal one under a
+/// right-to-left direction runs from the right and scrolls from there, as
+/// Flutter's horizontal ListView and GridView do (reversed again when it is
+/// reversed itself).
+bool _reversed(Node n) => n.prop(CollectionScrollProps.reverse) != (_rtl(n) && n.axis == Axis.horizontal);
+
+/// Whether a collection's items are mirrored across it ([RenderCollection.
+/// mirrored]): a vertical one (its items' cross position) or a wrap under
+/// right to left.
+bool _mirrors(Node n, {bool wraps = false}) => _rtl(n) && (wraps || n.axis == Axis.vertical);
+
 void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final itemId = n.children.firstOrNull;
   final item = itemId == null ? null : b.nodeOf(itemId);
@@ -209,8 +223,11 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   // Ordinary bound lists need the same live viewport as paginated lists.
   // The render-only collection below is the design canvas's at-rest view.
   // Counted design templates and lists with drag/drop slots retain their
-  // render-object path, which owns item cleanup, shrink wrapping and gaps.
+  // render-object path, which owns item cleanup, shrink wrapping and gaps;
+  // so do lists whose items overlap (a negative spacing: an avatar stack),
+  // which a scrolling viewport can't lay out.
   if (b.tree.animates && n.bind.containsKey('data') && n.behaviors.dropTarget == null && !_opensDropSlots(b, n) &&
+      n.prop(ListViewProps.spacing) >= 0 &&
       n.prop(ListViewProps.scrollable) && !_wraps(n) &&
       n.prop(ListViewProps.layout) == api.ListLayout.list && ListRuntime(b, n).data != null) {
     return _dataList(b, n, chain, itemId, item);
@@ -311,6 +328,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
       }
     }
     final view = b.obtain<RenderWrapItems>('wrap', RenderWrapItems.new)
+      ..mirrored = _mirrors(n, wraps: true)
       ..clipBehavior = _clip(n)
       ..paintReversed = false
       ..onNeedItems = null
@@ -359,6 +377,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final overlap = count != null && separator == api.ListSeparator.space && spacing < 0 ? -spacing : 0.0;
 
   final view = b.obtain<RenderListItems>('list', RenderListItems.new)
+    ..mirrored = _mirrors(n)
     ..shareFill = !n.prop(ListViewProps.scrollable)
     ..clipBehavior = _clip(n)
     ..paintReversed = false
@@ -385,7 +404,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
       ..onNeedItems = null
       ..update(
         axis: n.axis,
-        reverse: n.prop(CollectionScrollProps.reverse),
+        reverse: _reversed(n),
         anchorEnd: false,
         padding: padding,
         hugMain: hugMain,
@@ -422,14 +441,14 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
       ..onScroll = ((event) => fireTrigger(b, 'scroll', event: event))
       ..onScrollEnd = ((event) => fireTrigger(b, 'scrollEnd', event: event))
       ..axis = n.axis
-      ..reverse = n.prop(CollectionScrollProps.reverse)
+      ..reverse = _reversed(n)
       ..clipBehavior = _clip(n));
     view
       ..measurable = true
       ..onNeedItems = null
       ..update(
         axis: n.axis,
-        reverse: n.prop(CollectionScrollProps.reverse),
+        reverse: _reversed(n),
         anchorEnd: false,
         padding: padding,
         hugMain: true,
@@ -451,7 +470,7 @@ void _listView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..onNeedItems = ((c) => _syncItems(b, n, container, itemId, c))
     ..update(
       axis: n.axis,
-      reverse: n.prop(CollectionScrollProps.reverse),
+      reverse: _reversed(n),
       anchorEnd: true,
       padding: padding,
       hugMain: _hugsMain(b, n) && count != null,
@@ -551,10 +570,11 @@ void _gridView(NodeBuilder b, Node n, List<RenderBox> chain) {
   final count = _itemCount(n);
   chain.add(_viewportBox(b, n, canShrinkWrap: count != null));
   final view = b.obtain<RenderGridItems>('grid', RenderGridItems.new)
+    ..mirrored = _mirrors(n)
     ..clipBehavior = _clip(n)
     ..paintReversed = false
     ..axis = n.axis
-    ..reverse = n.prop(CollectionScrollProps.reverse)
+    ..reverse = _reversed(n)
     ..padding = n.layout.padding.flutter
     ..crossAxisCount = n.prop(GridViewProps.crossAxisCount)
     ..maxCrossAxisExtent = n.prop(GridViewProps.maxCrossAxisExtent)
@@ -609,7 +629,7 @@ void _pageView(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..paintReversed = n.prop(PageViewProps.paintOrder) == api.PagePaintOrder.reverse
     ..onNeedItems = null
     ..axis = n.axis
-    ..reverse = n.prop(CollectionScrollProps.reverse)
+    ..reverse = _reversed(n)
     ..viewportFraction = fraction
     ..padEnds = padEnds
     ..initialPage = initial

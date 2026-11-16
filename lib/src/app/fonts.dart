@@ -5,6 +5,7 @@
 // matching file. Uploaded fonts come from their URL; a font without one is
 // a Google Font, fetched by family, weight and style.
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:codelessly_api/codelessly_api.dart' show PublishFont;
 
@@ -236,7 +237,21 @@ class CodelesslyFonts {
 
   /// Forgets the characters noted (tests).
   @visibleForTesting
-  static void resetGlyphs() => _glyphs = '';
+  static void resetGlyphs() {
+    _glyphs = '';
+    _glyphFiles.clear();
+  }
+
+  /// Glyph files registered per font (family, weight, style): each later
+  /// one is a family of its own ([FontDemand.glyphFamily]).
+  static final Map<String, int> _glyphFiles = {};
+
+  static String _nextGlyphFamily(PublishFont f) {
+    final key = '${f.family}/${f.weight}/${f.italic}';
+    final n = _glyphFiles[key] ?? 0;
+    _glyphFiles[key] = n + 1;
+    return FontDemand.glyphFamily(f.family, math.min(n, FontDemand.glyphBatches - 1));
+  }
 
   /// The fonts this registered, for characters noted later.
   final List<PublishFont> _registered = [];
@@ -258,10 +273,10 @@ class CodelesslyFonts {
     }
     await track(Future.wait([
       for (final e in byFamily.entries)
-        Future.wait(e.value.map((f) => glyphs.fetchGlyphs(f, fresh))).then((files) async {
-          final ok = [...files.nonNulls];
-          if (ok.isNotEmpty) await _register(FontDemand.glyphFamily(e.key), ok);
-        }).catchError((Object _) {}),
+        for (final f in e.value)
+          glyphs.fetchGlyphs(f, fresh).then((file) async {
+            if (file != null) await _register(_nextGlyphFamily(f), [file]);
+          }).catchError((Object _) {}),
     ]));
   }
 
@@ -293,8 +308,11 @@ class CodelesslyFonts {
             _registered.addAll(e.value);
             // Characters beyond latin: a family of their own the styles
             // fall back to (FontDemand.glyphFamily).
-            final more = [...(await extraFiles).nonNulls];
-            if (more.isNotEmpty) await _register(FontDemand.glyphFamily(e.key), more);
+            final more = await extraFiles;
+            for (var i = 0; i < more.length && i < e.value.length; i++) {
+              final file = more[i];
+              if (file != null) await _register(_nextGlyphFamily(e.value[i]), [file]);
+            }
             return true;
           })
           .catchError((Object _) => false);

@@ -85,6 +85,7 @@ void textFieldRecipe(NodeBuilder b, Node n, List<RenderBox> chain, {TextFieldSer
   final box = b.obtain<RenderTextField>('textField', RenderTextField.new);
   box
     ..builder = b
+    ..textDirection = n.behaviors.textDirection == api.TextDirection.rtl ? TextDirection.rtl : TextDirection.ltr
     ..services = interactive ? services : null
     ..interactive = interactive
     ..config = TextFieldConfig.of(n, tokens, inherited: b.slot.textDefault, interactive: interactive)
@@ -273,10 +274,8 @@ class TextFieldConfig {
             ];
     c.decoration = n.prop(TextFieldProps.decoration);
     c.tokens = tokens;
-    c.textAlign = switch (n.prop(TextFieldProps.textAlign)) {
-      api.TextAlign.start => TextAlign.left,
-      final a => convert.textAlign(a),
-    };
+    // Start and end follow the field's text direction.
+    c.textAlign = convert.textAlign(n.prop(TextFieldProps.textAlign));
     c.alignVertical = switch (n.prop(TextFieldProps.textAlignVertical)) {
       null => null,
       api.TextAlignVertical.top => TextAlignVertical.top,
@@ -403,13 +402,6 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         _focusChanged(on);
       };
     onPressed = _tapped;
-    _tapAndPan = TapAndPanGestureRecognizer(debugOwner: this)
-      ..onTapDown = _tapDown
-      ..onTapUp = _tapUp
-      ..onDragStart = _dragStart
-      ..onDragUpdate = _dragUpdate;
-    _longPress = LongPressGestureRecognizer(debugOwner: this)..onLongPressStart = _longPressStart;
-    _affixTap = TapGestureRecognizer(debugOwner: this)..onTap = _affixTapped;
   }
 
   /// The field that has the keyboard focus now, of every root (someone is
@@ -421,9 +413,30 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
   final FieldScrollOffset _scroll = FieldScrollOffset();
   final ValueNotifier<bool> _caretVisible = ValueNotifier(false);
   late final CaretBlink _caret = CaretBlink(_caretVisible);
-  late final TapAndPanGestureRecognizer _tapAndPan;
-  late final LongPressGestureRecognizer _longPress;
-  late final TapGestureRecognizer _affixTap;
+  // The gestures exist while the field is attached: detaching releases them,
+  // with the double-tap timer a tap leaves running, so a field taken out of
+  // the tree (its dispose may wait for a frame that never comes) holds no
+  // timer. A field attached again makes new ones when touched.
+  TapAndPanGestureRecognizer? _tapAndPanGesture;
+  LongPressGestureRecognizer? _longPressGesture;
+  TapGestureRecognizer? _affixTapGesture;
+  TapAndPanGestureRecognizer get _tapAndPan => _tapAndPanGesture ??= TapAndPanGestureRecognizer(debugOwner: this)
+    ..onTapDown = _tapDown
+    ..onTapUp = _tapUp
+    ..onDragStart = _dragStart
+    ..onDragUpdate = _dragUpdate;
+  LongPressGestureRecognizer get _longPress =>
+      _longPressGesture ??= LongPressGestureRecognizer(debugOwner: this)..onLongPressStart = _longPressStart;
+  TapGestureRecognizer get _affixTap => _affixTapGesture ??= TapGestureRecognizer(debugOwner: this)..onTap = _affixTapped;
+
+  void _releaseGestures() {
+    _tapAndPanGesture?.dispose();
+    _longPressGesture?.dispose();
+    _affixTapGesture?.dispose();
+    _tapAndPanGesture = null;
+    _longPressGesture = null;
+    _affixTapGesture = null;
+  }
 
   /// The laid-out text (Flutter's `RenderEditable`).
   @override
@@ -481,6 +494,13 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
 
   TextFieldConfig? _config;
   TextFieldConfig get config => _config!;
+  @override
+  set textDirection(TextDirection v) {
+    if (v == textDirection) return;
+    super.textDirection = v;
+    _editable.textDirection = v;
+  }
+
   set config(TextFieldConfig c) {
     if (c == _config) return;
     final old = _config;
@@ -738,7 +758,13 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         _focusEvent('editingComplete');
       }
     }
+    // Off the tree (its screen torn down while it had the focus), there is
+    // nothing to show: it lays out again when it is attached.
+    if (!attached) return;
     _editable.selectionColor = on ? config.tokens.primary.withValues(alpha: .25) : null;
+    // A field losing the focus because its root is leaving the screen is
+    // not laid out again (the framework may be mid-layout).
+    if (focusNode.scope?.detaching ?? false) return;
     _syncText();
     markNeedsLayout();
   }
@@ -914,7 +940,7 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
         fontFamily: c.valueStyle.fontFamily,
         fontSize: c.valueStyle.fontSize,
         fontWeight: c.valueStyle.fontWeight,
-        textDirection: TextDirection.ltr,
+        textDirection: textDirection,
         textAlign: c.textAlign,
         letterSpacing: c.valueStyle.letterSpacing,
       ));
@@ -993,14 +1019,13 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     _autofillGroup?.unregister(editor);
     editor.closeConnection();
     _caret.stop();
+    _releaseGestures();
     super.detach();
   }
 
   @override
   void dispose() {
-    _tapAndPan.dispose();
-    _longPress.dispose();
-    _affixTap.dispose();
+    _releaseGestures();
     _caret.stop();
     _editable.dispose();
     _caretVisible.dispose();
