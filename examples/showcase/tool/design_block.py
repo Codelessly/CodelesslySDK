@@ -31,7 +31,7 @@ Without a model (a person or an agent as the designer, given exactly what the mo
         --block <the block's JSON file> --card <the card's notation file> [--use <a JSON file of steps and texts>]
         one round of the same check: <dir>/round<n>/ with the four pictures and problems.txt
 """
-import base64, json, os, re, shutil, subprocess, sys, time, urllib.request
+import base64, json, os, re, shutil, subprocess, sys, time, urllib.error, urllib.request
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SDK = os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
@@ -51,8 +51,12 @@ def ask(model, system, messages):
     req = urllib.request.Request('https://api.anthropic.com/v1/messages', data=json.dumps(body).encode(), headers={
         'content-type': 'application/json', 'x-api-key': os.environ['ANTHROPIC_API_KEY'], 'anthropic-version': '2023-06-01'})
     t0 = time.time()
-    with urllib.request.urlopen(req, timeout=900) as r:
-        answer = json.loads(r.read())
+    try:
+        with urllib.request.urlopen(req, timeout=900) as r:
+            answer = json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        detail = e.read().decode('utf-8', errors='replace')[:2000]
+        raise RuntimeError(f'Anthropic request failed (HTTP {e.code}): {detail}') from e
     return ''.join(b.get('text', '') for b in answer['content']), round(time.time() - t0, 1), answer.get('usage', {})
 
 

@@ -4,12 +4,13 @@
  "roots": ["band"],
  "widget": {
   "type": "CallToAction",
-  "doc": "The closing band of a landing page on the hero gradient: CallToAction \"Ready to start?\" \"One line of reassurance.\" primary:\"Start free\" secondary:\"Talk to sales\" (empty secondary: one button), firing onPrimary and onSecondary; place it in a Section and it fills the section's width.",
+  "doc": "The closing band of a landing page: CallToAction \"Ready to start?\" \"One line of reassurance.\" primary:\"Start free\" tone:\"accent\" (or dark, the default); empty secondary hides the second button. Place it in a Section.",
   "props": [
    {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Ready to get started?", "doc": "The headline.", "required": true},
    {"key": "text", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line under the headline (empty: none)."},
    {"key": "primary", "type": {"kind": "string", "flutter": "String"}, "default": "Get started", "doc": "The label of the main action.", "required": true},
-   {"key": "secondary", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The label of a quiet second action (empty: none)."}
+   {"key": "secondary", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The label of a quiet second action (empty: none)."},
+   {"key": "tone", "type": {"kind": "enumeration", "flutter": "String", "values": ["dark", "accent"]}, "default": "dark", "doc": "Dark gradient or the site's bright accent."}
   ],
   "events": [
    {"key": "onPrimary", "doc": "The main action was pressed."},
@@ -42,7 +43,7 @@
       "op": "rrect",
       "rect": [0, 0, "${size.width}", "${size.height}"],
       "radius": "${theme.radii.cardWide}",
-      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': theme.colors.heroA}, {'position': 1, 'color': theme.colors.heroB}]}}}"
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topLeft', 'end': 'bottomRight', 'stops': [{'position': 0, 'color': props.tone == 'accent' ? theme.colors.accent : theme.colors.heroA}, {'position': 1, 'color': props.tone == 'accent' ? theme.colors.accentBright : theme.colors.heroB}]}}}"
      }
     ]
    }
@@ -50,13 +51,14 @@
   "title": {
    "type": "text",
    "props": {"text": "${props.title}", "style": {"from": "heading2Wide", "color": "onHero"}, "textAlign": "center"},
+   "bind": {"props.style.color": "${= props.tone == 'accent' ? theme.colors.onAccent : theme.colors.onHero}"},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
   },
   "text": {
    "type": "text",
    "props": {"text": "${props.text}", "style": {"from": "leadWide", "color": "onHeroSoft"}, "textAlign": "center"},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 14, 0, 0]},
-   "bind": {"visible": "${= props.text != ''}"}
+   "bind": {"visible": "${= props.text != ''}", "props.style.color": "${= props.tone == 'accent' ? theme.colors.onAccent : theme.colors.onHeroSoft}"}
   },
   "actions": {
    "type": "row",
@@ -70,7 +72,7 @@
    "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 8},
    "layout": {"width": {"hug": 0}, "height": 44, "padding": [22, 0, 20, 0]},
    "decoration": {"fills": [{"color": "onHero"}], "radius": 10},
-   "bind": {"decoration.radius": "${theme.radii.controlMedium}"},
+   "bind": {"decoration.radius": "${theme.radii.controlMedium}", "decoration.fills[0].color": "${= props.tone == 'accent' ? theme.colors.heroA : theme.colors.onHero}"},
    "states": {"pressed": {"primary": {"opacity": 0.85}}},
    "actions": [
     {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onPrimary", "value": "${props.primary}"}]}
@@ -79,11 +81,13 @@
   "primaryLabel": {
    "type": "text",
    "props": {"text": "${props.primary}", "style": {"from": "strongWide", "color": "heroA"}, "maxLines": 1},
+   "bind": {"props.style.color": "${= props.tone == 'accent' ? theme.colors.onHero : theme.colors.heroA}"},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
   },
   "primaryIcon": {
    "type": "icon",
    "props": {"icon": "arrow_forward_rounded", "size": 18, "color": "heroA"},
+   "bind": {"props.color": "${= props.tone == 'accent' ? theme.colors.onHero : theme.colors.heroA}"},
    "layout": {"width": 18, "height": 18}
   },
   "secondary": {
@@ -92,7 +96,7 @@
    "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
    "layout": {"width": {"hug": 0}, "height": 44, "padding": [22, 0, 22, 0]},
    "decoration": {"fills": [{"color": "heroChip"}], "strokes": [{"color": "heroLine"}], "strokeWidth": 1.2, "radius": 10},
-   "bind": {"visible": "${= props.secondary != ''}", "decoration.radius": "${theme.radii.controlMedium}"},
+   "bind": {"visible": "${= props.secondary != ''}", "decoration.radius": "${theme.radii.controlMedium}", "decoration.fills[0].color": "${= props.tone == 'accent' ? theme.colors.accentTint : theme.colors.heroChip}"},
    "states": {"pressed": {"secondary": {"opacity": 0.8}}},
    "actions": [
     {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onSecondary", "value": "${props.secondary}"}]}
@@ -101,6 +105,7 @@
   "secondaryLabel": {
    "type": "text",
    "props": {"text": "${props.secondary}", "style": {"from": "strongWide", "color": "onHero"}, "maxLines": 1},
+   "bind": {"props.style.color": "${= props.tone == 'accent' ? theme.colors.onAccent : theme.colors.onHero}"},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
   }
  }

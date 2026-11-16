@@ -15,9 +15,10 @@ closest to the request as written) and lets it put a block in place of plain nod
 <document.json> is the card as a layout document (a recording's .notation.json, or what
 tool/notation/notation.sh expand wrote). Each round: the agent is shown the card's render (light, dark and 320
 wide) and its nodes, and answers with {"ops": [...]}; the ops are applied (tool/notation/notation.sh apply),
-the result is rendered with the design system's theme, and what the appliers and the renderer report, plus
-any text the card showed before and no longer shows, go back with the new pictures. The round with the
-fewest problems is kept. Writes <out>/before/, <out>/round<n>/ (answer.txt, ops.json, card.json, light.png,
+the result is rendered with the site's theme and sibling pages when site.json sits beside the card, and what
+the appliers and renderer report, plus any text the card showed before and no longer shows, go back with the
+new pictures. Only a round with no new problems and a visible change is kept. Writes <out>/before/,
+<out>/round<n>/ (answer.txt, ops.json, card.json, light.png,
 dark.png, narrow.png, problems.txt), <out>/after.json and <out>/summary.json (seconds and tokens per round).
 The key is read from the environment and never written.
 
@@ -36,7 +37,7 @@ With no key at hand the design agent can be any agent that reads files and pictu
         reads <dir>/round<n>/answer.txt (the agent's answer), applies and renders it and writes
         round<n>/problems.txt and the three pictures, as a round of the run does
     style_pass.py finish --out <dir>
-        keeps the round with the fewest problems: after.json and summary.json
+        keeps the latest clean, visible round, or the original: after.json and summary.json
 """
 import json, os, shutil, sys, time
 
@@ -50,11 +51,35 @@ def reported(log):
             for i, l in enumerate(lines) if l.startswith(('ERROR', 'WARNING'))]
 
 
-def render(card, ds, d, width=420, narrow=320):
+def site_context(card, source_site, source_page, ds, d):
+    """Preview a page inside its site, with its theme, variables and sibling routes."""
+    if not source_site:
+        return card, [], None
+    preview = f'{d}/.site-preview'
+    shutil.rmtree(preview, ignore_errors=True)
+    os.makedirs(preview)
+    for name in os.listdir(source_site):
+        if name == 'site.json':
+            continue
+        os.symlink(os.path.join(source_site, name), os.path.join(preview, name))
+    name = source_page
+    target = os.path.join(preview, name)
+    if os.path.lexists(target):
+        os.unlink(target)
+    shutil.copy(card, target)
+    manifest = json.load(open(f'{source_site}/site.json'))
+    manifest['designSystem'] = os.path.relpath(ds, preview)
+    json.dump(manifest, open(f'{preview}/site.json', 'w'))
+    root = json.load(open(card))['roots'][0]
+    return preview, ['--screen', root], root
+
+
+def render(card, ds, d, width=420, narrow=320, source_site=None, source_page=None):
     """Renders <card> with the design system's theme into <d>: light.png, dark.png, narrow.png. Returns the
     problems the renderer reported (light, at 420 and at 320) and the texts on the card."""
     os.makedirs(d, exist_ok=True)
     problems, texts = [], []
+    source, screen_args, _ = site_context(card, source_site, source_page, ds, d)
     # A card is captured in a tall window; a page (a desktop width) to its end, and an app window (a canvas
     # as tall as its window) at the window's size.
     tall, whole = 1400, []
@@ -66,7 +91,7 @@ def render(card, ds, d, width=420, narrow=320):
                         ('narrow', ['--sizes', f'{narrow}x{tall}'] + whole)):
         folder = f'{d}/raw-{name}'
         shutil.rmtree(folder, ignore_errors=True)
-        code, log = run(['tool/render/render.sh', card, '--out', folder, '--design-system', ds] + extra)
+        code, log = run(['tool/render/render.sh', source, '--out', folder] + ([] if source_site else ['--design-system', ds]) + screen_args + extra)
         if name != 'dark':
             problems += [(f'At {narrow} wide: ' if name == 'narrow' else '') + l for l in reported(log) if l not in problems]
         shots = sorted(f for f in os.listdir(folder) if f.endswith('.png')) if os.path.isdir(folder) else []
@@ -169,7 +194,7 @@ ANSWER
 Two or three sentences on what you change and why. Then one ```json fence holding {{"ops": [...]}}: every op in the order it is applied. Patch what exists; set only what is new."""
 
 
-def check_round(out, ds, n, text, problems0, texts0, width, narrow):
+def check_round(out, ds, n, text, problems0, texts0, width, narrow, source_site=None, source_page=None):
     """Applies and renders the answer of round <n>; writes its problems. Returns (problems, how many ops)."""
     d = f'{out}/round{n}'
     os.makedirs(d, exist_ok=True)
@@ -184,7 +209,7 @@ def check_round(out, ds, n, text, problems0, texts0, width, narrow):
         code, log = run(['tool/notation/notation.sh', 'apply', f'{out}/before.json', f'{d}/ops.json', '--design-system', ds, '--out', f'{d}/card.json'])
         problems += [l for l in log.splitlines() if l.startswith('ERROR')]
         if os.path.exists(f'{d}/card.json'):
-            rendered, texts = render(f'{d}/card.json', ds, d, width, narrow)
+            rendered, texts = render(f'{d}/card.json', ds, d, width, narrow, source_site, source_page)
             problems += [l for l in rendered if l not in problems0]
             shown = ' '.join(texts)
             # With a block in place of plain nodes a text may be drawn in parts or joined with another: it is
@@ -194,6 +219,11 @@ def check_round(out, ds, n, text, problems0, texts0, width, narrow):
             words = lambda t: [w for w in t.split() if any(c.isalnum() for c in w)]
             gone = [t for t in texts0 if t not in texts and t not in shown and not all(w in shown for w in words(t))]
             problems += [f'A text the card showed is gone: "{t[:80]}". The pass must not change what the card says.' for t in gone[:12]]
+            if not problems and os.path.exists(f'{out}/before/light.png') and os.path.exists(f'{d}/light.png'):
+                from PIL import Image, ImageChops
+                before, after = (Image.open(p).convert('RGB') for p in (f'{out}/before/light.png', f'{d}/light.png'))
+                if before.size == after.size and ImageChops.difference(before, after).getbbox() is None:
+                    problems.append('No visible change at the target width; the operations touched unused or overridden fields.')
     open(f'{d}/problems.txt', 'w').write('\n'.join(problems) + '\n')
     try:
         count = len(json.loads(ops).get('ops', [])) if ops else 0
@@ -204,14 +234,18 @@ def check_round(out, ds, n, text, problems0, texts0, width, narrow):
 
 def finish(out, summary):
     checked = [r for r in summary['rounds'] if 'problems' in r and os.path.exists(f"{out}/round{r['round']}/card.json")]
-    if checked:
-        best = min(checked, key=lambda r: (r['problems'], -r['round']))
+    valid = [r for r in checked if r['problems'] == 0]
+    if valid:
+        best = max(valid, key=lambda r: r['round'])
         summary['final'], summary['problems'] = best['round'], best['problems']
-        summary['status'] = 'passed' if best['problems'] == 0 else 'failed'
+        summary['status'] = 'passed'
         shutil.copy(f"{out}/round{best['round']}/card.json", f'{out}/after.json')
         shutil.copy(f"{out}/round{best['round']}/ops.json", f'{out}/ops.json')
     else:
-        summary['status'] = 'failed'
+        summary['status'] = 'unchanged'
+        summary['final'] = None
+        summary['problems'] = min((r['problems'] for r in checked), default=None)
+        shutil.copy(f'{out}/before.json', f'{out}/after.json')
     json.dump(summary, open(f'{out}/summary.json', 'w'), indent=1)
     print(json.dumps({k: summary.get(k) for k in ('final', 'status', 'problems', 'totalSeconds')}))
 
@@ -248,7 +282,7 @@ def main():
         if mode == 'check':
             n = int(opt('--round'))
             t0 = time.time()
-            problems, count = check_round(out, st['ds'], n, open(f'{out}/round{n}/answer.txt').read(), st['problems0'], st['texts0'], st['width'], st['narrow'])
+            problems, count = check_round(out, st['ds'], n, open(f'{out}/round{n}/answer.txt').read(), st['problems0'], st['texts0'], st['width'], st['narrow'], st.get('sourceSite'), st.get('sourcePage'))
             st['rounds'] = [r for r in st['rounds'] if r['round'] != n] + [{'round': n, 'checkAndRenderSeconds': round(time.time() - t0, 1), 'problems': len(problems), 'ops': count}]
             json.dump(st, open(f'{out}/state.json', 'w'), indent=1)
             print(f'round {n}: {count} operations, {len(problems)} problem(s). Pictures: {out}/round{n}/light.png, dark.png, narrow.png')
@@ -275,13 +309,15 @@ def main():
     model, rounds = opt('--model', 'claude-opus-5-5'), int(opt('--rounds', '2'))
     shutil.copy(card, f'{out}/before.json')
     t_all = time.time()
-    problems0, texts0 = render(f'{out}/before.json', ds, f'{out}/before', width, narrow)
+    source_site = os.path.dirname(card) if os.path.exists(f'{os.path.dirname(card)}/site.json') else None
+    source_page = os.path.basename(card) if source_site else None
+    problems0, texts0 = render(f'{out}/before.json', ds, f'{out}/before', width, narrow, source_site, source_page)
     if mode == 'prepare':
         open(f'{out}/brief.txt', 'w').write(system)
         os.makedirs(f'{out}/blocks', exist_ok=True)
         for t, f in shots:
             shutil.copy(f, f'{out}/blocks/{t}.png')
-        json.dump({'ds': ds, 'card': os.path.relpath(card, SDK), 'width': width, 'narrow': narrow, 'problems0': problems0, 'texts0': texts0, 'blocks': blocks,
+        json.dump({'ds': ds, 'card': os.path.relpath(card, SDK), 'sourceSite': source_site, 'sourcePage': source_page, 'width': width, 'narrow': narrow, 'problems0': problems0, 'texts0': texts0, 'blocks': blocks,
                    'pictures': [t for t, _ in shots], 'model': opt('--model', ''), 'rounds': []}, open(f'{out}/state.json', 'w'), indent=1)
         print(f'{out}: brief.txt, before/, {len(shots)} block picture(s)')
         return
@@ -311,7 +347,7 @@ def main():
             print(json.dumps(summary['rounds'][-1]))
             break
         t0 = time.time()
-        problems, count = check_round(out, ds, n, text, problems0, texts0, width, narrow)
+        problems, count = check_round(out, ds, n, text, problems0, texts0, width, narrow, source_site, source_page)
         summary['rounds'].append({'round': n, 'modelSeconds': seconds, 'checkAndRenderSeconds': round(time.time() - t0, 1), 'problems': len(problems), 'ops': count,
                                   'input_tokens': usage.get('input_tokens'), 'output_tokens': usage.get('output_tokens')})
         print(json.dumps(summary['rounds'][-1]))
