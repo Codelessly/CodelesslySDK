@@ -14,7 +14,7 @@
    {"key": "cta", "type": {"kind": "string", "flutter": "String"}, "default": "Start free", "doc": "The one primary action's label (empty: hidden)."}
   ],
   "events": [
-   {"key": "onNavigate", "doc": "A link was chosen; the value is its name (the brand gives an empty name: home)."},
+   {"key": "onNavigate", "doc": "A link or action was chosen; the value is its name (the brand gives an empty name: home)."},
    {"key": "onCta", "doc": "The primary action was pressed."},
    {"key": "onSecondary", "doc": "The quiet action was pressed."}
   ]
@@ -125,7 +125,7 @@
    "bind": {"visible": "${= props.secondary != ''}", "decoration.radius": "${theme.radii.controlMedium}"},
    "states": {"pressed": {"second": {"opacity": 0.6}}},
    "actions": [
-    {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onSecondary", "value": "${props.secondary}"}]}
+    {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onSecondary", "value": "${props.secondary}"}, {"type": "componentEvent", "event": "onNavigate", "value": "${props.secondary}"}]}
    ]
   },
   "secondText": {
@@ -142,7 +142,7 @@
    "bind": {"visible": "${= props.cta != ''}", "decoration.radius": "${theme.radii.controlMedium}"},
    "states": {"pressed": {"cta": {"opacity": 0.85}}},
    "actions": [
-    {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onCta", "value": "${props.cta}"}]}
+    {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onCta", "value": "${props.cta}"}, {"type": "componentEvent", "event": "onNavigate", "value": "${props.cta}"}]}
    ]
   },
   "ctaText": {
