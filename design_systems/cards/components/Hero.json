@@ -83,7 +83,7 @@
   },
   "chipText": {
    "type": "text",
-   "props": {"text": "${props.eyebrow}", "style": {"from": "smallWide", "color": "accent", "fontWeight": 600}, "maxLines": 1, "overflow": "ellipsis"},
+   "props": {"text": "${props.eyebrow}", "style": {"from": "smallWide", "color": "accentText", "fontWeight": 600}, "maxLines": 1, "overflow": "ellipsis"},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
   },
   "title": {

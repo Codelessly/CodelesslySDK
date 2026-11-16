@@ -60,6 +60,7 @@
    "inkFaint": "#FF6B7280",
    "inkGhost": "#FF9CA3AF",
    "accent": "#FF2563EB",
+   "accentText": "#FF1D4ED8",
    "accentDeep": "#FF1D4ED8",
    "accentBright": "#FF3B82F6",
    "accentTint": "#FFF3F4F6",
@@ -647,7 +648,7 @@
     "fontWeight": 700,
     "height": 1.2,
     "letterSpacing": 0.9,
-    "color": "accent",
+    "color": "accentText",
     "leadingDistribution": "even"
    },
    "fieldLabelWide": {

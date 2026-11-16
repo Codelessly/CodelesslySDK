@@ -105,7 +105,7 @@
    "props": {"text": "${item}", "style": {"from": "mutedWide", "color": "inkSoft", "fontWeight": 500}, "maxLines": 1},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
    "bind": {
-    "props.style.color": "${= props.active == item ? theme.colors.accent : theme.colors.inkSoft}",
+    "props.style.color": "${= props.active == item ? theme.colors.accentText : theme.colors.inkSoft}",
     "props.style.fontWeight": "${= props.active == item ? 600 : 500}"
    }
   },
