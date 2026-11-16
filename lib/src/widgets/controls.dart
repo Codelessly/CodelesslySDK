@@ -11,6 +11,7 @@ import 'package:codelessly_api/core.dart'
         ButtonProps,
         ChipProps,
         DatePickerProps,
+        CalendarProps,
         DateTimeInputProps,
         DropdownProps,
         ExpansionTileProps,
@@ -27,6 +28,7 @@ import '../render/controls/dropdown.dart';
 import '../render/controls/expansion.dart';
 import '../render/controls/navigation_bar.dart';
 import '../render/controls/pickers.dart';
+import '../render/controls/inline_calendar.dart';
 import '../render/controls/segmented.dart';
 import '../render/controls/slider.dart';
 import '../render/controls/tab_bar.dart';
@@ -60,6 +62,7 @@ final Map<String, WidgetRecipe> barRecipes = {
 /// Date and time pickers (render/controls/pickers.dart), in the platform
 /// locale's names with the runtime's clock (picker_locale.dart).
 final Map<String, WidgetRecipe> pickerRecipes = {
+  CalendarProps.spec.type: inlineCalendarRecipe,
   for (final type in [DatePickerProps.spec.type, TimePickerProps.spec.type, DateTimeInputProps.spec.type])
     type: (b, n, chain) => pickerRecipe(b, n, chain, locale: pickerLocale()),
 };
