@@ -90,7 +90,8 @@
   },
   "title": {
    "type": "text",
-   "props": {"text": "${props.title}", "style": "heading1Wide", "textAlign": "start"},
+   "media": [{"maxWidth": 1023, "patch": {"props": {"style": {"fontSize": 48}}}}, {"maxWidth": 699, "patch": {"props": {"style": {"fontSize": 40}}}}],
+   "props": {"text": "${props.title}", "style": {"from": "heading1Wide"}, "textAlign": "start"},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
    "bind": {"props.textAlign": "${= props.align == 'center' ? 'center' : 'start'}"}
   },
