@@ -264,6 +264,8 @@ def main():
     blocks, pictures = '--blocks' in sys.argv, opt('--block-pictures')
     system = brief_for(ds, doc, request, blocks=blocks)
     shots = [(t, f'{os.path.abspath(pictures)}/{t}.png') for t in NEAR if os.path.exists(f'{os.path.abspath(pictures)}/{t}.png')] if blocks and pictures else []
+    if width >= 700:
+        system += PAGE_TIER
     if width != 420:
         system = system.replace('a card', 'a screen').replace('The card', 'The screen').replace('the card', 'the screen').replace('THE CARD', 'THE SCREEN').replace('in a 320-wide column', f'at {narrow} wide').replace('It is correct', f'It is shown {width} wide. It is correct')
     if mode == 'brief':
@@ -290,6 +292,14 @@ def main():
     if shots:
         shown.append({'type': 'text', 'text': 'The closest blocks of the system as they are drawn (the bar to reach): ' + ', '.join(t for t, _ in shots) + ', in that order.'})
         shown += [image(f) for _, f in shots]
+    if opt('--reference') and os.path.exists(opt('--reference')):
+        # A page of the same kind, designed from scratch: the bar to reach, not the content to copy.
+        from PIL import Image
+        ref = Image.open(opt('--reference')).convert('RGB')
+        ref = ref.crop((0, 0, ref.width, min(ref.height, 2000)))
+        ref.save(f'{out}/reference.png')
+        shown.append({'type': 'text', 'text': 'A page of the same kind (other content), designed from scratch for the desktop: its hierarchy, density, type scale and use of the accent are the bar to reach. Do not copy its content or invent parts this screen does not have.'})
+        shown.append(image(f'{out}/reference.png'))
     messages = [{'role': 'user', 'content': shown}]
     for n in range(1, rounds + 1):
         text, seconds, usage = ask(model, system, messages)
@@ -316,6 +326,16 @@ def main():
     if summary['status'] == 'failed':
         sys.exit(1)
 
+
+PAGE_TIER = '''
+
+THIS SCREEN IS A DESKTOP PAGE, NOT A CHAT CARD: USE THE PAGE TIER
+The system has two tiers of one language. The card tier (the principles above, the block shown) is for a chat card about 420 wide. This screen is a website page or an app window, and takes the page tier: the same colors, ink, hairlines and fonts, at a page's scale.
+- Text styles: heading1Wide (a landing page's headline, 56), heading2Wide (a section's or an article's title, 36), heading3Wide (a card's or panel's title, 20), titleWide (an app page's title, 28), headingWide (17 semibold), strongWide (15 semibold), bodyWide (15), leadWide (18, under a headline), mutedWide (14), smallWide (13.5), captionWide (12.5), eyebrowWide (the label over a title, in the accent), columnHead (a table's header cell), numberHero / numberLarge / number / figure for figures. Not cardTitle, blockTitle, rowTitle, lead, meta or eyebrow: they are too small here.
+- Surfaces: a website is on pageFill (white), with alternate bands on band ruled off by line; an app's content is on page (light gray) with its sidebar, top bar and panels on card. A panel: radius cardWide (16), a line hairline, shadow cardWide, padding 24. A tile inside it: tileWide (12). Not the 26 corner of a chat card.
+- The accent does the wayfinding: the selected navigation item is activeTint with its label and icon in accent; a feature's or a figure's icon sits on an iconTile tile, in the accent; the recommended option is marked by the accent (a 2 px accent border, an accent badge), not by a gray outline or a tinted gradient. One primary button per view.
+- Scale and rhythm: a website's bands have 88 above and below, a headline block has 20 to 24 between its parts, grids of tiles 24 apart; an app's content has 24 around it and 16 to 20 between panels. A control is 40 high (44 for a headline's actions); a table's row 52. Prices and key figures are large (numberLarge or bigger), not body text. Content never runs the full width of a 1280 window: a form's fields sit in a column at most 640 wide or two across, running text at most 720.
+- What a page needs that a card does not: a top bar with a title and its actions level with each other, even columns that end together, table columns aligned with their headers (text left, numbers right), panels in a row equally tall.'''
 
 SECOND_LOOK = ('Look at it as the art director: hierarchy, spacing, alignment, contrast in both modes, whether it sits at the bar of the system, and whether anything is broken, clipped or empty. '
                'If it is right, answer with the single word SHIP. Otherwise answer with the WHOLE list of operations again, corrected '
