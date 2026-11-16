@@ -95,7 +95,6 @@
   },
   "list": {
    "type": "listView",
-   "media": [{"maxWidth": 699, "patch": {"visible": false}}],
    "children": [
     "item"
    ],
@@ -113,7 +112,15 @@
    },
    "bind": {
     "data": "${props.rows}"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
   },
   "item": {
    "type": "row",
@@ -217,29 +224,107 @@
   "mobileList": {
    "type": "listView",
    "visible": false,
-   "media": [{"maxWidth": 699, "patch": {"visible": true}}],
-   "children": ["mobileItem"],
-   "props": {"scrollable": false},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
-   "bind": {"data": "${props.rows}"}
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": true
+     }
+    }
+   ],
+   "children": [
+    "mobileItem"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.rows}"
+   }
   },
   "mobileItem": {
    "type": "column",
-   "children": ["mobileLabel", "mobileValue"],
-   "props": {"crossAxisAlignment": "stretch", "spacing": 4},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 10, 0, 10]},
-   "decoration": {"strokes": [{"color": "lineStrong"}], "strokeWidth": 1, "strokeSides": "top"},
-   "bind": {"visible": "${= (length(item) > 1 && text(at(item, 1)) != '')}", "decoration.strokeWidth": "${= index == 0 ? 0 : 1}"}
+   "children": [
+    "mobileLabel",
+    "mobileValue"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     10,
+     0,
+     10
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1,
+    "strokeSides": "top"
+   },
+   "bind": {
+    "visible": "${= (length(item) > 1 && text(at(item, 1)) != '')}",
+    "decoration.strokeWidth": "${= index == 0 ? 0 : 1}"
+   }
   },
   "mobileLabel": {
    "type": "text",
-   "props": {"text": "${= at(item, 0)}", "style": {"from": "lead", "fontSize": 13.5}, "maxLines": 2},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+   "props": {
+    "text": "${= at(item, 0)}",
+    "style": {
+     "from": "lead",
+     "fontSize": 13.5
+    },
+    "maxLines": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   },
   "mobileValue": {
    "type": "text",
-   "props": {"text": "${= length(item) > 1 ? at(item, 1) : ''}", "style": {"from": "figure", "fontWeight": 600}, "maxLines": 6},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+   "props": {
+    "text": "${= length(item) > 1 ? at(item, 1) : ''}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600
+    },
+    "maxLines": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   }
  }
 }
