@@ -429,6 +429,32 @@ class _SessionUi extends NavigatorActionUi {
 
   final _CodelesslyViewState view;
 
+  // The modals this view has open: their screens are nodes of the view's
+  // own tree, so a closeModal action runs in the view's context, not in the
+  // modal's route.
+  int _openModals = 0;
+
+  @override
+  Future<Object?> openModal(OpenModalAction action, {Json params = const {}}) async {
+    _openModals++;
+    try {
+      return await super.openModal(action, params: params);
+    } finally {
+      _openModals--;
+    }
+  }
+
+  /// Closes the modal on top (a menu row that chooses, a dialog's Cancel).
+  @override
+  bool closeModal(Object? result) {
+    if (super.closeModal(result)) return true;
+    if (_openModals <= 0 || !view.mounted) return false;
+    final navigator = Navigator.maybeOf(view.context);
+    if (navigator == null || !navigator.canPop()) return false;
+    navigator.pop(result);
+    return true;
+  }
+
   @override
   Future<void> navigate(NavigateAction action, {Json params = const {}, Json baseParams = const {}}) async =>
       view.navigate(action.to, action.mode);

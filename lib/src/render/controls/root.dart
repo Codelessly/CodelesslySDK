@@ -10,6 +10,7 @@
 import 'dart:ui' as ui;
 
 import 'package:flutter/rendering.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import 'focus.dart';
@@ -142,6 +143,13 @@ class RenderControlRoot extends RenderProxyBox {
       e.layout(BoxConstraints.loose(size), parentUsesSize: true);
       (e.parentData! as BoxParentData).offset = e.placeIn(this, size);
     }
+    // In an overlay the keyboard opened: the focus goes to its first stop
+    // once there is one laid out (its screen may load after it opens).
+    if (focus.layer?.wantsFocus ?? false) {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        if (attached) focus.layer?.takeFocus();
+      });
+    }
   }
 
   @override
@@ -172,6 +180,47 @@ class RenderControlRoot extends RenderProxyBox {
       return;
     }
     super.applyPaintTransform(child, transform);
+  }
+}
+
+/// A node whose focusable descendants are one Tab stop the arrow keys move
+/// through (the document's `focusGroup`): it puts a [ControlFocusGroup]
+/// in its root's scope while attached.
+class RenderFocusGroup extends RenderProxyBox {
+  RenderFocusGroup();
+
+  late final ControlFocusGroup group = ControlFocusGroup(this);
+
+  void configure({required ControlFocusAxis axis, required bool wrap, required bool typeAhead, bool rightToLeft = false}) {
+    group
+      ..axis = axis
+      ..wrap = wrap
+      ..typeAhead = typeAhead
+      ..rightToLeft = rightToLeft;
+  }
+
+  @override
+  void attach(PipelineOwner owner) {
+    super.attach(owner);
+    final root = RenderControlRoot.of(this);
+    if (root != null) group.join(root.focus);
+  }
+
+  @override
+  void detach() {
+    super.detach();
+    // A chain rebuilt around this box (a state style adding a layer)
+    // detaches and re-attaches it in the same frame: it leaves its scope
+    // only when it stays off the tree.
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (!attached) group.leave();
+    });
+  }
+
+  @override
+  void dispose() {
+    group.leave();
+    super.dispose();
   }
 }
 

@@ -102,6 +102,9 @@
    "bind": {
     "decoration.radius": "${= props.size == 'small' ? 8 : 10}",
     "decoration.effects": "${theme.shadows.level3}"
+   },
+   "focusGroup": {
+    "typeAhead": true
    }
   },
   "heading": {
