@@ -5,6 +5,8 @@
 import 'package:codelessly_api/core.dart' as api show WidgetState;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/render/controls/tokens.dart';
+import 'package:codelessly_sdk/src/render/controls/overlay.dart' show RenderTooltipBubble;
+import 'package:codelessly_sdk/src/render/controls/root.dart' show RenderControlRoot;
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -329,5 +331,21 @@ void main() {
     expect(b.label, 'Pricing');
     expect(b.isSelected, isTrue);
     handle.dispose();
+  });
+
+  testWidgets('a plain press target shows its tooltip on keyboard focus without an extra stop', (tester) async {
+    final s = await harness.show(tester, {
+      'col': {'type': 'column', 'layout': {'width': 300, 'height': 200}, 'children': ['help']},
+      'help': {'type': 'box', 'layout': {'width': 44, 'height': 44}, 'tooltip': 'Filter help', 'actions': [_click('n')]},
+    }, variables: [harness.v('n', 0, VariableType.integer)]);
+    final root = tester.renderObject<RenderControlRoot>(find.byType(NodeView));
+    final keys = Keyboard(tester);
+    expect(keys.stopIds(s.tree.boxOf('help')!), ['help']);
+    await keys.tab();
+    expect(keys.focusedId, 'help');
+    expect(keys.semantics!.label, 'Filter help');
+    expect((root.overlayEntries.single as RenderTooltipBubble).message, 'Filter help');
+    await keys.escape();
+    expect(root.overlayEntries, isEmpty);
   });
 }

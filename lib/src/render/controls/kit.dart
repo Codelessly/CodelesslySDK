@@ -24,6 +24,7 @@ import 'package:flutter/scheduler.dart' show Ticker;
 import 'package:flutter/services.dart';
 
 import 'focus.dart';
+import 'overlay.dart' show tooltipFocusChanged;
 import 'root.dart';
 
 /// The base of a control: its states and their sources, its activation
@@ -36,6 +37,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
       _statesChanged();
       markNeedsPaint();
       markNeedsSemanticsUpdate();
+      tooltipFocusChanged(focusNode);
     });
     _tap = TapGestureRecognizer(debugOwner: this)
       ..onTapDown = ((_) => _setPressed(true))
@@ -51,6 +53,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
       ..onHighlightChange = () {
         _statesChanged();
         markNeedsPaint();
+        tooltipFocusChanged(focusNode);
       };
   }
 

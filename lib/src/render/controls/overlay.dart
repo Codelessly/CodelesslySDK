@@ -1,13 +1,16 @@
 // The overlay layer's entries (render/controls/root.dart shows them above
 // the screen): what Flutter's `Overlay` and `OverlayEntry` are for widgets.
 // The first entry is the tooltip: SSUI's dark pill, shown after
-// `durations.tooltipDelay` of hovering a node with a `tooltip`.
+// `durations.tooltipDelay` of hovering, keyboard focus or a touch hold.
 import 'dart:async';
 import 'dart:math' as math;
+import 'dart:ui' show PointerDeviceKind, TextDirection;
 
 import 'package:codelessly_api/core.dart' as api show ThemeTokens;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 
+import 'focus.dart';
 import 'root.dart';
 import 'tokens.dart';
 
@@ -24,7 +27,7 @@ abstract class RenderOverlayEntry extends RenderBox {
 /// A tooltip's bubble: [message] in a pill above [anchor] (below when there
 /// is no room), centered on it and kept 8 px inside the root.
 class RenderTooltipBubble extends RenderOverlayEntry {
-  RenderTooltipBubble({required this.anchor, required String message, required ControlTokens tokens})
+  RenderTooltipBubble({required this.anchor, required String message, required ControlTokens tokens, required this._direction})
       : _message = message, // ignore: prefer_initializing_formals
         _tokens = tokens; // ignore: prefer_initializing_formals
 
@@ -45,6 +48,15 @@ class RenderTooltipBubble extends RenderOverlayEntry {
     markNeedsLayout();
   }
 
+  TextDirection _direction;
+  TextDirection get direction => _direction;
+  set direction(TextDirection v) {
+    if (v == _direction) return;
+    _direction = v;
+    _text.textDirection = v;
+    markNeedsLayout();
+  }
+
   static const _padding = EdgeInsets.symmetric(horizontal: 8, vertical: 4);
   static const _gap = 6.0;
   static const _maxWidth = 250.0;
@@ -53,6 +65,7 @@ class RenderTooltipBubble extends RenderOverlayEntry {
 
   @override
   void performLayout() {
+    _text.textDirection = _direction;
     _text.text = TextSpan(
       text: _message,
       style: TextStyle(
@@ -102,7 +115,7 @@ class RenderTooltipBubble extends RenderOverlayEntry {
     config.isSemanticBoundary = true;
     config.liveRegion = true;
     config.label = _message;
-    config.textDirection = TextDirection.ltr;
+    config.textDirection = _direction;
   }
 
   @override
@@ -113,13 +126,12 @@ class RenderTooltipBubble extends RenderOverlayEntry {
 }
 
 /// A node's `tooltip` (Flutter's `Tooltip`): shows the bubble in the root's
-/// overlay after the theme's tooltip delay of hovering, hides it when the
-/// pointer leaves or presses. Screen readers read [message] as the node's
-/// tooltip.
+/// overlay after the theme's tooltip delay of hovering, keyboard focus or
+/// a touch hold. Screen readers read [message] as the node's tooltip.
 class RenderTooltipRegion extends RenderMouseRegion {
   RenderTooltipRegion() : super(opaque: false) {
-    onEnter = (_) => _schedule();
-    onExit = (_) => hide();
+    onEnter = (_) { _hovered = true; _schedule(); };
+    onExit = (_) { _hovered = false; if (!_focused) { hide(); _dismissed = false; } };
   }
 
   String _message = '';
@@ -137,25 +149,76 @@ class RenderTooltipRegion extends RenderMouseRegion {
     _bubble?.tokens = v;
   }
 
+  TextDirection _direction = TextDirection.ltr;
+  set direction(TextDirection v) {
+    _direction = v;
+    _bubble?.direction = v;
+    markNeedsSemanticsUpdate();
+  }
+
   Timer? _timer;
+  Timer? _touchExpiry;
   RenderTooltipBubble? _bubble;
   RenderControlRoot? _root;
+  bool _hovered = false;
+  bool _focused = false;
+  bool _touchHeld = false;
+  bool _dismissed = false;
+  int? _touchPointer;
+  Offset? _touchStart;
+  final Map<ControlFocusNode, ({ControlKeyResult Function(KeyEvent)? result, ControlKeyResult Function(KeyEvent) wrapper})> _focusKeys = {};
 
   /// Whether the bubble is showing.
   bool get showing => _bubble != null;
 
   void _schedule() {
+    if (_dismissed || _bubble != null || _timer != null) return;
     _timer?.cancel();
     _timer = Timer(Duration(milliseconds: _tokens?.tooltipDelayMs ?? 400), show);
+  }
+
+  /// Observes an existing press target or kit control; it adds no Tab stop.
+  void focusChanged(ControlFocusNode node, bool focused) {
+    if (focused && node.showsHighlight) {
+      if (!_focusKeys.containsKey(node)) {
+        final previous = node.onKeyResult;
+        final previousKey = node.onKey;
+        ControlKeyResult keys(KeyEvent event) {
+          if (event is KeyDownEvent && event.logicalKey == LogicalKeyboardKey.escape && (_bubble != null || _timer != null)) {
+            _dismissed = true;
+            hide();
+            return ControlKeyResult.handled;
+          }
+          return previous?.call(event) ?? ((previousKey?.call(event) ?? false) ? ControlKeyResult.handled : ControlKeyResult.ignored);
+        }
+        _focusKeys[node] = (result: previous, wrapper: keys);
+        node.onKeyResult = keys;
+      }
+      if (!_focused) {
+        _focused = true;
+        _dismissed = false;
+        _schedule();
+      }
+    } else {
+      final saved = _focusKeys.remove(node);
+      if (saved != null && identical(node.onKeyResult, saved.wrapper)) node.onKeyResult = saved.result;
+      if (_focusKeys.isEmpty) {
+        _focused = false;
+        _dismissed = false;
+        if (!_hovered && !_touchHeld) hide();
+      }
+    }
   }
 
   /// Shows the bubble now (a long press, a test).
   void show() {
     _timer?.cancel();
+    _timer = null;
     if (_bubble != null || _message.isEmpty || !attached) return;
     final root = RenderControlRoot.of(this);
     if (root == null) return;
-    final bubble = RenderTooltipBubble(anchor: this, message: _message, tokens: _tokens ?? ControlTokens.resolve(api.ThemeTokens.none, dark: false));
+    final bubble = RenderTooltipBubble(anchor: this, message: _message,
+        tokens: _tokens ?? ControlTokens.resolve(api.ThemeTokens.none, dark: false), direction: _direction);
     bubble.measureAnchor(root);
     _root = root..showOverlay(bubble);
     _bubble = bubble;
@@ -165,6 +228,8 @@ class RenderTooltipRegion extends RenderMouseRegion {
   void hide() {
     _timer?.cancel();
     _timer = null;
+    _touchExpiry?.cancel();
+    _touchExpiry = null;
     final b = _bubble;
     if (b == null) return;
     _root?.hideOverlay(b);
@@ -188,7 +253,30 @@ class RenderTooltipRegion extends RenderMouseRegion {
 
   @override
   void handleEvent(PointerEvent event, HitTestEntry entry) {
-    if (event is PointerDownEvent) hide();
+    if (event is PointerDownEvent) {
+      hide();
+      if (event.kind == PointerDeviceKind.touch || event.kind == PointerDeviceKind.stylus) {
+        _touchPointer = event.pointer;
+        _touchStart = event.position;
+        _touchHeld = true;
+        _dismissed = false;
+        _schedule();
+      }
+    } else if (event is PointerMoveEvent && event.pointer == _touchPointer &&
+        _touchStart != null && (event.position - _touchStart!).distance > 12) {
+      _touchHeld = false;
+      _touchPointer = null;
+      if (!_focused && !_hovered) hide();
+    } else if ((event is PointerUpEvent || event is PointerCancelEvent) && event.pointer == _touchPointer) {
+      _touchHeld = false;
+      _touchPointer = null;
+      if (_bubble == null) {
+        if (!_focused && !_hovered) hide();
+      } else {
+        _touchExpiry?.cancel();
+        _touchExpiry = Timer(const Duration(seconds: 2), () { if (!_focused && !_hovered) hide(); });
+      }
+    }
     super.handleEvent(event, entry);
   }
 
@@ -197,13 +285,45 @@ class RenderTooltipRegion extends RenderMouseRegion {
     super.describeSemanticsConfiguration(config);
     if (_message.isNotEmpty) {
       config.tooltip = _message;
-      config.textDirection = TextDirection.ltr;
+      config.textDirection = _direction;
     }
   }
 
   @override
   void detach() {
+    _touchExpiry?.cancel();
+    for (final entry in _focusKeys.entries) {
+      if (identical(entry.key.onKeyResult, entry.value.wrapper)) entry.key.onKeyResult = entry.value.result;
+    }
+    _focusKeys.clear();
+    _focused = false;
     hide();
     super.detach();
   }
+}
+
+/// The focusable child of a tooltip reports its keyboard highlight here.
+void tooltipFocusChanged(ControlFocusNode node) {
+  for (RenderObject? p = node.owner.parent; p != null; p = p.parent) {
+    if (p is RenderTooltipRegion) {
+      p.focusChanged(node, node.showsHighlight);
+      return;
+    }
+  }
+  // A plain node's press target wraps its visual behavior layers, so its
+  // tooltip is its direct child rather than an ancestor of the focus node.
+  RenderTooltipRegion? found;
+  void find(RenderObject parent, int depth) {
+    if (found != null || depth > 8) return;
+    parent.visitChildren((child) {
+      if (found != null) return;
+      if (child is RenderTooltipRegion) {
+        found = child;
+      } else {
+        find(child, depth + 1);
+      }
+    });
+  }
+  find(node.owner, 0);
+  found?.focusChanged(node, node.showsHighlight);
 }
