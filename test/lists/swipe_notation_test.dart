@@ -101,12 +101,27 @@ void main() {
     // The list exposes the same named action to assistive technology.
     final swipe = find.byType(SwipeActionsBox);
     expect(swipe, findsOneWidget);
-    final data = tester.getSemantics(swipe);
-    expect(data.getSemanticsData().customSemanticsActionIds, isNotEmpty);
-    expect([
-      for (final id in data.getSemanticsData().customSemanticsActionIds!)
-        CustomSemanticsAction.getAction(id)!.label,
-    ], contains('Book'));
+    final actionLabels = <String>[];
+    bool visit(SemanticsNode node) {
+      for (final id
+          in node.getSemanticsData().customSemanticsActionIds ??
+              const <int>[]) {
+        actionLabels.add(CustomSemanticsAction.getAction(id)!.label ?? '');
+      }
+      node.visitChildren(visit);
+      return true;
+    }
+
+    visit(
+      tester
+          .binding
+          .renderViews
+          .first
+          .owner!
+          .semanticsOwner!
+          .rootSemanticsNode!,
+    );
+    expect(actionLabels, contains('Book'));
     semantics.dispose();
   });
 
@@ -135,6 +150,36 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('Left reveals, Escape hides, and Enter or Space runs it', (
+    tester,
+  ) async {
+    final semantics = tester.ensureSemantics();
+    await _show(tester);
+    final keys = Keyboard(tester);
+    for (var i = 0; i < 12 && keys.focusedText != 'Swipe actions for Lift'; i++) {
+      await keys.tab();
+    }
+    expect(keys.focusedText, 'Swipe actions for Lift');
+    expect(keys.ringShown, isTrue);
+    expect(keys.semantics?.isFocused, isTrue);
+    expect(keys.semantics?.isButton, isTrue);
+    expect(keys.semantics?.isEnabled, isTrue);
+    expect(keys.semantics?.label, contains('Lift'));
+    await keys.left();
+    expect(find.text('Book'), findsOneWidget);
+    await keys.escape();
+    expect(find.text('Book'), findsNothing);
+    expect(keys.focusedText, 'Swipe actions for Lift');
+    await keys.left();
+    await keys.enter();
+    expect(firstTextUnder(_box(tester, 'picked')), 'Chosen: Lift');
+    await keys.space();
+    expect(find.text('Book'), findsOneWidget);
+    await keys.space();
+    expect(firstTextUnder(_box(tester, 'picked')), 'Chosen: Lift');
+    semantics.dispose();
+  });
+
   testWidgets(
     'at phone width the end action mirrors under right-to-left text',
     (tester) async {
@@ -145,6 +190,22 @@ void main() {
         const Offset(260, 0),
       );
       await _settle(tester);
+      expect(firstTextUnder(_box(tester, 'picked')), 'Chosen: Lift');
+    },
+  );
+
+  testWidgets(
+    'in right-to-left text Right reveals the end action from the keyboard',
+    (tester) async {
+      await _show(tester, width: 390, direction: TextDirection.rtl);
+      final keys = Keyboard(tester);
+      for (var i = 0; i < 12 && keys.focusedText != 'Swipe actions for Lift'; i++) {
+        await keys.tab();
+      }
+      expect(keys.focusedText, 'Swipe actions for Lift');
+      await keys.right();
+      expect(find.text('Book'), findsOneWidget);
+      await keys.enter();
       expect(firstTextUnder(_box(tester, 'picked')), 'Chosen: Lift');
     },
   );
