@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+# The Codelessly toolkit for agents (and people) who write Codelessly documents: one entry point for the loop of
+# looking things up, writing, checking and seeing, all headless (no editor, no device, no browser).
+# See tool/README.md for every tool, when to use it, and how they fit together.
+#
+#   tool/codelessly doctor                         is everything here? (Flutter, the API checkout, the reference)
+#   tool/codelessly docs [words | anchor | name]   the API reference: the pages, a section, a search
+#   tool/codelessly flatten <tree.json>            nested node trees (as the editor takes them) to a document
+#   tool/codelessly validate <doc | site>...       strict validation only: codes, JSON pointers, suggestions
+#   tool/codelessly render <doc | site>... --out <dir> [--outline] [--sheet] [steps...]
+#                                                  validate, render every screen at each size, report problems
+#   tool/codelessly outline <out dir> <doc | site> what a render drew, as text: boxes, texts, problems per node
+#   tool/codelessly states <states.json>           every state of a site rendered, compared, summarized
+#   tool/codelessly sheet <png | dir>... --out <png> many captures on one labelled image
+#   tool/codelessly notation prompt|expand|apply   the compact authoring notation (tool/notation)
+#   tool/codelessly replay <stream.jsonl> --out <dir>   a recorded ui_apply stream, replayed (tool/stream)
+#   tool/codelessly serve [--stop|--status]        keep the renderer running: renders take ~1 s instead of ~6 s
+#   tool/codelessly mcp                            all of the above as an MCP server (stdio), for any agent
+#
+# `tool/codelessly <command> --help` describes each.
+set -u
+sdk="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cli="$sdk/tool/cli"
+py="${PYTHON:-python3}"
+cmd="${1:-help}"
+[ $# -gt 0 ] && shift
+
+case "$cmd" in
+  docs) exec "$py" "$cli/docs.py" "$@" ;;
+  flatten) exec "$py" "$cli/flatten.py" "$@" ;;
+  outline) exec "$py" "$cli/outline.py" "$@" ;;
+  sheet) exec "$py" "$cli/sheet.py" "$@" ;;
+  states) exec "$py" "$cli/states.py" "$@" ;;
+  render|validate) exec "$py" "$cli/run_render.py" "$cmd" "$@" ;;
+  notation) exec "$sdk/tool/notation/notation.sh" "$@" ;;
+  replay) exec "$sdk/tool/stream/replay.sh" "$@" ;;
+  serve) exec "$sdk/tool/render/serve.sh" "$@" ;;
+  mcp) exec "$py" "$cli/mcp_server.py" "$@" ;;
+  doctor)
+    . "$sdk/tool/lib/env.sh"
+    ok=1
+    say() { printf '%-12s %s\n' "$1" "$2"; }
+    if codelessly_find_flutter "tool/codelessly doctor" 2>/dev/null; then
+      say flutter "$flutter_bin ($("$flutter_bin" --version 2>/dev/null | head -1))"
+    else
+      say flutter "MISSING: set FLUTTER=/path/to/flutter/bin/flutter (render, validate, states, notation, replay need it)"
+      ok=0
+    fi
+    codelessly_find_api
+    if [ -n "$api" ]; then say api "sibling checkout $api"; else say api "none beside the SDK: the published codelessly_api is used (no docs/reference, no notation)"; fi
+    [ -n "${flutter_bin:-}" ] && say versions "$(codelessly_version_line)"
+    if ref="$("$py" "$cli/docs.py" --starter 2>/dev/null)"; then say reference "$(dirname "$ref")"; else say reference "MISSING: docs needs codelessly_api's docs/reference (CodelesslyAPI beside the SDK, or CODELESSLY_API)"; ok=0; fi
+    say python "$("$py" --version 2>&1)"
+    if "$py" -c 'import PIL' 2>/dev/null; then say images "Pillow"; elif command -v montage >/dev/null; then say images "ImageMagick montage"; else say images "none: sheet needs Pillow or ImageMagick"; fi
+    lib=""; for l in "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.so" "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.dylib"; do [ -f "$l" ] && lib="$l"; done
+    if [ -n "$lib" ]; then say scripts "QuickJS $lib"; else say scripts "no QuickJS library: documents' scripts don't run in renders (tool/build_quickjs.sh builds it)"; fi
+    if [ "${1:-}" = "--warm" ] && [ -n "${flutter_bin:-}" ]; then
+      tmp="$(mktemp -d)"
+      printf '{"schema":3,"roots":["c"],"nodes":{"c":{"type":"canvas","layout":{"width":100,"height":100}}}}' > "$tmp/doc.json"
+      start=$(date +%s)
+      if "$sdk/tool/render/render.sh" "$tmp/doc.json" --out "$tmp/out" --sizes 100x100 >/dev/null 2>&1; then
+        say harness "compiled and rendered in $(( $(date +%s) - start ))s"
+      else
+        say harness "FAILED: run tool/render/render.sh on a document to see why"; ok=0
+      fi
+      rm -rf "$tmp"
+    else
+      say harness "(--warm compiles the render harness now, so the first render is fast)"
+    fi
+    [ $ok = 1 ] && exit 0 || exit 1
+    ;;
+  help|-h|--help) sed -n '2,/^set -u/p' "$0" | sed '$d' | sed 's/^# \{0,1\}//' ;;
+  *) echo "Unknown command: $cmd. tool/codelessly help lists them." >&2; exit 2 ;;
+esac

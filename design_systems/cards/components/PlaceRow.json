@@ -443,6 +443,7 @@
   },
   "fRatingI": {
    "type": "icon",
+   "media": [{"maxWidth": 699, "patch": {"visible": false}}],
    "props": {
     "icon": "star_outline_rounded",
     "size": 13,
@@ -532,6 +533,7 @@
   },
   "fDistanceI": {
    "type": "icon",
+   "media": [{"maxWidth": 699, "patch": {"visible": false}}],
    "props": {
     "icon": "near_me_outlined",
     "size": 13,
@@ -622,6 +624,7 @@
   },
   "fHoursI": {
    "type": "icon",
+   "media": [{"maxWidth": 699, "patch": {"visible": false}}],
    "props": {
     "icon": "schedule_rounded",
     "size": 13,

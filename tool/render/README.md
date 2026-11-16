@@ -131,6 +131,7 @@ screen, the file's name), not an error: write the site page by page. The render 
 | `image_failed` | error | An image file is missing, or an image does not decode. |
 | `image_network` | warning | An image is on the network: not fetched, so blank in the screenshot. |
 | `empty_screen` | warning | The screen drew no nodes. |
+| `transparent_background` | warning | 2% or more of a capture has nothing painted behind it (transparent in the PNG): a reader sees the host's background there (black in an app with none, the page's color in a browser), not the document's. Give the screen's canvas a fill. |
 | `component_missing` | error | A call rendered without its component's definition (or nested more than 32 deep): an empty box of its size. Named by its path. |
 
 `test/tool/render_command_test.dart` checks that these codes are reported for the fixtures in
@@ -193,6 +194,13 @@ they never were or the pubspec (or its overrides) changed since. `codelessly_api
 when there is one (`../CodelesslyAPI` or `../codelessly_api` next to the SDK, or the directory `$CODELESSLY_API`
 names): the script writes a `pubspec_overrides.yaml` saying so on its first line, and removes it when the sibling
 is gone. An overrides file of your own is never touched. Without a sibling, the published `codelessly_api` is used.
+
+**The render server.** `tool/render/serve.sh` (or `tool/codelessly serve`) starts the harness once and keeps it
+running: every later `render.sh` run on the checkout is a request to it and skips Flutter's start (about 5 s), with
+the same arguments, report, files and exit status. It serves the code it started with: when the SDK's `lib/` or
+`tool/render/`, its pubspecs or the sibling `codelessly_api`'s `lib/` change after it started, `render.sh` stops it
+and renders the usual way. `serve.sh --status` and `--stop`; it stops by itself after `--idle` seconds without a
+request (default 1800). Its state and log are in `build/.render-server/`.
 
 Runs take turns: `flutter test` rewrites the checkout's `build/` (native assets, test assets, the compiled harness)
 as it starts, so `render.sh` holds a lock (`build/.render.lock`) for the run, and a run started meanwhile says it is
