@@ -112,7 +112,16 @@
    "bind": {
     "data": "${props.options}",
     "props.crossAxisCount": "${= max(1, length(props.options))}"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 599,
+     "patch": {
+      "props": {"crossAxisCount": 2},
+      "bind": {"props.crossAxisCount": null}
+     }
+    }
+   ]
   },
   "cell": {
    "type": "row",
