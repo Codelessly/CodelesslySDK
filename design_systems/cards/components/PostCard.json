@@ -110,7 +110,6 @@
   },
   "tagText": {
    "type": "text",
-   "media": [{"maxWidth": 1023, "patch": {"props": {"maxLines": 2}}}],
    "props": {"text": "${= upper(props.tag)}", "style": {"from": "eyebrowWide", "color": "accent"}, "maxLines": 1},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "squeezable": true},
    "media": [{"minWidth": 700, "maxWidth": 1023, "patch": {"props": {"maxLines": 2}, "layout": {"width": {"fill": 0}}}}]
