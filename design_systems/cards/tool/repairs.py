@@ -1,30 +1,47 @@
 #!/usr/bin/env python3
-"""Repairs to the controls Cards copies from SSUI, under this brand.
+"""What Cards changes in the components its build generates, so that a rebuild keeps it.
 
-SSUI's menu was drawn for a dense editor: 11 px items, a 1 px inset, and a panel corner that the brand's radius
-scales to 15 (a menu's corner then reads rounder than the button that opened it). Under Cards a menu is a small
-surface of the control family: a corner of 10, as a Select's menu has, items inset from its edge with a corner of their own under
-the pointer, and text at the card's body size (the page's on a wide window).
+build.py writes every component it copies from SSUI (rebranded) and every block of blocks.py afresh. A change
+made to one of those files by hand, or by an agent fixing a block on a real page, would be lost at the next
+build. This module holds such changes and build.py applies them last:
 
-    python3 design_systems/cards/tool/repairs.py        # applies them to components/ in place
+1. Repairs written here as code (REPAIRS): the menu, which SSUI drew for a dense editor.
+2. Recorded patches, one file per component in tool/repairs/<Name>.json: a JSON merge patch (maps merge, null
+   removes a key, anything else replaces) over what the build generates.
 
-build.py applies the same after it copies SSUI's components, so a rebuild keeps them.
+    python3 design_systems/cards/tool/repairs.py              # applies both to components/ in place
+    python3 design_systems/cards/tool/repairs.py --record     # after editing generated components by hand:
+                                                              # builds a pristine copy, and records each
+                                                              # difference as a patch (and checks a rebuild
+                                                              # gives the files back)
+
+A change that belongs in blocks.py (a block's own design) is better made there; record is for the fixes that
+arrive as edited JSON.
 """
 import json
 import os
+import shutil
+import subprocess
+import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+PATCHES = f'{HERE}/repairs'
 
 # From this window width on a menu's text is the page's size.
 PAGE = 700
 
 
 def _menu_popover(doc):
+    """SSUI's menu was drawn for a dense editor: 11 px items, a 1 px inset, and a panel corner that the brand's
+    radius scales to 15. Under Cards a menu is a small surface of the control family: a corner of 10, as a
+    Select's menu has, items inset from its edge with a corner of their own under the pointer, and text at the
+    card's body size (the page's on a wide window)."""
     n = doc['nodes']
     menu = n['menu']
     menu['layout']['padding'] = 5
-    # The corner of a Select's own menu, so the two kinds of menu match.
+    # The corner of a Select's own menu, so the two kinds of menu match (the theme's radii.menu).
     menu['decoration']['radius'] = 10
     menu['bind']['decoration.radius'] = "${= props.size == 'small' ? 8 : 10}"
     heading = n['heading']
@@ -64,22 +81,121 @@ def _menu_item(doc):
 
 REPAIRS = {'MenuPopover': _menu_popover, 'MenuItem': _menu_item}
 
-
-def repair(name, doc):
-    """The component document [doc] of type [name], repaired (the same document when it needs none)."""
-    return REPAIRS[name](doc) if name in REPAIRS else doc
+# A removed key in a recorded patch. JSON null cannot say it: a document may hold a null of its own.
+REMOVED = {'$removed': True}
 
 
-def apply(root=ROOT):
-    for name in REPAIRS:
+def _diff(a, b):
+    """The merge patch that turns [a] into [b], or None when they are equal."""
+    if isinstance(a, dict) and isinstance(b, dict):
+        out = {}
+        for k in b:
+            if k not in a:
+                out[k] = b[k]
+            elif a[k] != b[k]:
+                out[k] = _diff(a[k], b[k])
+        for k in a:
+            if k not in b:
+                out[k] = REMOVED
+        return out
+    return b
+
+
+def _merge(a, patch):
+    if isinstance(a, dict) and isinstance(patch, dict) and patch != REMOVED:
+        out = dict(a)
+        for k, v in patch.items():
+            if v == REMOVED:
+                out.pop(k, None)
+            elif k in out:
+                out[k] = _merge(out[k], v)
+            else:
+                out[k] = v
+        return out
+    return patch
+
+
+def _read(path):
+    with open(path, encoding='utf-8') as f:
+        return json.load(f)
+
+
+def _write(path, doc):
+    with open(path, 'w', encoding='utf-8', newline='\n') as f:
+        json.dump(doc, f, indent=1, ensure_ascii=False)
+        f.write('\n')
+
+
+def patches():
+    """The recorded patches, by component type."""
+    if not os.path.isdir(PATCHES):
+        return {}
+    return {f[:-5]: _read(f'{PATCHES}/{f}') for f in sorted(os.listdir(PATCHES)) if f.endswith('.json')}
+
+
+def repair(name, doc, recorded=None):
+    """The component document [doc] of type [name] with Cards' changes (the same document when it has none)."""
+    if name in REPAIRS:
+        doc = REPAIRS[name](doc)
+    recorded = patches() if recorded is None else recorded
+    if name in recorded:
+        doc = _merge(doc, recorded[name])
+    return doc
+
+
+def apply(root=ROOT, quiet=False):
+    recorded = patches()
+    for name in sorted(set(REPAIRS) | set(recorded)):
         path = f'{root}/components/{name}.json'
-        with open(path, encoding='utf-8') as f:
-            doc = json.load(f)
-        with open(path, 'w', encoding='utf-8', newline='\n') as f:
-            json.dump(repair(name, doc), f, indent=1, ensure_ascii=False)
-            f.write('\n')
-        print(f'repaired {name}')
+        if not os.path.exists(path):
+            print(f'repairs: no component {name} (its patch is stale: remove tool/repairs/{name}.json)', file=sys.stderr)
+            continue
+        _write(path, repair(name, _read(path), recorded))
+        if not quiet:
+            print(f'repaired {name}')
+
+
+def _pristine():
+    """A fresh build of the design systems in a temporary folder, with no recorded patch applied."""
+    tmp = tempfile.mkdtemp(prefix='cards-build-')
+    systems = os.path.dirname(ROOT)
+    shutil.copytree(systems, f'{tmp}/design_systems')
+    shutil.rmtree(f'{tmp}/design_systems/cards/tool/repairs', ignore_errors=True)
+    subprocess.run([sys.executable, f'{tmp}/design_systems/cards/tool/build.py', '--no-showcase'], check=True,
+                   stdout=subprocess.DEVNULL, env={**os.environ, 'PYTHONUTF8': '1'})
+    return tmp
+
+
+def record():
+    """Records, for every generated component that differs from a pristine build, the patch that gives it back."""
+    tmp = _pristine()
+    built = f'{tmp}/design_systems/cards/components'
+    os.makedirs(PATCHES, exist_ok=True)
+    kept = set()
+    for f in sorted(os.listdir(f'{ROOT}/components')):
+        if not f.endswith('.json') or not os.path.exists(f'{built}/{f}'):
+            continue
+        ours, fresh = _read(f'{ROOT}/components/{f}'), _read(f'{built}/{f}')
+        if ours == fresh:
+            continue
+        # A number that differs in its last place (a drawing's coordinates on another machine) is not a change.
+        if json.loads(json.dumps(ours), parse_float=lambda s: round(float(s), 9)) == json.loads(json.dumps(fresh), parse_float=lambda s: round(float(s), 9)):
+            continue
+        patch = _diff(fresh, ours)
+        if _merge(fresh, patch) != ours:
+            raise SystemExit(f'{f}: the patch does not give the file back')
+        _write(f'{PATCHES}/{f}', patch)
+        kept.add(f)
+        print(f'recorded {f[:-5]}')
+    for f in os.listdir(PATCHES):
+        if f.endswith('.json') and f not in kept:
+            os.remove(f'{PATCHES}/{f}')
+            print(f'dropped {f[:-5]} (the build gives it by itself now)')
+    shutil.rmtree(tmp, ignore_errors=True)
 
 
 if __name__ == '__main__':
-    apply()
+    if '--record' in sys.argv:
+        record()
+    else:
+        apply()

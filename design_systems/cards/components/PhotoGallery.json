@@ -173,7 +173,19 @@
     "props.crossAxisCount": "${props.columns}",
     "visible": "${= props.layout == 'grid' && props.value <= 0}"
    },
-   "media": [{"maxWidth": 699, "patch": {"props": {"crossAxisCount": 2}, "bind": {"props.crossAxisCount": null}}}]
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "crossAxisCount": 2
+      },
+      "bind": {
+       "props.crossAxisCount": null
+      }
+     }
+    }
+   ]
   },
   "cell": {
    "type": "column",
@@ -235,7 +247,16 @@
     "props.kind": "${item.kind}",
     "props.tone": "${= coalesce(item.tone, 'auto')}"
    },
-   "media": [{"maxWidth": 699, "patch": {"layout": {"height": 140}}}]
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "height": 140
+      }
+     }
+    }
+   ]
   },
   "caption": {
    "type": "text",
@@ -258,7 +279,16 @@
      "hug": 0
     }
    },
-   "media": [{"maxWidth": 699, "patch": {"props": {"maxLines": 2}}}]
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "maxLines": 2
+      }
+     }
+    }
+   ]
   },
   "strip": {
    "type": "row",
