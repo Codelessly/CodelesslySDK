@@ -201,6 +201,10 @@ class TextFieldConfig {
   late final TextAlign textAlign;
   late final TextAlignVertical? alignVertical;
   late final TextInputType keyboardType;
+  late final bool numberField;
+  late final double? numberMin, numberMax;
+  late final double numberStep;
+  late final String semanticLabel;
   late final TextInputAction? inputAction;
   late final TextCapitalization capitalization;
   late final bool autocorrect, autofocus, enableInteractiveSelection, enabled, obscureText, readOnly, selectAllOnFocus;
@@ -298,6 +302,11 @@ class TextFieldConfig {
       api.TextInputType.webSearch => TextInputType.webSearch,
       api.TextInputType.twitter => TextInputType.twitter,
     };
+    c.numberField = n.prop(TextFieldProps.keyboardType) == api.TextInputType.number;
+    c.numberMin = n.prop(TextFieldProps.min);
+    c.numberMax = n.prop(TextFieldProps.max);
+    c.numberStep = n.prop(TextFieldProps.step);
+    c.semanticLabel = n.prop(TextFieldProps.semanticLabel);
     c.inputAction = switch (n.prop(TextFieldProps.textInputAction)) {
       null => null,
       final a => TextInputAction.values.byName(a.name),
@@ -783,7 +792,44 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
 
   ControlKeyResult _key(KeyEvent event) {
     if (!_interactive || !enabled) return ControlKeyResult.ignored;
+    if (config.numberField && (event is KeyDownEvent || event is KeyRepeatEvent)) {
+      final key = event.logicalKey;
+      if (key == LogicalKeyboardKey.arrowUp || key == LogicalKeyboardKey.arrowDown ||
+          key == LogicalKeyboardKey.pageUp || key == LogicalKeyboardKey.pageDown) {
+        final direction = key == LogicalKeyboardKey.arrowUp || key == LogicalKeyboardKey.pageUp ? 1 : -1;
+        _stepNumber(direction * (key == LogicalKeyboardKey.pageUp || key == LogicalKeyboardKey.pageDown ? 10 : 1));
+        return ControlKeyResult.handled;
+      }
+      if (key == LogicalKeyboardKey.home && config.numberMin != null) {
+        _setNumber(config.numberMin!);
+        return ControlKeyResult.handled;
+      }
+      if (key == LogicalKeyboardKey.end && config.numberMax != null) {
+        _setNumber(config.numberMax!);
+        return ControlKeyResult.handled;
+      }
+    }
     return editor.handleKey(event);
+  }
+
+  double _nextNumber(int steps) {
+    final current = double.tryParse(editor.text) ?? config.numberMin ?? 0;
+    var next = current + steps * config.numberStep;
+    if (config.numberMin case final min?) next = next < min ? min : next;
+    if (config.numberMax case final max?) next = next > max ? max : next;
+    return next;
+  }
+
+  void _stepNumber(int steps) => _setNumber(_nextNumber(steps));
+
+  void _setNumber(double next) {
+    if (!next.isFinite) return;
+    final text = next.toStringAsFixed(6).replaceFirst(RegExp(r'0+$'), '').replaceFirst(RegExp(r'\.$'), '');
+    if (text == editor.text) return;
+    editor.userUpdateTextEditingValue(
+      TextEditingValue(text: text, selection: TextSelection.collapsed(offset: text.length)),
+      SelectionChangedCause.keyboard,
+    );
   }
 
   void _tapped() {
@@ -983,10 +1029,28 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
       ..isObscured = c.obscureText
       ..isMultiline = !c.oneLine
       ..value = c.obscureText ? c.obscuringCharacter * v.text.length : v.text;
+    if (c.semanticLabel.isNotEmpty) config.label = c.semanticLabel;
     if (c.maxLength != null) {
       config
         ..maxValueLength = c.maxLength
         ..currentValueLength = v.text.length;
+    }
+    if (c.numberField) {
+      final range = [
+        if (c.numberMin != null) 'Minimum ${c.numberMin}',
+        if (c.numberMax != null) 'maximum ${c.numberMax}',
+        'step ${c.numberStep}',
+      ].join(', ');
+      config.hint = config.hint.isEmpty ? range : '${config.hint}; $range';
+      final current = double.tryParse(editor.text);
+      if (current == null || c.numberMax == null || current < c.numberMax!) {
+        config.onIncrease = () => _stepNumber(1);
+        config.increasedValue = _nextNumber(1).toString();
+      }
+      if (current == null || c.numberMin == null || current > c.numberMin!) {
+        config.onDecrease = () => _stepNumber(-1);
+        config.decreasedValue = _nextNumber(-1).toString();
+      }
     }
     if (!_interactive || !enabled) return;
     if (v.selection.isValid) config.textSelection = v.selection;

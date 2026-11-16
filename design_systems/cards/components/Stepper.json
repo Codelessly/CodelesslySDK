@@ -176,7 +176,17 @@
     ],
     "radius": 15,
     "clip": "antiAlias"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "height": 46
+      }
+     }
+    }
+   ]
   },
   "minus": {
    "type": "row",
@@ -228,7 +238,10 @@
     {
      "trigger": {
       "type": "click",
-      "when": "props.enabled && props.value > props.min"
+      "when": "props.enabled && props.value > props.min",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
      },
      "actions": [
       {
@@ -242,6 +255,18 @@
        "value": "${props.value}"
       }
      ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
     }
    ]
   },
@@ -293,25 +318,59 @@
    }
   },
   "number": {
-   "type": "text",
+   "type": "textField",
    "props": {
-    "text": "${props.value}",
     "style": {
      "fontSize": 14,
      "fontWeight": 500,
      "height": 1.4,
      "color": "primaryText",
      "leadingDistribution": "even"
+    },
+    "textAlign": "center",
+    "keyboardType": "number",
+    "decoration": {
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     }
     }
    },
    "layout": {
     "width": {
-     "hug": 20
+     "hug": 26
     },
     "height": {
      "hug": 20
     }
-   }
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.min": "${props.min}",
+    "props.max": "${props.max}",
+    "props.step": "${props.step}",
+    "props.enabled": "${props.enabled}",
+    "props.semanticLabel": "${= props.label == '' ? 'Number' : props.label}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= clamp(number(result), props.min, props.max)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
   },
   "plus": {
    "type": "row",
@@ -363,7 +422,10 @@
     {
      "trigger": {
       "type": "click",
-      "when": "props.enabled && props.value < props.max"
+      "when": "props.enabled && props.value < props.max",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
      },
      "actions": [
       {
@@ -377,6 +439,18 @@
        "value": "${props.value}"
       }
      ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
     }
    ]
   },

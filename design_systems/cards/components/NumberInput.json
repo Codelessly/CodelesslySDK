@@ -96,6 +96,15 @@
     },
     "default": true,
     "doc": "False dims it and stops input."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Number",
+    "doc": "Accessible name for the field."
    }
   ],
   "events": [
@@ -247,7 +256,11 @@
    "bind": {
     "props.initialValue": "${props.value}",
     "props.enabled": "${props.enabled}",
-    "props.style.fontSize": "${= props.size == 'small' ? 13 : (props.size == 'medium' ? 13 : (15))}"
+    "props.style.fontSize": "${= props.size == 'small' ? 13 : (props.size == 'medium' ? 13 : (15))}",
+    "props.min": "${props.min}",
+    "props.max": "${props.max}",
+    "props.step": "${props.step}",
+    "props.semanticLabel": "${props.label}"
    },
    "actions": [
     {
@@ -310,7 +323,18 @@
    },
    "bind": {
     "visible": "${props.showStepper}"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 88
+      }
+     }
+    }
+   ]
   },
   "up": {
    "type": "row",
@@ -354,7 +378,10 @@
     {
      "trigger": {
       "type": "click",
-      "when": "props.enabled"
+      "when": "props.enabled",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
      },
      "actions": [
       {
@@ -368,6 +395,22 @@
        "value": "${props.value}"
       }
      ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      },
+      "bind": {
+       "layout.width": null,
+       "layout.height": null
+      }
+     }
     }
    ]
   },
@@ -413,7 +456,10 @@
     {
      "trigger": {
       "type": "click",
-      "when": "props.enabled"
+      "when": "props.enabled",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
      },
      "actions": [
       {
@@ -427,6 +473,22 @@
        "value": "${props.value}"
       }
      ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      },
+      "bind": {
+       "layout.width": null,
+       "layout.height": null
+      }
+     }
     }
    ]
   },

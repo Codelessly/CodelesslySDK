@@ -47,6 +47,24 @@
     "required": true
    },
    {
+    "key": "max",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 99,
+    "doc": "The most items."
+   },
+   {
+    "key": "step",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 1,
+    "doc": "How much each press changes the quantity."
+   },
+   {
     "key": "kind",
     "type": {
      "kind": "string",
@@ -122,7 +140,18 @@
     ],
     "strokeWidth": 1,
     "strokeSides": "bottom"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "wrap": true,
+       "runSpacing": 8
+      }
+     }
+    }
+   ]
   },
   "thumb": {
    "type": "Media",
@@ -156,7 +185,20 @@
     "height": {
      "hug": 0
     }
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 200
+       },
+       "basis": 180
+      }
+     }
+    }
+   ]
   },
   "title": {
    "type": "text",
@@ -232,7 +274,20 @@
     "height": {
      "hug": 0
     }
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 0
+       },
+       "basis": 150
+      }
+     }
+    }
+   ]
   },
   "stepMinus": {
    "type": "row",
@@ -268,15 +323,30 @@
    "actions": [
     {
      "trigger": {
-      "type": "click"
+      "type": "click",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
      },
      "actions": [
       {
        "type": "componentEvent",
        "event": "onChanged",
-       "value": "${= max(0, props.qty - 1)}"
+       "value": "${= max(0, props.qty - props.step)}"
       }
      ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
     }
    ]
   },
@@ -329,15 +399,30 @@
    "actions": [
     {
      "trigger": {
-      "type": "click"
+      "type": "click",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
      },
      "actions": [
       {
        "type": "componentEvent",
        "event": "onChanged",
-       "value": "${= props.qty + 1}"
+       "value": "${= min(props.max, props.qty + props.step)}"
       }
      ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
     }
    ]
   },
@@ -354,18 +439,45 @@
    }
   },
   "stepValue": {
-   "type": "text",
+   "type": "textField",
    "props": {
-    "text": "${= props.qty}",
     "style": "numberSmall",
-    "textAlign": "center"
+    "textAlign": "center",
+    "keyboardType": "number",
+    "decoration": {
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     }
+    }
    },
    "layout": {
     "width": 26,
     "height": {
-     "hug": 0
+     "hug": 20
     }
-   }
+   },
+   "bind": {
+    "props.initialValue": "${props.qty}",
+    "props.min": "${= 0}",
+    "props.max": "${props.max}",
+    "props.step": "${props.step}",
+    "props.semanticLabel": "${= 'Quantity of ' + props.title}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= clamp(number(result), 0, props.max)}"
+      }
+     ]
+    }
+   ]
   },
   "step": {
    "type": "row",

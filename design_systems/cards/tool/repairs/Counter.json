@@ -14,6 +14,124 @@
      }
     }
    ]
+  },
+  "stepMinus": {
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= max(props.min, props.value - props.step)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
+    }
+   ]
+  },
+  "stepPlus": {
+   "actions": [
+    {
+     "trigger": {
+      "type": "click",
+      "repeat": true,
+      "holdMs": 420,
+      "intervalMs": 120
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= min(props.max, props.value + props.step)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ],
+   "focusable": false,
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 44,
+       "height": 44
+      }
+     }
+    }
+   ]
+  },
+  "stepValue": {
+   "type": "textField",
+   "props": {
+    "keyboardType": "number",
+    "decoration": {
+     "isCollapsed": true,
+     "border": {
+      "type": "none"
+     }
+    },
+    "text": {
+     "$removed": true
+    }
+   },
+   "layout": {
+    "height": {
+     "hug": 20
+    }
+   },
+   "bind": {
+    "props.initialValue": "${props.value}",
+    "props.min": "${props.min}",
+    "props.max": "${props.max}",
+    "props.step": "${props.step}",
+    "props.semanticLabel": "${props.label}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= clamp(number(result), props.min, props.max)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${props.value}"
+      }
+     ]
+    }
+   ]
   }
  }
 }
