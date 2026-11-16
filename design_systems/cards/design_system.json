@@ -650,6 +650,22 @@
     "color": "accent",
     "leadingDistribution": "even"
    },
+   "fieldLabelWide": {
+    "fontFamily": "Inter",
+    "fontSize": 13,
+    "fontWeight": 600,
+    "height": 1.2,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
+   "inputTextWide": {
+    "fontFamily": "Inter",
+    "fontSize": 14,
+    "fontWeight": 400,
+    "height": 1.4,
+    "color": "primaryText",
+    "leadingDistribution": "even"
+   },
    "columnHead": {
     "fontFamily": "Inter",
     "fontSize": 12,

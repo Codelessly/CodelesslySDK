@@ -18,7 +18,7 @@ HOME = os.path.join(SDK, 'examples', 'showcase', 'desktop')
 
 
 def requests():
-    all_ = json.load(open(os.path.join(HOME, 'requests.json')))
+    all_ = json.load(open(os.path.join(HOME, opt('--requests', 'requests.json'))))
     only = opt('--only')
     return {k: v for k, v in all_.items() if not only or k in only.split(',')}
 

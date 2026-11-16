@@ -199,6 +199,9 @@ PAGE_TEXT_STYLES = {
     # A 36-high control's label (a page's buttons): 14, where SSUI's is 13.
     'controlMedium': {'fontFamily': TEXT, 'fontSize': 14, 'fontWeight': 600, 'height': 1.2, 'color': 'primaryText'},
     'controlLarge': {'fontFamily': TEXT, 'fontSize': 15, 'fontWeight': 600, 'height': 1.2, 'color': 'primaryText'},
+    # A field on a page: its label and its text.
+    'fieldLabelWide': {'fontFamily': TEXT, 'fontSize': 13, 'fontWeight': 600, 'height': 1.2, 'color': 'primaryText'},
+    'inputTextWide': {'fontFamily': TEXT, 'fontSize': 14, 'fontWeight': 400, 'height': 1.4, 'color': 'primaryText'},
     # A table's header cell.
     'columnHead': {'fontFamily': TEXT, 'fontSize': 12, 'fontWeight': 600, 'height': 1.2, 'letterSpacing': 0.4, 'color': 'inkFaint'},
 }
