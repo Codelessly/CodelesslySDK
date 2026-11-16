@@ -132,6 +132,9 @@
  },
  "nodes": {
   "labels": {
+   "bind": {
+    "layout.width": "${props.labelWidth}"
+   },
    "media": [
     {
      "maxWidth": 699,
@@ -144,10 +147,7 @@
       }
      }
     }
-   ],
-   "bind": {
-    "layout.width": "${props.labelWidth}"
-   }
+   ]
   },
   "lead": {
    "media": [
