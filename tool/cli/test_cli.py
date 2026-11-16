@@ -56,6 +56,15 @@ class FlattenTest(unittest.TestCase):
         self.assertEqual(doc['nodes']['home_desktop']['layout'], {'width': 1440, 'height': 900})
         self.assertEqual(doc['variables'], {'page_variables': [{'name': 'n', 'type': 'integer', 'value': 0}]})
 
+    def test_each_breakpoint_tree_is_its_own_key_scope(self):
+        tree = lambda: {'type': 'column', 'children': [
+            {'type': 'filledButton', 'key': 'retry', 'states': {'pressed': {'@retry': {'opacity': 0.5}}}}]}
+        doc = flatten.flatten({'trees': {'mobile': tree(), 'desktop': tree()}}, screen='s')
+        buttons = [k for k, v in doc['nodes'].items() if v['type'] == 'filledButton']
+        self.assertEqual(buttons, ['retry', 'retry1'])
+        for b in buttons:
+            self.assertEqual(list(doc['nodes'][b]['states']['pressed']), [b])  # its own node, not the other tree's
+
     def test_a_document_with_nested_children_keeps_its_ids(self):
         doc = flatten.flatten({'schema': 3, 'roots': ['c'], 'nodes': {
             'c': {'type': 'canvas', 'slots': {'body': {'type': 'column', 'key': 'col', 'children': ['t']}}},
