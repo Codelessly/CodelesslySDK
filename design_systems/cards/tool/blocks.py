@@ -539,29 +539,254 @@ def steps():
                      props, nodes, 'steps', previews=[{'name': 'Second', 'size': [340, 54], 'props': {'current': 2}}])
 
 
-# --- Segments ---------------------------------------------------------------------------------------------
+# --- Tab-like controls ------------------------------------------------------------------------------------
+# Three kinds, one rule. Tabs (and BrowserTabs): the views of a page, any number of them. Segments, TabToggle and
+# SegmentedControl: a small switch in a track, two to four short options. ChipTabs and ChoiceChips: pills (a
+# filter, a choice of slots). All but ChoiceChips stay on one line: when the options do not fit, the line scrolls
+# sideways (every label at its own width, the line fading where it continues, the chosen option brought into
+# view); it never wraps and never squeezes a label. A phone (a window under 700 wide) gets 44 high tap areas.
+
+PHONE = 'screen.width < 700'
+HOVER = {'decoration': {'foregroundFills': [{'color': 'hoverOverlay'}]}}
+DOWN = {'decoration': {'foregroundFills': [{'color': 'pressedOverlay'}]}}
+EASE = [{'property': 'decoration', 'duration': 150}]
+
+
+def strip(children, gap=0, fade=24, width=FILL, pad=None, **more):
+    """One line that scrolls sideways when its children do not fit, fading at the edge it continues past."""
+    lay = {'width': width, 'height': HUG}
+    if width is HUG:
+        lay['squeezable'] = True  # as wide as its options, and no wider than its place
+    if pad is not None:
+        lay['padding'] = pad
+    return node('row', lay, {'crossAxisAlignment': 'center', 'spacing': gap, 'scrollable': True, 'scrollDirection': 'horizontal',
+                             'edgeFade': fade, 'fillViewport': width is not HUG}, children, **more)
+
+
+def line_of(children, data, height, gap=0, bind=None, **more):
+    """The options of a strip from a list: every one laid out, each as wide as its label."""
+    return node('listView', {'width': HUG, 'height': height}, {'scrollDirection': 'horizontal', 'scrollable': False, 'spacing': gap},
+                children, bind={'data': data, **(bind or {})}, **more)
+
+
+def reveal(item, options):
+    """Brings the chosen option of a list into view: when the strip appears and whenever the choice changes."""
+    at_ = 'indexOf(%s, props.value)' % options
+    go = {'type': 'scrollTo', 'node': item, 'item': E(at_), 'axis': 'horizontal', 'alignment': 0.5, 'curve': 'easeOutCubic'}
+    return [{'trigger': {'type': 'load', 'when': '%s > 0' % at_}, 'actions': [{**go, 'durationMs': 0}]},
+            {'trigger': {'type': 'valueChanged', 'variable': 'props.value', 'when': '%s >= 0' % at_}, 'actions': [{**go, 'durationMs': 240}]}]
+
+
+def knob_cell(p, label, on, pick, width=HUG, height=FILL, pad_x=14, font=13, bind=None, text_bind=None, knob_bind=None, min_width=None):
+    """One option of a track: its tap area as tall as the track, the knob inset in it (raised when chosen), its label."""
+    return {
+        p: node('row', {'width': width, 'height': height, 'padding': [1.5, 3, 1.5, 3], **({'constraints': {'minWidth': 0}} if min_width else {})},
+                {'crossAxisAlignment': 'center'}, [p + 'Knob'],
+                bind={**(bind or {}), **({'layout.constraints': E('{minWidth: %s}' % min_width)} if min_width else {})}, states={'hovered': {p + 'Knob': HOVER}, 'pressed': {p + 'Knob': DOWN}}, actions=click(*pick)),
+        p + 'Knob': node('row', {'width': width, 'height': FILL, 'padding': [pad_x, 0, pad_x, 0], **({'constraints': {'minWidth': 0}} if min_width else {})},
+                         {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'}, [p + 'Text'],
+                         decoration={'fills': [{'color': '#00FFFFFF'}], 'radius': 9},
+                         bind={'decoration.fills[0].color': E("%s ? theme.colors.raisedBackground : '#00FFFFFF'" % on),
+                               'decoration.effects': E('%s ? theme.shadows.knob : []' % on),
+                               'decoration.radius': E('max(0, theme.radii.control - 3)'), **(knob_bind or {}),
+                               **({'layout.constraints': E('{minWidth: %s - 3}' % min_width)} if min_width else {})},
+                         transitions=EASE),
+        p + 'Text': text(label, {'from': 'chip', 'fontSize': font}, maxLines=1, bind={
+            'props.style.color': E('%s ? theme.colors.ink : theme.colors.inkSoft' % on), **(text_bind or {})}),
+    }
+
+
+def track(children, width=FILL, bind=None):
+    return node('row', {'width': width, 'height': HUG}, {'crossAxisAlignment': 'center'}, children,
+                decoration={'fills': [{'color': 'subtleFill'}], 'strokes': [{'color': 'line'}], 'strokeWidth': 1, 'radius': 12, 'clip': 'antiAlias'},
+                bind={'decoration.radius': '${theme.radii.control}', **(bind or {})})
+
+
+SEGMENT_SLOTS = 5
+
 
 def segments():
-    on = "(props.value == item || (props.value == '' && index == 0))"
+    """Equal segments, each at most 200 wide, while they fit; a line that scrolls where they do not.
+
+    A list's items cannot share its width (a row's children can: in a row that scrolls with fillViewport a child
+    that fills shares the viewport while the content fits, and is as wide as its content where it scrolls), so up
+    to five options are cells of the row itself, each at least as wide as the longest label so that equal shares
+    never cut one. More than five (not what this block is for) come from a list, each as wide as its label."""
+    n = SEGMENT_SLOTS
+    count = 'length(props.options)'
+    high = E('%s ? 44 : 40' % PHONE)
+    at_ = 'indexOf(props.options, props.value)'
+    # The least a segment is wide: the longest label, counted at 7.1 px a character (13 px Inter semibold runs
+    # near 7), with 14 px each side of it and the 3 px between knobs. The knob's own padding is 10, so a label of
+    # wide letters has 8 px to spare before it would touch. All the segments at this width are what the track
+    # needs to stay whole; with less room it scrolls.
+    widest = '(first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31)'
+
+    def go(node_, ms, **more):
+        return {'type': 'scrollTo', 'node': node_, 'axis': 'horizontal', 'alignment': 0.5, 'curve': 'easeOutCubic', 'durationMs': ms, **more}
+
+    def shown(ms):
+        return [{**go('cell%d' % i, ms), 'when': {'left': E('%s <= %d && %s == %d' % (count, n, at_, i)), 'op': 'isTrue'}} for i in range(n)] + [
+            {**go('moreCell', ms, item=E(at_)), 'when': {'left': E('%s > %d' % (count, n)), 'op': 'isTrue'}}]
     nodes = {
-        'track': col(['cells'], pad=3, decoration={'fills': [{'color': 'tile'}], 'radius': 12},
-                     bind={'decoration.radius': '${theme.radii.control}'}),
-        'cells': grid(['cell'], E('max(1, length(props.options))'), 2, '${props.options}'),
-        'cell': row(['cellText'], height=34, main='center', decoration={'fills': [{'color': '#00FFFFFF'}], 'radius': 9},
-                    bind={'decoration.fills[0].color': E("%s ? theme.colors.card : '#00FFFFFF'" % on),
-                          'decoration.effects': E('%s ? theme.shadows.knob : []' % on),
-                          'decoration.radius': '${= max(0, theme.radii.control - 3)}'},
-                    actions=click(setv('props.value', 'item'), fire('onChanged', '${item}'))),
-        'cellText': text('${item}', {'from': 'chip', 'fontSize': 13}, maxLines=1, bind={
-            'props.style.color': E('%s ? theme.colors.ink : theme.colors.inkSoft' % on)}),
+        'place': node('row', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'center'}, ['track']),
+        'track': track(['scroll'], bind={'layout.constraints': E('{maxWidth: 200 * max(2, %s) + 3}' % count)}),
+        'scroll': strip(['cell%d' % i for i in range(n)] + ['more'], pad=[1.5, 0, 1.5, 0], actions=[
+            {'trigger': {'type': 'load', 'when': '%s > 0' % at_}, 'actions': shown(0)},
+            {'trigger': {'type': 'valueChanged', 'variable': 'props.value', 'when': '%s >= 0' % at_}, 'actions': shown(240)}]),
+        'more': line_of(['moreCell'], E('%s > %d ? props.options : []' % (count, n)), 40,
+                        bind={'visible': E('%s > %d' % (count, n)), 'layout.height': high}),
+        **knob_cell('moreCell', '${item}', "(props.value == item || (props.value == '' && index == 0))", [setv('props.value', 'item'), fire('onChanged', '${item}')]),
     }
+    nodes['track']['layout']['constraints'] = {'maxWidth': 603}
+    for i in range(n):
+        opt = "(%s > %d ? at(props.options, %d) : '')" % (count, i, i)
+        on = '(props.value == %s%s)' % (opt, " || props.value == ''" if i == 0 else '')
+        nodes.update(knob_cell('cell%d' % i, E(opt), on, [setv('props.value', opt), fire('onChanged', E(opt))], width=FILL, height=40, pad_x=10,
+                               bind={'visible': E('%s > %d && %s <= %d' % (count, i, count, n)), 'layout.height': high}, min_width=widest))
     props = [
         P('value', var(STRING), '', 'The name of your text variable: it holds the chosen option (declare it with the starting option).'),
-        P('options', STRINGS, ['7 days', '30 days', '90 days'], 'Two to five options.', True),
+        P('options', STRINGS, ['7 days', '30 days', '90 days'], 'Two to four short options (a word or two each).', True),
     ]
-    return component('Segments', "A switch between two to five options in one track (a period, a tone, a status filter): write Segments =range options:[\"7 days\",\"30 days\"] and it keeps the chosen option's text in your variable; onChanged fires with it.",
-                     props, nodes, 'track', events=[('onChanged', 'An option was chosen; the value is its text.')],
+    return component('Segments', "A small switch between two to four short options in one track, as wide as its place (a period, a tone, a status filter; not a page's tabs: those are Tabs): write Segments =range options:[\"7 days\",\"30 days\"] and it keeps the chosen option's text in your variable; onChanged fires with it. The segments are equally wide while they fit; where they do not, the track scrolls sideways on one line.",
+                     props, nodes, 'place', events=[('onChanged', 'An option was chosen; the value is its text.')],
                      previews=[{'name': 'Period', 'size': [340, 40], 'props': {'value': '30 days'}}])
+
+
+def pill_track(type_, doc, options, sizes, size_default, size_doc, preview):
+    """A track as wide as its options (TabToggle, SegmentedControl): sizes maps a size's name to (height, side padding, font)."""
+    def by_size(i):
+        names = list(sizes)
+        out = repr(sizes[names[-1]][i])
+        for name in reversed(names[:-1]):
+            out = "props.size == '%s' ? %r : (%s)" % (name, sizes[name][i], out)
+        return out
+    nodes = {
+        'track': track(['scroll'], width=HUG),
+        'scroll': strip(['list'], width=HUG, pad=[1.5, 0, 1.5, 0], actions=reveal('option', 'props.options')),
+        'list': line_of(['option'], '${props.options}', sizes[size_default][0],
+                        bind={'layout.height': E('%s ? 44 : (%s)' % (PHONE, by_size(0)))}),
+        **knob_cell('option', '${item}', 'item == props.value', [setv('props.value', 'item'), fire('onChanged', '${item}')],
+                    text_bind={'props.style.fontSize': E(by_size(2))},
+                    knob_bind={'layout.padding': E('[%s, 0, %s, 0]' % (by_size(1), by_size(1)))}),
+    }
+    props = [
+        P('options', STRINGS, options, 'Two to four short options.', True),
+        P('value', var(STRING), '', 'The name of your text variable holding the choice.'),
+        P('size', enum(*sizes), size_default, size_doc),
+    ]
+    return component(type_, doc, props, nodes, 'track', events=[('onChanged', 'An option was chosen; the value is its text.')], previews=[preview])
+
+
+def tab_toggle():
+    return pill_track('TabToggle', "A small switch between two to four views as a track only as wide as its options, the chosen one raised (List or Grid in a toolbar, Monthly or Yearly over prices); Segments is the same switch as wide as its place, and a page's tabs are Tabs. The choice is kept in your variable. Fires onChanged. Where its options do not fit it scrolls sideways on one line.",
+                      ['List', 'Grid'], {'sm': (32, 10, 12.5), 'md': (36, 14, 13), 'lg': (44, 18, 14)}, 'md', 'sm, md or lg.',
+                      {'name': 'Two', 'size': [160, 36], 'props': {'options': ['List', 'Grid'], 'value': 'List'}})
+
+
+def segmented_control():
+    return pill_track('SegmentedControl', "The same small switch as TabToggle with finer sizes: two to four short options in a track only as wide as they are (a view switch, a period), the choice in your variable. Fires onChanged. Where its options do not fit it scrolls sideways on one line.",
+                      ['Day', 'Week', 'Month'],
+                      {'xs': (28, 8, 11.5), 'compact': (32, 10, 12), 'small': (34, 12, 12.5), 'medium': (36, 12, 13), 'large': (44, 14, 15)},
+                      'compact', 'xs, compact, small, medium or large.',
+                      {'name': 'Week', 'size': [240, 32], 'props': {'options': ['Day', 'Week', 'Month'], 'value': 'Week'}})
+
+
+def tabs():
+    on = "(props.value == item || (props.value == '' && index == 0))"
+    nodes = {
+        'bar': node('stack', {'width': FILL, 'height': HUG}, None, ['rule', 'scroll']),
+        'rule': node('box', {'width': FILL, 'height': 1, 'x': {'start': 0}, 'y': {'end': 0}}, decoration=fills('line')),
+        'scroll': strip(['list'], actions=reveal('tab', 'props.tabs')),
+        'list': line_of(['tab'], '${props.tabs}', 44, gap=4),
+        'tab': node('column', {'width': HUG, 'height': FILL}, {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'spaceBetween'}, ['tabTop', 'tabBody', 'tabLine'],
+                    states={'hovered': {'tabBody': HOVER}, 'pressed': {'tabBody': DOWN}},
+                    actions=click(setv('props.value', 'item'), fire('onChanged', '${item}'))),
+        'tabTop': node('box', {'width': 1, 'height': 2}),
+        'tabBody': node('row', {'width': HUG, 'height': 32, 'padding': [12, 0, 12, 0]}, {'crossAxisAlignment': 'center'}, ['tabText'],
+                        decoration={'radius': 8}, bind={'decoration.radius': E('max(0, theme.radii.control - 4)')}, transitions=EASE),
+        'tabText': text('${item}', 'controlMedium', maxLines=1, bind={
+            'props.style.color': E('%s ? theme.colors.ink : theme.colors.inkFaint' % on)}),
+        'tabLine': node('box', {'width': FILL, 'height': 2}, decoration={'fills': [{'color': '#00FFFFFF'}], 'radius': [2, 2, 0, 0]},
+                        bind={'decoration.fills[0].color': E("%s ? theme.colors.accent : '#00FFFFFF'" % on)}, transitions=EASE),
+    }
+    props = [
+        P('tabs', STRINGS, ['Overview', 'Activity', 'Settings'], "The tabs' labels, any number.", True),
+        P('value', var(STRING), '', "The name of your text variable: it holds the open tab's label (declare it with the tab to start on: state tab=\"Overview\"; left empty, the first tab shows as open)."),
+    ]
+    return component('Tabs', "The tabs of a page or a card: labels on a hairline, the open one underlined in the accent, switching what is shown under them. Write Tabs =tab tabs:[\"Overview\",\"Activity\",\"Settings\"] with state tab=\"Overview\", then one if tab==\"Overview\" block per tab under it. Any number of tabs: where they do not fit, the row scrolls sideways on one line and brings the open tab into view. For a small switch of two to four options use Segments, for filter pills ChipTabs. Fires onChanged with the label.",
+                     props, nodes, 'bar', events=[('onChanged', 'A tab was opened; the value is its label.')],
+                     previews=[{'name': 'Three', 'size': [360, 44], 'props': {'value': 'Activity'}}])
+
+
+def chip_tabs():
+    on = 'item == props.value'
+    nodes = {
+        'row': node('row', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'center', 'spacing': 8}, ['scroll', 'add']),
+        'scroll': strip(['list'], width=HUG, actions=reveal('chip', 'props.tabs')),
+        'list': line_of(['chip'], '${props.tabs}', 36, gap=8, bind={'layout.height': E('%s ? 44 : 36' % PHONE)}),
+        'chip': node('row', {'width': HUG, 'height': FILL}, {'crossAxisAlignment': 'center'}, ['pill'],
+                     states={'hovered': {'pill': HOVER}, 'pressed': {'pill': DOWN}},
+                     actions=click(setv('props.value', 'item'), fire('onSelected', '${item}'))),
+        'pill': node('row', {'width': HUG, 'height': 32, 'padding': [14, 0, 14, 0]}, {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'}, ['label'],
+                     decoration={'fills': [{'color': 'card'}], 'strokes': [{'color': 'line'}], 'strokeWidth': 1, 'radius': 999},
+                     bind={'decoration.fills[0].color': E('%s ? theme.colors.accentTint : theme.colors.card' % on),
+                           'decoration.strokes[0].color': E('%s ? theme.colors.accent : theme.colors.line' % on),
+                           'decoration.strokeWidth': E('%s ? 1.5 : 1' % on),
+                           'decoration.radius': '${theme.radii.chip}'}, transitions=EASE),
+        'label': text('${item}', {'from': 'chip', 'fontSize': 13}, maxLines=1, bind={
+            'props.style.color': E('%s ? theme.colors.ink : theme.colors.inkSoft' % on)}),
+        **round_button('add', 'add_rounded', 32, actions=click(fire('onAdd')), bind={'visible': '${props.showAdd}'}),
+    }
+    nodes['add']['states']['hovered'] = {'add': HOVER}
+    props = [
+        P('tabs', STRINGS, ['Draft', 'Review', 'Final'], "The pills' labels, any number.", True),
+        P('value', var(STRING), '', 'The name of your text variable holding the chosen label.'),
+        P('showAdd', BOOL, False, 'A round + after the pills.'),
+    ]
+    return component('ChipTabs', "A row of pills to filter a list or switch between a few open items (All, Open, Closed; Draft, Review, Final), the chosen one outlined in the accent; an optional round + after them. Any number of pills: where they do not fit, the row scrolls sideways on one line. A page's views are Tabs; a choice of slots or sizes in a grid is ChoiceChips. The chosen label is kept in your variable. Fires onSelected with the label and onAdd.",
+                     props, nodes, 'row', events=[('onSelected', 'A pill was chosen; the value is its label.'), ('onAdd', 'The + was tapped.')],
+                     previews=[{'name': 'Three', 'size': [300, 36], 'props': {'value': 'Review', 'showAdd': True}}])
+
+
+def browser_tabs():
+    on = 'item == props.value'
+    has_icon = "(length(props.icons) > index && props.icons[index] != '')"
+    nodes = {
+        'bar': node('row', {'width': FILL, 'height': HUG}, {'crossAxisAlignment': 'end', 'spacing': 4}, ['scroll', 'add'],
+                    decoration={'strokes': [{'color': 'line'}], 'strokeSides': 'bottom'}),
+        'scroll': strip(['list'], width=HUG, actions=reveal('tab', 'props.tabs')),
+        'list': line_of(['tab'], '${props.tabs}', 36, gap=2, bind={'layout.height': E('%s ? 44 : 36' % PHONE)}),
+        'tab': node('row', {'width': HUG, 'height': FILL, 'padding': [12, 0, 8, 0]}, {'crossAxisAlignment': 'center', 'spacing': 6}, ['glyph', 'label', 'close'],
+                    decoration={'fills': [{'color': 'hoverOverlay'}], 'strokes': [{'color': 'line'}], 'strokeSides': 'top', 'radius': [10, 10, 0, 0]},
+                    bind={'decoration.fills[0].color': E('%s ? theme.colors.primaryBackground : theme.colors.hoverOverlay' % on)},
+                    states={'hovered': {'tab': HOVER}, 'pressed': {'tab': DOWN}}, transitions=EASE,
+                    actions=click(setv('props.value', 'item'), fire('onChanged', '${item}'))),
+        'glyph': icon('description', 15, 'inkFaint', bind={'visible': E(has_icon), 'props.icon': E("%s ? props.icons[index] : 'description'" % has_icon),
+                                                         'props.color': E('%s ? theme.colors.ink : theme.colors.inkFaint' % on)}),
+        'label': text('${item}', {'from': 'chip', 'fontSize': 13, 'fontWeight': 500}, maxLines=1, overflow='ellipsis',
+                      layout={'constraints': {'maxWidth': 200}},
+                      bind={'props.style.color': E('%s ? theme.colors.ink : theme.colors.inkFaint' % on)}),
+        'close': node('row', {'width': 20, 'height': 20}, {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'}, ['x'],
+                      decoration={'radius': 999}, bind={'visible': '${props.closable}'},
+                      states={'hovered': {'close': {'decoration': {'fills': [{'color': 'pressedOverlay'}]}}}},
+                      actions=click(fire('onClose', '${item}'))),
+        'x': icon('close_rounded', 13, 'inkFaint'),
+        'add': node('row', {'width': 28, 'height': 28, 'margin': [0, 0, 0, 4]}, {'crossAxisAlignment': 'center', 'mainAxisAlignment': 'center'}, ['plus'],
+                    decoration={'radius': 999}, bind={'visible': '${props.showAdd}'}, tooltip='New tab',
+                    states={'hovered': {'add': HOVER}, 'pressed': {'add': DOWN}}, actions=click(fire('onAdd'))),
+        'plus': icon('add_rounded', 16, 'inkSoft'),
+    }
+    props = [
+        P('tabs', STRINGS, ['Overview', 'Report.pdf', 'Notes'], "The tabs' labels, any number.", True),
+        P('icons', STRINGS, [], 'One icon per tab (empty: none).'),
+        P('value', var(STRING), '', 'The name of your text variable holding the chosen label.'),
+        P('closable', BOOL, True, 'An x on each tab.'),
+        P('showAdd', BOOL, False, 'A + after the tabs.'),
+    ]
+    return component('BrowserTabs', "Open documents as tabs in a browser's or an editor's manner: each with an x to close it, an optional + to open another (files, reports, chats open side by side; a page's own views are Tabs). Any number: where they do not fit, the row scrolls sideways on one line. The chosen one is kept in your variable. Fires onChanged, onClose with the label, and onAdd.",
+                     props, nodes, 'bar', events=[('onChanged', 'A tab was chosen; the value is its label.'), ('onClose', "A tab's x was tapped; the value is its label."), ('onAdd', 'The + was tapped.')],
+                     previews=[{'name': 'Default', 'size': [340, 36], 'props': {'value': 'Report.pdf', 'showAdd': True}}])
 
 
 # --- InputField -------------------------------------------------------------------------------------------
@@ -667,28 +892,43 @@ def option_list():
 
 def choice_chips():
     on, off = 'props.value == item', 'contains(props.disabled, item)'
+    # Equal chips, `columns` to a row, while the longest label fits a chip at a card's width (13.5 px Inter runs
+    # near 7.5 px a character; a card's content is 364 wide, and so is a phone's); else chips as wide as their
+    # labels that wrap, as chips do. Never fewer columns than asked for with the labels squeezed into them.
+    longest = 'first(sortByDesc(map(props.options, o => length(o)), n => n))'
+    fits = '(max(1, props.columns) * (%s * 7.5 + 24 + 8) - 8 <= min(screen.width, 420) - 56)' % longest
+
+    def chip(p, width, pad=None):
+        return {
+            p: row([p + 'Text'], width=width, height=40, main='center', pad=pad,
+                   decoration={'fills': [{'color': 'card'}], 'strokes': [{'color': 'lineStrong'}], 'strokeWidth': 1.2, 'radius': 12},
+                   bind={'decoration.radius': '${theme.radii.control}',
+                         'decoration.fills[0].color': E('%s ? theme.colors.tile : %s ? theme.colors.accent : theme.colors.card' % (off, on)),
+                         'decoration.strokes[0].color': E('%s ? theme.colors.tile : %s ? theme.colors.accent : theme.colors.lineStrong' % (off, on)),
+                         'decoration.effects': E('%s && !(%s) ? theme.shadows.pick : []' % (on, off))},
+                   states={'pressed': {p: PRESS}},
+                   actions=click({'type': 'if', 'condition': {'left': E(off), 'op': 'isFalse'},
+                                  'then': [setv('props.value', 'item'), fire('onChanged', '${item}')]})),
+            p + 'Text': text('${item}', {'from': 'figure', 'fontWeight': 600}, maxLines=1, bind={
+                'props.style.color': E('%s ? theme.colors.inkGhost : %s ? theme.colors.onAccent : theme.colors.ink' % (off, on)),
+                'props.style.decoration': E("%s ? 'lineThrough' : 'none'" % off)}),
+        }
     nodes = {
-        'chips': grid(['chip'], '${props.columns}', 8, '${props.options}'),
-        'chip': row(['chipText'], height=40, main='center',
-                    decoration={'fills': [{'color': 'card'}], 'strokes': [{'color': 'lineStrong'}], 'strokeWidth': 1.2, 'radius': 12},
-                    bind={'decoration.radius': '${theme.radii.control}',
-                          'decoration.fills[0].color': E('%s ? theme.colors.tile : %s ? theme.colors.accent : theme.colors.card' % (off, on)),
-                          'decoration.strokes[0].color': E('%s ? theme.colors.tile : %s ? theme.colors.accent : theme.colors.lineStrong' % (off, on)),
-                          'decoration.effects': E('%s && !(%s) ? theme.shadows.pick : []' % (on, off))},
-                    states={'pressed': {'chip': PRESS}},
-                    actions=click({'type': 'if', 'condition': {'left': E(off), 'op': 'isFalse'},
-                                   'then': [setv('props.value', 'item'), fire('onChanged', '${item}')]})),
-        'chipText': text('${item}', {'from': 'figure', 'fontWeight': 600}, maxLines=1, bind={
-            'props.style.color': E('%s ? theme.colors.inkGhost : %s ? theme.colors.onAccent : theme.colors.ink' % (off, on)),
-            'props.style.decoration': E("%s ? 'lineThrough' : 'none'" % off)}),
+        'chips': col(['grid', 'flow']),
+        'grid': grid(['chip'], '${props.columns}', 8, E('%s ? props.options : []' % fits), bind={'visible': E(fits)}),
+        **chip('chip', FILL),
+        'flow': node('listView', {'width': FILL, 'height': HUG},
+                     {'scrollDirection': 'horizontal', 'scrollable': False, 'wrap': True, 'wrapSpacing': 8, 'runSpacing': 8},
+                     ['pill'], bind={'data': E('%s ? [] : props.options' % fits), 'visible': E('!%s' % fits)}),
+        **chip('pill', HUG, pad=[16, 0, 16, 0]),
     }
     props = [
         P('value', var(STRING), '', 'The name of your text variable: it holds the chosen option.'),
-        P('options', STRINGS, ['18:00', '18:30', '19:00', '19:30'], 'The options, one chip each.', True),
+        P('options', STRINGS, ['18:00', '18:30', '19:00', '19:30'], 'The options, one chip each: short (a time, a size, a word).', True),
         P('disabled', STRINGS, [], 'The options that cannot be chosen (full time slots, sizes out of stock): greyed and struck through.'),
         P('columns', INT, 4, 'Chips per row.'),
     ]
-    return component('ChoiceChips', "A single choice as a grid of chips (time slots, sizes): ChoiceChips =time options:[\"18:00\",\"18:30\"] disabled:[\"18:30\"] keeps the chosen chip's text in your variable; disabled lists the ones that are unavailable (full, sold out); columns sets chips per row.",
+    return component('ChoiceChips', "A single choice as a grid of equal chips (time slots, sizes, a finish; not tabs or a filter: those are Tabs, Segments and ChipTabs): ChoiceChips =time options:[\"18:00\",\"18:30\"] disabled:[\"18:30\"] keeps the chosen chip's text in your variable; disabled lists the ones that are unavailable (full, sold out); columns sets chips per row. Labels too long for that many columns are not squeezed: the chips are then as wide as their labels and wrap.",
                      props, nodes, 'chips', events=[('onChanged', 'A chip was chosen; the value is its text.')],
                      previews=[{'name': 'Slots', 'size': [340, 40], 'props': {'value': '19:00', 'disabled': ['18:30']}}])
 
@@ -1820,7 +2060,7 @@ def weather_day():
 
 def all_components():
     return [chat_card(), section_label(), paragraph(), action_button(), total_bar(), details(), callout(), disclosure(), receipt(), recommendation(),
-            steps(), segments(), input_field(), option_list(), choice_chips(), day_picker(), counter(),
+            steps(), segments(), tabs(), tab_toggle(), segmented_control(), chip_tabs(), browser_tabs(), input_field(), option_list(), choice_chips(), day_picker(), counter(),
             flight_option(), product_tile(), carousel(), page_dots(), pager(), wide_scroll(), cart_line(),
             diff_hunk(), comparison_table(), stat_tile(), chart_card(), table_header(), table_row(),
             photo_gallery(), day_header(), itinerary_stop(), checklist(), map_panel(), place_row(),

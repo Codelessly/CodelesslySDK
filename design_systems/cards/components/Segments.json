@@ -2,11 +2,11 @@
  "schema": 3,
  "id": "Segments",
  "roots": [
-  "track"
+  "place"
  ],
  "widget": {
   "type": "Segments",
-  "doc": "A switch between two to five options in one track (a period, a tone, a status filter): write Segments =range options:[\"7 days\",\"30 days\"] and it keeps the chosen option's text in your variable; onChanged fires with it.",
+  "doc": "A small switch between two to four short options in one track, as wide as its place (a period, a tone, a status filter; not a page's tabs: those are Tabs): write Segments =range options:[\"7 days\",\"30 days\"] and it keeps the chosen option's text in your variable; onChanged fires with it. The segments are equally wide while they fit; where they do not, the track scrolls sideways on one line.",
   "props": [
    {
     "key": "value",
@@ -35,7 +35,7 @@
      "30 days",
      "90 days"
     ],
-    "doc": "Two to five options.",
+    "doc": "Two to four short options (a word or two each).",
     "required": true
    }
   ],
@@ -59,14 +59,30 @@
   }
  ],
  "nodes": {
-  "track": {
-   "type": "column",
+  "place": {
+   "type": "row",
    "children": [
-    "cells"
+    "track"
    ],
    "props": {
-    "crossAxisAlignment": "stretch",
-    "spacing": 0
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "track": {
+   "type": "row",
+   "children": [
+    "scroll"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
    },
    "layout": {
     "width": {
@@ -75,86 +91,295 @@
     "height": {
      "hug": 0
     },
-    "padding": 3
+    "constraints": {
+     "maxWidth": 603
+    }
    },
    "decoration": {
     "fills": [
      {
-      "color": "tile"
+      "color": "subtleFill"
      }
     ],
-    "radius": 12
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1,
+    "radius": 12,
+    "clip": "antiAlias"
    },
    "bind": {
-    "decoration.radius": "${theme.radii.control}"
+    "decoration.radius": "${theme.radii.control}",
+    "layout.constraints": "${= {maxWidth: 200 * max(2, length(props.options)) + 3}}"
    }
   },
-  "cells": {
-   "type": "gridView",
-   "children": [
-    "cell"
-   ],
-   "props": {
-    "crossAxisCount": 1,
-    "crossAxisSpacing": 2,
-    "mainAxisSpacing": 2,
-    "shrinkWrapRows": true,
-    "physics": "never"
-   },
-   "layout": {
-    "width": {
-     "fill": 0
-    },
-    "height": {
-     "hug": 0
-    }
-   },
-   "bind": {
-    "data": "${props.options}",
-    "props.crossAxisCount": "${= max(1, length(props.options))}"
-   },
-   "media": [
-    {
-     "maxWidth": 699,
-     "patch": {
-      "props": {
-       "crossAxisCount": 2
-      },
-      "bind": {
-       "props.crossAxisCount": null
-      }
-     }
-    }
-   ]
-  },
-  "cell": {
+  "scroll": {
    "type": "row",
    "children": [
-    "cellText"
+    "cell0",
+    "cell1",
+    "cell2",
+    "cell3",
+    "cell4",
+    "more"
    ],
    "props": {
     "crossAxisAlignment": "center",
     "spacing": 0,
-    "mainAxisAlignment": "center"
+    "scrollable": true,
+    "scrollDirection": "horizontal",
+    "edgeFade": 24,
+    "fillViewport": true
    },
    "layout": {
     "width": {
      "fill": 0
     },
-    "height": 34
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     1.5,
+     0,
+     1.5,
+     0
+    ]
    },
-   "decoration": {
-    "fills": [
-     {
-      "color": "#00FFFFFF"
-     }
-    ],
-    "radius": 9
+   "actions": [
+    {
+     "trigger": {
+      "type": "load",
+      "when": "indexOf(props.options, props.value) > 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "cell0",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 0}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "cell1",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 1}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "cell2",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 2}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "cell3",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 3}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "cell4",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 4}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "moreCell",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0,
+       "item": "${= indexOf(props.options, props.value)}",
+       "when": {
+        "left": "${= length(props.options) > 5}",
+        "op": "isTrue"
+       }
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "valueChanged",
+      "variable": "props.value",
+      "when": "indexOf(props.options, props.value) >= 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "cell0",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 0}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "cell1",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 1}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "cell2",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 2}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "cell3",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 3}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "cell4",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240,
+       "when": {
+        "left": "${= length(props.options) <= 5 && indexOf(props.options, props.value) == 4}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "scrollTo",
+       "node": "moreCell",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240,
+       "item": "${= indexOf(props.options, props.value)}",
+       "when": {
+        "left": "${= length(props.options) > 5}",
+        "op": "isTrue"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "more": {
+   "type": "listView",
+   "children": [
+    "moreCell"
+   ],
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 0
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 40
    },
    "bind": {
-    "decoration.fills[0].color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.card : '#00FFFFFF'}",
-    "decoration.effects": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.shadows.knob : []}",
-    "decoration.radius": "${= max(0, theme.radii.control - 3)}"
+    "data": "${= length(props.options) > 5 ? props.options : []}",
+    "visible": "${= length(props.options) > 5}",
+    "layout.height": "${= screen.width < 700 ? 44 : 40}"
+   }
+  },
+  "moreCell": {
+   "type": "row",
+   "children": [
+    "moreCellKnob"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     1.5,
+     3,
+     1.5,
+     3
+    ]
+   },
+   "states": {
+    "hovered": {
+     "moreCellKnob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "moreCellKnob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
    },
    "actions": [
     {
@@ -174,19 +399,52 @@
       }
      ]
     }
+   ]
+  },
+  "moreCellKnob": {
+   "type": "row",
+   "children": [
+    "moreCellText"
    ],
-   "media": [
-    {
-     "maxWidth": 699,
-     "patch": {
-      "layout": {
-       "height": 44
-      }
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     14,
+     0,
+     14,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
      }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.raisedBackground : '#00FFFFFF'}",
+    "decoration.effects": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.shadows.knob : []}",
+    "decoration.radius": "${= max(0, theme.radii.control - 3)}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
     }
    ]
   },
-  "cellText": {
+  "moreCellText": {
    "type": "text",
    "props": {
     "text": "${item}",
@@ -206,6 +464,711 @@
    },
    "bind": {
     "props.style.color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "cell0": {
+   "type": "row",
+   "children": [
+    "cell0Knob"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40,
+    "padding": [
+     1.5,
+     3,
+     1.5,
+     3
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.options) > 0 && length(props.options) <= 5}",
+    "layout.height": "${= screen.width < 700 ? 44 : 40}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31)}}"
+   },
+   "states": {
+    "hovered": {
+     "cell0Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "cell0Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (length(props.options) > 0 ? at(props.options, 0) : '')}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= (length(props.options) > 0 ? at(props.options, 0) : '')}"
+      }
+     ]
+    }
+   ]
+  },
+  "cell0Knob": {
+   "type": "row",
+   "children": [
+    "cell0Text"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.value == (length(props.options) > 0 ? at(props.options, 0) : '') || props.value == '') ? theme.colors.raisedBackground : '#00FFFFFF'}",
+    "decoration.effects": "${= (props.value == (length(props.options) > 0 ? at(props.options, 0) : '') || props.value == '') ? theme.shadows.knob : []}",
+    "decoration.radius": "${= max(0, theme.radii.control - 3)}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31) - 3}}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ]
+  },
+  "cell0Text": {
+   "type": "text",
+   "props": {
+    "text": "${= (length(props.options) > 0 ? at(props.options, 0) : '')}",
+    "style": {
+     "from": "chip",
+     "fontSize": 13
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.options) > 0 ? at(props.options, 0) : '') || props.value == '') ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "cell1": {
+   "type": "row",
+   "children": [
+    "cell1Knob"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40,
+    "padding": [
+     1.5,
+     3,
+     1.5,
+     3
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.options) > 1 && length(props.options) <= 5}",
+    "layout.height": "${= screen.width < 700 ? 44 : 40}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31)}}"
+   },
+   "states": {
+    "hovered": {
+     "cell1Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "cell1Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (length(props.options) > 1 ? at(props.options, 1) : '')}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= (length(props.options) > 1 ? at(props.options, 1) : '')}"
+      }
+     ]
+    }
+   ]
+  },
+  "cell1Knob": {
+   "type": "row",
+   "children": [
+    "cell1Text"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.value == (length(props.options) > 1 ? at(props.options, 1) : '')) ? theme.colors.raisedBackground : '#00FFFFFF'}",
+    "decoration.effects": "${= (props.value == (length(props.options) > 1 ? at(props.options, 1) : '')) ? theme.shadows.knob : []}",
+    "decoration.radius": "${= max(0, theme.radii.control - 3)}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31) - 3}}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ]
+  },
+  "cell1Text": {
+   "type": "text",
+   "props": {
+    "text": "${= (length(props.options) > 1 ? at(props.options, 1) : '')}",
+    "style": {
+     "from": "chip",
+     "fontSize": 13
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.options) > 1 ? at(props.options, 1) : '')) ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "cell2": {
+   "type": "row",
+   "children": [
+    "cell2Knob"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40,
+    "padding": [
+     1.5,
+     3,
+     1.5,
+     3
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.options) > 2 && length(props.options) <= 5}",
+    "layout.height": "${= screen.width < 700 ? 44 : 40}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31)}}"
+   },
+   "states": {
+    "hovered": {
+     "cell2Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "cell2Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (length(props.options) > 2 ? at(props.options, 2) : '')}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= (length(props.options) > 2 ? at(props.options, 2) : '')}"
+      }
+     ]
+    }
+   ]
+  },
+  "cell2Knob": {
+   "type": "row",
+   "children": [
+    "cell2Text"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.value == (length(props.options) > 2 ? at(props.options, 2) : '')) ? theme.colors.raisedBackground : '#00FFFFFF'}",
+    "decoration.effects": "${= (props.value == (length(props.options) > 2 ? at(props.options, 2) : '')) ? theme.shadows.knob : []}",
+    "decoration.radius": "${= max(0, theme.radii.control - 3)}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31) - 3}}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ]
+  },
+  "cell2Text": {
+   "type": "text",
+   "props": {
+    "text": "${= (length(props.options) > 2 ? at(props.options, 2) : '')}",
+    "style": {
+     "from": "chip",
+     "fontSize": 13
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.options) > 2 ? at(props.options, 2) : '')) ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "cell3": {
+   "type": "row",
+   "children": [
+    "cell3Knob"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40,
+    "padding": [
+     1.5,
+     3,
+     1.5,
+     3
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.options) > 3 && length(props.options) <= 5}",
+    "layout.height": "${= screen.width < 700 ? 44 : 40}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31)}}"
+   },
+   "states": {
+    "hovered": {
+     "cell3Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "cell3Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (length(props.options) > 3 ? at(props.options, 3) : '')}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= (length(props.options) > 3 ? at(props.options, 3) : '')}"
+      }
+     ]
+    }
+   ]
+  },
+  "cell3Knob": {
+   "type": "row",
+   "children": [
+    "cell3Text"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.value == (length(props.options) > 3 ? at(props.options, 3) : '')) ? theme.colors.raisedBackground : '#00FFFFFF'}",
+    "decoration.effects": "${= (props.value == (length(props.options) > 3 ? at(props.options, 3) : '')) ? theme.shadows.knob : []}",
+    "decoration.radius": "${= max(0, theme.radii.control - 3)}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31) - 3}}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ]
+  },
+  "cell3Text": {
+   "type": "text",
+   "props": {
+    "text": "${= (length(props.options) > 3 ? at(props.options, 3) : '')}",
+    "style": {
+     "from": "chip",
+     "fontSize": 13
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.options) > 3 ? at(props.options, 3) : '')) ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "cell4": {
+   "type": "row",
+   "children": [
+    "cell4Knob"
+   ],
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40,
+    "padding": [
+     1.5,
+     3,
+     1.5,
+     3
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "bind": {
+    "visible": "${= length(props.options) > 4 && length(props.options) <= 5}",
+    "layout.height": "${= screen.width < 700 ? 44 : 40}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31)}}"
+   },
+   "states": {
+    "hovered": {
+     "cell4Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "cell4Knob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= (length(props.options) > 4 ? at(props.options, 4) : '')}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${= (length(props.options) > 4 ? at(props.options, 4) : '')}"
+      }
+     ]
+    }
+   ]
+  },
+  "cell4Knob": {
+   "type": "row",
+   "children": [
+    "cell4Text"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ],
+    "constraints": {
+     "minWidth": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.value == (length(props.options) > 4 ? at(props.options, 4) : '')) ? theme.colors.raisedBackground : '#00FFFFFF'}",
+    "decoration.effects": "${= (props.value == (length(props.options) > 4 ? at(props.options, 4) : '')) ? theme.shadows.knob : []}",
+    "decoration.radius": "${= max(0, theme.radii.control - 3)}",
+    "layout.constraints": "${= {minWidth: (first(sortByDesc(map(props.options, o => length(o)), n => n)) * 7.1 + 31) - 3}}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ]
+  },
+  "cell4Text": {
+   "type": "text",
+   "props": {
+    "text": "${= (length(props.options) > 4 ? at(props.options, 4) : '')}",
+    "style": {
+     "from": "chip",
+     "fontSize": 13
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == (length(props.options) > 4 ? at(props.options, 4) : '')) ? theme.colors.ink : theme.colors.inkSoft}"
    }
   }
  }

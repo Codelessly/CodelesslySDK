@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Tabs",
-  "doc": "A row of tabs over a panel, the current one in your variable; show the panel for it yourself. Fires onChanged.",
+  "doc": "The tabs of a page or a card: labels on a hairline, the open one underlined in the accent, switching what is shown under them. Write Tabs =tab tabs:[\"Overview\",\"Activity\",\"Settings\"] with state tab=\"Overview\", then one if tab==\"Overview\" block per tab under it. Any number of tabs: where they do not fit, the row scrolls sideways on one line and brings the open tab into view. For a small switch of two to four options use Segments, for filter pills ChipTabs. Fires onChanged with the label.",
   "props": [
    {
     "key": "tabs",
@@ -23,7 +23,7 @@
      "Activity",
      "Settings"
     ],
-    "doc": "The tab labels.",
+    "doc": "The tabs' labels, any number.",
     "required": true
    },
    {
@@ -36,64 +36,126 @@
      }
     },
     "default": "",
-    "doc": "The name of your text variable holding the current tab."
+    "doc": "The name of your text variable: it holds the open tab's label (declare it with the tab to start on: state tab=\"Overview\"; left empty, the first tab shows as open)."
    }
   ],
   "events": [
    {
     "key": "onChanged",
-    "payload": {
-     "kind": "string",
-     "flutter": "String"
-    }
+    "doc": "A tab was opened; the value is its label."
    }
   ]
  },
  "previews": [
   {
-   "name": "Overview",
+   "name": "Three",
    "size": [
     360,
-    36
+    44
    ],
    "props": {
-    "tabs": [
-     "Overview",
-     "Activity",
-     "Settings"
-    ],
-    "value": "Overview"
+    "value": "Activity"
    }
   }
  ],
  "nodes": {
   "bar": {
-   "type": "row",
+   "type": "stack",
    "children": [
-    "tabList"
+    "rule",
+    "scroll"
    ],
    "layout": {
     "width": {
-     "fill": 360
+     "fill": 0
     },
-    "height": 36,
-    "padding": [
-     12,
-     0,
-     12,
-     0
-    ]
-   },
-   "decoration": {
-    "strokes": [
-     {
-      "color": "primaryBorder"
-     }
-    ],
-    "strokeSides": "bottom"
+    "height": {
+     "hug": 0
+    }
    }
   },
-  "tabList": {
+  "rule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 1,
+    "x": {
+     "start": 0
+    },
+    "y": {
+     "end": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "line"
+     }
+    ]
+   }
+  },
+  "scroll": {
+   "type": "row",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "scrollable": true,
+    "scrollDirection": "horizontal",
+    "edgeFade": 24,
+    "fillViewport": true
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "load",
+      "when": "indexOf(props.tabs, props.value) > 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "tab",
+       "item": "${= indexOf(props.tabs, props.value)}",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "valueChanged",
+      "variable": "props.value",
+      "when": "indexOf(props.tabs, props.value) >= 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "tab",
+       "item": "${= indexOf(props.tabs, props.value)}",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240
+      }
+     ]
+    }
+   ]
+  },
+  "list": {
    "type": "listView",
    "children": [
     "tab"
@@ -101,69 +163,71 @@
    "props": {
     "scrollDirection": "horizontal",
     "scrollable": false,
-    "spacing": 16
+    "spacing": 4
    },
    "layout": {
     "width": {
-     "fill": 336
+     "hug": 0
     },
-    "height": {
-     "fill": 36
-    }
+    "height": 44
    },
    "bind": {
     "data": "${props.tabs}"
    }
   },
   "tab": {
-   "type": "stack",
+   "type": "column",
    "children": [
-    "tabLabel",
+    "tabTop",
+    "tabBody",
     "tabLine"
    ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "spaceBetween"
+   },
    "layout": {
     "width": {
-     "hug": 60
+     "hug": 0
     },
     "height": {
-     "fill": 36
+     "fill": 0
     }
    },
-   "bind": {
-    "selected": "${= item == props.value}"
-   },
    "states": {
-    "selected": {
-     "tabLabel": {
-      "props": {
-       "style": {
-        "color": "primaryText",
-        "fontWeight": 600
-       }
+    "hovered": {
+     "tabBody": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
       }
-     },
-     "tabLine": {
-      "visible": true
      }
     },
-    "hovered": {
-     "tabLabel": {
-      "props": {
-       "style": {
-        "color": "primaryText"
-       }
+    "pressed": {
+     "tabBody": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
       }
      }
     }
    },
    "actions": [
     {
-     "trigger": "click",
+     "trigger": {
+      "type": "click"
+     },
      "actions": [
       {
        "type": "setVariable",
        "variable": "props.value",
-       "value": "${item}"
+       "value": "${= item}"
       },
       {
        "type": "componentEvent",
@@ -174,52 +238,95 @@
     }
    ]
   },
-  "tabLabel": {
-   "type": "text",
+  "tabTop": {
+   "type": "box",
+   "layout": {
+    "width": 1,
+    "height": 2
+   }
+  },
+  "tabBody": {
+   "type": "row",
+   "children": [
+    "tabText"
+   ],
    "props": {
-    "text": "${item}",
-    "style": {
-     "from": "controlCompact",
-     "color": "secondaryText"
-    }
+    "crossAxisAlignment": "center"
    },
    "layout": {
     "width": {
-     "hug": 50
+     "hug": 0
+    },
+    "height": 32,
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "bind": {
+    "decoration.radius": "${= max(0, theme.radii.control - 4)}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ]
+  },
+  "tabText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": "controlMedium",
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
     },
     "height": {
-     "hug": 15
-    },
-    "y": {
-     "align": 0
+     "hug": 0
     }
+   },
+   "bind": {
+    "props.style.color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.ink : theme.colors.inkFaint}"
    }
   },
   "tabLine": {
    "type": "box",
-   "visible": false,
    "layout": {
     "width": {
-     "fill": 50
+     "fill": 0
     },
-    "height": 2,
-    "y": {
-     "end": 0
-    }
+    "height": 2
    },
    "decoration": {
     "fills": [
      {
-      "color": "primary"
+      "color": "#00FFFFFF"
      }
     ],
     "radius": [
-     1,
-     1,
+     2,
+     2,
      0,
      0
     ]
-   }
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (props.value == item || (props.value == '' && index == 0)) ? theme.colors.accent : '#00FFFFFF'}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ]
   }
  }
 }
