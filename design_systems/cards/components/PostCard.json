@@ -110,7 +110,7 @@
   "tagText": {
    "type": "text",
    "props": {"text": "${= upper(props.tag)}", "style": {"from": "eyebrowWide", "color": "accent"}, "maxLines": 1},
-   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "squeezable": true}
   },
   "title": {
    "type": "text",
