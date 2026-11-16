@@ -15,7 +15,7 @@ import 'ui/presentation_scope.dart';
 import '../runtime/actions/ui.dart';
 import 'navigator_ui.dart';
 import 'ui/capture_scope.dart';
-import 'ui/modal_focus.dart';
+import 'ui/presentation_route.dart' show ModalFocus;
 import '../services/services.dart' show Services;
 import 'backdrop_screens.dart';
 import 'codelessly.dart';

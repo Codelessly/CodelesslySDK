@@ -58,7 +58,7 @@ class NodeView extends RenderObjectWidget {
 /// shown in: each [NodeView] below puts its focus scope in [layer], so the
 /// keyboard stays in the overlay while it is the top one
 /// (render/controls/focus.dart's [ControlFocusLayer]). The host that opens
-/// the overlay's route puts it there (app/ui/modal_focus.dart).
+/// the overlay's route puts it there (ModalFocus, app/ui/presentation_route.dart).
 class ControlFocusLayerScope extends InheritedWidget {
   const ControlFocusLayerScope({super.key, required this.layer, required super.child});
 

@@ -1,4 +1,4 @@
-// The keyboard in a modal overlay (app/ui/modal_focus.dart): every dialog,
+// The keyboard in a modal overlay (ModalFocus, app/ui/presentation_route.dart): every dialog,
 // sheet, side sheet, popover, full-screen cover and the built-in confirm
 // takes the focus as it opens, keeps Tab inside, closes on Escape unless
 // the document blocks it, gives the focus back to what opened it, and is
