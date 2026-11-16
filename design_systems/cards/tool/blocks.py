@@ -1001,6 +1001,31 @@ def counter():
                      previews=[{'name': 'Guests', 'size': [340, 56], 'props': {'value': 2, 'detail': '1 to 8'}}])
 
 
+def rating():
+    nodes = {
+        'stars': node('slider', {'width': 200, 'height': 44},
+                      {'min': 0, 'max': 5, 'trackShape': 'stars', 'showThumb': False,
+                       'activeTrackColor': 'accent', 'inactiveTrackColor': 'lineStrong',
+                       'showValueIndicator': 'never'},
+                      bind={'props.value': '${= props.value == null ? props.score : props.value}',
+                            'props.divisions': '${= props.half ? 10 : 5}',
+                            'props.label': '${props.label}',
+                            'props.readOnly': '${props.readOnly}'},
+                      actions=[{'trigger': {'type': 'changed'}, 'actions': [setv('props.value', '${result}'), fire('onChanged', '${result}')]}]),
+    }
+    props = [
+        P('label', STRING, 'Rating', 'The name announced with the score.', True),
+        P('value', var(NUM), '', 'A bound score variable, from 0 to 5.'),
+        P('score', NUM, 0, 'A fixed score when readOnly is true.'),
+        P('half', BOOL, False, 'True: half-star steps.'),
+        P('readOnly', BOOL, False, 'True: display the score without allowing changes.'),
+    ]
+    return component('Rating', 'Five stars as one rating control. Rating "Your rating" =score half:true; Rating "Course score" score:4.7 readOnly:true displays one.',
+                     props, nodes, 'stars', events=[('onChanged', 'The new score.')],
+                     previews=[{'name': 'Choose a score', 'size': [200, 44], 'props': {'value': 3.5, 'half': True}},
+                               {'name': 'Course score', 'size': [200, 44], 'props': {'score': 4.7, 'readOnly': True}}])
+
+
 def cart_line():
     nodes = {
         'line': row(['thumb', 'texts', 'right'], 12, pad=[0, 9, 0, 9],
@@ -2061,7 +2086,7 @@ def weather_day():
 
 def all_components():
     return [chat_card(), section_label(), paragraph(), action_button(), total_bar(), details(), callout(), disclosure(), receipt(), recommendation(),
-            steps(), segments(), tabs(), tab_toggle(), segmented_control(), chip_tabs(), browser_tabs(), input_field(), option_list(), choice_chips(), day_picker(), counter(),
+            steps(), segments(), tabs(), tab_toggle(), segmented_control(), chip_tabs(), browser_tabs(), input_field(), option_list(), choice_chips(), day_picker(), counter(), rating(),
             flight_option(), product_tile(), carousel(), page_dots(), pager(), wide_scroll(), cart_line(),
             diff_hunk(), comparison_table(), stat_tile(), chart_card(), table_header(), table_row(),
             photo_gallery(), day_header(), itinerary_stop(), checklist(), map_panel(), place_row(),

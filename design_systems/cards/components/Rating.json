@@ -1,0 +1,135 @@
+{
+ "schema": 3,
+ "id": "Rating",
+ "roots": [
+  "stars"
+ ],
+ "widget": {
+  "type": "Rating",
+  "doc": "Five stars as one rating control. Rating \"Your rating\" =score half:true; Rating \"Course score\" score:4.7 readOnly:true displays one.",
+  "props": [
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Rating",
+    "doc": "The name announced with the score.",
+    "required": true
+   },
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "number",
+      "flutter": "double"
+     }
+    },
+    "default": "",
+    "doc": "A bound score variable, from 0 to 5."
+   },
+   {
+    "key": "score",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 0,
+    "doc": "A fixed score when readOnly is true."
+   },
+   {
+    "key": "half",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True: half-star steps."
+   },
+   {
+    "key": "readOnly",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "True: display the score without allowing changes."
+   }
+  ],
+  "events": [
+   {
+    "key": "onChanged",
+    "doc": "The new score."
+   }
+  ]
+ },
+ "previews": [
+  {
+   "name": "Choose a score",
+   "size": [
+    200,
+    44
+   ],
+   "props": {
+    "value": 3.5,
+    "half": true
+   }
+  },
+  {
+   "name": "Course score",
+   "size": [
+    200,
+    44
+   ],
+   "props": {
+    "score": 4.7,
+    "readOnly": true
+   }
+  }
+ ],
+ "nodes": {
+  "stars": {
+   "type": "slider",
+   "props": {
+    "min": 0,
+    "max": 5,
+    "trackShape": "stars",
+    "showThumb": false,
+    "activeTrackColor": "accent",
+    "inactiveTrackColor": "lineStrong",
+    "showValueIndicator": "never"
+   },
+   "layout": {
+    "width": 200,
+    "height": 44
+   },
+   "bind": {
+    "props.value": "${= props.value == null ? props.score : props.value}",
+    "props.divisions": "${= props.half ? 10 : 5}",
+    "props.label": "${props.label}",
+    "props.readOnly": "${props.readOnly}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${result}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onChanged",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}
