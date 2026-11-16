@@ -206,6 +206,7 @@
   },
   "label": {
    "type": "text",
+   "media": [{"maxWidth": 699, "patch": {"props": {"maxLines": 4}}}],
    "props": {
     "text": "${item}",
     "style": "chip",

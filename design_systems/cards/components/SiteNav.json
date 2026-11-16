@@ -4,7 +4,7 @@
  "roots": ["band"],
  "widget": {
   "type": "SiteNav",
-  "doc": "A website's top bar, written first under Page: SiteNav brand:\"Tidewater\" icon:\"waves\" links:[\"Features\",\"Pricing\"] active:=page secondary:\"Sign in\" cta:\"Start free\" -> page=result (onNavigate gives the link's name; onCta and onSecondary fire on the buttons; an empty label hides its button, and an empty active marks no link).",
+  "doc": "A website's top bar, written first under Page: SiteNav brand:\"Tidewater\" icon:\"waves\" links:[\"Features\",\"Pricing\"] active:=page secondary:\"Sign in\" cta:\"Start free\" -> page=result (onNavigate gives the link's name; onCta and onSecondary fire on the buttons; an empty label hides its button, and an empty active marks no link). On a phone it provides a menu button that opens all links.",
   "props": [
    {"key": "brand", "type": {"kind": "string", "flutter": "String"}, "default": "Tidewater", "doc": "The product's name, at the left.", "required": true},
    {"key": "icon", "type": {"kind": "string", "flutter": "String"}, "default": "waves", "doc": "A Material icon on the small accent mark before the name (empty: no mark)."},
@@ -25,17 +25,17 @@
  "nodes": {
   "band": {
    "type": "column",
-   "children": ["inner", "rule"],
+   "children": ["inner", "mobileLinks", "rule"],
    "props": {"crossAxisAlignment": "center", "spacing": 0},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
    "decoration": {"fills": [{"color": "pageFill"}]}
   },
   "inner": {
    "type": "row",
+   "media": [{"maxWidth": 699, "patch": {"layout": {"padding": [20, 12, 20, 12]}, "props": {"spacing": 12}}}],
    "children": ["brandRow", "linksWrap", "actions"],
    "props": {"crossAxisAlignment": "center", "spacing": 24},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "constraints": {"maxWidth": 1184}, "padding": [32, 12, 32, 12]},
-   "media": [{"maxWidth": 600, "patch": {"props": {"wrap": true, "runSpacing": 8}}}]
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "constraints": {"maxWidth": 1184}, "padding": [32, 12, 32, 12]}
   },
   "rule": {
    "type": "box",
@@ -75,11 +75,11 @@
    "type": "row",
    "children": ["links"],
    "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
-   "media": [{"maxWidth": 600, "patch": {"layout": {"basis": 260}}}]
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
   },
   "links": {
    "type": "listView",
+   "media": [{"maxWidth": 699, "patch": {"visible": false}}],
    "children": ["link"],
    "props": {"scrollable": false, "scrollDirection": "horizontal", "wrap": true, "wrapSpacing": 2, "runSpacing": 2, "wrapAlignment": "center", "wrapCrossAlignment": "center", "stretchItems": false},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
@@ -111,12 +111,13 @@
   },
   "actions": {
    "type": "row",
-   "children": ["second", "cta"],
+   "children": ["menuButton", "second", "cta"],
    "props": {"crossAxisAlignment": "center", "spacing": 8},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
   },
   "second": {
    "type": "row",
+   "media": [{"maxWidth": 699, "patch": {"visible": false, "bind": {"visible": null}}}],
    "children": ["secondText"],
    "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
    "layout": {"width": {"hug": 0}, "height": 40, "padding": [14, 0, 14, 0]},
@@ -148,6 +149,50 @@
    "type": "text",
    "props": {"text": "${props.cta}", "style": {"from": "strongWide", "fontSize": 14, "color": "onAccent"}, "maxLines": 1},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "menuButton": {
+   "type": "row",
+   "visible": false,
+   "media": [{"maxWidth": 699, "patch": {"visible": true}}],
+   "children": ["menuIcon"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": 40, "height": 40},
+   "states": {"pressed": {"menuButton": {"opacity": 0.7}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "menu", "op": "toggle"}]}]
+  },
+  "menuIcon": {
+   "type": "icon",
+   "props": {"icon": "menu_rounded", "size": 24, "color": "ink"},
+   "layout": {"width": 24, "height": 24},
+   "bind": {"props.icon": "${= menu ? 'close_rounded' : 'menu_rounded'}"}
+  },
+  "mobileLinks": {
+   "type": "column",
+   "visible": false,
+   "media": [{"maxWidth": 699, "patch": {"bind": {"visible": "${menu}"}}}],
+   "children": ["mobileList"],
+   "props": {"crossAxisAlignment": "stretch"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [20, 0, 20, 16]}
+  },
+  "mobileList": {
+   "type": "listView",
+   "children": ["mobileLink"],
+   "props": {"scrollable": false, "scrollDirection": "vertical"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"data": "${props.links}"}
+  },
+  "mobileLink": {
+   "type": "row",
+   "children": ["mobileLinkText"],
+   "props": {"crossAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "height": 44, "padding": [12, 0, 12, 0]},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "menu", "value": "${= false}"}, {"type": "componentEvent", "event": "onNavigate", "value": "${item}"}]}]
+  },
+  "mobileLinkText": {
+   "type": "text",
+   "props": {"text": "${item}", "style": {"from": "bodyWide", "color": "inkSoft"}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
   }
- }
+ },
+ "variables": {"band": [{"name": "menu", "type": "boolean", "value": false}]}
 }
