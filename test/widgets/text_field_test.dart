@@ -11,6 +11,7 @@ import 'package:codelessly_sdk/src/render/controls/tokens.dart' show ControlToke
 import 'package:codelessly_sdk/src/runtime/actions/text_fields.dart' show TextFieldHandle;
 import 'package:flutter/material.dart' hide Node;
 import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import '../controls/toggles_support.dart';
@@ -442,6 +443,28 @@ void main() {
       expect(icon.center.dy, closeTo(f.boxRect.center.dy, 1));
       expect(f.contentRect.left, 20 + 26 + 8 + f.scale.gap);
     });
+  });
+
+  testWidgets('fuzzy search input accepts touch and keyboard and retains field semantics', (tester) async {
+    final semantics = tester.ensureSemantics();
+    final (scope, _) = await show(tester, {
+      'type': 'textField', 'layout': {'width': 240, 'height': 44},
+      'props': {'decoration': {'labelText': 'Search episodes'}},
+      'bind': {'props.initialValue': r'${query}'},
+      'actions': [harness.reaction('changed', [
+        {'type': 'setVariable', 'variable': 'query', 'value': r'${result}'},
+      ])],
+    }, [harness.v('query', '')]);
+    await tapField(tester, textField(tester));
+    await typeInto(tester, 'ligth');
+    expect(scope.read('query'), 'ligth');
+    expect(FormulaEvaluator.evaluate('fuzzy(["The keeper of the light", "Platform seventeen"], query)',
+        (path) => path == 'query' ? scope.read('query') : null), ['The keeper of the light']);
+    await tester.sendKeyEvent(LogicalKeyboardKey.tab);
+    await tester.pump();
+    final tree = tester.binding.pipelineOwner.semanticsOwner!.rootSemanticsNode!.toStringDeep();
+    expect(tree, contains('Search episodes'));
+    semantics.dispose();
   });
 
   group('typing into a bound field', () {
