@@ -126,3 +126,31 @@ SSUI's.
 `tier5` is the ten pages written with the blocks on offer: 1 notation issue, 0 render errors. The model used
 them on the landing, pricing and dashboard pages; those pages match the default grammar's layout with more
 finish (icons in the logo strip, arrows in the change pills, a plan's check marks).
+
+## At a tablet's and a phone's width (2026-11-15)
+
+Every arm above was written and judged 1280 wide. The twenty sites of test 5 (CodelesslyEditor
+`docs/projects/2026-11-milestone-1`) were rendered at 834 and 390 as well, and squeezed: cards three across a
+phone, a table's fixed columns past the edge, a sidebar beside its content, each a layout error.
+
+The notation now lays a page out narrower by itself: on a canvas 700 wide or wider the expander adds media
+rules below 1024 and below 700 (CodelesslyAPI `lib/src/core/notation/reflow.dart`, and
+`docs/design/13-compact-notation.md` §14 for the rules), and leaves the page at the width it was written for as
+it was. `expand --no-reflow` turns it off.
+
+Render errors, before → with the reflow, with no change to any page's notation:
+
+| Pages | 1440 | 834 | 390 |
+|---|---|---|---|
+| `tier5` (ten pages) | 0 → 0 | 52 → 0 | 74 → 0 |
+| Seven of the test 5 sites (50 pages: Second Canopy, Slow Atlas, Low Tide Radio, Quill, Relay, Pedal, Casa Brasa) | 0 → 0 | 8 → 0 | 130 → 2 |
+
+The two left: a carousel of a fixed height whose quote takes more lines on a phone, and a `Segments` whose
+labels are wider than a phone's third. Two blocks changed with it: `SiteNav` hides its links and its second
+action on a phone, and `PostCard`'s tag gives way when it is longer than the card. A `Donut` written with
+`labels` now draws them as a legend beside it, which goes under it where there is no room.
+
+Not done: the links a `Nav` hides and the panes an `App` hides have no menu on a phone unless the page writes
+one (`show:phone`).
+
+`tool/render/render.sh` also runs under Git Bash on Windows now (it gave Dart `/c/…` paths).
