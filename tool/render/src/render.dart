@@ -6,6 +6,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:codelessly_api/codelessly_api.dart' as api;
@@ -93,6 +94,7 @@ const runtimeCodes = <(String, String, String)>[
   ('image_failed', 'error', 'An image could not be loaded or decoded: a file named by a path relative to the site that is not there (the message names it), or a bad data: URL.'),
   ('image_network', 'warning', 'An image is on the network: the render command does not fetch it, so it is blank in the screenshot.'),
   ('empty_screen', 'warning', 'The screen drew no node boxes (nothing to show).'),
+  ('transparent_background', 'warning', 'At least 2% of a capture has nothing painted behind it: there a reader sees the host\'s background (black in an app with none, the page\'s color in a browser), not the document\'s. Give the screen\'s canvas a fill.'),
   ('set_overwritten', 'warning', 'A reaction (a timer, a load) wrote a variable a --set step set, after the step: the capture shows the --set value. Pin a clock with --now.'),
   ('component_missing', 'error', 'A call rendered without its component\'s definition (or nested past the depth limit): an empty box of its size. The message names the call by path.'),
 ];
@@ -778,6 +780,18 @@ Future<void> _renderAll(
         File(file).writeAsBytesSync(await _captureFullPage(tester, ro, page, binding));
       }
       report.images.add(file);
+      // Nothing painted behind part of the screen: there, a reader sees the host's background (an app's or a
+      // browser page's), which the document does not choose.
+      final bare = await tester.runAsync(() => _transparentShare(File(file).readAsBytesSync()));
+      if (bare != null && bare >= 0.02) {
+        final canvasId = published.layoutOfCanvas.keys.firstWhere((c) => published.layoutOfCanvas[c] == screen, orElse: () => '');
+        issue(RuntimeIssue('transparent_background', 'warning',
+            '${(bare * 100).toStringAsFixed(bare < 0.1 ? 1 : 0)}% of the capture has nothing painted behind it (transparent in the PNG): '
+            'what shows there is the host\'s background, not the document\'s (an app\'s, often black; a browser page\'s, often white). '
+            'Give the screen\'s canvas a fill: "decoration": {"fills": [{"color": "#FFFFFFFF"}]} (or a theme color).',
+            nodeId: canvasId.isEmpty ? null : canvasId, screen: label, size: sizeName,
+            file: canvasId.isEmpty ? null : fileOfNode[canvasId]));
+      }
       if (args.compare case final String reference) {
         final found = referenceFor(file, reference, map: args.compareMap);
         if (found.file == null) {
@@ -2343,4 +2357,24 @@ String? _shownText(NodeBox box) {
 
   visit(box);
   return out;
+}
+
+/// The share of [png]'s pixels that are fully transparent, or null when it does not decode.
+Future<double?> _transparentShare(List<int> png) async {
+  try {
+    final codec = await ui.instantiateImageCodec(Uint8List.fromList(png));
+    final image = (await codec.getNextFrame()).image;
+    final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
+    final total = image.width * image.height;
+    image.dispose();
+    if (data == null || total == 0) return null;
+    final bytes = data.buffer.asUint8List();
+    var bare = 0;
+    for (var i = 3; i < bytes.length; i += 4) {
+      if (bytes[i] == 0) bare++;
+    }
+    return bare / total;
+  } catch (_) {
+    return null;
+  }
 }
