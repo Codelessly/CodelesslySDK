@@ -32,6 +32,7 @@ import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
 import 'package:codelessly_sdk/src/render/layout/fit_box.dart' show RenderCodelesslyFlex;
 import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField, textFieldIn;
+import 'package:codelessly_sdk/src/widgets/collections_table.dart' show RenderRunningTable;
 
 import 'args.dart';
 import 'compare.dart';
@@ -53,16 +54,7 @@ final class RuntimeIssue {
   final String? file;
   final String? path;
 
-  api.Json toJson() => {
-        'code': code,
-        'severity': severity,
-        'path': path ?? '',
-        'message': message,
-        'nodeId': ?nodeId,
-        'screen': ?screen,
-        'size': ?size,
-        'file': ?file,
-      };
+  api.Json toJson() => {'code': code, 'severity': severity, 'path': path ?? '', 'message': message, 'nodeId': ?nodeId, 'screen': ?screen, 'size': ?size, 'file': ?file};
 
   String get key => '$code|$nodeId|$message';
 }
@@ -147,8 +139,7 @@ final class _OutDirExporter implements FileExporter {
 final class _Recorder implements AnalyticsService {
   final List<(Object, String?)> errors = [];
   @override
-  void logError(Object error, {StackTrace? stackTrace, String? message, String? type, Map<String, Object?> context = const {}}) =>
-      errors.add((error, message));
+  void logError(Object error, {StackTrace? stackTrace, String? message, String? type, Map<String, Object?> context = const {}}) => errors.add((error, message));
   @override
   void logEvent(String name, [Map<String, Object?> parameters = const {}]) {}
   @override
@@ -163,11 +154,12 @@ List<({String name, String path, String text})> loadInputs(List<String> inputs) 
     final type = FileSystemEntity.typeSync(input);
     final files = <File>[];
     if (type == FileSystemEntityType.directory) {
-      files.addAll(Directory(input).listSync().whereType<File>().where((f) {
-        final base = f.uri.pathSegments.last;
-        return base.endsWith('.json') && !base.startsWith('_') && !RegExp(r'^diagnostics(-.*)?\.json$').hasMatch(base);
-      }).toList()
-        ..sort((a, b) => a.path.compareTo(b.path)));
+      files.addAll(
+        Directory(input).listSync().whereType<File>().where((f) {
+          final base = f.uri.pathSegments.last;
+          return base.endsWith('.json') && !base.startsWith('_') && !RegExp(r'^diagnostics(-.*)?\.json$').hasMatch(base);
+        }).toList()..sort((a, b) => a.path.compareTo(b.path)),
+      );
     } else if (type == FileSystemEntityType.file) {
       files.add(File(input));
     }
@@ -208,7 +200,8 @@ List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics, {List<String
       'code': 'page_not_written',
       'severity': 'warning',
       'file': file,
-      'message': '$file is listed in site.json, file not written yet'
+      'message':
+          '$file is listed in site.json, file not written yet'
           '${links.isEmpty ? '' : ': ${links.length} link${links.length == 1 ? '' : 's'} name${links.length == 1 ? 's' : ''} its screen "$stem" (${where.take(6).join('; ')}${where.length > 6 ? '; and ${where.length - 6} more' : ''})'}. '
           'Links to it are checked once it is written; its canvas id is the screen they name.',
       if (links.isNotEmpty) 'count': links.length,
@@ -227,7 +220,8 @@ List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics, {List<String
     final where = [for (final g in group) '${g['file'] == null ? '' : '${g['file']} '}${g['path']}'];
     out.add({
       ...d,
-      'message': 'No screen "$to": ${group.length} links name it (${where.take(6).join('; ')}${where.length > 6 ? '; and ${where.length - 6} more' : ''}). '
+      'message':
+          'No screen "$to": ${group.length} links name it (${where.take(6).join('; ')}${where.length > 6 ? '; and ${where.length - 6} more' : ''}). '
           '"to" is a canvas id of a page of the site: list every page in site.json\'s "pages" before writing the pages that link to them, '
           'or correct the links.',
       'count': group.length,
@@ -243,7 +237,8 @@ List<api.Json> _summarizeUnknownScreens(List<api.Json> diagnostics, {List<String
         {
           ...d,
           'severity': 'warning',
-          'message': '${d['message']} It may be a canvas of a page listed and not written yet (${unwritten.join(', ')}): '
+          'message':
+              '${d['message']} It may be a canvas of a page listed and not written yet (${unwritten.join(', ')}): '
               'this is an error once every listed page is written.',
         }
       else
@@ -305,10 +300,13 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
     for (final v in api.readList(site.manifest?['variables']) ?? const [])
       if (api.readMap(v) case final api.Json m when (api.readList(m['parameters'])?.isNotEmpty ?? false) && m['name'] is String) m['name'] as String,
   };
-  FormulaReport check(String formula) =>
-      (error: FormulaEvaluator.errorOf(formula, functionNames: functions), paths: FormulaEvaluator.referencedPaths(formula));
+  FormulaReport check(String formula) => (error: FormulaEvaluator.errorOf(formula, functionNames: functions), paths: FormulaEvaluator.referencedPaths(formula));
   final manifest = site.manifest == null ? null : api.SiteManifest.fromJson(site.manifest);
-  final diagnostics = validateProject(docs, options: ValidateOptions(formulas: check, variables: functions), manifest: manifest);
+  final diagnostics = validateProject(
+    docs,
+    options: ValidateOptions(formulas: check, variables: functions),
+    manifest: manifest,
+  );
   // Notes (a schema-2 document, migrated as it loads) are not findings.
   // Pages site.json lists whose files are not there yet (a site written
   // page by page): one note per file, with the links that name its screen.
@@ -318,13 +316,10 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
         for (final p in api.SiteManifest.fromJson(site.manifest).pages)
           if (!File('$i/$p').existsSync()) p,
   ];
-  report.diagnostics.addAll(_summarizeUnknownScreens(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()).toList(),
-      unwritten: unwritten));
+  report.diagnostics.addAll(_summarizeUnknownScreens(diagnostics.where((d) => d.severity != Severity.info).map((d) => d.toJson()).toList(), unwritten: unwritten));
   // The site's theme: its named colors and text styles.
   final themeJson = api.readMap(site.manifest?['theme']);
-  report.diagnostics.addAll(validateTheme(themeJson,
-          breakpoints: site.manifest?['breakpoints'] == null ? null : api.Breakpoints.fromJson(site.manifest!['breakpoints']))
-      .map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
+  report.diagnostics.addAll(validateTheme(themeJson, breakpoints: site.manifest?['breakpoints'] == null ? null : api.Breakpoints.fromJson(site.manifest!['breakpoints'])).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   // The fonts it declares: their shape and formats.
   report.diagnostics.addAll(validateSiteFonts(site.manifest?['fonts']).map((d) => d.withFile(api.SiteManifest.fileName).toJson()));
   if (args.validateOnly || docs.isEmpty) return _finish(report, args);
@@ -342,21 +337,18 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   ].firstOrNull;
   final declared = manifest?.fonts ?? const <api.FontFamily>[];
   final declaredProblems = <DeclaredFontProblem>[];
-  final faces = [
-    ...defaultFonts(root),
-    if (siteDir != null) ...declaredFonts(declared, siteDir, declaredProblems),
-    ...scanFonts(args.fontDirs),
-  ];
+  final faces = [...defaultFonts(root), if (siteDir != null) ...declaredFonts(declared, siteDir, declaredProblems), ...scanFonts(args.fontDirs)];
   for (final p in declaredProblems) {
-    issue(RuntimeIssue('font_missing', 'error',
-        'Font "${p.family}" declares ${p.asset}: ${p.reason}. ${p.missing ? 'Put the file there (paths are relative to site.json)' : 'Declare a .ttf, .otf or .woff file'}; its text falls back meanwhile.',
-        file: api.SiteManifest.fileName));
+    issue(RuntimeIssue('font_missing', 'error', 'Font "${p.family}" declares ${p.asset}: ${p.reason}. ${p.missing ? 'Put the file there (paths are relative to site.json)' : 'Declare a .ttf, .otf or .woff file'}; its text falls back meanwhile.', file: api.SiteManifest.fileName));
   }
   final fetcher = DirectoryFontFetcher(faces);
   await tester.runAsync(() async {
     // The default family and the icon font, registered up front.
     for (final family in const ['Roboto', 'Material Icons']) {
-      final files = [for (final f in faces) if (f.family == family) f.path];
+      final files = [
+        for (final f in faces)
+          if (f.family == family) f.path,
+      ];
       if (files.isEmpty) continue;
       final loader = FontLoader(family == 'Material Icons' ? 'MaterialIcons' : family);
       for (final p in files) {
@@ -427,9 +419,7 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       if (img.status == 'failed') {
         issue(RuntimeIssue('image_failed', 'error', 'Image ${img.url}: ${img.detail}.', nodeId: img.nodeId, file: e.key, path: img.path));
       } else if (img.status == 'network') {
-        issue(RuntimeIssue('image_network', 'warning',
-            'Image ${img.url} is on the network: not fetched here, so it is blank in the screenshots. Use a file next to the document (assets/...) to see it.',
-            nodeId: img.nodeId, file: e.key, path: img.path));
+        issue(RuntimeIssue('image_network', 'warning', 'Image ${img.url} is on the network: not fetched here, so it is blank in the screenshots. Use a file next to the document (assets/...) to see it.', nodeId: img.nodeId, file: e.key, path: img.path));
       }
     }
     // Raster data: URLs (local files included) must decode.
@@ -446,12 +436,14 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
       }
     });
   }
-  final published = publishPages(pages,
-      variables: publishVariables(site.manifest),
-      breakpoints: site.manifest?['breakpoints'],
-      components: [for (final t in components.types) components[t]!.document.toJson()],
-      theme: prepareTheme(themeJson ?? const {}, defaultFamily: 'Roboto'),
-      fonts: declared);
+  final published = publishPages(
+    pages,
+    variables: publishVariables(site.manifest),
+    breakpoints: site.manifest?['breakpoints'],
+    components: [for (final t in components.types) components[t]!.document.toJson()],
+    theme: prepareTheme(themeJson ?? const {}, defaultFamily: 'Roboto'),
+    fonts: declared,
+  );
   final fileOfNode = <String, String>{
     for (final e in docs.entries)
       for (final id in (api.readMap(e.value['nodes']) ?? const {}).keys) id: e.key,
@@ -491,23 +483,33 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   // `--now`: the time now() returns.
   FormulaClock.pinned = args.now;
   // Icons named without a codepoint (a bound name) draw from the font.
-  IconSources.codepointOf = (name, style) =>
-      codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
+  IconSources.codepointOf = (name, style) => codepoints[style == 'filled' ? '${name}_baseline' : '${name}_$style'] ?? codepoints[name];
   try {
     if (alone.isEmpty) {
-      await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report,
-          components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir);
+      await _renderAll(tester, args, faces, published, docs, fileOfNode, fetcher, issue, report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir);
     }
     for (final a in alone) {
       // A preview renders at its own size; ad-hoc parameters at each size.
       final sizes = a.width != null && a.height != null ? [ui.Size(a.width!, a.height!)] : args.sizes;
-      await _renderAll(tester, args.copyWith(sizes: sizes, screens: [a.name]), faces, published, docs, fileOfNode, fetcher, issue,
-          report, components: components, fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none), svgUsers: svgUsers, siteDir: siteDir);
+      await _renderAll(
+        tester,
+        args.copyWith(sizes: sizes, screens: [a.name]),
+        faces,
+        published,
+        docs,
+        fileOfNode,
+        fetcher,
+        issue,
+        report,
+        components: components,
+        fontUsers: _fontUsers(docs, manifest?.theme ?? api.ThemeTokens.none),
+        svgUsers: svgUsers,
+        siteDir: siteDir,
+      );
     }
     for (final e in components.missing.entries) {
       for (final path in e.value) {
-        issue(RuntimeIssue('component_missing', 'error', 'Call "$path" renders ${e.key}, which no component document of the site defines.',
-            nodeId: path));
+        issue(RuntimeIssue('component_missing', 'error', 'Call "$path" renders ${e.key}, which no component document of the site defines.', nodeId: path));
       }
     }
   } finally {
@@ -526,24 +528,18 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   return _finish(report, args);
 }
 
-Future<void> _renderAll(
-  WidgetTester tester,
-  RenderArgs args,
-  List<FontFace> faces,
-  ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published,
-  Map<String, api.Json> docs,
-  Map<String, String> fileOfNode,
-  DirectoryFontFetcher fetcher,
-  void Function(RuntimeIssue) issue,
-  RenderReport report, {
-  ComponentRegistry? components,
-  Map<String, List<String>> fontUsers = const {},
-  Map<String, Set<String>> svgUsers = const {},
-  String? siteDir,
-}) async {
+Future<void> _renderAll(WidgetTester tester, RenderArgs args, List<FontFace> faces, ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published, Map<String, api.Json> docs, Map<String, String> fileOfNode, DirectoryFontFetcher fetcher, void Function(RuntimeIssue) issue, RenderReport report, {ComponentRegistry? components, Map<String, List<String>> fontUsers = const {}, Map<String, Set<String>> svgUsers = const {}, String? siteDir}) async {
   // 3. Which screens.
-  final screens = _screens(published, docs, args.screens, (s) => issue(s),
-      components: [if (components != null) for (final t in components.types) components[t]!.document.toJson()]);
+  final screens = _screens(
+    published,
+    docs,
+    args.screens,
+    (s) => issue(s),
+    components: [
+      if (components != null)
+        for (final t in components.types) components[t]!.document.toJson(),
+    ],
+  );
   final recorder = _Recorder();
   final binding = tester.binding;
   final exporter = _OutDirExporter(args.out, report);
@@ -558,13 +554,21 @@ Future<void> _renderAll(
       clipboardAt = (label, sizeName);
       final codelessly = Codelessly(
         // The site's files (declared fonts), read from its folder.
-        loader: MemoryPublishLoader(published.bundle, readAsset: siteDir == null ? null : (path) async {
-          final f = File('$siteDir/$path');
-          return f.existsSync() ? f.readAsBytesSync() : null;
-        }),
+        loader: MemoryPublishLoader(
+          published.bundle,
+          readAsset: siteDir == null
+              ? null
+              : (path) async {
+                  final f = File('$siteDir/$path');
+                  return f.existsSync() ? f.readAsBytesSync() : null;
+                },
+        ),
         components: components,
         fonts: fetcher,
-        config: CodelesslyConfig(services: Services(analytics: recorder, exports: exporter), fontTimeout: const Duration(seconds: 5)),
+        config: CodelesslyConfig(
+          services: Services(analytics: recorder, exports: exporter),
+          fontTimeout: const Duration(seconds: 5),
+        ),
       );
       final controller = CodelesslyWidgetController();
       final navigator = GlobalKey<NavigatorState>();
@@ -604,37 +608,34 @@ Future<void> _renderAll(
           final node = _nodeOfError(details ?? _errorDetails[err]);
           _errorDetails.remove(err);
           final advice = node == null || by == null ? null : _overflowAdvice(binding, node, double.parse(by[1]!), text);
-          issue(RuntimeIssue('render_exception', 'error',
-              node == null
-                  ? '$text (Flutter named no render object for it: it was thrown outside a node\'s layout and paint, while building or in a callback.)'
-                  : advice ?? 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text',
-              nodeId: node?.tree.pathOf(node.id, node.instance),
-              screen: label,
-              size: sizeName,
-              file: node == null ? null : _fileOf(node, fileOfNode, docs)));
+          issue(RuntimeIssue('render_exception', 'error', node == null ? '$text (Flutter named no render object for it: it was thrown outside a node\'s layout and paint, while building or in a callback.)' : advice ?? 'Node "${node.tree.pathOf(node.id, node.instance)}" (${node.node?.type ?? '?'}): $text', nodeId: node?.tree.pathOf(node.id, node.instance), screen: label, size: sizeName, file: node == null ? null : _fileOf(node, fileOfNode, docs)));
         }
         for (final (err, message) in recorder.errors) {
           final node = err is ActionFailed ? err.nodeId : null;
-          issue(RuntimeIssue('action_error', 'error', '${message ?? 'Action failed'}: ${_firstLine('$err')}',
-              nodeId: node, screen: label, size: sizeName, file: node == null ? null : fileOfNode[node]));
+          issue(RuntimeIssue('action_error', 'error', '${message ?? 'Action failed'}: ${_firstLine('$err')}', nodeId: node, screen: label, size: sizeName, file: node == null ? null : fileOfNode[node]));
         }
         recorder.errors.clear();
       }
 
-      await tester.pumpWidget(RepaintBoundary(
-        key: boundary,
-        child: MaterialApp(
-          navigatorKey: navigator,
-          debugShowCheckedModeBanner: false,
-          // The layout's controls take the project's theme, never this one;
-          // their font without one is the platform's (Roboto, as on Android
-          // and the web), given to the published theme ([prepareTheme]).
-          theme: ThemeData(fontFamily: 'Roboto'),
-          builder: (context, child) => DefaultTextStyle.merge(style: const TextStyle(fontFamily: 'Roboto'), child: child!),
-          onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
-          home: CodelesslyWidget(codelessly: codelessly, layoutId: screen, controller: controller),
+      await tester.pumpWidget(
+        RepaintBoundary(
+          key: boundary,
+          child: MaterialApp(
+            navigatorKey: navigator,
+            debugShowCheckedModeBanner: false,
+            // The layout's controls take the project's theme, never this one;
+            // their font without one is the platform's (Roboto, as on Android
+            // and the web), given to the published theme ([prepareTheme]).
+            theme: ThemeData(fontFamily: 'Roboto'),
+            builder: (context, child) => DefaultTextStyle.merge(
+              style: const TextStyle(fontFamily: 'Roboto'),
+              child: child!,
+            ),
+            onGenerateRoute: CodelesslyWidget.onGenerateRoute(codelessly),
+            home: CodelesslyWidget(codelessly: codelessly, layoutId: screen, controller: controller),
+          ),
         ),
-      ));
+      );
       // Loading waits for the layout's fonts (registered with the engine in
       // real time) up to its font timeout (on the test's clock): let both run.
       for (var i = 0; i < 100 && !controller.isLoaded && controller.error == null; i++) {
@@ -644,8 +645,7 @@ Future<void> _renderAll(
       await _settle(tester);
       collect();
       if (!controller.isLoaded) {
-        issue(RuntimeIssue('render_exception', 'error', 'Screen "$label" did not load: ${controller.error ?? 'timed out'}',
-            screen: label, size: sizeName));
+        issue(RuntimeIssue('render_exception', 'error', 'Screen "$label" did not load: ${controller.error ?? 'timed out'}', screen: label, size: sizeName));
         await tester.pumpWidget(const SizedBox());
         await tester.pump(const Duration(seconds: 10));
         controller.dispose();
@@ -656,17 +656,21 @@ Future<void> _renderAll(
       // 4. Interactions, in order.
       final skipped = <String>[];
       for (final step in args.steps) {
-        final problem = await _apply(tester, step, controller, navigator, codelessly, screens: _screenList(published, docs),
-            warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message,
-                nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])));
+        final problem = await _apply(
+          tester,
+          step,
+          controller,
+          navigator,
+          codelessly,
+          screens: _screenList(published, docs),
+          warn: (code, message, nodeId) => issue(RuntimeIssue(code, 'warning', message, nodeId: nodeId, screen: label, size: sizeName, file: nodeId == null ? null : fileOfNode[nodeId])),
+        );
         if (problem != null) {
           // A node hidden at this width, or of another canvas of the screen
           // (another breakpoint's design), is absent here by design: the
           // step is skipped at this size, with a note, not an error.
           final target = step.target.split('/').last.split('#').first;
-          final elsewhere = problem.contains('no node "$target"') &&
-              (fileOfNode.containsKey(target) ||
-                  docs.values.any((d) => (api.readMap(d['nodes']) ?? const {}).values.any((n) => api.readMap(n)?['name'] == target)));
+          final elsewhere = problem.contains('no node "$target"') && (fileOfNode.containsKey(target) || docs.values.any((d) => (api.readMap(d['nodes']) ?? const {}).values.any((n) => api.readMap(n)?['name'] == target)));
           if (problem.startsWith(_notShownHere)) {
             skipped.add('$step (hidden at this width)');
           } else if (elsewhere) {
@@ -683,11 +687,17 @@ Future<void> _renderAll(
       if (skipped.isNotEmpty) {
         // One line per size, not one per step: these nodes are on another
         // breakpoint's canvas of the screen.
-        issue(RuntimeIssue('step_skipped', 'warning',
+        issue(
+          RuntimeIssue(
+            'step_skipped',
+            'warning',
             'Skipped at this size, their nodes not being shown here: ${skipped.join(', ')}. The other steps ran and the capture was made; '
-            'nothing is wrong when the node is meant to be hidden at this width.'
-            '${skipped.any((s) => s.endsWith('(not on the canvas shown at this width)')) ? ' A node on a breakpoint\'s own canvas: to reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.' : ''}',
-            screen: label, size: sizeName));
+                'nothing is wrong when the node is meant to be hidden at this width.'
+                '${skipped.any((s) => s.endsWith('(not on the canvas shown at this width)')) ? ' A node on a breakpoint\'s own canvas: to reach whichever canvas is shown with one step, give the matching nodes the same "name" and name it in the step.' : ''}',
+            screen: label,
+            size: sizeName,
+          ),
+        );
       }
       // Full page: the page's own scroll view (the largest one a user can
       // scroll; a decorative list that does not scroll, or one inside the
@@ -730,10 +740,16 @@ Future<void> _renderAll(
         if (jsonEncode(now) == jsonEncode(e.value)) continue;
         _writeVariable(binding, controller, e.key, e.value);
         await tester.pump();
-        issue(RuntimeIssue('set_overwritten', 'warning',
+        issue(
+          RuntimeIssue(
+            'set_overwritten',
+            'warning',
             '--set ${e.key}: a reaction (a timer, a load) set it to ${jsonEncode(now)} after the step; the capture shows it as set, ${jsonEncode(e.value)}. '
-            'A clock written from now() stays put with --now <ISO time> (now() returns it).',
-            screen: label, size: sizeName));
+                'A clock written from now() stays put with --now <ISO time> (now() returns it).',
+            screen: label,
+            size: sizeName,
+          ),
+        );
       }
 
       // 6. Runtime checks, then the PNG. A font asked for by name late (by
@@ -746,37 +762,39 @@ Future<void> _renderAll(
       for (final m in fetcher.misses) {
         // A weight next to one the family has is drawn with it, as on a
         // device whose font lacks it: not worth a warning.
-        final near = m.substitute != null && m.substitute!.toLowerCase().startsWith('${m.family.toLowerCase()} ') && RegExp(r' (\d+)').firstMatch(m.substitute!) != null &&
-            (int.parse(RegExp(r' (\d+)').firstMatch(m.substitute!)!.group(1)!) - m.weight).abs() <= 100 &&
-            m.substitute!.contains('italic') == m.italic;
+        final near = m.substitute != null && m.substitute!.toLowerCase().startsWith('${m.family.toLowerCase()} ') && RegExp(r' (\d+)').firstMatch(m.substitute!) != null && (int.parse(RegExp(r' (\d+)').firstMatch(m.substitute!)!.group(1)!) - m.weight).abs() <= 100 && m.substitute!.contains('italic') == m.italic;
         if (near) continue;
         final style = '${m.weight}${m.italic ? ' italic' : ''}';
-        final has = [for (final f in faces) if (f.family.toLowerCase() == m.family.toLowerCase()) '${f.weight}${f.italic ? ' italic' : ''}'];
+        final has = [
+          for (final f in faces)
+            if (f.family.toLowerCase() == m.family.toLowerCase()) '${f.weight}${f.italic ? ' italic' : ''}',
+        ];
         final slug = m.family.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
         final unread = [
           for (final u in unreadFonts)
             if (u.path.toLowerCase().replaceAll(RegExp(r'[^a-z0-9/]+'), '').contains(slug)) '${u.path}: ${u.reason}',
         ];
-        final looked = [
-          'the built-in Roboto and Material Icons',
-          if (fontUsers.isNotEmpty) 'site.json\'s fonts',
-          if (args.fontDirs.isNotEmpty) fontDirsOf(args.fontDirs).join(', ') else 'no --fonts directory',
-        ].join('; ');
+        final looked = ['the built-in Roboto and Material Icons', if (fontUsers.isNotEmpty) 'site.json\'s fonts', if (args.fontDirs.isNotEmpty) fontDirsOf(args.fontDirs).join(', ') else 'no --fonts directory'].join('; ');
         final users = [
           ...?fontUsers[m.family.toLowerCase()],
           // An SVG image whose <text> names the family.
           for (final svg in svgUsers[m.family.toLowerCase()] ?? const <String>{}) 'the text of $svg',
         ];
-        issue(RuntimeIssue('font_fallback', 'warning',
+        issue(
+          RuntimeIssue(
+            'font_fallback',
+            'warning',
             'Font "${m.family}" $style (fontFamily "${m.family}", fontWeight ${m.weight}, fontStyle ${m.italic ? 'italic' : 'normal'}) was asked for'
-            '${users.isEmpty ? '' : ' by ${users.take(8).map((u) => '"$u"').join(', ')}${users.length > 8 ? ' and ${users.length - 8} more' : ''}'}; '
-            '${has.isEmpty ? 'no file of that family was found' : 'the family has only ${has.join(', ')}'} in $looked. '
-            '${m.substitute == null ? 'Its text is drawn in the default font.' : 'Drawn with ${m.substitute}.'}'
-            '${unread.isEmpty ? '' : ' Found but not read: ${unread.take(3).join('; ')}.'}'
-            ' Declare it in site.json: "fonts": [{"family": "${m.family}", "fonts": [{"asset": "fonts/<file>.ttf", "weight": ${m.weight}${m.italic ? ', "style": "italic"' : ''}}]}] '
-            '(.ttf, .otf or .woff beside site.json), or pass --fonts <dir> (a font package folder such as node_modules/@fontsource/<family>, '
-            'or `--fonts system` for the system\'s fonts).',
-            nodeId: fontUsers[m.family.toLowerCase()]?.firstOrNull));
+                '${users.isEmpty ? '' : ' by ${users.take(8).map((u) => '"$u"').join(', ')}${users.length > 8 ? ' and ${users.length - 8} more' : ''}'}; '
+                '${has.isEmpty ? 'no file of that family was found' : 'the family has only ${has.join(', ')}'} in $looked. '
+                '${m.substitute == null ? 'Its text is drawn in the default font.' : 'Drawn with ${m.substitute}.'}'
+                '${unread.isEmpty ? '' : ' Found but not read: ${unread.take(3).join('; ')}.'}'
+                ' Declare it in site.json: "fonts": [{"family": "${m.family}", "fonts": [{"asset": "fonts/<file>.ttf", "weight": ${m.weight}${m.italic ? ', "style": "italic"' : ''}}]}] '
+                '(.ttf, .otf or .woff beside site.json), or pass --fonts <dir> (a font package folder such as node_modules/@fontsource/<family>, '
+                'or `--fonts system` for the system\'s fonts).',
+            nodeId: fontUsers[m.family.toLowerCase()]?.firstOrNull,
+          ),
+        );
       }
       final name = '${_fileSafe(label)}@$sizeName${args.theme == null ? '' : '-${args.theme}'}${args.label == null ? '' : '-${_fileSafe(args.label!)}'}.png';
       final file = '${args.out}/$name';
@@ -798,27 +816,39 @@ Future<void> _renderAll(
       final bare = await tester.runAsync(() => _transparentShare(File(file).readAsBytesSync()));
       if (bare != null && bare >= 0.02) {
         final canvasId = published.layoutOfCanvas.keys.firstWhere((c) => published.layoutOfCanvas[c] == screen, orElse: () => '');
-        issue(RuntimeIssue('transparent_background', 'warning',
+        issue(
+          RuntimeIssue(
+            'transparent_background',
+            'warning',
             '${(bare * 100).toStringAsFixed(bare < 0.1 ? 1 : 0)}% of the capture has nothing painted behind it (transparent in the PNG): '
-            'what shows there is the host\'s background, not the document\'s (an app\'s, often black; a browser page\'s, often white). '
-            'Give the screen\'s canvas a fill: "decoration": {"fills": [{"color": "#FFFFFFFF"}]} (or a theme color).',
-            nodeId: canvasId.isEmpty ? null : canvasId, screen: label, size: sizeName,
-            file: canvasId.isEmpty ? null : fileOfNode[canvasId]));
+                'what shows there is the host\'s background, not the document\'s (an app\'s, often black; a browser page\'s, often white). '
+                'Give the screen\'s canvas a fill: "decoration": {"fills": [{"color": "#FFFFFFFF"}]} (or a theme color).',
+            nodeId: canvasId.isEmpty ? null : canvasId,
+            screen: label,
+            size: sizeName,
+            file: canvasId.isEmpty ? null : fileOfNode[canvasId],
+          ),
+        );
       }
       if (args.compare case final String reference) {
         final found = referenceFor(file, reference, map: args.compareMap);
         if (found.file == null) {
-          issue(RuntimeIssue('compare_failed', 'warning',
+          issue(
+            RuntimeIssue(
+              'compare_failed',
+              'warning',
               '--compare: no reference for $name in $reference${found.candidates.isEmpty ? '' : ' among ${found.candidates.map((c) => c.split('/').last).join(', ')}'}: '
-              'a reference matches when its name is the screen, the state (the --label, else default or none) and the size, exactly; '
-              'name the file, give the state the --label the reference names, or map the names with --compare-map ${label.toLowerCase()}=<reference name>.',
-              screen: label, size: sizeName));
+                  'a reference matches when its name is the screen, the state (the --label, else default or none) and the size, exactly; '
+                  'name the file, give the state the --label the reference names, or map the names with --compare-map ${label.toLowerCase()}=<reference name>.',
+              screen: label,
+              size: sizeName,
+            ),
+          );
         } else {
           try {
             report.comparisons.add((await tester.runAsync(() => compareImages(file, found.file!)))!);
           } catch (e) {
-            issue(RuntimeIssue('compare_failed', 'warning', '--compare: ${found.file} could not be compared: ${_firstLine('$e')}',
-                screen: label, size: sizeName));
+            issue(RuntimeIssue('compare_failed', 'warning', '--compare: ${found.file} could not be compared: ${_firstLine('$e')}', screen: label, size: sizeName));
           }
         }
       }
@@ -827,16 +857,7 @@ Future<void> _renderAll(
       final focusedBox = _focusedBox();
       if (focusedBox != null) {
         final scope = ControlFocusScope.focusedScope!;
-        report.focus.add({
-          'image': name,
-          'screen': label,
-          'size': sizeName,
-          'id': focusedBox.id,
-          if (componentInstanceOf(focusedBox.instance) != null) 'path': focusedBox.tree.pathOf(focusedBox.id, focusedBox.instance),
-          'ring': scope.focused!.showsHighlight,
-          if (scope.focused!.label?.call() ?? firstTextUnder(focusedBox) case final String text) 'text': text,
-          if (scope.layer != null) 'inOverlay': true,
-        });
+        report.focus.add({'image': name, 'screen': label, 'size': sizeName, 'id': focusedBox.id, if (componentInstanceOf(focusedBox.instance) != null) 'path': focusedBox.tree.pathOf(focusedBox.id, focusedBox.instance), 'ring': scope.focused!.showsHighlight, if (scope.focused!.label?.call() ?? firstTextUnder(focusedBox) case final String text) 'text': text, if (scope.layer != null) 'inOverlay': true});
       }
       if (args.dumpLayout) {
         final boxes = [
@@ -854,8 +875,7 @@ Future<void> _renderAll(
               if (_shownText(b) case final String text) 'text': text,
             },
         ];
-        File(file.replaceFirst(RegExp(r'\.png$'), '.layout.json'))
-            .writeAsStringSync(const JsonEncoder.withIndent(' ').convert(boxes));
+        File(file.replaceFirst(RegExp(r'\.png$'), '.layout.json')).writeAsStringSync(const JsonEncoder.withIndent(' ').convert(boxes));
       }
 
       // The mouse a --hover step put on the screen leaves with it: the next
@@ -942,11 +962,7 @@ Future<void> _fontsSettled(WidgetTester tester, DirectoryFontFetcher fetcher) as
 
 /// What a screen is called in file names and reports: its canvases'
 /// `props.screen`, else its layout id.
-String _screenName(
-  ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published,
-  Map<String, api.Json> docs,
-  String layout,
-) {
+String _screenName(({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published, Map<String, api.Json> docs, String layout) {
   for (final d in docs.values) {
     final n = api.readMap(api.readMap(d['nodes'])?[layout]);
     final screen = api.readMap(n?['props'])?['screen'];
@@ -957,29 +973,18 @@ String _screenName(
 
 /// Every screen by what a step may name it: its canvases' paths, else
 /// their screen names, else the canvas ids.
-List<String> _screenList(
-  ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published,
-  Map<String, api.Json> docs,
-) =>
-    [
-      for (final d in docs.values)
-        for (final e in (api.readMap(d['nodes']) ?? const {}).entries)
-          if (api.readMap(e.value) case final api.Json n when n['type'] == 'canvas' && published.layoutOfCanvas.containsKey(e.key))
-            n['path'] is String && (n['path'] as String).isNotEmpty ? n['path'] as String : e.key,
-    ];
+List<String> _screenList(({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published, Map<String, api.Json> docs) => [
+  for (final d in docs.values)
+    for (final e in (api.readMap(d['nodes']) ?? const {}).entries)
+      if (api.readMap(e.value) case final api.Json n when n['type'] == 'canvas' && published.layoutOfCanvas.containsKey(e.key)) n['path'] is String && (n['path'] as String).isNotEmpty ? n['path'] as String : e.key,
+];
 
 /// The layouts to render: those [wanted] names (a canvas id, a layout id,
 /// a screen name or a canvas name), else every screen: every layout but the
 /// overlays and backdrops, and but those only ever opened as a modal (an
 /// `openModal` in a page or in a component, [components] included, names
 /// each of its canvases and no `navigate` does).
-List<String> _screens(
-  ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published,
-  Map<String, api.Json> docs,
-  List<String> wanted,
-  void Function(RuntimeIssue) issue, {
-  List<api.Json> components = const [],
-}) {
+List<String> _screens(({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published, Map<String, api.Json> docs, List<String> wanted, void Function(RuntimeIssue) issue, {List<api.Json> components = const []}) {
   final all = published.screens.keys.toList();
   if (wanted.isEmpty) {
     final model = published.bundle.model;
@@ -999,10 +1004,7 @@ List<String> _screens(
     components.forEach(walk);
     bool onlyModal(String layout) {
       final canvases = published.screens[layout] ?? const <String>[];
-      return layout != model.entryLayoutId &&
-          canvases.isNotEmpty &&
-          canvases.every((c) => modals.contains(c) && !navigated.contains(c)) &&
-          !navigated.contains(layout);
+      return layout != model.entryLayoutId && canvases.isNotEmpty && canvases.every((c) => modals.contains(c) && !navigated.contains(c)) && !navigated.contains(layout);
     }
 
     return [
@@ -1082,7 +1084,10 @@ String? _overflowAdvice(WidgetsBinding binding, NodeBox box, double by, String t
   final need = have + by;
   // Its copy in a list: the n-th box of the same node, as `#n` names it.
   final path = box.tree.pathOf(box.id, box.instance);
-  final copies = [for (final b in _boxes(binding)) if (b.id == box.id && identical(b.tree, box.tree) && b.tree.pathOf(b.id, b.instance) == path) b];
+  final copies = [
+    for (final b in _boxes(binding))
+      if (b.id == box.id && identical(b.tree, box.tree) && b.tree.pathOf(b.id, b.instance) == path) b,
+  ];
   final name = copies.length > 1 ? '$path#${copies.indexOf(box)}' : path;
   final kids = <NodeBox>[];
   void visit(RenderObject o) {
@@ -1097,14 +1102,17 @@ String? _overflowAdvice(WidgetsBinding binding, NodeBox box, double by, String t
   final holds = [for (final k in kids.take(8)) '${k.id} ${px(vertical ? k.size.height : k.size.width)}'].join(', ');
   final field = vertical ? n.layout.height : n.layout.width;
   final what = switch (field.fit) {
-    api.SizeFit.fixed => 'Its $axis is fixed at ${px(field.value)} and its content needs ${px(need)} ($holds, with its padding and spacing): '
-        'a text in it takes more lines here than where that $axis was chosen (a longer item of a list, a narrower column). '
-        'Let it grow with its content ({"hug": ${px(field.value)}}), make it at least ${px(need.ceilToDouble())}, '
-        'or cap the text (maxLines with an ellipsis).',
-    api.SizeFit.hug => 'It hugs its content, which needs ${px(need)} ($holds, with its padding and spacing), but its parent gives it '
-        'only ${px(have)}: the parent has a fixed $axis or a max $axis. Let the parent hug too, or let it scroll.',
-    _ => 'It fills ${px(have)} of its parent, and its content needs ${px(need)} ($holds, with its padding and spacing). '
-        'Give the parent more room on that axis (hug), or let this node hug its content.',
+    api.SizeFit.fixed =>
+      'Its $axis is fixed at ${px(field.value)} and its content needs ${px(need)} ($holds, with its padding and spacing): '
+          'a text in it takes more lines here than where that $axis was chosen (a longer item of a list, a narrower column). '
+          'Let it grow with its content ({"hug": ${px(field.value)}}), make it at least ${px(need.ceilToDouble())}, '
+          'or cap the text (maxLines with an ellipsis).',
+    api.SizeFit.hug =>
+      'It hugs its content, which needs ${px(need)} ($holds, with its padding and spacing), but its parent gives it '
+          'only ${px(have)}: the parent has a fixed $axis or a max $axis. Let the parent hug too, or let it scroll.',
+    _ =>
+      'It fills ${px(have)} of its parent, and its content needs ${px(need)} ($holds, with its padding and spacing). '
+          'Give the parent more room on that axis (hug), or let this node hug its content.',
   };
   return 'Node "$name" (${n.type}): its content overflows its $side by ${px(by)} px. $what';
 }
@@ -1159,7 +1167,10 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   final pageIndex = pageBox == null ? -1 : all.indexOf(pageBox);
   final over = pageBox == null
       ? const <NodeBox>[]
-      : [for (final b in _fixedAround(binding, pageBox)) if (all.indexOf(b) > pageIndex && !_isInside(b, page)) b];
+      : [
+          for (final b in _fixedAround(binding, pageBox))
+            if (all.indexOf(b) > pageIndex && !_isInside(b, page)) b,
+        ];
   // The page's route alone: the outermost repaint boundary between the
   // page and its navigator's theater (routes over it are its siblings).
   final theaters = {for (final (_, t) in _theaters()) t};
@@ -1246,8 +1257,7 @@ Future<List<int>> _captureFullPage(WidgetTester tester, RenderRepaintBoundary ro
   // Only the columns the page view covers: what stands beside it (a rail,
   // a sidebar that does not scroll) shows once, in the first window, not
   // again at every seam.
-  void rows(ui.Image img, double top, double height, double to) => canvas.drawImageRect(
-      img, Rect.fromLTWH(view.left - layerAt.dx, top - layerAt.dy, view.width, height), Rect.fromLTWH(view.left, to, view.width, height), paint);
+  void rows(ui.Image img, double top, double height, double to) => canvas.drawImageRect(img, Rect.fromLTWH(view.left - layerAt.dx, top - layerAt.dy, view.width, height), Rect.fromLTWH(view.left, to, view.width, height), paint);
   for (final (img, at) in slices) {
     // The viewport's rows: the page from offset [at].
     rows(img, view.top, view.height, view.top + at);
@@ -1422,8 +1432,7 @@ String? _canvasOf(NodeBox b) {
   // A node inside a component, by path: `plans/card1/cta`; a call by its
   // id (its box is its definition root's): `send`, `sizes#3`.
   final first = id.split('/').first.split('#').first;
-  final byPath = id.contains('/') ||
-      boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first);
+  final byPath = id.contains('/') || boxes.any((b) => b.id != first && b.tree.isInstanceRoot(b.id, b.instance) && b.tree.pathOf(b.id, b.instance) == first);
   if (byPath) {
     for (final b in boxes) {
       final found = b.tree.boxAtPath(id);
@@ -1452,10 +1461,17 @@ String? _canvasOf(NodeBox b) {
   final segments = id.split('/');
   for (var i = 0; i < segments.length; i++) {
     final (name, index) = split(segments[i]);
-    var all = [for (final b in scope) if (b.id == name) b];
+    var all = [
+      for (final b in scope)
+        if (b.id == name) b,
+    ];
     // A node may be named by its `name` too: the same name on a screen's
     // breakpoint canvases reaches whichever is shown.
-    if (all.isEmpty) all = [for (final b in scope) if (b.node?.name == name) b];
+    if (all.isEmpty)
+      all = [
+        for (final b in scope)
+          if (b.node?.name == name) b,
+      ];
     final upTo = segments.take(i + 1).join('/');
     if (all.isEmpty) {
       return (box: null, problem: i == 0 ? 'no node "$name" is on screen' : 'no node "$name" is inside "${segments.take(i).join('/')}"');
@@ -1475,40 +1491,45 @@ String? _canvasOf(NodeBox b) {
       // Under a canvas (`page/saved`), the page's own node: not one of a
       // component's.
       if (kinds.length > 1 && i > 0 && chosen?.node?.type == 'canvas') {
-        final own = [for (final b in kinds.values) if (componentInstanceOf(b.instance) == null) b];
+        final own = [
+          for (final b in kinds.values)
+            if (componentInstanceOf(b.instance) == null) b,
+        ];
         if (own.length == 1) {
           kinds
             ..clear()
             ..['own'] = own.single;
-          all = [for (final b in all) if (componentInstanceOf(b.instance) == null) b];
+          all = [
+            for (final b in all)
+              if (componentInstanceOf(b.instance) == null) b,
+          ];
         }
       }
       if (kinds.length > 1 && prefer != null) {
-        final preferred = [for (final b in kinds.values) if (prefer(b)) b];
+        final preferred = [
+          for (final b in kinds.values)
+            if (prefer(b)) b,
+        ];
         if (preferred.length == 1) {
           final keep = preferred.single;
           kinds
             ..clear()
             ..['preferred'] = keep;
           final keepPath = keep.tree.pathOf(keep.id, keep.instance);
-          all = [for (final b in all) if (identical(b.tree, keep.tree) && b.tree.pathOf(b.id, b.instance) == keepPath) b];
+          all = [
+            for (final b in all)
+              if (identical(b.tree, keep.tree) && b.tree.pathOf(b.id, b.instance) == keepPath) b,
+          ];
         }
       }
       if (kinds.length > 1) {
         final paths = {for (final b in kinds.values) b.tree.pathOf(b.id, b.instance)};
-        final names = [
-          for (final b in kinds.values)
-            paths.length == kinds.length
-                ? b.tree.pathOf(b.id, b.instance)
-                : '${b.tree.pathOf(b.id, b.instance)} (on canvas ${_canvasOf(b) ?? '?'})',
-        ];
-        final write = [
-          for (final b in kinds.values)
-            componentInstanceOf(b.instance) == null ? '${_canvasOf(b) ?? '<canvas id>'}/$name' : b.tree.pathOf(b.id, b.instance),
-        ];
+        final names = [for (final b in kinds.values) paths.length == kinds.length ? b.tree.pathOf(b.id, b.instance) : '${b.tree.pathOf(b.id, b.instance)} (on canvas ${_canvasOf(b) ?? '?'})'];
+        final write = [for (final b in kinds.values) componentInstanceOf(b.instance) == null ? '${_canvasOf(b) ?? '<canvas id>'}/$name' : b.tree.pathOf(b.id, b.instance)];
         return (
           box: null,
-          problem: 'ambiguous: ${kinds.length} different nodes on screen are "$upTo": ${names.join(', ')}. '
+          problem:
+              'ambiguous: ${kinds.length} different nodes on screen are "$upTo": ${names.join(', ')}. '
               'Ids are per document, so a page, a component and a modal may each have one. Name the one meant: '
               '${write.toSet().length == write.length ? write.join(' or ') : 'they are on one canvas: give them different ids'}',
         );
@@ -1521,7 +1542,10 @@ String? _canvasOf(NodeBox b) {
     }
     if (i < segments.length - 1) {
       final within = chosen;
-      scope = [for (final b in boxes) if (!identical(b, within) && _isInside(b, within)) b];
+      scope = [
+        for (final b in boxes)
+          if (!identical(b, within) && _isInside(b, within)) b,
+      ];
     }
   }
   if (chosen != null && !_shown(chosen)) {
@@ -1571,9 +1595,7 @@ ui.Rect _rectOf(RenderBox b) {
   return o & b.size;
 }
 
-Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetController controller,
-    GlobalKey<NavigatorState> navigator, Codelessly codelessly,
-    {required void Function(String code, String message, String? nodeId) warn, List<String> screens = const []}) async {
+Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetController controller, GlobalKey<NavigatorState> navigator, Codelessly codelessly, {required void Function(String code, String message, String? nodeId) warn, List<String> screens = const []}) async {
   final binding = tester.binding;
   ui.Rect viewRect() => ui.Offset.zero & (tester.view.physicalSize / tester.view.devicePixelRatio);
 
@@ -1581,7 +1603,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
   List<RenderObject> hitAt(ui.Offset p) {
     final result = HitTestResult();
     binding.hitTestInView(result, p, tester.view.viewId);
-    return [for (final e in result.path) if (e.target is RenderObject) e.target as RenderObject];
+    return [
+      for (final e in result.path)
+        if (e.target is RenderObject) e.target as RenderObject,
+    ];
   }
 
   // The first point of [box]'s visible part (its center, then a grid over
@@ -1652,7 +1677,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       if (control == null) {
         // A component drawn from nodes (a design system's segmented control,
         // its tabs): its parts are the copies of the node it repeats.
-        final within = [for (final b in _boxes(binding)) if (!identical(b, found.box) && _isInside(b, found.box!) && b.attached && b.hasSize) b];
+        final within = [
+          for (final b in _boxes(binding))
+            if (!identical(b, found.box) && _isInside(b, found.box!) && b.attached && b.hasSize) b,
+        ];
         final byId = <String, List<NodeBox>>{};
         for (final b in within) {
           (byId[b.id] ??= []).add(b);
@@ -1715,7 +1743,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       over == null
           ? '--$verb $id: nothing at the node\'s place takes pointer events (it is hidden, or drawn under something that is not a node).'
           : '--$verb $id: the node is covered by "${over.id}" (${over.node?.type}) wherever it shows; nothing was ${verb == 'tap' ? 'tapped' : 'hovered'}. '
-              'Scroll it from under what overlays it (--scroll), or tap the covering node if that is what was meant.',
+                'Scroll it from under what overlays it (--scroll), or tap the covering node if that is what was meant.',
     );
   }
 
@@ -1725,6 +1753,9 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
     var inWidget = true;
     RenderControl? control;
     for (final o in path) {
+      // A table handles header sorts and body row taps in its own render
+      // object; its cell template is usually just text with no reaction.
+      if (o is RenderRunningTable) return true;
       // A control drawn by the SDK (a button, a switch, a field, a tab bar)
       // takes the tap itself: it changes its value, opens its menu or
       // picker, or fires its node's reactions. Only a control that does
@@ -1739,10 +1770,16 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
         control = null;
       }
       if (o is NodeBox) inWidget = false;
-      if (o is RenderReactions && o.triggers.intersection(const {
-        api.TriggerType.click, api.TriggerType.doubleTap, api.TriggerType.longPress, api.TriggerType.hold, //
-        api.TriggerType.pointerDown, api.TriggerType.pointerUp, api.TriggerType.secondaryClick,
-      }).isNotEmpty) {
+      if (o is RenderReactions &&
+          o.triggers.intersection(const {
+            api.TriggerType.click,
+            api.TriggerType.doubleTap,
+            api.TriggerType.longPress,
+            api.TriggerType.hold, //
+            api.TriggerType.pointerDown,
+            api.TriggerType.pointerUp,
+            api.TriggerType.secondaryClick,
+          }).isNotEmpty) {
         return true;
       }
       if (inWidget && o is RenderPointerListener && (o.onPointerDown != null || o.onPointerUp != null)) return true;
@@ -1767,10 +1804,12 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       final (at, problem) = await pointAt(step.target, 'tap');
       if (at == null) return problem;
       if (!reactsToTap(hitAt(at))) {
-        warn('tap_no_reaction',
-            '--tap ${step.target}: neither the node nor anything around it reacts to a tap (no "click" reaction, button or input), so the tap did nothing. '
-                'Add {"trigger": "click", "actions": [...]} to the node, or tap the node that has it.',
-            step.target.split('#').first.split('@').first);
+        warn(
+          'tap_no_reaction',
+          '--tap ${step.target}: neither the node nor anything around it reacts to a tap (no "click" reaction, button or input), so the tap did nothing. '
+              'Add {"trigger": "click", "actions": [...]} to the node, or tap the node that has it.',
+          step.target.split('#').first.split('@').first,
+        );
       }
       await _unfocusFieldOutside(tester, _boxOf(binding, step.target.replaceFirst(RegExp(r'@\d+$'), '')));
       await tester.tapAt(at);
@@ -1793,11 +1832,7 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       await _unfocusFieldOutside(tester, source);
       // A drag that starts on a long press (a reorder on touch, a long-press
       // draggable) is held first.
-      final held = source != null &&
-          find
-              .byWidgetPredicate((w) => w is LongPressDraggable || w is ReorderableDelayedDragStartListener)
-              .evaluate()
-              .any((e) => e.renderObject != null && (_isInside(source, e.renderObject!) || _isInside(e.renderObject!, source)));
+      final held = source != null && find.byWidgetPredicate((w) => w is LongPressDraggable || w is ReorderableDelayedDragStartListener).evaluate().any((e) => e.renderObject != null && (_isInside(source, e.renderObject!) || _isInside(e.renderObject!, source)));
       // The tree's own draggable (a render object) holds too on touch.
       bool holds(RenderObject o) => o is RenderDragSource && o.startsOnLongPress;
       var ownHeld = false;
@@ -1996,22 +2031,7 @@ Future<void> _unfocusFieldOutside(WidgetTester tester, NodeBox? target) async {
   await tester.pump();
 }
 
-const _keyNames = <String, LogicalKeyboardKey>{
-  'ArrowLeft': LogicalKeyboardKey.arrowLeft,
-  'ArrowRight': LogicalKeyboardKey.arrowRight,
-  'ArrowUp': LogicalKeyboardKey.arrowUp,
-  'ArrowDown': LogicalKeyboardKey.arrowDown,
-  'Enter': LogicalKeyboardKey.enter,
-  'Escape': LogicalKeyboardKey.escape,
-  'Tab': LogicalKeyboardKey.tab,
-  'Space': LogicalKeyboardKey.space,
-  'Home': LogicalKeyboardKey.home,
-  'End': LogicalKeyboardKey.end,
-  'Backspace': LogicalKeyboardKey.backspace,
-  'Delete': LogicalKeyboardKey.delete,
-  'PageUp': LogicalKeyboardKey.pageUp,
-  'PageDown': LogicalKeyboardKey.pageDown,
-};
+const _keyNames = <String, LogicalKeyboardKey>{'ArrowLeft': LogicalKeyboardKey.arrowLeft, 'ArrowRight': LogicalKeyboardKey.arrowRight, 'ArrowUp': LogicalKeyboardKey.arrowUp, 'ArrowDown': LogicalKeyboardKey.arrowDown, 'Enter': LogicalKeyboardKey.enter, 'Escape': LogicalKeyboardKey.escape, 'Tab': LogicalKeyboardKey.tab, 'Space': LogicalKeyboardKey.space, 'Home': LogicalKeyboardKey.home, 'End': LogicalKeyboardKey.end, 'Backspace': LogicalKeyboardKey.backspace, 'Delete': LogicalKeyboardKey.delete, 'PageUp': LogicalKeyboardKey.pageUp, 'PageDown': LogicalKeyboardKey.pageDown};
 
 /// The key named [name] (as the web's `KeyboardEvent.key`: `ArrowRight`,
 /// `Enter`; any case), a letter or a digit.
@@ -2037,7 +2057,10 @@ Object? _stepValue(Step step) {
 /// screen navigated to), else null: steps act on the screen in view.
 ValueScope? _shownScope(WidgetsBinding binding, CodelesslyWidgetController controller) {
   final own = controller.tree;
-  final canvases = [for (final b in _boxes(binding)) if (b.node?.type == 'canvas') b];
+  final canvases = [
+    for (final b in _boxes(binding))
+      if (b.node?.type == 'canvas') b,
+  ];
   if (own == null || canvases.isEmpty || canvases.any((b) => identical(b.tree, own))) return null;
   final top = canvases.last;
   final bindings = top.tree.bindings;
@@ -2068,15 +2091,7 @@ bool _isInside(RenderObject o, RenderObject ancestor) {
 }
 
 /// Overflows, text that doesn't fit or can't be seen, empty screens.
-List<RuntimeIssue> _check(
-  WidgetsBinding binding,
-  ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published,
-  Map<String, api.Json> docs,
-  Map<String, String> fileOfNode,
-  String screen,
-  String size,
-  List<FontFace> faces,
-) {
+List<RuntimeIssue> _check(WidgetsBinding binding, ({api.PublishBundle bundle, Map<String, String> layoutOfCanvas, Map<String, List<String>> screens}) published, Map<String, api.Json> docs, Map<String, String> fileOfNode, String screen, String size, List<FontFace> faces) {
   final out = <RuntimeIssue>[];
   final boxes = _boxes(binding);
   // The glyphs a family has: its regular face's (else Roboto's).
@@ -2084,12 +2099,11 @@ List<RuntimeIssue> _check(
     final fam = (family == null || family.isEmpty) ? 'Roboto' : family;
     // The file the fetcher serves for the family's regular face.
     final face = DirectoryFontFetcher(faces).match(fam, 400, false);
-    final used = face != null && face.family.toLowerCase() == fam.toLowerCase()
-        ? face
-        : faces.where((f) => f.family == 'Roboto' && !f.italic).firstOrNull;
+    final used = face != null && face.family.toLowerCase() == fam.toLowerCase() ? face : faces.where((f) => f.family == 'Roboto' && !f.italic).firstOrNull;
     if (used == null) return null;
     return _coverage.putIfAbsent(used.path, () => fontCoverage(used.path));
   }
+
   if (boxes.isEmpty) {
     out.add(RuntimeIssue('empty_screen', 'warning', 'Screen "$screen" drew no nodes.', screen: screen, size: size));
     return out;
@@ -2107,10 +2121,7 @@ List<RuntimeIssue> _check(
     return null;
   }
 
-
-
-  String? fileOfComponent(String type) =>
-      docs.entries.where((e) => api.readMap(e.value[api.kWidgetKey])?['type'] == type).firstOrNull?.key;
+  String? fileOfComponent(String type) => docs.entries.where((e) => api.readMap(e.value[api.kWidgetKey])?['type'] == type).firstOrNull?.key;
   final view = binding.renderViews.first.size;
   final byKey = <String, NodeBox>{for (final b in boxes) '${b.id}|${b.instance}': b};
   const repeaters = {'listView', 'gridView', 'pageView', 'tableView', 'tabs'};
@@ -2183,14 +2194,10 @@ List<RuntimeIssue> _check(
         if (laid.top >= -1 && laid.bottom <= parentBox.size.height + 1) dy = 0;
       }
       if (dx > 1 && !scrollsAlong(b, true, upTo: parentBox)) {
-        out.add(RuntimeIssue('layout_overflow', 'warning',
-            '"${nameOf(b)}" (${node.type}, ${r.width.toStringAsFixed(0)} wide) overflows its parent "$parentName" (${parent.type}, ${pr.width.toStringAsFixed(0)} wide) by ${dx.toStringAsFixed(0)} px horizontally.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+        out.add(RuntimeIssue('layout_overflow', 'warning', '"${nameOf(b)}" (${node.type}, ${r.width.toStringAsFixed(0)} wide) overflows its parent "$parentName" (${parent.type}, ${pr.width.toStringAsFixed(0)} wide) by ${dx.toStringAsFixed(0)} px horizontally.', nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       if (dy > 1 && !scrollsAlong(b, false, upTo: parentBox)) {
-        out.add(RuntimeIssue('layout_overflow', 'warning',
-            '"${nameOf(b)}" (${node.type}, ${r.height.toStringAsFixed(0)} tall) overflows its parent "$parentName" (${parent.type}, ${pr.height.toStringAsFixed(0)} tall) by ${dy.toStringAsFixed(0)} px vertically.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+        out.add(RuntimeIssue('layout_overflow', 'warning', '"${nameOf(b)}" (${node.type}, ${r.height.toStringAsFixed(0)} tall) overflows its parent "$parentName" (${parent.type}, ${pr.height.toStringAsFixed(0)} tall) by ${dy.toStringAsFixed(0)} px vertically.', nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
     }
     // A fill with no room to fill: its parent measured it unbounded on
@@ -2208,27 +2215,31 @@ List<RuntimeIssue> _check(
         final why = parent == null
             ? 'what holds it measures it with no $dim limit'
             : (horizontal ? parent.layout.width : parent.layout.height).fit == api.SizeFit.hug && const {'row', 'column', 'flex'}.contains(parent.type) && !parent.prop(api.FlexProps.wrap)
-                ? 'its parent "$parentName" (${parent.type}) hugs its $dim, so there is no $dim to fill'
-                : parent.type == 'gridView'
-                    ? 'its grid "$parentName" sizes each row to its content, so there is no $dim to fill'
-                    : 'its parent "$parentName" (${parent.type}) measures it with no $dim limit (a hugging or wrapping parent, a grid row sized to its content, or a scroll view)';
-        out.add(RuntimeIssue('fill_fallback', 'warning',
+            ? 'its parent "$parentName" (${parent.type}) hugs its $dim, so there is no $dim to fill'
+            : parent.type == 'gridView'
+            ? 'its grid "$parentName" sizes each row to its content, so there is no $dim to fill'
+            : 'its parent "$parentName" (${parent.type}) measures it with no $dim limit (a hugging or wrapping parent, a grid row sized to its content, or a scroll view)';
+        out.add(
+          RuntimeIssue(
+            'fill_fallback',
+            'warning',
             '"${nameOf(b)}" (${node.type}) fills its $dim, but $why: it takes its design $dim, ${design.toStringAsFixed(0)} px (the number in {"fill": ${design.toStringAsFixed(0)}}). '
-            '${horizontal ? '' : 'To line up the bottoms of cards in a row, put the decoration on the stretched child itself and push its footer with a spacer (a spacer fills what stretching adds); or '}'
-            'give the parent a definite $dim (fixed, or fill inside a parent that has one), or make this node hug its $dim.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+                '${horizontal ? '' : 'To line up the bottoms of cards in a row, put the decoration on the stretched child itself and push its footer with a spacer (a spacer fills what stretching adds); or '}'
+                'give the parent a definite $dim (fixed, or fill inside a parent that has one), or make this node hug its $dim.',
+            nodeId: nameOf(b),
+            screen: screen,
+            size: size,
+            file: file,
+          ),
+        );
       }
     }
     // Past the screen (the part not clipped away by an ancestor).
     if (!seen.isEmpty && seen.right > view.width + 1 && !scrollsAlong(b, true)) {
-      out.add(RuntimeIssue('offscreen', 'warning',
-          '"${nameOf(b)}" (${node.type}) ends at x=${seen.right.toStringAsFixed(0)}, past the ${view.width.toStringAsFixed(0)} px wide screen.',
-          nodeId: nameOf(b), screen: screen, size: size, file: file));
+      out.add(RuntimeIssue('offscreen', 'warning', '"${nameOf(b)}" (${node.type}) ends at x=${seen.right.toStringAsFixed(0)}, past the ${view.width.toStringAsFixed(0)} px wide screen.', nodeId: nameOf(b), screen: screen, size: size, file: file));
     }
     if (!seen.isEmpty && seen.bottom > view.height + 1 && !scrollsAlong(b, false)) {
-      out.add(RuntimeIssue('offscreen', 'warning',
-          '"${nameOf(b)}" (${node.type}) ends at y=${seen.bottom.toStringAsFixed(0)}, below the ${view.height.toStringAsFixed(0)} px tall screen, and nothing scrolls: make the body column scrollable ("scrollable": true).',
-          nodeId: nameOf(b), screen: screen, size: size, file: file));
+      out.add(RuntimeIssue('offscreen', 'warning', '"${nameOf(b)}" (${node.type}) ends at y=${seen.bottom.toStringAsFixed(0)}, below the ${view.height.toStringAsFixed(0)} px tall screen, and nothing scrolls: make the body column scrollable ("scrollable": true).', nodeId: nameOf(b), screen: screen, size: size, file: file));
     }
     // Icons that draw nothing.
     if (node.type == 'icon' && b.drawn) {
@@ -2236,10 +2247,18 @@ List<RuntimeIssue> _check(
       final icon = glyph?.icon ?? const {};
       final image = icon['image'] ?? icon['svg'];
       if (glyph != null && image == null && IconSources.glyphOf(icon) == null) {
-        out.add(RuntimeIssue('icon_not_drawn', 'warning',
+        out.add(
+          RuntimeIssue(
+            'icon_not_drawn',
+            'warning',
             'Icon "${nameOf(b)}" draws nothing: ${icon.isEmpty ? 'it names no icon' : '${jsonEncode(icon)} is not a Material icon the renderer knows'}. '
-            'Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+                'Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.',
+            nodeId: nameOf(b),
+            screen: screen,
+            size: size,
+            file: file,
+          ),
+        );
       }
     }
     // A path drawn past its box, where that part shows (no ancestor clips
@@ -2251,15 +2270,21 @@ List<RuntimeIssue> _check(
       if (bounds != null && viewBox == null) {
         final drawn = bounds.shift(r.topLeft);
         final shown = clip == null ? drawn : drawn.intersect(clip);
-        final past = shown.isEmpty
-            ? 0.0
-            : math.max(math.max(r.left - shown.left, shown.right - r.right), math.max(r.top - shown.top, shown.bottom - r.bottom));
+        final past = shown.isEmpty ? 0.0 : math.max(math.max(r.left - shown.left, shown.right - r.right), math.max(r.top - shown.top, shown.bottom - r.bottom));
         if (past > 1) {
-          out.add(RuntimeIssue('path_overflow', 'warning',
+          out.add(
+            RuntimeIssue(
+              'path_overflow',
+              'warning',
               'The path of "${nameOf(b)}" reaches ${past.toStringAsFixed(0)} px past its ${b.size.width.toStringAsFixed(0)}x${b.size.height.toStringAsFixed(0)} box '
-              '(path coordinates are the box\'s own pixels, from its top left), and nothing clips that part away. '
-              'Give it "viewBox": [w, h] to scale it into the box, or set "decoration": {"clip": "hardEdge"} on an ancestor.',
-              nodeId: nameOf(b), screen: screen, size: size, file: file));
+                  '(path coordinates are the box\'s own pixels, from its top left), and nothing clips that part away. '
+                  'Give it "viewBox": [w, h] to scale it into the box, or set "decoration": {"clip": "hardEdge"} on an ancestor.',
+              nodeId: nameOf(b),
+              screen: screen,
+              size: size,
+              file: file,
+            ),
+          );
         }
       }
     }
@@ -2287,28 +2312,41 @@ List<RuntimeIssue> _check(
         return true;
       });
       if (missing.isNotEmpty) {
-        out.add(RuntimeIssue('missing_glyph', 'warning',
+        out.add(
+          RuntimeIssue(
+            'missing_glyph',
+            'warning',
             'Text "${nameOf(b)}" has ${missing.map((c) => '"$c" (U+${c.runes.first.toRadixString(16).toUpperCase().padLeft(4, '0')})').join(', ')}, which its font has no glyph for: drawn as an empty box. '
-            'Use a character the font has, an icon node, or a box with a "path" for a small mark.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+                'Use a character the font has, an icon node, or a box with a "path" for a small mark.',
+            nodeId: nameOf(b),
+            screen: screen,
+            size: size,
+            file: file,
+          ),
+        );
       }
       final cut = node.prop(api.TextProps.overflow) != api.TextOverflow.clip;
       if (p.didExceedMaxLines && !cut) {
-        out.add(RuntimeIssue('text_truncated', 'warning', 'Text "${nameOf(b)}" ("$short") is cut at maxLines: set "overflow": "ellipsis" if that is meant, or give it more lines.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+        out.add(RuntimeIssue('text_truncated', 'warning', 'Text "${nameOf(b)}" ("$short") is cut at maxLines: set "overflow": "ellipsis" if that is meant, or give it more lines.', nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       final needH = p.getMaxIntrinsicHeight(b.size.width);
       final needW = p.getMinIntrinsicWidth(double.infinity);
       if (needH > b.size.height + 1.5 && !p.didExceedMaxLines) {
-        out.add(RuntimeIssue('text_clipped', 'warning',
-            'Text "${nameOf(b)}" ("$short") needs ${needH.toStringAsFixed(0)} px of height at ${b.size.width.toStringAsFixed(0)} wide but its box is ${b.size.height.toStringAsFixed(0)}: give it {"hug": n} height or more room.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+        out.add(RuntimeIssue('text_clipped', 'warning', 'Text "${nameOf(b)}" ("$short") needs ${needH.toStringAsFixed(0)} px of height at ${b.size.width.toStringAsFixed(0)} wide but its box is ${b.size.height.toStringAsFixed(0)}: give it {"hug": n} height or more room.', nodeId: nameOf(b), screen: screen, size: size, file: file));
       }
       if (needW > b.size.width + 1.5 && node.prop(api.TextProps.maxLines) == null) {
-        out.add(RuntimeIssue('text_clipped', 'warning',
+        out.add(
+          RuntimeIssue(
+            'text_clipped',
+            'warning',
             'Text "${nameOf(b)}" ("$short") has a word ${needW.toStringAsFixed(0)} px wide in a box ${b.size.width.toStringAsFixed(0)} wide: it is cut. '
-            'Give the text more width (a fill or larger width), a smaller font size, or "scaleDown": true.',
-            nodeId: nameOf(b), screen: screen, size: size, file: file));
+                'Give the text more width (a fill or larger width), a smaller font size, or "scaleDown": true.',
+            nodeId: nameOf(b),
+            screen: screen,
+            size: size,
+            file: file,
+          ),
+        );
       }
     }
   }
@@ -2334,16 +2372,18 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
   // Errors first, then warnings; each group in document order.
   report.diagnostics.sort((a, b) => (a['severity'] == 'error' ? 0 : 1).compareTo(b['severity'] == 'error' ? 0 : 1));
   Directory(args.out).createSync(recursive: true);
-  File('${args.out}/${diagnosticsFileName(args.label)}').writeAsStringSync(const JsonEncoder.withIndent('  ').convert({
-    'errors': report.errors,
-    'warnings': report.warnings,
-    'images': [for (final i in report.images) i.split('/').last],
-    if (report.comparisons.isNotEmpty) 'comparisons': [for (final c in report.comparisons) c.toJson()],
-    if (report.downloads.isNotEmpty) 'downloads': report.downloads,
-    if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
-    if (report.focus.isNotEmpty) 'focus': report.focus,
-    'diagnostics': report.diagnostics,
-  }));
+  File('${args.out}/${diagnosticsFileName(args.label)}').writeAsStringSync(
+    const JsonEncoder.withIndent('  ').convert({
+      'errors': report.errors,
+      'warnings': report.warnings,
+      'images': [for (final i in report.images) i.split('/').last],
+      if (report.comparisons.isNotEmpty) 'comparisons': [for (final c in report.comparisons) c.toJson()],
+      if (report.downloads.isNotEmpty) 'downloads': report.downloads,
+      if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
+      if (report.focus.isNotEmpty) 'focus': report.focus,
+      'diagnostics': report.diagnostics,
+    }),
+  );
   return report;
 }
 
@@ -2351,13 +2391,11 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
 String formatReport(RenderReport report) {
   final b = StringBuffer();
   for (final d in report.diagnostics) {
-    final where = [
-      if (d['file'] != null) d['file'],
-      if (d['screen'] != null) 'screen ${d['screen']}',
-      if (d['size'] != null) d['size'],
-    ].join(' ');
-    b.writeln('${(d['severity'] as String).toUpperCase().padRight(7)} ${d['code']}${where.isEmpty ? '' : ' [$where]'}'
-        '${(d['path'] as String?)?.isNotEmpty ?? false ? ' ${d['path']}' : (d['nodeId'] != null ? ' node ${d['nodeId']}' : '')}');
+    final where = [if (d['file'] != null) d['file'], if (d['screen'] != null) 'screen ${d['screen']}', if (d['size'] != null) d['size']].join(' ');
+    b.writeln(
+      '${(d['severity'] as String).toUpperCase().padRight(7)} ${d['code']}${where.isEmpty ? '' : ' [$where]'}'
+      '${(d['path'] as String?)?.isNotEmpty ?? false ? ' ${d['path']}' : (d['nodeId'] != null ? ' node ${d['nodeId']}' : '')}',
+    );
     b.writeln('        ${d['message']}${d['suggestion'] != null ? ' Did you mean "${d['suggestion']}"?' : ''}');
   }
   for (final i in report.images) {
@@ -2374,8 +2412,10 @@ String formatReport(RenderReport report) {
     b.writeln('copied to the clipboard: ${jsonEncode(t.length > 120 ? '${t.substring(0, 120)}...' : t)}${c['screen'] == null ? '' : ' [screen ${c['screen']} ${c['size']}]'}');
   }
   for (final f in report.focus) {
-    b.writeln('focus on ${f['path'] ?? f['id']}${f['text'] == null ? '' : ' ${jsonEncode(f['text'])}'}'
-        '${f['ring'] == true ? ' (ring shown)' : ' (no ring)'}${f['inOverlay'] == true ? ', in the open overlay' : ''} [screen ${f['screen']} ${f['size']}]');
+    b.writeln(
+      'focus on ${f['path'] ?? f['id']}${f['text'] == null ? '' : ' ${jsonEncode(f['text'])}'}'
+      '${f['ring'] == true ? ' (ring shown)' : ' (no ring)'}${f['inOverlay'] == true ? ', in the open overlay' : ''} [screen ${f['screen']} ${f['size']}]',
+    );
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();

@@ -19,9 +19,9 @@ const fixtures = 'test/tool/fixtures';
 const a0 = '$fixtures/authoring';
 
 List<String> codes(RenderReport r, [String? severity]) => [
-      for (final d in r.diagnostics)
-        if (severity == null || d['severity'] == severity) d['code'] as String,
-    ];
+  for (final d in r.diagnostics)
+    if (severity == null || d['severity'] == severity) d['code'] as String,
+];
 
 void main() {
   _modalScreens();
@@ -50,35 +50,19 @@ void main() {
   });
 
   testWidgets('interactions run before the capture; full page captures the scroll height', (tester) async {
-    final report = await runRender(
-      tester,
-      RenderArgs(
-        inputs: ['$fixtures/site/home.json', '$fixtures/site/contact.json'],
-        out: out.path,
-        sizes: const [Size(390, 844)],
-        screens: const ['home'],
-        steps: const [Step('tap', 'm-add'), Step('tap', 'm-add'), Step('set', 'count', '40'), Step('tap', 'm-add')],
-        fullPage: true,
-        dumpLayout: true,
-      ),
-    );
+    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/site/home.json', '$fixtures/site/contact.json'], out: out.path, sizes: const [Size(390, 844)], screens: const ['home'], steps: const [Step('tap', 'm-add'), Step('tap', 'm-add'), Step('set', 'count', '40'), Step('tap', 'm-add')], fullPage: true, dumpLayout: true));
     expect(report.errors, 0, reason: '${report.diagnostics}');
     final boxes = jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List;
     final canvas = boxes.firstWhere((b) => b['id'] == 'home-m') as Map;
     expect(canvas['h'], 844, reason: 'full page: the window keeps its size (as a browser\'s full-page capture)');
-    expect(boxes.cast<Map>().map((b) => (b['y'] as num) + (b['h'] as num)).reduce(math.max), greaterThan(844),
-        reason: 'the page\'s content below the window, where the PNG draws it');
+    expect(boxes.cast<Map>().map((b) => (b['y'] as num) + (b['h'] as num)).reduce(math.max), greaterThan(844), reason: 'the page\'s content below the window, where the PNG draws it');
     final bytes = File('${out.path}/home@390x844.png').readAsBytesSync();
     // PNG height (big-endian at 20..23) is the full page.
     expect((bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23], greaterThan(844));
   });
 
   testWidgets('a tap that copies to the clipboard runs the rest of its chain', (tester) async {
-    final report = await runRender(
-      tester,
-      RenderArgs(inputs: ['$fixtures/clipboard.json'], out: out.path, sizes: const [Size(390, 300)],
-          steps: const [Step('tap', 'copy')], dumpLayout: true),
-    ).timeout(const Duration(seconds: 30));
+    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/clipboard.json'], out: out.path, sizes: const [Size(390, 300)], steps: const [Step('tap', 'copy')], dumpLayout: true)).timeout(const Duration(seconds: 30));
     expect(report.errors, 0, reason: '${report.diagnostics}');
     final boxes = jsonDecode(File('${out.path}/home@390x300.layout.json').readAsStringSync()) as List;
     final done = boxes.cast<Map>().firstWhere((b) => b['id'] == 'done');
@@ -86,11 +70,7 @@ void main() {
   });
 
   testWidgets('navigating to a screen of another document', (tester) async {
-    final report = await runRender(
-      tester,
-      RenderArgs(inputs: ['$fixtures/site'], out: out.path, sizes: const [Size(1440, 900)], screens: const ['home'],
-          steps: const [Step('tap', 'd-go')], label: 'contact'),
-    );
+    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/site'], out: out.path, sizes: const [Size(1440, 900)], screens: const ['home'], steps: const [Step('tap', 'd-go')], label: 'contact'));
     expect(report.errors, 0, reason: '${report.diagnostics}');
     expect(File('${out.path}/home@1440x900-contact.png').existsSync(), isTrue);
   });
@@ -101,8 +81,17 @@ void main() {
     expect(
       found,
       containsAll(<String>[
-        'dangling_child', 'unknown_prop', 'invalid_enum', 'wrong_type', 'unknown_field', 'unknown_name', //
-        'layout_field_ignored', 'unknown_bind_path', 'expression_syntax', 'unknown_screen', 'unknown_action_key',
+        'dangling_child',
+        'unknown_prop',
+        'invalid_enum',
+        'wrong_type',
+        'unknown_field',
+        'unknown_name', //
+        'layout_field_ignored',
+        'unknown_bind_path',
+        'expression_syntax',
+        'unknown_screen',
+        'unknown_action_key',
       ]),
     );
     expect(report.errors, greaterThan(0));
@@ -134,37 +123,36 @@ void main() {
   });
 
   testWidgets('an unknown --screen and a missing node to tap are reported', (tester) async {
-    final report = await runRender(
-      tester,
-      RenderArgs(inputs: ['$fixtures/site'], out: out.path, sizes: const [Size(390, 844)], screens: const ['nope', 'contact'],
-          steps: const [Step('tap', 'missing')]),
-    );
+    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/site'], out: out.path, sizes: const [Size(390, 844)], screens: const ['nope', 'contact'], steps: const [Step('tap', 'missing')]));
     expect(codes(report, 'error'), containsAll(<String>['unknown_screen_arg', 'interaction_failed']));
     expect(formatReport(report), contains('error(s)'));
   });
 
   testWidgets('steps for another breakpoint\'s canvas are summarized in one warning', (tester) async {
-    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/site'], out: out.path, sizes: const [Size(390, 844)], screens: const ['home'],
-        steps: const [Step('tap', 'd-go'), Step('hover', 'd-go')]));
-    final skipped = [for (final d in report.diagnostics) if (d['code'] == 'step_skipped') d];
+    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/site'], out: out.path, sizes: const [Size(390, 844)], screens: const ['home'], steps: const [Step('tap', 'd-go'), Step('hover', 'd-go')]));
+    final skipped = [
+      for (final d in report.diagnostics)
+        if (d['code'] == 'step_skipped') d,
+    ];
     expect(skipped, hasLength(1), reason: '${report.diagnostics}');
     expect(skipped.single['severity'], 'warning');
     expect(skipped.single['message'], allOf(contains('--tap d-go'), contains('--hover d-go')));
   });
 
   testWidgets('a step may name a node by its name: the same name on each breakpoint canvas', (tester) async {
-    final report = await runRender(tester, RenderArgs(inputs: ['$a0/named.json'], out: out.path, sizes: const [Size(390, 844), Size(1440, 900)],
-        steps: const [Step('tap', 'go-button')], dumpLayout: true));
+    final report = await runRender(tester, RenderArgs(inputs: ['$a0/named.json'], out: out.path, sizes: const [Size(390, 844), Size(1440, 900)], steps: const [Step('tap', 'go-button')], dumpLayout: true));
     expect(report.diagnostics.where((d) => d['severity'] == 'error' || d['code'] == 'step_skipped'), isEmpty, reason: '${report.diagnostics}');
   });
 
   group('authoring fixes', () {
     const a = '$fixtures/authoring';
-    List<Map> diag(RenderReport r, String code) => [for (final d in r.diagnostics) if (d['code'] == code) d];
+    List<Map> diag(RenderReport r, String code) => [
+      for (final d in r.diagnostics)
+        if (d['code'] == code) d,
+    ];
 
     testWidgets('a tap step reveals its target below an overlaid header and hits it', (tester) async {
-      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('tap', 'target'), Step('tap', 'target')], dumpLayout: true, label: 'two'));
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'target'), Step('tap', 'target')], dumpLayout: true, label: 'two'));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       expect(diag(report, 'tap_no_reaction'), isEmpty);
       // The header was not tapped (its menu would open); the counter shows 2.
@@ -176,8 +164,7 @@ void main() {
     });
 
     testWidgets('a tap on a node with a margin hits its content; a tap with no reaction is reported', (tester) async {
-      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('tap', 'margined'), Step('tap', 'plain')]));
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'margined'), Step('tap', 'plain')]));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       expect(diag(report, 'tap_no_reaction').map((d) => d['nodeId']), ['plain']);
     });
@@ -186,73 +173,233 @@ void main() {
       // Buttons, switches, dropdowns and the rest are render objects that
       // take the tap themselves; the tool used to look only for a reactions
       // layer or a widget's gesture handler and called every such tap dead.
-      final report = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [
-        Step('tap', 'go'), Step('tap', 'sw'), Step('tap', 'seg'), Step('tap', 'check'), Step('tap', 'tileGo'), Step('tap', 'drop'), //
-      ]));
+      final report = await runRender(
+        tester,
+        RenderArgs(
+          inputs: ['$a/control_taps.json'],
+          out: out.path,
+          sizes: const [Size(390, 844)],
+          steps: const [
+            Step('tap', 'go'),
+            Step('tap', 'sw'),
+            Step('tap', 'seg'),
+            Step('tap', 'check'),
+            Step('tap', 'tileGo'),
+            Step('tap', 'drop'), //
+          ],
+        ),
+      );
       expect(report.errors, 0, reason: '${report.diagnostics}');
       expect(diag(report, 'tap_no_reaction'), isEmpty, reason: '${diag(report, 'tap_no_reaction')}');
-      final dead = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('tap', 'bare'), Step('tap', 'tile')], label: 'dead'));
+      final dead = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'bare'), Step('tap', 'tile')], label: 'dead'));
       expect(diag(dead, 'tap_no_reaction').map((d) => d['nodeId']), ['bare', 'tile']);
     });
 
     testWidgets('--image-map reads a network image from a folder; a mapped URL with no file there is image_failed', (tester) async {
       final dir = Directory('${out.path}/im/art/cards')..createSync(recursive: true);
       // A 1x1 PNG.
-      File('${dir.path}/post card.png').writeAsBytesSync(base64Decode(
-          'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='));
-      File('${out.path}/im/doc.json').writeAsStringSync(jsonEncode({
-        'schema': 3, 'roots': ['c'],
-        'nodes': {
-          'c': {'type': 'canvas', 'layout': {'width': 100, 'height': 100}, 'slots': {'body': 'img'},
-            'decoration': {'fills': [{'color': '#FFFFFFFF'}]}},
-          'img': {'type': 'box', 'layout': {'width': 50, 'height': 50}, 'decoration': {'fills': [
-            {'type': 'image', 'image': {'url': 'https://cdn.example.com/art/cards/post%20card.png?v=3', 'fit': 'cover'}},
-          ]}},
-        },
-      }));
-      final mapped = await runRender(tester, RenderArgs(inputs: ['${out.path}/im/doc.json'], out: '${out.path}/im/o1',
-          sizes: const [Size(100, 100)], imageMap: {'https://cdn.example.com/art/': '${out.path}/im/art'}));
+      File('${dir.path}/post card.png').writeAsBytesSync(base64Decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg=='));
+      File('${out.path}/im/doc.json').writeAsStringSync(
+        jsonEncode({
+          'schema': 3,
+          'roots': ['c'],
+          'nodes': {
+            'c': {
+              'type': 'canvas',
+              'layout': {'width': 100, 'height': 100},
+              'slots': {'body': 'img'},
+              'decoration': {
+                'fills': [
+                  {'color': '#FFFFFFFF'},
+                ],
+              },
+            },
+            'img': {
+              'type': 'box',
+              'layout': {'width': 50, 'height': 50},
+              'decoration': {
+                'fills': [
+                  {
+                    'type': 'image',
+                    'image': {'url': 'https://cdn.example.com/art/cards/post%20card.png?v=3', 'fit': 'cover'},
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      );
+      final mapped = await runRender(tester, RenderArgs(inputs: ['${out.path}/im/doc.json'], out: '${out.path}/im/o1', sizes: const [Size(100, 100)], imageMap: {'https://cdn.example.com/art/': '${out.path}/im/art'}));
       expect(diag(mapped, 'image_network'), isEmpty);
       expect(diag(mapped, 'image_failed'), isEmpty);
-      final missing = await runRender(tester, RenderArgs(inputs: ['${out.path}/im/doc.json'], out: '${out.path}/im/o2',
-          sizes: const [Size(100, 100)], imageMap: {'https://cdn.example.com/art/': '${out.path}/im/nothere'}));
+      final missing = await runRender(tester, RenderArgs(inputs: ['${out.path}/im/doc.json'], out: '${out.path}/im/o2', sizes: const [Size(100, 100)], imageMap: {'https://cdn.example.com/art/': '${out.path}/im/nothere'}));
       expect(diag(missing, 'image_failed').single['message'], contains('nothere/cards/post card.png'));
     });
 
     testWidgets('a running table shows new data with as many rows (its cells move to their new items)', (tester) async {
       Directory('${out.path}/tv').createSync(recursive: true);
-      File('${out.path}/tv/doc.json').writeAsStringSync(jsonEncode({
-        'schema': 3, 'roots': ['c'],
-        'variables': {'page_variables': [
-          {'name': 'rows', 'type': 'list', 'value': [{'name': 'A', 'status': 'Awaiting'}, {'name': 'B', 'status': 'Awaiting'}]},
-        ]},
-        'nodes': {
-          'c': {'type': 'canvas', 'layout': {'width': 400, 'height': 300}, 'slots': {'body': 'tbl'},
-            'decoration': {'fills': [{'color': '#FFFFFFFF'}]}},
-          'tbl': {'type': 'tableView', 'layout': {'width': {'fill': 1}, 'height': {'fill': 1}}, 'bind': {'data': r'${rows}'},
-            'props': {'columns': [{'key': 'name', 'label': 'Name'}, {'key': 'status', 'label': 'Status'}]},
-            'slots': {'cell': 'cellText'}},
-          'cellText': {'type': 'text', 'props': {'text': r'${item.value}', 'style': {'color': '#FF000000'}}},
-        },
-      }));
-      await runRender(tester, RenderArgs(inputs: ['${out.path}/tv/doc.json'], out: '${out.path}/tv/o', sizes: const [Size(400, 300)],
-          dumpLayout: true, steps: const [Step('set', 'rows', '[{"name":"A","status":"Declared"},{"name":"B","status":"Counted"}]')]));
+      File('${out.path}/tv/doc.json').writeAsStringSync(
+        jsonEncode({
+          'schema': 3,
+          'roots': ['c'],
+          'variables': {
+            'page_variables': [
+              {
+                'name': 'rows',
+                'type': 'list',
+                'value': [
+                  {'name': 'A', 'status': 'Awaiting'},
+                  {'name': 'B', 'status': 'Awaiting'},
+                ],
+              },
+            ],
+          },
+          'nodes': {
+            'c': {
+              'type': 'canvas',
+              'layout': {'width': 400, 'height': 300},
+              'slots': {'body': 'tbl'},
+              'decoration': {
+                'fills': [
+                  {'color': '#FFFFFFFF'},
+                ],
+              },
+            },
+            'tbl': {
+              'type': 'tableView',
+              'layout': {
+                'width': {'fill': 1},
+                'height': {'fill': 1},
+              },
+              'bind': {'data': r'${rows}'},
+              'props': {
+                'columns': [
+                  {'key': 'name', 'label': 'Name'},
+                  {'key': 'status', 'label': 'Status'},
+                ],
+              },
+              'slots': {'cell': 'cellText'},
+            },
+            'cellText': {
+              'type': 'text',
+              'props': {
+                'text': r'${item.value}',
+                'style': {'color': '#FF000000'},
+              },
+            },
+          },
+        }),
+      );
+      await runRender(tester, RenderArgs(inputs: ['${out.path}/tv/doc.json'], out: '${out.path}/tv/o', sizes: const [Size(400, 300)], dumpLayout: true, steps: const [Step('set', 'rows', '[{"name":"A","status":"Declared"},{"name":"B","status":"Counted"}]')]));
       final boxes = jsonDecode(File('${out.path}/tv/o/c@400x300.layout.json').readAsStringSync()) as List;
-      final texts = [for (final b in boxes.cast<Map>()) if (b['id'] == 'cellText') b['text']];
+      final texts = [
+        for (final b in boxes.cast<Map>())
+          if (b['id'] == 'cellText') b['text'],
+      ];
       expect(texts, ['A', 'Declared', 'B', 'Counted']);
+    });
+
+    testWidgets('a table header tap is recognized and sorts in the render harness', (tester) async {
+      Directory('${out.path}/sortable').createSync(recursive: true);
+      File('${out.path}/sortable/doc.json').writeAsStringSync(
+        jsonEncode({
+          'schema': 3,
+          'roots': ['c'],
+          'variables': {
+            'page_variables': [
+              {
+                'name': 'rows',
+                'type': 'list',
+                'value': [
+                  {'name': 'Beta'},
+                  {'name': 'Alpha'},
+                ],
+              },
+            ],
+          },
+          'nodes': {
+            'c': {
+              'type': 'canvas',
+              'layout': {'width': 390, 'height': 300},
+              'slots': {'body': 'tbl'},
+              'decoration': {
+                'fills': [
+                  {'color': '#FFFFFFFF'},
+                ],
+              },
+            },
+            'tbl': {
+              'type': 'tableView',
+              'layout': {
+                'width': {'fill': 1},
+                'height': 180,
+              },
+              'bind': {'data': r'${rows}'},
+              'props': {
+                'sortable': true,
+                'columns': [
+                  {'key': 'name', 'label': 'Name'},
+                ],
+              },
+              'slots': {'cell': 'cellText', 'columnHeader': 'head'},
+            },
+            'cellText': {
+              'type': 'text',
+              'props': {
+                'text': r'${item.value}',
+                'style': {'color': '#FF000000'},
+              },
+            },
+            'head': {
+              'type': 'text',
+              'props': {
+                'text': r'${item.label}',
+                'style': {'color': '#FF000000'},
+              },
+            },
+          },
+        }),
+      );
+      final report = await runRender(tester, RenderArgs(inputs: ['${out.path}/sortable/doc.json'], out: '${out.path}/sortable/o', sizes: const [Size(390, 300)], dumpLayout: true, steps: const [Step('tap', 'head#0')]));
+      expect(codes(report), isNot(contains('tap_no_reaction')));
+      final boxes = jsonDecode(File('${out.path}/sortable/o/c@390x300.layout.json').readAsStringSync()) as List;
+      expect(
+        [
+          for (final b in boxes.cast<Map>())
+            if (b['id'] == 'cellText') b['text'],
+        ],
+        ['Alpha', 'Beta'],
+      );
     });
 
     testWidgets('a screen with nothing painted behind part of it is reported; a canvas with a fill is not', (tester) async {
       Directory('${out.path}/bg').createSync(recursive: true);
       String doc(bool fill) => jsonEncode({
-            'schema': 3, 'roots': ['c'],
-            'nodes': {
-              'c': {'type': 'canvas', 'layout': {'width': 390, 'height': 844}, 'slots': {'body': 'b'},
-                if (fill) 'decoration': {'fills': [{'color': '#FFFFFFFF'}]}},
-              'b': {'type': 'box', 'layout': {'width': 100, 'height': 100}, 'decoration': {'fills': [{'color': '#FF336699'}]}},
+        'schema': 3,
+        'roots': ['c'],
+        'nodes': {
+          'c': {
+            'type': 'canvas',
+            'layout': {'width': 390, 'height': 844},
+            'slots': {'body': 'b'},
+            if (fill)
+              'decoration': {
+                'fills': [
+                  {'color': '#FFFFFFFF'},
+                ],
+              },
+          },
+          'b': {
+            'type': 'box',
+            'layout': {'width': 100, 'height': 100},
+            'decoration': {
+              'fills': [
+                {'color': '#FF336699'},
+              ],
             },
-          });
+          },
+        },
+      });
       File('${out.path}/bg/bare.json').writeAsStringSync(doc(false));
       File('${out.path}/bg/filled.json').writeAsStringSync(doc(true));
       final bare = await runRender(tester, RenderArgs(inputs: ['${out.path}/bg/bare.json'], out: '${out.path}/bg/o1', sizes: const [Size(390, 844)]));
@@ -262,23 +409,20 @@ void main() {
     });
 
     testWidgets('a part of a control is tapped with @n: the second segment is chosen, and a part that is not there is named (test 4: seven builds)', (tester) async {
-      final report = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('tap', 'seg@1')], label: 'part', dumpLayout: true));
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'seg@1')], label: 'part', dumpLayout: true));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       expect(report.diagnostics.where((d) => d['severity'] == 'warning'), isEmpty, reason: '${report.diagnostics}');
       // The text shown only when the second segment is chosen is laid out.
       final boxes = jsonDecode(File('${out.path}/s@390x844-part.layout.json').readAsStringSync()) as List;
       expect(boxes.any((b) => (b as Map)['id'] == 'picked'), isTrue, reason: 'the tap chose segment B');
-      final missing = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('tap', 'seg@5'), Step('tap', 'go@0')], label: 'nopart'));
+      final missing = await runRender(tester, RenderArgs(inputs: ['$a/control_taps.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'seg@5'), Step('tap', 'go@0')], label: 'nopart'));
       final messages = [for (final d in missing.diagnostics) '${d['message']}'];
       expect(messages.any((m) => m.contains('"seg" has 2 parts (@0 to @1)')), isTrue, reason: '$messages');
       expect(messages.any((m) => m.contains('"go" has no parts to name with @')), isTrue, reason: '$messages');
     });
 
     testWidgets('a key reaction on a text field fires while that field is typed in (test 4: ArrowDown in a search field)', (tester) async {
-      final report = await runRender(tester, RenderArgs(inputs: ['$a/field_keys.json'], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('focus', 'field'), Step('key', 'ArrowDown')], label: 'keys', dumpLayout: true));
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/field_keys.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('focus', 'field'), Step('key', 'ArrowDown')], label: 'keys', dumpLayout: true));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       final boxes = jsonDecode(File('${out.path}/s@390x844-keys.layout.json').readAsStringSync()) as List;
       expect(boxes.any((b) => (b as Map)['id'] == 'picked'), isTrue, reason: 'the field\'s own ArrowDown reaction ran');
@@ -303,27 +447,23 @@ void main() {
     });
 
     testWidgets('a click reaction written on a component call runs in the page\'s scope: it reads and sets the page\'s variables (the generated Sudoku\'s number pad)', (tester) async {
-      final report = await runRender(tester, RenderArgs(inputs: ['$a/test4/call_click'], out: out.path, sizes: const [Size(390, 300)],
-          steps: const [Step('tap', 'tap')], label: 'call', dumpLayout: true));
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/test4/call_click'], out: out.path, sizes: const [Size(390, 300)], steps: const [Step('tap', 'tap')], label: 'call', dumpLayout: true));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       final boxes = jsonDecode(File('${out.path}/s@390x300-call.layout.json').readAsStringSync()) as List;
       expect(boxes.any((b) => (b as Map)['id'] == 'shown'), isTrue, reason: 'count became 1');
     });
 
     testWidgets('a tap on a covered node names what covers it', (tester) async {
-      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('tap', 'last')]));
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'last')]));
       final failed = diag(report, 'interaction_failed');
       expect(failed, hasLength(1), reason: '${report.diagnostics}');
       expect(failed.single['message'], contains('"veil"'));
-      final through = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('tap', 'spacer-top')]));
+      final through = await runRender(tester, RenderArgs(inputs: ['$a/taps.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'spacer-top')]));
       expect(diag(through, 'interaction_failed').single['message'], contains('no fill and no reaction'));
     });
 
     testWidgets('a type step types into a text field, and its bound variable and the text showing it follow', (tester) async {
-      final report = await runRender(tester, RenderArgs(inputs: ['$a/checks.json'], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('focus', 'field'), Step('type', 'field', 'cauliflower')], dumpLayout: true));
+      final report = await runRender(tester, RenderArgs(inputs: ['$a/checks.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('focus', 'field'), Step('type', 'field', 'cauliflower')], dumpLayout: true));
       expect(diag(report, 'interaction_failed'), isEmpty, reason: '${report.diagnostics}');
       final shown = [
         for (final d in report.diagnostics)
@@ -364,8 +504,10 @@ void main() {
 
   group('every diagnostic is true for the document as it renders at that size', () {
     const t = '$fixtures/truth';
-    List<Map<String, Object?>> diag(RenderReport r, String code) =>
-        [for (final d in r.diagnostics) if (d['code'] == code) d.cast<String, Object?>()];
+    List<Map<String, Object?>> diag(RenderReport r, String code) => [
+      for (final d in r.diagnostics)
+        if (d['code'] == code) d.cast<String, Object?>(),
+    ];
 
     testWidgets('a row a media rule makes scroll on phones: its cells are not offscreen nor overflowing', (tester) async {
       final report = await runRender(tester, RenderArgs(inputs: ['$t/scroll_by_media.json'], out: out.path));
@@ -388,8 +530,7 @@ void main() {
     });
 
     testWidgets('a full-page capture after a tap that scrolled shows the whole page from its top', (tester) async {
-      final report = await runRender(tester,
-          RenderArgs(inputs: ['$t/tap_far_down.json'], out: out.path, sizes: const [Size(390, 844)], fullPage: true, steps: const [Step('tap', 'button')]));
+      final report = await runRender(tester, RenderArgs(inputs: ['$t/tap_far_down.json'], out: out.path, sizes: const [Size(390, 844)], fullPage: true, steps: const [Step('tap', 'button')]));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       final bytes = File('${out.path}/long@390x844.png').readAsBytesSync();
       final height = (bytes[20] << 24) | (bytes[21] << 16) | (bytes[22] << 8) | bytes[23];
@@ -404,8 +545,7 @@ void main() {
       expect([px(195, 10, 0), px(195, 10, 1)], [255, 0], reason: 'the red top band at the top of the PNG');
       expect([px(195, 2050, 0), px(195, 2050, 1)], [0, 255], reason: 'the green button at the bottom');
       // A viewport capture shows where the tap scrolled to.
-      final view = await runRender(tester,
-          RenderArgs(inputs: ['$t/tap_far_down.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'button')], label: 'v'));
+      final view = await runRender(tester, RenderArgs(inputs: ['$t/tap_far_down.json'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'button')], label: 'v'));
       expect(view.errors, 0);
       final vb = File('${out.path}/long@390x844-v.png').readAsBytesSync();
       final vimage = await tester.runAsync(() async {
@@ -428,6 +568,7 @@ void main() {
       }
       return out0;
     }
+
     int columns(Map<String, List<Map>> b) => b['plan']!.where((p) => p['y'] == b['plan']!.first['y']).length;
     final m = boxes('390x844'), t = boxes('834x1112'), d = boxes('1440x900');
     expect([columns(m), columns(t), columns(d)], [1, 2, 3], reason: 'auto-fit columns from one bound list');
@@ -454,8 +595,7 @@ void main() {
     });
 
     testWidgets('pages render their calls; steps address nodes inside instances by path', (tester) async {
-      final report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, sizes: const [Size(390, 844)],
-          steps: const [Step('tap', 'card1/btn'), Step('tap', 'card2/btn')], dumpLayout: true));
+      final report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'card1/btn'), Step('tap', 'card2/btn')], dumpLayout: true));
       expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
       final boxes = jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List;
       final paths = {for (final b in boxes) (b as Map)['path'] ?? b['id']};
@@ -467,8 +607,7 @@ void main() {
       var report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, component: 'Card'));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       expect(report.images.map((f) => f.split('/').last), ['Card-hello@320x240.png']);
-      report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, component: 'Card', props: '{"title": "Ad hoc", "count": 5}',
-          slots: '$site/slots.json', sizes: const [Size(390, 844), Size(834, 1112)], dumpLayout: true));
+      report = await runRender(tester, RenderArgs(inputs: [site], out: out.path, component: 'Card', props: '{"title": "Ad hoc", "count": 5}', slots: '$site/slots.json', sizes: const [Size(390, 844), Size(834, 1112)], dumpLayout: true));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       expect(report.images.map((f) => f.split('/').last), ['Card@390x844.png', 'Card@834x1112.png']);
       final boxes = jsonDecode(File('${out.path}/Card@390x844.layout.json').readAsStringSync()) as List;
@@ -479,8 +618,7 @@ void main() {
 
     testWidgets('every component of a site can be rendered alone, each preview at its size', (tester) async {
       expect(parseArgs([site, '--out', 'o', '--components-all']).componentsAll, isTrue);
-      final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/guide-components'], out: out.path, componentsAll: true,
-          sizes: const [Size(390, 844)]));
+      final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/guide-components'], out: out.path, componentsAll: true, sizes: const [Size(390, 844)]));
       expect(report.errors, 0, reason: '${report.diagnostics}');
       expect(report.images.map((f) => f.split('/').last), isNotEmpty);
       expect(report.images.every((f) => f.split('/').last.startsWith('Chip')), isTrue, reason: '${report.images}');
@@ -490,14 +628,23 @@ void main() {
 
     testWidgets('a call to a component the site lacks: validation names it, the render reports it', (tester) async {
       final dir = Directory('${out.path}/site')..createSync();
-      File('${dir.path}/home.json').writeAsStringSync(jsonEncode({
-        'schema': 2,
-        'roots': ['home'],
-        'nodes': {
-          'home': {'type': 'canvas', 'slots': {'body': 'c'}, 'layout': {'width': 390, 'height': 844}},
-          'c': {'type': 'Missing', 'layout': {'width': 100, 'height': 40}},
-        },
-      }));
+      File('${dir.path}/home.json').writeAsStringSync(
+        jsonEncode({
+          'schema': 2,
+          'roots': ['home'],
+          'nodes': {
+            'home': {
+              'type': 'canvas',
+              'slots': {'body': 'c'},
+              'layout': {'width': 390, 'height': 844},
+            },
+            'c': {
+              'type': 'Missing',
+              'layout': {'width': 100, 'height': 40},
+            },
+          },
+        }),
+      );
       File('${dir.path}/site.json').writeAsStringSync('{"schema": 2}');
       final report = await runRender(tester, RenderArgs(inputs: [dir.path], out: '${out.path}/o', sizes: const [Size(390, 844)]));
       expect(codes(report), containsAll(['unknown_component', 'component_missing']));
@@ -507,8 +654,7 @@ void main() {
     // The guide's example (codelessly_api tool/reference/examples/sections,
     // copied): a chip component, its calls, an event and a list of calls.
     testWidgets('the guide\'s components example renders clean, and its event reaches the page', (tester) async {
-      final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/guide-components'], out: out.path,
-          sizes: const [Size(390, 844)], steps: const [Step('tap', 'design/remove')], dumpLayout: true));
+      final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/guide-components'], out: out.path, sizes: const [Size(390, 844)], steps: const [Step('tap', 'design/remove')], dumpLayout: true));
       expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
       final boxes = jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List;
       expect(boxes.where((b) => (b as Map)['id'] == 'text'), hasLength(3), reason: 'one chip called directly, two from the list');
@@ -517,10 +663,8 @@ void main() {
     // The Relay pricing page (m05 c2, B) as a site of sections and components
     // (examples/relay-pricing) draws the same pixels as the one-document page.
     testWidgets('the rewritten Relay pricing page renders pixel-identical to the original', (tester) async {
-      final o = await runRender(tester, RenderArgs(inputs: ['$fixtures/sections/original'], out: '${out.path}/o', sizes: const [Size(390, 844)],
-          fullPage: true, steps: const [Step('tap', 'fq#1')]));
-      final s = await runRender(tester, RenderArgs(inputs: ['examples/relay-pricing'], out: '${out.path}/s', sizes: const [Size(390, 844)], screens: const ['pricing'],
-          fullPage: true, steps: const [Step('tap', 'faq/fq#1')]));
+      final o = await runRender(tester, RenderArgs(inputs: ['$fixtures/sections/original'], out: '${out.path}/o', sizes: const [Size(390, 844)], fullPage: true, steps: const [Step('tap', 'fq#1')]));
+      final s = await runRender(tester, RenderArgs(inputs: ['examples/relay-pricing'], out: '${out.path}/s', sizes: const [Size(390, 844)], screens: const ['pricing'], fullPage: true, steps: const [Step('tap', 'faq/fq#1')]));
       expect(s.errors, 0, reason: '${s.diagnostics}');
       expect(codes(s, 'error'), codes(o, 'error'));
       final a = File(o.images.single).readAsBytesSync(), b = File(s.images.single).readAsBytesSync();
@@ -561,8 +705,7 @@ void main() {
     });
 
     testWidgets('an action naming a node of a component acts on its own instance', (tester) async {
-      final r = await runRender(tester, RenderArgs(inputs: [f], out: out.path, sizes: const [Size(390, 844)], dumpLayout: true,
-          steps: const [Step('tap', 'p2/go'), Step('wait', '12000')]));
+      final r = await runRender(tester, RenderArgs(inputs: [f], out: out.path, sizes: const [Size(390, 844)], dumpLayout: true, steps: const [Step('tap', 'p2/go'), Step('wait', '12000')]));
       expect(codes(r, 'error'), isEmpty, reason: '${r.diagnostics}');
       final boxes = (jsonDecode(File('${out.path}/home@390x844.layout.json').readAsStringSync()) as List).cast<Map>();
       Map at(String path) => boxes.singleWhere((b) => b['path'] == path);
@@ -570,14 +713,14 @@ void main() {
         final list = at('$panel/list'), end = at('$panel/end');
         return (end['y'] as num) >= (list['y'] as num) && (end['y'] as num) + (end['h'] as num) <= (list['y'] as num) + (list['h'] as num) + 0.5;
       }
+
       expect(shows('p2'), isTrue, reason: 'the tapped instance scrolled its own list: $boxes');
       expect(shows('p1'), isFalse, reason: 'the other instance did not move');
     });
   });
 
   testWidgets('a full-page capture keeps the window, so a drawer pinned to its top and bottom covers the first window only', (tester) async {
-    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)],
-        fullPage: true, dumpLayout: true));
+    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)], fullPage: true, dumpLayout: true));
     expect(r.errors, 0, reason: '${r.diagnostics}');
     final boxes = (jsonDecode(File('${out.path}/drawerScreen@390x844.layout.json').readAsStringSync()) as List).cast<Map>();
     final drawer = boxes.singleWhere((b) => b['id'] == 'drawer');
@@ -596,8 +739,7 @@ void main() {
   testWidgets('an unfocus step takes the focus from a field, and a key step presses a key on what has the focus', (tester) async {
     Future<double> moved(List<Step> steps) async {
       final o = Directory('${out.path}/${steps.length}-${steps.first.kind}')..createSync();
-      final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-keys.json'], out: o.path, sizes: const [Size(390, 844)],
-          dumpLayout: true, steps: steps));
+      final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-keys.json'], out: o.path, sizes: const [Size(390, 844)], dumpLayout: true, steps: steps));
       expect(r.errors, 0, reason: '${r.diagnostics}');
       final boxes = (jsonDecode(File('${o.path}/keys@390x844.layout.json').readAsStringSync()) as List).cast<Map>();
       return (boxes.singleWhere((b) => b['id'] == 'moved')['h'] as num).toDouble();
@@ -610,8 +752,7 @@ void main() {
   });
 
   testWidgets('comparing renders matches the same page and finds one pushed down, saying by how much', (tester) async {
-    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)],
-        fullPage: true, compare: '$fixtures/fix3-drawer.json'.replaceFirst('fix3-drawer.json', 'none.png')));
+    final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-drawer.json'], out: out.path, sizes: const [Size(390, 844)], fullPage: true, compare: '$fixtures/fix3-drawer.json'.replaceFirst('fix3-drawer.json', 'none.png')));
     expect(codes(r), ['compare_failed'], reason: '${r.diagnostics}');
     final capture = r.images.single;
     // A reference: the capture 20 px lower under a 20 px band.
@@ -641,9 +782,9 @@ void main() {
     final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-overlap.json'], out: out.path, sizes: const [Size(390, 844), Size(1440, 900)]));
     expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
     Future<List<int>> column(String png, int x, List<int> ys) async => (await tester.runAsync(() async {
-          final img = await decodePng(File('${out.path}/$png').readAsBytesSync());
-          return [for (final y in ys) img.rgba[(y * img.width + x) * 4] << 16 | img.rgba[(y * img.width + x) * 4 + 1] << 8 | img.rgba[(y * img.width + x) * 4 + 2]];
-        }))!;
+      final img = await decodePng(File('${out.path}/$png').readAsBytesSync());
+      return [for (final y in ys) img.rgba[(y * img.width + x) * 4] << 16 | img.rgba[(y * img.width + x) * 4 + 1] << 8 | img.rgba[(y * img.width + x) * 4 + 2]];
+    }))!;
     // On a phone the card is drawn 36 px up, over the hero's bottom; its
     // slot (and the box after it, at 300) do not move.
     expect(await column('overlap@390x844.png', 195, [160, 170, 260, 270, 310]), [0x00FF00, 0xFF0000, 0xFF0000, 0xFFFFFF, 0x0000FF]);
@@ -654,13 +795,10 @@ void main() {
   testWidgets('a media rule may bind: visible on phones only while a variable allows, hidden elsewhere', (tester) async {
     Future<Map<String, double>> heights(List<Step> steps) async {
       final o = Directory('${out.path}/${steps.length}')..createSync();
-      final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-media-bind.json'], out: o.path,
-          sizes: const [Size(390, 844), Size(1440, 900)], dumpLayout: true, steps: steps));
+      final r = await runRender(tester, RenderArgs(inputs: ['$fixtures/fix3-media-bind.json'], out: o.path, sizes: const [Size(390, 844), Size(1440, 900)], dumpLayout: true, steps: steps));
       expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
       return {
-        for (final w in ['390x844', '1440x900'])
-          w: ((jsonDecode(File('${o.path}/mb@$w.layout.json').readAsStringSync()) as List).cast<Map>().singleWhere((b) => b['id'] == 'bar')['h'] as num)
-              .toDouble(),
+        for (final w in ['390x844', '1440x900']) w: ((jsonDecode(File('${o.path}/mb@$w.layout.json').readAsStringSync()) as List).cast<Map>().singleWhere((b) => b['id'] == 'bar')['h'] as num).toDouble(),
       };
     }
 
@@ -671,8 +809,7 @@ void main() {
   // The guide's band example (codelessly_api tool/reference/examples/band.json, copied): a full-width band whose
   // content is capped at 1200 and centered, and a table from one row and one cell template.
   testWidgets('the guide\'s band example: full-width band, content capped and centered, a table from one template', (tester) async {
-    final r = await runRender(tester, RenderArgs(inputs: ['$a0/band.json'], out: out.path, sizes: const [Size(390, 844), Size(1700, 900)],
-        dumpLayout: true));
+    final r = await runRender(tester, RenderArgs(inputs: ['$a0/band.json'], out: out.path, sizes: const [Size(390, 844), Size(1700, 900)], dumpLayout: true));
     expect(r.diagnostics, isEmpty, reason: '${r.diagnostics}');
     List<Map> boxes(String size) => (jsonDecode(File('${out.path}/home@$size.layout.json').readAsStringSync()) as List).cast<Map>();
     final wide = boxes('1700x900');
@@ -693,22 +830,14 @@ void _lateFonts() {
     // by name when the text lays out) and its file takes a while to read.
     DirectoryFontFetcher.debugLatency = const Duration(milliseconds: 1500);
     addTearDown(() => DirectoryFontFetcher.debugLatency = Duration.zero);
-    final report = await runRender(
-        tester,
-        RenderArgs(
-          inputs: ['$fixtures/latefont/page'],
-          out: out.path,
-          sizes: const [Size(390, 844)],
-          fontDirs: const ['$fixtures/latefont/fonts'],
-        ));
+    final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/latefont/page'], out: out.path, sizes: const [Size(390, 844)], fontDirs: const ['$fixtures/latefont/fonts']));
     expect(codes(report), isNot(contains('text_clipped')), reason: '${report.diagnostics}');
     expect(codes(report), isNot(contains('font_fallback')), reason: '${report.diagnostics}');
   });
 }
 
 void _modalScreens() {
-  testWidgets('with no --screen, canvases opened as modals are not rendered as screens: from a page or from inside a component',
-      (tester) async {
+  testWidgets('with no --screen, canvases opened as modals are not rendered as screens: from a page or from inside a component', (tester) async {
     final out = Directory.systemTemp.createTempSync('render_modals');
     addTearDown(() => out.deleteSync(recursive: true));
     final report = await runRender(tester, RenderArgs(inputs: ['$fixtures/modals'], out: out.path, sizes: const [Size(390, 844)]));
