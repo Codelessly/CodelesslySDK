@@ -1,0 +1,76 @@
+state tab="overview"
+state range="30d"
+state q=""
+state orders=[{"id":"#10482","customer":"Maya Reyes","status":"Paid","total":"$142.00","date":"Mar 14"},{"id":"#10481","customer":"Jonas Weber","status":"Pending","total":"$68.50","date":"Mar 14"},{"id":"#10480","customer":"Aisha Khan","status":"Paid","total":"$215.20","date":"Mar 13"},{"id":"#10479","customer":"Liam O'Connor","status":"Refunded","total":"$39.90","date":"Mar 13"},{"id":"#10478","customer":"Sofia Rossi","status":"Paid","total":"$87.00","date":"Mar 12"},{"id":"#10477","customer":"Daniel Kim","status":"Pending","total":"$124.75","date":"Mar 12"},{"id":"#10476","customer":"Chloe Martin","status":"Paid","total":"$56.30","date":"Mar 11"},{"id":"#10475","customer":"Omar Haddad","status":"Refunded","total":"$73.40","date":"Mar 11"}]
+App
+  Sidebar
+    Brand "Harbor" icon:"anchor"
+    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
+    NavItem "Orders" icon:"receipt_long" selected:=tab=="orders" -> tab="orders"
+    NavItem "Inventory" icon:"inventory_2" selected:=tab=="inventory" -> tab="inventory"
+    NavItem "Customers" icon:"group" selected:=tab=="customers" -> tab="customers"
+    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
+    NavItem "Settings" icon:"settings" selected:=tab=="settings" -> tab="settings"
+    Spacer grow
+    Row gap:10 middle
+      Avatar "Sam Patel" size:36
+      Column
+        Text.strong "Sam Patel"
+        Text.caption "Operations lead"
+  Main
+    Nav
+      Heading "Overview" level:1
+      Row gap:12 middle
+        SegmentedButton =range items:["7d","30d","90d"]
+        Input "Search" =q w:220
+        Button "New order" -> emit newOrder
+    Column pad:24 gap:20 scroll
+      Grid cols:4 gap:16
+        StatCard "Revenue" value:"$128,400" icon:"payments_rounded" change:"+8.2%" trend:"up" note:"vs prior period"
+        StatCard "Orders" value:"1,942" icon:"shopping_bag_rounded" change:"+3.1%" trend:"up" note:"vs prior period"
+        StatCard "Returns" value:"2.4%" icon:"assignment_return_rounded" change:"-0.6%" trend:"down" good:false note:"vs prior period"
+        StatCard "Avg. order" value:"$66.10" icon:"sell_rounded" change:"+1.9%" trend:"up" note:"vs prior period"
+      Row gap:20 top
+        Card grow gap:12
+          Row between middle
+            Heading "Revenue" level:3
+            Text.caption "Last 12 weeks, $ thousands"
+          LineChart values:[8.4,9.1,8.8,9.6,10.2,9.9,10.8,11.3,10.9,11.8,12.4,12.9] labels:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"] h:240
+        Card w:360 gap:12
+          Heading "Channels" level:3
+          Donut values:[52,24,14,10] labels:["Online store","Marketplace","Wholesale","Retail"] h:180
+          Row between
+            Text.muted "Online store"
+            Text.strong "52%"
+          Row between
+            Text.muted "Marketplace"
+            Text.strong "24%"
+          Row between
+            Text.muted "Wholesale"
+            Text.strong "14%"
+          Row between
+            Text.muted "Retail"
+            Text.strong "10%"
+      Card pad:0 gap:0
+        Row between middle pad:[20,16,20,16]
+          Heading "Latest orders" level:3
+          Link "View all" -> tab="orders"
+        Row pad:[20,12,20,12] gap:16 border-top:#FFE5E7EB
+          Text.columnHead "Order" w:100
+          Text.columnHead "Customer" grow
+          Text.columnHead "Status" w:120
+          Text.columnHead "Total" w:100 right
+          Text.columnHead "Date" w:100 right
+        each o in orders
+          Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
+            Text.strong "{o.id}" w:100
+            Text "{o.customer}" grow
+            Row w:120
+              if o.status=="Paid"
+                Badge.success "Paid"
+              if o.status=="Pending"
+                Badge.warning "Pending"
+              if o.status=="Refunded"
+                Badge.error "Refunded"
+            Text "{o.total}" w:100 right
+            Text.muted "{o.date}" w:100 right

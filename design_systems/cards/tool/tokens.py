@@ -176,6 +176,48 @@ PLAIN = {
     'shadows': {'popup': [{'type': 'dropShadow', 'color': '#24000000', 'offset': [0, 16], 'blurRadius': 40, 'spreadRadius': -8},
                           {'type': 'dropShadow', 'color': '#0F000000', 'offset': [0, 2], 'blurRadius': 6}]},
 }
+# The page tier: what the same names are on a wide canvas (a website page or an app window, `sizes.wide` and
+# up). A name ending in `Wide` takes the place of the name before it there (NotationOptions.fromTheme), so one
+# theme serves a chat card and a page with nothing switched by hand: a card is written at its own width and
+# keeps the card tier even inside a desktop app. A window-size rule in the theme would not do that (it reads the
+# window, not the card). The values are what ten pages designed from scratch agreed on (examples/showcase/
+# desktop/native): 15 px running text, 16 px corners on a page's surfaces, 24 px inside them, a soft wide shadow.
+PAGE_TEXT_STYLES = {
+    # A website's headline, its section titles and the title of a card on a page.
+    'heading1Wide': {'fontFamily': DISPLAY, 'fontSize': 56, 'fontWeight': 800, 'height': 1.05, 'letterSpacing': -1.8, 'color': 'primaryText'},
+    'heading2Wide': {'fontFamily': DISPLAY, 'fontSize': 36, 'fontWeight': 700, 'height': 1.12, 'letterSpacing': -0.9, 'color': 'primaryText'},
+    'heading3Wide': {'fontFamily': DISPLAY, 'fontSize': 20, 'fontWeight': 700, 'height': 1.25, 'letterSpacing': -0.3, 'color': 'primaryText'},
+    'headingWide': {'fontFamily': TEXT, 'fontSize': 17, 'fontWeight': 600, 'height': 1.3, 'letterSpacing': -0.2, 'color': 'primaryText'},
+    'strongWide': {'fontFamily': TEXT, 'fontSize': 15, 'fontWeight': 600, 'height': 1.35, 'letterSpacing': -0.1, 'color': 'primaryText'},
+    'bodyWide': {'fontFamily': TEXT, 'fontSize': 15, 'fontWeight': 400, 'height': 1.55, 'color': 'primaryText'},
+    'leadWide': {'fontFamily': TEXT, 'fontSize': 18, 'fontWeight': 400, 'height': 1.55, 'color': 'secondaryText'},
+    'mutedWide': {'fontFamily': TEXT, 'fontSize': 14, 'fontWeight': 400, 'height': 1.5, 'color': 'secondaryText'},
+    'smallWide': {'fontFamily': TEXT, 'fontSize': 13.5, 'fontWeight': 400, 'height': 1.45, 'color': 'secondaryText'},
+    'captionWide': {'fontFamily': TEXT, 'fontSize': 12.5, 'fontWeight': 500, 'height': 1.4, 'color': 'inkFaint'},
+    # The small label over a title: in the accent, not the faint gray capitals of a card.
+    'eyebrowWide': {'fontFamily': TEXT, 'fontSize': 12.5, 'fontWeight': 700, 'height': 1.2, 'letterSpacing': 0.9, 'color': 'accent'},
+    # A 36-high control's label (a page's buttons): 14, where SSUI's is 13.
+    'controlMedium': {'fontFamily': TEXT, 'fontSize': 14, 'fontWeight': 600, 'height': 1.2, 'color': 'primaryText'},
+    'controlLarge': {'fontFamily': TEXT, 'fontSize': 15, 'fontWeight': 600, 'height': 1.2, 'color': 'primaryText'},
+    # A field on a page: its label and its text.
+    'fieldLabelWide': {'fontFamily': TEXT, 'fontSize': 13, 'fontWeight': 600, 'height': 1.2, 'color': 'primaryText'},
+    'inputTextWide': {'fontFamily': TEXT, 'fontSize': 14, 'fontWeight': 400, 'height': 1.4, 'color': 'primaryText'},
+    # A table's header cell.
+    'columnHead': {'fontFamily': TEXT, 'fontSize': 12, 'fontWeight': 600, 'height': 1.2, 'letterSpacing': 0.4, 'color': 'inkFaint'},
+}
+PAGE = {
+    'radii': {'cardWide': 16, 'panelWide': 14, 'tileWide': 12, 'ctaWide': 10},
+    # sizes.ctaWide 0: a button alone on its line is as big as its label on a page, not as wide as the page.
+    'sizes': {'content': 1120, 'narrow': 720, 'sidebar': 248, 'topBarWide': 64, 'tableRowWide': 52, 'ctaWide': 0, 'controlWide': 40},
+    'spacing': {'cardWide': 24, 'tileWide': 18, 'cardGapWide': 14, 'section': 88, 'gutter': 32},
+    'shadows': {'cardWide': [{'type': 'dropShadow', 'color': '#12000000', 'offset': [0, 12], 'blurRadius': 32, 'spreadRadius': -16},
+                             {'type': 'dropShadow', 'color': '#0A000000', 'offset': [0, 1], 'blurRadius': 2}]},
+}
+PAGE_DARK_SHADOWS = {'cardWide': [{'type': 'dropShadow', 'color': '#59000000', 'offset': [0, 12], 'blurRadius': 32, 'spreadRadius': -16}]}
+# A page's alternate band (a website's tinted section) and the tile an icon sits on.
+PAGE_COLORS = {'band': '#FFF8FAFC', 'iconTile': '#1A2563EB'}
+PAGE_DARK_COLORS = {'band': '#FF1A1A1A', 'iconTile': '#293B82F6'}
+
 # A series chart's series colors, in turn (the SDK's indicator_theme.dart reads colors.chart1...).
 # A neutral fill written on the page (not in a card): the card's white, where the theme's neutral fill is the page's own gray.
 PLAIN_COLORS = {'pageFill': '#FFFFFFFF', 'chart1': '#FF2563EB', 'chart2': '#FF0891B2', 'chart3': '#FF9333EA', 'chart4': '#FF16A34A', 'chart5': '#FFEA580C'}

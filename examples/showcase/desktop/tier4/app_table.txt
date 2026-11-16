@@ -1,0 +1,72 @@
+state rows=[{"id":1,"name":"Maya Reyes","company":"Northwind Traders","status":"Active","plan":"Business","value":1240,"seen":0,"seenText":"Today","mine":true},{"id":2,"name":"Jonas Weber","company":"Brightside Dental","status":"Trial","plan":"Starter","value":0,"seen":1,"seenText":"Yesterday","mine":false},{"id":3,"name":"Priya Nair","company":"Lumen Studio","status":"Active","plan":"Team","value":480,"seen":2,"seenText":"2 days ago","mine":true},{"id":4,"name":"Tom Becker","company":"Ironbridge Logistics","status":"Churned","plan":"Business","value":0,"seen":41,"seenText":"6 weeks ago","mine":false},{"id":5,"name":"Aisha Khan","company":"Greenfield Farms","status":"Active","plan":"Team","value":560,"seen":3,"seenText":"3 days ago","mine":true},{"id":6,"name":"Lucas Moreau","company":"Atelier Moreau","status":"Trial","plan":"Starter","value":0,"seen":0,"seenText":"Today","mine":true},{"id":7,"name":"Sofia Rossi","company":"Rossi & Figli","status":"Active","plan":"Enterprise","value":3200,"seen":5,"seenText":"5 days ago","mine":false},{"id":8,"name":"Daniel Kim","company":"Kestrel Analytics","status":"Churned","plan":"Team","value":0,"seen":63,"seenText":"2 months ago","mine":false},{"id":9,"name":"Elena Petrova","company":"Harbor Coffee Co.","status":"Active","plan":"Starter","value":99,"seen":7,"seenText":"1 week ago","mine":true},{"id":10,"name":"Omar Haddad","company":"Delta Build Group","status":"Trial","plan":"Business","value":0,"seen":1,"seenText":"Yesterday","mine":false}]
+state picked=[]
+state sort="name"
+state desc=false
+state status="All"
+state view="All"
+state q=""
+state page=0
+App
+  Sidebar
+    Brand "Fieldbook" icon:"menu_book"
+    NavItem "Dashboard" icon:"dashboard" -> emit nav "dashboard"
+    NavItem "Customers" icon:"groups" selected:=true -> emit nav "customers"
+    NavItem "Deals" icon:"handshake" -> emit nav "deals"
+    NavItem "Tasks" icon:"task_alt" badge:"4" -> emit nav "tasks"
+    NavItem "Reports" icon:"bar_chart" -> emit nav "reports"
+    Spacer grow
+    Row gap:10 middle
+      Avatar "Sam Patel" size:32
+      Column
+        Text.strong "Sam Patel"
+        Text.caption "Sales lead"
+  Main
+    Nav
+      Row gap:12 middle
+        Heading "Customers" level:1
+        Badge.neutral "248"
+      Row gap:8
+        Button.outline "Import" -> emit import
+        Button "Add customer" -> emit addCustomer
+    Column pad:24 gap:16
+      Row gap:12 middle
+        Input "Search customers" =q w:280
+        Select =status items:["All","Active","Trial","Churned"] w:140
+        Spacer grow
+        Segments =view options:["All","Mine"]
+      if length(picked)>0
+        Row gap:12 middle pad:[16,10,16,10] fill:#142563EB radius:8
+          Text.strong "{length(picked)} selected"
+          Spacer grow
+          Button.outline "Export" -> emit export picked
+          Button.destructive "Delete" -> rows=removeWhere(rows,c=>contains(picked,c.id)); picked=[]
+      Card pad:0 gap:0
+        Row pad:[20,8,20,8] gap:16 middle
+          Checkbox "" w:32 checked:=length(picked)>0&&length(picked)==length(rows) -> picked=length(picked)==length(rows)?[]:map(rows,c=>c.id)
+          Button.ghost "Name" grow -> rows=(sort=="name"&&!desc)?sortByDesc(rows,c=>c.name):sortBy(rows,c=>c.name); desc=(sort=="name"&&!desc); sort="name"
+          Button.ghost "Company" w:180 -> rows=(sort=="company"&&!desc)?sortByDesc(rows,c=>c.company):sortBy(rows,c=>c.company); desc=(sort=="company"&&!desc); sort="company"
+          Text.columnHead "Status" w:90
+          Text.columnHead "Plan" w:90
+          Button.ghost "Monthly value" w:120 -> rows=(sort=="value"&&!desc)?sortByDesc(rows,c=>c.value):sortBy(rows,c=>c.value); desc=(sort=="value"&&!desc); sort="value"
+          Button.ghost "Last seen" w:110 -> rows=(sort=="seen"&&!desc)?sortByDesc(rows,c=>c.seen):sortBy(rows,c=>c.seen); desc=(sort=="seen"&&!desc); sort="seen"
+          Spacer w:40
+        each c in rows
+          Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB fill:=contains(picked,c.id)?"#142563EB":"#00FFFFFF" visible:=(status=="All"||c.status==status)&&(view=="All"||c.mine)&&(q==""||contains(lower(c.name),lower(q))||contains(lower(c.company),lower(q)))
+            Checkbox "" w:32 checked:=contains(picked,c.id) -> picked=contains(picked,c.id)?without(picked,c.id):append(picked,c.id)
+            Row grow gap:12 middle
+              Avatar "{c.name}" size:32
+              Text.strong "{c.name}"
+            Text.muted "{c.company}" w:180
+            Row w:90
+              Badge.success "Active" visible:=c.status=="Active"
+              Badge.info "Trial" visible:=c.status=="Trial"
+              Badge.neutral "Churned" visible:=c.status=="Churned"
+            Text "{c.plan}" w:90
+            Text "{money(c.value,"$",0)}" w:120
+            Text.muted "{c.seenText}" w:110
+            IconButton "more_vert" w:40 -> emit rowMenu c.id
+        Row between middle pad:[20,12,20,12] border-top:#FFE5E7EB
+          Text.muted "Rows {page*10+1}-{page*10+10} of 248"
+          Row gap:8
+            Button.outline "Previous" enabled:=page>0 -> page=max(0,page-1)
+            Button.outline "Next" enabled:=page<24 -> page=min(24,page+1)

@@ -1,0 +1,3572 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_calendar"
+ ],
+ "nodes": {
+  "app_calendar": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1",
+    "column6",
+    "column40"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 240,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     20,
+     12,
+     16
+    ]
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "children": [
+    "row2",
+    "filledButton1",
+    "column3",
+    "text11",
+    "column5",
+    "spacer1"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     8,
+     4,
+     8,
+     16
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column2",
+    "text1"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ]
+   },
+   "children": [
+    "icon1"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "event",
+    "size": 16,
+    "color": "onPrimary"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Cadence",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 17,
+     "fontWeight": 700
+    }
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 40.0
+   },
+   "props": {
+    "label": "New event",
+    "icon": "add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "newEvent"
+      }
+     ]
+    }
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row3",
+    "grid1"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text2",
+    "row4"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "June 2026"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "iconButton1",
+    "iconButton2"
+   ]
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_left"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "prevMonth"
+      }
+     ]
+    }
+   ]
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_right"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "nextMonth"
+      }
+     ]
+    }
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1",
+    "gridView1"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "text3",
+    "text4",
+    "text5",
+    "text6",
+    "text7",
+    "text8",
+    "text9"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "M",
+    "textAlign": "center"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "T",
+    "textAlign": "center"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "W",
+    "textAlign": "center"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "T",
+    "textAlign": "center"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "F",
+    "textAlign": "center"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "S",
+    "textAlign": "center"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "S",
+    "textAlign": "center"
+   }
+  },
+  "gridView1": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 7,
+    "mainAxisSpacing": 2,
+    "crossAxisSpacing": 2,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${= range(30)}"
+   },
+   "children": [
+    "gridView1Item"
+   ]
+  },
+  "gridView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column4"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 14,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item+1==10?theme.primary:\"#00000000\"}"
+   },
+   "children": [
+    "text10"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${= item+1}",
+    "textAlign": "center"
+   },
+   "bind": {
+    "props.style.color": "${= item+1==10?theme.onPrimary:theme.colors.primaryText}"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "MY CALENDARS"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "checkbox1",
+    "checkbox2",
+    "checkbox3",
+    "checkbox4"
+   ]
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Work",
+    "activeColor": "#FF2563EB"
+   },
+   "bind": {
+    "props.value": "${work}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "work",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Personal",
+    "activeColor": "#FF16A34A"
+   },
+   "bind": {
+    "props.value": "${personal}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "personal",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox3": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Team",
+    "activeColor": "#FF7C3AED"
+   },
+   "bind": {
+    "props.value": "${team}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "team",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkbox4": {
+   "type": "checkbox",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Holidays",
+    "activeColor": "#FFEA580C"
+   },
+   "bind": {
+    "props.value": "${holidays}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "holidays",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row5",
+    "divider1",
+    "column7"
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "row6",
+    "segmentedButton1"
+   ]
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text12",
+    "iconButton3",
+    "iconButton4",
+    "outlinedButton1"
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading3Wide"
+    },
+    "text": "Jun 8 – 14, 2026"
+   }
+  },
+  "iconButton3": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_left"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "prevWeek"
+      }
+     ]
+    }
+   ]
+  },
+  "iconButton4": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chevron_right"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "nextWeek"
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 40.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Today"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "today"
+      }
+     ]
+    }
+   ]
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "height": 40.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "Day",
+      "label": "Day"
+     },
+     {
+      "value": "Week",
+      "label": "Week"
+     },
+     {
+      "value": "Month",
+      "label": "Month"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [view]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "view",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     16,
+     12,
+     16,
+     16
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row7",
+    "divider2",
+    "row8"
+   ]
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column8",
+    "column9",
+    "column11",
+    "column13",
+    "column15",
+    "column17",
+    "column19",
+    "column21"
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": 56,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "children": [
+    "text13",
+    "column10"
+   ]
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "MON",
+    "textAlign": "center"
+   }
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "text14"
+   ]
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "8",
+    "textAlign": "center"
+   }
+  },
+  "column11": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "children": [
+    "text15",
+    "column12"
+   ]
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "TUE",
+    "textAlign": "center"
+   }
+  },
+  "column12": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "text16"
+   ]
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "9",
+    "textAlign": "center"
+   }
+  },
+  "column13": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "children": [
+    "text17",
+    "column14"
+   ]
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "color": "primary"
+    },
+    "text": "WED",
+    "textAlign": "center"
+   }
+  },
+  "column14": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 14,
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ]
+   },
+   "children": [
+    "text18"
+   ]
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "color": "onPrimary"
+    },
+    "text": "10",
+    "textAlign": "center"
+   }
+  },
+  "column15": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "children": [
+    "text19",
+    "column16"
+   ]
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "THU",
+    "textAlign": "center"
+   }
+  },
+  "column16": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "text20"
+   ]
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "11",
+    "textAlign": "center"
+   }
+  },
+  "column17": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "children": [
+    "text21",
+    "column18"
+   ]
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "FRI",
+    "textAlign": "center"
+   }
+  },
+  "column18": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "text22"
+   ]
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "12",
+    "textAlign": "center"
+   }
+  },
+  "column19": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "children": [
+    "text23",
+    "column20"
+   ]
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "SAT",
+    "textAlign": "center"
+   }
+  },
+  "column20": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "text24"
+   ]
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "13",
+    "textAlign": "center"
+   }
+  },
+  "column21": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 2
+   },
+   "children": [
+    "text25",
+    "column22"
+   ]
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "SUN",
+    "textAlign": "center"
+   }
+  },
+  "column22": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "text26"
+   ]
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "14",
+    "textAlign": "center"
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column23",
+    "column24",
+    "column27",
+    "column30",
+    "column33",
+    "column36",
+    "column38",
+    "column39"
+   ]
+  },
+  "column23": {
+   "type": "column",
+   "layout": {
+    "width": 56,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${hours}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text27"
+   ]
+  },
+  "text27": {
+   "type": "text",
+   "layout": {
+    "height": 48,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${item}"
+   }
+  },
+  "column24": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": [
+     2,
+     0,
+     2,
+     0
+    ],
+    "height": 528,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "children": [
+    "spacer2",
+    "column25",
+    "spacer3",
+    "column26"
+   ]
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "height": 48,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "column25": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "hug": 48
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ],
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==1?\"#FF111827\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text28",
+    "text29"
+   ]
+  },
+  "text28": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "fontSize": 12,
+     "color": "#FF1E3A8A"
+    },
+    "text": "Standup"
+   }
+  },
+  "text29": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 11,
+     "color": "#FF1E3A8A"
+    },
+    "text": "9:00–10:00"
+   }
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "height": 192,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "column26": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ],
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==2?\"#FF111827\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text30",
+    "text31"
+   ]
+  },
+  "text30": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "fontSize": 12,
+     "color": "#FF1E3A8A"
+    },
+    "text": "Design review"
+   }
+  },
+  "text31": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 11,
+     "color": "#FF1E3A8A"
+    },
+    "text": "2:00–3:30"
+   }
+  },
+  "column27": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": [
+     2,
+     0,
+     2,
+     0
+    ],
+    "height": 528,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "children": [
+    "spacer4",
+    "column28",
+    "spacer5",
+    "column29"
+   ]
+  },
+  "spacer4": {
+   "type": "spacer",
+   "layout": {
+    "height": 96,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "column28": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ],
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==3?\"#FF111827\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text32",
+    "text33"
+   ]
+  },
+  "text32": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "fontSize": 12,
+     "color": "#FF166534"
+    },
+    "text": "Dentist"
+   }
+  },
+  "text33": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 11,
+     "color": "#FF166534"
+    },
+    "text": "10:00–11:30"
+   }
+  },
+  "spacer5": {
+   "type": "spacer",
+   "layout": {
+    "height": 216,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "column29": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "hug": 48
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ],
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==4?\"#FF111827\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 4}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text34",
+    "text35"
+   ]
+  },
+  "text34": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "fontSize": 12,
+     "color": "#FF5B21B6"
+    },
+    "text": "Team sync"
+   }
+  },
+  "text35": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 11,
+     "color": "#FF5B21B6"
+    },
+    "text": "4:00–5:00"
+   }
+  },
+  "column30": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": [
+     2,
+     0,
+     2,
+     0
+    ],
+    "height": 528,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left",
+    "fills": [
+     {
+      "color": "#0F2563EB"
+     }
+    ]
+   },
+   "children": [
+    "spacer6",
+    "column31",
+    "spacer7",
+    "column32"
+   ]
+  },
+  "spacer6": {
+   "type": "spacer",
+   "layout": {
+    "height": 72,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "column31": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "hug": 48
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ],
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==5?\"#FF111827\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 5}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text36",
+    "text37"
+   ]
+  },
+  "text36": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "fontSize": 12,
+     "color": "#FF1E3A8A"
+    },
+    "text": "1:1 with Maya"
+   }
+  },
+  "text37": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 11,
+     "color": "#FF1E3A8A"
+    },
+    "text": "9:30–10:30"
+   }
+  },
+  "spacer7": {
+   "type": "spacer",
+   "layout": {
+    "height": 24,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "column32": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "hug": 96
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ],
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==6?\"#FF111827\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 6}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text38",
+    "text39"
+   ]
+  },
+  "text38": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "fontSize": 12,
+     "color": "#FF5B21B6"
+    },
+    "text": "Planning workshop"
+   }
+  },
+  "text39": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 11,
+     "color": "#FF5B21B6"
+    },
+    "text": "11:00–1:00"
+   }
+  },
+  "column33": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": [
+     2,
+     0,
+     2,
+     0
+    ],
+    "height": 528,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "children": [
+    "spacer8",
+    "column34",
+    "spacer9",
+    "column35"
+   ]
+  },
+  "spacer8": {
+   "type": "spacer",
+   "layout": {
+    "height": 24,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "column34": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "hug": 48
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ],
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==7?\"#FF111827\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 7}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text40",
+    "text41"
+   ]
+  },
+  "text40": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "fontSize": 12,
+     "color": "#FF166534"
+    },
+    "text": "Gym"
+   }
+  },
+  "text41": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 11,
+     "color": "#FF166534"
+    },
+    "text": "8:30–9:30"
+   }
+  },
+  "spacer9": {
+   "type": "spacer",
+   "layout": {
+    "height": 168,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "column35": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "hug": 48
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ],
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==8?\"#FF111827\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 8}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text42",
+    "text43"
+   ]
+  },
+  "text42": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "fontSize": 12,
+     "color": "#FF166534"
+    },
+    "text": "Lunch with Ana"
+   }
+  },
+  "text43": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 11,
+     "color": "#FF166534"
+    },
+    "text": "1:00–2:00"
+   }
+  },
+  "column36": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": [
+     2,
+     0,
+     2,
+     0
+    ],
+    "height": 528,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "children": [
+    "spacer10",
+    "column37"
+   ]
+  },
+  "spacer10": {
+   "type": "spacer",
+   "layout": {
+    "height": 336,
+    "width": {
+     "fill": 0
+    }
+   }
+  },
+  "column37": {
+   "type": "column",
+   "layout": {
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     6,
+     4,
+     6,
+     4
+    ],
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 6,
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==9?\"#FF111827\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 9}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "text44",
+    "text45"
+   ]
+  },
+  "text44": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide",
+     "fontSize": 12,
+     "color": "#FF5B21B6"
+    },
+    "text": "Sprint demo"
+   }
+  },
+  "text45": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "fontSize": 11,
+     "color": "#FF5B21B6"
+    },
+    "text": "3:00–4:30"
+   }
+  },
+  "column38": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": 528,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   }
+  },
+  "column39": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": 528,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   }
+  },
+  "column40": {
+   "type": "column",
+   "layout": {
+    "width": 300,
+    "height": {
+     "fill": 0
+    },
+    "padding": 16
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "children": [
+    "listView2"
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${= filter(events,x=>x.id==sel)}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column41"
+   ]
+  },
+  "column41": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text46",
+    "text47",
+    "row9",
+    "row10",
+    "divider3",
+    "text50",
+    "listView3",
+    "divider4",
+    "text53",
+    "text54",
+    "row12"
+   ]
+  },
+  "text46": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "EVENT DETAILS"
+   }
+  },
+  "text47": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "${item.title}"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text48"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "schedule",
+    "size": 18
+   }
+  },
+  "text48": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.time}",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon3",
+    "text49"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "place",
+    "size": 18
+   }
+  },
+  "text49": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.place}",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text50": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "GUESTS (3)"
+   }
+  },
+  "listView3": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 14
+   },
+   "bind": {
+    "data": "${item.guests}"
+   },
+   "children": [
+    "listView3Item"
+   ]
+  },
+  "listView3Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row11"
+   ]
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar1",
+    "column42"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "small"
+   },
+   "bind": {
+    "props.name": "${item.name}"
+   }
+  },
+  "column42": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 0,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text51",
+    "text52"
+   ]
+  },
+  "text51": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "text52": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${item.reply}"
+   },
+   "bind": {
+    "props.style.color": "${= item.reply==\"Accepted\"?theme.success:(item.reply==\"Declined\"?theme.error:theme.colors.secondaryText)}"
+   }
+  },
+  "divider4": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "text53": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "NOTE"
+   }
+  },
+  "text54": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mutedWide"
+    },
+    "text": "${item.note}"
+   }
+  },
+  "row12": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton2",
+    "filledButton2"
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "flex": 1,
+    "height": 40.0,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "label": "Edit"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "edit",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "flex": 1,
+    "height": 40.0,
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "style": {
+     "backgroundColor": "#FFDC2626",
+     "foregroundColor": "#FFFFFFFF"
+    },
+    "label": "Delete"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "delete",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "app_calendar": [
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 6
+   },
+   {
+    "name": "view",
+    "type": "text",
+    "value": "Week"
+   },
+   {
+    "name": "work",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "personal",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "team",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "holidays",
+    "type": "boolean",
+    "value": true
+   },
+   {
+    "name": "hours",
+    "type": "list",
+    "value": [
+     "8 AM",
+     "9 AM",
+     "10 AM",
+     "11 AM",
+     "12 PM",
+     "1 PM",
+     "2 PM",
+     "3 PM",
+     "4 PM",
+     "5 PM",
+     "6 PM"
+    ]
+   },
+   {
+    "name": "events",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "title": "Standup",
+      "time": "Mon, Jun 8 · 9:00 – 10:00 AM",
+      "place": "Room Atlas",
+      "note": "Quick round: yesterday, today, blockers.",
+      "guests": [
+       {
+        "name": "Maya Reyes",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Leo Kim",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Priya Nair",
+        "reply": "Pending"
+       }
+      ]
+     },
+     {
+      "id": 2,
+      "title": "Design review",
+      "time": "Mon, Jun 8 · 2:00 – 3:30 PM",
+      "place": "Room Borealis",
+      "note": "Walk through the new onboarding flow.",
+      "guests": [
+       {
+        "name": "Maya Reyes",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Tom Becker",
+        "reply": "Declined"
+       },
+       {
+        "name": "Priya Nair",
+        "reply": "Accepted"
+       }
+      ]
+     },
+     {
+      "id": 3,
+      "title": "Dentist",
+      "time": "Tue, Jun 9 · 10:00 – 11:30 AM",
+      "place": "Smile Clinic, 4th Ave",
+      "note": "Bring insurance card.",
+      "guests": [
+       {
+        "name": "Ana Souza",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Jon Walsh",
+        "reply": "Pending"
+       },
+       {
+        "name": "Leo Kim",
+        "reply": "Pending"
+       }
+      ]
+     },
+     {
+      "id": 4,
+      "title": "Team sync",
+      "time": "Tue, Jun 9 · 4:00 – 5:00 PM",
+      "place": "Video call",
+      "note": "Weekly priorities and handoffs.",
+      "guests": [
+       {
+        "name": "Maya Reyes",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Leo Kim",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Tom Becker",
+        "reply": "Pending"
+       }
+      ]
+     },
+     {
+      "id": 5,
+      "title": "1:1 with Maya",
+      "time": "Wed, Jun 10 · 9:30 – 10:30 AM",
+      "place": "Cafe corner",
+      "note": "Career goals and feedback.",
+      "guests": [
+       {
+        "name": "Maya Reyes",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Priya Nair",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Jon Walsh",
+        "reply": "Pending"
+       }
+      ]
+     },
+     {
+      "id": 6,
+      "title": "Planning workshop",
+      "time": "Wed, Jun 10 · 11:00 AM – 1:00 PM",
+      "place": "Room Cirrus, 3rd floor",
+      "note": "Bring your Q3 estimates. Lunch is provided.",
+      "guests": [
+       {
+        "name": "Maya Reyes",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Leo Kim",
+        "reply": "Pending"
+       },
+       {
+        "name": "Tom Becker",
+        "reply": "Declined"
+       }
+      ]
+     },
+     {
+      "id": 7,
+      "title": "Gym",
+      "time": "Thu, Jun 11 · 8:30 – 9:30 AM",
+      "place": "Harbor Fitness",
+      "note": "Leg day.",
+      "guests": [
+       {
+        "name": "Ana Souza",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Jon Walsh",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Leo Kim",
+        "reply": "Pending"
+       }
+      ]
+     },
+     {
+      "id": 8,
+      "title": "Lunch with Ana",
+      "time": "Thu, Jun 11 · 1:00 – 2:00 PM",
+      "place": "Olive & Fig",
+      "note": "Table booked under Ana.",
+      "guests": [
+       {
+        "name": "Ana Souza",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Maya Reyes",
+        "reply": "Pending"
+       },
+       {
+        "name": "Priya Nair",
+        "reply": "Declined"
+       }
+      ]
+     },
+     {
+      "id": 9,
+      "title": "Sprint demo",
+      "time": "Fri, Jun 12 · 3:00 – 4:30 PM",
+      "place": "Main hall",
+      "note": "Show what shipped this sprint.",
+      "guests": [
+       {
+        "name": "Maya Reyes",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Leo Kim",
+        "reply": "Accepted"
+       },
+       {
+        "name": "Tom Becker",
+        "reply": "Accepted"
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

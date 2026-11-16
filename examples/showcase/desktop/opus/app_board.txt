@@ -1,0 +1,72 @@
+state q=""
+state sel="t6"
+state ticked=["Moodboard approved","Desktop layout in Figma"]
+state cols=[{"id":"backlog","name":"Backlog"},{"id":"progress","name":"In progress"},{"id":"review","name":"In review"},{"id":"done","name":"Done"}]
+state tasks=[{"id":"t1","col":"backlog","title":"Audit legacy blog redirects","label":"SEO","tint":"#FFDCFCE7","ink":"#FF15803D","due":"Apr 18","comments":2,"who":"Leo Martins","desc":"List every old blog URL and map it to its new location so no traffic is lost at launch.","steps":["Export old URL list","Map to new slugs","Write 301 rules","Test on staging"]},{"id":"t2","col":"backlog","title":"Draft pricing page copy","label":"Content","tint":"#FFFEF3C7","ink":"#FFB45309","due":"Apr 21","comments":4,"who":"Priya Shah","desc":"Rewrite the pricing page around the three new plans, with a short FAQ.","steps":["Plan names agreed","Feature table copy","FAQ answers","Legal review"]},{"id":"t3","col":"backlog","title":"Cookie banner compliance check","label":"Legal","tint":"#FFF3F4F6","ink":"#FF374151","due":"Apr 24","comments":1,"who":"Aiko Tanaka","desc":"Make sure consent is asked before any tracking script loads.","steps":["List all scripts","Pick consent tool","Configure categories","Sign-off from legal"]},{"id":"t4","col":"backlog","title":"Set up analytics events","label":"Dev","tint":"#FFDBEAFE","ink":"#FF1D4ED8","due":"Apr 25","comments":0,"who":"Jonas Berg","desc":"Track sign-ups, demo requests and pricing toggles on the new site.","steps":["Event naming plan","Tag manager setup","Implement events","Verify in dashboard"]},{"id":"t5","col":"backlog","title":"Collect customer testimonials","label":"Content","tint":"#FFFEF3C7","ink":"#FFB45309","due":"Apr 30","comments":3,"who":"Maya Reyes","desc":"Gather six short quotes with photos and logos from happy customers.","steps":["Shortlist customers","Send requests","Edit quotes","Get approvals"]},{"id":"t6","col":"progress","title":"Homepage hero redesign","label":"Design","tint":"#FFEDE9FE","ink":"#FF6D28D9","due":"Apr 12","comments":7,"who":"Maya Reyes","desc":"A new hero with a product shot, one clear headline and a single call to action.","steps":["Moodboard approved","Desktop layout in Figma","Mobile layout","Hand-off to dev"]},{"id":"t7","col":"progress","title":"Migrate CMS content models","label":"Dev","tint":"#FFDBEAFE","ink":"#FF1D4ED8","due":"Apr 15","comments":5,"who":"Jonas Berg","desc":"Move pages, posts and authors to the new CMS schema.","steps":["Define new models","Write migration script","Dry run","Run on production"]},{"id":"t8","col":"progress","title":"Navigation IA rework","label":"Design","tint":"#FFEDE9FE","ink":"#FF6D28D9","due":"Apr 16","comments":3,"who":"Aiko Tanaka","desc":"Simplify the top navigation to five items and a clear Product menu.","steps":["Card sorting results","New sitemap","Menu wireframes","Usability test"]},{"id":"t9","col":"review","title":"Product page templates","label":"Dev","tint":"#FFDBEAFE","ink":"#FF1D4ED8","due":"Apr 10","comments":6,"who":"Leo Martins","desc":"Reusable template for each product with features, screenshots and pricing.","steps":["Template built","CMS fields wired","Responsive check","Design review"]},{"id":"t10","col":"review","title":"Accessibility pass on forms","label":"QA","tint":"#FFFFE4E6","ink":"#FFBE123C","due":"Apr 11","comments":2,"who":"Priya Shah","desc":"Check labels, focus order, contrast and error messages on all forms.","steps":["Keyboard navigation","Screen reader labels","Contrast check","Error messages"]},{"id":"t11","col":"done","title":"Brand color tokens","label":"Design","tint":"#FFEDE9FE","ink":"#FF6D28D9","due":"Mar 28","comments":4,"who":"Maya Reyes","desc":"Color palette exported as design tokens for the codebase.","steps":["Palette final","Token names","Export to JSON","Docs page"]},{"id":"t12","col":"done","title":"Hosting & CDN setup","label":"Dev","tint":"#FFDBEAFE","ink":"#FF1D4ED8","due":"Mar 30","comments":1,"who":"Jonas Berg","desc":"Production hosting, CDN and SSL configured for the new domain.","steps":["Choose provider","DNS records","SSL certificates","Cache rules"]},{"id":"t13","col":"done","title":"Sitemap draft","label":"SEO","tint":"#FFDCFCE7","ink":"#FF15803D","due":"Apr 2","comments":2,"who":"Leo Martins","desc":"First version of the sitemap shared with the team.","steps":["Page inventory","Group sections","Review with team","Publish draft"]},{"id":"t14","col":"done","title":"Kickoff workshop notes","label":"Content","tint":"#FFFEF3C7","ink":"#FFB45309","due":"Mar 25","comments":0,"who":"Priya Shah","desc":"Notes and decisions from the relaunch kickoff workshop.","steps":["Write up notes","List decisions","Share with team","Archive recording"]}]
+state activity=[{"task":"t6","who":"Maya Reyes","what":"moved this to In progress","when":"2h ago"},{"task":"t6","who":"Jonas Berg","what":"commented: hero image needs a dark variant","when":"Yesterday"},{"task":"t6","who":"Aiko Tanaka","what":"created this task","when":"Apr 3"},{"task":"t9","who":"Leo Martins","what":"moved this to In review","when":"1h ago"},{"task":"t7","who":"Jonas Berg","what":"added a checklist","when":"3h ago"},{"task":"t10","who":"Priya Shah","what":"moved this to In review","when":"Today"}]
+App
+  Main
+    Nav
+      Row gap:16 middle
+        Text.strong "Lanes" color:#FF4F46E5
+        Divider h:20
+        Heading "Website relaunch"
+      Row gap:12 middle
+        Row gap:4
+          Avatar "Maya Reyes" size:30
+          Avatar "Jonas Berg" size:30
+          Avatar "Priya Shah" size:30
+          Avatar "Leo Martins" size:30
+          Avatar "Aiko Tanaka" size:30
+        Input "Filter" "Filter tasks" =q w:220
+        Button "New task" -> emit newTask
+    Column pad:24 gap:16
+      Row gap:16 top
+        each c in cols
+          Box grow fill:#FFF3F4F6 radius:12 pad:12 gap:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",c.id)); activity=concat([{"task":result.data,"who":"You","what":"moved this to "+c.name,"when":"Just now"}],activity)
+            Row between middle
+              Row gap:8 middle
+                Text.strong "{c.name}"
+                CountBadge count:=count(tasks,x=>x.col==c.id&&contains(lower(x.title),lower(q)))
+              IconButton "add" -> emit addTask c.id
+            each t in tasks
+              if t.col==c.id && contains(lower(t.title),lower(q))
+                Card gap:10 drag:task(t.id) border:=sel==t.id?"#FF4F46E5":"#FFE5E7EB" -> sel=t.id
+                  Text.strong "{t.title}"
+                  Row
+                    Box fill:=t.tint radius:10 pad:[8,2,8,2]
+                      Text.caption "{t.label}" color:=t.ink weight:600
+                  Row between middle
+                    Row gap:12 middle
+                      Row gap:4 middle
+                        Icon "event" {"props":{"size":14}}
+                        Text.caption "{t.due}"
+                      Row gap:4 middle
+                        Icon "chat_bubble_outline" {"props":{"size":14}}
+                        Text.caption "{t.comments}"
+                    Avatar "{t.who}" size:24
+  if sel!=""
+    Pane w:340 pad:16 gap:14
+      Row between top
+        Text.title "{find(tasks,x=>x.id==sel).title}"
+        IconButton "close" -> sel=""
+      Row
+        Box fill:=find(tasks,x=>x.id==sel).tint radius:10 pad:[8,2,8,2]
+          Text.caption "{find(tasks,x=>x.id==sel).label}" color:=find(tasks,x=>x.id==sel).ink weight:600
+      Details rows:=[["Status",find(cols,c=>c.id==find(tasks,x=>x.id==sel).col).name],["Assignee",find(tasks,x=>x.id==sel).who],["Due",find(tasks,x=>x.id==sel).due],["Comments",""+find(tasks,x=>x.id==sel).comments]]
+      SectionLabel "Description"
+      Paragraph "{find(tasks,x=>x.id==sel).desc}"
+      Checklist "Checklist" =ticked items:=find(tasks,x=>x.id==sel).steps
+      SectionLabel "Activity"
+      each a in activity
+        if a.task==sel
+          Row gap:10 top
+            Avatar "{a.who}" size:26
+            Column gap:2 grow
+              Text.small "{a.who} {a.what}"
+              Text.caption "{a.when}"
+      Row gap:10 top
+        Avatar "{find(tasks,x=>x.id==sel).who}" size:26
+        Column gap:2 grow
+          Text.small "{find(tasks,x=>x.id==sel).who} was assigned"
+          Text.caption "When created"

@@ -1,0 +1,170 @@
+{
+ "schema": 3,
+ "id": "ArticleHeader",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "ArticleHeader",
+  "doc": "The head of a blog article, as wide as its reading column: ArticleHeader category:\"Infrastructure\" title:\"…\" summary:\"…\" author:\"Priya Raman\" role:\"Staff Engineer\" initials:\"PR\" date:\"Nov 12, 2026\" readTime:\"9 min read\" (empty texts hide their parts; no initials shows a person icon; rule:false drops the closing hairline).",
+  "props": [
+   {"key": "category", "type": {"kind": "string", "flutter": "String"}, "default": "Engineering", "doc": "The category, shown in caps in an accent pill (empty: none)."},
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Article title", "doc": "The headline.", "required": true},
+   {"key": "summary", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One paragraph under the headline (empty: none)."},
+   {"key": "author", "type": {"kind": "string", "flutter": "String"}, "default": "Author", "doc": "The author's name.", "required": true},
+   {"key": "role", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The author's role, under the name (empty: none)."},
+   {"key": "initials", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "Initials in the round avatar (empty: a person icon)."},
+   {"key": "date", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The publication date, as text (empty: none)."},
+   {"key": "readTime", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The reading time, as text: 9 min read (empty: none)."},
+   {"key": "rule", "type": {"kind": "boolean", "flutter": "bool"}, "default": true, "doc": "A hairline under the byline that closes the header."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Infrastructure",
+   "size": [760, 400],
+   "props": {
+    "category": "Infrastructure",
+    "title": "What we learned moving 40 services to one queue",
+    "summary": "Consolidating six message brokers onto a single partitioned log cut our on-call pages by 60 percent. It also broke three things we didn't know were load-bearing.",
+    "author": "Priya Raman",
+    "role": "Staff Engineer, Platform",
+    "initials": "PR",
+    "date": "November 12, 2026",
+    "readTime": "9 min read"
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": ["catRow", "title", "summary", "byline", "rule"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "catRow": {
+   "type": "row",
+   "children": ["catPill"],
+   "props": {"crossAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 0, 0, 20]},
+   "bind": {"visible": "${= props.category != ''}"}
+  },
+  "catPill": {
+   "type": "row",
+   "children": ["catText"],
+   "props": {"crossAxisAlignment": "center"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [12, 6, 12, 6]},
+   "decoration": {"fills": [{"color": "activeTint"}], "strokes": [{"color": "accentLine"}], "strokeWidth": 1, "radius": 999},
+   "bind": {"decoration.radius": "${theme.radii.chip}"}
+  },
+  "catText": {
+   "type": "text",
+   "props": {"text": "${= upper(props.category)}", "style": {"from": "eyebrowWide", "color": "accent"}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "title": {
+   "type": "text",
+   "props": {"text": "${props.title}", "style": {"from": "heading1Wide", "fontSize": 50, "height": 1.08}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 0, 0, 18]}
+  },
+  "summary": {
+   "type": "text",
+   "props": {"text": "${props.summary}", "style": {"from": "leadWide", "color": "inkSoft"}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 0, 0, 28]},
+   "bind": {"visible": "${= props.summary != ''}"}
+  },
+  "byline": {
+   "type": "row",
+   "children": ["person", "dot1", "date", "dot2", "time"],
+   "props": {"crossAxisAlignment": "center", "spacing": 14, "runSpacing": 12, "wrap": true},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "person": {
+   "type": "row",
+   "children": ["avatar", "names"],
+   "props": {"crossAxisAlignment": "center", "spacing": 12},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "avatar": {
+   "type": "row",
+   "children": ["avatarText", "avatarIcon"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": 44, "height": 44},
+   "decoration": {"fills": [{"color": "accent"}], "radius": 22}
+  },
+  "avatarText": {
+   "type": "text",
+   "props": {"text": "${= upper(props.initials)}", "style": {"from": "strongWide", "color": "onAccent"}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.initials != ''}"}
+  },
+  "avatarIcon": {
+   "type": "icon",
+   "props": {"icon": "person_rounded", "size": 22, "color": "onAccent"},
+   "layout": {"width": 22, "height": 22},
+   "bind": {"visible": "${= props.initials == ''}"}
+  },
+  "names": {
+   "type": "column",
+   "children": ["name", "role"],
+   "props": {"crossAxisAlignment": "start", "spacing": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "name": {
+   "type": "text",
+   "props": {"text": "${props.author}", "style": "strongWide", "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "role": {
+   "type": "text",
+   "props": {"text": "${props.role}", "style": {"from": "captionWide", "color": "inkFaint"}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.role != ''}"}
+  },
+  "dot1": {
+   "type": "box",
+   "layout": {"width": 4, "height": 4},
+   "decoration": {"fills": [{"color": "lineStrong"}], "radius": 2},
+   "bind": {"visible": "${= props.date != ''}"}
+  },
+  "date": {
+   "type": "text",
+   "props": {"text": "${props.date}", "style": {"from": "mutedWide", "color": "inkSoft"}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.date != ''}"}
+  },
+  "dot2": {
+   "type": "box",
+   "layout": {"width": 4, "height": 4},
+   "decoration": {"fills": [{"color": "lineStrong"}], "radius": 2},
+   "bind": {"visible": "${= props.readTime != ''}"}
+  },
+  "time": {
+   "type": "row",
+   "children": ["timeIcon", "timeText"],
+   "props": {"crossAxisAlignment": "center", "spacing": 6},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.readTime != ''}"}
+  },
+  "timeIcon": {
+   "type": "icon",
+   "props": {"icon": "schedule_rounded", "size": 16, "color": "inkFaint"},
+   "layout": {"width": 16, "height": 16}
+  },
+  "timeText": {
+   "type": "text",
+   "props": {"text": "${props.readTime}", "style": {"from": "mutedWide", "color": "inkSoft"}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "rule": {
+   "type": "column",
+   "children": ["ruleLine"],
+   "props": {"crossAxisAlignment": "stretch"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 28, 0, 0]},
+   "bind": {"visible": "${props.rule}"}
+  },
+  "ruleLine": {
+   "type": "box",
+   "layout": {"width": {"fill": 0}, "height": 1},
+   "decoration": {"fills": [{"color": "line"}]}
+  }
+ }
+}

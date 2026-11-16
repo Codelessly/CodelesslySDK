@@ -1,0 +1,69 @@
+{
+ "schema": 3,
+ "id": "StatBand",
+ "roots": ["tile"],
+ "widget": {
+  "type": "StatBand",
+  "doc": "Three or four headline figures in one tile as wide as its section: StatBand values:[\"4,200\",\"31%\",\"2 min\"] labels:[\"hotels\",\"more direct bookings\",\"setup\"] notes:[...] (notes optional, one per value; up to four shown; wraps to two across when narrow).",
+  "props": [
+   {"key": "values", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["4,200", "31%", "2 min"], "doc": "The figures, as text, one cell each (three or four; a fifth is not shown).", "required": true},
+   {"key": "labels", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["hotels", "more direct bookings", "setup"], "doc": "What each figure counts, under it.", "required": true},
+   {"key": "notes", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": [], "doc": "A quiet third line per figure (optional: a source, a period)."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Tidewater",
+   "size": [1120, 200],
+   "props": {
+    "values": ["4,200", "31%", "2 min"],
+    "labels": ["hotels run their front desk on Tidewater", "more direct bookings in the first year", "from sign-up to your first booking"],
+    "notes": ["Across 3 continents", "Median, 2025 cohort", "No credit card needed"]
+   }
+  }
+ ],
+ "nodes": {
+  "tile": {
+   "type": "column",
+   "children": ["cells"],
+   "props": {"crossAxisAlignment": "stretch"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 32, 0, 32]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 16},
+   "bind": {
+    "decoration.fills[0].color": "${theme.colors.card}",
+    "decoration.strokes[0].color": "${theme.colors.line}",
+    "decoration.radius": "${theme.radii.cardWide}"
+   }
+  },
+  "cells": {
+   "type": "row",
+   "children": ["cell0", "cell1", "cell2", "cell3"],
+   "props": {"wrap": true, "spacing": 0, "runSpacing": 28, "crossAxisAlignment": "start"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+
+  "cell0": {"type": "column", "children": ["rule0", "value0", "label0", "note0"], "props": {"crossAxisAlignment": "start"}, "layout": {"width": {"fill": 300}, "basis": 240, "height": {"hug": 0}, "padding": [36, 4, 28, 4]}, "bind": {"visible": "${= length(props.values) > 0}"}},
+  "rule0": {"type": "box", "layout": {"width": 28, "height": 3}, "decoration": {"fills": [{"color": "accent"}], "radius": 2}, "bind": {"decoration.fills[0].color": "${theme.colors.accent}"}},
+  "value0": {"type": "text", "props": {"text": "${= length(props.values) > 0 ? at(props.values, 0) : ''}", "style": {"from": "numberHero", "fontSize": 50}, "maxLines": 1, "scaleDown": true}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 18, 0, 8]}},
+  "label0": {"type": "text", "props": {"text": "${= length(props.labels) > 0 ? at(props.labels, 0) : ''}", "style": {"from": "bodyWide", "color": "inkSoft"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "note0": {"type": "text", "props": {"text": "${= length(props.notes) > 0 ? at(props.notes, 0) : ''}", "style": {"from": "captionWide", "color": "inkFaint"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 6, 0, 0]}, "bind": {"visible": "${= length(props.notes) > 0 && at(props.notes, 0) != ''}"}},
+
+  "cell1": {"type": "column", "children": ["rule1", "value1", "label1", "note1"], "props": {"crossAxisAlignment": "start"}, "layout": {"width": {"fill": 300}, "basis": 240, "height": {"hug": 0}, "padding": [36, 4, 28, 4]}, "customPaint": {"painter": [{"op": "rect", "rect": [0, 4, 1, "${= max(4, size.height - 4)}"], "paint": "${theme.colors.line}"}]}, "bind": {"visible": "${= length(props.values) > 1}"}},
+  "rule1": {"type": "box", "layout": {"width": 28, "height": 3}, "decoration": {"fills": [{"color": "accent"}], "radius": 2}, "bind": {"decoration.fills[0].color": "${theme.colors.accent}"}},
+  "value1": {"type": "text", "props": {"text": "${= length(props.values) > 1 ? at(props.values, 1) : ''}", "style": {"from": "numberHero", "fontSize": 50}, "maxLines": 1, "scaleDown": true}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 18, 0, 8]}},
+  "label1": {"type": "text", "props": {"text": "${= length(props.labels) > 1 ? at(props.labels, 1) : ''}", "style": {"from": "bodyWide", "color": "inkSoft"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "note1": {"type": "text", "props": {"text": "${= length(props.notes) > 1 ? at(props.notes, 1) : ''}", "style": {"from": "captionWide", "color": "inkFaint"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 6, 0, 0]}, "bind": {"visible": "${= length(props.notes) > 1 && at(props.notes, 1) != ''}"}},
+
+  "cell2": {"type": "column", "children": ["rule2", "value2", "label2", "note2"], "props": {"crossAxisAlignment": "start"}, "layout": {"width": {"fill": 300}, "basis": 240, "height": {"hug": 0}, "padding": [36, 4, 28, 4]}, "customPaint": {"painter": [{"op": "rect", "rect": [0, 4, 1, "${= max(4, size.height - 4)}"], "paint": "${theme.colors.line}"}]}, "bind": {"visible": "${= length(props.values) > 2}"}},
+  "rule2": {"type": "box", "layout": {"width": 28, "height": 3}, "decoration": {"fills": [{"color": "accent"}], "radius": 2}, "bind": {"decoration.fills[0].color": "${theme.colors.accent}"}},
+  "value2": {"type": "text", "props": {"text": "${= length(props.values) > 2 ? at(props.values, 2) : ''}", "style": {"from": "numberHero", "fontSize": 50}, "maxLines": 1, "scaleDown": true}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 18, 0, 8]}},
+  "label2": {"type": "text", "props": {"text": "${= length(props.labels) > 2 ? at(props.labels, 2) : ''}", "style": {"from": "bodyWide", "color": "inkSoft"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "note2": {"type": "text", "props": {"text": "${= length(props.notes) > 2 ? at(props.notes, 2) : ''}", "style": {"from": "captionWide", "color": "inkFaint"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 6, 0, 0]}, "bind": {"visible": "${= length(props.notes) > 2 && at(props.notes, 2) != ''}"}},
+
+  "cell3": {"type": "column", "children": ["rule3", "value3", "label3", "note3"], "props": {"crossAxisAlignment": "start"}, "layout": {"width": {"fill": 300}, "basis": 240, "height": {"hug": 0}, "padding": [36, 4, 28, 4]}, "customPaint": {"painter": [{"op": "rect", "rect": [0, 4, 1, "${= max(4, size.height - 4)}"], "paint": "${theme.colors.line}"}]}, "bind": {"visible": "${= length(props.values) > 3}"}},
+  "rule3": {"type": "box", "layout": {"width": 28, "height": 3}, "decoration": {"fills": [{"color": "accent"}], "radius": 2}, "bind": {"decoration.fills[0].color": "${theme.colors.accent}"}},
+  "value3": {"type": "text", "props": {"text": "${= length(props.values) > 3 ? at(props.values, 3) : ''}", "style": {"from": "numberHero", "fontSize": 50}, "maxLines": 1, "scaleDown": true}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 18, 0, 8]}},
+  "label3": {"type": "text", "props": {"text": "${= length(props.labels) > 3 ? at(props.labels, 3) : ''}", "style": {"from": "bodyWide", "color": "inkSoft"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "note3": {"type": "text", "props": {"text": "${= length(props.notes) > 3 ? at(props.notes, 3) : ''}", "style": {"from": "captionWide", "color": "inkFaint"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 6, 0, 0]}, "bind": {"visible": "${= length(props.notes) > 3 && at(props.notes, 3) != ''}"}}
+ }
+}

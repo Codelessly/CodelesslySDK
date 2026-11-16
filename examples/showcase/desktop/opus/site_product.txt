@@ -1,0 +1,129 @@
+state img=0
+state finish="Brass"
+state qty=1
+state tab="Description"
+state cart=2
+state q=""
+state views=["Front view","Side profile","Brass joint detail","On an oak desk"]
+state specs=[{"k":"Dimensions","v":"H 46 cm · Arm reach 38 cm · Base Ø 16 cm"},{"k":"Materials","v":"Solid brass joints, powder-coated steel arm"},{"k":"Light source","v":"Integrated LED, 8 W, 600 lumen"},{"k":"Color temperature","v":"2700 K – 4000 K, adjustable"},{"k":"Dimming","v":"Touch dimmer, 5 steps"},{"k":"Cable","v":"1.8 m braided textile, USB-C power"}]
+state reviews=[{"name":"Maya Reyes","stars":5,"date":"Mar 2, 2026","text":"Beautifully made. The brass has a warm glow and the arm stays exactly where I put it."},{"name":"Jonas Berg","stars":5,"date":"Feb 18, 2026","text":"Perfect light for late work. The dimmer steps are well judged and the base is heavy enough."},{"name":"Priya Shah","stars":4,"date":"Jan 29, 2026","text":"Lovely design, a little pricier than I hoped, but the Graphite finish looks great on my walnut desk."}]
+Page
+  Nav
+    Text.strong "Nord & Co" size:22
+    Row gap:4
+      Link "Lighting"
+      Link "Furniture"
+      Link "Desk"
+      Link "Journal"
+    Row gap:12 middle
+      SearchBar "Search the store" =q w:260
+      NotificationBadge count:=cart
+        IconButton "shopping_bag" -> emit openCart
+  Section
+    Column gap:24
+      Breadcrumb items:["Home","Lighting","Desk lamps","Arc One"] showHomeIcon:true
+      Row gap:48 top
+        Column grow gap:16
+          Box h:480 radius:16 fill:=finish=="Brass"?"#FFF3E9D2":finish=="Graphite"?"#FFE3E4E6":"#FFF1EBE1" center middle gap:12
+            Icon "emoji_objects" {"props":{"size":180}}
+            Text.muted "{views[img]} · {finish}"
+          Grid cols:4 gap:12
+            Box h:96 radius:10 fill:#FFF5F3EE center middle border:=img==0?"#FF111827":"#FFE5E7EB" -> img=0
+              Icon "emoji_objects"
+            Box h:96 radius:10 fill:#FFF5F3EE center middle border:=img==1?"#FF111827":"#FFE5E7EB" -> img=1
+              Icon "light"
+            Box h:96 radius:10 fill:#FFF5F3EE center middle border:=img==2?"#FF111827":"#FFE5E7EB" -> img=2
+              Icon "zoom_in"
+            Box h:96 radius:10 fill:#FFF5F3EE center middle border:=img==3?"#FF111827":"#FFE5E7EB" -> img=3
+              Icon "desk"
+        Column grow gap:20
+          Column gap:8
+            Text.eyebrow "Nord & Co · Desk lamps"
+            Heading "Arc One Desk Lamp" level:1
+            Row gap:6 middle
+              Icon "star" color:#FFF59E0B
+              Icon "star" color:#FFF59E0B
+              Icon "star" color:#FFF59E0B
+              Icon "star" color:#FFF59E0B
+              Icon "star_half" color:#FFF59E0B
+              Text.strong "4.7"
+              Link "318 reviews" -> tab="Reviews"
+          Row gap:12 middle
+            Text "$149" size:36 weight:700
+            Text.muted "$189" strike size:20
+            Badge.success "Save $40"
+          Paragraph "A sculptural task lamp with a balanced steel arm and solid brass joints. Warm, dimmable light that moves exactly where you need it."
+          Column gap:8
+            Text.fieldLabel "Finish: {finish}"
+            Row gap:8
+              ChoiceChip "Brass" selected:=finish=="Brass" -> finish="Brass"
+              ChoiceChip "Graphite" selected:=finish=="Graphite" -> finish="Graphite"
+              ChoiceChip "Sand" selected:=finish=="Sand" -> finish="Sand"
+          Stepper "Quantity" =qty min:1 max:10
+          Row gap:12
+            Button "Add to cart" grow -> cart=cart+qty; toast "Added {qty} × Arc One ({finish}) to cart"
+            Button.outline "Buy now" grow -> emit buyNow
+          Card gap:12
+            Row gap:12 middle
+              Icon "local_shipping"
+              Column gap:2
+                Text.strong "Free delivery in 2–4 business days"
+                Text.muted "Order before 3 pm for same-day dispatch."
+            Divider
+            Row gap:12 middle
+              Icon "assignment_return"
+              Column gap:2
+                Text.strong "30-day free returns"
+                Text.muted "Changed your mind? Send it back, no questions asked."
+  Section
+    Column gap:20
+      SegmentedControl =tab options:["Description","Specifications","Reviews"]
+      if tab=="Description"
+        Column gap:12 maxw:760
+          Heading "Designed for focus" level:3
+          Paragraph "Arc One balances a slender steel arm on a weighted base, so it holds any angle without a single knob to tighten. The integrated LED dims in five steps and shifts from warm 2700 K evening light to crisp 4000 K for detail work."
+          Paragraph "Each lamp is assembled by hand and finished in brushed brass, graphite or sand powder coat. It ships with a braided USB-C cable and a two-year warranty."
+      if tab=="Specifications"
+        Card gap:0 maxw:760
+          each s in specs
+            Row between pad:[0,12,0,12] border-bottom:#FFE5E7EB
+              Text.muted "{s.k}"
+              Text.strong "{s.v}"
+      if tab=="Reviews"
+        Column gap:12 maxw:760
+          Row gap:12 middle
+            Text "4.7" size:40 weight:700
+            Text.muted "out of 5 · 318 reviews"
+          each r in reviews
+            Card gap:8
+              Row between middle
+                Row gap:10 middle
+                  Avatar "{r.name}" size:36
+                  Text.strong "{r.name}"
+                Text.muted "{r.date}"
+              Row gap:2
+                Icon "star" color:#FFF59E0B
+                Icon "star" color:#FFF59E0B
+                Icon "star" color:#FFF59E0B
+                Icon "star" color:#FFF59E0B
+                Icon "star" color:=r.stars>=5?"#FFF59E0B":"#FFD1D5DB"
+              Text "{r.text}"
+  Section fill:#FFF7F5F0
+    Column gap:20
+      Heading "You may also like"
+      Grid cols:4 gap:24
+        ProductTile "Oak Desk Tray" "Solid oak · 32 cm" price:"$59" rating:4.8 kind:"box" tone:"sand" -> emit openProduct "oak-tray"
+        ProductTile "Stoneware Mug" "Hand-glazed · 350 ml" price:"$28" rating:4.6 kind:"mug" tone:"slate" -> emit openProduct "mug"
+        ProductTile "Canvas Desk Tote" "Waxed canvas" price:"$45" rating:4.5 kind:"tote" tone:"mint" -> emit openProduct "tote"
+        ProductTile "Studio Laptop Stand" "Aluminium · adjustable" price:"$89" rating:4.7 kind:"laptop" tone:"sky" -> emit openProduct "stand"
+  Footer
+    Row between top
+      Column gap:6
+        Text.strong "Nord & Co"
+        Text.muted "Considered objects for home and work."
+      Row gap:16
+        Link "Shipping"
+        Link "Returns"
+        Link "Contact"
+        Link "Privacy"
+      Text.muted "© 2026 Nord & Co"

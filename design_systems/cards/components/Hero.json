@@ -1,0 +1,176 @@
+{
+ "schema": 3,
+ "id": "Hero",
+ "roots": ["band"],
+ "widget": {
+  "type": "Hero",
+  "doc": "The opening band of a landing page, written directly under Page: Hero eyebrow:\"New: …\" title:\"…\" text:\"…\" primary:\"Start free\" secondary:\"Book a demo\" note:\"No credit card needed\" kind:\"harbor\" tone:\"day\" -> onPrimary; align defaults to \"split\" (the drawn picture beside the text, under it on a narrow window), \"center\" centers everything with no picture, and empty texts hide their parts.",
+  "props": [
+   {"key": "eyebrow", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "A short line in the pill over the headline (empty: none)."},
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Fill every room, without the spreadsheets", "doc": "The headline.", "required": true},
+   {"key": "text", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One or two lines under the headline."},
+   {"key": "primary", "type": {"kind": "string", "flutter": "String"}, "default": "Get started", "doc": "The primary action's label (empty: none)."},
+   {"key": "secondary", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The quiet second action's label (empty: none)."},
+   {"key": "note", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "A short reassurance under the actions, with a check (empty: none)."},
+   {"key": "kind", "type": {"kind": "string", "flutter": "String"}, "default": "harbor", "doc": "The drawn picture, as Media kind (a scene or a product)."},
+   {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "day", "doc": "The picture's tone: dawn, day, dusk, night for a scene; sand, rose, mint, sky, lilac, slate for a product."},
+   {"key": "align", "type": {"kind": "string", "flutter": "String"}, "default": "split", "doc": "split: the picture beside the text; center: centered text, no picture."}
+  ],
+  "events": [
+   {"key": "onPrimary", "doc": "The primary action was pressed."},
+   {"key": "onSecondary", "doc": "The secondary action was pressed."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Split",
+   "size": [1280, 640],
+   "props": {
+    "eyebrow": "New: smart pricing for the spring season",
+    "title": "Fill every room, without the spreadsheets",
+    "text": "One calendar for every room and every channel, so your mornings go to guests, not to cells.",
+    "primary": "Start free",
+    "secondary": "Book a demo",
+    "note": "No credit card needed",
+    "kind": "harbor",
+    "tone": "dawn"
+   }
+  },
+  {
+   "name": "Center",
+   "size": [1280, 460],
+   "props": {"eyebrow": "Now in beta", "title": "Calm front desks start here", "text": "Rooms, rates and guests in one place.", "primary": "Start free", "secondary": "Book a demo", "note": "No credit card needed", "align": "center"}
+  }
+ ],
+ "nodes": {
+  "band": {
+   "type": "column",
+   "children": ["inner"],
+   "props": {"crossAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [32, 88, 32, 88]},
+   "decoration": {
+    "fills": [{"color": "pageFill"}],
+    "strokes": [{"color": "line"}],
+    "strokeWidth": 1,
+    "strokeSides": "bottom"
+   }
+  },
+  "inner": {
+   "type": "row",
+   "children": ["copy", "art"],
+   "props": {"wrap": true, "spacing": 64, "runSpacing": 48, "crossAxisAlignment": "center", "mainAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "constraints": {"maxWidth": 1120}, "height": {"hug": 0}}
+  },
+  "copy": {
+   "type": "column",
+   "children": ["chip", "title", "text", "actions", "note"],
+   "props": {"crossAxisAlignment": "start", "spacing": 0},
+   "layout": {"width": {"fill": 540}, "basis": 440, "height": {"hug": 0}},
+   "bind": {"props.crossAxisAlignment": "${= props.align == 'center' ? 'center' : 'start'}"}
+  },
+  "chip": {
+   "type": "row",
+   "children": ["chipDot", "chipText"],
+   "props": {"crossAxisAlignment": "center", "spacing": 8},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [12, 5, 14, 5], "margin": [0, 0, 0, 22]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "accentLine"}], "strokeWidth": 1, "radius": 999},
+   "bind": {"visible": "${= props.eyebrow != ''}", "decoration.radius": "${theme.radii.chip}"}
+  },
+  "chipDot": {
+   "type": "box",
+   "layout": {"width": 7, "height": 7},
+   "decoration": {"fills": [{"color": "good"}], "radius": 4}
+  },
+  "chipText": {
+   "type": "text",
+   "props": {"text": "${props.eyebrow}", "style": {"from": "smallWide", "color": "accent", "fontWeight": 600}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "title": {
+   "type": "text",
+   "media": [{"maxWidth": 1023, "patch": {"props": {"style": {"fontSize": 48}}}}, {"maxWidth": 699, "patch": {"props": {"style": {"fontSize": 40}}}}],
+   "props": {"text": "${props.title}", "style": {"from": "heading1Wide"}, "textAlign": "start"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"props.textAlign": "${= props.align == 'center' ? 'center' : 'start'}"}
+  },
+  "text": {
+   "type": "text",
+   "props": {"text": "${props.text}", "style": {"from": "leadWide", "color": "inkSoft"}, "textAlign": "start"},
+   "layout": {"width": {"fill": 0}, "constraints": {"maxWidth": 580}, "height": {"hug": 0}, "padding": [0, 20, 0, 0]},
+   "bind": {"visible": "${= props.text != ''}", "props.textAlign": "${= props.align == 'center' ? 'center' : 'start'}"}
+  },
+  "actions": {
+   "type": "row",
+   "children": ["primary", "secondary"],
+   "props": {"wrap": true, "spacing": 12, "runSpacing": 12, "crossAxisAlignment": "center"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [0, 32, 0, 0]},
+   "bind": {"visible": "${= props.primary != '' || props.secondary != ''}"}
+  },
+  "primary": {
+   "type": "row",
+   "children": ["primaryLabel", "primaryIcon"],
+   "props": {"crossAxisAlignment": "center", "mainAxisAlignment": "center", "spacing": 8},
+   "layout": {"width": {"hug": 0}, "height": 44, "padding": [22, 0, 20, 0]},
+   "decoration": {"fills": [{"color": "accent"}], "radius": 10},
+   "bind": {"visible": "${= props.primary != ''}", "decoration.radius": "${theme.radii.controlMedium}"},
+   "states": {"hovered": {"primary": {"opacity": 0.92}}, "pressed": {"primary": {"opacity": 0.82}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onPrimary", "value": "${props.primary}"}]}]
+  },
+  "primaryLabel": {
+   "type": "text",
+   "props": {"text": "${props.primary}", "style": {"from": "strongWide", "color": "onAccent", "fontSize": 15}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "primaryIcon": {
+   "type": "icon",
+   "props": {"icon": "arrow_forward_rounded", "size": 17, "color": "onAccent"},
+   "layout": {"width": 17, "height": 17}
+  },
+  "secondary": {
+   "type": "row",
+   "children": ["secondaryLabel"],
+   "props": {"crossAxisAlignment": "center", "mainAxisAlignment": "center"},
+   "layout": {"width": {"hug": 0}, "height": 44, "padding": [20, 0, 20, 0]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "lineStrong"}], "strokeWidth": 1, "radius": 10},
+   "bind": {"visible": "${= props.secondary != ''}", "decoration.radius": "${theme.radii.controlMedium}"},
+   "states": {"hovered": {"secondary": {"opacity": 0.9}}, "pressed": {"secondary": {"opacity": 0.8}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onSecondary", "value": "${props.secondary}"}]}]
+  },
+  "secondaryLabel": {
+   "type": "text",
+   "props": {"text": "${props.secondary}", "style": {"from": "strongWide", "color": "ink", "fontSize": 15}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "note": {
+   "type": "row",
+   "children": ["noteIcon", "noteText"],
+   "props": {"crossAxisAlignment": "center", "spacing": 7},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [0, 18, 0, 0]},
+   "bind": {"visible": "${= props.note != ''}"}
+  },
+  "noteIcon": {
+   "type": "icon",
+   "props": {"icon": "check_circle_rounded", "size": 16, "color": "good"},
+   "layout": {"width": 16, "height": 16}
+  },
+  "noteText": {
+   "type": "text",
+   "props": {"text": "${props.note}", "style": {"from": "smallWide", "color": "inkSoft"}},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "art": {
+   "type": "column",
+   "children": ["picture"],
+   "props": {"crossAxisAlignment": "stretch"},
+   "layout": {"width": {"fill": 500}, "basis": 400, "height": {"hug": 0}, "padding": [16, 16, 16, 16]},
+   "decoration": {"fills": [{"color": "tile"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 16},
+   "bind": {"visible": "${= props.align != 'center'}", "decoration.radius": "${theme.radii.cardWide}"}
+  },
+  "picture": {
+   "type": "Media",
+   "props": {"kind": "harbor", "tone": "day", "round": true},
+   "layout": {"width": {"fill": 0}, "height": 380},
+   "bind": {"props.kind": "${props.kind}", "props.tone": "${props.tone}"}
+  }
+ }
+}

@@ -1,0 +1,108 @@
+Page
+  Nav
+    Brand "Nord & Co" icon:"light"
+    Row gap:4
+      Link "Living"
+      Link "Lighting"
+      Link "Kitchen"
+      Link "Office"
+    Row gap:12 middle
+      SearchBar "Search products" =q w:260
+      NotificationBadge count:=cart
+        IconButton "shopping_cart" -> emit openCart
+  Section
+    Column gap:24
+      Breadcrumb items:["Home","Lighting","Desk lamps","Arc One"]
+      Row gap:56 top
+        Column grow gap:16
+          Media kind:"box" tone:=tones[shot] h:480
+          Row gap:12
+            each t in thumbs
+              Box pad:4 radius:10 border:=shot==t.i?"#FF2563EB":"#FFE5E7EB" -> shot=t.i
+                Media kind:"box" tone:=t.tone w:96 h:80
+        Column grow gap:20
+          Column gap:8
+            Text.eyebrow "NORD & CO · LIGHTING"
+            Heading "Arc One desk lamp" level:1
+            Row gap:8 middle
+              Row gap:2
+                Icon "star" color:#FFF59E0B size:20
+                Icon "star" color:#FFF59E0B size:20
+                Icon "star" color:#FFF59E0B size:20
+                Icon "star" color:#FFF59E0B size:20
+                Icon "star_half" color:#FFF59E0B size:20
+              Text.strong "4.7"
+              Text.muted "318 reviews"
+          Row gap:12 bottom
+            Text.numberLarge "$149"
+            Text.muted "$189" strike
+            Badge.success "Save $40"
+          Text.muted "A slim adjustable arm, a dimmable warm light and a weighted base that keeps it steady on any desk."
+          Divider
+          Column gap:8
+            Text.strong "Finish: {finish}"
+            ChoiceChips =finish options:["Brass","Graphite","Sand"] columns:3
+          Row gap:12 middle
+            Text.strong "Quantity"
+            Stepper "Quantity" =qty min:1 max:10
+          Row gap:12
+            Button "Add to cart" size:large grow -> cart=cart+qty; toast "Added to cart"
+            Button.outline "Buy now" size:large grow -> emit buyNow
+          Card gap:12
+            Row gap:12 middle
+              IconTile "local_shipping"
+              Column gap:2
+                Text.strong "Free delivery"
+                Text.muted "Arrives in 2–4 working days on orders over $75."
+            Row gap:12 middle
+              IconTile "undo"
+              Column gap:2
+                Text.strong "30-day returns"
+                Text.muted "Not the right fit? Send it back free of charge."
+  Section tint
+    Column gap:20
+      SegmentedButton =tab items:["Description","Specifications","Reviews"]
+      if tab=="Description"
+        Column gap:12 maxw:760
+          Heading "Light that moves with you" level:3
+          Text.body "Arc One pairs a slim steel arm with a weighted base and a soft, glare-free shade. The head tilts 120 degrees and the arm reaches 45 cm, so light lands exactly where you are working."
+          Text.body "Touch-dimming runs from a candle-warm glow to a crisp reading light, and the finish is hand-applied in small batches so every lamp is a little different."
+      if tab=="Specifications"
+        Card pad:0 gap:0
+          each s in specs
+            Row pad:[20,0,20,0] h:52 middle border-top:#FFE5E7EB
+              Text.strong s.k w:240
+              Text.muted s.v grow
+      if tab=="Reviews"
+        Column gap:16
+          each r in reviews
+            Card gap:8
+              Row between middle
+                Row gap:10 middle
+                  Avatar r.name size:36
+                  Column gap:2
+                    Text.strong "{r.name}"
+                    Text.caption "{r.date}"
+                Text "{r.stars==5?'★★★★★':'★★★★☆'}" color:#FFF59E0B size:18
+              Text.strong "{r.title}"
+              Text.muted "{r.text}"
+  Section
+    Column gap:24
+      Heading "You may also like" level:2
+      Grid cols:4 gap:24
+        ProductTile "Fold floor lamp" "Powder-coated steel" "$229" rating:4.6 kind:"box" tone:"sky" -> emit openProduct
+        ProductTile "Dune table lamp" "Ceramic base, linen shade" "$119" rating:4.8 kind:"mug" tone:"sand" -> emit openProduct
+        ProductTile "Pebble night light" "Rechargeable, dimmable" "$59" rating:4.5 kind:"box" tone:"rose" -> emit openProduct
+        ProductTile "Halo pendant" "Brushed brass, 40 cm" "$179" rating:4.7 kind:"box" tone:"mint" -> emit openProduct
+  SiteFooter brand:"Nord & Co" tagline:"Considered objects for calm homes." icon:"light" headings:["Shop","Help","Company"] links:[["Lighting","Furniture","Textiles","Gift cards"],["Delivery","Returns","Care guides","Contact"],["About us","Journal","Careers","Stores"]] legal:"© 2026 Nord & Co" small:["Privacy","Terms"]
+
+state cart=2
+state qty=1
+state finish="Brass"
+state shot=0
+state tab="Description"
+state q=""
+state tones=["sand","slate","rose","sky"]
+state thumbs=[{"i":0,"tone":"sand"},{"i":1,"tone":"slate"},{"i":2,"tone":"rose"},{"i":3,"tone":"sky"}]
+state specs=[{"k":"Height","v":"45 cm at full reach"},{"k":"Light source","v":"Integrated LED, 8 W"},{"k":"Color temperature","v":"2700 K – 4000 K, dimmable"},{"k":"Material","v":"Steel arm, solid brass or powder-coated base"},{"k":"Cable","v":"1.8 m, fabric-wrapped, USB-C power"},{"k":"Weight","v":"1.9 kg"}]
+state reviews=[{"name":"Hannah Berg","date":"2 weeks ago","stars":5,"title":"Exactly what my desk needed","text":"Beautiful finish and the dimming is smooth. It looks even better in person."},{"name":"Marcus Lindqvist","date":"1 month ago","stars":5,"title":"Sturdy and elegant","text":"The weighted base keeps it steady and the arm holds any angle I set."},{"name":"Priya Nair","date":"2 months ago","stars":4,"title":"Lovely light, short cable","text":"Warm, even light with no glare. I wish the cable were a little longer."}]

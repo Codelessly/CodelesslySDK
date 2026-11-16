@@ -1,0 +1,132 @@
+{
+ "schema": 3,
+ "id": "FilterBar",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "FilterBar",
+  "doc": "The toolbar over a page's table: FilterBar =q placeholder:\"Search name or company\" filters:=[{\"label\":\"Status\",\"value\":\"All\"}] count:\"248 customers\" action:\"Export\" -> onFilter (result: the tapped filter's label) keeps the typed text in your variable and also fires onSearch (the text) and onAction; a filter whose value does not start with All or Any shows as active in the accent.",
+  "props": [
+   {"key": "query", "type": {"kind": "variable", "of": {"kind": "string", "flutter": "String"}}, "default": "", "doc": "The name of your text variable: it holds what is typed."},
+   {"key": "placeholder", "type": {"kind": "string", "flutter": "String"}, "default": "Search", "doc": "The search field's hint."},
+   {"key": "filters", "type": {"kind": "list", "flutter": "List<Map>", "item": {"kind": "map", "flutter": "Map"}}, "default": [{"label": "Status", "value": "All"}], "doc": "The filter chips, each {label, value}.", "required": true},
+   {"key": "count", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The count of results at the right (empty: none)."},
+   {"key": "action", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The secondary action's label (empty: none)."},
+   {"key": "actionIcon", "type": {"kind": "string", "flutter": "String"}, "default": "download_rounded", "doc": "A Material icon before the action's label (empty: none)."}
+  ],
+  "events": [
+   {"key": "onFilter", "doc": "A filter chip was tapped; the value is its label."},
+   {"key": "onSearch", "doc": "The text changed; the value is the text."},
+   {"key": "onAction", "doc": "The action button was pressed."}
+  ]
+ },
+ "previews": [
+  {"name": "Customers", "size": [1120, 64], "props": {"placeholder": "Search name or company", "filters": [{"label": "Status", "value": "Active"}, {"label": "Segment", "value": "All segments"}, {"label": "Plan", "value": "Any plan"}], "count": "184 customers", "action": "Export"}},
+  {"name": "Narrow", "size": [720, 120], "props": {"placeholder": "Search name or company", "filters": [{"label": "Status", "value": "All"}, {"label": "Owner", "value": "Maya Reyes"}], "count": "248 customers", "action": "Export"}}
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "row", "children": ["search", "chips", "tail"],
+   "props": {"wrap": true, "spacing": 12, "runSpacing": 12, "crossAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "search": {
+   "type": "row", "children": ["searchIcon", "input", "clear"],
+   "props": {"crossAxisAlignment": "center", "spacing": 10},
+   "layout": {"width": {"fill": 300}, "basis": 280, "height": 40, "padding": [14, 0, 10, 0]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 10},
+   "bind": {"decoration.radius": "${theme.radii.controlMedium}", "decoration.strokes[0].color": "${= props.query != '' ? theme.colors.accentLine : theme.colors.line}"}
+  },
+  "searchIcon": {"type": "icon", "props": {"icon": "search_rounded", "size": 18, "color": "inkFaint"}, "layout": {"width": 18, "height": 18}},
+  "input": {
+   "type": "textField",
+   "props": {
+    "initialValue": "",
+    "style": {"from": "inputTextWide", "fontSize": 14},
+    "maxLines": 1,
+    "decoration": {
+     "hintText": "Search",
+     "hintStyle": {"from": "inputTextWide", "fontSize": 14, "color": "inkFaint"},
+     "border": {"type": "none"},
+     "enabledBorder": {"type": "none"},
+     "focusedBorder": {"type": "none"},
+     "isDense": true,
+     "filled": false,
+     "contentPadding": [0, 0, 0, 0]
+    }
+   },
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {
+    "props.initialValue": "${props.query}",
+    "props.decoration.hintText": "${props.placeholder}"
+   },
+   "actions": [
+    {"trigger": {"type": "changed"}, "actions": [
+     {"type": "setVariable", "variable": "props.query", "value": "${= result}"},
+     {"type": "componentEvent", "event": "onSearch", "value": "${result}"}
+    ]}
+   ]
+  },
+  "clear": {
+   "type": "row", "children": ["clearIcon"], "props": {"mainAxisAlignment": "center"},
+   "layout": {"width": 22, "height": 22},
+   "decoration": {"fills": [{"color": "tileDeep"}], "radius": 11},
+   "bind": {"visible": "${= props.query != ''}"},
+   "states": {"pressed": {"clear": {"opacity": 0.7}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [
+    {"type": "setVariable", "variable": "props.query", "value": ""},
+    {"type": "componentEvent", "event": "onSearch", "value": ""}
+   ]}]
+  },
+  "clearIcon": {"type": "icon", "props": {"icon": "close_rounded", "size": 13, "color": "inkSoft"}, "layout": {"width": 13, "height": 13}},
+  "chips": {
+   "type": "listView", "children": ["chip"],
+   "props": {"scrollable": false, "scrollDirection": "horizontal", "wrap": true, "wrapSpacing": 8, "runSpacing": 8, "wrapCrossAlignment": "center"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"data": "${props.filters}", "visible": "${= length(props.filters) > 0}"}
+  },
+  "chip": {
+   "type": "row", "children": ["chipLabel", "chipValue", "chipIcon"],
+   "props": {"crossAxisAlignment": "center", "spacing": 6},
+   "layout": {"width": {"hug": 0}, "height": 40, "padding": [14, 0, 10, 0]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 10},
+   "bind": {
+    "decoration.radius": "${theme.radii.controlMedium}",
+    "decoration.fills[0].color": "${= item.value != '' && !startsWith(item.value, 'All') && !startsWith(item.value, 'Any') ? theme.colors.accentTint : theme.colors.card}",
+    "decoration.strokes[0].color": "${= item.value != '' && !startsWith(item.value, 'All') && !startsWith(item.value, 'Any') ? theme.colors.accentLine : theme.colors.line}"
+   },
+   "states": {"pressed": {"chip": {"opacity": 0.82}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onFilter", "value": "${item.label}"}]}]
+  },
+  "chipLabel": {"type": "text", "props": {"text": "${item.label}", "style": {"from": "smallWide", "color": "inkSoft"}, "maxLines": 1}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "chipValue": {
+   "type": "text", "props": {"text": "${item.value}", "style": {"from": "strongWide", "fontSize": 14}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"props.style.color": "${= item.value != '' && !startsWith(item.value, 'All') && !startsWith(item.value, 'Any') ? theme.colors.accent : theme.colors.ink}"}
+  },
+  "chipIcon": {"type": "icon", "props": {"icon": "expand_more_rounded", "size": 18, "color": "inkFaint"}, "layout": {"width": 18, "height": 18}},
+  "tail": {
+   "type": "row", "children": ["count", "action"],
+   "props": {"crossAxisAlignment": "center", "spacing": 14},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "count": {
+   "type": "text", "props": {"text": "${props.count}", "style": {"from": "mutedWide", "fontFeatures": ["tnum"]}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.count != ''}"}
+  },
+  "action": {
+   "type": "row", "children": ["actionIcon", "actionLabel"],
+   "props": {"crossAxisAlignment": "center", "spacing": 8},
+   "layout": {"width": {"hug": 0}, "height": 40, "padding": [14, 0, 16, 0]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "lineStrong"}], "strokeWidth": 1, "radius": 10},
+   "bind": {"visible": "${= props.action != ''}", "decoration.radius": "${theme.radii.controlMedium}"},
+   "states": {"pressed": {"action": {"opacity": 0.8}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onAction", "value": "${props.action}"}]}]
+  },
+  "actionIcon": {
+   "type": "icon", "props": {"icon": "download_rounded", "size": 17, "color": "ink"}, "layout": {"width": 17, "height": 17},
+   "bind": {"visible": "${= props.actionIcon != ''}", "props.icon": "${= props.actionIcon != '' ? props.actionIcon : 'download_rounded'}"}
+  },
+  "actionLabel": {"type": "text", "props": {"text": "${props.action}", "style": {"from": "strongWide", "fontSize": 14}, "maxLines": 1}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}}
+ }
+}

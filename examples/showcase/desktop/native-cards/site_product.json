@@ -1,0 +1,4495 @@
+{
+ "schema": 3,
+ "id": "ArcOne",
+ "roots": [
+  "product"
+ ],
+ "nodes": {
+  "product": {
+   "type": "canvas",
+   "name": "Arc One",
+   "slots": {
+    "body": "page"
+   },
+   "layout": {
+    "width": 1280,
+    "height": 900
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "page": {
+   "type": "column",
+   "children": [
+    "hdr",
+    "main",
+    "foot"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 900
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "hdr": {
+   "type": "column",
+   "children": [
+    "hdrRail"
+   ],
+   "sticky": {
+    "offset": 0
+   },
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 68
+    },
+    "padding": [
+     40,
+     0,
+     40,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        24,
+        0,
+        24,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "hdrRail": {
+   "type": "row",
+   "children": [
+    "logo",
+    "nav",
+    "hdrGap",
+    "search",
+    "acct",
+    "cart"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": 68,
+    "constraints": {
+     "maxWidth": 1200
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "logo": {
+   "type": "row",
+   "children": [
+    "logoMark",
+    "logoText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 140
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "logoMark": {
+   "type": "box",
+   "layout": {
+    "width": 26,
+    "height": 26
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "ink"
+     }
+    ],
+    "radius": [
+     13,
+     13,
+     4,
+     13
+    ]
+   }
+  },
+  "logoText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Nord & Co",
+    "style": {
+     "from": "title",
+     "fontSize": 19,
+     "color": "ink"
+    }
+   }
+  },
+  "nav": {
+   "type": "listView",
+   "children": [
+    "navItem"
+   ],
+   "layout": {
+    "width": {
+     "hug": 360
+    },
+    "height": 20,
+    "margin": [
+     24,
+     0,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 28
+   },
+   "bind": {
+    "data": "${navLinks}"
+   },
+   "media": [
+    {
+     "maxWidth": 1000,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "navItem": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "fill": 20
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "controlMedium",
+     "color": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= index == 0 ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "hdrGap": {
+   "type": "spacer"
+  },
+  "search": {
+   "type": "textField",
+   "layout": {
+    "width": 300,
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "decoration": {
+     "hintText": "Search lamps, chairs, textiles",
+     "prefixIcon": {
+      "icon": "search_rounded",
+      "size": 18
+     },
+     "filled": true,
+     "fillColor": "tile",
+     "contentPadding": [
+      12,
+      11,
+      12,
+      11
+     ]
+    }
+   },
+   "bind": {
+    "props.initialValue": "${query}"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "width": 220
+      }
+     }
+    }
+   ],
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "${= 'Searching for \u201c' + query + '\u201d'}"
+      }
+     ]
+    }
+   ]
+  },
+  "acct": {
+   "type": "iconButton",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "props": {
+    "icon": "person_outline_rounded",
+    "style": {
+     "foregroundColor": "ink"
+    }
+   },
+   "tooltip": "Account"
+  },
+  "cart": {
+   "type": "stack",
+   "children": [
+    "cartBtn",
+    "cartBadge"
+   ],
+   "layout": {
+    "width": 44,
+    "height": 40
+   },
+   "tooltip": "Cart",
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "${= cartCount + ' items in your cart'}"
+      }
+     ]
+    }
+   ]
+  },
+  "cartBtn": {
+   "type": "row",
+   "children": [
+    "cartIcon"
+   ],
+   "layout": {
+    "width": 40,
+    "height": 40,
+    "x": 0,
+    "y": 0
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 12
+   }
+  },
+  "cartIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "shopping_bag_outlined",
+    "size": 20,
+    "color": "ink"
+   }
+  },
+  "cartBadge": {
+   "type": "row",
+   "children": [
+    "cartN"
+   ],
+   "layout": {
+    "width": {
+     "hug": 18
+    },
+    "height": 18,
+    "x": {
+     "end": 0
+    },
+    "y": {
+     "start": -2
+    },
+    "padding": [
+     5,
+     0,
+     5,
+     0
+    ],
+    "constraints": {
+     "minWidth": 18
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 999,
+    "strokes": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokeWidth": 2,
+    "strokeAlign": "outside"
+   }
+  },
+  "cartN": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "props": {
+    "text": "${cartCount}",
+    "style": {
+     "from": "badge",
+     "fontSize": 10.5,
+     "fontWeight": 700,
+     "color": "onAccent"
+    }
+   }
+  },
+  "main": {
+   "type": "column",
+   "children": [
+    "rail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 2000
+    },
+    "padding": [
+     40,
+     20,
+     40,
+     80
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        24,
+        16,
+        24,
+        56
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "rail": {
+   "type": "column",
+   "children": [
+    "crumbs",
+    "prod",
+    "tabsCard",
+    "related"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 2000
+    },
+    "constraints": {
+     "maxWidth": 1200
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 0
+   }
+  },
+  "crumbs": {
+   "type": "listView",
+   "children": [
+    "crumb"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": 20
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 6
+   },
+   "bind": {
+    "data": "${crumbs}"
+   }
+  },
+  "crumb": {
+   "type": "row",
+   "children": [
+    "crumbT",
+    "crumbI"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "fill": 20
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "crumbT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= index == 3 ? theme.colors.ink : theme.colors.inkFaint}"
+   }
+  },
+  "crumbI": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 16,
+    "color": "inkGhost"
+   },
+   "bind": {
+    "visible": "${= index < 3}"
+   }
+  },
+  "prod": {
+   "type": "flex",
+   "children": [
+    "gallery",
+    "buy"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 740
+    },
+    "margin": [
+     0,
+     20,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 56,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "spacing": 32,
+       "crossAxisAlignment": "stretch"
+      }
+     }
+    }
+   ]
+  },
+  "gallery": {
+   "type": "column",
+   "children": [
+    "pic",
+    "thumbs"
+   ],
+   "layout": {
+    "width": {
+     "fill": 704
+    },
+    "height": {
+     "hug": 736
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "pic": {
+   "type": "stack",
+   "children": [
+    "art",
+    "viewTag",
+    "prevV",
+    "nextV",
+    "viewCount"
+   ],
+   "layout": {
+    "width": {
+     "fill": 704
+    },
+    "height": 620
+   },
+   "decoration": {
+    "radius": 20,
+    "clip": "antiAlias"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "height": 480
+      }
+     }
+    }
+   ]
+  },
+  "art": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 704
+    },
+    "height": {
+     "fill": 620
+    },
+    "x": 0,
+    "y": 0
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topCenter",
+      "end": "bottomCenter",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FFF1EADF"
+       },
+       {
+        "position": 1,
+        "color": "#FFE3D6C2"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].stops[0].color": "${v.a}",
+    "decoration.fills[0].stops[1].color": "${v.b}"
+   },
+   "customPaint": {
+    "viewBox": [
+     600,
+     480
+    ],
+    "fit": "cover",
+    "foregroundPainter": [
+     {
+      "op": "circle",
+      "c": [
+       410,
+       250
+      ],
+      "radius": 200,
+      "paint": "${v.glow}"
+     },
+     {
+      "op": "rect",
+      "rect": [
+       0,
+       392,
+       600,
+       88
+      ],
+      "paint": "${v.desk}"
+     },
+     {
+      "op": "path",
+      "d": "M344 262 L476 238 L580 392 L200 392 Z",
+      "paint": "${v.beam}"
+     },
+     {
+      "op": "path",
+      "d": "M170 404 C200 394 360 394 390 404 C360 414 200 414 170 404 Z",
+      "paint": "#2E000000"
+     },
+     {
+      "op": "path",
+      "d": "M212 400 C212 380 348 380 348 400 Z",
+      "paint": "${fc}"
+     },
+     {
+      "op": "line",
+      "p1": [
+       280,
+       386
+      ],
+      "p2": [
+       236,
+       226
+      ],
+      "paint": {
+       "color": "${fc}",
+       "style": "stroke",
+       "strokeWidth": 9,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "line",
+      "p1": [
+       236,
+       226
+      ],
+      "p2": [
+       374,
+       160
+      ],
+      "paint": {
+       "color": "${fc}",
+       "style": "stroke",
+       "strokeWidth": 9,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       236,
+       226
+      ],
+      "radius": 12,
+      "paint": "${fc}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       374,
+       160
+      ],
+      "radius": 9,
+      "paint": "${fc}"
+     },
+     {
+      "op": "path",
+      "d": "M360 150 L412 136 L478 238 L342 262 Z",
+      "paint": "${fc}"
+     },
+     {
+      "op": "path",
+      "d": "M372 150 L392 145 L378 252 L356 256 Z",
+      "paint": "#26FFFFFF"
+     },
+     {
+      "op": "line",
+      "p1": [
+       342,
+       262
+      ],
+      "p2": [
+       478,
+       238
+      ],
+      "paint": {
+       "color": "#55FFFFFF",
+       "style": "stroke",
+       "strokeWidth": 3
+      }
+     },
+     {
+      "op": "circle",
+      "c": [
+       410,
+       252
+      ],
+      "radius": 13,
+      "paint": "#FFFFE6A6"
+     }
+    ]
+   }
+  },
+  "viewTag": {
+   "type": "row",
+   "children": [
+    "viewTagT"
+   ],
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 26
+    },
+    "x": {
+     "start": 18
+    },
+    "y": {
+     "start": 18
+    },
+    "padding": [
+     10,
+     5,
+     10,
+     5
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "viewTagT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "props": {
+    "text": "${= v.name + ' \u00b7 ' + finishes[finish].name}",
+    "style": {
+     "from": "chip",
+     "color": "ink"
+    }
+   }
+  },
+  "prevV": {
+   "type": "row",
+   "children": [
+    "prevI"
+   ],
+   "layout": {
+    "width": 40,
+    "height": 40,
+    "x": {
+     "start": 18
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "shape": "circle"
+   },
+   "tooltip": "Previous view",
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "view",
+       "value": "${= (view + 3) % 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "prevI": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "chevron_left_rounded",
+    "size": 20,
+    "color": "ink"
+   }
+  },
+  "nextV": {
+   "type": "row",
+   "children": [
+    "nextI"
+   ],
+   "layout": {
+    "width": 40,
+    "height": 40,
+    "x": {
+     "end": 18
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "shape": "circle"
+   },
+   "tooltip": "Next view",
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "view",
+       "value": "${= (view + 1) % 4}"
+      }
+     ]
+    }
+   ]
+  },
+  "nextI": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "chevron_right_rounded",
+    "size": 20,
+    "color": "ink"
+   }
+  },
+  "viewCount": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    },
+    "x": {
+     "end": 20
+    },
+    "y": {
+     "start": 22
+    }
+   },
+   "props": {
+    "text": "${= (view + 1) + ' / 4'}",
+    "style": {
+     "from": "chip",
+     "fontFamily": "JetBrains Mono",
+     "color": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= view == 1 ? theme.colors.onHeroSoft : theme.colors.inkSoft}"
+   }
+  },
+  "thumbs": {
+   "type": "gridView",
+   "children": [
+    "thumb"
+   ],
+   "layout": {
+    "width": {
+     "fill": 704
+    },
+    "height": 104
+   },
+   "props": {
+    "crossAxisCount": 4,
+    "mainAxisExtent": 104,
+    "crossAxisSpacing": 12,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${views}"
+   }
+  },
+  "thumb": {
+   "type": "column",
+   "children": [
+    "thumbClip"
+   ],
+   "layout": {
+    "width": {
+     "fill": 170
+    },
+    "height": {
+     "fill": 104
+    },
+    "padding": 3
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "tooltip": "${item.name}",
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 2,
+    "radius": 14
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= index == view ? theme.colors.accent : '#00000000'}"
+   },
+   "states": {
+    "hovered": {
+     "thumb": {
+      "opacity": 0.85
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "view",
+       "value": "${index}"
+      }
+     ]
+    }
+   ]
+  },
+  "thumbClip": {
+   "type": "column",
+   "children": [
+    "thumbArt"
+   ],
+   "layout": {
+    "width": {
+     "fill": 164
+    },
+    "height": {
+     "fill": 98
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "radius": 11,
+    "clip": "antiAlias"
+   }
+  },
+  "thumbArt": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 164
+    },
+    "height": {
+     "fill": 98
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topCenter",
+      "end": "bottomCenter",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FFF1EADF"
+       },
+       {
+        "position": 1,
+        "color": "#FFE3D6C2"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].stops[0].color": "${item.a}",
+    "decoration.fills[0].stops[1].color": "${item.b}"
+   },
+   "customPaint": {
+    "viewBox": [
+     600,
+     480
+    ],
+    "fit": "cover",
+    "foregroundPainter": [
+     {
+      "op": "circle",
+      "c": [
+       410,
+       250
+      ],
+      "radius": 200,
+      "paint": "${item.glow}"
+     },
+     {
+      "op": "rect",
+      "rect": [
+       0,
+       392,
+       600,
+       88
+      ],
+      "paint": "${item.desk}"
+     },
+     {
+      "op": "path",
+      "d": "M344 262 L476 238 L580 392 L200 392 Z",
+      "paint": "${item.beam}"
+     },
+     {
+      "op": "path",
+      "d": "M212 400 C212 380 348 380 348 400 Z",
+      "paint": "${fc}"
+     },
+     {
+      "op": "line",
+      "p1": [
+       280,
+       386
+      ],
+      "p2": [
+       236,
+       226
+      ],
+      "paint": {
+       "color": "${fc}",
+       "style": "stroke",
+       "strokeWidth": 12,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "line",
+      "p1": [
+       236,
+       226
+      ],
+      "p2": [
+       374,
+       160
+      ],
+      "paint": {
+       "color": "${fc}",
+       "style": "stroke",
+       "strokeWidth": 12,
+       "strokeCap": "round"
+      }
+     },
+     {
+      "op": "path",
+      "d": "M360 150 L412 136 L478 238 L342 262 Z",
+      "paint": "${fc}"
+     },
+     {
+      "op": "circle",
+      "c": [
+       410,
+       252
+      ],
+      "radius": 14,
+      "paint": "#FFFFE6A6"
+     }
+    ]
+   }
+  },
+  "buy": {
+   "type": "column",
+   "children": [
+    "bHead",
+    "priceBlk",
+    "rule1",
+    "finBlk",
+    "qtyRow",
+    "ctas",
+    "stock",
+    "notes"
+   ],
+   "layout": {
+    "width": 440,
+    "height": {
+     "hug": 760
+    }
+   },
+   "props": {
+    "spacing": 22,
+    "crossAxisAlignment": "stretch"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 720
+       }
+      }
+     }
+    }
+   ]
+  },
+  "bHead": {
+   "type": "column",
+   "children": [
+    "eyebrow",
+    "pTitle",
+    "pLead",
+    "rate"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "eyebrow": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "props": {
+    "text": "NORD STUDIO \u00b7 DESK LAMP",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   }
+  },
+  "pTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 48
+    }
+   },
+   "props": {
+    "text": "Arc One",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 44,
+     "fontWeight": 800,
+     "height": 1.05,
+     "letterSpacing": -1.4,
+     "color": "ink"
+    }
+   }
+  },
+  "pLead": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "text": "An adjustable LED task lamp with a spun-aluminum shade and solid brass joints. Dims from reading light to a low evening glow.",
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "rate": {
+   "type": "row",
+   "children": [
+    "stars",
+    "rateN",
+    "rateL"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 8
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "2"
+      },
+      {
+       "type": "scrollTo",
+       "node": "tabsCard",
+       "offset": 88
+      }
+     ]
+    }
+   ]
+  },
+  "stars": {
+   "type": "listView",
+   "children": [
+    "star"
+   ],
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": 16
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 2
+   },
+   "bind": {
+    "data": "${= range(5)}"
+   }
+  },
+  "star": {
+   "type": "icon",
+   "layout": {
+    "width": 16,
+    "height": {
+     "fill": 16
+    }
+   },
+   "props": {
+    "icon": "star_rounded",
+    "size": 16,
+    "color": "gold"
+   },
+   "bind": {
+    "props.icon": "${= item < 4 ? 'star_rounded' : 'star_half_rounded'}"
+   }
+  },
+  "rateN": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "4.7",
+    "style": {
+     "from": "chip",
+     "fontSize": 13,
+     "color": "ink"
+    }
+   }
+  },
+  "rateL": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "318 reviews",
+    "style": {
+     "from": "meta",
+     "color": "accent",
+     "decoration": "underline"
+    }
+   }
+  },
+  "priceBlk": {
+   "type": "column",
+   "children": [
+    "priceRow",
+    "priceNote"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "priceRow": {
+   "type": "row",
+   "children": [
+    "price",
+    "was",
+    "save"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "price": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 38
+    }
+   },
+   "props": {
+    "text": "$149",
+    "style": {
+     "from": "numberLarge",
+     "fontSize": 36,
+     "fontFeatures": [
+      "tnum"
+     ],
+     "color": "ink"
+    }
+   }
+  },
+  "was": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "text": "$189",
+    "style": {
+     "from": "numberSmall",
+     "fontWeight": 500,
+     "color": "inkFaint",
+     "decoration": "lineThrough"
+    }
+   }
+  },
+  "save": {
+   "type": "row",
+   "children": [
+    "saveT"
+   ],
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": [
+     8,
+     4,
+     8,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goodTint"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "saveT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "props": {
+    "text": "Save $40",
+    "style": {
+     "from": "chip",
+     "fontSize": 11.5,
+     "color": "goodDeep"
+    }
+   }
+  },
+  "priceNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Incl. VAT \u00b7 or 4 interest-free payments of $37.25",
+    "style": {
+     "from": "bodySecondary",
+     "color": "inkFaint"
+    }
+   }
+  },
+  "rule1": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "line"
+     }
+    ]
+   }
+  },
+  "finBlk": {
+   "type": "column",
+   "children": [
+    "finLbl",
+    "finGrid"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 80
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "finLbl": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "",
+    "style": {
+     "from": "fieldLabel",
+     "fontSize": 12.5,
+     "color": "ink"
+    }
+   },
+   "bind": {
+    "props.text": "${= 'Finish \u2014 ' + finishes[finish].name}"
+   }
+  },
+  "finGrid": {
+   "type": "gridView",
+   "children": [
+    "fin"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": 52
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "mainAxisExtent": 52,
+    "crossAxisSpacing": 10,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${finishes}"
+   }
+  },
+  "fin": {
+   "type": "row",
+   "children": [
+    "finSw",
+    "finN"
+   ],
+   "layout": {
+    "width": {
+     "fill": 140
+    },
+    "height": {
+     "fill": 52
+    },
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 12
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= index == finish ? theme.colors.tile : theme.colors.card}",
+    "decoration.strokes[0].color": "${= index == finish ? theme.colors.accent : theme.colors.line}"
+   },
+   "states": {
+    "hovered": {
+     "fin": {
+      "opacity": 0.9
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "finish",
+       "value": "${index}"
+      }
+     ]
+    }
+   ]
+  },
+  "finSw": {
+   "type": "box",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFC6A15B"
+     }
+    ],
+    "shape": "circle",
+    "strokes": [
+     {
+      "color": "#1F000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   }
+  },
+  "finN": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 80
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "from": "controlMedium",
+     "color": "ink"
+    }
+   }
+  },
+  "qtyRow": {
+   "type": "row",
+   "children": [
+    "qtyLbl",
+    "stepper",
+    "qGap",
+    "total"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 44
+    }
+   },
+   "props": {
+    "spacing": 14
+   }
+  },
+  "qtyLbl": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Quantity",
+    "style": {
+     "from": "fieldLabel",
+     "fontSize": 12.5,
+     "color": "ink"
+    }
+   }
+  },
+  "stepper": {
+   "type": "row",
+   "children": [
+    "minus",
+    "qtyN",
+    "plus"
+   ],
+   "layout": {
+    "width": {
+     "hug": 128
+    },
+    "height": 44,
+    "padding": [
+     2,
+     0,
+     2,
+     0
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "radius": 12
+   }
+  },
+  "minus": {
+   "type": "iconButton",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "props": {
+    "icon": "remove_rounded",
+    "style": {
+     "foregroundColor": "ink"
+    }
+   },
+   "bind": {
+    "props.enabled": "${= qty > 1}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "qty",
+       "value": "${= max(1, qty - 1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "qtyN": {
+   "type": "text",
+   "layout": {
+    "width": 40,
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${qty}",
+    "textAlign": "center",
+    "style": {
+     "from": "numberSmall",
+     "color": "ink"
+    }
+   }
+  },
+  "plus": {
+   "type": "iconButton",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "props": {
+    "icon": "add_rounded",
+    "style": {
+     "foregroundColor": "ink"
+    }
+   },
+   "bind": {
+    "props.enabled": "${= qty < 9}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "qty",
+       "value": "${= min(9, qty + 1)}"
+      }
+     ]
+    }
+   ]
+  },
+  "qGap": {
+   "type": "spacer"
+  },
+  "total": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600,
+     "color": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.text": "${= 'Total $' + (qty * 149)}"
+   }
+  },
+  "ctas": {
+   "type": "row",
+   "children": [
+    "addCart",
+    "buyNow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 52
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "addCart": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "fill": 214
+    },
+    "height": 52
+   },
+   "props": {
+    "label": "Add to cart",
+    "icon": "shopping_bag_outlined",
+    "style": {
+     "backgroundColor": "accent",
+     "foregroundColor": "onAccent",
+     "textStyle": {
+      "from": "cta"
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cartCount",
+       "op": "add",
+       "value": "${qty}"
+      },
+      {
+       "type": "showToast",
+       "message": "${= qty + ' \u00d7 Arc One (' + finishes[finish].name + ') added to your cart'}"
+      }
+     ]
+    }
+   ]
+  },
+  "buyNow": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 214
+    },
+    "height": 52
+   },
+   "props": {
+    "label": "Buy now",
+    "style": {
+     "foregroundColor": "ink",
+     "side": {
+      "color": "lineStrong",
+      "width": 1.2
+     },
+     "textStyle": {
+      "from": "cta"
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "${= 'Checkout: ' + qty + ' \u00d7 Arc One, $' + (qty * 149)}"
+      }
+     ]
+    }
+   ]
+  },
+  "stock": {
+   "type": "row",
+   "children": [
+    "stockDot",
+    "stockT"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "stockDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "good"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "stockT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 17
+    }
+   },
+   "props": {
+    "text": "In stock \u00b7 ships from our Oslo studio within 24 hours",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "notes": {
+   "type": "listView",
+   "children": [
+    "note"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 200
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "separator": "divider",
+    "dividerColor": "line",
+    "spacing": 1
+   },
+   "bind": {
+    "data": "${notes}"
+   }
+  },
+  "note": {
+   "type": "row",
+   "children": [
+    "noteMark",
+    "noteTx"
+   ],
+   "layout": {
+    "width": {
+     "fill": 440
+    },
+    "height": {
+     "hug": 64
+    },
+    "padding": [
+     0,
+     14,
+     0,
+     14
+    ]
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "noteMark": {
+   "type": "row",
+   "children": [
+    "noteI"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 10
+   }
+  },
+  "noteI": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "${item.icon}",
+    "size": 18,
+    "color": "ink"
+   },
+   "bind": {
+    "props.icon": "${item.icon}"
+   }
+  },
+  "noteTx": {
+   "type": "column",
+   "children": [
+    "noteT",
+    "noteS"
+   ],
+   "layout": {
+    "width": {
+     "fill": 380
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "noteT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 380
+    },
+    "height": {
+     "hug": 19
+    }
+   },
+   "props": {
+    "text": "${item.title}",
+    "style": {
+     "from": "sectionTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "noteS": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 380
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.sub}",
+    "style": {
+     "from": "bodySecondary",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "tabsCard": {
+   "type": "column",
+   "children": [
+    "tabBar",
+    "descP",
+    "specP",
+    "revP"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 500
+    },
+    "margin": [
+     0,
+     72,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 20
+   }
+  },
+  "tabBar": {
+   "type": "row",
+   "children": [
+    "tabs"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 54
+    },
+    "padding": [
+     32,
+     0,
+     32,
+     0
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "tabs": {
+   "type": "listView",
+   "children": [
+    "tab"
+   ],
+   "layout": {
+    "width": {
+     "hug": 400
+    },
+    "height": 54
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 32
+   },
+   "bind": {
+    "data": "${tabNames}"
+   }
+  },
+  "tab": {
+   "type": "column",
+   "children": [
+    "tabT",
+    "tabU"
+   ],
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "fill": 54
+    },
+    "padding": [
+     0,
+     18,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "${index}"
+      }
+     ]
+    }
+   ]
+  },
+  "tabT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "controlLarge",
+     "fontSize": 14,
+     "color": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= index == tab ? theme.colors.ink : theme.colors.inkFaint}",
+    "props.style.fontWeight": "${= index == tab ? 600 : 500}"
+   }
+  },
+  "tabU": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 90
+    },
+    "height": 2
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= index == tab ? theme.colors.accent : '#00000000'}"
+   }
+  },
+  "descP": {
+   "type": "flex",
+   "children": [
+    "descTx",
+    "feats"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 260
+    },
+    "padding": [
+     32,
+     32,
+     32,
+     36
+    ]
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 56,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= tab == 0}"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "spacing": 28,
+       "crossAxisAlignment": "stretch"
+      }
+     }
+    }
+   ]
+  },
+  "descTx": {
+   "type": "column",
+   "children": [
+    "dH",
+    "d1",
+    "d2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": {
+     "hug": 200
+    },
+    "flex": 3
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "dH": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Light where you work, nowhere else",
+    "style": {
+     "from": "title",
+     "color": "ink"
+    }
+   }
+  },
+  "d1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "text": "Arc One puts a soft, glare-free pool of light exactly on your page or keyboard. Two friction joints hold any angle without knobs, and the shade turns a full 300\u00b0 so you can bounce light off a wall when the day is done.",
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "d2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 640
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "text": "Each lamp is spun, powder-coated and assembled in small batches in Norway. The weighted base keeps a 46 cm reach steady, and the inline USB-C dimmer remembers your last setting.",
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "feats": {
+   "type": "listView",
+   "children": [
+    "feat"
+   ],
+   "layout": {
+    "width": {
+     "fill": 420
+    },
+    "height": {
+     "hug": 200
+    },
+    "flex": 2
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${features}"
+   }
+  },
+  "feat": {
+   "type": "row",
+   "children": [
+    "featI",
+    "featT"
+   ],
+   "layout": {
+    "width": {
+     "fill": 420
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     14,
+     14,
+     14,
+     14
+    ]
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 12
+   }
+  },
+  "featI": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "check_circle_rounded",
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "featT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "body",
+     "color": "ink"
+    }
+   }
+  },
+  "specP": {
+   "type": "column",
+   "children": [
+    "specs"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 300
+    },
+    "padding": [
+     32,
+     24,
+     32,
+     32
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= tab == 1}"
+   }
+  },
+  "specs": {
+   "type": "listView",
+   "children": [
+    "spec"
+   ],
+   "layout": {
+    "width": {
+     "fill": 860
+    },
+    "height": {
+     "hug": 300
+    },
+    "constraints": {
+     "maxWidth": 860
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${specs}"
+   }
+  },
+  "spec": {
+   "type": "row",
+   "children": [
+    "specK",
+    "specV"
+   ],
+   "layout": {
+    "width": {
+     "fill": 860
+    },
+    "height": {
+     "hug": 48
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     14
+    ]
+   },
+   "props": {
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= index % 2 == 0 ? theme.colors.tile : '#00000000'}"
+   }
+  },
+  "specK": {
+   "type": "text",
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.k}",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "specV": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 560
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.v}",
+    "style": {
+     "from": "figure",
+     "color": "ink"
+    }
+   }
+  },
+  "revP": {
+   "type": "flex",
+   "children": [
+    "revSum",
+    "revList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 400
+    },
+    "padding": [
+     32,
+     28,
+     32,
+     24
+    ]
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 56,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= tab == 2}"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "spacing": 24,
+       "crossAxisAlignment": "stretch"
+      }
+     }
+    }
+   ]
+  },
+  "revSum": {
+   "type": "column",
+   "children": [
+    "revEb",
+    "revScore",
+    "revStars",
+    "revBase",
+    "dist",
+    "writeRev"
+   ],
+   "layout": {
+    "width": 280,
+    "height": {
+     "hug": 320
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 720
+       }
+      }
+     }
+    }
+   ]
+  },
+  "revEb": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "props": {
+    "text": "CUSTOMER RATING",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   }
+  },
+  "revScore": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 56
+    }
+   },
+   "props": {
+    "text": "4.7",
+    "style": {
+     "from": "numberHero",
+     "color": "ink"
+    }
+   }
+  },
+  "revStars": {
+   "type": "listView",
+   "children": [
+    "rsI"
+   ],
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": 20
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 2
+   },
+   "bind": {
+    "data": "${= range(5)}"
+   }
+  },
+  "rsI": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": {
+     "fill": 20
+    }
+   },
+   "props": {
+    "icon": "star_rounded",
+    "size": 20,
+    "color": "gold"
+   },
+   "bind": {
+    "props.icon": "${= item < 4 ? 'star_rounded' : 'star_half_rounded'}"
+   }
+  },
+  "revBase": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Based on 318 verified reviews",
+    "style": {
+     "from": "bodySecondary",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "dist": {
+   "type": "listView",
+   "children": [
+    "dRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 6
+   },
+   "bind": {
+    "data": "${dist}"
+   }
+  },
+  "dRow": {
+   "type": "row",
+   "children": [
+    "dS",
+    "dBar",
+    "dP"
+   ],
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": 18
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "dS": {
+   "type": "text",
+   "layout": {
+    "width": 20,
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.s}\u2605",
+    "style": {
+     "from": "caption",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "dBar": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": 6
+   },
+   "props": {
+    "max": 100,
+    "color": "gold",
+    "backgroundColor": "track",
+    "borderRadius": 3,
+    "exactFill": true
+   },
+   "bind": {
+    "props.value": "${item.p}"
+   }
+  },
+  "dP": {
+   "type": "text",
+   "layout": {
+    "width": 34,
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.p}%",
+    "textAlign": "right",
+    "style": {
+     "from": "caption",
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 11,
+     "color": "inkFaint"
+    }
+   }
+  },
+  "writeRev": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 280
+    },
+    "height": 42,
+    "margin": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "label": "Write a review",
+    "icon": "edit_outlined",
+    "style": {
+     "foregroundColor": "ink",
+     "side": {
+      "color": "lineStrong"
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Thanks! We'll email you a review link after delivery."
+      }
+     ]
+    }
+   ]
+  },
+  "revList": {
+   "type": "listView",
+   "children": [
+    "rev"
+   ],
+   "layout": {
+    "width": {
+     "fill": 780
+    },
+    "height": {
+     "hug": 400
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "separator": "divider",
+    "dividerColor": "line",
+    "spacing": 1
+   },
+   "bind": {
+    "data": "${reviews}"
+   }
+  },
+  "rev": {
+   "type": "column",
+   "children": [
+    "revHd",
+    "revT",
+    "revB"
+   ],
+   "layout": {
+    "width": {
+     "fill": 780
+    },
+    "height": {
+     "hug": 130
+    },
+    "padding": [
+     0,
+     18,
+     0,
+     18
+    ]
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "revHd": {
+   "type": "row",
+   "children": [
+    "av",
+    "who",
+    "rvGap",
+    "rvStars"
+   ],
+   "layout": {
+    "width": {
+     "fill": 780
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "av": {
+   "type": "row",
+   "children": [
+    "avT"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tileDeep"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "avT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 10
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= substring(item.name, 0, 1)}",
+    "style": {
+     "from": "chip",
+     "fontSize": 13,
+     "color": "ink"
+    }
+   }
+  },
+  "who": {
+   "type": "column",
+   "children": [
+    "whoN",
+    "whoM"
+   ],
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 34
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "whoN": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "from": "sectionTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "whoM": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.date} \u00b7 ${item.finish} \u00b7 Verified buyer",
+    "style": {
+     "from": "caption",
+     "color": "inkFaint"
+    }
+   }
+  },
+  "rvGap": {
+   "type": "spacer"
+  },
+  "rvStars": {
+   "type": "listView",
+   "children": [
+    "rvS"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": 14
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 1
+   },
+   "bind": {
+    "data": "${= range(5)}"
+   }
+  },
+  "rvS": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": {
+     "fill": 14
+    }
+   },
+   "props": {
+    "icon": "star_rounded",
+    "size": 14,
+    "color": "gold"
+   },
+   "bind": {
+    "props.color": "${= item < parent.item.stars ? theme.colors.gold : theme.colors.lineStrong}"
+   }
+  },
+  "revT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 780
+    },
+    "height": {
+     "hug": 19
+    }
+   },
+   "props": {
+    "text": "${item.title}",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "revB": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 780
+    },
+    "height": {
+     "hug": 40
+    },
+    "constraints": {
+     "maxWidth": 680
+    }
+   },
+   "props": {
+    "text": "${item.body}",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "related": {
+   "type": "column",
+   "children": [
+    "relHd",
+    "relGrid"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 360
+    },
+    "margin": [
+     0,
+     72,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "relHd": {
+   "type": "row",
+   "children": [
+    "relT",
+    "relAll"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "relT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "text": "You may also like",
+    "style": {
+     "from": "titleWide",
+     "color": "ink"
+    }
+   }
+  },
+  "relAll": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": 36
+   },
+   "props": {
+    "label": "View all lighting",
+    "icon": "arrow_forward_rounded",
+    "style": {
+     "foregroundColor": "accent"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Opening all lighting"
+      }
+     ]
+    }
+   ]
+  },
+  "relGrid": {
+   "type": "gridView",
+   "children": [
+    "rc"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 320
+    }
+   },
+   "props": {
+    "crossAxisCount": 4,
+    "shrinkWrapRows": true,
+    "crossAxisSpacing": 20,
+    "mainAxisSpacing": 20,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${related}"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "crossAxisCount": 2
+      }
+     }
+    }
+   ]
+  },
+  "rc": {
+   "type": "column",
+   "children": [
+    "rcArt",
+    "rcInfo"
+   ],
+   "layout": {
+    "width": {
+     "fill": 285
+    },
+    "height": {
+     "hug": 320
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 18,
+    "clip": "antiAlias"
+   },
+   "states": {
+    "hovered": {
+     "rc": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "lineStrong"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "rcArt": {
+   "type": "stack",
+   "children": [
+    "rcIcon",
+    "rcTag"
+   ],
+   "layout": {
+    "width": {
+     "fill": 285
+    },
+    "height": 200
+   },
+   "decoration": {
+    "fills": [
+     {
+      "type": "radial",
+      "center": [
+       0,
+       -0.2
+      ],
+      "radius": 0.9,
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FFF6F1E8"
+       },
+       {
+        "position": 1,
+        "color": "#FFE4D9C7"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].stops[0].color": "${item.a}",
+    "decoration.fills[0].stops[1].color": "${item.b}"
+   }
+  },
+  "rcIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 84,
+    "height": 84,
+    "x": {
+     "align": 0
+    },
+    "y": {
+     "align": 0
+    }
+   },
+   "props": {
+    "icon": "light",
+    "size": 84,
+    "color": "#FF3B3F45"
+   },
+   "bind": {
+    "props.icon": "${item.icon}",
+    "props.color": "${item.ink}"
+   }
+  },
+  "rcTag": {
+   "type": "row",
+   "children": [
+    "rcTagT"
+   ],
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 22
+    },
+    "x": {
+     "start": 12
+    },
+    "y": {
+     "start": 12
+    },
+    "padding": [
+     8,
+     4,
+     8,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= item.tag != ''}"
+   }
+  },
+  "rcTagT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "props": {
+    "text": "${item.tag}",
+    "style": {
+     "from": "badge",
+     "fontWeight": 600,
+     "color": "ink"
+    }
+   }
+  },
+  "rcInfo": {
+   "type": "row",
+   "children": [
+    "rcTx",
+    "rcAdd"
+   ],
+   "layout": {
+    "width": {
+     "fill": 285
+    },
+    "height": {
+     "hug": 90
+    },
+    "padding": [
+     16,
+     14,
+     12,
+     16
+    ]
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "rcTx": {
+   "type": "column",
+   "children": [
+    "rcN",
+    "rcR",
+    "rcP"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 70
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "rcN": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 19
+    }
+   },
+   "props": {
+    "text": "${item.name}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "rcR": {
+   "type": "row",
+   "children": [
+    "rcRI",
+    "rcRT"
+   ],
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "rcRI": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "icon": "star_rounded",
+    "size": 14,
+    "color": "gold"
+   }
+  },
+  "rcRT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.rating} (${item.count})",
+    "style": {
+     "from": "caption",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "rcP": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.price}",
+    "style": {
+     "from": "numberSmall",
+     "color": "ink"
+    }
+   }
+  },
+  "rcAdd": {
+   "type": "iconButton",
+   "layout": {
+    "width": 38,
+    "height": 38
+   },
+   "tooltip": "Add to cart",
+   "props": {
+    "icon": "add_shopping_cart_rounded",
+    "style": {
+     "foregroundColor": "ink",
+     "backgroundColor": "tile"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cartCount",
+       "op": "add",
+       "value": "1"
+      },
+      {
+       "type": "showToast",
+       "message": "${= item.name + ' added to your cart'}"
+      }
+     ]
+    }
+   ]
+  },
+  "foot": {
+   "type": "column",
+   "children": [
+    "footRail"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "hug": 300
+    },
+    "padding": [
+     40,
+     48,
+     40,
+     32
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "padding": [
+        24,
+        40,
+        24,
+        28
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "footRail": {
+   "type": "column",
+   "children": [
+    "footTop",
+    "footRule",
+    "footBot"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 260
+    },
+    "constraints": {
+     "maxWidth": 1200
+    }
+   },
+   "props": {
+    "spacing": 28,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "footTop": {
+   "type": "flex",
+   "children": [
+    "brand",
+    "footCols"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 180
+    }
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 64,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "spacing": 32,
+       "crossAxisAlignment": "stretch"
+      }
+     }
+    }
+   ]
+  },
+  "brand": {
+   "type": "column",
+   "children": [
+    "fLogo",
+    "fBlurb",
+    "fNews"
+   ],
+   "layout": {
+    "width": 360,
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 900,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 720
+       }
+      }
+     }
+    }
+   ]
+  },
+  "fLogo": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Nord & Co",
+    "style": {
+     "from": "title",
+     "color": "ink"
+    }
+   }
+  },
+  "fBlurb": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "text": "Quiet, durable things for the places you live and work. Designed in Oslo since 2011.",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "fNews": {
+   "type": "row",
+   "children": [
+    "fEmail",
+    "fJoin"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "hug": 42
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "fEmail": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 250
+    },
+    "height": {
+     "hug": 42
+    }
+   },
+   "props": {
+    "keyboardType": "emailAddress",
+    "decoration": {
+     "hintText": "Email for new arrivals",
+     "filled": true,
+     "fillColor": "tile",
+     "contentPadding": [
+      12,
+      12,
+      12,
+      12
+     ]
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "email",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "fJoin": {
+   "type": "filledButton",
+   "layout": {
+    "width": 96,
+    "height": 42
+   },
+   "props": {
+    "label": "Join",
+    "style": {
+     "backgroundColor": "ink",
+     "foregroundColor": "card"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "if",
+       "condition": {
+        "left": "${= contains(email, '@')}",
+        "op": "isTrue"
+       },
+       "then": [
+        {
+         "type": "showToast",
+         "message": "You're on the list."
+        }
+       ],
+       "else": [
+        {
+         "type": "showToast",
+         "message": "Enter a valid email address."
+        }
+       ]
+      }
+     ]
+    }
+   ]
+  },
+  "footCols": {
+   "type": "gridView",
+   "children": [
+    "fc"
+   ],
+   "layout": {
+    "width": {
+     "fill": 776
+    },
+    "height": {
+     "hug": 170
+    }
+   },
+   "props": {
+    "crossAxisCount": 3,
+    "shrinkWrapRows": true,
+    "crossAxisSpacing": 24,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${footCols}"
+   }
+  },
+  "fc": {
+   "type": "column",
+   "children": [
+    "fcT",
+    "fcL"
+   ],
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "fcT": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "props": {
+    "text": "${item.t}",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   }
+  },
+  "fcL": {
+   "type": "listView",
+   "children": [
+    "fl"
+   ],
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 130
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${item.links}"
+   }
+  },
+  "fl": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 240
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "footRule": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": 1
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "line"
+     }
+    ]
+   }
+  },
+  "footBot": {
+   "type": "row",
+   "children": [
+    "copy",
+    "themeBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1200
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "copy": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 400
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "\u00a9 2025 Nord & Co AS \u00b7 Privacy \u00b7 Terms \u00b7 Cookie settings",
+    "style": {
+     "from": "caption",
+     "color": "inkFaint"
+    }
+   }
+  },
+  "themeBtn": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": 36
+   },
+   "props": {
+    "label": "Dark mode",
+    "icon": "dark_mode_outlined",
+    "style": {
+     "foregroundColor": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.label": "${= theme.isDark ? 'Light mode' : 'Dark mode'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setThemeMode",
+       "mode": "${= theme.isDark ? 'light' : 'dark'}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "product": [
+   {
+    "name": "view",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "finish",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "qty",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "cartCount",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "tab",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "query",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "email",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "navLinks",
+    "type": "list",
+    "value": [
+     "Lighting",
+     "Furniture",
+     "Textiles",
+     "Journal"
+    ]
+   },
+   {
+    "name": "crumbs",
+    "type": "list",
+    "value": [
+     "Home",
+     "Lighting",
+     "Desk lamps",
+     "Arc One"
+    ]
+   },
+   {
+    "name": "tabNames",
+    "type": "list",
+    "value": [
+     "Description",
+     "Specifications",
+     "Reviews (318)"
+    ]
+   },
+   {
+    "name": "finishes",
+    "type": "list",
+    "value": [
+     {
+      "name": "Brass",
+      "color": "#FFC6A15B"
+     },
+     {
+      "name": "Graphite",
+      "color": "#FF3B3F45"
+     },
+     {
+      "name": "Sand",
+      "color": "#FFD9CBB0"
+     }
+    ]
+   },
+   {
+    "name": "fc",
+    "type": "text",
+    "formula": "finishes[finish].color"
+   },
+   {
+    "name": "views",
+    "type": "list",
+    "value": [
+     {
+      "name": "Studio",
+      "a": "#FFF1EADF",
+      "b": "#FFE3D6C2",
+      "glow": "#00000000",
+      "beam": "#00000000",
+      "desk": "#FFD9C9B0"
+     },
+     {
+      "name": "Lit at night",
+      "a": "#FF2B3550",
+      "b": "#FF141A2A",
+      "glow": "#40FFD27A",
+      "beam": "#33FFE2A0",
+      "desk": "#FF3A2E26"
+     },
+     {
+      "name": "Morning",
+      "a": "#FFE8EFF6",
+      "b": "#FFC9D8E6",
+      "glow": "#00000000",
+      "beam": "#00000000",
+      "desk": "#FFB9C4CF"
+     },
+     {
+      "name": "On the desk",
+      "a": "#FFEDE6DA",
+      "b": "#FFD8CDBB",
+      "glow": "#22FFE2A0",
+      "beam": "#1AFFE2A0",
+      "desk": "#FF8C6B4E"
+     }
+    ]
+   },
+   {
+    "name": "v",
+    "type": "map",
+    "formula": "views[view]"
+   },
+   {
+    "name": "notes",
+    "type": "list",
+    "value": [
+     {
+      "icon": "local_shipping_outlined",
+      "title": "Free delivery by Thu, 14 Mar",
+      "sub": "Order within 4 h 12 min. Express next-day delivery $15."
+     },
+     {
+      "icon": "autorenew_rounded",
+      "title": "30-day free returns",
+      "sub": "Changed your mind? Send it back in the original box, on us."
+     },
+     {
+      "icon": "verified_outlined",
+      "title": "5-year warranty",
+      "sub": "Covers the LED module, the dimmer and every joint."
+     }
+    ]
+   },
+   {
+    "name": "features",
+    "type": "list",
+    "value": [
+     "Glare-free 800 lm LED, CRI 95 for true colors",
+     "Warm to neutral white, 2700\u20134000 K, stepless",
+     "Friction joints hold any angle, no knobs",
+     "Replaceable LED module, built to last decades"
+    ]
+   },
+   {
+    "name": "specs",
+    "type": "list",
+    "value": [
+     {
+      "k": "Dimensions",
+      "v": "46 \u00d7 18 \u00d7 52 cm (reach \u00d7 base \u00d7 height)"
+     },
+     {
+      "k": "Weight",
+      "v": "2.1 kg"
+     },
+     {
+      "k": "Light source",
+      "v": "Integrated LED, 9 W \u00b7 800 lm \u00b7 CRI 95"
+     },
+     {
+      "k": "Color temperature",
+      "v": "2700\u20134000 K, adjustable"
+     },
+     {
+      "k": "Materials",
+      "v": "Spun aluminum shade, solid brass joints, steel base"
+     },
+     {
+      "k": "Cable & dimmer",
+      "v": "2 m fabric cable, inline USB-C dimmer"
+     }
+    ]
+   },
+   {
+    "name": "dist",
+    "type": "list",
+    "value": [
+     {
+      "s": 5,
+      "p": 78
+     },
+     {
+      "s": 4,
+      "p": 15
+     },
+     {
+      "s": 3,
+      "p": 4
+     },
+     {
+      "s": 2,
+      "p": 2
+     },
+     {
+      "s": 1,
+      "p": 1
+     }
+    ]
+   },
+   {
+    "name": "reviews",
+    "type": "list",
+    "value": [
+     {
+      "name": "Ingrid S.",
+      "date": "12 Feb 2025",
+      "finish": "Brass",
+      "stars": 5,
+      "title": "The last desk lamp I'll buy",
+      "body": "Heavy, quiet joints and a light that doesn't tire my eyes after a long evening of drawing. The brass warms up beautifully."
+     },
+     {
+      "name": "Marcus T.",
+      "date": "28 Jan 2025",
+      "finish": "Graphite",
+      "stars": 5,
+      "title": "Perfect reach over a wide desk",
+      "body": "It covers my whole 160 cm desk from one corner. The dimmer remembering its setting is a small thing I now can't live without."
+     },
+     {
+      "name": "Aiko M.",
+      "date": "9 Jan 2025",
+      "finish": "Sand",
+      "stars": 4,
+      "title": "Lovely, wish the cable were longer",
+      "body": "Beautiful finish and light quality. Two meters of cable was just short for my setup, so I needed an extension."
+     }
+    ]
+   },
+   {
+    "name": "related",
+    "type": "list",
+    "value": [
+     {
+      "name": "Arc Mini",
+      "price": "$99",
+      "rating": "4.6",
+      "count": 142,
+      "icon": "emoji_objects_outlined",
+      "tag": "New",
+      "a": "#FFF6F1E8",
+      "b": "#FFE4D9C7",
+      "ink": "#FFB08A45"
+     },
+     {
+      "name": "Halo Floor Lamp",
+      "price": "$289",
+      "rating": "4.8",
+      "count": 96,
+      "icon": "light",
+      "tag": "",
+      "a": "#FFEFF3F6",
+      "b": "#FFD5DEE6",
+      "ink": "#FF3B3F45"
+     },
+     {
+      "name": "Dome Pendant",
+      "price": "$179",
+      "rating": "4.5",
+      "count": 211,
+      "icon": "wb_incandescent_outlined",
+      "tag": "",
+      "a": "#FFF4EDEA",
+      "b": "#FFE6D5CF",
+      "ink": "#FF8E5A4A"
+     },
+     {
+      "name": "Pebble Clip Light",
+      "price": "$59",
+      "rating": "4.4",
+      "count": 77,
+      "icon": "highlight",
+      "tag": "\u221220%",
+      "a": "#FFEEF2EC",
+      "b": "#FFD6DFD2",
+      "ink": "#FF4E6B52"
+     }
+    ]
+   },
+   {
+    "name": "footCols",
+    "type": "list",
+    "value": [
+     {
+      "t": "SHOP",
+      "links": [
+       "Lighting",
+       "Furniture",
+       "Textiles",
+       "Gift cards"
+      ]
+     },
+     {
+      "t": "HELP",
+      "links": [
+       "Delivery",
+       "Returns",
+       "Warranty",
+       "Contact us"
+      ]
+     },
+     {
+      "t": "COMPANY",
+      "links": [
+       "Our studio",
+       "Journal",
+       "Careers",
+       "Trade program"
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

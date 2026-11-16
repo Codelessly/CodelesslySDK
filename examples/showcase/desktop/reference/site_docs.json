@@ -1,0 +1,2478 @@
+{
+ "schema": 3,
+ "roots": [
+  "site_docs"
+ ],
+ "nodes": {
+  "site_docs": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1280,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "children": [
+    "column2",
+    "divider1",
+    "column3",
+    "divider4",
+    "column11"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "children": [
+    "row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "children": [
+    "row2",
+    "HeaderSearchInput1",
+    "row4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 24
+   }
+  },
+  "row2": {
+   "type": "row",
+   "children": [
+    "icon1",
+    "text1",
+    "row3"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": 22,
+    "height": 22
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "cell_tower",
+     "style": "filled"
+    },
+    "color": "accent",
+    "size": 22
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 18,
+     "color": "ink"
+    },
+    "text": "Beacon"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "children": [
+    "text2"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9,
+     0,
+     9,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "neutralTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "neutralTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "SDK",
+    "style": {
+     "from": "badge",
+     "color": "secondaryText"
+    }
+   }
+  },
+  "HeaderSearchInput1": {
+   "type": "HeaderSearchInput",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 34
+   },
+   "props": {
+    "placeholder": "Search the docs…",
+    "value": "q"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "children": [
+    "dropdown1",
+    "textButton1",
+    "filledButton1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "dropdown1": {
+   "type": "dropdown",
+   "layout": {
+    "width": 110,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "v2.4",
+     "v2.3",
+     "v2.2",
+     "v1.9"
+    ]
+   },
+   "bind": {
+    "props.value": "${version}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "version",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "GitHub"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openLink",
+       "url": "https://github.com"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Dashboard"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "dashboard"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "children": [
+    "column4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     40,
+     24,
+     56
+    ]
+   }
+  },
+  "column4": {
+   "type": "column",
+   "children": [
+    "row5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "children": [
+    "column5",
+    "column6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "children": [
+    "text3",
+    "row6",
+    "row7",
+    "row8",
+    "row9",
+    "spacer1",
+    "text8",
+    "row10",
+    "row11",
+    "row12",
+    "row13",
+    "spacer2",
+    "text13",
+    "row14",
+    "row15",
+    "row16",
+    "row17",
+    "spacer3",
+    "column10"
+   ],
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     6
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Start"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "children": [
+    "text4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"intro\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "intro"
+      }
+     ]
+    }
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Introduction",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "children": [
+    "text5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"quickstart\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "quickstart"
+      }
+     ]
+    }
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Quickstart",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row8": {
+   "type": "row",
+   "children": [
+    "text6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"install\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "install"
+      }
+     ]
+    }
+   ]
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Installation",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row9": {
+   "type": "row",
+   "children": [
+    "text7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"concepts\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "concepts"
+      }
+     ]
+    }
+   ]
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Core concepts",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 16
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     6
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Guides"
+   }
+  },
+  "row10": {
+   "type": "row",
+   "children": [
+    "text9"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"events\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "events"
+      }
+     ]
+    }
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Tracking events",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row11": {
+   "type": "row",
+   "children": [
+    "text10"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"identify\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "identify"
+      }
+     ]
+    }
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Identifying users",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row12": {
+   "type": "row",
+   "children": [
+    "text11"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"offline\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "offline"
+      }
+     ]
+    }
+   ]
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Offline queueing",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row13": {
+   "type": "row",
+   "children": [
+    "text12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"privacy\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "privacy"
+      }
+     ]
+    }
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Privacy & consent",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 16
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     0,
+     10,
+     6
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Reference"
+   }
+  },
+  "row14": {
+   "type": "row",
+   "children": [
+    "text14"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"client\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "client"
+      }
+     ]
+    }
+   ]
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Client",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row15": {
+   "type": "row",
+   "children": [
+    "text15"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"config\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "config"
+      }
+     ]
+    }
+   ]
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Configuration",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row16": {
+   "type": "row",
+   "children": [
+    "text16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"eventsapi\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "eventsapi"
+      }
+     ]
+    }
+   ]
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Events API",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row17": {
+   "type": "row",
+   "children": [
+    "text17"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (section==\"errors\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "errors"
+      }
+     ]
+    }
+   ]
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Error codes",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "column6": {
+   "type": "column",
+   "children": [
+    "Breadcrumb1",
+    "text18",
+    "text19",
+    "text20",
+    "text21",
+    "CodeBlock1",
+    "text22",
+    "text23",
+    "CodeBlock2",
+    "text24",
+    "text25",
+    "CodeBlock3",
+    "Callout1",
+    "text26",
+    "column7",
+    "divider2",
+    "row18"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     40,
+     32,
+     40,
+     36
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 26
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "Breadcrumb1": {
+   "type": "Breadcrumb",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "Docs",
+     "Start",
+     "Quickstart"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onNavigate"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "navigate",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "heading1",
+     "fontWeight": 800,
+     "color": "ink"
+    },
+    "text": "Quickstart"
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    },
+    "text": "Get Beacon running in your app in under five minutes. You will install the SDK, create a client with your project key and send your first event."
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "1. Install the SDK"
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Add the package with your package manager of choice."
+   }
+  },
+  "CodeBlock1": {
+   "type": "CodeBlock",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Terminal",
+    "code": "npm install @beacon/sdk",
+    "language": "bash"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onCopy"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Copied"
+      }
+     ]
+    }
+   ]
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "2. Create a client"
+   }
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Initialize one client when your app starts and reuse it everywhere."
+   }
+  },
+  "CodeBlock2": {
+   "type": "CodeBlock",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "client.ts",
+    "code": "import { Beacon } from '@beacon/sdk';\n\nexport const beacon = new Beacon({\n  apiKey: process.env.BEACON_KEY,\n  region: 'us-east',\n});",
+    "language": "typescript"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onCopy"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Copied"
+      }
+     ]
+    }
+   ]
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "3. Track your first event"
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Call track with an event name and any properties you want to record."
+   }
+  },
+  "CodeBlock3": {
+   "type": "CodeBlock",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "app.ts",
+    "code": "beacon.track('signup_completed', {\n  plan: 'pro',\n  source: 'landing_page',\n});",
+    "language": "typescript"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onCopy"
+     },
+     "actions": [
+      {
+       "type": "showToast",
+       "message": "Copied"
+      }
+     ]
+    }
+   ]
+  },
+  "Callout1": {
+   "type": "Callout",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Find your project key",
+    "message": "Your API key lives under Settings → Project in the Beacon dashboard. Keep it in an environment variable, never in source control.",
+    "tone": "accent",
+    "icon": "info"
+   }
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     12,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Client options"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "children": [
+    "TableHeader1",
+    "listView1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.tile}"
+   }
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36
+   },
+   "props": {
+    "value": "sort",
+    "columns": [
+     "Name",
+     "Type",
+     "Default",
+     "Description"
+    ],
+    "keys": [
+     "name",
+     "type",
+     "def",
+     "desc"
+    ],
+    "widths": [
+     160.0,
+     100.0,
+     110.0,
+     420.0
+    ]
+   },
+   "bind": {
+    "props.desc": "${desc}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "children": [
+    "listView1Item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${= (desc?sortByDesc(options,x=>sort==\"type\"?x.type:sort==\"def\"?x.def:sort==\"desc\"?x.desc:x.name):sortBy(options,x=>sort==\"type\"?x.type:sort==\"def\"?x.def:sort==\"desc\"?x.desc:x.name))}"
+   }
+  },
+  "listView1Item": {
+   "type": "column",
+   "children": [
+    "TableRow1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "widths": [
+     160.0,
+     100.0,
+     110.0,
+     420.0
+    ]
+   },
+   "bind": {
+    "props.cells": "${= [item.name,item.type,item.def,item.desc]}"
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "row18": {
+   "type": "row",
+   "children": [
+    "column8",
+    "column9"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16
+   }
+  },
+  "column8": {
+   "type": "column",
+   "children": [
+    "text27",
+    "text28"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 14
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "text27": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Previous"
+   }
+  },
+  "text28": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "← Introduction",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "intro"
+      }
+     ]
+    }
+   ]
+  },
+  "column9": {
+   "type": "column",
+   "children": [
+    "text29",
+    "text30"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 14
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "end"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "text29": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Next"
+   }
+  },
+  "text30": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Installation →",
+    "style": {
+     "from": "rowTitle",
+     "color": "accent"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "install"
+      }
+     ]
+    }
+   ]
+  },
+  "column10": {
+   "type": "column",
+   "children": [
+    "text31",
+    "text32",
+    "text33",
+    "text34",
+    "text35",
+    "divider3",
+    "text36"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "text31": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "On this page"
+   }
+  },
+  "text32": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "1. Install the SDK",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "scrollTo",
+       "value": "install"
+      }
+     ]
+    }
+   ]
+  },
+  "text33": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "2. Create a client",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "scrollTo",
+       "value": "client"
+      }
+     ]
+    }
+   ]
+  },
+  "text34": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "3. Track your first event",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "scrollTo",
+       "value": "track"
+      }
+     ]
+    }
+   ]
+  },
+  "text35": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Client options",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "scrollTo",
+       "value": "options"
+      }
+     ]
+    }
+   ]
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "text36": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Edit this page",
+    "style": {
+     "from": "body",
+     "color": "primary"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "openLink",
+       "url": "https://github.com"
+      }
+     ]
+    }
+   ]
+  },
+  "divider4": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column11": {
+   "type": "column",
+   "children": [
+    "column12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     28,
+     24,
+     32
+    ]
+   }
+  },
+  "column12": {
+   "type": "column",
+   "children": [
+    "row19"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row19": {
+   "type": "row",
+   "children": [
+    "text37",
+    "text38"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text37": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Beacon"
+   }
+  },
+  "text38": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "© 2026 Beacon Labs · Docs ${version}"
+   }
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 20
+   }
+  }
+ },
+ "variables": {
+  "site_docs": [
+   {
+    "name": "section",
+    "type": "text",
+    "value": "quickstart"
+   },
+   {
+    "name": "version",
+    "type": "text",
+    "value": "v2.4"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "name"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "options",
+    "type": "list",
+    "value": [
+     {
+      "name": "apiKey",
+      "type": "string",
+      "def": "—",
+      "desc": "Your project key from the Beacon dashboard. Required."
+     },
+     {
+      "name": "region",
+      "type": "string",
+      "def": "\"us-east\"",
+      "desc": "Data region the client sends events to."
+     },
+     {
+      "name": "flushInterval",
+      "type": "number",
+      "def": "5000",
+      "desc": "Milliseconds between batched event uploads."
+     },
+     {
+      "name": "debug",
+      "type": "boolean",
+      "def": "false",
+      "desc": "Logs every tracked event to the console."
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -89,18 +89,22 @@ def main():
     # Plain parts: the short words' styles, every style in the brand's text family, the card, badge and button
     # tokens, and per-step control radii in place of one buttonRadius for every height.
     theme['textStyles'].update({n: {**st, 'leadingDistribution': 'even'} for n, st in tokens.PLAIN_TEXT_STYLES.items()})
+    theme['textStyles'].update({n: {**st, 'leadingDistribution': 'even'} for n, st in tokens.PAGE_TEXT_STYLES.items()})
     for st in theme['textStyles'].values():
         st.setdefault('fontFamily', tokens.TEXT)
     for k in ('radii', 'sizes', 'spacing', 'shadows'):
         theme[k].update(tokens.PLAIN[k])
+        theme[k].update(tokens.PAGE[k])
     theme.pop('buttonRadius', None)
     theme['colors'].update(tokens.PLAIN_COLORS)
+    theme['colors'].update(tokens.PAGE_COLORS)
     theme['fontFamily'] = tokens.TEXT
     theme['durations'].update({'enter': 360})
     dark = theme.setdefault('dark', {})
     dark.setdefault('colors', {}).update(tokens.DARK['colors'])
     dark['colors'].update(tokens.PLAIN_DARK_COLORS)
-    dark['shadows'] = {**theme['shadows'], **tokens.DARK['shadows'], **tokens.PLAIN_DARK_SHADOWS}
+    dark['colors'].update(tokens.PAGE_DARK_COLORS)
+    dark['shadows'] = {**theme['shadows'], **tokens.DARK['shadows'], **tokens.PLAIN_DARK_SHADOWS, **tokens.PAGE_DARK_SHADOWS}
     manifest['fonts'] = tokens.FONTS
 
     # Two repairs to the copied SSUI controls under this brand: code styles name the shipped mono family, and one

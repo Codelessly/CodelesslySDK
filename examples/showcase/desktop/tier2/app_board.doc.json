@@ -1,0 +1,1551 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_board"
+ ],
+ "nodes": {
+  "app_board": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "divider1",
+    "row6"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "row3",
+    "row5"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "row4"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "Website relaunch"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar1",
+    "Avatar2",
+    "Avatar3",
+    "Avatar4",
+    "Avatar5"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Maya Reyes",
+    "size": "small"
+   }
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Jon Okafor",
+    "size": "small"
+   }
+  },
+  "Avatar3": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Lena Fischer",
+    "size": "small"
+   }
+  },
+  "Avatar4": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Sam Patel",
+    "size": "small"
+   }
+  },
+  "Avatar5": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Ana Costa",
+    "size": "small"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "textField1",
+    "filledButton1"
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": 220,
+    "height": 36.0
+   },
+   "props": {
+    "decoration": {
+     "labelText": "",
+     "hintText": "Filter tasks"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 36.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "New task",
+    "icon": "add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "newTask"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row7",
+    "column5"
+   ]
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "flex": 1,
+    "padding": 24,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "scrollDirection": "horizontal",
+    "spacing": 16,
+    "crossAxisAlignment": "start",
+    "edgeFade": 12
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "scrollDirection": "horizontal",
+    "spacing": 16
+   },
+   "bind": {
+    "data": "${cols}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "center"
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": 216,
+    "height": {
+     "fill": 0
+    },
+    "padding": 10
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ],
+    "radius": 10
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "drop"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= updateWhere(tasks,x=>x.id==result.data,x=>with(x,\"col\",item.id))}"
+      }
+     ]
+    }
+   ],
+   "dropTarget": {
+    "accepts": [
+     "task"
+    ]
+   },
+   "children": [
+    "row8",
+    "listView2"
+   ]
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row9",
+    "iconButton1"
+   ]
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text2",
+    "row10"
+   ]
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "neutralTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "neutralTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text3"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= count(tasks,x=>x.col==item.id)}",
+    "style": {
+     "from": "badge",
+     "color": "secondaryText"
+    }
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addTask",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${= filter(tasks,x=>x.col==item.id&&contains(lower(x.title),lower(q)))}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column3"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryBackground"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 14,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#12000000",
+      "offset": [
+       0,
+       12
+      ],
+      "spreadRadius": -16,
+      "blurRadius": 32
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0A000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==item.id?theme.primary:theme.colors.primaryBorder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ],
+   "draggable": {
+    "group": "task",
+    "data": "${item.id}"
+   },
+   "children": [
+    "column4",
+    "text5",
+    "row11"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     6,
+     2,
+     6,
+     2
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   },
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "badge",
+     "color": "onPrimary",
+     "fontSize": 11
+    },
+    "text": "${item.label}"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle"
+    },
+    "text": "${item.title}"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row12",
+    "Avatar6"
+   ]
+  },
+  "row12": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row13",
+    "row14"
+   ]
+  },
+  "row13": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text6"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "schedule",
+    "size": 14
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${item.due}"
+   }
+  },
+  "row14": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text7"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chat_bubble_outline",
+    "size": 14
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${item.comments}"
+   }
+  },
+  "Avatar6": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "xs"
+   },
+   "bind": {
+    "props.name": "${item.who}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": 360,
+    "height": {
+     "fill": 0
+    },
+    "padding": 16
+   },
+   "props": {
+    "spacing": 14,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "bind": {
+    "visible": "${= sel!=0}"
+   },
+   "children": [
+    "listView3"
+   ]
+  },
+  "listView3": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 14
+   },
+   "bind": {
+    "data": "${= filter(tasks,x=>x.id==sel)}"
+   },
+   "children": [
+    "listView3Item"
+   ]
+  },
+  "listView3Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row15",
+    "text9",
+    "Details1",
+    "SectionLabel1",
+    "Paragraph1",
+    "Checklist1",
+    "SectionLabel2",
+    "listView4"
+   ]
+  },
+  "row15": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column6",
+    "iconButton2"
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     6,
+     2,
+     6,
+     2
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   },
+   "children": [
+    "text8"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "badge",
+     "color": "onPrimary",
+     "fontSize": 11
+    },
+    "text": "${item.label}"
+   }
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "${item.title}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Assignee\",item.who],[\"Due\",item.due],[\"Comments\",item.comments],[\"Status\",item.col]]}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Description"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.text": "${item.desc}"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Checklist",
+    "value": "done",
+    "items": [
+     "Review requirements",
+     "Complete the work",
+     "Get a teammate's feedback",
+     "Update the project notes"
+    ]
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Activity"
+   },
+   "bind": {
+    "props.note": "${= length(activity)} updates"
+   }
+  },
+  "listView4": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${activity}"
+   },
+   "children": [
+    "listView4Item"
+   ]
+  },
+  "listView4Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row16"
+   ]
+  },
+  "row16": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Avatar7",
+    "column7"
+   ]
+  },
+  "Avatar7": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "small"
+   },
+   "bind": {
+    "props.name": "${item.who}"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text10",
+    "text11"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.who} ${item.what}",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${item.when}"
+   }
+  }
+ },
+ "variables": {
+  "app_board": [
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "done",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "cols",
+    "type": "list",
+    "value": [
+     {
+      "id": "backlog",
+      "name": "Backlog"
+     },
+     {
+      "id": "progress",
+      "name": "In progress"
+     },
+     {
+      "id": "review",
+      "name": "In review"
+     },
+     {
+      "id": "done",
+      "name": "Done"
+     }
+    ]
+   },
+   {
+    "name": "tasks",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "title": "Audit existing site content",
+      "label": "Content",
+      "color": "#FFE08A1E",
+      "due": "Mar 4",
+      "comments": 3,
+      "who": "Ana Costa",
+      "col": "backlog",
+      "desc": "List every page on the current site and mark what to keep, merge or drop."
+     },
+     {
+      "id": 2,
+      "title": "Define new sitemap",
+      "label": "Design",
+      "color": "#FF7C4DDB",
+      "due": "Mar 6",
+      "comments": 5,
+      "who": "Maya Reyes",
+      "col": "backlog",
+      "desc": "Agree the top-level navigation and page hierarchy with the team."
+     },
+     {
+      "id": 3,
+      "title": "Set up staging environment",
+      "label": "Dev",
+      "color": "#FF2F6FED",
+      "due": "Mar 8",
+      "comments": 1,
+      "who": "Jon Okafor",
+      "col": "backlog",
+      "desc": "Provision a staging host with automatic deploys from the main branch."
+     },
+     {
+      "id": 4,
+      "title": "Write pricing page copy",
+      "label": "Content",
+      "color": "#FFE08A1E",
+      "due": "Mar 11",
+      "comments": 2,
+      "who": "Lena Fischer",
+      "col": "backlog",
+      "desc": "Draft headlines and plan descriptions for the three pricing tiers."
+     },
+     {
+      "id": 5,
+      "title": "Choose icon set",
+      "label": "Design",
+      "color": "#FF7C4DDB",
+      "due": "Mar 12",
+      "comments": 0,
+      "who": "Sam Patel",
+      "col": "backlog",
+      "desc": "Pick one consistent icon family and export the SVGs we need."
+     },
+     {
+      "id": 6,
+      "title": "Design homepage hero",
+      "label": "Design",
+      "color": "#FF7C4DDB",
+      "due": "Mar 3",
+      "comments": 7,
+      "who": "Maya Reyes",
+      "col": "progress",
+      "desc": "Produce desktop and mobile hero layouts with the new brand colors."
+     },
+     {
+      "id": 7,
+      "title": "Build responsive navigation",
+      "label": "Dev",
+      "color": "#FF2F6FED",
+      "due": "Mar 5",
+      "comments": 4,
+      "who": "Jon Okafor",
+      "col": "progress",
+      "desc": "Implement the header, mobile drawer and keyboard navigation."
+     },
+     {
+      "id": 8,
+      "title": "Fix broken contact form",
+      "label": "Bug",
+      "color": "#FFD93B3B",
+      "due": "Mar 2",
+      "comments": 6,
+      "who": "Sam Patel",
+      "col": "progress",
+      "desc": "Submissions fail silently on Safari; reproduce and fix."
+     },
+     {
+      "id": 9,
+      "title": "Migrate blog posts",
+      "label": "Content",
+      "color": "#FFE08A1E",
+      "due": "Feb 28",
+      "comments": 2,
+      "who": "Ana Costa",
+      "col": "review",
+      "desc": "Move the 42 existing posts into the new CMS with redirects."
+     },
+     {
+      "id": 10,
+      "title": "Accessibility pass on forms",
+      "label": "QA",
+      "color": "#FF1E9E6A",
+      "due": "Mar 1",
+      "comments": 3,
+      "who": "Lena Fischer",
+      "col": "review",
+      "desc": "Check labels, focus order and error messages against WCAG AA."
+     },
+     {
+      "id": 11,
+      "title": "Kick-off and goals",
+      "label": "Design",
+      "color": "#FF7C4DDB",
+      "due": "Feb 12",
+      "comments": 8,
+      "who": "Maya Reyes",
+      "col": "done",
+      "desc": "Align on scope, success metrics and the launch date."
+     },
+     {
+      "id": 12,
+      "title": "Brand color palette",
+      "label": "Design",
+      "color": "#FF7C4DDB",
+      "due": "Feb 16",
+      "comments": 4,
+      "who": "Sam Patel",
+      "col": "done",
+      "desc": "Finalise primary, accent and neutral colors with contrast checks."
+     },
+     {
+      "id": 13,
+      "title": "Pick CMS",
+      "label": "Dev",
+      "color": "#FF2F6FED",
+      "due": "Feb 20",
+      "comments": 9,
+      "who": "Jon Okafor",
+      "col": "done",
+      "desc": "Compare three headless CMS options and choose one."
+     },
+     {
+      "id": 14,
+      "title": "Analytics baseline",
+      "label": "QA",
+      "color": "#FF1E9E6A",
+      "due": "Feb 24",
+      "comments": 1,
+      "who": "Lena Fischer",
+      "col": "done",
+      "desc": "Record traffic and conversion figures before the relaunch."
+     }
+    ]
+   },
+   {
+    "name": "activity",
+    "type": "list",
+    "value": [
+     {
+      "who": "Maya Reyes",
+      "what": "moved this card to In progress",
+      "when": "2h ago"
+     },
+     {
+      "who": "Jon Okafor",
+      "what": "commented: \"Looks good, one small tweak.\"",
+      "when": "Yesterday"
+     },
+     {
+      "who": "Sam Patel",
+      "what": "changed the due date",
+      "when": "2 days ago"
+     },
+     {
+      "who": "Ana Costa",
+      "what": "created this task",
+      "when": "Last week"
+     }
+    ]
+   }
+  ]
+ }
+}

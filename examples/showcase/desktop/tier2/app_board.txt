@@ -1,0 +1,62 @@
+state sel=0
+state q=""
+state done=[]
+state cols=[{"id":"backlog","name":"Backlog"},{"id":"progress","name":"In progress"},{"id":"review","name":"In review"},{"id":"done","name":"Done"}]
+state tasks=[{"id":1,"title":"Audit existing site content","label":"Content","color":"#FFE08A1E","due":"Mar 4","comments":3,"who":"Ana Costa","col":"backlog","desc":"List every page on the current site and mark what to keep, merge or drop."},{"id":2,"title":"Define new sitemap","label":"Design","color":"#FF7C4DDB","due":"Mar 6","comments":5,"who":"Maya Reyes","col":"backlog","desc":"Agree the top-level navigation and page hierarchy with the team."},{"id":3,"title":"Set up staging environment","label":"Dev","color":"#FF2F6FED","due":"Mar 8","comments":1,"who":"Jon Okafor","col":"backlog","desc":"Provision a staging host with automatic deploys from the main branch."},{"id":4,"title":"Write pricing page copy","label":"Content","color":"#FFE08A1E","due":"Mar 11","comments":2,"who":"Lena Fischer","col":"backlog","desc":"Draft headlines and plan descriptions for the three pricing tiers."},{"id":5,"title":"Choose icon set","label":"Design","color":"#FF7C4DDB","due":"Mar 12","comments":0,"who":"Sam Patel","col":"backlog","desc":"Pick one consistent icon family and export the SVGs we need."},{"id":6,"title":"Design homepage hero","label":"Design","color":"#FF7C4DDB","due":"Mar 3","comments":7,"who":"Maya Reyes","col":"progress","desc":"Produce desktop and mobile hero layouts with the new brand colors."},{"id":7,"title":"Build responsive navigation","label":"Dev","color":"#FF2F6FED","due":"Mar 5","comments":4,"who":"Jon Okafor","col":"progress","desc":"Implement the header, mobile drawer and keyboard navigation."},{"id":8,"title":"Fix broken contact form","label":"Bug","color":"#FFD93B3B","due":"Mar 2","comments":6,"who":"Sam Patel","col":"progress","desc":"Submissions fail silently on Safari; reproduce and fix."},{"id":9,"title":"Migrate blog posts","label":"Content","color":"#FFE08A1E","due":"Feb 28","comments":2,"who":"Ana Costa","col":"review","desc":"Move the 42 existing posts into the new CMS with redirects."},{"id":10,"title":"Accessibility pass on forms","label":"QA","color":"#FF1E9E6A","due":"Mar 1","comments":3,"who":"Lena Fischer","col":"review","desc":"Check labels, focus order and error messages against WCAG AA."},{"id":11,"title":"Kick-off and goals","label":"Design","color":"#FF7C4DDB","due":"Feb 12","comments":8,"who":"Maya Reyes","col":"done","desc":"Align on scope, success metrics and the launch date."},{"id":12,"title":"Brand color palette","label":"Design","color":"#FF7C4DDB","due":"Feb 16","comments":4,"who":"Sam Patel","col":"done","desc":"Finalise primary, accent and neutral colors with contrast checks."},{"id":13,"title":"Pick CMS","label":"Dev","color":"#FF2F6FED","due":"Feb 20","comments":9,"who":"Jon Okafor","col":"done","desc":"Compare three headless CMS options and choose one."},{"id":14,"title":"Analytics baseline","label":"QA","color":"#FF1E9E6A","due":"Feb 24","comments":1,"who":"Lena Fischer","col":"done","desc":"Record traffic and conversion figures before the relaunch."}]
+state activity=[{"who":"Maya Reyes","what":"moved this card to In progress","when":"2h ago"},{"who":"Jon Okafor","what":"commented: \"Looks good, one small tweak.\"","when":"Yesterday"},{"who":"Sam Patel","what":"changed the due date","when":"2 days ago"},{"who":"Ana Costa","what":"created this task","when":"Last week"}]
+App
+  Main
+    Nav
+      Row gap:16
+        Heading "Website relaunch" level:3
+        Row gap:4
+          Avatar "Maya Reyes" size:28
+          Avatar "Jon Okafor" size:28
+          Avatar "Lena Fischer" size:28
+          Avatar "Sam Patel" size:28
+          Avatar "Ana Costa" size:28
+      Row gap:12
+        Input "Filter tasks" =q w:220
+        Button "New task" icon:"add" -> emit newTask
+    Row grow top
+      Row scroll grow gap:16 pad:24 top
+        each c in cols
+          Box w:216 h:fill fill:#FFF2F3F6 radius:10 pad:10 gap:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col",c.id))
+            Row between
+              Row gap:8
+                Text.strong "{c.name}"
+                Badge.neutral "{count(tasks,x=>x.col==c.id)}"
+              IconButton "add" -> emit addTask c.id
+            each t in filter(tasks,x=>x.col==c.id&&contains(lower(x.title),lower(q)))
+              Card drag:task(t.id) gap:8 pad:12 fill:#FFFFFFFF border:=sel==t.id?"#FF2F6FED":"#FFE2E5EA" -> sel=t.id
+                Box fill:=t.color radius:4 pad:[6,2,6,2]
+                  Text.badge "{t.label}" color:#FFFFFFFF size:11
+                Text.rowTitle "{t.title}"
+                Row between
+                  Row gap:10
+                    Row gap:4
+                      Icon "schedule" size:14
+                      Text.caption "{t.due}"
+                    Row gap:4
+                      Icon "chat_bubble_outline" size:14
+                      Text.caption "{t.comments}"
+                  Avatar "{t.who}" size:24
+      if sel!=0
+        Column w:360 h:fill pad:16 gap:14 scroll border-left:#FFE2E5EA
+          each d in filter(tasks,x=>x.id==sel)
+            Row between
+              Box fill:=d.color radius:4 pad:[6,2,6,2]
+                Text.badge "{d.label}" color:#FFFFFFFF size:11
+              IconButton "close" -> sel=0
+            Heading "{d.title}" level:3
+            Details rows:=[["Assignee",d.who],["Due",d.due],["Comments",d.comments],["Status",d.col]]
+            SectionLabel "Description"
+            Paragraph "{d.desc}"
+            Checklist "Checklist" =done items:["Review requirements","Complete the work","Get a teammate's feedback","Update the project notes"]
+            SectionLabel "Activity" "{length(activity)} updates"
+            each a in activity
+              Row gap:10 top
+                Avatar "{a.who}" size:28
+                Column grow gap:2
+                  Text "{a.who} {a.what}"
+                  Text.caption "{a.when}"

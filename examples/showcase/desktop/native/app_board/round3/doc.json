@@ -1,0 +1,3279 @@
+{
+ "schema": 3,
+ "roots": [
+  "board"
+ ],
+ "nodes": {
+  "board": {
+   "type": "canvas",
+   "name": "Board",
+   "slots": {
+    "body": "app"
+   },
+   "layout": {
+    "width": 1280,
+    "height": 800
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF6F7F9"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "keyDown",
+      "key": "Escape"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selectedId",
+       "value": "${= ''}"
+      }
+     ]
+    }
+   ]
+  },
+  "app": {
+   "type": "column",
+   "children": [
+    "topbar",
+    "main"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "topbar": {
+   "type": "row",
+   "children": [
+    "logoMark",
+    "logoText",
+    "crumbSep",
+    "projName",
+    "topSpacer",
+    "members",
+    "filter",
+    "newTask"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": 64,
+    "padding": [
+     24,
+     0,
+     24,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "logoMark": {
+   "type": "column",
+   "children": [
+    "logoGlyph"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 9,
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF3B82F6"
+       },
+       {
+        "position": 1,
+        "color": "#FF1D4ED8"
+       }
+      ]
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#332563EB",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   }
+  },
+  "logoGlyph": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "view_kanban_rounded",
+    "size": 18,
+    "color": "#FFFFFFFF"
+   }
+  },
+  "logoText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 52
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "text": "Lanes",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 18,
+     "fontWeight": 700,
+     "letterSpacing": -0.36,
+     "color": "#FF0F172A"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "crumbSep": {
+   "type": "box",
+   "layout": {
+    "width": 1,
+    "height": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "projName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "text": "Website relaunch",
+    "maxLines": 1,
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 22,
+     "fontWeight": 700,
+     "letterSpacing": -0.44,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "topSpacer": {
+   "type": "spacer"
+  },
+  "members": {
+   "type": "listView",
+   "children": [
+    "memberAv"
+   ],
+   "layout": {
+    "width": {
+     "hug": 150
+    },
+    "height": 32
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": -5
+   },
+   "bind": {
+    "data": "${members}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "memberAv": {
+   "type": "column",
+   "children": [
+    "memberIni"
+   ],
+   "layout": {
+    "width": 32,
+    "height": {
+     "fill": 32
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "tooltip": "${item.name}",
+   "decoration": {
+    "shape": "circle",
+    "strokes": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokeWidth": 2,
+    "fills": [
+     {
+      "color": "#FF6366F1"
+     },
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#40FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   }
+  },
+  "memberIni": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "props": {
+    "text": "${item.ini}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "filter": {
+   "type": "textField",
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF0F172A"
+    },
+    "decoration": {
+     "hintText": "Filter tasks",
+     "hintStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "color": "#FF94A3B8"
+     },
+     "prefixIcon": {
+      "icon": "search",
+      "size": 18
+     },
+     "filled": true,
+     "fillColor": "#FFF6F7F9",
+     "contentPadding": [
+      12,
+      11,
+      12,
+      11
+     ]
+    }
+   },
+   "bind": {
+    "props.initialValue": "${query}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": "${result}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 200
+      }
+     }
+    }
+   ]
+  },
+  "newTask": {
+   "type": "filledButton",
+   "layout": {
+    "width": 124,
+    "height": 40
+   },
+   "props": {
+    "label": "New task",
+    "icon": "add",
+    "style": {
+     "backgroundColor": "#FF2563EB",
+     "foregroundColor": "#FFFFFFFF",
+     "iconSize": 18,
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selectedId",
+       "value": "${= 't' + (length(tasks) + 1)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= append(tasks, {id: selectedId, key: 'LNS-' + (length(tasks) + 101), title: 'Untitled task', status: 'Backlog', label: 'Design', due: 'No date', dueState: 'ok', comments: 0, assignee: 0, desc: 'Add a description so the team knows what done looks like.', checklist: [{t: 'Define the scope', done: false}, {t: 'First draft', done: false}, {t: 'Review with the team', done: false}, {t: 'Ship it', done: false}], activity: [{m: 0, t: 'created this task in Backlog', w: 'Just now'}]})}"
+      }
+     ]
+    }
+   ]
+  },
+  "main": {
+   "type": "row",
+   "children": [
+    "boardArea",
+    "details"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 736
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "boardArea": {
+   "type": "column",
+   "children": [
+    "boardHead",
+    "lanes"
+   ],
+   "layout": {
+    "width": {
+     "fill": 920
+    },
+    "height": {
+     "fill": 736
+    },
+    "padding": [
+     24,
+     20,
+     24,
+     24
+    ]
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "boardHead": {
+   "type": "row",
+   "children": [
+    "sprintIcon",
+    "sprintText",
+    "bhSpacer",
+    "doneText",
+    "doneBar"
+   ],
+   "layout": {
+    "width": {
+     "fill": 872
+    },
+    "height": 28
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "sprintIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "view_kanban_outlined",
+    "size": 18,
+    "color": "#FF475569"
+   }
+  },
+  "sprintText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "flexible": 320
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Sprint 12 \u00b7 Jun 17 \u2013 Jul 12 \u00b7 ${= length(tasks)} tasks",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "text": "Sprint 12 \u00b7 ${= length(tasks)} tasks"
+      }
+     }
+    }
+   ]
+  },
+  "bhSpacer": {
+   "type": "spacer"
+  },
+  "doneText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${doneCount} of ${= length(tasks)} done",
+    "maxLines": 1,
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "doneBar": {
+   "type": "progressBar",
+   "layout": {
+    "width": 120,
+    "height": 6
+   },
+   "props": {
+    "value": 4,
+    "max": 14,
+    "color": "#FF16A34A",
+    "backgroundColor": "#FFE5E7EB",
+    "borderRadius": 3,
+    "exactFill": true,
+    "animate": true
+   },
+   "bind": {
+    "props.value": "${doneCount}",
+    "props.max": "${= length(tasks)}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 56
+      }
+     }
+    }
+   ]
+  },
+  "lanes": {
+   "type": "listView",
+   "children": [
+    "lane"
+   ],
+   "layout": {
+    "width": {
+     "fill": 872
+    },
+    "height": {
+     "fill": 652
+    }
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "spacing": 12,
+    "alwaysScroll": false
+   },
+   "bind": {
+    "data": "${columns}"
+   }
+  },
+  "lane": {
+   "type": "column",
+   "children": [
+    "laneHead",
+    "laneEmpty",
+    "cards"
+   ],
+   "layout": {
+    "width": 212,
+    "height": {
+     "fill": 652
+    },
+    "padding": 12
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "radius": 16,
+    "fills": [
+     {
+      "color": "#FFEEF1F5"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "dashPattern": [
+     6,
+     4
+    ],
+    "foregroundFills": [
+     {
+      "type": "linear",
+      "begin": "topCenter",
+      "end": "bottomCenter",
+      "stops": [
+       {
+        "position": 0.9,
+        "color": "#00EEF1F5"
+       },
+       {
+        "position": 0.985,
+        "color": "#FFEEF1F5"
+       },
+       {
+        "position": 1,
+        "color": "#FFEEF1F5"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "layout.width": "${= max(screen.width >= 1024 ? 208 : (selectedId != '' ? 184 : 168), (screen.width - (selectedId != '' ? (screen.width >= 1024 ? 360 : 340) : 0) - 84) / 4)}",
+    "decoration.fills[0].color": "${= overLane == item.name ? '#FFE3ECFD' : '#FFEEF1F5'}",
+    "decoration.strokes[0].color": "${= overLane == item.name ? '#FF2563EB' : '#00000000'}"
+   },
+   "dropTarget": {
+    "accepts": [
+     "card"
+    ],
+    "key": "${item.name}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "dragEnter"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "overLane",
+       "value": "${item.name}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "dragExit"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "overLane",
+       "value": "${= ''}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "drop"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= map(tasks, t => t.id == result.data && t.status != item.name ? set(set(t, 'status', item.name), 'activity', append(t.activity, {m: 0, t: 'moved this to ' + item.name, w: 'Just now'})) : t)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "overLane",
+       "value": "${= ''}"
+      }
+     ]
+    }
+   ]
+  },
+  "laneHead": {
+   "type": "row",
+   "children": [
+    "laneDot",
+    "laneName",
+    "laneCount",
+    "laneSp",
+    "laneAdd"
+   ],
+   "layout": {
+    "width": {
+     "fill": 188
+    },
+    "height": 28,
+    "padding": [
+     4,
+     0,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "laneDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF94A3B8"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   }
+  },
+  "laneName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.name}",
+    "maxLines": 1,
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "laneCount": {
+   "type": "row",
+   "children": [
+    "laneCountText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     8,
+     1,
+     8,
+     1
+    ]
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   }
+  },
+  "laneCountText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 8
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${= count(shown, t => t.status == item.name)}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "laneSp": {
+   "type": "spacer"
+  },
+  "laneAdd": {
+   "type": "iconButton",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "tooltip": "Add a task to ${item.name}",
+   "props": {
+    "icon": "add",
+    "style": {
+     "foregroundColor": "#FF475569",
+     "iconSize": 18
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selectedId",
+       "value": "${= 't' + (length(tasks) + 1)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= append(tasks, {id: selectedId, key: 'LNS-' + (length(tasks) + 101), title: 'Untitled task', status: item.name, label: 'Design', due: 'No date', dueState: 'ok', comments: 0, assignee: 0, desc: 'Add a description so the team knows what done looks like.', checklist: [{t: 'Define the scope', done: false}, {t: 'First draft', done: false}, {t: 'Review with the team', done: false}, {t: 'Ship it', done: false}], activity: [{m: 0, t: 'created this task in ' + item.name, w: 'Just now'}]})}"
+      }
+     ]
+    }
+   ]
+  },
+  "laneEmpty": {
+   "type": "column",
+   "children": [
+    "laneEmptyText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 188
+    },
+    "height": 72
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 12,
+    "strokes": [
+     {
+      "color": "#FFCBD5E1"
+     }
+    ],
+    "dashPattern": [
+     5,
+     4
+    ]
+   },
+   "bind": {
+    "visible": "${= count(shown, t => t.status == item.name) == 0}"
+   }
+  },
+  "laneEmptyText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 110
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Drop cards here",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "cards": {
+   "type": "listView",
+   "children": [
+    "card"
+   ],
+   "layout": {
+    "width": {
+     "fill": 188
+    },
+    "height": {
+     "fill": 560
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "alwaysScroll": false
+   },
+   "bind": {
+    "data": "${= filter(shown, t => t.status == item.name)}"
+   }
+  },
+  "card": {
+   "type": "column",
+   "children": [
+    "cardTop",
+    "cardTitle",
+    "cardMeta"
+   ],
+   "layout": {
+    "width": {
+     "fill": 188
+    },
+    "height": {
+     "hug": 112
+    },
+    "padding": 12
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 12,
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 8
+     }
+    ]
+   },
+   "draggable": {
+    "group": "card",
+    "data": "${item.id}",
+    "start": "auto",
+    "childWhenDragging": "ghost"
+   },
+   "bind": {
+    "selected": "${= selectedId == item.id}"
+   },
+   "states": {
+    "hovered": {
+     "card": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "#FFCBD5E1"
+        }
+       ]
+      }
+     }
+    },
+    "selected": {
+     "card": {
+      "decoration": {
+       "strokes": [
+        {
+         "color": "#FF2563EB"
+        }
+       ],
+       "effects": [
+        {
+         "type": "dropShadow",
+         "color": "#262563EB",
+         "offset": [
+          0,
+          0
+         ],
+         "blurRadius": 0,
+         "spreadRadius": 3
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selectedId",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "cardTop": {
+   "type": "row",
+   "children": [
+    "cardLabel",
+    "ctSp",
+    "cardKey"
+   ],
+   "layout": {
+    "width": {
+     "fill": 164
+    },
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "cardLabel": {
+   "type": "row",
+   "children": [
+    "cardLabelText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": [
+     8,
+     3,
+     8,
+     3
+    ]
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#FFEEF2FF"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= labelBg(item.label)}"
+   }
+  },
+  "cardLabelText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.label}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF4338CA"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= labelFg(item.label)}"
+   }
+  },
+  "ctSp": {
+   "type": "spacer"
+  },
+  "cardKey": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 56
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.key}",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 11,
+     "fontWeight": 500,
+     "color": "#FF94A3B8"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "cardTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 164
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "text": "${item.title}",
+    "maxLines": 2,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "height": 1.4,
+     "color": "#FF0F172A"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.status == 'Done' ? '#FF64748B' : '#FF0F172A'}"
+   }
+  },
+  "cardMeta": {
+   "type": "row",
+   "children": [
+    "dueBox",
+    "cmtBox",
+    "cmSp",
+    "cardAv"
+   ],
+   "layout": {
+    "width": {
+     "fill": 164
+    },
+    "height": {
+     "hug": 24
+    }
+   },
+   "props": {
+    "spacing": 12
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "spacing": 8
+      }
+     }
+    }
+   ]
+  },
+  "dueBox": {
+   "type": "row",
+   "children": [
+    "dueIco",
+    "dueTxt"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "dueIco": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "icon": "event",
+    "size": 14,
+    "color": "#FF64748B"
+   },
+   "bind": {
+    "props.icon": "${= item.dueState == 'done' ? 'check_circle' : 'event'}",
+    "props.color": "${= dueColor(item.dueState)}"
+   }
+  },
+  "dueTxt": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.due}",
+    "maxLines": 1,
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#FF64748B"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= dueColor(item.dueState)}"
+   }
+  },
+  "cmtBox": {
+   "type": "row",
+   "children": [
+    "cmtIco",
+    "cmtTxt"
+   ],
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "cmtIco": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "icon": "chat_bubble_outline",
+    "size": 14,
+    "color": "#FF94A3B8"
+   }
+  },
+  "cmtTxt": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 10
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.comments}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "cmSp": {
+   "type": "spacer"
+  },
+  "cardAv": {
+   "type": "column",
+   "children": [
+    "cardAvIni"
+   ],
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "tooltip": "${= members[item.assignee].name}",
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF6366F1"
+     },
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#40FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= members[item.assignee].color}"
+   }
+  },
+  "cardAvIni": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "props": {
+    "text": "${= members[item.assignee].ini}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 9,
+     "fontWeight": 700,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "details": {
+   "type": "column",
+   "children": [
+    "detHead",
+    "detBody",
+    "composer"
+   ],
+   "layout": {
+    "width": 360,
+    "height": {
+     "fill": 736
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "bind": {
+    "visible": "${= selectedId != ''}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 340
+      }
+     }
+    }
+   ]
+  },
+  "detHead": {
+   "type": "row",
+   "children": [
+    "detKey",
+    "dhSp",
+    "detCopy",
+    "detClose"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 56,
+    "padding": [
+     24,
+     0,
+     12,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 4
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "detKey": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 64
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Website relaunch / ${sel.key}",
+    "maxLines": 1,
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 12,
+     "fontWeight": 500,
+     "color": "#FF64748B"
+    }
+   }
+  },
+  "dhSp": {
+   "type": "spacer"
+  },
+  "detCopy": {
+   "type": "iconButton",
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "tooltip": "Copy link",
+   "props": {
+    "icon": "link",
+    "style": {
+     "foregroundColor": "#FF475569",
+     "iconSize": 18
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "copyToClipboard",
+       "text": "${= 'https://lanes.app/website-relaunch/' + sel.key}"
+      },
+      {
+       "type": "showToast",
+       "message": "Link copied"
+      }
+     ]
+    }
+   ]
+  },
+  "detClose": {
+   "type": "iconButton",
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "tooltip": "Close (Esc)",
+   "props": {
+    "icon": "close",
+    "style": {
+     "foregroundColor": "#FF475569",
+     "iconSize": 18
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selectedId",
+       "value": "${= ''}"
+      }
+     ]
+    }
+   ]
+  },
+  "detBody": {
+   "type": "column",
+   "children": [
+    "titleBlock",
+    "propsBlock",
+    "descBlock",
+    "checkBlock",
+    "actBlock"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": {
+     "fill": 610
+    },
+    "padding": [
+     24,
+     24,
+     24,
+     32
+    ]
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 32,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "titleBlock": {
+   "type": "column",
+   "children": [
+    "detLabel",
+    "detTitle"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 80
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "detLabel": {
+   "type": "row",
+   "children": [
+    "detLabelText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 22
+    },
+    "padding": [
+     8,
+     3,
+     8,
+     3
+    ]
+   },
+   "decoration": {
+    "radius": 6,
+    "fills": [
+     {
+      "color": "#FFEEF2FF"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= labelBg(sel.label)}"
+   }
+  },
+  "detLabelText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 44
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${sel.label}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF4338CA"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= labelFg(sel.label)}"
+   }
+  },
+  "detTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "text": "${sel.title}",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 24,
+     "fontWeight": 700,
+     "height": 1.2,
+     "letterSpacing": -0.48,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "propsBlock": {
+   "type": "column",
+   "children": [
+    "propStatus",
+    "propAssignee",
+    "propDue"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "propStatus": {
+   "type": "row",
+   "children": [
+    "psLbl",
+    "statusDD"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "psLbl": {
+   "type": "text",
+   "layout": {
+    "width": 88,
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Status",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "statusDD": {
+   "type": "dropdown",
+   "layout": {
+    "width": {
+     "fill": 216
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "items": [
+     "Backlog",
+     "In progress",
+     "In review",
+     "Done"
+    ],
+    "value": "In progress",
+    "isExpanded": true
+   },
+   "bind": {
+    "props.value": "${sel.status}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= map(tasks, t => t.id == selectedId && t.status != result ? set(set(t, 'status', result), 'activity', append(t.activity, {m: 0, t: 'moved this to ' + result, w: 'Just now'})) : t)}"
+      }
+     ]
+    }
+   ]
+  },
+  "propAssignee": {
+   "type": "row",
+   "children": [
+    "paLbl",
+    "paAv",
+    "paName"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "paLbl": {
+   "type": "text",
+   "layout": {
+    "width": 88,
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Assignee",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "paAv": {
+   "type": "column",
+   "children": [
+    "paIni"
+   ],
+   "layout": {
+    "width": 24,
+    "height": 24
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF6366F1"
+     },
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#40FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= members[sel.assignee].color}"
+   }
+  },
+  "paIni": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "props": {
+    "text": "${= members[sel.assignee].ini}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 9,
+     "fontWeight": 700,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "paName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${= members[sel.assignee].name}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "propDue": {
+   "type": "row",
+   "children": [
+    "pdLbl",
+    "pdIco",
+    "pdText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "pdLbl": {
+   "type": "text",
+   "layout": {
+    "width": 88,
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Due date",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "pdIco": {
+   "type": "icon",
+   "layout": {
+    "width": 24,
+    "height": 16
+   },
+   "props": {
+    "icon": "event",
+    "size": 16,
+    "color": "#FF64748B"
+   },
+   "bind": {
+    "props.color": "${= dueColor(sel.dueState)}"
+   }
+  },
+  "pdText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF0F172A"
+    }
+   },
+   "bind": {
+    "props.text": "${= sel.due + (sel.dueState == 'late' ? ' \u00b7 Overdue' : sel.dueState == 'soon' ? ' \u00b7 Due soon' : '')}",
+    "props.style.color": "${= sel.dueState == 'ok' ? '#FF0F172A' : dueColor(sel.dueState)}"
+   }
+  },
+  "descBlock": {
+   "type": "column",
+   "children": [
+    "descHead",
+    "descText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 90
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "descHead": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "DESCRIPTION",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "descText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 60
+    }
+   },
+   "props": {
+    "text": "${sel.desc}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "height": 1.55,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "checkBlock": {
+   "type": "column",
+   "children": [
+    "checkHead",
+    "checkBar",
+    "checkList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 200
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "checkHead": {
+   "type": "row",
+   "children": [
+    "chTitle",
+    "chSp",
+    "chCount"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "chTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "CHECKLIST",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "chSp": {
+   "type": "spacer"
+  },
+  "chCount": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${selDone} of ${= length(sel.checklist)}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "checkBar": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": 6
+   },
+   "props": {
+    "value": 2,
+    "max": 4,
+    "color": "#FF16A34A",
+    "backgroundColor": "#FFE5E7EB",
+    "borderRadius": 3,
+    "exactFill": true,
+    "animate": true
+   },
+   "bind": {
+    "props.value": "${selDone}",
+    "props.max": "${= length(sel.checklist)}"
+   }
+  },
+  "checkList": {
+   "type": "listView",
+   "children": [
+    "checkRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 168
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 2
+   },
+   "bind": {
+    "data": "${sel.checklist}"
+   }
+  },
+  "checkRow": {
+   "type": "row",
+   "children": [
+    "checkBox",
+    "checkText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": 40,
+    "padding": [
+     4,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "checkRow": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "#FFF6F7F9"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= map(tasks, t => t.id == selectedId ? set(t, 'checklist', setAt(t.checklist, index, set(item, 'done', !item.done))) : t)}"
+      }
+     ]
+    }
+   ]
+  },
+  "checkBox": {
+   "type": "checkbox",
+   "ignorePointer": true,
+   "props": {
+    "value": false,
+    "activeColor": "#FF2563EB"
+   },
+   "bind": {
+    "props.value": "${item.done}"
+   }
+  },
+  "checkText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.t}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF0F172A"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.done ? '#FF94A3B8' : '#FF0F172A'}",
+    "props.style.decoration": "${= item.done ? 'lineThrough' : 'none'}"
+   }
+  },
+  "actBlock": {
+   "type": "column",
+   "children": [
+    "actHead",
+    "actList"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 200
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "actHead": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "ACTIVITY",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "actList": {
+   "type": "listView",
+   "children": [
+    "actRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 160
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 16
+   },
+   "bind": {
+    "data": "${sel.activity}"
+   }
+  },
+  "actRow": {
+   "type": "row",
+   "children": [
+    "actAv",
+    "actCol"
+   ],
+   "layout": {
+    "width": {
+     "fill": 312
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "actAv": {
+   "type": "column",
+   "children": [
+    "actIni"
+   ],
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF6366F1"
+     },
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#40FFFFFF"
+       },
+       {
+        "position": 1,
+        "color": "#00FFFFFF"
+       }
+      ]
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= members[item.m].color}"
+   }
+  },
+  "actIni": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 14
+    },
+    "height": {
+     "hug": 12
+    }
+   },
+   "props": {
+    "text": "${= members[item.m].ini}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 10,
+     "fontWeight": 700,
+     "color": "#FFFFFFFF"
+    }
+   }
+  },
+  "actCol": {
+   "type": "column",
+   "children": [
+    "actText",
+    "actWhen"
+   ],
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "actText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${= members[item.m].name + ' ' + item.t}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "height": 1.45,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "actWhen": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.w}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "composer": {
+   "type": "row",
+   "children": [
+    "commentField",
+    "sendBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 360
+    },
+    "height": 72,
+    "padding": [
+     24,
+     0,
+     16,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 8
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "commentField": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 260
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF0F172A"
+    },
+    "decoration": {
+     "hintText": "Write a comment",
+     "hintStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "color": "#FF94A3B8"
+     },
+     "filled": true,
+     "fillColor": "#FFF6F7F9",
+     "contentPadding": [
+      12,
+      11,
+      12,
+      11
+     ]
+    }
+   },
+   "bind": {
+    "props.initialValue": "${commentDraft}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "commentDraft",
+       "value": "${result}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "submitted"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "when": {
+        "left": "${commentDraft}",
+        "op": "isNotEmpty"
+       },
+       "value": "${= map(tasks, t => t.id == selectedId ? set(set(t, 'comments', t.comments + 1), 'activity', append(t.activity, {m: 0, t: 'commented: ' + commentDraft, w: 'Just now'})) : t)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "commentDraft",
+       "value": "${= ''}"
+      }
+     ]
+    }
+   ]
+  },
+  "sendBtn": {
+   "type": "iconButton",
+   "layout": {
+    "width": 40,
+    "height": 40
+   },
+   "tooltip": "Send",
+   "props": {
+    "icon": "send",
+    "style": {
+     "backgroundColor": "#FF2563EB",
+     "foregroundColor": "#FFFFFFFF",
+     "iconSize": 18
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "when": {
+        "left": "${commentDraft}",
+        "op": "isNotEmpty"
+       },
+       "value": "${= map(tasks, t => t.id == selectedId ? set(set(t, 'comments', t.comments + 1), 'activity', append(t.activity, {m: 0, t: 'commented: ' + commentDraft, w: 'Just now'})) : t)}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "commentDraft",
+       "value": "${= ''}"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "board": [
+   {
+    "name": "query",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "selectedId",
+    "type": "text",
+    "value": "t6"
+   },
+   {
+    "name": "overLane",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "commentDraft",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "members",
+    "type": "list",
+    "value": [
+     {
+      "name": "Maya Chen",
+      "ini": "MC",
+      "color": "#FF2563EB"
+     },
+     {
+      "name": "Jonas Weber",
+      "ini": "JW",
+      "color": "#FF7C3AED"
+     },
+     {
+      "name": "Priya Nair",
+      "ini": "PN",
+      "color": "#FFDB2777"
+     },
+     {
+      "name": "Leo Martins",
+      "ini": "LM",
+      "color": "#FF059669"
+     },
+     {
+      "name": "Sam Okafor",
+      "ini": "SO",
+      "color": "#FFEA580C"
+     }
+    ]
+   },
+   {
+    "name": "columns",
+    "type": "list",
+    "value": [
+     {
+      "name": "Backlog",
+      "color": "#FF94A3B8"
+     },
+     {
+      "name": "In progress",
+      "color": "#FF2563EB"
+     },
+     {
+      "name": "In review",
+      "color": "#FFD97706"
+     },
+     {
+      "name": "Done",
+      "color": "#FF16A34A"
+     }
+    ]
+   },
+   {
+    "name": "tasks",
+    "type": "list",
+    "value": [
+     {
+      "id": "t1",
+      "key": "LNS-101",
+      "title": "Audit current sitemap and redirects",
+      "status": "Backlog",
+      "label": "SEO",
+      "due": "Jul 8",
+      "dueState": "ok",
+      "comments": 2,
+      "assignee": 3,
+      "desc": "List every live URL and map it to its new home so no search traffic is lost at launch.",
+      "checklist": [
+       {
+        "t": "Export the crawl",
+        "done": true
+       },
+       {
+        "t": "Map old to new URLs",
+        "done": false
+       },
+       {
+        "t": "Write the redirect rules",
+        "done": false
+       },
+       {
+        "t": "Test on staging",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 0,
+        "t": "created this task",
+        "w": "Jun 12"
+       },
+       {
+        "m": 3,
+        "t": "exported the crawl",
+        "w": "Jun 18"
+       }
+      ]
+     },
+     {
+      "id": "t2",
+      "key": "LNS-102",
+      "title": "Write copy for the pricing page",
+      "status": "Backlog",
+      "label": "Content",
+      "due": "Jul 3",
+      "dueState": "ok",
+      "comments": 4,
+      "assignee": 2,
+      "desc": "Three plans, one comparison table and an FAQ. Keep it plain and specific.",
+      "checklist": [
+       {
+        "t": "Plan names and taglines",
+        "done": true
+       },
+       {
+        "t": "Comparison rows",
+        "done": false
+       },
+       {
+        "t": "FAQ answers",
+        "done": false
+       },
+       {
+        "t": "Legal review",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 0,
+        "t": "created this task",
+        "w": "Jun 13"
+       },
+       {
+        "m": 2,
+        "t": "commented: first draft in the doc",
+        "w": "Jun 19"
+       }
+      ]
+     },
+     {
+      "id": "t3",
+      "key": "LNS-103",
+      "title": "Choose an illustration style",
+      "status": "Backlog",
+      "label": "Design",
+      "due": "Jul 10",
+      "dueState": "ok",
+      "comments": 1,
+      "assignee": 1,
+      "desc": "Pick one direction for spot illustrations across the site, from the three explorations.",
+      "checklist": [
+       {
+        "t": "Three explorations",
+        "done": true
+       },
+       {
+        "t": "Team vote",
+        "done": false
+       },
+       {
+        "t": "Draw five spots",
+        "done": false
+       },
+       {
+        "t": "Export to SVG",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 1,
+        "t": "created this task",
+        "w": "Jun 14"
+       }
+      ]
+     },
+     {
+      "id": "t4",
+      "key": "LNS-104",
+      "title": "Set up analytics events",
+      "status": "Backlog",
+      "label": "Frontend",
+      "due": "Jul 12",
+      "dueState": "ok",
+      "comments": 0,
+      "assignee": 4,
+      "desc": "Track sign-up clicks, plan selection and scroll depth on the homepage.",
+      "checklist": [
+       {
+        "t": "Agree on event names",
+        "done": false
+       },
+       {
+        "t": "Add the tracking layer",
+        "done": false
+       },
+       {
+        "t": "Verify in the debugger",
+        "done": false
+       },
+       {
+        "t": "Build the dashboard",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 0,
+        "t": "created this task",
+        "w": "Jun 15"
+       }
+      ]
+     },
+     {
+      "id": "t5",
+      "key": "LNS-105",
+      "title": "Cookie banner overlaps the footer on Safari",
+      "status": "Backlog",
+      "label": "Bug",
+      "due": "Jun 28",
+      "dueState": "soon",
+      "comments": 3,
+      "assignee": 4,
+      "desc": "On Safari 17 the banner sits over the footer links and they cannot be clicked.",
+      "checklist": [
+       {
+        "t": "Reproduce",
+        "done": true
+       },
+       {
+        "t": "Fix the stacking",
+        "done": false
+       },
+       {
+        "t": "Test on iOS",
+        "done": false
+       },
+       {
+        "t": "Close the report",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 3,
+        "t": "reported this bug",
+        "w": "Jun 20"
+       },
+       {
+        "m": 4,
+        "t": "reproduced it on Safari 17",
+        "w": "Jun 21"
+       }
+      ]
+     },
+     {
+      "id": "t6",
+      "key": "LNS-106",
+      "title": "Build the new homepage hero",
+      "status": "In progress",
+      "label": "Frontend",
+      "due": "Jun 27",
+      "dueState": "soon",
+      "comments": 6,
+      "assignee": 4,
+      "desc": "Implement the approved hero: headline, two calls to action and the animated product shot. It must load under 1.5 s on 4G.",
+      "checklist": [
+       {
+        "t": "Layout at three widths",
+        "done": true
+       },
+       {
+        "t": "Product shot animation",
+        "done": true
+       },
+       {
+        "t": "Hook up the sign-up CTA",
+        "done": false
+       },
+       {
+        "t": "Lighthouse pass",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 0,
+        "t": "created this task",
+        "w": "Jun 16"
+       },
+       {
+        "m": 4,
+        "t": "moved this to In progress",
+        "w": "Jun 19"
+       },
+       {
+        "m": 1,
+        "t": "commented: final assets are in Figma",
+        "w": "Yesterday"
+       }
+      ]
+     },
+     {
+      "id": "t7",
+      "key": "LNS-107",
+      "title": "Design system: buttons and inputs",
+      "status": "In progress",
+      "label": "Design",
+      "due": "Jun 26",
+      "dueState": "late",
+      "comments": 5,
+      "assignee": 1,
+      "desc": "Every state for buttons, fields, selects and checkboxes, with tokens the code can use.",
+      "checklist": [
+       {
+        "t": "Buttons",
+        "done": true
+       },
+       {
+        "t": "Text fields",
+        "done": true
+       },
+       {
+        "t": "Selects and checkboxes",
+        "done": false
+       },
+       {
+        "t": "Hand off tokens",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 1,
+        "t": "created this task",
+        "w": "Jun 15"
+       },
+       {
+        "m": 1,
+        "t": "moved this to In progress",
+        "w": "Jun 17"
+       }
+      ]
+     },
+     {
+      "id": "t8",
+      "key": "LNS-108",
+      "title": "Migrate blog posts to the new CMS",
+      "status": "In progress",
+      "label": "Content",
+      "due": "Jul 1",
+      "dueState": "ok",
+      "comments": 2,
+      "assignee": 2,
+      "desc": "Move all 86 posts with their images and authors; drop the ones older than 2019.",
+      "checklist": [
+       {
+        "t": "Import script",
+        "done": true
+       },
+       {
+        "t": "Fix image paths",
+        "done": false
+       },
+       {
+        "t": "Check authors",
+        "done": false
+       },
+       {
+        "t": "Spot-check 20 posts",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 2,
+        "t": "created this task",
+        "w": "Jun 16"
+       },
+       {
+        "m": 2,
+        "t": "moved this to In progress",
+        "w": "Jun 20"
+       }
+      ]
+     },
+     {
+      "id": "t9",
+      "key": "LNS-109",
+      "title": "Navigation and mega menu",
+      "status": "In review",
+      "label": "Design",
+      "due": "Jun 25",
+      "dueState": "late",
+      "comments": 8,
+      "assignee": 1,
+      "desc": "Top navigation with a products mega menu and a compact mobile drawer.",
+      "checklist": [
+       {
+        "t": "Information architecture",
+        "done": true
+       },
+       {
+        "t": "Desktop menu",
+        "done": true
+       },
+       {
+        "t": "Mobile drawer",
+        "done": true
+       },
+       {
+        "t": "Sign-off",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 1,
+        "t": "created this task",
+        "w": "Jun 12"
+       },
+       {
+        "m": 1,
+        "t": "moved this to In review",
+        "w": "Jun 22"
+       }
+      ]
+     },
+     {
+      "id": "t10",
+      "key": "LNS-110",
+      "title": "Meta titles for the top 40 pages",
+      "status": "In review",
+      "label": "SEO",
+      "due": "Jun 29",
+      "dueState": "soon",
+      "comments": 1,
+      "assignee": 3,
+      "desc": "Titles under 60 characters and descriptions under 155 for the pages that bring most traffic.",
+      "checklist": [
+       {
+        "t": "Pick the 40 pages",
+        "done": true
+       },
+       {
+        "t": "Write titles",
+        "done": true
+       },
+       {
+        "t": "Write descriptions",
+        "done": true
+       },
+       {
+        "t": "Review",
+        "done": false
+       }
+      ],
+      "activity": [
+       {
+        "m": 3,
+        "t": "created this task",
+        "w": "Jun 14"
+       },
+       {
+        "m": 3,
+        "t": "moved this to In review",
+        "w": "Jun 23"
+       }
+      ]
+     },
+     {
+      "id": "t11",
+      "key": "LNS-111",
+      "title": "Kickoff and goals workshop",
+      "status": "Done",
+      "label": "Content",
+      "due": "Jun 14",
+      "dueState": "done",
+      "comments": 4,
+      "assignee": 0,
+      "desc": "Agree on goals, audiences and what success looks like for the relaunch.",
+      "checklist": [
+       {
+        "t": "Invite stakeholders",
+        "done": true
+       },
+       {
+        "t": "Run the workshop",
+        "done": true
+       },
+       {
+        "t": "Write up goals",
+        "done": true
+       },
+       {
+        "t": "Share the summary",
+        "done": true
+       }
+      ],
+      "activity": [
+       {
+        "m": 0,
+        "t": "created this task",
+        "w": "Jun 10"
+       },
+       {
+        "m": 0,
+        "t": "moved this to Done",
+        "w": "Jun 14"
+       }
+      ]
+     },
+     {
+      "id": "t12",
+      "key": "LNS-112",
+      "title": "Moodboard and art direction",
+      "status": "Done",
+      "label": "Design",
+      "due": "Jun 18",
+      "dueState": "done",
+      "comments": 7,
+      "assignee": 1,
+      "desc": "One board for type, color and imagery that every page follows.",
+      "checklist": [
+       {
+        "t": "Collect references",
+        "done": true
+       },
+       {
+        "t": "Type pairing",
+        "done": true
+       },
+       {
+        "t": "Palette",
+        "done": true
+       },
+       {
+        "t": "Present",
+        "done": true
+       }
+      ],
+      "activity": [
+       {
+        "m": 1,
+        "t": "created this task",
+        "w": "Jun 11"
+       },
+       {
+        "m": 1,
+        "t": "moved this to Done",
+        "w": "Jun 18"
+       }
+      ]
+     },
+     {
+      "id": "t13",
+      "key": "LNS-113",
+      "title": "Pick the new CMS",
+      "status": "Done",
+      "label": "Frontend",
+      "due": "Jun 19",
+      "dueState": "done",
+      "comments": 3,
+      "assignee": 4,
+      "desc": "Compare three headless options on editing, cost and hosting.",
+      "checklist": [
+       {
+        "t": "Shortlist three",
+        "done": true
+       },
+       {
+        "t": "Prototype each",
+        "done": true
+       },
+       {
+        "t": "Score them",
+        "done": true
+       },
+       {
+        "t": "Decide",
+        "done": true
+       }
+      ],
+      "activity": [
+       {
+        "m": 4,
+        "t": "created this task",
+        "w": "Jun 11"
+       },
+       {
+        "m": 4,
+        "t": "moved this to Done",
+        "w": "Jun 19"
+       }
+      ]
+     },
+     {
+      "id": "t14",
+      "key": "LNS-114",
+      "title": "Fix broken links from the old site",
+      "status": "Done",
+      "label": "Bug",
+      "due": "Jun 20",
+      "dueState": "done",
+      "comments": 2,
+      "assignee": 3,
+      "desc": "Twelve internal links pointed at pages that no longer exist.",
+      "checklist": [
+       {
+        "t": "Find the links",
+        "done": true
+       },
+       {
+        "t": "Fix the targets",
+        "done": true
+       },
+       {
+        "t": "Re-crawl",
+        "done": true
+       },
+       {
+        "t": "Close",
+        "done": true
+       }
+      ],
+      "activity": [
+       {
+        "m": 3,
+        "t": "created this task",
+        "w": "Jun 17"
+       },
+       {
+        "m": 3,
+        "t": "moved this to Done",
+        "w": "Jun 20"
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "name": "shown",
+    "type": "list",
+    "formula": "filter(tasks, t => query == '' || contains(lower(t.title), lower(query)) || contains(lower(t.label), lower(query)) || contains(lower(t.key), lower(query)))"
+   },
+   {
+    "name": "doneCount",
+    "type": "integer",
+    "formula": "count(tasks, t => t.status == 'Done')"
+   },
+   {
+    "name": "selList",
+    "type": "list",
+    "formula": "filter(tasks, t => t.id == selectedId)"
+   },
+   {
+    "name": "sel",
+    "type": "map",
+    "formula": "length(selList) > 0 ? selList[0] : tasks[0]"
+   },
+   {
+    "name": "selDone",
+    "type": "integer",
+    "formula": "count(sel.checklist, c => c.done)"
+   },
+   {
+    "name": "labelBg",
+    "type": "text",
+    "parameters": [
+     "l"
+    ],
+    "formula": "l == 'Design' ? '#FFEEF2FF' : l == 'Frontend' ? '#FFE0F2FE' : l == 'Content' ? '#FFFEF3C7' : l == 'SEO' ? '#FFDCFCE7' : '#FFFEE2E2'"
+   },
+   {
+    "name": "labelFg",
+    "type": "text",
+    "parameters": [
+     "l"
+    ],
+    "formula": "l == 'Design' ? '#FF4338CA' : l == 'Frontend' ? '#FF0369A1' : l == 'Content' ? '#FFB45309' : l == 'SEO' ? '#FF15803D' : '#FFB91C1C'"
+   },
+   {
+    "name": "dueColor",
+    "type": "text",
+    "parameters": [
+     "s"
+    ],
+    "formula": "s == 'late' ? '#FFDC2626' : s == 'soon' ? '#FFD97706' : s == 'done' ? '#FF16A34A' : '#FF64748B'"
+   }
+  ]
+ }
+}

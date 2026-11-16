@@ -1,0 +1,820 @@
+1. **Plan cards don't line up.** Scale's description wraps to two lines, so its price, button and feature list sit 20 px below Solo's and Team's. The three cards should read as one row of matching parts.
+2. **Team barely stands out.** It differs from the other cards only by a blue border, with the same flat shadow, so the recommended plan doesn't lift off the row.
+3. **The comparison table has no ending.** It stops after eight rows with nothing to act on, so a reader who has just compared must scroll back up to choose.
+4. **The FAQ list floats.** The first question starts 35 px below the heading with no rule above it. The heading and the list don't share a top line, and the first item looks unanchored.
+5. **The footer ends short.** At 1280 its three link columns stop around x 900 and leave an empty quarter. At 768 the brand block and the links wrap loosely instead of stacking on purpose.
+
+```json
+{
+  "schema": 3,
+  "id": "ledgerly-pricing",
+  "roots": ["pricing"],
+  "nodes": {
+    "pricing": {
+      "type": "canvas",
+      "name": "Pricing",
+      "slots": {"body": "page"},
+      "layout": {"width": 1280, "height": 800},
+      "decoration": {"fills": [{"color": "page"}]}
+    },
+    "page": {
+      "type": "column",
+      "children": ["navBand", "heroBand", "plansBand", "compareBand", "faqBand", "footBand"],
+      "layout": {"width": {"fill": 1280}, "height": {"fill": 800}},
+      "props": {"scrollable": true}
+    },
+
+    "navBand": {
+      "type": "column",
+      "children": ["navRail"],
+      "sticky": {"offset": 0},
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 64}, "padding": [32, 0, 32, 0]},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeSides": "bottom"},
+      "media": [{"minWidth": 1024, "patch": {"layout": {"padding": [48, 0, 48, 0]}}}]
+    },
+    "navRail": {
+      "type": "row",
+      "children": ["brand", "navLinks", "navSpacer", "signIn", "navCta"],
+      "layout": {"width": {"fill": 1120}, "height": 64, "constraints": {"maxWidth": 1120}},
+      "props": {"crossAxisAlignment": "center", "spacing": 32}
+    },
+    "brand": {
+      "type": "row",
+      "children": ["brandMark", "brandName"],
+      "layout": {"width": {"hug": 120}, "height": {"hug": 28}},
+      "props": {"spacing": 10, "crossAxisAlignment": "center"}
+    },
+    "brandMark": {
+      "type": "row",
+      "children": ["brandIcon"],
+      "layout": {"width": 28, "height": 28},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "accent"}], "radius": 8}
+    },
+    "brandIcon": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "receipt_long_rounded", "size": 16, "color": "onAccent"}},
+    "brandName": {
+      "type": "text",
+      "layout": {"width": {"hug": 80}, "height": {"hug": 24}},
+      "props": {"text": "Ledgerly", "style": {"from": "title", "fontSize": 19, "color": "ink"}}
+    },
+    "navLinks": {
+      "type": "row",
+      "children": ["navL1", "navL2", "navL3", "navL4"],
+      "layout": {"width": {"hug": 320}, "height": {"hug": 20}},
+      "props": {"spacing": 28, "crossAxisAlignment": "center"},
+      "media": [{"maxWidth": 899, "patch": {"visible": false}}]
+    },
+    "navL1": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 18}}, "props": {"text": "Product", "style": {"from": "controlMedium", "color": "inkSoft"}}},
+    "navL2": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 18}}, "props": {"text": "Pricing", "style": {"from": "controlMedium", "fontWeight": 600, "color": "ink"}}},
+    "navL3": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 18}}, "props": {"text": "Customers", "style": {"from": "controlMedium", "color": "inkSoft"}}},
+    "navL4": {"type": "text", "layout": {"width": {"hug": 60}, "height": {"hug": 18}}, "props": {"text": "Docs", "style": {"from": "controlMedium", "color": "inkSoft"}}},
+    "navSpacer": {"type": "spacer"},
+    "signIn": {
+      "type": "text",
+      "layout": {"width": {"hug": 50}, "height": {"hug": 18}},
+      "props": {"text": "Sign in", "style": {"from": "controlMedium", "fontWeight": 600, "color": "ink"}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "showToast", "message": "Sign in is coming up next"}]}]
+    },
+    "navCta": {
+      "type": "row",
+      "children": ["navCtaLabel"],
+      "layout": {"width": {"hug": 140}, "height": 38, "padding": [16, 0, 16, 0]},
+      "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "accent"}], "radius": 10},
+      "states": {"hovered": {"navCta": {"decoration": {"fills": [{"color": "accentDeep"}]}}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "scrollTo", "node": "plansBand", "offset": 72}]}]
+    },
+    "navCtaLabel": {
+      "type": "text",
+      "layout": {"width": {"hug": 110}, "height": {"hug": 18}},
+      "props": {"text": "Start free trial", "style": {"from": "controlMedium", "fontWeight": 600, "color": "onAccent"}}
+    },
+
+    "heroBand": {
+      "type": "column",
+      "children": ["heroRail"],
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 360}, "padding": [32, 72, 32, 40]},
+      "media": [{"minWidth": 1024, "patch": {"layout": {"padding": [48, 88, 48, 48]}}}]
+    },
+    "heroRail": {
+      "type": "column",
+      "children": ["heroEyebrow", "heroTitle", "heroLead", "toggle"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 280}, "constraints": {"maxWidth": 1120}},
+      "props": {"crossAxisAlignment": "center", "spacing": 16}
+    },
+    "heroEyebrow": {
+      "type": "text",
+      "layout": {"width": {"hug": 60}, "height": {"hug": 14}},
+      "props": {"text": "PRICING", "style": {"from": "eyebrow", "fontSize": 12, "letterSpacing": 1.6, "color": "accent"}}
+    },
+    "heroTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 720}, "height": {"hug": 60}, "constraints": {"maxWidth": 720}},
+      "props": {
+        "text": "Simple pricing for every stage",
+        "textAlign": "center",
+        "style": {"fontFamily": "Inter Display", "fontSize": 54, "fontWeight": 800, "height": 1.06, "letterSpacing": -1.8, "color": "ink"}
+      },
+      "media": [{"maxWidth": 899, "patch": {"props": {"style": {"fontSize": 42, "letterSpacing": -1.2}}}}]
+    },
+    "heroLead": {
+      "type": "text",
+      "layout": {"width": {"fill": 560}, "height": {"hug": 52}, "constraints": {"maxWidth": 560}},
+      "props": {
+        "text": "Start free for 30 days. Pick the plan that fits how you work today, and change it whenever your books grow.",
+        "textAlign": "center",
+        "style": {"fontFamily": "Inter", "fontSize": 17, "fontWeight": 400, "height": 1.55, "color": "inkSoft"}
+      }
+    },
+    "toggle": {
+      "type": "row",
+      "children": ["segMonthly", "segYearly"],
+      "layout": {"width": {"hug": 260}, "height": {"hug": 44}, "padding": 4, "margin": [0, 12, 0, 0]},
+      "props": {"spacing": 4, "crossAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "tile"}], "strokes": [{"color": "line"}], "radius": 12}
+    },
+    "segMonthly": {
+      "type": "row",
+      "children": ["segMonthlyLabel"],
+      "layout": {"width": {"hug": 90}, "height": 36, "padding": [18, 0, 18, 0]},
+      "props": {"crossAxisAlignment": "center", "mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#00000000"}], "strokeWidth": 1.5, "radius": 9},
+      "bind": {"selected": "${= !yearly}"},
+      "states": {"selected": {"segMonthly": {"decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "accent"}]}}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "yearly", "value": "${= false}"}]}]
+    },
+    "segMonthlyLabel": {
+      "type": "text",
+      "layout": {"width": {"hug": 54}, "height": {"hug": 18}},
+      "props": {"text": "Monthly", "style": {"from": "controlMedium", "fontWeight": 600, "color": "ink"}}
+    },
+    "segYearly": {
+      "type": "row",
+      "children": ["segYearlyLabel", "saveChip"],
+      "layout": {"width": {"hug": 150}, "height": 36, "padding": [18, 0, 12, 0]},
+      "props": {"spacing": 8, "crossAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#00000000"}], "strokes": [{"color": "#00000000"}], "strokeWidth": 1.5, "radius": 9},
+      "bind": {"selected": "${= yearly}"},
+      "states": {"selected": {"segYearly": {"decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "accent"}]}}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "yearly", "value": "${= true}"}]}]
+    },
+    "segYearlyLabel": {
+      "type": "text",
+      "layout": {"width": {"hug": 46}, "height": {"hug": 18}},
+      "props": {"text": "Yearly", "style": {"from": "controlMedium", "fontWeight": 600, "color": "ink"}}
+    },
+    "saveChip": {
+      "type": "row",
+      "children": ["saveText"],
+      "layout": {"width": {"hug": 60}, "height": {"hug": 20}, "padding": [8, 3, 8, 3]},
+      "decoration": {"fills": [{"color": "goodTint"}], "radius": 999}
+    },
+    "saveText": {
+      "type": "text",
+      "layout": {"width": {"hug": 50}, "height": {"hug": 14}},
+      "props": {"text": "Save 20%", "style": {"from": "chip", "fontSize": 11, "color": "goodDeep"}}
+    },
+
+    "plansBand": {
+      "type": "column",
+      "children": ["plansRail"],
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 640}, "padding": [32, 8, 32, 24]},
+      "media": [{"minWidth": 1024, "patch": {"layout": {"padding": [48, 8, 48, 32]}}}]
+    },
+    "plansRail": {
+      "type": "column",
+      "children": ["plansGrid", "assure"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 620}, "constraints": {"maxWidth": 1120}},
+      "props": {"crossAxisAlignment": "center", "spacing": 28}
+    },
+    "plansGrid": {
+      "type": "gridView",
+      "children": ["plan"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 580}},
+      "props": {"crossAxisCount": 3, "crossAxisSpacing": 20, "mainAxisSpacing": 20, "shrinkWrapRows": true, "physics": "never"},
+      "bind": {"data": "${plans}"},
+      "media": [{"maxWidth": 899, "patch": {"props": {"crossAxisCount": 1}, "layout": {"constraints": {"maxWidth": 460}}}}]
+    },
+    "plan": {
+      "type": "column",
+      "children": ["planHead", "planDesc", "priceRow", "priceNote", "planBtn", "planRule", "featTitle", "featList"],
+      "layout": {"width": {"fill": 360}, "height": {"hug": 580}, "padding": 28},
+      "props": {"crossAxisAlignment": "start", "spacing": 12},
+      "decoration": {
+        "fills": [{"color": "card"}],
+        "strokes": [{"color": "line"}],
+        "strokeWidth": 1,
+        "radius": 18,
+        "effects": [{"type": "dropShadow", "color": "#0A000000", "offset": [0, 6], "blurRadius": 20}]
+      },
+      "bind": {
+        "decoration.strokes[0].color": "${= item.popular ? theme.colors.accent : theme.colors.line}",
+        "decoration.strokeWidth": "${= item.popular ? 2 : 1}",
+        "decoration.effects[0].color": "${= item.popular ? theme.colors.accentGlow : '#0A000000'}",
+        "decoration.effects[0].blurRadius": "${= item.popular ? 36 : 20}",
+        "decoration.effects[0].offset": "${= item.popular ? [0, 14] : [0, 6]}"
+      }
+    },
+    "planHead": {
+      "type": "row",
+      "children": ["planName", "popBadge"],
+      "layout": {"width": {"fill": 300}, "height": {"hug": 24}},
+      "props": {"mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center"}
+    },
+    "planName": {
+      "type": "text",
+      "layout": {"width": {"hug": 80}, "height": {"hug": 22}},
+      "props": {"text": "${item.name}", "style": {"from": "blockTitle", "fontSize": 17, "color": "ink"}}
+    },
+    "popBadge": {
+      "type": "row",
+      "children": ["popText"],
+      "layout": {"width": {"hug": 100}, "height": {"hug": 22}, "padding": [10, 4, 10, 4]},
+      "decoration": {"fills": [{"color": "accent"}], "radius": 999},
+      "bind": {"visible": "${= item.popular}"}
+    },
+    "popText": {
+      "type": "text",
+      "layout": {"width": {"hug": 80}, "height": {"hug": 14}},
+      "props": {"text": "Most popular", "style": {"from": "chip", "fontSize": 11.5, "color": "onAccent"}}
+    },
+    "planDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 300}, "height": {"hug": 40}, "constraints": {"minHeight": 40}},
+      "props": {"text": "${item.desc}", "maxLines": 2, "overflow": "ellipsis", "style": {"from": "body", "color": "inkSoft"}},
+      "media": [{"maxWidth": 899, "patch": {"layout": {"constraints": {"minHeight": 0}}}}]
+    },
+    "priceRow": {
+      "type": "row",
+      "children": ["priceNum", "pricePer"],
+      "layout": {"width": {"fill": 300}, "height": {"hug": 52}, "padding": [0, 8, 0, 0]},
+      "props": {"crossAxisAlignment": "end", "spacing": 6}
+    },
+    "priceNum": {
+      "type": "text",
+      "layout": {"width": {"hug": 120}, "height": {"hug": 48}},
+      "props": {
+        "text": "${= '$' + (yearly ? item.yearMo : item.month)}",
+        "style": {"fontFamily": "Inter Display", "fontSize": 46, "fontWeight": 800, "height": 1.0, "letterSpacing": -1.6, "color": "ink"}
+      }
+    },
+    "pricePer": {
+      "type": "text",
+      "layout": {"width": {"hug": 50}, "height": {"hug": 18}, "padding": [0, 0, 0, 6]},
+      "props": {"text": "/ month", "style": {"from": "meta", "color": "inkFaint"}}
+    },
+    "priceNote": {
+      "type": "text",
+      "layout": {"width": {"fill": 300}, "height": {"hug": 18}},
+      "props": {
+        "text": "${= yearly ? 'Billed $' + item.yearTotal + ' yearly, you save $' + item.save : 'Billed monthly, cancel anytime'}",
+        "style": {"from": "small", "color": "inkFaint"}
+      }
+    },
+    "planBtn": {
+      "type": "row",
+      "children": ["planBtnLabel"],
+      "layout": {"width": {"fill": 300}, "height": 46, "margin": [0, 8, 0, 0]},
+      "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "lineStrong"}], "strokeWidth": 1.2, "radius": 12},
+      "bind": {
+        "decoration.fills[0].color": "${= item.popular ? theme.colors.accent : theme.colors.card}",
+        "decoration.strokes[0].color": "${= item.popular ? theme.colors.accent : theme.colors.lineStrong}"
+      },
+      "states": {"hovered": {"planBtn": {"opacity": 0.88}}, "pressed": {"planBtn": {"opacity": 0.76}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "showToast", "message": "${= 'Starting your 30-day ' + item.name + ' trial (' + (yearly ? 'yearly' : 'monthly') + ' billing)'}"}]}]
+    },
+    "planBtnLabel": {
+      "type": "text",
+      "layout": {"width": {"hug": 120}, "height": {"hug": 18}},
+      "props": {"text": "${item.cta}", "style": {"from": "cta", "color": "ink"}},
+      "bind": {"props.style.color": "${= item.popular ? theme.colors.onAccent : theme.colors.ink}"}
+    },
+    "planRule": {
+      "type": "box",
+      "layout": {"width": {"fill": 300}, "height": 1, "margin": [0, 10, 0, 4]},
+      "decoration": {"fills": [{"color": "line"}]}
+    },
+    "featTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 300}, "height": {"hug": 14}},
+      "props": {"text": "${item.featTitle}", "style": {"from": "eyebrow", "color": "inkFaint"}}
+    },
+    "featList": {
+      "type": "listView",
+      "children": ["feat"],
+      "layout": {"width": {"fill": 300}, "height": {"hug": 150}},
+      "props": {"scrollable": false, "spacing": 11},
+      "bind": {"data": "${item.features}"}
+    },
+    "feat": {
+      "type": "row",
+      "children": ["featIcon", "featText"],
+      "layout": {"width": {"fill": 300}, "height": {"hug": 20}},
+      "props": {"spacing": 10, "crossAxisAlignment": "start"}
+    },
+    "featIcon": {
+      "type": "icon",
+      "layout": {"width": 18, "height": 20},
+      "props": {"icon": "check_rounded", "size": 17, "color": "good"}
+    },
+    "featText": {
+      "type": "text",
+      "layout": {"width": {"fill": 270}, "height": {"hug": 20}},
+      "props": {"text": "${item}", "style": {"from": "body", "color": "ink"}}
+    },
+    "assure": {
+      "type": "listView",
+      "children": ["assureItem"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 20}},
+      "props": {"scrollable": false, "scrollDirection": "horizontal", "wrap": true, "wrapSpacing": 32, "runSpacing": 10, "wrapAlignment": "center"},
+      "bind": {"data": "${assurances}"}
+    },
+    "assureItem": {
+      "type": "row",
+      "children": ["assureIcon", "assureText"],
+      "layout": {"width": {"hug": 200}, "height": {"hug": 20}},
+      "props": {"spacing": 8, "crossAxisAlignment": "center"}
+    },
+    "assureIcon": {
+      "type": "icon",
+      "layout": {"width": 16, "height": 16},
+      "props": {"icon": "lock_outlined", "size": 16, "color": "inkFaint"},
+      "bind": {"props.icon": "${item.icon}"}
+    },
+    "assureText": {
+      "type": "text",
+      "layout": {"width": {"hug": 160}, "height": {"hug": 18}},
+      "props": {"text": "${item.text}", "style": {"from": "meta", "color": "inkSoft"}}
+    },
+
+    "compareBand": {
+      "type": "column",
+      "children": ["compareRail"],
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 600}, "padding": [32, 56, 32, 24]},
+      "media": [{"minWidth": 1024, "patch": {"layout": {"padding": [48, 72, 48, 32]}}}]
+    },
+    "compareRail": {
+      "type": "column",
+      "children": ["compareHead", "compareCard"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 580}, "constraints": {"maxWidth": 1120}},
+      "props": {"crossAxisAlignment": "start", "spacing": 24}
+    },
+    "compareHead": {
+      "type": "column",
+      "children": ["cmpTitle", "cmpSub"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 70}},
+      "props": {"crossAxisAlignment": "start", "spacing": 8}
+    },
+    "cmpTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 38}},
+      "props": {"text": "Compare plans", "style": {"fontFamily": "Inter Display", "fontSize": 32, "fontWeight": 700, "height": 1.15, "letterSpacing": -0.8, "color": "ink"}}
+    },
+    "cmpSub": {
+      "type": "text",
+      "layout": {"width": {"fill": 620}, "height": {"hug": 22}, "constraints": {"maxWidth": 620}},
+      "props": {"text": "Every plan includes unlimited customers, bank-grade encryption and free migration from your old tool.", "style": {"from": "lead", "color": "inkSoft"}}
+    },
+    "compareCard": {
+      "type": "column",
+      "children": ["cmpHeaderRow", "cmpRows", "cmpFootRow"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 540}},
+      "props": {"crossAxisAlignment": "stretch"},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "radius": 18, "clip": "antiAlias"}
+    },
+    "cmpHeaderRow": {
+      "type": "row",
+      "children": ["cmpHLabel", "cmpHPlans"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 64}, "padding": [28, 16, 28, 16]},
+      "props": {"crossAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "tile"}]}
+    },
+    "cmpHLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 420}, "height": {"hug": 14}, "flex": 2},
+      "props": {"text": "FEATURES", "style": {"from": "eyebrow", "color": "inkFaint"}}
+    },
+    "cmpHPlans": {
+      "type": "gridView",
+      "children": ["cmpHPlan"],
+      "layout": {"width": {"fill": 640}, "height": {"hug": 40}, "flex": 3},
+      "props": {"crossAxisCount": 3, "shrinkWrapRows": true, "physics": "never"},
+      "bind": {"data": "${plans}"}
+    },
+    "cmpHPlan": {
+      "type": "column",
+      "children": ["cmpHName", "cmpHPrice"],
+      "layout": {"width": {"fill": 210}, "height": {"hug": 40}},
+      "props": {"spacing": 2}
+    },
+    "cmpHName": {
+      "type": "text",
+      "layout": {"width": {"hug": 60}, "height": {"hug": 20}},
+      "props": {"text": "${item.name}", "style": {"from": "sectionTitle", "color": "ink"}},
+      "bind": {"props.style.color": "${= item.popular ? theme.colors.accent : theme.colors.ink}"}
+    },
+    "cmpHPrice": {
+      "type": "text",
+      "layout": {"width": {"hug": 60}, "height": {"hug": 16}},
+      "props": {"text": "${= '$' + (yearly ? item.yearMo : item.month) + ' / mo'}", "style": {"from": "bodySecondary", "color": "inkFaint"}}
+    },
+    "cmpRows": {
+      "type": "listView",
+      "children": ["cmpRow"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 416}},
+      "props": {"scrollable": false},
+      "bind": {"data": "${compare}"}
+    },
+    "cmpRow": {
+      "type": "row",
+      "children": ["cmpLabel", "cmpCells"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 52}, "padding": [28, 15, 28, 15]},
+      "props": {"crossAxisAlignment": "center"},
+      "decoration": {"strokes": [{"color": "line"}], "strokeSides": "top"}
+    },
+    "cmpLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 420}, "height": {"hug": 20}, "flex": 2},
+      "props": {"text": "${item.label}", "style": {"from": "body", "fontWeight": 500, "color": "ink"}}
+    },
+    "cmpCells": {
+      "type": "gridView",
+      "children": ["cmpCell"],
+      "layout": {"width": {"fill": 640}, "height": {"hug": 22}, "flex": 3},
+      "props": {"crossAxisCount": 3, "shrinkWrapRows": true, "physics": "never"},
+      "bind": {"data": "${item.values}"}
+    },
+    "cmpCell": {
+      "type": "row",
+      "children": ["cmpCheck", "cmpDash", "cmpText"],
+      "layout": {"width": {"fill": 210}, "height": {"hug": 22}},
+      "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"}
+    },
+    "cmpCheck": {
+      "type": "icon",
+      "layout": {"width": 20, "height": 20},
+      "props": {"icon": "check_circle_rounded", "size": 20, "color": "good"},
+      "bind": {"visible": "${= item == 'yes'}"}
+    },
+    "cmpDash": {
+      "type": "box",
+      "layout": {"width": 12, "height": 2},
+      "decoration": {"fills": [{"color": "inkGhost"}], "radius": 1},
+      "bind": {"visible": "${= item == 'no'}"}
+    },
+    "cmpText": {
+      "type": "text",
+      "layout": {"width": {"hug": 60}, "height": {"hug": 18}},
+      "props": {"text": "${item}", "style": {"from": "figure", "fontWeight": 600, "color": "ink"}},
+      "bind": {"visible": "${= item != 'yes' && item != 'no'}"}
+    },
+    "cmpFootRow": {
+      "type": "row",
+      "children": ["cmpFootLabel", "cmpFootBtns"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 76}, "padding": [28, 18, 28, 18]},
+      "props": {"crossAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "tile"}], "strokes": [{"color": "line"}], "strokeSides": "top"}
+    },
+    "cmpFootLabel": {
+      "type": "column",
+      "children": ["cmpFootTitle", "cmpFootSub"],
+      "layout": {"width": {"fill": 420}, "height": {"hug": 40}, "flex": 2},
+      "props": {"crossAxisAlignment": "start", "spacing": 2}
+    },
+    "cmpFootTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 400}, "height": {"hug": 20}},
+      "props": {"text": "Try any plan free for 30 days", "style": {"from": "sectionTitle", "color": "ink"}}
+    },
+    "cmpFootSub": {
+      "type": "text",
+      "layout": {"width": {"fill": 400}, "height": {"hug": 18}},
+      "props": {"text": "No card needed. Switch plans whenever you like.", "style": {"from": "bodySecondary", "color": "inkFaint"}}
+    },
+    "cmpFootBtns": {
+      "type": "gridView",
+      "children": ["cmpFootBtn"],
+      "layout": {"width": {"fill": 640}, "height": {"hug": 40}, "flex": 3},
+      "props": {"crossAxisCount": 3, "crossAxisSpacing": 16, "shrinkWrapRows": true, "physics": "never"},
+      "bind": {"data": "${plans}"}
+    },
+    "cmpFootBtn": {
+      "type": "row",
+      "children": ["cmpFootBtnLabel"],
+      "layout": {"width": {"fill": 200}, "height": 40},
+      "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "lineStrong"}], "strokeWidth": 1.2, "radius": 10},
+      "bind": {
+        "decoration.fills[0].color": "${= item.popular ? theme.colors.accent : theme.colors.card}",
+        "decoration.strokes[0].color": "${= item.popular ? theme.colors.accent : theme.colors.lineStrong}"
+      },
+      "states": {"hovered": {"cmpFootBtn": {"opacity": 0.88}}, "pressed": {"cmpFootBtn": {"opacity": 0.76}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "showToast", "message": "${= 'Starting your 30-day ' + item.name + ' trial (' + (yearly ? 'yearly' : 'monthly') + ' billing)'}"}]}]
+    },
+    "cmpFootBtnLabel": {
+      "type": "text",
+      "layout": {"width": {"hug": 80}, "height": {"hug": 16}},
+      "props": {"text": "${= 'Choose ' + item.name}", "style": {"from": "controlMedium", "fontWeight": 600, "color": "ink"}},
+      "bind": {"props.style.color": "${= item.popular ? theme.colors.onAccent : theme.colors.ink}"}
+    },
+
+    "faqBand": {
+      "type": "column",
+      "children": ["faqRail"],
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 420}, "padding": [32, 56, 32, 72]},
+      "media": [{"minWidth": 1024, "patch": {"layout": {"padding": [48, 80, 48, 96]}}}]
+    },
+    "faqRail": {
+      "type": "flex",
+      "children": ["faqIntro", "faqListWrap"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 360}, "constraints": {"maxWidth": 1120}},
+      "props": {"direction": "horizontal", "spacing": 72, "crossAxisAlignment": "start"},
+      "media": [{"maxWidth": 899, "patch": {"props": {"direction": "vertical", "spacing": 28}}}]
+    },
+    "faqIntro": {
+      "type": "column",
+      "children": ["faqTitle", "faqSub", "faqContact"],
+      "layout": {"width": 340, "height": {"hug": 180}},
+      "props": {"crossAxisAlignment": "start", "spacing": 12},
+      "media": [{"maxWidth": 899, "patch": {"layout": {"width": {"fill": 704}}}}]
+    },
+    "faqTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 340}, "height": {"hug": 76}},
+      "props": {"text": "Frequently asked questions", "style": {"fontFamily": "Inter Display", "fontSize": 32, "fontWeight": 700, "height": 1.15, "letterSpacing": -0.8, "color": "ink"}}
+    },
+    "faqSub": {
+      "type": "text",
+      "layout": {"width": {"fill": 340}, "height": {"hug": 44}},
+      "props": {"text": "Can't find what you need? Our bookkeeping team answers within one business day.", "style": {"from": "lead", "color": "inkSoft"}}
+    },
+    "faqContact": {
+      "type": "row",
+      "children": ["faqContactText", "faqContactIcon"],
+      "layout": {"width": {"hug": 140}, "height": {"hug": 20}, "margin": [0, 4, 0, 0]},
+      "props": {"spacing": 6, "crossAxisAlignment": "center"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "openLink", "url": "mailto:support@ledgerly.com"}]}]
+    },
+    "faqContactText": {
+      "type": "text",
+      "layout": {"width": {"hug": 110}, "height": {"hug": 18}},
+      "props": {"text": "Talk to support", "style": {"from": "controlMedium", "fontWeight": 600, "color": "accent"}}
+    },
+    "faqContactIcon": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "arrow_forward_rounded", "size": 16, "color": "accent"}},
+    "faqListWrap": {
+      "type": "column",
+      "children": ["faqList"],
+      "layout": {"width": {"fill": 700}, "height": {"hug": 340}},
+      "props": {"crossAxisAlignment": "stretch"},
+      "decoration": {"strokes": [{"color": "lineStrong"}], "strokeSides": "top"}
+    },
+    "faqList": {
+      "type": "listView",
+      "children": ["faqItem"],
+      "layout": {"width": {"fill": 700}, "height": {"hug": 340}},
+      "props": {"scrollable": false},
+      "bind": {"data": "${faqs}"}
+    },
+    "faqItem": {
+      "type": "column",
+      "children": ["faqQRow", "faqA"],
+      "layout": {"width": {"fill": 700}, "height": {"hug": 72}, "padding": [0, 22, 0, 22]},
+      "props": {"crossAxisAlignment": "start", "spacing": 10},
+      "decoration": {"strokes": [{"color": "line"}], "strokeSides": "bottom"},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "openFaq", "value": "${= openFaq == index ? -1 : index}"}]}]
+    },
+    "faqQRow": {
+      "type": "row",
+      "children": ["faqQ", "faqChev"],
+      "layout": {"width": {"fill": 700}, "height": {"hug": 28}},
+      "props": {"spacing": 16, "crossAxisAlignment": "center"}
+    },
+    "faqQ": {
+      "type": "text",
+      "layout": {"width": {"fill": 640}, "height": {"hug": 20}},
+      "props": {"text": "${item.q}", "style": {"from": "rowTitle", "fontSize": 16, "color": "ink"}}
+    },
+    "faqChev": {
+      "type": "row",
+      "children": ["faqChevIcon"],
+      "layout": {"width": 28, "height": 28},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "tile"}], "radius": 999}
+    },
+    "faqChevIcon": {
+      "type": "icon",
+      "layout": {"width": 16, "height": 16},
+      "props": {"icon": "add_rounded", "size": 16, "color": "ink"},
+      "bind": {"props.icon": "${= openFaq == index ? 'remove_rounded' : 'add_rounded'}"}
+    },
+    "faqA": {
+      "type": "text",
+      "layout": {"width": {"fill": 700}, "height": {"hug": 40}, "padding": [0, 0, 44, 0]},
+      "props": {"text": "${item.a}", "style": {"from": "lead", "color": "inkSoft"}},
+      "bind": {"visible": "${= openFaq == index}"}
+    },
+
+    "footBand": {
+      "type": "column",
+      "children": ["footRail"],
+      "layout": {"width": {"fill": 1280}, "height": {"hug": 280}, "padding": [32, 48, 32, 32]},
+      "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeSides": "top"},
+      "media": [{"minWidth": 1024, "patch": {"layout": {"padding": [48, 56, 48, 40]}}}]
+    },
+    "footRail": {
+      "type": "column",
+      "children": ["footTop", "footRule", "footBottom"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 240}, "constraints": {"maxWidth": 1120}},
+      "props": {"crossAxisAlignment": "start", "spacing": 28}
+    },
+    "footTop": {
+      "type": "flex",
+      "children": ["footBrand", "footCols"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 150}},
+      "props": {"direction": "horizontal", "spacing": 72, "crossAxisAlignment": "start"},
+      "media": [{"maxWidth": 899, "patch": {"props": {"direction": "vertical", "spacing": 32}}}]
+    },
+    "footBrand": {
+      "type": "column",
+      "children": ["footLogoRow", "footTag"],
+      "layout": {"width": 300, "height": {"hug": 90}},
+      "props": {"crossAxisAlignment": "start", "spacing": 12},
+      "media": [{"maxWidth": 899, "patch": {"layout": {"width": {"fill": 704}}}}]
+    },
+    "footLogoRow": {
+      "type": "row",
+      "children": ["footMark", "footName"],
+      "layout": {"width": {"hug": 120}, "height": {"hug": 28}},
+      "props": {"spacing": 10, "crossAxisAlignment": "center"}
+    },
+    "footMark": {
+      "type": "row",
+      "children": ["footMarkIcon"],
+      "layout": {"width": 28, "height": 28},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "accent"}], "radius": 8}
+    },
+    "footMarkIcon": {"type": "icon", "layout": {"width": 16, "height": 16}, "props": {"icon": "receipt_long_rounded", "size": 16, "color": "onAccent"}},
+    "footName": {
+      "type": "text",
+      "layout": {"width": {"hug": 80}, "height": {"hug": 24}},
+      "props": {"text": "Ledgerly", "style": {"from": "title", "fontSize": 19, "color": "ink"}}
+    },
+    "footTag": {
+      "type": "text",
+      "layout": {"width": {"fill": 300}, "height": {"hug": 40}, "constraints": {"maxWidth": 320}},
+      "props": {"text": "Invoicing, bookkeeping and payroll for small businesses that would rather be doing the work.", "style": {"from": "body", "color": "inkSoft"}}
+    },
+    "footCols": {
+      "type": "gridView",
+      "children": ["footCol"],
+      "layout": {"width": {"fill": 748}, "height": {"hug": 140}},
+      "props": {"crossAxisCount": 4, "crossAxisSpacing": 24, "shrinkWrapRows": true, "physics": "never"},
+      "bind": {"data": "${footCols}"}
+    },
+    "footCol": {
+      "type": "column",
+      "children": ["fcTitle", "fcLinks"],
+      "layout": {"width": {"fill": 170}, "height": {"hug": 140}},
+      "props": {"crossAxisAlignment": "start", "spacing": 14}
+    },
+    "fcTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 170}, "height": {"hug": 14}},
+      "props": {"text": "${item.title}", "style": {"from": "eyebrow", "color": "inkFaint"}}
+    },
+    "fcLinks": {
+      "type": "listView",
+      "children": ["fcLink"],
+      "layout": {"width": {"fill": 170}, "height": {"hug": 110}},
+      "props": {"scrollable": false, "spacing": 10},
+      "bind": {"data": "${item.links}"}
+    },
+    "fcLink": {
+      "type": "text",
+      "layout": {"width": {"fill": 170}, "height": {"hug": 18}},
+      "props": {"text": "${item}", "style": {"from": "small", "color": "inkSoft"}}
+    },
+    "footRule": {"type": "box", "layout": {"width": {"fill": 1120}, "height": 1}, "decoration": {"fills": [{"color": "line"}]}},
+    "footBottom": {
+      "type": "row",
+      "children": ["footCopy", "footTheme"],
+      "layout": {"width": {"fill": 1120}, "height": {"hug": 28}},
+      "props": {"wrap": true, "mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center", "runSpacing": 12}
+    },
+    "footCopy": {
+      "type": "text",
+      "layout": {"width": {"hug": 300}, "height": {"hug": 18}},
+      "props": {"text": "© 2025 Ledgerly, Inc. All rights reserved.", "style": {"from": "small", "color": "inkFaint"}}
+    },
+    "footTheme": {
+      "type": "row",
+      "children": ["footThemeIcon", "footThemeText"],
+      "layout": {"width": {"hug": 120}, "height": 30, "padding": [12, 0, 12, 0]},
+      "props": {"spacing": 6, "crossAxisAlignment": "center"},
+      "decoration": {"strokes": [{"color": "line"}], "radius": 999},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setThemeMode", "mode": "${= theme.isDark ? 'light' : 'dark'}"}]}]
+    },
+    "footThemeIcon": {
+      "type": "icon",
+      "layout": {"width": 15, "height": 15},
+      "props": {"icon": "dark_mode_outlined", "size": 15, "color": "inkSoft"},
+      "bind": {"props.icon": "${= theme.isDark ? 'light_mode_outlined' : 'dark_mode_outlined'}"}
+    },
+    "footThemeText": {
+      "type": "text",
+      "layout": {"width": {"hug": 70}, "height": {"hug": 16}},
+      "props": {"text": "Dark mode", "style": {"from": "controlCompact", "color": "inkSoft"}},
+      "bind": {"props.text": "${= theme.isDark ? 'Light mode' : 'Dark mode'}"}
+    }
+  },
+  "variables": {
+    "page_variables": [
+      {"name": "yearly", "type": "boolean", "value": false},
+      {"name": "openFaq", "type": "integer", "value": 0},
+      {
+        "name": "plans",
+        "type": "list",
+        "value": [
+          {
+            "name": "Solo", "popular": false, "month": "9", "yearMo": "7.20", "yearTotal": "86.40", "save": "21.60",
+            "desc": "For freelancers keeping their own books.",
+            "cta": "Start with Solo", "featTitle": "INCLUDES",
+            "features": ["Unlimited invoices & quotes", "2 bank connections", "Receipt capture by photo", "Tax-ready reports", "Email support"]
+          },
+          {
+            "name": "Team", "popular": true, "month": "29", "yearMo": "23.20", "yearTotal": "278.40", "save": "69.60",
+            "desc": "For small teams that close the books together.",
+            "cta": "Start with Team", "featTitle": "EVERYTHING IN SOLO, PLUS",
+            "features": ["Up to 5 users with roles", "10 bank connections", "Multi-currency invoicing", "Payroll for up to 10 people", "Chat support"]
+          },
+          {
+            "name": "Scale", "popular": false, "month": "79", "yearMo": "63.20", "yearTotal": "758.40", "save": "189.60",
+            "desc": "For growing companies with an accountant on board.",
+            "cta": "Start with Scale", "featTitle": "EVERYTHING IN TEAM, PLUS",
+            "features": ["Unlimited users & entities", "Unlimited bank connections", "Audit log & approvals", "Accountant workspace", "Priority phone support"]
+          }
+        ]
+      },
+      {
+        "name": "compare",
+        "type": "list",
+        "value": [
+          {"label": "Users", "values": ["1", "5", "Unlimited"]},
+          {"label": "Bank connections", "values": ["2", "10", "Unlimited"]},
+          {"label": "Unlimited invoices & quotes", "values": ["yes", "yes", "yes"]},
+          {"label": "Receipt capture", "values": ["yes", "yes", "yes"]},
+          {"label": "Multi-currency invoicing", "values": ["no", "yes", "yes"]},
+          {"label": "Payroll", "values": ["no", "yes", "yes"]},
+          {"label": "Audit log & approvals", "values": ["no", "no", "yes"]},
+          {"label": "Priority phone support", "values": ["no", "no", "yes"]}
+        ]
+      },
+      {
+        "name": "faqs",
+        "type": "list",
+        "value": [
+          {"q": "Can I switch plans later?", "a": "Yes. Upgrade or downgrade at any time from Settings, then Billing. We prorate the difference to the day."},
+          {"q": "How does the yearly discount work?", "a": "Yearly billing is 20% off the monthly price, charged once a year. You can move back to monthly at your next renewal."},
+          {"q": "Is there a free trial?", "a": "Every plan starts with 30 days free with all features unlocked. No card is needed until you decide to stay."},
+          {"q": "Can my accountant access my books?", "a": "Yes. Invite your accountant at no extra cost. They get their own login and never count as a paid user."}
+        ]
+      },
+      {
+        "name": "assurances",
+        "type": "list",
+        "value": [
+          {"icon": "lock_outlined", "text": "Bank-grade encryption"},
+          {"icon": "credit_card_off_outlined", "text": "No card needed for the trial"},
+          {"icon": "event_available_outlined", "text": "Cancel anytime"}
+        ]
+      },
+      {
+        "name": "footCols",
+        "type": "list",
+        "value": [
+          {"title": "PRODUCT", "links": ["Features", "Pricing", "Integrations", "Changelog"]},
+          {"title": "COMPANY", "links": ["About", "Customers", "Careers", "Press"]},
+          {"title": "RESOURCES", "links": ["Help center", "Guides", "API docs", "Status"]},
+          {"title": "LEGAL", "links": ["Terms", "Privacy", "Security", "DPA"]}
+        ]
+      }
+    ]
+  }
+}
+```
+
+MISSING TOKENS
+- **displayTitle**: Inter Display 54 / 800, line height 1.06, letter spacing -1.8 (42 below 900 px). Used for the hero title.
+- **sectionHeadline**: Inter Display 32 / 700, line height 1.15, letter spacing -0.8. Used for "Compare plans" and the FAQ heading.
+- **leadLarge**: Inter 17 / 400, line height 1.55. Used for the hero paragraph.
+- **priceDisplay**: Inter Display 46 / 800, line height 1.0, letter spacing -1.6. Used for the plan prices.
+- **radius.pageCard**: 18. Used for the plan cards and the comparison card. The theme's `card` radius (26) is too round for desktop surfaces this size.
+- **spacing.gutter**: 32 at tablet, 48 from 1024. Used as the side padding of every band.
+- **spacing.section**: 56–96. Used for the vertical rhythm between bands; the theme's spacing stops at 64.
+- **layout.rail**: 1120. Used as the content cap of every band.
+- **layout.measure**: 720, 560 and 620. Used for the title, the hero lead and the comparison subtitle.
+- **shadow.pageCard**: #0A000000, offset 0 6, blur 20. Used for the plan cards.
+- **shadow.pageCardRaised**: accentGlow, offset 0 14, blur 36. Used for the Team card.
+- **control heights**: 38 for the nav button, 46 for the plan buttons, 40 for the table buttons. The theme has no control-height tokens.

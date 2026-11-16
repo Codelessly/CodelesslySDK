@@ -1,0 +1,36 @@
+{
+ "name": "app_inbox",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 287.0,
+   "problems": 1,
+   "errors": 1,
+   "input_tokens": 197,
+   "cached": 123465,
+   "output_tokens": 32000
+  },
+  {
+   "round": 2,
+   "modelSeconds": 202.1,
+   "problems": 0,
+   "errors": 0,
+   "input_tokens": 13712,
+   "cached": 123465,
+   "output_tokens": 27300
+  },
+  {
+   "round": 3,
+   "modelSeconds": 192.7,
+   "problems": 0,
+   "errors": 0,
+   "input_tokens": 24943,
+   "cached": 123465,
+   "output_tokens": 27726
+  }
+ ],
+ "final": 3,
+ "errors": 0,
+ "problems": 0
+}
