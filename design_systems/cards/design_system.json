@@ -1556,6 +1556,7 @@
   "components/DocsNav.json",
   "components/FaqItem.json",
   "components/FeatureCard.json",
+  "components/FilterBar.json",
   "components/FormSection.json",
   "components/Hero.json",
   "components/LogoStrip.json",
