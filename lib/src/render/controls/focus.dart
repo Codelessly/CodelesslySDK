@@ -596,8 +596,9 @@ class ControlFocusScope {
       if (p is RenderIgnorePointer && p.ignoring) return false;
       if (p is RenderAbsorbPointer && p.absorbing) return false;
       if (p is RenderOffstage && p.offstage) return false;
+      // (Not an animated opacity: an overlay fading in is at 0 on the frame
+      // the focus moves into it.)
       if (p is RenderOpacity && p.opacity == 0) return false;
-      if (p is RenderAnimatedOpacity && p.opacity.value == 0) return false;
     }
     return true;
   }
