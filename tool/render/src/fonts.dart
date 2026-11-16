@@ -73,18 +73,43 @@ typedef FontFace = ({String family, int weight, bool italic, String path});
       // Prefer Windows/Unicode names over Mac Roman ones.
       if (!names.containsKey(nameId) || platform == 3) names[nameId] = text;
     }
-    final family = names[16] ?? names[1];
-    if (family == null || family.isEmpty) return null;
     var weight = 400;
     var italic = false;
     if (os2At != null) {
       weight = data.getUint16(os2At + 4);
       italic = (data.getUint16(os2At + 62) & 1) != 0;
     }
-    return (family: family, weight: ((weight / 100).round() * 100).clamp(100, 900), italic: italic, weights: weights);
+    weight = ((weight / 100).round() * 100).clamp(100, 900);
+    final family = names[16] ?? (names[1] == null ? null : typographicFamily(names[1]!, weight));
+    if (family == null || family.isEmpty) return null;
+    return (family: family, weight: weight, italic: italic, weights: weights);
   } catch (_) {
     return null;
   }
+}
+
+/// The family a font file's legacy family name (`name` ID 1) belongs to when the file has no typographic family
+/// (ID 16): a face outside regular, bold, italic and bold italic is named with its weight in ID 1 ("IBM Plex Mono
+/// SemiBold", weight 600), which is the family "IBM Plex Mono" at 600, as browsers and fontconfig read it. The
+/// weight word is dropped only when it names the file's own weight (OS/2), so a family called "... Black" at 400
+/// keeps its name.
+String typographicFamily(String legacy, int weight) {
+  final m = RegExp(r'^(.+?)[ -]+(Thin|Hairline|ExtraLight|Extra Light|UltraLight|Ultra Light|Light|Book|Medium|SemiBold|'
+          r'Semi Bold|DemiBold|Demi Bold|ExtraBold|Extra Bold|UltraBold|Ultra Bold|Black|Heavy)$', caseSensitive: false)
+      .firstMatch(legacy.trim());
+  if (m == null) return legacy;
+  final word = m.group(2)!.toLowerCase().replaceAll(' ', '');
+  final named = switch (word) {
+    'thin' || 'hairline' => 100,
+    'extralight' || 'ultralight' => 200,
+    'light' => 300,
+    'book' => 400,
+    'medium' => 500,
+    'semibold' || 'demibold' => 600,
+    'extrabold' || 'ultrabold' => 800,
+    _ => 900,
+  };
+  return named == weight ? m.group(1)! : legacy;
 }
 
 /// The system's font directories (Linux, macOS, Windows): what
