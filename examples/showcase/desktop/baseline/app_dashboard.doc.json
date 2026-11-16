@@ -1,0 +1,798 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_dashboard"
+ ],
+ "nodes": {
+  "app_dashboard": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Sidebar1",
+    "column2"
+   ]
+  },
+  "Sidebar1": {
+   "type": "Sidebar",
+   "layout": {
+    "width": 240,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "value": "section",
+    "brand": "Harbor",
+    "sectionLabel": "Workspace",
+    "items": [
+     "Overview",
+     "Orders",
+     "Inventory",
+     "Customers",
+     "Reports",
+     "Settings"
+    ],
+    "icons": [
+     "dashboard",
+     "receipt_long",
+     "inventory_2",
+     "group",
+     "bar_chart",
+     "settings"
+    ]
+   },
+   "children": [
+    "divider1",
+    "row2"
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "padding": 12,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar1",
+    "column1"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Maya Reyes",
+    "size": "medium"
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "Maya Reyes"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "maya@harbor.co"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": 24,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row3",
+    "grid1",
+    "row5",
+    "column3"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "row4"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "titleWide"
+    },
+    "text": "Overview"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Segments1",
+    "SearchBar1",
+    "filledButton1"
+   ]
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "range",
+    "options": [
+     "7d",
+     "30d",
+     "90d"
+    ]
+   }
+  },
+  "SearchBar1": {
+   "type": "SearchBar",
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "placeholder": "Search orders, customers",
+    "value": "q"
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "New order",
+    "icon": "add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "newOrder"
+      }
+     ]
+    }
+   ]
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "StatTile1",
+    "StatTile2",
+    "StatTile3",
+    "StatTile4"
+   ]
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Revenue",
+    "note": "vs previous period",
+    "value": "$128,400",
+    "delta": "+8.2%",
+    "icon": "payments"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Orders",
+    "note": "vs previous period",
+    "value": "1,942",
+    "delta": "+3.1%",
+    "icon": "shopping_cart"
+   }
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Returns",
+    "note": "vs previous period",
+    "value": "2.4%",
+    "delta": "-0.6%",
+    "invert": true,
+    "icon": "assignment_return"
+   }
+  },
+  "StatTile4": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "label": "Avg. order",
+    "note": "vs previous period",
+    "value": "$66.10",
+    "delta": "+1.9%",
+    "icon": "sell"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "ChartCard1",
+    "ChartCard2"
+   ]
+  },
+  "ChartCard1": {
+   "type": "ChartCard",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Revenue, last 12 weeks",
+    "value": "$128,400",
+    "kind": "line",
+    "delta": "+8.2%",
+    "values": [
+     8.2,
+     9.1,
+     8.7,
+     9.8,
+     10.4,
+     9.9,
+     11.2,
+     10.8,
+     11.9,
+     12.6,
+     12.1,
+     13.7
+    ],
+    "labels": [
+     "W1",
+     "W2",
+     "W3",
+     "W4",
+     "W5",
+     "W6",
+     "W7",
+     "W8",
+     "W9",
+     "W10",
+     "W11",
+     "W12"
+    ]
+   }
+  },
+  "ChartCard2": {
+   "type": "ChartCard",
+   "layout": {
+    "width": 400,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Revenue by channel",
+    "value": "$128,400",
+    "kind": "bars",
+    "values": [
+     52,
+     34,
+     21,
+     13,
+     8
+    ],
+    "labels": [
+     "Web",
+     "Mobile",
+     "Retail",
+     "Wholesale",
+     "Market"
+    ]
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 18,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 18,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#14000000",
+      "offset": [
+       0,
+       18
+      ],
+      "spreadRadius": -14,
+      "blurRadius": 40
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   },
+   "children": [
+    "row6",
+    "TableHeader1",
+    "listView1"
+   ]
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text4",
+    "textButton1"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading"
+    },
+    "text": "Latest orders"
+   }
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "View all"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "viewAll"
+      }
+     ]
+    }
+   ]
+  },
+  "TableHeader1": {
+   "type": "TableHeader",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 36.0
+   },
+   "props": {
+    "columns": [
+     "Order",
+     "Customer",
+     "Total",
+     "Date",
+     "Status"
+    ]
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 8
+   },
+   "bind": {
+    "data": "${orders}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "TableRow1"
+   ]
+  },
+  "TableRow1": {
+   "type": "TableRow",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.cells": "${= [item.id,item.customer,money(item.total,\"$\",2),item.date]}",
+    "props.badge": "${item.status}"
+   }
+  }
+ },
+ "variables": {
+  "app_dashboard": [
+   {
+    "name": "section",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "range",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "orders",
+    "type": "list",
+    "value": [
+     {
+      "id": "#10482",
+      "customer": "Olivia Bennett",
+      "status": "Paid",
+      "total": 182.4,
+      "date": "Mar 14"
+     },
+     {
+      "id": "#10481",
+      "customer": "Daniel Okafor",
+      "status": "Due",
+      "total": 64.9,
+      "date": "Mar 14"
+     },
+     {
+      "id": "#10480",
+      "customer": "Priya Nair",
+      "status": "Paid",
+      "total": 239.0,
+      "date": "Mar 13"
+     },
+     {
+      "id": "#10479",
+      "customer": "Lucas Meyer",
+      "status": "Overdue",
+      "total": 41.5,
+      "date": "Mar 12"
+     },
+     {
+      "id": "#10478",
+      "customer": "Sofia Alvarez",
+      "status": "Paid",
+      "total": 97.2,
+      "date": "Mar 12"
+     },
+     {
+      "id": "#10477",
+      "customer": "Henry Walsh",
+      "status": "Due",
+      "total": 128.75,
+      "date": "Mar 11"
+     },
+     {
+      "id": "#10476",
+      "customer": "Aiko Tanaka",
+      "status": "Paid",
+      "total": 56.3,
+      "date": "Mar 10"
+     },
+     {
+      "id": "#10475",
+      "customer": "Noah Fischer",
+      "status": "Overdue",
+      "total": 310.0,
+      "date": "Mar 9"
+     }
+    ]
+   }
+  ]
+ }
+}

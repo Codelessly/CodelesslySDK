@@ -2,12 +2,14 @@
 // (package:codelessly_api/notation.dart): the grammar, the words, and, with
 // a design system, its components.
 //
-//   dart run tool/notation/prompt.dart [--design-system <folder>]
+//   dart run tool/notation/prompt.dart [--design-system <folder>] [--width <canvas width>]
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 
 Future<void> main(List<String> args) async {
+  final w = args.indexOf('--width');
+  final width = w >= 0 && w + 1 < args.length ? double.tryParse(args[w + 1]) ?? 390.0 : 390.0;
   final i = args.indexOf('--design-system');
   DesignSystem? ds;
   if (i >= 0 && i + 1 < args.length) {
@@ -27,7 +29,7 @@ Future<void> main(List<String> args) async {
     catalog,
     () => notationPrompt(
       catalog: catalog,
-      options: ds == null ? const NotationOptions() : NotationOptions.fromDesignSystem(ds),
+      options: ds == null ? NotationOptions(width: width) : NotationOptions.fromDesignSystem(ds, width: width),
       designSystem: ds,
     ),
   ));

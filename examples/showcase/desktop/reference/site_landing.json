@@ -1,0 +1,2896 @@
+{
+ "schema": 3,
+ "roots": [
+  "site_landing"
+ ],
+ "nodes": {
+  "site_landing": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1280,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "children": [
+    "column2",
+    "divider1",
+    "column3",
+    "column7",
+    "column10",
+    "column17",
+    "column22",
+    "column26",
+    "divider2",
+    "column29"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "children": [
+    "row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "children": [
+    "row2",
+    "row3",
+    "row4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 24
+   }
+  },
+  "row2": {
+   "type": "row",
+   "children": [
+    "icon1",
+    "text1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "waves",
+     "style": "rounded"
+    },
+    "color": "accent",
+    "size": 24
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 800,
+     "fontSize": 20
+    },
+    "text": "Tidewater"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "children": [
+    "textButton1",
+    "textButton2",
+    "textButton3",
+    "textButton4"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Features"
+   }
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Pricing"
+   }
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Customers"
+   }
+  },
+  "textButton4": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Docs"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "children": [
+    "textButton5",
+    "filledButton1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "textButton5": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Sign in"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "signIn"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Start free"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "start"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "children": [
+    "column4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     88,
+     24,
+     96
+    ]
+   }
+  },
+  "column4": {
+   "type": "column",
+   "children": [
+    "row5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "children": [
+    "column5",
+    "column6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 64
+   }
+  },
+  "column5": {
+   "type": "column",
+   "children": [
+    "row6",
+    "text3",
+    "text4",
+    "row7",
+    "text5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 22,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "children": [
+    "text2"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 26,
+    "padding": [
+     11,
+     0,
+     11,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 999
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Built for hotels with 5 to 80 rooms",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading1",
+     "fontWeight": 800,
+     "fontSize": 52,
+     "color": "ink"
+    },
+    "text": "Fill every room, without the spreadsheets"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "lead",
+     "fontSize": 18,
+     "color": "inkSoft"
+    },
+    "text": "Tidewater keeps your calendar, booking channels and room rates in one place, so you spend less time updating and more time hosting."
+   }
+  },
+  "row7": {
+   "type": "row",
+   "children": [
+    "filledButton2",
+    "outlinedButton1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     6,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Start free"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "start"
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Book a demo"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "demo"
+      }
+     ]
+    }
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "Free for 14 days. No card needed."
+   }
+  },
+  "column6": {
+   "type": "column",
+   "children": [
+    "row8",
+    "Media1",
+    "grid1",
+    "barChart1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 22
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 26
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "row8": {
+   "type": "row",
+   "children": [
+    "text6",
+    "row9"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Harbour House · This week"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "children": [
+    "text7"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9,
+     0,
+     9,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "successTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "successTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "92% booked",
+    "style": {
+     "from": "badge",
+     "color": "success"
+    }
+   }
+  },
+  "Media1": {
+   "type": "Media",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 160
+   },
+   "props": {
+    "kind": "harbor",
+    "tone": "dawn"
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "children": [
+    "grid1Row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid1Row1": {
+   "type": "row",
+   "children": [
+    "StatTile1",
+    "StatTile2",
+    "StatTile3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "StatTile1": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Occupancy",
+    "value": "92%",
+    "delta": "+8%"
+   }
+  },
+  "StatTile2": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Avg. rate",
+    "value": "$148",
+    "delta": "+$12"
+   }
+  },
+  "StatTile3": {
+   "type": "StatTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Direct",
+    "value": "38%",
+    "delta": "+5%"
+   }
+  },
+  "barChart1": {
+   "type": "barChart",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 160
+   },
+   "props": {
+    "values": [
+     14,
+     18,
+     16,
+     21,
+     24,
+     23,
+     19
+    ],
+    "labels": [
+     "Mon",
+     "Tue",
+     "Wed",
+     "Thu",
+     "Fri",
+     "Sat",
+     "Sun"
+    ],
+    "color": "accent",
+    "barRadius": 8,
+    "barGap": 10,
+    "maxBarWidth": 28,
+    "labelFontFamily": "Inter",
+    "labelFontSize": 11,
+    "labelColor": "inkFaint",
+    "gridColor": "line"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "children": [
+    "column8"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     48,
+     24,
+     48
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ]
+   }
+  },
+  "column8": {
+   "type": "column",
+   "children": [
+    "column9"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "children": [
+    "text8",
+    "row10"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Trusted by independent hotels everywhere"
+   }
+  },
+  "row10": {
+   "type": "row",
+   "children": [
+    "text9",
+    "text10",
+    "text11",
+    "text12",
+    "text13"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 700,
+     "fontSize": 18,
+     "color": "inkFaint"
+    },
+    "text": "Harbour House"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 700,
+     "fontSize": 18,
+     "color": "inkFaint"
+    },
+    "text": "The Saltmarsh Inn"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 700,
+     "fontSize": 18,
+     "color": "inkFaint"
+    },
+    "text": "Pine & Fern Lodge"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 700,
+     "fontSize": 18,
+     "color": "inkFaint"
+    },
+    "text": "Casa Ribeira"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 700,
+     "fontSize": 18,
+     "color": "inkFaint"
+    },
+    "text": "Northlight Hotel"
+   }
+  },
+  "column10": {
+   "type": "column",
+   "children": [
+    "column11"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     96,
+     24,
+     96
+    ]
+   }
+  },
+  "column11": {
+   "type": "column",
+   "children": [
+    "column12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column12": {
+   "type": "column",
+   "children": [
+    "column13",
+    "grid2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 40,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column13": {
+   "type": "column",
+   "children": [
+    "text14",
+    "text15"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading2",
+     "fontWeight": 800,
+     "fontSize": 34,
+     "color": "ink"
+    },
+    "text": "Everything a small hotel needs"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    },
+    "text": "Three tools that work together, set up in an afternoon."
+   }
+  },
+  "grid2": {
+   "type": "column",
+   "children": [
+    "grid2Row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid2Row1": {
+   "type": "row",
+   "children": [
+    "column14",
+    "column15",
+    "column16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column14": {
+   "type": "column",
+   "children": [
+    "mark2",
+    "text16",
+    "text17"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 14
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.tile}"
+   }
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "calendar_month",
+     "style": "rounded"
+    },
+    "color": "accent",
+    "size": 22
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "fontSize": 17,
+     "color": "ink"
+    },
+    "text": "Live calendar"
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    },
+    "text": "See every room, every night and every guest on one screen. Drag a booking to move it."
+   }
+  },
+  "column15": {
+   "type": "column",
+   "children": [
+    "mark3",
+    "text18",
+    "text19"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 14
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.tile}"
+   }
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "sync",
+     "style": "rounded"
+    },
+    "color": "accent",
+    "size": 22
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "fontSize": 17,
+     "color": "ink"
+    },
+    "text": "Channel sync"
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    },
+    "text": "Availability stays in step across Booking.com, Expedia, Airbnb and your own site. No double bookings."
+   }
+  },
+  "column16": {
+   "type": "column",
+   "children": [
+    "mark4",
+    "text20",
+    "text21"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 14
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.tile}"
+   }
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "insights",
+     "style": "rounded"
+    },
+    "color": "accent",
+    "size": 22
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "fontSize": 17,
+     "color": "ink"
+    },
+    "text": "Smart pricing"
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    },
+    "text": "Rates that follow demand, local events and the season, within the limits you set."
+   }
+  },
+  "column17": {
+   "type": "column",
+   "children": [
+    "column18"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     72,
+     24,
+     72
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "bar"
+     }
+    ]
+   }
+  },
+  "column18": {
+   "type": "column",
+   "children": [
+    "grid3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid3": {
+   "type": "column",
+   "children": [
+    "grid3Row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid3Row1": {
+   "type": "row",
+   "children": [
+    "column19",
+    "column20",
+    "column21"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column19": {
+   "type": "column",
+   "children": [
+    "text22",
+    "text23"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "4,200",
+    "style": {
+     "from": "numberHero",
+     "fontSize": 56,
+     "color": "onBar"
+    }
+   }
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "hotels run on Tidewater",
+    "style": {
+     "from": "meta",
+     "fontSize": 15,
+     "color": "onBarSoft"
+    }
+   }
+  },
+  "column20": {
+   "type": "column",
+   "children": [
+    "text24",
+    "text25"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "31%",
+    "style": {
+     "from": "numberHero",
+     "fontSize": 56,
+     "color": "onBar"
+    }
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "more direct bookings",
+    "style": {
+     "from": "meta",
+     "fontSize": 15,
+     "color": "onBarSoft"
+    }
+   }
+  },
+  "column21": {
+   "type": "column",
+   "children": [
+    "text26",
+    "text27"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "2 min",
+    "style": {
+     "from": "numberHero",
+     "fontSize": 56,
+     "color": "onBar"
+    }
+   }
+  },
+  "text27": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "to set up your first room",
+    "style": {
+     "from": "meta",
+     "fontSize": 15,
+     "color": "onBarSoft"
+    }
+   }
+  },
+  "column22": {
+   "type": "column",
+   "children": [
+    "column23"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     96,
+     24,
+     96
+    ]
+   }
+  },
+  "column23": {
+   "type": "column",
+   "children": [
+    "column24"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 720
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column24": {
+   "type": "column",
+   "children": [
+    "icon5",
+    "text28",
+    "row11"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24
+   }
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "format_quote",
+     "style": "rounded"
+    },
+    "color": "accent",
+    "size": 40
+   }
+  },
+  "text28": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "We used to spend Sunday evenings fixing the spreadsheet. Now the calendar just stays right, and our direct bookings went up by a third in the first season.",
+    "textAlign": "center",
+    "style": {
+     "from": "lead",
+     "fontWeight": 500,
+     "fontSize": 24,
+     "color": "ink"
+    }
+   }
+  },
+  "row11": {
+   "type": "row",
+   "children": [
+    "Avatar1",
+    "column25"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Maya Reyes",
+    "size": "medium"
+   }
+  },
+  "column25": {
+   "type": "column",
+   "children": [
+    "text29",
+    "text30"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text29": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Maya Reyes"
+   }
+  },
+  "text30": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "Owner, The Saltmarsh Inn"
+   }
+  },
+  "column26": {
+   "type": "column",
+   "children": [
+    "column27"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     24,
+     24,
+     96
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column27": {
+   "type": "column",
+   "children": [
+    "column28"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column28": {
+   "type": "column",
+   "children": [
+    "text31",
+    "text32",
+    "row12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     32,
+     56,
+     32,
+     56
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 26
+   },
+   "props": {
+    "spacing": 16
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "text31": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading2",
+     "fontWeight": 800,
+     "fontSize": 34,
+     "color": "ink"
+    },
+    "text": "Ready to fill every room?"
+   }
+  },
+  "text32": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    },
+    "text": "Start free today and have your calendar live before your next check-in."
+   }
+  },
+  "row12": {
+   "type": "row",
+   "children": [
+    "filledButton3",
+    "outlinedButton2"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Start free"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "start"
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Talk to sales"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sales"
+      }
+     ]
+    }
+   ]
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "column29": {
+   "type": "column",
+   "children": [
+    "column30"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     56,
+     24,
+     40
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   }
+  },
+  "column30": {
+   "type": "column",
+   "children": [
+    "column31"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column31": {
+   "type": "column",
+   "children": [
+    "grid4",
+    "divider3",
+    "row13"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid4": {
+   "type": "column",
+   "children": [
+    "grid4Row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid4Row1": {
+   "type": "row",
+   "children": [
+    "column32",
+    "column33",
+    "column34",
+    "column35"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column32": {
+   "type": "column",
+   "children": [
+    "text33",
+    "text34",
+    "text35",
+    "text36",
+    "text37"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text33": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Product"
+   }
+  },
+  "text34": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Features",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text35": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Pricing",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text36": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Integrations",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text37": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Changelog",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "column33": {
+   "type": "column",
+   "children": [
+    "text38",
+    "text39",
+    "text40",
+    "text41",
+    "text42"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text38": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Customers"
+   }
+  },
+  "text39": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Stories",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text40": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Hotels",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text41": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "B&Bs",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text42": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Hostels",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "column34": {
+   "type": "column",
+   "children": [
+    "text43",
+    "text44",
+    "text45",
+    "text46",
+    "text47"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text43": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Resources"
+   }
+  },
+  "text44": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Docs",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text45": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Help center",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text46": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Guides",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text47": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Status",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "column35": {
+   "type": "column",
+   "children": [
+    "text48",
+    "text49",
+    "text50",
+    "text51",
+    "text52"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text48": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Company"
+   }
+  },
+  "text49": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "About",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text50": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Careers",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text51": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Contact",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text52": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Privacy",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "row13": {
+   "type": "row",
+   "children": [
+    "text53",
+    "text54"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text53": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 800,
+     "fontSize": 17,
+     "color": "ink"
+    },
+    "text": "Tidewater"
+   }
+  },
+  "text54": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "© 2026 Tidewater. All rights reserved."
+   }
+  },
+  "mark2": {
+   "type": "row",
+   "children": [
+    "icon2"
+   ],
+   "layout": {
+    "width": 44,
+    "height": 44,
+    "padding": [
+     0,
+     0,
+     0,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "radius": 12
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.control}"
+   }
+  },
+  "mark3": {
+   "type": "row",
+   "children": [
+    "icon3"
+   ],
+   "layout": {
+    "width": 44,
+    "height": 44,
+    "padding": [
+     0,
+     0,
+     0,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "radius": 12
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.control}"
+   }
+  },
+  "mark4": {
+   "type": "row",
+   "children": [
+    "icon4"
+   ],
+   "layout": {
+    "width": 44,
+    "height": 44,
+    "padding": [
+     0,
+     0,
+     0,
+     4
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "radius": 12
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.control}"
+   }
+  }
+ }
+}

@@ -1,0 +1,4 @@
+ERROR   wrong_type [doc] /nodes/searchField/props/decoration/border
+        Expected a InputBorder object, got the text "none".
+WARNING loose_value [doc] /nodes/addBtn/actions/0/actions/0/index
+        Expected text, got a number (0); write it as "0".

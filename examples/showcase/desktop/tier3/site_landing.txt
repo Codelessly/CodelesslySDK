@@ -1,0 +1,100 @@
+Page
+  Nav
+    Brand "Tidewater" icon:"waves"
+    Row gap:4
+      Link "Features"
+      Link "Pricing"
+      Link "Customers"
+      Link "Docs"
+    Row gap:12 middle
+      Button.ghost "Sign in" -> emit signin
+      Button "Start free" -> emit start
+  Section
+    Row gap:48 middle
+      Column grow gap:20
+        Text.eyebrow "BOOKING FOR SMALL HOTELS"
+        Heading "Fill every room, without the spreadsheets" level:1
+        Text.lead "Tidewater keeps your calendar, channels and prices in one place, so every night gets booked."
+        Row gap:12
+          Button "Start free" size:large -> emit start
+          Button.outline "See how it works" size:large -> emit tour
+      Column grow
+        Media kind:"harbor" tone:"day" h:360
+  Section compact tint
+    Column gap:16 center
+      Text.eyebrow "TRUSTED BY INDEPENDENT HOTELS" center
+      Row between
+        Text.heading3 "Harbor Inn"
+        Text.heading3 "The Lantern House"
+        Text.heading3 "Saltmarsh Lodge"
+        Text.heading3 "Juniper & Pine"
+        Text.heading3 "Hotel Marlow"
+  Section
+    Column gap:12
+      Text.eyebrow "FEATURES"
+      Heading "Everything a small hotel needs" level:2
+    Grid cols:3 gap:24
+      Card gap:12
+        IconTile "calendar_month"
+        Heading "Live calendar" level:3
+        Text.muted "See every room and every night at a glance. Drag a booking to move it, and changes show up instantly."
+      Card gap:12
+        IconTile "sync"
+        Heading "Channel sync" level:3
+        Text.muted "Availability stays in step across every booking site, so you never get a double booking."
+      Card gap:12
+        IconTile "trending_up"
+        Heading "Smart pricing" level:3
+        Text.muted "Rates adjust to demand, events and season, so you earn more on busy nights and fill the quiet ones."
+  Section tint
+    Grid cols:3 gap:24
+      Column gap:4 center
+        Text "4,200" size:48 weight:700 center
+        Text.muted "hotels" center
+      Column gap:4 center
+        Text "31%" size:48 weight:700 center
+        Text.muted "more direct bookings" center
+      Column gap:4 center
+        Text "2 min" size:48 weight:700 center
+        Text.muted "setup" center
+  Section narrow center
+    Column gap:20 center
+      Icon "format_quote"
+      Text.heading2 "“We dropped our spreadsheet in the first week. Direct bookings are up and I get my evenings back.”" center
+      Row gap:12 middle center
+        Avatar "Elena Costa" size:44
+        Column
+          Text.strong "Elena Costa"
+          Text.muted "Owner, Saltmarsh Lodge"
+  Section tint center
+    Column gap:16 center
+      Heading "Ready to fill every room?" level:2
+      Text.lead "Set up in two minutes. Free to start, no card needed." center
+      Row gap:12 center
+        Button "Start free" size:large -> emit start
+        Button.outline "Talk to us" size:large -> emit contact
+  Footer
+    Grid cols:4 gap:32
+      Column gap:8
+        Text.strong "Product"
+        Link "Features"
+        Link "Pricing"
+        Link "Integrations"
+      Column gap:8
+        Text.strong "Company"
+        Link "About"
+        Link "Customers"
+        Link "Careers"
+      Column gap:8
+        Text.strong "Resources"
+        Link "Docs"
+        Link "Guides"
+        Link "Help center"
+      Column gap:8
+        Text.strong "Legal"
+        Link "Privacy"
+        Link "Terms"
+        Link "Security"
+    Row between
+      Text.strong "Tidewater"
+      Text.muted "© 2026 Tidewater"

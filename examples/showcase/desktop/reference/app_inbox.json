@@ -1,0 +1,2804 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_inbox"
+ ],
+ "nodes": {
+  "app_inbox": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280,
+    "height": {
+     "fill": 800
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "children": [
+    "column1",
+    "column3",
+    "column8",
+    "column17"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column1": {
+   "type": "column",
+   "children": [
+    "row2",
+    "spacer1",
+    "row3",
+    "row4",
+    "row5",
+    "row6",
+    "spacer2",
+    "row7"
+   ],
+   "layout": {
+    "width": 160,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     18,
+     10,
+     14
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "children": [
+    "icon1",
+    "text1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     8,
+     0,
+     8,
+     6
+    ]
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "support_agent",
+     "style": "filled"
+    },
+    "size": 20,
+    "color": "accent"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Relaydesk",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 8
+   }
+  },
+  "row3": {
+   "type": "row",
+   "children": [
+    "icon2",
+    "text2",
+    "text3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (folder==\"inbox\")?theme.colors.card:\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}",
+    "decoration.strokes[0].color": "${= (folder==\"inbox\")?theme.colors.accentLine:\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "inbox"
+      }
+     ]
+    }
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "inbox",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Inbox",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "color": "accent"
+    },
+    "text": "12"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "children": [
+    "icon3",
+    "text4",
+    "text5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (folder==\"mine\")?theme.colors.card:\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}",
+    "decoration.strokes[0].color": "${= (folder==\"mine\")?theme.colors.accentLine:\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "mine"
+      }
+     ]
+    }
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "person",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Assigned to me",
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "color": "inkFaint"
+    },
+    "text": "4"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "children": [
+    "icon4",
+    "text6",
+    "text7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (folder==\"waiting\")?theme.colors.card:\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}",
+    "decoration.strokes[0].color": "${= (folder==\"waiting\")?theme.colors.accentLine:\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "waiting"
+      }
+     ]
+    }
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "schedule",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Waiting",
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "color": "inkFaint"
+    },
+    "text": "7"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "children": [
+    "icon5",
+    "text8"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (folder==\"closed\")?theme.colors.card:\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}",
+    "decoration.strokes[0].color": "${= (folder==\"closed\")?theme.colors.accentLine:\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "closed"
+      }
+     ]
+    }
+   ]
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Closed",
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "children": [
+    "Avatar1",
+    "column2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 14
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Sam Patel"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "children": [
+    "text9",
+    "text10"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Sam Patel",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "Support agent",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "children": [
+    "row8",
+    "column4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "flex": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row8": {
+   "type": "row",
+   "children": [
+    "text11",
+    "row9"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     18,
+     18,
+     16,
+     18
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 8
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "color": "ink"
+    },
+    "text": "Inbox",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "children": [
+    "text12"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 24,
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "accentLine"
+     }
+    ],
+    "radius": 999
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "12 open",
+    "style": {
+     "from": "chip",
+     "color": "accent"
+    },
+    "maxLines": 1
+   }
+  },
+  "column4": {
+   "type": "column",
+   "children": [
+    "listView1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "children": [
+    "listView1Item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${convos}"
+   }
+  },
+  "listView1Item": {
+   "type": "column",
+   "children": [
+    "column5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "children": [
+    "row10"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     14,
+     14,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==item.id?theme.colors.tile:\"#00FFFFFF\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "row10": {
+   "type": "row",
+   "children": [
+    "Avatar2",
+    "column6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "medium"
+   },
+   "bind": {
+    "props.name": "${item.name}"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "children": [
+    "row11",
+    "text15",
+    "text16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "children": [
+    "text13",
+    "row12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 6
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "${item.name}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "row12": {
+   "type": "row",
+   "children": [
+    "text14",
+    "column7"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "fontSize": 12,
+     "color": "inkFaint"
+    },
+    "text": "${item.time}",
+    "maxLines": 1
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 4
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${item.unread}"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "lead",
+     "color": "ink"
+    },
+    "text": "${item.subject}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "${item.preview}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "column8": {
+   "type": "column",
+   "children": [
+    "row13",
+    "column10"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "flex": 7
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row13": {
+   "type": "row",
+   "children": [
+    "column9"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     20,
+     18,
+     20,
+     18
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 24
+   }
+  },
+  "column9": {
+   "type": "column",
+   "children": [
+    "text17",
+    "row14",
+    "row16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "color": "ink"
+    },
+    "text": "Charged twice for order #4821"
+   }
+  },
+  "row14": {
+   "type": "row",
+   "children": [
+    "row15",
+    "text19",
+    "text20"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "row15": {
+   "type": "row",
+   "children": [
+    "text18"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 24,
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "warnTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "warnLine"
+     }
+    ],
+    "radius": 999
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Open",
+    "style": {
+     "from": "chip",
+     "color": "warnDeep"
+    },
+    "maxLines": 1
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Assigned to Sam Patel",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "· #CS-2048",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "row16": {
+   "type": "row",
+   "children": [
+    "outlinedButton1",
+    "textButton1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     2,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Reassign"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "reassign"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Snooze"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "snooze"
+      }
+     ]
+    }
+   ]
+  },
+  "column10": {
+   "type": "column",
+   "children": [
+    "row17",
+    "row19",
+    "column13",
+    "row22",
+    "row24",
+    "column16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     20,
+     16,
+     24
+    ]
+   },
+   "props": {
+    "spacing": 14,
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row17": {
+   "type": "row",
+   "children": [
+    "column11"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column11": {
+   "type": "column",
+   "children": [
+    "row18",
+    "text23"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 480
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.tile}"
+   }
+  },
+  "row18": {
+   "type": "row",
+   "children": [
+    "Avatar3",
+    "text21",
+    "text22"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "Avatar3": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Marco Ruiz",
+    "size": "xs"
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Marco Ruiz"
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "fontSize": 12,
+     "color": "inkFaint"
+    },
+    "text": "8:02"
+   }
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Hi, I placed order #4821 yesterday and my card was charged twice for $86.40. Can you help?",
+    "style": {
+     "from": "lead",
+     "color": "ink"
+    }
+   }
+  },
+  "row19": {
+   "type": "row",
+   "children": [
+    "column12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "end"
+   }
+  },
+  "column12": {
+   "type": "column",
+   "children": [
+    "row20",
+    "text26"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 480
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "accentLine"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 12
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "row20": {
+   "type": "row",
+   "children": [
+    "text24",
+    "text25"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Sam Patel",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "8:20",
+    "style": {
+     "from": "numberSmall",
+     "fontSize": 12,
+     "color": "inkFaint"
+    }
+   }
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Sorry about that, Marco. I can see two charges on our side and I've started a refund for the duplicate.",
+    "style": {
+     "from": "lead",
+     "color": "ink"
+    }
+   }
+  },
+  "column13": {
+   "type": "column",
+   "children": [
+    "row21",
+    "text28"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "warnTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "warnLine"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 12
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "row21": {
+   "type": "row",
+   "children": [
+    "icon6",
+    "text27"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "lock",
+     "style": "rounded"
+    },
+    "size": 16,
+    "color": "warnDeep"
+   }
+  },
+  "text27": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Internal note · Sam Patel · 8:24",
+    "style": {
+     "from": "chip",
+     "color": "warnDeep"
+    }
+   }
+  },
+  "text28": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Payment processor retried after a timeout. Flagged to billing; refund ID RF-77310.",
+    "style": {
+     "from": "lead",
+     "color": "ink"
+    }
+   }
+  },
+  "row22": {
+   "type": "row",
+   "children": [
+    "column14"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column14": {
+   "type": "column",
+   "children": [
+    "row23",
+    "text31"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 480
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.tile}"
+   }
+  },
+  "row23": {
+   "type": "row",
+   "children": [
+    "Avatar4",
+    "text29",
+    "text30"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "Avatar4": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Marco Ruiz",
+    "size": "xs"
+   }
+  },
+  "text29": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Marco Ruiz"
+   }
+  },
+  "text30": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "fontSize": 12,
+     "color": "inkFaint"
+    },
+    "text": "9:05"
+   }
+  },
+  "text31": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "How long will the refund take to show up?",
+    "style": {
+     "from": "lead",
+     "color": "ink"
+    }
+   }
+  },
+  "row24": {
+   "type": "row",
+   "children": [
+    "column15"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "end"
+   }
+  },
+  "column15": {
+   "type": "column",
+   "children": [
+    "row25",
+    "text34"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 480
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "accentLine"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 12
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "row25": {
+   "type": "row",
+   "children": [
+    "text32",
+    "text33"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "text32": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Sam Patel",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "text33": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "9:10",
+    "style": {
+     "from": "numberSmall",
+     "fontSize": 12,
+     "color": "inkFaint"
+    }
+   }
+  },
+  "text34": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Usually 3 to 5 business days, depending on your bank. I'll keep this open until it lands.",
+    "style": {
+     "from": "lead",
+     "color": "ink"
+    }
+   }
+  },
+  "column16": {
+   "type": "column",
+   "children": [
+    "textField1",
+    "row26"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 14
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Reply to Marco",
+     "hintText": "Write a reply…"
+    },
+    "minLines": 3,
+    "maxLines": 6
+   },
+   "bind": {
+    "props.initialValue": "${reply}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "row26": {
+   "type": "row",
+   "children": [
+    "iconButton1",
+    "spacer3",
+    "outlinedButton2",
+    "filledButton1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "attach_file",
+     "style": "filled"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "attach"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send and close"
+   },
+   "bind": {
+    "props.enabled": "${= trim(reply)!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sendClose",
+       "value": "${reply}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": ""
+      },
+      {
+       "type": "showToast",
+       "message": "Sent and closed"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send"
+   },
+   "bind": {
+    "props.enabled": "${= trim(reply)!=\"\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "send",
+       "value": "${reply}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": ""
+      },
+      {
+       "type": "showToast",
+       "message": "Sent"
+      }
+     ]
+    }
+   ]
+  },
+  "column17": {
+   "type": "column",
+   "children": [
+    "text35",
+    "row27",
+    "divider2",
+    "Details1",
+    "text38",
+    "row28",
+    "divider3",
+    "textButton2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "flex": 6,
+    "padding": [
+     16,
+     20,
+     16,
+     20
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text35": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Customer"
+   }
+  },
+  "row27": {
+   "type": "row",
+   "children": [
+    "Avatar5",
+    "column18"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "Avatar5": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Marco Ruiz",
+    "size": "large"
+   }
+  },
+  "column18": {
+   "type": "column",
+   "children": [
+    "text36",
+    "text37"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text36": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Marco Ruiz",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text37": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "marco.ruiz@fastmail.com",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Plan\",\"Pro, annual\"],[\"Customer since\",\"March 2022\"],[\"Last order\",\"#4821 · $86.40\"],[\"Conversations\",\"6\"]]}"
+   }
+  },
+  "text38": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Tags"
+   }
+  },
+  "row28": {
+   "type": "row",
+   "children": [
+    "chip1",
+    "chip2",
+    "chip3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "chip1": {
+   "type": "chip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "VIP"
+   }
+  },
+  "chip2": {
+   "type": "chip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Billing"
+   }
+  },
+  "chip3": {
+   "type": "chip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Refund"
+   }
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "View all orders"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openOrders"
+      }
+     ]
+    }
+   ]
+  }
+ },
+ "variables": {
+  "app_inbox": [
+   {
+    "name": "folder",
+    "type": "text",
+    "value": "inbox"
+   },
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "reply",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "convos",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Priya Nair",
+      "subject": "Can't log in after reset",
+      "preview": "I reset my password twice and still get an error on the sign-in page.",
+      "time": "9:41",
+      "unread": true
+     },
+     {
+      "id": 2,
+      "name": "Marco Ruiz",
+      "subject": "Charged twice for order #4821",
+      "preview": "Thanks, I can see the refund pending on my card statement now.",
+      "time": "9:12",
+      "unread": false
+     },
+     {
+      "id": 3,
+      "name": "Hannah Becker",
+      "subject": "Change billing address",
+      "preview": "We moved offices last month and need the invoices updated.",
+      "time": "8:55",
+      "unread": true
+     },
+     {
+      "id": 4,
+      "name": "Tomás Silva",
+      "subject": "Export to CSV is empty",
+      "preview": "The file downloads but there are only headers, no rows at all.",
+      "time": "8:30",
+      "unread": true
+     },
+     {
+      "id": 5,
+      "name": "Aiko Tanaka",
+      "subject": "Add two seats to our plan",
+      "preview": "Our team is growing, could you add two more seats this week?",
+      "time": "Yesterday",
+      "unread": false
+     },
+     {
+      "id": 6,
+      "name": "Daniel Okafor",
+      "subject": "Webhook retries",
+      "preview": "How many times do you retry a failed webhook before giving up?",
+      "time": "Yesterday",
+      "unread": true
+     },
+     {
+      "id": 7,
+      "name": "Sofia Rossi",
+      "subject": "Invoice for March",
+      "preview": "I can't find the March invoice in the billing section.",
+      "time": "Mon",
+      "unread": false
+     },
+     {
+      "id": 8,
+      "name": "Liam O'Connor",
+      "subject": "Feature request: dark mode",
+      "preview": "Any plans for a dark theme? My team works late shifts.",
+      "time": "Mon",
+      "unread": false
+     }
+    ]
+   }
+  ]
+ }
+}

@@ -1,0 +1,164 @@
+Page
+  Nav
+    Brand "Ledgerly" icon:"account_balance"
+    Row gap:4
+      Link "Product"
+      Link "Pricing"
+      Link "Customers"
+      Link "Docs"
+    Row gap:8
+      Button.outline "Sign in" -> emit signin
+      Button "Start free" -> emit start
+  state billing="Monthly"
+  state faqs=[]
+  state features=[{"name":"Invoicing and estimates","solo":true,"team":true,"scale":true},{"name":"Bank feeds","solo":true,"team":true,"scale":true},{"name":"Expense tracking","solo":true,"team":true,"scale":true},{"name":"Multi-user access","solo":false,"team":true,"scale":true},{"name":"Payroll","solo":false,"team":true,"scale":true},{"name":"Custom reports","solo":false,"team":false,"scale":true},{"name":"Multi-entity consolidation","solo":false,"team":false,"scale":true},{"name":"Priority phone support","solo":false,"team":false,"scale":true}]
+  Section center
+    Column gap:16 center
+      Text.eyebrow "PRICING"
+      Heading "Simple pricing for every stage" level:1 center
+      Text.lead "Start with what you need today and upgrade as your books grow." center
+      SegmentedButton =billing items:["Monthly","Yearly"]
+      Text.caption "Yearly billing saves you 20% on every plan."
+    Grid cols:3 gap:24
+      Card gap:16
+        Heading "Solo" level:3
+        Text.muted "For freelancers and sole traders."
+        Row bottom gap:4
+          Text.numberHero "${billing=='Yearly'?'7.20':'9'}"
+          Text.muted "/mo"
+        Text.caption "{billing=='Yearly'?'Billed yearly':'Billed monthly'}"
+        Button.outline "Choose Solo" w:fill size:large -> emit choose "solo"
+        Divider
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "1 user"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Unlimited invoices"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Bank feeds"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Expense tracking"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Email support"
+      Card gap:16 border:#FF2563EB fill:#0F2563EB
+        Row between middle
+          Heading "Team" level:3
+          Badge.primary "Most popular"
+        Text.muted "For growing teams that work together."
+        Row bottom gap:4
+          Text.numberHero "${billing=='Yearly'?'23.20':'29'}"
+          Text.muted "/mo"
+        Text.caption "{billing=='Yearly'?'Billed yearly':'Billed monthly'}"
+        Button "Choose Team" w:fill size:large -> emit choose "team"
+        Divider
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Up to 10 users"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Everything in Solo"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Payroll"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Approval workflows"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Chat support"
+      Card gap:16
+        Heading "Scale" level:3
+        Text.muted "For finance teams with complex needs."
+        Row bottom gap:4
+          Text.numberHero "${billing=='Yearly'?'63.20':'79'}"
+          Text.muted "/mo"
+        Text.caption "{billing=='Yearly'?'Billed yearly':'Billed monthly'}"
+        Button.outline "Choose Scale" w:fill size:large -> emit choose "scale"
+        Divider
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Unlimited users"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Everything in Team"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Custom reports"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Multi-entity consolidation"
+        Row gap:10
+          Icon "check" color:#FF16A34A size:18
+          Text "Priority phone support"
+  Section tint
+    Column gap:12 center
+      Text.eyebrow "COMPARE PLANS"
+      Heading "Every feature, side by side" level:2 center
+    Card pad:0 gap:0
+      Row pad:[20,12,20,12] gap:16
+        Text.columnHead "Feature" grow
+        Text.columnHead "Solo" w:140 center
+        Text.columnHead "Team" w:140 center
+        Text.columnHead "Scale" w:140 center
+      each f in features
+        Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
+          Text f.name grow
+          Row w:140 center
+            if f.solo
+              Icon "check" color:#FF16A34A size:20
+            if !f.solo
+              Text.muted "—"
+          Row w:140 center
+            if f.team
+              Icon "check" color:#FF16A34A size:20
+            if !f.team
+              Text.muted "—"
+          Row w:140 center
+            if f.scale
+              Icon "check" color:#FF16A34A size:20
+            if !f.scale
+              Text.muted "—"
+  Section narrow
+    Column gap:12 center
+      Text.eyebrow "FAQ"
+      Heading "Frequently asked questions" level:2 center
+    Column gap:8
+      Accordion "Can I switch plans at any time?"
+        Text.muted "Yes. Upgrade or downgrade whenever you like and we will prorate the difference on your next invoice."
+      Accordion "Is there a free trial?"
+        Text.muted "Every plan starts with a 14-day free trial. No credit card is needed to begin."
+      Accordion "How does yearly billing work?"
+        Text.muted "You pay for twelve months up front and save 20% compared with paying month by month."
+      Accordion "Is my financial data secure?"
+        Text.muted "Your data is encrypted in transit and at rest, and we back it up every day across several regions."
+  Section center
+    Column gap:16 center
+      Heading "Ready to get your books in order?" level:2 center
+      Text.lead "Join thousands of businesses who close their month in half the time." center
+      Row gap:12
+        Button "Start free" size:large -> emit start
+        Button.outline "Talk to sales" size:large -> emit sales
+  Footer
+    Row between top
+      Column gap:8
+        Text.strong "Ledgerly"
+        Text.muted "Accounting made simple."
+      Column gap:8
+        Text.strong "Product"
+        Text.muted "Features"
+        Text.muted "Pricing"
+        Text.muted "Integrations"
+      Column gap:8
+        Text.strong "Company"
+        Text.muted "About"
+        Text.muted "Careers"
+        Text.muted "Contact"
+      Column gap:8
+        Text.strong "Legal"
+        Text.muted "Privacy"
+        Text.muted "Terms"
+        Text.muted "© 2026 Ledgerly"

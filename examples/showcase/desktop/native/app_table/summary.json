@@ -1,0 +1,36 @@
+{
+ "name": "app_table",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 251.3,
+   "problems": 2,
+   "errors": 1,
+   "input_tokens": 210,
+   "cached": 123465,
+   "output_tokens": 31752
+  },
+  {
+   "round": 2,
+   "modelSeconds": 153.9,
+   "problems": 0,
+   "errors": 0,
+   "input_tokens": 23169,
+   "cached": 123465,
+   "output_tokens": 22585
+  },
+  {
+   "round": 3,
+   "modelSeconds": 162.4,
+   "problems": 1,
+   "errors": 0,
+   "input_tokens": 23127,
+   "cached": 123465,
+   "output_tokens": 23501
+  }
+ ],
+ "final": 3,
+ "errors": 0,
+ "problems": 1
+}

@@ -1,0 +1,73 @@
+state filter="All"
+state email=""
+state entries=[{"date":"Mar 12, 2025","version":"2.8.0","title":"Streaming responses for webhooks","tag":"Added","bullets":["Webhook deliveries can now stream large payloads in chunks.","New stream option on endpoint settings.","Dashboard shows chunk-level delivery timing."],"code":"relay.webhooks.create({\n  url: \"https://api.acme.dev/hooks\",\n  stream: true\n})"},{"date":"Feb 27, 2025","version":"2.7.2","title":"Faster cold starts","tag":"Improved","bullets":["Edge functions start up to 40% faster in all regions.","Reduced memory use for idle workers."],"code":""},{"date":"Feb 14, 2025","version":"2.7.1","title":"Correct Retry-After on 429 responses","tag":"Fixed","bullets":["Retry-After now returns seconds, not milliseconds.","Rate limit headers are sent on every throttled response.","Fixed a rare duplicate event on retry."],"code":"HTTP/1.1 429 Too Many Requests\nRetry-After: 30"},{"date":"Jan 30, 2025","version":"2.7.0","title":"Scoped API keys","tag":"Added","bullets":["Restrict a key to specific projects or endpoints.","Keys can be given an expiry date.","Audit log records every key use."],"code":"relay keys create --scope read:events --expires 30d"},{"date":"Jan 16, 2025","version":"2.6.4","title":"Log search in the dashboard","tag":"Improved","bullets":["Search request logs by status, path or header.","Saved filters are shared with your team."],"code":""},{"date":"Dec 20, 2024","version":"2.6.3","title":"Pagination cursor fix","tag":"Fixed","bullets":["Cursors no longer skip items when records share a timestamp.","Empty last pages return an empty list instead of an error."],"code":"GET /v2/events?limit=50&cursor=evt_8Hk2"}]
+Page
+  Nav
+    Brand "Relay" icon:"bolt"
+    Row gap:4
+      Link "Docs"
+      Link "API"
+      Link "Changelog"
+      Link "Status"
+    Button.outline "Sign in" -> emit signin
+  Section
+    Column gap:12
+      Heading "Changelog" level:1
+      Text.lead "New features, improvements and fixes to the Relay platform."
+      Row gap:8
+        ChoiceChip "All" selected:=filter=="All" -> filter="All"
+        ChoiceChip "Added" selected:=filter=="Added" -> filter="Added"
+        ChoiceChip "Improved" selected:=filter=="Improved" -> filter="Improved"
+        ChoiceChip "Fixed" selected:=filter=="Fixed" -> filter="Fixed"
+    Row gap:48 top
+      Column grow gap:24
+        each e in entries
+          if filter=="All" || e.tag==filter
+            Row gap:32 top
+              Text.muted "{e.date}" w:120
+              Card grow gap:12
+                Row gap:12 middle
+                  Text.strong "v{e.version}"
+                  if e.tag=="Added"
+                    Badge.success "Added"
+                  if e.tag=="Improved"
+                    Badge.info "Improved"
+                  if e.tag=="Fixed"
+                    Badge.warning "Fixed"
+                Heading "{e.title}" level:3
+                Column gap:8
+                  each b in e.bullets
+                    Row gap:10
+                      Icon "check" color:#FF16A34A size:18
+                      Text "{b}" grow
+                if e.code!=""
+                  Box fill:#FF0F172A radius:8 pad:14
+                    Text.code "{e.code}" color:#FFE2E8F0
+      Column w:320 gap:16
+        Card gap:12
+          Heading "Subscribe to updates" level:3
+          Text.muted "Get release notes in your inbox. No spam."
+          Input "Email" "you@example.com" =email type:email
+          Button "Subscribe" w:fill -> emit subscribe email; toast "Thanks, you are subscribed"
+        Card gap:12
+          Heading "Latest versions" level:3
+          each e in take(entries,4)
+            Row between middle
+              Link "v{e.version}" -> emit openVersion e.version
+              Text.caption "{e.date}"
+  Footer
+    Row between top
+      Column gap:8
+        Text.strong "Relay"
+        Text.muted "The API platform for events."
+      Column gap:8
+        Text.strong "Product"
+        Text.muted "Docs"
+        Text.muted "API reference"
+        Text.muted "Status"
+      Column gap:8
+        Text.strong "Company"
+        Text.muted "About"
+        Text.muted "Careers"
+        Text.muted "Contact"
+      Text.muted "© 2025 Relay"

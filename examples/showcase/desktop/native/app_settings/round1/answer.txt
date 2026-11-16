@@ -1,0 +1,801 @@
+**Layout.** The window is a two-pane app shell. A fixed 264 px section rail on the left holds the Plume mark, the six sections and the signed-in user. The right pane scrolls by itself above a pinned 72 px action bar, so Save is always in reach. The content is capped at 960 px and uses the classic desktop settings grid: each group puts a 248 px explanation column beside a white card of controls. Below 1024 px the rail narrows to 216 px and each group stacks its explanation above its card, so at 768 nothing overflows.
+
+**Behavior.**
+- **Save changes** is computed, not flagged. It turns on only when the current values differ from the saved snapshot (name, username, bio, time zone, public profile, picture, the five notification switches), the bio is within 160 characters and the name is not empty. Typing a value back to what it was turns it off again.
+- **Cancel** restores the snapshot.
+- **Change** cycles through the drawn profile pictures.
+- **Delete account** asks for confirmation inline: you type your username before "Delete permanently" enables.
+- **Section links**: Profile, Notifications and Account scroll to their groups. Appearance, Billing and Team have no settings yet, so they show an empty state.
+
+```json
+{
+  "schema": 3,
+  "roots": ["settings"],
+  "nodes": {
+    "settings": {
+      "type": "canvas",
+      "name": "Plume settings",
+      "slots": {"body": "shell"},
+      "layout": {"width": 1280, "height": 800},
+      "decoration": {"fills": [{"color": "#FFF6F7F9"}]}
+    },
+    "shell": {
+      "type": "row",
+      "children": ["sidebar", "main"],
+      "layout": {"width": {"fill": 1280}, "height": {"fill": 800}},
+      "props": {"crossAxisAlignment": "stretch"}
+    },
+
+    "sidebar": {
+      "type": "column",
+      "children": ["brand", "navLabel", "navList", "sideSpacer", "sideUser"],
+      "layout": {"width": 264, "height": {"fill": 800}, "padding": [16, 20, 16, 16]},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 4},
+      "decoration": {"fills": [{"color": "#FFFFFFFF"}], "strokes": [{"color": "#FFE5E7EB"}], "strokeSides": "right"},
+      "media": [{"maxWidth": 1023, "patch": {"layout": {"width": 216, "padding": [12, 20, 12, 16]}}}]
+    },
+    "brand": {
+      "type": "row",
+      "children": ["brandMark", "brandName"],
+      "layout": {"width": {"fill": 232}, "height": {"hug": 32}, "padding": [8, 0, 8, 20]},
+      "props": {"spacing": 10}
+    },
+    "brandMark": {
+      "type": "row",
+      "children": ["brandIcon"],
+      "layout": {"width": 30, "height": 30},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {
+        "radius": 9,
+        "fills": [{"type": "linear", "begin": "topLeft", "end": "bottomRight", "stops": [{"position": 0, "color": "#FF2563EB"}, {"position": 1, "color": "#FF7C3AED"}]}]
+      }
+    },
+    "brandIcon": {"type": "icon", "layout": {"width": 18, "height": 18}, "props": {"icon": "history_edu", "color": "#FFFFFFFF", "size": 18}},
+    "brandName": {
+      "type": "text",
+      "layout": {"width": {"hug": 60}, "height": {"hug": 24}},
+      "props": {"text": "Plume", "style": {"fontFamily": "Inter Display", "fontSize": 19, "fontWeight": 700, "letterSpacing": -0.3, "color": "#FF0F172A"}}
+    },
+    "navLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 232}, "height": {"hug": 16}, "padding": [12, 4, 12, 8]},
+      "props": {"text": "SETTINGS", "style": {"fontFamily": "Inter", "fontSize": 11, "fontWeight": 600, "letterSpacing": 1.2, "color": "#FF94A3B8"}}
+    },
+    "navList": {
+      "type": "listView",
+      "children": ["navItem"],
+      "layout": {"width": {"fill": 232}, "height": {"hug": 260}},
+      "props": {"scrollable": false, "spacing": 2},
+      "bind": {"data": "${sections}"}
+    },
+    "navItem": {
+      "type": "row",
+      "children": ["navIcon", "navText"],
+      "layout": {"width": {"fill": 232}, "height": 40, "padding": [12, 0, 12, 0]},
+      "props": {"spacing": 12},
+      "decoration": {"fills": [{"color": "#00FFFFFF"}], "radius": 10},
+      "bind": {"selected": "${= section == item.id}"},
+      "states": {
+        "hovered": {"navItem": {"decoration": {"fills": [{"color": "#FFF3F4F6"}]}}},
+        "selected": {
+          "navItem": {"decoration": {"fills": [{"color": "#FFEFF4FF"}]}},
+          "navIcon": {"props": {"color": "#FF2563EB"}},
+          "navText": {"props": {"style": {"color": "#FF2563EB", "fontWeight": 600}}}
+        }
+      },
+      "actions": [
+        {
+          "trigger": {"type": "click"},
+          "actions": [
+            {"type": "setVariable", "variable": "section", "value": "${item.id}"},
+            {"type": "setVariable", "variable": "sectionLabel", "value": "${item.label}"},
+            {"type": "setVariable", "variable": "sectionDesc", "value": "${item.desc}"},
+            {"type": "setVariable", "variable": "sectionIcon", "value": "${item.icon}"},
+            {"type": "scrollTo", "node": "${item.target}", "durationMs": 400, "when": {"left": "${item.target}", "op": "isNotEmpty"}}
+          ]
+        }
+      ]
+    },
+    "navIcon": {
+      "type": "icon",
+      "layout": {"width": 20, "height": 20},
+      "props": {"icon": "person_outline", "color": "#FF64748B", "size": 20},
+      "bind": {"props.icon": "${item.icon}"}
+    },
+    "navText": {
+      "type": "text",
+      "layout": {"width": {"fill": 160}, "height": {"hug": 20}},
+      "props": {"text": "${item.label}", "style": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 500, "color": "#FF334155"}}
+    },
+    "sideSpacer": {"type": "spacer"},
+    "sideUser": {
+      "type": "row",
+      "children": ["userDot", "userCol"],
+      "layout": {"width": {"fill": 232}, "height": {"hug": 52}, "padding": 10},
+      "props": {"spacing": 10},
+      "decoration": {"strokes": [{"color": "#FFE5E7EB"}], "radius": 12}
+    },
+    "userDot": {
+      "type": "box",
+      "layout": {"width": 32, "height": 32},
+      "decoration": {"shape": "circle", "fills": [{"color": "#FF2563EB"}]},
+      "bind": {"decoration.fills[0].color": "${= avatarColors[avatar % 4]}"}
+    },
+    "userCol": {
+      "type": "column",
+      "children": ["userName", "userPlan"],
+      "layout": {"width": {"fill": 160}, "height": {"hug": 36}},
+      "props": {"crossAxisAlignment": "start", "spacing": 1}
+    },
+    "userName": {
+      "type": "text",
+      "layout": {"width": {"fill": 160}, "height": {"hug": 18}},
+      "props": {"text": "${savedName}", "maxLines": 1, "overflow": "ellipsis", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600, "color": "#FF0F172A"}}
+    },
+    "userPlan": {
+      "type": "text",
+      "layout": {"width": {"fill": 160}, "height": {"hug": 16}},
+      "props": {"text": "Pro plan · 3 seats", "maxLines": 1, "overflow": "ellipsis", "style": {"fontFamily": "Inter", "fontSize": 12, "color": "#FF94A3B8"}}
+    },
+
+    "main": {
+      "type": "column",
+      "children": ["content", "bottomBar"],
+      "layout": {"width": {"fill": 1016}, "height": {"fill": 800}},
+      "props": {"crossAxisAlignment": "stretch"}
+    },
+    "content": {
+      "type": "column",
+      "children": ["rail"],
+      "layout": {"width": {"fill": 1016}, "height": {"fill": 728}, "padding": [40, 36, 40, 56]},
+      "props": {"scrollable": true},
+      "media": [{"maxWidth": 1023, "patch": {"layout": {"padding": [24, 28, 24, 40]}}}]
+    },
+    "rail": {
+      "type": "column",
+      "children": ["pageHead", "formArea", "placeholder"],
+      "layout": {"width": {"fill": 936}, "height": {"hug": 1400}, "constraints": {"maxWidth": 960}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 32}
+    },
+    "pageHead": {
+      "type": "column",
+      "children": ["crumb", "pageTitle", "pageSub"],
+      "layout": {"width": {"fill": 936}, "height": {"hug": 90}},
+      "props": {"crossAxisAlignment": "start", "spacing": 6}
+    },
+    "crumb": {
+      "type": "text",
+      "layout": {"width": {"fill": 936}, "height": {"hug": 18}},
+      "props": {"text": "Settings  /  ${sectionLabel}", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 500, "color": "#FF94A3B8"}}
+    },
+    "pageTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 936}, "height": {"hug": 34}},
+      "props": {"text": "${sectionLabel}", "style": {"fontFamily": "Inter Display", "fontSize": 28, "fontWeight": 700, "height": 1.2, "letterSpacing": -0.56, "color": "#FF0F172A"}}
+    },
+    "pageSub": {
+      "type": "text",
+      "layout": {"width": {"fill": 936}, "height": {"hug": 24}},
+      "props": {"text": "${sectionDesc}", "style": {"fontFamily": "Inter", "fontSize": 15, "height": 1.55, "color": "#FF64748B"}}
+    },
+
+    "formArea": {
+      "type": "column",
+      "children": ["grpProfile", "rule1", "grpNotif", "rule2", "grpDanger"],
+      "layout": {"width": {"fill": 936}, "height": {"hug": 1200}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 36},
+      "bind": {"visible": "${= section == 'profile' || section == 'account' || section == 'notifications'}"}
+    },
+    "rule1": {"type": "box", "layout": {"width": {"fill": 936}, "height": 1}, "decoration": {"fills": [{"color": "#FFE5E7EB"}]}},
+    "rule2": {"type": "box", "layout": {"width": {"fill": 936}, "height": 1}, "decoration": {"fills": [{"color": "#FFE5E7EB"}]}},
+
+    "grpProfile": {
+      "type": "flex",
+      "children": ["gpHead", "gpCard"],
+      "layout": {"width": {"fill": 936}, "height": {"hug": 600}},
+      "props": {"direction": "horizontal", "spacing": 32, "crossAxisAlignment": "start"},
+      "media": [{"maxWidth": 1023, "patch": {"props": {"direction": "vertical", "spacing": 16, "crossAxisAlignment": "stretch"}}}]
+    },
+    "gpHead": {
+      "type": "column",
+      "children": ["gpTitle", "gpDesc"],
+      "layout": {"width": 248, "height": {"hug": 80}},
+      "props": {"crossAxisAlignment": "start", "spacing": 4},
+      "media": [{"maxWidth": 1023, "patch": {"layout": {"width": {"fill": 504}}}}]
+    },
+    "gpTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 248}, "height": {"hug": 22}},
+      "props": {"text": "Public profile", "style": {"fontFamily": "Inter", "fontSize": 16, "fontWeight": 600, "color": "#FF0F172A"}}
+    },
+    "gpDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 248}, "height": {"hug": 42}},
+      "props": {"text": "Your picture, name and bio appear on published pieces and in shared drafts.", "style": {"fontFamily": "Inter", "fontSize": 14, "height": 1.5, "color": "#FF64748B"}}
+    },
+    "gpCard": {
+      "type": "column",
+      "children": ["avatarRow", "nameRow", "bioBlock", "tzBlock", "publicRow"],
+      "layout": {"width": {"fill": 656}, "height": {"hug": 560}, "padding": 24},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 22},
+      "decoration": {
+        "fills": [{"color": "#FFFFFFFF"}],
+        "strokes": [{"color": "#FFE5E7EB"}],
+        "radius": 16,
+        "effects": [{"type": "dropShadow", "color": "#0A0F172A", "offset": [0, 6], "blurRadius": 24}]
+      }
+    },
+    "avatarRow": {
+      "type": "row",
+      "children": ["avatar", "avatarCol"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 72}},
+      "props": {"spacing": 20}
+    },
+    "avatar": {
+      "type": "stack",
+      "children": ["avatarFill"],
+      "layout": {"width": 72, "height": 72},
+      "decoration": {"shape": "circle", "clip": "antiAlias", "strokes": [{"color": "#FFE5E7EB"}]}
+    },
+    "avatarFill": {
+      "type": "box",
+      "layout": {"width": {"fill": 72}, "height": {"fill": 72}},
+      "decoration": {
+        "fills": [
+          {"color": "#FF2563EB"},
+          {"type": "linear", "begin": "topLeft", "end": "bottomRight", "stops": [{"position": 0, "color": "#40FFFFFF"}, {"position": 1, "color": "#00FFFFFF"}]}
+        ]
+      },
+      "bind": {"decoration.fills[0].color": "${= avatarColors[avatar % 4]}"},
+      "customPaint": {
+        "viewBox": [72, 72],
+        "painter": [
+          {"op": "circle", "c": [36, 29], "radius": 12, "paint": "#E6FFFFFF"},
+          {"op": "path", "d": "M12 76 C14 56 25 47 36 47 C47 47 58 56 60 76 Z", "paint": "#E6FFFFFF"}
+        ]
+      }
+    },
+    "avatarCol": {
+      "type": "column",
+      "children": ["changeBtn", "avatarHint"],
+      "layout": {"width": {"fill": 500}, "height": {"hug": 64}},
+      "props": {"crossAxisAlignment": "start", "spacing": 8}
+    },
+    "changeBtn": {
+      "type": "outlinedButton",
+      "layout": {"width": 116, "height": 36},
+      "props": {
+        "label": "Change",
+        "icon": "photo_camera_outlined",
+        "style": {"foregroundColor": "#FF0F172A", "textStyle": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600}}
+      },
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "avatar", "value": "${= (avatar + 1) % 4}"}]}]
+    },
+    "avatarHint": {
+      "type": "text",
+      "layout": {"width": {"fill": 500}, "height": {"hug": 18}},
+      "props": {"text": "JPG, PNG or GIF. Square works best, at least 400 px.", "style": {"fontFamily": "Inter", "fontSize": 12, "height": 1.4, "color": "#FF94A3B8"}}
+    },
+
+    "nameRow": {
+      "type": "row",
+      "children": ["nameField", "userField"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 96}},
+      "props": {"wrap": true, "spacing": 16, "runSpacing": 16, "crossAxisAlignment": "start"}
+    },
+    "nameField": {
+      "type": "column",
+      "children": ["nameLabel", "nameInput"],
+      "layout": {"width": {"fill": 296}, "height": {"hug": 76}, "basis": 220},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 6}
+    },
+    "nameLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 296}, "height": {"hug": 18}},
+      "props": {"text": "Full name", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600, "color": "#FF334155"}}
+    },
+    "nameInput": {
+      "type": "textField",
+      "layout": {"width": {"fill": 296}, "height": {"hug": 44}},
+      "props": {"decoration": {"hintText": "Your name"}},
+      "bind": {"props.initialValue": "${name}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "name", "value": "${result}"}]}]
+    },
+    "userField": {
+      "type": "column",
+      "children": ["userLabel", "userInput", "userUrl"],
+      "layout": {"width": {"fill": 296}, "height": {"hug": 96}, "basis": 220},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 6}
+    },
+    "userLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 296}, "height": {"hug": 18}},
+      "props": {"text": "Username", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600, "color": "#FF334155"}}
+    },
+    "userInput": {
+      "type": "textField",
+      "layout": {"width": {"fill": 296}, "height": {"hug": 44}},
+      "props": {"decoration": {"hintText": "username"}},
+      "bind": {"props.initialValue": "${username}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "username", "value": "${result}"}]}]
+    },
+    "userUrl": {
+      "type": "text",
+      "layout": {"width": {"fill": 296}, "height": {"hug": 16}},
+      "props": {"text": "plume.app/@${username}", "maxLines": 1, "overflow": "ellipsis", "style": {"fontFamily": "JetBrains Mono", "fontSize": 12, "color": "#FF94A3B8"}}
+    },
+
+    "bioBlock": {
+      "type": "column",
+      "children": ["bioHead", "bioInput", "bioHelp"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 160}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 6}
+    },
+    "bioHead": {
+      "type": "row",
+      "children": ["bioLabel", "bioCount"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 18}},
+      "props": {"mainAxisAlignment": "spaceBetween"}
+    },
+    "bioLabel": {
+      "type": "text",
+      "layout": {"width": {"hug": 40}, "height": {"hug": 18}},
+      "props": {"text": "Bio", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600, "color": "#FF334155"}}
+    },
+    "bioCount": {
+      "type": "text",
+      "layout": {"width": {"hug": 60}, "height": {"hug": 16}},
+      "props": {"text": "${= length(bio)} / 160", "style": {"fontFamily": "JetBrains Mono", "fontSize": 12, "fontWeight": 500, "color": "#FF94A3B8"}},
+      "bind": {"props.style.color": "${= bioOver ? '#FFDC2626' : '#FF94A3B8'}"}
+    },
+    "bioInput": {
+      "type": "textField",
+      "layout": {"width": {"fill": 608}, "height": {"hug": 104}},
+      "props": {"keyboardType": "multiline", "maxLines": 4, "decoration": {"hintText": "A sentence or two about what you write"}},
+      "bind": {"props.initialValue": "${bio}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "bio", "value": "${result}"}]}]
+    },
+    "bioHelp": {
+      "type": "text",
+      "layout": {"width": {"fill": 608}, "height": {"hug": 18}},
+      "props": {"text": "Shown on your profile and beside your published pieces.", "style": {"fontFamily": "Inter", "fontSize": 12, "height": 1.4, "color": "#FF94A3B8"}},
+      "bind": {
+        "props.text": "${= bioOver ? 'Your bio is ' + (length(bio) - 160) + ' characters over the limit.' : 'Shown on your profile and beside your published pieces.'}",
+        "props.style.color": "${= bioOver ? '#FFDC2626' : '#FF94A3B8'}"
+      }
+    },
+
+    "tzBlock": {
+      "type": "column",
+      "children": ["tzLabel", "tzDrop"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 72}},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 6}
+    },
+    "tzLabel": {
+      "type": "text",
+      "layout": {"width": {"fill": 608}, "height": {"hug": 18}},
+      "props": {"text": "Time zone", "style": {"fontFamily": "Inter", "fontSize": 13, "fontWeight": 600, "color": "#FF334155"}}
+    },
+    "tzDrop": {
+      "type": "dropdown",
+      "layout": {"width": {"fill": 608}, "height": {"hug": 44}},
+      "props": {
+        "isExpanded": true,
+        "hint": "Choose a time zone",
+        "items": ["(GMT-08:00) Los Angeles", "(GMT-05:00) New York", "(GMT+00:00) London", "(GMT+01:00) Berlin", "(GMT+05:30) Mumbai", "(GMT+09:00) Tokyo", "(GMT+10:00) Sydney"]
+      },
+      "bind": {"props.value": "${tz}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "tz", "value": "${result}"}]}]
+    },
+
+    "publicRow": {
+      "type": "row",
+      "children": ["publicText", "publicSwitch"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 72}, "padding": [16, 14, 16, 14]},
+      "props": {"spacing": 16},
+      "decoration": {"fills": [{"color": "#FFF8FAFC"}], "strokes": [{"color": "#FFE5E7EB"}], "radius": 12},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "isPublic", "op": "toggle"}]}]
+    },
+    "publicText": {
+      "type": "column",
+      "children": ["publicTitle", "publicDesc"],
+      "layout": {"width": {"fill": 500}, "height": {"hug": 44}},
+      "props": {"crossAxisAlignment": "start", "spacing": 2}
+    },
+    "publicTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 500}, "height": {"hug": 22}},
+      "props": {"text": "Public profile", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 600, "color": "#FF0F172A"}}
+    },
+    "publicDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 500}, "height": {"hug": 20}},
+      "props": {"text": "Anyone can read your bio and published pieces at plume.app/@${username}.", "style": {"fontFamily": "Inter", "fontSize": 14, "height": 1.5, "color": "#FF64748B"}}
+    },
+    "publicSwitch": {
+      "type": "switch",
+      "ignorePointer": true,
+      "props": {"value": true, "activeTrackColor": "#FF2563EB"},
+      "bind": {"props.value": "${isPublic}"}
+    },
+
+    "grpNotif": {
+      "type": "flex",
+      "children": ["gnHead", "gnCard"],
+      "layout": {"width": {"fill": 936}, "height": {"hug": 420}},
+      "props": {"direction": "horizontal", "spacing": 32, "crossAxisAlignment": "start"},
+      "media": [{"maxWidth": 1023, "patch": {"props": {"direction": "vertical", "spacing": 16, "crossAxisAlignment": "stretch"}}}]
+    },
+    "gnHead": {
+      "type": "column",
+      "children": ["gnTitle", "gnDesc"],
+      "layout": {"width": 248, "height": {"hug": 80}},
+      "props": {"crossAxisAlignment": "start", "spacing": 4},
+      "media": [{"maxWidth": 1023, "patch": {"layout": {"width": {"fill": 504}}}}]
+    },
+    "gnTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 248}, "height": {"hug": 22}},
+      "props": {"text": "Notifications", "style": {"fontFamily": "Inter", "fontSize": 16, "fontWeight": 600, "color": "#FF0F172A"}}
+    },
+    "gnDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 248}, "height": {"hug": 42}},
+      "props": {"text": "Choose what Plume emails you about. Security notices are always sent.", "style": {"fontFamily": "Inter", "fontSize": 14, "height": 1.5, "color": "#FF64748B"}}
+    },
+    "gnCard": {
+      "type": "column",
+      "children": ["notifList"],
+      "layout": {"width": {"fill": 656}, "height": {"hug": 400}, "padding": [24, 8, 24, 8]},
+      "props": {"crossAxisAlignment": "stretch"},
+      "decoration": {
+        "fills": [{"color": "#FFFFFFFF"}],
+        "strokes": [{"color": "#FFE5E7EB"}],
+        "radius": 16,
+        "effects": [{"type": "dropShadow", "color": "#0A0F172A", "offset": [0, 6], "blurRadius": 24}]
+      }
+    },
+    "notifList": {
+      "type": "listView",
+      "children": ["notifRow"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 380}},
+      "props": {"scrollable": false, "separator": "divider", "spacing": 1, "dividerThickness": 1, "dividerColor": "#FFF1F5F9"},
+      "bind": {"data": "${notifs}"}
+    },
+    "notifRow": {
+      "type": "row",
+      "children": ["notifText", "notifSwitch"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 76}, "padding": [0, 16, 0, 16]},
+      "props": {"spacing": 16},
+      "actions": [
+        {
+          "trigger": {"type": "click"},
+          "actions": [{"type": "setVariable", "variable": "notifs", "value": "${= setAt(notifs, index, set(item, 'on', !item.on))}"}]
+        }
+      ]
+    },
+    "notifText": {
+      "type": "column",
+      "children": ["notifTitle", "notifDesc"],
+      "layout": {"width": {"fill": 520}, "height": {"hug": 44}},
+      "props": {"crossAxisAlignment": "start", "spacing": 2}
+    },
+    "notifTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 520}, "height": {"hug": 22}},
+      "props": {"text": "${item.title}", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 600, "color": "#FF0F172A"}}
+    },
+    "notifDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 520}, "height": {"hug": 20}},
+      "props": {"text": "${item.desc}", "style": {"fontFamily": "Inter", "fontSize": 14, "height": 1.5, "color": "#FF64748B"}}
+    },
+    "notifSwitch": {
+      "type": "switch",
+      "ignorePointer": true,
+      "props": {"value": false, "activeTrackColor": "#FF2563EB"},
+      "bind": {"props.value": "${item.on}"}
+    },
+
+    "grpDanger": {
+      "type": "flex",
+      "children": ["gdHead", "gdCard"],
+      "layout": {"width": {"fill": 936}, "height": {"hug": 200}},
+      "props": {"direction": "horizontal", "spacing": 32, "crossAxisAlignment": "start"},
+      "media": [{"maxWidth": 1023, "patch": {"props": {"direction": "vertical", "spacing": 16, "crossAxisAlignment": "stretch"}}}]
+    },
+    "gdHead": {
+      "type": "column",
+      "children": ["gdTitle", "gdDesc"],
+      "layout": {"width": 248, "height": {"hug": 80}},
+      "props": {"crossAxisAlignment": "start", "spacing": 4},
+      "media": [{"maxWidth": 1023, "patch": {"layout": {"width": {"fill": 504}}}}]
+    },
+    "gdTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 248}, "height": {"hug": 22}},
+      "props": {"text": "Danger zone", "style": {"fontFamily": "Inter", "fontSize": 16, "fontWeight": 600, "color": "#FFB91C1C"}}
+    },
+    "gdDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 248}, "height": {"hug": 42}},
+      "props": {"text": "Irreversible actions on your account and everything in it.", "style": {"fontFamily": "Inter", "fontSize": 14, "height": 1.5, "color": "#FF64748B"}}
+    },
+    "gdCard": {
+      "type": "column",
+      "children": ["dangerRow", "confirmPanel"],
+      "layout": {"width": {"fill": 656}, "height": {"hug": 120}, "padding": 24},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 16},
+      "decoration": {"fills": [{"color": "#FFFFFFFF"}], "strokes": [{"color": "#FFFECACA"}], "radius": 16}
+    },
+    "dangerRow": {
+      "type": "row",
+      "children": ["dangerText", "deleteBtn"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 64}},
+      "props": {"spacing": 20}
+    },
+    "dangerText": {
+      "type": "column",
+      "children": ["dangerTitle", "dangerDesc"],
+      "layout": {"width": {"fill": 420}, "height": {"hug": 60}},
+      "props": {"crossAxisAlignment": "start", "spacing": 2}
+    },
+    "dangerTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 420}, "height": {"hug": 22}},
+      "props": {"text": "Delete account", "style": {"fontFamily": "Inter", "fontSize": 15, "fontWeight": 600, "color": "#FF0F172A"}}
+    },
+    "dangerDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 420}, "height": {"hug": 42}},
+      "props": {"text": "Permanently removes your profile, 214 drafts and 3 published collections. This cannot be undone.", "style": {"fontFamily": "Inter", "fontSize": 14, "height": 1.5, "color": "#FF64748B"}}
+    },
+    "deleteBtn": {
+      "type": "outlinedButton",
+      "layout": {"width": 152, "height": 40},
+      "props": {
+        "label": "Delete account",
+        "style": {"foregroundColor": "#FFDC2626", "side": {"color": "#FFFCA5A5", "width": 1}, "textStyle": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600}}
+      },
+      "bind": {"props.enabled": "${= !confirmDelete}"},
+      "actions": [
+        {
+          "trigger": {"type": "click"},
+          "actions": [
+            {"type": "setVariable", "variable": "confirmText", "value": ""},
+            {"type": "setVariable", "variable": "confirmDelete", "value": "${= true}"}
+          ]
+        }
+      ]
+    },
+    "confirmPanel": {
+      "type": "column",
+      "children": ["confirmTitle", "confirmInput", "confirmBtns"],
+      "layout": {"width": {"fill": 608}, "height": {"hug": 150}, "padding": 16},
+      "props": {"crossAxisAlignment": "stretch", "spacing": 12},
+      "decoration": {"fills": [{"color": "#FFFEF2F2"}], "radius": 12},
+      "bind": {"visible": "${confirmDelete}"}
+    },
+    "confirmTitle": {
+      "type": "text",
+      "layout": {"width": {"fill": 576}, "height": {"hug": 22}},
+      "props": {"text": "Are you sure? Type ${savedUsername} to confirm.", "style": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600, "height": 1.5, "color": "#FF991B1B"}}
+    },
+    "confirmInput": {
+      "type": "textField",
+      "layout": {"width": {"fill": 576}, "height": {"hug": 44}},
+      "props": {"decoration": {"hintText": "Your username"}},
+      "bind": {"props.initialValue": "${confirmText}"},
+      "actions": [{"trigger": {"type": "changed"}, "actions": [{"type": "setVariable", "variable": "confirmText", "value": "${result}"}]}]
+    },
+    "confirmBtns": {
+      "type": "row",
+      "children": ["keepBtn", "reallyBtn"],
+      "layout": {"width": {"fill": 576}, "height": {"hug": 40}},
+      "props": {"mainAxisAlignment": "end", "spacing": 8}
+    },
+    "keepBtn": {
+      "type": "textButton",
+      "layout": {"width": 148, "height": 40},
+      "props": {"label": "Keep my account", "style": {"foregroundColor": "#FF334155", "textStyle": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600}}},
+      "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "confirmDelete", "value": "${= false}"}]}]
+    },
+    "reallyBtn": {
+      "type": "filledButton",
+      "layout": {"width": 172, "height": 40},
+      "props": {
+        "label": "Delete permanently",
+        "style": {"backgroundColor": "#FFDC2626", "foregroundColor": "#FFFFFFFF", "textStyle": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600}}
+      },
+      "bind": {"props.enabled": "${= confirmText == savedUsername}"},
+      "actions": [
+        {
+          "trigger": {"type": "click"},
+          "actions": [
+            {"type": "setVariable", "variable": "confirmDelete", "value": "${= false}"},
+            {"type": "showToast", "message": "Your account is scheduled for deletion. We emailed you a link to undo it within 14 days."}
+          ]
+        }
+      ]
+    },
+
+    "placeholder": {
+      "type": "column",
+      "children": ["phIconWrap", "phTitle", "phDesc", "phBtn"],
+      "layout": {"width": {"fill": 936}, "height": {"hug": 300}, "padding": [32, 56, 32, 56]},
+      "props": {"spacing": 12},
+      "decoration": {"fills": [{"color": "#FFFFFFFF"}], "strokes": [{"color": "#FFE5E7EB"}], "radius": 16},
+      "bind": {"visible": "${= !(section == 'profile' || section == 'account' || section == 'notifications')}"}
+    },
+    "phIconWrap": {
+      "type": "row",
+      "children": ["phIcon"],
+      "layout": {"width": 56, "height": 56},
+      "props": {"mainAxisAlignment": "center"},
+      "decoration": {"fills": [{"color": "#FFEFF4FF"}], "shape": "circle"}
+    },
+    "phIcon": {
+      "type": "icon",
+      "layout": {"width": 26, "height": 26},
+      "props": {"icon": "palette_outlined", "color": "#FF2563EB", "size": 26},
+      "bind": {"props.icon": "${sectionIcon}"}
+    },
+    "phTitle": {
+      "type": "text",
+      "layout": {"width": {"hug": 200}, "height": {"hug": 28}},
+      "props": {"text": "${sectionLabel} is on its way", "textAlign": "center", "style": {"fontFamily": "Inter Display", "fontSize": 22, "fontWeight": 700, "letterSpacing": -0.44, "color": "#FF0F172A"}}
+    },
+    "phDesc": {
+      "type": "text",
+      "layout": {"width": {"fill": 420}, "height": {"hug": 46}, "constraints": {"maxWidth": 440}},
+      "props": {"text": "There is nothing to change here yet. Your profile, notifications and account options are under Profile.", "textAlign": "center", "style": {"fontFamily": "Inter", "fontSize": 15, "height": 1.55, "color": "#FF64748B"}}
+    },
+    "phBtn": {
+      "type": "textButton",
+      "layout": {"width": 160, "height": 40},
+      "props": {"label": "Back to Profile", "icon": "arrow_back", "style": {"foregroundColor": "#FF2563EB", "textStyle": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600}}},
+      "actions": [
+        {
+          "trigger": {"type": "click"},
+          "actions": [
+            {"type": "setVariable", "variable": "section", "value": "profile"},
+            {"type": "setVariable", "variable": "sectionLabel", "value": "Profile"},
+            {"type": "setVariable", "variable": "sectionDesc", "value": "How you appear to readers and collaborators on Plume."},
+            {"type": "setVariable", "variable": "sectionIcon", "value": "person_outline"}
+          ]
+        }
+      ]
+    },
+
+    "bottomBar": {
+      "type": "row",
+      "children": ["barDot", "barText", "barSpacer", "cancelBtn", "saveBtn"],
+      "layout": {"width": {"fill": 1016}, "height": 72, "padding": [40, 0, 40, 0]},
+      "props": {"spacing": 12},
+      "decoration": {
+        "fills": [{"color": "#FFFFFFFF"}],
+        "strokes": [{"color": "#FFE5E7EB"}],
+        "strokeSides": "top",
+        "effects": [{"type": "dropShadow", "color": "#080F172A", "offset": [0, -4], "blurRadius": 16}]
+      },
+      "media": [{"maxWidth": 1023, "patch": {"layout": {"padding": [24, 0, 24, 0]}}}]
+    },
+    "barDot": {
+      "type": "box",
+      "layout": {"width": 8, "height": 8},
+      "decoration": {"shape": "circle", "fills": [{"color": "#FF16A34A"}]},
+      "bind": {"decoration.fills[0].color": "${= bioOver ? '#FFDC2626' : (dirty ? '#FFF59E0B' : '#FF16A34A')}"}
+    },
+    "barText": {
+      "type": "text",
+      "layout": {"width": {"hug": 180}, "height": {"hug": 20}},
+      "props": {"text": "All changes saved", "style": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 500, "color": "#FF475569"}},
+      "bind": {"props.text": "${= bioOver ? 'Bio is over 160 characters' : (name == '' ? 'Your name can't be empty' : (dirty ? 'You have unsaved changes' : 'All changes saved'))}"}
+    },
+    "barSpacer": {"type": "spacer"},
+    "cancelBtn": {
+      "type": "outlinedButton",
+      "layout": {"width": 104, "height": 40},
+      "props": {"label": "Cancel", "style": {"foregroundColor": "#FF334155", "textStyle": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600}}},
+      "bind": {"props.enabled": "${dirty}"},
+      "actions": [
+        {
+          "trigger": {"type": "click"},
+          "actions": [
+            {"type": "setVariable", "variable": "name", "value": "${savedName}"},
+            {"type": "setVariable", "variable": "username", "value": "${savedUsername}"},
+            {"type": "setVariable", "variable": "bio", "value": "${savedBio}"},
+            {"type": "setVariable", "variable": "tz", "value": "${savedTz}"},
+            {"type": "setVariable", "variable": "isPublic", "value": "${savedPublic}"},
+            {"type": "setVariable", "variable": "avatar", "value": "${savedAvatar}"},
+            {"type": "setVariable", "variable": "notifs", "value": "${= map(range(length(notifs)), i => set(notifs[i], 'on', savedNotifs[i]))}"},
+            {"type": "showToast", "message": "Changes discarded"}
+          ]
+        }
+      ]
+    },
+    "saveBtn": {
+      "type": "filledButton",
+      "layout": {"width": 140, "height": 40},
+      "props": {
+        "label": "Save changes",
+        "style": {"backgroundColor": "#FF2563EB", "foregroundColor": "#FFFFFFFF", "textStyle": {"fontFamily": "Inter", "fontSize": 14, "fontWeight": 600}}
+      },
+      "bind": {"props.enabled": "${canSave}"},
+      "actions": [
+        {
+          "trigger": {"type": "click"},
+          "actions": [
+            {"type": "setVariable", "variable": "savedName", "value": "${name}"},
+            {"type": "setVariable", "variable": "savedUsername", "value": "${username}"},
+            {"type": "setVariable", "variable": "savedBio", "value": "${bio}"},
+            {"type": "setVariable", "variable": "savedTz", "value": "${tz}"},
+            {"type": "setVariable", "variable": "savedPublic", "value": "${isPublic}"},
+            {"type": "setVariable", "variable": "savedAvatar", "value": "${avatar}"},
+            {"type": "setVariable", "variable": "savedNotifs", "value": "${= map(notifs, n => n.on)}"},
+            {"type": "showToast", "message": "Settings saved"}
+          ]
+        }
+      ]
+    }
+  },
+  "variables": {
+    "settings": [
+      {"name": "section", "type": "text", "value": "profile"},
+      {"name": "sectionLabel", "type": "text", "value": "Profile"},
+      {"name": "sectionDesc", "type": "text", "value": "How you appear to readers and collaborators on Plume."},
+      {"name": "sectionIcon", "type": "text", "value": "person_outline"},
+      {
+        "name": "sections",
+        "type": "list",
+        "value": [
+          {"id": "profile", "label": "Profile", "icon": "person_outline", "target": "pageHead", "desc": "How you appear to readers and collaborators on Plume."},
+          {"id": "account", "label": "Account", "icon": "shield_outlined", "target": "grpDanger", "desc": "Sign-in details and what happens to your account."},
+          {"id": "notifications", "label": "Notifications", "icon": "notifications_none", "target": "grpNotif", "desc": "Decide which emails Plume sends you."},
+          {"id": "appearance", "label": "Appearance", "icon": "palette_outlined", "target": "", "desc": "Themes, editor fonts and reading width."},
+          {"id": "billing", "label": "Billing", "icon": "credit_card", "target": "", "desc": "Your plan, invoices and payment method."},
+          {"id": "team", "label": "Team", "icon": "group_outlined", "target": "", "desc": "Invite editors and manage shared collections."}
+        ]
+      },
+      {"name": "avatarColors", "type": "list", "value": ["#FF2563EB", "#FF7C3AED", "#FF0D9488", "#FFEA580C"]},
+
+      {"name": "name", "type": "text", "value": "Elena Marsh"},
+      {"name": "username", "type": "text", "value": "elenamarsh"},
+      {"name": "bio", "type": "text", "value": "Essayist and slow reader. Writing about cities, rivers and the small rituals of making things."},
+      {"name": "tz", "type": "text", "value": "(GMT-05:00) New York"},
+      {"name": "isPublic", "type": "boolean", "value": true},
+      {"name": "avatar", "type": "integer", "value": 0},
+      {
+        "name": "notifs",
+        "type": "list",
+        "value": [
+          {"title": "Comments on your drafts", "desc": "When a collaborator leaves a comment or suggestion.", "on": true},
+          {"title": "Mentions", "desc": "When someone mentions you in a draft or a reply.", "on": true},
+          {"title": "Weekly writing digest", "desc": "Your word count, streak and most-read pieces, every Monday.", "on": false},
+          {"title": "Product updates", "desc": "New features and occasional tips from the Plume team.", "on": false},
+          {"title": "New followers", "desc": "When a reader follows your public profile.", "on": true}
+        ]
+      },
+
+      {"name": "savedName", "type": "text", "value": "Elena Marsh"},
+      {"name": "savedUsername", "type": "text", "value": "elenamarsh"},
+      {"name": "savedBio", "type": "text", "value": "Essayist and slow reader. Writing about cities, rivers and the small rituals of making things."},
+      {"name": "savedTz", "type": "text", "value": "(GMT-05:00) New York"},
+      {"name": "savedPublic", "type": "boolean", "value": true},
+      {"name": "savedAvatar", "type": "integer", "value": 0},
+      {"name": "savedNotifs", "type": "list", "value": [true, true, false, false, true]},
+
+      {"name": "confirmDelete", "type": "boolean", "value": false},
+      {"name": "confirmText", "type": "text", "value": ""},
+
+      {"name": "bioOver", "type": "boolean", "formula": "length(bio) > 160"},
+      {
+        "name": "dirty",
+        "type": "boolean",
+        "formula": "name != savedName || username != savedUsername || bio != savedBio || tz != savedTz || isPublic != savedPublic || avatar != savedAvatar || count(range(length(notifs)), i => notifs[i].on != savedNotifs[i]) > 0"
+      },
+      {"name": "canSave", "type": "boolean", "formula": "dirty && !bioOver && name != ''"}
+    ]
+  }
+}
+```

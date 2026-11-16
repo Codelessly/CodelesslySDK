@@ -18,6 +18,13 @@ if [ -z "${CODELESSLY_QUICKJS_LIBRARY:-}" ]; then
 fi
 
 # Paths are taken relative to where the command is run; make them absolute.
+# Under Git Bash on Windows they are written as Dart reads them (C:/…, not /c/…).
+abs() {
+  local p="$1"
+  case "$p" in /*|[A-Za-z]:[/\\]*) ;; *) p="$PWD/$p" ;; esac
+  if command -v cygpath >/dev/null 2>&1; then p="$(cygpath -m "$p")"; fi
+  printf '%s' "$p"
+}
 args=()
 out=""
 expect_path=0
@@ -25,7 +32,7 @@ want_ds=0
 design_system=""
 for a in "$@"; do
   if [ $want_ds = 1 ]; then
-    case "$a" in /*) ;; *) a="$PWD/$a" ;; esac
+    a="$(abs "$a")"
     design_system="$a"
     want_ds=0
     continue
@@ -33,7 +40,7 @@ for a in "$@"; do
   if [ $expect_path = 1 ]; then
     # `--fonts system` names the system's font directories, not a path.
     if [ "${prev:-}" != "--fonts" ] || [ "$a" != "system" ]; then
-      case "$a" in /*) ;; *) a="$PWD/$a" ;; esac
+      a="$(abs "$a")"
     fi
     expect_path=0
     args+=("$a")
@@ -50,7 +57,7 @@ for a in "$@"; do
       if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map)$ ]]; then
         args+=("$a")
       else
-        case "$a" in /*) ;; *) a="$PWD/$a" ;; esac
+        a="$(abs "$a")"
         args+=("$a")
       fi
       ;;

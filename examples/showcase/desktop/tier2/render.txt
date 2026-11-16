@@ -1,0 +1,3 @@
+WARNING [app_inbox] image_network [app_inbox.doc] /nodes/Avatar4/props/image
+WARNING [app_inbox] image_network [app_inbox.doc] /nodes/Avatar6/props/image
+WARNING [app_inbox] image_network [app_inbox.doc] /nodes/Avatar8/props/image

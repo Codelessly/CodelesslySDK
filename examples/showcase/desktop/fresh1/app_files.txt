@@ -1,0 +1,124 @@
+state tab="all"
+state view="List"
+state q=""
+state allSel=false
+state last="f3"
+state files=[{"id":"f1","name":"Brand guidelines v3.pdf","icon":"picture_as_pdf","owner":"Maya Reyes","modified":"Today, 9:41","size":"4.2 MB","sel":true},{"id":"f2","name":"Logo pack.zip","icon":"folder_zip","owner":"Jonas Weber","modified":"Yesterday","size":"18.6 MB","sel":false},{"id":"f3","name":"Homepage hero.png","icon":"image","owner":"Priya Nair","modified":"Mar 12","size":"2.8 MB","sel":true},{"id":"f4","name":"Color palette.fig","icon":"design_services","owner":"Maya Reyes","modified":"Mar 10","size":"12.1 MB","sel":false},{"id":"f5","name":"Brand voice.docx","icon":"description","owner":"Sam Patel","modified":"Mar 8","size":"96 KB","sel":false},{"id":"f6","name":"Launch plan.xlsx","icon":"table_chart","owner":"Jonas Weber","modified":"Mar 5","size":"340 KB","sel":false},{"id":"f7","name":"Intro reel.mp4","icon":"movie","owner":"Priya Nair","modified":"Feb 28","size":"148 MB","sel":false}]
+App
+  Sidebar
+    Brand "Stowage" icon:"inventory_2"
+    Button "Upload" icon:"upload" w:fill -> emit upload
+    NavItem "All files" icon:"folder" selected:=tab=="all" -> tab="all"
+    NavItem "Shared with me" icon:"group" selected:=tab=="shared" -> tab="shared"
+    NavItem "Recent" icon:"schedule" selected:=tab=="recent" -> tab="recent"
+    NavItem "Starred" icon:"star" selected:=tab=="starred" -> tab="starred"
+    NavItem "Trash" icon:"delete" selected:=tab=="trash" -> tab="trash"
+    Spacer grow
+    Column gap:6
+      Row between
+        Text.small "Storage"
+        Text.caption "62 of 100 GB"
+      Progress 0.62
+  Main
+    Nav
+      Breadcrumb items:["All files","Design","Brand refresh"]
+      Row gap:12 middle
+        Input "Search files" =q w:240
+        SegmentedButton =view items:["List","Grid"]
+    Column pad:24 gap:20 scroll
+      Column gap:12
+        Text.eyebrow "FOLDERS"
+        Grid cols:4 gap:16
+          Card
+            Row gap:12 middle
+              IconTile "folder"
+              Column gap:2
+                Text.strong "Logos"
+                Text.caption "24 items"
+          Card
+            Row gap:12 middle
+              IconTile "folder"
+              Column gap:2
+                Text.strong "Photography"
+                Text.caption "132 items"
+          Card
+            Row gap:12 middle
+              IconTile "folder"
+              Column gap:2
+                Text.strong "Presentations"
+                Text.caption "18 items"
+          Card
+            Row gap:12 middle
+              IconTile "folder"
+              Column gap:2
+                Text.strong "Archive"
+                Text.caption "57 items"
+      Column gap:12
+        Text.eyebrow "FILES"
+        if count(files,f=>f.sel)>0
+          Row between middle pad:[16,10,16,10] fill:#FF111827 radius:10 animate:fade
+            Text.strong "{count(files,f=>f.sel)} selected" color:#FFFFFFFF
+            Row gap:8
+              Button.outline "Share" icon:"share" -> emit share
+              Button.outline "Move" icon:"drive_file_move" -> emit move
+              Button.outline "Download" icon:"download" -> emit download
+              Button.destructive "Delete" icon:"delete" -> files=removeWhere(files,f=>f.sel)
+        Card pad:0 gap:0
+          Row pad:[20,12,20,12] gap:16 middle
+            Checkbox =allSel w:24 -> files=map(files,f=>with(f,"sel",allSel))
+            Spacer w:24
+            Text.columnHead "Name" grow
+            Text.columnHead "Owner" w:160
+            Text.columnHead "Modified" w:120
+            Text.columnHead "Size" w:80 right
+          each row in files
+            Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB fill:=row.sel?"#142563EB":"#00FFFFFF" -> last=row.id
+              Checkbox =row.sel w:24 -> last=row.id
+              Icon "{row.icon}" size:22 w:24 color:#FF6B7280
+              Text.strong "{row.name}" grow
+              Row gap:8 middle w:160
+                Avatar "{row.owner}" size:24
+                Text "{row.owner}"
+              Text.muted "{row.modified}" w:120
+              Text.muted "{row.size}" w:80 right
+  Pane w:320 pad:16 gap:16 border-left:#FFE5E7EB
+    Text.eyebrow "DETAILS"
+    Box h:160 center fill:#FFF3F4F6 radius:12
+      Icon "{find(files,f=>f.id==last).icon}" size:56 color:#FF6B7280
+    Column gap:2
+      Heading "{find(files,f=>f.id==last).name}" level:3
+      Text.caption "{find(files,f=>f.id==last).size} · Modified {find(files,f=>f.id==last).modified}"
+    Divider
+    Text.eyebrow "WHO HAS ACCESS"
+    Row gap:10 middle
+      Avatar "{find(files,f=>f.id==last).owner}" size:32
+      Column grow
+        Text.strong "{find(files,f=>f.id==last).owner}"
+        Text.caption "Owner"
+    Row gap:10 middle
+      Avatar "Jonas Weber" size:32
+      Column grow
+        Text.strong "Jonas Weber"
+        Text.caption "Can edit"
+    Row gap:10 middle
+      Avatar "Sam Patel" size:32
+      Column grow
+        Text.strong "Sam Patel"
+        Text.caption "Can view"
+    Divider
+    Text.eyebrow "RECENT ACTIVITY"
+    Row gap:10 top
+      Icon "edit" size:18 color:#FF6B7280
+      Column grow
+        Text "Jonas Weber edited this file"
+        Text.caption "2 hours ago"
+    Row gap:10 top
+      Icon "share" size:18 color:#FF6B7280
+      Column grow
+        Text "Shared with Sam Patel"
+        Text.caption "Yesterday"
+    Row gap:10 top
+      Icon "upload" size:18 color:#FF6B7280
+      Column grow
+        Text "Uploaded by {find(files,f=>f.id==last).owner}"
+        Text.caption "Mar 4"

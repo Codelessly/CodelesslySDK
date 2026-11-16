@@ -1,0 +1,32 @@
+{
+ "name": "site_pricing",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 204.0,
+   "problems": 0,
+   "errors": 0,
+   "input_tokens": 180,
+   "cached": 123465,
+   "output_tokens": 25025
+  },
+  {
+   "round": 2,
+   "modelSeconds": 154.9,
+   "problems": 0,
+   "errors": 0,
+   "input_tokens": 20914,
+   "cached": 123465,
+   "output_tokens": 20805
+  },
+  {
+   "round": 3,
+   "modelSeconds": 30.1,
+   "shipped": 2
+  }
+ ],
+ "final": 2,
+ "errors": 0,
+ "problems": 0
+}

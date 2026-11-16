@@ -1,0 +1,4 @@
+At 768 wide: ERROR   render_exception [doc screen board 768x800] node laneHead
+        Node "laneHead#1" (row): its content overflows its right by 13 px. It fills 160 of its parent, and its content needs 173 (laneDot 8, laneName 77, laneCount 23.7, laneSp 0, laneAdd 28, with its padding and spacing). Give the parent more room on that axis (hug), or let this node hug its content.
+At 768 wide: WARNING layout_overflow [doc screen board 768x800] node laneAdd
+        "laneAdd" (iconButton, 28 wide) overflows its parent "laneHead" (row, 160 wide) by 12 px horizontally.

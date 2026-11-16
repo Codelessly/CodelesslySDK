@@ -1,0 +1,3071 @@
+{
+ "schema": 3,
+ "roots": [
+  "site_product"
+ ],
+ "nodes": {
+  "site_product": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1280,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "children": [
+    "column2",
+    "divider1",
+    "column3",
+    "column18",
+    "column25",
+    "divider3",
+    "column28"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "children": [
+    "row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "children": [
+    "text1",
+    "row2",
+    "row3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 24
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 22,
+     "color": "ink"
+    },
+    "text": "Nord & Co"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "children": [
+    "textButton1",
+    "textButton2",
+    "textButton3",
+    "textButton4"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Lighting"
+   }
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Furniture"
+   }
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Desk"
+   }
+  },
+  "textButton4": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Journal"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "children": [
+    "SearchBar1",
+    "NotificationBadge1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "SearchBar1": {
+   "type": "SearchBar",
+   "layout": {
+    "width": 260,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "placeholder": "Search the store",
+    "value": "q"
+   }
+  },
+  "NotificationBadge1": {
+   "type": "NotificationBadge",
+   "children": [
+    "iconButton1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.count": "${cart}"
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "shopping_bag",
+     "style": "filled"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openCart"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column3": {
+   "type": "column",
+   "children": [
+    "column4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     40,
+     24,
+     48
+    ]
+   }
+  },
+  "column4": {
+   "type": "column",
+   "children": [
+    "column5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "children": [
+    "Breadcrumb1",
+    "row4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "Breadcrumb1": {
+   "type": "Breadcrumb",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "Home",
+     "Lighting",
+     "Desk lamps",
+     "Arc One"
+    ],
+    "showHomeIcon": true
+   }
+  },
+  "row4": {
+   "type": "row",
+   "children": [
+    "column6",
+    "column12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 48,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "children": [
+    "column7",
+    "grid1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "children": [
+    "icon1",
+    "text2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 500
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 26
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "spacing": 16
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= finish==\"Brass\"?theme.colors.warningTint:finish==\"Graphite\"?theme.colors.track:theme.colors.errorTint}",
+    "decoration.radius": "${theme.radii.card}"
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "emoji_objects",
+     "style": "filled"
+    },
+    "size": 168,
+    "color": "ink"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "${= views[img]} · ${finish}"
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "children": [
+    "grid1Row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid1Row1": {
+   "type": "row",
+   "children": [
+    "column8",
+    "column9",
+    "column10",
+    "column11"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column8": {
+   "type": "column",
+   "children": [
+    "icon2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 88
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 14
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= img==0?\"#FF111827\":theme.colors.primaryBorder}",
+    "decoration.radius": "${theme.radii.tile}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "img",
+       "value": "${= 0}"
+      }
+     ]
+    }
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "emoji_objects",
+     "style": "filled"
+    },
+    "size": 26,
+    "color": "inkSoft"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "children": [
+    "icon3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 88
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 14
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= img==1?\"#FF111827\":theme.colors.primaryBorder}",
+    "decoration.radius": "${theme.radii.tile}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "img",
+       "value": "${= 1}"
+      }
+     ]
+    }
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "light",
+     "style": "filled"
+    },
+    "size": 26,
+    "color": "inkSoft"
+   }
+  },
+  "column10": {
+   "type": "column",
+   "children": [
+    "icon4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 88
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 14
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= img==2?\"#FF111827\":theme.colors.primaryBorder}",
+    "decoration.radius": "${theme.radii.tile}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "img",
+       "value": "${= 2}"
+      }
+     ]
+    }
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "zoom_in",
+     "style": "filled"
+    },
+    "size": 26,
+    "color": "inkSoft"
+   }
+  },
+  "column11": {
+   "type": "column",
+   "children": [
+    "icon5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 88
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "radius": 14
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= img==3?\"#FF111827\":theme.colors.primaryBorder}",
+    "decoration.radius": "${theme.radii.tile}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "img",
+       "value": "${= 3}"
+      }
+     ]
+    }
+   ]
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "desk",
+     "style": "filled"
+    },
+    "size": 26,
+    "color": "inkSoft"
+   }
+  },
+  "column12": {
+   "type": "column",
+   "children": [
+    "column13",
+    "row6",
+    "Paragraph1",
+    "buyPanel",
+    "column15"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 22,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column13": {
+   "type": "column",
+   "children": [
+    "text3",
+    "text4",
+    "row5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Nord & Co · Desk lamps"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 36,
+     "color": "ink"
+    },
+    "text": "Arc One Desk Lamp"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "children": [
+    "icon6",
+    "icon7",
+    "icon8",
+    "icon9",
+    "icon10",
+    "text5",
+    "text6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star",
+     "style": "filled"
+    },
+    "color": "#FFF59E0B",
+    "size": 18
+   }
+  },
+  "icon7": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star",
+     "style": "filled"
+    },
+    "color": "#FFF59E0B",
+    "size": 18
+   }
+  },
+  "icon8": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star",
+     "style": "filled"
+    },
+    "color": "#FFF59E0B",
+    "size": 18
+   }
+  },
+  "icon9": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star",
+     "style": "filled"
+    },
+    "color": "#FFF59E0B",
+    "size": 18
+   }
+  },
+  "icon10": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star_half",
+     "style": "filled"
+    },
+    "color": "#FFF59E0B",
+    "size": 18
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true,
+    "padding": [
+     6,
+     0,
+     4,
+     0
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "color": "ink"
+    },
+    "text": "4.7"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "318 reviews",
+    "style": {
+     "from": "meta",
+     "color": "accent"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "Reviews"
+      }
+     ]
+    }
+   ]
+  },
+  "row6": {
+   "type": "row",
+   "children": [
+    "text7",
+    "text8",
+    "row7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "$149",
+    "style": {
+     "from": "numberHero",
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "number",
+     "color": "inkFaint",
+     "decoration": "lineThrough"
+    },
+    "text": "$189",
+    "maxLines": 1
+   }
+  },
+  "row7": {
+   "type": "row",
+   "children": [
+    "text9"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 24,
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goodTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "goodLine"
+     }
+    ],
+    "radius": 999
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Save $40",
+    "style": {
+     "from": "chip",
+     "color": "goodDeep"
+    },
+    "maxLines": 1
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "A sculptural task lamp with a balanced steel arm and solid brass joints. Warm, dimmable light that moves exactly where you need it."
+   }
+  },
+  "column14": {
+   "type": "column",
+   "children": [
+    "text10",
+    "row8"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkSoft"
+    },
+    "text": "Finish: ${finish}"
+   }
+  },
+  "row8": {
+   "type": "row",
+   "children": [
+    "choiceChip1",
+    "choiceChip2",
+    "choiceChip3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "choiceChip1": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Brass"
+   },
+   "bind": {
+    "props.selected": "${= finish==\"Brass\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "finish",
+       "value": "Brass"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip2": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Graphite"
+   },
+   "bind": {
+    "props.selected": "${= finish==\"Graphite\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "finish",
+       "value": "Graphite"
+      }
+     ]
+    }
+   ]
+  },
+  "choiceChip3": {
+   "type": "choiceChip",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Sand"
+   },
+   "bind": {
+    "props.selected": "${= finish==\"Sand\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "finish",
+       "value": "Sand"
+      }
+     ]
+    }
+   ]
+  },
+  "Stepper1": {
+   "type": "Stepper",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Quantity",
+    "value": "qty",
+    "min": 1.0,
+    "max": 10.0
+   }
+  },
+  "row9": {
+   "type": "row",
+   "children": [
+    "filledButton1",
+    "outlinedButton1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48
+   },
+   "props": {
+    "label": "Add to cart"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "cart",
+       "value": "${= cart+qty}"
+      },
+      {
+       "type": "showToast",
+       "message": "Added ${qty} × Arc One (${finish}) to cart"
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48
+   },
+   "props": {
+    "label": "Buy now"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "buyNow"
+      }
+     ]
+    }
+   ]
+  },
+  "column15": {
+   "type": "column",
+   "children": [
+    "row10",
+    "divider2",
+    "row11"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     18,
+     16,
+     18,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 18
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "row10": {
+   "type": "row",
+   "children": [
+    "shipMark",
+    "column16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14
+   }
+  },
+  "icon11": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "local_shipping",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "accent"
+   }
+  },
+  "column16": {
+   "type": "column",
+   "children": [
+    "text11",
+    "text12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Free delivery in 2–4 business days"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Order before 3 pm for same-day dispatch."
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "children": [
+    "retMark",
+    "column17"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14
+   }
+  },
+  "icon12": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "assignment_return",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "accent"
+   }
+  },
+  "column17": {
+   "type": "column",
+   "children": [
+    "text13",
+    "text14"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "30-day free returns"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Changed your mind? Send it back, no questions asked."
+   }
+  },
+  "column18": {
+   "type": "column",
+   "children": [
+    "column19"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     24,
+     24,
+     64
+    ]
+   }
+  },
+  "column19": {
+   "type": "column",
+   "children": [
+    "column20"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column20": {
+   "type": "column",
+   "children": [
+    "SegmentedControl1",
+    "column21",
+    "column22",
+    "column23"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "SegmentedControl1": {
+   "type": "SegmentedControl",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "value": "tab",
+    "options": [
+     "Description",
+     "Specifications",
+     "Reviews"
+    ]
+   }
+  },
+  "column21": {
+   "type": "column",
+   "children": [
+    "text15",
+    "Paragraph2",
+    "Paragraph3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 760
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= tab==\"Description\"}"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Designed for focus"
+   }
+  },
+  "Paragraph2": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Arc One balances a slender steel arm on a weighted base, so it holds any angle without a single knob to tighten. The integrated LED dims in five steps and shifts from warm 2700 K evening light to crisp 4000 K for detail work."
+   }
+  },
+  "Paragraph3": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Each lamp is assembled by hand and finished in brushed brass, graphite or sand powder coat. It ships with a braided USB-C cable and a two-year warranty."
+   }
+  },
+  "column22": {
+   "type": "column",
+   "children": [
+    "listView1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 760
+    },
+    "padding": [
+     22,
+     6,
+     22,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= tab==\"Specifications\"}",
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "children": [
+    "listView1Item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${specs}"
+   }
+  },
+  "listView1Item": {
+   "type": "column",
+   "children": [
+    "row12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row12": {
+   "type": "row",
+   "children": [
+    "text16",
+    "text17"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     14,
+     0,
+     14
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "${item.k}"
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "${item.v}"
+   }
+  },
+  "column23": {
+   "type": "column",
+   "children": [
+    "row13",
+    "listView2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 760
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= tab==\"Reviews\"}"
+   }
+  },
+  "row13": {
+   "type": "row",
+   "children": [
+    "text18",
+    "text19"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "4.7",
+    "style": {
+     "from": "numberLarge",
+     "color": "ink"
+    }
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "out of 5 · 318 reviews"
+   }
+  },
+  "listView2": {
+   "type": "listView",
+   "children": [
+    "listView2Item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${reviews}"
+   }
+  },
+  "listView2Item": {
+   "type": "column",
+   "children": [
+    "column24"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column24": {
+   "type": "column",
+   "children": [
+    "row14",
+    "row16",
+    "text22"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.tile}"
+   }
+  },
+  "row14": {
+   "type": "row",
+   "children": [
+    "row15",
+    "text21"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "row15": {
+   "type": "row",
+   "children": [
+    "Avatar1",
+    "text20"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "medium"
+   },
+   "bind": {
+    "props.name": "${item.name}"
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "${item.date}"
+   }
+  },
+  "row16": {
+   "type": "row",
+   "children": [
+    "icon13",
+    "icon14",
+    "icon15",
+    "icon16",
+    "icon17"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2
+   }
+  },
+  "icon13": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star",
+     "style": "filled"
+    },
+    "color": "#FFF59E0B",
+    "size": 16
+   }
+  },
+  "icon14": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star",
+     "style": "filled"
+    },
+    "color": "#FFF59E0B",
+    "size": 16
+   }
+  },
+  "icon15": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star",
+     "style": "filled"
+    },
+    "color": "#FFF59E0B",
+    "size": 16
+   }
+  },
+  "icon16": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star",
+     "style": "filled"
+    },
+    "color": "#FFF59E0B",
+    "size": 16
+   }
+  },
+  "icon17": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "star",
+     "style": "filled"
+    },
+    "size": 16
+   },
+   "bind": {
+    "props.color": "${= item.stars>=5?\"#FFF59E0B\":\"#FFD1D5DB\"}"
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.text}",
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "column25": {
+   "type": "column",
+   "children": [
+    "column26"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     56,
+     24,
+     64
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "column26": {
+   "type": "column",
+   "children": [
+    "column27"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column27": {
+   "type": "column",
+   "children": [
+    "text23",
+    "grid2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "fontSize": 24,
+     "color": "ink"
+    },
+    "text": "You may also like"
+   }
+  },
+  "grid2": {
+   "type": "column",
+   "children": [
+    "grid2Row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid2Row1": {
+   "type": "row",
+   "children": [
+    "ProductTile1",
+    "ProductTile2",
+    "ProductTile3",
+    "ProductTile4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "ProductTile1": {
+   "type": "ProductTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Oak Desk Tray",
+    "detail": "Solid oak · 32 cm",
+    "price": "$59",
+    "rating": "4.8",
+    "kind": "box",
+    "tone": "sand"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openProduct",
+       "value": "oak-tray"
+      }
+     ]
+    }
+   ]
+  },
+  "ProductTile2": {
+   "type": "ProductTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Stoneware Mug",
+    "detail": "Hand-glazed · 350 ml",
+    "price": "$28",
+    "rating": "4.6",
+    "kind": "mug",
+    "tone": "slate"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openProduct",
+       "value": "mug"
+      }
+     ]
+    }
+   ]
+  },
+  "ProductTile3": {
+   "type": "ProductTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Canvas Desk Tote",
+    "detail": "Waxed canvas",
+    "price": "$45",
+    "rating": "4.5",
+    "kind": "tote",
+    "tone": "mint"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openProduct",
+       "value": "tote"
+      }
+     ]
+    }
+   ]
+  },
+  "ProductTile4": {
+   "type": "ProductTile",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Studio Laptop Stand",
+    "detail": "Aluminium · adjustable",
+    "price": "$89",
+    "rating": "4.7",
+    "kind": "laptop",
+    "tone": "sky"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPressed"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "openProduct",
+       "value": "stand"
+      }
+     ]
+    }
+   ]
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "column28": {
+   "type": "column",
+   "children": [
+    "column29"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     36,
+     24,
+     40
+    ]
+   }
+  },
+  "column29": {
+   "type": "column",
+   "children": [
+    "row17"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row17": {
+   "type": "row",
+   "children": [
+    "column30",
+    "row18",
+    "text30"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "start",
+    "spacing": 24
+   }
+  },
+  "column30": {
+   "type": "column",
+   "children": [
+    "text24",
+    "text25"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Nord & Co"
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Considered objects for home and work."
+   }
+  },
+  "row18": {
+   "type": "row",
+   "children": [
+    "text26",
+    "text27",
+    "text28",
+    "text29"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20
+   }
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Shipping",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text27": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Returns",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text28": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Contact",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text29": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Privacy",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text30": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "© 2026 Nord & Co"
+   }
+  },
+  "buyPanel": {
+   "type": "column",
+   "children": [
+    "column14",
+    "Stepper1",
+    "buyDivider",
+    "row9"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 20
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "spacing": 18,
+    "crossAxisAlignment": "stretch"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "buyDivider": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "shipMark": {
+   "type": "row",
+   "children": [
+    "icon11"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 10
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "retMark": {
+   "type": "row",
+   "children": [
+    "icon12"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 10
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  }
+ },
+ "variables": {
+  "site_product": [
+   {
+    "name": "img",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "finish",
+    "type": "text",
+    "value": "Brass"
+   },
+   {
+    "name": "qty",
+    "type": "integer",
+    "value": 1
+   },
+   {
+    "name": "tab",
+    "type": "text",
+    "value": "Description"
+   },
+   {
+    "name": "cart",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "views",
+    "type": "list",
+    "value": [
+     "Front view",
+     "Side profile",
+     "Brass joint detail",
+     "On an oak desk"
+    ]
+   },
+   {
+    "name": "specs",
+    "type": "list",
+    "value": [
+     {
+      "k": "Dimensions",
+      "v": "H 46 cm · Arm reach 38 cm · Base Ø 16 cm"
+     },
+     {
+      "k": "Materials",
+      "v": "Solid brass joints, powder-coated steel arm"
+     },
+     {
+      "k": "Light source",
+      "v": "Integrated LED, 8 W, 600 lumen"
+     },
+     {
+      "k": "Color temperature",
+      "v": "2700 K – 4000 K, adjustable"
+     },
+     {
+      "k": "Dimming",
+      "v": "Touch dimmer, 5 steps"
+     },
+     {
+      "k": "Cable",
+      "v": "1.8 m braided textile, USB-C power"
+     }
+    ]
+   },
+   {
+    "name": "reviews",
+    "type": "list",
+    "value": [
+     {
+      "name": "Maya Reyes",
+      "stars": 5,
+      "date": "Mar 2, 2026",
+      "text": "Beautifully made. The brass has a warm glow and the arm stays exactly where I put it."
+     },
+     {
+      "name": "Jonas Berg",
+      "stars": 5,
+      "date": "Feb 18, 2026",
+      "text": "Perfect light for late work. The dimmer steps are well judged and the base is heavy enough."
+     },
+     {
+      "name": "Priya Shah",
+      "stars": 4,
+      "date": "Jan 29, 2026",
+      "text": "Lovely design, a little pricier than I hoped, but the Graphite finish looks great on my walnut desk."
+     }
+    ]
+   }
+  ]
+ }
+}

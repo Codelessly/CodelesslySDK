@@ -1,0 +1,6 @@
+WARNING loose_value [doc] /nodes/newOrder/actions/0/actions/0/index
+        Expected text, got a number (0); write it as "0".
+WARNING icon_not_drawn [doc screen overview 1280x800] node navIcon
+        Icon "navIcon" draws nothing: {"type":"MATERIAL_ICON","name":"insert_chart","style":"outlined"} is not a Material icon the renderer knows. Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.
+At 768 wide: WARNING icon_not_drawn [doc screen overview 768x800] node navIcon
+        Icon "navIcon" draws nothing: {"type":"MATERIAL_ICON","name":"insert_chart","style":"outlined"} is not a Material icon the renderer knows. Write a Material icon name ("search", "arrow_forward", "menu"), as listed at fonts.google.com/icons.

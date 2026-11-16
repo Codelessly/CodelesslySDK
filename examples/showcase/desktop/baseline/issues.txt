@@ -1,0 +1,16 @@
+site_product: line 100:24: Unknown word "item.name" on a Avatar. Props are written key:value.
+site_product: line 100:17: A Avatar needs name: write name:"…".
+site_blog: line 34:140: Unknown word "italic" on a Text. Props are written key:value.
+site_blog: line 51:27: A Column has no "sticky": left out. Its props are written key:value on the line.
+app_table: line 1:15: Unknown word "was" on a Column. Props are written key:value.
+app_table: line 1:19: Unknown word "not" on a Column. Props are written key:value.
+app_table: line 1:23: Unknown word "needed;" on a Column. Props are written key:value.
+app_table: line 1:31: Unknown word "the" on a Column. Props are written key:value.
+app_table: line 1:35: Unknown word "window" on a Column. Props are written key:value.
+app_table: line 1:42: Unknown word "is" on a Column. Props are written key:value.
+app_table: line 1:45: Unknown word "a" on a Column. Props are written key:value.
+app_table: line 1:47: Unknown word "Row" on a Column. Props are written key:value.
+app_table: line 1:51: Unknown word "of" on a Column. Props are written key:value.
+app_table: line 1:54: Unknown word "sidebar" on a Column. Props are written key:value.
+app_table: line 1:62: Unknown word "and" on a Column. Props are written key:value.
+app_table: line 1:66: Unknown word "content." on a Column. Props are written key:value.

@@ -1,0 +1,70 @@
+Page
+  state version="v2.4"
+  state page="Quickstart"
+  state sort="name"
+  state desc=false
+  Nav
+    Row gap:8 middle
+      Icon "settings_input_antenna"
+      Text.strong "Beacon"
+    Row gap:12 middle
+      SearchBar "Search the docs" =q w:320
+      Select =version items:["v2.4","v2.3","v2.2"] w:90
+  Section
+    Row gap:32 top
+      Column w:220 gap:4
+        Text.eyebrow "Start"
+        NavItem "Quickstart" selected:=page=="Quickstart" -> page="Quickstart"
+        NavItem "Installation" selected:=page=="Installation" -> page="Installation"
+        NavItem "Configuration" selected:=page=="Configuration" -> page="Configuration"
+        NavItem "Authentication" selected:=page=="Authentication" -> page="Authentication"
+        Spacer h:12
+        Text.eyebrow "Guides"
+        NavItem "Tracking events" selected:=page=="Tracking events" -> page="Tracking events"
+        NavItem "User identity" selected:=page=="User identity" -> page="User identity"
+        NavItem "Offline mode" selected:=page=="Offline mode" -> page="Offline mode"
+        NavItem "Testing" selected:=page=="Testing" -> page="Testing"
+        Spacer h:12
+        Text.eyebrow "Reference"
+        NavItem "Client API" selected:=page=="Client API" -> page="Client API"
+        NavItem "Events API" selected:=page=="Events API" -> page="Events API"
+        NavItem "Errors" selected:=page=="Errors" -> page="Errors"
+        NavItem "Changelog" selected:=page=="Changelog" -> page="Changelog"
+      Column grow gap:20
+        Breadcrumb items:["Docs","Start","Quickstart"]
+        Heading "Quickstart" level:1
+        Text.lead "Beacon is an SDK for collecting product events and user traits. This guide takes you from an empty project to your first event in about five minutes."
+        Column gap:8
+          Heading "1. Install the package" level:3
+          Text.muted "Add the Beacon SDK to your project with your package manager."
+          CodeBlock "Terminal" "npm install @beacon/sdk" language:"bash" copyable:true
+        Column gap:8
+          Heading "2. Initialize the client" level:3
+          Text.muted "Create one client when your app starts, using the write key from your dashboard."
+          CodeBlock "app.js" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({\n  writeKey: 'YOUR_WRITE_KEY',\n});" language:"javascript" copyable:true
+        Column gap:8
+          Heading "3. Send your first event" level:3
+          Text.muted "Track an event anywhere in your code. It shows up in the live view within seconds."
+          CodeBlock "app.js" "beacon.track('signup_completed', {\n  plan: 'pro',\n});" language:"javascript" copyable:true
+        Callout "Good to know" "Events are batched and sent every 10 seconds by default. Lower flushInterval while developing to see them sooner." tone:accent icon:"info"
+        Column gap:8
+          Heading "Configuration options" level:3
+          TableHeader =sort desc:desc columns:["Name","Type","Default","Description"] keys:["name","type","default","description"] widths:[140,90,90,336]
+          TableRow cells:["writeKey","string","none","Identifies your project. Required."] widths:[140,90,90,336]
+          TableRow cells:["flushInterval","number","10000","Milliseconds between batched sends."] widths:[140,90,90,336]
+          TableRow cells:["debug","boolean","false","Logs every event to the console."] widths:[140,90,90,336]
+          TableRow cells:["host","string","api.beacon.dev","Endpoint that receives events."] widths:[140,90,90,336]
+        Divider
+        Row between
+          Button.outline "Previous" icon:"arrow_back" -> emit previous
+          Button.outline "Next" icon:"arrow_forward" -> emit next
+      Column w:180 gap:8 pad:[16,0,0,0] border-left:#FFE5E7EB
+        Text.eyebrow "On this page"
+        Link "Install the package"
+        Link "Initialize the client"
+        Link "Send your first event"
+        Link "Configuration options"
+  Footer
+    Row between
+      Text.strong "Beacon"
+      Text.muted "© 2026 Beacon SDK"

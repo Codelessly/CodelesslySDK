@@ -1,0 +1,1 @@
+site_blog: line 59:29: A Column has no "sticky": left out. Its props are written key:value on the line.

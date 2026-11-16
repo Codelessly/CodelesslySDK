@@ -1,0 +1,2312 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_table"
+ ],
+ "nodes": {
+  "app_table": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280,
+    "height": {
+     "fill": 800
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "children": [
+    "column1",
+    "column3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column1": {
+   "type": "column",
+   "children": [
+    "row2",
+    "row3",
+    "row4",
+    "row5",
+    "row6",
+    "row7",
+    "spacer1",
+    "row8"
+   ],
+   "layout": {
+    "width": 220,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     14,
+     20,
+     14,
+     16
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row2": {
+   "type": "row",
+   "children": [
+    "brandMark",
+    "text1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     6,
+     2,
+     6,
+     18
+    ]
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": 17,
+    "height": 17
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "menu_book",
+     "style": "filled"
+    },
+    "size": 17,
+    "color": "accent"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Fieldbook"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "children": [
+    "icon2",
+    "text2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"dashboard\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "dashboard"
+      }
+     ]
+    }
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "dashboard",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Dashboard",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "row4": {
+   "type": "row",
+   "children": [
+    "icon3",
+    "text3",
+    "text4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"customers\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "customers"
+      }
+     ]
+    }
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "group",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Customers",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "color": "inkFaint"
+    },
+    "text": "248"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "children": [
+    "icon4",
+    "text5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"deals\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "deals"
+      }
+     ]
+    }
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "handshake",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Deals",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "children": [
+    "icon5",
+    "text6",
+    "text7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"tasks\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "tasks"
+      }
+     ]
+    }
+   ]
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "task_alt",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Tasks",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "numberSmall",
+     "color": "inkFaint"
+    },
+    "text": "7"
+   }
+  },
+  "row7": {
+   "type": "row",
+   "children": [
+    "icon6",
+    "text8"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     9,
+     10,
+     9
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 8
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (tab==\"reports\")?\"activeTint\":\"#00000000\"}",
+    "decoration.radius": "${theme.radii.control}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tab",
+       "value": "reports"
+      }
+     ]
+    }
+   ]
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "bar_chart",
+     "style": "filled"
+    },
+    "size": 18,
+    "color": "inkSoft"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Reports",
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    }
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "row8": {
+   "type": "row",
+   "children": [
+    "Avatar1",
+    "column2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 10
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 14
+   },
+   "props": {
+    "spacing": 10
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.tile}"
+   }
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Sam Patel"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "children": [
+    "text9",
+    "text10"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "Sam Patel"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "Sales lead"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "children": [
+    "row9",
+    "divider1",
+    "column4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "children": [
+    "row10",
+    "row12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     28,
+     18,
+     28,
+     18
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 24
+   }
+  },
+  "row10": {
+   "type": "row",
+   "children": [
+    "text11",
+    "row11"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontSize": 26,
+     "color": "ink"
+    },
+    "text": "Customers"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "children": [
+    "text12"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 24,
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 999
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "248",
+    "style": {
+     "from": "numberSmall",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "row12": {
+   "type": "row",
+   "children": [
+    "outlinedButton1",
+    "filledButton1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Import"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "import"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Add customer"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addCustomer"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "color": "line"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "children": [
+    "row13",
+    "column5",
+    "column6"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     28,
+     22,
+     28,
+     28
+    ]
+   },
+   "props": {
+    "spacing": 18,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "row13": {
+   "type": "row",
+   "children": [
+    "textField1",
+    "dropdown1",
+    "segmentedButton1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Search",
+     "hintText": "Name or company"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "dropdown1": {
+   "type": "dropdown",
+   "layout": {
+    "width": 140,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "items": [
+     "All",
+     "Active",
+     "Trial",
+     "Churned"
+    ]
+   },
+   "bind": {
+    "props.value": "${status}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "status",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "segmentedButton1": {
+   "type": "segmentedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "segments": [
+     {
+      "value": "All",
+      "label": "All"
+     },
+     {
+      "value": "SMB",
+      "label": "SMB"
+     },
+     {
+      "value": "Mid-market",
+      "label": "Mid-market"
+     },
+     {
+      "value": "Enterprise",
+      "label": "Enterprise"
+     }
+    ]
+   },
+   "bind": {
+    "props.selected": "${= [segment]}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "segment",
+       "value": "${result[0]}"
+      }
+     ]
+    }
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "children": [
+    "row14"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     20,
+     12,
+     14,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "bar"
+     }
+    ],
+    "radius": 18
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= length(picked)>0}",
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.bar}"
+   },
+   "animations": [
+    {
+     "id": "a",
+     "preset": "enter",
+     "params": {
+      "from": {
+       "opacity": 0,
+       "translateY": 16
+      }
+     }
+    }
+   ]
+  },
+  "row14": {
+   "type": "row",
+   "children": [
+    "text13",
+    "textButton1",
+    "spacer3",
+    "filledButton2",
+    "filledButton3"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "onBar"
+    },
+    "text": "${= length(picked)} selected"
+   }
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Clear",
+    "style": {
+     "foregroundColor": "onBarSoft"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= []}"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "tonal": true,
+    "label": "Export"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "export",
+       "value": "${picked}"
+      },
+      {
+       "type": "showToast",
+       "message": "Exporting ${= length(picked)} customers"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton3": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "backgroundColor": "bad",
+     "foregroundColor": "#FFFFFFFF"
+    },
+    "label": "Delete"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "deleteCustomers",
+       "value": "${picked}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= []}"
+      },
+      {
+       "type": "showToast",
+       "message": "Deleted"
+      }
+     ]
+    }
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "children": [
+    "row15",
+    "listView1",
+    "row19"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "row15": {
+   "type": "row",
+   "children": [
+    "checkbox1",
+    "textButton2",
+    "textButton3",
+    "textButton4",
+    "textButton5",
+    "textButton6",
+    "textButton7",
+    "spacer4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     6,
+     16,
+     6
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "checkbox1": {
+   "type": "checkbox",
+   "layout": {
+    "width": 40,
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= length(picked)==length(customers)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= length(picked)==length(customers)?[]:map(customers,x=>x.id)}"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 240
+   },
+   "props": {
+    "style": {
+     "foregroundColor": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.label": "Name${= sort=='name'?(desc?' ↓':' ↑'):''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "desc",
+       "value": "${= sort==\"name\"?!desc:false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "name"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 180
+   },
+   "props": {
+    "style": {
+     "foregroundColor": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.label": "Company${= sort=='company'?(desc?' ↓':' ↑'):''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "desc",
+       "value": "${= sort==\"company\"?!desc:false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "company"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton4": {
+   "type": "textButton",
+   "layout": {
+    "width": 84,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "foregroundColor": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.label": "Status${= sort=='status'?(desc?' ↓':' ↑'):''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "desc",
+       "value": "${= sort==\"status\"?!desc:false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "status"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton5": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 110
+   },
+   "props": {
+    "style": {
+     "foregroundColor": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.label": "Plan${= sort=='plan'?(desc?' ↓':' ↑'):''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "desc",
+       "value": "${= sort==\"plan\"?!desc:false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "plan"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton6": {
+   "type": "textButton",
+   "layout": {
+    "width": 104,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "foregroundColor": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.label": "Monthly value${= sort=='mrr'?(desc?' ↓':' ↑'):''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "desc",
+       "value": "${= sort==\"mrr\"?!desc:false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "mrr"
+      }
+     ]
+    }
+   ]
+  },
+  "textButton7": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 120
+   },
+   "props": {
+    "style": {
+     "foregroundColor": "inkSoft"
+    }
+   },
+   "bind": {
+    "props.label": "Last seen${= sort=='seen'?(desc?' ↓':' ↑'):''}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "desc",
+       "value": "${= sort==\"seen\"?!desc:false}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "sort",
+       "value": "seen"
+      }
+     ]
+    }
+   ]
+  },
+  "spacer4": {
+   "type": "spacer",
+   "layout": {
+    "width": 40,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "children": [
+    "listView1Item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${= (desc?sortByDesc(filter(customers,x=>(q==\"\"||contains(lower(x.name),lower(q))||contains(lower(x.company),lower(q)))&&(status==\"All\"||x.status==status)&&(segment==\"All\"||x.seg==segment)),x=>sort==\"name\"?x.name:sort==\"company\"?x.company:sort==\"status\"?x.status:sort==\"plan\"?x.plan:sort==\"mrr\"?x.mrr:x.mins):sortBy(filter(customers,x=>(q==\"\"||contains(lower(x.name),lower(q))||contains(lower(x.company),lower(q)))&&(status==\"All\"||x.status==status)&&(segment==\"All\"||x.seg==segment)),x=>sort==\"name\"?x.name:sort==\"company\"?x.company:sort==\"status\"?x.status:sort==\"plan\"?x.plan:sort==\"mrr\"?x.mrr:x.mins))}"
+   }
+  },
+  "listView1Item": {
+   "type": "column",
+   "children": [
+    "row16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row16": {
+   "type": "row",
+   "children": [
+    "checkbox2",
+    "row17",
+    "text15",
+    "row18",
+    "text16",
+    "text17",
+    "text18",
+    "iconButton1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= contains(picked,item.id)?theme.colors.infoTint:\"#00FFFFFF\"}",
+    "animations[0].delay": "${= index*30}"
+   },
+   "animations": [
+    {
+     "id": "a",
+     "preset": "enter",
+     "params": {
+      "from": {
+       "opacity": 0
+      }
+     }
+    }
+   ]
+  },
+  "checkbox2": {
+   "type": "checkbox",
+   "layout": {
+    "width": 40,
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.value": "${= contains(picked,item.id)}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "picked",
+       "value": "${= contains(picked,item.id)?without(picked,item.id):append(picked,item.id)}"
+      }
+     ]
+    }
+   ]
+  },
+  "row17": {
+   "type": "row",
+   "children": [
+    "Avatar2",
+    "text14"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 240
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.name": "${item.name}"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "color": "ink"
+    },
+    "text": "${item.name}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 180
+   },
+   "props": {
+    "text": "${item.company}",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "row18": {
+   "type": "row",
+   "children": [
+    "StatusBadge1"
+   ],
+   "layout": {
+    "width": 84,
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "StatusBadge1": {
+   "type": "StatusBadge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.label": "${item.status}",
+    "props.tone": "${= item.status==\"Active\"?\"success\":item.status==\"Trial\"?\"info\":\"neutral\"}"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 110
+   },
+   "props": {
+    "text": "${item.plan}",
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": 104,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "number",
+     "fontSize": 16,
+     "color": "ink"
+    },
+    "text": "${= money(item.mrr,'$',0)}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 120
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "${item.seen}",
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": 40,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "more_vert",
+     "style": "filled"
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "rowMenu",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "row19": {
+   "type": "row",
+   "children": [
+    "text19",
+    "spacer6",
+    "row20"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     18,
+     12,
+     14,
+     12
+    ]
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "Rows ${= page*10+1}-${= min(page*10+10,248)} of 248"
+   }
+  },
+  "spacer6": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row20": {
+   "type": "row",
+   "children": [
+    "outlinedButton2",
+    "outlinedButton3"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Previous"
+   },
+   "bind": {
+    "props.enabled": "${= page>0}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= max(0,page-1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "loadPage",
+       "value": "${page}"
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Next"
+   },
+   "bind": {
+    "props.enabled": "${= page<24}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "page",
+       "value": "${= min(24,page+1)}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "loadPage",
+       "value": "${page}"
+      }
+     ]
+    }
+   ]
+  },
+  "brandMark": {
+   "type": "row",
+   "children": [
+    "icon1"
+   ],
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "radius": 10
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  }
+ },
+ "variables": {
+  "app_table": [
+   {
+    "name": "tab",
+    "type": "text",
+    "value": "customers"
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "status",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "segment",
+    "type": "text",
+    "value": "All"
+   },
+   {
+    "name": "sort",
+    "type": "text",
+    "value": "name"
+   },
+   {
+    "name": "desc",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "page",
+    "type": "integer",
+    "value": 0
+   },
+   {
+    "name": "picked",
+    "type": "list",
+    "value": [
+     1,
+     3,
+     4
+    ]
+   },
+   {
+    "name": "customers",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Maya Reyes",
+      "company": "Northwind Labs",
+      "status": "Active",
+      "plan": "Growth",
+      "mrr": 480,
+      "seen": "2 min ago",
+      "mins": 2,
+      "seg": "SMB"
+     },
+     {
+      "id": 2,
+      "name": "Jonas Berg",
+      "company": "Fjord Freight",
+      "status": "Trial",
+      "plan": "Starter",
+      "mrr": 0,
+      "seen": "1 h ago",
+      "mins": 60,
+      "seg": "SMB"
+     },
+     {
+      "id": 3,
+      "name": "Priya Nair",
+      "company": "Lumen Health",
+      "status": "Active",
+      "plan": "Enterprise",
+      "mrr": 2400,
+      "seen": "3 h ago",
+      "mins": 180,
+      "seg": "Enterprise"
+     },
+     {
+      "id": 4,
+      "name": "Carlos Mendes",
+      "company": "Atlas Retail",
+      "status": "Churned",
+      "plan": "Growth",
+      "mrr": 0,
+      "seen": "34 d ago",
+      "mins": 48960,
+      "seg": "Mid-market"
+     },
+     {
+      "id": 5,
+      "name": "Aiko Tanaka",
+      "company": "Kumo Studio",
+      "status": "Active",
+      "plan": "Pro",
+      "mrr": 920,
+      "seen": "Yesterday",
+      "mins": 1440,
+      "seg": "Mid-market"
+     },
+     {
+      "id": 6,
+      "name": "Liam O'Connor",
+      "company": "Harbor Coffee",
+      "status": "Trial",
+      "plan": "Pro",
+      "mrr": 0,
+      "seen": "5 h ago",
+      "mins": 300,
+      "seg": "SMB"
+     },
+     {
+      "id": 7,
+      "name": "Sofia Rossi",
+      "company": "Verde Foods",
+      "status": "Active",
+      "plan": "Growth",
+      "mrr": 560,
+      "seen": "2 d ago",
+      "mins": 2880,
+      "seg": "SMB"
+     },
+     {
+      "id": 8,
+      "name": "Noah Kim",
+      "company": "Brightpath Edu",
+      "status": "Active",
+      "plan": "Enterprise",
+      "mrr": 3100,
+      "seen": "20 min ago",
+      "mins": 20,
+      "seg": "Enterprise"
+     },
+     {
+      "id": 9,
+      "name": "Emma Laurent",
+      "company": "Maison Bleu",
+      "status": "Churned",
+      "plan": "Starter",
+      "mrr": 0,
+      "seen": "61 d ago",
+      "mins": 87840,
+      "seg": "SMB"
+     },
+     {
+      "id": 10,
+      "name": "David Okafor",
+      "company": "Copperline Energy",
+      "status": "Active",
+      "plan": "Pro",
+      "mrr": 1250,
+      "seen": "4 d ago",
+      "mins": 5760,
+      "seg": "Mid-market"
+     }
+    ]
+   }
+  ]
+ }
+}

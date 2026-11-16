@@ -1,0 +1,3133 @@
+{
+ "schema": 3,
+ "roots": [
+  "site_pricing"
+ ],
+ "nodes": {
+  "site_pricing": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1280,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "children": [
+    "column2",
+    "column3",
+    "column6",
+    "column14",
+    "column18",
+    "column22"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column2": {
+   "type": "column",
+   "children": [
+    "row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "row1": {
+   "type": "row",
+   "children": [
+    "row2",
+    "row3",
+    "row4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "spacing": 24
+   }
+  },
+  "row2": {
+   "type": "row",
+   "children": [
+    "icon1",
+    "text1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "account_balance_wallet",
+     "style": "rounded"
+    },
+    "color": "accent",
+    "size": 22
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "fontWeight": 800,
+     "fontSize": 17,
+     "color": "ink"
+    },
+    "text": "Ledgerly"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "children": [
+    "textButton1",
+    "textButton2",
+    "textButton3",
+    "textButton4"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4
+   }
+  },
+  "textButton1": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Product"
+   }
+  },
+  "textButton2": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Pricing"
+   }
+  },
+  "textButton3": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Customers"
+   }
+  },
+  "textButton4": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Resources"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "children": [
+    "textButton5",
+    "filledButton1"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "textButton5": {
+   "type": "textButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Sign in"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "signIn"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Start free trial"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "start"
+      }
+     ]
+    }
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "children": [
+    "column4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     72,
+     24,
+     32
+    ]
+   }
+  },
+  "column4": {
+   "type": "column",
+   "children": [
+    "column5"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32
+   }
+  },
+  "column5": {
+   "type": "column",
+   "children": [
+    "text2",
+    "text3",
+    "Segments1",
+    "savePill"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 14
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 800,
+     "fontSize": 44,
+     "color": "ink"
+    },
+    "text": "Simple pricing for every stage",
+    "textAlign": "center"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "lead",
+     "color": "inkSoft"
+    },
+    "text": "Start free for 14 days. No credit card required.",
+    "textAlign": "center"
+   }
+  },
+  "Segments1": {
+   "type": "Segments",
+   "layout": {
+    "width": 320,
+    "height": {
+     "hug": 0
+    },
+    "margin": [
+     0,
+     10,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "value": "period",
+    "options": [
+     "Monthly",
+     "Yearly"
+    ]
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "color": "goodDeep"
+    },
+    "text": "Save 20% with yearly billing",
+    "textAlign": "center"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "children": [
+    "column7"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     16,
+     24,
+     56
+    ]
+   }
+  },
+  "column7": {
+   "type": "column",
+   "children": [
+    "grid1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "children": [
+    "grid1Row1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "grid1Row1": {
+   "type": "row",
+   "children": [
+    "column8",
+    "column10",
+    "column12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "column8": {
+   "type": "column",
+   "children": [
+    "text5",
+    "text6",
+    "row5",
+    "text9",
+    "divider2",
+    "column9",
+    "spacer1",
+    "outlinedButton1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 26
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 14
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Solo"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "For freelancers and sole traders."
+   }
+  },
+  "row5": {
+   "type": "row",
+   "children": [
+    "text7",
+    "text8"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= period=='Yearly'?'$7.20':'$9'}",
+    "style": {
+     "from": "numberHero",
+     "fontSize": 44,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true,
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "/mo",
+    "maxLines": 1
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "${= period=='Yearly'?'Billed $86.40 yearly':'Billed monthly'}"
+   }
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column9": {
+   "type": "column",
+   "children": [
+    "row6",
+    "row7",
+    "row8",
+    "row9",
+    "row10"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     10
+    ]
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "children": [
+    "icon2",
+    "text10"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "1 user",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "children": [
+    "icon3",
+    "text11"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Unlimited invoices",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row8": {
+   "type": "row",
+   "children": [
+    "icon4",
+    "text12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Bank feeds",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row9": {
+   "type": "row",
+   "children": [
+    "icon5",
+    "text13"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Expense tracking",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row10": {
+   "type": "row",
+   "children": [
+    "icon6",
+    "text14"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Email support",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48
+   },
+   "props": {
+    "label": "Choose Solo"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cta}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "choose",
+       "value": "solo"
+      }
+     ]
+    }
+   ]
+  },
+  "column10": {
+   "type": "column",
+   "children": [
+    "row11",
+    "text17",
+    "row13",
+    "text20",
+    "divider3",
+    "column11",
+    "spacer2",
+    "filledButton2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 26
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accentTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "accent"
+     }
+    ],
+    "strokeWidth": 2,
+    "radius": 14
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.pick}"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "children": [
+    "text15",
+    "row12"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Team"
+   }
+  },
+  "row12": {
+   "type": "row",
+   "children": [
+    "text16"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 24,
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 999
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Most popular",
+    "style": {
+     "from": "chip",
+     "fontWeight": 700,
+     "color": "onAccent"
+    },
+    "maxLines": 1
+   }
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "For growing businesses with a team."
+   }
+  },
+  "row13": {
+   "type": "row",
+   "children": [
+    "text18",
+    "text19"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= period=='Yearly'?'$23.20':'$29'}",
+    "style": {
+     "from": "numberHero",
+     "fontSize": 44,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   }
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true,
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "/mo",
+    "maxLines": 1
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "${= period=='Yearly'?'Billed $278.40 yearly':'Billed monthly'}"
+   }
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column11": {
+   "type": "column",
+   "children": [
+    "row14",
+    "row15",
+    "row16",
+    "row17",
+    "row18"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     10
+    ]
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row14": {
+   "type": "row",
+   "children": [
+    "icon7",
+    "text21"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon7": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "accent"
+   }
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Up to 10 users",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row15": {
+   "type": "row",
+   "children": [
+    "icon8",
+    "text22"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon8": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "accent"
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Everything in Solo",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row16": {
+   "type": "row",
+   "children": [
+    "icon9",
+    "text23"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon9": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "accent"
+   }
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Payroll",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row17": {
+   "type": "row",
+   "children": [
+    "icon10",
+    "text24"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon10": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "accent"
+   }
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Multi-currency",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row18": {
+   "type": "row",
+   "children": [
+    "icon11",
+    "text25"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon11": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "accent"
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Priority support",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer2": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "filledButton2": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48
+   },
+   "props": {
+    "label": "Choose Team"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cta}",
+    "decoration.effects": "${theme.shadows.cta}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "choose",
+       "value": "team"
+      }
+     ]
+    }
+   ]
+  },
+  "column12": {
+   "type": "column",
+   "children": [
+    "text26",
+    "text27",
+    "row19",
+    "text30",
+    "divider4",
+    "column13",
+    "spacer3",
+    "outlinedButton2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": 26
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 14
+   },
+   "props": {
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "text": "Scale"
+   }
+  },
+  "text27": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "text": "For established companies."
+   }
+  },
+  "row19": {
+   "type": "row",
+   "children": [
+    "text28",
+    "text29"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "end"
+   }
+  },
+  "text28": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= period=='Yearly'?'$63.20':'$79'}",
+    "style": {
+     "from": "numberHero",
+     "fontSize": 44,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   }
+  },
+  "text29": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true,
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "/mo",
+    "maxLines": 1
+   }
+  },
+  "text30": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "${= period=='Yearly'?'Billed $758.40 yearly':'Billed monthly'}"
+   }
+  },
+  "divider4": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column13": {
+   "type": "column",
+   "children": [
+    "row20",
+    "row21",
+    "row22",
+    "row23",
+    "row24"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     4,
+     0,
+     10
+    ]
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row20": {
+   "type": "row",
+   "children": [
+    "icon12",
+    "text31"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon12": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text31": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Unlimited users",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row21": {
+   "type": "row",
+   "children": [
+    "icon13",
+    "text32"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon13": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text32": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Everything in Team",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row22": {
+   "type": "row",
+   "children": [
+    "icon14",
+    "text33"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon14": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text33": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Custom reports",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row23": {
+   "type": "row",
+   "children": [
+    "icon15",
+    "text34"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon15": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text34": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "API access",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "row24": {
+   "type": "row",
+   "children": [
+    "icon16",
+    "text35"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon16": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "check_circle",
+     "style": "rounded"
+    },
+    "size": 18,
+    "color": "good"
+   }
+  },
+  "text35": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Dedicated account manager",
+    "style": {
+     "from": "body"
+    }
+   }
+  },
+  "spacer3": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": 48
+   },
+   "props": {
+    "label": "Choose Scale"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cta}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "choose",
+       "value": "scale"
+      }
+     ]
+    }
+   ]
+  },
+  "column14": {
+   "type": "column",
+   "children": [
+    "column15"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     40,
+     24,
+     72
+    ]
+   }
+  },
+  "column15": {
+   "type": "column",
+   "children": [
+    "column16"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column16": {
+   "type": "column",
+   "children": [
+    "text36",
+    "column17"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text36": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 800,
+     "fontSize": 30,
+     "color": "ink"
+    },
+    "text": "Compare plans",
+    "textAlign": "center"
+   }
+  },
+  "column17": {
+   "type": "column",
+   "children": [
+    "row25",
+    "listView1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     14
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 18
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.card}",
+    "decoration.effects": "${theme.shadows.card}"
+   }
+  },
+  "row25": {
+   "type": "row",
+   "children": [
+    "text37",
+    "text38",
+    "text39",
+    "text40"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     14,
+     16,
+     14
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "text37": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Feature"
+   }
+  },
+  "text38": {
+   "type": "text",
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Solo",
+    "textAlign": "center"
+   }
+  },
+  "text39": {
+   "type": "text",
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "accent"
+    },
+    "text": "Team",
+    "textAlign": "center"
+   }
+  },
+  "text40": {
+   "type": "text",
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    },
+    "text": "Scale",
+    "textAlign": "center"
+   }
+  },
+  "listView1": {
+   "type": "listView",
+   "children": [
+    "listView1Item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${rows}"
+   }
+  },
+  "listView1Item": {
+   "type": "column",
+   "children": [
+    "row26"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row26": {
+   "type": "row",
+   "children": [
+    "text41",
+    "text42",
+    "text43",
+    "text44"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     13,
+     16,
+     13
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "text41": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "from": "body",
+     "color": "ink"
+    }
+   }
+  },
+  "text42": {
+   "type": "text",
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= item.solo?'✓':'—'}",
+    "textAlign": "center",
+    "style": {
+     "from": "rowTitle"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.solo?theme.success:theme.colors.tertiaryText}"
+   }
+  },
+  "text43": {
+   "type": "text",
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= item.team?'✓':'—'}",
+    "textAlign": "center",
+    "style": {
+     "from": "rowTitle"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.team?theme.success:theme.colors.tertiaryText}"
+   }
+  },
+  "text44": {
+   "type": "text",
+   "layout": {
+    "width": 160,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${= item.scale?'✓':'—'}",
+    "textAlign": "center",
+    "style": {
+     "from": "rowTitle"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.scale?theme.success:theme.colors.tertiaryText}"
+   }
+  },
+  "column18": {
+   "type": "column",
+   "children": [
+    "column19"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     64,
+     24,
+     72
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "column19": {
+   "type": "column",
+   "children": [
+    "column20"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 720
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column20": {
+   "type": "column",
+   "children": [
+    "text45",
+    "listView2"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "text45": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "cardTitle",
+     "fontWeight": 800,
+     "fontSize": 30,
+     "color": "ink"
+    },
+    "text": "Frequently asked questions",
+    "textAlign": "center"
+   }
+  },
+  "listView2": {
+   "type": "listView",
+   "children": [
+    "listView2Item"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${faqs}"
+   }
+  },
+  "listView2Item": {
+   "type": "column",
+   "children": [
+    "column21"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   }
+  },
+  "column21": {
+   "type": "column",
+   "children": [
+    "TextExpandable1"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     18,
+     10,
+     18,
+     10
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 18
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 12
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.panel}"
+   }
+  },
+  "TextExpandable1": {
+   "type": "TextExpandable",
+   "children": [
+    "text46"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.title": "${item.q}"
+   }
+  },
+  "text46": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "body",
+     "color": "inkSoft"
+    },
+    "text": "${item.a}"
+   }
+  },
+  "column22": {
+   "type": "column",
+   "children": [
+    "column23"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     24,
+     32,
+     24,
+     32
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "top"
+   }
+  },
+  "column23": {
+   "type": "column",
+   "children": [
+    "row27"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   }
+  },
+  "row27": {
+   "type": "row",
+   "children": [
+    "row28",
+    "row29",
+    "text51"
+   ],
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "row28": {
+   "type": "row",
+   "children": [
+    "icon17",
+    "text47"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "icon17": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "account_balance_wallet",
+     "style": "rounded"
+    },
+    "color": "accent",
+    "size": 20
+   }
+  },
+  "text47": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "rowTitle",
+     "fontWeight": 800,
+     "color": "ink"
+    },
+    "text": "Ledgerly"
+   }
+  },
+  "row29": {
+   "type": "row",
+   "children": [
+    "text48",
+    "text49",
+    "text50"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 20
+   }
+  },
+  "text48": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Privacy",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text49": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Terms",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text50": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "text": "Contact",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   }
+  },
+  "text51": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "props": {
+    "style": {
+     "from": "meta",
+     "color": "inkFaint"
+    },
+    "text": "© 2026 Ledgerly Inc."
+   }
+  },
+  "savePill": {
+   "type": "row",
+   "children": [
+    "saveIcon",
+    "text4"
+   ],
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     10,
+     5,
+     12,
+     5
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goodTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "goodLine"
+     }
+    ],
+    "radius": 999
+   },
+   "props": {
+    "spacing": 6
+   }
+  },
+  "saveIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "icon": {
+     "type": "MATERIAL_ICON",
+     "name": "savings",
+     "style": "rounded"
+    },
+    "size": 14,
+    "color": "goodDeep"
+   }
+  }
+ },
+ "variables": {
+  "site_pricing": [
+   {
+    "name": "period",
+    "type": "text",
+    "value": "Monthly"
+   },
+   {
+    "name": "faqs",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "q": "Can I switch plans later?",
+      "a": "Yes. You can upgrade or downgrade at any time, and we prorate the difference on your next invoice."
+     },
+     {
+      "id": 2,
+      "q": "How does yearly billing work?",
+      "a": "Pay once a year and save 20% compared to monthly billing. You can cancel renewal whenever you like."
+     },
+     {
+      "id": 3,
+      "q": "Is there a free trial?",
+      "a": "Every plan comes with a 14-day free trial. No credit card is needed to start."
+     },
+     {
+      "id": 4,
+      "q": "Is my financial data secure?",
+      "a": "Your data is encrypted in transit and at rest, backed up daily, and stored in SOC 2 certified data centers."
+     }
+    ]
+   },
+   {
+    "name": "rows",
+    "type": "list",
+    "value": [
+     {
+      "name": "Invoicing & quotes",
+      "solo": true,
+      "team": true,
+      "scale": true
+     },
+     {
+      "name": "Bank feeds",
+      "solo": true,
+      "team": true,
+      "scale": true
+     },
+     {
+      "name": "Expense tracking",
+      "solo": true,
+      "team": true,
+      "scale": true
+     },
+     {
+      "name": "Multi-user access",
+      "solo": false,
+      "team": true,
+      "scale": true
+     },
+     {
+      "name": "Payroll",
+      "solo": false,
+      "team": true,
+      "scale": true
+     },
+     {
+      "name": "Multi-currency",
+      "solo": false,
+      "team": true,
+      "scale": true
+     },
+     {
+      "name": "Custom reports",
+      "solo": false,
+      "team": false,
+      "scale": true
+     },
+     {
+      "name": "Dedicated account manager",
+      "solo": false,
+      "team": false,
+      "scale": true
+     }
+    ]
+   }
+  ]
+ }
+}
