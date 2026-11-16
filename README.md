@@ -224,7 +224,7 @@ controller.layoutId = 'checkout';         // show another layout
 
 ## UI written by an agent
 
-A layout is data, so an agent can write one. Four things in this repository are for that:
+A layout is data, so an agent can write one. Five things in this repository are for that:
 
 - **Design systems as data** ([`design_systems/`](https://github.com/Codelessly/CodelesslySDK/tree/master/design_systems)).
   `ssui` is Soft SaaS UI as 160 component documents (buttons and fields through menus, trees, diffs, a terminal and a
@@ -252,6 +252,11 @@ A layout is data, so an agent can write one. Four things in this repository are 
 - **A render tool** ([`tool/render`](https://github.com/Codelessly/CodelesslySDK/tree/master/tool/render)). It
   validates a document, draws it at the sizes asked for, and drives it (`--tap`, `--type`, `--drag`, `--scroll`), so
   what was generated can be checked without an app.
+- **The toolkit around it** ([`tool/codelessly`](https://github.com/Codelessly/CodelesslySDK/blob/master/tool/README.md)).
+  One entry point for the whole loop: `docs` (look the reference up), `flatten` (nested trees to a document),
+  `validate`, `render --outline` (every node's box, text and problems as text), `states` (every state of a site
+  against its references, worst first), `sheet` (captures on one image), and `mcp`, an MCP server that gives any
+  agent those as tool calls, screenshots included.
 
 - **A playground** ([`examples/playground`](https://github.com/Codelessly/CodelesslySDK/tree/master/examples/playground)).
   Type the notation, see it render as you type, switch design system, read what was not understood and the

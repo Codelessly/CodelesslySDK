@@ -121,6 +121,7 @@
   },
   "excerpt": {
    "type": "text",
+   "media": [{"maxWidth": 699, "patch": {"props": {"maxLines": 2}}}],
    "props": {"text": "${props.excerpt}", "style": "mutedWide", "maxLines": 1, "overflow": "ellipsis"},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
    "bind": {"visible": "${= props.excerpt != ''}"}
