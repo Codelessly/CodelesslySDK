@@ -76,6 +76,16 @@ def render(card, ds, d, width=420, narrow=320, site=None, phone=None):
                 found = True
             elif not os.path.exists(target):
                 os.symlink(original, target)
+        for component in manifest.get('components', []):
+            target = os.path.join(local, component)
+            os.makedirs(os.path.dirname(target), exist_ok=True)
+            if not os.path.exists(target):
+                os.symlink(os.path.join(site, component), target)
+        for assets in ('assets', 'fonts'):
+            target = os.path.join(local, assets)
+            original = os.path.join(site, assets)
+            if os.path.exists(original) and not os.path.exists(target):
+                os.symlink(original, target)
         if not found:
             raise ValueError(f'{screen} is not a page in {site}/site.json')
         json.dump(staged, open(f'{local}/site.json', 'w'))
