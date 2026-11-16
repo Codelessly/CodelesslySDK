@@ -43,9 +43,16 @@ Future<void> main(List<String> args) async {
   final catalog = ds?.catalogOver(standardCatalog) ?? standardCatalog;
   final screen = opt('--id') ?? 'screen';
   final width = double.tryParse(opt('--width') ?? '') ?? 390;
+  // The destination site's manifest is the authority for project variables.
+  // They must not be redeclared as page-local variables by an assignment.
+  final outPath = opt('--out');
+  final manifestFile = outPath == null ? null : File('${File(outPath).parent.path}/site.json');
+  final projectVariables = manifestFile != null && manifestFile.existsSync()
+      ? SiteManifest.fromJson(jsonDecode(manifestFile.readAsStringSync())).variables.map((v) => v.name).toSet()
+      : <String>{};
   final options = ds == null
-      ? NotationOptions(screen: screen, width: width, reflow: !args.contains('--no-reflow'))
-      : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'), reflow: !args.contains('--no-reflow'));
+      ? NotationOptions(screen: screen, width: width, reflow: !args.contains('--no-reflow'), projectVariables: projectVariables)
+      : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'), reflow: !args.contains('--no-reflow'), projectVariables: projectVariables);
   final result = Catalog.run(catalog, () => parseNotation(File(file).readAsStringSync(), catalog: catalog, options: options));
   for (final issue in result.issues) {
     stderr.writeln('$file: $issue');
