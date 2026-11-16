@@ -119,7 +119,10 @@
    },
    {
     "key": "labelWidth",
-    "type": {"kind": "number", "flutter": "double"},
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
     "default": 98,
     "doc": "Width of the fixed row-label column on a wide page. On a phone it uses 110 so the comparison columns remain reachable."
    },
@@ -224,7 +227,6 @@
   },
   "labels": {
    "type": "column",
-   "media": [{"maxWidth": 699, "patch": {"layout": {"width": 110}, "bind": {"layout.width": null}}}],
    "children": [
     "corner",
     "labelRows",
@@ -271,9 +273,22 @@
     ]
    },
    "bind": {
-    "layout.width": "${props.labelWidth}",
-    "decoration.fills[0].stops[2].color": "${= alpha(theme.colors.card, 0)}"
-   }
+    "decoration.fills[0].stops[2].color": "${= alpha(theme.colors.card, 0)}",
+    "layout.width": "${props.labelWidth}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 110
+      },
+      "bind": {
+       "layout.width": null
+      }
+     }
+    }
+   ]
   },
   "corner": {
    "type": "column",
@@ -436,12 +451,26 @@
   },
   "lead": {
    "type": "spacer",
-   "media": [{"maxWidth": 699, "patch": {"layout": {"width": 96}, "bind": {"layout.width": null}}}],
    "layout": {
     "width": 84,
     "height": 1
    },
-   "bind": {"layout.width": "${= props.labelWidth - 14}"}
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 96
+      },
+      "bind": {
+       "layout.width": null
+      }
+     }
+    }
+   ],
+   "bind": {
+    "layout.width": "${= props.labelWidth - 14}"
+   }
   },
   "tail": {
    "type": "spacer",
