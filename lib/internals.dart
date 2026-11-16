@@ -40,6 +40,6 @@ export 'src/render/contracts.dart'
         InstanceBindings,
         NodeGestures,
         TreeBindings;
-export 'src/app/ui/modal_focus.dart' show ModalFocus;
+export 'src/app/ui/presentation_route.dart' show ModalFocus;
 export 'src/render/node_view.dart' show ControlFocusLayerScope, FocusManagerKeyboard, RenderNodeView;
 export 'src/session/view.dart' show SessionValues, ThemedSource;
