@@ -292,6 +292,19 @@ class CodelesslyFlexParentData extends FlexParentData {
   String toString() => '${super.toString()}; collapsed=$collapsed${basis == null ? '' : '; basis=$basis grow=$grow'}';
 }
 
+/// A painting context whose drawing goes nowhere: what is painted on it is recorded into a layer that is then
+/// dropped ([RenderCodelesslyFlex.debugPaintOverflowStripes]).
+class _DiscardedPaint extends PaintingContext {
+  _DiscardedPaint(Rect bounds) : this._(ContainerLayer(), bounds);
+  _DiscardedPaint._(this._root, Rect bounds) : super(_root, bounds);
+
+  final ContainerLayer _root;
+
+  void finish() {
+    stopRecordingIfNeeded();
+    _root.dispose();
+  }
+}
 
 /// The render object of [CodelesslyFlex].
 ///
@@ -369,6 +382,25 @@ class RenderCodelesslyFlex extends RenderFlex {
   }
 
   final LayerHandle<ClipRectLayer> _overflowClip = LayerHandle<ClipRectLayer>();
+
+  /// Whether a debug build paints the overflow stripe and its label over an overflowing flex (Flutter's own
+  /// look). Off, it paints what a release build paints (the children, clipped as [clipBehavior] says) and still
+  /// reports the overflow: the render command's captures show the published app, and it reports the overflow as
+  /// a problem of its own.
+  static bool debugPaintOverflowStripes = true;
+
+  @override
+  void paintOverflowIndicator(PaintingContext context, Offset offset, Rect containerRect, Rect childRect,
+      {List<DiagnosticsNode>? overflowHints}) {
+    if (debugPaintOverflowStripes) {
+      super.paintOverflowIndicator(context, offset, containerRect, childRect, overflowHints: overflowHints);
+      return;
+    }
+    // The report is made where the stripes are drawn: draw them where nothing shows.
+    final discard = _DiscardedPaint(containerRect);
+    super.paintOverflowIndicator(discard, offset, containerRect, childRect, overflowHints: overflowHints);
+    discard.finish();
+  }
 
   /// How far the last child's end is past this box's own, along the main
   /// axis (0 or less: it fits).

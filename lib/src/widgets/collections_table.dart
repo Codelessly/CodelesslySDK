@@ -45,7 +45,7 @@ bool tableDecorated(Node n) {
 void tableViewRuntimeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   chain.add(b.fitBox('fit', n.layout.width.fit, n.layout.height.fit, Size(n.layout.width.value, n.layout.height.value)));
   final r = ListRuntime(b, n);
-  final rows = tableRowsOf(r);
+  var rows = tableRowsOf(r);
   String? slot(String name) => n.slots[name] != null && b.nodeOf(n.slots[name]!) != null ? n.slots[name] : null;
   final cell = slot(TableViewProps.cell), columnHeader = slot(TableViewProps.columnHeader);
   final rowHeader = slot(TableViewProps.rowHeader), corner = slot(TableViewProps.corner);
@@ -62,6 +62,42 @@ void tableViewRuntimeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
     chain.add(b.obtain<RenderPadding>('tablePadding', () => RenderPadding(padding: padding, textDirection: TextDirection.ltr))
       ..padding = padding);
   }
+  // The template of table cell (row, col), header spans counted, and its key, index and item for the rows as they
+  // are now (null id: no template for it).
+  (String?, Object, int, Object?) cellAt(int row, int col) {
+    final inHeaderRow = headerRow && row == 0, inHeaderColumn = headerColumn && col == 0;
+    final rowIndex = row - rowOffset, columnIndex = col - columnOffset;
+    if (inHeaderRow && inHeaderColumn) return (corner, 'corner', 0, null);
+    if (inHeaderRow) {
+      final column = columns[columnIndex];
+      return (
+        columnHeader,
+        ('column', columnIndex),
+        columnIndex,
+        {'label': column.label, 'column': column.key, 'columnIndex': columnIndex},
+      );
+    }
+    if (inHeaderColumn) return (rowHeader, ('row', rowIndex), rowIndex, {'row': rows[rowIndex], 'rowIndex': rowIndex});
+    final column = columns[columnIndex];
+    final row_ = rows[rowIndex];
+    return (
+      cell,
+      (rowIndex, columnIndex),
+      rowIndex,
+      {
+        'value': switch (row_) {
+          final Map m => m[column.key],
+          final List l => l.elementAtOrNull(columnIndex),
+          _ => null,
+        },
+        'row': row_,
+        'column': column.key,
+        'rowIndex': rowIndex,
+        'columnIndex': columnIndex,
+      },
+    );
+  }
+
   final view = b.obtain<RenderRunningTable>('runningTable', RenderRunningTable.new);
   view
     ..clipBehavior = clip(n.prop(TableViewProps.clipBehavior))
@@ -96,44 +132,7 @@ void tableViewRuntimeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
     ..onWindow = (cells) {
       final ids = <String>[], instances = <Object?>[], built = <(int, int)>[];
       for (final (row, col) in cells) {
-        final inHeaderRow = headerRow && row == 0, inHeaderColumn = headerColumn && col == 0;
-        final rowIndex = row - rowOffset, columnIndex = col - columnOffset;
-        final String? id;
-        final Object key;
-        final int index;
-        final Object? item;
-        if (inHeaderRow && inHeaderColumn) {
-          (id, key, index, item) = (corner, 'corner', 0, null);
-        } else if (inHeaderRow) {
-          final column = columns[columnIndex];
-          (id, key, index, item) = (
-            columnHeader,
-            ('column', columnIndex),
-            columnIndex,
-            {'label': column.label, 'column': column.key, 'columnIndex': columnIndex},
-          );
-        } else if (inHeaderColumn) {
-          (id, key, index, item) = (rowHeader, ('row', rowIndex), rowIndex, {'row': rows[rowIndex], 'rowIndex': rowIndex});
-        } else {
-          final column = columns[columnIndex];
-          final row_ = rows[rowIndex];
-          (id, key, index, item) = (
-            cell,
-            (rowIndex, columnIndex),
-            rowIndex,
-            {
-              'value': switch (row_) {
-                final Map m => m[column.key],
-                final List l => l.elementAtOrNull(columnIndex),
-                _ => null,
-              },
-              'row': row_,
-              'column': column.key,
-              'rowIndex': rowIndex,
-              'columnIndex': columnIndex,
-            },
-          );
-        }
+        final (id, key, index, item) = cellAt(row, col);
         if (id == null) continue;
         final instance = ProvidedItem('cell', b.instance, n.id, key);
         r.binder?.provideItem(b.source, instance, index: index, item: item);
@@ -145,6 +144,23 @@ void tableViewRuntimeRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
       return built;
     }
     ..changed();
+  // New data (a variable edit, a capture's values) with as many rows leaves the node as it was, so this recipe does
+  // not run again: the cells built move to their new items in place, as the table at rest's do (collections.dart).
+  // Without it they kept showing their old items. (Another row count changes the node: the recipe runs again.)
+  if (n.bind.containsKey('data') && r.binder != null) {
+    final binder = r.binder!;
+    binder.onItemsChanged(n.id, b.instance, (items) {
+      if (items.length != rows.length) return;
+      rows = items;
+      for (final (row, col) in view.builtCells) {
+        final (id, key, index, item) = cellAt(row, col);
+        if (id == null) continue;
+        binder.provideItem(b.source, ProvidedItem('cell', b.instance, n.id, key), index: index, item: item);
+      }
+    });
+  } else {
+    r.binder?.onItemsChanged(n.id, b.instance, null);
+  }
   chain.add(view);
 }
 
@@ -342,6 +358,9 @@ class RenderRunningTable extends RenderBox
 
   List<(int, int)>? _wanted;
   List<(int, int)> _cells = const [];
+
+  /// The cells built for the window in view, (row, column) with header spans counted, as [onWindow] returned them.
+  List<(int, int)> get builtCells => _cells;
 
   static bool _listEquals(List<(int, int)> a, List<(int, int)>? b) {
     if (b == null || a.length != b.length) return false;
