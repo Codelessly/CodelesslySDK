@@ -1,4 +1,6 @@
 
+import 'dart:ui' show Tristate;
+
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/codelessly_api.dart' show LayoutDocument;
 import 'package:codelessly_sdk/codelessly_sdk.dart' hide captureImage;
@@ -122,6 +124,7 @@ void main() {
     expect(field.editor.text, '123456');
     final data = field.debugSemantics!.getSemanticsData();
     expect(data.flagsCollection.isTextField, isTrue);
+    expect(data.flagsCollection.isFocused, Tristate.isTrue);
     expect(data.label, 'Verification code');
     expect(data.value, '123456');
     expect(data.maxValueLength, 6);
