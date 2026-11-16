@@ -9,13 +9,15 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-/// A scratch layout: `<root>/sdk/tool/render/render.sh` (this checkout's
-/// script), `<root>/sdk/pubspec.yaml`, and a stand-in flutter at
+/// A scratch layout: `<root>/sdk/tool/render/render.sh` and
+/// `<root>/sdk/tool/lib/env.sh` (this checkout's scripts), `<root>/sdk/pubspec.yaml`, and a stand-in flutter at
 /// `<root>/flutter/bin/flutter`.
 class Layout {
   Layout() : root = Directory.systemTemp.createTempSync('render_script_test').path {
     Directory('$sdk/tool/render').createSync(recursive: true);
     File('tool/render/render.sh').copySync('$sdk/tool/render/render.sh');
+    Directory('$sdk/tool/lib').createSync(recursive: true);
+    File('tool/lib/env.sh').copySync('$sdk/tool/lib/env.sh');
     File('$sdk/pubspec.yaml').writeAsStringSync('name: codelessly_sdk\n');
     Directory('$root/flutter/bin').createSync(recursive: true);
     // Records each call; `pub get` writes the package config; `test` writes
