@@ -151,6 +151,17 @@
       },
       "opacity": 0.85
      }
+    },
+    "focused": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "secondaryBackground"
+        }
+       ]
+      }
+     }
     }
    },
    "actions": [

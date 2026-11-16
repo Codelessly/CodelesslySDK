@@ -41,7 +41,17 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
       ..onTapDown = ((_) => _setPressed(true))
       ..onTapUp = ((_) => _setPressed(false))
       ..onTapCancel = (() => _setPressed(false))
-      ..onTap = activate;
+      ..onTap = () {
+        // What an overlay this press opens gives the focus back to.
+        ControlFocusScope.noteActivation(focusNode, keyboard: false);
+        activate();
+      };
+    focusNode
+      ..label = (() => _semanticsLabel ?? semanticsName)
+      ..onHighlightChange = () {
+        _statesChanged();
+        markNeedsPaint();
+      };
   }
 
   RenderBox? _icon;
@@ -415,6 +425,31 @@ abstract interface class LabeledControl implements RenderBox {
   /// Each label: its text, font family, and glyph boxes in local
   /// coordinates.
   List<({String text, String? fontFamily, List<Rect> glyphs})> get labels;
+}
+
+/// The first text shown under [root], in paint order: a paragraph's, or a
+/// control's label. What a press target built from plain nodes is called
+/// (a menu row's title), and an overlay with no name of its own.
+String? firstTextUnder(RenderObject root) {
+  String? found;
+  void visit(RenderObject o) {
+    if (found != null) return;
+    if (o is RenderParagraph) {
+      final t = o.text.toPlainText().trim();
+      if (t.isNotEmpty) found = t;
+    } else if (o is LabeledControl) {
+      for (final l in o.labels) {
+        if (l.text.trim().isNotEmpty) {
+          found = l.text.trim();
+          break;
+        }
+      }
+    }
+    if (found == null) o.visitChildren(visit);
+  }
+
+  visit(root);
+  return found;
 }
 
 /// Paints [overlay] over [shape] (the state layer: hover, press).
