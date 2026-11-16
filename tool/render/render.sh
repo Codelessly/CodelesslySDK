@@ -87,15 +87,43 @@ fi
 # that makes runs on one checkout take turns: tool/lib/env.sh.
 . "$sdk/tool/lib/env.sh"
 codelessly_find_flutter "tool/render/render.sh <site> --out <dir>" || exit 2
-codelessly_take_lock
 codelessly_find_api
-echo "Rendering with $(codelessly_version_line), Flutter $flutter_bin." >&2
-codelessly_write_api_override
-codelessly_pub_get || exit 2
 
 work="$(mktemp -d "$out/.render.XXXXXX")"
 trap 'rm -rf "$work"; codelessly_release_lock' EXIT
 printf '%s\n' "${args[@]}" > "$work/args"
+
+# The render server (tool/render/serve.sh), when it is up and serves this code: the run is a request to it.
+server="$sdk/build/.render-server"
+if [ -f "$server/ready" ] && [ -f "$server/pid" ] && kill -0 "$(cat "$server/pid")" 2>/dev/null; then
+  changed="$(find "$sdk/lib" "$sdk/tool/render" "$sdk/pubspec.yaml" "$sdk/pubspec_overrides.yaml" ${api:+"$api/lib" "$api/pubspec.yaml"} \
+    -newer "$server/ready" -print -quit 2>/dev/null)"
+  if [ -n "$changed" ]; then
+    echo "The render server serves older code (${changed#$sdk/} changed since it started): stopping it; rendering the usual way. tool/render/serve.sh starts it again." >&2
+    "$here/serve.sh" --stop >/dev/null 2>&1
+  else
+    echo "Rendering with $(codelessly_version_line), the render server (pid $(cat "$server/pid"))." >&2
+    req="$server/$(date +%s%N)-$$.req"
+    printf '%s\n' "$work/args" > "$req.tmp" && mv "$req.tmp" "$req"
+    while [ ! -f "$work/args.status" ]; do
+      if ! kill -0 "$(cat "$server/pid" 2>/dev/null)" 2>/dev/null; then
+        echo "The render server stopped during the run; rendering the usual way." >&2
+        rm -f "$req"
+        break
+      fi
+      sleep 0.05
+    done
+    if [ -f "$work/args.status" ]; then
+      cat "$work/args.report"
+      exit "$(cat "$work/args.status")"
+    fi
+  fi
+fi
+
+codelessly_take_lock
+echo "Rendering with $(codelessly_version_line), Flutter $flutter_bin." >&2
+codelessly_write_api_override
+codelessly_pub_get || exit 2
 (
   cd "$sdk" && CODELESSLY_RENDER_ARGS="$work/args" "$flutter_bin" test --no-pub \
     tool/render/render_harness.dart > "$work/flutter.log" 2>&1

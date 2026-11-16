@@ -32,6 +32,7 @@ One entry point for the authoring loop. `tool/codelessly help` lists the command
 | `sheet <png \| dir>... --out <png>` | Captures on one labelled image, one row per state, narrowest size first. | Showing a model (or a person) many captures at once. |
 | `notation prompt\|expand\|apply` | The compact authoring notation ([notation/notation.sh](notation/notation.sh)): the prompt a model gets, a notation text expanded to a document, ops applied to a document. | Generating UI with a model in the notation instead of JSON. |
 | `replay <stream.jsonl> --out <dir>` | A recorded `ui_apply` stream replayed headless: video, contact sheet, metrics ([stream/README.md](stream/README.md)). | Working on streaming generative UI. |
+| `serve [--stop\|--status]` | Keeps the renderer running in the background ([render/serve.sh](render/serve.sh)), so every `render`, `validate` and `states` run on this checkout skips Flutter's start: about 1 s a run instead of about 6. It serves the code it started with; after a change to the SDK or the API it is stopped and runs go the usual way until it is started again. Stops after 30 idle minutes. | Any session that will render more than a few times. The MCP server starts it by itself. |
 | `mcp` | All of the above as an MCP server on stdio: `codelessly_docs`, `codelessly_validate`, `codelessly_render` (report, outline and PNGs in one answer), `codelessly_flatten`, `codelessly_states`. | Giving any MCP client (Claude Code, an IDE agent, your own) the render loop as tool calls. |
 
 Register the MCP server with a client, e.g. a project's `.mcp.json`:
@@ -44,6 +45,7 @@ A typical session:
 
 ```sh
 tool/codelessly doctor --warm
+tool/codelessly serve                                  # keep the renderer up: ~1 s renders
 tool/codelessly docs                                   # what's where
 tool/codelessly docs "a row that becomes a column"     # the section for a need
 tool/codelessly render site/ --out out/ --outline      # problems, boxes, texts; PNGs in out/
@@ -52,8 +54,9 @@ tool/codelessly states states.json                     # every state vs its refe
 ```
 
 Speed: a render takes about 5 seconds once the harness is compiled (the first after an SDK change takes 20 to 60
-seconds, `doctor --warm` does it up front) plus about half a second per screen and size. Runs on one checkout take
-turns (a lock in `build/`); use git worktrees for runs in parallel.
+seconds, `doctor --warm` does it up front) plus about half a second per screen and size; with `serve` running, the
+5 seconds of Flutter's start go away. Runs on one checkout take turns (a lock in `build/`, or the server's queue);
+use git worktrees for runs in parallel.
 
 ## Every tool here
 
@@ -64,7 +67,7 @@ turns (a lock in `build/`); use git worktrees for runs in parallel.
 | `codelessly` | The entry point above. | this file |
 | `cli/` | The entry point's Python commands: `docs.py`, `flatten.py`, `outline.py`, `states.py`, `sheet.py`, `run_render.py` (render/validate with `--outline`/`--sheet`), `mcp_server.py`. `test_cli.py` tests them without Flutter. | each file's docstring |
 | `lib/env.sh` | Shared by every launcher: finds Flutter, points the SDK at the sibling `codelessly_api` (a `pubspec_overrides.yaml` marked as written by the tools), resolves dependencies when stale, the per-checkout lock. | its header |
-| `render/` | The render command: `render.sh` (launcher), `render_harness.dart` (the `flutter test` entry), `src/` (arguments, site loading, publishing, fonts, rendering, steps, checks, compare). | [render/README.md](render/README.md), codelessly_api `docs/reference/render.md` |
+| `render/` | The render command: `render.sh` (launcher), `serve.sh` (the render server), `render_harness.dart` (the `flutter test` entry, one run or the server's loop), `src/` (arguments, site loading, publishing, fonts, rendering, steps, checks, compare). | [render/README.md](render/README.md), codelessly_api `docs/reference/render.md` |
 | `notation/` | The compact notation's tools: `prompt.dart`, `expand.dart`, `apply.dart`, launched by `notation.sh`. | `notation.sh` header |
 
 ### Measuring generative UI (research)
