@@ -92,11 +92,16 @@ def render(card, ds, d, width=420, narrow=320, source_site=None, source_page=Non
         folder = f'{d}/raw-{name}'
         shutil.rmtree(folder, ignore_errors=True)
         code, log = run(['tool/render/render.sh', source, '--out', folder] + ([] if source_site else ['--design-system', ds]) + screen_args + extra)
-        if name != 'dark':
-            problems += [(f'At {narrow} wide: ' if name == 'narrow' else '') + l for l in reported(log) if l not in problems]
+        prefix = f'At {narrow} wide: ' if name == 'narrow' else ('In dark mode: ' if name == 'dark' else '')
+        found = reported(log)
+        problems += [prefix + l for l in found if prefix + l not in problems]
+        if code and not found:
+            problems.append(f'{prefix}Renderer exited {code}: {log[-500:]}')
         shots = sorted(f for f in os.listdir(folder) if f.endswith('.png')) if os.path.isdir(folder) else []
         if shots:
             crop(f'{folder}/{shots[0]}', f'{d}/{name}.png', dark=name == 'dark')
+        else:
+            problems.append(f'{prefix}Renderer produced no picture.')
         dumps = [f for f in os.listdir(folder) if f.endswith('.layout.json')] if os.path.isdir(folder) else []
         if dumps:
             texts = [b['text'] for b in json.load(open(f'{folder}/{dumps[0]}')) if b.get('text')]
