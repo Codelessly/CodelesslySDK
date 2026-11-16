@@ -82,6 +82,7 @@ void main() {
     expect(recorded.fired, isEmpty);
     final data = s.debugSemantics!.getSemanticsData();
     expect(data.value, '4.5 of 5');
+    expect(data.hint, 'Read only');
     expect(data.hasAction(SemanticsAction.increase), isFalse);
     handle.dispose();
   });
