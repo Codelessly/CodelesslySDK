@@ -1,0 +1,73 @@
+{
+ "previews": [
+  {
+   "name": "Grid",
+   "size": [
+    360,
+    350
+   ],
+   "props": {}
+  },
+  {
+   "name": "Strip",
+   "size": [
+    360,
+    150
+   ],
+   "props": {
+    "layout": "strip"
+   }
+  },
+  {
+   "name": "Pages",
+   "size": [
+    360,
+    290
+   ],
+   "props": {
+    "layout": "pages"
+   }
+  }
+ ],
+ "nodes": {
+  "grid": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "crossAxisCount": 2
+      },
+      "bind": {
+       "props.crossAxisCount": null
+      }
+     }
+    }
+   ]
+  },
+  "thumb": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "height": 140
+      }
+     }
+    }
+   ]
+  },
+  "caption": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "maxLines": 2
+      }
+     }
+    }
+   ]
+  }
+ }
+}

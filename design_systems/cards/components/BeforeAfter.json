@@ -1,0 +1,291 @@
+{
+  "schema": 3,
+  "id": "BeforeAfter",
+  "roots": [
+    "root"
+  ],
+  "widget": {
+    "type": "BeforeAfter",
+    "doc": "A draggable before/after image wipe with two drawn Media scenes: BeforeAfter =position kind:\"skyline\" before:\"dawn\" after:\"dusk\" height:500. The slider changes the visible share continuously.",
+    "props": [
+      {
+        "key": "value",
+        "type": {
+          "kind": "variable",
+          "of": {
+            "kind": "number",
+            "flutter": "double"
+          }
+        },
+        "default": "",
+        "doc": "The comparison position variable from 0 to 100."
+      },
+      {
+        "key": "kind",
+        "type": {
+          "kind": "string",
+          "flutter": "String"
+        },
+        "default": "skyline",
+        "required": true,
+        "doc": "The drawn Media scene."
+      },
+      {
+        "key": "before",
+        "type": {
+          "kind": "string",
+          "flutter": "String"
+        },
+        "default": "dawn",
+        "doc": "The original Media tone."
+      },
+      {
+        "key": "after",
+        "type": {
+          "kind": "string",
+          "flutter": "String"
+        },
+        "default": "dusk",
+        "doc": "The new Media tone."
+      },
+      {
+        "key": "height",
+        "type": {
+          "kind": "number",
+          "flutter": "double"
+        },
+        "default": 500,
+        "doc": "Height of the image comparison."
+      }
+    ],
+    "events": [
+      {
+        "key": "onChanged",
+        "payload": {
+          "kind": "number",
+          "flutter": "double"
+        },
+        "doc": "The position changed."
+      }
+    ]
+  },
+  "previews": [
+    {
+      "name": "Halfway",
+      "size": [
+        640,
+        460
+      ],
+      "props": {
+        "value": 50,
+        "kind": "skyline",
+        "before": "dawn",
+        "after": "dusk",
+        "height": 360
+      }
+    }
+  ],
+  "nodes": {
+    "root": {
+      "type": "column",
+      "children": [
+        "stage",
+        "slider",
+        "labels"
+      ],
+      "props": {
+        "spacing": 12
+      },
+      "layout": {
+        "width": {
+          "fill": 0
+        },
+        "height": {
+          "hug": 0
+        }
+      }
+    },
+    "stage": {
+      "type": "stack",
+      "children": [
+        "old",
+        "reveal"
+      ],
+      "layout": {
+        "width": {
+          "fill": 0
+        },
+        "height": 500
+      },
+      "bind": {
+        "layout.width": "${= min(screen.width - 48, 1120)}",
+        "layout.height": "${props.height}"
+      },
+      "decoration": {
+        "radius": 14,
+        "clip": "antiAlias"
+      }
+    },
+    "old": {
+      "type": "Media",
+      "props": {
+        "kind": "skyline",
+        "tone": "dawn",
+        "round": false
+      },
+      "layout": {
+        "width": {
+          "fill": 0
+        },
+        "height": {
+          "fill": 0
+        },
+        "x": {
+          "start": 0
+        },
+        "y": {
+          "start": 0
+        }
+      },
+      "bind": {
+        "props.kind": "${props.kind}",
+        "props.tone": "${props.before}"
+      }
+    },
+    "reveal": {
+      "type": "stack",
+      "children": [
+        "new"
+      ],
+      "layout": {
+        "width": 560,
+        "height": 500,
+        "x": {
+          "start": 0
+        },
+        "y": {
+          "start": 0
+        }
+      },
+      "decoration": {
+        "clip": "antiAlias"
+      },
+      "bind": {
+        "layout.width": "${= min(screen.width - 48, 1120) * clamp(props.value,0,100) / 100}",
+        "layout.height": "${props.height}"
+      }
+    },
+    "new": {
+      "type": "Media",
+      "props": {
+        "kind": "skyline",
+        "tone": "dusk",
+        "round": false
+      },
+      "layout": {
+        "width": 1120,
+        "height": 500,
+        "x": {
+          "start": 0
+        },
+        "y": {
+          "start": 0
+        }
+      },
+      "bind": {
+        "layout.width": "${= min(screen.width - 48, 1120)}",
+        "layout.height": "${props.height}",
+        "props.kind": "${props.kind}",
+        "props.tone": "${props.after}"
+      }
+    },
+    "slider": {
+      "type": "slider",
+      "layout": {
+        "width": {
+          "fill": 0
+        },
+        "height": 32
+      },
+      "props": {
+        "value": 50,
+        "min": 0,
+        "max": 100,
+        "trackHeight": 4,
+        "activeTrackColor": "primary",
+        "inactiveTrackColor": "track",
+        "thumbColor": "ink"
+      },
+      "bind": {
+        "props.value": "${props.value}"
+      },
+      "actions": [
+        {
+          "trigger": {
+            "type": "changed"
+          },
+          "actions": [
+            {
+              "type": "setVariable",
+              "variable": "props.value",
+              "value": "${result}"
+            },
+            {
+              "type": "componentEvent",
+              "event": "onChanged",
+              "value": "${result}"
+            }
+          ]
+        }
+      ]
+    },
+    "labels": {
+      "type": "row",
+      "children": [
+        "beforeLabel",
+        "afterLabel"
+      ],
+      "props": {
+        "mainAxisAlignment": "spaceBetween"
+      },
+      "layout": {
+        "width": {
+          "fill": 0
+        },
+        "height": {
+          "hug": 0
+        }
+      }
+    },
+    "beforeLabel": {
+      "type": "text",
+      "props": {
+        "text": "Before",
+        "style": "captionWide"
+      },
+      "layout": {
+        "width": {
+          "hug": 0
+        },
+        "height": {
+          "hug": 0
+        }
+      }
+    },
+    "afterLabel": {
+      "type": "text",
+      "props": {
+        "text": "After",
+        "style": "captionWide"
+      },
+      "layout": {
+        "width": {
+          "hug": 0
+        },
+        "height": {
+          "hug": 0
+        }
+      }
+    }
+  }
+}

@@ -8,7 +8,7 @@
   "props": [
    {"key": "brand", "type": {"kind": "string", "flutter": "String"}, "default": "Tidewater", "doc": "The product's name.", "required": true},
    {"key": "tagline", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line under the name (empty: none)."},
-   {"key": "icon", "type": {"kind": "string", "flutter": "String"}, "default": "waves", "doc": "A Material icon in the brand's mark."},
+   {"key": "icon", "type": {"kind": "string", "flutter": "String"}, "default": "waves", "doc": "A Material icon in the brand's mark (empty: no mark)."},
    {"key": "headings", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["Product", "Company"], "doc": "The column headings, up to four.", "required": true},
    {"key": "links", "type": {"kind": "list", "flutter": "List<List<String>>", "item": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}}, "default": [["Features", "Pricing"], ["About", "Careers"]], "doc": "The links of each column, one list per heading.", "required": true},
    {"key": "legal", "type": {"kind": "string", "flutter": "String"}, "default": "© 2026", "doc": "The copyright line."},
@@ -39,7 +39,7 @@
   "top": {"type": "row", "children": ["brandCol", "linksRow"], "props": {"wrap": true, "spacing": 32, "runSpacing": 36, "crossAxisAlignment": "start"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 0, 0, 12]}},
   "brandCol": {"type": "column", "children": ["brandRow", "tagline"], "props": {"crossAxisAlignment": "start", "spacing": 12}, "layout": {"width": {"fill": 1}, "basis": 280, "height": {"hug": 0}}},
   "brandRow": {"type": "row", "children": ["mark", "brand"], "props": {"crossAxisAlignment": "center", "spacing": 10}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
-  "mark": {"type": "row", "children": ["markIcon"], "props": {"mainAxisAlignment": "center"}, "layout": {"width": 30, "height": 30}, "decoration": {"fills": [{"color": "accent"}], "radius": 9}, "bind": {"decoration.radius": "${theme.radii.inner}"}},
+  "mark": {"type": "row", "children": ["markIcon"], "props": {"mainAxisAlignment": "center"}, "layout": {"width": 30, "height": 30}, "decoration": {"fills": [{"color": "accent"}], "radius": 9}, "bind": {"decoration.radius": "${theme.radii.inner}", "visible": "${= props.icon != ''}"}},
   "markIcon": {"type": "icon", "props": {"icon": "waves", "size": 18, "color": "onAccent"}, "layout": {"width": 18, "height": 18}, "bind": {"props.icon": "${props.icon}"}},
   "brand": {"type": "text", "props": {"text": "${props.brand}", "style": "headingWide"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
   "tagline": {"type": "text", "props": {"text": "${props.tagline}", "style": {"from": "mutedWide", "color": "inkSoft"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "constraints": {"maxWidth": 300}}, "bind": {"visible": "${= props.tagline != ''}"}},

@@ -1,7 +1,7 @@
 // Expands a UI written in the compact notation
 // (package:codelessly_api/notation.dart) into a layout document.
 //
-//   dart run tool/notation/expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--out <file.json>]
+//   dart run tool/notation/expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>]
 //
 // With --design-system (a folder holding design_system.json) the notation
 // may call that design system's components by name and takes its looks.
@@ -9,6 +9,8 @@
 // a UiSession writes it: the document follows dark mode and the theme).
 // A page (--width 700 or more) is given the media rules that lay it out on a
 // tablet and a phone; --no-reflow leaves it written for its one width.
+// The variables of the site.json beside --out (or of --site) are the site's:
+// the page uses them by name and declares none of them on its screen.
 // What the notation could not read is written to stderr, one line each;
 // the exit status is 1 when there is any.
 import 'dart:convert';
@@ -25,7 +27,7 @@ Future<void> main(List<String> args) async {
 
   final file = args.where((a) => !a.startsWith('--')).firstOrNull;
   if (file == null || !File(file).existsSync()) {
-    stderr.writeln('usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--out <file.json>]');
+    stderr.writeln('usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>]');
     exit(2);
   }
   DesignSystem? ds;
@@ -43,9 +45,24 @@ Future<void> main(List<String> args) async {
   final catalog = ds?.catalogOver(standardCatalog) ?? standardCatalog;
   final screen = opt('--id') ?? 'screen';
   final width = double.tryParse(opt('--width') ?? '') ?? 390;
+  // The site's variables (site.json's `variables`): a page reads and sets
+  // them by name, with no copy of its own that would hide them. From
+  // --site <site.json>, else the site.json beside --out.
+  final sitePath = opt('--site') ?? (opt('--out') == null ? null : '${File(opt('--out')!).parent.path}/site.json');
+  final projectVariables = <String, Map<String, Object?>>{};
+  if (sitePath != null && File(sitePath).existsSync()) {
+    try {
+      final manifest = jsonDecode(File(sitePath).readAsStringSync());
+      for (final v in (manifest is Map ? manifest['variables'] : null) as List? ?? const []) {
+        if (v is Map && v['name'] is String) projectVariables[v['name'] as String] = v.cast<String, Object?>();
+      }
+    } on FormatException catch (e) {
+      stderr.writeln('$sitePath is not JSON (${e.message}): its variables were not read.');
+    }
+  }
   final options = ds == null
-      ? NotationOptions(screen: screen, width: width, reflow: !args.contains('--no-reflow'))
-      : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'), reflow: !args.contains('--no-reflow'));
+      ? NotationOptions(screen: screen, width: width, reflow: !args.contains('--no-reflow'), projectVariables: projectVariables)
+      : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'), reflow: !args.contains('--no-reflow'), projectVariables: projectVariables);
   final result = Catalog.run(catalog, () => parseNotation(File(file).readAsStringSync(), catalog: catalog, options: options));
   for (final issue in result.issues) {
     stderr.writeln('$file: $issue');
