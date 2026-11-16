@@ -84,7 +84,7 @@
   },
   "chipText": {
    "type": "text",
-   "media": [{"maxWidth": 699, "patch": {"layout": {"width": {"fill": 0}}}}],
+   "media": [{"maxWidth": 699, "patch": {"layout": {"width": {"fill": 0}}, "props": {"maxLines": 2}}}],
    "props": {"text": "${props.eyebrow}", "style": {"from": "smallWide", "color": "accent", "fontWeight": 600}, "maxLines": 1, "overflow": "ellipsis"},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
   },
