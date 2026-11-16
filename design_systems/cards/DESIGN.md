@@ -31,6 +31,21 @@ Every SSUI name (`primaryText`, `primaryBorder`, `subtleFill`, …) is present w
 so the 159 SSUI controls render as SSUI's. `themes/light.json` and `themes/dark.json` are the two sets as theme
 overrides; the render tool's `--theme dark` shows the dark set.
 
+## Tabs, switches and pills
+
+Three kinds, each with one job, all built in `tool/blocks.py` from the same parts. `Tabs` is a page's (or a card's)
+views: 14 px semibold labels on a hairline, the open one in ink with a 2 px accent underline, 44 high.
+`Segments` (as wide as its place, equal segments of at most 200) and `TabToggle` / `SegmentedControl` (as wide as
+their options) are a small switch of two to four short options: a `subtleFill` track with a hairline and the
+control radius, the chosen option a raised knob (`raisedBackground`, `shadows.knob`, the control radius less 3),
+40 high. `ChipTabs` is filter pills (32 high, the chosen one a neutral fill with the accent border);
+`ChoiceChips` is a grid of equal chips for slots and sizes; `BrowserTabs` is open documents, each with an x.
+Every one of them stays on one line: where the options do not fit, the line scrolls sideways with each label at
+its own width, fades at the edge it continues past and brings the chosen option into view; it never wraps onto
+rows and never cuts a label (only `ChoiceChips`, a grid, wraps, with chips as wide as their labels). Hover and
+press lay `hoverOverlay` and `pressedOverlay` over the option; on a phone (a window under 700 wide) tap areas
+are 44 high.
+
 ## Where the neutrals come from
 
 `OverlookV2/packages/soft_saas_ui/lib/soft_saas/design_tokens.dart` (through `design_systems/ssui/design_system.json`,
