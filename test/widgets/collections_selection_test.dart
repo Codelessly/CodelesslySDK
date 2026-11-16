@@ -25,6 +25,7 @@ void main() {
               child: SelectionListControl(
                 label: 'Agenda',
                 items: items,
+                columns: 3,
                 selected: () => selected,
                 onChanged: (next) => selected = next,
               ),
@@ -34,6 +35,8 @@ void main() {
       );
       await tester.tap(find.text('First'));
       await tester.pump();
+      expect(tester.getTopLeft(find.text('Second')).dy,
+          greaterThan(tester.getTopLeft(find.text('First')).dy));
       await tester.tap(find.text('Third'));
       await tester.pump();
       expect(selected, ['a', 'c']);
