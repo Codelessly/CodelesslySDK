@@ -30,6 +30,7 @@ import '../custom_paint.dart' show RenderCustomPaintLayer;
 import '../node_tree.dart' show NodeBox, fireTrigger;
 import '../recipe.dart';
 import 'kit.dart';
+import 'focus.dart';
 import 'kit_toggles.dart';
 import 'overlay.dart';
 import 'root.dart';
@@ -47,8 +48,10 @@ void sliderRecipe(NodeBuilder b, Node n, List<RenderBox> chain) {
   final box = b.obtain<RenderSlider>('slider', RenderSlider.new)
     ..interactive = interactive
     ..configure(n, ControlTokens.of(b), Size(l.width.value, l.height.value))
+    ..rightToLeft = n.behaviors.textDirection == api.TextDirection.rtl
     ..customPaint = paint
     ..onChanged = interactive ? (v) => fireTrigger(b, 'changed', event: {'value': v}) : null
+    ..onRangeChanged = interactive ? (low, high) => fireTrigger(b, 'changed', event: {'result': {'low': low, 'high': high}}) : null
     ..onChangeEnd = interactive ? (v) => fireTrigger(b, 'changeEnd', event: {'value': v}) : null
     ..onStateChanged = interactive && patched.isNotEmpty
         ? (s, on) {
@@ -128,6 +131,11 @@ class RenderSlider extends RenderControl {
       _bound = bound;
       _value = bound;
     }
+    final highBound = n.prop(SliderProps.rangeEnd);
+    if (!_configured || highBound != _highBound) {
+      _highBound = highBound;
+      _highValue = highBound;
+    }
     _configured = true;
     if (changed) {
       markNeedsLayout();
@@ -141,9 +149,15 @@ class RenderSlider extends RenderControl {
 
   /// Reports a new value (`changed`) and the end of a change (`changeEnd`).
   void Function(double value)? onChanged, onChangeEnd;
+  void Function(double low, double high)? onRangeChanged;
 
   double? _bound;
   double _value = 0;
+  double? _highBound, _highValue;
+  bool _highActive = false;
+  bool get isRange => _highValue != null;
+  bool get highActive => _highActive;
+  double get rangeEnd => (_highValue ?? value).clamp(value, max);
 
   bool get _vertical => _node != null && node.prop(SliderProps.orientation) == api.Axis.vertical;
 
@@ -152,7 +166,7 @@ class RenderSlider extends RenderControl {
   int? get divisions => switch (node.prop(SliderProps.divisions)) { final d? when d > 0 => d, _ => null };
 
   /// The value shown: within the range and the selectable part of it.
-  double get value => _selectable(_value.clamp(min, max));
+  double get value => _selectable(_value.clamp(min, isRange ? (_highValue ?? max).clamp(min, max) : max));
 
   double _selectable(double v) {
     final lo = (node.prop(SliderProps.selectableMin) ?? min).clamp(min, max);
@@ -172,8 +186,20 @@ class RenderSlider extends RenderControl {
 
   /// Where the value is in the range (0–1).
   double get fraction => max <= min ? 0 : ((value - min) / (max - min)).clamp(0.0, 1.0);
+  double get highFraction => max <= min ? 0 : ((rangeEnd - min) / (max - min)).clamp(0.0, 1.0);
 
   void _set(double v, {bool end = false}) {
+    if (isRange) {
+      final kept = _selectable(_snap(v)).clamp(_highActive ? value : min, _highActive ? max : rangeEnd);
+      if (_highActive ? kept != _highValue : kept != _value) {
+        if (_highActive) { _highValue = kept; } else { _value = kept; }
+        markNeedsPaint();
+        markNeedsSemanticsUpdate();
+        onRangeChanged?.call(value, rangeEnd);
+      }
+      if (end) onChangeEnd?.call(_highActive ? rangeEnd : value);
+      return;
+    }
     final kept = _selectable(_snap(v));
     if (kept != _value) {
       _value = kept;
@@ -206,7 +232,13 @@ class RenderSlider extends RenderControl {
 
   void _start(Offset local) {
     if (!enabled) return;
-    if (!focusNode.hasFocus) focusNode.requestFocus();
+    ControlFocusScope.noteActivation(focusNode, keyboard: false);
+    focusNode.requestFocus(highlight: false);
+    if (isRange) {
+      final frame = _vertical ? Offset(size.height - local.dy, local.dx) : local;
+      _highActive = (frame.dx - _x(highFraction)).abs() < (frame.dx - _x(fraction)).abs();
+      markNeedsSemanticsUpdate();
+    }
     _dragging = true;
     _set(_valueAt(local));
     markNeedsPaint();
@@ -215,7 +247,9 @@ class RenderSlider extends RenderControl {
 
   void _moveTo(Offset local) {
     if (!_dragging) return;
-    _set(_valueAt(local));
+    final target = _valueAt(local);
+    if (isRange && value == rangeEnd && target != value) _highActive = target > value;
+    _set(target);
   }
 
   void _end() {
@@ -234,7 +268,7 @@ class RenderSlider extends RenderControl {
     final frame = _vertical ? Offset(size.height - local.dy, local.dx) : local;
     final (:start, :end) = _travel;
     var t = end <= start ? 0.0 : ((frame.dx - start) / (end - start)).clamp(0.0, 1.0);
-    if (node.prop(SliderProps.inverted)) t = 1 - t;
+    if (node.prop(SliderProps.inverted) != (isRange && _rightToLeft && !_vertical)) t = 1 - t;
     return min + t * (max - min);
   }
 
@@ -250,20 +284,27 @@ class RenderSlider extends RenderControl {
     if (!_interactive || !enabled) return false;
     if (event is! KeyDownEvent && event is! KeyRepeatEvent) return false;
     final k = event.logicalKey;
+    if (isRange && (k == LogicalKeyboardKey.space || k == LogicalKeyboardKey.enter)) {
+      _highActive = !_highActive;
+      markNeedsPaint();
+      markNeedsSemanticsUpdate();
+      return true;
+    }
     final inverted = node.prop(SliderProps.inverted);
+    final current = isRange && _highActive ? rangeEnd : value;
     double? to;
     if (k == LogicalKeyboardKey.arrowUp) {
-      to = value + step;
+      to = current + step;
     } else if (k == LogicalKeyboardKey.arrowDown) {
-      to = value - step;
+      to = current - step;
     } else if (k == LogicalKeyboardKey.arrowRight) {
-      to = value + (inverted && !_vertical ? -step : step);
+      to = current + ((inverted != (isRange && _rightToLeft && !_vertical)) ? -step : step);
     } else if (k == LogicalKeyboardKey.arrowLeft) {
-      to = value - (inverted && !_vertical ? -step : step);
+      to = current - ((inverted != (isRange && _rightToLeft && !_vertical)) ? -step : step);
     } else if (k == LogicalKeyboardKey.pageUp) {
-      to = value + _pageStep;
+      to = current + _pageStep;
     } else if (k == LogicalKeyboardKey.pageDown) {
-      to = value - _pageStep;
+      to = current - _pageStep;
     } else if (k == LogicalKeyboardKey.home) {
       to = min;
     } else if (k == LogicalKeyboardKey.end) {
@@ -280,12 +321,12 @@ class RenderSlider extends RenderControl {
     return d != null ? step * math.max(1, (d / 10).round()) : step * 10;
   }
 
-  void increase() => _set(value + step, end: true);
-  void decrease() => _set(value - step, end: true);
+  void increase() => _set((isRange && _highActive ? rangeEnd : value) + step, end: true);
+  void decrease() => _set((isRange && _highActive ? rangeEnd : value) - step, end: true);
 
   // --- geometry ------------------------------------------------------------------------
 
-  Size get _natural => Size(_design.width > 0 ? _design.width : 200, _design.height > 0 ? _design.height : 28);
+  Size get _natural => Size(_design.width > 0 ? _design.width : 200, _design.height > 0 ? _design.height : isRange ? 44 : 28);
 
   @override
   double computeMinIntrinsicWidth(double height) => _natural.width;
@@ -343,12 +384,16 @@ class RenderSlider extends RenderControl {
   /// The frame's x of [t] (0–1 of the range).
   double _x(double t) {
     final (:start, :end) = _travel;
-    final along = node.prop(SliderProps.inverted) ? 1 - t : t;
+    final along = node.prop(SliderProps.inverted) != (isRange && _rightToLeft && !_vertical) ? 1 - t : t;
     return start + along * (end - start);
   }
 
   /// The thumb's center in the frame.
   Offset get thumbCenter => Offset(_x(fraction), trackRect.center.dy);
+  Offset get highThumbCenter => Offset(_x(highFraction), trackRect.center.dy);
+
+  bool _rightToLeft = false;
+  set rightToLeft(bool v) { if (v != _rightToLeft) { _rightToLeft = v; markNeedsPaint(); markNeedsSemanticsUpdate(); } }
 
   // --- look ------------------------------------------------------------------------------
 
@@ -405,7 +450,8 @@ class RenderSlider extends RenderControl {
       },
     };
     customPaint?.drawFor(this, canvas, Offset.zero, frame, locals, foreground: false);
-    _paintThumb(canvas, thumb);
+    _paintThumb(canvas, thumb, active: !_highActive);
+    if (isRange) _paintThumb(canvas, highThumbCenter, active: _highActive);
     customPaint?.drawFor(this, canvas, Offset.zero, frame, locals, foreground: true);
     canvas.restore();
   }
@@ -415,6 +461,12 @@ class RenderSlider extends RenderControl {
     final kind = n.prop(SliderProps.trackShape);
     final inactive = Paint()..color = inactiveTrackColor;
     final active = Paint()..color = activeTrackColor;
+    if (isRange) {
+      canvas.drawRRect(RRect.fromRectAndRadius(track, Radius.circular(track.height / 2)), inactive);
+      final lo = math.min(thumb.dx, highThumbCenter.dx), hi = math.max(thumb.dx, highThumbCenter.dx);
+      if (hi > lo) canvas.drawRRect(RRect.fromRectAndRadius(Rect.fromLTRB(lo, track.top, hi, track.bottom), Radius.circular(track.height / 2)), active);
+      return;
+    }
     if (kind == api.SliderTrackShape.ruler) {
       // A strip across the whole width, the active color from zero (or the
       // minimum) to the value under it.
@@ -489,12 +541,12 @@ class RenderSlider extends RenderControl {
     }
   }
 
-  void _paintThumb(Canvas canvas, Offset c) {
+  void _paintThumb(Canvas canvas, Offset c, {bool active = true}) {
     final n = node;
     if (!n.prop(SliderProps.showThumb)) return;
     final shape = n.prop(SliderProps.thumbShape);
     final size = thumbSize;
-    if (haloShown && shape != api.SliderThumbShape.pointer) {
+    if (haloShown && active && shape != api.SliderThumbShape.pointer) {
       final halo = _c(n.prop(SliderProps.overlayColor)) ?? _tokens.primary.withValues(alpha: .12);
       if (halo.a > 0) canvas.drawCircle(c, n.prop(SliderProps.overlayRadius) ?? 12, Paint()..color = halo);
     }
@@ -679,7 +731,7 @@ class RenderSlider extends RenderControl {
   // --- semantics ---------------------------------------------------------------------------
 
   @override
-  String get semanticsName => '';
+  String get semanticsName => isRange ? (node.prop(SliderProps.label) ?? 'Range') : '';
 
   String _percent(double v) => max <= min ? '0%' : '${(((v - min) / (max - min)).clamp(0.0, 1.0) * 100).round()}%';
 
@@ -688,9 +740,11 @@ class RenderSlider extends RenderControl {
     super.describeSemanticsConfiguration(config);
     config
       ..isSlider = true
-      ..value = _percent(value)
-      ..increasedValue = _percent(_selectable(_snap(value + step)))
-      ..decreasedValue = _percent(_selectable(_snap(value - step)));
+      ..textDirection = _rightToLeft ? TextDirection.rtl : TextDirection.ltr
+      ..hint = isRange ? 'Press Space to switch between the lower and upper thumbs' : ''
+      ..value = isRange ? '${value.round()} to ${rangeEnd.round()}; ${_highActive ? 'upper' : 'lower'} thumb' : _percent(value)
+      ..increasedValue = isRange ? '${_snap((_highActive ? rangeEnd : value) + step).round()}' : _percent(_selectable(_snap(value + step)))
+      ..decreasedValue = isRange ? '${_snap((_highActive ? rangeEnd : value) - step).round()}' : _percent(_selectable(_snap(value - step)));
     if (_interactive && enabled) {
       config
         ..onIncrease = increase
