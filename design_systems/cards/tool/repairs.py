@@ -44,6 +44,8 @@ def _menu_popover(doc):
     # The corner of a Select's own menu, so the two kinds of menu match (the theme's radii.menu).
     menu['decoration']['radius'] = 10
     menu['bind']['decoration.radius'] = "${= props.size == 'small' ? 8 : 10}"
+    # One Tab stop: Up and Down move through its items, Home and End jump, a typed letter finds an item.
+    menu['focusGroup'] = {'typeAhead': True}
     heading = n['heading']
     heading['layout']['padding'] = [9, 7, 9, 5]
     heading['decoration'] = {}
@@ -65,6 +67,8 @@ def _menu_item(doc):
     item['states'] = {
         'hovered': {'item': {'decoration': {'fills': [{'color': 'secondaryBackground'}]}}},
         'pressed': {'item': {'decoration': {'fills': [{'color': 'secondaryBackground'}]}, 'opacity': 0.85}},
+        # The row the keyboard is on, as the one under the pointer (the focus ring shows too).
+        'focused': {'item': {'decoration': {'fills': [{'color': 'secondaryBackground'}]}}},
     }
     item['media'] = [{'minWidth': PAGE, 'patch': {'layout': {'padding': [10, 8, 10, 8], 'constraints': {'minHeight': 38}}}}]
     n['glyph']['props']['size'] = 16
