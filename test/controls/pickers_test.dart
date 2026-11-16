@@ -7,6 +7,8 @@
 // names without Material localizations, the time columns, the value
 // written back as `changed`, the design's own picker, screen readers, and
 // no purple anywhere.
+import 'dart:convert' show jsonDecode;
+import 'dart:io' show File;
 import 'dart:ui' show Tristate;
 
 import 'package:codelessly_sdk/codelessly_sdk.dart';
@@ -470,6 +472,49 @@ void main() {
     expect(panel.outline.tlRadiusX, 14);
     final popup = _root(tester).overlayEntries.single as RenderPickerPopup;
     expect(popup.semanticsLabel, 'FIRST DAY OFF');
+  });
+
+  // The popup needs no `pickerTheme`: it draws with the project's theme (a
+  // design system's tokens, a site's own over them), light and dark.
+  testWidgets('with no pickerTheme the calendar and the time columns take the project\'s theme: a design system\'s, a site\'s accent over it, dark',
+      (tester) async {
+    final cards = DesignSystemManifest.fromJson(
+        jsonDecode(File('design_systems/cards/design_system.json').readAsStringSync()) as Map<String, Object?>).theme;
+    final green = cards.mergedWith(ThemeTokens.fromJson(const {'primary': '#FF346F47'}));
+    for (final (theme, dark, accent, surface, ink, line) in [
+      (cards, false, const Color(0xFF2563EB), const Color(0xFFFFFFFF), const Color(0xFF111827), const Color(0xFFE5E7EB)),
+      (cards, true, const Color(0xFF3B82F6), const Color(0xFF141414), const Color(0xFFFFFFFF), const Color(0xFF383838)),
+      (green, false, const Color(0xFF346F47), const Color(0xFFFFFFFF), const Color(0xFF111827), const Color(0xFFE5E7EB)),
+    ]) {
+      final reason = 'accent $accent, dark $dark';
+      final (tree, _) = await _show(tester, {
+        'date': hugging('datePicker', {'value': '2026-11-03'}),
+        'time': hugging('timePicker', {'value': '09:30'}),
+        'dt': hugging('dateTimeInput', {'mode': 'dateTime', 'value': '2026-11-03T09:30:00'}),
+      }, theme: theme.toJson(), dark: dark);
+      for (final id in ['date', 'time', 'dt']) {
+        final colors = _field(tree, id).spec.colors;
+        expect(colors.accent, accent, reason: '$id: $reason');
+        expect(colors.onAccent, const Color(0xFFFFFFFF), reason: '$id: $reason');
+        expect(colors.background, surface, reason: '$id: $reason');
+        expect(colors.text, ink, reason: '$id: $reason');
+        expect(colors.divider, line, reason: '$id: $reason');
+        expect(colors.fontFamily, 'Inter', reason: '$id: the design system\'s font');
+        expect(colors.radius, 12, reason: '$id: the design system\'s control radius');
+        expect(colors.dayRadius, 9, reason: '$id: the design system\'s inner radius');
+      }
+      await tester.tapAt(centerOf(tree, 'date'));
+      await tester.pump();
+      final panel = _field(tree, 'date').panel!;
+      final c = panel.calendar!;
+      expect(c.lookOf(DateTime(2026, 11, 3)).fill, accent, reason: 'the selected day: $reason');
+      expect(c.lookOf(DateTime(2026, 11, 14)).ring, accent, reason: 'today\'s ring: $reason');
+      expect(c.lookOf(DateTime(2026, 11, 5)).ink, ink, reason: 'a day: $reason');
+      expect(panel.outline.tlRadiusX, 12, reason: reason);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pump();
+      expect(_root(tester).overlayEntries, isEmpty);
+    }
   });
 
   testWidgets('screen readers: the field is a button with its value; the popup a route of days that a tap picks',

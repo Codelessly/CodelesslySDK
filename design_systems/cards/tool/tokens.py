@@ -169,8 +169,9 @@ PLAIN = {
     # A card in a card: radii.tile, spacing.tile, no shadow. A badge: a pill 22 high, 9 at its sides. A button alone
     # on its line in a column: full width, 46 high. A bar chart: rounded bars at most 28 wide, 10 apart.
     # A control's corner by its height (a 28-high button 8, not the 12 of the 44-high action button).
-    # What floats (dialogs, sheets, menus, pickers, toasts): radii.popup, shadows.popup.
-    'radii': {'popup': 20, 'badge': 999, 'progress': 999, 'bar': 6, 'controlXs': 6, 'controlCompact': 8, 'controlSmall': 9, 'controlMedium': 10, 'controlLarge': 12},
+    # What floats (dialogs, sheets, pickers, toasts): radii.popup, shadows.popup. A menu that opens by its
+    # button (a popover) is of the control family, not a small dialog: radii.menu.
+    'radii': {'popup': 20, 'menu': 10, 'badge': 999, 'progress': 999, 'bar': 6, 'controlXs': 6, 'controlCompact': 8, 'controlSmall': 9, 'controlMedium': 10, 'controlLarge': 12},
     'sizes': {'cta': 46, 'badge': 22, 'bar': 28, 'progress': 8, 'wide': 900, 'ring': 11},
     'spacing': {'card': 18, 'tile': 14, 'badge': 9, 'bar': 10, 'cardGap': 12},
     'shadows': {'popup': [{'type': 'dropShadow', 'color': '#24000000', 'offset': [0, 16], 'blurRadius': 40, 'spreadRadius': -8},
