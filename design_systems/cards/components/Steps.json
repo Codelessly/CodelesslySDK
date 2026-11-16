@@ -206,7 +206,6 @@
   },
   "label": {
    "type": "text",
-   "media": [{"maxWidth": 699, "patch": {"props": {"maxLines": 4}}}],
    "props": {
     "text": "${item}",
     "style": "chip",
@@ -224,7 +223,17 @@
    },
    "bind": {
     "props.style.color": "${= index + 1 == props.current ? theme.colors.ink : index + 1 < props.current ? theme.colors.inkSoft : theme.colors.inkFaint}"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "props": {
+       "maxLines": 4
+      }
+     }
+    }
+   ]
   }
  }
 }

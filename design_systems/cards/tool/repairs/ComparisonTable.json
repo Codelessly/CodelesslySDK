@@ -1,0 +1,171 @@
+{
+ "widget": {
+  "props": [
+   {
+    "key": "names",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [
+     "Lite",
+     "Max"
+    ],
+    "doc": "The two to five things compared, one column each.",
+    "required": true
+   },
+   {
+    "key": "prices",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "The headline figure under each name ($25/mo)."
+   },
+   {
+    "key": "notes",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A quiet line under each figure (optional)."
+   },
+   {
+    "key": "rows",
+    "type": {
+     "kind": "list",
+     "flutter": "List<dynamic>",
+     "item": {
+      "kind": "json",
+      "flutter": "dynamic"
+     }
+    },
+    "default": [
+     [
+      "Data",
+      "10 GB",
+      "Unlimited",
+      2
+     ]
+    ],
+    "doc": "One list per row: the label, a value per column, then the winning column (1 to 5; 0 for a tie).",
+    "required": true
+   },
+   {
+    "key": "pick",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The recommended name: its column is tinted and its button filled (empty: none)."
+   },
+   {
+    "key": "pickLabel",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Best value",
+    "doc": "The small label over the recommended column."
+   },
+   {
+    "key": "cta",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "Choose",
+    "doc": "The label of the button under each column."
+   },
+   {
+    "key": "corner",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A small caps label in the top-left corner (optional)."
+   },
+   {
+    "key": "columnWidth",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 124,
+    "doc": "The width of a column when there are more than two (they then scroll sideways)."
+   },
+   {
+    "key": "labelWidth",
+    "type": {
+     "kind": "number",
+     "flutter": "double"
+    },
+    "default": 98,
+    "doc": "Width of the fixed row-label column on a wide page. On a phone it uses 110 so the comparison columns remain reachable."
+   },
+   {
+    "key": "fade",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": true,
+    "doc": "The scrolling columns fade at the edge where there are more (false: a hard edge)."
+   }
+  ]
+ },
+ "nodes": {
+  "labels": {
+   "bind": {
+    "layout.width": "${props.labelWidth}"
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 110
+      },
+      "bind": {
+       "layout.width": null
+      }
+     }
+    }
+   ]
+  },
+  "lead": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "layout": {
+       "width": 96
+      },
+      "bind": {
+       "layout.width": null
+      }
+     }
+    }
+   ],
+   "bind": {
+    "layout.width": "${= props.labelWidth - 14}"
+   }
+  }
+ }
+}

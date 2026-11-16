@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Details",
-  "doc": "Labels and their values as rows in one quiet tile (a price breakdown, the facts of a request): rows:=[[\"Subtotal\",money(sub,\"$\",2)],[\"Delivery\",\"$4.99\"]], each a [label, value] pair (a row with an empty value is hidden); icons is an optional list alongside.",
+  "doc": "Labels and their values in one quiet tile: rows:=[[\"Subtotal\",money(sub,\"$\",2)],[\"Delivery\",\"$4.99\"]]. A phone stacks each pair, for long values; inlineOnPhone:true keeps short labels and values side by side there (a price breakdown). An empty value hides its row; icons is an optional list alongside.",
   "props": [
    {
     "key": "rows",
@@ -43,6 +43,15 @@
     },
     "default": [],
     "doc": "A Material icon per row, before its label (optional)."
+   },
+   {
+    "key": "inlineOnPhone",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Keep short labels and values on one line on a phone; leave false for long content."
    }
   ]
  },
@@ -95,7 +104,6 @@
   },
   "list": {
    "type": "listView",
-   "media": [{"maxWidth": 699, "patch": {"visible": false}}],
    "children": [
     "item"
    ],
@@ -113,7 +121,17 @@
    },
    "bind": {
     "data": "${props.rows}"
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "bind": {
+       "visible": "${props.inlineOnPhone}"
+      }
+     }
+    }
+   ]
   },
   "item": {
    "type": "row",
@@ -217,29 +235,109 @@
   "mobileList": {
    "type": "listView",
    "visible": false,
-   "media": [{"maxWidth": 699, "patch": {"visible": true}}],
-   "children": ["mobileItem"],
-   "props": {"scrollable": false},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
-   "bind": {"data": "${props.rows}"}
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "bind": {
+       "visible": "${= !props.inlineOnPhone}"
+      }
+     }
+    }
+   ],
+   "children": [
+    "mobileItem"
+   ],
+   "props": {
+    "scrollable": false
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "data": "${props.rows}"
+   }
   },
   "mobileItem": {
    "type": "column",
-   "children": ["mobileLabel", "mobileValue"],
-   "props": {"crossAxisAlignment": "stretch", "spacing": 4},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 10, 0, 10]},
-   "decoration": {"strokes": [{"color": "lineStrong"}], "strokeWidth": 1, "strokeSides": "top"},
-   "bind": {"visible": "${= (length(item) > 1 && text(at(item, 1)) != '')}", "decoration.strokeWidth": "${= index == 0 ? 0 : 1}"}
+   "children": [
+    "mobileLabel",
+    "mobileValue"
+   ],
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 4
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     0,
+     10,
+     0,
+     10
+    ]
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "lineStrong"
+     }
+    ],
+    "strokeWidth": 1,
+    "strokeSides": "top"
+   },
+   "bind": {
+    "visible": "${= (length(item) > 1 && text(at(item, 1)) != '')}",
+    "decoration.strokeWidth": "${= index == 0 ? 0 : 1}"
+   }
   },
   "mobileLabel": {
    "type": "text",
-   "props": {"text": "${= at(item, 0)}", "style": {"from": "lead", "fontSize": 13.5}, "maxLines": 2},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+   "props": {
+    "text": "${= at(item, 0)}",
+    "style": {
+     "from": "lead",
+     "fontSize": 13.5
+    },
+    "maxLines": 2
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   },
   "mobileValue": {
    "type": "text",
-   "props": {"text": "${= length(item) > 1 ? at(item, 1) : ''}", "style": {"from": "figure", "fontWeight": 600}, "maxLines": 6},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+   "props": {
+    "text": "${= length(item) > 1 ? at(item, 1) : ''}",
+    "style": {
+     "from": "figure",
+     "fontWeight": 600
+    },
+    "maxLines": 6
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
   }
  }
 }

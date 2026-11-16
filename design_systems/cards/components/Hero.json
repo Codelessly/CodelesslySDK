@@ -70,6 +70,7 @@
   },
   "chip": {
    "type": "row",
+   "media": [{"maxWidth": 699, "patch": {"layout": {"width": {"fill": 0}}}}],
    "children": ["chipDot", "chipText"],
    "props": {"crossAxisAlignment": "center", "spacing": 8},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [12, 5, 14, 5], "margin": [0, 0, 0, 22]},
@@ -83,6 +84,7 @@
   },
   "chipText": {
    "type": "text",
+   "media": [{"maxWidth": 699, "patch": {"layout": {"width": {"fill": 0}}}}],
    "props": {"text": "${props.eyebrow}", "style": {"from": "smallWide", "color": "accent", "fontWeight": 600}, "maxLines": 1, "overflow": "ellipsis"},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
   },
