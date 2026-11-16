@@ -1388,6 +1388,7 @@
   "components/WeatherHours.json",
   "components/WeatherDay.json",
   "components/Media.json",
+  "components/BeforeAfter.json",
   "components/WeatherGlyph.json",
   "components/Button.json",
   "components/IconButton.json",

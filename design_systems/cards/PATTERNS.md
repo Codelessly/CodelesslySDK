@@ -19,7 +19,7 @@ name, detail, price, rating), `PhotoGallery =open photos:=photos`, `ComparisonTa
 
 A page (a website, an app window) uses the page tier of the same system: the same colors and fonts at a page's
 scale, picked for you when the window is wide. Do not wrap a page in `ChatCard`, and do not close it on a
-`TotalBar`: those are a chat card's. The card blocks that show one thing (`StatTile`, `ChartCard`, `Media`,
+`TotalBar`: those are a chat card's. The card blocks that show one thing (`StatTile`, `ChartCard`, `Media`, `BeforeAfter`,
 `Checklist`, `Steps`) work inside a page's `Card`.
 The page blocks are named for what they are: on a website `SiteNav`, `Hero`, `LogoStrip`, `FeatureCard`, `StatBand`,
 `Testimonial`, `PricingPlan`, `FaqItem`, `CallToAction`, `PostCard`, `SiteFooter` (a band block goes directly under
