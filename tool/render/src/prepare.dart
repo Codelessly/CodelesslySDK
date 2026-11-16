@@ -144,10 +144,27 @@ Object? _typed(PropType type, Object? json, String family, Map<String, int> code
   }
 }
 
+/// `--image-map` for the run: network URL prefixes and the folders their files are read from.
+Map<String, String> renderImageMap = const {};
+
 /// [text] with a local image path made a data: URL; records every image.
 String _image(String text, String path, String nodeId, String dir, List<ImageRef> images, {String? docDir}) {
   final t = text.trim();
   if (t.startsWith('http://') || t.startsWith('https://')) {
+    // A URL `--image-map` maps to a folder: the rest of its path (no query, decoded) is the file there.
+    for (final e in renderImageMap.entries) {
+      if (!t.startsWith(e.key)) continue;
+      final rest = Uri.decodeComponent(t.substring(e.key.length).split(RegExp(r'[?#]')).first);
+      final file = File('${e.value}/$rest');
+      final mime = _mimeOf(rest);
+      if (mime == null || !file.existsSync()) {
+        images.add((nodeId: nodeId, path: path, url: t, status: 'failed',
+            detail: '--image-map ${e.key}=${e.value}: no ${mime == null ? 'image ' : ''}file ${file.path}'));
+        return text;
+      }
+      images.add((nodeId: nodeId, path: path, url: t, status: 'local', detail: file.path));
+      return 'data:$mime;base64,${base64Encode(file.readAsBytesSync())}';
+    }
     if (_mimeOf(Uri.tryParse(t)?.path ?? '') != null || path.contains('/image')) {
       images.add((nodeId: nodeId, path: path, url: t, status: 'network', detail: null));
     }

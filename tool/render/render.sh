@@ -47,7 +47,12 @@ for a in "$@"; do
     --*) args+=("$a") ;;
     *)
       # A positional argument right after a value-taking option is that option's value.
-      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map)$ ]]; then
+      if [ ${#args[@]} -gt 0 ] && [ "${args[-1]}" = "--image-map" ]; then
+        # <url prefix>=<folder>: the folder after the last "=", made absolute.
+        dir="${a##*=}"
+        case "$dir" in /*) ;; *) a="${a%=*}=$PWD/$dir" ;; esac
+        args+=("$a")
+      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map)$ ]]; then
         args+=("$a")
       else
         case "$a" in /*) ;; *) a="$PWD/$a" ;; esac
