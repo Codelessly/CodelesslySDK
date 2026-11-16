@@ -160,6 +160,10 @@ void main() {
     expect(calendar.cursorDay.day, 20);
     await keys.press(LogicalKeyboardKey.pageDown);
     expect(calendar.cursorDay.month, 12);
+    calendar.toggleYears();
+    expect(calendar.yearRect(1).center.dx, lessThan(calendar.yearRect(0).center.dx));
+    await keys.left();
+    expect(calendar.cursorDay.year, 2027);
   });
 
   testWidgets('notation writes both selected dates back into the page', (

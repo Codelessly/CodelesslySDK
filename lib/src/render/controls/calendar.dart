@@ -310,8 +310,8 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
     if (_years) {
       final y = _cursor.year;
       int? to;
-      if (key == LogicalKeyboardKey.arrowLeft) to = y - 1;
-      if (key == LogicalKeyboardKey.arrowRight) to = y + 1;
+      if (key == LogicalKeyboardKey.arrowLeft) to = y + (direction == TextDirection.rtl ? 1 : -1);
+      if (key == LogicalKeyboardKey.arrowRight) to = y + (direction == TextDirection.rtl ? -1 : 1);
       if (key == LogicalKeyboardKey.arrowUp) to = y - 3;
       if (key == LogicalKeyboardKey.arrowDown) to = y + 3;
       if (key == LogicalKeyboardKey.pageUp) to = y - 12;
@@ -460,8 +460,9 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
   /// The rect of year cell [i] (0..11).
   Rect yearRect(int i) {
     final w = (size.width - 2 * gap) / 3, h = (_bodyHeight - 3 * gap) / 4;
+    final col = direction == TextDirection.rtl ? 2 - i % 3 : i % 3;
     return Rect.fromLTWH(
-      i % 3 * (w + gap),
+      col * (w + gap),
       _bodyTop + i ~/ 3 * (h + gap),
       w,
       h,
