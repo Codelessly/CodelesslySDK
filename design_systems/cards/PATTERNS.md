@@ -15,6 +15,40 @@ draws its own rows from the records and takes nothing indented under it: `Carous
 name, detail, price, rating), `PhotoGallery =open photos:=photos`, `ComparisonTable names:[…] rows:[…]`. Inside
 `each x in list` a record's field is read through its name (`{x.price}`), never bare.
 
+## Pages in brief
+
+A page (a website, an app window) uses the page tier of the same system: the same colors and fonts at a page's
+scale, picked for you when the window is wide. Do not wrap a page in `ChatCard`, and do not close it on a
+`TotalBar`: those are a chat card's. The card blocks that show one thing (`StatTile`, `ChartCard`, `Media`, `BeforeAfter`,
+`Checklist`, `Steps`) work inside a page's `Card`.
+The page blocks are named for what they are: on a website `SiteNav`, `Hero`, `LogoStrip`, `FeatureCard`, `StatBand`,
+`Testimonial`, `PricingPlan`, `FaqItem`, `CallToAction`, `PostCard`, `SiteFooter` (a band block goes directly under
+`Page`, an item block in a `Grid` or a `Section`); in an app `PageHeader`, `StatCard`, `FormSection`, `SettingRow`,
+`ConversationRow`, `TaskCard`, `BoardColumn`. Use one where the page has that part; write the rest as below.
+A website alternates plain and tinted bands (`Section`, `Section tint`). A band opens with `Text.eyebrow "FEATURES"`,
+a `Heading` and at most one `Text.lead`, then its content. The hero is `Row gap:48 middle` of a `Column grow gap:20`
+(`Heading … level:1`, `Text.lead`, a `Row gap:12` of `Button … size:large` and `Button.outline … size:large`, a
+`Text.caption` reassurance) and a `Card grow` holding a drawing or a chart. Features are `Grid cols:3 gap:24` of
+`Card gap:12` (`IconTile`, `Heading … level:3`, `Text.muted`). Figures are a `Section tint compact` with
+`Grid cols:3` of `Column gap:4` (`Text.numberHero "4,200"`, `Text.muted`). Plans are `Grid cols:3 gap:24` of
+`Card gap:16`: `Heading … level:3`, `Text.muted`, a `Row bottom gap:4` of `Text.numberHero "$29"` and
+`Text.muted "/mo"`, a `Button … w:fill size:large` (filled on the recommended plan only, `Button.outline` on the
+others), a `Divider`, then `Row gap:10` lines of `Icon "check" color:#FF16A34A size:18` and `Text`; the recommended
+plan is `Card border:#FF2563EB` (no fill of its own) with a `Badge.primary "Most popular"` beside its name. A page closes on a
+`Section center` (a `Heading`, a `Text.lead`, the two buttons) and a `Footer` of a `Row between top` of columns.
+An app is `App` with a `Sidebar` (`Brand`, `Text.eyebrow` group labels, `NavItem` lines, `Spacer grow`, the
+signed-in person as a `Row gap:10 middle` of `Avatar` and a `Column`) and a `Main`: its `Nav` holds
+`Heading … level:1` and a `Row gap:8` of actions (one filled `Button`, the others `Button.outline`), and under it
+`Column pad:24 gap:20` of content. Figures are `Grid cols:4 gap:16` of `Card gap:8` (a `Row between middle` of
+`Text.muted` and `IconTile … size:32`, `Text.numberLarge`, a `Row gap:8 middle` of a `Badge` and a `Text.caption`).
+Charts sit in `Row gap:20` of `Card grow` and `Card w:360`, each headed by `Heading … level:3`. A table is one
+`Card pad:0 gap:0`: a header `Row pad:[20,12,20,12] gap:16` of `Text.columnHead` cells, then per record a
+`Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB`; give the same `w:` to a column's header and its
+cells, `grow` to the name's column, and `right` to numbers. A form is `Column maxw:720 gap:20` of `Card gap:16`
+(`Heading … level:3`, `Text.muted`, fields two across in `Row gap:16` with `grow` on each); its buttons sit at the
+end of a `Row end gap:8`. A list beside its details is `Pane w:360` (rows of `Row pad:[16,12,16,12] gap:12
+border-bottom:#FFE5E7EB`, the open one `fill:#142563EB`) next to a `Pane` for the open item.
+
 ## Pick one of several (flights, places, plans)
 
 ```

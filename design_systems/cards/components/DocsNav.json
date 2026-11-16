@@ -1,0 +1,133 @@
+{
+ "schema": 3,
+ "id": "DocsNav",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "DocsNav",
+  "doc": "The left navigation of a docs site, 240 wide and as tall as its links: DocsNav groups:[{\"title\":\"Start\",\"items\":[\"Introduction\",\"Quickstart\"]}] =collapsed active:=page -> page=result. Tap a group title to collapse or expand it; the collapsed group titles are kept in your list variable (empty at first). Links fire onNavigate with the tapped page's name.",
+  "props": [
+   {"key": "groups", "type": {"kind": "list", "flutter": "List<Map<String, dynamic>>", "item": {"kind": "object", "flutter": "Map<String, dynamic>", "fields": [{"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The group's label."}, {"key": "items", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": [], "doc": "The group's page names."}]}}, "default": [{"title": "Start", "items": ["Introduction", "Quickstart", "Installation"]}, {"title": "Guides", "items": ["Tracking events", "Identifying users"]}], "doc": "The groups in order, each {title, items: [page names]}.", "required": true},
+   {"key": "active", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The current page's name, marked with the accent tint (empty: none)."},
+   {"key": "collapsed", "type": {"kind": "variable", "of": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}}, "default": [], "doc": "The titles of groups the reader has collapsed. Tap a group title to change this list."}
+  ],
+  "events": [
+   {"key": "onNavigate", "doc": "A page link was tapped; the value is its name."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Beacon docs",
+   "size": [240, 620],
+   "props": {
+    "active": "Quickstart",
+    "groups": [
+     {"title": "Start", "items": ["Introduction", "Quickstart", "Installation", "Core concepts"]},
+     {"title": "Guides", "items": ["Tracking events", "Identifying users", "Batching and retries", "Testing locally"]},
+     {"title": "Reference", "items": ["Beacon client", "track()", "identify()", "Configuration"]}
+    ]
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": ["groups"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": 240, "height": {"hug": 0}, "padding": [12, 8, 16, 24]}
+  },
+  "groups": {
+   "type": "listView",
+   "children": ["group"],
+   "props": {"scrollable": false, "spacing": 26},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"data": "${props.groups}"}
+  },
+  "group": {
+   "type": "column",
+   "children": ["groupToggle", "links"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 8},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "groupToggle": {
+   "type": "row",
+   "children": ["groupTitle", "groupChevron"],
+   "props": {"mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "height": 28, "padding": [12, 0, 12, 0]},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "props.collapsed", "value": "${= contains(props.collapsed, item.title) ? without(props.collapsed, item.title) : append(props.collapsed, item.title)}"}]}]
+  },
+  "groupTitle": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(item.title)}",
+    "style": {"from": "eyebrowWide", "color": "inkFaint", "letterSpacing": 0.8},
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "groupChevron": {
+   "type": "icon",
+   "props": {"icon": "expand_more_rounded", "size": 17, "color": "inkFaint"},
+   "layout": {"width": 17, "height": 17},
+   "bind": {"props.icon": "${= contains(props.collapsed, item.title) ? 'chevron_right_rounded' : 'expand_more_rounded'}"}
+  },
+  "links": {
+   "type": "listView",
+   "children": ["link"],
+   "props": {"scrollable": false, "spacing": 2},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"data": "${item.items}", "visible": "${= !contains(props.collapsed, item.title)}"}
+  },
+  "link": {
+   "type": "column",
+   "children": ["linkOn", "linkOff"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "linkOn": {
+   "type": "row",
+   "children": ["linkOnText"],
+   "props": {"crossAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "height": 36, "padding": [12, 0, 12, 0]},
+   "decoration": {"fills": [{"color": "activeTint"}], "radius": 10},
+   "bind": {
+    "visible": "${= props.active == item}",
+    "decoration.radius": "${theme.radii.controlMedium}"
+   },
+   "actions": [
+    {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${item}"}]}
+   ]
+  },
+  "linkOnText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {"from": "strongWide", "fontSize": 14.5, "color": "accent"},
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "linkOff": {
+   "type": "row",
+   "children": ["linkOffText"],
+   "props": {"crossAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "height": 36, "padding": [12, 0, 12, 0]},
+   "bind": {"visible": "${= props.active != item}"},
+   "states": {"pressed": {"linkOff": {"opacity": 0.6}}},
+   "actions": [
+    {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${item}"}]}
+   ]
+  },
+  "linkOffText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {"from": "bodyWide", "fontSize": 14.5, "color": "inkSoft"},
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  }
+ }
+}

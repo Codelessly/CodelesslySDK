@@ -1,0 +1,24 @@
+{
+ "name": "app_inbox",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 292.4,
+   "problems": 1,
+   "errors": 1,
+   "input_tokens": 197,
+   "cached": 0,
+   "output_tokens": 32000
+  },
+  {
+   "round": 2,
+   "modelSeconds": 260.3,
+   "problems": 1,
+   "errors": 1,
+   "input_tokens": 13262,
+   "cached": 129398,
+   "output_tokens": 32000
+  }
+ ]
+}

@@ -1,0 +1,161 @@
+{
+ "site_landing": {
+  "name": "site_landing",
+  "model": "claude-opus-5-5",
+  "rounds": [
+   {
+    "round": 1,
+    "modelSeconds": 278.5,
+    "problems": 1,
+    "errors": 1,
+    "input_tokens": 236,
+    "cached": 0,
+    "output_tokens": 32000
+   },
+   {
+    "round": 2,
+    "modelSeconds": 167.3,
+    "problems": 0,
+    "errors": 0,
+    "input_tokens": 17650,
+    "cached": 129398,
+    "output_tokens": 23940
+   }
+  ],
+  "final": 2,
+  "errors": 0,
+  "problems": 0
+ },
+ "site_pricing": {
+  "name": "site_pricing",
+  "model": "claude-opus-5-5",
+  "rounds": [
+   {
+    "round": 1,
+    "modelSeconds": 212.4,
+    "problems": 0,
+    "errors": 0,
+    "input_tokens": 180,
+    "cached": 0,
+    "output_tokens": 26432
+   },
+   {
+    "round": 2,
+    "modelSeconds": 144.4,
+    "problems": 0,
+    "errors": 0,
+    "input_tokens": 22718,
+    "cached": 129398,
+    "output_tokens": 20438
+   }
+  ],
+  "final": 2,
+  "errors": 0,
+  "problems": 0
+ },
+ "site_product": {
+  "name": "site_product",
+  "model": "claude-opus-5-5",
+  "rounds": [
+   {
+    "round": 1,
+    "modelSeconds": 264.6,
+    "problems": 7,
+    "errors": 2,
+    "input_tokens": 219,
+    "cached": 0,
+    "output_tokens": 32000
+   },
+   {
+    "round": 2,
+    "modelSeconds": 178.6,
+    "problems": 0,
+    "errors": 0,
+    "input_tokens": 28818,
+    "cached": 129398,
+    "output_tokens": 25961
+   }
+  ],
+  "final": 2,
+  "errors": 0,
+  "problems": 0
+ },
+ "app_dashboard": {
+  "name": "app_dashboard",
+  "model": "claude-opus-5-5",
+  "rounds": [
+   {
+    "round": 1,
+    "modelSeconds": 217.4,
+    "problems": 3,
+    "errors": 0,
+    "input_tokens": 258,
+    "cached": 0,
+    "output_tokens": 25923
+   },
+   {
+    "round": 2,
+    "modelSeconds": 153.0,
+    "problems": 1,
+    "errors": 1,
+    "input_tokens": 19694,
+    "cached": 129398,
+    "output_tokens": 20951
+   }
+  ],
+  "final": 1,
+  "errors": 0,
+  "problems": 3
+ },
+ "app_inbox": {
+  "name": "app_inbox",
+  "model": "claude-opus-5-5",
+  "rounds": [
+   {
+    "round": 1,
+    "modelSeconds": 292.4,
+    "problems": 1,
+    "errors": 1,
+    "input_tokens": 197,
+    "cached": 0,
+    "output_tokens": 32000
+   },
+   {
+    "round": 2,
+    "modelSeconds": 260.3,
+    "problems": 1,
+    "errors": 1,
+    "input_tokens": 13262,
+    "cached": 129398,
+    "output_tokens": 32000
+   }
+  ]
+ },
+ "app_settings": {
+  "name": "app_settings",
+  "model": "claude-opus-5-5",
+  "rounds": [
+   {
+    "round": 1,
+    "modelSeconds": 228.3,
+    "problems": 0,
+    "errors": 0,
+    "input_tokens": 189,
+    "cached": 0,
+    "output_tokens": 27888
+   },
+   {
+    "round": 2,
+    "modelSeconds": 148.1,
+    "problems": 0,
+    "errors": 0,
+    "input_tokens": 20303,
+    "cached": 129398,
+    "output_tokens": 21018
+   }
+  ],
+  "final": 2,
+  "errors": 0,
+  "problems": 0
+ }
+}

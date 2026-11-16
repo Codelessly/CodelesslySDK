@@ -1,0 +1,2461 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_inbox"
+ ],
+ "nodes": {
+  "app_inbox": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1",
+    "column4",
+    "column9",
+    "column18"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": 200,
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     12,
+     20,
+     12,
+     16
+    ]
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "children": [
+    "row2",
+    "text2",
+    "row3",
+    "row4",
+    "row5",
+    "row6",
+    "spacer1",
+    "row7"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     8,
+     4,
+     8,
+     16
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column2",
+    "text1"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ]
+   },
+   "children": [
+    "icon1"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "support_agent",
+    "size": 16,
+    "color": "onPrimary"
+   }
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Relaydesk",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 17,
+     "fontWeight": 700
+    }
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "FOLDERS"
+   }
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (folder==\"inbox\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "inbox"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "icon2",
+    "text3",
+    "text4"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "inbox",
+    "size": 18
+   },
+   "bind": {
+    "props.color": "${= (folder==\"inbox\")?\"primary\":\"#FF4B5563\"}"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Inbox",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 14,
+     "fontWeight": 500
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (folder==\"inbox\")?\"primary\":theme.colors.secondaryText}"
+   }
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mutedWide"
+    },
+    "text": "12"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (folder==\"mine\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "mine"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "icon3",
+    "text5",
+    "text6"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "person",
+    "size": 18
+   },
+   "bind": {
+    "props.color": "${= (folder==\"mine\")?\"primary\":\"#FF4B5563\"}"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Assigned to me",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 14,
+     "fontWeight": 500
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (folder==\"mine\")?\"primary\":theme.colors.secondaryText}"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mutedWide"
+    },
+    "text": "4"
+   }
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (folder==\"waiting\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "waiting"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "icon4",
+    "text7",
+    "text8"
+   ]
+  },
+  "icon4": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "schedule",
+    "size": 18
+   },
+   "bind": {
+    "props.color": "${= (folder==\"waiting\")?\"primary\":\"#FF4B5563\"}"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Waiting",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 14,
+     "fontWeight": 500
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (folder==\"waiting\")?\"primary\":theme.colors.secondaryText}"
+   }
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mutedWide"
+    },
+    "text": "7"
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     10,
+     8,
+     10,
+     8
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (folder==\"closed\")?\"activeTint\":\"#00000000\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "folder",
+       "value": "closed"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "icon5",
+    "text9"
+   ]
+  },
+  "icon5": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "check_circle",
+    "size": 18
+   },
+   "bind": {
+    "props.color": "${= (folder==\"closed\")?\"primary\":\"#FF4B5563\"}"
+   }
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "flex": 1,
+    "squeezable": true,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Closed",
+    "style": {
+     "from": "bodyWide",
+     "fontSize": 14,
+     "fontWeight": 500
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (folder==\"closed\")?\"primary\":theme.colors.secondaryText}"
+   }
+  },
+  "spacer1": {
+   "type": "spacer",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   }
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar1",
+    "column3"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Priya Shah",
+    "size": "small"
+   }
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text10",
+    "text11"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "Priya Shah"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "Support agent"
+   }
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": 340,
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "children": [
+    "row8",
+    "divider1",
+    "column5"
+   ]
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "text12",
+    "text13"
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "Inbox"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "12 open"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${convos}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row9"
+   ]
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "bottom",
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= sel==item.id?\"#142563EB\":\"#00FFFFFF\"}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ],
+   "children": [
+    "Avatar2",
+    "column6",
+    "column7"
+   ]
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "medium"
+   },
+   "bind": {
+    "props.name": "${item.name}"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text14",
+    "text15",
+    "text16"
+   ]
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.subject}",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mutedWide",
+     "fontSize": 12
+    },
+    "text": "${item.preview}"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text17",
+    "column8"
+   ]
+  },
+  "text17": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${item.time}"
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 4,
+    "fills": [
+     {
+      "color": "primary"
+     }
+    ]
+   },
+   "bind": {
+    "visible": "${item.unread}"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row10",
+    "divider2",
+    "column11",
+    "column17"
+   ]
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "column10",
+    "row13"
+   ]
+  },
+  "column10": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text18",
+    "row11"
+   ]
+  },
+  "text18": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading3Wide"
+    },
+    "text": "Charged twice for May invoice"
+   }
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row12",
+    "Avatar3",
+    "text20"
+   ]
+  },
+  "row12": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "warningTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "warningTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text19"
+   ]
+  },
+  "text19": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Waiting on customer",
+    "style": {
+     "from": "badge",
+     "color": "warning"
+    }
+   }
+  },
+  "Avatar3": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Priya Shah",
+    "size": "xs"
+   }
+  },
+  "text20": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mutedWide"
+    },
+    "text": "Assigned to Priya Shah"
+   }
+  },
+  "row13": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "outlinedButton1",
+    "outlinedButton2"
+   ]
+  },
+  "outlinedButton1": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 40.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Reassign"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "reassign"
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton2": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 40.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "close"
+      }
+     ]
+    }
+   ]
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column11": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "padding": 24,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row14",
+    "row15",
+    "column14",
+    "row17",
+    "row18"
+   ]
+  },
+  "row14": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Avatar4",
+    "column12"
+   ]
+  },
+  "Avatar4": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Daniel Okafor",
+    "size": "small"
+   }
+  },
+  "column12": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "constraints": {
+     "maxWidth": 440
+    },
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "text21",
+    "text22"
+   ]
+  },
+  "text21": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "Daniel Okafor · 8:40"
+   }
+  },
+  "text22": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Hi, I was charged twice for the May invoice, $129.00 on the 3rd and again on the 4th. Can you check?",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "row15": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "end"
+   },
+   "children": [
+    "column13",
+    "Avatar5"
+   ]
+  },
+  "column13": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "constraints": {
+     "maxWidth": 440
+    },
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "text23",
+    "text24"
+   ]
+  },
+  "text23": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "Priya Shah · 8:52"
+   }
+  },
+  "text24": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Hi Daniel, sorry about that. I'm looking at the billing log now and will confirm shortly.",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "Avatar5": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Priya Shah",
+    "size": "small"
+   }
+  },
+  "column14": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFEF3C7"
+     }
+    ],
+    "radius": 12,
+    "strokes": [
+     {
+      "color": "#FFF59E0B"
+     }
+    ]
+   },
+   "children": [
+    "row16",
+    "text26"
+   ]
+  },
+  "row16": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon6",
+    "text25"
+   ]
+  },
+  "icon6": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "lock",
+    "size": 16,
+    "color": "#FFB45309"
+   }
+  },
+  "text25": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "color": "#FFB45309"
+    },
+    "text": "Internal note · Marcus Lee · 9:01"
+   }
+  },
+  "text26": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Confirmed duplicate: the payment retry fired after a timeout. Refund of $129.00 approved, no need to escalate.",
+    "style": {
+     "from": "bodyWide",
+     "color": "#FF78350F"
+    }
+   }
+  },
+  "row17": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Avatar6",
+    "column15"
+   ]
+  },
+  "Avatar6": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Daniel Okafor",
+    "size": "small"
+   }
+  },
+  "column15": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "constraints": {
+     "maxWidth": 440
+    },
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "text27",
+    "text28"
+   ]
+  },
+  "text27": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "Daniel Okafor · 9:12"
+   }
+  },
+  "text28": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Thanks for looking into it, the second charge is still showing as pending on my card.",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "row18": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start",
+    "mainAxisAlignment": "end"
+   },
+   "children": [
+    "column16",
+    "Avatar7"
+   ]
+  },
+  "column16": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "constraints": {
+     "maxWidth": 440
+    },
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "radius": 12
+   },
+   "children": [
+    "text29",
+    "text30"
+   ]
+  },
+  "text29": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "Priya Shah · 9:20"
+   }
+  },
+  "text30": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "The refund has been issued. Pending charges usually drop within 3 to 5 business days.",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "Avatar7": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Priya Shah",
+    "size": "small"
+   }
+  },
+  "column17": {
+   "type": "column",
+   "layout": {
+    "padding": 16,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "top"
+   },
+   "children": [
+    "textField1",
+    "row19"
+   ]
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Reply to Daniel",
+     "hintText": "Write your reply…"
+    },
+    "minLines": 3,
+    "maxLines": 6
+   },
+   "bind": {
+    "props.initialValue": "${reply}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "row19": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "end",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "filledButton1",
+    "outlinedButton3"
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "height": 40.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "send",
+       "value": "${reply}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": ""
+      },
+      {
+       "type": "showToast",
+       "message": "Reply sent"
+      }
+     ]
+    }
+   ]
+  },
+  "outlinedButton3": {
+   "type": "outlinedButton",
+   "layout": {
+    "height": 40.0,
+    "width": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Send and close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "sendAndClose",
+       "value": "${reply}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "reply",
+       "value": ""
+      },
+      {
+       "type": "showToast",
+       "message": "Sent and closed"
+      }
+     ]
+    }
+   ]
+  },
+  "column18": {
+   "type": "column",
+   "layout": {
+    "width": 260,
+    "height": {
+     "fill": 0
+    },
+    "padding": 16
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "children": [
+    "column19",
+    "divider3",
+    "Details1",
+    "text33",
+    "row20"
+   ]
+  },
+  "column19": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar8",
+    "text31",
+    "text32"
+   ]
+  },
+  "Avatar8": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Daniel Okafor",
+    "size": "large"
+   }
+  },
+  "text31": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "Daniel Okafor"
+   }
+  },
+  "text32": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mutedWide",
+     "fontSize": 12
+    },
+    "text": "daniel@okafor.studio"
+   }
+  },
+  "divider3": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "rows": [
+     [
+      "Plan",
+      "Business"
+     ],
+     [
+      "Customer since",
+      "Mar 2022"
+     ],
+     [
+      "Last order",
+      "#48213 · $129.00"
+     ]
+    ]
+   }
+  },
+  "text33": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "TAGS"
+   }
+  },
+  "row20": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row21",
+    "row22",
+    "row23"
+   ]
+  },
+  "row21": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "primaryTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text34"
+   ]
+  },
+  "text34": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Billing",
+    "style": {
+     "from": "badge",
+     "color": "primary"
+    }
+   }
+  },
+  "row22": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "neutralTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "neutralTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text35"
+   ]
+  },
+  "text35": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "Refund",
+    "style": {
+     "from": "badge",
+     "color": "secondaryText"
+    }
+   }
+  },
+  "row23": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 22,
+    "padding": [
+     9.0,
+     0,
+     9.0,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "successTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "successTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "children": [
+    "text36"
+   ]
+  },
+  "text36": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "VIP",
+    "style": {
+     "from": "badge",
+     "color": "success"
+    }
+   }
+  }
+ },
+ "variables": {
+  "app_inbox": [
+   {
+    "name": "sel",
+    "type": "integer",
+    "value": 2
+   },
+   {
+    "name": "folder",
+    "type": "text",
+    "value": "inbox"
+   },
+   {
+    "name": "reply",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "convos",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "name": "Maya Reyes",
+      "subject": "Can't log in on mobile",
+      "preview": "I reset my password twice and the app still says…",
+      "time": "9:41",
+      "unread": true
+     },
+     {
+      "id": 2,
+      "name": "Daniel Okafor",
+      "subject": "Charged twice for May invoice",
+      "preview": "Thanks for looking into it, the second charge is…",
+      "time": "9:12",
+      "unread": false
+     },
+     {
+      "id": 3,
+      "name": "Sofia Lindqvist",
+      "subject": "CSV export is missing columns",
+      "preview": "The export drops the tags and assignee columns…",
+      "time": "8:55",
+      "unread": true
+     },
+     {
+      "id": 4,
+      "name": "Chen Wei",
+      "subject": "Upgrade to the annual plan",
+      "preview": "Do you offer a discount if we pay for 12 months…",
+      "time": "8:20",
+      "unread": false
+     },
+     {
+      "id": 5,
+      "name": "Amara Nwosu",
+      "subject": "Webhook retries keep failing",
+      "preview": "Since Tuesday every retry returns a 502 from…",
+      "time": "Yesterday",
+      "unread": true
+     },
+     {
+      "id": 6,
+      "name": "Lucas Meyer",
+      "subject": "Change the billing email",
+      "preview": "Please send future invoices to finance@meyer.io…",
+      "time": "Yesterday",
+      "unread": false
+     },
+     {
+      "id": 7,
+      "name": "Hannah Cole",
+      "subject": "Thanks, that fixed it",
+      "preview": "Clearing the cache worked. Appreciate the quick…",
+      "time": "Mon",
+      "unread": false
+     },
+     {
+      "id": 8,
+      "name": "Rafael Ortiz",
+      "subject": "Question about seat count",
+      "preview": "We added two teammates but the invoice still shows…",
+      "time": "Mon",
+      "unread": true
+     }
+    ]
+   }
+  ]
+ }
+}

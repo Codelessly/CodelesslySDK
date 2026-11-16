@@ -1,0 +1,95 @@
+{
+ "schema": 3,
+ "id": "FaqItem",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "FaqItem",
+  "doc": "One FAQ question that opens and closes by itself on a tap: FaqItem question:\"Can I switch plans later?\" answer:\"Yes, any time.\" (=faq1 with state faq1=true starts it open; closed by default), stacked one per line in a column with a hairline under each (divider:false on the last).",
+  "props": [
+   {"key": "question", "type": {"kind": "string", "flutter": "String"}, "default": "Can I switch plans later?", "doc": "The question, in semibold.", "required": true},
+   {"key": "answer", "type": {"kind": "string", "flutter": "String"}, "default": "Yes. Upgrade or downgrade from Settings at any time.", "doc": "The answer, shown under the question while open.", "required": true},
+   {"key": "open", "type": {"kind": "variable", "of": {"kind": "boolean", "flutter": "bool"}}, "default": false, "doc": "Whether it is open (false by default); a tap on the question toggles it."},
+   {"key": "divider", "type": {"kind": "boolean", "flutter": "bool"}, "default": true, "doc": "The hairline under the item (false on the last one)."}
+  ],
+  "events": [
+   {"key": "onToggle", "doc": "The question was tapped; the value is \"open\" or \"closed\", its new state."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Open",
+   "size": [560, 150],
+   "props": {
+    "question": "Can I switch plans later?",
+    "answer": "Yes. Upgrade or downgrade from Settings at any time. Changes apply immediately and we prorate the difference on your next invoice.",
+    "open": true
+   }
+  },
+  {
+   "name": "Closed",
+   "size": [560, 76],
+   "props": {"question": "How does the yearly discount work?", "open": false}
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": ["head", "answer", "rule"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "head": {
+   "type": "row",
+   "children": ["q", "chev"],
+   "props": {"crossAxisAlignment": "center", "spacing": 16},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 20, 0, 20]},
+   "states": {"pressed": {"head": {"opacity": 0.72}}},
+   "actions": [
+    {
+     "trigger": {"type": "click"},
+     "actions": [
+      {"type": "setVariable", "variable": "props.open", "value": "${= !props.open}"},
+      {"type": "componentEvent", "event": "onToggle", "value": "${= props.open ? 'open' : 'closed'}"}
+     ]
+    }
+   ]
+  },
+  "q": {
+   "type": "text",
+   "props": {"text": "${props.question}", "style": "headingWide"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "chev": {
+   "type": "row",
+   "children": ["chevIcon"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": 32, "height": 32},
+   "decoration": {"fills": [{"color": "tile"}], "radius": 10},
+   "bind": {
+    "decoration.radius": "${theme.radii.controlMedium}",
+    "decoration.fills[0].color": "${= props.open ? theme.colors.iconTile : theme.colors.tile}"
+   }
+  },
+  "chevIcon": {
+   "type": "icon",
+   "props": {"icon": "expand_more_rounded", "size": 20, "color": "inkSoft"},
+   "layout": {"width": 20, "height": 20},
+   "bind": {
+    "props.icon": "${= props.open ? 'expand_less_rounded' : 'expand_more_rounded'}",
+    "props.color": "${= props.open ? theme.colors.accent : theme.colors.inkSoft}"
+   }
+  },
+  "answer": {
+   "type": "text",
+   "props": {"text": "${props.answer}", "style": {"from": "bodyWide", "color": "inkSoft"}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 0, 48, 22]},
+   "bind": {"visible": "${= props.open == true}"}
+  },
+  "rule": {
+   "type": "box",
+   "layout": {"width": {"fill": 0}, "height": 1},
+   "decoration": {"fills": [{"color": "line"}]},
+   "bind": {"visible": "${props.divider}"}
+  }
+ }
+}

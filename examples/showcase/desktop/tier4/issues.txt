@@ -1,0 +1,2 @@
+site_pricing: line 109:18: Unknown word "item.name" on a Text. Props are written key:value.
+site_blog: line 49:29: A Column has no "sticky": left out. Its props are written key:value on the line.

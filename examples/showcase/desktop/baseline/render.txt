@@ -1,0 +1,57 @@
+ERROR   [site_product] missing_prop [site_product.doc] /nodes/Avatar1/props
+ERROR   [site_blog] expression_syntax [site_blog.doc] /nodes/text19/props/text
+ERROR   [site_blog] expression_syntax [site_blog.doc] /nodes/text19/props/text
+ERROR   [site_blog] invalid_enum [site_blog.doc] /nodes/textField1/props/keyboardType
+ERROR   [site_blog] call_field_not_allowed [site_blog.doc] /nodes/Media1/decoration
+ERROR   [site_blog] call_field_not_allowed [site_blog.doc] /nodes/Media2/decoration
+ERROR   [site_blog] call_field_not_allowed [site_blog.doc] /nodes/Media3/decoration
+ERROR   [site_blog] call_field_not_allowed [site_blog.doc] /nodes/Media4/decoration
+WARNING [site_blog] decoration_ignored [site_blog.doc] /nodes/Media1/decoration
+WARNING [site_blog] layout_field_ignored [site_blog.doc] /nodes/column10/layout/y
+WARNING [site_blog] decoration_ignored [site_blog.doc] /nodes/Media2/decoration
+WARNING [site_blog] decoration_ignored [site_blog.doc] /nodes/Media3/decoration
+WARNING [site_blog] decoration_ignored [site_blog.doc] /nodes/Media4/decoration
+ERROR   [site_docs] unknown_name [site_docs.doc] /nodes/CodeBlock2/bind/props.code
+ERROR   [site_docs] expression_syntax [site_docs.doc] /nodes/CodeBlock2/bind/props.code
+ERROR   [site_docs] expression_syntax [site_docs.doc] /nodes/CodeBlock3/bind/props.code
+ERROR   [site_docs] render_exception [site_docs.doc screen site_docs 1280x800] node column1
+WARNING [site_docs] layout_overflow [site_docs.doc screen site_docs 1280x800] node row4
+WARNING [site_docs] offscreen [site_docs.doc screen site_docs 1280x800] node row4
+WARNING [site_docs] offscreen [site_docs.doc screen site_docs 1280x800] node column4
+ERROR   [app_dashboard] children_not_allowed [app_dashboard.doc] /nodes/Sidebar1/children
+ERROR   [app_dashboard] render_exception [../../../home/user/CodelesslySDK/design_systems/cards/components/Segments.json screen app_dashboard 1280x800] node Segments1
+ERROR   [app_dashboard] render_exception [../../../home/user/CodelesslySDK/design_systems/cards/components/Segments.json screen app_dashboard 1280x800] node Segments1
+ERROR   [app_dashboard] render_exception [screen app_dashboard 1280x800]
+ERROR   [app_dashboard] render_exception [screen app_dashboard 1280x800]
+ERROR   [app_dashboard] render_exception [screen app_dashboard 1280x800]
+ERROR   [app_inbox] render_exception [app_inbox.doc screen app_inbox 1280x800] node row18
+ERROR   [app_inbox] render_exception [app_inbox.doc screen app_inbox 1280x800] node row19
+ERROR   [app_inbox] render_exception [app_inbox.doc screen app_inbox 1280x800] node row20
+ERROR   [app_inbox] render_exception [app_inbox.doc screen app_inbox 1280x800] node row21
+ERROR   [app_inbox] render_exception [app_inbox.doc screen app_inbox 1280x800] node row24
+ERROR   [app_inbox] render_exception [app_inbox.doc screen app_inbox 1280x800] node column8
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text14
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text14
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text14
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text14
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text14
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text14
+WARNING [app_inbox] text_truncated [app_inbox.doc screen app_inbox 1280x800] node text14
+WARNING [app_inbox] layout_overflow [app_inbox.doc screen app_inbox 1280x800] node column11
+WARNING [app_inbox] layout_overflow [app_inbox.doc screen app_inbox 1280x800] node column12
+WARNING [app_inbox] layout_overflow [app_inbox.doc screen app_inbox 1280x800] node column13
+WARNING [app_inbox] layout_overflow [app_inbox.doc screen app_inbox 1280x800] node column14
+WARNING [app_inbox] layout_overflow [app_inbox.doc screen app_inbox 1280x800] node column16
+WARNING [app_inbox] layout_overflow [app_inbox.doc screen app_inbox 1280x800] node column17
+WARNING [app_inbox] offscreen [app_inbox.doc screen app_inbox 1280x800] node column17
+ERROR   [app_settings] render_exception [app_settings.doc screen app_settings 1280x800] node column1
+WARNING [app_settings] layout_overflow [app_settings.doc screen app_settings 1280x800] node row1
+WARNING [app_settings] offscreen [app_settings.doc screen app_settings 1280x800] node row1
+WARNING [app_settings] offscreen [app_settings.doc screen app_settings 1280x800] node column3
+WARNING [app_settings] layout_overflow [app_settings.doc screen app_settings 1280x800] node row6
+WARNING [app_settings] offscreen [app_settings.doc screen app_settings 1280x800] node row6
+WARNING [app_settings] offscreen [app_settings.doc screen app_settings 1280x800] node row7
+WARNING [app_settings] offscreen [../../../home/user/CodelesslySDK/design_systems/cards/components/ActionButton.json screen app_settings 1280x800] node ActionButton4
+WARNING [app_settings] offscreen [../../../home/user/CodelesslySDK/design_systems/cards/components/ActionButton.json screen app_settings 1280x800] node ActionButton4/label
+WARNING [app_settings] offscreen [../../../home/user/CodelesslySDK/design_systems/cards/components/ActionButton.json screen app_settings 1280x800] node ActionButton5
+WARNING [app_settings] offscreen [../../../home/user/CodelesslySDK/design_systems/cards/components/ActionButton.json screen app_settings 1280x800] node ActionButton5/label

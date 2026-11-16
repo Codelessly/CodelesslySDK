@@ -1,0 +1,123 @@
+{
+ "schema": 3,
+ "id": "SettingRow",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "SettingRow",
+  "doc": "One setting of a settings page, stacked in a Card pad:0 gap:0: SettingRow \"Mentions\" \"When someone tags you\" =mentions (kind switch), kind:\"link\" detail:\"English\" or kind:\"button\" detail:\"Delete account\" danger:true -> confirm=true; divider:false on the first row drops the hairline above it.",
+  "props": [
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Email notifications", "doc": "The setting's name.", "required": true},
+   {"key": "description", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line under the name (empty: none)."},
+   {"key": "kind", "type": {"kind": "string", "flutter": "String"}, "default": "switch", "doc": "The control at the right: switch, link or button."},
+   {"key": "value", "type": {"kind": "variable", "of": {"kind": "boolean", "flutter": "bool"}}, "default": false, "doc": "The name of your true/false variable, for a switch."},
+   {"key": "detail", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The current choice of a link, or the button's label."},
+   {"key": "danger", "type": {"kind": "boolean", "flutter": "bool"}, "default": false, "doc": "True: the button is in the error color."},
+   {"key": "divider", "type": {"kind": "boolean", "flutter": "bool"}, "default": true, "doc": "A hairline above the row (false on a card's first row)."}
+  ],
+  "events": [
+   {"key": "onPressed", "doc": "The link or the button was pressed."},
+   {"key": "onChanged", "doc": "The switch changed; the value is its new state."}
+  ]
+ },
+ "previews": [
+  {"name": "Switch", "size": [720, 78], "props": {"title": "Comments on your drafts", "description": "When a collaborator leaves a note on something you are writing.", "value": true, "divider": false}},
+  {"name": "Danger", "size": [720, 78], "props": {"title": "Delete account", "description": "Removes your pieces, drafts and subscribers for good.", "kind": "button", "detail": "Delete account", "danger": true, "divider": false}}
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column", "children": ["rule", "row"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "decoration": {"fills": [{"color": "card"}], "radius": 16},
+   "bind": {"decoration.radius": "${theme.radii.cardWide}"}
+  },
+  "rule": {
+   "type": "box",
+   "layout": {"width": {"fill": 0}, "height": 1},
+   "decoration": {"fills": [{"color": "line"}]},
+   "bind": {"visible": "${props.divider}"}
+  },
+  "row": {
+   "type": "row", "children": ["texts", "track", "link", "btn"],
+   "props": {"crossAxisAlignment": "center", "spacing": 24},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [24, 17, 24, 17]}
+  },
+  "texts": {
+   "type": "column", "children": ["title", "desc"],
+   "props": {"crossAxisAlignment": "start", "spacing": 3},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "title": {
+   "type": "text",
+   "props": {"text": "${props.title}", "style": {"from": "strongWide", "color": "ink"}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "desc": {
+   "type": "text",
+   "props": {"text": "${props.description}", "style": {"from": "mutedWide", "color": "inkSoft"}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.description != ''}"}
+  },
+  "track": {
+   "type": "row", "children": ["knob"],
+   "props": {"mainAxisAlignment": "start", "crossAxisAlignment": "center"},
+   "layout": {"width": 44, "height": 24, "padding": [2, 2, 2, 2]},
+   "decoration": {"fills": [{"color": "lineStrong"}], "radius": 999},
+   "bind": {
+    "visible": "${= props.kind == 'switch'}",
+    "props.mainAxisAlignment": "${= props.value ? 'end' : 'start'}",
+    "decoration.fills[0].color": "${= props.value ? theme.colors.accent : theme.colors.lineStrong}"
+   },
+   "states": {"pressed": {"track": {"opacity": 0.82}}},
+   "actions": [{
+    "trigger": {"type": "click"},
+    "actions": [
+     {"type": "setVariable", "variable": "props.value", "value": "${= !props.value}"},
+     {"type": "componentEvent", "event": "onChanged", "value": "${= props.value}"}
+    ]
+   }]
+  },
+  "knob": {
+   "type": "box",
+   "layout": {"width": 20, "height": 20},
+   "decoration": {"fills": [{"color": "artWhite"}], "radius": 999}
+  },
+  "link": {
+   "type": "row", "children": ["linkText", "linkIcon"],
+   "props": {"crossAxisAlignment": "center", "spacing": 4},
+   "layout": {"width": {"hug": 0}, "height": 36, "padding": [8, 0, 0, 0]},
+   "bind": {"visible": "${= props.kind == 'link'}"},
+   "states": {"pressed": {"link": {"opacity": 0.7}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onPressed", "value": "${props.detail}"}]}]
+  },
+  "linkText": {
+   "type": "text",
+   "props": {"text": "${props.detail}", "style": {"from": "mutedWide", "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "linkIcon": {
+   "type": "icon",
+   "props": {"icon": "chevron_right_rounded", "size": 20, "color": "inkFaint"},
+   "layout": {"width": 20, "height": 20}
+  },
+  "btn": {
+   "type": "row", "children": ["btnText"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": {"hug": 0}, "height": 38, "padding": [16, 0, 16, 0]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "lineStrong"}], "strokeWidth": 1, "radius": 10},
+   "bind": {
+    "visible": "${= props.kind == 'button'}",
+    "decoration.radius": "${theme.radii.controlMedium}",
+    "decoration.strokes[0].color": "${= props.danger ? theme.colors.badLine : theme.colors.lineStrong}"
+   },
+   "states": {"pressed": {"btn": {"opacity": 0.75}}},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onPressed", "value": "${props.detail}"}]}]
+  },
+  "btnText": {
+   "type": "text",
+   "props": {"text": "${props.detail}", "style": {"from": "strongWide", "fontSize": 14, "color": "ink"}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"props.style.color": "${= props.danger ? theme.colors.bad : theme.colors.ink}"}
+  }
+ }
+}

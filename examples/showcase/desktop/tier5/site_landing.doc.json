@@ -1,0 +1,607 @@
+{
+ "schema": 3,
+ "roots": [
+  "site_landing"
+ ],
+ "nodes": {
+  "site_landing": {
+   "type": "canvas",
+   "slots": {
+    "body": "column1"
+   },
+   "layout": {
+    "width": 1280.0,
+    "height": {
+     "hug": 0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ]
+   },
+   "children": [
+    "SiteNav1",
+    "Hero1",
+    "LogoStrip1",
+    "column2",
+    "column5",
+    "column7",
+    "CallToAction1",
+    "SiteFooter1"
+   ]
+  },
+  "SiteNav1": {
+   "type": "SiteNav",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "brand": "Tidewater",
+    "icon": "waves",
+    "links": [
+     "Features",
+     "Pricing",
+     "Customers",
+     "Docs"
+    ],
+    "secondary": "Sign in",
+    "cta": "Start free"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onNavigate"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "nav",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "Hero1": {
+   "type": "Hero",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Fill every room, without the spreadsheets",
+    "text": "Tidewater keeps your calendar, channels and pricing in one place, so small hotels book more rooms directly.",
+    "primary": "Start free",
+    "secondary": "Book a demo",
+    "note": "No credit card needed",
+    "kind": "harbor",
+    "tone": "day"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPrimary"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "start"
+      }
+     ]
+    }
+   ]
+  },
+  "LogoStrip1": {
+   "type": "LogoStrip",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Trusted by independent hotels",
+    "names": [
+     "Harbor House",
+     "The Larkspur",
+     "Saltmarsh Inn",
+     "Juniper & Pine",
+     "Old Mill Lodge"
+    ],
+    "icons": [
+     "anchor_rounded",
+     "local_florist_rounded",
+     "waves",
+     "park_rounded",
+     "home_rounded"
+    ]
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     32,
+     88,
+     32,
+     88
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column3"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column4",
+    "grid1"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text1",
+    "text2",
+    "text3"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "FEATURES"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading2Wide"
+    },
+    "text": "Everything a small hotel needs"
+   }
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "leadWide"
+    },
+    "text": "Run your whole property from one calm screen."
+   }
+  },
+  "grid1": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "grid1Row1"
+   ]
+  },
+  "grid1Row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 24,
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "FeatureCard1",
+    "FeatureCard2",
+    "FeatureCard3"
+   ]
+  },
+  "FeatureCard1": {
+   "type": "FeatureCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "title": "Live calendar",
+    "text": "Every room, every night, in one view that updates the moment a guest books.",
+    "icon": "calendar_month_rounded",
+    "tone": "accent",
+    "link": "Learn more"
+   }
+  },
+  "FeatureCard2": {
+   "type": "FeatureCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "title": "Channel sync",
+    "text": "Availability stays in step across every booking site, so double bookings never happen.",
+    "icon": "sync",
+    "tone": "good",
+    "link": "Learn more"
+   }
+  },
+  "FeatureCard3": {
+   "type": "FeatureCard",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "flex": 1
+   },
+   "props": {
+    "title": "Smart pricing",
+    "text": "Rates adjust to demand, seasons and local events, so you never leave money on the table.",
+    "icon": "trending_up_rounded",
+    "tone": "warn",
+    "link": "Learn more"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     32,
+     44,
+     32,
+     44
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "band"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "children": [
+    "column6"
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "StatBand1"
+   ]
+  },
+  "StatBand1": {
+   "type": "StatBand",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "values": [
+     "4,200",
+     "31%",
+     "2 min"
+    ],
+    "labels": [
+     "hotels",
+     "more direct bookings",
+     "setup"
+    ]
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     32,
+     88,
+     32,
+     88
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column8"
+   ]
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "constraints": {
+     "maxWidth": 1120
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 32,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Testimonial1"
+   ]
+  },
+  "Testimonial1": {
+   "type": "Testimonial",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "quote": "Tidewater replaced three spreadsheets and a whiteboard. We filled our quiet midweek rooms within a month.",
+    "name": "Elena Vasquez",
+    "role": "Owner, The Larkspur",
+    "initials": "EV",
+    "rating": 5
+   }
+  },
+  "CallToAction1": {
+   "type": "CallToAction",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Ready to fill every room?",
+    "text": "Set up in two minutes. No credit card needed.",
+    "primary": "Start free",
+    "secondary": "Talk to sales"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onPrimary"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "start"
+      }
+     ]
+    }
+   ]
+  },
+  "SiteFooter1": {
+   "type": "SiteFooter",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "brand": "Tidewater",
+    "tagline": "Booking made simple for small hotels.",
+    "icon": "waves",
+    "headings": [
+     "Product",
+     "Company",
+     "Resources",
+     "Legal"
+    ],
+    "links": [
+     [
+      "Features",
+      "Pricing",
+      "Integrations"
+     ],
+     [
+      "About",
+      "Customers",
+      "Careers"
+     ],
+     [
+      "Docs",
+      "Help center",
+      "Blog"
+     ],
+     [
+      "Privacy",
+      "Terms",
+      "Security"
+     ]
+    ],
+    "legal": "© 2026 Tidewater",
+    "small": [
+     "Privacy",
+     "Terms"
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "event",
+      "event": "onNavigate"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "nav",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  }
+ }
+}

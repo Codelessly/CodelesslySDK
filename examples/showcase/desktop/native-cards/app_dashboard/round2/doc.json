@@ -1,0 +1,3065 @@
+{
+ "schema": 3,
+ "id": "HarborOverview",
+ "roots": [
+  "overview"
+ ],
+ "nodes": {
+  "overview": {
+   "type": "canvas",
+   "name": "Overview",
+   "slots": {
+    "body": "app"
+   },
+   "layout": {
+    "width": 1280,
+    "height": 800
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "app": {
+   "type": "row",
+   "children": [
+    "sidebar",
+    "main"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "sidebar": {
+   "type": "column",
+   "children": [
+    "brand",
+    "navEyebrow",
+    "navList",
+    "sideSpacer",
+    "userRow"
+   ],
+   "layout": {
+    "width": 232,
+    "height": {
+     "fill": 800
+    },
+    "padding": [
+     14,
+     14,
+     14,
+     14
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 72,
+       "padding": [
+        12,
+        14,
+        12,
+        14
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "brand": {
+   "type": "row",
+   "children": [
+    "brandMark",
+    "brandName"
+   ],
+   "layout": {
+    "width": {
+     "fill": 204
+    },
+    "height": 36,
+    "padding": [
+     6,
+     0,
+     0,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 10
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": 0
+      },
+      "props": {
+       "mainAxisAlignment": "center"
+      }
+     }
+    }
+   ]
+  },
+  "brandMark": {
+   "type": "row",
+   "children": [
+    "brandIcon"
+   ],
+   "layout": {
+    "width": 30,
+    "height": 30
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "ink"
+     }
+    ],
+    "radius": 9
+   }
+  },
+  "brandIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "anchor",
+    "size": 17,
+    "color": "card"
+   },
+   "layout": {
+    "width": 17,
+    "height": 17
+   }
+  },
+  "brandName": {
+   "type": "text",
+   "props": {
+    "text": "Harbor",
+    "style": {
+     "from": "title",
+     "fontSize": 18,
+     "color": "ink"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "navEyebrow": {
+   "type": "text",
+   "props": {
+    "text": "WORKSPACE",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 204
+    },
+    "height": {
+     "hug": 14
+    },
+    "padding": [
+     10,
+     22,
+     0,
+     6
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "navList": {
+   "type": "listView",
+   "children": [
+    "navItem"
+   ],
+   "layout": {
+    "width": {
+     "fill": 204
+    },
+    "height": {
+     "hug": 240
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 2
+   },
+   "bind": {
+    "data": "${sections}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "margin": [
+        0,
+        18,
+        0,
+        0
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "navItem": {
+   "type": "row",
+   "children": [
+    "navIcon",
+    "navLabel",
+    "navBadge"
+   ],
+   "layout": {
+    "width": {
+     "fill": 204
+    },
+    "height": 38,
+    "padding": [
+     10,
+     0,
+     10,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 9
+   },
+   "inkWell": {
+    "overlayColor": "hoverOverlay"
+   },
+   "tooltip": "${item.label}",
+   "bind": {
+    "decoration.fills[0].color": "${= item.label == section ? theme.colors.tile : '#00000000'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "${item.label}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": 0
+      },
+      "props": {
+       "mainAxisAlignment": "center"
+      }
+     }
+    }
+   ]
+  },
+  "navIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "dashboard_outlined",
+    "size": 18,
+    "color": "inkSoft"
+   },
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "bind": {
+    "props.icon": "${item.icon}",
+    "props.color": "${= item.label == section ? theme.colors.accent : theme.colors.inkSoft}"
+   }
+  },
+  "navLabel": {
+   "type": "text",
+   "props": {
+    "text": "${item.label}",
+    "style": {
+     "from": "controlMedium",
+     "color": "inkSoft"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.label == section ? theme.colors.ink : theme.colors.inkSoft}",
+    "props.style.fontWeight": "${= item.label == section ? 600 : 500}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "navBadge": {
+   "type": "row",
+   "children": [
+    "navBadgeText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 26
+    },
+    "height": 20,
+    "padding": [
+     7,
+     0,
+     7,
+     0
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tileDeep"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "visible": "${= item.badge != ''}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false,
+      "bind": {
+       "visible": null
+      }
+     }
+    }
+   ]
+  },
+  "navBadgeText": {
+   "type": "text",
+   "props": {
+    "text": "${item.badge}",
+    "style": {
+     "from": "badge",
+     "fontWeight": 600,
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 12
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "sideSpacer": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 204
+    }
+   }
+  },
+  "userRow": {
+   "type": "row",
+   "children": [
+    "avatar",
+    "userText",
+    "userMore"
+   ],
+   "layout": {
+    "width": {
+     "fill": 204
+    },
+    "height": {
+     "hug": 52
+    },
+    "padding": [
+     10,
+     10,
+     8,
+     10
+    ]
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 12
+   },
+   "inkWell": {
+    "overlayColor": "hoverOverlay"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        4,
+        6,
+        4,
+        6
+       ]
+      },
+      "props": {
+       "mainAxisAlignment": "center"
+      },
+      "decoration": {
+       "strokes": []
+      }
+     }
+    }
+   ]
+  },
+  "avatar": {
+   "type": "row",
+   "children": [
+    "avatarText"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tileDeep"
+     }
+    ],
+    "shape": "circle"
+   }
+  },
+  "avatarText": {
+   "type": "text",
+   "props": {
+    "text": "MO",
+    "style": {
+     "from": "chip",
+     "fontSize": 11.5,
+     "color": "ink"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 18
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "userText": {
+   "type": "column",
+   "children": [
+    "userName",
+    "userRole"
+   ],
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 34
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "userName": {
+   "type": "text",
+   "props": {
+    "text": "Maya Okafor",
+    "style": {
+     "from": "controlMedium",
+     "fontWeight": 600,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "userRole": {
+   "type": "text",
+   "props": {
+    "text": "Ops lead",
+    "style": {
+     "from": "bodySecondary",
+     "color": "inkFaint"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "userMore": {
+   "type": "icon",
+   "props": {
+    "icon": "unfold_more_rounded",
+    "size": 16,
+    "color": "inkFaint"
+   },
+   "layout": {
+    "width": 16,
+    "height": 16
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "main": {
+   "type": "column",
+   "children": [
+    "topbar",
+    "content"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1048
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "topbar": {
+   "type": "row",
+   "children": [
+    "titleBlock",
+    "rangeSeg",
+    "search",
+    "newOrder"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1048
+    },
+    "height": 64,
+    "padding": [
+     24,
+     0,
+     24,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   }
+  },
+  "titleBlock": {
+   "type": "column",
+   "children": [
+    "pageTitle",
+    "pageSub"
+   ],
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 44
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 1
+   }
+  },
+  "pageTitle": {
+   "type": "text",
+   "props": {
+    "text": "${section}",
+    "style": {
+     "from": "pageTitle",
+     "color": "ink"
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 26
+    }
+   }
+  },
+  "pageSub": {
+   "type": "text",
+   "props": {
+    "text": "Tue, 14 May \u00b7 All locations",
+    "style": {
+     "from": "bodySecondary",
+     "color": "inkFaint"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "rangeSeg": {
+   "type": "row",
+   "children": [
+    "rangeList"
+   ],
+   "layout": {
+    "width": {
+     "hug": 150
+    },
+    "height": 34,
+    "padding": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 10
+   }
+  },
+  "rangeList": {
+   "type": "listView",
+   "children": [
+    "rangeItem"
+   ],
+   "layout": {
+    "width": 144,
+    "height": 28
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 0
+   },
+   "bind": {
+    "data": "${ranges}"
+   }
+  },
+  "rangeItem": {
+   "type": "row",
+   "children": [
+    "rangeText"
+   ],
+   "layout": {
+    "width": 48,
+    "height": {
+     "fill": 28
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokeWidth": 1.2,
+    "radius": 8
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item == range ? theme.colors.card : '#00000000'}",
+    "decoration.strokes[0].color": "${= item == range ? theme.colors.accent : '#00000000'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "range",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "rangeText": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "controlCompact",
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 24
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item == range ? theme.colors.ink : theme.colors.inkSoft}",
+    "props.style.fontWeight": "${= item == range ? 600 : 500}"
+   }
+  },
+  "search": {
+   "type": "textField",
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "decoration": {
+     "hintText": "Search orders",
+     "prefixIcon": {
+      "icon": "search",
+      "size": 16
+     }
+    }
+   },
+   "bind": {
+    "props.initialValue": "${search}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "search",
+       "value": "${result}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 170
+      }
+     }
+    }
+   ]
+  },
+  "newOrder": {
+   "type": "filledButton",
+   "layout": {
+    "width": 124,
+    "height": 36
+   },
+   "props": {
+    "label": "New order",
+    "icon": "add_rounded",
+    "style": {
+     "backgroundColor": "accent",
+     "foregroundColor": "onAccent",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 13,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "orders",
+       "op": "insert",
+       "index": "0",
+       "value": "${= {num: 'HB-' + (10417 + length(orders)), customer: 'Draft order', status: 'Draft', total: '$0.00', date: 'Just now'}}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "search",
+       "value": ""
+      },
+      {
+       "type": "showToast",
+       "message": "Draft order created"
+      }
+     ]
+    }
+   ]
+  },
+  "content": {
+   "type": "column",
+   "children": [
+    "statGrid",
+    "insights",
+    "ordersCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1048
+    },
+    "height": {
+     "fill": 736
+    },
+    "padding": 24
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 16,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "statGrid": {
+   "type": "gridView",
+   "children": [
+    "stat"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1000
+    },
+    "height": {
+     "hug": 120
+    }
+   },
+   "props": {
+    "crossAxisCount": 4,
+    "crossAxisSpacing": 16,
+    "mainAxisSpacing": 16,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${stats}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "crossAxisCount": 2
+      }
+     }
+    }
+   ]
+  },
+  "stat": {
+   "type": "column",
+   "children": [
+    "statTop",
+    "statValue",
+    "statBottom"
+   ],
+   "layout": {
+    "width": {
+     "fill": 238
+    },
+    "height": {
+     "hug": 120
+    },
+    "padding": [
+     18,
+     16,
+     18,
+     16
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 14
+   }
+  },
+  "statTop": {
+   "type": "row",
+   "children": [
+    "statLabel",
+    "statMark"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "statLabel": {
+   "type": "text",
+   "props": {
+    "text": "${item.label}",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "statMark": {
+   "type": "row",
+   "children": [
+    "statIcon"
+   ],
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 8
+   }
+  },
+  "statIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "payments_outlined",
+    "size": 15,
+    "color": "inkSoft"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   },
+   "bind": {
+    "props.icon": "${item.icon}"
+   }
+  },
+  "statValue": {
+   "type": "text",
+   "props": {
+    "text": "${item.value}",
+    "style": {
+     "from": "numberLarge",
+     "fontSize": 28,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "scaleDown": true
+   },
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 30
+    },
+    "padding": [
+     0,
+     8,
+     0,
+     10
+    ]
+   }
+  },
+  "statBottom": {
+   "type": "row",
+   "children": [
+    "delta",
+    "statNote"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "delta": {
+   "type": "row",
+   "children": [
+    "deltaIcon",
+    "deltaText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 56
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     5,
+     3,
+     7,
+     3
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goodTint"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= (!startsWith(item.delta, '-')) != item.invert ? theme.colors.goodTint : theme.colors.badTint}"
+   }
+  },
+  "deltaIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_upward_rounded",
+    "size": 12,
+    "color": "goodDeep"
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   },
+   "bind": {
+    "props.icon": "${= !startsWith(item.delta, '-') ? 'arrow_upward_rounded' : 'arrow_downward_rounded'}",
+    "props.color": "${= (!startsWith(item.delta, '-')) != item.invert ? theme.colors.goodDeep : theme.colors.badDeep}"
+   }
+  },
+  "deltaText": {
+   "type": "text",
+   "props": {
+    "text": "${= replace(replace(item.delta, '+', ''), '-', '')}",
+    "style": {
+     "from": "chip",
+     "fontSize": 11.5,
+     "color": "goodDeep"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 30
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "bind": {
+    "props.style.color": "${= (!startsWith(item.delta, '-')) != item.invert ? theme.colors.goodDeep : theme.colors.badDeep}"
+   }
+  },
+  "statNote": {
+   "type": "text",
+   "props": {
+    "text": "${= 'vs prior ' + replace(range, 'd', ' days')}",
+    "style": {
+     "from": "meta",
+     "fontSize": 11.5,
+     "color": "inkFaint"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "insights": {
+   "type": "flex",
+   "children": [
+    "chartCard",
+    "channelCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1000
+    },
+    "height": {
+     "hug": 344
+    }
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "direction": "vertical",
+       "crossAxisAlignment": "stretch"
+      }
+     }
+    }
+   ]
+  },
+  "chartCard": {
+   "type": "column",
+   "children": [
+    "chartHead",
+    "chart"
+   ],
+   "layout": {
+    "width": {
+     "fill": 746
+    },
+    "height": 344,
+    "padding": [
+     20,
+     18,
+     20,
+     14
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 14
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 14
+   }
+  },
+  "chartHead": {
+   "type": "row",
+   "children": [
+    "chartTitles",
+    "legend"
+   ],
+   "layout": {
+    "width": {
+     "fill": 706
+    },
+    "height": {
+     "hug": 56
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "end",
+    "spacing": 12
+   }
+  },
+  "chartTitles": {
+   "type": "column",
+   "children": [
+    "chartEyebrow",
+    "chartFigure"
+   ],
+   "layout": {
+    "width": {
+     "fill": 400
+    },
+    "height": {
+     "hug": 56
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 6
+   }
+  },
+  "chartEyebrow": {
+   "type": "text",
+   "props": {
+    "text": "REVENUE \u00b7 LAST 12 WEEKS",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "chartFigure": {
+   "type": "row",
+   "children": [
+    "chartTotal",
+    "chartDelta"
+   ],
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 34
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "chartTotal": {
+   "type": "text",
+   "props": {
+    "text": "$345.0k",
+    "style": {
+     "from": "numberLarge",
+     "color": "ink"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 130
+    },
+    "height": {
+     "hug": 32
+    }
+   }
+  },
+  "chartDelta": {
+   "type": "row",
+   "children": [
+    "chartDeltaIcon",
+    "chartDeltaText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     5,
+     3,
+     7,
+     3
+    ]
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "goodTint"
+     }
+    ],
+    "radius": 999
+   }
+  },
+  "chartDeltaIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_upward_rounded",
+    "size": 12,
+    "color": "goodDeep"
+   },
+   "layout": {
+    "width": 12,
+    "height": 12
+   }
+  },
+  "chartDeltaText": {
+   "type": "text",
+   "props": {
+    "text": "12.6%",
+    "style": {
+     "from": "chip",
+     "fontSize": 11.5,
+     "color": "goodDeep"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 34
+    },
+    "height": {
+     "hug": 14
+    }
+   }
+  },
+  "legend": {
+   "type": "row",
+   "children": [
+    "legNow",
+    "legNowText",
+    "legPrev",
+    "legPrevText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "legNow": {
+   "type": "box",
+   "layout": {
+    "width": 14,
+    "height": 3
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "accent"
+     }
+    ],
+    "radius": 2
+   }
+  },
+  "legNowText": {
+   "type": "text",
+   "props": {
+    "text": "This period",
+    "style": {
+     "from": "meta",
+     "fontSize": 11.5,
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 70
+    },
+    "height": {
+     "hug": 16
+    },
+    "padding": [
+     0,
+     0,
+     10,
+     0
+    ]
+   }
+  },
+  "legPrev": {
+   "type": "box",
+   "layout": {
+    "width": 14,
+    "height": 2
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "inkFaint"
+     }
+    ],
+    "strokeWidth": 1.5,
+    "strokeSides": "top",
+    "dashPattern": [
+     3,
+     2
+    ]
+   }
+  },
+  "legPrevText": {
+   "type": "text",
+   "props": {
+    "text": "Previous",
+    "style": {
+     "from": "meta",
+     "fontSize": 11.5,
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 56
+    },
+    "height": {
+     "hug": 16
+    }
+   }
+  },
+  "chart": {
+   "type": "chart",
+   "layout": {
+    "width": {
+     "fill": 706
+    },
+    "height": {
+     "fill": 240
+    }
+   },
+   "props": {
+    "chartType": "line",
+    "labelField": "label",
+    "xLabelEvery": 2,
+    "gridLines": 4,
+    "fitMinY": true,
+    "gridColor": "line",
+    "axisLabelColor": "inkFaint",
+    "axisFontFamily": "Inter",
+    "axisFontSize": 10.5,
+    "yAxisWidth": 44,
+    "yLabelPrefix": "$",
+    "yLabelSuffix": "k",
+    "tooltip": true,
+    "selectOnHover": true,
+    "tooltipColor": "tooltipBackground",
+    "tooltipTextColor": "tooltipText",
+    "selectionColor": "hoverOverlay",
+    "series": [
+     {
+      "field": "prev",
+      "name": "Previous",
+      "kind": "line",
+      "color": "inkFaint",
+      "dashed": true,
+      "strokeWidth": 1.5,
+      "curved": true
+     },
+     {
+      "field": "rev",
+      "name": "Revenue",
+      "kind": "area",
+      "color": "accent",
+      "curved": true,
+      "strokeWidth": 2.5,
+      "fillOpacity": 0.12,
+      "endDot": true
+     }
+    ]
+   },
+   "bind": {
+    "props.data": "${weeks}"
+   }
+  },
+  "channelCard": {
+   "type": "column",
+   "children": [
+    "chanHead",
+    "mixBar",
+    "chanList",
+    "chanSpacer",
+    "chanNote"
+   ],
+   "layout": {
+    "width": 238,
+    "height": 344,
+    "padding": [
+     18,
+     18,
+     18,
+     18
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 14
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 14
+   },
+   "media": [
+    {
+     "minWidth": 1024,
+     "patch": {
+      "bind": {
+       "layout.width": "${= (screen.width - 328) / 4}"
+      }
+     }
+    },
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 648
+       },
+       "height": {
+        "hug": 300
+       }
+      }
+     }
+    }
+   ]
+  },
+  "chanHead": {
+   "type": "column",
+   "children": [
+    "chanEyebrow",
+    "chanTitle"
+   ],
+   "layout": {
+    "width": {
+     "fill": 202
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 6
+   }
+  },
+  "chanEyebrow": {
+   "type": "text",
+   "props": {
+    "text": "BY CHANNEL",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "chanTitle": {
+   "type": "text",
+   "props": {
+    "text": "Revenue by channel",
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 202
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "mixBar": {
+   "type": "row",
+   "children": [
+    "mix1",
+    "mix2",
+    "mix3",
+    "mix4"
+   ],
+   "layout": {
+    "width": {
+     "fill": 202
+    },
+    "height": 8
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "radius": 999,
+    "clip": "antiAlias"
+   }
+  },
+  "mix1": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 46
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 46
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "chart1"
+     }
+    ]
+   }
+  },
+  "mix2": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 28
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 28
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "chart2"
+     }
+    ]
+   }
+  },
+  "mix3": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 17
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 17
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "chart3"
+     }
+    ]
+   }
+  },
+  "mix4": {
+   "type": "box",
+   "layout": {
+    "width": {
+     "fill": 9
+    },
+    "height": {
+     "fill": 8
+    },
+    "flex": 9
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "chart4"
+     }
+    ]
+   }
+  },
+  "chanList": {
+   "type": "listView",
+   "children": [
+    "chanRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 202
+    },
+    "height": {
+     "hug": 188
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 12
+   },
+   "bind": {
+    "data": "${channels}"
+   }
+  },
+  "chanRow": {
+   "type": "column",
+   "children": [
+    "chanTop",
+    "chanBottom"
+   ],
+   "layout": {
+    "width": {
+     "fill": 202
+    },
+    "height": {
+     "hug": 38
+    }
+   },
+   "props": {
+    "spacing": 5,
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "chanTop": {
+   "type": "row",
+   "children": [
+    "chanDot",
+    "chanName",
+    "chanAmt"
+   ],
+   "layout": {
+    "width": {
+     "fill": 202
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "chanDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "chart1"
+     }
+    ],
+    "shape": "circle"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= index == 0 ? theme.colors.chart1 : index == 1 ? theme.colors.chart2 : index == 2 ? theme.colors.chart3 : theme.colors.chart4}"
+   }
+  },
+  "chanName": {
+   "type": "text",
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "from": "body",
+     "fontWeight": 500,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "chanAmt": {
+   "type": "text",
+   "props": {
+    "text": "${item.amount}",
+    "textAlign": "right",
+    "style": {
+     "from": "numberSmall",
+     "fontSize": 14,
+     "color": "ink"
+    }
+   },
+   "layout": {
+    "width": 60,
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "chanBottom": {
+   "type": "row",
+   "children": [
+    "chanTrack",
+    "chanShare"
+   ],
+   "layout": {
+    "width": {
+     "fill": 202
+    },
+    "height": {
+     "hug": 15
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "chanTrack": {
+   "type": "stack",
+   "children": [
+    "chanFill"
+   ],
+   "layout": {
+    "width": {
+     "fill": 150
+    },
+    "height": 4,
+    "margin": [
+     16,
+     0,
+     0,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "track"
+     }
+    ],
+    "radius": 2
+   }
+  },
+  "chanFill": {
+   "type": "box",
+   "layout": {
+    "width": 0,
+    "height": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "chart1"
+     }
+    ],
+    "radius": 2
+   },
+   "bind": {
+    "layout.widthFactor": "${= item.pct / 100}",
+    "decoration.fills[0].color": "${= index == 0 ? theme.colors.chart1 : index == 1 ? theme.colors.chart2 : index == 2 ? theme.colors.chart3 : theme.colors.chart4}"
+   }
+  },
+  "chanShare": {
+   "type": "text",
+   "props": {
+    "text": "${item.share}",
+    "textAlign": "right",
+    "style": {
+     "from": "meta",
+     "fontSize": 11.5,
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": 34,
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "chanSpacer": {
+   "type": "spacer",
+   "layout": {
+    "width": {
+     "fill": 202
+    }
+   }
+  },
+  "chanNote": {
+   "type": "row",
+   "children": [
+    "chanNoteIcon",
+    "chanNoteText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 202
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   }
+  },
+  "chanNoteIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "trending_up_rounded",
+    "size": 15,
+    "color": "good"
+   },
+   "layout": {
+    "width": 15,
+    "height": 15
+   }
+  },
+  "chanNoteText": {
+   "type": "text",
+   "props": {
+    "text": "Marketplace +3.2 pts vs prior",
+    "style": {
+     "from": "bodySecondary",
+     "color": "inkSoft"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 180
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "ordersCard": {
+   "type": "column",
+   "children": [
+    "ordHead",
+    "colHead",
+    "orderList",
+    "emptyText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1000
+    },
+    "height": {
+     "hug": 520
+    },
+    "padding": [
+     20,
+     18,
+     20,
+     10
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "radius": 14
+   }
+  },
+  "ordHead": {
+   "type": "row",
+   "children": [
+    "ordTitles",
+    "viewAll"
+   ],
+   "layout": {
+    "width": {
+     "fill": 960
+    },
+    "height": {
+     "hug": 40
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     12
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   }
+  },
+  "ordTitles": {
+   "type": "column",
+   "children": [
+    "ordTitle",
+    "ordCount"
+   ],
+   "layout": {
+    "width": {
+     "fill": 800
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   }
+  },
+  "ordTitle": {
+   "type": "text",
+   "props": {
+    "text": "Latest orders",
+    "style": {
+     "from": "blockTitle",
+     "color": "ink"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "ordCount": {
+   "type": "text",
+   "props": {
+    "text": "${= 'Showing ' + length(shown) + ' of ' + length(orders)}",
+    "style": {
+     "from": "bodySecondary",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "viewAll": {
+   "type": "row",
+   "children": [
+    "viewAllText",
+    "viewAllIcon"
+   ],
+   "layout": {
+    "width": {
+     "hug": 90
+    },
+    "height": 30,
+    "padding": [
+     10,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8
+   },
+   "inkWell": {
+    "overlayColor": "hoverOverlay"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "showAll",
+       "op": "toggle"
+      }
+     ]
+    }
+   ]
+  },
+  "viewAllText": {
+   "type": "text",
+   "props": {
+    "text": "${= showAll ? 'Show latest' : 'View all'}",
+    "style": {
+     "from": "controlSmall",
+     "fontWeight": 600,
+     "color": "accent"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 15
+    }
+   }
+  },
+  "viewAllIcon": {
+   "type": "icon",
+   "props": {
+    "icon": "arrow_forward_rounded",
+    "size": 14,
+    "color": "accent"
+   },
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "bind": {
+    "props.icon": "${= showAll ? 'expand_less_rounded' : 'arrow_forward_rounded'}"
+   }
+  },
+  "colHead": {
+   "type": "row",
+   "children": [
+    "hOrder",
+    "hCustomer",
+    "hStatus",
+    "hDate",
+    "hTotal"
+   ],
+   "layout": {
+    "width": {
+     "fill": 960
+    },
+    "height": 34,
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 8
+   }
+  },
+  "hOrder": {
+   "type": "text",
+   "props": {
+    "text": "ORDER",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": 110,
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "hCustomer": {
+   "type": "text",
+   "props": {
+    "text": "CUSTOMER",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "hStatus": {
+   "type": "text",
+   "props": {
+    "text": "STATUS",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": 130,
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "hDate": {
+   "type": "text",
+   "props": {
+    "text": "DATE",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": 120,
+    "height": {
+     "hug": 13
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "hTotal": {
+   "type": "text",
+   "props": {
+    "text": "TOTAL",
+    "textAlign": "right",
+    "style": {
+     "from": "eyebrow",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": 100,
+    "height": {
+     "hug": 13
+    }
+   }
+  },
+  "orderList": {
+   "type": "listView",
+   "children": [
+    "orderRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 960
+    },
+    "height": {
+     "hug": 400
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${shown}"
+   }
+  },
+  "orderRow": {
+   "type": "row",
+   "children": [
+    "oNum",
+    "oCustomer",
+    "oStatusCell",
+    "oDate",
+    "oTotal"
+   ],
+   "layout": {
+    "width": {
+     "fill": 960
+    },
+    "height": 48,
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "states": {
+    "hovered": {
+     "orderRow": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   }
+  },
+  "oNum": {
+   "type": "text",
+   "props": {
+    "text": "${item.num}",
+    "style": {
+     "from": "mono",
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": 110,
+    "height": {
+     "hug": 18
+    }
+   }
+  },
+  "oCustomer": {
+   "type": "text",
+   "props": {
+    "text": "${item.customer}",
+    "style": {
+     "from": "body",
+     "fontWeight": 500,
+     "color": "ink"
+    },
+    "maxLines": 1,
+    "overflow": "ellipsis"
+   },
+   "layout": {
+    "width": {
+     "fill": 300
+    },
+    "height": {
+     "hug": 20
+    }
+   }
+  },
+  "oStatusCell": {
+   "type": "row",
+   "children": [
+    "oTag"
+   ],
+   "layout": {
+    "width": 130,
+    "height": {
+     "hug": 22
+    }
+   }
+  },
+  "oTag": {
+   "type": "row",
+   "children": [
+    "oTagDot",
+    "oTagText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": 22,
+    "padding": [
+     8,
+     0,
+     9,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 6,
+    "crossAxisAlignment": "center"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "neutralTint"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "neutralTintBorder"
+     }
+    ],
+    "radius": 999
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item.status == 'Delivered' ? theme.colors.goodTint : item.status == 'Processing' ? theme.colors.warnTint : item.status == 'Refunded' ? theme.colors.badTint : theme.colors.neutralTint}",
+    "decoration.strokes[0].color": "${= item.status == 'Delivered' ? theme.colors.goodTint : item.status == 'Processing' ? theme.colors.warnTint : item.status == 'Refunded' ? theme.colors.badTint : theme.colors.neutralTintBorder}"
+   }
+  },
+  "oTagDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "inkSoft"
+     }
+    ],
+    "shape": "circle"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item.status == 'Delivered' ? theme.colors.good : item.status == 'Processing' ? theme.colors.warn : item.status == 'Refunded' ? theme.colors.bad : item.status == 'Shipped' ? theme.colors.ink : theme.colors.inkFaint}"
+   }
+  },
+  "oTagText": {
+   "type": "text",
+   "props": {
+    "text": "${item.status}",
+    "style": {
+     "from": "badge",
+     "fontWeight": 600,
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 13
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.status == 'Delivered' ? theme.colors.goodDeep : item.status == 'Processing' ? theme.colors.warnDeep : item.status == 'Refunded' ? theme.colors.badDeep : item.status == 'Shipped' ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "oDate": {
+   "type": "text",
+   "props": {
+    "text": "${item.date}",
+    "style": {
+     "from": "meta",
+     "color": "inkSoft"
+    }
+   },
+   "layout": {
+    "width": 120,
+    "height": {
+     "hug": 17
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "oTotal": {
+   "type": "text",
+   "props": {
+    "text": "${item.total}",
+    "textAlign": "right",
+    "style": {
+     "from": "numberSmall",
+     "fontSize": 14,
+     "color": "ink"
+    }
+   },
+   "layout": {
+    "width": 100,
+    "height": {
+     "hug": 17
+    }
+   }
+  },
+  "emptyText": {
+   "type": "text",
+   "props": {
+    "text": "${= 'No orders match \u201c' + search + '\u201d'}",
+    "textAlign": "center",
+    "style": {
+     "from": "body",
+     "color": "inkFaint"
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 960
+    },
+    "height": {
+     "hug": 20
+    },
+    "padding": [
+     0,
+     28,
+     0,
+     28
+    ]
+   },
+   "bind": {
+    "visible": "${= length(shown) == 0}"
+   }
+  }
+ },
+ "variables": {
+  "overview": [
+   {
+    "name": "section",
+    "type": "text",
+    "value": "Overview"
+   },
+   {
+    "name": "range",
+    "type": "text",
+    "value": "30d"
+   },
+   {
+    "name": "ranges",
+    "type": "list",
+    "value": [
+     "7d",
+     "30d",
+     "90d"
+    ]
+   },
+   {
+    "name": "search",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "showAll",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "sections",
+    "type": "list",
+    "value": [
+     {
+      "label": "Overview",
+      "icon": "space_dashboard_outlined",
+      "badge": ""
+     },
+     {
+      "label": "Orders",
+      "icon": "receipt_long_outlined",
+      "badge": "12"
+     },
+     {
+      "label": "Inventory",
+      "icon": "inventory_2_outlined",
+      "badge": ""
+     },
+     {
+      "label": "Customers",
+      "icon": "people_outline",
+      "badge": ""
+     },
+     {
+      "label": "Reports",
+      "icon": "bar_chart",
+      "badge": ""
+     },
+     {
+      "label": "Settings",
+      "icon": "settings_outlined",
+      "badge": ""
+     }
+    ]
+   },
+   {
+    "name": "stats7",
+    "type": "list",
+    "value": [
+     {
+      "label": "Revenue",
+      "value": "$31,250",
+      "delta": "+4.6%",
+      "invert": false,
+      "icon": "payments_outlined"
+     },
+     {
+      "label": "Orders",
+      "value": "468",
+      "delta": "+2.2%",
+      "invert": false,
+      "icon": "shopping_bag_outlined"
+     },
+     {
+      "label": "Returns",
+      "value": "2.1%",
+      "delta": "-0.3%",
+      "invert": true,
+      "icon": "assignment_return_outlined"
+     },
+     {
+      "label": "Avg. order",
+      "value": "$66.77",
+      "delta": "+2.3%",
+      "invert": false,
+      "icon": "sell_outlined"
+     }
+    ]
+   },
+   {
+    "name": "stats30",
+    "type": "list",
+    "value": [
+     {
+      "label": "Revenue",
+      "value": "$128,400",
+      "delta": "+8.2%",
+      "invert": false,
+      "icon": "payments_outlined"
+     },
+     {
+      "label": "Orders",
+      "value": "1,942",
+      "delta": "+3.1%",
+      "invert": false,
+      "icon": "shopping_bag_outlined"
+     },
+     {
+      "label": "Returns",
+      "value": "2.4%",
+      "delta": "-0.6%",
+      "invert": true,
+      "icon": "assignment_return_outlined"
+     },
+     {
+      "label": "Avg. order",
+      "value": "$66.10",
+      "delta": "+1.9%",
+      "invert": false,
+      "icon": "sell_outlined"
+     }
+    ]
+   },
+   {
+    "name": "stats90",
+    "type": "list",
+    "value": [
+     {
+      "label": "Revenue",
+      "value": "$372,900",
+      "delta": "+11.4%",
+      "invert": false,
+      "icon": "payments_outlined"
+     },
+     {
+      "label": "Orders",
+      "value": "5,688",
+      "delta": "+6.0%",
+      "invert": false,
+      "icon": "shopping_bag_outlined"
+     },
+     {
+      "label": "Returns",
+      "value": "2.7%",
+      "delta": "+0.2%",
+      "invert": true,
+      "icon": "assignment_return_outlined"
+     },
+     {
+      "label": "Avg. order",
+      "value": "$65.56",
+      "delta": "+5.1%",
+      "invert": false,
+      "icon": "sell_outlined"
+     }
+    ]
+   },
+   {
+    "name": "stats",
+    "type": "list",
+    "formula": "range == '7d' ? stats7 : range == '90d' ? stats90 : stats30"
+   },
+   {
+    "name": "weeks",
+    "type": "list",
+    "value": [
+     {
+      "label": "Feb 26",
+      "rev": 24.1,
+      "prev": 22.8
+     },
+     {
+      "label": "Mar 4",
+      "rev": 25.8,
+      "prev": 23.5
+     },
+     {
+      "label": "Mar 11",
+      "rev": 24.9,
+      "prev": 24.0
+     },
+     {
+      "label": "Mar 18",
+      "rev": 27.2,
+      "prev": 23.2
+     },
+     {
+      "label": "Mar 25",
+      "rev": 28.0,
+      "prev": 25.1
+     },
+     {
+      "label": "Apr 1",
+      "rev": 27.4,
+      "prev": 25.9
+     },
+     {
+      "label": "Apr 8",
+      "rev": 29.6,
+      "prev": 25.0
+     },
+     {
+      "label": "Apr 15",
+      "rev": 30.3,
+      "prev": 26.4
+     },
+     {
+      "label": "Apr 22",
+      "rev": 29.1,
+      "prev": 27.1
+     },
+     {
+      "label": "Apr 29",
+      "rev": 31.8,
+      "prev": 26.8
+     },
+     {
+      "label": "May 6",
+      "rev": 32.6,
+      "prev": 28.3
+     },
+     {
+      "label": "May 13",
+      "rev": 34.2,
+      "prev": 29.0
+     }
+    ]
+   },
+   {
+    "name": "channels",
+    "type": "list",
+    "value": [
+     {
+      "name": "Online store",
+      "share": "46%",
+      "pct": 46,
+      "amount": "$59.1k"
+     },
+     {
+      "name": "Marketplace",
+      "share": "28%",
+      "pct": 28,
+      "amount": "$35.9k"
+     },
+     {
+      "name": "Wholesale",
+      "share": "17%",
+      "pct": 17,
+      "amount": "$21.8k"
+     },
+     {
+      "name": "Retail POS",
+      "share": "9%",
+      "pct": 9,
+      "amount": "$11.6k"
+     }
+    ]
+   },
+   {
+    "name": "orders",
+    "type": "list",
+    "value": [
+     {
+      "num": "HB-10428",
+      "customer": "Lena Fischer",
+      "status": "Processing",
+      "total": "$248.00",
+      "date": "Today, 09:42"
+     },
+     {
+      "num": "HB-10427",
+      "customer": "Northwind Cafe",
+      "status": "Shipped",
+      "total": "$1,320.50",
+      "date": "Today, 08:15"
+     },
+     {
+      "num": "HB-10426",
+      "customer": "Arjun Mehta",
+      "status": "Delivered",
+      "total": "$86.40",
+      "date": "May 13"
+     },
+     {
+      "num": "HB-10425",
+      "customer": "Sofia Alvarez",
+      "status": "Delivered",
+      "total": "$142.00",
+      "date": "May 13"
+     },
+     {
+      "num": "HB-10424",
+      "customer": "Tom Becker",
+      "status": "Refunded",
+      "total": "$59.90",
+      "date": "May 12"
+     },
+     {
+      "num": "HB-10423",
+      "customer": "Blue Dock Supply",
+      "status": "Shipped",
+      "total": "$2,048.00",
+      "date": "May 12"
+     },
+     {
+      "num": "HB-10422",
+      "customer": "Hana Sato",
+      "status": "Processing",
+      "total": "$73.25",
+      "date": "May 12"
+     },
+     {
+      "num": "HB-10421",
+      "customer": "Owen Price",
+      "status": "Delivered",
+      "total": "$118.60",
+      "date": "May 11"
+     },
+     {
+      "num": "HB-10420",
+      "customer": "Grace Kim",
+      "status": "Delivered",
+      "total": "$64.00",
+      "date": "May 11"
+     },
+     {
+      "num": "HB-10419",
+      "customer": "Marco Rossi",
+      "status": "Shipped",
+      "total": "$205.10",
+      "date": "May 10"
+     },
+     {
+      "num": "HB-10418",
+      "customer": "Ines Duarte",
+      "status": "Refunded",
+      "total": "$39.99",
+      "date": "May 10"
+     },
+     {
+      "num": "HB-10417",
+      "customer": "Pier 9 Market",
+      "status": "Delivered",
+      "total": "$956.00",
+      "date": "May 9"
+     }
+    ]
+   },
+   {
+    "name": "shown",
+    "type": "list",
+    "formula": "slice(filter(orders, o => contains(lower(o.customer), lower(search)) || contains(lower(o.num), lower(search))), 0, showAll ? 100 : 8)"
+   }
+  ]
+ }
+}

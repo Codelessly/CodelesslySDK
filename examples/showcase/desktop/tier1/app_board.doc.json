@@ -1,0 +1,1637 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_board"
+ ],
+ "nodes": {
+  "app_board": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1",
+    "column5"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "divider1",
+    "row6"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ]
+   },
+   "children": [
+    "row3",
+    "row4"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "LANES"
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "titleWide"
+    },
+    "text": "Website relaunch"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row5",
+    "textField1",
+    "filledButton1"
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar1",
+    "Avatar2",
+    "Avatar3",
+    "Avatar4",
+    "Avatar5"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Maya Reyes",
+    "size": "small"
+   }
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Jon Park",
+    "size": "small"
+   }
+  },
+  "Avatar3": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Ana Ortiz",
+    "size": "small"
+   }
+  },
+  "Avatar4": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Lee Chen",
+    "size": "small"
+   }
+  },
+  "Avatar5": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Sam Patel",
+    "size": "small"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Filter tasks"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "New task"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= append(tasks,with(newTask,\"id\",100+length(tasks)))}"
+      }
+     ]
+    }
+   ]
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "padding": 24,
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 1,
+    "crossAxisSpacing": 16,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${cols}",
+    "props.crossAxisCount": "${= max(1, length(cols))}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column2"
+   ]
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "drop"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= updateWhere(tasks,t=>t.id==result.data,t=>with(t,\"col\",item.id))}"
+      }
+     ]
+    }
+   ],
+   "dropTarget": {
+    "accepts": [
+     "task"
+    ]
+   },
+   "children": [
+    "row7",
+    "listView2"
+   ]
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row8",
+    "iconButton1"
+   ]
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "CountBadge1"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "CountBadge1": {
+   "type": "CountBadge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 16.0
+   },
+   "props": {
+    "showZero": true
+   },
+   "bind": {
+    "props.count": "${= count(tasks,x=>x.col==item.id)}"
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= append(tasks,with(with(newTask,\"id\",100+length(tasks)),\"col\",item.id))}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${= filter(tasks,x=>x.col==item.id&&contains(lower(x.title),lower(q)))}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column3"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 24,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 14,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#12000000",
+      "offset": [
+       0,
+       12
+      ],
+      "spreadRadius": -16,
+      "blurRadius": 32
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0A000000",
+      "offset": [
+       0,
+       1
+      ],
+      "blurRadius": 2
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel!=\"\"&&sel.id==item.id?\"#FF3B5BDB\":theme.colors.primaryBorder}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "done",
+       "value": "${= []}"
+      }
+     ]
+    }
+   ],
+   "draggable": {
+    "group": "task",
+    "data": "${item.id}"
+   },
+   "children": [
+    "column4",
+    "text5",
+    "row9"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     6,
+     2,
+     6,
+     2
+    ],
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   },
+   "children": [
+    "text4"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "color": "onPrimary"
+    },
+    "text": "${item.label}"
+   }
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "${item.title}"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row10",
+    "Avatar6"
+   ]
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row11",
+    "row12"
+   ]
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text6"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "event"
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${item.due}"
+   }
+  },
+  "row12": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text7"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chat_bubble_outline"
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${item.comments}"
+   }
+  },
+  "Avatar6": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "xs"
+   },
+   "bind": {
+    "props.name": "${item.who}"
+   }
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "width": 360,
+    "height": {
+     "fill": 0
+    },
+    "padding": 16
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 12,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "strokeSides": "left"
+   },
+   "bind": {
+    "visible": "${= sel!=\"\"}"
+   },
+   "children": [
+    "row13",
+    "text9",
+    "row14",
+    "text12",
+    "text13",
+    "Checklist1",
+    "text14",
+    "column7"
+   ]
+  },
+  "row13": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column6",
+    "iconButton2"
+   ]
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     6,
+     2,
+     6,
+     2
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 4
+   },
+   "bind": {
+    "decoration.fills[0].color": "${sel.color}"
+   },
+   "children": [
+    "text8"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide",
+     "color": "onPrimary"
+    },
+    "text": "${sel.label}"
+   }
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strongWide"
+    },
+    "text": "${sel.title}"
+   }
+  },
+  "row14": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row15",
+    "row16"
+   ]
+  },
+  "row15": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon3",
+    "text10"
+   ]
+  },
+  "icon3": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "event"
+   }
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mutedWide"
+    },
+    "text": "Due ${sel.due}"
+   }
+  },
+  "row16": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar7",
+    "text11"
+   ]
+  },
+  "Avatar7": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "xs"
+   },
+   "bind": {
+    "props.name": "${sel.who}"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "mutedWide"
+    },
+    "text": "${sel.who}"
+   }
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "DESCRIPTION"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${sel.desc}",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Checklist",
+    "value": "done",
+    "items": [
+     "Draft the first version",
+     "Get feedback from the team",
+     "Make revisions",
+     "Final sign-off"
+    ]
+   }
+  },
+  "text14": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "eyebrowWide"
+    },
+    "text": "ACTIVITY"
+   }
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView3"
+   ]
+  },
+  "listView3": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${activity}"
+   },
+   "children": [
+    "listView3Item"
+   ]
+  },
+  "listView3Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row17"
+   ]
+  },
+  "row17": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "mainAxisAlignment": "center",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar8",
+    "column8"
+   ]
+  },
+  "Avatar8": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "xs"
+   },
+   "bind": {
+    "props.name": "${item.who}"
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text15",
+    "text16"
+   ]
+  },
+  "text15": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "text": "${item.what}",
+    "style": {
+     "from": "bodyWide"
+    }
+   }
+  },
+  "text16": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "captionWide"
+    },
+    "text": "${item.when}"
+   }
+  }
+ },
+ "variables": {
+  "app_board": [
+   {
+    "name": "tasks",
+    "type": "list",
+    "value": [
+     {
+      "id": 1,
+      "title": "Audit current sitemap",
+      "label": "Content",
+      "color": "#FF2F9E44",
+      "due": "Mar 18",
+      "comments": 3,
+      "who": "Maya Reyes",
+      "desc": "List every live page and decide whether to keep, merge or retire it.",
+      "col": "backlog"
+     },
+     {
+      "id": 2,
+      "title": "Define new colour palette",
+      "label": "Design",
+      "color": "#FF7048E8",
+      "due": "Mar 20",
+      "comments": 5,
+      "who": "Jon Park",
+      "desc": "Pick primary, accent and neutral colours that pass contrast checks.",
+      "col": "backlog"
+     },
+     {
+      "id": 3,
+      "title": "Set up staging environment",
+      "label": "Dev",
+      "color": "#FF1C7ED6",
+      "due": "Mar 22",
+      "comments": 1,
+      "who": "Ana Ortiz",
+      "desc": "Create a staging site that mirrors production and deploys on merge.",
+      "col": "backlog"
+     },
+     {
+      "id": 4,
+      "title": "Write pricing page copy",
+      "label": "Content",
+      "color": "#FF2F9E44",
+      "due": "Mar 25",
+      "comments": 2,
+      "who": "Lee Chen",
+      "desc": "Draft plain-language copy for the three plans and the FAQ.",
+      "col": "backlog"
+     },
+     {
+      "id": 5,
+      "title": "Fix broken footer links",
+      "label": "Bug",
+      "color": "#FFE03131",
+      "due": "Mar 15",
+      "comments": 0,
+      "who": "Ana Ortiz",
+      "desc": "Several footer links return 404 after the last migration.",
+      "col": "backlog"
+     },
+     {
+      "id": 6,
+      "title": "Design homepage hero",
+      "label": "Design",
+      "color": "#FF7048E8",
+      "due": "Mar 14",
+      "comments": 8,
+      "who": "Jon Park",
+      "desc": "Hero with headline, product image and a single call to action.",
+      "col": "progress"
+     },
+     {
+      "id": 7,
+      "title": "Build responsive nav",
+      "label": "Dev",
+      "color": "#FF1C7ED6",
+      "due": "Mar 16",
+      "comments": 4,
+      "who": "Ana Ortiz",
+      "desc": "Navigation that collapses to a menu under 800px wide.",
+      "col": "progress"
+     },
+     {
+      "id": 8,
+      "title": "Migrate blog posts",
+      "label": "Content",
+      "color": "#FF2F9E44",
+      "due": "Mar 19",
+      "comments": 2,
+      "who": "Maya Reyes",
+      "desc": "Move 42 posts to the new template and keep their URLs.",
+      "col": "progress"
+     },
+     {
+      "id": 9,
+      "title": "Contact form validation",
+      "label": "Dev",
+      "color": "#FF1C7ED6",
+      "due": "Mar 12",
+      "comments": 6,
+      "who": "Lee Chen",
+      "desc": "Validate fields inline and show clear error messages.",
+      "col": "review"
+     },
+     {
+      "id": 10,
+      "title": "Icon set for features",
+      "label": "Design",
+      "color": "#FF7048E8",
+      "due": "Mar 13",
+      "comments": 3,
+      "who": "Jon Park",
+      "desc": "Twelve line icons in a single style, exported as SVG.",
+      "col": "review"
+     },
+     {
+      "id": 11,
+      "title": "Kickoff and goals",
+      "label": "Content",
+      "color": "#FF2F9E44",
+      "due": "Mar 4",
+      "comments": 9,
+      "who": "Maya Reyes",
+      "desc": "Agree the goals, scope and timeline with stakeholders.",
+      "col": "done"
+     },
+     {
+      "id": 12,
+      "title": "Choose CMS",
+      "label": "Dev",
+      "color": "#FF1C7ED6",
+      "due": "Mar 6",
+      "comments": 7,
+      "who": "Ana Ortiz",
+      "desc": "Compare three options and pick one the team can maintain.",
+      "col": "done"
+     },
+     {
+      "id": 13,
+      "title": "Wireframes for key pages",
+      "label": "Design",
+      "color": "#FF7048E8",
+      "due": "Mar 9",
+      "comments": 4,
+      "who": "Jon Park",
+      "desc": "Low-fidelity wireframes for home, pricing and contact.",
+      "col": "done"
+     },
+     {
+      "id": 14,
+      "title": "Fix 404 on old URLs",
+      "label": "Bug",
+      "color": "#FFE03131",
+      "due": "Mar 10",
+      "comments": 1,
+      "who": "Lee Chen",
+      "desc": "Add redirects for the old URLs found in the audit.",
+      "col": "done"
+     }
+    ]
+   },
+   {
+    "name": "cols",
+    "type": "list",
+    "value": [
+     {
+      "id": "backlog",
+      "name": "Backlog"
+     },
+     {
+      "id": "progress",
+      "name": "In progress"
+     },
+     {
+      "id": "review",
+      "name": "In review"
+     },
+     {
+      "id": "done",
+      "name": "Done"
+     }
+    ]
+   },
+   {
+    "name": "newTask",
+    "type": "map",
+    "value": {
+     "id": 0,
+     "title": "Untitled task",
+     "label": "Design",
+     "color": "#FF7048E8",
+     "due": "TBD",
+     "comments": 0,
+     "who": "Maya Reyes",
+     "desc": "No description yet.",
+     "col": "backlog"
+    }
+   },
+   {
+    "name": "activity",
+    "type": "list",
+    "value": [
+     {
+      "who": "Jon Park",
+      "what": "Jon commented: looks good so far",
+      "when": "2 hours ago"
+     },
+     {
+      "who": "Maya Reyes",
+      "what": "Maya moved this card",
+      "when": "Yesterday"
+     },
+     {
+      "who": "Ana Ortiz",
+      "what": "Ana changed the due date",
+      "when": "2 days ago"
+     },
+     {
+      "who": "Lee Chen",
+      "what": "Lee created this task",
+      "when": "Last week"
+     }
+    ]
+   },
+   {
+    "name": "sel",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "done",
+    "type": "list",
+    "value": []
+   },
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   }
+  ]
+ }
+}

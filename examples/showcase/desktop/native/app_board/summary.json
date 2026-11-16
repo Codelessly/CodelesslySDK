@@ -1,0 +1,36 @@
+{
+ "name": "app_board",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 281.0,
+   "problems": 1,
+   "errors": 1,
+   "input_tokens": 162,
+   "cached": 123465,
+   "output_tokens": 32000
+  },
+  {
+   "round": 2,
+   "modelSeconds": 180.3,
+   "problems": 1,
+   "errors": 0,
+   "input_tokens": 14078,
+   "cached": 123465,
+   "output_tokens": 24236
+  },
+  {
+   "round": 3,
+   "modelSeconds": 163.4,
+   "problems": 2,
+   "errors": 1,
+   "input_tokens": 22044,
+   "cached": 123465,
+   "output_tokens": 23083
+  }
+ ],
+ "final": 2,
+ "errors": 0,
+ "problems": 1
+}
