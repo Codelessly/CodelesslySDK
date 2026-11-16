@@ -35,8 +35,22 @@ void main() {
       );
       await tester.tap(find.text('First'));
       await tester.pump();
-      expect(tester.getTopLeft(find.text('Second')).dy,
-          greaterThan(tester.getTopLeft(find.text('First')).dy));
+      final pointerBoxes = tester.widgetList<DecoratedBox>(
+        find.descendant(
+          of: find.byType(SelectionListControl),
+          matching: find.byType(DecoratedBox),
+        ),
+      );
+      expect(
+        pointerBoxes.any(
+          (box) => (box.decoration as BoxDecoration).border?.top.width == 2,
+        ),
+        isFalse,
+      );
+      expect(
+        tester.getTopLeft(find.text('Second')).dy,
+        greaterThan(tester.getTopLeft(find.text('First')).dy),
+      );
       await tester.tap(find.text('Third'));
       await tester.pump();
       expect(selected, ['a', 'c']);
@@ -93,6 +107,18 @@ void main() {
       );
       await tester.sendKeyEvent(LogicalKeyboardKey.tab);
       await tester.pump();
+      final boxes = tester.widgetList<DecoratedBox>(
+        find.descendant(
+          of: find.byType(SelectionListControl),
+          matching: find.byType(DecoratedBox),
+        ),
+      );
+      expect(
+        boxes.any(
+          (box) => (box.decoration as BoxDecoration).border?.top.width == 2,
+        ),
+        isTrue,
+      );
       await tester.sendKeyEvent(LogicalKeyboardKey.space);
       await tester.pump();
       expect(selected, ['a']);

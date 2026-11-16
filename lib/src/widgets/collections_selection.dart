@@ -231,7 +231,10 @@ class _SelectionListControlState extends State<SelectionListControl> {
                 focusNode: _focus,
                 onKeyEvent: _key,
                 onFocusChange: (on) => setState(() {
-                  if (!on) _keyboardFocus = false;
+                  _keyboardFocus =
+                      on &&
+                      FocusManager.instance.highlightMode ==
+                          FocusHighlightMode.traditional;
                 }),
                 child: LayoutBuilder(
                   builder: (context, limits) {
