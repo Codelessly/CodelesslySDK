@@ -502,6 +502,7 @@ void main() {
   });
 
   testWidgets('a dark RTL tooltip keeps its text direction and keyboard behavior', (tester) async {
+    final semantics = tester.ensureSemantics();
     final (_, _) = await _show(tester, {
       'more': hugging('iconButton', {'icon': 'more_horiz'}, {'tooltip': 'مزيد من الخيارات', 'textDirection': 'rtl'}),
     }, dark: true, fill: '#FF111111');
@@ -510,11 +511,13 @@ void main() {
     await keys.tab();
     expect(keys.focusedId, 'more');
     expect(keys.ringShown, isTrue);
+    expect(keys.semantics!.data.textDirection, TextDirection.rtl);
     final bubble = root.overlayEntries.single as RenderTooltipBubble;
     expect(bubble.message, 'مزيد من الخيارات');
     expect(bubble.direction, TextDirection.rtl);
     await keys.escape();
     expect(root.overlayEntries, isEmpty);
+    semantics.dispose();
   });
 
   testWidgets('on a touch screen a small button takes taps in a 44 × 44 target around it', (tester) async {

@@ -152,6 +152,13 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
 
   String? get semanticsLabel => _semanticsLabel;
 
+  TextDirection _semanticsDirection = TextDirection.ltr;
+  set semanticsDirection(TextDirection value) {
+    if (value == _semanticsDirection) return;
+    _semanticsDirection = value;
+    markNeedsSemanticsUpdate();
+  }
+
   bool _hovered = false, _pressed = false;
   bool get hovered => _hovered && _enabled;
   bool get pressed => _pressed && _enabled;
@@ -401,7 +408,7 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
       ..label = _semanticsLabel ?? semanticsName
       ..isEnabled = _enabled
       ..isFocused = focusNode.hasFocus
-      ..textDirection = TextDirection.ltr;
+      ..textDirection = _semanticsDirection;
     if (_selected) config.isSelected = true;
     if (_busy) {
       config
