@@ -1,0 +1,70 @@
+// Overlays written after the page: a dialog whose form sets a page value, a filter sheet, menus by their buttons, a popover, a drawer.
+// tool/notation/notation.sh expand overlays.txt --design-system design_systems/cards --named --id overlays --width 1280 --out <site>/overlays.json
+// tool/render/render.sh <site> --out <dir> --sizes 1440x900,390x844 --tap joinBtn   (or filtersBtn, sortBtn, moreBtn, tipBtn, cartBtn)
+state email=""
+state joined=false
+state sort="Newest"
+state onlyOpen=false
+state maxPrice=50
+Page
+  Nav
+    Brand "Tidewater" icon:"waves"
+    Row gap:4
+      Link "Features" href:"#features"
+      Link "Pricing" href:"#pricing"
+    Row gap:8
+      Button.outline#filtersBtn "Filters" -> open filters
+      Button#joinBtn "Join the waitlist" -> open signup
+  Section#features
+    Heading "Rooms" level:1
+    Row gap:12 middle
+      Text.muted "Sorted by {sort}"
+      Button.outline#sortBtn "Sort" icon:"sort" -> open sortMenu
+      IconButton#moreBtn "more_horiz" -> open more
+      Button.ghost#tipBtn "What is this?" -> open tip
+      Button.ghost#cartBtn "Cart" -> open cart
+    if joined
+      Text.success#thanks "Thanks, {email} is on the list."
+    Grid cols:3 gap:24
+      Card gap:8
+        Heading "Harbor room" level:3
+        Text.muted "Two guests, sea view."
+      Card gap:8
+        Heading "Loft" level:3
+        Text.muted "Four guests, a kitchen."
+      Card gap:8
+        Heading "Cabin" level:3
+        Text.muted "Two guests, a stove."
+  Section#pricing tint
+    Heading "Pricing"
+    Text.muted "Only open rooms: {onlyOpen}. Up to ${maxPrice} a night."
+
+Dialog#signup "Join the waitlist" "We write once, when your room opens."
+  Input#emailField "Email" "you@example.com" =email
+  Row gap:8 end
+    Button.ghost "Cancel" -> close
+    Button#signupGo "Join" enabled:=email!="" -> joined=true; close
+
+Sheet#filters "Filters"
+  Toggle "Only open rooms" =onlyOpen
+  Text.muted "Up to ${maxPrice} a night"
+  Slider =maxPrice min:20 max:200
+  Button#applyFilters "Show rooms" -> close
+
+Menu#sortMenu
+  MenuItem#sortNewest "Newest" icon:"schedule" -> sort="Newest"
+  MenuItem#sortPrice "Price" icon:"sell" -> sort="Price"
+  MenuItem "Name" icon:"sort_by_alpha" -> sort="Name"
+
+Menu#more end
+  MenuItem "Share" icon:"share" -> toast "Shared"
+  MenuItem "Join the waitlist" icon:"mail" -> open signup
+
+Popover#tip
+  Text.strong "Rooms"
+  Text.muted "Every room is cleaned between stays and checked the morning you arrive."
+
+Drawer#cart right "Your cart" w:340
+  Text.muted "Nothing here yet."
+  Spacer grow
+  Button "Check out" -> close
