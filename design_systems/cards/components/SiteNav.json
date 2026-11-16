@@ -34,7 +34,8 @@
    "type": "row",
    "children": ["brandRow", "linksWrap", "actions"],
    "props": {"crossAxisAlignment": "center", "spacing": 24},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "constraints": {"maxWidth": 1184}, "padding": [32, 12, 32, 12]}
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "constraints": {"maxWidth": 1184}, "padding": [32, 12, 32, 12]},
+   "media": [{"maxWidth": 600, "patch": {"props": {"wrap": true, "runSpacing": 8}}}]
   },
   "rule": {
    "type": "box",
@@ -74,7 +75,8 @@
    "type": "row",
    "children": ["links"],
    "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
-   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "media": [{"maxWidth": 600, "patch": {"layout": {"basis": 260}}}]
   },
   "links": {
    "type": "listView",
