@@ -41,15 +41,35 @@ class NodeView extends RenderObjectWidget {
   @override
   RenderNodeView createRenderObject(BuildContext context) {
     _configure(context);
-    return RenderNodeView(tree, rootId, keyboard: interactive ? FocusManagerKeyboard() : null);
+    return RenderNodeView(tree, rootId, keyboard: interactive ? FocusManagerKeyboard() : null)
+      ..focus.layer = interactive ? ControlFocusLayerScope.maybeOf(context) : null;
   }
 
   @override
   void updateRenderObject(BuildContext context, RenderNodeView renderObject) {
     _configure(context);
     renderObject.setRoot(tree, rootId);
+    renderObject.focus.layer = interactive ? ControlFocusLayerScope.maybeOf(context) : null;
     if (interactive != (renderObject.keyboard != null)) renderObject.keyboard = interactive ? FocusManagerKeyboard() : null;
   }
+}
+
+/// The modal overlay (a dialog, a sheet, a popover) the screens under it are
+/// shown in: each [NodeView] below puts its focus scope in [layer], so the
+/// keyboard stays in the overlay while it is the top one
+/// (render/controls/focus.dart's [ControlFocusLayer]). The host that opens
+/// the overlay's route puts it there (ModalFocus, app/ui/presentation_route.dart).
+class ControlFocusLayerScope extends InheritedWidget {
+  const ControlFocusLayerScope({super.key, required this.layer, required super.child});
+
+  final ControlFocusLayer layer;
+
+  /// The overlay [context] is shown in; null: none (a page).
+  static ControlFocusLayer? maybeOf(BuildContext context) =>
+      context.getInheritedWidgetOfExactType<ControlFocusLayerScope>()?.layer;
+
+  @override
+  bool updateShouldNotify(ControlFocusLayerScope oldWidget) => !identical(oldWidget.layer, layer);
 }
 
 /// Key events for a root from Flutter's `FocusManager` (its early handlers,
@@ -116,6 +136,10 @@ class RenderNodeView extends RenderControlRoot with RenderObjectWithLayoutCallba
 
   RenderTree? _tree;
   String? _rootId;
+
+  /// The tree it shows, and the node of it that is its root.
+  RenderTree? get tree => _tree;
+  String? get rootId => _rootId;
 
   void setRoot(RenderTree tree, String rootId) {
     if (identical(tree, _tree) && rootId == _rootId) return;

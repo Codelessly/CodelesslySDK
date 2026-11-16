@@ -28,7 +28,7 @@
      ]
     },
     "default": "medium",
-    "doc": "small: radius 7. medium: radius 8."
+    "doc": "small: radius 8. medium: radius 10."
    }
   ],
   "children": "list"
@@ -62,7 +62,7 @@
     "height": {
      "hug": 80
     },
-    "padding": 1
+    "padding": 5
    },
    "decoration": {
     "fills": [
@@ -75,7 +75,7 @@
       "color": "primaryBorder"
      }
     ],
-    "radius": 15,
+    "radius": 10,
     "clip": "antiAlias",
     "effects": [
      {
@@ -100,8 +100,11 @@
     ]
    },
    "bind": {
-    "decoration.radius": "${= props.size == 'small' ? 7 : 8}",
+    "decoration.radius": "${= props.size == 'small' ? 8 : 10}",
     "decoration.effects": "${theme.shadows.level3}"
+   },
+   "focusGroup": {
+    "typeAhead": true
    }
   },
   "heading": {
@@ -117,20 +120,13 @@
      "hug": 25
     },
     "padding": [
-     8,
-     6,
-     8,
-     6
+     9,
+     7,
+     9,
+     5
     ]
    },
-   "decoration": {
-    "strokes": [
-     {
-      "color": "primaryBorder"
-     }
-    ],
-    "strokeSides": "bottom"
-   },
+   "decoration": {},
    "bind": {
     "visible": "${= props.heading != ''}"
    }
@@ -140,11 +136,12 @@
    "props": {
     "text": "${props.heading}",
     "style": {
-     "fontSize": 10,
-     "fontWeight": 700,
+     "fontSize": 11,
+     "fontWeight": 600,
      "height": 1.3,
      "color": "tertiaryText",
-     "leadingDistribution": "even"
+     "leadingDistribution": "even",
+     "letterSpacing": 0.2
     },
     "maxLines": 1,
     "overflow": "ellipsis"
@@ -156,24 +153,7 @@
     "height": {
      "hug": 13
     }
-   },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "props": {
-       "style": {
-        "fontSize": 12
-       }
-      },
-      "layout": {
-       "height": {
-        "hug": 16
-       }
-      }
-     }
-    }
-   ]
+   }
   },
   "content": {
    "type": "slot"

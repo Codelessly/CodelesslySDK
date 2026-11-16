@@ -79,7 +79,7 @@
    "name": "Default",
    "size": [
     226,
-    28
+    34
    ],
    "props": {
     "title": "Copy command",
@@ -98,7 +98,7 @@
    ],
    "props": {
     "crossAxisAlignment": "center",
-    "spacing": 8
+    "spacing": 10
    },
    "layout": {
     "width": {
@@ -108,24 +108,51 @@
      "hug": 28
     },
     "padding": [
-     8,
-     6,
-     8,
-     6
-    ]
+     9,
+     7,
+     9,
+     7
+    ],
+    "constraints": {
+     "minHeight": 34
+    }
    },
    "decoration": {
     "fills": [
      {
       "color": "#00000000"
      }
-    ]
+    ],
+    "radius": 6
    },
    "bind": {
     "opacity": "${= props.enabled ? 1 : 0.5}"
    },
    "states": {
     "hovered": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "secondaryBackground"
+        }
+       ]
+      }
+     }
+    },
+    "pressed": {
+     "item": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "secondaryBackground"
+        }
+       ]
+      },
+      "opacity": 0.85
+     }
+    },
+    "focused": {
      "item": {
       "decoration": {
        "fills": [
@@ -153,18 +180,18 @@
    ],
    "media": [
     {
-     "maxWidth": 1023,
+     "minWidth": 700,
      "patch": {
       "layout": {
-       "height": {
-        "hug": 44
-       },
        "padding": [
+        10,
         8,
-        8,
-        8,
+        10,
         8
-       ]
+       ],
+       "constraints": {
+        "minHeight": 38
+       }
       }
      }
     }
@@ -175,11 +202,11 @@
    "props": {
     "icon": "circle",
     "color": "secondaryText",
-    "size": 13
+    "size": 16
    },
    "layout": {
-    "width": 13,
-    "height": 13
+    "width": 16,
+    "height": 16
    },
    "bind": {
     "visible": "${= props.icon != ''}",
@@ -195,7 +222,7 @@
    ],
    "props": {
     "crossAxisAlignment": "stretch",
-    "spacing": 1
+    "spacing": 2
    },
    "layout": {
     "width": {
@@ -204,26 +231,14 @@
     "height": {
      "hug": 15
     }
-   },
-   "media": [
-    {
-     "maxWidth": 1023,
-     "patch": {
-      "layout": {
-       "height": {
-        "hug": 34
-       }
-      }
-     }
-    }
-   ]
+   }
   },
   "title": {
    "type": "text",
    "props": {
     "text": "${props.title}",
     "style": {
-     "fontSize": 11,
+     "fontSize": 13,
      "fontWeight": 500,
      "height": 1.35,
      "color": "primaryText",
@@ -245,16 +260,11 @@
    },
    "media": [
     {
-     "maxWidth": 1023,
+     "minWidth": 700,
      "patch": {
       "props": {
        "style": {
-        "fontSize": 13
-       }
-      },
-      "layout": {
-       "height": {
-        "hug": 18
+        "fontSize": 14
        }
       }
      }
@@ -266,7 +276,7 @@
    "props": {
     "text": "${props.subtitle}",
     "style": {
-     "fontSize": 10,
+     "fontSize": 11.5,
      "fontWeight": 400,
      "height": 1.3,
      "color": "tertiaryText",
@@ -288,16 +298,11 @@
    },
    "media": [
     {
-     "maxWidth": 1023,
+     "minWidth": 700,
      "patch": {
       "props": {
        "style": {
-        "fontSize": 11
-       }
-      },
-      "layout": {
-       "height": {
-        "hug": 15
+        "fontSize": 12.5
        }
       }
      }
@@ -309,7 +314,7 @@
    "props": {
     "text": "${props.trailing}",
     "style": {
-     "fontSize": 10,
+     "fontSize": 11.5,
      "fontWeight": 400,
      "height": 1.3,
      "color": "tertiaryText",
@@ -326,7 +331,19 @@
    },
    "bind": {
     "visible": "${= props.trailing != ''}"
-   }
+   },
+   "media": [
+    {
+     "minWidth": 700,
+     "patch": {
+      "props": {
+       "style": {
+        "fontSize": 12.5
+       }
+      }
+     }
+    }
+   ]
   }
  }
 }

@@ -2,7 +2,7 @@
 # Validate and render Codelessly layout documents. See tool/render/README.md.
 #   tool/render/render.sh <document.json | dir> --out <dir> [--sizes 390x844,...] [--screen id]
 #       [--full-page] [--fonts dir] [--theme light|dark|system] [--tap id] [--hover id] [--focus id] [--type id=text]
-#       [--set name=json] [--scroll id=px] [--drag id=dx,dy] [--navigate screen?param=value] [--wait ms] [--now time]
+#       [--set name=json] [--scroll id=px] [--drag id=dx,dy] [--double-tap id] [--wheel id=dy] [--pinch id=scale] [--navigate screen?param=value] [--wait ms] [--now time]
 #       [--label text] [--compare png|dir] [--compare-map screen=name] [--validate-only]
 #       [--component Type [--props json] [--slots file]]
 #       [--design-system folder]   (with one document: render it with that design system's blocks and theme)
@@ -49,12 +49,18 @@ for a in "$@"; do
     continue
   fi
   case "$a" in
-    --out|--fonts|--slots|--compare) expect_path=1; prev="$a"; args+=("$a") ;;
+    --out|--fonts|--slots|--compare|--sheet|--sheet-base) expect_path=1; prev="$a"; args+=("$a") ;;
     --design-system) want_ds=1 ;;
     --*) args+=("$a") ;;
     *)
       # A positional argument right after a value-taking option is that option's value.
-      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map)$ ]]; then
+      if [ ${#args[@]} -gt 0 ] && [ "${args[-1]}" = "--image-map" ]; then
+        # <url prefix>=<folder>: the folder after the last "=", made absolute.
+        dir="$(abs "${a##*=}")" key="${a%=*}"
+        # A table (a .json file) is a path too.
+        case "$key" in *.json) key="$(abs "$key")" ;; esac
+        args+=("$key=$dir")
+      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|double-tap|wheel|pinch|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map|sheet-height|sheet-columns|sheet-title)$ ]]; then
         args+=("$a")
       else
         a="$(abs "$a")"
@@ -112,7 +118,7 @@ if [ -f "$server/ready" ] && [ -f "$server/pid" ] && kill -0 "$(cat "$server/pid
     echo "Rendering with $(codelessly_version_line), the render server (pid $(cat "$server/pid"))." >&2
     req="$server/$(date +%s%N)-$$.req"
     printf '%s\n' "$work/args" > "$req.tmp" && mv "$req.tmp" "$req"
-    while [ ! -f "$work/args.status" ]; do
+    while [ ! -f "$work/args.status" ] && [ ! -f "$work/args.retry" ]; do
       if ! kill -0 "$(cat "$server/pid" 2>/dev/null)" 2>/dev/null; then
         echo "The render server stopped during the run; rendering the usual way." >&2
         rm -f "$req"
@@ -120,7 +126,11 @@ if [ -f "$server/ready" ] && [ -f "$server/pid" ] && kill -0 "$(cat "$server/pid
       fi
       sleep 0.05
     done
-    if [ -f "$work/args.status" ]; then
+    if [ -f "$work/args.retry" ]; then
+      echo "The render server had other files registered for fonts this run draws ($(head -1 "$work/args.retry")); it stopped. Rendering the usual way; tool/render/serve.sh starts it again." >&2
+      for _ in $(seq 1 100); do kill -0 "$(cat "$server/pid" 2>/dev/null)" 2>/dev/null || break; sleep 0.1; done
+      rm -rf "$server"
+    elif [ -f "$work/args.status" ]; then
       cat "$work/args.report"
       exit "$(cat "$work/args.status")"
     fi
