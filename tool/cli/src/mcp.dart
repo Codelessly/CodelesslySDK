@@ -43,7 +43,7 @@ const _stepSchema = {
   'type': 'object',
   'description': 'One interaction, run in order before the capture: {"tap": "id"}, {"type": "email=a@b.co"}, '
       '{"hover": "id"}, {"focus": "id"}, {"unfocus": true}, {"key": "Enter"}, {"set": "name=json"}, '
-      '{"scroll": "id=px"}, {"drag": "id=dx,dy"}, {"navigate": "screen?param=value"}, {"wait": 500}. '
+      '{"scroll": "id=px"}, {"drag": "id=dx,dy"}, {"double-tap": "id"}, {"wheel": "id=dy"}, {"pinch": "id=scale"}, {"navigate": "screen?param=value"}, {"wait": 500}. '
       '"id#n" picks the n-th copy a list repeats; "id@n" the n-th tab/segment.',
   'additionalProperties': true,
 };
