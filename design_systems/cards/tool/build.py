@@ -24,6 +24,7 @@ SDK = os.path.dirname(SYSTEMS)
 sys.path.insert(0, HERE)
 
 import blocks  # noqa: E402
+import repairs  # noqa: E402
 import tokens  # noqa: E402
 
 spec = importlib.util.spec_from_file_location('nds', f'{SYSTEMS}/tool/new_design_system.py')
@@ -117,6 +118,9 @@ def main():
             fixed = fixed.replace('110,\n    26', '150,\n    26')
         if fixed != text:
             open(path, 'w').write(fixed)
+
+    # …and the menu, which under this brand is of the control family (repairs.py).
+    repairs.apply(ROOT)
 
     base = [c for c in manifest['components']]
     base_names = {c.split('/')[1][:-5] for c in base}

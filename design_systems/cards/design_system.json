@@ -1069,6 +1069,7 @@
    "chip": 999,
    "cta": 14,
    "popup": 20,
+   "menu": 10,
    "badge": 999,
    "progress": 999,
    "bar": 6,
