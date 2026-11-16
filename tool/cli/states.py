@@ -23,6 +23,7 @@ The manifest (paths relative to it):
       "args": ["--fonts", "fonts"],          // passed to every render (--full-page, --theme dark, --now ...)
       "references": "screenshots",           // optional: a folder of reference PNGs (render --compare's naming)
       "minMatch": 0.97,                      // optional: below this share of matching pixels a state fails
+      "ignore": ["unknown_screen"],          // optional: codes left out of the counts (still in diagnostics)
       "states": [
         {"name": "home", "screen": "home"},
         {"name": "home-annual", "screen": "home", "steps": [{"tap": "billing-toggle"}], "sizes": "1440x900"},
@@ -34,7 +35,8 @@ The manifest (paths relative to it):
 
 A step is `{"<render option without -->": value}` (`tap`, `hover`, `type`, `set`, `scroll`, `drag`, `key`,
 `navigate`, `wait`, `focus`; `{"unfocus": true}`), or a list of raw arguments (`["--tap", "go"]`). A state's
-`compare` is a reference file, a folder, or a map from size to file (each size then renders on its own).
+`compare` is a reference file, a folder, or a map from size to file (each size then renders on its own); its
+`documents` replace the manifest's for that state (a page alone, so other pages' problems are not its own).
 """
 from __future__ import annotations
 
@@ -143,7 +145,8 @@ def main(argv=None):
         seen = set()
         for size, extra in runs:
             diag_file.unlink(missing_ok=True)
-            code, text = run_render([str(RENDER), *docs, '--out', str(sdir), '--sizes', size, *args, *extra])
+            state_docs = [rel(base, d) for d in s['documents']] if s.get('documents') else docs
+            code, text = run_render([str(RENDER), *state_docs, '--out', str(sdir), '--sizes', size, *args, *extra])
             status = max(status, code)
             log += text
             if diag_file.exists():  # each run writes the label's file: merge the runs (one per size) into one
@@ -161,11 +164,13 @@ def main(argv=None):
         if has_diagnostics:
             diag_file.write_text(json.dumps(merged, indent=1))
         (sdir / 'render.log').write_text(log)
-        diags, comps, images = merged['diagnostics'], merged['comparisons'], merged['images']
+        ignore = set(m.get('ignore') or [])
+        diags = [x for x in merged['diagnostics'] if x.get('code') not in ignore]
+        comps, images = merged['comparisons'], merged['images']
         errors = [d for d in diags if d.get('severity') == 'error']
         warnings = [d for d in diags if d.get('severity') != 'error']
         worst = min((c['matching'] for c in comps if 'matching' in c), default=None)
-        failed = status == 2 or bool(errors) or (min_match is not None and worst is not None and worst < min_match)
+        failed = (status == 2 and not has_diagnostics) or bool(errors) or (min_match is not None and worst is not None and worst < min_match)
         if a.outline:
             import outline
             types, parents = outline.load_documents(docs)

@@ -29,6 +29,7 @@ import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTil
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
+import 'package:codelessly_sdk/src/render/layout/fit_box.dart' show RenderCodelesslyFlex;
 import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField, textFieldIn;
 
 import 'args.dart';
@@ -259,6 +260,8 @@ String _jsonError(Object e, String text) {
 Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? flutterRoot}) async {
   final report = RenderReport();
   final seen = <String>{};
+  // Before the documents are prepared (their images inlined); cleared when the run ends.
+  renderImageMap = args.imageMap;
   void issue(RuntimeIssue i) {
     if (seen.add('${i.key}|${i.screen}|${i.size}')) report.diagnostics.add(i.toJson());
   }
@@ -451,6 +454,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
 
   // Tests draw shadows without blur unless told otherwise (an app blurs them).
   debugDisableShadows = false;
+  // An overflowing row or column is drawn as the published app draws it, without the debug build's stripes; the
+  // overflow is still reported (render_exception, with the node).
+  RenderCodelesslyFlex.debugPaintOverflowStripes = false;
   // The details of each error, to name the node it came from.
   final previousOnError = FlutterError.onError;
   FlutterError.onError = (details) {
@@ -502,6 +508,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   } finally {
     disposeDecodedFonts();
     debugDisableShadows = true;
+    RenderCodelesslyFlex.debugPaintOverflowStripes = true;
+    renderImageMap = const {};
     FlutterError.onError = previousOnError;
     IconSources.codepointOf = null;
     FormulaClock.pinned = null;

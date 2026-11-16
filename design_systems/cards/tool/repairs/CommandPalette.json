@@ -103,20 +103,6 @@
    }
   ]
  },
- "variables": {
-  "palette": [
-   {
-    "name": "selected",
-    "type": "text",
-    "value": ""
-   },
-   {
-    "name": "matches",
-    "type": "list",
-    "formula": "filter(props.commands, c => props.value == '' || contains(lower(c), lower(props.value)))"
-   }
-  ]
- },
  "nodes": {
   "field": {
    "actions": [
@@ -355,5 +341,19 @@
     "decoration.fills[0].color": "${= selected == item ? theme.colors.activeTint : '#00000000'}"
    }
   }
+ },
+ "variables": {
+  "palette": [
+   {
+    "name": "selected",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "matches",
+    "type": "list",
+    "formula": "filter(props.commands, c => props.value == '' || contains(lower(c), lower(props.value)))"
+   }
+  ]
  }
 }

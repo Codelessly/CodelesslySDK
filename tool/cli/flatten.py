@@ -97,7 +97,9 @@ def canvas_for(root_id: str, cid: str, size, f: Flattener, screen=None, breakpoi
     return c
 
 
-def flatten(data, size=None, screen=None) -> dict:
+def flatten(data, size=None, screen=None, keys_out: dict | None = None) -> dict:
+    """The flat document for `data` (see the module's doc). With trees per breakpoint, `keys_out` (a dict) gets each
+    breakpoint's {key: node id}, as the editor's layouts.createResponsive answers."""
     # A document: lift nested children out of its nodes.
     if isinstance(data, dict) and isinstance(data.get('nodes'), dict) and 'type' not in data:
         doc = dict(data)
@@ -129,7 +131,15 @@ def flatten(data, size=None, screen=None) -> dict:
     if isinstance(data, dict) and isinstance(data.get('trees'), dict):
         name = screen or data.get('screen') or data.get('name') or 'screen'
         for bp, tree in data['trees'].items():
+            # Each breakpoint's tree is one scope, as the editor reads it: its "@key" names a node of that tree
+            # (the trees reuse keys: the mobile "retry" and the desktop "retry" are two nodes).
+            f.keys = {}
+            before = set(f.nodes)
             body = f.add(tree, prefer=f'{bp}_root')
+            for nid in set(f.nodes) - before:
+                f.nodes[nid] = f.resolve(f.nodes[nid])
+            if keys_out is not None:  # what layouts.createResponsive answers: each tree's key -> node id
+                keys_out[bp] = dict(f.keys)
             cid = f.fresh(f'{name}_{bp}')
             f.nodes[cid] = canvas_for(body, cid, BREAKPOINT_SIZES.get(bp, size), f, screen=name,
                                       breakpoint=bp, actions=data.get('canvasActions'))
