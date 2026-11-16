@@ -1,4 +1,54 @@
 {
+ "widget": {
+  "doc": "Labels and their values in one quiet tile: rows:=[[\"Subtotal\",money(sub,\"$\",2)],[\"Delivery\",\"$4.99\"]]. A phone stacks each pair, for long values; inlineOnPhone:true keeps short labels and values side by side there (a price breakdown). An empty value hides its row; icons is an optional list alongside.",
+  "props": [
+   {
+    "key": "rows",
+    "type": {
+     "kind": "list",
+     "flutter": "List<dynamic>",
+     "item": {
+      "kind": "json",
+      "flutter": "dynamic"
+     }
+    },
+    "default": [
+     [
+      "Subtotal",
+      "$25.95"
+     ],
+     [
+      "Delivery",
+      "$4.99"
+     ]
+    ],
+    "doc": "One [label, value] pair per row; a row whose value is empty is not shown.",
+    "required": true
+   },
+   {
+    "key": "icons",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "A Material icon per row, before its label (optional)."
+   },
+   {
+    "key": "inlineOnPhone",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Keep short labels and values on one line on a phone; leave false for long content."
+   }
+  ]
+ },
  "nodes": {
   "box": {
    "children": [
@@ -11,7 +61,9 @@
     {
      "maxWidth": 699,
      "patch": {
-      "visible": false
+      "bind": {
+       "visible": "${props.inlineOnPhone}"
+      }
      }
     }
    ]
@@ -23,7 +75,9 @@
     {
      "maxWidth": 699,
      "patch": {
-      "visible": true
+      "bind": {
+       "visible": "${= !props.inlineOnPhone}"
+      }
      }
     }
    ],

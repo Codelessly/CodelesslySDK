@@ -344,7 +344,9 @@ class CodelesslyWidget extends StatefulWidget {
           layoutId: layoutId,
           params: params,
           data: template?.data ?? const {},
-          sizing: template?.sizing ?? CanvasSizing.fill,
+          // A page route fills the navigator even when its action came from
+          // a dialog or drawer whose canvas uses design sizing.
+          sizing: CanvasSizing.fill,
           loadingBuilder: template?.loadingBuilder ?? template?.controller?.loadingBuilder,
           errorBuilder: template?.errorBuilder ?? template?.controller?.errorBuilder,
           layoutBuilder: template?.layoutBuilder ?? template?.controller?.layoutBuilder,
