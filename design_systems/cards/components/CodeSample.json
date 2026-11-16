@@ -30,7 +30,7 @@
  "nodes": {
   "wrap": {
    "type": "column",
-   "children": ["head", "rule", "body"],
+   "children": ["head", "rule", "body", "scrollHint"],
    "props": {"crossAxisAlignment": "stretch", "spacing": 0},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
    "decoration": {"fills": [{"color": "codeBg"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 12, "clip": "antiAlias"},
@@ -136,6 +136,13 @@
     "style": {"from": "code", "fontSize": 13, "height": 1.7, "color": "ink"}
    },
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [18, 16, 24, 16]}
+  },
+  "scrollHint": {
+   "type": "text",
+   "visible": false,
+   "media": [{"maxWidth": 699, "patch": {"bind": {"visible": "${= length(props.code) > 80}"}}}],
+   "props": {"text": "Swipe sideways to read the full code →", "style": {"from": "captionWide", "color": "inkFaint"}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [18, 0, 18, 12]}
   }
  }
 }
