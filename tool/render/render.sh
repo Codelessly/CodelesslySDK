@@ -49,9 +49,11 @@ for a in "$@"; do
       # A positional argument right after a value-taking option is that option's value.
       if [ ${#args[@]} -gt 0 ] && [ "${args[-1]}" = "--image-map" ]; then
         # <url prefix>=<folder>: the folder after the last "=", made absolute.
-        dir="${a##*=}"
-        case "$dir" in /*) ;; *) a="${a%=*}=$PWD/$dir" ;; esac
-        args+=("$a")
+        dir="${a##*=}" key="${a%=*}"
+        case "$dir" in /*) ;; *) dir="$PWD/$dir" ;; esac
+        # A table (a .json file) is a path too.
+        case "$key" in *.json) case "$key" in /*) ;; *) key="$PWD/$key" ;; esac ;; esac
+        args+=("$key=$dir")
       elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map)$ ]]; then
         args+=("$a")
       else
