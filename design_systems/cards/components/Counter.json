@@ -183,7 +183,20 @@
     "height": {
      "hug": 0
     }
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "style": {
+        "from": "rowTitle",
+        "fontSize": 13
+       }
+      }
+     }
+    }
+   ]
   },
   "detail": {
    "type": "text",

@@ -12,7 +12,8 @@ import 'dart:ui' as ui;
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl;
+import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusScope;
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, firstTextUnder;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
@@ -29,6 +30,7 @@ import 'package:codelessly_sdk/src/render/controls/tile.dart' show RenderListTil
 import 'package:codelessly_sdk/src/render/paint/path_paint.dart' show parseSvgPath;
 import 'package:codelessly_sdk/src/render/paint/svg_fonts.dart' show SvgFonts;
 import 'package:codelessly_sdk/src/render/view_scroll.dart' show RenderSticky;
+import 'package:codelessly_sdk/src/render/layout/fit_box.dart' show RenderCodelesslyFlex;
 import 'package:codelessly_sdk/src/render/controls/text_field.dart' show RenderTextField, textFieldIn;
 
 import 'args.dart';
@@ -112,6 +114,10 @@ final class RenderReport {
 
   /// Texts a `copyToClipboard` action copied, in order.
   final List<api.Json> clipboard = [];
+
+  /// Where the keyboard focus is in each capture that has one (after
+  /// `--key Tab`, a `--focus`): the node, and whether its ring shows.
+  final List<api.Json> focus = [];
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
 }
@@ -259,6 +265,8 @@ String _jsonError(Object e, String text) {
 Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? flutterRoot}) async {
   final report = RenderReport();
   final seen = <String>{};
+  // Before the documents are prepared (their images inlined); cleared when the run ends.
+  renderImageMap = args.imageMap;
   void issue(RuntimeIssue i) {
     if (seen.add('${i.key}|${i.screen}|${i.size}')) report.diagnostics.add(i.toJson());
   }
@@ -451,6 +459,9 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
 
   // Tests draw shadows without blur unless told otherwise (an app blurs them).
   debugDisableShadows = false;
+  // An overflowing row or column is drawn as the published app draws it, without the debug build's stripes; the
+  // overflow is still reported (render_exception, with the node).
+  RenderCodelesslyFlex.debugPaintOverflowStripes = false;
   // The details of each error, to name the node it came from.
   final previousOnError = FlutterError.onError;
   FlutterError.onError = (details) {
@@ -502,6 +513,8 @@ Future<RenderReport> runRender(WidgetTester tester, RenderArgs args, {String? fl
   } finally {
     disposeDecodedFonts();
     debugDisableShadows = true;
+    RenderCodelesslyFlex.debugPaintOverflowStripes = true;
+    renderImageMap = const {};
     FlutterError.onError = previousOnError;
     IconSources.codepointOf = null;
     FormulaClock.pinned = null;
@@ -809,11 +822,28 @@ Future<void> _renderAll(
           }
         }
       }
+      // Where the keyboard focus is: the node (a control, a text field, a
+      // node with a click reaction), and whether its focus ring shows.
+      final focusedBox = _focusedBox();
+      if (focusedBox != null) {
+        final scope = ControlFocusScope.focusedScope!;
+        report.focus.add({
+          'image': name,
+          'screen': label,
+          'size': sizeName,
+          'id': focusedBox.id,
+          if (componentInstanceOf(focusedBox.instance) != null) 'path': focusedBox.tree.pathOf(focusedBox.id, focusedBox.instance),
+          'ring': scope.focused!.showsHighlight,
+          if (scope.focused!.label?.call() ?? firstTextUnder(focusedBox) case final String text) 'text': text,
+          if (scope.layer != null) 'inOverlay': true,
+        });
+      }
       if (args.dumpLayout) {
         final boxes = [
           for (final b in _boxes(binding))
             {
               'id': b.id,
+              if (identical(b, focusedBox)) 'focused': true,
               if (b.instance != null) 'instance': '${b.instance}',
               if (componentInstanceOf(b.instance) != null) 'path': b.tree.pathOf(b.id, b.instance),
               'x': _rectOf(b).left.round(),
@@ -1786,6 +1816,51 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       }
       await g.up();
       return null;
+    case 'double-tap':
+      // Two taps in quick succession where the node shows.
+      final (at, problem) = await pointAt(step.target, 'double-tap');
+      if (at == null) return problem;
+      await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
+      await tester.tapAt(at);
+      await tester.pump(const Duration(milliseconds: 60));
+      await tester.tapAt(at);
+      return null;
+    case 'wheel':
+      // A mouse wheel turned over the node: dy pixels (negative: away from
+      // the user, which zooms in where a wheel zooms), `ctrl+` held with it.
+      final m = RegExp(r'^\s*(ctrl\+)?(-?\d+(?:\.\d+)?)\s*$').firstMatch(step.value ?? '');
+      if (m == null) return '--wheel ${step.target}=${step.value}: say how far: --wheel ${step.target}=-240 (pixels; negative is away from the user), or =ctrl+-240 with Control held.';
+      final (at, problem) = await pointAt(step.target, 'wheel');
+      if (at == null) return problem;
+      final wheel = TestPointer(90, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(wheel.hover(at));
+      if (m[1] != null) await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendEventToBinding(wheel.scroll(ui.Offset(0, double.parse(m[2]!))));
+      await tester.pump();
+      if (m[1] != null) await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendEventToBinding(wheel.removePointer(location: at));
+      return null;
+    case 'pinch':
+      // Two fingers 80 px apart about the node's point, spread (or closed) to
+      // 80 px times the scale.
+      final scale = double.tryParse((step.value ?? '').trim());
+      if (scale == null || scale <= 0) return '--pinch ${step.target}=${step.value}: say by how much: --pinch ${step.target}=2 (fingers twice as far apart; 0.5 closes them).';
+      final (at, problem) = await pointAt(step.target, 'pinch');
+      if (at == null) return problem;
+      const half = ui.Offset(40, 0);
+      final a = await tester.startGesture(at - half, pointer: 91);
+      final b = await tester.startGesture(at + half, pointer: 92);
+      await tester.pump();
+      const moves = 12;
+      for (var i = 1; i <= moves; i++) {
+        final by = half * (1 + (scale - 1) * i / moves);
+        await a.moveTo(at - by);
+        await b.moveTo(at + by);
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await a.up();
+      await b.up();
+      return null;
     case 'hover':
       final (at, problem) = await pointAt(step.target, 'hover');
       if (at == null) return problem;
@@ -2240,6 +2315,17 @@ List<RuntimeIssue> _check(
   return out;
 }
 
+/// The node box that holds the keyboard focus (the box around the focused
+/// control or press target); null: nothing has it.
+NodeBox? _focusedBox() {
+  final node = ControlFocusScope.focusedScope?.focused;
+  if (node == null || !node.owner.attached) return null;
+  for (RenderObject? p = node.owner; p != null; p = p.parent) {
+    if (p is NodeBox) return p;
+  }
+  return null;
+}
+
 /// Where a run's diagnostics go: `diagnostics.json`, or with a label
 /// `diagnostics-<label>.json` (one run per state keeps each state's).
 String diagnosticsFileName(String? label) => label == null ? 'diagnostics.json' : 'diagnostics-${_fileSafe(label)}.json';
@@ -2255,6 +2341,7 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     if (report.comparisons.isNotEmpty) 'comparisons': [for (final c in report.comparisons) c.toJson()],
     if (report.downloads.isNotEmpty) 'downloads': report.downloads,
     if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
+    if (report.focus.isNotEmpty) 'focus': report.focus,
     'diagnostics': report.diagnostics,
   }));
   return report;
@@ -2285,6 +2372,10 @@ String formatReport(RenderReport report) {
   for (final c in report.clipboard) {
     final t = '${c['text']}';
     b.writeln('copied to the clipboard: ${jsonEncode(t.length > 120 ? '${t.substring(0, 120)}...' : t)}${c['screen'] == null ? '' : ' [screen ${c['screen']} ${c['size']}]'}');
+  }
+  for (final f in report.focus) {
+    b.writeln('focus on ${f['path'] ?? f['id']}${f['text'] == null ? '' : ' ${jsonEncode(f['text'])}'}'
+        '${f['ring'] == true ? ' (ring shown)' : ' (no ring)'}${f['inOverlay'] == true ? ', in the open overlay' : ''} [screen ${f['screen']} ${f['size']}]');
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();

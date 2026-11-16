@@ -443,7 +443,6 @@
   },
   "fRatingI": {
    "type": "icon",
-   "media": [{"maxWidth": 699, "patch": {"visible": false}}],
    "props": {
     "icon": "star_outline_rounded",
     "size": 13,
@@ -452,7 +451,15 @@
    "layout": {
     "width": 13,
     "height": 13
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
   },
   "fRatingT": {
    "type": "text",
@@ -533,7 +540,6 @@
   },
   "fDistanceI": {
    "type": "icon",
-   "media": [{"maxWidth": 699, "patch": {"visible": false}}],
    "props": {
     "icon": "near_me_outlined",
     "size": 13,
@@ -542,7 +548,15 @@
    "layout": {
     "width": 13,
     "height": 13
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
   },
   "fDistanceT": {
    "type": "text",
@@ -624,7 +638,6 @@
   },
   "fHoursI": {
    "type": "icon",
-   "media": [{"maxWidth": 699, "patch": {"visible": false}}],
    "props": {
     "icon": "schedule_rounded",
     "size": 13,
@@ -633,7 +646,15 @@
    "layout": {
     "width": 13,
     "height": 13
-   }
+   },
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
   },
   "fHoursT": {
    "type": "text",

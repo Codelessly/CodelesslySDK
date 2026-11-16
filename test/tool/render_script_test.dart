@@ -187,4 +187,30 @@ void main() {
     expect(dir.existsSync(), isFalse, reason: 'serve.sh --stop cleared it');
   });
 
+
+  test('a run the render server hands back (a font it cannot draw anew) is rendered the usual way', () async {
+    await l.run({'FLUTTER_ROOT': '${l.root}/flutter'}); // resolve first
+    final tests = l.callLines.where((c) => c.contains(' test ')).length;
+    final dir = Directory('${l.sdk}/build/.render-server')..createSync(recursive: true);
+    // A stand-in server that hands every request back, then stops, as render_harness.dart does on a font conflict.
+    final server = await Process.start('bash', ['-c', r'''
+      while true; do
+        for r in "$0"/*.req; do
+          [ -f "$r" ] || continue
+          a="$(cat "$r")"; rm -f "$r"
+          echo "Inter 400: b.ttf after a.ttf" > "$a.retry"; exit 0
+        done
+        sleep 0.05
+      done''', dir.path]);
+    addTearDown(server.kill);
+    File('${dir.path}/pid').writeAsStringSync('${server.pid}');
+    await Future<void>.delayed(const Duration(milliseconds: 1100));
+    File('${dir.path}/ready').writeAsStringSync('${server.pid}');
+    final r = await l.run({'FLUTTER_ROOT': '${l.root}/flutter'});
+    expect(r.exitCode, 0, reason: '${r.stderr}');
+    expect('${r.stderr}', contains('other files registered for fonts'));
+    expect(l.callLines.where((c) => c.contains(' test ')), hasLength(tests + 1), reason: 'rendered the usual way');
+    expect(dir.existsSync(), isFalse);
+  });
+
 }
