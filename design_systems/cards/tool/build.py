@@ -24,6 +24,7 @@ SDK = os.path.dirname(SYSTEMS)
 sys.path.insert(0, HERE)
 
 import blocks  # noqa: E402
+import repairs  # noqa: E402
 import tokens  # noqa: E402
 
 spec = importlib.util.spec_from_file_location('nds', f'{SYSTEMS}/tool/new_design_system.py')
@@ -35,7 +36,9 @@ README = '''# Cards
 A design system for inline chat cards: a brand layer over SSUI's controls, plus card blocks at full polish and
 drawn media (no image files). See DESIGN.md (the look and the tokens) and PATTERNS.md (one worked card per kind).
 
-Built by `python3 design_systems/cards/tool/build.py` (do not edit the generated files by hand):
+Built by `python3 design_systems/cards/tool/build.py`. A change made to a generated component by hand is lost at
+the next build unless it is recorded: `python3 design_systems/cards/tool/repairs.py --record` writes each such
+change to `tool/repairs/<Name>.json`, which the build applies last:
 
 | File | What it is |
 |---|---|
@@ -128,6 +131,9 @@ def main():
             json.dump(doc, f, indent=1, ensure_ascii=False)
             f.write('\n')
         own.append(f'components/{name}.json')
+    # Last, what Cards changes in what was just written (repairs.py): the menu, and the fixes made to a
+    # generated block as edited JSON, each recorded as a patch so that this build gives it back.
+    repairs.apply(ROOT, quiet=True)
     replaced = sorted(base_names & {o.split('/')[1][:-5] for o in own})
     # Blocks stored after the build (designed on demand in a session and written into components/): kept, after
     # the blocks made here.

@@ -51,10 +51,13 @@ site: navigation may name a canvas of another page.
 | `--theme <mode>` | `light`, `dark` or `system`: the theme mode the site starts in, as a `setThemeMode` action sets it (named colors, text styles and controls follow). PNG names end `-<mode>`; a later `--tap` on the site's switch changes it. |
 | `--tap <id>` | Tap the node where it shows. `<id>#<n>` taps the n-th copy (from 0) of a node a list repeats; `<template>#<n>/<id>` the node inside a list's n-th copy (`evCard#0/evReserve`, the same node as `evReserve#0`). `<id>@<n>` taps the n-th part (from 0) of a control with several: a segment of a `segmentedButton`, a tab of a `tabBar` or `tabs`, a destination of a `navigationBar` or `bottomNavigationBar` (`--tap billing@1`). A unique part `id` or `value` in a control's `tabs`, `segments` or `destinations` can be tapped directly (`--tap stay` for a tab with `"id": "stay"`). A focused text field elsewhere is unfocused first, as a click outside a field does in a browser (its blur reactions run before the tap's). |
 | `--drag <id>=<dx>,<dy>` | Press on the node, move by `dx`, `dy` in a dozen steps and release: a reorder handle, a slider, a draggable card, a swipe. `--drag <id>=<other id>` drags it onto another node (a drop target). A drag that starts on a long press (a list reordered by touch, a long-press draggable) is held first. |
+| `--double-tap <id>` | Tap the node twice in quick succession: a double tap, a double click (a photo's zoom, a `doubleTap` reaction). |
+| `--wheel <id>=<dy>` | Turn a mouse wheel over the node by `dy` pixels (negative: away from the user, which zooms in where a wheel zooms); `--wheel <id>=ctrl+<dy>` with Control held (a browser's trackpad pinch). |
+| `--pinch <id>=<scale>` | Two fingers on the node, 80 px apart, spread to `scale` times as far apart (`2` zooms in, `0.5` out). |
 | `--hover <id>` | Move a mouse over the node (hover states, `cursorEnter`). |
 | `--focus <id>` | Focus the text field (a `textField`, or the one inside the node). |
 | `--unfocus` | Take the focus from the focused field: no caret in the capture (an error state after `--type`); its blur reactions run. |
-| `--key <key>` | Press a key on what has the focus, as a keyboard does: `ArrowLeft`, `ArrowRight`, `ArrowUp`, `ArrowDown`, `Enter`, `Escape`, `Tab`, `Space`, `Home`, `End`, `Backspace`, `Delete`, `PageUp`, `PageDown`, a letter or a digit, with modifiers (`shift+Tab`, `ctrl+a`). A canvas's `keyDown` reactions run when no field has the focus. |
+| `--key <key>` | Press a key on what has the focus, as a keyboard does: `ArrowLeft`, `ArrowRight`, `ArrowUp`, `ArrowDown`, `Enter`, `Escape`, `Tab`, `Space`, `Home`, `End`, `Backspace`, `Delete`, `PageUp`, `PageDown`, a letter or a digit, with modifiers (`shift+Tab`, `ctrl+a`). A canvas's `keyDown` reactions run when no field has the focus. `Tab` moves the focus through the page's stops (controls, text fields, nodes with a click reaction) or, with an overlay open, through the overlay's; `Enter` and `Space` press the focused one; in a menu the arrows, `Home`, `End` and a letter move; `Escape` closes the top overlay. The run reports where the focus ends ("Where the focus is", below). |
 | `--type <id>=<text>` | Focus the text field and type the text, as a user would: its `changed` reactions run, and a field whose `props.initialValue` is bound to a variable sets it. When two shown nodes share the id and only one has a text field (a form's `company` field and a footer's `company` heading), that one is typed into; else name it by path (`contact/company=Vertex`, `<canvas id>/<id>` for the page's own). |
 | `--set <name>=<json>` | Set a variable of the screen in view (after `--navigate`, of the screen navigated to): `--set annual=true`, `--set 'email="a@b.co"'`. It holds: when nothing but `--wait` and other `--set` steps comes after it, a timer or `load` reaction that writes the variable later does not change the capture (it is set again before the capture, with a `set_overwritten` warning). |
 | `--now <ISO time>` | The time `now()` (and `nowMs()`) returns for the whole run: `--now 2026-11-13T09:00:00Z`. A clock or countdown a timer writes from `now()` shows that time; check before, during and after an event without a test-only variable. |
@@ -64,14 +67,15 @@ site: navigation may name a canvas of another page.
 | `--label <text>` | Add `-<text>` to the PNG names and write `diagnostics-<text>.json`, to keep states apart. |
 | `--compare <png or dir>` | Compare each capture with a reference screenshot: the file, or in a directory the PNG of the same size (`390x844`) whose name is exactly the screen and the state (the `--label`; without one, `default` or no state), the parts separated by `--`, `-`, `_`, `@` or `.`: `section--saved--390x844.png` for `--label saved`, never `section--saved-empty--390x844.png`. Writes `<png>.compare.png` (the capture left, the reference right) and `<png>.diff.png` (the capture dimmed, differing pixels red), and prints the share of matching pixels, the height difference, the first differing row and the vertical bands where they differ, each with the offset at which it matches the reference when it is only shifted. Images of different heights compare; a reference of another width is scaled to the capture's. The figures go to the diagnostics file's `comparisons`. |
 | `--compare-map <screen>=<name>` | Compare a screen under the name its reference has (`--compare-map home=index`), or a screen and state (`--compare-map home-empty=index--no-results`). Repeatable. |
-| `--dump-layout` | Also write `<png name>.layout.json`: every node's box on screen (`id`, `x`, `y`, `w`, `h`) and, for a node that draws text, the `text` it shows (what a value check reads). |
+| `--image-map <url prefix>=<folder>` | Read network images whose URL starts with the prefix from the folder (the rest of the URL, decoded and without its query, is the file's path there) and inline them, as local paths are: `--image-map https://cdn.example.com/art/=assets/art`. For documents that name published image URLs whose files you have (a reference app's assets). A mapped URL with no file there is `image_failed`, naming the path. For URLs no prefix covers (a storage bucket's tokens), name a table instead: `--image-map asset_urls.json=assets/art`, a JSON object pairing each file (relative to the folder) with its URL, either way round, as an asset upload writes it; a URL also matches without its query. Repeatable. |
+| `--dump-layout` | Also write `<png name>.layout.json`: every node's box on screen (`id`, `x`, `y`, `w`, `h`) and, for a node that draws text, the `text` it shows (what a value check reads). The node that has the keyboard focus has `"focused": true`. |
 | `--design-system <folder>` | With one document: render it with that design system's blocks and theme (a card expanded from the notation with `--design-system`). The tool makes the one-page site for it under `<out>/.site`. |
 | `--component <Type>` | Render one component of the site alone: once per preview (at its size), else with its defaults at each size. |
 | `--props '<json>'` | With `--component`: its parameters, as a call's `props`, at each size. A `variable` parameter becomes a page variable of the same name. |
 | `--slots <file>` | With `--component`: what the call passes, `{"children": [ids], "slots": {"name": id}, "nodes": {...}}`. |
 | `--validate-only` | Only validate. |
 
-Steps (`--tap`, `--hover`, `--focus`, `--unfocus`, `--key`, `--type`, `--set`, `--scroll`, `--drag`, `--navigate`, `--wait`) run in the order given, after the screen
+Steps (`--tap`, `--double-tap`, `--hover`, `--focus`, `--unfocus`, `--key`, `--type`, `--set`, `--scroll`, `--drag`, `--wheel`, `--pinch`, `--navigate`, `--wait`) run in the order given, after the screen
 has loaded and before the capture, at every size. Each step settles about a second; before the capture, number variables still counting (`animate`
 `animateTo` in a `load` reaction) are let arrive (up to 20 s), so counters show the numbers they end at. A step that names a node not shown at a size (hidden there by a
 media rule or a binding, or on another breakpoint's canvas) is skipped at that size, with one warning per size
@@ -91,9 +95,32 @@ tool/render/render.sh site/ --out shots/ --navigate 'speaker?id=ada' --tap bioMo
 tool/render/render.sh site/ --out shots/ --screen planner --drag stopHandle#0=0,120 --drag budget=80,0 --label dragged
 # The pricing toggle switched to annual, on desktop only.
 tool/render/render.sh site/ --out shots/ --screen home --sizes 1440x900 --tap billing-toggle --label annual
+# A photo viewer: opened at the third photo, zoomed by a double tap, then panned.
+tool/render/render.sh site/ --out shots/ --tap thumb#2 --double-tap viewerPhoto --drag viewerPhoto=-200,0 --label zoomed
 # A form's error state.
 tool/render/render.sh site/ --out shots/ --screen contact --tap submit --label errors
 ```
+
+## Where the focus is
+
+After the steps, when something has the keyboard focus (a `--key Tab`, a `--focus`, an overlay the keyboard opened),
+the run prints one line per capture and lists the same in the diagnostics file's `focus`:
+
+```
+focus on sortBtn "Sort" (ring shown) [screen overlays 1440x900]
+focus on MenuPopover1/sortPrice/item "Price" (ring shown), in the open overlay [screen overlays 1440x900]
+```
+
+```json
+"focus": [{"image": "overlays@1440x900-menu.png", "screen": "overlays", "size": "1440x900", "id": "item",
+           "path": "MenuPopover1/sortPrice/item", "ring": true, "text": "Price", "inOverlay": true}]
+```
+
+`id` is the node around the focused control or press target (`path` when it is inside a component instance), `text` what
+it is called, `ring` whether its focus ring is drawn (the keyboard brought the focus; a pointer never shows one) and
+`inOverlay` whether it is in an open dialog, sheet, popover or menu. No line: nothing has the focus (a page nobody
+tabbed into, an overlay a tap opened). To walk a page by keyboard, add one `--key Tab` per stop and read the line;
+`--key Tab --key Tab --key Enter` presses the second stop.
 
 ## What it reports
 

@@ -2,7 +2,7 @@
 # The compact notation's tools, runnable from a fresh checkout:
 #
 #   tool/notation/notation.sh prompt [--design-system <folder>]
-#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--out <file.json>]
+#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>]
 #   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
 #
 # It finds Flutter's dart, makes the SDK use the codelessly_api checked out

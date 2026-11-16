@@ -395,6 +395,7 @@ class RenderTextField extends RenderFieldFrame implements FieldEditorHost {
     adoptChild(_editable);
     final focusChanged = focusNode.onFocusChange;
     focusNode
+      ..isTextInput = true
       ..onActivate = null
       ..onKeyResult = _key
       ..onFocusChange = (on) {

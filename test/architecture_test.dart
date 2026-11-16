@@ -150,6 +150,10 @@ const Map<String, Map<String, String>> renderStatics = {
   'render/paint/path_paint.dart': {'_parsed': 'parsed SVG path data, by its text'},
   'render/paint/svg_path.dart': {'_cache': 'measured paths, by their data'},
   'render/convert.dart': {'_asked': 'FontDemand: the font families asked for, once each'},
+  // The modal overlays that are open, top last: which one holds the keyboard
+  // is a question about the whole app (a dialog over a menu over a page are
+  // three roots), as Flutter's FocusManager is one.
+  'render/controls/focus.dart': {'_open': 'ControlFocusLayer: the open modal overlays, in the order they opened'},
   // Debug counters, off unless a tool turns them on.
   'render/node_tree.dart': {
     'debugApplyCounts': 'applies per node id while NodeBox.debugCountApplies',
