@@ -1,0 +1,117 @@
+state tab="members"
+state q=""
+state roleF="All roles"
+state statusF="All statuses"
+state page=0
+state members=[{"name":"Maya Reyes","email":"maya@bastion.io","role":"Owner","status":"Active","tfa":true,"last":"Just now"},{"name":"Daniel Okafor","email":"daniel@bastion.io","role":"Admin","status":"Active","tfa":true,"last":"12 min ago"},{"name":"Priya Nair","email":"priya@bastion.io","role":"Admin","status":"Active","tfa":true,"last":"1 hour ago"},{"name":"Lucas Meyer","email":"lucas@bastion.io","role":"Editor","status":"Active","tfa":false,"last":"Yesterday"},{"name":"Sofia Rossi","email":"sofia@bastion.io","role":"Editor","status":"Invited","tfa":false,"last":"Never"},{"name":"Hiro Tanaka","email":"hiro@bastion.io","role":"Viewer","status":"Active","tfa":true,"last":"2 days ago"},{"name":"Amara Diallo","email":"amara@bastion.io","role":"Editor","status":"Suspended","tfa":false,"last":"3 weeks ago"},{"name":"Ethan Brooks","email":"ethan@bastion.io","role":"Viewer","status":"Active","tfa":true,"last":"5 days ago"},{"name":"Chloe Martin","email":"chloe@bastion.io","role":"Admin","status":"Active","tfa":true,"last":"3 hours ago"},{"name":"Noah Fischer","email":"noah@bastion.io","role":"Viewer","status":"Invited","tfa":false,"last":"Never"}]
+state invites=[{"email":"sofia@bastion.io","role":"Editor","sent":"Sent 2 days ago"},{"email":"noah@bastion.io","role":"Viewer","sent":"Sent 5 days ago"},{"email":"jon.weber@acme.com","role":"Admin","sent":"Sent today"}]
+App
+  Sidebar
+    Brand "Bastion" icon:"shield"
+    Text.eyebrow "WORKSPACE"
+    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
+    NavItem "Members" icon:"group" selected:=tab=="members" -> tab="members"
+    NavItem "Roles" icon:"admin_panel_settings" selected:=tab=="roles" -> tab="roles"
+    NavItem "Audit log" icon:"history" selected:=tab=="audit" -> tab="audit"
+    NavItem "Billing" icon:"credit_card" selected:=tab=="billing" -> tab="billing"
+    NavItem "Security" icon:"lock" selected:=tab=="security" -> tab="security"
+    Spacer grow
+    Row gap:10 middle
+      Avatar "Maya Reyes" size:36
+      Column
+        Text.strong "Maya Reyes"
+        Text.caption "Owner"
+  Main
+    Nav
+      Row gap:12 middle
+        Heading "Members" level:1
+        Badge.neutral "48"
+      Button "Invite member" icon:"person_add" -> emit invite
+    Column pad:24 gap:20 scroll
+      Grid cols:4 gap:16
+        Card gap:8
+          Row between middle
+            Text.muted "Members"
+            IconTile "group" size:32
+          Text.numberLarge "48"
+          Row gap:8 middle
+            Badge.success "+4"
+            Text.caption "this month"
+        Card gap:8
+          Row between middle
+            Text.muted "Pending invites"
+            IconTile "mail" size:32
+          Text.numberLarge "{length(invites)}"
+          Row gap:8 middle
+            Badge.warning "Waiting"
+            Text.caption "awaiting reply"
+        Card gap:8
+          Row between middle
+            Text.muted "Admins"
+            IconTile "admin_panel_settings" size:32
+          Text.numberLarge "5"
+          Row gap:8 middle
+            Badge.neutral "10%"
+            Text.caption "of all members"
+        Card gap:8
+          Row between middle
+            Text.muted "Two-factor on"
+            IconTile "verified_user" size:32
+          Text.numberLarge "92%"
+          Row gap:8 middle
+            Badge.success "+3%"
+            Text.caption "vs last month"
+      Card pad:16
+        Row gap:12 middle
+          Input "Search members" "Name or email" =q grow
+          Select =roleF items:["All roles","Owner","Admin","Editor","Viewer"] w:180
+          Select =statusF items:["All statuses","Active","Invited","Suspended"] w:180
+      Card pad:0 gap:0
+        Row pad:[20,12,20,12] gap:16 middle
+          Text.columnHead "MEMBER" w:240
+          Text.columnHead "EMAIL" grow
+          Text.columnHead "ROLE" w:130
+          Text.columnHead "STATUS" w:100
+          Text.columnHead "2FA" w:60
+          Text.columnHead "LAST ACTIVE" w:110
+          Spacer w:40
+        each row in members
+          if (q=="" || contains(lower(row.name),lower(q)) || contains(lower(row.email),lower(q))) && (roleF=="All roles" || row.role==roleF) && (statusF=="All statuses" || row.status==statusF)
+            Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
+              Row gap:10 middle w:240
+                Avatar "{row.name}" size:32
+                Text.strong "{row.name}"
+              Text.muted "{row.email}" grow
+              Select =row.role items:["Owner","Admin","Editor","Viewer"] w:130
+              Row w:100
+                if row.status=="Active"
+                  Badge.success "Active"
+                if row.status=="Invited"
+                  Badge.info "Invited"
+                if row.status=="Suspended"
+                  Badge.error "Suspended"
+              Row w:60
+                if row.tfa
+                  Icon "check_circle" color:#FF16A34A size:20
+                if !row.tfa
+                  Icon "warning" color:#FFD97706 size:20
+              Text.muted "{row.last}" w:110
+              IconButton "more_vert" w:40 -> toast "Actions for {row.name}"
+        Row between middle pad:[20,12,20,12] border-top:#FFE5E7EB
+          Text.muted "Showing {page*10+1}–{page*10+10} of 48 members"
+          Pager =page count:5
+      Card pad:0 gap:0
+        Row between middle pad:[20,16,20,16]
+          Column gap:2
+            Heading "Pending invites" level:3
+            Text.muted "People who have been invited but have not joined yet."
+          Badge.warning "{length(invites)} pending"
+        each inv in invites
+          Row pad:[20,0,20,0] gap:16 h:56 middle border-top:#FFE5E7EB
+            IconTile "mail" size:32
+            Column grow
+              Text.strong "{inv.email}"
+              Text.caption "{inv.sent}"
+            Badge.neutral "{inv.role}"
+            Button.outline "Resend" size:small -> toast "Invite resent to {inv.email}"
+            Button.ghost "Revoke" size:small -> invites=removeWhere(invites,i=>i.email==inv.email); toast "Invite revoked"

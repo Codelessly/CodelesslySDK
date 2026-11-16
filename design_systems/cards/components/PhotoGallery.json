@@ -101,7 +101,7 @@
    "name": "Grid",
    "size": [
     360,
-    130
+    350
    ],
    "props": {}
   },
@@ -172,7 +172,8 @@
     "data": "${props.photos}",
     "props.crossAxisCount": "${props.columns}",
     "visible": "${= props.layout == 'grid' && props.value <= 0}"
-   }
+   },
+   "media": [{"maxWidth": 699, "patch": {"props": {"crossAxisCount": 2}, "bind": {"props.crossAxisCount": null}}}]
   },
   "cell": {
    "type": "column",
@@ -233,7 +234,8 @@
    "bind": {
     "props.kind": "${item.kind}",
     "props.tone": "${= coalesce(item.tone, 'auto')}"
-   }
+   },
+   "media": [{"maxWidth": 699, "patch": {"layout": {"height": 140}}}]
   },
   "caption": {
    "type": "text",
@@ -255,7 +257,8 @@
     "height": {
      "hug": 0
     }
-   }
+   },
+   "media": [{"maxWidth": 699, "patch": {"props": {"maxLines": 2}}}]
   },
   "strip": {
    "type": "row",

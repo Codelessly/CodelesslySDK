@@ -1,0 +1,84 @@
+{
+ "schema": 3,
+ "id": "PageHeader",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "PageHeader",
+  "doc": "The header of an app screen's content: PageHeader \"Customers\" \"Everyone you sell to.\" count:\"248\" with the screen's actions (Button.outline, Button, a search Input) indented under it; they sit at the right level with the title and go under it when narrow.",
+  "children": "list",
+  "props": [
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Customers", "doc": "The screen's title.", "required": true},
+   {"key": "subtitle", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line under the title saying what the screen holds (empty: none)."},
+   {"key": "count", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "A count shown as a pill beside the title, as text (248, 1.2k; empty: none)."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Customers",
+   "size": [960, 96],
+   "props": {"title": "Customers", "subtitle": "Everyone you sell to, and how they're doing.", "count": "248"}
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "row",
+   "children": ["titles", "actions"],
+   "props": {"wrap": true, "crossAxisAlignment": "start", "spacing": 24, "runSpacing": 14},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 4, 0, 4]}
+  },
+  "titles": {
+   "type": "column",
+   "children": ["head", "subtitle"],
+   "props": {"crossAxisAlignment": "start", "spacing": 6},
+   "layout": {"width": {"fill": 300}, "basis": 240, "height": {"hug": 0}}
+  },
+  "head": {
+   "type": "row",
+   "children": ["title", "count"],
+   "props": {"crossAxisAlignment": "center", "spacing": 12},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "title": {
+   "type": "text",
+   "props": {"text": "${props.title}", "style": {"from": "titleWide", "color": "ink"}},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "count": {
+   "type": "row",
+   "children": ["countText"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [10, 3, 10, 3]},
+   "decoration": {"fills": [{"color": "tile"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 999},
+   "bind": {
+    "visible": "${= props.count != ''}",
+    "decoration.radius": "${theme.radii.chip}"
+   }
+  },
+  "countText": {
+   "type": "text",
+   "props": {
+    "text": "${props.count}",
+    "style": {"from": "strongWide", "fontSize": 13, "color": "inkSoft", "fontFeatures": ["tnum"]},
+    "maxLines": 1
+   },
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "subtitle": {
+   "type": "text",
+   "props": {"text": "${props.subtitle}", "style": {"from": "mutedWide", "color": "inkSoft"}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.subtitle != ''}"}
+  },
+  "actions": {
+   "type": "row",
+   "children": ["actionSlot"],
+   "props": {"wrap": true, "crossAxisAlignment": "center", "spacing": 10, "runSpacing": 10},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "actionSlot": {
+   "type": "slot",
+   "props": {"name": "children"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  }
+ }
+}

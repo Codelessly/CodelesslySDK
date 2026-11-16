@@ -1,0 +1,2781 @@
+{
+ "schema": 3,
+ "roots": [
+  "overview"
+ ],
+ "nodes": {
+  "overview": {
+   "type": "canvas",
+   "name": "Overview",
+   "slots": {
+    "body": "app"
+   },
+   "layout": {
+    "width": 1280,
+    "height": 800
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF6F7F9"
+     }
+    ]
+   }
+  },
+  "app": {
+   "type": "row",
+   "children": [
+    "sidebar",
+    "main"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1280
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "sidebar": {
+   "type": "column",
+   "children": [
+    "brand",
+    "navCaption",
+    "navList",
+    "sideSpacer",
+    "userCard"
+   ],
+   "layout": {
+    "width": 248,
+    "height": {
+     "fill": 800
+    },
+    "padding": [
+     16,
+     20,
+     16,
+     16
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 4
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": 72,
+       "padding": [
+        12,
+        20,
+        12,
+        16
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "brand": {
+   "type": "row",
+   "children": [
+    "logoMark",
+    "logoText"
+   ],
+   "layout": {
+    "width": {
+     "fill": 216
+    },
+    "height": {
+     "hug": 36
+    },
+    "padding": [
+     8,
+     0,
+     8,
+     20
+    ]
+   },
+   "props": {
+    "spacing": 10
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        0,
+        0,
+        0,
+        20
+       ]
+      },
+      "props": {
+       "mainAxisAlignment": "center"
+      }
+     }
+    }
+   ]
+  },
+  "logoMark": {
+   "type": "row",
+   "children": [
+    "logoIcon"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "type": "linear",
+      "begin": "topLeft",
+      "end": "bottomRight",
+      "stops": [
+       {
+        "position": 0,
+        "color": "#FF3B82F6"
+       },
+       {
+        "position": 1,
+        "color": "#FF1D4ED8"
+       }
+      ]
+     }
+    ]
+   }
+  },
+  "logoIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "anchor",
+    "color": "#FFFFFFFF",
+    "size": 18
+   }
+  },
+  "logoText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": {
+     "hug": 26
+    }
+   },
+   "props": {
+    "text": "Harbor",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 20,
+     "fontWeight": 700,
+     "letterSpacing": -0.4,
+     "color": "#FF0F172A"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "navCaption": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 216
+    },
+    "height": {
+     "hug": 16
+    },
+    "padding": [
+     12,
+     0,
+     12,
+     6
+    ]
+   },
+   "props": {
+    "text": "WORKSPACE",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "navList": {
+   "type": "listView",
+   "children": [
+    "navItem"
+   ],
+   "layout": {
+    "width": {
+     "fill": 216
+    },
+    "height": {
+     "hug": 264
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 4
+   },
+   "bind": {
+    "data": "${sections}"
+   }
+  },
+  "navItem": {
+   "type": "row",
+   "children": [
+    "navIcon",
+    "navLabel"
+   ],
+   "layout": {
+    "width": {
+     "fill": 216
+    },
+    "height": 40,
+    "padding": [
+     12,
+     0,
+     12,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 12
+   },
+   "tooltip": "${item.label}",
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   },
+   "inkWell": {
+    "hoverColor": "#0A0F172A",
+    "splashColor": "#142563EB"
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= section == item.label ? '#FFEFF6FF' : '#00FFFFFF'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "section",
+       "value": "${item.label}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": 0
+      },
+      "props": {
+       "mainAxisAlignment": "center"
+      }
+     }
+    }
+   ]
+  },
+  "navIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 20,
+    "height": 20
+   },
+   "props": {
+    "icon": "dashboard_outlined",
+    "size": 20,
+    "color": "#FF475569"
+   },
+   "bind": {
+    "props.icon": "${item.icon}",
+    "props.color": "${= section == item.label ? '#FF2563EB' : '#FF64748B'}"
+   }
+  },
+  "navLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 160
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "${item.label}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= section == item.label ? '#FF1D4ED8' : '#FF475569'}",
+    "props.style.fontWeight": "${= section == item.label ? 600 : 500}"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "sideSpacer": {
+   "type": "spacer"
+  },
+  "userCard": {
+   "type": "row",
+   "children": [
+    "avatar",
+    "userText",
+    "userMore"
+   ],
+   "layout": {
+    "width": {
+     "fill": 216
+    },
+    "height": {
+     "hug": 56
+    },
+    "padding": 10
+   },
+   "props": {
+    "spacing": 10
+   },
+   "decoration": {
+    "radius": 12,
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": 0
+      },
+      "props": {
+       "mainAxisAlignment": "center"
+      },
+      "decoration": {
+       "strokes": []
+      }
+     }
+    }
+   ]
+  },
+  "avatar": {
+   "type": "row",
+   "children": [
+    "avatarText"
+   ],
+   "layout": {
+    "width": 36,
+    "height": 36
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FFDBEAFE"
+     }
+    ]
+   }
+  },
+  "avatarText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 20
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "MO",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 700,
+     "color": "#FF1D4ED8"
+    }
+   }
+  },
+  "userText": {
+   "type": "column",
+   "children": [
+    "userName",
+    "userRole"
+   ],
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "userName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "Maya Okafor",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "userRole": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Operations lead",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "userMore": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "unfold_more",
+    "size": 18,
+    "color": "#FF94A3B8"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "main": {
+   "type": "column",
+   "children": [
+    "topbar",
+    "content"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1032
+    },
+    "height": {
+     "fill": 800
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   }
+  },
+  "topbar": {
+   "type": "row",
+   "children": [
+    "titleCol",
+    "topSpacer",
+    "rangeSeg",
+    "search",
+    "newBtn"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1032
+    },
+    "height": 72,
+    "padding": [
+     32,
+     0,
+     32,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        24,
+        0,
+        24,
+        0
+       ]
+      },
+      "props": {
+       "spacing": 12
+      }
+     }
+    }
+   ]
+  },
+  "titleCol": {
+   "type": "column",
+   "children": [
+    "pageTitle",
+    "pageSub"
+   ],
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 46
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 2
+   }
+  },
+  "pageTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "text": "Overview",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 24,
+     "fontWeight": 700,
+     "letterSpacing": -0.5,
+     "height": 1.15,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "pageSub": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 220
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF94A3B8"
+    }
+   },
+   "bind": {
+    "props.text": "${= 'All locations \u00b7 last ' + rangeLabel}"
+   }
+  },
+  "topSpacer": {
+   "type": "spacer"
+  },
+  "rangeSeg": {
+   "type": "row",
+   "children": [
+    "rangeList"
+   ],
+   "layout": {
+    "width": {
+     "hug": 176
+    },
+    "height": 40,
+    "padding": 4
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ]
+   }
+  },
+  "rangeList": {
+   "type": "listView",
+   "children": [
+    "rangeItem"
+   ],
+   "layout": {
+    "width": {
+     "hug": 164
+    },
+    "height": 32
+   },
+   "props": {
+    "scrollDirection": "horizontal",
+    "scrollable": false,
+    "spacing": 4
+   },
+   "bind": {
+    "data": "${ranges}"
+   }
+  },
+  "rangeItem": {
+   "type": "row",
+   "children": [
+    "rangeText"
+   ],
+   "layout": {
+    "width": 52,
+    "height": {
+     "fill": 32
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 8,
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= range == item ? '#FFFFFFFF' : '#00FFFFFF'}",
+    "decoration.strokes[0].color": "${= range == item ? '#FFE5E7EB' : '#00FFFFFF'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "range",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "rangeText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 28
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "fontWeight": 600,
+     "color": "#FF64748B"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= range == item ? '#FF0F172A' : '#FF64748B'}"
+   }
+  },
+  "search": {
+   "type": "textField",
+   "layout": {
+    "width": 240,
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "decoration": {
+     "hintText": "Search orders or customers",
+     "prefixIcon": {
+      "icon": "search",
+      "size": 18
+     }
+    }
+   },
+   "bind": {
+    "props.initialValue": "${query}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": "${result}"
+      }
+     ]
+    }
+   ],
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "newBtn": {
+   "type": "filledButton",
+   "layout": {
+    "width": 136,
+    "height": 40
+   },
+   "props": {
+    "label": "New order",
+    "icon": "add",
+    "style": {
+     "backgroundColor": "#FF2563EB",
+     "foregroundColor": "#FFFFFFFF",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "orders",
+       "op": "insert",
+       "index": 0,
+       "value": "${= {num: '#' + (10412 + length(orders)), customer: 'Draft customer', initials: 'DC', status: 'Pending', total: '$0.00', date: 'Just now'}}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "query",
+       "value": ""
+      },
+      {
+       "type": "showToast",
+       "message": "Draft order created"
+      }
+     ]
+    }
+   ]
+  },
+  "content": {
+   "type": "column",
+   "children": [
+    "kpiGrid",
+    "chartRow",
+    "ordersCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 1032
+    },
+    "height": {
+     "fill": 728
+    },
+    "padding": [
+     32,
+     28,
+     32,
+     32
+    ]
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 24,
+    "crossAxisAlignment": "stretch"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "padding": [
+        24,
+        24,
+        24,
+        24
+       ]
+      },
+      "props": {
+       "spacing": 16
+      }
+     }
+    }
+   ]
+  },
+  "kpiGrid": {
+   "type": "gridView",
+   "children": [
+    "kpiCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 968
+    },
+    "height": {
+     "hug": 140
+    }
+   },
+   "props": {
+    "physics": "never",
+    "minCrossAxisExtent": 210,
+    "shrinkWrapRows": true,
+    "crossAxisSpacing": 16,
+    "mainAxisSpacing": 16
+   },
+   "bind": {
+    "data": "${kpis}"
+   }
+  },
+  "kpiCard": {
+   "type": "column",
+   "children": [
+    "kpiTop",
+    "kpiValue",
+    "kpiFoot"
+   ],
+   "layout": {
+    "width": {
+     "fill": 230
+    },
+    "height": {
+     "hug": 140
+    },
+    "padding": 20
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 10
+   },
+   "decoration": {
+    "radius": 16,
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 24
+     }
+    ]
+   }
+  },
+  "kpiTop": {
+   "type": "row",
+   "children": [
+    "kpiLabel",
+    "kpiIconWrap"
+   ],
+   "layout": {
+    "width": {
+     "fill": 190
+    },
+    "height": {
+     "hug": 32
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "kpiLabel": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.label}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "kpiIconWrap": {
+   "type": "row",
+   "children": [
+    "kpiIcon"
+   ],
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "radius": 10,
+    "fills": [
+     {
+      "color": "#FFEFF6FF"
+     }
+    ]
+   }
+  },
+  "kpiIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 18,
+    "height": 18
+   },
+   "props": {
+    "icon": "payments_outlined",
+    "size": 18,
+    "color": "#FF2563EB"
+   },
+   "bind": {
+    "props.icon": "${item.icon}"
+   }
+  },
+  "kpiValue": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 190
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "text": "${item.value}",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 30,
+     "fontWeight": 700,
+     "letterSpacing": -0.6,
+     "height": 1.15,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "kpiFoot": {
+   "type": "row",
+   "children": [
+    "kpiPill",
+    "kpiNote"
+   ],
+   "layout": {
+    "width": {
+     "fill": 190
+    },
+    "height": {
+     "hug": 22
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "kpiPill": {
+   "type": "row",
+   "children": [
+    "pillIcon",
+    "pillText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 64
+    },
+    "height": 22,
+    "padding": [
+     6,
+     0,
+     8,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 2
+   },
+   "decoration": {
+    "radius": 11,
+    "fills": [
+     {
+      "color": "#FFDCFCE7"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item.good ? '#FFDCFCE7' : '#FFFEE2E2'}"
+   }
+  },
+  "pillIcon": {
+   "type": "icon",
+   "layout": {
+    "width": 14,
+    "height": 14
+   },
+   "props": {
+    "icon": "arrow_upward",
+    "size": 14,
+    "color": "#FF15803D"
+   },
+   "bind": {
+    "props.icon": "${= item.up ? 'arrow_upward' : 'arrow_downward'}",
+    "props.color": "${= item.good ? '#FF15803D' : '#FFB91C1C'}"
+   }
+  },
+  "pillText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 40
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.delta}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF15803D"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item.good ? '#FF15803D' : '#FFB91C1C'}"
+   }
+  },
+  "kpiNote": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF94A3B8"
+    }
+   },
+   "bind": {
+    "props.text": "${= 'vs prior ' + range}"
+   }
+  },
+  "chartRow": {
+   "type": "flex",
+   "children": [
+    "chartCard",
+    "channelCard"
+   ],
+   "layout": {
+    "width": {
+     "fill": 968
+    },
+    "height": {
+     "hug": 340
+    }
+   },
+   "props": {
+    "direction": "horizontal",
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "props": {
+       "direction": "vertical"
+      }
+     }
+    }
+   ]
+  },
+  "chartCard": {
+   "type": "column",
+   "children": [
+    "chartHead",
+    "revChart"
+   ],
+   "layout": {
+    "width": {
+     "fill": 632
+    },
+    "height": 348,
+    "padding": 24
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 16
+   },
+   "decoration": {
+    "radius": 16,
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 24
+     }
+    ]
+   }
+  },
+  "chartHead": {
+   "type": "row",
+   "children": [
+    "chartTitleCol",
+    "chartLegend"
+   ],
+   "layout": {
+    "width": {
+     "fill": 584
+    },
+    "height": {
+     "hug": 52
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "start"
+   }
+  },
+  "chartTitleCol": {
+   "type": "column",
+   "children": [
+    "chartTitle",
+    "chartFigure"
+   ],
+   "layout": {
+    "width": {
+     "hug": 260
+    },
+    "height": {
+     "hug": 52
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   }
+  },
+  "chartTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Revenue \u00b7 last 12 weeks",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "chartFigure": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 200
+    },
+    "height": {
+     "hug": 28
+    }
+   },
+   "props": {
+    "text": "$410,000",
+    "style": {
+     "fontFamily": "Inter Display",
+     "fontSize": 24,
+     "fontWeight": 700,
+     "letterSpacing": -0.5,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "chartLegend": {
+   "type": "row",
+   "children": [
+    "legendDot",
+    "legendText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 120
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "legendDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ]
+   }
+  },
+  "legendText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 100
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Gross revenue",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "revChart": {
+   "type": "chart",
+   "layout": {
+    "width": {
+     "fill": 584
+    },
+    "height": {
+     "fill": 236
+    }
+   },
+   "props": {
+    "chartType": "line",
+    "labelField": "label",
+    "series": [
+     {
+      "field": "revenue",
+      "name": "Revenue",
+      "kind": "area",
+      "color": "#FF2563EB",
+      "curved": true,
+      "endDot": true,
+      "strokeWidth": 2.5,
+      "fillOpacity": 0.12
+     }
+    ],
+    "minY": 20,
+    "maxY": 45,
+    "gridLines": 5,
+    "gridColor": "#FFEEF0F3",
+    "baselineColor": "#FFE5E7EB",
+    "axisLabelColor": "#FF94A3B8",
+    "axisFontFamily": "Inter",
+    "axisFontSize": 11,
+    "yAxisWidth": 44,
+    "yLabelPrefix": "$",
+    "yLabelSuffix": "k",
+    "tooltip": true,
+    "selectOnHover": true,
+    "tooltipColor": "#FF0F172A",
+    "tooltipTextColor": "#FFFFFFFF"
+   },
+   "bind": {
+    "props.data": "${weeks}"
+   }
+  },
+  "channelCard": {
+   "type": "column",
+   "children": [
+    "chHead",
+    "chList"
+   ],
+   "layout": {
+    "width": 320,
+    "height": 348,
+    "padding": 24
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 22
+   },
+   "decoration": {
+    "radius": 16,
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 24
+     }
+    ]
+   },
+   "media": [
+    {
+     "maxWidth": 1023,
+     "patch": {
+      "layout": {
+       "width": {
+        "fill": 648
+       },
+       "height": {
+        "hug": 320
+       }
+      }
+     }
+    }
+   ]
+  },
+  "chHead": {
+   "type": "column",
+   "children": [
+    "chTitle",
+    "chSub"
+   ],
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   }
+  },
+  "chTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Sales by channel",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "chSub": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "Share of revenue, this period",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "chList": {
+   "type": "listView",
+   "children": [
+    "chItem"
+   ],
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": {
+     "hug": 220
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 20
+   },
+   "bind": {
+    "data": "${channels}"
+   }
+  },
+  "chItem": {
+   "type": "column",
+   "children": [
+    "chRow",
+    "chBar"
+   ],
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": {
+     "hug": 36
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch",
+    "spacing": 8
+   }
+  },
+  "chRow": {
+   "type": "row",
+   "children": [
+    "chDot",
+    "chName",
+    "chAmt",
+    "chPct"
+   ],
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "spacing": 8
+   }
+  },
+  "chDot": {
+   "type": "box",
+   "layout": {
+    "width": 8,
+    "height": 8
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF2563EB"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.color}"
+   }
+  },
+  "chName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.name}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "chAmt": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 60
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.amount}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "chPct": {
+   "type": "text",
+   "layout": {
+    "width": 40,
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.pct}%",
+    "textAlign": "right",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "chBar": {
+   "type": "progressBar",
+   "layout": {
+    "width": {
+     "fill": 272
+    },
+    "height": 6
+   },
+   "props": {
+    "max": 100,
+    "color": "#FF2563EB",
+    "backgroundColor": "#FFF1F5F9",
+    "borderRadius": 3,
+    "exactFill": true,
+    "animate": true
+   },
+   "bind": {
+    "props.value": "${item.pct}",
+    "props.color": "${item.color}"
+   }
+  },
+  "ordersCard": {
+   "type": "column",
+   "children": [
+    "ordHead",
+    "ordColHead",
+    "ordList",
+    "ordEmpty"
+   ],
+   "layout": {
+    "width": {
+     "fill": 968
+    },
+    "height": {
+     "hug": 560
+    },
+    "padding": [
+     0,
+     0,
+     0,
+     8
+    ]
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "decoration": {
+    "radius": 16,
+    "clip": "antiAlias",
+    "fills": [
+     {
+      "color": "#FFFFFFFF"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#0A0F172A",
+      "offset": [
+       0,
+       8
+      ],
+      "blurRadius": 24
+     }
+    ]
+   }
+  },
+  "ordHead": {
+   "type": "row",
+   "children": [
+    "ordTitleCol",
+    "viewAll"
+   ],
+   "layout": {
+    "width": {
+     "fill": 968
+    },
+    "height": {
+     "hug": 72
+    },
+    "padding": [
+     24,
+     20,
+     16,
+     16
+    ]
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween"
+   }
+  },
+  "ordTitleCol": {
+   "type": "column",
+   "children": [
+    "ordTitle",
+    "ordSub"
+   ],
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 40
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start",
+    "spacing": 4
+   }
+  },
+  "ordTitle": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 160
+    },
+    "height": {
+     "hug": 20
+    }
+   },
+   "props": {
+    "text": "Latest orders",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 15,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "ordSub": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 240
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF94A3B8"
+    }
+   },
+   "bind": {
+    "props.text": "${= 'Showing ' + length(shownOrders) + ' of ' + length(filtered) + (query == '' ? ' orders' : ' matching \"' + query + '\"')}"
+   }
+  },
+  "viewAll": {
+   "type": "textButton",
+   "layout": {
+    "width": 132,
+    "height": 36
+   },
+   "props": {
+    "label": "View all",
+    "icon": "arrow_forward",
+    "style": {
+     "foregroundColor": "#FF2563EB",
+     "textStyle": {
+      "fontFamily": "Inter",
+      "fontSize": 14,
+      "fontWeight": 600
+     }
+    }
+   },
+   "bind": {
+    "props.label": "${= showAll ? 'Show latest' : 'View all'}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "showAll",
+       "op": "toggle"
+      }
+     ]
+    }
+   ]
+  },
+  "ordColHead": {
+   "type": "row",
+   "children": [
+    "hNum",
+    "hCust",
+    "hStatus",
+    "hTotal",
+    "hDate"
+   ],
+   "layout": {
+    "width": {
+     "fill": 968
+    },
+    "height": 40,
+    "padding": [
+     24,
+     0,
+     24,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#FFF8FAFC"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "#FFE5E7EB"
+     }
+    ],
+    "strokeSides": "topBottom"
+   }
+  },
+  "hNum": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "ORDER",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "hCust": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 16
+    },
+    "flex": 3
+   },
+   "props": {
+    "text": "CUSTOMER",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "hStatus": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "STATUS",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "hTotal": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "TOTAL",
+    "textAlign": "right",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "hDate": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 16
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "DATE",
+    "textAlign": "right",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "letterSpacing": 0.8,
+     "color": "#FF94A3B8"
+    }
+   }
+  },
+  "ordList": {
+   "type": "listView",
+   "children": [
+    "ordRow"
+   ],
+   "layout": {
+    "width": {
+     "fill": 968
+    },
+    "height": {
+     "hug": 448
+    }
+   },
+   "props": {
+    "scrollable": false
+   },
+   "bind": {
+    "data": "${shownOrders}"
+   }
+  },
+  "ordRow": {
+   "type": "row",
+   "children": [
+    "cNum",
+    "cCust",
+    "cStatus",
+    "cTotal",
+    "cDate"
+   ],
+   "layout": {
+    "width": {
+     "fill": 968
+    },
+    "height": 56,
+    "padding": [
+     24,
+     0,
+     24,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 16
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ],
+    "strokeSides": "bottom"
+   },
+   "inkWell": {
+    "hoverColor": "#08000000"
+   }
+  },
+  "cNum": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 18
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "${item.num}",
+    "style": {
+     "fontFamily": "JetBrains Mono",
+     "fontSize": 13,
+     "fontWeight": 500,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "cCust": {
+   "type": "row",
+   "children": [
+    "cAvatar",
+    "cName"
+   ],
+   "layout": {
+    "width": {
+     "fill": 200
+    },
+    "height": {
+     "hug": 28
+    },
+    "flex": 3
+   },
+   "props": {
+    "spacing": 10
+   }
+  },
+  "cAvatar": {
+   "type": "row",
+   "children": [
+    "cInitials"
+   ],
+   "layout": {
+    "width": 28,
+    "height": 28
+   },
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FFF1F5F9"
+     }
+    ]
+   }
+  },
+  "cInitials": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 16
+    },
+    "height": {
+     "hug": 14
+    }
+   },
+   "props": {
+    "text": "${item.initials}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 11,
+     "fontWeight": 600,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "cName": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 150
+    },
+    "height": {
+     "hug": 18
+    }
+   },
+   "props": {
+    "text": "${item.customer}",
+    "maxLines": 1,
+    "overflow": "ellipsis",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 500,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "cStatus": {
+   "type": "row",
+   "children": [
+    "tag"
+   ],
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 24
+    },
+    "flex": 2
+   }
+  },
+  "tag": {
+   "type": "row",
+   "children": [
+    "tagDot",
+    "tagText"
+   ],
+   "layout": {
+    "width": {
+     "hug": 80
+    },
+    "height": 24,
+    "padding": [
+     8,
+     0,
+     10,
+     0
+    ]
+   },
+   "props": {
+    "spacing": 6
+   },
+   "decoration": {
+    "radius": 12,
+    "fills": [
+     {
+      "color": "#FFDCFCE7"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= tagBg(item.status)}"
+   }
+  },
+  "tagDot": {
+   "type": "box",
+   "layout": {
+    "width": 6,
+    "height": 6
+   },
+   "decoration": {
+    "shape": "circle",
+    "fills": [
+     {
+      "color": "#FF15803D"
+     }
+    ]
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= tagFg(item.status)}"
+   }
+  },
+  "tagText": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 50
+    },
+    "height": {
+     "hug": 16
+    }
+   },
+   "props": {
+    "text": "${item.status}",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 12,
+     "fontWeight": 600,
+     "color": "#FF15803D"
+    }
+   },
+   "bind": {
+    "props.style.color": "${= tagFg(item.status)}"
+   }
+  },
+  "cTotal": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 18
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "${item.total}",
+    "textAlign": "right",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "fontWeight": 600,
+     "color": "#FF0F172A"
+    }
+   }
+  },
+  "cDate": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 120
+    },
+    "height": {
+     "hug": 18
+    },
+    "flex": 2
+   },
+   "props": {
+    "text": "${item.date}",
+    "textAlign": "right",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 13,
+     "color": "#FF475569"
+    }
+   }
+  },
+  "ordEmpty": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 968
+    },
+    "height": {
+     "hug": 56
+    },
+    "padding": [
+     24,
+     20,
+     24,
+     20
+    ]
+   },
+   "props": {
+    "text": "No orders match your search.",
+    "textAlign": "center",
+    "style": {
+     "fontFamily": "Inter",
+     "fontSize": 14,
+     "color": "#FF94A3B8"
+    }
+   },
+   "bind": {
+    "visible": "${= length(filtered) == 0}"
+   }
+  }
+ },
+ "variables": {
+  "overview": [
+   {
+    "name": "section",
+    "type": "text",
+    "value": "Overview"
+   },
+   {
+    "name": "range",
+    "type": "text",
+    "value": "30d"
+   },
+   {
+    "name": "query",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "showAll",
+    "type": "boolean",
+    "value": false
+   },
+   {
+    "name": "ranges",
+    "type": "list",
+    "value": [
+     "7d",
+     "30d",
+     "90d"
+    ]
+   },
+   {
+    "name": "rangeLabel",
+    "type": "text",
+    "formula": "range == '7d' ? '7 days' : (range == '90d' ? '90 days' : '30 days')"
+   },
+   {
+    "name": "sections",
+    "type": "list",
+    "value": [
+     {
+      "label": "Overview",
+      "icon": "space_dashboard_outlined"
+     },
+     {
+      "label": "Orders",
+      "icon": "receipt_long_outlined"
+     },
+     {
+      "label": "Inventory",
+      "icon": "inventory_2_outlined"
+     },
+     {
+      "label": "Customers",
+      "icon": "group_outlined"
+     },
+     {
+      "label": "Reports",
+      "icon": "insert_chart_outlined"
+     },
+     {
+      "label": "Settings",
+      "icon": "settings_outlined"
+     }
+    ]
+   },
+   {
+    "name": "kpis7",
+    "type": "list",
+    "value": [
+     {
+      "label": "Revenue",
+      "value": "$31,240",
+      "delta": "+2.4%",
+      "up": true,
+      "good": true,
+      "icon": "payments_outlined"
+     },
+     {
+      "label": "Orders",
+      "value": "468",
+      "delta": "+1.2%",
+      "up": true,
+      "good": true,
+      "icon": "shopping_bag_outlined"
+     },
+     {
+      "label": "Returns",
+      "value": "2.1%",
+      "delta": "-0.3%",
+      "up": false,
+      "good": true,
+      "icon": "assignment_return_outlined"
+     },
+     {
+      "label": "Avg. order",
+      "value": "$66.75",
+      "delta": "+1.1%",
+      "up": true,
+      "good": true,
+      "icon": "sell_outlined"
+     }
+    ]
+   },
+   {
+    "name": "kpis30",
+    "type": "list",
+    "value": [
+     {
+      "label": "Revenue",
+      "value": "$128,400",
+      "delta": "+8.2%",
+      "up": true,
+      "good": true,
+      "icon": "payments_outlined"
+     },
+     {
+      "label": "Orders",
+      "value": "1,942",
+      "delta": "+3.1%",
+      "up": true,
+      "good": true,
+      "icon": "shopping_bag_outlined"
+     },
+     {
+      "label": "Returns",
+      "value": "2.4%",
+      "delta": "-0.6%",
+      "up": false,
+      "good": true,
+      "icon": "assignment_return_outlined"
+     },
+     {
+      "label": "Avg. order",
+      "value": "$66.10",
+      "delta": "+1.9%",
+      "up": true,
+      "good": true,
+      "icon": "sell_outlined"
+     }
+    ]
+   },
+   {
+    "name": "kpis90",
+    "type": "list",
+    "value": [
+     {
+      "label": "Revenue",
+      "value": "$372,900",
+      "delta": "+11.6%",
+      "up": true,
+      "good": true,
+      "icon": "payments_outlined"
+     },
+     {
+      "label": "Orders",
+      "value": "5,604",
+      "delta": "+6.8%",
+      "up": true,
+      "good": true,
+      "icon": "shopping_bag_outlined"
+     },
+     {
+      "label": "Returns",
+      "value": "2.7%",
+      "delta": "+0.2%",
+      "up": true,
+      "good": false,
+      "icon": "assignment_return_outlined"
+     },
+     {
+      "label": "Avg. order",
+      "value": "$66.54",
+      "delta": "+4.4%",
+      "up": true,
+      "good": true,
+      "icon": "sell_outlined"
+     }
+    ]
+   },
+   {
+    "name": "kpis",
+    "type": "list",
+    "formula": "range == '7d' ? kpis7 : (range == '90d' ? kpis90 : kpis30)"
+   },
+   {
+    "name": "weeks",
+    "type": "list",
+    "value": [
+     {
+      "label": "W1",
+      "revenue": 28.4
+     },
+     {
+      "label": "W2",
+      "revenue": 30.1
+     },
+     {
+      "label": "W3",
+      "revenue": 29.6
+     },
+     {
+      "label": "W4",
+      "revenue": 31.8
+     },
+     {
+      "label": "W5",
+      "revenue": 33.2
+     },
+     {
+      "label": "W6",
+      "revenue": 32.5
+     },
+     {
+      "label": "W7",
+      "revenue": 34.9
+     },
+     {
+      "label": "W8",
+      "revenue": 36.1
+     },
+     {
+      "label": "W9",
+      "revenue": 35.4
+     },
+     {
+      "label": "W10",
+      "revenue": 37.8
+     },
+     {
+      "label": "W11",
+      "revenue": 39.2
+     },
+     {
+      "label": "W12",
+      "revenue": 41.0
+     }
+    ]
+   },
+   {
+    "name": "channels",
+    "type": "list",
+    "value": [
+     {
+      "name": "Online store",
+      "pct": 48,
+      "amount": "$61.6k",
+      "color": "#FF2563EB"
+     },
+     {
+      "name": "Marketplace",
+      "pct": 27,
+      "amount": "$34.7k",
+      "color": "#FF60A5FA"
+     },
+     {
+      "name": "Wholesale",
+      "pct": 16,
+      "amount": "$20.5k",
+      "color": "#FF14B8A6"
+     },
+     {
+      "name": "Retail POS",
+      "pct": 9,
+      "amount": "$11.6k",
+      "color": "#FFF59E0B"
+     }
+    ]
+   },
+   {
+    "name": "orders",
+    "type": "list",
+    "value": [
+     {
+      "num": "#10412",
+      "customer": "Lena Whitford",
+      "initials": "LW",
+      "status": "Paid",
+      "total": "$184.20",
+      "date": "Jun 11, 09:42"
+     },
+     {
+      "num": "#10411",
+      "customer": "Northwind Supply",
+      "initials": "NS",
+      "status": "Shipped",
+      "total": "$1,260.00",
+      "date": "Jun 11, 08:15"
+     },
+     {
+      "num": "#10410",
+      "customer": "Arjun Mehta",
+      "initials": "AM",
+      "status": "Pending",
+      "total": "$72.50",
+      "date": "Jun 10, 19:03"
+     },
+     {
+      "num": "#10409",
+      "customer": "Sofia Lindqvist",
+      "initials": "SL",
+      "status": "Paid",
+      "total": "$96.00",
+      "date": "Jun 10, 16:27"
+     },
+     {
+      "num": "#10408",
+      "customer": "Kofi Mensah",
+      "initials": "KM",
+      "status": "Refunded",
+      "total": "$58.90",
+      "date": "Jun 10, 13:51"
+     },
+     {
+      "num": "#10407",
+      "customer": "Bayside Grocers",
+      "initials": "BG",
+      "status": "Shipped",
+      "total": "$842.30",
+      "date": "Jun 10, 10:08"
+     },
+     {
+      "num": "#10406",
+      "customer": "Hannah Cole",
+      "initials": "HC",
+      "status": "Paid",
+      "total": "$129.75",
+      "date": "Jun 9, 21:34"
+     },
+     {
+      "num": "#10405",
+      "customer": "Diego Ram\u00edrez",
+      "initials": "DR",
+      "status": "Pending",
+      "total": "$44.00",
+      "date": "Jun 9, 18:12"
+     },
+     {
+      "num": "#10404",
+      "customer": "Mei Tanaka",
+      "initials": "MT",
+      "status": "Paid",
+      "total": "$210.40",
+      "date": "Jun 9, 14:45"
+     },
+     {
+      "num": "#10403",
+      "customer": "Cedar & Co.",
+      "initials": "CC",
+      "status": "Shipped",
+      "total": "$615.00",
+      "date": "Jun 9, 11:20"
+     },
+     {
+      "num": "#10402",
+      "customer": "Omar Haddad",
+      "initials": "OH",
+      "status": "Refunded",
+      "total": "$39.99",
+      "date": "Jun 8, 17:56"
+     },
+     {
+      "num": "#10401",
+      "customer": "Grace Okonkwo",
+      "initials": "GO",
+      "status": "Paid",
+      "total": "$88.60",
+      "date": "Jun 8, 09:30"
+     }
+    ]
+   },
+   {
+    "name": "filtered",
+    "type": "list",
+    "formula": "filter(orders, o => contains(lower(o.customer), lower(query)) || contains(lower(o.num), lower(query)))"
+   },
+   {
+    "name": "shownOrders",
+    "type": "list",
+    "formula": "showAll ? filtered : slice(filtered, 0, 8)"
+   },
+   {
+    "name": "tagBg",
+    "type": "text",
+    "parameters": [
+     "s"
+    ],
+    "formula": "s == 'Paid' ? '#FFDCFCE7' : (s == 'Shipped' ? '#FFDBEAFE' : (s == 'Pending' ? '#FFFEF3C7' : '#FFFEE2E2'))"
+   },
+   {
+    "name": "tagFg",
+    "type": "text",
+    "parameters": [
+     "s"
+    ],
+    "formula": "s == 'Paid' ? '#FF15803D' : (s == 'Shipped' ? '#FF1D4ED8' : (s == 'Pending' ? '#FFB45309' : '#FFB91C1C'))"
+   }
+  ]
+ }
+}

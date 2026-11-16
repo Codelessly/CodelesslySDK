@@ -171,6 +171,7 @@
   },
   "label": {
    "type": "text",
+   "media": [{"maxWidth": 1023, "patch": {"props": {"style": {"from": "rowTitle", "fontSize": 13}}}}],
    "props": {
     "text": "${props.label}",
     "style": "rowTitle"

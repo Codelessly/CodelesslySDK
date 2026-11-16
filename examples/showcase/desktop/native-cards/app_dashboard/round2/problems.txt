@@ -1,0 +1,2 @@
+ERROR   render_exception [doc screen overview 1280x800] node channelCard
+        Node "channelCard" (column): its content overflows its bottom by 13 px. Its height is fixed at 344 and its content needs 357 (chanHead 39, mixBar 8, chanList 200, chanSpacer 0, chanNote 18, with its padding and spacing): a text in it takes more lines here than where that height was chosen (a longer item of a list, a narrower column). Let it grow with its content ({"hug": 344}), make it at least 357, or cap the text (maxLines with an ellipsis).

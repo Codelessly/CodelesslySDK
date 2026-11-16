@@ -1,0 +1,14 @@
+ERROR   unknown_node_key [doc] /nodes/nav/margin
+        A node has no "margin"; it belongs in "layout.margin". Did you mean "layout.margin"?
+ERROR   unknown_node_key [doc] /nodes/writeRev/margin
+        A node has no "margin"; it belongs in "layout.margin". Did you mean "layout.margin"?
+WARNING fit_not_allowed [doc] /nodes/navItem/layout/height
+        hug is not honored here: Items in a list always fill across it.
+WARNING fit_not_allowed [doc] /nodes/crumb/layout/height
+        fixed is not honored here: Items in a list always fill across it.
+WARNING fit_not_allowed [doc] /nodes/star/layout/height
+        fixed is not honored here: Items in a list always fill across it.
+WARNING fit_not_allowed [doc] /nodes/rsI/layout/height
+        fixed is not honored here: Items in a list always fill across it.
+WARNING fit_not_allowed [doc] /nodes/rvS/layout/height
+        fixed is not honored here: Items in a list always fill across it.

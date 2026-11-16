@@ -1,0 +1,77 @@
+{
+ "schema": 3,
+ "id": "LogoStrip",
+ "roots": ["band"],
+ "widget": {
+  "type": "LogoStrip",
+  "doc": "A band of up to eight customer wordmarks under a hero, written directly under Page: LogoStrip \"Trusted by independent hotels\" names:[\"Harbor House\",\"The Larkspur\"] icons:[\"anchor_rounded\",\"local_florist_rounded\"] (icons optional, one Material icon per name; empty: names alone), evenly spread and wrapping when the window is narrow.",
+  "props": [
+   {"key": "label", "type": {"kind": "string", "flutter": "String"}, "default": "Trusted by teams everywhere", "doc": "The small line over the names (empty: none)."},
+   {"key": "names", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["Northwind", "Acme", "Globex", "Initech", "Umbrella"], "doc": "The customers, one wordmark each (the first eight are shown).", "required": true},
+   {"key": "icons", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": [], "doc": "A Material icon per name, drawn as its small mark (optional)."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Hotels",
+   "size": [1280, 190],
+   "props": {
+    "label": "Trusted by independent hotels",
+    "names": ["Harbor House", "The Larkspur", "Salt & Pine", "Casa Marisol", "Northgate Inn"],
+    "icons": ["anchor_rounded", "local_florist_rounded", "park_rounded", "wb_sunny_rounded", "cottage_rounded"]
+   }
+  }
+ ],
+ "nodes": {
+  "band": {
+   "type": "column",
+   "children": ["wrap"],
+   "props": {"crossAxisAlignment": "stretch"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [32, 52, 32, 56]},
+   "decoration": {"fills": [{"color": "band"}], "strokes": [{"color": "line"}], "strokeWidth": 1},
+   "bind": {"decoration.fills[0].color": "${theme.colors.band}", "decoration.strokes[0].color": "${theme.colors.line}"}
+  },
+  "wrap": {
+   "type": "column",
+   "children": ["label", "row"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 26},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "label": {
+   "type": "text",
+   "props": {"text": "${props.label}", "style": {"from": "smallWide", "color": "inkSoft"}, "textAlign": "center"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.label != ''}"}
+  },
+  "row": {
+   "type": "row",
+   "children": ["m0", "m1", "m2", "m3", "m4", "m5", "m6", "m7"],
+   "props": {"wrap": true, "spacing": 16, "runSpacing": 20, "mainAxisAlignment": "spaceEvenly", "crossAxisAlignment": "center"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "m0": {"type": "row", "children": ["i0", "t0"], "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 8}, "layout": {"width": {"fill": 1}, "basis": 170, "height": 32}, "bind": {"visible": "${= length(props.names) > 0}"}},
+  "i0": {"type": "icon", "props": {"icon": "circle", "size": 20, "color": "inkSoft"}, "layout": {"width": 20, "height": 20}, "bind": {"visible": "${= length(props.icons) > 0 && at(props.icons, 0) != ''}", "props.icon": "${= length(props.icons) > 0 ? at(props.icons, 0) : 'circle'}"}},
+  "t0": {"type": "text", "props": {"text": "${= length(props.names) > 0 ? at(props.names, 0) : ''}", "style": {"from": "headingWide", "fontSize": 19, "fontWeight": 700, "letterSpacing": -0.4, "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "m1": {"type": "row", "children": ["i1", "t1"], "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 8}, "layout": {"width": {"fill": 1}, "basis": 170, "height": 32}, "bind": {"visible": "${= length(props.names) > 1}"}},
+  "i1": {"type": "icon", "props": {"icon": "circle", "size": 20, "color": "inkSoft"}, "layout": {"width": 20, "height": 20}, "bind": {"visible": "${= length(props.icons) > 1 && at(props.icons, 1) != ''}", "props.icon": "${= length(props.icons) > 1 ? at(props.icons, 1) : 'circle'}"}},
+  "t1": {"type": "text", "props": {"text": "${= length(props.names) > 1 ? at(props.names, 1) : ''}", "style": {"from": "headingWide", "fontSize": 19, "fontWeight": 700, "letterSpacing": -0.4, "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "m2": {"type": "row", "children": ["i2", "t2"], "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 8}, "layout": {"width": {"fill": 1}, "basis": 170, "height": 32}, "bind": {"visible": "${= length(props.names) > 2}"}},
+  "i2": {"type": "icon", "props": {"icon": "circle", "size": 20, "color": "inkSoft"}, "layout": {"width": 20, "height": 20}, "bind": {"visible": "${= length(props.icons) > 2 && at(props.icons, 2) != ''}", "props.icon": "${= length(props.icons) > 2 ? at(props.icons, 2) : 'circle'}"}},
+  "t2": {"type": "text", "props": {"text": "${= length(props.names) > 2 ? at(props.names, 2) : ''}", "style": {"from": "headingWide", "fontSize": 19, "fontWeight": 700, "letterSpacing": -0.4, "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "m3": {"type": "row", "children": ["i3", "t3"], "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 8}, "layout": {"width": {"fill": 1}, "basis": 170, "height": 32}, "bind": {"visible": "${= length(props.names) > 3}"}},
+  "i3": {"type": "icon", "props": {"icon": "circle", "size": 20, "color": "inkSoft"}, "layout": {"width": 20, "height": 20}, "bind": {"visible": "${= length(props.icons) > 3 && at(props.icons, 3) != ''}", "props.icon": "${= length(props.icons) > 3 ? at(props.icons, 3) : 'circle'}"}},
+  "t3": {"type": "text", "props": {"text": "${= length(props.names) > 3 ? at(props.names, 3) : ''}", "style": {"from": "headingWide", "fontSize": 19, "fontWeight": 700, "letterSpacing": -0.4, "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "m4": {"type": "row", "children": ["i4", "t4"], "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 8}, "layout": {"width": {"fill": 1}, "basis": 170, "height": 32}, "bind": {"visible": "${= length(props.names) > 4}"}},
+  "i4": {"type": "icon", "props": {"icon": "circle", "size": 20, "color": "inkSoft"}, "layout": {"width": 20, "height": 20}, "bind": {"visible": "${= length(props.icons) > 4 && at(props.icons, 4) != ''}", "props.icon": "${= length(props.icons) > 4 ? at(props.icons, 4) : 'circle'}"}},
+  "t4": {"type": "text", "props": {"text": "${= length(props.names) > 4 ? at(props.names, 4) : ''}", "style": {"from": "headingWide", "fontSize": 19, "fontWeight": 700, "letterSpacing": -0.4, "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "m5": {"type": "row", "children": ["i5", "t5"], "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 8}, "layout": {"width": {"fill": 1}, "basis": 170, "height": 32}, "bind": {"visible": "${= length(props.names) > 5}"}},
+  "i5": {"type": "icon", "props": {"icon": "circle", "size": 20, "color": "inkSoft"}, "layout": {"width": 20, "height": 20}, "bind": {"visible": "${= length(props.icons) > 5 && at(props.icons, 5) != ''}", "props.icon": "${= length(props.icons) > 5 ? at(props.icons, 5) : 'circle'}"}},
+  "t5": {"type": "text", "props": {"text": "${= length(props.names) > 5 ? at(props.names, 5) : ''}", "style": {"from": "headingWide", "fontSize": 19, "fontWeight": 700, "letterSpacing": -0.4, "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "m6": {"type": "row", "children": ["i6", "t6"], "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 8}, "layout": {"width": {"fill": 1}, "basis": 170, "height": 32}, "bind": {"visible": "${= length(props.names) > 6}"}},
+  "i6": {"type": "icon", "props": {"icon": "circle", "size": 20, "color": "inkSoft"}, "layout": {"width": 20, "height": 20}, "bind": {"visible": "${= length(props.icons) > 6 && at(props.icons, 6) != ''}", "props.icon": "${= length(props.icons) > 6 ? at(props.icons, 6) : 'circle'}"}},
+  "t6": {"type": "text", "props": {"text": "${= length(props.names) > 6 ? at(props.names, 6) : ''}", "style": {"from": "headingWide", "fontSize": 19, "fontWeight": 700, "letterSpacing": -0.4, "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "m7": {"type": "row", "children": ["i7", "t7"], "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center", "spacing": 8}, "layout": {"width": {"fill": 1}, "basis": 170, "height": 32}, "bind": {"visible": "${= length(props.names) > 7}"}},
+  "i7": {"type": "icon", "props": {"icon": "circle", "size": 20, "color": "inkSoft"}, "layout": {"width": 20, "height": 20}, "bind": {"visible": "${= length(props.icons) > 7 && at(props.icons, 7) != ''}", "props.icon": "${= length(props.icons) > 7 ? at(props.icons, 7) : 'circle'}"}},
+  "t7": {"type": "text", "props": {"text": "${= length(props.names) > 7 ? at(props.names, 7) : ''}", "style": {"from": "headingWide", "fontSize": 19, "fontWeight": 700, "letterSpacing": -0.4, "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}}
+ }
+}

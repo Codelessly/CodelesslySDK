@@ -1,0 +1,132 @@
+state team="All"
+state place="All"
+state teams=["Engineering","Science","Design","Sales"]
+state roles=[{"id":1,"title":"Senior Data Engineer","team":"Engineering","place":"Remote","kind":"Full-time"},{"id":2,"title":"Platform Engineer","team":"Engineering","place":"Boston","kind":"Full-time"},{"id":3,"title":"Geospatial Software Engineer","team":"Engineering","place":"Berlin","kind":"Contract"},{"id":4,"title":"Climate Scientist, Hydrology","team":"Science","place":"London","kind":"Full-time"},{"id":5,"title":"Remote Sensing Researcher","team":"Science","place":"Remote","kind":"Full-time"},{"id":6,"title":"Atmospheric Modeler","team":"Science","place":"Boston","kind":"Contract"},{"id":7,"title":"Product Designer","team":"Design","place":"Remote","kind":"Full-time"},{"id":8,"title":"Data Visualization Designer","team":"Design","place":"Berlin","kind":"Contract"},{"id":9,"title":"Account Executive, Public Sector","team":"Sales","place":"London","kind":"Full-time"},{"id":10,"title":"Solutions Consultant","team":"Sales","place":"Boston","kind":"Full-time"}]
+Page
+  Nav
+    Brand "Fathom" icon:"public"
+    Row gap:4
+      Link "Product"
+      Link "Customers"
+      Link "Company"
+      Link "Careers"
+    Button.outline "Sign in" -> emit signIn
+  Section
+    Column gap:20 maxw:760
+      Text.eyebrow "CAREERS"
+      Heading "Work on the planet's hardest data" level:1
+      Text.lead "Fathom turns satellite, sensor and model output into climate data that cities, insurers and scientists can trust. We are a small, curious team that cares about getting the numbers right and putting them to use."
+      Row gap:12 middle
+        Text.numberLarge "{length(roles)}"
+        Text.muted "open roles across 4 teams"
+  Section tint
+    Column gap:12
+      Text.eyebrow "OUR VALUES"
+      Heading "How we work" level:2
+    Grid cols:4 gap:24
+      Column gap:8
+        IconTile "visibility"
+        Heading "Rigor" level:3
+        Text.muted "We show our uncertainty and check our work in the open."
+      Column gap:8
+        IconTile "eco"
+        Heading "Impact" level:3
+        Text.muted "Every project should help someone make a better climate decision."
+      Column gap:8
+        IconTile "groups"
+        Heading "Candor" level:3
+        Text.muted "We say what we think, kindly, and change our minds when the data does."
+      Column gap:8
+        IconTile "explore"
+        Heading "Curiosity" level:3
+        Text.muted "The best questions come from people who keep asking why."
+  Section
+    Column gap:12
+      Text.eyebrow "OPEN ROLES"
+      Heading "Find your team" level:2
+    Row between middle
+      Row gap:8
+        ChoiceChip "All" selected:=team=='All' -> team='All'
+        ChoiceChip "Engineering" selected:=team=='Engineering' -> team='Engineering'
+        ChoiceChip "Science" selected:=team=='Science' -> team='Science'
+        ChoiceChip "Design" selected:=team=='Design' -> team='Design'
+        ChoiceChip "Sales" selected:=team=='Sales' -> team='Sales'
+      Row gap:8 middle
+        Text.muted "Place"
+        Select =place items:["All","Remote","Boston","London","Berlin"]
+    each t in teams
+      if (team=='All'||team==t)&&count(roles,r=>r.team==t&&(place=='All'||r.place==place))>0
+        Card pad:0 gap:0
+          Row between middle pad:[20,14,20,14]
+            Heading "{t}" level:3
+            Badge.neutral "{count(roles,r=>r.team==t&&(place=='All'||r.place==place))}"
+          each r in filter(roles,x=>x.team==t&&(place=='All'||x.place==place))
+            Row pad:[20,0,20,0] gap:16 h:60 middle border-top:#FFE5E7EB
+              Column grow gap:2
+                Text.strong "{r.title}"
+                Text.caption "{r.team}"
+              Row gap:6 middle w:140
+                Icon "place" size:18
+                Text.muted "{r.place}"
+              Badge.neutral "{r.kind}" w:90
+              Link "Apply" -> emit apply r.id
+    if count(roles,r=>(team=='All'||r.team==team)&&(place=='All'||r.place==place))==0
+      EmptyState "No roles match" "Try another team or place." icon:"search_off"
+  Section tint
+    Column gap:12
+      Text.eyebrow "BENEFITS"
+      Heading "Taken care of, so you can do your best work" level:2
+    Grid cols:3 gap:24
+      Row gap:12 top
+        IconTile "health_and_safety"
+        Column grow gap:4
+          Heading "Health cover" level:3
+          Text.muted "Medical, dental and vision for you and your family."
+      Row gap:12 top
+        IconTile "beach_access"
+        Column grow gap:4
+          Heading "Generous time off" level:3
+          Text.muted "Five weeks of leave plus public holidays."
+      Row gap:12 top
+        IconTile "home_work"
+        Column grow gap:4
+          Heading "Work from anywhere" level:3
+          Text.muted "Remote-first, with offices in Boston, London and Berlin."
+      Row gap:12 top
+        IconTile "school"
+        Column grow gap:4
+          Heading "Learning budget" level:3
+          Text.muted "$2,000 a year for books, courses and conferences."
+      Row gap:12 top
+        IconTile "child_care"
+        Column grow gap:4
+          Heading "Parental leave" level:3
+          Text.muted "Twenty paid weeks for every new parent."
+      Row gap:12 top
+        IconTile "savings"
+        Column grow gap:4
+          Heading "Equity and retirement" level:3
+          Text.muted "Shares in Fathom and a matched retirement plan."
+  Section center
+    Column gap:16 center
+      Heading "Don't see a fitting role?" level:2
+      Text.lead "Tell us what you would build with climate data. We read every note."
+      Button "Send us a note" size:large -> emit openApplication
+  Footer
+    Row between top
+      Column gap:8
+        Text.strong "Fathom"
+        Text.muted "Climate data you can trust."
+      Row gap:48 top
+        Column gap:8
+          Text.strong "Product"
+          Text.muted "Overview"
+          Text.muted "Pricing"
+        Column gap:8
+          Text.strong "Company"
+          Text.muted "About"
+          Text.muted "Careers"
+        Column gap:8
+          Text.strong "Contact"
+          Text.muted "hello@fathom.example"
+      Text.muted "© 2026 Fathom"

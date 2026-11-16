@@ -1,0 +1,1747 @@
+{
+ "schema": 3,
+ "roots": [
+  "app_board"
+ ],
+ "nodes": {
+  "app_board": {
+   "type": "canvas",
+   "slots": {
+    "body": "row1"
+   },
+   "layout": {
+    "width": 1280.0,
+    "height": {
+     "fill": 800.0
+    }
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "page"
+     }
+    ]
+   }
+  },
+  "row1": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column1",
+    "column6"
+   ]
+  },
+  "column1": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "height": {
+     "fill": 0
+    },
+    "width": {
+     "fill": 0
+    }
+   },
+   "props": {
+    "scrollable": true,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row2",
+    "divider2",
+    "column2"
+   ]
+  },
+  "row2": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "padding": [
+     24,
+     14,
+     24,
+     14
+    ],
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center",
+    "spacing": 24
+   },
+   "children": [
+    "row3",
+    "row4"
+   ]
+  },
+  "row3": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text1",
+    "divider1",
+    "text2"
+   ]
+  },
+  "text1": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong",
+     "color": "#FF4F46E5"
+    },
+    "text": "Lanes"
+   }
+  },
+  "divider1": {
+   "type": "divider",
+   "layout": {
+    "height": 20,
+    "width": {
+     "hug": 0
+    }
+   }
+  },
+  "text2": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "heading2"
+    },
+    "text": "Website relaunch"
+   }
+  },
+  "row4": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row5",
+    "textField1",
+    "filledButton1"
+   ]
+  },
+  "row5": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "Avatar1",
+    "Avatar2",
+    "Avatar3",
+    "Avatar4",
+    "Avatar5"
+   ]
+  },
+  "Avatar1": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Maya Reyes",
+    "size": "small"
+   }
+  },
+  "Avatar2": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Jonas Berg",
+    "size": "small"
+   }
+  },
+  "Avatar3": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Priya Shah",
+    "size": "small"
+   }
+  },
+  "Avatar4": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Leo Martins",
+    "size": "small"
+   }
+  },
+  "Avatar5": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "name": "Aiko Tanaka",
+    "size": "small"
+   }
+  },
+  "textField1": {
+   "type": "textField",
+   "layout": {
+    "width": 220,
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "decoration": {
+     "labelText": "Filter",
+     "hintText": "Filter tasks"
+    }
+   },
+   "bind": {
+    "props.initialValue": "${q}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "changed"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "q",
+       "value": "${result}"
+      }
+     ]
+    }
+   ]
+  },
+  "filledButton1": {
+   "type": "filledButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "New task"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "newTask"
+      }
+     ]
+    }
+   ]
+  },
+  "divider2": {
+   "type": "divider",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   }
+  },
+  "column2": {
+   "type": "column",
+   "layout": {
+    "padding": 24,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row6"
+   ]
+  },
+  "row6": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 16,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "listView1"
+   ]
+  },
+  "listView1": {
+   "type": "gridView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisCount": 1,
+    "crossAxisSpacing": 16,
+    "shrinkWrapRows": true,
+    "physics": "never"
+   },
+   "bind": {
+    "data": "${cols}",
+    "props.crossAxisCount": "${= max(1, length(cols))}"
+   },
+   "children": [
+    "listView1Item"
+   ]
+  },
+  "listView1Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "stretch"
+   },
+   "children": [
+    "column3"
+   ]
+  },
+  "column3": {
+   "type": "column",
+   "layout": {
+    "padding": 12,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "pageFill"
+     }
+    ],
+    "radius": 12
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "drop"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "tasks",
+       "value": "${= updateWhere(tasks,x=>x.id==result.data,x=>with(x,\"col\",item.id))}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "activity",
+       "value": "${= concat([{\"task\":result.data,\"who\":\"You\",\"what\":\"moved this to \"+item.name,\"when\":\"Just now\"}],activity)}"
+      }
+     ]
+    }
+   ],
+   "dropTarget": {
+    "accepts": [
+     "task"
+    ]
+   },
+   "children": [
+    "row7",
+    "listView2"
+   ]
+  },
+  "row7": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row8",
+    "iconButton1"
+   ]
+  },
+  "row8": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 8,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "text3",
+    "CountBadge1"
+   ]
+  },
+  "text3": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "${item.name}"
+   }
+  },
+  "CountBadge1": {
+   "type": "CountBadge",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 16.0
+   },
+   "bind": {
+    "props.count": "${= count(tasks,x=>x.col==item.id&&contains(lower(x.title),lower(q)))}"
+   }
+  },
+  "iconButton1": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "add"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "addTask",
+       "value": "${item.id}"
+      }
+     ]
+    }
+   ]
+  },
+  "listView2": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 10
+   },
+   "bind": {
+    "data": "${tasks}"
+   },
+   "children": [
+    "listView2Item"
+   ]
+  },
+  "listView2Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "column4"
+   ]
+  },
+  "column4": {
+   "type": "column",
+   "layout": {
+    "padding": 18,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "card"
+     }
+    ],
+    "strokes": [
+     {
+      "color": "primaryBorder"
+     }
+    ],
+    "radius": 18,
+    "effects": [
+     {
+      "type": "dropShadow",
+      "color": "#14000000",
+      "offset": [
+       0,
+       18
+      ],
+      "spreadRadius": -14,
+      "blurRadius": 40
+     },
+     {
+      "type": "dropShadow",
+      "color": "#0D000000",
+      "offset": [
+       0,
+       2
+      ],
+      "blurRadius": 6
+     }
+    ]
+   },
+   "bind": {
+    "decoration.strokes[0].color": "${= sel==item.id?\"#FF4F46E5\":theme.colors.primaryBorder}",
+    "visible": "${= item.col==item.id && contains(lower(item.title),lower(q))}"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": "${= item.id}"
+      }
+     ]
+    }
+   ],
+   "draggable": {
+    "group": "task",
+    "data": "${item.id}"
+   },
+   "children": [
+    "text4",
+    "row9",
+    "row10"
+   ]
+  },
+  "text4": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "strong"
+    },
+    "text": "${item.title}"
+   }
+  },
+  "row9": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column5"
+   ]
+  },
+  "column5": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     8,
+     2,
+     8,
+     2
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${item.tint}"
+   },
+   "children": [
+    "text5"
+   ]
+  },
+  "text5": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption",
+     "fontWeight": 600
+    },
+    "text": "${item.label}"
+   },
+   "bind": {
+    "props.style.color": "${item.ink}"
+   }
+  },
+  "row10": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row11",
+    "Avatar6"
+   ]
+  },
+  "row11": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 12,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "row12",
+    "row13"
+   ]
+  },
+  "row12": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon1",
+    "text6"
+   ]
+  },
+  "icon1": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "event",
+    "size": 14
+   }
+  },
+  "text6": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${item.due}"
+   }
+  },
+  "row13": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 4,
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "icon2",
+    "text7"
+   ]
+  },
+  "icon2": {
+   "type": "icon",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "chat_bubble_outline",
+    "size": 14
+   }
+  },
+  "text7": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${item.comments}"
+   }
+  },
+  "Avatar6": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "xs"
+   },
+   "bind": {
+    "props.name": "${item.who}"
+   }
+  },
+  "column6": {
+   "type": "column",
+   "layout": {
+    "width": 340,
+    "height": {
+     "fill": 0
+    },
+    "padding": 16
+   },
+   "props": {
+    "scrollable": true,
+    "spacing": 14,
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeSides": "right"
+   },
+   "bind": {
+    "visible": "${= sel!=\"\"}"
+   },
+   "children": [
+    "row14",
+    "row15",
+    "Details1",
+    "SectionLabel1",
+    "Paragraph1",
+    "Checklist1",
+    "SectionLabel2",
+    "listView3",
+    "row17"
+   ]
+  },
+  "row14": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "mainAxisAlignment": "spaceBetween",
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text8",
+    "iconButton2"
+   ]
+  },
+  "text8": {
+   "type": "text",
+   "layout": {
+    "squeezable": true,
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "titleWide"
+    },
+    "text": "${= find(tasks,x=>x.id==sel).title}"
+   }
+  },
+  "iconButton2": {
+   "type": "iconButton",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "icon": "close"
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "sel",
+       "value": ""
+      }
+     ]
+    }
+   ]
+  },
+  "row15": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "center"
+   },
+   "children": [
+    "column7"
+   ]
+  },
+  "column7": {
+   "type": "column",
+   "layout": {
+    "padding": [
+     8,
+     2,
+     8,
+     2
+    ],
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ],
+    "radius": 10
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= find(tasks,x=>x.id==sel).tint}"
+   },
+   "children": [
+    "text9"
+   ]
+  },
+  "text9": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption",
+     "fontWeight": 600
+    },
+    "text": "${= find(tasks,x=>x.id==sel).label}"
+   },
+   "bind": {
+    "props.style.color": "${= find(tasks,x=>x.id==sel).ink}"
+   }
+  },
+  "Details1": {
+   "type": "Details",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.rows": "${= [[\"Status\",find(cols,c=>c.id==find(tasks,x=>x.id==sel).col).name],[\"Assignee\",find(tasks,x=>x.id==sel).who],[\"Due\",find(tasks,x=>x.id==sel).due],[\"Comments\",\"\"+find(tasks,x=>x.id==sel).comments]]}"
+   }
+  },
+  "SectionLabel1": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Description"
+   }
+  },
+  "Paragraph1": {
+   "type": "Paragraph",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.text": "${= find(tasks,x=>x.id==sel).desc}"
+   }
+  },
+  "Checklist1": {
+   "type": "Checklist",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "title": "Checklist",
+    "value": "ticked"
+   },
+   "bind": {
+    "props.items": "${= find(tasks,x=>x.id==sel).steps}"
+   }
+  },
+  "SectionLabel2": {
+   "type": "SectionLabel",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "label": "Activity"
+   }
+  },
+  "listView3": {
+   "type": "listView",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "scrollable": false,
+    "spacing": 14
+   },
+   "bind": {
+    "data": "${activity}"
+   },
+   "children": [
+    "listView3Item"
+   ]
+  },
+  "listView3Item": {
+   "type": "column",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "row16"
+   ]
+  },
+  "row16": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "bind": {
+    "visible": "${= item.task==sel}"
+   },
+   "children": [
+    "Avatar7",
+    "column8"
+   ]
+  },
+  "Avatar7": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "small"
+   },
+   "bind": {
+    "props.name": "${item.who}"
+   }
+  },
+  "column8": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text10",
+    "text11"
+   ]
+  },
+  "text10": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "${item.who} ${item.what}"
+   }
+  },
+  "text11": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "${item.when}"
+   }
+  },
+  "row17": {
+   "type": "row",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 10,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "Avatar8",
+    "column9"
+   ]
+  },
+  "Avatar8": {
+   "type": "Avatar",
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "size": "small"
+   },
+   "bind": {
+    "props.name": "${= find(tasks,x=>x.id==sel).who}"
+   }
+  },
+  "column9": {
+   "type": "column",
+   "layout": {
+    "flex": 1,
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "spacing": 2,
+    "crossAxisAlignment": "start"
+   },
+   "children": [
+    "text12",
+    "text13"
+   ]
+  },
+  "text12": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "small"
+    },
+    "text": "${= find(tasks,x=>x.id==sel).who} was assigned"
+   }
+  },
+  "text13": {
+   "type": "text",
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "props": {
+    "style": {
+     "from": "caption"
+    },
+    "text": "When created"
+   }
+  }
+ },
+ "variables": {
+  "app_board": [
+   {
+    "name": "q",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "sel",
+    "type": "text",
+    "value": "t6"
+   },
+   {
+    "name": "ticked",
+    "type": "list",
+    "value": [
+     "Moodboard approved",
+     "Desktop layout in Figma"
+    ]
+   },
+   {
+    "name": "cols",
+    "type": "list",
+    "value": [
+     {
+      "id": "backlog",
+      "name": "Backlog"
+     },
+     {
+      "id": "progress",
+      "name": "In progress"
+     },
+     {
+      "id": "review",
+      "name": "In review"
+     },
+     {
+      "id": "done",
+      "name": "Done"
+     }
+    ]
+   },
+   {
+    "name": "tasks",
+    "type": "list",
+    "value": [
+     {
+      "id": "t1",
+      "col": "backlog",
+      "title": "Audit legacy blog redirects",
+      "label": "SEO",
+      "tint": "#FFDCFCE7",
+      "ink": "#FF15803D",
+      "due": "Apr 18",
+      "comments": 2,
+      "who": "Leo Martins",
+      "desc": "List every old blog URL and map it to its new location so no traffic is lost at launch.",
+      "steps": [
+       "Export old URL list",
+       "Map to new slugs",
+       "Write 301 rules",
+       "Test on staging"
+      ]
+     },
+     {
+      "id": "t2",
+      "col": "backlog",
+      "title": "Draft pricing page copy",
+      "label": "Content",
+      "tint": "#FFFEF3C7",
+      "ink": "#FFB45309",
+      "due": "Apr 21",
+      "comments": 4,
+      "who": "Priya Shah",
+      "desc": "Rewrite the pricing page around the three new plans, with a short FAQ.",
+      "steps": [
+       "Plan names agreed",
+       "Feature table copy",
+       "FAQ answers",
+       "Legal review"
+      ]
+     },
+     {
+      "id": "t3",
+      "col": "backlog",
+      "title": "Cookie banner compliance check",
+      "label": "Legal",
+      "tint": "#FFF3F4F6",
+      "ink": "#FF374151",
+      "due": "Apr 24",
+      "comments": 1,
+      "who": "Aiko Tanaka",
+      "desc": "Make sure consent is asked before any tracking script loads.",
+      "steps": [
+       "List all scripts",
+       "Pick consent tool",
+       "Configure categories",
+       "Sign-off from legal"
+      ]
+     },
+     {
+      "id": "t4",
+      "col": "backlog",
+      "title": "Set up analytics events",
+      "label": "Dev",
+      "tint": "#FFDBEAFE",
+      "ink": "#FF1D4ED8",
+      "due": "Apr 25",
+      "comments": 0,
+      "who": "Jonas Berg",
+      "desc": "Track sign-ups, demo requests and pricing toggles on the new site.",
+      "steps": [
+       "Event naming plan",
+       "Tag manager setup",
+       "Implement events",
+       "Verify in dashboard"
+      ]
+     },
+     {
+      "id": "t5",
+      "col": "backlog",
+      "title": "Collect customer testimonials",
+      "label": "Content",
+      "tint": "#FFFEF3C7",
+      "ink": "#FFB45309",
+      "due": "Apr 30",
+      "comments": 3,
+      "who": "Maya Reyes",
+      "desc": "Gather six short quotes with photos and logos from happy customers.",
+      "steps": [
+       "Shortlist customers",
+       "Send requests",
+       "Edit quotes",
+       "Get approvals"
+      ]
+     },
+     {
+      "id": "t6",
+      "col": "progress",
+      "title": "Homepage hero redesign",
+      "label": "Design",
+      "tint": "#FFEDE9FE",
+      "ink": "#FF6D28D9",
+      "due": "Apr 12",
+      "comments": 7,
+      "who": "Maya Reyes",
+      "desc": "A new hero with a product shot, one clear headline and a single call to action.",
+      "steps": [
+       "Moodboard approved",
+       "Desktop layout in Figma",
+       "Mobile layout",
+       "Hand-off to dev"
+      ]
+     },
+     {
+      "id": "t7",
+      "col": "progress",
+      "title": "Migrate CMS content models",
+      "label": "Dev",
+      "tint": "#FFDBEAFE",
+      "ink": "#FF1D4ED8",
+      "due": "Apr 15",
+      "comments": 5,
+      "who": "Jonas Berg",
+      "desc": "Move pages, posts and authors to the new CMS schema.",
+      "steps": [
+       "Define new models",
+       "Write migration script",
+       "Dry run",
+       "Run on production"
+      ]
+     },
+     {
+      "id": "t8",
+      "col": "progress",
+      "title": "Navigation IA rework",
+      "label": "Design",
+      "tint": "#FFEDE9FE",
+      "ink": "#FF6D28D9",
+      "due": "Apr 16",
+      "comments": 3,
+      "who": "Aiko Tanaka",
+      "desc": "Simplify the top navigation to five items and a clear Product menu.",
+      "steps": [
+       "Card sorting results",
+       "New sitemap",
+       "Menu wireframes",
+       "Usability test"
+      ]
+     },
+     {
+      "id": "t9",
+      "col": "review",
+      "title": "Product page templates",
+      "label": "Dev",
+      "tint": "#FFDBEAFE",
+      "ink": "#FF1D4ED8",
+      "due": "Apr 10",
+      "comments": 6,
+      "who": "Leo Martins",
+      "desc": "Reusable template for each product with features, screenshots and pricing.",
+      "steps": [
+       "Template built",
+       "CMS fields wired",
+       "Responsive check",
+       "Design review"
+      ]
+     },
+     {
+      "id": "t10",
+      "col": "review",
+      "title": "Accessibility pass on forms",
+      "label": "QA",
+      "tint": "#FFFFE4E6",
+      "ink": "#FFBE123C",
+      "due": "Apr 11",
+      "comments": 2,
+      "who": "Priya Shah",
+      "desc": "Check labels, focus order, contrast and error messages on all forms.",
+      "steps": [
+       "Keyboard navigation",
+       "Screen reader labels",
+       "Contrast check",
+       "Error messages"
+      ]
+     },
+     {
+      "id": "t11",
+      "col": "done",
+      "title": "Brand color tokens",
+      "label": "Design",
+      "tint": "#FFEDE9FE",
+      "ink": "#FF6D28D9",
+      "due": "Mar 28",
+      "comments": 4,
+      "who": "Maya Reyes",
+      "desc": "Color palette exported as design tokens for the codebase.",
+      "steps": [
+       "Palette final",
+       "Token names",
+       "Export to JSON",
+       "Docs page"
+      ]
+     },
+     {
+      "id": "t12",
+      "col": "done",
+      "title": "Hosting & CDN setup",
+      "label": "Dev",
+      "tint": "#FFDBEAFE",
+      "ink": "#FF1D4ED8",
+      "due": "Mar 30",
+      "comments": 1,
+      "who": "Jonas Berg",
+      "desc": "Production hosting, CDN and SSL configured for the new domain.",
+      "steps": [
+       "Choose provider",
+       "DNS records",
+       "SSL certificates",
+       "Cache rules"
+      ]
+     },
+     {
+      "id": "t13",
+      "col": "done",
+      "title": "Sitemap draft",
+      "label": "SEO",
+      "tint": "#FFDCFCE7",
+      "ink": "#FF15803D",
+      "due": "Apr 2",
+      "comments": 2,
+      "who": "Leo Martins",
+      "desc": "First version of the sitemap shared with the team.",
+      "steps": [
+       "Page inventory",
+       "Group sections",
+       "Review with team",
+       "Publish draft"
+      ]
+     },
+     {
+      "id": "t14",
+      "col": "done",
+      "title": "Kickoff workshop notes",
+      "label": "Content",
+      "tint": "#FFFEF3C7",
+      "ink": "#FFB45309",
+      "due": "Mar 25",
+      "comments": 0,
+      "who": "Priya Shah",
+      "desc": "Notes and decisions from the relaunch kickoff workshop.",
+      "steps": [
+       "Write up notes",
+       "List decisions",
+       "Share with team",
+       "Archive recording"
+      ]
+     }
+    ]
+   },
+   {
+    "name": "activity",
+    "type": "list",
+    "value": [
+     {
+      "task": "t6",
+      "who": "Maya Reyes",
+      "what": "moved this to In progress",
+      "when": "2h ago"
+     },
+     {
+      "task": "t6",
+      "who": "Jonas Berg",
+      "what": "commented: hero image needs a dark variant",
+      "when": "Yesterday"
+     },
+     {
+      "task": "t6",
+      "who": "Aiko Tanaka",
+      "what": "created this task",
+      "when": "Apr 3"
+     },
+     {
+      "task": "t9",
+      "who": "Leo Martins",
+      "what": "moved this to In review",
+      "when": "1h ago"
+     },
+     {
+      "task": "t7",
+      "who": "Jonas Berg",
+      "what": "added a checklist",
+      "when": "3h ago"
+     },
+     {
+      "task": "t10",
+      "who": "Priya Shah",
+      "what": "moved this to In review",
+      "when": "Today"
+     }
+    ]
+   }
+  ]
+ }
+}

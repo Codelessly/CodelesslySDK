@@ -1,0 +1,13 @@
+ERROR   [site_landing] unknown_prop [site_landing.doc] /nodes/filledButton2/props/size
+ERROR   [site_landing] unknown_prop [site_landing.doc] /nodes/outlinedButton1/props/size
+ERROR   [site_landing] unknown_prop [site_landing.doc] /nodes/filledButton3/props/size
+ERROR   [site_landing] unknown_prop [site_landing.doc] /nodes/outlinedButton2/props/size
+ERROR   [site_product] unknown_prop [site_product.doc] /nodes/filledButton1/props/size
+ERROR   [site_product] unknown_prop [site_product.doc] /nodes/outlinedButton1/props/size
+WARNING [site_product] missing_glyph [site_product.doc screen site_product 1280x800] node text5
+ERROR   [site_blog] invalid_enum [site_blog.doc] /nodes/textField1/props/keyboardType
+WARNING [site_blog] layout_field_ignored [site_blog.doc] /nodes/column14/layout/y
+WARNING [app_dashboard] fit_not_allowed [app_dashboard.doc] /nodes/spacer1/layout/height
+WARNING [app_inbox] fit_not_allowed [app_inbox.doc] /nodes/spacer1/layout/height
+WARNING [app_settings] fit_not_allowed [app_settings.doc] /nodes/spacer1/layout/height
+WARNING [app_table] fit_not_allowed [app_table.doc] /nodes/spacer1/layout/height

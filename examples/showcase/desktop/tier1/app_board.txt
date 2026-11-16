@@ -1,0 +1,69 @@
+state tasks=[{"id":1,"title":"Audit current sitemap","label":"Content","color":"#FF2F9E44","due":"Mar 18","comments":3,"who":"Maya Reyes","desc":"List every live page and decide whether to keep, merge or retire it.","col":"backlog"},{"id":2,"title":"Define new colour palette","label":"Design","color":"#FF7048E8","due":"Mar 20","comments":5,"who":"Jon Park","desc":"Pick primary, accent and neutral colours that pass contrast checks.","col":"backlog"},{"id":3,"title":"Set up staging environment","label":"Dev","color":"#FF1C7ED6","due":"Mar 22","comments":1,"who":"Ana Ortiz","desc":"Create a staging site that mirrors production and deploys on merge.","col":"backlog"},{"id":4,"title":"Write pricing page copy","label":"Content","color":"#FF2F9E44","due":"Mar 25","comments":2,"who":"Lee Chen","desc":"Draft plain-language copy for the three plans and the FAQ.","col":"backlog"},{"id":5,"title":"Fix broken footer links","label":"Bug","color":"#FFE03131","due":"Mar 15","comments":0,"who":"Ana Ortiz","desc":"Several footer links return 404 after the last migration.","col":"backlog"},{"id":6,"title":"Design homepage hero","label":"Design","color":"#FF7048E8","due":"Mar 14","comments":8,"who":"Jon Park","desc":"Hero with headline, product image and a single call to action.","col":"progress"},{"id":7,"title":"Build responsive nav","label":"Dev","color":"#FF1C7ED6","due":"Mar 16","comments":4,"who":"Ana Ortiz","desc":"Navigation that collapses to a menu under 800px wide.","col":"progress"},{"id":8,"title":"Migrate blog posts","label":"Content","color":"#FF2F9E44","due":"Mar 19","comments":2,"who":"Maya Reyes","desc":"Move 42 posts to the new template and keep their URLs.","col":"progress"},{"id":9,"title":"Contact form validation","label":"Dev","color":"#FF1C7ED6","due":"Mar 12","comments":6,"who":"Lee Chen","desc":"Validate fields inline and show clear error messages.","col":"review"},{"id":10,"title":"Icon set for features","label":"Design","color":"#FF7048E8","due":"Mar 13","comments":3,"who":"Jon Park","desc":"Twelve line icons in a single style, exported as SVG.","col":"review"},{"id":11,"title":"Kickoff and goals","label":"Content","color":"#FF2F9E44","due":"Mar 4","comments":9,"who":"Maya Reyes","desc":"Agree the goals, scope and timeline with stakeholders.","col":"done"},{"id":12,"title":"Choose CMS","label":"Dev","color":"#FF1C7ED6","due":"Mar 6","comments":7,"who":"Ana Ortiz","desc":"Compare three options and pick one the team can maintain.","col":"done"},{"id":13,"title":"Wireframes for key pages","label":"Design","color":"#FF7048E8","due":"Mar 9","comments":4,"who":"Jon Park","desc":"Low-fidelity wireframes for home, pricing and contact.","col":"done"},{"id":14,"title":"Fix 404 on old URLs","label":"Bug","color":"#FFE03131","due":"Mar 10","comments":1,"who":"Lee Chen","desc":"Add redirects for the old URLs found in the audit.","col":"done"}]
+state cols=[{"id":"backlog","name":"Backlog"},{"id":"progress","name":"In progress"},{"id":"review","name":"In review"},{"id":"done","name":"Done"}]
+state newTask={"id":0,"title":"Untitled task","label":"Design","color":"#FF7048E8","due":"TBD","comments":0,"who":"Maya Reyes","desc":"No description yet.","col":"backlog"}
+state activity=[{"who":"Jon Park","what":"Jon commented: looks good so far","when":"2 hours ago"},{"who":"Maya Reyes","what":"Maya moved this card","when":"Yesterday"},{"who":"Ana Ortiz","what":"Ana changed the due date","when":"2 days ago"},{"who":"Lee Chen","what":"Lee created this task","when":"Last week"}]
+state sel=""
+state done=[]
+state q=""
+App
+  Main
+    Nav
+      Row gap:12 center
+        Text.eyebrow "LANES"
+        Heading "Website relaunch" level:1
+      Row gap:12 center
+        Row gap:4
+          Avatar "Maya Reyes" size:32
+          Avatar "Jon Park" size:32
+          Avatar "Ana Ortiz" size:32
+          Avatar "Lee Chen" size:32
+          Avatar "Sam Patel" size:32
+        Input "Filter tasks" =q w:220
+        Button "New task" -> tasks=append(tasks,with(newTask,"id",100+length(tasks)))
+    Row gap:16 pad:24 grow top
+      each c in cols
+        Column grow gap:10 pad:12 radius:10 fill:#FFF3F4F6 drop:task -> tasks=updateWhere(tasks,t=>t.id==result.data,t=>with(t,"col",c.id))
+          Row between center
+            Row gap:8 center
+              Text.strong "{c.name}"
+              CountBadge count:=count(tasks,x=>x.col==c.id) showZero:true
+            IconButton "add" -> tasks=append(tasks,with(with(newTask,"id",100+length(tasks)),"col",c.id))
+          each t in filter(tasks,x=>x.col==c.id&&contains(lower(x.title),lower(q)))
+            Card gap:8 drag:task(t.id) border:=sel!=""&&sel.id==t.id?"#FF3B5BDB":"#FFE0E0E0" -> sel=t; done=[]
+              Box fill:=t.color radius:4 pad:[6,2,6,2]
+                Text.caption "{t.label}" color:#FFFFFFFF
+              Text.strong "{t.title}"
+              Row between center
+                Row gap:12 center
+                  Row gap:4 center
+                    Icon "event"
+                    Text.caption "{t.due}"
+                  Row gap:4 center
+                    Icon "chat_bubble_outline"
+                    Text.caption "{t.comments}"
+                Avatar "{t.who}" size:24
+  if sel!=""
+    Pane w:360 pad:16 gap:12 border-left:#FFE0E0E0
+      Row between center
+        Box fill:=sel.color radius:4 pad:[6,2,6,2]
+          Text.caption "{sel.label}" color:#FFFFFFFF
+        IconButton "close" -> sel=""
+      Heading "{sel.title}" level:3
+      Row gap:16 center
+        Row gap:4 center
+          Icon "event"
+          Text.muted "Due {sel.due}"
+        Row gap:8 center
+          Avatar "{sel.who}" size:24
+          Text.muted "{sel.who}"
+      Text.eyebrow "DESCRIPTION"
+      Text "{sel.desc}"
+      Checklist "Checklist" =done items:["Draft the first version","Get feedback from the team","Make revisions","Final sign-off"]
+      Text.eyebrow "ACTIVITY"
+      Column gap:10
+        each a in activity
+          Row gap:8 center
+            Avatar "{a.who}" size:24
+            Column
+              Text "{a.what}"
+              Text.caption "{a.when}"

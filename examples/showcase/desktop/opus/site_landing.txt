@@ -1,0 +1,118 @@
+Page
+  Nav
+    Row gap:8 middle
+      Icon "waves" color:#FF0E7490
+      Text.strong "Tidewater" size:20
+    Row gap:4
+      Link "Features"
+      Link "Pricing"
+      Link "Customers"
+      Link "Docs"
+    Row gap:8 middle
+      Button.ghost "Sign in" -> emit signIn
+      Button "Start free" -> emit start
+  Section
+    Row gap:48 middle
+      Column grow gap:20
+        Badge.info "Built for hotels with 5 to 80 rooms"
+        Heading "Fill every room, without the spreadsheets" level:1
+        Text.lead "Tidewater keeps your calendar, booking channels and room rates in one place, so you spend less time updating and more time hosting."
+        Row gap:12
+          Button "Start free" -> emit start
+          Button.outline "Book a demo" -> emit demo
+        Text.muted "Free for 14 days. No card needed."
+      Card grow gap:12
+        Row between middle
+          Text.strong "Harbour House · This week"
+          Badge.success "92% booked"
+        Media kind:"harbor" tone:"dawn" h:140
+        Grid cols:3 gap:10
+          StatTile "Occupancy" value:"92%" delta:"+8%"
+          StatTile "Avg. rate" value:"$148" delta:"+$12"
+          StatTile "Direct" value:"38%" delta:"+5%"
+        BarChart values:[14,18,16,21,24,23,19] labels:["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h:160
+  Section fill:#FFF3F4F6
+    Column center gap:16
+      Text.muted "Trusted by independent hotels everywhere"
+      Row between w:fill
+        Text.strong "Harbour House" color:#FF6B7280 size:18
+        Text.strong "The Saltmarsh Inn" color:#FF6B7280 size:18
+        Text.strong "Pine & Fern Lodge" color:#FF6B7280 size:18
+        Text.strong "Casa Ribeira" color:#FF6B7280 size:18
+        Text.strong "Northlight Hotel" color:#FF6B7280 size:18
+  Section
+    Column gap:32
+      Column center gap:8
+        Heading "Everything a small hotel needs"
+        Text.muted "Three tools that work together, set up in an afternoon."
+      Grid cols:3 gap:24
+        Card gap:10
+          Icon "calendar_month" color:#FF0E7490 size:32
+          Text.strong "Live calendar"
+          Text.muted "See every room, every night and every guest on one screen. Drag a booking to move it."
+        Card gap:10
+          Icon "sync" color:#FF0E7490 size:32
+          Text.strong "Channel sync"
+          Text.muted "Availability stays in step across Booking.com, Expedia, Airbnb and your own site. No double bookings."
+        Card gap:10
+          Icon "insights" color:#FF0E7490 size:32
+          Text.strong "Smart pricing"
+          Text.muted "Rates that follow demand, local events and the season, within the limits you set."
+  Section fill:#FF0E7490
+    Grid cols:3 gap:24
+      Column center gap:4
+        Text "4,200" size:48 weight:700 color:#FFFFFFFF
+        Text "hotels run on Tidewater" color:#FFE0F2F7
+      Column center gap:4
+        Text "31%" size:48 weight:700 color:#FFFFFFFF
+        Text "more direct bookings" color:#FFE0F2F7
+      Column center gap:4
+        Text "2 min" size:48 weight:700 color:#FFFFFFFF
+        Text "to set up your first room" color:#FFE0F2F7
+  Section narrow
+    Column center gap:20
+      Icon "format_quote" color:#FF0E7490 size:40
+      Text "We used to spend Sunday evenings fixing the spreadsheet. Now the calendar just stays right, and our direct bookings went up by a third in the first season." center size:22
+      Row gap:12 middle
+        Avatar "Maya Reyes" size:44
+        Column gap:2
+          Text.strong "Maya Reyes"
+          Text.muted "Owner, The Saltmarsh Inn"
+  Section fill:#FFF3F4F6
+    Column center gap:16
+      Heading "Ready to fill every room?"
+      Text.muted "Start free today and have your calendar live before your next check-in."
+      Row gap:12
+        Button "Start free" -> emit start
+        Button.outline "Talk to sales" -> emit sales
+  Footer
+    Column gap:32
+      Grid cols:4 gap:24
+        Column gap:8
+          Text.strong "Product"
+          Link "Features"
+          Link "Pricing"
+          Link "Integrations"
+          Link "Changelog"
+        Column gap:8
+          Text.strong "Customers"
+          Link "Stories"
+          Link "Hotels"
+          Link "B&Bs"
+          Link "Hostels"
+        Column gap:8
+          Text.strong "Resources"
+          Link "Docs"
+          Link "Help center"
+          Link "Guides"
+          Link "Status"
+        Column gap:8
+          Text.strong "Company"
+          Link "About"
+          Link "Careers"
+          Link "Contact"
+          Link "Privacy"
+      Divider
+      Row between
+        Text.strong "Tidewater"
+        Text.muted "© 2026 Tidewater. All rights reserved."

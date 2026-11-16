@@ -1,0 +1,100 @@
+Page
+  Nav
+    Text.strong "Tidewater"
+    Row gap:4
+      Link "Features"
+      Link "Pricing"
+      Link "Customers"
+      Link "Docs"
+    Row gap:8
+      Button.ghost "Sign in" -> emit signin
+      Button "Start free" -> emit start
+  Section
+    Row gap:48
+      Column grow gap:20
+        Heading "Fill every room, without the spreadsheets" level:1
+        Text.lead "Tidewater keeps your calendar, channels and pricing in one place, so small hotels book more direct stays."
+        Row gap:12
+          Button "Start free" size:large -> emit start
+          Button.outline "See how it works" size:large -> emit tour
+      Card grow
+        Media kind:"harbor" tone:"day" h:320
+  Section compact
+    Column gap:16 center
+      Text.eyebrow "TRUSTED BY INDEPENDENT HOTELS"
+      Row between
+        Text.heading "Harbor Inn"
+        Text.heading "The Lantern House"
+        Text.heading "Saltmarsh Lodge"
+        Text.heading "Birchwood B&B"
+        Text.heading "Casa Marisol"
+  Section tint
+    Column gap:12
+      Text.eyebrow "FEATURES"
+      Heading "Everything a small hotel needs" level:2
+    Grid cols:3 gap:24
+      Card gap:12
+        IconTile "calendar_month"
+        Heading "Live calendar" level:3
+        Text.muted "See every room and every night at a glance, updated the moment a guest books."
+      Card gap:12
+        IconTile "sync"
+        Heading "Channel sync" level:3
+        Text.muted "Availability stays in step across every booking site, so you never get double-booked."
+      Card gap:12
+        IconTile "trending_up"
+        Heading "Smart pricing" level:3
+        Text.muted "Rates adjust to demand and season, so quiet nights fill and busy ones pay more."
+  Section
+    Grid cols:3 gap:24
+      Column gap:4 center
+        Text "4,200" size:48 weight:700
+        Text.muted "hotels"
+      Column gap:4 center
+        Text "31%" size:48 weight:700
+        Text.muted "more direct bookings"
+      Column gap:4 center
+        Text "2 min" size:48 weight:700
+        Text.muted "setup"
+  Section tint narrow
+    Column gap:16 center
+      Icon "format_quote"
+      Text.lead "We stopped juggling three spreadsheets and our direct bookings climbed within a month. Tidewater just works." center
+      Row gap:12 center
+        Avatar "Maya Reyes" size:40
+        Column
+          Text.strong "Maya Reyes"
+          Text.muted "Owner, The Lantern House"
+  Section center
+    Column gap:16 center
+      Heading "Ready to fill every room?" level:2
+      Text.lead "Set up in two minutes. No credit card needed." center
+      Row gap:12 center
+        Button "Start free" size:large -> emit start
+        Button.outline "Talk to us" size:large -> emit contact
+  Footer
+    Row between top
+      Column gap:8
+        Text.strong "Product"
+        Link "Features"
+        Link "Pricing"
+        Link "Integrations"
+      Column gap:8
+        Text.strong "Company"
+        Link "About"
+        Link "Customers"
+        Link "Careers"
+      Column gap:8
+        Text.strong "Resources"
+        Link "Docs"
+        Link "Guides"
+        Link "Help centre"
+      Column gap:8
+        Text.strong "Legal"
+        Link "Privacy"
+        Link "Terms"
+        Link "Security"
+    Divider
+    Row between
+      Text.strong "Tidewater"
+      Text.muted "© 2026 Tidewater"

@@ -1,0 +1,82 @@
+{
+ "schema": 3,
+ "id": "SiteFooter",
+ "roots": ["band"],
+ "widget": {
+  "type": "SiteFooter",
+  "doc": "A website's closing band written directly under Page: SiteFooter brand:\"Tidewater\" tagline:\"…\" headings:[\"Product\",\"Company\"] links:[[\"Features\",\"Pricing\"],[\"About\",\"Careers\"]] legal:\"© 2026 Tidewater\" small:[\"Privacy\",\"Terms\"] -> page=result; it shows up to four columns and four small links, wraps them when narrow, and onNavigate gives the tapped link's name.",
+  "props": [
+   {"key": "brand", "type": {"kind": "string", "flutter": "String"}, "default": "Tidewater", "doc": "The product's name.", "required": true},
+   {"key": "tagline", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line under the name (empty: none)."},
+   {"key": "icon", "type": {"kind": "string", "flutter": "String"}, "default": "waves", "doc": "A Material icon in the brand's mark (empty: no mark)."},
+   {"key": "headings", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": ["Product", "Company"], "doc": "The column headings, up to four.", "required": true},
+   {"key": "links", "type": {"kind": "list", "flutter": "List<List<String>>", "item": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}}, "default": [["Features", "Pricing"], ["About", "Careers"]], "doc": "The links of each column, one list per heading.", "required": true},
+   {"key": "legal", "type": {"kind": "string", "flutter": "String"}, "default": "© 2026", "doc": "The copyright line."},
+   {"key": "small", "type": {"kind": "list", "flutter": "List<String>", "item": {"kind": "string", "flutter": "String"}}, "default": [], "doc": "Small links beside the copyright, up to four."}
+  ],
+  "events": [
+   {"key": "onNavigate", "doc": "A link was tapped; the value is its name."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Tidewater",
+   "size": [1280, 360],
+   "props": {
+    "tagline": "The calm front desk for independent hotels.",
+    "headings": ["Product", "Company", "Resources", "Legal"],
+    "links": [["Features", "Pricing", "Integrations", "Changelog"], ["About", "Customers", "Careers", "Contact"], ["Docs", "Guides", "Help centre", "Status"], ["Privacy", "Terms", "Cookies", "Security"]],
+    "legal": "© 2026 Tidewater. All rights reserved.",
+    "small": ["Privacy", "Terms", "Sitemap"]
+   }
+  }
+ ],
+ "nodes": {
+  "band": {"type": "column", "children": ["rule0", "innerWrap"], "props": {"crossAxisAlignment": "stretch"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "decoration": {"fills": [{"color": "pageFill"}]}},
+  "rule0": {"type": "box", "layout": {"width": {"fill": 0}, "height": 1}, "decoration": {"fills": [{"color": "line"}]}},
+  "innerWrap": {"type": "column", "children": ["inner"], "props": {"crossAxisAlignment": "center"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [32, 56, 32, 36]}},
+  "inner": {"type": "column", "children": ["top", "rule1", "bottom"], "props": {"crossAxisAlignment": "stretch", "spacing": 28}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "constraints": {"maxWidth": 1120}}},
+  "top": {"type": "row", "children": ["brandCol", "linksRow"], "props": {"wrap": true, "spacing": 32, "runSpacing": 36, "crossAxisAlignment": "start"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 0, 0, 12]}},
+  "brandCol": {"type": "column", "children": ["brandRow", "tagline"], "props": {"crossAxisAlignment": "start", "spacing": 12}, "layout": {"width": {"fill": 1}, "basis": 280, "height": {"hug": 0}}},
+  "brandRow": {"type": "row", "children": ["mark", "brand"], "props": {"crossAxisAlignment": "center", "spacing": 10}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "mark": {"type": "row", "children": ["markIcon"], "props": {"mainAxisAlignment": "center"}, "layout": {"width": 30, "height": 30}, "decoration": {"fills": [{"color": "accent"}], "radius": 9}, "bind": {"decoration.radius": "${theme.radii.inner}", "visible": "${= props.icon != ''}"}},
+  "markIcon": {"type": "icon", "props": {"icon": "waves", "size": 18, "color": "onAccent"}, "layout": {"width": 18, "height": 18}, "bind": {"props.icon": "${props.icon}"}},
+  "brand": {"type": "text", "props": {"text": "${props.brand}", "style": "headingWide"}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "tagline": {"type": "text", "props": {"text": "${props.tagline}", "style": {"from": "mutedWide", "color": "inkSoft"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "constraints": {"maxWidth": 300}}, "bind": {"visible": "${= props.tagline != ''}"}},
+
+  "linksRow": {"type": "row", "children": ["col0", "col1", "col2", "col3"], "props": {"wrap": true, "spacing": 24, "runSpacing": 32, "crossAxisAlignment": "start"}, "layout": {"width": {"fill": 2}, "basis": 560, "height": {"hug": 0}}},
+
+  "col0": {"type": "column", "children": ["hd0", "ls0"], "props": {"crossAxisAlignment": "stretch", "spacing": 14}, "layout": {"width": {"fill": 1}, "basis": 120, "height": {"hug": 0}}, "bind": {"visible": "${= length(props.headings) > 0}"}},
+  "hd0": {"type": "text", "props": {"text": "${= length(props.headings) > 0 ? at(props.headings, 0) : ''}", "style": {"from": "smallWide", "fontWeight": 600, "color": "ink"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "ls0": {"type": "listView", "children": ["lk0"], "props": {"scrollable": false, "spacing": 10}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "bind": {"data": "${= length(props.links) > 0 ? at(props.links, 0) : []}"}},
+  "lk0": {"type": "row", "children": ["lt0"], "props": {"mainAxisAlignment": "start", "crossAxisAlignment": "center"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "states": {"pressed": {"lk0": {"opacity": 0.6}}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${item}"}]}]},
+  "lt0": {"type": "text", "props": {"text": "${item}", "style": {"from": "mutedWide", "color": "inkSoft"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+
+  "col1": {"type": "column", "children": ["hd1", "ls1"], "props": {"crossAxisAlignment": "stretch", "spacing": 14}, "layout": {"width": {"fill": 1}, "basis": 120, "height": {"hug": 0}}, "bind": {"visible": "${= length(props.headings) > 1}"}},
+  "hd1": {"type": "text", "props": {"text": "${= length(props.headings) > 1 ? at(props.headings, 1) : ''}", "style": {"from": "smallWide", "fontWeight": 600, "color": "ink"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "ls1": {"type": "listView", "children": ["lk1"], "props": {"scrollable": false, "spacing": 10}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "bind": {"data": "${= length(props.links) > 1 ? at(props.links, 1) : []}"}},
+  "lk1": {"type": "row", "children": ["lt1"], "props": {"mainAxisAlignment": "start", "crossAxisAlignment": "center"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "states": {"pressed": {"lk1": {"opacity": 0.6}}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${item}"}]}]},
+  "lt1": {"type": "text", "props": {"text": "${item}", "style": {"from": "mutedWide", "color": "inkSoft"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+
+  "col2": {"type": "column", "children": ["hd2", "ls2"], "props": {"crossAxisAlignment": "stretch", "spacing": 14}, "layout": {"width": {"fill": 1}, "basis": 120, "height": {"hug": 0}}, "bind": {"visible": "${= length(props.headings) > 2}"}},
+  "hd2": {"type": "text", "props": {"text": "${= length(props.headings) > 2 ? at(props.headings, 2) : ''}", "style": {"from": "smallWide", "fontWeight": 600, "color": "ink"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "ls2": {"type": "listView", "children": ["lk2"], "props": {"scrollable": false, "spacing": 10}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "bind": {"data": "${= length(props.links) > 2 ? at(props.links, 2) : []}"}},
+  "lk2": {"type": "row", "children": ["lt2"], "props": {"mainAxisAlignment": "start", "crossAxisAlignment": "center"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "states": {"pressed": {"lk2": {"opacity": 0.6}}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${item}"}]}]},
+  "lt2": {"type": "text", "props": {"text": "${item}", "style": {"from": "mutedWide", "color": "inkSoft"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+
+  "col3": {"type": "column", "children": ["hd3", "ls3"], "props": {"crossAxisAlignment": "stretch", "spacing": 14}, "layout": {"width": {"fill": 1}, "basis": 120, "height": {"hug": 0}}, "bind": {"visible": "${= length(props.headings) > 3}"}},
+  "hd3": {"type": "text", "props": {"text": "${= length(props.headings) > 3 ? at(props.headings, 3) : ''}", "style": {"from": "smallWide", "fontWeight": 600, "color": "ink"}}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "ls3": {"type": "listView", "children": ["lk3"], "props": {"scrollable": false, "spacing": 10}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "bind": {"data": "${= length(props.links) > 3 ? at(props.links, 3) : []}"}},
+  "lk3": {"type": "row", "children": ["lt3"], "props": {"mainAxisAlignment": "start", "crossAxisAlignment": "center"}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}, "states": {"pressed": {"lk3": {"opacity": 0.6}}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${item}"}]}]},
+  "lt3": {"type": "text", "props": {"text": "${item}", "style": {"from": "mutedWide", "color": "inkSoft"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+
+  "rule1": {"type": "box", "layout": {"width": {"fill": 0}, "height": 1}, "decoration": {"fills": [{"color": "line"}]}},
+  "bottom": {"type": "row", "children": ["legal", "smallRow"], "props": {"wrap": true, "mainAxisAlignment": "spaceBetween", "crossAxisAlignment": "center", "spacing": 24, "runSpacing": 10}, "layout": {"width": {"fill": 0}, "height": {"hug": 0}}},
+  "legal": {"type": "text", "props": {"text": "${props.legal}", "style": {"from": "captionWide", "color": "inkFaint"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "smallRow": {"type": "row", "children": ["s0", "s1", "s2", "s3"], "props": {"wrap": true, "crossAxisAlignment": "center", "spacing": 20, "runSpacing": 6}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}},
+  "s0": {"type": "text", "props": {"text": "${= length(props.small) > 0 ? at(props.small, 0) : ''}", "style": {"from": "captionWide", "color": "inkSoft"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}, "bind": {"visible": "${= length(props.small) > 0}"}, "states": {"pressed": {"s0": {"opacity": 0.6}}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${= at(props.small, 0)}"}]}]},
+  "s1": {"type": "text", "props": {"text": "${= length(props.small) > 1 ? at(props.small, 1) : ''}", "style": {"from": "captionWide", "color": "inkSoft"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}, "bind": {"visible": "${= length(props.small) > 1}"}, "states": {"pressed": {"s1": {"opacity": 0.6}}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${= at(props.small, 1)}"}]}]},
+  "s2": {"type": "text", "props": {"text": "${= length(props.small) > 2 ? at(props.small, 2) : ''}", "style": {"from": "captionWide", "color": "inkSoft"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}, "bind": {"visible": "${= length(props.small) > 2}"}, "states": {"pressed": {"s2": {"opacity": 0.6}}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${= at(props.small, 2)}"}]}]},
+  "s3": {"type": "text", "props": {"text": "${= length(props.small) > 3 ? at(props.small, 3) : ''}", "style": {"from": "captionWide", "color": "inkSoft"}}, "layout": {"width": {"hug": 0}, "height": {"hug": 0}}, "bind": {"visible": "${= length(props.small) > 3}"}, "states": {"pressed": {"s3": {"opacity": 0.6}}}, "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onNavigate", "value": "${= at(props.small, 3)}"}]}]}
+ }
+}

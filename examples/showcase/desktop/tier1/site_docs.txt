@@ -1,0 +1,70 @@
+Page
+  Nav
+    Row gap:8 middle
+      Icon "sensors"
+      Text.strong "Beacon"
+      Text.muted "Docs"
+    SearchBar "Search the docs" =q w:320
+    Row gap:12 middle
+      Select =version items:["v2.4","v2.3","v2.2"]
+      Link "GitHub" href:"https://github.com"
+  Section
+    Row gap:32 top
+      Column w:220 gap:16
+        Column gap:4
+          Text.eyebrow "START"
+          NavItem "Introduction" icon:"info" -> emit nav "introduction"
+          NavItem "Quickstart" icon:"bolt" selected:=true -> emit nav "quickstart"
+          NavItem "Installation" icon:"download" -> emit nav "installation"
+          NavItem "Configuration" icon:"tune" -> emit nav "configuration"
+        Column gap:4
+          Text.eyebrow "GUIDES"
+          NavItem "Tracking events" icon:"timeline" -> emit nav "events"
+          NavItem "User identity" icon:"person" -> emit nav "identity"
+          NavItem "Offline mode" icon:"cloud_off" -> emit nav "offline"
+          NavItem "Testing" icon:"science" -> emit nav "testing"
+        Column gap:4
+          Text.eyebrow "REFERENCE"
+          NavItem "Client API" icon:"code" -> emit nav "client"
+          NavItem "Options" icon:"settings" -> emit nav "options"
+          NavItem "Error codes" icon:"error" -> emit nav "errors"
+          NavItem "Changelog" icon:"history" -> emit nav "changelog"
+      Column grow gap:20
+        Breadcrumb items:["Docs","Start","Quickstart"]
+        Heading "Quickstart" level:1
+        Text.lead "Get the Beacon SDK running in your app and send your first event in about five minutes."
+        Column gap:10
+          Heading "1. Install the package" level:3
+          Text.muted "Add Beacon to your project with your package manager."
+          CodeBlock "Terminal" "npm install @beacon/sdk" language:"bash" copyable:true
+        Column gap:10
+          Heading "2. Initialize the client" level:3
+          Text.muted "Create one client when your app starts, using the API key from your dashboard."
+          CodeBlock "app.ts" "import { Beacon } from '@beacon/sdk';\n\nconst beacon = new Beacon({\n  apiKey: 'YOUR_API_KEY',\n  flushInterval: 5000\n});" language:"typescript" copyable:true
+        Column gap:10
+          Heading "3. Send your first event" level:3
+          Text.muted "Call track with an event name and any properties you want to keep."
+          CodeBlock "app.ts" "beacon.track('signup_completed', {\n  plan: 'pro'\n});" language:"typescript" copyable:true
+        Callout "Keep your key private" "Use a server-side key for backend code. The browser key only accepts events and cannot read any data." tone:"accent" icon:"info"
+        Column gap:10
+          Heading "Client options" level:3
+          Text.muted "Pass these options when you create the client."
+          Column
+            TableHeader columns:["Name","Type","Default","Description"] keys:["name","type","def","desc"] widths:[140,100,100,300]
+            TableRow cells:["apiKey","string","none","Your project's API key. Required."] widths:[140,100,100,300]
+            TableRow cells:["flushInterval","number","5000","Milliseconds between batches of queued events."] widths:[140,100,100,300]
+            TableRow cells:["debug","boolean","false","Print every event to the console as it is sent."] widths:[140,100,100,300]
+            TableRow cells:["endpoint","string","api.beacon.dev","Where events are sent, for self-hosted setups."] widths:[140,100,100,300]
+        Row between border-top:#FFE0E0E0 pad:[0,16,0,0]
+          Button.outline "← Previous: Installation" -> emit nav "installation"
+          Button.outline "Next: Configuration →" -> emit nav "configuration"
+      Column w:200 gap:8
+        Text.eyebrow "ON THIS PAGE"
+        Link "Install the package" -> emit jump "install"
+        Link "Initialize the client" -> emit jump "init"
+        Link "Send your first event" -> emit jump "event"
+        Link "Client options" -> emit jump "options"
+  Footer
+    Row between
+      Text.strong "Beacon"
+      Text.muted "© 2026 Beacon"

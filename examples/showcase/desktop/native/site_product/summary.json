@@ -1,0 +1,36 @@
+{
+ "name": "site_product",
+ "model": "claude-opus-5-5",
+ "rounds": [
+  {
+   "round": 1,
+   "modelSeconds": 272.7,
+   "problems": 1,
+   "errors": 1,
+   "input_tokens": 219,
+   "cached": 123465,
+   "output_tokens": 32000
+  },
+  {
+   "round": 2,
+   "modelSeconds": 196.5,
+   "problems": 0,
+   "errors": 0,
+   "input_tokens": 18253,
+   "cached": 123465,
+   "output_tokens": 28131
+  },
+  {
+   "round": 3,
+   "modelSeconds": 225.1,
+   "problems": 1,
+   "errors": 1,
+   "input_tokens": 32212,
+   "cached": 123465,
+   "output_tokens": 32000
+  }
+ ],
+ "final": 2,
+ "errors": 0,
+ "problems": 0
+}

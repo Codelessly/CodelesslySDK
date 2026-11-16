@@ -1,0 +1,7 @@
+WARNING [site_event] text_clipped [site_event.doc screen site_event 1280x800] node text5
+WARNING [site_event] text_clipped [site_event.doc screen site_event 1280x800] node text10
+WARNING [site_restaurant] missing_glyph [site_restaurant.doc screen site_restaurant 1280x800] node text26
+WARNING [site_restaurant] missing_glyph [site_restaurant.doc screen site_restaurant 1280x800] node text29
+WARNING [app_analytics] fit_not_allowed [app_analytics.doc] /nodes/spacer2/layout/height
+WARNING [app_files] text_clipped [app_files.doc screen app_files 1280x800] node text12
+WARNING [app_files] text_clipped [app_files.doc screen app_files 1280x800] node text14

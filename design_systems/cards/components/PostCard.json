@@ -1,0 +1,174 @@
+{
+ "schema": 3,
+ "id": "PostCard",
+ "roots": ["tile"],
+ "widget": {
+  "type": "PostCard",
+  "doc": "One article tile for a blog grid: PostCard kind:\"skyline\" tone:\"day\" tag:\"Infrastructure\" title:\"...\" excerpt:\"...\" author:\"Priya Raman\" initials:\"PR\" meta:\"Mar 12 · 9 min read\" -> open=\"...\" (a drawn cover from kind and tone, default day; a tap fires onPressed with the title).",
+  "props": [
+   {"key": "kind", "type": {"kind": "string", "flutter": "String"}, "default": "skyline", "doc": "The cover scene, as Media: skyline, market, festival, train (a city); harbor, lagoon, dunes (water); mountain, forest, temple, bamboo (hills)."},
+   {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "day", "doc": "The cover's time of day: dawn, day, dusk or night."},
+   {"key": "tag", "type": {"kind": "string", "flutter": "String"}, "default": "Infrastructure", "doc": "The category, as a small pill (empty: none)."},
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "What we learned moving 40 services to one queue", "doc": "The article's title (two lines at most).", "required": true},
+   {"key": "excerpt", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "One line of what it is about (empty: none)."},
+   {"key": "author", "type": {"kind": "string", "flutter": "String"}, "default": "Priya Raman", "doc": "The author's name.", "required": true},
+   {"key": "initials", "type": {"kind": "string", "flutter": "String"}, "default": "PR", "doc": "The author's initials, in the round plate."},
+   {"key": "meta", "type": {"kind": "string", "flutter": "String"}, "default": "Mar 12, 2025 · 9 min read", "doc": "The date and reading time, under the name."}
+  ],
+  "events": [
+   {"key": "onPressed", "doc": "The tile was tapped; the value is the title."}
+  ]
+ },
+ "previews": [
+  {"name": "Infrastructure", "size": [360, 380], "props": {"kind": "skyline", "tone": "dusk", "excerpt": "Six brokers, one partitioned log, 60 percent fewer pages."}}
+ ],
+ "nodes": {
+  "tile": {
+   "type": "column",
+   "children": ["cover", "body"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [8, 8, 8, 16]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 16},
+   "bind": {"decoration.radius": "${theme.radii.cardWide}"},
+   "states": {
+    "hovered": {"tile": {"decoration": {"strokes": [{"color": "lineStrong"}]}}},
+    "pressed": {"tile": {"opacity": 0.86}}
+   },
+   "actions": [
+    {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onPressed", "value": "${props.title}"}]}
+   ]
+  },
+  "cover": {
+   "type": "box",
+   "layout": {"width": {"fill": 0}, "height": 150},
+   "customPaint": {
+    "painter": [
+     {"op": "rrect", "rect": [0, 0, "${size.width}", "${size.height}"], "radius": 12,
+      "paint": "${= {'shader': {'type': 'linear', 'begin': 'topCenter', 'end': 'bottomCenter', 'stops': [{'position': 0, 'color': props.tone == 'dawn' ? theme.colors.dawnSky1 : props.tone == 'dusk' ? theme.colors.duskSky1 : props.tone == 'night' ? theme.colors.nightSky1 : theme.colors.daySky1}, {'position': 1, 'color': props.tone == 'dawn' ? theme.colors.dawnSky2 : props.tone == 'dusk' ? theme.colors.duskSky2 : props.tone == 'night' ? theme.colors.nightSky2 : theme.colors.daySky2}]}}}"},
+     {"op": "rrect", "rect": ["${= size.width * 0.5}", 18, 30, 30], "radius": 15,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnOrb : props.tone == 'dusk' ? theme.colors.duskOrb : props.tone == 'night' ? theme.colors.nightOrb : theme.colors.dayOrb}"},
+
+     {"op": "rrect", "when": "${= !contains(['skyline','market','festival','train','harbor','lagoon','dunes'], props.kind)}", "rect": ["${= size.width * 0.02}", "${= size.height * 0.42}", "${= size.width * 0.56}", "${= size.height * 0.58}"], "radius": 60,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnFar : props.tone == 'dusk' ? theme.colors.duskFar : props.tone == 'night' ? theme.colors.nightFar : theme.colors.dayFar}"},
+     {"op": "rrect", "when": "${= !contains(['skyline','market','festival','train','harbor','lagoon','dunes'], props.kind)}", "rect": ["${= size.width * 0.42}", "${= size.height * 0.32}", "${= size.width * 0.56}", "${= size.height * 0.68}"], "radius": 60,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnFar : props.tone == 'dusk' ? theme.colors.duskFar : props.tone == 'night' ? theme.colors.nightFar : theme.colors.dayFar}"},
+     {"op": "rrect", "when": "${= !contains(['skyline','market','festival','train','harbor','lagoon','dunes'], props.kind)}", "rect": ["${= size.width * 0.18}", "${= size.height * 0.56}", "${= size.width * 0.64}", "${= size.height * 0.44}"], "radius": 50,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnMid : props.tone == 'dusk' ? theme.colors.duskMid : props.tone == 'night' ? theme.colors.nightMid : theme.colors.dayMid}"},
+
+     {"op": "rrect", "when": "${= contains(['skyline','market','festival','train'], props.kind)}", "rect": ["${= size.width * 0.06}", "${= size.height * 0.48}", "${= size.width * 0.11}", "${= size.height * 0.52 - 28}"], "radius": 3,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnFar : props.tone == 'dusk' ? theme.colors.duskFar : props.tone == 'night' ? theme.colors.nightFar : theme.colors.dayFar}"},
+     {"op": "rrect", "when": "${= contains(['skyline','market','festival','train'], props.kind)}", "rect": ["${= size.width * 0.19}", "${= size.height * 0.28}", "${= size.width * 0.12}", "${= size.height * 0.72 - 28}"], "radius": 3,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnMid : props.tone == 'dusk' ? theme.colors.duskMid : props.tone == 'night' ? theme.colors.nightMid : theme.colors.dayMid}"},
+     {"op": "rrect", "when": "${= contains(['skyline','market','festival','train'], props.kind)}", "rect": ["${= size.width * 0.33}", "${= size.height * 0.54}", "${= size.width * 0.09}", "${= size.height * 0.46 - 28}"], "radius": 3,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnFar : props.tone == 'dusk' ? theme.colors.duskFar : props.tone == 'night' ? theme.colors.nightFar : theme.colors.dayFar}"},
+     {"op": "rrect", "when": "${= contains(['skyline','market','festival','train'], props.kind)}", "rect": ["${= size.width * 0.44}", "${= size.height * 0.40}", "${= size.width * 0.12}", "${= size.height * 0.60 - 28}"], "radius": 3,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnMid : props.tone == 'dusk' ? theme.colors.duskMid : props.tone == 'night' ? theme.colors.nightMid : theme.colors.dayMid}"},
+     {"op": "rrect", "when": "${= contains(['skyline','market','festival','train'], props.kind)}", "rect": ["${= size.width * 0.60}", "${= size.height * 0.50}", "${= size.width * 0.10}", "${= size.height * 0.50 - 28}"], "radius": 3,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnFar : props.tone == 'dusk' ? theme.colors.duskFar : props.tone == 'night' ? theme.colors.nightFar : theme.colors.dayFar}"},
+     {"op": "rrect", "when": "${= contains(['skyline','market','festival','train'], props.kind)}", "rect": ["${= size.width * 0.72}", "${= size.height * 0.24}", "${= size.width * 0.12}", "${= size.height * 0.76 - 28}"], "radius": 3,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnMid : props.tone == 'dusk' ? theme.colors.duskMid : props.tone == 'night' ? theme.colors.nightMid : theme.colors.dayMid}"},
+     {"op": "rrect", "when": "${= contains(['skyline','market','festival','train'], props.kind)}", "rect": ["${= size.width * 0.86}", "${= size.height * 0.46}", "${= size.width * 0.09}", "${= size.height * 0.54 - 28}"], "radius": 3,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnFar : props.tone == 'dusk' ? theme.colors.duskFar : props.tone == 'night' ? theme.colors.nightFar : theme.colors.dayFar}"},
+     {"op": "rrect", "when": "${= contains(['skyline','market','festival','train'], props.kind)}", "rect": ["${= size.width * 0.235}", "${= size.height * 0.36}", 5, 7], "radius": 1,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnLight : props.tone == 'dusk' ? theme.colors.duskLight : props.tone == 'night' ? theme.colors.nightLight : theme.colors.dayLight}"},
+     {"op": "rrect", "when": "${= contains(['skyline','market','festival','train'], props.kind)}", "rect": ["${= size.width * 0.765}", "${= size.height * 0.33}", 5, 7], "radius": 1,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnLight : props.tone == 'dusk' ? theme.colors.duskLight : props.tone == 'night' ? theme.colors.nightLight : theme.colors.dayLight}"},
+
+     {"op": "rrect", "when": "${= contains(['harbor','lagoon','dunes'], props.kind)}", "rect": ["${= size.width * 0.06}", "${= size.height * 0.42}", "${= size.width * 0.54}", "${= size.height * 0.30}"], "radius": 40,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnFar : props.tone == 'dusk' ? theme.colors.duskFar : props.tone == 'night' ? theme.colors.nightFar : theme.colors.dayFar}"},
+     {"op": "rrect", "when": "${= contains(['harbor','lagoon','dunes'], props.kind)}", "rect": ["${= size.width * 0.46}", "${= size.height * 0.50}", "${= size.width * 0.50}", "${= size.height * 0.24}"], "radius": 40,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnMid : props.tone == 'dusk' ? theme.colors.duskMid : props.tone == 'night' ? theme.colors.nightMid : theme.colors.dayMid}"},
+     {"op": "rrect", "when": "${= contains(['harbor','lagoon','dunes'], props.kind)}", "rect": [0, "${= size.height * 0.64}", "${size.width}", "${= size.height * 0.36}"], "radius": 12,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnNear : props.tone == 'dusk' ? theme.colors.duskNear : props.tone == 'night' ? theme.colors.nightNear : theme.colors.dayNear}"},
+     {"op": "rrect", "when": "${= contains(['harbor','lagoon','dunes'], props.kind)}", "rect": [0, "${= size.height * 0.64}", "${size.width}", 14], "radius": 0,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnNear : props.tone == 'dusk' ? theme.colors.duskNear : props.tone == 'night' ? theme.colors.nightNear : theme.colors.dayNear}"},
+     {"op": "rrect", "when": "${= contains(['harbor','lagoon','dunes'], props.kind)}", "rect": ["${= size.width * 0.62}", "${= size.height * 0.76}", "${= size.width * 0.16}", 3], "radius": 2,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnLight : props.tone == 'dusk' ? theme.colors.duskLight : props.tone == 'night' ? theme.colors.nightLight : theme.colors.dayLight}"},
+     {"op": "rrect", "when": "${= contains(['harbor','lagoon','dunes'], props.kind)}", "rect": ["${= size.width * 0.66}", "${= size.height * 0.85}", "${= size.width * 0.08}", 3], "radius": 2,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnLight : props.tone == 'dusk' ? theme.colors.duskLight : props.tone == 'night' ? theme.colors.nightLight : theme.colors.dayLight}"},
+
+     {"op": "rrect", "when": "${= !contains(['harbor','lagoon','dunes'], props.kind)}", "rect": [0, "${= size.height - 30}", "${size.width}", 30], "radius": 12,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnNear : props.tone == 'dusk' ? theme.colors.duskNear : props.tone == 'night' ? theme.colors.nightNear : theme.colors.dayNear}"},
+     {"op": "rrect", "when": "${= !contains(['harbor','lagoon','dunes'], props.kind)}", "rect": [0, "${= size.height - 30}", "${size.width}", 14], "radius": 0,
+      "paint": "${= props.tone == 'dawn' ? theme.colors.dawnNear : props.tone == 'dusk' ? theme.colors.duskNear : props.tone == 'night' ? theme.colors.nightNear : theme.colors.dayNear}"}
+    ]
+   }
+  },
+  "body": {
+   "type": "column",
+   "children": ["tagPill", "title", "excerpt", "rule", "foot"],
+   "props": {"crossAxisAlignment": "start", "spacing": 8},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [10, 16, 10, 0]}
+  },
+  "tagPill": {
+   "type": "row",
+   "children": ["tagText"],
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [10, 4, 10, 4]},
+   "media": [{"minWidth": 700, "maxWidth": 1023, "patch": {"layout": {"width": {"fill": 0}}}}],
+   "decoration": {"fills": [{"color": "primaryTint"}], "strokes": [{"color": "primaryTintBorder"}], "strokeWidth": 1, "radius": 999},
+   "bind": {"visible": "${= props.tag != ''}"}
+  },
+  "tagText": {
+   "type": "text",
+   "props": {"text": "${= upper(props.tag)}", "style": {"from": "eyebrowWide", "color": "accent"}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "squeezable": true},
+   "media": [{"minWidth": 700, "maxWidth": 1023, "patch": {"props": {"maxLines": 2}, "layout": {"width": {"fill": 0}}}}]
+  },
+  "title": {
+   "type": "text",
+   "props": {"text": "${props.title}", "style": "heading3Wide", "maxLines": 2, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": 54, "padding": [0, 2, 0, 0]}
+  },
+  "excerpt": {
+   "type": "text",
+   "media": [{"maxWidth": 699, "patch": {"props": {"maxLines": 2}}}],
+   "props": {"text": "${props.excerpt}", "style": "mutedWide", "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.excerpt != ''}"}
+  },
+  "rule": {
+   "type": "box",
+   "layout": {"width": {"fill": 0}, "height": 1, "margin": [0, 8, 0, 4]},
+   "decoration": {"fills": [{"color": "line"}]}
+  },
+  "foot": {
+   "type": "row",
+   "children": ["avatar", "who", "go"],
+   "props": {"crossAxisAlignment": "center", "spacing": 10},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "avatar": {
+   "type": "row",
+   "children": ["avatarText"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": 34, "height": 34},
+   "decoration": {"fills": [{"color": "iconTile"}], "radius": 17}
+  },
+  "avatarText": {
+   "type": "text",
+   "props": {"text": "${props.initials}", "style": {"from": "captionWide", "color": "accent", "fontWeight": 700}},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "who": {
+   "type": "column",
+   "children": ["name", "meta"],
+   "props": {"crossAxisAlignment": "start", "spacing": 1},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "name": {
+   "type": "text",
+   "props": {"text": "${props.author}", "style": {"from": "strongWide", "fontSize": 14}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "meta": {
+   "type": "text",
+   "props": {"text": "${props.meta}", "style": {"from": "captionWide", "color": "inkFaint"}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "go": {
+   "type": "icon",
+   "props": {"icon": "arrow_outward_rounded", "size": 18, "color": "inkFaint"},
+   "layout": {"width": 18, "height": 18}
+  }
+ }
+}

@@ -1,0 +1,92 @@
+state tab="overview"
+state range="30d"
+state orders=[{"id":"#10492","customer":"Maya Reyes","status":"Paid","total":"$84.20","date":"Mar 14"},{"id":"#10491","customer":"Jonas Weber","status":"Shipped","total":"$212.00","date":"Mar 14"},{"id":"#10490","customer":"Priya Nair","status":"Pending","total":"$46.50","date":"Mar 13"},{"id":"#10489","customer":"Liam O'Connor","status":"Paid","total":"$129.90","date":"Mar 13"},{"id":"#10488","customer":"Sofia Rossi","status":"Refunded","total":"$58.00","date":"Mar 12"},{"id":"#10487","customer":"Kenji Sato","status":"Shipped","total":"$301.75","date":"Mar 12"},{"id":"#10486","customer":"Amara Okafor","status":"Pending","total":"$73.40","date":"Mar 11"},{"id":"#10485","customer":"Lucas Meyer","status":"Paid","total":"$96.10","date":"Mar 11"}]
+App
+  Sidebar
+    Brand "Harbor" icon:"anchor"
+    NavItem "Overview" icon:"dashboard" selected:=tab=="overview" -> tab="overview"
+    NavItem "Orders" icon:"receipt_long" selected:=tab=="orders" -> tab="orders"
+    NavItem "Inventory" icon:"inventory_2" selected:=tab=="inventory" -> tab="inventory"
+    NavItem "Customers" icon:"group" selected:=tab=="customers" -> tab="customers"
+    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
+    NavItem "Settings" icon:"settings" selected:=tab=="settings" -> tab="settings"
+    Spacer grow
+    Row gap:10 middle
+      Avatar "Sam Patel" size:36
+      Column
+        Text.strong "Sam Patel"
+        Text.caption "Operations lead"
+  Main
+    Nav
+      Heading "Overview" level:1
+      Row gap:8 middle
+        SegmentedButton =range items:["7d","30d","90d"]
+        Input "Search" =q w:220
+        Button "New order" icon:"add" -> emit newOrder
+    Column pad:24 gap:20
+      Grid cols:4 gap:16
+        Card gap:8
+          Row between middle
+            Text.muted "Revenue"
+            IconTile "payments" size:32
+          Text.numberLarge "$128,400"
+          Row gap:8 middle
+            Badge.success "+8.2%"
+            Text.caption "vs previous period"
+        Card gap:8
+          Row between middle
+            Text.muted "Orders"
+            IconTile "shopping_bag" size:32
+          Text.numberLarge "1,942"
+          Row gap:8 middle
+            Badge.success "+3.1%"
+            Text.caption "vs previous period"
+        Card gap:8
+          Row between middle
+            Text.muted "Returns"
+            IconTile "assignment_return" size:32
+          Text.numberLarge "2.4%"
+          Row gap:8 middle
+            Badge.success "-0.6%"
+            Text.caption "vs previous period"
+        Card gap:8
+          Row between middle
+            Text.muted "Avg. order"
+            IconTile "sell" size:32
+          Text.numberLarge "$66.10"
+          Row gap:8 middle
+            Badge.success "+1.9%"
+            Text.caption "vs previous period"
+      Row gap:20 top
+        Card grow gap:12
+          Heading "Revenue, last 12 weeks" level:3
+          LineChart values:[8200,9100,8700,9800,10400,9900,11200,10800,11900,12600,12100,13400] labels:["W1","W2","W3","W4","W5","W6","W7","W8","W9","W10","W11","W12"] h:240
+        Card w:360 gap:12
+          Heading "Sales by channel" level:3
+          Donut values:[52,24,14,10] labels:["Online store","Marketplace","Retail","Wholesale"]
+          Text.caption "Share of revenue, selected period"
+      Card pad:0 gap:0
+        Row between middle pad:[20,16,20,12]
+          Heading "Latest orders" level:3
+          Link "View all" -> emit viewAll
+        Row pad:[20,12,20,12] gap:16 border-top:#FFE5E7EB
+          Text.columnHead "ORDER" w:100
+          Text.columnHead "CUSTOMER" grow
+          Text.columnHead "STATUS" w:120
+          Text.columnHead "TOTAL" w:100 right
+          Text.columnHead "DATE" w:100
+        each o in orders
+          Row pad:[20,0,20,0] gap:16 h:52 middle border-top:#FFE5E7EB
+            Text.strong "{o.id}" w:100
+            Text "{o.customer}" grow
+            Row w:120
+              if o.status=="Paid"
+                Badge.success "Paid"
+              if o.status=="Shipped"
+                Badge.info "Shipped"
+              if o.status=="Pending"
+                Badge.warning "Pending"
+              if o.status=="Refunded"
+                Badge.error "Refunded"
+            Text "{o.total}" w:100 right
+            Text.muted "{o.date}" w:100

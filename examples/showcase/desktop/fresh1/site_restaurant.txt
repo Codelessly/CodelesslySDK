@@ -1,0 +1,118 @@
+Page
+  Nav
+    Brand "Olmo" icon:"local_fire_department"
+    Row gap:4
+      Link "Menu" -> emit goMenu
+      Link "Reservations" -> emit goReservations
+      Link "Private dining" -> emit goPrivate
+      Link "Visit" -> emit goVisit
+    Button "Book a table" -> emit goReservations
+  Section
+    Row gap:48 middle
+      Column grow gap:20
+        Text.eyebrow "NEIGHBORHOOD ITALIAN"
+        Heading "Wood fire, handmade pasta, long evenings" level:1
+        Text.lead "Seasonal plates from a wood-fired oven, pasta rolled each morning, and a room that stays warm until late."
+        Row gap:8 middle
+          Icon "schedule" size:18
+          Text.strong "Open today, 5:00 pm to 11:00 pm"
+        Row gap:12
+          Button "Book a table" size:large -> emit goReservations
+          Button.outline "See the menu" size:large -> emit goMenu
+      Card grow pad:0
+        Media kind:"market" tone:"dusk" h:380
+  Section tint
+    Column gap:12
+      Text.eyebrow "THE MENU"
+      Heading "Cooked over fire, finished by hand"
+    Grid cols:3 gap:32
+      Column gap:16
+        Heading "Antipasti" level:3
+        Divider
+        each d in antipasti
+          Row between top gap:16
+            Column grow gap:2
+              Text.strong "{d.name}"
+              Text.muted "{d.desc}"
+            Text.strong "{d.price}"
+      Column gap:16
+        Heading "Primi" level:3
+        Divider
+        each d in primi
+          Row between top gap:16
+            Column grow gap:2
+              Text.strong "{d.name}"
+              Text.muted "{d.desc}"
+            Text.strong "{d.price}"
+      Column gap:16
+        Heading "Secondi" level:3
+        Divider
+        each d in secondi
+          Row between top gap:16
+            Column grow gap:2
+              Text.strong "{d.name}"
+              Text.muted "{d.desc}"
+            Text.strong "{d.price}"
+  Section
+    Column gap:12
+      Text.eyebrow "RESERVATIONS"
+      Heading "Save your table"
+      Text.lead "Tell us when and how many. We hold your table for 15 minutes."
+    Card gap:16
+      Row gap:16 bottom
+        DatePicker "Date" =date grow
+        Select "Time" =time items:["6:00 pm","7:00 pm","8:00 pm","9:00 pm"] grow -> left=time=='6:00 pm'?5:time=='7:00 pm'?2:time=='8:00 pm'?1:4
+        Stepper "Guests" =party min:1 max:10
+        Button "Reserve, {left} tables left" size:large -> emit reserve; toast "Table requested for {party} at {time}"
+      Text.caption "Parties of more than 10? Ask about private dining."
+  Section tint
+    Column gap:12
+      Text.eyebrow "WHAT GUESTS SAY"
+      Heading "Neighbors, regulars, first timers"
+    Grid cols:2 gap:24
+      Card gap:12
+        Text "★★★★★" color:#FFF59E0B size:20
+        Text.lead "The cacio e pepe alone is worth the walk. We stayed three hours and nobody rushed us."
+        Row gap:10 middle
+          Avatar "Marta Rossi" size:36
+          Text.muted "Marta R., Tuesday regular"
+      Card gap:12
+        Text "★★★★★" color:#FFF59E0B size:20
+        Text.lead "Charred octopus, a glass of red, the oven glowing in the corner. Our new anniversary place."
+        Row gap:10 middle
+          Avatar "Daniel Kim" size:36
+          Text.muted "Daniel K., first visit"
+  Section
+    Column gap:12
+      Text.eyebrow "VISIT"
+      Heading "14 Linden Street, by the old market"
+    Row gap:32 top
+      Card grow
+        MapPanel =pick count:3
+      Card grow gap:12
+        Heading "Hours" level:3
+        Details rows:=[["Monday","Closed"],["Tuesday","5:00 pm to 10:00 pm"],["Wednesday","5:00 pm to 10:00 pm"],["Thursday","5:00 pm to 10:30 pm"],["Friday","5:00 pm to 11:30 pm"],["Saturday","12:00 pm to 11:30 pm"],["Sunday","12:00 pm to 9:30 pm"]]
+        Text.muted "14 Linden Street · (555) 014-2260"
+  Footer
+    Row between top
+      Column gap:8
+        Text.strong "Olmo"
+        Text.muted "Wood fire, handmade pasta."
+      Column gap:8
+        Text.strong "Visit"
+        Text.muted "14 Linden Street"
+        Text.muted "(555) 014-2260"
+      Column gap:8
+        Text.strong "Write to us"
+        Text.muted "hello@olmo.example"
+        Text.muted "events@olmo.example"
+      Text.muted "© 2026 Olmo"
+
+state date=""
+state time="7:00 pm"
+state party=2
+state left=2
+state pick=0
+state antipasti=[{"name":"Charred octopus","desc":"Fingerling potatoes, salsa verde, lemon","price":"$17"},{"name":"Burrata","desc":"Roasted tomatoes, basil oil, grilled bread","price":"$15"},{"name":"Fritto misto","desc":"Calamari, sage, lemon aioli","price":"$16"},{"name":"Wood-fired focaccia","desc":"Rosemary, sea salt, whipped ricotta","price":"$9"},{"name":"Beet and citrus","desc":"Blood orange, pistachio, ricotta salata","price":"$13"}]
+state primi=[{"name":"Cacio e pepe","desc":"Tonnarelli, pecorino, black pepper","price":"$21"},{"name":"Tagliatelle al ragù","desc":"Slow-cooked beef and pork, parmigiano","price":"$24"},{"name":"Pumpkin tortelli","desc":"Brown butter, sage, amaretti","price":"$23"},{"name":"Spaghetti alle vongole","desc":"Clams, garlic, chili, white wine","price":"$26"},{"name":"Wild mushroom risotto","desc":"Carnaroli, thyme, mascarpone","price":"$22"}]
+state secondi=[{"name":"Whole branzino","desc":"Roasted over embers, fennel, capers","price":"$38"},{"name":"Bistecca","desc":"Dry-aged ribeye, rosemary potatoes","price":"$52"},{"name":"Roast chicken","desc":"Under a brick, salsa rossa, bitter greens","price":"$29"},{"name":"Pork chop","desc":"Peach mostarda, grilled radicchio","price":"$34"},{"name":"Eggplant parmigiana","desc":"Smoked mozzarella, San Marzano, basil","price":"$24"}]
