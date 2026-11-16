@@ -2,7 +2,7 @@
 # Validate and render Codelessly layout documents. See tool/render/README.md.
 #   tool/render/render.sh <document.json | dir> --out <dir> [--sizes 390x844,...] [--screen id]
 #       [--full-page] [--fonts dir] [--theme light|dark|system] [--tap id] [--hover id] [--focus id] [--type id=text]
-#       [--set name=json] [--scroll id=px] [--drag id=dx,dy] [--navigate screen?param=value] [--wait ms] [--now time]
+#       [--set name=json] [--scroll id=px] [--drag id=dx,dy] [--double-tap id] [--wheel id=dy] [--pinch id=scale] [--navigate screen?param=value] [--wait ms] [--now time]
 #       [--label text] [--compare png|dir] [--compare-map screen=name] [--validate-only]
 #       [--component Type [--props json] [--slots file]]
 #       [--design-system folder]   (with one document: render it with that design system's blocks and theme)
@@ -54,7 +54,7 @@ for a in "$@"; do
     --*) args+=("$a") ;;
     *)
       # A positional argument right after a value-taking option is that option's value.
-      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map)$ ]]; then
+      if [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|double-tap|wheel|pinch|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map)$ ]]; then
         args+=("$a")
       else
         a="$(abs "$a")"

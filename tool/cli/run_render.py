@@ -25,7 +25,7 @@ RENDER = SDK / 'tool' / 'render' / 'render.sh'
 sys.path.insert(0, str(HERE))
 
 # Render options that take a value (so their value is not a document).
-VALUED = {'--out', '--sizes', '--screen', '--fonts', '--theme', '--tap', '--drag', '--hover', '--focus', '--key',
+VALUED = {'--out', '--sizes', '--screen', '--fonts', '--theme', '--tap', '--double-tap', '--wheel', '--pinch', '--drag', '--hover', '--focus', '--key',
           '--type', '--set', '--now', '--scroll', '--navigate', '--wait', '--label', '--compare', '--compare-map',
           '--design-system', '--component', '--props', '--slots'}
 

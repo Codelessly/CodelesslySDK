@@ -51,6 +51,9 @@ site: navigation may name a canvas of another page.
 | `--theme <mode>` | `light`, `dark` or `system`: the theme mode the site starts in, as a `setThemeMode` action sets it (named colors, text styles and controls follow). PNG names end `-<mode>`; a later `--tap` on the site's switch changes it. |
 | `--tap <id>` | Tap the node where it shows. `<id>#<n>` taps the n-th copy (from 0) of a node a list repeats; `<template>#<n>/<id>` the node inside a list's n-th copy (`evCard#0/evReserve`, the same node as `evReserve#0`). `<id>@<n>` taps the n-th part (from 0) of a control with several: a segment of a `segmentedButton`, a tab of a `tabBar` or `tabs`, a destination of a `navigationBar` or `bottomNavigationBar` (`--tap billing@1`). A unique part `id` or `value` in a control's `tabs`, `segments` or `destinations` can be tapped directly (`--tap stay` for a tab with `"id": "stay"`). A focused text field elsewhere is unfocused first, as a click outside a field does in a browser (its blur reactions run before the tap's). |
 | `--drag <id>=<dx>,<dy>` | Press on the node, move by `dx`, `dy` in a dozen steps and release: a reorder handle, a slider, a draggable card, a swipe. `--drag <id>=<other id>` drags it onto another node (a drop target). A drag that starts on a long press (a list reordered by touch, a long-press draggable) is held first. |
+| `--double-tap <id>` | Tap the node twice in quick succession: a double tap, a double click (a photo's zoom, a `doubleTap` reaction). |
+| `--wheel <id>=<dy>` | Turn a mouse wheel over the node by `dy` pixels (negative: away from the user, which zooms in where a wheel zooms); `--wheel <id>=ctrl+<dy>` with Control held (a browser's trackpad pinch). |
+| `--pinch <id>=<scale>` | Two fingers on the node, 80 px apart, spread to `scale` times as far apart (`2` zooms in, `0.5` out). |
 | `--hover <id>` | Move a mouse over the node (hover states, `cursorEnter`). |
 | `--focus <id>` | Focus the text field (a `textField`, or the one inside the node). |
 | `--unfocus` | Take the focus from the focused field: no caret in the capture (an error state after `--type`); its blur reactions run. |
@@ -71,7 +74,7 @@ site: navigation may name a canvas of another page.
 | `--slots <file>` | With `--component`: what the call passes, `{"children": [ids], "slots": {"name": id}, "nodes": {...}}`. |
 | `--validate-only` | Only validate. |
 
-Steps (`--tap`, `--hover`, `--focus`, `--unfocus`, `--key`, `--type`, `--set`, `--scroll`, `--drag`, `--navigate`, `--wait`) run in the order given, after the screen
+Steps (`--tap`, `--double-tap`, `--hover`, `--focus`, `--unfocus`, `--key`, `--type`, `--set`, `--scroll`, `--drag`, `--wheel`, `--pinch`, `--navigate`, `--wait`) run in the order given, after the screen
 has loaded and before the capture, at every size. Each step settles about a second; before the capture, number variables still counting (`animate`
 `animateTo` in a `load` reaction) are let arrive (up to 20 s), so counters show the numbers they end at. A step that names a node not shown at a size (hidden there by a
 media rule or a binding, or on another breakpoint's canvas) is skipped at that size, with one warning per size
@@ -91,6 +94,8 @@ tool/render/render.sh site/ --out shots/ --navigate 'speaker?id=ada' --tap bioMo
 tool/render/render.sh site/ --out shots/ --screen planner --drag stopHandle#0=0,120 --drag budget=80,0 --label dragged
 # The pricing toggle switched to annual, on desktop only.
 tool/render/render.sh site/ --out shots/ --screen home --sizes 1440x900 --tap billing-toggle --label annual
+# A photo viewer: opened at the third photo, zoomed by a double tap, then panned.
+tool/render/render.sh site/ --out shots/ --tap thumb#2 --double-tap viewerPhoto --drag viewerPhoto=-200,0 --label zoomed
 # A form's error state.
 tool/render/render.sh site/ --out shots/ --screen contact --tap submit --label errors
 ```

@@ -148,6 +148,12 @@ Options:
   --drag <nodeId>=<dx>,<dy>   Press on the node, move by dx, dy and release (a
                           reorder handle, a slider, a draggable card).
   --drag <nodeId>=<nodeId>    Drag the node onto another node (a drop target).
+  --double-tap <nodeId>   Tap the node twice in quick succession (a double tap, a
+                          double click: a photo's zoom).
+  --wheel <nodeId>=<dy>   Turn a mouse wheel over the node by dy pixels (negative:
+                          away from the user); =ctrl+<dy> with Control held.
+  --pinch <nodeId>=<scale>    Two fingers on the node, spread to <scale> times as far
+                          apart (2 zooms in, 0.5 out).
   --wait <ms>             Let time pass (animations, delays, toasts).
   --unfocus               Take the focus from the focused field (no caret in the
                           capture; its blur/unfocus reactions run).
@@ -182,7 +188,7 @@ the fonts site.json declares ("fonts", files beside it: no --fonts needed) and
 the images its documents name by a path relative to the site (images/a.jpg).
 Steps name nodes inside components by path: --tap plans/card1/cta (the call
 ids from the page down, then the node's id; <segment>#<n> picks a list copy).
-Steps (--tap, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --drag, --navigate, --wait) run in the order given.
+Steps (--tap, --double-tap, --hover, --focus, --unfocus, --key, --type, --set, --scroll, --drag, --wheel, --pinch, --navigate, --wait) run in the order given.
 ''';
 
 /// Parses [argv]; throws a [FormatException] with a message for bad input.
@@ -253,9 +259,9 @@ RenderArgs parseArgs(List<String> argv) {
         if (now == null) throw FormatException('--now takes an ISO 8601 time (2026-11-13T09:00:00Z), got "$v".');
       case '--unfocus':
         steps.add(const Step('unfocus', ''));
-      case '--tap' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key':
+      case '--tap' || '--double-tap' || '--hover' || '--focus' || '--navigate' || '--wait' || '--key':
         steps.add(Step(a.substring(2), next(i++, a)));
-      case '--set' || '--scroll' || '--type' || '--drag':
+      case '--set' || '--scroll' || '--type' || '--drag' || '--wheel' || '--pinch':
         final v = next(i++, a);
         final eq = v.indexOf('=');
         if (eq < 0) throw FormatException('$a takes <target>=<value>, got "$v".');
