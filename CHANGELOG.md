@@ -21,12 +21,8 @@
   it is in an overlay), lists it under `focus` in the diagnostics file, and marks it in `--dump-layout`.
 - **docs/BEHAVIOR_CHECKLIST.md**: ten questions a control or design-system block answers, and
   `test/support/keyboard.dart`, the test helper that answers them.
-
-### Fixed
-
-- A `CodelesslyView` session's `closeModal` closes the modal the session opened (a menu row that chose left the
-  menu open).
-
+- **Session views**: a `CodelesslyView` session's `closeModal` closes the modal the session opened (a menu row that
+  chose left the menu open).
 - **Pages at a tablet's and a phone's width**: with the notation's reflow (codelessly_api), a page written for a
   desktop renders without layout errors at 834 and 390 wide; `tool/notation/notation.sh expand` takes
   `--no-reflow`, and reads a site's variables from the `site.json` beside `--out` (or `--site`).
