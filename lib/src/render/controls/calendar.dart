@@ -127,7 +127,8 @@ class RenderCalendar extends RenderBox implements MouseTrackerAnnotation {
     Map<String, String> dayPrices = const {},
     Map<String, String> marks = const {},
   }) {
-    final changed = !sameDay(_value, start) || !sameDay(_rangeEnd, end);
+    bool sameOptionalDay(DateTime? a, DateTime? b) => (a == null && b == null) || sameDay(a, b);
+    final changed = !sameOptionalDay(_value, start) || !sameOptionalDay(_rangeEnd, end);
     _value = start == null ? null : dayOf(start);
     _rangeEnd = end == null ? null : dayOf(end);
     _first = first == null ? null : dayOf(first);

@@ -122,6 +122,8 @@ void main() {
       expect(keys.semantics!.isFocused, isTrue);
       await keys.right();
       expect(calendar.cursorDay.day, 21);
+    calendar.updateRange(start: DateTime(2026, 11, 20), disabledDates: {'2026-11-21'});
+    expect(calendar.cursorDay.day, 21, reason: 'an unchanged bound range does not reset the keyboard cursor');
       await keys.right();
       expect(calendar.cursorDay.day, 22);
       await keys.enter();
