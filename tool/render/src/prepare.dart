@@ -144,15 +144,57 @@ Object? _typed(PropType type, Object? json, String family, Map<String, int> code
   }
 }
 
-/// `--image-map` for the run: network URL prefixes and the folders their files are read from.
+/// `--image-map` for the run: network URL prefixes (or JSON tables) and the folders their files are read from.
 Map<String, String> renderImageMap = const {};
+
+Map<String, String>? _tableFor;
+Map<String, String> _tableOf = const {};
+
+/// The URLs the `--image-map` tables (`<table.json>=<folder>`) name, each with its file: a table is a JSON object
+/// pairing a file path (relative to the folder) with its URL, either way round (`{"art/a.png": "https://..."}`, as
+/// an asset upload writes it, or URL to path). A URL is also listed without its query.
+Map<String, String> _imageTable() {
+  if (identical(_tableFor, renderImageMap)) return _tableOf;
+  final out = <String, String>{};
+  for (final e in renderImageMap.entries) {
+    if (!e.key.endsWith('.json')) continue;
+    final Object? json;
+    try {
+      json = jsonDecode(File(e.key).readAsStringSync());
+    } catch (_) {
+      continue;
+    }
+    if (json is! Map) continue;
+    for (final p in json.entries) {
+      if (p.key is! String || p.value is! String) continue;
+      final (url, file) = (p.value as String).startsWith('http') ? (p.value as String, p.key as String) : (p.key as String, p.value as String);
+      final at = file.startsWith('/') ? file : '${e.value}/$file';
+      out[url] = at;
+      out.putIfAbsent(url.split('?').first, () => at);
+    }
+  }
+  _tableFor = renderImageMap;
+  return _tableOf = out;
+}
 
 /// [text] with a local image path made a data: URL; records every image.
 String _image(String text, String path, String nodeId, String dir, List<ImageRef> images, {String? docDir}) {
   final t = text.trim();
   if (t.startsWith('http://') || t.startsWith('https://')) {
+    // A URL a `--image-map` table names: its file.
+    final listed = _imageTable()[t] ?? _imageTable()[t.split('?').first];
+    if (listed != null) {
+      final mime = _mimeOf(listed);
+      if (mime == null || !File(listed).existsSync()) {
+        images.add((nodeId: nodeId, path: path, url: t, status: 'failed', detail: '--image-map: no image file $listed'));
+        return text;
+      }
+      images.add((nodeId: nodeId, path: path, url: t, status: 'local', detail: listed));
+      return 'data:$mime;base64,${base64Encode(File(listed).readAsBytesSync())}';
+    }
     // A URL `--image-map` maps to a folder: the rest of its path (no query, decoded) is the file there.
     for (final e in renderImageMap.entries) {
+      if (e.key.endsWith('.json')) continue;
       if (!t.startsWith(e.key)) continue;
       final rest = Uri.decodeComponent(t.substring(e.key.length).split(RegExp(r'[?#]')).first);
       final file = File('${e.value}/$rest');
