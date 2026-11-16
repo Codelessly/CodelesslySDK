@@ -1,5 +1,6 @@
 // A keyed selection shared by lists and grids. The group owns one keyboard
 // stop; its items remain individually named and selected in semantics.
+import 'dart:ui' show SemanticsRole;
 import 'package:codelessly_api/core.dart' show Node, SelectionListProps;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -221,109 +222,127 @@ class _SelectionListControlState extends State<SelectionListControl> {
               ),
             ),
             const SizedBox(height: 8),
-            Focus(
-              focusNode: _focus,
-              onKeyEvent: _key,
-              onFocusChange: (on) => setState(() {
-                if (!on) _keyboardFocus = false;
-              }),
-              child: LayoutBuilder(
-                builder: (context, limits) {
-                  final w = limits.maxWidth.isFinite ? limits.maxWidth : width;
-                  final cols = _layoutColumns = w < 600
-                      ? 1
-                      : widget.columns.clamp(
-                          1,
-                          widget.items.isEmpty ? 1 : widget.items.length,
-                        );
-                  final cell = (w - (cols - 1) * 8) / cols;
-                  return DecoratedBox(
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: _focus.hasFocus && _keyboardFocus
-                            ? colors.primary
-                            : colors.outlineVariant,
-                        width: _focus.hasFocus && _keyboardFocus ? 2 : 1,
+            Semantics(
+              role: SemanticsRole.list,
+              label: '${widget.label}, multi-select, $count selected',
+              container: true,
+              explicitChildNodes: true,
+              child: Focus(
+                focusNode: _focus,
+                onKeyEvent: _key,
+                onFocusChange: (on) => setState(() {
+                  if (!on) _keyboardFocus = false;
+                }),
+                child: LayoutBuilder(
+                  builder: (context, limits) {
+                    final w = limits.maxWidth.isFinite
+                        ? limits.maxWidth
+                        : width;
+                    final cols = _layoutColumns = w < 600
+                        ? 1
+                        : widget.columns.clamp(
+                            1,
+                            widget.items.isEmpty ? 1 : widget.items.length,
+                          );
+                    final cell = (w - (cols - 1) * 8) / cols;
+                    return DecoratedBox(
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: _focus.hasFocus && _keyboardFocus
+                              ? colors.primary
+                              : colors.outlineVariant,
+                          width: _focus.hasFocus && _keyboardFocus ? 2 : 1,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
                       ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8),
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          for (var i = 0; i < widget.items.length; i++)
-                            SizedBox(
-                              width: cell - 6,
-                              child: Semantics(
-                                button: true,
-                                selected: _current.contains(
-                                  widget.items[i].key,
-                                ),
-                                focused: _focus.hasFocus && _active == i,
-                                label: widget.items[i].label,
-                                onTap: () => _choose(i),
-                                child: GestureDetector(
-                                  behavior: HitTestBehavior.opaque,
-                                  onTap: () {
-                                    _focus.requestFocus();
-                                    _keyboardFocus = false;
-                                    _choose(
-                                      i,
-                                      range: HardwareKeyboard
-                                          .instance
-                                          .isShiftPressed,
-                                    );
-                                  },
-                                  child: Container(
-                                    constraints: const BoxConstraints(
-                                      minHeight: 44,
-                                    ),
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 10,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color:
-                                          _current.contains(widget.items[i].key)
-                                          ? colors.primaryContainer
-                                          : colors.surface,
-                                      border: Border.all(
-                                        color: _active == i && _focus.hasFocus
-                                            ? colors.primary
-                                            : colors.outlineVariant,
-                                      ),
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        Icon(
-                                          _current.contains(widget.items[i].key)
-                                              ? Icons.check_box
-                                              : Icons.check_box_outline_blank,
-                                          size: 20,
-                                          color: colors.primary,
+                      child: Padding(
+                        padding: const EdgeInsets.all(8),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            for (var i = 0; i < widget.items.length; i++)
+                              SizedBox(
+                                width: cell - 6,
+                                child: Semantics(
+                                  button: true,
+                                  selected: _current.contains(
+                                    widget.items[i].key,
+                                  ),
+                                  focused: _focus.hasFocus && _active == i,
+                                  label: widget.items[i].label,
+                                  onTap: () => _choose(i),
+                                  child: ExcludeSemantics(
+                                    child: GestureDetector(
+                                      behavior: HitTestBehavior.opaque,
+                                      onTap: () {
+                                        _focus.requestFocus();
+                                        _keyboardFocus = false;
+                                        _choose(
+                                          i,
+                                          range: HardwareKeyboard
+                                              .instance
+                                              .isShiftPressed,
+                                        );
+                                      },
+                                      child: Container(
+                                        constraints: const BoxConstraints(
+                                          minHeight: 44,
                                         ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            widget.items[i].label,
-                                            maxLines: 2,
-                                            overflow: TextOverflow.ellipsis,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color:
+                                              _current.contains(
+                                                widget.items[i].key,
+                                              )
+                                              ? colors.primaryContainer
+                                              : colors.surface,
+                                          border: Border.all(
+                                            color:
+                                                _active == i && _focus.hasFocus
+                                                ? colors.primary
+                                                : colors.outlineVariant,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
                                           ),
                                         ),
-                                      ],
+                                        child: Row(
+                                          children: [
+                                            Icon(
+                                              _current.contains(
+                                                    widget.items[i].key,
+                                                  )
+                                                  ? Icons.check_box
+                                                  : Icons
+                                                        .check_box_outline_blank,
+                                              size: 20,
+                                              color: colors.primary,
+                                            ),
+                                            const SizedBox(width: 8),
+                                            Expanded(
+                                              child: Text(
+                                                widget.items[i].label,
+                                                maxLines: 2,
+                                                overflow: TextOverflow.ellipsis,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
                               ),
-                            ),
-                        ],
+                          ],
+                        ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
             const SizedBox(height: 4),
