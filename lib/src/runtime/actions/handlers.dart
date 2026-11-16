@@ -4,14 +4,16 @@
 import 'dart:async';
 
 import 'dart:convert';
+import 'dart:ui' as ui show TextDirection;
 
 import 'package:codelessly_api/core.dart';
 import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:flutter/rendering.dart' as rendering show Axis;
 import 'package:flutter/rendering.dart' show MatrixUtils, Rect, RenderObject, RenderViewportBase;
 import 'package:flutter/scheduler.dart' show SchedulerBinding, timeDilation;
+import 'package:flutter/semantics.dart' show SemanticsService;
 import 'package:flutter/services.dart' show Clipboard, ClipboardData, HapticFeedback, SelectionChangedCause, TextEditingValue, TextSelection;
-import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition;
+import 'package:flutter/widgets.dart' show Cubic, Curve, Curves, ScrollPosition, FocusManager, Directionality, View, WidgetsBinding;
 
 import '../../render/layout/design_scroll.dart' show RenderDesignScroll;
 import '../../render/components.dart' show componentInstanceOf;
@@ -125,6 +127,19 @@ Future<void> _handleCore(CoreAction a, ActionRun run) async {
       await run.run(holds ? a.then : a.orElse);
     case ForEachAction():
       await _forEach(a, run);
+    case AnnounceAction():
+      final message = run.text(a.message).trim();
+      if (message.isEmpty) break;
+      final focused = FocusManager.instance.primaryFocus?.context;
+      final view = focused == null ? WidgetsBinding.instance.platformDispatcher.views.firstOrNull : View.maybeOf(focused);
+      if (view != null) {
+        final declared = run.node?.behaviors.textDirection ??
+            (run.node == null ? null : run.host.tree?.rootSlot(run.node!.id).direction);
+        final direction = declared == null
+            ? (focused == null ? ui.TextDirection.ltr : Directionality.maybeOf(focused) ?? ui.TextDirection.ltr)
+            : declared == TextDirection.rtl ? ui.TextDirection.rtl : ui.TextDirection.ltr;
+        SemanticsService.sendAnnouncement(view, message, direction);
+      }
     case ShowToastAction():
       final runner = run.nested(run.result);
       final label = run.text(a.actionLabel);
