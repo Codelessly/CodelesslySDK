@@ -6,18 +6,30 @@
 // (load, timers, value changes, keys) live with the box; inputs report
 // theirs (changed, submitted...) from their islands; viewport triggers
 // watch what of the box is visible after each frame.
+//
+// A node with a click reaction is also a press target for the keyboard: a
+// Tab stop of its root's focus order (render/controls/focus.dart) that
+// shows the theme's focus ring when the keyboard brings the focus, and runs
+// its click on Enter and Space. See [RenderReactions.configurePress] for
+// which nodes are and are not.
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:collection/collection.dart' show DeepCollectionEquality;
 
 import 'package:codelessly_api/core.dart' show InputDecoration, InputIcon, Json, NavigationBarProps, Node, PropDef, SwitchProps, TriggerType, Trigger;
+import 'package:codelessly_api/core.dart' as api show WidgetState;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
+import '../../render/controls/focus.dart';
+import '../../render/controls/kit.dart' show firstTextUnder, paintFocusRing;
+import '../../render/controls/root.dart' show RenderControlRoot;
 import '../../render/controls/text_field.dart' show RenderTextField;
+import '../../render/controls/tokens.dart' show ControlTokens;
+import '../../render/convert.dart';
 
 import '../../render/custom_paint.dart' show customPaintEvent;
 import '../../render/node_tree.dart';
@@ -111,8 +123,22 @@ class TreeReactions implements NodeInteractions {
     final viewport = types.contains(TriggerType.enterViewport) || types.contains(TriggerType.exitViewport);
     if (pointer.isEmpty && !viewport) return;
     final g = n.behaviors.transformGesture;
+    final states = box.tree.statesOf(box.id, instance: box.instance);
+    final clicks = pointer.contains(TriggerType.click);
     chain.add(box.obtain<RenderReactions>('reactions', RenderReactions.new)
       ..triggers = pointer
+      ..configurePress(
+        // The document's opt-out, and a node that lets the pointer through
+        // or is disabled: not the keyboard's either.
+        focusable: clicks && n.behaviors.focusable && !n.behaviors.ignorePointer && !states.contains(api.WidgetState.disabled),
+        // Whether a click would run now: a reaction whose `when` holds.
+        enabled: clicks ? () => _clickHolds(box) : null,
+        selected: states.contains(api.WidgetState.selected),
+        label: n.behaviors.tooltip,
+        ringColor: clicks ? ControlTokens.of(box).focusBorder : null,
+        ringRadius: n.decoration.radius.flutter,
+        onFocused: (on) => box.tree.setState(box.id, api.WidgetState.focused, on, instance: box.instance),
+      )
       // A plain drag is one finger: on a node that also pinches, a second
       // finger hands the gesture to the pinch.
       ..yieldsToPinch = types.contains(TriggerType.pinch) || (g != null && g.enabled && (g.zoom || g.rotate))
@@ -125,6 +151,25 @@ class TreeReactions implements NodeInteractions {
   }
 
   static bool _isViewport(TriggerType t) => t == TriggerType.enterViewport || t == TriggerType.exitViewport;
+
+  /// Whether a click on [box] would run a reaction now: it has one whose
+  /// `when` holds (a menu row dimmed by `when: props.enabled` has none).
+  bool _clickHolds(NodeBox box) {
+    final n = box.node;
+    if (n == null || !box.attached) return false;
+    ActionContext? ctx;
+    for (final r in n.actions) {
+      if (r.trigger.type != TriggerType.click) continue;
+      final when = r.trigger.when.trim();
+      if (when.isEmpty) return true;
+      try {
+        if (triggerWhenHolds(when, ctx ??= contextFor(box))) return true;
+      } catch (_) {
+        return true;
+      }
+    }
+    return false;
+  }
 
   @override
   Future<void> fire(NodeBox box, String trigger, {Json event = const {}}) async {
@@ -609,14 +654,192 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   bool _has(TriggerType t) => _triggers.contains(t);
   void _fire(TriggerType t, [Json event = const {}]) => onTrigger?.call(t, event);
 
+  // --- the keyboard: a press target ---------------------------------------------
+
+  ControlFocusNode? _focus;
+
+  /// Its place in the root's focus order while it is a press target; null
+  /// otherwise.
+  ControlFocusNode? get focusNode => _focus;
+
+  bool _focusable = false;
+  bool Function()? _enabled;
+  bool _selected = false;
+  String _label = '';
+  Color? _ringColor;
+  BorderRadius _ringRadius = BorderRadius.zero;
+  void Function(bool focused)? _onFocused;
+
+  /// Makes the node a press target for the keyboard, or not.
+  ///
+  /// A node is one when it has a `click` reaction (hover, long press, drag
+  /// and the other triggers alone do not make one) and [focusable]: the
+  /// document did not opt it out (`"focusable": false`), it does not let
+  /// the pointer through (`ignorePointer`) and it is not `disabled`. It
+  /// is skipped while [enabled] says no click would run (every click
+  /// reaction's `when` fails), while something around it ignores the
+  /// pointer or hides it, and when the node is itself a control with a
+  /// focus of its own (a text field with a click reaction is one stop, the
+  /// field). A press target around other stops (a card with a button in
+  /// it) stays one, reached before them.
+  ///
+  /// Focused from the keyboard it paints the focus ring: [ringColor] (the
+  /// theme's `focusBorder`, as the controls' ring) just outside its box,
+  /// with the node's corners ([ringRadius]); and [onFocused] puts the node
+  /// in its `focused` state, so its `states.focused` patch applies. A
+  /// pointer never shows either. [label] names it when it has no text
+  /// (its `tooltip`); [selected] is its bound `selected`.
+  void configurePress({
+    required bool focusable,
+    bool Function()? enabled,
+    bool selected = false,
+    String label = '',
+    Color? ringColor,
+    BorderRadius ringRadius = BorderRadius.zero,
+    void Function(bool focused)? onFocused,
+  }) {
+    _enabled = enabled;
+    _onFocused = onFocused;
+    if (ringColor != _ringColor || ringRadius != _ringRadius) {
+      _ringColor = ringColor;
+      _ringRadius = ringRadius;
+      if (_focus?.showsHighlight ?? false) markNeedsPaint();
+    }
+    if (selected != _selected || label != _label || focusable != _focusable) {
+      _selected = selected;
+      _label = label;
+      markNeedsSemanticsUpdate();
+    }
+    if (focusable == _focusable) return;
+    _focusable = focusable;
+    if (!focusable) {
+      _focus?.leave();
+      _focus = null;
+      return;
+    }
+    final node = _focus = ControlFocusNode(this, onActivate: _activate, onFocusChange: (_) => _focusChanged())
+      ..onHighlightChange = _focusChanged
+      ..focusableWhen = _canFocus
+      ..selected = (() => _selected)
+      ..label = (() => _label.isNotEmpty ? _label : firstTextUnder(this));
+    if (attached) {
+      final root = RenderControlRoot.of(this);
+      if (root != null) node.join(root.focus);
+    }
+  }
+
+  /// Whether a click would run now (its reaction's `when` holds).
+  bool get pressEnabled => _enabled?.call() ?? true;
+
+  bool _canFocus() => pressEnabled && !_isOwnControl;
+
+  // Whether the node is itself a control with a focus of its own (another
+  // focus node inside its box and no other node's): worked out again when
+  // the scope's nodes change.
+  bool _ownControl = false;
+  int _ownControlStamp = -1;
+
+  bool get _isOwnControl {
+    final scope = _focus?.scope;
+    if (scope == null) return false;
+    final stamp = scope.nodes.length;
+    if (stamp == _ownControlStamp) return _ownControl;
+    _ownControlStamp = stamp;
+    final mine = _boxAround(this);
+    _ownControl = false;
+    for (final n in scope.nodes) {
+      if (identical(n, _focus) || n.owner is RenderReactions) continue;
+      if (identical(_boxAround(n.owner), mine)) {
+        _ownControl = true;
+        break;
+      }
+    }
+    return _ownControl;
+  }
+
+  static NodeBox? _boxAround(RenderObject o) {
+    for (RenderObject? p = o; p != null; p = p.parent) {
+      if (p is NodeBox) return p;
+    }
+    return null;
+  }
+
+  /// Whether other stops are inside it (a card with a button): its
+  /// semantics then keep theirs apart.
+  bool get _hasStopsInside {
+    final scope = _focus?.scope;
+    if (scope == null) return false;
+    for (final n in scope.nodes) {
+      if (identical(n, _focus)) continue;
+      for (RenderObject? p = n.owner.parent; p != null; p = p.parent) {
+        if (identical(p, this)) return true;
+      }
+    }
+    return false;
+  }
+
+  // Enter or Space: the click, at its center.
+  void _activate() {
+    if (!attached || !hasSize || !pressEnabled) return;
+    final center = size.center(Offset.zero);
+    _fire(TriggerType.click, _where(center, localToGlobal(center)));
+  }
+
+  bool _shownFocused = false;
+
+  void _focusChanged() {
+    markNeedsPaint();
+    markNeedsSemanticsUpdate();
+    final shown = _focus?.showsHighlight ?? false;
+    if (shown == _shownFocused) return;
+    _shownFocused = shown;
+    // The node's `focused` state re-applies its box: after the key handler.
+    final cb = _onFocused;
+    if (cb != null) scheduleMicrotask(() => cb(shown));
+  }
+
+  @override
+  void paint(PaintingContext context, Offset offset) {
+    super.paint(context, offset);
+    final color = _ringColor;
+    if (color != null && (_focus?.showsHighlight ?? false)) {
+      paintFocusRing(context.canvas, _ringRadius.toRRect(offset & size), color);
+    }
+  }
+
   @override
   void describeSemanticsConfiguration(SemanticsConfiguration config) {
     super.describeSemanticsConfiguration(config);
     if (_has(TriggerType.click) || _has(TriggerType.longPress)) {
       config.isSemanticBoundary = true;
       config.isButton = true;
-      if (_has(TriggerType.click)) config.onTap = () => _fire(TriggerType.click);
+      if (_label.isNotEmpty) {
+        config
+          ..label = _label
+          ..textDirection = TextDirection.ltr;
+      }
+      if (_selected) config.isSelected = true;
+      final focus = _focus;
+      final enabled = pressEnabled;
+      if (_has(TriggerType.click)) {
+        config.isEnabled = enabled;
+        if (enabled) {
+          config.onTap = () {
+            if (focus != null) ControlFocusScope.noteActivation(focus, keyboard: false);
+            _fire(TriggerType.click);
+          };
+        }
+      }
       if (_has(TriggerType.longPress)) config.onLongPress = () => _fire(TriggerType.longPress);
+      if (focus != null && enabled && !_isOwnControl) {
+        config
+          ..isFocusable = true
+          ..isFocused = focus.hasFocus
+          ..onFocus = () => focus.requestFocus();
+        // One node a screen reader reads as a whole (a row's icon, title
+        // and note), unless other stops inside it must stay apart.
+        if (!_hasStopsInside) config.isMergingSemanticsOfDescendants = true;
+      }
     }
   }
 
@@ -648,7 +871,13 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
       _tap = TapGestureRecognizer(debugOwner: this)
         ..onTapDown = ((d) => at = _where(d.localPosition, d.globalPosition))
         ..onTapUp = ((_) {})
-        ..onTap = (_has(TriggerType.click) ? () => _fire(TriggerType.click, at ?? const {}) : null)
+        ..onTap = (_has(TriggerType.click)
+            ? () {
+                // What an overlay this press opens gives the focus back to.
+                if (_focus case final f?) ControlFocusScope.noteActivation(f, keyboard: false);
+                _fire(TriggerType.click, at ?? const {});
+              }
+            : null)
         ..onSecondaryTapUp = _has(TriggerType.secondaryClick)
             ? (d) => _fire(TriggerType.secondaryClick, {
                   'result': {'x': d.globalPosition.dx, 'y': d.globalPosition.dy},
@@ -864,6 +1093,10 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
   void attach(PipelineOwner owner) {
     super.attach(owner);
     if (_visibleFraction != null) _ViewportWatcher.add(this);
+    if (_focus case final f?) {
+      final root = RenderControlRoot.of(this);
+      if (root != null) f.join(root.focus);
+    }
   }
 
   @override
@@ -884,14 +1117,19 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
     // layer on pointer down) detaches and re-attaches it in the same frame:
     // disposing the recognizers then lost the tap in progress, so a button
     // with press feedback never clicked. Dispose only if it stays detached.
+    // Its place in the focus order too: a state style that adds a layer as
+    // the focus arrives must not take the focus away.
     SchedulerBinding.instance.addPostFrameCallback((_) {
-      if (!attached) _disposeRecognizers();
+      if (attached) return;
+      _disposeRecognizers();
+      _focus?.leave();
     });
   }
 
   @override
   void dispose() {
     _disposeRecognizers();
+    _focus?.leave();
     super.dispose();
   }
 
