@@ -833,7 +833,6 @@ class RenderReactions extends RenderProxyBoxWithHitTestBehavior implements Mouse
       if (_has(TriggerType.longPress)) config.onLongPress = () => _fire(TriggerType.longPress);
       if (focus != null && enabled && !_isOwnControl) {
         config
-          ..isFocusable = true
           ..isFocused = focus.hasFocus
           ..onFocus = () => focus.requestFocus();
         // One node a screen reader reads as a whole (a row's icon, title
