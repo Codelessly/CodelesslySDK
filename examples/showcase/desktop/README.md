@@ -119,8 +119,8 @@ page it is a part of (`native/<page>.png`), in the page tier's names, over three
 copies the ones that passed into `design_systems/cards/components` and a picture of each into `blocks/pictures/`.
 Installed: SiteNav, Hero, LogoStrip, FeatureCard, StatBand, Testimonial, PricingPlan, FaqItem, CallToAction,
 PostCard, SiteFooter, ArticleHeader, CodeSample, DocsNav, PageHeader, StatCard, FormSection, SettingRow,
-ConversationRow, TaskCard, BoardColumn (see `install.py`'s output for the current list). Not installed: DataTable,
-MessageBubble and SideNav failed their own use test (a tap that should change a text did not); EmptyState is
+ConversationRow, TaskCard, BoardColumn, FilterBar (22). Not installed: DataTable, MessageBubble, SideNav and
+Pagination failed their own use test (a tap that should change a text did not); EmptyState is
 SSUI's.
 
 `tier5` is the ten pages written with the blocks on offer: 1 notation issue, 0 render errors. The model used
