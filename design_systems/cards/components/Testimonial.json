@@ -21,6 +21,7 @@
  "nodes": {
   "panel": {
    "type": "column",
+   "media": [{"maxWidth": 699, "patch": {"layout": {"padding": [20, 20, 20, 20]}, "props": {"spacing": 12}}}],
    "children": ["mark", "stars", "quote", "person"],
    "props": {"crossAxisAlignment": "center", "spacing": 18},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [32, 32, 32, 32]},
@@ -52,6 +53,7 @@
   "s5": {"type": "icon", "props": {"icon": "star_rounded", "size": 20, "color": "gold"}, "layout": {"width": 20, "height": 20}, "bind": {"props.color": "${= round(props.rating, 0) >= 5 ? theme.colors.gold : theme.colors.lineStrong}"}},
   "quote": {
    "type": "text",
+   "media": [{"maxWidth": 699, "patch": {"props": {"style": {"fontSize": 18, "height": 1.35}}}}],
    "props": {
     "text": "${props.quote}",
     "style": {"from": "heading3Wide", "fontSize": 22, "height": 1.42, "color": "ink"},

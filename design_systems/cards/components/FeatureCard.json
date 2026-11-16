@@ -18,6 +18,17 @@
  },
  "previews": [
   {
+   "name": "Accent feature",
+   "size": [368, 290],
+   "props": {
+    "title": "A quieter arrival",
+    "text": "The first step is clear and close at hand.",
+    "icon": "auto_awesome_rounded",
+    "tone": "accent",
+    "link": "Explore"
+   }
+  },
+  {
    "name": "Channel sync",
    "size": [368, 290],
    "props": {
@@ -52,7 +63,7 @@
    "decoration": {"fills": [{"color": "iconTile"}], "radius": 12},
    "bind": {
     "decoration.radius": "${theme.radii.tileWide}",
-    "decoration.fills[0].color": "${= props.tone == 'good' ? theme.colors.goodTint : props.tone == 'warn' ? theme.colors.warnTint : props.tone == 'bad' ? theme.colors.badTint : props.tone == 'neutral' ? theme.colors.tile : theme.colors.iconTile}"
+    "decoration.fills[0].color": "${= props.tone == 'good' ? theme.colors.goodTint : props.tone == 'warn' ? theme.colors.warnTint : props.tone == 'bad' ? theme.colors.badTint : props.tone == 'neutral' ? theme.colors.tile : theme.colors.accentTint}"
    }
   },
   "markIcon": {

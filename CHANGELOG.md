@@ -1,3 +1,47 @@
+## Unreleased
+
+### Added
+
+- **The keyboard on plain nodes**: a node with a `click` reaction is a Tab stop. It shows the theme's focus ring
+  (`focusBorder`, the node's corner radius) when the keyboard brings the focus, never for a pointer; Enter and Space
+  run its click; its `focused` state applies; a screen reader gets one focusable button named by its text or
+  `tooltip`. Skipped: `focusable: false`, `ignorePointer`, `disabled`, hidden nodes, a click whose `when` fails,
+  and a node that is itself a control. Tab also skips controls under `ignorePointer` and scrolls the stop it lands
+  on into view.
+- **Modal overlays hold the keyboard**: a dialog, sheet, side sheet, popover, full-screen cover and the built-in
+  confirm take the focus as they open (the first focusable when the keyboard opened them, else the overlay itself
+  with no ring), keep Tab inside, close on Escape unless `barrierDismissible` is false or the canvas blocks back
+  (`backPressed` runs), and give the focus back to what opened them; nested overlays unwind. Their route is named
+  for assistive technology (the canvas's `semanticLabel`, a popover by its opener, else its first text).
+  `ModalFocus` (internals) is the host for a route of your own.
+- **`focusGroup`**: what is focusable inside a node is one Tab stop; the arrows of its axis, Home, End and (with
+  `typeAhead`) a letter move inside. Cards' `MenuPopover` is one, so a notation `Menu` is driven as the kit's
+  dropdown menu is; `MenuItem` shows the focused row as the hovered one.
+- **Render command**: prints where the keyboard focus is after the steps (the node, whether its ring shows, whether
+  it is in an overlay), lists it under `focus` in the diagnostics file, and marks it in `--dump-layout`.
+- **docs/BEHAVIOR_CHECKLIST.md**: ten questions a control or design-system block answers, and
+  `test/support/keyboard.dart`, the test helper that answers them.
+- **Session views**: a `CodelesslyView` session's `closeModal` closes the modal the session opened (a menu row that
+  chose left the menu open).
+- **Pages at a tablet's and a phone's width**: with the notation's reflow (codelessly_api), a page written for a
+  desktop renders without layout errors at 834 and 390 wide; `tool/notation/notation.sh expand` takes
+  `--no-reflow`, and reads a site's variables from the `site.json` beside `--out` (or `--site`).
+- **A menu's corner**: a popover is clipped to a theme's `radii.menu` where it names one (else `radii.popup`, a
+  dialog's corner).
+- **Cards**: blocks fixed for a phone (SiteNav with its own menu, Hero, PostCard, Details with `inlineOnPhone`,
+  PlaceRow, Steps, Pager, ComparisonTable, PhotoGallery, CodeSample, Counter, Testimonial, SiteFooter, DocsNav,
+  CommandPalette, FeatureCard, InputField, CallToAction), a new `BeforeAfter`, `radii.menu`, and menu items at
+  the body size. `design_systems/cards/tool/repairs.py` keeps changes made to generated components across a
+  rebuild (`--record`).
+- **Examples**: overlays, an app's sidebar drawer and a lightbox written in the notation
+  (`examples/showcase/desktop/behaviours`).
+
+### Fixed
+
+- A date or time field given only a label keeps its calendar and chevron, and shows the label as its hint.
+- A page route opened from an overlay sized to its design fills the window.
+- `tool/render/render.sh` runs under Git Bash on Windows (it gave Dart `/c/…` paths).
+
 ## 32.0.0
 
 Needs codelessly_api 32.0.0. No SDK API was removed or renamed; the major version follows the API's (the compact

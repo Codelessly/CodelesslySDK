@@ -18,7 +18,9 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 
 import 'animations.dart';
+import 'controls/focus.dart' show ControlFocusAxis;
 import 'controls/overlay.dart' show RenderTooltipRegion;
+import 'controls/root.dart' show RenderFocusGroup;
 import 'controls/tokens.dart' show ControlTokens;
 import 'convert.dart';
 import 'drag_track.dart';
@@ -102,6 +104,21 @@ bool _hasMotionLayer(NodeBuilder b, Node n, bool animates) =>
 void loopLayers(NodeBuilder b, Node n, List<RenderBox> chain, {required bool animates}) {
   final be = n.behaviors;
   if (be.ignorePointer && animates) chain.add(b.obtain<RenderIgnorePointer>('ignorePointer', RenderIgnorePointer.new));
+  // One Tab stop for what is focusable inside; the arrows move among it
+  // (render/controls/focus.dart's ControlFocusGroup).
+  if (be.focusGroup case final api.FocusGroup group when animates) {
+    chain.add(b.obtain<RenderFocusGroup>('focusGroup', RenderFocusGroup.new)
+      ..configure(
+        axis: switch (group.axis) {
+          api.FocusGroupAxis.vertical => ControlFocusAxis.vertical,
+          api.FocusGroupAxis.horizontal => ControlFocusAxis.horizontal,
+          api.FocusGroupAxis.both => ControlFocusAxis.both,
+        },
+        wrap: group.wrap,
+        typeAhead: group.typeAhead,
+        rightToLeft: be.textDirection == api.TextDirection.rtl,
+      ));
+  }
   // Pointer states a running app tracks (hover and press), for the node's
   // state styles and ink.
   final states = be.states.patches.keys;
