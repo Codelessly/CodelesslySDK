@@ -15,6 +15,7 @@ import 'package:codelessly_api/core.dart'
         RouteTransition,
         ShowToastAction;
 import 'package:flutter/material.dart' hide NavigationMode;
+import 'package:flutter/services.dart' show KeyDownEvent, LogicalKeyboardKey;
 import 'package:codelessly_api/core.dart' show NavigationMode;
 
 import 'viewport.dart' show CanvasSizing, CanvasSizingScope;
@@ -26,6 +27,8 @@ import 'ui/route_transition.dart';
 import 'ui/toast.dart';
 import '../render/control_theme.dart' show CodelesslyThemeTokens;
 import '../render/convert.dart' show boxShadow;
+import '../render/controls/focus.dart' show ControlFocusLayer;
+import '../render/node_view.dart' show ControlFocusLayerScope;
 import '../runtime/actions/ui.dart';
 
 /// Builds the route that shows screen [destination] (a canvas or layout id)
@@ -42,7 +45,7 @@ typedef ScreenBuilder = Widget? Function(String destination, Json params);
 ///
 /// [context] gives the context the actions run near (a NodeView's, a
 /// screen's); it's read when an action runs, so it can be any later one.
-class NavigatorActionUi implements ActionUi, OptionalFilePicker {
+class NavigatorActionUi implements ActionUi, OptionalFilePicker, HoverCardUi {
   NavigatorActionUi({required this.context, this.route, this.modal, this.sheetModal, this.files, this.breakpoints});
 
   final BuildContext? Function() context;
@@ -71,11 +74,20 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
     return c != null && c.mounted ? c : null;
   }
 
+  static final Expando<_HoverCardSession> _hoverCards = Expando<_HoverCardSession>();
+
+  @override
+  void hoverAnchorExit(Rect anchor) {
+    final c = _context;
+    if (c != null) _hoverCards[Navigator.of(c)]?.anchorExit(anchor);
+  }
+
   @override
   Future<void> navigate(NavigateAction action, {Json params = const {}, Json baseParams = const {}}) async {
     final c = _context;
     final navigator = c == null ? null : Navigator.maybeOf(c);
     if (navigator == null) return;
+    _hoverCards[navigator]?.dismiss();
     var mode = action.mode;
     if (mode == NavigationMode.pop) {
       if (navigator.canPop()) {
@@ -128,6 +140,11 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
       // when no anchor is named.
       api.ModalAnchor.none => action.presentation == ModalPresentation.popover ? RevealAnchor.lastTrigger ?? pointer : null,
     };
+    if (action.hoverCard && anchor != null && !sheet) {
+      final navigator = Navigator.of(c);
+      final session = _hoverCards[navigator] ??= _HoverCardSession(navigator);
+      return session.open(c, modalContent, anchor: anchor, action: action);
+    }
     // A popover: by the node that opened it, or the pointer.
     if (anchor != null &&
         action.routeTransition == null &&
@@ -141,6 +158,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
           gap: action.anchorGap,
           offset: action.anchorOffset,
           reserve: action.anchorReserve,
+          arrow: action.popoverArrow,
           barrierDismissible: action.barrierDismissible,
           barrierColor: action.barrierColor);
     }
@@ -165,6 +183,11 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
   bool closeModal(Object? result) {
     final c = _context;
     if (c == null) return false;
+    final hover = _hoverCards[Navigator.of(c)];
+    if (hover != null && hover.isOpen) {
+      hover.dismiss(result);
+      return true;
+    }
     // A presented banner or full-screen layout closes the way it was shown.
     if (CodelesslyPresentation.maybeOf(c)?.close case final close?) {
       close(result);
@@ -409,6 +432,7 @@ Future<Object?> showAnchoredModal(
   double gap = 4,
   double offset = 0,
   double reserve = 0,
+  bool arrow = false,
   bool barrierDismissible = true,
   api.Color? barrierColor,
 }) {
@@ -417,6 +441,9 @@ Future<Object?> showAnchoredModal(
   final local = overlay is RenderBox && overlay.attached
       ? Rect.fromPoints(overlay.globalToLocal(anchor.topLeft), overlay.globalToLocal(anchor.bottomRight))
       : anchor;
+  final layout = PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset,
+      reserve: reserve, textDirection: Directionality.of(context));
+  final shown = arrow ? _arrowContent(context, content, layout) : content;
   return showDialog<Object?>(
     context: context,
     useRootNavigator: false,
@@ -424,23 +451,269 @@ Future<Object?> showAnchoredModal(
     barrierColor: barrierColor == null ? Colors.transparent : Color(barrierColor.value),
     useSafeArea: false,
     builder: (_) => CustomSingleChildLayout(
-      delegate: PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset, reserve: reserve),
+      delegate: layout,
       child: Material(
         type: MaterialType.transparency,
-        child: ModalFocus(dismissible: barrierDismissible, popover: true, child: content),
+        child: ModalFocus(dismissible: barrierDismissible, popover: true, child: shown),
       ),
     ),
   );
 }
 
+Widget _arrowContent(
+  BuildContext context,
+  Widget child,
+  PopoverLayout layout,
+) => CustomPaint(
+  foregroundPainter: _PopoverArrowPainter(
+    layout,
+    Theme.of(context).colorScheme.surface,
+    Theme.of(context).colorScheme.outlineVariant,
+  ),
+  child: Padding(
+    padding: const EdgeInsets.symmetric(vertical: 8),
+    child: child,
+  ),
+);
+
+class _PopoverArrowPainter extends CustomPainter {
+  const _PopoverArrowPainter(this.layout, this.color, this.border);
+  final PopoverLayout layout;
+  final Color color;
+  final Color border;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final above = layout.position.dy < layout.anchor.top;
+    final x = (layout.anchor.center.dx - layout.position.dx)
+        .clamp(12.0, size.width - 12.0)
+        .toDouble();
+    final y = above ? size.height : 0.0;
+    final path = Path()
+      ..moveTo(x - 8, above ? y - 8 : y + 8)
+      ..lineTo(x, y)
+      ..lineTo(x + 8, above ? y - 8 : y + 8)
+      ..close();
+    canvas.drawPath(path, Paint()..color = color);
+    final outline = Path()
+      ..moveTo(x - 8, above ? y - 8 : y + 8)
+      ..lineTo(x, y)
+      ..lineTo(x + 8, above ? y - 8 : y + 8);
+    canvas.drawPath(
+      outline,
+      Paint()
+        ..color = border
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 1,
+    );
+  }
+
+  @override
+  bool shouldRepaint(_PopoverArrowPainter old) =>
+      old.layout != layout || old.color != color || old.border != border;
+}
+
+/// A hover preview does not install a modal barrier: the pointer can cross
+/// from its anchor into the preview, and the page stays usable underneath.
+class _HoverCardSession {
+  _HoverCardSession(this.navigator);
+  final NavigatorState navigator;
+  OverlayEntry? _entry;
+  Timer? _openTimer, _closeTimer;
+  Timer? _resumeHoverTimer;
+  bool _suppressHover = false;
+  Completer<Object?>? _result;
+  Rect? _anchor;
+  FocusNode? _returnFocus;
+  FocusNode? _cardFocus;
+  ControlFocusLayer? _layer;
+  bool _insideCard = false;
+  bool _dismissible = true;
+  bool get isOpen => _entry != null;
+
+  Future<Object?> open(
+    BuildContext context,
+    Widget content, {
+    required Rect anchor,
+    required OpenModalAction action,
+  }) {
+    if (_suppressHover && action.hoverDelayMs > 0)
+      return Future<Object?>.value(null);
+    if (_result != null && _anchor == anchor) {
+      _closeTimer?.cancel();
+      if (action.hoverDelayMs == 0 && _entry == null) {
+        _openTimer?.cancel();
+        _show(context, content, anchor, action);
+      }
+      return _result!.future;
+    }
+    dismiss();
+    _anchor = anchor;
+    final result = _result = Completer<Object?>();
+    if (action.hoverDelayMs > 0) {
+      _openTimer = Timer(
+        Duration(milliseconds: action.hoverDelayMs),
+        () => _show(context, content, anchor, action),
+      );
+    } else {
+      _show(context, content, anchor, action);
+    }
+    return result.future;
+  }
+
+  void _show(
+    BuildContext context,
+    Widget content,
+    Rect anchor,
+    OpenModalAction action,
+  ) {
+    if (_result == null || !navigator.mounted) return;
+    _dismissible = action.barrierDismissible;
+    final overlay = navigator.overlay;
+    if (overlay == null) return;
+    final render = overlay.context.findRenderObject();
+    final local = render is RenderBox && render.attached
+        ? Rect.fromPoints(
+            render.globalToLocal(anchor.topLeft),
+            render.globalToLocal(anchor.bottomRight),
+          )
+        : anchor;
+    final layout = PopoverLayout(
+      anchor: local,
+      placement: action.placement,
+      gap: action.anchorGap,
+      offset: action.anchorOffset,
+      reserve: action.anchorReserve,
+      textDirection: Directionality.of(context),
+    );
+    final keyboard =
+        FocusManager.instance.highlightMode == FocusHighlightMode.traditional;
+    _layer = ControlFocusLayer(
+      onDismiss: () {
+        if (!_dismissible) return false;
+        dismiss();
+        return true;
+      },
+      isCurrent: () => navigator.mounted,
+    )..open();
+    if (keyboard) {
+      _returnFocus = FocusManager.instance.primaryFocus;
+      _cardFocus = FocusNode(debugLabel: 'Hover card');
+    }
+    final inherited = InheritedTheme.captureAll(
+      context,
+      Localizations.override(context: context, child: content),
+    );
+    _entry = OverlayEntry(
+      builder: (entryContext) => CustomSingleChildLayout(
+        delegate: layout,
+        child: MouseRegion(
+          onEnter: (_) {
+            _insideCard = true;
+            _closeTimer?.cancel();
+          },
+          onExit: (_) {
+            _insideCard = false;
+            if (_dismissible) _scheduleClose(const Duration(milliseconds: 180));
+          },
+          child: Focus(
+            focusNode: _cardFocus,
+            onKeyEvent: (_, event) {
+              if (_dismissible && event is KeyDownEvent &&
+                  event.logicalKey == LogicalKeyboardKey.escape) {
+                dismiss();
+                return KeyEventResult.handled;
+              }
+              return KeyEventResult.ignored;
+            },
+            child: CodelesslyPresentation(
+              presentation: ModalPresentation.popover,
+              close: dismiss,
+              child: Semantics(
+                scopesRoute: true,
+                namesRoute: true,
+                label: _layer?.openerLabel ?? 'Preview',
+                explicitChildNodes: true,
+                child: ControlFocusLayerScope(
+                  layer: _layer!,
+                  child: Material(
+                    type: MaterialType.transparency,
+                    child: action.popoverArrow
+                        ? _arrowContent(context, inherited, layout)
+                        : inherited,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    overlay.insert(_entry!);
+    if (keyboard)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_entry != null) _cardFocus?.requestFocus();
+      });
+  }
+
+  void anchorExit(Rect anchor) {
+    if (!_dismissible) return;
+    if (_anchor == null || (_anchor!.center - anchor.center).distance > 2)
+      return;
+    _openTimer?.cancel();
+    if (_entry == null) {
+      dismiss();
+      return;
+    }
+    if (!_insideCard) _scheduleClose(const Duration(milliseconds: 480));
+  }
+
+  void _scheduleClose(Duration delay) {
+    _closeTimer?.cancel();
+    _closeTimer = Timer(delay, () {
+      if (!_insideCard) dismiss();
+    });
+  }
+
+  void dismiss([Object? value]) {
+    if (_entry != null) {
+      _suppressHover = true;
+      _resumeHoverTimer?.cancel();
+      _resumeHoverTimer = Timer(
+        const Duration(milliseconds: 500),
+        () => _suppressHover = false,
+      );
+    }
+    _openTimer?.cancel();
+    _closeTimer?.cancel();
+    _entry?.remove();
+    _entry?.dispose();
+    _entry = null;
+    _layer?.close();
+    _layer = null;
+    _cardFocus?.dispose();
+    _cardFocus = null;
+    if (_returnFocus case final focus? when focus.canRequestFocus)
+      focus.requestFocus();
+    _returnFocus = null;
+    _insideCard = false;
+    _anchor = null;
+    final result = _result;
+    _result = null;
+    if (result != null && !result.isCompleted) result.complete(value);
+  }
+}
+
 /// Lays a popover out by its anchor (see [showAnchoredModal]).
 class PopoverLayout extends SingleChildLayoutDelegate {
   PopoverLayout(
-      {required this.anchor, required this.placement, this.gap = 4, this.offset = 0, this.margin = 8, this.reserve = 0});
+      {required this.anchor, required this.placement, this.gap = 4, this.offset = 0, this.margin = 8, this.reserve = 0, this.textDirection = TextDirection.ltr});
 
   final Rect anchor;
   final api.PopoverPlacement placement;
   final double gap, offset, margin;
+  final TextDirection textDirection;
+  Offset position = Offset.zero;
 
   /// Room kept under the popover's top when it opens below its anchor
   /// (`OpenModalAction.anchorReserve`).
@@ -463,11 +736,12 @@ class PopoverLayout extends SingleChildLayoutDelegate {
                 : name.startsWith('left')
                     ? 'left'
                     : 'center';
-    final along = name.endsWith('Start')
+    final logicalAlong = name.endsWith('Start')
         ? -1
         : name.endsWith('End')
             ? 1
             : 0;
+    final along = vertical && textDirection == TextDirection.rtl ? -logicalAlong : logicalAlong;
     double x, y;
     if (side == 'center') {
       x = anchor.center.dx - childSize.width / 2;
@@ -505,7 +779,7 @@ class PopoverLayout extends SingleChildLayoutDelegate {
     }
     double clampTo(double v, double extent, double total) =>
         v.clamp(margin, (total - margin - extent).clamp(margin, double.infinity)).toDouble();
-    return Offset(clampTo(x, childSize.width, size.width), clampTo(y, childSize.height, size.height));
+    return position = Offset(clampTo(x, childSize.width, size.width), clampTo(y, childSize.height, size.height));
   }
 
   @override
@@ -515,6 +789,7 @@ class PopoverLayout extends SingleChildLayoutDelegate {
       old.gap != gap ||
       old.offset != offset ||
       old.margin != margin ||
-      old.reserve != reserve;
+      old.reserve != reserve ||
+      old.textDirection != textDirection;
 }
 
