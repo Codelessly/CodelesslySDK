@@ -12,7 +12,8 @@ import 'dart:ui' as ui;
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_api/validate.dart';
 import 'package:codelessly_sdk/codelessly_sdk.dart';
-import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl;
+import 'package:codelessly_sdk/src/render/controls/focus.dart' show ControlFocusScope;
+import 'package:codelessly_sdk/src/render/controls/kit.dart' show LabeledControl, firstTextUnder;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart' hide Page, Step; // ignore: deprecated_member_use
 import 'package:flutter/rendering.dart';
@@ -113,6 +114,10 @@ final class RenderReport {
 
   /// Texts a `copyToClipboard` action copied, in order.
   final List<api.Json> clipboard = [];
+
+  /// Where the keyboard focus is in each capture that has one (after
+  /// `--key Tab`, a `--focus`): the node, and whether its ring shows.
+  final List<api.Json> focus = [];
   int get errors => diagnostics.where((d) => d['severity'] == 'error').length;
   int get warnings => diagnostics.where((d) => d['severity'] == 'warning').length;
 }
@@ -817,11 +822,28 @@ Future<void> _renderAll(
           }
         }
       }
+      // Where the keyboard focus is: the node (a control, a text field, a
+      // node with a click reaction), and whether its focus ring shows.
+      final focusedBox = _focusedBox();
+      if (focusedBox != null) {
+        final scope = ControlFocusScope.focusedScope!;
+        report.focus.add({
+          'image': name,
+          'screen': label,
+          'size': sizeName,
+          'id': focusedBox.id,
+          if (componentInstanceOf(focusedBox.instance) != null) 'path': focusedBox.tree.pathOf(focusedBox.id, focusedBox.instance),
+          'ring': scope.focused!.showsHighlight,
+          if (scope.focused!.label?.call() ?? firstTextUnder(focusedBox) case final String text) 'text': text,
+          if (scope.layer != null) 'inOverlay': true,
+        });
+      }
       if (args.dumpLayout) {
         final boxes = [
           for (final b in _boxes(binding))
             {
               'id': b.id,
+              if (identical(b, focusedBox)) 'focused': true,
               if (b.instance != null) 'instance': '${b.instance}',
               if (componentInstanceOf(b.instance) != null) 'path': b.tree.pathOf(b.id, b.instance),
               'x': _rectOf(b).left.round(),
@@ -2248,6 +2270,17 @@ List<RuntimeIssue> _check(
   return out;
 }
 
+/// The node box that holds the keyboard focus (the box around the focused
+/// control or press target); null: nothing has it.
+NodeBox? _focusedBox() {
+  final node = ControlFocusScope.focusedScope?.focused;
+  if (node == null || !node.owner.attached) return null;
+  for (RenderObject? p = node.owner; p != null; p = p.parent) {
+    if (p is NodeBox) return p;
+  }
+  return null;
+}
+
 /// Where a run's diagnostics go: `diagnostics.json`, or with a label
 /// `diagnostics-<label>.json` (one run per state keeps each state's).
 String diagnosticsFileName(String? label) => label == null ? 'diagnostics.json' : 'diagnostics-${_fileSafe(label)}.json';
@@ -2263,6 +2296,7 @@ RenderReport _finish(RenderReport report, RenderArgs args) {
     if (report.comparisons.isNotEmpty) 'comparisons': [for (final c in report.comparisons) c.toJson()],
     if (report.downloads.isNotEmpty) 'downloads': report.downloads,
     if (report.clipboard.isNotEmpty) 'clipboard': report.clipboard,
+    if (report.focus.isNotEmpty) 'focus': report.focus,
     'diagnostics': report.diagnostics,
   }));
   return report;
@@ -2293,6 +2327,10 @@ String formatReport(RenderReport report) {
   for (final c in report.clipboard) {
     final t = '${c['text']}';
     b.writeln('copied to the clipboard: ${jsonEncode(t.length > 120 ? '${t.substring(0, 120)}...' : t)}${c['screen'] == null ? '' : ' [screen ${c['screen']} ${c['size']}]'}');
+  }
+  for (final f in report.focus) {
+    b.writeln('focus on ${f['path'] ?? f['id']}${f['text'] == null ? '' : ' ${jsonEncode(f['text'])}'}'
+        '${f['ring'] == true ? ' (ring shown)' : ' (no ring)'}${f['inOverlay'] == true ? ', in the open overlay' : ''} [screen ${f['screen']} ${f['size']}]');
   }
   b.writeln('${report.errors} error(s), ${report.warnings} warning(s).');
   return b.toString();
