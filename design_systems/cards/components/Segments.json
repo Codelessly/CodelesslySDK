@@ -91,7 +91,7 @@
   },
   "cells": {
    "type": "gridView",
-   "media": [{"maxWidth": 699, "patch": {"props": {"crossAxisCount": 2}, "bind": {"props.crossAxisCount": null}}}],
+   "media": [{"maxWidth": 699, "patch": {"bind": {"props.crossAxisCount": "${= length(props.options) <= 3 ? max(1, length(props.options)) : 2}"}}}],
    "children": [
     "cell"
    ],
