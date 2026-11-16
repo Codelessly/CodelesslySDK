@@ -18,6 +18,9 @@ Tools:
 * `codelessly_flatten`   nested node trees (as the editor takes them) to a flat document.
 * `codelessly_states`    every state of a site from a manifest: summary (worst first) and a contact sheet.
 
+The first validate, render or states call starts the render server (tool/render/serve.sh), so later calls cost
+about a second instead of six; set CODELESSLY_MCP_NO_SERVER=1 to keep every run separate.
+
 Inline documents are written under $CODELESSLY_MCP_WORK (default: a temp folder), one folder per call, so a call's
 files can be read back; every answer names its folder. Messages are newline-delimited JSON-RPC 2.0 (MCP stdio).
 """
@@ -195,7 +198,21 @@ def tool_docs(args):
     return [text(out)], code not in (0,)
 
 
+_server_checked = False
+
+
+def ensure_server():
+    """Starts the render server (tool/render/serve.sh) once per MCP session, so every render after the first skips
+    Flutter's start. CODELESSLY_MCP_NO_SERVER=1 turns it off."""
+    global _server_checked
+    if _server_checked or os.environ.get('CODELESSLY_MCP_NO_SERVER'):
+        return
+    _server_checked = True
+    subprocess.run([str(SDK / 'tool' / 'render' / 'serve.sh')], capture_output=True, text=True, timeout=900)
+
+
 def tool_validate(args):
+    ensure_server()
     d = call_dir('validate')
     doc = document_arg(args, d)
     code, out = run([str(CODELESSLY), 'validate', doc, '--out', str(d / 'out')])
@@ -203,6 +220,7 @@ def tool_validate(args):
 
 
 def tool_render(args):
+    ensure_server()
     d = call_dir('render')
     doc = document_arg(args, d)
     out = d / 'out'
@@ -250,6 +268,7 @@ def tool_flatten(args):
 
 
 def tool_states(args):
+    ensure_server()
     d = call_dir('states')
     cmd = [str(CODELESSLY), 'states', args['manifest'], '--out', str(d)]
     for o in args.get('only') or []:
