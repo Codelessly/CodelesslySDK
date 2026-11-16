@@ -1,0 +1,88 @@
+Page
+  Nav
+    Brand "Signal & Noise" icon:"graphic_eq"
+    Row gap:4
+      Link "Articles"
+      Link "Topics"
+      Link "Podcast"
+      Link "About"
+    Button "Subscribe" -> emit subscribe
+  Section
+    Column gap:16 maxw:820
+      Badge.primary "Infrastructure"
+      Heading "What we learned moving 40 services to one queue" level:1
+      Row gap:12
+        Avatar "Maya Reyes" size:44
+        Column gap:2
+          Text.strong "Maya Reyes"
+          Row gap:8
+            Text.muted "March 12, 2026"
+            Text.muted "·"
+            Text.muted "9 min read"
+    Media kind:"skyline" tone:"dusk" h:400 w:fill
+  Section
+    Row gap:64 top
+      Column grow gap:20 maxw:700
+        Heading "Why one queue" level:2
+        Text.body "For years every team ran its own broker. Each one had its own retry rules, its own dashboards and its own way of failing at three in the morning. When we counted, forty services were publishing to nine different systems, and nobody could say where a given message had been."
+        Text.body "Consolidating looked like a risky bet. A single queue becomes a single point of failure, and a noisy neighbour can starve everyone else. We decided the operational clarity was worth it, as long as we could isolate workloads properly."
+        Box pad:[24,8,8,8] border-left:#FF3D5AFE gap:8
+          Text "“A queue is not a pipe. It is a promise about what happens when things go wrong.”" size:22 weight:600
+          Text.muted "Maya Reyes, Platform Team"
+        Heading "How we migrated without downtime" level:2
+        Text.body "We moved services one at a time, writing to both the old broker and the new queue until the consumers agreed. Each consumer declared its own partition key and its own retry budget in a small config file, like the one below."
+        CodeBlock "queue.yaml" "consumer: billing-invoices\npartition_key: account_id\nretries:\n  max: 5\n  backoff: exponential\ndead_letter: billing-invoices.dlq" language:"yaml" copyable:true
+        Text.body "Three lessons stood out once the last service was moved:"
+        Column gap:10
+          Row gap:12
+            Text.strong "•"
+            Text.body "Give every consumer its own retry budget, so one failing service cannot flood the rest."
+          Row gap:12
+            Text.strong "•"
+            Text.body "Dual-write first and compare results; do not cut over on a schedule."
+          Row gap:12
+            Text.strong "•"
+            Text.body "Make the dead-letter queue visible on every team's dashboard from day one."
+        Text.body "Nine months later, incident pages about message loss have dropped to zero, and new services are online in an afternoon rather than a sprint."
+      Column w:320 gap:20 {"props": {"sticky": true, "top": 88}}
+        Card gap:10
+          Text.eyebrow "ON THIS PAGE"
+          Link "Why one queue" -> emit toc "why"
+          Link "How we migrated without downtime" -> emit toc "migrate"
+          Link "Three lessons" -> emit toc "lessons"
+          Link "Results" -> emit toc "results"
+        Card gap:12
+          Heading "Get the next post" level:3
+          Text.muted "One engineering essay every two weeks. No spam."
+          Input "Email" "you@example.com" =email type:email
+          Button "Subscribe" -> emit newsletter email; toast "Thanks for subscribing"
+  Section tint
+    Column gap:24
+      Heading "Related articles" level:2
+      Grid cols:3 gap:24
+        Card gap:10
+          Media kind:"train" tone:"day" h:150
+          Badge.neutral "Reliability"
+          Heading "Designing retries that do not melt your database" level:3
+          Text.muted "Backoff, jitter and budgets, with numbers."
+          Text.caption "Jonas Weber · 7 min read"
+        Card gap:10
+          Media kind:"harbor" tone:"dawn" h:150
+          Badge.neutral "Observability"
+          Heading "Tracing a message across forty services" level:3
+          Text.muted "What we log, what we drop, and why."
+          Text.caption "Priya Nair · 8 min read"
+        Card gap:10
+          Media kind:"mountain" tone:"night" h:150
+          Badge.neutral "Culture"
+          Heading "Writing the postmortem nobody dreads" level:3
+          Text.muted "Blameless reviews that actually change things."
+          Text.caption "Tom Okafor · 6 min read"
+  Footer
+    Row between
+      Text.strong "Signal & Noise"
+      Row gap:16
+        Link "RSS"
+        Link "Privacy"
+        Link "Contact"
+      Text.muted "© 2026 Signal & Noise"

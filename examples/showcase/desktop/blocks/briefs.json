@@ -10,7 +10,7 @@
   "reference": "site_landing"
  },
  "LogoStrip": {
-  "brief": "A quiet strip of customer names under a hero: a small label ('Trusted by\u2026') and the names set as wordmarks in a row, evenly spread, wrapping when the window is narrow. Parameters: label, names (a list).",
+  "brief": "A quiet strip of customer names under a hero: a small label ('Trusted by…') and the names set as wordmarks in a row, evenly spread, wrapping when the window is narrow. Parameters: label, names (a list).",
   "page": "Under the hero of 'Tidewater': 'Trusted by independent hotels' with Harbor House, The Larkspur, Salt & Pine, Casa Marisol, Northgate Inn.",
   "reference": "site_landing"
  },
@@ -41,7 +41,7 @@
  },
  "SiteFooter": {
   "brief": "The footer of a website: the brand with a one-line description at the left, then up to four columns of links each under a small heading, a hairline, and under it the copyright line and a few legal links. Parameters: brand, tagline, headings (a list), links (a list of lists of names, one per heading), legal (the copyright line), small (a list of small links). Event: onNavigate (result: the link's name). A band as wide as the window with its content in the centered column; the columns wrap when narrow.",
-  "page": "The footer of the 'Tidewater' site: columns Product, Company, Resources, Legal with four links each, '\u00a9 2026 Tidewater'.",
+  "page": "The footer of the 'Tidewater' site: columns Product, Company, Resources, Legal with four links each, '© 2026 Tidewater'.",
   "reference": "site_landing"
  },
  "PostCard": {
@@ -88,5 +88,50 @@
   "brief": "One group of a settings or form screen on a desktop: the group's title and a line of description in a narrow column at the left, and the group's fields (the lines written under it) in a card at the right; on a narrow window the title goes above the card. Parameters: title, description. It takes children (the fields). As wide as its place.",
   "page": "The Profile section of the account settings of 'Plume': name, username, a multi-line bio and a time zone choice, with a title and description beside the fields.",
   "reference": "app_settings"
+ },
+ "StatCard": {
+  "brief": "One figure of a dashboard: a label, the number, a small icon on a tinted tile at the top right, and under the number how it changed (a tinted pill with an arrow, up in the good color or down in the bad one) with what it is compared to. Parameters: label, value, icon, change (text such as '+8.2%'), trend ('up', 'down' or 'flat'), good (whether up is good: default true), note ('vs prior 30d'). As wide as its place (four sit in a row).",
+  "page": "The overview screen of 'Harbor', an operations dashboard: a sidebar with Overview (current), Orders (12), Inventory, Customers, Reports, Settings and the user Sam Patel, Operations lead; beside it a top bar and four figures.",
+  "reference": "app_dashboard"
+ },
+ "BoardColumn": {
+  "brief": "One column of a kanban board: a header with the column's name, a count, a colored dot for its status and an add button; under it the cards (its children, in a slot) on a tinted ground that is as tall as the board; an empty column says so. Parameters: title, count, tone ('neutral', 'accent', 'warn', 'good'), limit (optional: a work-in-progress limit shown as count/limit, in the warning color when reached). Events: onAdd. 280 wide or as wide as its place.",
+  "page": "A project board for 'Lanes' as an app window: a top bar and four columns (Backlog, In progress, In review, Done) of task cards.",
+  "reference": "app_board"
+ },
+ "FaqItem": {
+  "brief": "One question of a FAQ that opens and closes: the question in semibold with a chevron that turns, the answer under it when open, a hairline between items. Parameters: question, answer, open (default false). It keeps its own open state. As wide as its place (a narrow column).",
+  "page": "The pricing page of 'Ledgerly', accounting software: a centered title, a Monthly / Yearly choice that changes the prices, and three plans side by side: Solo $9/mo, Team $29/mo (most popular), Scale $79/mo, each with five features.",
+  "reference": "site_pricing"
+ },
+ "DocsNav": {
+  "brief": "The left navigation of a documentation site: groups with a small label, each with its page links; the current page is marked with the accent tint and ink. Parameters: groups (a list of {title, items: [names]}), active (the current page's name). Events: onNavigate (result: the name). 240 wide, as tall as its content.",
+  "page": "Build a documentation page for the 'Beacon' SDK as a desktop website: a header with the logo, a search field and a version choice 'v2.4'; a left sidebar with three groups (Start, Guides, Reference) of four links each, 'Quickstart' selected; the main column with a breadcrumb, the title 'Quickstart', an intro, three numbered steps each with a code sample that has a copy button, an information callout and a table of four options (name, type, default, description); a right 'On this page' list; Previous and Next links at the bottom.",
+  "reference": "site_docs"
+ },
+ "CodeSample": {
+  "brief": "A code sample on a docs page: a header bar with the file name or language and a copy button, the code in the mono style on the code ground with line numbers, horizontally scrollable. Parameters: title, code (text with newlines), language, numbers (default true). Events: onCopy. As wide as its place.",
+  "page": "Build a documentation page for the 'Beacon' SDK as a desktop website: a header with the logo, a search field and a version choice 'v2.4'; a left sidebar with three groups (Start, Guides, Reference) of four links each, 'Quickstart' selected; the main column with a breadcrumb, the title 'Quickstart', an intro, three numbered steps each with a code sample that has a copy button, an information callout and a table of four options (name, type, default, description); a right 'On this page' list; Previous and Next links at the bottom.",
+  "reference": "site_docs"
+ },
+ "ArticleHeader": {
+  "brief": "The head of a blog article: a category label in the accent, the title as a large headline, a one-paragraph summary, and a byline row (the author's avatar, name, role, the date and the reading time). Parameters: category, title, summary, author, role, date, readTime. As wide as its place (a narrow reading column), left-aligned.",
+  "page": "The 'Related articles' section of the engineering blog 'Signal & Noise': three articles as cards, each with a picture, a tag, a title, the author and the reading time.",
+  "reference": "site_blog"
+ },
+ "FilterBar": {
+  "brief": "The bar over a data table: a search field with a search icon at the left, then filter chips (each a label and its current value, with a chevron), and at the right the count of results and a secondary action. Parameters: placeholder, filters (a list of {label, value}), count (text such as '128 customers'), action (label). Events: onSearch (result: the text), onFilter (result: the filter's label), onAction. As wide as its place; wraps when narrow.",
+  "page": "The customers screen of 'Fieldbook', a CRM: the header with the title 'Customers', the count 248, an Import button and 'Add customer', above a toolbar and a table.",
+  "reference": "app_table"
+ },
+ "Pagination": {
+  "brief": "The footer of a data table: at the left 'Showing 1–25 of 128', at the right previous and next buttons with the page numbers between them (the current one filled with the accent tint). Parameters: from, to, total, page, pages. Events: onPage (result: the page number). As wide as its place.",
+  "page": "The customers screen of 'Fieldbook', a CRM: the header with the title 'Customers', the count 248, an Import button and 'Add customer', above a toolbar and a table.",
+  "reference": "app_table"
+ },
+ "EmptyState": {
+  "brief": "What a pane shows when there is nothing in it: a drawn icon on a large tinted tile, a title, one sentence, and one action. Parameters: icon, title, body, action. Events: onAction. Centered in its place.",
+  "page": "A support inbox for 'Relaydesk' as an app window: a rail of folders, a list of eight conversations with the second one selected, and the open conversation at the right.",
+  "reference": "app_inbox"
  }
 }

@@ -1,0 +1,79 @@
+state tab="customers"
+state q=""
+state status="All"
+state view="All"
+state sort="name"
+state desc=false
+state picked=[]
+state page=0
+state rows=[{"id":1,"name":"Maya Reyes","company":"Northwind Traders","status":"Active","plan":"Business","value":1280,"seen":"2 hours ago","days":0,"owner":"Me","starred":true},{"id":2,"name":"Daniel Okafor","company":"Brightside Dental","status":"Trial","plan":"Starter","value":0,"seen":"Yesterday","days":1,"owner":"Me","starred":false},{"id":3,"name":"Priya Nair","company":"Lumen Studio","status":"Active","plan":"Pro","value":640,"seen":"3 days ago","days":3,"owner":"Sam","starred":true},{"id":4,"name":"Tomás Herrera","company":"Cobalt Logistics","status":"Churned","plan":"Business","value":0,"seen":"6 weeks ago","days":42,"owner":"Sam","starred":false},{"id":5,"name":"Hannah Becker","company":"Alder & Finch","status":"Active","plan":"Enterprise","value":4200,"seen":"Today","days":0,"owner":"Me","starred":true},{"id":6,"name":"Kenji Watanabe","company":"Sakura Foods","status":"Trial","plan":"Pro","value":0,"seen":"5 days ago","days":5,"owner":"Me","starred":false},{"id":7,"name":"Olivia Grant","company":"Greenfield Farms","status":"Active","plan":"Starter","value":99,"seen":"1 week ago","days":7,"owner":"Sam","starred":false},{"id":8,"name":"Samir Haddad","company":"Oasis Travel","status":"Churned","plan":"Pro","value":0,"seen":"3 months ago","days":90,"owner":"Sam","starred":false},{"id":9,"name":"Elena Petrova","company":"Kestrel Analytics","status":"Active","plan":"Enterprise","value":3150,"seen":"4 hours ago","days":0,"owner":"Me","starred":true},{"id":10,"name":"Marcus Webb","company":"Harbor Coffee Co.","status":"Trial","plan":"Business","value":0,"seen":"2 days ago","days":2,"owner":"Me","starred":false}]
+App
+  Sidebar
+    Text.strong "Fieldbook"
+    NavItem "Dashboard" icon:"dashboard" selected:=tab=="dashboard" -> tab="dashboard"
+    NavItem "Customers" icon:"groups" selected:=tab=="customers" -> tab="customers"
+    NavItem "Deals" icon:"handshake" badge:"8" selected:=tab=="deals" -> tab="deals"
+    NavItem "Tasks" icon:"task_alt" badge:"5" selected:=tab=="tasks" -> tab="tasks"
+    NavItem "Reports" icon:"bar_chart" selected:=tab=="reports" -> tab="reports"
+    Spacer grow
+    Row gap:10 middle
+      Avatar "Sam Patel" size:32
+      Text.muted "Sam Patel"
+  Main
+    Nav
+      Row gap:12 middle
+        Heading "Customers" level:1
+        Badge.neutral "248"
+      Row gap:8
+        Button.outline "Import" -> emit import
+        Button "Add customer" -> emit addCustomer
+    Column pad:24 gap:16
+      Row gap:12 middle
+        Input "Search customers" =q w:280
+        Select =status items:["All","Active","Trial","Churned"] w:160
+        Spacer grow
+        Segments =view options:["All","Mine","Starred"]
+      if length(picked)>0
+        Row between middle fill:#FF1E293B radius:8 pad:[16,8,16,8]
+          Text "{length(picked)} selected" color:#FFFFFFFF weight:600
+          Row gap:8
+            Button.outline "Export" -> emit exportCustomers picked
+            Button.destructive "Delete" -> rows=removeWhere(rows,r=>contains(picked,r.id)); picked=[]
+      Card gap:0 pad:0
+        Row gap:12 middle pad:[16,8,16,8] fill:#FFF8FAFC
+          Checkbox checked:=length(picked)==length(rows) -> picked=length(picked)==length(rows)?[]:map(rows,x=>x.id)
+          Button.ghost "Name" w:200 -> desc=sort=="name"?!desc:false; sort="name"
+          Button.ghost "Company" w:180 -> desc=sort=="company"?!desc:false; sort="company"
+          Button.ghost "Status" w:110 -> desc=sort=="status"?!desc:false; sort="status"
+          Button.ghost "Plan" w:100 -> desc=sort=="plan"?!desc:false; sort="plan"
+          Button.ghost "Monthly value" w:130 -> desc=sort=="value"?!desc:false; sort="value"
+          Button.ghost "Last seen" w:120 -> desc=sort=="days"?!desc:false; sort="days"
+          Spacer grow
+        Divider
+        each r in desc?sortByDesc(rows,x=>sort=="name"?x.name:sort=="company"?x.company:sort=="status"?x.status:sort=="plan"?x.plan:sort=="value"?x.value:x.days):sortBy(rows,x=>sort=="name"?x.name:sort=="company"?x.company:sort=="status"?x.status:sort=="plan"?x.plan:sort=="value"?x.value:x.days)
+          if (status=="All"||r.status==status)&&(q==""||contains(lower(r.name),lower(q))||contains(lower(r.company),lower(q)))&&(view=="All"||(view=="Starred"&&r.starred)||(view=="Mine"&&r.owner=="Me"))
+            Column gap:0
+              Row gap:12 middle pad:[16,10,16,10] fill:=contains(picked,r.id)?"#FFEFF6FF":"#00FFFFFF"
+                Checkbox checked:=contains(picked,r.id) -> picked=contains(picked,r.id)?without(picked,r.id):append(picked,r.id)
+                Row gap:10 middle w:200
+                  Avatar "{r.name}" size:32
+                  Text.strong "{r.name}"
+                Text "{r.company}" w:180
+                Row w:110
+                  if r.status=="Active"
+                    Badge.success "Active"
+                  if r.status=="Trial"
+                    Badge.warning "Trial"
+                  if r.status=="Churned"
+                    Badge.error "Churned"
+                Text "{r.plan}" w:100
+                Text "{money(r.value,'$',0)}" w:130
+                Text.muted "{r.seen}" w:120
+                Spacer grow
+                IconButton "more_vert" -> emit rowMenu r.id
+              Divider
+      Row between middle
+        Text.muted "Rows {page*10+1}-{page*10+10} of 248"
+        Row gap:8
+          Button.outline "Previous" -> page=max(0,page-1)
+          Button.outline "Next" -> page=min(24,page+1)
