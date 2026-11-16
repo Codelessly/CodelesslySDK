@@ -159,7 +159,10 @@ class PickerSpec {
   /// The node's own padding (null: the scale's).
   final EdgeInsets? padding;
 
-  bool get decorated => decoration != api.InputDecoration.empty;
+  /// Whether the document styles the field itself (a fill, a border, icons
+  /// of its own). A decoration that only names its label or hint is still
+  /// the plain field, with its calendar and chevron.
+  bool get decorated => decoration.toJson().keys.any((k) => k != 'labelText' && k != 'hintText');
 
   /// [n]'s picker in [tokens], reading names and now from [locale].
   factory PickerSpec.of(Node n, ControlTokens tokens, PickerLocale locale, {api.TextStyle? inherited}) {
@@ -225,7 +228,9 @@ class PickerSpec {
           pattern: n.prop(PickerFieldProps.format),
           style: _style(own, inherited),
           ownColor: own.color?.flutter,
-          hint: d.hintText,
+          // A field given a label and no hint shows the label where its value
+          // goes ("Arrival"), as a dateTimeInput does: there is no label above it.
+          hint: d.hintText ?? (d.labelText != null && d.labelText!.isNotEmpty ? d.labelText : null),
           hintStyle: hs.isEmpty ? null : _style(hs, inherited).copyWith(color: hs.color?.flutter),
           placeholder: _placeholder(kind),
           decoration: d,
