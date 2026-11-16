@@ -118,6 +118,12 @@
     "doc": "The width of a column when there are more than two (they then scroll sideways)."
    },
    {
+    "key": "labelWidth",
+    "type": {"kind": "number", "flutter": "double"},
+    "default": 98,
+    "doc": "Width of the fixed row-label column on a wide page. On a phone it uses 110 so the comparison columns remain reachable."
+   },
+   {
     "key": "fade",
     "type": {
      "kind": "boolean",
@@ -218,6 +224,7 @@
   },
   "labels": {
    "type": "column",
+   "media": [{"maxWidth": 699, "patch": {"layout": {"width": 110}, "bind": {"layout.width": null}}}],
    "children": [
     "corner",
     "labelRows",
@@ -264,6 +271,7 @@
     ]
    },
    "bind": {
+    "layout.width": "${props.labelWidth}",
     "decoration.fills[0].stops[2].color": "${= alpha(theme.colors.card, 0)}"
    }
   },
@@ -428,10 +436,12 @@
   },
   "lead": {
    "type": "spacer",
+   "media": [{"maxWidth": 699, "patch": {"layout": {"width": 96}, "bind": {"layout.width": null}}}],
    "layout": {
     "width": 84,
     "height": 1
-   }
+   },
+   "bind": {"layout.width": "${= props.labelWidth - 14}"}
   },
   "tail": {
    "type": "spacer",
