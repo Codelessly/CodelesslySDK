@@ -101,7 +101,7 @@ class PickerUi extends NoActionUi {
 // root (a fill) and its responsive layouts follow the device, not the
 // canvas's narrow design size.
 
-Future<NodeView> _open(WidgetTester tester, {required bool cover}) async {
+Future<NodeView> _open(WidgetTester tester, {required bool cover, Map<String, Object?>? transition}) async {
   setScreen(tester, const Size(1194, 834));
   final home = PublishLayout.fromJson({
     'schema': 2,
@@ -116,7 +116,7 @@ Future<NodeView> _open(WidgetTester tester, {required bool cover}) async {
           {
             'trigger': {'type': 'click'},
             'actions': [
-              {'type': 'openModal', 'to': 'm', 'cover': cover, 'barrierColor': '#00000000'},
+              {'type': 'openModal', 'to': 'm', 'cover': cover, 'barrierColor': '#00000000', 'routeTransition': ?transition},
             ],
           },
         ],
@@ -418,6 +418,23 @@ void main() {
       final view = await _open(tester, cover: true);
       expect(view.rootId, 'm');
       expect(tester.getSize(find.byType(NodeView).last), const Size(1194, 834));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('a covering modal with a transition of its own fills the screen too, and a drag down closes it', (tester) async {
+      // A photo viewer: it fades in, and a drag down takes it away.
+      final view = await _open(tester, cover: true, transition: {
+        'enter': {
+          'motion': {'opacity': 0, 'shiftY': 0.12},
+        },
+        'durationMs': 220,
+        'dismiss': {'direction': 'down', 'distance': 0.2},
+      });
+      expect(view.rootId, 'm');
+      expect(tester.getSize(find.byType(NodeView).last), const Size(1194, 834));
+      await tester.dragFrom(const Offset(600, 300), const Offset(0, 400));
+      await settle(tester);
+      expect(find.byType(NodeView).evaluate().map((e) => (e.widget as NodeView).rootId), isNot(contains('m')));
       expect(tester.takeException(), isNull);
     });
 

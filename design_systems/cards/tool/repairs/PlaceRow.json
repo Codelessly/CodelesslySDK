@@ -1,0 +1,34 @@
+{
+ "nodes": {
+  "fRatingI": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "fDistanceI": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  },
+  "fHoursI": {
+   "media": [
+    {
+     "maxWidth": 699,
+     "patch": {
+      "visible": false
+     }
+    }
+   ]
+  }
+ }
+}

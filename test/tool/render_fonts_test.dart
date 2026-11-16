@@ -55,6 +55,16 @@ void main() {
   setUp(() => dir = Directory.systemTemp.createTempSync('render_fonts_test'));
   tearDown(() => dir.deleteSync(recursive: true));
 
+  test('a legacy family name with the weight in it (no typographic family) is that family at that weight', () {
+    expect(typographicFamily('IBM Plex Mono SemiBold', 600), 'IBM Plex Mono');
+    expect(typographicFamily('Barlow SemiBold', 600), 'Barlow');
+    expect(typographicFamily('Inter Medium', 500), 'Inter');
+    expect(typographicFamily('Roboto Light', 300), 'Roboto');
+    expect(typographicFamily('Source Sans 3 ExtraLight', 200), 'Source Sans 3');
+    expect(typographicFamily('Archivo Black', 400), 'Archivo Black', reason: 'a family named Black, at 400');
+    expect(typographicFamily('Playfair Display', 400), 'Playfair Display');
+  });
+
   test('a WOFF decodes to the TrueType file it wraps: the same family, weight and tables', () {
     final ttf = File('../references/strata/assets/fonts/Manrope-Regular.ttf').readAsBytesSync();
     final sfnt = sfntOf(woffOf(ttf))!;

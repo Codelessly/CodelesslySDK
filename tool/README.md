@@ -22,7 +22,7 @@ One entry point for the authoring loop. `tool/codelessly help` lists the command
 
 | Command | What it does | When |
 |---|---|---|
-| `doctor [--warm]` | Says what the toolkit finds: Flutter, the API checkout, the reference, Pillow/ImageMagick, QuickJS. `--warm` compiles the render harness so the first render is fast. | Once per machine or session; when a command can't find something. |
+| `doctor [--warm]` | Says what the toolkit finds: Flutter, the API checkout, the reference, the compiled commands, QuickJS. `--warm` compiles the render harness so the first render is fast. | Once per machine or session; when a command can't find something. |
 | `docs [query]` | The API reference from the shell: no query lists the pages; an anchor (`forms-validation-and-an-error-state`), a name (`row`, `navigate`, `textField`) or words (`sticky header`) print the best section and other matches. `--starter` prints the base's path. | Before writing a feature you haven't used; when a validation code names a field you don't know. |
 | `flatten <tree.json>` | A nested node tree, trees per breakpoint (`{"trees": {"mobile": ..., "desktop": ...}}`, as the editor's `layouts.createResponsive` takes them) or a document with nested children, to a flat layout document. `key` names a node; `"@key"` elsewhere becomes its id. | You (or a generator) write screens as nested trees; render them headless before installing them in the editor. |
 | `validate <doc \| site>...` | Strict validation only: every problem with a code, a JSON pointer and a suggestion. Exit 1 on errors. | After every edit; fastest check. |
@@ -65,7 +65,7 @@ use git worktrees for runs in parallel.
 | Path | What | Docs |
 |---|---|---|
 | `codelessly` | The entry point above. | this file |
-| `cli/` | The entry point's Python commands: `docs.py`, `flatten.py`, `outline.py`, `states.py`, `sheet.py`, `run_render.py` (render/validate with `--outline`/`--sheet`), `mcp_server.py`. `test_cli.py` tests them without Flutter. | each file's docstring |
+| `cli/` | The entry point's commands, in Dart: `codelessly.dart` (the dispatcher) and `src/` (`docs`, `flatten`, `outline`, `states`, `render_cmd` (render/validate with `--outline`/`--sheet`, and `sheet`), `mcp`). `tool/codelessly` compiles them to `build/codelessly_cli` when they change (about 3 s, once); they need nothing but Flutter's Dart. `test/tool/cli_test.dart` tests them. | each file's header |
 | `lib/env.sh` | Shared by every launcher: finds Flutter, points the SDK at the sibling `codelessly_api` (a `pubspec_overrides.yaml` marked as written by the tools), resolves dependencies when stale, the per-checkout lock. | its header |
 | `render/` | The render command: `render.sh` (launcher), `serve.sh` (the render server), `render_harness.dart` (the `flutter test` entry, one run or the server's loop), `src/` (arguments, site loading, publishing, fonts, rendering, steps, checks, compare). | [render/README.md](render/README.md), codelessly_api `docs/reference/render.md` |
 | `notation/` | The compact notation's tools: `prompt.dart`, `expand.dart`, `apply.dart`, launched by `notation.sh`. | `notation.sh` header |
