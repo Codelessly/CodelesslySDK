@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "SegmentedControl",
-  "doc": "Two to five mutually exclusive options in one control (a view switch, a period), the choice in your variable. Fires onChanged.",
+  "doc": "The same small switch as TabToggle with finer sizes: two to four short options in a track only as wide as they are (a view switch, a period), the choice in your variable. Fires onChanged. Where its options do not fit it scrolls sideways on one line.",
   "props": [
    {
     "key": "options",
@@ -23,7 +23,7 @@
      "Week",
      "Month"
     ],
-    "doc": "The options, as shown.",
+    "doc": "Two to four short options.",
     "required": true
    },
    {
@@ -36,7 +36,7 @@
      }
     },
     "default": "",
-    "doc": "The name of your text variable holding the chosen option."
+    "doc": "The name of your text variable holding the choice."
    },
    {
     "key": "size",
@@ -52,16 +52,13 @@
      ]
     },
     "default": "compact",
-    "doc": "The control scale: xs 24 (rows, dense panels), compact 28 (the default), small 32, medium 36, large 44."
+    "doc": "xs, compact, small, medium or large."
    }
   ],
   "events": [
    {
     "key": "onChanged",
-    "payload": {
-     "kind": "string",
-     "flutter": "String"
-    }
+    "doc": "An option was chosen; the value is its text."
    }
   ]
  },
@@ -70,7 +67,7 @@
    "name": "Week",
    "size": [
     240,
-    28
+    32
    ],
    "props": {
     "options": [
@@ -86,19 +83,18 @@
   "track": {
    "type": "row",
    "children": [
-    "segments"
+    "scroll"
    ],
    "props": {
     "crossAxisAlignment": "center"
    },
    "layout": {
     "width": {
-     "hug": 200
+     "hug": 0
     },
     "height": {
-     "hug": 28
-    },
-    "padding": 2
+     "hug": 0
+    }
    },
    "decoration": {
     "fills": [
@@ -106,113 +102,162 @@
       "color": "subtleFill"
      }
     ],
-    "radius": 12
+    "strokes": [
+     {
+      "color": "line"
+     }
+    ],
+    "strokeWidth": 1,
+    "radius": 12,
+    "clip": "antiAlias"
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.control}"
    }
   },
-  "segments": {
+  "scroll": {
+   "type": "row",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "scrollable": true,
+    "scrollDirection": "horizontal",
+    "edgeFade": 24,
+    "fillViewport": false
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true,
+    "padding": [
+     1.5,
+     0,
+     1.5,
+     0
+    ]
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "load",
+      "when": "indexOf(props.options, props.value) > 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "option",
+       "item": "${= indexOf(props.options, props.value)}",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "valueChanged",
+      "variable": "props.value",
+      "when": "indexOf(props.options, props.value) >= 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "option",
+       "item": "${= indexOf(props.options, props.value)}",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240
+      }
+     ]
+    }
+   ]
+  },
+  "list": {
    "type": "listView",
    "children": [
-    "segment"
+    "option"
    ],
    "props": {
     "scrollDirection": "horizontal",
     "scrollable": false,
-    "spacing": 2
+    "spacing": 0
    },
    "layout": {
     "width": {
-     "hug": 196
+     "hug": 0
     },
-    "height": 24
+    "height": 32
    },
    "bind": {
     "data": "${props.options}",
-    "layout.height": "${= props.size == 'xs' ? 20 : (props.size == 'compact' ? 24 : (props.size == 'small' ? 28 : (props.size == 'medium' ? 32 : (40))))}"
+    "layout.height": "${= screen.width < 700 ? 44 : (props.size == 'xs' ? 28 : (props.size == 'compact' ? 32 : (props.size == 'small' ? 34 : (props.size == 'medium' ? 36 : (44)))))}"
    }
   },
-  "segment": {
+  "option": {
    "type": "row",
    "children": [
-    "segmentLabel"
+    "optionKnob"
    ],
    "props": {
-    "mainAxisAlignment": "center",
     "crossAxisAlignment": "center"
    },
    "layout": {
     "width": {
-     "hug": 60
+     "hug": 0
     },
     "height": {
-     "fill": 24
+     "fill": 0
     },
     "padding": [
-     10,
-     0,
-     10,
-     0
+     1.5,
+     3,
+     1.5,
+     3
     ]
    },
-   "decoration": {
-    "fills": [
-     {
-      "color": "#00000000"
-     }
-    ],
-    "radius": 9
-   },
-   "bind": {
-    "selected": "${= item == props.value}",
-    "layout.padding": "${= props.size == 'xs' ? [8, 0, 8, 0] : (props.size == 'compact' ? [10, 0, 10, 0] : (props.size == 'small' ? [12, 0, 12, 0] : (props.size == 'medium' ? [12, 0, 12, 0] : ([14, 0, 14, 0]))))}"
-   },
    "states": {
-    "selected": {
-     "segment": {
+    "hovered": {
+     "optionKnob": {
       "decoration": {
-       "fills": [
+       "foregroundFills": [
         {
-         "color": "raisedBackground"
-        }
-       ],
-       "effects": [
-        {
-         "type": "dropShadow",
-         "color": "#0D000000",
-         "offset": [
-          0,
-          1
-         ],
-         "blurRadius": 2
+         "color": "hoverOverlay"
         }
        ]
       }
-     },
-     "segmentLabel": {
-      "props": {
-       "style": {
-        "color": "primaryText"
-       }
-      }
      }
     },
-    "hovered": {
-     "segmentLabel": {
-      "props": {
-       "style": {
-        "color": "primaryText"
-       }
+    "pressed": {
+     "optionKnob": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
       }
      }
     }
    },
    "actions": [
     {
-     "trigger": "click",
+     "trigger": {
+      "type": "click"
+     },
      "actions": [
       {
        "type": "setVariable",
        "variable": "props.value",
-       "value": "${item}"
+       "value": "${= item}"
       },
       {
        "type": "componentEvent",
@@ -223,24 +268,70 @@
     }
    ]
   },
-  "segmentLabel": {
+  "optionKnob": {
+   "type": "row",
+   "children": [
+    "optionText"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "fill": 0
+    },
+    "padding": [
+     14,
+     0,
+     14,
+     0
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00FFFFFF"
+     }
+    ],
+    "radius": 9
+   },
+   "bind": {
+    "decoration.fills[0].color": "${= item == props.value ? theme.colors.raisedBackground : '#00FFFFFF'}",
+    "decoration.effects": "${= item == props.value ? theme.shadows.knob : []}",
+    "decoration.radius": "${= max(0, theme.radii.control - 3)}",
+    "layout.padding": "${= [props.size == 'xs' ? 8 : (props.size == 'compact' ? 10 : (props.size == 'small' ? 12 : (props.size == 'medium' ? 12 : (14)))), 0, props.size == 'xs' ? 8 : (props.size == 'compact' ? 10 : (props.size == 'small' ? 12 : (props.size == 'medium' ? 12 : (14)))), 0]}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ]
+  },
+  "optionText": {
    "type": "text",
    "props": {
     "text": "${item}",
     "style": {
-     "from": "controlCompact",
-     "color": "secondaryText"
-    }
+     "from": "chip",
+     "fontSize": 13
+    },
+    "maxLines": 1
    },
    "layout": {
     "width": {
-     "hug": 40
+     "hug": 0
     },
     "height": {
-     "hug": 15
+     "hug": 0
     }
    },
    "bind": {
+    "props.style.color": "${= item == props.value ? theme.colors.ink : theme.colors.inkSoft}",
     "props.style.fontSize": "${= props.size == 'xs' ? 11.5 : (props.size == 'compact' ? 12 : (props.size == 'small' ? 12.5 : (props.size == 'medium' ? 13 : (15))))}"
    }
   }

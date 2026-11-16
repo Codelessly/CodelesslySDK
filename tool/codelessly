@@ -20,22 +20,39 @@
 # `tool/codelessly <command> --help` describes each.
 set -u
 sdk="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-cli="$sdk/tool/cli"
-py="${PYTHON:-python3}"
 cmd="${1:-help}"
 [ $# -gt 0 ] && shift
 
+# The Dart commands (tool/cli): compiled to build/codelessly_cli when it is missing or older than their sources,
+# under a lock so concurrent first calls compile once. Flutter's dart compiles them; no other dependency.
+cli_exe="$sdk/build/codelessly_cli"
+run_cli() {
+  if [ ! -x "$cli_exe" ] || [ -n "$(find "$sdk/tool/cli" -name '*.dart' -newer "$cli_exe" -print -quit 2>/dev/null)" ]; then
+    . "$sdk/tool/lib/env.sh"
+    codelessly_find_flutter "tool/codelessly $cmd" || exit 2
+    mkdir -p "$sdk/build"
+    (
+      exec 8>"$sdk/build/.codelessly_cli.lock"
+      command -v flock >/dev/null 2>&1 && flock 8
+      if [ ! -x "$cli_exe" ] || [ -n "$(find "$sdk/tool/cli" -name '*.dart' -newer "$cli_exe" -print -quit 2>/dev/null)" ]; then
+        echo "Compiling the toolkit's commands (tool/cli, once per change)..." >&2
+        log="$(mktemp)"
+        if ! "$dart_bin" compile exe "$sdk/tool/cli/codelessly.dart" -o "$cli_exe.tmp" > "$log" 2>&1; then
+          cat "$log" >&2; rm -f "$log"; exit 2
+        fi
+        rm -f "$log"
+        mv "$cli_exe.tmp" "$cli_exe"
+      fi
+    ) || exit 2
+  fi
+  CODELESSLY_SDK="$sdk" exec "$cli_exe" "$@"
+}
+
 case "$cmd" in
-  docs) exec "$py" "$cli/docs.py" "$@" ;;
-  flatten) exec "$py" "$cli/flatten.py" "$@" ;;
-  outline) exec "$py" "$cli/outline.py" "$@" ;;
-  sheet) exec "$py" "$cli/sheet.py" "$@" ;;
-  states) exec "$py" "$cli/states.py" "$@" ;;
-  render|validate) exec "$py" "$cli/run_render.py" "$cmd" "$@" ;;
+  docs|flatten|outline|sheet|states|render|validate|mcp) run_cli "$cmd" "$@" ;;
   notation) exec "$sdk/tool/notation/notation.sh" "$@" ;;
   replay) exec "$sdk/tool/stream/replay.sh" "$@" ;;
   serve) exec "$sdk/tool/render/serve.sh" "$@" ;;
-  mcp) exec "$py" "$cli/mcp_server.py" "$@" ;;
   doctor)
     . "$sdk/tool/lib/env.sh"
     ok=1
@@ -49,9 +66,8 @@ case "$cmd" in
     codelessly_find_api
     if [ -n "$api" ]; then say api "sibling checkout $api"; else say api "none beside the SDK: the published codelessly_api is used (no docs/reference, no notation)"; fi
     [ -n "${flutter_bin:-}" ] && say versions "$(codelessly_version_line)"
-    if ref="$("$py" "$cli/docs.py" --starter 2>/dev/null)"; then say reference "$(dirname "$ref")"; else say reference "MISSING: docs needs codelessly_api's docs/reference (CodelesslyAPI beside the SDK, or CODELESSLY_API)"; ok=0; fi
-    say python "$("$py" --version 2>&1)"
-    if "$py" -c 'import PIL' 2>/dev/null; then say images "Pillow"; elif command -v montage >/dev/null; then say images "ImageMagick montage"; else say images "none: sheet needs Pillow or ImageMagick"; fi
+    if ref="$("$0" docs --starter 2>/dev/null)"; then say reference "$(dirname "$ref")"; else say reference "MISSING: docs needs codelessly_api's docs/reference (CodelesslyAPI beside the SDK, or CODELESSLY_API)"; ok=0; fi
+    if [ -x "$sdk/build/codelessly_cli" ]; then say commands "build/codelessly_cli (tool/cli, Dart)"; else say commands "not compiled yet (the first command compiles tool/cli)"; fi
     lib=""; for l in "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.so" "$sdk/.dart_tool/codelessly_quickjs/libcodelessly_quickjs.dylib"; do [ -f "$l" ] && lib="$l"; done
     if [ -n "$lib" ]; then say scripts "QuickJS $lib"; else say scripts "no QuickJS library: documents' scripts don't run in renders (tool/build_quickjs.sh builds it)"; fi
     if [ "${1:-}" = "--warm" ] && [ -n "${flutter_bin:-}" ]; then
