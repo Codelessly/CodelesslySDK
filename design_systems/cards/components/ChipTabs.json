@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "ChipTabs",
-  "doc": "Open items as a row of small pills, the chosen one outlined; an optional add button. Fires onSelected with the label and onAdd.",
+  "doc": "A row of pills to filter a list or switch between a few open items (All, Open, Closed; Draft, Review, Final), the chosen one outlined in the accent; an optional round + after them. Any number of pills: where they do not fit, the row scrolls sideways on one line. A page's views are Tabs; a choice of slots or sizes in a grid is ChoiceChips. The chosen label is kept in your variable. Fires onSelected with the label and onAdd.",
   "props": [
    {
     "key": "tabs",
@@ -23,7 +23,7 @@
      "Review",
      "Final"
     ],
-    "doc": "The pills' labels.",
+    "doc": "The pills' labels, any number.",
     "required": true
    },
    {
@@ -51,13 +51,11 @@
   "events": [
    {
     "key": "onSelected",
-    "payload": {
-     "kind": "string",
-     "flutter": "String"
-    }
+    "doc": "A pill was chosen; the value is its label."
    },
    {
-    "key": "onAdd"
+    "key": "onAdd",
+    "doc": "The + was tapped."
    }
   ]
  },
@@ -65,15 +63,10 @@
   {
    "name": "Three",
    "size": [
-    220,
-    24
+    300,
+    36
    ],
    "props": {
-    "tabs": [
-     "Draft",
-     "Review",
-     "Final"
-    ],
     "value": "Review",
     "showAdd": true
    }
@@ -83,21 +76,81 @@
   "row": {
    "type": "row",
    "children": [
-    "list",
+    "scroll",
     "add"
    ],
    "props": {
     "crossAxisAlignment": "center",
-    "spacing": 5
+    "spacing": 8
    },
    "layout": {
     "width": {
-     "hug": 220
+     "fill": 0
     },
     "height": {
-     "hug": 28
+     "hug": 0
     }
    }
+  },
+  "scroll": {
+   "type": "row",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "scrollable": true,
+    "scrollDirection": "horizontal",
+    "edgeFade": 24,
+    "fillViewport": false
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "load",
+      "when": "indexOf(props.tabs, props.value) > 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "chip",
+       "item": "${= indexOf(props.tabs, props.value)}",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "valueChanged",
+      "variable": "props.value",
+      "when": "indexOf(props.tabs, props.value) >= 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "chip",
+       "item": "${= indexOf(props.tabs, props.value)}",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240
+      }
+     ]
+    }
+   ]
   },
   "list": {
    "type": "listView",
@@ -107,109 +160,180 @@
    "props": {
     "scrollDirection": "horizontal",
     "scrollable": false,
-    "spacing": 5
+    "spacing": 8
    },
    "layout": {
     "width": {
-     "hug": 180
+     "hug": 0
     },
-    "height": 28,
-    "padding": 2
+    "height": 36
    },
    "bind": {
-    "data": "${props.tabs}"
+    "data": "${props.tabs}",
+    "layout.height": "${= screen.width < 700 ? 44 : 36}"
    }
   },
   "chip": {
    "type": "row",
    "children": [
-    "label"
+    "pill"
    ],
    "props": {
-    "mainAxisAlignment": "center",
     "crossAxisAlignment": "center"
    },
    "layout": {
     "width": {
-     "hug": 50
+     "hug": 0
     },
     "height": {
-     "fill": 24
+     "fill": 0
+    }
+   },
+   "states": {
+    "hovered": {
+     "pill": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
     },
+    "pressed": {
+     "pill": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "click"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "props.value",
+       "value": "${= item}"
+      },
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      }
+     ]
+    }
+   ]
+  },
+  "pill": {
+   "type": "row",
+   "children": [
+    "label"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": 32,
     "padding": [
-     8,
+     14,
      0,
-     8,
+     14,
      0
     ]
    },
    "decoration": {
     "fills": [
      {
-      "color": "secondaryBackground"
+      "color": "card"
      }
     ],
     "strokes": [
      {
-      "color": "primaryBorder"
+      "color": "line"
      }
     ],
-    "radius": 9999,
-    "effects": [
-     {
-      "type": "dropShadow",
-      "color": "primaryTint",
-      "offset": [
-       0,
-       0
-      ],
-      "blurRadius": 0,
-      "spreadRadius": 2,
-      "visible": false
-     }
-    ]
+    "strokeWidth": 1,
+    "radius": 999
    },
    "bind": {
-    "selected": "${= item == props.value}"
+    "decoration.fills[0].color": "${= item == props.value ? theme.colors.accentTint : theme.colors.card}",
+    "decoration.strokes[0].color": "${= item == props.value ? theme.colors.accent : theme.colors.line}",
+    "decoration.strokeWidth": "${= item == props.value ? 1.5 : 1}",
+    "decoration.radius": "${theme.radii.chip}"
+   },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ]
+  },
+  "label": {
+   "type": "text",
+   "props": {
+    "text": "${item}",
+    "style": {
+     "from": "chip",
+     "fontSize": 13
+    },
+    "maxLines": 1
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    }
+   },
+   "bind": {
+    "props.style.color": "${= item == props.value ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "add": {
+   "type": "row",
+   "children": [
+    "addI"
+   ],
+   "props": {
+    "mainAxisAlignment": "center"
+   },
+   "layout": {
+    "width": 32,
+    "height": 32
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "tile"
+     }
+    ],
+    "radius": 16.0
+   },
+   "bind": {
+    "visible": "${props.showAdd}"
    },
    "states": {
-    "selected": {
-     "chip": {
-      "decoration": {
-       "fills": [
-        {
-         "color": "raisedBackground"
-        }
-       ],
-       "strokes": [
-        {
-         "color": "primary"
-        }
-       ],
-       "effects": [
-        {
-         "type": "dropShadow",
-         "color": "primaryTint",
-         "offset": [
-          0,
-          0
-         ],
-         "blurRadius": 0,
-         "spreadRadius": 2
-        }
-       ]
-      }
-     },
-     "label": {
-      "props": {
-       "style": {
-        "color": "primaryText"
-       }
-      }
+    "pressed": {
+     "add": {
+      "opacity": 0.6
      }
     },
     "hovered": {
-     "chip": {
+     "add": {
       "decoration": {
        "foregroundFills": [
         {
@@ -222,80 +346,9 @@
    },
    "actions": [
     {
-     "trigger": "click",
-     "actions": [
-      {
-       "type": "setVariable",
-       "variable": "props.value",
-       "value": "${item}"
-      },
-      {
-       "type": "componentEvent",
-       "event": "onSelected",
-       "value": "${item}"
-      }
-     ]
-    }
-   ]
-  },
-  "label": {
-   "type": "text",
-   "props": {
-    "text": "${item}",
-    "style": {
-     "fontSize": 10.5,
-     "fontWeight": 500,
-     "height": 1.2,
-     "color": "secondaryText",
-     "leadingDistribution": "even"
-    }
-   },
-   "layout": {
-    "width": {
-     "hug": 34
-    },
-    "height": {
-     "hug": 13
-    }
-   }
-  },
-  "add": {
-   "type": "row",
-   "children": [
-    "plus"
-   ],
-   "props": {
-    "mainAxisAlignment": "center",
-    "crossAxisAlignment": "center"
-   },
-   "layout": {
-    "width": 18,
-    "height": 18
-   },
-   "bind": {
-    "visible": "${props.showAdd}"
-   },
-   "states": {
-    "hovered": {
-     "add": {
-      "decoration": {
-       "fills": [
-        {
-         "color": "hoverOverlay"
-        }
-       ]
-      }
+     "trigger": {
+      "type": "click"
      },
-     "plus": {
-      "props": {
-       "color": "primaryText"
-      }
-     }
-    }
-   },
-   "actions": [
-    {
-     "trigger": "click",
      "actions": [
       {
        "type": "componentEvent",
@@ -303,21 +356,18 @@
       }
      ]
     }
-   ],
-   "decoration": {
-    "radius": 9999
-   }
+   ]
   },
-  "plus": {
+  "addI": {
    "type": "icon",
    "props": {
-    "icon": "add",
-    "color": "tertiaryText",
-    "size": 12
+    "icon": "add_rounded",
+    "size": 18,
+    "color": "ink"
    },
    "layout": {
-    "width": 12,
-    "height": 12
+    "width": 18,
+    "height": 18
    }
   }
  }

@@ -26,6 +26,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 
 import '../paint/icon_glyph.dart';
+import 'focus.dart' show TypeAhead;
 import 'kit.dart';
 import 'kit_dropdown.dart';
 import 'overlay.dart';
@@ -592,30 +593,15 @@ class RenderMenu extends RenderBox
     _activate(pick);
   }
 
-  String _typed = '';
-  final Stopwatch _sinceTyped = Stopwatch();
+  final TypeAhead _typeAhead = TypeAhead();
 
   /// Jumps to the next row whose label starts with what was typed in the
   /// last 700 ms (a repeated letter cycles through the rows it starts).
   void typeAhead(String character) {
-    if (!_sinceTyped.isRunning || _sinceTyped.elapsedMilliseconds > 700) _typed = '';
-    _sinceTyped
-      ..reset()
-      ..start();
-    _typed += character.toLowerCase();
     final enabled = _enabled;
-    if (enabled.isEmpty) return;
-    final cycling = _typed.length > 1 && _typed.split('').every((c) => c == _typed[0]);
-    final needle = cycling ? _typed[0] : _typed;
-    final start = _active == null ? -1 : enabled.indexOf(_active!);
-    final from = (cycling || _typed.length == 1) ? start + 1 : math.max(0, start);
-    for (var step = 0; step < enabled.length; step++) {
-      final i = enabled[(from + step) % enabled.length];
-      if (_items[i].label.toLowerCase().startsWith(needle)) {
-        _activate(i);
-        return;
-      }
-    }
+    final at = _active == null ? -1 : enabled.indexOf(_active!);
+    final found = _typeAhead.match(character, [for (final i in enabled) _items[i].label], at < 0 ? null : at);
+    if (found != null) _activate(enabled[found]);
   }
 
   /// Chooses row [i] (an enabled one).

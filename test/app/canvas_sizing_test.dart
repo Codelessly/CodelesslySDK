@@ -4,6 +4,7 @@
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/internals.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 Node canvasNode(double w, double h, {ScaleMode mode = ScaleMode.responsive, bool hug = false, double? maxWidth}) => Node.fromJson({
@@ -59,6 +60,21 @@ void main() {
       expect(capped.layoutHeight, 2000);
       expect(CanvasViewport.autoScaleHeight(c, 2880), 1800);
     });
+  });
+
+  testWidgets('a page opened from a design-sized modal fills the navigator', (tester) async {
+    final app = Codelessly();
+    await tester.pumpWidget(MaterialApp(
+      onGenerateRoute: (_) => CodelesslyWidget.route<void>(
+        codelessly: app,
+        layoutId: 'next',
+        template: const CodelesslyWidget(sizing: CanvasSizing.design),
+      ),
+    ));
+    final page = tester.widget<CodelesslyWidget>(find.byType(CodelesslyWidget));
+    expect(page.sizing, CanvasSizing.fill);
+    await tester.pumpWidget(const SizedBox());
+    app.dispose();
   });
 
 }
