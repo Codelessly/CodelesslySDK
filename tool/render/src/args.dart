@@ -34,6 +34,7 @@ final class RenderArgs {
     this.theme,
     this.compareMap = const {},
     this.now,
+    this.imageMap = const {},
   });
 
   static const defaultSizes = [Size(390, 844), Size(834, 1112), Size(1440, 900)];
@@ -83,6 +84,10 @@ final class RenderArgs {
   /// countdowns written from it are the same in every capture.
   final DateTime? now;
 
+  /// `--image-map`: network image URLs starting with a prefix read from a folder instead (`https://cdn.x/art/` →
+  /// `assets/art`), so images a document names by URL show in the capture.
+  final Map<String, String> imageMap;
+
   /// These arguments with other [sizes] and [screens].
   RenderArgs copyWith({List<Size>? sizes, List<String>? screens}) => RenderArgs(
         inputs: inputs,
@@ -103,6 +108,7 @@ final class RenderArgs {
         theme: theme,
         compareMap: compareMap,
         now: now,
+        imageMap: imageMap,
       );
 }
 
@@ -164,6 +170,9 @@ Options:
                           and the size, exactly: home--saved--390x844.png.
   --compare-map <a>=<b>   Compare screen a (or a-<label>) under the reference
                           name b: home=index. Repeatable.
+  --image-map <url>=<dir> Read network images whose URL starts with <url> from
+                          <dir> (the rest of the URL as the path), so they show:
+                          https://cdn.example.com/art/=assets/art. Repeatable.
   --label <text>          Append -<text> to the PNG names (state screenshots);
                           diagnostics go to diagnostics-<text>.json.
   --validate-only         Only validate; render nothing.
@@ -197,6 +206,7 @@ RenderArgs parseArgs(List<String> argv) {
   String? label, component, props, slots, compare, theme;
   DateTime? now;
   final compareMap = <String, String>{};
+  final imageMap = <String, String>{};
   String next(int i, String flag) {
     if (i + 1 >= argv.length) throw FormatException('$flag needs a value.');
     return argv[i + 1];
@@ -247,6 +257,12 @@ RenderArgs parseArgs(List<String> argv) {
         final eq = v.indexOf('=');
         if (eq <= 0 || eq == v.length - 1) throw FormatException('--compare-map takes <screen>=<reference name>, got "$v".');
         compareMap[v.substring(0, eq).trim()] = v.substring(eq + 1).trim();
+      case '--image-map':
+        final v = next(i++, a);
+        // The prefix is a URL (it has its own "="s rarely): the folder is after the last "=".
+        final eq = v.lastIndexOf('=');
+        if (eq <= 0 || eq == v.length - 1) throw FormatException('--image-map takes <url prefix>=<folder>, got "$v".');
+        imageMap[v.substring(0, eq).trim()] = v.substring(eq + 1).trim();
       case '--now':
         final v = next(i++, a);
         now = DateTime.tryParse(v);
@@ -288,5 +304,6 @@ RenderArgs parseArgs(List<String> argv) {
     theme: theme,
     compareMap: compareMap,
     now: now,
+    imageMap: imageMap,
   );
 }
