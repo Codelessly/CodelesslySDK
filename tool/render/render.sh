@@ -49,7 +49,7 @@ for a in "$@"; do
     continue
   fi
   case "$a" in
-    --out|--fonts|--slots|--compare) expect_path=1; prev="$a"; args+=("$a") ;;
+    --out|--fonts|--slots|--compare|--sheet|--sheet-base) expect_path=1; prev="$a"; args+=("$a") ;;
     --design-system) want_ds=1 ;;
     --*) args+=("$a") ;;
     *)
@@ -60,7 +60,7 @@ for a in "$@"; do
         # A table (a .json file) is a path too.
         case "$key" in *.json) key="$(abs "$key")" ;; esac
         args+=("$key=$dir")
-      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map)$ ]]; then
+      elif [ ${#args[@]} -gt 0 ] && [[ "${args[-1]}" =~ ^--(sizes|screen|tap|hover|focus|key|type|set|scroll|drag|navigate|wait|now|label|component|props|theme|compare-map|sheet-height|sheet-columns|sheet-title)$ ]]; then
         args+=("$a")
       else
         a="$(abs "$a")"

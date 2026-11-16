@@ -16,6 +16,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'src/args.dart';
 import 'src/fonts.dart';
+import 'src/sheet.dart';
 import 'src/render.dart';
 
 void main() {
@@ -32,6 +33,7 @@ void main() {
 Future<void> _renderOne(WidgetTester tester, String argsFile) async {
   final lines = File(argsFile).readAsLinesSync();
   final status = File('$argsFile.status');
+  if (lines.contains('--sheet')) return _sheetOne(tester, lines, argsFile);
   final RenderArgs args;
   try {
     args = parseArgs(lines);
@@ -43,6 +45,35 @@ Future<void> _renderOne(WidgetTester tester, String argsFile) async {
   final report = await runRender(tester, args);
   File('$argsFile.report').writeAsStringSync(formatReport(report));
   status.writeAsStringSync(report.errors > 0 ? '1' : '0');
+}
+
+/// A contact sheet job (`render.sh --sheet <file.png> --out <dir> [--sheet-height n] [--sheet-columns n]
+/// [--sheet-title text] [--sheet-base dir] <png | dir>...`): the captures on one image (src/sheet.dart).
+Future<void> _sheetOne(WidgetTester tester, List<String> lines, String argsFile) async {
+  String? value(String flag) {
+    final i = lines.indexOf(flag);
+    return i >= 0 && i + 1 < lines.length ? lines[i + 1] : null;
+  }
+
+  const valued = {'--sheet', '--out', '--sheet-height', '--sheet-columns', '--sheet-title', '--sheet-base'};
+  final inputs = <String>[];
+  for (var i = 0; i < lines.length; i++) {
+    if (valued.contains(lines[i])) {
+      i++;
+    } else if (!lines[i].startsWith('--')) {
+      inputs.add(lines[i]);
+    }
+  }
+  final out = value('--sheet')!;
+  final images = sheetInputs(inputs);
+  final made = await tester.runAsync(() => makeSheet(images, out,
+      height: int.tryParse(value('--sheet-height') ?? '') ?? 480,
+      columns: int.tryParse(value('--sheet-columns') ?? ''),
+      title: value('--sheet-title'),
+      base: value('--sheet-base'),
+      flutterRoot: Platform.environment['FLUTTER_ROOT'] ?? ''));
+  File('$argsFile.report').writeAsStringSync(made == null ? 'No PNGs found.\n' : 'wrote $made\n');
+  File('$argsFile.status').writeAsStringSync(made == null ? '1' : '0');
 }
 
 Future<void> _serve(WidgetTester tester, String dir) async {
