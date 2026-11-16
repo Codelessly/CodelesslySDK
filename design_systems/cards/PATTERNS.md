@@ -58,6 +58,8 @@ border-bottom:#FFE5E7EB`, the open one `fill:#142563EB`) next to a `Pane` for th
 A page's views (a product's Description, Specifications and Reviews; a settings page's sections) are
 `Tabs =tab tabs:[…]` over one `if tab=="…"` block each, never a `SegmentedButton`; a billing period or a date
 range beside a heading is `TabToggle` (or `Segments` where it should span its place).
+Photos on a page are `PhotoGallery photos:[…]`: a tap opens them large over the window by itself (zoom, swipe,
+arrows, thumbnails); a `Lightbox#id` is for pictures of your own (`Image`) only.
 
 ## Pick one of several (flights, places, plans)
 
@@ -167,7 +169,10 @@ lines indented under it (the last with `last:true`), then `Checklist "Book ahead
 `total-length(d1)`. Photos are one line:
 `PhotoGallery =open photos:[{"kind":"harbor","caption":"…"},…]` (a grid; `layout:"strip"` is one row that scrolls
 sideways, `layout:"pages"` full-width photos swiped one at a time with dots); a tap opens the large view, which
-also pages by swipe. A carousel is one line too: `Carousel =i items:=shoes cta:"Details" -> open=true`, where each
+also pages by swipe. On a card the large view takes the grid's place. On a page it opens over the window, the grid
+staying as it is: a viewer with a count, arrows, thumbnails and the caption, where a pinch, the wheel or a double
+tap zooms a photo and a drag down, Escape or a tap beside it closes; write no `Lightbox` and no `if` for it (in a
+document written by hand, `viewer:"overlay"` and an `onChanged` that opens a viewer's canvas). A carousel is one line too: `Carousel =i items:=shoes cta:"Details" -> open=true`, where each
 record has name, detail, price, rating and tone; it slides by swipe with a peek of the next item, and `dots`,
 `arrows`, `counter` and `thumbs` switch its controls. The details view is an `if open` group reading `shoes[i]`.
 

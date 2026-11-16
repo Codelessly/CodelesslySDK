@@ -1606,7 +1606,7 @@ def photo_gallery():
     swiped = [{'trigger': {'type': 'changed'}, 'actions': [setv('props.value', '${= result.index + 1}'), fire('onChanged', '${= result.index + 1}')]}]
     cap = lambda nid: text("${= coalesce(item.caption, '')}", {'from': 'meta', 'fontSize': 11.5, 'height': 1.25}, FILL, maxLines=1, overflow='ellipsis',
                            color='inkSoft')
-    closed = "props.value <= 0"
+    closed = "(props.value <= 0 || props.viewer == 'overlay')"
     nodes = {
         'gallery': col(['grid', 'strip', 'paged', 'veil'], 0),
         # a grid of thumbnails
@@ -1641,7 +1641,7 @@ def photo_gallery():
         # the large view, in place of the grid or strip, paged by swipe
         'veil': col(['bar', 'stage', 'foot', 'vdots'], 10, pad=[12, 12, 12, 12],
                     decoration={'fills': [{'color': 'bar'}], 'radius': 14},
-                    bind={'visible': "${= props.layout != 'pages' && props.value > 0}", 'decoration.radius': '${theme.radii.tile}'}),
+                    bind={'visible': "${= props.layout != 'pages' && props.value > 0 && props.viewer != 'overlay'}", 'decoration.radius': '${theme.radii.tile}'}),
         'bar': row(['count', 'close'], 8, main='spaceBetween'),
         'count': row(['countText'], width=HUG, pad=[10, 6, 10, 6], decoration={'fills': [{'color': 'barRaise'}], 'radius': 999}),
         'countText': text('${= %s + 1} of ${= %s}' % (shown, n), 'chip', color='onBar'),
@@ -1674,8 +1674,9 @@ def photo_gallery():
         P('dots', BOOL, True, 'Pagination dots under the paged and the large view.'),
         P('columns', INT, 3, 'Thumbnails per row of the grid.'),
         P('fade', BOOL, True, 'The strip fades at the edge where there are more photos (false: a hard edge).'),
+        P('viewer', enum('inline', 'overlay'), 'inline', 'inline shows the large view in place of the grid or strip (a card in a chat); overlay leaves the grid as it is and only fires onChanged with the photo tapped, for a viewer shown over the window (on a page the notation opens its Lightbox there by itself).'),
     ]
-    return component('PhotoGallery', "A photo gallery with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: %s; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next; your variable holds the photo in view (0: none open)." % scenes,
+    return component('PhotoGallery', "A photo gallery with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: %s; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next (on a page it opens over the window, where it also zooms: a pinch, the wheel, a double tap); your variable holds the photo in view (0: none open)." % scenes,
                      props, nodes, 'gallery', events=[('onChanged', 'A photo was opened, changed or closed; the value is its number (0: closed).')],
                      previews=[{'name': 'Grid', 'size': [360, 130], 'props': {}}, {'name': 'Strip', 'size': [360, 150], 'props': {'layout': 'strip'}},
                                {'name': 'Pages', 'size': [360, 290], 'props': {'layout': 'pages'}}])
