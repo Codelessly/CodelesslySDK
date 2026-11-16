@@ -1794,6 +1794,51 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       }
       await g.up();
       return null;
+    case 'double-tap':
+      // Two taps in quick succession where the node shows.
+      final (at, problem) = await pointAt(step.target, 'double-tap');
+      if (at == null) return problem;
+      await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
+      await tester.tapAt(at);
+      await tester.pump(const Duration(milliseconds: 60));
+      await tester.tapAt(at);
+      return null;
+    case 'wheel':
+      // A mouse wheel turned over the node: dy pixels (negative: away from
+      // the user, which zooms in where a wheel zooms), `ctrl+` held with it.
+      final m = RegExp(r'^\s*(ctrl\+)?(-?\d+(?:\.\d+)?)\s*$').firstMatch(step.value ?? '');
+      if (m == null) return '--wheel ${step.target}=${step.value}: say how far: --wheel ${step.target}=-240 (pixels; negative is away from the user), or =ctrl+-240 with Control held.';
+      final (at, problem) = await pointAt(step.target, 'wheel');
+      if (at == null) return problem;
+      final wheel = TestPointer(90, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(wheel.hover(at));
+      if (m[1] != null) await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendEventToBinding(wheel.scroll(ui.Offset(0, double.parse(m[2]!))));
+      await tester.pump();
+      if (m[1] != null) await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendEventToBinding(wheel.removePointer(location: at));
+      return null;
+    case 'pinch':
+      // Two fingers 80 px apart about the node's point, spread (or closed) to
+      // 80 px times the scale.
+      final scale = double.tryParse((step.value ?? '').trim());
+      if (scale == null || scale <= 0) return '--pinch ${step.target}=${step.value}: say by how much: --pinch ${step.target}=2 (fingers twice as far apart; 0.5 closes them).';
+      final (at, problem) = await pointAt(step.target, 'pinch');
+      if (at == null) return problem;
+      const half = ui.Offset(40, 0);
+      final a = await tester.startGesture(at - half, pointer: 91);
+      final b = await tester.startGesture(at + half, pointer: 92);
+      await tester.pump();
+      const moves = 12;
+      for (var i = 1; i <= moves; i++) {
+        final by = half * (1 + (scale - 1) * i / moves);
+        await a.moveTo(at - by);
+        await b.moveTo(at + by);
+        await tester.pump(const Duration(milliseconds: 16));
+      }
+      await a.up();
+      await b.up();
+      return null;
     case 'hover':
       final (at, problem) = await pointAt(step.target, 'hover');
       if (at == null) return problem;

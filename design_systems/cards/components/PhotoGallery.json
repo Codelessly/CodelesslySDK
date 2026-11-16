@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "PhotoGallery",
-  "doc": "A photo gallery with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next; your variable holds the photo in view (0: none open).",
+  "doc": "A photo gallery with a built-in large view: PhotoGallery =open photos:[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: mountain, harbor, skyline, dunes, forest, lagoon, market, festival, train, temple, bamboo; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next (on a page it opens over the window, where it also zooms: a pinch, the wheel, a double tap); your variable holds the photo in view (0: none open).",
   "props": [
    {
     "key": "value",
@@ -87,6 +87,19 @@
     },
     "default": true,
     "doc": "The strip fades at the edge where there are more photos (false: a hard edge)."
+   },
+   {
+    "key": "viewer",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "inline",
+      "overlay"
+     ]
+    },
+    "default": "inline",
+    "doc": "inline shows the large view in place of the grid or strip (a card in a chat); overlay leaves the grid as it is and only fires onChanged with the photo tapped, for a viewer shown over the window (on a page the notation opens its Lightbox there by itself)."
    }
   ],
   "events": [
@@ -171,7 +184,7 @@
    "bind": {
     "data": "${props.photos}",
     "props.crossAxisCount": "${props.columns}",
-    "visible": "${= props.layout == 'grid' && props.value <= 0}"
+    "visible": "${= props.layout == 'grid' && (props.value <= 0 || props.viewer == 'overlay')}"
    },
    "media": [
     {
@@ -307,7 +320,7 @@
     "height": 150
    },
    "bind": {
-    "visible": "${= props.layout == 'strip' && props.value <= 0}",
+    "visible": "${= props.layout == 'strip' && (props.value <= 0 || props.viewer == 'overlay')}",
     "props.edgeFade": "${= props.fade ? 12 : 0}"
    }
   },
@@ -793,7 +806,7 @@
     "radius": 14
    },
    "bind": {
-    "visible": "${= props.layout != 'pages' && props.value > 0}",
+    "visible": "${= props.layout != 'pages' && props.value > 0 && props.viewer != 'overlay'}",
     "decoration.radius": "${theme.radii.tile}"
    }
   },

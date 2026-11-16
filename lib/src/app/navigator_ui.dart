@@ -311,6 +311,14 @@ Future<Object?> showScreenModal(
       builder: (_) {
         if (sheet) return Align(alignment: Alignment.bottomCenter, child: content);
         if (fullScreen) return content;
+        // Covers the screen, as without a transition: the screen it shows
+        // fills it, at the device size.
+        if (cover) {
+          return Material(
+            type: MaterialType.transparency,
+            child: CanvasSizingScope(sizing: CanvasSizing.fill, child: SizedBox.expand(child: content)),
+          );
+        }
         return SafeArea(child: Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)));
       },
     ));
