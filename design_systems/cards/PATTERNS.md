@@ -14,6 +14,13 @@ format money with `money(n,"$",2)`. Pictures are `Media kind:"…"`, never a URL
 draws its own rows from the records and takes nothing indented under it: `Carousel =i items:=shoes` (records with
 name, detail, price, rating), `PhotoGallery =open photos:=photos`, `ComparisonTable names:[…] rows:[…]`. Inside
 `each x in list` a record's field is read through its name (`{x.price}`), never bare.
+Three controls switch between things, and each has one job. `Tabs =tab tabs:["Overview","Activity","Settings"]`
+(with `state tab="Overview"`) is the tabs of a page or a card: any number of views, underlined, one `if tab=="…"`
+block per tab under it. `Segments =range options:["7 days","30 days"]` is a small switch of two to four short
+options, as wide as its place (`TabToggle` is the same switch only as wide as its options, for a toolbar).
+`ChipTabs =filter tabs:["All","Open","Closed"]` is filter pills over a list; `ChoiceChips =time` is a choice of
+slots or sizes in a grid, not tabs. All of them stay on one line and scroll sideways where they do not fit: do not
+split a long set into rows yourself, and do not use `SegmentedButton` or `Segments` for more than four options.
 
 ## Pages in brief
 
@@ -48,6 +55,11 @@ cells, `grow` to the name's column, and `right` to numbers. A form is `Column ma
 (`Heading … level:3`, `Text.muted`, fields two across in `Row gap:16` with `grow` on each); its buttons sit at the
 end of a `Row end gap:8`. A list beside its details is `Pane w:360` (rows of `Row pad:[16,12,16,12] gap:12
 border-bottom:#FFE5E7EB`, the open one `fill:#142563EB`) next to a `Pane` for the open item.
+A page's views (a product's Description, Specifications and Reviews; a settings page's sections) are
+`Tabs =tab tabs:[…]` over one `if tab=="…"` block each, never a `SegmentedButton`; a billing period or a date
+range beside a heading is `TabToggle` (or `Segments` where it should span its place).
+Photos on a page are `PhotoGallery photos:[…]`: a tap opens them large over the window by itself (zoom, swipe,
+arrows, thumbnails); a `Lightbox#id` is for pictures of your own (`Image`) only.
 
 ## Pick one of several (flights, places, plans)
 
@@ -157,7 +169,10 @@ lines indented under it (the last with `last:true`), then `Checklist "Book ahead
 `total-length(d1)`. Photos are one line:
 `PhotoGallery =open photos:[{"kind":"harbor","caption":"…"},…]` (a grid; `layout:"strip"` is one row that scrolls
 sideways, `layout:"pages"` full-width photos swiped one at a time with dots); a tap opens the large view, which
-also pages by swipe. A carousel is one line too: `Carousel =i items:=shoes cta:"Details" -> open=true`, where each
+also pages by swipe. On a card the large view takes the grid's place. On a page it opens over the window, the grid
+staying as it is: a viewer with a count, arrows, thumbnails and the caption, where a pinch, the wheel or a double
+tap zooms a photo and a drag down, Escape or a tap beside it closes; write no `Lightbox` and no `if` for it (in a
+document written by hand, `viewer:"overlay"` and an `onChanged` that opens a viewer's canvas). A carousel is one line too: `Carousel =i items:=shoes cta:"Details" -> open=true`, where each
 record has name, detail, price, rating and tone; it slides by swipe with a peek of the next item, and `dots`,
 `arrows`, `counter` and `thumbs` switch its controls. The details view is an `if open` group reading `shoes[i]`.
 

@@ -1,0 +1,105 @@
+{
+ "widget": {
+  "doc": "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" =email; obscure:true masks a password, lines:6 makes a multi-line box, icon:\"search_rounded\" a search field, error:=cond?\"message\":\"\" shows a red message under it, success a green one.",
+  "props": [
+   {
+    "key": "value",
+    "type": {
+     "kind": "variable",
+     "of": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": "",
+    "doc": "The name of your text variable: the field shows it and writes it as the user types."
+   },
+   {
+    "key": "label",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "The label over the field (empty: none)."
+   },
+   {
+    "key": "placeholder",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "Shown while the field is empty."
+   },
+   {
+    "key": "lines",
+    "type": {
+     "kind": "integer",
+     "flutter": "int"
+    },
+    "default": 1,
+    "doc": "More than 1 makes it a multi-line box about that many lines tall (a message body)."
+   },
+   {
+    "key": "icon",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A Material icon inside the field, e.g. search_rounded (empty: none)."
+   },
+   {
+    "key": "error",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A message under the field, in red with a red border (empty: no error)."
+   },
+   {
+    "key": "success",
+    "type": {
+     "kind": "string",
+     "flutter": "String"
+    },
+    "default": "",
+    "doc": "A green confirmation under the field, e.g. \"SAVE10 applied\" (empty: none)."
+   },
+   {
+    "key": "keyboard",
+    "type": {
+     "kind": "enumeration",
+     "flutter": "String",
+     "values": [
+      "text",
+      "emailAddress",
+      "number",
+      "phone",
+      "url"
+     ]
+    },
+    "default": "text",
+    "doc": "The keyboard a phone shows."
+   },
+   {
+    "key": "obscure",
+    "type": {
+     "kind": "boolean",
+     "flutter": "bool"
+    },
+    "default": false,
+    "doc": "Mask the characters of a one-line password field."
+   }
+  ]
+ },
+ "nodes": {
+  "field": {
+   "bind": {
+    "props.obscureText": "${props.obscure}"
+   }
+  }
+ }
+}
