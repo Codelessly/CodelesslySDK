@@ -4,7 +4,10 @@ import 'dart:typed_data';
 import 'package:codelessly_api/codelessly_api.dart' as api;
 import 'package:codelessly_sdk/codelessly_sdk.dart';
 import 'package:codelessly_sdk/src/app/fonts.dart';
+import 'package:codelessly_sdk/src/render/controls/field_frame.dart' show ownStyle;
 import 'package:codelessly_sdk/src/render/convert.dart' show FontDemand;
+import 'package:codelessly_sdk/src/runtime/actions/look.dart' show applyTextStyle;
+import 'package:flutter/painting.dart' show TextStyle;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -137,6 +140,18 @@ void main() {
       expect(registered['Geist glyphs'], [2]);
     });
 
+    test('a later layout\'s new characters for a font already drawn are the next glyph family', () async {
+      // On the web a family's later file of the same weight adds no glyphs:
+      // Tack's shortcuts sheet (← → ⌫) after its board (⇧ ↵ ⌘) drew them in
+      // the platform's font.
+      final fetcher = _Glyphs();
+      final registered = <String>[];
+      final fonts = CodelesslyFonts(fetcher: fetcher, register: (family, _) async => registered.add(family));
+      await fonts.load([const PublishFont(id: 'm5', family: 'Geist Mono', weight: 500)], text: 'Shift ⇧');
+      await fonts.addText('Move ← → ⌫');
+      expect(registered, ['Geist Mono', 'Geist Mono glyphs', 'Geist Mono glyphs 2']);
+    });
+
     test('text of latin characters alone fetches no extra file', () async {
       CodelesslyFonts.resetGlyphs();
       final fetcher = _Glyphs();
@@ -170,5 +185,15 @@ void main() {
       await cache.load('Barlow', [file(1)]);
       expect(calls, 2);
     });
+  });
+
+  test('a field\'s hint and a feedback look fall back to the family\'s glyphs too', () {
+    FontDemand.glyphFallback = true;
+    addTearDown(() => FontDemand.glyphFallback = false);
+    // Tack's "Add an item and press ↵" placeholder drew ↵ as a box.
+    const glyphs = ['Geist glyphs', 'Geist glyphs 2', 'Geist glyphs 3', 'Geist glyphs 4'];
+    expect(ownStyle(const api.TextStyle(fontFamily: 'Geist')).fontFamilyFallback, glyphs);
+    expect(applyTextStyle(const api.TextStyle(fontFamily: 'Geist'), const TextStyle()).fontFamilyFallback, glyphs);
+    expect(ownStyle(const api.TextStyle(fontSize: 12)).fontFamilyFallback, isNull);
   });
 }

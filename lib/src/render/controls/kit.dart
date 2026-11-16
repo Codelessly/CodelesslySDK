@@ -355,11 +355,15 @@ abstract class RenderControl extends RenderBox implements MouseTrackerAnnotation
 
   @override
   void detach() {
-    focusNode.leave();
     _hovered = _pressed = false;
-    _settle();
     super.detach();
     _icon?.detach();
+    // Off the tree first: a focused control that lets its focus go reacts
+    // (a text field relays out), and a screen torn down in the middle of
+    // another render object's layout (a LayoutBuilder rebuilding, the
+    // editor's preview closing) must not mark it for layout there.
+    focusNode.leave();
+    _settle();
   }
 
   @override

@@ -445,9 +445,23 @@ class _Compiler {
     final style = textStyle(t.style, textDefault);
     final base = t.style.color == null && t.style.foreground == null ? style.copyWith(color: const Color(0xFF000000)) : style;
     final align = textAlign(t.textAlign);
+    // Style numbers given as expressions (a label that grows with the zoom).
+    final fontSize = optionalNumber(t.styleExprs['fontSize']);
+    final letterSpacing = optionalNumber(t.styleExprs['letterSpacing']);
+    final wordSpacing = optionalNumber(t.styleExprs['wordSpacing']);
+    final height = optionalNumber(t.styleExprs['height']);
+    final dynamicStyle = t.styleExprs.isNotEmpty;
     return _ParagraphOp(info, (s, bounds) {
       final painters = info.paints;
       var st = base;
+      if (dynamicStyle) {
+        st = st.copyWith(
+          fontSize: fontSize(s)?.let((v) => v > 0 ? v : null),
+          letterSpacing: letterSpacing(s),
+          wordSpacing: wordSpacing(s),
+          height: height(s)?.let((v) => v > 0 ? v : null),
+        );
+      }
       if (painters.isNotEmpty) {
         final ink = painters.first(s, bounds);
         if (ink != null) st = st.copyWith(color: null, foreground: ink.paint);

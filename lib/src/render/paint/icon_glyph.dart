@@ -1,3 +1,4 @@
+import 'directional_icons.dart';
 import 'dart:math' as math;
 
 // An icon, painted at its box's size: Material Icons, Material Symbols and
@@ -16,6 +17,25 @@ import 'material_icon_versions.dart';
 /// prebuilt SVGs; Cupertino icons from Codelessly's icon CDN (override with
 /// `--dart-define=CODELESSLY_CUPERTINO_SVG_BASE_URL=...`).
 abstract final class IconSources {
+  /// Whether [icon] (an icon prop) points a reading direction, so it mirrors
+  /// under a right-to-left text direction: a Material icon or symbol whose
+  /// base name (without `_rounded`, `_outlined`, `_sharp`) Flutter declares
+  /// with `matchTextDirection` (`arrow_back`, `chevron_right`, `send`...).
+  static bool mirrorsInRtl(Json icon) {
+    if (readString(icon['source']) == 'image') return false;
+    final type = readString(icon['type']) ?? 'MATERIAL_ICON';
+    if (type != 'MATERIAL_ICON' && type != 'MATERIAL_SYMBOL') return false;
+    var name = (readString(icon['name']) ?? '').toLowerCase();
+    if (name.startsWith('icons.')) name = name.substring(6);
+    for (final suffix in const ['_rounded', '_outlined', '_sharp']) {
+      if (name.endsWith(suffix)) {
+        name = name.substring(0, name.length - suffix.length);
+        break;
+      }
+    }
+    return directionalMaterialIcons.contains(name);
+  }
+
   static const cupertinoBaseUrl =
       String.fromEnvironment('CODELESSLY_CUPERTINO_SVG_BASE_URL', defaultValue: 'https://icons.codelessly.com');
 
@@ -195,6 +215,18 @@ class RenderIconGlyph extends RenderBox with ImageClient {
     return imageFor(_fallback);
   }
 
+  /// Whether the icon is drawn mirrored left to right: a directional
+  /// Material icon (an arrow, a chevron) under a right-to-left text
+  /// direction, as Flutter's `Icon` mirrors one declared with
+  /// `matchTextDirection` (see [IconSources.mirrorsInRtl]).
+  bool _mirrored = false;
+  bool get mirrored => _mirrored;
+  set mirrored(bool v) {
+    if (v == _mirrored) return;
+    _mirrored = v;
+    markNeedsPaint();
+  }
+
   Color? _color;
   set color(Color? v) {
     if (v == _color) return;
@@ -256,6 +288,21 @@ class RenderIconGlyph extends RenderBox with ImageClient {
   @override
   void paint(PaintingContext context, Offset offset) {
     if (_icon['show'] == false) return;
+    if (_mirrored) {
+      final rect = _glyphRect(offset);
+      final canvas = context.canvas
+        ..save()
+        ..translate(rect.center.dx, 0)
+        ..scale(-1, 1)
+        ..translate(-rect.center.dx, 0);
+      _paintIcon(context, offset);
+      canvas.restore();
+      return;
+    }
+    _paintIcon(context, offset);
+  }
+
+  void _paintIcon(PaintingContext context, Offset offset) {
     final color = _color ?? defaultColor;
     if (IconSources.drawsGlyph(_icon)) {
       _paintGlyph(context.canvas, _glyphRect(offset), color);

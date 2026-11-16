@@ -1056,6 +1056,9 @@ class RenderAnimations extends RenderPose {
     // A track that sets the node's opacity draws it here (the node then
     // has no opacity layer of its own); else that layer, inside, does.
     final own = animatesOpacity(n) && n.opacity < 0.99 ? n.opacity : 1.0;
+    // A bound opacity keeps its layer at 1, as the node's own would
+    // (node_tree.dart): Flutter's Opacity widget.
+    keepOpacityLayer = animatesOpacity(n) && n.bind.containsKey('opacity');
     this.opacity = (opacity * (opacityOverride ?? own)).clamp(0.0, 1.0);
     for (final e in _tweens.entries) {
       if ((e.key == 'motion.translateX' || e.key == 'motion.translateY') && e.value.keyframes.isNotEmpty) pushed = true;

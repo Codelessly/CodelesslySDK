@@ -99,6 +99,19 @@ void main() {
     expect(jsonEncode(layout.document.toJson()), jsonEncode(want.document.toJson()));
   });
 
+  test('a large layout compressed in a publish bundle loads (the site\'s bundle)', () {
+    // The site reads one bundle (`publish/<slug>.json`) assembled from the
+    // stored layouts, so a large one keeps its nodes in compressedNodes.
+    final json = jsonDecode(jsonEncode(rigcheck.toJson())) as Json;
+    final layouts = json['layouts'] as Json;
+    layouts[layoutId] = encodeStoredLayout(layouts[layoutId] as Json, compress: true);
+    expect((layouts[layoutId] as Json).containsKey('nodes'), isFalse);
+    final bundle = decodeBundle(utf8.encode(jsonEncode(json)));
+    final want = rigcheck.layouts[layoutId]!;
+    expect(bundle.layouts[layoutId]!.document.nodes.keys, want.document.nodes.keys);
+    expect(jsonEncode(bundle.layouts[layoutId]!.document.toJson()), jsonEncode(want.document.toJson()));
+  });
+
   test('a preview loads the preview publish', () async {
     final db = FakeFirebaseFirestore();
     await writePublish(db, 'p1', rigcheck, collection: 'publish_preview');

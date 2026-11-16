@@ -202,7 +202,7 @@ TextStyle ownStyle(api.TextStyle s) {
   }
   return TextStyle(
     fontFamily: s.fontFamily,
-    fontFamilyFallback: s.fontFamilyFallback.isEmpty ? null : s.fontFamilyFallback,
+    fontFamilyFallback: FontDemand.fallbackOf(s.fontFamily, s.fontFamilyFallback),
     fontSize: s.fontSize,
     fontWeight: w == null ? null : FontWeight.values[(w ~/ 100 - 1).clamp(0, 8)],
     fontStyle: s.fontStyle == null ? null : FontStyle.values.byName(s.fontStyle!.name),
@@ -653,6 +653,26 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
 
   // --- texts --------------------------------------------------------------------------
 
+  /// The direction the field lays out in (its node's): under right to left
+  /// its text and hint start at the right, the prefix is on the right and
+  /// the suffix on the left, the label and helper sit at the right and the
+  /// counter at the left, as Flutter's InputDecorator.
+  TextDirection get textDirection => _textDirection;
+  TextDirection _textDirection = TextDirection.ltr;
+  set textDirection(TextDirection v) {
+    if (v == _textDirection) return;
+    _textDirection = v;
+    for (final p in [_label, _hint, _below, _counter, _prefixText, _suffixText]) {
+      p.textDirection = v;
+    }
+    markNeedsLayout();
+  }
+
+  bool get _rtl => _textDirection == TextDirection.rtl;
+
+  /// [x] (with [width]) mirrored across the box under right to left.
+  double _across(double x, double width) => _rtl ? boxRect.left + boxRect.right - x - width : x;
+
   final TextPainter _label = TextPainter(textDirection: TextDirection.ltr, maxLines: 1, ellipsis: '…');
   final TextPainter _hint = TextPainter(textDirection: TextDirection.ltr, ellipsis: '…');
   final TextPainter _below = TextPainter(textDirection: TextDirection.ltr, ellipsis: '…');
@@ -686,6 +706,27 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
     );
     return own == null ? base : base.merge(own);
   }
+
+  /// How far below the content's top the hint is painted: its baseline on
+  /// the content's (Flutter's InputDecorator lays the hint and the input
+  /// out on one baseline), 0 when they share a style.
+  double get hintBaselineShift {
+    final d = decoration;
+    if (d.hintStyle == null) return 0;
+    final key = (d.valueStyle, hintStyle);
+    if (_hintShiftKey == key) return _hintShift;
+    final value = TextPainter(text: TextSpan(text: ' ', style: d.valueStyle), textDirection: TextDirection.ltr)..layout();
+    final hint = TextPainter(text: TextSpan(text: ' ', style: hintStyle), textDirection: TextDirection.ltr)..layout();
+    _hintShift = value.computeDistanceToActualBaseline(TextBaseline.alphabetic) -
+        hint.computeDistanceToActualBaseline(TextBaseline.alphabetic);
+    value.dispose();
+    hint.dispose();
+    _hintShiftKey = key;
+    return _hintShift;
+  }
+
+  Object? _hintShiftKey;
+  double _hintShift = 0;
 
   /// The hint's style: the content's, in `tertiaryText`, the decoration's
   /// hint style over it (so the hint and the typed text share a line).
@@ -961,16 +1002,37 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
     } else {
       final free = boxRect.height - line;
       final y = _alignVertical?.y ?? 0;
-      if (d.contentPadding != null && !d.collapsed && _alignVertical != null && _alignVertical!.y < 0) {
+      // Flutter's InputDecorator aligns a field with no outline border to the
+      // top (textAlignVertical null): a padding given puts the line its top
+      // below the box's top.
+      final outlined = [d.border, d.enabledBorder, d.focusedBorder].any((b) => b?.kind == FieldBorderKind.outline);
+      if (d.contentPadding != null && _alignVertical == null && !outlined) {
+        top = boxRect.top + d.contentPadding!.top;
+      } else if (d.contentPadding != null && !d.collapsed && _alignVertical != null && _alignVertical!.y < 0) {
         top = boxRect.top + d.contentPadding!.top;
       } else {
         top = boxRect.top + free / 2 * (1 + y);
       }
       height = line;
     }
-    contentRect = Rect.fromLTWH(left, top, contentWidth, height);
-    _prefixTextAt = Offset(_prefixTextAt.dx, contentRect.top);
-    _suffixTextAt = Offset(_suffixTextAt.dx, contentRect.top);
+    contentRect = Rect.fromLTWH(_across(left, contentWidth), top, contentWidth, height);
+    // An affix's text width, when its text shows (only then is its painter
+    // laid out).
+    bool shows(FieldAffix? a) => a != null && a.hasText && (a.alwaysVisible || affixTextsShown);
+    final prefixTextWidth = shows(d.prefix) ? _prefixText.width : 0.0;
+    final suffixTextWidth = shows(d.suffix) ? _suffixText.width : 0.0;
+    _prefixTextAt = Offset(_across(_prefixTextAt.dx, prefixTextWidth), contentRect.top);
+    _suffixTextAt = Offset(_across(_suffixTextAt.dx, suffixTextWidth), contentRect.top);
+    if (_rtl) {
+      _prefixIconRect = _prefixIconRect.isEmpty
+          ? _prefixIconRect
+          : Rect.fromLTWH(_across(_prefixIconRect.left, _prefixIconRect.width), _prefixIconRect.top, _prefixIconRect.width,
+              _prefixIconRect.height);
+      _suffixIconRect = _suffixIconRect.isEmpty
+          ? _suffixIconRect
+          : Rect.fromLTWH(_across(_suffixIconRect.left, _suffixIconRect.width), _suffixIconRect.top, _suffixIconRect.width,
+              _suffixIconRect.height);
+    }
     // The hint, in the content's place.
     _hint
       ..text = TextSpan(text: d.hint, style: hintStyle)
@@ -1039,7 +1101,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
   bool get hintShown => contentEmpty && decoration.hint.isNotEmpty;
 
   /// Where the label's glyphs are (local).
-  Rect get labelRect => decoration.label.isEmpty ? Rect.zero : Offset(0, _labelTop) & _label.size;
+  Rect get labelRect => decoration.label.isEmpty ? Rect.zero : Offset(_rtl ? size.width - _label.width : 0, _labelTop) & _label.size;
 
   /// Where the line below is (local; empty when none).
   Rect get belowRect => belowText.isEmpty ? Rect.zero : Offset(0, _belowTop) & _below.size;
@@ -1063,7 +1125,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
   void _paintFrame(PaintingContext context, Offset offset) {
     final d = decoration;
     final canvas = context.canvas;
-    if (d.label.isNotEmpty) _label.paint(canvas, offset + Offset(0, _labelTop));
+    if (d.label.isNotEmpty) _label.paint(canvas, offset + Offset(_rtl ? size.width - _label.width : 0, _labelTop));
     final shape = boxShape.shift(offset);
     if (fillNow case final Color fill when fill.a > 0) canvas.drawRRect(shape, Paint()..color = fill);
     // The affixes.
@@ -1079,7 +1141,7 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
     // The hint and the content, inside the box.
     final clip = d.collapsed ? (Offset.zero & size) : boxRect;
     _clip.layer = context.pushClipRect(needsCompositing, offset, clip, (context, offset) {
-      if (hintShown) _hint.paint(context.canvas, offset + contentRect.topLeft);
+      if (hintShown) _hint.paint(context.canvas, offset + contentRect.topLeft + Offset(0, hintBaselineShift));
       paintContent(context, offset);
     }, oldLayer: _clip.layer);
     // The clip may have pushed a layer: draw on the canvas after it.
@@ -1102,8 +1164,10 @@ abstract class RenderFieldFrame extends RenderControl implements LabeledControl 
       paintFocusRing(over, shape, d.focusRingColor!, width: d.focusRingWidth);
     }
     final below = belowText;
-    if (below.isNotEmpty) _below.paint(over, offset + Offset(0, _belowTop));
-    if (d.counter.isNotEmpty) _counter.paint(over, offset + Offset(size.width - _counter.width, _belowTop));
+    if (below.isNotEmpty) _below.paint(over, offset + Offset(_rtl ? size.width - _below.width : 0, _belowTop));
+    if (d.counter.isNotEmpty) {
+      _counter.paint(over, offset + Offset(_rtl ? 0 : size.width - _counter.width, _belowTop));
+    }
   }
 
   // --- what tools and the guard read --------------------------------------------------------
