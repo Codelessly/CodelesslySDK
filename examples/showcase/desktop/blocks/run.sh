@@ -16,4 +16,4 @@ P
      --out "$out/$n" --width 1280 --narrow 768 --rounds 3 --reference "$here/../native/$(cat "$out/$n.ref.txt").png" > "$out/$n.log" 2>&1; echo "$n exit $?" >> "$out/done.txt")
 }
 export -f one; export here sdk out
-printf '%s\n' $names | xargs -P 6 -I{} bash -c 'one {}'
+printf '%s\n' $names | xargs -P 2 -I{} bash -c 'one {}'
