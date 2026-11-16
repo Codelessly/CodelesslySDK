@@ -22,10 +22,13 @@
  "previews": [
   {"name": "Tidewater", "size": [1280, 65], "props": {"brand": "Tidewater", "icon": "waves", "links": ["Features", "Pricing", "Customers", "Docs"], "active": "Pricing", "secondary": "Sign in", "cta": "Start free"}}
  ],
+ "variables": {
+  "band": [{"name": "menuOpen", "type": "boolean", "value": false}]
+ },
  "nodes": {
   "band": {
    "type": "column",
-   "children": ["inner", "rule"],
+   "children": ["inner", "mobileMenu", "rule"],
    "props": {"crossAxisAlignment": "center", "spacing": 0},
    "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
    "decoration": {"fills": [{"color": "pageFill"}]}
@@ -111,7 +114,7 @@
   },
   "actions": {
    "type": "row",
-   "children": ["second", "cta"],
+   "children": ["second", "menuButton", "cta"],
    "props": {"crossAxisAlignment": "center", "spacing": 8},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
   },
@@ -148,6 +151,49 @@
   "ctaText": {
    "type": "text",
    "props": {"text": "${props.cta}", "style": {"from": "strongWide", "fontSize": 14, "color": "onAccent"}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "menuButton": {
+   "type": "row",
+   "media": [{"maxWidth": 699, "patch": {"visible": true}}],
+   "visible": false,
+   "children": ["menuIcon"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": 40, "height": 40},
+   "decoration": {"fills": [{"color": "activeTint"}], "radius": 10},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "menuOpen", "value": "${= !menuOpen}"}]}]
+  },
+  "menuIcon": {
+   "type": "icon",
+   "props": {"icon": "menu", "size": 22, "color": "accent"},
+   "layout": {"width": 22, "height": 22},
+   "bind": {"props.icon": "${= menuOpen ? 'close' : 'menu'}"}
+  },
+  "mobileMenu": {
+   "type": "column",
+   "visible": false,
+   "media": [{"maxWidth": 699, "patch": {"bind": {"visible": "${= menuOpen}"}}}],
+   "children": ["mobileLinks"],
+   "props": {"crossAxisAlignment": "stretch"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [20, 0, 20, 12]}
+  },
+  "mobileLinks": {
+   "type": "listView",
+   "children": ["mobileLink"],
+   "props": {"scrollable": false, "spacing": 2},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"data": "${props.links}"}
+  },
+  "mobileLink": {
+   "type": "row",
+   "children": ["mobileLinkText"],
+   "layout": {"width": {"fill": 0}, "height": 44, "padding": [12, 0, 12, 0]},
+   "decoration": {"fills": [{"color": "pageFill"}], "radius": 10},
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "setVariable", "variable": "menuOpen", "value": "${= false}"}, {"type": "componentEvent", "event": "onNavigate", "value": "${item}"}]}]
+  },
+  "mobileLinkText": {
+   "type": "text",
+   "props": {"text": "${item}", "style": {"from": "mutedWide", "color": "inkSoft", "fontWeight": 600}},
    "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
   }
  }
