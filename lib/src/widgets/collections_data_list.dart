@@ -16,6 +16,8 @@ import 'package:flutter/rendering.dart' show RenderAbstractViewport, ScrollCache
 import 'package:flutter/scheduler.dart';
 
 import '../render/convert.dart';
+import '../render/controls/focus.dart';
+import '../render/controls/root.dart';
 import '../render/recipe.dart';
 import '../runtime/lists/pagination.dart';
 import 'collections_data_list_model.dart';
@@ -129,6 +131,37 @@ class DataListView extends StatefulWidget {
 
 class DataListViewState extends State<DataListView> {
   final ScrollController scrollController = ScrollController();
+  final GlobalKey _latestKey = GlobalKey();
+  ControlFocusNode? _latestFocus;
+
+  void _redrawLatestFocus() {
+    SchedulerBinding.instance.addPostFrameCallback((_) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  void _syncLatestFocus() {
+    if (!mounted) return;
+    final owner = _latestKey.currentContext?.findRenderObject();
+    final root = owner is RenderBox ? RenderControlRoot.of(owner) : null;
+    if (owner is! RenderBox || root == null) {
+      _latestFocus?.leave();
+      _latestFocus = null;
+      return;
+    }
+    if (identical(_latestFocus?.owner, owner) && identical(_latestFocus?.scope, root.focus)) return;
+    _latestFocus?.leave();
+    _latestFocus = ControlFocusNode(owner, onActivate: _jumpToLatest, onFocusChange: (_) => _redrawLatestFocus())
+      ..label = (() => 'Jump to latest')
+      ..onHighlightChange = _redrawLatestFocus
+      ..join(root.focus);
+  }
+
+  void _jumpToLatest() {
+    if (_latestFocus?.hasFocus ?? false) _latestFocus?.scope?.next();
+    setState(() => _atEnd = true);
+    _scrollToEnd(animate: true, frames: 3);
+  }
 
   // --- items: the current index and snapping -------------------------------------
 
@@ -274,7 +307,8 @@ class DataListViewState extends State<DataListView> {
   void _scrolled() {
     if (_endFrames > 0 || !scrollController.hasClients) return;
     final p = scrollController.position;
-    _atEnd = p.pixels >= p.maxScrollExtent - 8;
+    final atEnd = p.pixels >= p.maxScrollExtent - 8;
+    if (atEnd != _atEnd) setState(() => _atEnd = atEnd);
   }
 
   /// Scrolls to the end after the frame, again on the next ones (lazily
@@ -317,6 +351,7 @@ class DataListViewState extends State<DataListView> {
 
   @override
   void dispose() {
+    _latestFocus?.leave();
     _m
       ..removeListener(_changed)
       ..dispose();
@@ -646,6 +681,36 @@ class DataListViewState extends State<DataListView> {
           ),
         ],
       );
+    }
+    if (sticky) {
+      SchedulerBinding.instance.addPostFrameCallback((_) => _syncLatestFocus());
+      final colors = Theme.of(context).colorScheme;
+      list = Stack(children: [
+        Positioned.fill(child: list),
+        if (!_atEnd) PositionedDirectional(
+          end: 12,
+          bottom: 12,
+          child: Semantics(
+            key: _latestKey,
+            label: 'Jump to latest',
+            button: true,
+            focused: _latestFocus?.hasFocus ?? false,
+            onTap: _jumpToLatest,
+            child: ExcludeSemantics(child: Focus(
+              descendantsAreFocusable: false,
+              child: IconButton.filledTonal(
+                key: const ValueKey('followListLatest'),
+                tooltip: 'Jump to latest',
+                onPressed: _jumpToLatest,
+                icon: Icon(axis == Axis.vertical ? Icons.arrow_downward : Icons.arrow_forward),
+                style: IconButton.styleFrom(minimumSize: const Size(48, 48), backgroundColor: colors.surfaceContainerHigh)
+                    .copyWith(side: WidgetStatePropertyAll(_latestFocus?.showsHighlight == true
+                        ? BorderSide(color: colors.primary, width: 2) : BorderSide.none)),
+              ),
+            )),
+          ),
+        ),
+      ]);
     }
     return list;
   }

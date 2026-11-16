@@ -36,6 +36,8 @@ Future<Screen> show(
   bool interactive = true,
   CodelesslyServices? services,
   ActionUi ui = const NoActionUi(),
+  ThemeData? theme,
+  TextDirection direction = TextDirection.ltr,
 }) async {
   final doc = LayoutDocument.fromJson({'roots': [root], 'nodes': nodes});
   final scope = VariableScope(variables);
@@ -50,6 +52,8 @@ Future<Screen> show(
     tree.dispose();
   });
   await tester.pumpWidget(MaterialApp(
+    theme: theme,
+    builder: (context, child) => Directionality(textDirection: direction, child: child!),
     home: Scaffold(
       body: Align(alignment: Alignment.topLeft, child: NodeView(tree: tree, rootId: root, interactive: interactive)),
     ),
