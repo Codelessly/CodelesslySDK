@@ -1,0 +1,104 @@
+{
+ "schema": 3,
+ "id": "BoardColumn",
+ "roots": ["col"],
+ "widget": {
+  "type": "BoardColumn",
+  "doc": "One kanban column: BoardColumn \"In progress\" count:3 tone:\"accent\" limit:4 -> onAdd with its task cards indented under it, in a Row stretch so it runs the board's height (tone neutral, accent, warn or good colors the dot; limit 0 means none, otherwise the count reads count/limit and turns warning-colored when reached; 280 wide by default, w:fill to take its place; a count of 0 shows emptyText).",
+  "children": "list",
+  "props": [
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Backlog", "doc": "The column's name.", "required": true},
+   {"key": "count", "type": {"kind": "number", "flutter": "int"}, "default": 0, "doc": "How many cards are in the column (0 shows the empty state)."},
+   {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "neutral", "doc": "The status dot: neutral, accent, warn or good."},
+   {"key": "limit", "type": {"kind": "number", "flutter": "int"}, "default": 0, "doc": "A work-in-progress limit, shown as count/limit and warning-colored when reached (0: none)."},
+   {"key": "emptyText", "type": {"kind": "string", "flutter": "String"}, "default": "No tasks here yet", "doc": "What an empty column says."}
+  ],
+  "events": [{"key": "onAdd", "doc": "The add button was pressed; the value is the column's title."}]
+ },
+ "previews": [
+  {"name": "Empty with limit", "size": [280, 420], "props": {"title": "In review", "count": 0, "tone": "warn", "limit": 3, "emptyText": "Nothing waiting for review"}},
+  {"name": "At limit", "size": [280, 260], "props": {"title": "In progress", "count": 3, "tone": "accent", "limit": 3}}
+ ],
+ "nodes": {
+  "col": {
+   "type": "column", "children": ["head", "body"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 10},
+   "layout": {"width": 280, "height": {"fill": 0}, "padding": [10, 12, 10, 10]},
+   "decoration": {"fills": [{"color": "tile"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 16},
+   "bind": {"decoration.radius": "${theme.radii.cardWide}"}
+  },
+  "head": {
+   "type": "row", "children": ["dot", "title", "countPill", "gap", "add"],
+   "props": {"crossAxisAlignment": "center", "spacing": 8},
+   "layout": {"width": {"fill": 0}, "height": 32, "padding": [6, 0, 0, 0]}
+  },
+  "dot": {
+   "type": "box", "layout": {"width": 8, "height": 8},
+   "decoration": {"fills": [{"color": "inkFaint"}], "radius": 4},
+   "bind": {"decoration.fills[0].color": "${= props.tone == 'accent' ? theme.colors.accent : props.tone == 'warn' ? theme.colors.warn : props.tone == 'good' ? theme.colors.good : theme.colors.inkFaint}"}
+  },
+  "title": {
+   "type": "text",
+   "props": {"text": "${props.title}", "style": "strongWide", "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "countPill": {
+   "type": "row", "children": ["countText"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": {"hug": 0}, "height": 22, "padding": [8, 0, 8, 0]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 999},
+   "bind": {
+    "decoration.fills[0].color": "${= props.limit > 0 && props.count >= props.limit ? theme.colors.warnTint : theme.colors.card}",
+    "decoration.strokes[0].color": "${= props.limit > 0 && props.count >= props.limit ? theme.colors.warnLine : theme.colors.line}"
+   }
+  },
+  "countText": {
+   "type": "text",
+   "props": {"text": "${= props.limit > 0 ? props.count + '/' + props.limit : '' + props.count}", "style": {"from": "captionWide", "fontWeight": 600, "color": "inkSoft"}},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"props.style.color": "${= props.limit > 0 && props.count >= props.limit ? theme.colors.warnDeep : theme.colors.inkSoft}"}
+  },
+  "gap": {"type": "spacer", "layout": {"width": {"fill": 0}, "height": 1}},
+  "add": {
+   "type": "row", "children": ["addIcon"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": 30, "height": 30},
+   "decoration": {"fills": [{"color": "tile"}], "radius": 9},
+   "bind": {"decoration.radius": "${theme.radii.controlSmall}"},
+   "states": {
+    "hovered": {"add": {"decoration": {"fills": [{"color": "tileDeep"}]}}},
+    "pressed": {"add": {"opacity": 0.7}}
+   },
+   "actions": [{"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onAdd", "value": "${props.title}"}]}]
+  },
+  "addIcon": {
+   "type": "icon", "props": {"icon": "add_rounded", "size": 20, "color": "inkSoft"},
+   "layout": {"width": 20, "height": 20}
+  },
+  "body": {
+   "type": "column", "children": ["empty", "cards"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 10, "scrollable": true},
+   "layout": {"width": {"fill": 0}, "height": {"fill": 0}}
+  },
+  "empty": {
+   "type": "column", "children": ["emptyIcon", "emptyText"],
+   "props": {"crossAxisAlignment": "center", "mainAxisAlignment": "center", "spacing": 6},
+   "layout": {"width": {"fill": 0}, "height": 108, "padding": [12, 12, 12, 12]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "lineStrong"}], "strokeWidth": 1, "radius": 12},
+   "bind": {"visible": "${= props.count == 0}", "decoration.radius": "${theme.radii.tileWide}"}
+  },
+  "emptyIcon": {
+   "type": "icon", "props": {"icon": "inbox_outlined", "size": 22, "color": "inkFaint"},
+   "layout": {"width": 22, "height": 22}
+  },
+  "emptyText": {
+   "type": "text",
+   "props": {"text": "${props.emptyText}", "style": {"from": "smallWide", "color": "inkFaint"}, "textAlign": "center"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "cards": {
+   "type": "slot", "props": {"name": "children"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  }
+ }
+}

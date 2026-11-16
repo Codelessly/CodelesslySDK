@@ -1,0 +1,7 @@
+WARNING [site_blog] layout_field_ignored [site_blog.doc] /nodes/column11/layout/y
+WARNING [site_blog] image_network [site_blog.doc] /nodes/Avatar1/props/image
+WARNING [app_table] missing_glyph [app_table.doc screen app_table 1280x800] node text12
+WARNING [app_table] missing_glyph [app_table.doc screen app_table 1280x800] node text13
+WARNING [app_table] missing_glyph [app_table.doc screen app_table 1280x800] node text14
+WARNING [app_table] missing_glyph [app_table.doc screen app_table 1280x800] node text15
+WARNING [app_table] missing_glyph [app_table.doc screen app_table 1280x800] node text16

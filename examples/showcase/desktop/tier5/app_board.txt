@@ -1,0 +1,97 @@
+state sel=""
+state q=""
+state nextId=15
+state done=[]
+state tasks=[{"id":"t1","title":"Audit current sitemap","label":"Content","tone":"info","due":"Nov 18","dueTone":"","comments":3,"who":"MR","avTone":"accent","col":"Backlog","desc":"List every page on the current site and mark what to keep, merge or retire."},{"id":"t2","title":"Write new homepage copy","label":"Content","tone":"info","due":"Nov 22","dueTone":"soon","comments":5,"who":"SO","avTone":"warn","col":"Backlog","desc":"Draft headline, subhead and three feature blurbs for the relaunch homepage."},{"id":"t3","title":"Define design tokens","label":"Design","tone":"lilac","due":"Nov 25","dueTone":"","comments":2,"who":"JK","avTone":"purple","col":"Backlog","desc":"Colors, type scale and spacing shared by design and code."},{"id":"t4","title":"Set up analytics events","label":"Frontend","tone":"accent","due":"Nov 29","dueTone":"","comments":0,"who":"TL","avTone":"good","col":"Backlog","desc":"Track sign-ups, pricing views and demo requests."},{"id":"t5","title":"Plan redirect map","label":"SEO","tone":"warn","due":"Dec 02","dueTone":"","comments":1,"who":"MR","avTone":"accent","col":"Backlog","desc":"Map old URLs to new ones so no search traffic is lost."},{"id":"t6","title":"Build the new homepage hero","label":"Frontend","tone":"accent","due":"Nov 27","dueTone":"soon","comments":6,"who":"SO","avTone":"warn","col":"In progress","desc":"Responsive hero with headline, call to action and product drawing."},{"id":"t7","title":"Pricing page layout","label":"Design","tone":"lilac","due":"Nov 20","dueTone":"late","comments":4,"who":"JK","avTone":"purple","col":"In progress","desc":"Three plans, a comparison table and an FAQ."},{"id":"t8","title":"Migrate blog posts","label":"Content","tone":"info","due":"Dec 05","dueTone":"","comments":2,"who":"TL","avTone":"good","col":"In progress","desc":"Move 48 posts to the new template and check images."},{"id":"t9","title":"Navigation and footer","label":"Frontend","tone":"accent","due":"Nov 19","dueTone":"soon","comments":7,"who":"SO","avTone":"warn","col":"In review","desc":"Shared top bar and footer with keyboard support."},{"id":"t10","title":"Contact form validation","label":"Bug","tone":"bad","due":"Nov 17","dueTone":"late","comments":3,"who":"TL","avTone":"good","col":"In review","desc":"Show clear errors and block empty submissions."},{"id":"t11","title":"Kick-off brief","label":"Planning","tone":"good","due":"Nov 04","dueTone":"done","comments":8,"who":"MR","avTone":"accent","col":"Done","desc":"Goals, audience and success measures for the relaunch."},{"id":"t12","title":"Competitor review","label":"Research","tone":"neutral","due":"Nov 08","dueTone":"done","comments":4,"who":"JK","avTone":"purple","col":"Done","desc":"Five competitor sites compared on message and speed."},{"id":"t13","title":"Brand color refresh","label":"Design","tone":"lilac","due":"Nov 11","dueTone":"done","comments":9,"who":"JK","avTone":"purple","col":"Done","desc":"New palette approved by the leadership team."},{"id":"t14","title":"Hosting and staging setup","label":"Frontend","tone":"accent","due":"Nov 13","dueTone":"done","comments":1,"who":"TL","avTone":"good","col":"Done","desc":"Staging site with preview links for every branch."}]
+App
+  Main
+    Nav
+      Row gap:16 middle
+        Brand "Lanes" icon:"view_kanban"
+        Heading "Website relaunch" level:1
+      Row gap:6 middle
+        Avatar "Maya Reyes" size:32
+        Avatar "Sam Ortiz" size:32
+        Avatar "Jin Kim" size:32
+        Avatar "Tara Lee" size:32
+        Avatar "Omar Haddad" size:32
+      Row gap:8 middle
+        Input "Filter tasks" =q w:220
+        Button "New task" icon:"add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Backlog","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
+    Column pad:24 gap:16 scroll
+      Row gap:12 stretch
+        Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","Backlog"))
+          Row between middle
+            Row gap:8 middle
+              Text.strong "Backlog"
+              CountBadge count:=count(tasks,x=>x.col=="Backlog") showZero:true
+            IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Backlog","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
+          each t in tasks
+            if t.col=="Backlog" && contains(lower(t.title),lower(q))
+              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
+        Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","In progress"))
+          Row between middle
+            Row gap:8 middle
+              Text.strong "In progress"
+              CountBadge count:=count(tasks,x=>x.col=="In progress") showZero:true
+            IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"In progress","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
+          each t in tasks
+            if t.col=="In progress" && contains(lower(t.title),lower(q))
+              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
+        Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","In review"))
+          Row between middle
+            Row gap:8 middle
+              Text.strong "In review"
+              CountBadge count:=count(tasks,x=>x.col=="In review") showZero:true
+            IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"In review","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
+          each t in tasks
+            if t.col=="In review" && contains(lower(t.title),lower(q))
+              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
+        Column grow gap:10 pad:10 fill:#FFF3F4F6 radius:10 drop:task -> tasks=updateWhere(tasks,x=>x.id==result.data,x=>with(x,"col","Done"))
+          Row between middle
+            Row gap:8 middle
+              Text.strong "Done"
+              CountBadge count:=count(tasks,x=>x.col=="Done") showZero:true
+            IconButton "add" -> tasks=append(tasks,{"id":"t"+nextId,"title":"New task","label":"Planning","tone":"neutral","due":"Dec 10","dueTone":"","comments":0,"who":"MR","avTone":"accent","col":"Done","desc":"Describe this task."}); sel="t"+nextId; nextId=nextId+1
+          each t in tasks
+            if t.col=="Done" && contains(lower(t.title),lower(q))
+              TaskCard title:=t.title label:=t.label tone:=t.tone due:=t.due dueTone:=t.dueTone comments:=t.comments assignee:=t.who avatarTone:=t.avTone selected:=sel==t.id drag:task(t.id) -> sel=t.id
+  Pane w:340 pad:16 gap:16 border-left:#FFE5E7EB scroll
+    if sel==""
+      EmptyState "No task selected" "Select a card to see its details." icon:"touch_app"
+    if sel!=""
+      Row between middle
+        Text.eyebrow "{find(tasks,x=>x.id==sel).col}"
+        IconButton "close" -> sel=""
+      Heading "{find(tasks,x=>x.id==sel).title}" level:3
+      Row gap:8 middle
+        Badge.primary "{find(tasks,x=>x.id==sel).label}"
+        Text.caption "Due {find(tasks,x=>x.id==sel).due}"
+        Spacer grow
+        Avatar "{find(tasks,x=>x.id==sel).who}" size:28
+      Column gap:6
+        Text.fieldLabel "Description"
+        Text.muted "{find(tasks,x=>x.id==sel).desc}"
+      Checklist "Checklist" =done items:["Outline the approach","Draft the first version","Get feedback from the team","Publish to staging"]
+      Column gap:10
+        Text.fieldLabel "Activity"
+        Row gap:10 top
+          Avatar "Maya Reyes" size:28
+          Column grow
+            Text.small "Maya moved this task to {find(tasks,x=>x.id==sel).col}"
+            Text.caption "2 hours ago"
+        Row gap:10 top
+          Avatar "Sam Ortiz" size:28
+          Column grow
+            Text.small "Sam commented: looks good, one small tweak left."
+            Text.caption "Yesterday"
+        Row gap:10 top
+          Avatar "Jin Kim" size:28
+          Column grow
+            Text.small "Jin changed the due date to {find(tasks,x=>x.id==sel).due}"
+            Text.caption "2 days ago"
+        Row gap:10 top
+          Avatar "Tara Lee" size:28
+          Column grow
+            Text.small "Tara created this task"
+            Text.caption "Last week"
