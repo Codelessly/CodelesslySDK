@@ -198,16 +198,12 @@ def tool_docs(args):
     return [text(out)], code not in (0,)
 
 
-_server_checked = False
-
-
 def ensure_server():
-    """Starts the render server (tool/render/serve.sh) once per MCP session, so every render after the first skips
-    Flutter's start. CODELESSLY_MCP_NO_SERVER=1 turns it off."""
-    global _server_checked
-    if _server_checked or os.environ.get('CODELESSLY_MCP_NO_SERVER'):
+    """Starts the render server (tool/render/serve.sh) when it is not up: on the first render, and again after it
+    stopped (idle, a code change, a font conflict it handed back). serve.sh answers at once when it is up.
+    CODELESSLY_MCP_NO_SERVER=1 turns it off."""
+    if os.environ.get('CODELESSLY_MCP_NO_SERVER'):
         return
-    _server_checked = True
     subprocess.run([str(SDK / 'tool' / 'render' / 'serve.sh')], capture_output=True, text=True, timeout=900)
 
 

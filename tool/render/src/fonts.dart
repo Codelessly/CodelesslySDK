@@ -296,8 +296,25 @@ class DirectoryFontFetcher implements FontFetcher {
       if (!misses.contains(miss)) misses.add(miss);
     }
     if (face == null) return null;
+    // The engine keeps the first file registered for a face for the process's life: a later run (the render
+    // server's) giving that face another file would still be drawn with the first one.
+    final key = '${font.family.toLowerCase()}|${font.weight}|${font.italic}';
+    final before = engineFiles[key];
+    if (before == null) {
+      engineFiles[key] = face.path;
+    } else if (before != face.path) {
+      engineConflicts.add('${font.family} ${font.weight}${font.italic ? ' italic' : ''}: ${face.path} after $before');
+    }
     return File(face.path).readAsBytesSync();
   }
+
+  /// Process-wide: the file the engine was given for each face (`family|weight|italic`), across runs.
+  static final Map<String, String> engineFiles = {};
+
+  /// Faces this process was asked to draw with a file other than the one the engine already has for them (a
+  /// family first drawn in Roboto, missing, then given its own file): the drawing is the first file's. The render
+  /// server stops and hands such a run back (tool/render/render_harness.dart).
+  static final List<String> engineConflicts = [];
 }
 
 final Map<String, int> _latinScores = {};

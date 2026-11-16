@@ -105,7 +105,7 @@ if [ -f "$server/ready" ] && [ -f "$server/pid" ] && kill -0 "$(cat "$server/pid
     echo "Rendering with $(codelessly_version_line), the render server (pid $(cat "$server/pid"))." >&2
     req="$server/$(date +%s%N)-$$.req"
     printf '%s\n' "$work/args" > "$req.tmp" && mv "$req.tmp" "$req"
-    while [ ! -f "$work/args.status" ]; do
+    while [ ! -f "$work/args.status" ] && [ ! -f "$work/args.retry" ]; do
       if ! kill -0 "$(cat "$server/pid" 2>/dev/null)" 2>/dev/null; then
         echo "The render server stopped during the run; rendering the usual way." >&2
         rm -f "$req"
@@ -113,7 +113,11 @@ if [ -f "$server/ready" ] && [ -f "$server/pid" ] && kill -0 "$(cat "$server/pid
       fi
       sleep 0.05
     done
-    if [ -f "$work/args.status" ]; then
+    if [ -f "$work/args.retry" ]; then
+      echo "The render server had other files registered for fonts this run draws ($(head -1 "$work/args.retry")); it stopped. Rendering the usual way; tool/render/serve.sh starts it again." >&2
+      for _ in $(seq 1 100); do kill -0 "$(cat "$server/pid" 2>/dev/null)" 2>/dev/null || break; sleep 0.1; done
+      rm -rf "$server"
+    elif [ -f "$work/args.status" ]; then
       cat "$work/args.report"
       exit "$(cat "$work/args.status")"
     fi

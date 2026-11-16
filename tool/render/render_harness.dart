@@ -15,6 +15,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'src/args.dart';
+import 'src/fonts.dart';
 import 'src/render.dart';
 
 void main() {
@@ -66,6 +67,16 @@ Future<void> _serve(WidgetTester tester, String dir) async {
     next.deleteSync();
     try {
       await _renderOne(tester, argsFile);
+      if (DirectoryFontFetcher.engineConflicts.isNotEmpty) {
+        // A face this run needs is registered with another file from an earlier run, and the engine cannot forget
+        // it: this run's capture is not what a run of its own draws. Hand it back and stop serving.
+        for (final ext in const ['.status', '.report']) {
+          final f = File('$argsFile$ext');
+          if (f.existsSync()) f.deleteSync();
+        }
+        File('$argsFile.retry').writeAsStringSync('${DirectoryFontFetcher.engineConflicts.join('\n')}\n');
+        break;
+      }
     } catch (e, s) {
       // A run that throws answers with the error; the server keeps serving.
       File('$argsFile.report').writeAsStringSync('The render server failed on this run: $e\n$s\n');
