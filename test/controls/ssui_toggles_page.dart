@@ -24,7 +24,7 @@ String ssuiTogglesReference(bool dark) =>
 
 /// Roboto, as the reference is set in.
 Future<void> loadRoboto() async {
-  const dir = '/opt/flutter/bin/cache/artifacts/material_fonts';
+  final dir = '${Platform.environment['FLUTTER_ROOT'] ?? '/opt/flutter'}/bin/cache/artifacts/material_fonts';
   final roboto = FontLoader('Roboto');
   for (final f in ['Roboto-Regular.ttf', 'Roboto-Medium.ttf', 'Roboto-Bold.ttf']) {
     roboto.addFont(Future.value(ByteData.sublistView(File('$dir/$f').readAsBytesSync())));
