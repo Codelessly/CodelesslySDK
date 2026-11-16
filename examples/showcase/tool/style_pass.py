@@ -237,6 +237,9 @@ def block_pictures(ds, out):
 
 
 def main():
+    if '--help' in sys.argv or '-h' in sys.argv:
+        print(__doc__)
+        return
     mode = sys.argv[1] if len(sys.argv) > 1 and not sys.argv[1].startswith('--') else 'run'
     out = os.path.abspath(opt('--out'))
     os.makedirs(out, exist_ok=True)
