@@ -74,6 +74,32 @@
     "doc": "One shortcut per command (empty: none)."
    },
    {
+    "key": "categories",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One category name per command. The first matching command in each category shows its heading."
+   },
+   {
+    "key": "routes",
+    "type": {
+     "kind": "list",
+     "flutter": "List<String>",
+     "item": {
+      "kind": "string",
+      "flutter": "String"
+     }
+    },
+    "default": [],
+    "doc": "One canvas id per command. Selecting a command navigates to that canvas; empty leaves routing to onSelected."
+   },
+   {
     "key": "emptyMessage",
     "type": {
      "kind": "string",
@@ -237,6 +263,18 @@
    "actions": [
     {
      "trigger": {
+      "type": "load"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selected",
+       "value": "${= length(matches) > 0 ? matches[0] : ''}"
+      }
+     ]
+    },
+    {
+     "trigger": {
       "type": "changed"
      },
      "actions": [
@@ -244,6 +282,73 @@
        "type": "setVariable",
        "variable": "props.value",
        "value": "${result}"
+      },
+      {
+       "type": "setVariable",
+       "variable": "selected",
+       "value": "${= length(matches) > 0 ? matches[0] : ''}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "keyDown",
+      "key": "ArrowDown"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selected",
+       "value": "${= length(matches) == 0 ? '' : matches[(findIndex(matches, c => c == selected) + 1) % length(matches)]}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "keyDown",
+      "key": "ArrowUp"
+     },
+     "actions": [
+      {
+       "type": "setVariable",
+       "variable": "selected",
+       "value": "${= length(matches) == 0 ? '' : matches[(findIndex(matches, c => c == selected) + length(matches) - 1) % length(matches)]}"
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "keyDown",
+      "key": "Enter"
+     },
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${selected}",
+       "when": {
+        "left": "${= selected != ''}",
+        "op": "isTrue"
+       }
+      },
+      {
+       "type": "navigate",
+       "to": "${= props.routes[findIndex(props.commands, c => c == selected)]}",
+       "when": {
+        "left": "${= selected != '' && findIndex(props.commands, c => c == selected) < length(props.routes)}",
+        "op": "isTrue"
+       }
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "keyDown",
+      "key": "Escape"
+     },
+     "actions": [
+      {
+       "type": "closeModal"
       }
      ]
     }
@@ -255,7 +360,7 @@
     "command"
    ],
    "props": {
-    "scrollable": false
+    "scrollable": true
    },
    "layout": {
     "width": {
@@ -269,72 +374,36 @@
      4,
      0,
      4
-    ]
+    ],
+    "constraints": {
+     "maxHeight": 320
+    }
    },
    "bind": {
-    "data": "${props.commands}"
+    "data": "${props.commands}",
+    "visible": "${= length(matches) > 0}"
    }
   },
   "command": {
-   "type": "row",
+   "type": "column",
    "children": [
-    "glyph",
-    "label",
-    "chip"
+    "category",
+    "commandRow"
    ],
    "props": {
-    "crossAxisAlignment": "center",
-    "spacing": 12
+    "crossAxisAlignment": "stretch"
    },
    "layout": {
     "width": {
      "fill": 418
     },
     "height": {
-     "hug": 44
-    },
-    "padding": [
-     16,
-     12,
-     16,
-     12
-    ]
-   },
-   "decoration": {
-    "fills": [
-     {
-      "color": "#00000000"
-     }
-    ]
+     "hug": 0
+    }
    },
    "bind": {
     "visible": "${= props.value == '' || contains(lower(item), lower(props.value))}"
-   },
-   "states": {
-    "hovered": {
-     "command": {
-      "decoration": {
-       "fills": [
-        {
-         "color": "hoverOverlay"
-        }
-       ]
-      }
-     }
-    }
-   },
-   "actions": [
-    {
-     "trigger": "click",
-     "actions": [
-      {
-       "type": "componentEvent",
-       "event": "onSelected",
-       "value": "${item}"
-      }
-     ]
-    }
-   ]
+   }
   },
   "glyph": {
    "type": "icon",
@@ -473,6 +542,119 @@
      "hug": 20
     }
    }
+  },
+  "category": {
+   "type": "text",
+   "props": {
+    "text": "${= upper(props.categories[index])}",
+    "style": {
+     "from": "eyebrowWide",
+     "color": "inkFaint",
+     "fontSize": 11,
+     "fontWeight": 700,
+     "letterSpacing": 0.7
+    }
+   },
+   "layout": {
+    "width": {
+     "fill": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "padding": [
+     16,
+     12,
+     16,
+     4
+    ]
+   },
+   "bind": {
+    "visible": "${= length(props.categories) > index && props.categories[index] != '' && findIndex(range(index), i => props.categories[i] == props.categories[index] && (props.value == '' || contains(lower(props.commands[i]), lower(props.value)))) < 0}"
+   }
+  },
+  "commandRow": {
+   "type": "row",
+   "children": [
+    "glyph",
+    "label",
+    "chip"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 12
+   },
+   "layout": {
+    "width": {
+     "fill": 418
+    },
+    "height": {
+     "hug": 44
+    },
+    "padding": [
+     16,
+     12,
+     16,
+     12
+    ]
+   },
+   "decoration": {
+    "fills": [
+     {
+      "color": "#00000000"
+     }
+    ]
+   },
+   "states": {
+    "hovered": {
+     "commandRow": {
+      "decoration": {
+       "fills": [
+        {
+         "color": "hoverOverlay"
+        }
+       ]
+      }
+     }
+    }
+   },
+   "actions": [
+    {
+     "trigger": "click",
+     "actions": [
+      {
+       "type": "componentEvent",
+       "event": "onSelected",
+       "value": "${item}"
+      },
+      {
+       "type": "navigate",
+       "to": "${= props.routes[index]}",
+       "when": {
+        "left": "${= length(props.routes) > index && props.routes[index] != ''}",
+        "op": "isTrue"
+       }
+      }
+     ]
+    }
+   ],
+   "bind": {
+    "decoration.fills[0].color": "${= selected == item ? theme.colors.activeTint : '#00000000'}"
+   }
   }
+ },
+ "variables": {
+  "palette": [
+   {
+    "name": "selected",
+    "type": "text",
+    "value": ""
+   },
+   {
+    "name": "matches",
+    "type": "list",
+    "formula": "filter(props.commands, c => props.value == '' || contains(lower(c), lower(props.value)))"
+   }
+  ]
  }
 }

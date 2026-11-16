@@ -15,6 +15,7 @@ import 'ui/presentation_scope.dart';
 import '../runtime/actions/ui.dart';
 import 'navigator_ui.dart';
 import 'ui/capture_scope.dart';
+import 'ui/presentation_route.dart' show ModalFocus;
 import '../services/services.dart' show Services;
 import 'backdrop_screens.dart';
 import 'codelessly.dart';
@@ -236,7 +237,10 @@ class CodelesslyPresenter {
       route = CodelesslyPageRoute<Object?>(
         fullscreenDialog: true,
         settings: RouteSettings(name: '/present/$layoutId'),
-        builder: (_) => screen(CanvasSizing.fill, close: close),
+        builder: (_) => ModalFocus(
+          dismissible: p.action.barrierDismissible,
+          child: screen(CanvasSizing.fill, close: close),
+        ),
       );
       p.dismiss = () => close(null);
       return navigator.push<Object?>(route);
