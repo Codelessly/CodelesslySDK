@@ -1,0 +1,78 @@
+{
+ "schema": 3,
+ "id": "FormSection",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "FormSection",
+  "doc": "One group of a settings or form page: FormSection \"Personal details\" \"Shown on your published pieces.\" with its fields indented under it, the title and description at the left (above the panel when the place is narrower than about 712) and the fields in a panel at the right, as wide as its place.",
+  "props": [
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "Personal details", "doc": "The group's name, at the left.", "required": true},
+   {"key": "description", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "A line or two on what the group is for, under the title (empty: none)."}
+  ],
+  "children": "list"
+ },
+ "previews": [
+  {
+   "name": "Profile",
+   "size": [984, 260],
+   "props": {
+    "title": "Personal details",
+    "description": "Your name and bio appear on published pieces and in shared drafts."
+   }
+  },
+  {
+   "name": "Narrow",
+   "size": [472, 320],
+   "props": {
+    "title": "Personal details",
+    "description": "Your name and bio appear on published pieces and in shared drafts."
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "row",
+   "children": ["side", "panel"],
+   "props": {"wrap": true, "spacing": 32, "runSpacing": 16, "crossAxisAlignment": "start"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "side": {
+   "type": "column",
+   "children": ["title", "description"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 6},
+   "layout": {"width": {"fill": 1}, "basis": 240, "height": {"hug": 0}, "padding": [0, 4, 8, 0]}
+  },
+  "title": {
+   "type": "text",
+   "props": {"text": "${props.title}", "style": "headingWide"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "description": {
+   "type": "text",
+   "props": {"text": "${props.description}", "style": {"from": "mutedWide", "height": 1.5}},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.description != ''}"}
+  },
+  "panel": {
+   "type": "column",
+   "children": ["fields"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 20},
+   "layout": {"width": {"fill": 4}, "basis": 440, "height": {"hug": 0}, "padding": [24, 24, 24, 24]},
+   "decoration": {
+    "fills": [{"color": "card"}],
+    "strokes": [{"color": "line"}],
+    "strokeWidth": 1,
+    "radius": 16
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cardWide}",
+    "decoration.effects": "${theme.shadows.cardWide}"
+   }
+  },
+  "fields": {
+   "type": "slot",
+   "props": {"name": "children"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  }
+ }
+}

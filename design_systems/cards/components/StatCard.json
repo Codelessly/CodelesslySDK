@@ -1,0 +1,113 @@
+{
+ "schema": 3,
+ "id": "StatCard",
+ "roots": ["card"],
+ "widget": {
+  "type": "StatCard",
+  "doc": "A dashboard figure on a page: StatCard \"Revenue\" value:\"$128,400\" icon:\"payments_rounded\" change:\"+8.2%\" trend:\"up\" note:\"vs prior 30d\"; trend is up, down or flat (default up), good:false when a rise is bad (returns, churn) so the pill turns green on a fall, and it fills its place (four in a row).",
+  "props": [
+   {"key": "label", "type": {"kind": "string", "flutter": "String"}, "default": "Revenue", "doc": "What the figure is.", "required": true},
+   {"key": "value", "type": {"kind": "string", "flutter": "String"}, "default": "$0", "doc": "The figure, as text ($128,400).", "required": true},
+   {"key": "icon", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "A Material icon on the tinted tile at the top right (empty: none)."},
+   {"key": "change", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The change as written (+8.2%), in the pill (empty: no pill)."},
+   {"key": "trend", "type": {"kind": "string", "flutter": "String"}, "default": "up", "doc": "The direction: up, down or flat (flat draws a neutral pill)."},
+   {"key": "good", "type": {"kind": "boolean", "flutter": "bool"}, "default": true, "doc": "Whether up is the good direction (false for returns, churn, cost)."},
+   {"key": "note", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "What the change is compared to (vs prior 30d)."}
+  ]
+ },
+ "previews": [
+  {"name": "Revenue", "size": [264, 150], "props": {"label": "Revenue", "value": "$128,400", "icon": "payments_rounded", "change": "+8.2%", "trend": "up", "note": "vs prior 30d"}},
+  {"name": "Returns", "size": [264, 150], "props": {"label": "Returns", "value": "2.4%", "icon": "assignment_return_rounded", "change": "-0.6%", "trend": "down", "good": false, "note": "vs prior 30d"}}
+ ],
+ "nodes": {
+  "card": {
+   "type": "column",
+   "children": ["top", "value", "bottom"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [22, 20, 22, 20]},
+   "decoration": {
+    "fills": [{"color": "card"}],
+    "strokes": [{"color": "line"}],
+    "strokeWidth": 1,
+    "radius": 16
+   },
+   "bind": {
+    "decoration.radius": "${theme.radii.cardWide}"
+   }
+  },
+  "top": {
+   "type": "row",
+   "children": ["label", "mark"],
+   "props": {"crossAxisAlignment": "center", "spacing": 12},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "label": {
+   "type": "text",
+   "props": {"text": "${props.label}", "style": {"from": "bodyWide", "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "mark": {
+   "type": "row",
+   "children": ["markIcon"],
+   "props": {"mainAxisAlignment": "center"},
+   "layout": {"width": 32, "height": 32},
+   "decoration": {"fills": [{"color": "iconTile"}], "radius": 8},
+   "bind": {
+    "visible": "${= props.icon != ''}",
+    "decoration.radius": "${theme.radii.controlCompact}"
+   }
+  },
+  "markIcon": {
+   "type": "icon",
+   "props": {"icon": "insights_rounded", "size": 18, "color": "accent"},
+   "layout": {"width": 18, "height": 18},
+   "bind": {"props.icon": "${= props.icon != '' ? props.icon : 'insights_rounded'}"}
+  },
+  "value": {
+   "type": "text",
+   "props": {"text": "${props.value}", "style": "numberLarge", "maxLines": 1, "scaleDown": true},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [0, 10, 0, 10]}
+  },
+  "bottom": {
+   "type": "row",
+   "children": ["pill", "note"],
+   "props": {"crossAxisAlignment": "center", "spacing": 8, "wrap": true, "runSpacing": 6},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.change != '' || props.note != ''}"}
+  },
+  "pill": {
+   "type": "row",
+   "children": ["pillIcon", "pillText"],
+   "props": {"crossAxisAlignment": "center", "spacing": 3},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [6, 3, 8, 3]},
+   "decoration": {"fills": [{"color": "goodTint"}], "radius": 999},
+   "bind": {
+    "visible": "${= props.change != ''}",
+    "decoration.fills[0].color": "${= props.trend == 'flat' ? theme.colors.tile : ((props.trend == 'up') == props.good ? theme.colors.goodTint : theme.colors.badTint)}"
+   }
+  },
+  "pillIcon": {
+   "type": "icon",
+   "props": {"icon": "arrow_upward_rounded", "size": 13, "color": "goodDeep"},
+   "layout": {"width": 13, "height": 13},
+   "bind": {
+    "props.icon": "${= props.trend == 'flat' ? 'remove_rounded' : (props.trend == 'down' ? 'arrow_downward_rounded' : 'arrow_upward_rounded')}",
+    "props.color": "${= props.trend == 'flat' ? theme.colors.inkSoft : ((props.trend == 'up') == props.good ? theme.colors.goodDeep : theme.colors.badDeep)}"
+   }
+  },
+  "pillText": {
+   "type": "text",
+   "props": {"text": "${props.change}", "style": {"from": "captionWide", "fontWeight": 700}},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {
+    "props.style.color": "${= props.trend == 'flat' ? theme.colors.inkSoft : ((props.trend == 'up') == props.good ? theme.colors.goodDeep : theme.colors.badDeep)}"
+   }
+  },
+  "note": {
+   "type": "text",
+   "props": {"text": "${props.note}", "style": {"from": "captionWide", "color": "inkFaint"}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.note != ''}"}
+  }
+ }
+}

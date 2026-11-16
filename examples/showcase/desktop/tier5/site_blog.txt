@@ -1,0 +1,59 @@
+state email=""
+Page
+  SiteNav brand:"Signal & Noise" icon:"graphic_eq" links:["Articles","Topics","Podcast","About"] cta:"Subscribe" -> emit subscribe
+  Section
+    Column gap:16
+      Row
+        Badge.primary "Infrastructure"
+      Heading "What we learned moving 40 services to one queue" level:1
+      Row gap:12 middle
+        Avatar "Priya Raman" src:"https://i.pravatar.cc/80?img=47" size:44
+        Column gap:2
+          Text.strong "Priya Raman"
+          Text.muted "Mar 12, 2026 · 9 min read"
+    Media kind:"skyline" tone:"dusk" h:400
+  Section
+    Row gap:56 top
+      Column grow maxw:720 gap:20
+        Text.lead "Two years ago every service on our platform ran its own queue. Last spring we replaced all forty of them with one. Here is what broke, what held, and what we would do again."
+        Heading "Why forty queues became a problem" level:2
+        Text "Each team had picked the broker that suited them on the day. Over time that gave us six different delivery guarantees, four retry policies and no single place to look when a message went missing. On-call engineers needed a map just to follow one order through the system."
+        Text "The cost was not only operational. Every new service started with a week of plumbing, and every incident review ended with the same line: we could not tell where the message was."
+        Box border-left:#FF2563EB pad:[20,4,0,4]
+          Text "“A queue you cannot see into is just a very patient way of losing data.”" size:22 weight:600
+          Text.muted "Priya Raman, Platform team"
+        Heading "What the migration looked like" level:2
+        Text "We moved one service at a time behind a thin client library. The library wrote to both the old queue and the new one, compared the results, and only then switched reads over. A typical service took two days."
+        CodeBlock "queue.yaml" "topic: orders.created\nconsumer_group: billing\nretry:\n  max_attempts: 5\n  backoff: exponential\ndead_letter: orders.created.dlq" language:"yaml" copyable:true
+        Text "Three lessons stood out once the last service was across:"
+        Column gap:10
+          Row gap:12 middle
+            Icon "circle" size:8 color:#FF2563EB
+            Text "Run old and new side by side until the numbers match."
+          Row gap:12 middle
+            Icon "circle" size:8 color:#FF2563EB
+            Text "Give every topic an owner and a dead-letter queue from day one."
+          Row gap:12 middle
+            Icon "circle" size:8 color:#FF2563EB
+            Text "Make retries visible on a dashboard, not just in the logs."
+        Text "None of this was glamorous, but incidents involving lost messages fell from eleven a quarter to one."
+      Column w:320 gap:20 {"props": {"sticky": true, "top": 24}}
+        Card gap:10
+          Text.eyebrow "ON THIS PAGE"
+          Text.muted "Why forty queues became a problem" -> emit goto "problem"
+          Text.muted "What the migration looked like" -> emit goto "migration"
+          Text.muted "Three lessons" -> emit goto "lessons"
+        Card gap:12
+          Heading "The Signal & Noise letter" level:3
+          Text.muted "One engineering story a week. No noise."
+          Input "Email" hint:"you@example.com" type:email =email
+          Button "Subscribe" w:fill -> toast "You are subscribed"; email=""
+  Section tint
+    Column gap:12
+      Text.eyebrow "KEEP READING"
+      Heading "Related articles"
+    Grid cols:3 gap:24
+      PostCard kind:"harbor" tone:"day" tag:"Reliability" title:"Designing retries that do not melt your database" excerpt:"Backoff, jitter and the budget that keeps a bad hour from becoming a bad day." author:"Marcus Lee" initials:"ML" meta:"Feb 26 · 7 min read" -> emit open result
+      PostCard kind:"train" tone:"dawn" tag:"Observability" title:"Tracing a message across forty services" excerpt:"How one trace id changed the way our on-call engineers work." author:"Aiko Tanaka" initials:"AT" meta:"Feb 9 · 8 min read" -> emit open result
+      PostCard kind:"mountain" tone:"dusk" tag:"Culture" title:"Writing the migration plan nobody argues with" excerpt:"A short template for large changes that have to land in many teams." author:"Daniel Okafor" initials:"DO" meta:"Jan 21 · 6 min read" -> emit open result
+  SiteFooter brand:"Signal & Noise" tagline:"Notes from the engineers who run the platform." icon:"graphic_eq" headings:["Read","Company"] links:[["Articles","Topics","Podcast"],["About","Careers","Contact"]] legal:"© 2026 Signal & Noise" small:["Privacy","Terms","RSS"]

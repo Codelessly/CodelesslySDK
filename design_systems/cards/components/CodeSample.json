@@ -1,0 +1,141 @@
+{
+ "schema": 3,
+ "id": "CodeSample",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "CodeSample",
+  "doc": "A docs code sample as wide as its place: CodeSample \"src/beacon.ts\" =copied code:\"line 1\\nline 2\" language:\"ts\" numbers:true (default true; bash/sh/shell/zsh/console show a terminal glyph, others a file) -> onCopy copies the code and fires with it, and the button reads Copied while your boolean variable (default false) is true.",
+  "props": [
+   {"key": "copied", "type": {"kind": "variable", "of": {"kind": "boolean", "flutter": "bool"}}, "default": false, "doc": "The name of your boolean variable: true once copied (the button reads Copied)."},
+   {"key": "title", "type": {"kind": "string", "flutter": "String"}, "default": "src/index.ts", "doc": "The file name or a label (Terminal), in the header.", "required": true},
+   {"key": "code", "type": {"kind": "string", "flutter": "String"}, "default": "console.log('hello');", "doc": "The code, lines separated by newlines; long lines scroll sideways.", "required": true},
+   {"key": "language", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The language as a small pill in the header (empty: none); bash, sh, shell, zsh or console show a terminal glyph."},
+   {"key": "numbers", "type": {"kind": "boolean", "flutter": "bool"}, "default": true, "doc": "Line numbers in a gutter at the left (default true)."}
+  ],
+  "events": [
+   {"key": "onCopy", "doc": "The code was copied to the clipboard; the value is the code."}
+  ]
+ },
+ "previews": [
+  {
+   "name": "Init client",
+   "size": [640, 236],
+   "props": {
+    "title": "src/beacon.ts",
+    "language": "ts",
+    "code": "import { Beacon } from '@beacon/sdk';\n\nexport const beacon = new Beacon({\n  apiKey: process.env.BEACON_KEY,\n  region: 'eu-west',\n});"
+   }
+  }
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": ["head", "rule", "body"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "decoration": {"fills": [{"color": "codeBg"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 12, "clip": "antiAlias"},
+   "bind": {"decoration.radius": "${theme.radii.tileWide}"}
+  },
+  "head": {
+   "type": "row",
+   "children": ["glyph", "title", "lang", "copy"],
+   "props": {"crossAxisAlignment": "center", "spacing": 10},
+   "layout": {"width": {"fill": 0}, "height": 46, "padding": [16, 0, 8, 0]},
+   "decoration": {"fills": [{"color": "tile"}]}
+  },
+  "glyph": {
+   "type": "icon",
+   "props": {"icon": "description_outlined", "size": 16, "color": "inkFaint"},
+   "layout": {"width": 16, "height": 16},
+   "bind": {"props.icon": "${= contains(['bash', 'sh', 'shell', 'zsh', 'console', 'terminal'], lower(props.language)) ? 'terminal_rounded' : 'description_outlined'}"}
+  },
+  "title": {
+   "type": "text",
+   "props": {"text": "${props.title}", "style": {"from": "code", "fontSize": 13, "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "lang": {
+   "type": "row",
+   "children": ["langText"],
+   "props": {"crossAxisAlignment": "center"},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [8, 3, 8, 3]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 999},
+   "bind": {"visible": "${= props.language != ''}"}
+  },
+  "langText": {
+   "type": "text",
+   "props": {"text": "${= upper(props.language)}", "style": {"from": "captionWide", "fontSize": 11, "fontWeight": 600, "letterSpacing": 0.6, "color": "inkFaint"}},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "copy": {
+   "type": "row",
+   "children": ["copyIcon", "copyLabel"],
+   "props": {"crossAxisAlignment": "center", "spacing": 6},
+   "layout": {"width": {"hug": 0}, "height": 30, "padding": [10, 0, 12, 0]},
+   "decoration": {"fills": [{"color": "card"}], "strokes": [{"color": "line"}], "strokeWidth": 1, "radius": 9},
+   "bind": {
+    "decoration.radius": "${theme.radii.controlSmall}",
+    "decoration.strokes[0].color": "${= props.copied ? theme.colors.goodLine : theme.colors.line}",
+    "decoration.fills[0].color": "${= props.copied ? theme.colors.goodTint : theme.colors.card}"
+   },
+   "states": {"pressed": {"copy": {"opacity": 0.8}}},
+   "actions": [
+    {
+     "trigger": {"type": "click"},
+     "actions": [
+      {"type": "copyToClipboard", "text": "${props.code}"},
+      {"type": "setVariable", "variable": "props.copied", "value": "${= true}"},
+      {"type": "componentEvent", "event": "onCopy", "value": "${props.code}"}
+     ]
+    }
+   ]
+  },
+  "copyIcon": {
+   "type": "icon",
+   "props": {"icon": "content_copy_rounded", "size": 14, "color": "inkSoft"},
+   "layout": {"width": 14, "height": 14},
+   "bind": {
+    "props.icon": "${= props.copied ? 'check_rounded' : 'content_copy_rounded'}",
+    "props.color": "${= props.copied ? theme.colors.goodDeep : theme.colors.inkSoft}"
+   }
+  },
+  "copyLabel": {
+   "type": "text",
+   "props": {"text": "Copy", "style": {"from": "smallWide", "fontSize": 13, "fontWeight": 600, "color": "ink"}},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {
+    "props.text": "${= props.copied ? 'Copied' : 'Copy'}",
+    "props.style.color": "${= props.copied ? theme.colors.goodDeep : theme.colors.ink}"
+   }
+  },
+  "rule": {
+   "type": "divider",
+   "props": {"color": "line", "thickness": 1},
+   "layout": {"width": {"fill": 0}, "height": 1}
+  },
+  "body": {
+   "type": "row",
+   "children": ["gutter", "code"],
+   "props": {"crossAxisAlignment": "start", "spacing": 0, "scrollable": true, "scrollDirection": "horizontal"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "gutter": {
+   "type": "text",
+   "props": {
+    "text": "${= join(map(range(length(props.code) - length(replace(props.code, '\\n', '')) + 1), i => i + 1), '\\n')}",
+    "style": {"from": "code", "fontSize": 13, "height": 1.7, "color": "inkFaint"},
+    "textAlign": "right"
+   },
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [18, 16, 0, 16]},
+   "bind": {"visible": "${props.numbers}"}
+  },
+  "code": {
+   "type": "text",
+   "props": {
+    "text": "${props.code}",
+    "style": {"from": "code", "fontSize": 13, "height": 1.7, "color": "ink"}
+   },
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}, "padding": [18, 16, 24, 16]}
+  }
+ }
+}

@@ -73,3 +73,56 @@ used as they are. So the look is one system; what is missing is a page's scale, 
 `reference/` (Opus in the notation with Cards, then the design pass) and `blocks/` (eighteen block briefs for
 the block designer, six of which were designed before the change of method) are kept as the record of the first
 attempt, and are not part of the design system.
+
+## The page tier (`tier1/` to `tier4/`, `fresh1/`)
+
+Side by side, the from-scratch pages were more correct than the Cards-theme ones (owner, 2026-11-16). What the
+card theme did to a page:
+
+| Cards-theme issue | Cause in the theme |
+|---|---|
+| Everything on a gray page in white boxes; no bands on a website | `page` is gray and white exists only as `card` |
+| "Selected" is a gray outlined pill | `accentTint` equals the page gray; the brief spends the accent sparingly |
+| Text too small (11.5 to 13 where the references use 14 to 16) | the type scale tops out at 14.5 for body |
+| Colorless icons, a black brand mark | no tinted icon tile |
+| Cramped controls (28 to 32 high) | control and row sizes are a card's |
+| Tiny uppercase labels on everything | `eyebrow` is the only label style |
+
+So Cards got a second tier, not a toggle. In `design_systems/cards/tool/tokens.py` a name ending in `Wide` is
+that token on a page (`strongWide`, `radii.cardWide`, `spacing.cardWide`, `shadows.cardWide`, `sizes.controlWide`),
+with page-only names beside them (`heading1Wide`, `leadWide`, `columnHead`, `colors.band`, `colors.iconTile`,
+`sizes.content`, `spacing.section`). `NotationOptions.fromTheme` uses the `Wide` name in place of the plain one
+when the canvas is `sizes.wide` (900) or wider. A chat card is written at its own width, so it keeps the card
+tier wherever it is shown, including inside a desktop app. A window-size rule in the theme would not do that:
+theme `media` rules read the window, not the card.
+
+How a page goes together is `## Pages in brief` in `design_systems/cards/PATTERNS.md`; the notation prompt adds
+it at a page's width.
+
+| Arm | What changed | Notation issues | Render errors |
+|---|---|---|---|
+| `tier1` | the page tier's tokens; tinted sections; a selected item in the accent | 1 | 7 |
+| `tier2` | control heights by size; Brand, IconTile; a search field's label as its hint; equal cards | 0 | 0 |
+| `tier3` | badge cells, decorated text as a box, fixed sidebar | 1 | 0 |
+| `tier4` | Pages in brief | 2 | 0 |
+| `fresh1` | ten prompts never seen before (`requests2.json`) | 1 | 0 (14 before five grammar fixes) |
+
+Design pass on `tier4` (owner, 2026-11-16): on the pricing page it is better than the default; on the app
+screens the default layout is better (the pass widened a search field, added wells and dividers to a settings
+form, grew a top bar, and broke four figures into two rows). `style_pass.py` now tells the pass to keep the
+layout it was given on a page.
+
+## Desktop blocks (`blocks/`, `tier5/`)
+
+`blocks/briefs.json` has 27 briefs. Each block is designed by `tool/design_block.py` against the from-scratch
+page it is a part of (`native/<page>.png`), in the page tier's names, over three rounds; `blocks/install.py`
+copies the ones that passed into `design_systems/cards/components` and a picture of each into `blocks/pictures/`.
+Installed: SiteNav, Hero, LogoStrip, FeatureCard, StatBand, Testimonial, PricingPlan, FaqItem, CallToAction,
+PostCard, SiteFooter, ArticleHeader, CodeSample, DocsNav, PageHeader, StatCard, FormSection, SettingRow,
+ConversationRow, TaskCard, BoardColumn (see `install.py`'s output for the current list). Not installed: DataTable,
+MessageBubble and SideNav failed their own use test (a tap that should change a text did not); EmptyState is
+SSUI's.
+
+`tier5` is the ten pages written with the blocks on offer: 1 notation issue, 0 render errors. The model used
+them on the landing, pricing and dashboard pages; those pages match the default grammar's layout with more
+finish (icons in the logo strip, arrows in the change pills, a plan's check marks).

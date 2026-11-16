@@ -21,6 +21,10 @@ A page (a website, an app window) uses the page tier of the same system: the sam
 scale, picked for you when the window is wide. Do not wrap a page in `ChatCard`, and do not close it on a
 `TotalBar`: those are a chat card's. The card blocks that show one thing (`StatTile`, `ChartCard`, `Media`,
 `Checklist`, `Steps`) work inside a page's `Card`.
+The page blocks are named for what they are: on a website `SiteNav`, `Hero`, `LogoStrip`, `FeatureCard`, `StatBand`,
+`Testimonial`, `PricingPlan`, `FaqItem`, `CallToAction`, `PostCard`, `SiteFooter` (a band block goes directly under
+`Page`, an item block in a `Grid` or a `Section`); in an app `PageHeader`, `StatCard`, `FormSection`, `SettingRow`,
+`ConversationRow`, `TaskCard`, `BoardColumn`. Use one where the page has that part; write the rest as below.
 A website alternates plain and tinted bands (`Section`, `Section tint`). A band opens with `Text.eyebrow "FEATURES"`,
 a `Heading` and at most one `Text.lead`, then its content. The hero is `Row gap:48 middle` of a `Column grow gap:20`
 (`Heading … level:1`, `Text.lead`, a `Row gap:12` of `Button … size:large` and `Button.outline … size:large`, a

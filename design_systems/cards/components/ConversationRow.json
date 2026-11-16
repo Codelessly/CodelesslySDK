@@ -1,0 +1,123 @@
+{
+ "schema": 3,
+ "id": "ConversationRow",
+ "roots": ["wrap"],
+ "widget": {
+  "type": "ConversationRow",
+  "doc": "One conversation in an inbox pane: ConversationRow \"Priya Raman\" subject:\"…\" preview:\"…\" time:\"10:05\" initials:\"PR\" tone:\"rose\" unread:=c.unread selected:=open==c.id -> open=c.id (tone is sand, rose, mint, sky, lilac or slate, default sky; initials default to the name's first letter).",
+  "props": [
+   {"key": "name", "type": {"kind": "string", "flutter": "String"}, "default": "Priya Raman", "doc": "The customer's name.", "required": true},
+   {"key": "subject", "type": {"kind": "string", "flutter": "String"}, "default": "Charged twice for the March invoice", "doc": "The conversation's subject."},
+   {"key": "preview", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The latest message, clipped to one line."},
+   {"key": "time", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "When the latest message came (10:05, Yesterday, Mon)."},
+   {"key": "unread", "type": {"kind": "boolean", "flutter": "bool"}, "default": false, "doc": "Shows the blue dot and sets the name and subject heavier."},
+   {"key": "selected", "type": {"kind": "boolean", "flutter": "bool"}, "default": false, "doc": "The open conversation: a tinted fill and an accent bar at the left."},
+   {"key": "initials", "type": {"kind": "string", "flutter": "String"}, "default": "", "doc": "The letters in the round mark (empty: the name's first letter)."},
+   {"key": "tone", "type": {"kind": "string", "flutter": "String"}, "default": "sky", "doc": "The mark's color: sand, rose, mint, sky, lilac or slate."}
+  ],
+  "events": [
+   {"key": "onPressed", "doc": "The row was tapped (open this conversation)."}
+  ]
+ },
+ "previews": [
+  {"name": "Selected", "size": [312, 84], "props": {"name": "Priya Raman", "initials": "PR", "tone": "rose", "subject": "Charged twice for the March invoice", "preview": "Thanks Maya! Will I get a confirmation email once the refund goes through?", "time": "10:05", "selected": true}},
+  {"name": "Unread", "size": [312, 84], "props": {"name": "Elena Sokolova", "initials": "ES", "tone": "mint", "subject": "Bulk export stuck at 87%", "preview": "Started the CSV export an hour ago and it has not moved.", "time": "9:58", "unread": true}}
+ ],
+ "nodes": {
+  "wrap": {
+   "type": "column",
+   "children": ["main", "rule"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 0},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "decoration": {"fills": [{"color": "card"}]}
+  },
+  "main": {
+   "type": "row",
+   "children": ["avatar", "texts"],
+   "props": {"crossAxisAlignment": "start", "spacing": 12},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}, "padding": [18, 14, 18, 14]},
+   "decoration": {"fills": [{"color": "card"}]},
+   "bind": {"decoration.fills[0].color": "${= props.selected ? theme.colors.activeTint : theme.colors.card}"},
+   "customPaint": {
+    "painter": [
+     {"op": "rrect", "rect": [0, 0, 3, "${size.height}"], "radius": 0, "when": "${props.selected}", "paint": "${theme.colors.accent}"}
+    ]
+   },
+   "states": {"pressed": {"main": {"opacity": 0.86}}},
+   "actions": [
+    {"trigger": {"type": "click"}, "actions": [{"type": "componentEvent", "event": "onPressed", "value": "${props.name}"}]}
+   ]
+  },
+  "avatar": {
+   "type": "row",
+   "children": ["avatarText"],
+   "props": {"mainAxisAlignment": "center", "crossAxisAlignment": "center"},
+   "layout": {"width": 40, "height": 40},
+   "decoration": {"fills": [{"color": "skyB"}], "strokes": [{"color": "skyMid"}], "strokeWidth": 1.5, "radius": 20},
+   "bind": {
+    "decoration.fills[0].color": "${= props.tone == 'rose' ? theme.colors.roseB : props.tone == 'mint' ? theme.colors.mintB : props.tone == 'sand' ? theme.colors.sandB : props.tone == 'lilac' ? theme.colors.lilacB : props.tone == 'slate' ? theme.colors.slateB : theme.colors.skyB}",
+    "decoration.strokes[0].color": "${= props.tone == 'rose' ? theme.colors.roseMid : props.tone == 'mint' ? theme.colors.mintMid : props.tone == 'sand' ? theme.colors.sandMid : props.tone == 'lilac' ? theme.colors.lilacMid : props.tone == 'slate' ? theme.colors.slateMid : theme.colors.skyMid}"
+   }
+  },
+  "avatarText": {
+   "type": "text",
+   "props": {
+    "text": "${= props.initials != '' ? props.initials : upper(at(props.name, 0))}",
+    "style": {"from": "strongWide", "fontSize": 14, "fontWeight": 700, "color": "ink"},
+    "maxLines": 1
+   },
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}}
+  },
+  "texts": {
+   "type": "column",
+   "children": ["top", "subject", "preview"],
+   "props": {"crossAxisAlignment": "stretch", "spacing": 2},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "top": {
+   "type": "row",
+   "children": ["name", "dot", "time"],
+   "props": {"crossAxisAlignment": "center", "spacing": 8},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}}
+  },
+  "name": {
+   "type": "text",
+   "props": {"text": "${props.name}", "style": {"from": "strongWide", "color": "ink"}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"props.style.fontWeight": "${= props.unread ? 700 : 600}"}
+  },
+  "dot": {
+   "type": "box",
+   "layout": {"width": 8, "height": 8},
+   "decoration": {"fills": [{"color": "accent"}], "radius": 4},
+   "bind": {"visible": "${props.unread}"}
+  },
+  "time": {
+   "type": "text",
+   "props": {"text": "${props.time}", "style": {"from": "captionWide", "color": "inkFaint"}, "maxLines": 1},
+   "layout": {"width": {"hug": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.time != ''}"}
+  },
+  "subject": {
+   "type": "text",
+   "props": {"text": "${props.subject}", "style": {"from": "smallWide", "color": "inkSoft"}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {
+    "visible": "${= props.subject != ''}",
+    "props.style.fontWeight": "${= props.unread ? 600 : 400}",
+    "props.style.color": "${= props.unread ? theme.colors.ink : theme.colors.inkSoft}"
+   }
+  },
+  "preview": {
+   "type": "text",
+   "props": {"text": "${props.preview}", "style": {"from": "smallWide", "color": "inkFaint"}, "maxLines": 1, "overflow": "ellipsis"},
+   "layout": {"width": {"fill": 0}, "height": {"hug": 0}},
+   "bind": {"visible": "${= props.preview != ''}"}
+  },
+  "rule": {
+   "type": "box",
+   "layout": {"width": {"fill": 0}, "height": 1},
+   "decoration": {"fills": [{"color": "line"}]}
+  }
+ }
+}
