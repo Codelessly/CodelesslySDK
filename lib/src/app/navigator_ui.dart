@@ -117,7 +117,7 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
         ? inherited
         : Padding(
             padding: EdgeInsets.fromLTRB(action.insets[0], action.insets[1], action.insets[2], action.insets[3]),
-            child: action.presentation == ModalPresentation.fullScreen || action.cover ? inherited : popupSurface(c, inherited),
+            child: action.presentation == ModalPresentation.fullScreen || action.cover ? inherited : popupSurface(c, inherited, menu: action.presentation == ModalPresentation.popover),
           );
     final pointer = RevealAnchor.lastTap == null ? null : RevealAnchor.lastTap! & Size.zero;
     final anchor = switch (action.anchor) {
@@ -253,9 +253,13 @@ class NavigatorActionUi implements ActionUi, OptionalFilePicker {
 /// [content] (a dialog's or popover's screen) with the corners and shadow
 /// the project's theme gives what floats (`radii.popup`, `shadows.popup`),
 /// when it names them; else as the screen draws itself.
-Widget popupSurface(BuildContext context, Widget content) {
+///
+/// A [menu] (a popover: what opens by its button) takes `radii.menu` where
+/// the theme names it: a menu is of the control family, and a dialog's
+/// corner on a surface three rows tall reads as a bubble.
+Widget popupSurface(BuildContext context, Widget content, {bool menu = false}) {
   final own = Theme.of(context).extension<CodelesslyThemeTokens>();
-  final radius = own?.tokens.radii['popup'];
+  final radius = (menu ? own?.tokens.radii['menu'] : null) ?? own?.tokens.radii['popup'];
   if (own == null || radius == null) return content;
   final tokens = own.tokens.forBrightness(dark: own.brightness == Brightness.dark);
   final r = BorderRadius.circular(radius);
@@ -291,8 +295,9 @@ Future<Object?> showScreenModal(
   bool cover = false,
 }) {
   final scrim = barrierColor == null ? null : Color(barrierColor.value);
-  // A toast on screen goes under the modal's barrier.
-  content = ToastBelowRoute(child: content);
+  // A toast on screen goes under the modal's barrier. The keyboard stays
+  // in the modal while it is open (ModalFocus, ui/presentation_route.dart).
+  content = ModalFocus(dismissible: barrierDismissible, child: ToastBelowRoute(child: content));
   final width = MediaQuery.maybeSizeOf(context)?.width;
   final narrow = width == null || width < sheetBelowWidth;
   final sheet = presentation == ModalPresentation.bottomSheet || (presentation == ModalPresentation.adaptive && narrow);
@@ -307,6 +312,14 @@ Future<Object?> showScreenModal(
       builder: (_) {
         if (sheet) return Align(alignment: Alignment.bottomCenter, child: content);
         if (fullScreen) return content;
+        // Covers the screen, as without a transition: the screen it shows
+        // fills it, at the device size.
+        if (cover) {
+          return Material(
+            type: MaterialType.transparency,
+            child: CanvasSizingScope(sizing: CanvasSizing.fill, child: SizedBox.expand(child: content)),
+          );
+        }
         return SafeArea(child: Align(alignment: alignment, child: Material(type: MaterialType.transparency, child: content)));
       },
     ));
@@ -412,7 +425,10 @@ Future<Object?> showAnchoredModal(
     useSafeArea: false,
     builder: (_) => CustomSingleChildLayout(
       delegate: PopoverLayout(anchor: local, placement: placement, gap: gap, offset: offset, reserve: reserve),
-      child: Material(type: MaterialType.transparency, child: content),
+      child: Material(
+        type: MaterialType.transparency,
+        child: ModalFocus(dismissible: barrierDismissible, popover: true, child: content),
+      ),
     ),
   );
 }

@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "BrowserTabs",
-  "doc": "Tabs as in a browser: open documents side by side, each with an x. The chosen one is kept in your variable. Fires onChanged, onClose with the label, and onAdd.",
+  "doc": "Open documents as tabs in a browser's or an editor's manner: each with an x to close it, an optional + to open another (files, reports, chats open side by side; a page's own views are Tabs). Any number: where they do not fit, the row scrolls sideways on one line. The chosen one is kept in your variable. Fires onChanged, onClose with the label, and onAdd.",
   "props": [
    {
     "key": "tabs",
@@ -23,7 +23,7 @@
      "Report.pdf",
      "Notes"
     ],
-    "doc": "The tabs' labels.",
+    "doc": "The tabs' labels, any number.",
     "required": true
    },
    {
@@ -73,20 +73,15 @@
   "events": [
    {
     "key": "onChanged",
-    "payload": {
-     "kind": "string",
-     "flutter": "String"
-    }
+    "doc": "A tab was chosen; the value is its label."
    },
    {
     "key": "onClose",
-    "payload": {
-     "kind": "string",
-     "flutter": "String"
-    }
+    "doc": "A tab's x was tapped; the value is its label."
    },
    {
-    "key": "onAdd"
+    "key": "onAdd",
+    "doc": "The + was tapped."
    }
   ]
  },
@@ -95,7 +90,7 @@
    "name": "Default",
    "size": [
     340,
-    30
+    36
    ],
    "props": {
     "value": "Report.pdf",
@@ -107,7 +102,7 @@
   "bar": {
    "type": "row",
    "children": [
-    "list",
+    "scroll",
     "add"
    ],
    "props": {
@@ -116,20 +111,80 @@
    },
    "layout": {
     "width": {
-     "fill": 340
+     "fill": 0
     },
     "height": {
-     "hug": 30
+     "hug": 0
     }
    },
    "decoration": {
     "strokes": [
      {
-      "color": "primaryBorder"
+      "color": "line"
      }
     ],
     "strokeSides": "bottom"
    }
+  },
+  "scroll": {
+   "type": "row",
+   "children": [
+    "list"
+   ],
+   "props": {
+    "crossAxisAlignment": "center",
+    "spacing": 0,
+    "scrollable": true,
+    "scrollDirection": "horizontal",
+    "edgeFade": 24,
+    "fillViewport": false
+   },
+   "layout": {
+    "width": {
+     "hug": 0
+    },
+    "height": {
+     "hug": 0
+    },
+    "squeezable": true
+   },
+   "actions": [
+    {
+     "trigger": {
+      "type": "load",
+      "when": "indexOf(props.tabs, props.value) > 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "tab",
+       "item": "${= indexOf(props.tabs, props.value)}",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 0
+      }
+     ]
+    },
+    {
+     "trigger": {
+      "type": "valueChanged",
+      "variable": "props.value",
+      "when": "indexOf(props.tabs, props.value) >= 0"
+     },
+     "actions": [
+      {
+       "type": "scrollTo",
+       "node": "tab",
+       "item": "${= indexOf(props.tabs, props.value)}",
+       "axis": "horizontal",
+       "alignment": 0.5,
+       "curve": "easeOutCubic",
+       "durationMs": 240
+      }
+     ]
+    }
+   ]
   },
   "list": {
    "type": "listView",
@@ -138,16 +193,18 @@
    ],
    "props": {
     "scrollDirection": "horizontal",
-    "scrollable": false
+    "scrollable": false,
+    "spacing": 2
    },
    "layout": {
     "width": {
-     "hug": 280
+     "hug": 0
     },
-    "height": 29
+    "height": 36
    },
    "bind": {
-    "data": "${props.tabs}"
+    "data": "${props.tabs}",
+    "layout.height": "${= screen.width < 700 ? 44 : 36}"
    }
   },
   "tab": {
@@ -159,14 +216,14 @@
    ],
    "props": {
     "crossAxisAlignment": "center",
-    "spacing": 4
+    "spacing": 6
    },
    "layout": {
     "width": {
-     "hug": 90
+     "hug": 0
     },
     "height": {
-     "fill": 29
+     "fill": 0
     },
     "padding": [
      12,
@@ -183,63 +240,60 @@
     ],
     "strokes": [
      {
-      "color": "primaryBorder"
+      "color": "line"
      }
     ],
     "strokeSides": "top",
     "radius": [
-     12,
-     12,
+     10,
+     10,
      0,
      0
     ]
    },
    "bind": {
-    "selected": "${= item == props.value}"
+    "decoration.fills[0].color": "${= item == props.value ? theme.colors.primaryBackground : theme.colors.hoverOverlay}"
    },
    "states": {
-    "selected": {
+    "hovered": {
      "tab": {
       "decoration": {
-       "fills": [
+       "foregroundFills": [
         {
-         "color": "primaryBackground"
+         "color": "hoverOverlay"
         }
        ]
       }
-     },
-     "label": {
-      "props": {
-       "style": {
-        "color": "primaryText",
-        "fontWeight": 500
-       }
-      }
-     },
-     "glyph": {
-      "props": {
-       "color": "primaryText"
-      }
      }
     },
-    "hovered": {
-     "label": {
-      "props": {
-       "style": {
-        "color": "secondaryText"
-       }
+    "pressed": {
+     "tab": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
       }
      }
     }
    },
+   "transitions": [
+    {
+     "property": "decoration",
+     "duration": 150
+    }
+   ],
    "actions": [
     {
-     "trigger": "click",
+     "trigger": {
+      "type": "click"
+     },
      "actions": [
       {
        "type": "setVariable",
        "variable": "props.value",
-       "value": "${item}"
+       "value": "${= item}"
       },
       {
        "type": "componentEvent",
@@ -254,16 +308,17 @@
    "type": "icon",
    "props": {
     "icon": "description",
-    "color": "tertiaryText",
-    "size": 14
+    "size": 15,
+    "color": "inkFaint"
    },
    "layout": {
-    "width": 14,
-    "height": 14
+    "width": 15,
+    "height": 15
    },
    "bind": {
-    "visible": "${= length(props.icons) > index && props.icons[index] != ''}",
-    "props.icon": "${= length(props.icons) > index && props.icons[index] != '' ? props.icons[index] : 'description'}"
+    "visible": "${= (length(props.icons) > index && props.icons[index] != '')}",
+    "props.icon": "${= (length(props.icons) > index && props.icons[index] != '') ? props.icons[index] : 'description'}",
+    "props.color": "${= item == props.value ? theme.colors.ink : theme.colors.inkFaint}"
    }
   },
   "label": {
@@ -271,22 +326,26 @@
    "props": {
     "text": "${item}",
     "style": {
-     "fontSize": 12,
-     "fontWeight": 400,
-     "height": 1.3,
-     "color": "tertiaryText",
-     "leadingDistribution": "even"
+     "from": "chip",
+     "fontSize": 13,
+     "fontWeight": 500
     },
     "maxLines": 1,
     "overflow": "ellipsis"
    },
    "layout": {
     "width": {
-     "hug": 60
+     "hug": 0
     },
     "height": {
-     "hug": 16
+     "hug": 0
+    },
+    "constraints": {
+     "maxWidth": 200
     }
+   },
+   "bind": {
+    "props.style.color": "${= item == props.value ? theme.colors.ink : theme.colors.inkFaint}"
    }
   },
   "close": {
@@ -299,8 +358,11 @@
     "mainAxisAlignment": "center"
    },
    "layout": {
-    "width": 16,
-    "height": 16
+    "width": 20,
+    "height": 20
+   },
+   "decoration": {
+    "radius": 999
    },
    "bind": {
     "visible": "${props.closable}"
@@ -315,17 +377,14 @@
         }
        ]
       }
-     },
-     "x": {
-      "props": {
-       "color": "primaryText"
-      }
      }
     }
    },
    "actions": [
     {
-     "trigger": "click",
+     "trigger": {
+      "type": "click"
+     },
      "actions": [
       {
        "type": "componentEvent",
@@ -334,21 +393,18 @@
       }
      ]
     }
-   ],
-   "decoration": {
-    "radius": 9999
-   }
+   ]
   },
   "x": {
    "type": "icon",
    "props": {
-    "icon": "close",
-    "color": "tertiaryText",
-    "size": 12
+    "icon": "close_rounded",
+    "size": 13,
+    "color": "inkFaint"
    },
    "layout": {
-    "width": 12,
-    "height": 12
+    "width": 13,
+    "height": 13
    }
   },
   "add": {
@@ -361,17 +417,17 @@
     "mainAxisAlignment": "center"
    },
    "layout": {
-    "width": 24,
-    "height": 24,
+    "width": 28,
+    "height": 28,
     "margin": [
      0,
      0,
      0,
-     3
+     4
     ]
    },
    "decoration": {
-    "radius": 12
+    "radius": 999
    },
    "bind": {
     "visible": "${props.showAdd}"
@@ -387,17 +443,25 @@
         }
        ]
       }
-     },
-     "plus": {
-      "props": {
-       "color": "primaryText"
+     }
+    },
+    "pressed": {
+     "add": {
+      "decoration": {
+       "foregroundFills": [
+        {
+         "color": "pressedOverlay"
+        }
+       ]
       }
      }
     }
    },
    "actions": [
     {
-     "trigger": "click",
+     "trigger": {
+      "type": "click"
+     },
      "actions": [
       {
        "type": "componentEvent",
@@ -410,13 +474,13 @@
   "plus": {
    "type": "icon",
    "props": {
-    "icon": "add",
-    "color": "tertiaryText",
-    "size": 14
+    "icon": "add_rounded",
+    "size": 16,
+    "color": "inkSoft"
    },
    "layout": {
-    "width": 14,
-    "height": 14
+    "width": 16,
+    "height": 16
    }
   }
  }

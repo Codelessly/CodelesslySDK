@@ -62,9 +62,6 @@
  "nodes": {
   "bar": {
    "type": "row",
-   "bind": {
-    "visible": "${= props.count > 0}"
-   },
    "children": [
     "label",
     "prev",
@@ -81,6 +78,9 @@
     "height": {
      "hug": 0
     }
+   },
+   "bind": {
+    "visible": "${= props.count > 0}"
    }
   },
   "label": {
