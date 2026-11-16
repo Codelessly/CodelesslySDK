@@ -425,6 +425,25 @@ void main() {
     });
   }
 
+  testWidgets('confirm pointer choices expose buttons and close on Cancel or OK', (tester) async {
+    final handle = tester.ensureSemantics();
+    final controller = await _show(tester);
+    final keys = Keyboard(tester);
+    await tapNode(tester, controller, 'openConfirm');
+    final cancel = find.byKey(const ValueKey('codelessly-confirm-cancel'));
+    final ok = find.byKey(const ValueKey('codelessly-confirm-ok'));
+    expect(tester.getSemantics(cancel).hasFlag(SemanticsFlag.isButton), isTrue);
+    expect(tester.getSemantics(ok).hasFlag(SemanticsFlag.isButton), isTrue);
+    await tester.tap(cancel);
+    await settle(tester);
+    expect(keys.topOverlay, isNull);
+    await tapNode(tester, controller, 'openConfirm');
+    await tester.tap(ok);
+    await settle(tester);
+    expect(keys.topOverlay, isNull);
+    handle.dispose();
+  });
+
   testWidgets('a popover that opens while a field is typed in leaves the focus in the field', (tester) async {
     await _show(tester);
     final keys = Keyboard(tester);
