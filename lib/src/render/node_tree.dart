@@ -24,6 +24,7 @@ import 'hero.dart';
 import 'play.dart';
 import 'contracts.dart';
 import 'control_theme.dart' show ControlTheme, backdropOf;
+import 'controls/focus.dart' show FocusGate;
 import 'controls/tokens.dart' show ControlTokens;
 import 'convert.dart';
 import 'custom_paint.dart' show customPaintLayers;
@@ -1040,7 +1041,7 @@ extension _NodeLayout on Node {
 }
 
 /// One node in the render tree.
-class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout {
+class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout, FocusGate {
   NodeBox._(this.tree, this.id, this._slot, this.instance);
 
   @override
@@ -1347,6 +1348,10 @@ class NodeBox extends RenderProxyBox implements NodeBuilder, SkippedChildLayout 
 
   /// Whether it draws (not hidden, collapsed or invisible).
   bool get drawn => !(_hidden || _collapsed || (_node != null && !_node!.visible));
+
+  /// A node that is not drawn, and what is inside it, is not a Tab stop.
+  @override
+  bool get admitsFocus => drawn;
 
   @override
   void paint(PaintingContext context, Offset offset) {
