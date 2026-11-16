@@ -1,3 +1,26 @@
+## Unreleased
+
+### Added
+
+- **Pages at a tablet's and a phone's width**: with the notation's reflow (codelessly_api), a page written for a
+  desktop renders without layout errors at 834 and 390 wide; `tool/notation/notation.sh expand` takes
+  `--no-reflow`, and reads a site's variables from the `site.json` beside `--out` (or `--site`).
+- **A menu's corner**: a popover is clipped to a theme's `radii.menu` where it names one (else `radii.popup`, a
+  dialog's corner).
+- **Cards**: blocks fixed for a phone (SiteNav with its own menu, Hero, PostCard, Details with `inlineOnPhone`,
+  PlaceRow, Steps, Pager, ComparisonTable, PhotoGallery, CodeSample, Counter, Testimonial, SiteFooter, DocsNav,
+  CommandPalette, FeatureCard, InputField, CallToAction), a new `BeforeAfter`, `radii.menu`, and menu items at
+  the body size. `design_systems/cards/tool/repairs.py` keeps changes made to generated components across a
+  rebuild (`--record`).
+- **Examples**: overlays, an app's sidebar drawer and a lightbox written in the notation
+  (`examples/showcase/desktop/behaviours`).
+
+### Fixed
+
+- A date or time field given only a label keeps its calendar and chevron, and shows the label as its hint.
+- A page route opened from an overlay sized to its design fills the window.
+- `tool/render/render.sh` runs under Git Bash on Windows (it gave Dart `/c/…` paths).
+
 ## 32.0.0
 
 Needs codelessly_api 32.0.0. No SDK API was removed or renamed; the major version follows the API's (the compact
