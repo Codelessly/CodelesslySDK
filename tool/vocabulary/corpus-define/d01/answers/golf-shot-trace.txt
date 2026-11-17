@@ -1,0 +1,189 @@
+### Hole
+state hole=7
+state par=4
+state club="Driver"
+state shots=[]
+state putts=0
+state px=50
+state py=92
+state mine=[4,5,3,4,4,5,0,0,0,0,0,0,0,0,0,0,0,0]
+App
+  Sidebar
+    Brand "Fairway" icon="golf_course"
+    NavItem "Hole" icon="flag" selected={true}
+    NavItem "Scorecard" icon="grid_on" onTap={go scorecard}
+    NavItem "Stats" icon="insights" onTap={go stats}
+    Spacer grow
+    Text.muted "Ray Li, hcp 12.4"
+  Main
+    Nav
+      Heading "Hole {hole} - Par {par} - 412 yds" level=1
+      Row gap=8
+        Button.outline "Undo shot" onTap={shots=removeAt(shots,length(shots)-1); px=length(shots)>1 ? shots[length(shots)-2].x : 50; py=length(shots)>1 ? shots[length(shots)-2].y : 92}
+        Button.outline "Clear" onTap={shots=[]; px=50; py=92; putts=0}
+        Button "Finish hole" onTap={open finish}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Column grow gap=12
+          HoleMap hole={hole} shots={shots} h=460 onTap={shots=append(shots,{"x":result.x,"y":result.y,"club":club,"yds":round((max(abs(result.x-px),abs(result.y-py))+min(abs(result.x-px),abs(result.y-py))*0.4)*4.2,0)}); px=result.x; py=result.y}
+          Text.muted "Tap the map where each shot finished. Pick the club first."
+          Row scroll gap=8
+            ChoiceChip "Driver" selected={club=="Driver"} onTap={club="Driver"}
+            ChoiceChip "3 Wood" selected={club=="3 Wood"} onTap={club="3 Wood"}
+            ChoiceChip "5 Iron" selected={club=="5 Iron"} onTap={club="5 Iron"}
+            ChoiceChip "7 Iron" selected={club=="7 Iron"} onTap={club="7 Iron"}
+            ChoiceChip "9 Iron" selected={club=="9 Iron"} onTap={club="9 Iron"}
+            ChoiceChip "PW" selected={club=="PW"} onTap={club="PW"}
+            ChoiceChip "SW" selected={club=="SW"} onTap={club="SW"}
+            ChoiceChip "Putter" selected={club=="Putter"} onTap={club="Putter"}
+        Column w=320 gap=12
+          Card gap=8
+            Heading "Shots" level=3
+            if isEmpty(shots)
+              Text.muted "No shots yet. Tee off from the bottom of the map."
+            each s in shots
+              Row between
+                Text "{index+1}. {s.club}"
+                Text.strong "{s.yds} yds"
+          Card gap=8
+            Heading "Putts" level=3
+            Row gap=12 middle
+              IconButton "remove" tooltip="One fewer putt" onTap={putts=max(0,putts-1)}
+              Text "{putts}" size=32 weight=700
+              IconButton "add" tooltip="One more putt" onTap={putts=putts+1}
+          Card gap=4
+            Text.muted "Score for the hole"
+            Text "{length(shots)+putts}" size=48 weight=700
+            Text.muted "{length(shots)+putts==par ? 'Par' : (length(shots)+putts<par ? 'Under par' : 'Over par')}"
+  Sheet#finish "Hole {hole} done"
+    Text "You took {length(shots)+putts} strokes on a par {par}: {length(shots)} to the green and {putts} putts."
+    Row gap=8
+      Button "Save to card" onTap={mine=setAt(mine,hole-1,length(shots)+putts); shots=[]; putts=0; px=50; py=92; hole=hole+1; toast "Saved to card"; close}
+      Button.outline "Keep playing" onTap={close}
+
+### Scorecard
+state pars=[4,5,3,4,4,5,4,3,4,4,4,3,5,4,4,3,5,4]
+state mine=[4,5,3,4,4,5,5,3,4,5,4,3,6,4,4,3,5,5]
+state friend=[5,5,4,4,3,6,4,3,5,4,4,2,5,4,5,3,5,4]
+state view="mine"
+App
+  Sidebar
+    Brand "Fairway" icon="golf_course"
+    NavItem "Hole" icon="flag" onTap={go hole}
+    NavItem "Scorecard" icon="grid_on" selected={true}
+    NavItem "Stats" icon="insights" onTap={go stats}
+    Spacer grow
+    Text.muted "Ray Li, hcp 12.4"
+  Main
+    Nav
+      Heading "Scorecard - Saturday round" level=1
+      SegmentedButton bind=view items=["mine","friend"]
+    Column pad=24 gap=16
+      Row gap=16
+        Card grow gap=4
+          Text.muted "Ray"
+          Text "{sum(mine,s=>s)}" size=40 weight=700
+          Text.muted "{sum(mine,s=>s)-sum(pars,p=>p)} over par"
+        Card grow gap=4
+          Text.muted "Dana Whitfield"
+          Text "{sum(friend,s=>s)}" size=40 weight=700
+          Text.muted "{sum(friend,s=>s)-sum(pars,p=>p)} over par"
+      Card gap=12
+        Heading "Front nine" level=3
+        Grid cols=9 gap=6 keep
+          each p in take(pars,9)
+            Column center gap=2
+              Text.caption "{index+1}"
+              Text.caption "Par {p}"
+              ParCell score={view=="mine" ? mine[index] : friend[index]} par={p}
+        Heading "Back nine" level=3
+        Grid cols=9 gap=6 keep
+          each p in slice(pars,9,18)
+            Column center gap=2
+              Text.caption "{index+10}"
+              Text.caption "Par {p}"
+              ParCell score={view=="mine" ? mine[index+9] : friend[index+9]} par={p}
+      Card gap=8
+        Heading "Side by side" level=3
+        Row gap=8
+          Text.strong "Hole" w=60
+          Text.strong "Par" w=60
+          Text.strong "Ray" w=60
+          Text.strong "Dana" grow
+        each p in pars
+          Row gap=8
+            Text "{index+1}" w=60
+            Text "{p}" w=60
+            Text "{mine[index]}" w=60
+            Text "{friend[index]}" grow
+            Badge.success "Ray" visible={mine[index]<friend[index]}
+            Badge.info "Dana" visible={friend[index]<mine[index]}
+
+### Stats
+state range="Last 10 rounds"
+App
+  Sidebar
+    Brand "Fairway" icon="golf_course"
+    NavItem "Hole" icon="flag" onTap={go hole}
+    NavItem "Scorecard" icon="grid_on" onTap={go scorecard}
+    NavItem "Stats" icon="insights" selected={true}
+    Spacer grow
+    Text.muted "Ray Li, hcp 12.4"
+  Main
+    Nav
+      Heading "Stats" level=1
+      Select bind=range items=["Last 5 rounds","Last 10 rounds","This season"]
+    Column pad=24 gap=16
+      Grid cols=3 gap=16
+        Card gap=8 center
+          Text.muted "Fairways hit"
+          Stack center middle
+            Ring 0.64
+            Text "9 of 14" weight=700
+        Card gap=8 center
+          Text.muted "Greens in regulation"
+          Stack center middle
+            Ring 0.39
+            Text "7 of 18" weight=700
+        Card gap=8 center
+          Text.muted "Putts per round"
+          Text "33.4" size=48 weight=700
+          Sparkline values=[36,35,34,34,33,32,33]
+      Row gap=16
+        Card grow gap=8
+          Heading "Score by round" level=3
+          LineChart labels=["R1","R2","R3","R4","R5","R6"] values=[92,90,91,88,89,87] h=220
+        Card grow gap=8
+          Heading "Average to par by hole type" level=3
+          BarChart labels=["Par 3","Par 4","Par 5"] values=[0.9,1.1,0.7] h=220
+      Card gap=8
+        Heading "Club distances" level=3
+        Row between
+          Text "Driver"
+          Text.strong "238 yds"
+        Row between
+          Text "7 Iron"
+          Text.strong "148 yds"
+        Row between
+          Text "PW"
+          Text.strong "102 yds"
+
+// Draws a hole from above on the green fairway tint with the tee, the green, two bunkers and the shots as numbered dots joined by lines;
+// it is a flat drawing, not a measured course. A tap reports its place as result.x and result.y (0 to 100).
+define HoleMap hole=1 shots=[] h=460 onTap
+  Stack w=fill h={h} fill=#FF86C27A radius=12 onTap={onTap}
+    Box w=140 h=60 fill=#FF2E7D32 radius=30
+    Box w=60 h=40 fill=#FFE9D8A6 radius=20
+    Box w=50 h=34 fill=#FFE9D8A6 radius=17
+    Text.caption "Green" color=#FFFFFFFF
+    Text.caption "Tee" color=#FFFFFFFF
+    Text.caption "Hole {hole}" color=#FFFFFFFF
+    each s in shots
+      Stack
+        Box w=22 h=22 radius=11 fill=#FFFFFFFF
+        Text.caption "{index+1} - {s.yds}y"
+
+// A scorecard cell tinted by score against par: birdie green, par plain, bogey amber, double or worse red.
+define ParCell score=0 par=4
+  Box w=fill pad=6 radius=6 fill={score==0 ? "#FFF3F4F6" : (score<par ? "#FFBBF7D0" : (score==par ? "#FFFFFFFF" : (score==par+1 ? "#FFFDE68A" : "#FFFECACA")))}
+    Text.strong "{score==0 ? '-' : score}" center

@@ -251,3 +251,66 @@ what recurs". What stays ours is what a definition cannot express: the universal
 
 **To check at review 4.** Does self-definition work first time, and does it lower invention? Resolved share
 with universal words merged. Whether the same word defined in several answers converges on one meaning.
+
+### Review 4 (the self-definition experiment, `corpus-define/d01`)
+
+**What was run.** Twenty briefs already in the corpus, chosen for their invented words (a DJ deck, a
+crossword, a whiteboard, a circuit bench, a star map, a patient chart…), written again by Sonnet from the open
+prompt plus one paragraph and three small examples: *every word you use that is not taught below, you define
+after the last screen, in the same notation.* One pass, nothing else changed. Each answer's `define` blocks
+were copied to the head of each of its screens (`hoist.py`) because the tool reads a definition only before
+its use and one screen at a time.
+
+**Numbers** (the same twenty briefs, before and after):
+
+| | before (open prompt) | after (open + define) |
+|---|---|---|
+| lines | 3,540 | 3,729 (+5%) |
+| distinct words | 841 | 724 |
+| resolved | 455 (54.1%) | **695 (96.0%)** |
+| unknown types | 49 | **2** |
+| lines that stand in | 70 | **4** |
+| definitions written | 0 | 65, in 19 of 20 answers |
+| grammar issues | 76 | 141 |
+| validation errors | 24 | 30 |
+
+**What it says.**
+1. *It works first time.* 65 definitions from a paragraph of instruction; 63 of the 65 words then resolve.
+   The answers cost five percent more lines. One answer (the tower defence map) invented nothing and defined
+   nothing.
+2. *Models invent less when they must define.* 841 distinct words fell to 724: with a price on a new word, a
+   writer reaches for the core more often. The words that remain are the ones worth having.
+3. *The pages look like the apps.* Rendered: the DJ deck has two platters, bar waveforms, EQ knobs as rings,
+   channel faders and a crossfader, all from the writer's own `Platter`, `Waveform`, `Knob`, `Fader`, `Deck`;
+   the crossword has a real 12-column grid with black squares, numbers, the current word tinted and clue lists.
+   Before, those parts were empty boxes. No renderer change, no shipped definition.
+4. *The grammar issues that rose are ours, and few in kind.* 74 of the 141 are one line shape in two answers,
+   `drag=part("battery")` (a drag value written as a string), counted once per screen because of the
+   hoisting; the rest are a bare `{expr}` where the text or icon goes (`Icon {playing ? "pause" : "play"}`),
+   `hide={cond}`, and three definitions whose first line was a `state`. All are narrow spots, not confusion
+   about how to define.
+5. *What a definition did honestly without:* a camera, a real map, sound and a metronome are labelled boxes
+   with a comment, as asked. That list is the primitives list, written by the models themselves.
+
+**Insight, confirmed.** The long tail is closed by the writer. The loop is no longer "collect unknown words,
+then build them": an answer arrives with its own vocabulary, renders whole, and what we collect is a corpus of
+*definitions*: several models' meanings for `Knob`, `Waveform`, `Timeline`, written in our grammar, ready to
+compare. Our work narrows to three things a definition cannot give: the universal words, the primitives, and
+a core good enough that definitions come out short and right.
+
+**Decisions.**
+- D19. Self-definition becomes the open prompt (`notationPrompt(open: true)` carries the paragraph and the
+  examples). The first corpus stays as the record of what models reach for with no price on a word.
+- D20. A definition anywhere in an answer holds for all of its screens, before or after its uses (parser and
+  tool); `hoist.py` goes when that lands.
+- D21. The narrow spots this run exposed: a bare `{expr}` where the text or the icon goes is that value; a
+  drag value written as a string or a record; `hide={cond}` and `show={cond}` as `visible`; a definition whose
+  first line is `state`.
+- D22. Harvest (D15) is now the centre of the tool: for every word defined in more than one answer, the
+  signatures and bodies side by side, and which core words and universal words each leans on.
+- D23. The corpus goal is met (5,199 words). No more answers are written for size. The next batch, when the
+  fixes above are merged, is the 313 briefs again in self-defining mode, as the corpus of definitions.
+
+**To check at review 5.** With D19 to D21 merged: grammar issues per 1,000 lines on self-defining answers
+(expect under 10), the share of definitions that validate, and for the ten most defined words whether the
+definitions agree enough to promote one.

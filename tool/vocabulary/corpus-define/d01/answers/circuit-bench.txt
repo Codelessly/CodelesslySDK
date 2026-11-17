@@ -1,0 +1,238 @@
+### Bench
+state parts=[{"id":"p1","kind":"battery","value":9,"x":1,"y":1},{"id":"p2","kind":"resistor","value":220,"x":3,"y":1},{"id":"p3","kind":"lamp","value":20,"x":5,"y":1},{"id":"p4","kind":"switch","value":1,"x":3,"y":3}]
+state wires=[{"id":"w1","from":"p1","to":"p2"},{"id":"w2","from":"p2","to":"p3"},{"id":"w3","from":"p3","to":"p4"},{"id":"w4","from":"p4","to":"p1"}]
+state sel=""
+state tool="move"
+state wireFrom=""
+state running=true
+state closed=true
+state volts=9
+state r=240
+state amps=0.0
+state probeAt=""
+state probeV=0
+state trace=[]
+state t=0
+state shorted=false
+every 500 when running onTick={t=t+1; volts=coalesce(first(map(filter(parts,p=>p.kind=="battery"),p=>p.value)),0); closed=all(filter(parts,p=>p.kind=="switch"),p=>p.value==1); r=sum(filter(parts,p=>p.kind=="resistor"),p=>p.value)+20*count(parts,p=>p.kind=="lamp"); amps=closed && r>0 ? volts/r : 0; shorted=closed && r==0 && volts>0; trace=length(trace)>=40 ? append(removeAt(trace,0),closed ? volts : 0) : append(trace,closed ? volts : 0); shorted ? {running=false; open shortDlg} : }
+App
+  Sidebar
+    Brand "Solderless" icon="electrical_services"
+    NavItem "Bench" icon="grid_on" selected={true}
+    NavItem "Scope" icon="show_chart" onTap={go scope}
+    NavItem "Parts library" icon="category" onTap={go library}
+    Text.caption "TRAY"
+    Column gap=8
+      Card drag=part("battery") gap=2
+        Row gap=8 middle
+          Icon "battery_full"
+          Text.strong "Battery"
+          Spacer grow
+          Text.muted "9 V"
+      Card drag=part("resistor") gap=2
+        Row gap=8 middle
+          Icon "linear_scale"
+          Text.strong "Resistor"
+          Spacer grow
+          Text.muted "220 Ω"
+      Card drag=part("lamp") gap=2
+        Row gap=8 middle
+          Icon "lightbulb"
+          Text.strong "Lamp"
+          Spacer grow
+          Text.muted "20 Ω"
+      Card drag=part("switch") gap=2
+        Row gap=8 middle
+          Icon "toggle_on"
+          Text.strong "Switch"
+          Spacer grow
+          Text.muted "SPST"
+      Card drag=part("capacitor") gap=2
+        Row gap=8 middle
+          Icon "sync_alt"
+          Text.strong "Capacitor"
+          Spacer grow
+          Text.muted "100 µF"
+    Spacer grow
+    Text.muted "{length(parts)} parts, {length(wires)} wires"
+  Main
+    Nav
+      Heading "Series lamp circuit" level=1
+      Row gap=8
+        SegmentedButton bind=tool items=["move","wire","probe"]
+        Button.outline "Step" icon="skip_next" onTap={running=false; t=t+1}
+        Button "Run" icon="play_arrow" hidden={running} onTap={shorted ? toast "Fix the short first" : running=true}
+        Button.destructive "Stop" icon="stop" hidden={!running} onTap={running=false}
+        IconButton "delete_sweep" tooltip="Clear the bench" onTap={open clearDlg}
+    Row grow top
+      Column grow pad=16 gap=12
+        Row gap=12 middle
+          Badge.success "Running" hidden={!running}
+          Badge.neutral "Paused" hidden={running}
+          Text.muted "Tool: {tool}"
+          if tool=="wire"
+            Text.muted "{wireFrom=="" ? "Tap a part to start a wire" : "Tap a second part to join it"}"
+          if tool=="probe"
+            Text.muted "Tap a part to read volts there"
+          Spacer grow
+          Text.strong "{fixed(amps*1000,1)} mA"
+        CircuitBoard parts={parts} wires={wires} cols=8 rows=5 selected={sel} amps={amps} running={running} wireFrom={wireFrom} drop=part onDrop={parts=append(parts,{"id":"p{length(parts)+1}{t}","kind":result.data,"value":result.data=="battery" ? 9 : result.data=="resistor" ? 100 : result.data=="capacitor" ? 100 : result.data=="switch" ? 1 : 20,"x":2,"y":4})} onSelect={tool=="move" ? sel=result : tool=="probe" ? {probeAt=result; probeV=amps*r*0+volts-amps*sum(filter(parts,p=>p.kind=="resistor"),p=>p.value)*0.5; toast "Probe at {result}: {fixed(probeV,2)} V"} : wireFrom=="" ? wireFrom=result : {wires=append(wires,{"id":"w{length(wires)+1}","from":wireFrom,"to":result}); wireFrom=""}} onOpen={sel=result; open partMenu}
+        Row gap=12 top
+          Card grow gap=4
+            Text.caption "LAMP BRIGHTNESS"
+            Row gap=12 middle
+              Lamp glow={clamp(amps*1000/40,0,1)}
+              Progress {clamp(amps*1000/40,0,1)}
+          Card grow gap=4
+            Text.caption "PROBE"
+            Text.strong "{probeAt=="" ? "No probe set" : "{probeAt}: {fixed(probeV,2)} V"}"
+            Text.muted "Source {volts} V across {r} Ω"
+      Pane w=320 pad=16 gap=12
+        if sel==""
+          Heading "Nothing selected" level=3
+          Text.muted "Tap a part on the bench to change its value."
+        each p in filter(parts,x=>x.id==sel)
+          Heading "{upper(p.kind)}" level=3
+          Text.muted "Part {p.id}"
+          if p.kind=="switch"
+            Toggle "Closed" bind=p.value
+          if p.kind!="switch"
+            Stepper bind=p.value min={p.kind=="battery" ? 1 : 1} max={p.kind=="battery" ? 24 : 1000} step={p.kind=="battery" ? 1 : 10} unit={p.kind=="battery" ? "V" : "Ω"}
+          Button.destructive "Remove part" onTap={parts=removeWhere(parts,x=>x.id==p.id); wires=removeWhere(wires,w=>w.from==p.id || w.to==p.id); sel=""}
+        Divider
+        Heading "Voltage over time" level=3
+        LineChart values={trace} h=140
+        Button.outline "Open scope" onTap={go scope}
+Menu#partMenu
+  MenuItem "Rename" icon="edit" onTap={toast "Renamed"}
+  MenuItem "Duplicate" icon="content_copy" onTap={parts=concat(parts,map(filter(parts,x=>x.id==sel),x=>with(with(x,"id","{x.id}c"),"x",x.x+1)))}
+  MenuItem "Delete" icon="delete" onTap={parts=removeWhere(parts,x=>x.id==sel); wires=removeWhere(wires,w=>w.from==sel || w.to==sel); sel=""}
+Dialog#shortDlg "Short circuit" "The battery is connected with no resistance in the loop."
+  Row gap=12 middle
+    Icon "warning" color=#FFDC2626 size=32
+    Text "Current would be unlimited. The run was stopped to protect the parts."
+  Row gap=8 end
+    Button.outline "Add a resistor" onTap={parts=append(parts,{"id":"p{length(parts)+1}","kind":"resistor","value":100,"x":2,"y":4}); shorted=false; close}
+    Button "OK" onTap={close}
+Dialog#clearDlg "Clear the bench?" "All parts and wires are removed."
+  Row gap=8 end
+    Button.outline "Cancel" onTap={close}
+    Button.destructive "Clear" onTap={parts=[]; wires=[]; sel=""; trace=[]; close; toast "Bench cleared"}
+
+// Honest version: the board lists parts in a grid of cells, marks the selected one, and shows each wire as a labelled line of text under the grid; real freehand wire drawing, drifting dots and part icons need a canvas, so a labelled box stands in for them. Lamp glow follows `amps`.
+define CircuitBoard parts=[] wires=[] cols=8 rows=5 selected="" amps=0 running=true wireFrom="" onSelect onOpen onDrop
+  Column gap=8
+    Box fill=#FF0F172A radius=8 pad=12 gap=8 h=300 onDrop={onDrop}
+      Text.caption "Canvas grid {cols} x {rows}" color=#FF94A3B8
+      Grid cols=4 gap=8
+        each p in parts
+          Box pad=10 radius=8 gap=4 fill={p.id==selected ? "#FF1E3A8A" : "#FF1E293B"} border={p.id==wireFrom ? "#FFFACC15" : "#FF334155"} menu=partMenu onTap={onSelect(p.id)} animate={running && p.kind=="lamp" ? "pulse" : "fade"}
+            Row gap=6 middle
+              Icon "{p.kind=="battery" ? "battery_full" : p.kind=="resistor" ? "linear_scale" : p.kind=="lamp" ? "lightbulb" : p.kind=="switch" ? "toggle_on" : "sync_alt"}" color={p.kind=="lamp" && amps>0 ? "#FFFACC15" : "#FFE2E8F0"}
+              Text.small "{p.kind}" color=#FFE2E8F0
+            Text.caption "{p.value}{p.kind=="battery" ? " V" : p.kind=="switch" ? (p.value==1 ? " on" : " off") : " Ω"}" color=#FF94A3B8
+    Row scroll gap=6
+      each w in wires
+        Chip "{w.from} to {w.to}"
+
+// A lamp whose light grows with glow from 0 to 1.
+define Lamp glow=0 size=48
+  Box w={size} h={size} radius={size/2} fill={glow>0.66 ? "#FFFACC15" : glow>0.33 ? "#FFFDE68A" : glow>0.02 ? "#FFFEF3C7" : "#FFE2E8F0"} border="#FF94A3B8" animate={glow>0.02 ? "pulse" : "fade"}
+
+// A number with minus and plus buttons.
+define Stepper "label" bind=value min=0 max=100 step=1 unit="" onChange
+  Row gap=8 middle
+    Button.outline "-" onTap={value=max(min,value-step); onChange(value)}
+    Text.strong "{value} {unit}"
+    Button.outline "+" onTap={value=min(max,value+step); onChange(value)}
+
+### Scope
+state source=9
+state scale="5 s"
+state samples=[0,2,5,7,9,9,9,8,9,9,0,0,9,9,9]
+state cursor=6
+state hold=false
+every 1s when !hold onTick={samples=length(samples)>=60 ? append(removeAt(samples,0),source) : append(samples,source)}
+App
+  Sidebar
+    Brand "Solderless" icon="electrical_services"
+    NavItem "Bench" icon="grid_on" onTap={go bench}
+    NavItem "Scope" icon="show_chart" selected={true}
+    NavItem "Parts library" icon="category" onTap={go library}
+  Main
+    Nav
+      Heading "Scope" level=1
+      Row gap=8
+        Select bind=scale items=["1 s","5 s","30 s"]
+        Toggle "Hold" bind=hold
+        Button.outline "Clear" onTap={samples=[]; cursor=0}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between
+          Text.strong "Voltage at the lamp"
+          Badge.info "{scale} per division"
+        LineChart values={samples} h=260
+        Slider bind=cursor min=0 max={max(1,length(samples)-1)}
+        Row between
+          Text.muted "Cursor at sample {cursor}"
+          Text.strong "{fixed(coalesce(samples[cursor],0),2)} V"
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.caption "PEAK"
+          Text "{max(0,coalesce(last(sortBy(samples,s=>s)),0))} V" size=32 weight=700
+        Card gap=4
+          Text.caption "AVERAGE"
+          Text "{length(samples)==0 ? 0 : fixed(sum(samples,s=>s)/length(samples),2)} V" size=32 weight=700
+        Card gap=4
+          Text.caption "SAMPLES"
+          Text "{length(samples)}" size=32 weight=700
+      Card gap=8
+        Text.strong "Source voltage"
+        Row gap=12 middle
+          Slider bind=source min=0 max=24 grow
+          Text.strong "{source} V"
+        Text.muted "The trace follows this value every second while Hold is off."
+
+### Parts library
+Page
+  Nav
+    Brand "Solderless" icon="electrical_services"
+    Row gap=4
+      Link "Bench" onTap={go bench}
+      Link "Scope" onTap={go scope}
+      Link "Parts library"
+    Button "Open the bench" onTap={go bench}
+  Section
+    Column gap=12
+      Heading "Parts library" level=1
+      Text.muted "Everything in the tray, with the values you can set."
+  Section tint
+    Grid cols=3 gap=24
+      Card gap=12
+        IconTile "battery_full"
+        Heading "Battery" level=3
+        Text.muted "A fixed voltage source, 1 to 24 V. Two of them in a loop make a short."
+      Card gap=12
+        IconTile "linear_scale"
+        Heading "Resistor" level=3
+        Text.muted "Limits current. Set 10 to 1000 ohms with the stepper."
+      Card gap=12
+        IconTile "lightbulb"
+        Heading "Lamp" level=3
+        Text.muted "Glows brighter as current rises, about 20 ohms."
+      Card gap=12
+        IconTile "toggle_on"
+        Heading "Switch" level=3
+        Text.muted "Opens and closes the loop. The run reacts when it clicks."
+      Card gap=12
+        IconTile "sync_alt"
+        Heading "Capacitor" level=3
+        Text.muted "Charges and discharges, so the scope shows a curve."
+      Card gap=12
+        IconTile "search"
+        Heading "Probe" level=3
+        Text.muted "Tap a point and read the volts there."
+  Footer
+    Row between
+      Text.strong "Solderless"
+      Text.muted "A circuit simulator for the classroom"

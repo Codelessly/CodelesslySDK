@@ -1,0 +1,174 @@
+### Sequencer
+project bank=[{"name":"Four floor","kick":[1,0,0,0,1,0,0,0,1,0,0,0,1,0,0,0],"snare":[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0],"hats":[0,0,1,0,0,0,1,0,0,0,1,0,0,0,1,1],"notes":[{"pitch":0,"step":0,"len":3},{"pitch":2,"step":4,"len":2},{"pitch":3,"step":8,"len":4},{"pitch":2,"step":12,"len":2}]},{"name":"Broken","kick":[1,0,0,1,0,0,1,0,0,0,1,0,0,1,0,0],"snare":[0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,1],"hats":[1,1,0,1,1,1,0,1,1,1,0,1,1,1,0,1],"notes":[{"pitch":1,"step":0,"len":2},{"pitch":4,"step":6,"len":2},{"pitch":1,"step":10,"len":3}]},{"name":"Half time","kick":[1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0],"hats":[1,0,1,0,1,0,1,0,1,0,1,0,1,0,1,0],"notes":[{"pitch":0,"step":0,"len":8},{"pitch":5,"step":8,"len":8}]},{"name":"Fill","kick":[1,0,1,0,1,0,1,0,1,1,1,1,1,1,1,1],"snare":[0,0,0,0,1,0,0,0,1,0,1,0,1,1,1,1],"hats":[1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],"notes":[]},{"name":"Empty 5","kick":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"hats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"notes":[]},{"name":"Empty 6","kick":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"hats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"notes":[]},{"name":"Empty 7","kick":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"hats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"notes":[]},{"name":"Empty 8","kick":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"snare":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"hats":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"notes":[]}]
+project pat=0
+project tempo=96
+project swing=12
+project vol=80
+project saved=[{"name":"Sunday groove","bpm":92,"bars":4,"date":"Nov 2"},{"name":"Broken demo","bpm":104,"bars":8,"date":"Nov 9"}]
+state playing=false
+state step=0
+state acc=0
+state level=0
+state muted=[]
+state solo=""
+state clip=""
+state exportName="Loop 1"
+state exportFormat="WAV"
+state exportBars=4
+every 50 when playing onTick={acc=acc+50; acc >= (15000/tempo) * (step%2==0 ? 1+swing/100 : 1-swing/100) ? {step=(step+1)%16; acc=0; level=clamp((bank[pat].kick[step]*0.5+bank[pat].snare[step]*0.3+bank[pat].hats[step]*0.2+0.2)*vol/100,0,1)} : {}}
+App
+  Sidebar
+    Brand "Grid Drums" icon="graphic_eq"
+    NavItem "Sequencer" icon="grid_on" selected={true}
+    NavItem "Bassline" icon="piano" onTap={go bassline}
+    NavItem "Loop library" icon="library_music" badge="{length(saved)}" onTap={go library}
+    Spacer grow
+    Text.muted "Pattern {pat+1}: {bank[pat].name}"
+  Main
+    Nav
+      Heading "Sequencer" level=1
+      Row gap=8 middle
+        Button.outline "Save loop" icon="save" onTap={saved=append(saved,{"name":bank[pat].name,"bpm":tempo,"bars":4,"date":formatDate(today(),"MMM d")}); toast "Loop saved"}
+        Button.outline "Export" icon="ios_share" onTap={open export}
+        Button "{playing ? 'Stop' : 'Play'}" icon="{playing ? 'stop' : 'play_arrow'}" onTap={playing=!playing; step=0; acc=0}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between middle
+          Text.strong "Pattern bank"
+          Row gap=8
+            Button.outline "Copy" icon="content_copy" onTap={clip=bank[pat]; toast "Pattern {pat+1} copied"}
+            Button.outline "Paste" icon="content_paste" onTap={clip=="" ? toast "Nothing copied yet" : {bank=setAt(bank,pat,with(clip,"name",bank[pat].name)); toast "Pasted into pattern {pat+1}"}}
+            Button.ghost "Clear" icon="delete_sweep" onTap={bank=setAt(bank,pat,with(with(with(with(bank[pat],"kick",[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),"snare",[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),"hats",[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]),"notes",[]))}
+        Row gap=8
+          each p in bank
+            ChoiceChip "{index+1}" selected={pat==index} onTap={pat=index}
+      Card gap=10
+        StepRow "Kick" steps={bank[pat].kick} step={step} playing={playing} muted={contains(muted,"kick")} solo={solo=="kick"} color=#FFEF4444 onToggle={bank=setAt(bank,pat,with(bank[pat],"kick",setAt(bank[pat].kick,result,1-bank[pat].kick[result])))} onMute={contains(muted,"kick") ? muted=without(muted,"kick") : muted=append(muted,"kick")} onSolo={solo=="kick" ? solo="" : solo="kick"}
+        StepRow "Snare" steps={bank[pat].snare} step={step} playing={playing} muted={contains(muted,"snare")} solo={solo=="snare"} color=#FFF59E0B onToggle={bank=setAt(bank,pat,with(bank[pat],"snare",setAt(bank[pat].snare,result,1-bank[pat].snare[result])))} onMute={contains(muted,"snare") ? muted=without(muted,"snare") : muted=append(muted,"snare")} onSolo={solo=="snare" ? solo="" : solo="snare"}
+        StepRow "Hats" steps={bank[pat].hats} step={step} playing={playing} muted={contains(muted,"hats")} solo={solo=="hats"} color=#FF22C55E onToggle={bank=setAt(bank,pat,with(bank[pat],"hats",setAt(bank[pat].hats,result,1-bank[pat].hats[result])))} onMute={contains(muted,"hats") ? muted=without(muted,"hats") : muted=append(muted,"hats")} onSolo={solo=="hats" ? solo="" : solo="hats"}
+        Row gap=8 middle
+          Text.strong "Bass" w=56
+          Text.muted "{length(bank[pat].notes)} notes in the piano roll"
+          Spacer grow
+          ChoiceChip "M" selected={contains(muted,"bass")} onTap={contains(muted,"bass") ? muted=without(muted,"bass") : muted=append(muted,"bass")}
+          ChoiceChip "S" selected={solo=="bass"} onTap={solo=="bass" ? solo="" : solo="bass"}
+          Button.outline "Edit bassline" icon="piano" onTap={go bassline}
+      Row gap=16 top
+        Card grow gap=12
+          Text.strong "Feel"
+          Row gap=32 center
+            Knob "Tempo" bind=tempo min=60 max=180 unit="BPM"
+            Knob "Swing" bind=swing min=0 max=60 unit="%"
+        Card grow gap=12
+          Text.strong "Master"
+          Row gap=16 middle
+            Column grow gap=4
+              Text.caption "Volume {vol}%"
+              Slider bind=vol min=0 max=100
+            LevelMeter value={playing ? level : 0}
+  Dialog#export "Export loop" "Render the current pattern to a file"
+    Input "File name" bind=exportName
+    Select "Format" items=["WAV","MP3","MIDI"] bind=exportFormat
+    SegmentedButton items=["1 bar","2 bars","4 bars"] onChange={exportBars=result=="1 bar" ? 1 : (result=="2 bars" ? 2 : 4)}
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button "Export {exportFormat}" onTap={toast "Exported {exportName}.{lower(exportFormat)}"; close}
+
+### Bassline
+state selp=-1
+state sels=-1
+App
+  Sidebar
+    Brand "Grid Drums" icon="graphic_eq"
+    NavItem "Sequencer" icon="grid_on" onTap={go sequencer}
+    NavItem "Bassline" icon="piano" selected={true}
+    NavItem "Loop library" icon="library_music" badge="{length(saved)}" onTap={go library}
+    Spacer grow
+    Text.muted "Pattern {pat+1}: {bank[pat].name}"
+  Main
+    Nav
+      Heading "Bassline" level=1
+      Row gap=8 middle
+        Text.muted "{tempo} BPM"
+        Button.outline "Sequencer" icon="grid_on" onTap={go sequencer}
+    Column pad=24 gap=16 scroll
+      Card gap=12
+        Row between middle
+          Text.strong "Piano roll, pattern {pat+1}"
+          Row gap=8
+            Button.outline "Shorter" icon="remove" onTap={sels<0 ? toast "Select a note first" : bank=setAt(bank,pat,with(bank[pat],"notes",updateWhere(bank[pat].notes,n=>n.pitch==selp && n.step==sels,n=>with(n,"len",max(1,n.len-1)))))}
+            Button.outline "Longer" icon="add" onTap={sels<0 ? toast "Select a note first" : bank=setAt(bank,pat,with(bank[pat],"notes",updateWhere(bank[pat].notes,n=>n.pitch==selp && n.step==sels,n=>with(n,"len",min(16-n.step,n.len+1)))))}
+            Button.destructive "Delete" icon="delete" onTap={sels<0 ? toast "Select a note first" : {bank=setAt(bank,pat,with(bank[pat],"notes",removeWhere(bank[pat].notes,n=>n.pitch==selp && n.step==sels))); selp=-1; sels=-1}}
+        PianoRoll notes={bank[pat].notes} step={step} playing={playing} selp={selp} sels={sels} onCell={find(bank[pat].notes,n=>n.pitch==floor(result/16) && result%16>=n.step && result%16<n.step+n.len)==null ? {bank=setAt(bank,pat,with(bank[pat],"notes",append(bank[pat].notes,{"pitch":floor(result/16),"step":result%16,"len":1}))); selp=floor(result/16); sels=result%16} : {selp=floor(result/16); sels=find(bank[pat].notes,n=>n.pitch==floor(result/16) && result%16>=n.step && result%16<n.step+n.len).step}}
+        Text.caption "Tap an empty cell to draw a note. Tap a note to select it, then make it longer or shorter."
+      Card gap=8
+        Text.strong "Notes in this pattern"
+        if length(bank[pat].notes)==0
+          Text.muted "No notes yet."
+        each n in sortBy(bank[pat].notes,x=>x.step)
+          ListTile "{['C2','D2','E2','F2','G2','A2','Bb2','C3'][n.pitch]} at step {n.step+1}" subtitle="{n.len} steps" selected={n.pitch==selp && n.step==sels} onTap={selp=n.pitch; sels=n.step}
+
+### Loop library
+state libq=""
+App
+  Sidebar
+    Brand "Grid Drums" icon="graphic_eq"
+    NavItem "Sequencer" icon="grid_on" onTap={go sequencer}
+    NavItem "Bassline" icon="piano" onTap={go bassline}
+    NavItem "Loop library" icon="library_music" badge="{length(saved)}" selected={true}
+    Spacer grow
+    Text.muted "{length(saved)} saved loops"
+  Main
+    Nav
+      Heading "Loop library" level=1
+      Input "Search loops" bind=libq w=220
+    Column pad=24 gap=16 scroll
+      if length(filter(saved,s=>contains(lower(s.name),lower(libq))))==0
+        Card gap=8
+          Text.muted "No loops match. Save one from the sequencer."
+      Grid cols=2 gap=16
+        each s in filter(saved,s=>contains(lower(s.name),lower(libq)))
+          Card gap=8
+            Row between middle
+              Text.strong "{s.name}"
+              Badge.neutral "{s.bpm} BPM"
+            Text.muted "{s.bars} bars, saved {s.date}"
+            Row gap=8
+              Button.outline "Load" icon="upload" onTap={tempo=s.bpm; toast "Loaded {s.name}"; go sequencer}
+              Button.outline "Export" icon="ios_share" onTap={toast "Exported {s.name}.wav"}
+              Button.ghost "Delete" icon="delete" onTap={saved=removeWhere(saved,x=>x.name==s.name && x.date==s.date)}
+
+// One row of sixteen steps: a label, mute and solo, and sixteen cells; the playing step has an amber outline. A tap turns a cell on or off; painting by dragging across cells is not expressible here, so it is a tap per cell.
+define StepRow "label" steps=[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] step=0 playing=false muted=false solo=false color=#FF2563EB onToggle onMute onSolo
+  Row gap=8 middle
+    Text.strong "{label}" w=56
+    Row gap=3 grow
+      each cell in steps
+        Box grow h=44 radius=4 fill={cell==1 ? (muted ? "#FF6B7280" : color) : (index%4==0 ? "#FF374151" : "#FF1F2937")} border={playing && index==step ? "#FFFBBF24" : "#00000000"} onTap={onToggle(index)}
+    ChoiceChip "M" selected={muted} onTap={onMute}
+    ChoiceChip "S" selected={solo} onTap={onSolo}
+
+// A knob dragged up and down is drawn as a slider with its figure above (no rotary dial in the core words).
+define Knob "label" bind=value min=0 max=100 unit=""
+  Column gap=4 center w=140
+    Text.caption "{label}"
+    Text.strong "{value} {unit}"
+    Slider bind=value min={min} max={max}
+
+// A level meter of twelve segments that turn amber and red toward the top.
+define LevelMeter value=0 segments=12
+  Column gap=4 w=48
+    Text.caption "Level"
+    Row gap=2 h=40 bottom
+      each seg in range(segments)
+        Box grow h={10+seg*3} radius=2 fill={seg/segments < value ? (seg>9 ? "#FFEF4444" : (seg>7 ? "#FFF59E0B" : "#FF22C55E")) : "#FF374151"}
+
+// A piano roll of eight pitches by sixteen steps. A tap sends pitch*16+step as result. Notes are drawn as filled runs of cells; stretching is done with buttons outside, not by dragging an edge.
+define PianoRoll notes=[] step=0 playing=false selp=-1 sels=-1 onCell
+  Column gap=2
+    each p in [7,6,5,4,3,2,1,0]
+      Row gap=2 middle
+        Text.caption "{['C2','D2','E2','F2','G2','A2','Bb2','C3'][p]}" w=36
+        Row gap=2 grow
+          each i in range(16)
+            Box grow h=28 radius=3 fill={any(notes,n=>n.pitch==p && i>=n.step && i<n.step+n.len) ? (any(notes,n=>n.pitch==p && n.step==sels && selp==p && i>=n.step && i<n.step+n.len) ? "#FFF59E0B" : "#FF8B5CF6") : (i%4==0 ? "#FF374151" : "#FF1F2937")} border={playing && i==step ? "#FFFBBF24" : "#00000000"} onTap={onCell(p*16+i)}

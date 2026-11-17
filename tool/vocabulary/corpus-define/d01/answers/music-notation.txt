@@ -1,0 +1,187 @@
+### Practice
+state clef="Treble"
+state range="C4-C5"
+state deck=["E4","G4","C5","D4","F4","B4","A4","C4","E5","G4"]
+state i=0
+state score=0
+state tries=0
+state streak=0
+state best=7
+state flash=""
+state misses=[]
+state input="keys"
+state answers=[]
+App
+  Sidebar
+    Brand "Stave" icon="music_note"
+    NavItem "Practice" icon="piano" selected={true}
+    NavItem "Rhythm" icon="graphic_eq" onTap={go rhythm}
+    NavItem "Summary" icon="insights" onTap={go summary}
+    NavItem "Settings" icon="tune" onTap={open settings}
+    Spacer grow
+    Text.muted "Best streak: {best}"
+  Main
+    Nav
+      Heading "Name the note" level=1
+      Row gap=8
+        Badge.success "Streak {streak}"
+        Badge.neutral "{score} / {tries}"
+        IconButton "tune" tooltip="Clef and range" onTap={open settings}
+    Column pad=24 gap=16 center
+      Card gap=12 maxw=720
+        Row between
+          Text.muted "{clef} clef, {range}"
+          Text.muted "Note {i+1} of {length(deck)}"
+        Staff "{deck[i]}" clef={clef} flash={flash}
+        if flash=="right"
+          Text.success "Correct" center animate=pop
+        if flash=="wrong"
+          Text.danger "Not quite, that was {deck[i]}" center animate=shake
+      SegmentedButton bind=input items=["keys","names"]
+      if input=="keys"
+        Card maxw=720
+          Keyboard from="C4" octaves=1 flash={flash} onKey={answer=result}
+      if input=="names"
+        Card maxw=720
+          Grid cols=7 gap=8
+            each n in ["C","D","E","F","G","A","B"]
+              Button.outline "{n}" onTap={answer=n}
+    Footer
+      Row between
+        Text.muted "Tap a key or a name to answer"
+        Button.ghost "Skip" onTap={streak=0; i=(i+1)%length(deck)}
+
+### Rhythm
+state bpm=90
+state running=false
+state beat=0
+state taps=[]
+state offsets=[]
+App
+  Sidebar
+    Brand "Stave" icon="music_note"
+    NavItem "Practice" icon="piano" onTap={go practice}
+    NavItem "Rhythm" icon="graphic_eq" selected={true}
+    NavItem "Summary" icon="insights" onTap={go summary}
+    NavItem "Settings" icon="tune" onTap={open settings}
+  Main
+    Nav
+      Heading "Tap along" level=1
+      Row gap=8
+        Text.muted "{bpm} BPM"
+        Button "{running ? 'Stop' : 'Start'}" onTap={running=!running; beat=0; taps=[]; offsets=[]}
+    Column pad=24 gap=16
+      Card gap=12
+        Text.strong "Tempo"
+        Slider bind=bpm min=40 max=160
+        Row gap=12 middle
+          Metronome bpm={bpm} running={running} beat={beat}
+          Text.muted "Beat {beat+1} of 4"
+      Card gap=12
+        Text.strong "Pattern"
+        BeatTrack pattern=["q","q","e e","q"] beat={beat} taps={taps}
+        Row gap=8
+          each o in offsets
+            Badge.neutral "{o < 0 ? 'early' : 'late'} {abs(o)} ms"
+      Button "Tap" size=large onTap={taps=append(taps,beat); offsets=append(offsets,(beat*37)%90-45)}
+      Row gap=24
+        Column gap=4
+          Text.muted "Average offset"
+          Text.heading "{length(offsets)==0 ? 0 : round(sum(offsets,o=>o)/length(offsets),0)} ms"
+        Column gap=4
+          Text.muted "Early taps"
+          Text.heading "{count(offsets,o=>o<0)}"
+        Column gap=4
+          Text.muted "Late taps"
+          Text.heading "{count(offsets,o=>o>0)}"
+every 1s when running onTick={beat=(beat+1)%4}
+
+### Summary
+state slow=[{"note":"F#4","ms":2410,"miss":4},{"note":"B3","ms":2180,"miss":3},{"note":"A5","ms":1960,"miss":2},{"note":"D4","ms":1210,"miss":0}]
+state daily=[12,18,15,22,19,26,24]
+Page
+  Nav
+    Brand "Stave" icon="music_note"
+    Row gap=4
+      Link "Practice" onTap={go practice}
+      Link "Rhythm" onTap={go rhythm}
+      Link "Summary"
+  Section
+    Heading "Session summary" level=1
+    Text.muted "24 minutes, 62 notes, clef treble"
+    Grid cols=3 gap=24
+      Card gap=4
+        Text.muted "Accuracy"
+        Text "86%" size=40 weight=700
+        Progress 0.86
+      Card gap=4
+        Text.muted "Best streak"
+        Text "11" size=40 weight=700
+      Card gap=4
+        Text.muted "Average time"
+        Text "1.4 s" size=40 weight=700
+  Section tint
+    Heading "Slowest notes" level=2
+    Card gap=8
+      each s in sortByDesc(slow,x=>x.ms)
+        Row between middle
+          Row gap=12 middle
+            Text.strong "{s.note}" w=60
+            Text.muted "{s.miss} misses"
+          Text "{fixed(s.ms/1000,1)} s"
+    Card gap=8
+      Text.strong "Notes per day"
+      BarChart values={daily} labels=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] h=160
+  Section compact
+    Row gap=12
+      Button "Practice slow notes" onTap={go practice}
+      Button.outline "Back to start" onTap={go practice}
+  Footer
+    Text.muted "Stave"
+
+Dialog#settings "Clef and range" "Applies to the next note"
+  state clef="Treble"
+  state range="C4-C5"
+  state accidentals=false
+  Select "Clef" bind=clef items=["Treble","Bass","Alto"]
+  Select "Range" bind=range items=["C4-C5","C3-C5","C2-C6"]
+  Toggle "Include sharps and flats" bind=accidentals
+  Row gap=8 end
+    Button.ghost "Cancel" onTap={close}
+    Button "Apply" onTap={i=0; streak=0; toast "Settings saved"; close}
+
+// Draws five staff lines and the note as a labelled round mark; no real notation glyphs or positions
+define Staff "note" clef="Treble" flash=""
+  Column gap=0 pad=12
+    Text.caption "{clef}"
+    Stack h=100
+      Column gap=18 pad=[0,6,0,6]
+        Divider
+        Divider
+        Divider
+        Divider
+        Divider
+      Box w=28 h=22 radius=11 fill={flash=="right" ? "#FF16A34A" : flash=="wrong" ? "#FFDC2626" : "#FF111827"} center middle
+        Text "{note}" color=#FFFFFFFF size=11
+
+// A row of white keys; black keys are not drawn. Tapping a key gives its letter as result
+define Keyboard from="C4" octaves=1 flash="" onKey
+  Row gap=2 h=120
+    each k in ["C","D","E","F","G","A","B"]
+      Box grow fill={flash=="wrong" ? "#FFFEE2E2" : "#FFFFFFFF"} border="#FF111827" radius=4 bottom onTap={onKey(k)}
+        Text.caption "{k}"
+
+// A blinking dot per beat; the pulse is a fade, no sound
+define Metronome bpm=90 running=false beat=0
+  Row gap=8
+    each b in range(4)
+      Box w=20 h=20 radius=10 fill={running && b==beat ? "#FF2563EB" : "#FFD1D5DB"}
+
+// A row of beat cells for the pattern, marking the beats you tapped
+define BeatTrack pattern=[] beat=0 taps=[]
+  Row gap=8
+    each p in pattern
+      Box grow h=48 radius=6 pad=8 fill={indexOf(pattern,p)==beat ? "#FFDBEAFE" : "#FFF3F4F6"} center middle
+        Text "{p}"
+        if contains(taps,indexOf(pattern,p))
+          Icon "check"

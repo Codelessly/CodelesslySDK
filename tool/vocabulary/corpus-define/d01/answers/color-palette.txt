@@ -1,0 +1,172 @@
+### Palette
+state colors=[{"id":1,"hex":"#FF264653","locked":false},{"id":2,"hex":"#FF2A9D8F","locked":true},{"id":3,"hex":"#FFE9C46A","locked":false},{"id":4,"hex":"#FFF4A261","locked":false},{"id":5,"hex":"#FFE76F51","locked":false}]
+state sel=1
+state draft="#FF264653"
+state palName="Coastal Sunset"
+state saved=[]
+KeyListener key="space" onPress={shuffle colors}
+App
+  Sidebar
+    Brand "Swatchbook" icon="palette"
+    NavItem "Generator" icon="auto_awesome" selected={true} onTap={go palette}
+    NavItem "Contrast" icon="contrast" onTap={go contrast}
+    NavItem "Saved palettes" icon="bookmarks" badge="{length(saved)}" onTap={go saved}
+    Spacer grow
+    Text.muted "Press space to shuffle"
+  Main
+    Nav
+      Input "Palette name" bind=palName w=220
+      Row gap=8
+        IconButton "shuffle" tooltip="Shuffle unlocked" onTap={shuffle colors}
+        Button.outline "Shades" icon="gradient" onTap={go shades}
+        Button.outline "Export" icon="code" onTap={open export}
+        Button "Save" icon="bookmark_add" onTap={saved=append(saved,{"name":palName,"colors":map(colors,c=>c.hex)}); toast "Palette saved"}
+    Row grow stretch
+      each c in colors
+        Box grow fill={c.hex} drag=bar(c.id) drop=bar onDrop={colors=moveItem(colors,result.data,c.id)} onTap={sel=c.id; draft=c.hex; open picker} animate=fade stagger=60
+          Spacer grow
+          Column center gap=10 pad=20
+            IconButton {c.locked ? "lock" : "lock_open"} tooltip="Lock colour" onTap={colors=updateWhere(colors,x=>x.id==c.id,x=>with(x,"locked",!x.locked))}
+            Text.mono "{upper(replace(c.hex,'#FF',''))}" size=22 weight=700 color=#FFFFFFFF
+            Button.ghost "Copy" icon="content_copy" onTap={copy c.hex; toast "Copied {c.hex}"}
+          Spacer h=24
+
+Sheet#picker "Edit colour"
+  Row gap=24 top
+    ColorWheel bind=draft size=220
+    Column grow gap=12
+      Box h=56 radius=8 fill={draft}
+      HexInput "Hex" bind=draft
+      Slider "Hue" bind=hue min=0 max=360
+      Slider "Saturation" bind=sat min=0 max=100
+      Slider "Lightness" bind=light min=0 max=100
+      Row gap=8 end
+        Button.ghost "Cancel" onTap={close}
+        Button "Apply" onTap={colors=updateWhere(colors,x=>x.id==sel,x=>with(x,"hex",draft)); close}
+
+Dialog#export "Export palette" "Copy the code for your project"
+  state fmt="CSS"
+  SegmentedButton bind=fmt items=["CSS","Tailwind","Swift","JSON"]
+  CodeBlock lang={lower(fmt)} code={fmt=="CSS" ? ":root { --c1: " + colors[0].hex + "; --c2: " + colors[1].hex + "; }" : join(map(colors,c=>c.hex),", ")}
+  Row gap=8 end
+    Button.outline "Close" onTap={close}
+    Button "Copy code" icon="content_copy" onTap={copy join(map(colors,c=>c.hex),", "); toast "Code copied"; close}
+
+### Contrast
+state fg="#FF264653"
+state bg="#FFF4A261"
+state ratio=4.8
+App
+  Sidebar
+    Brand "Swatchbook" icon="palette"
+    NavItem "Generator" icon="auto_awesome" onTap={go palette}
+    NavItem "Contrast" icon="contrast" selected={true} onTap={go contrast}
+    NavItem "Saved palettes" icon="bookmarks" onTap={go saved}
+  Main
+    Nav
+      Heading "Contrast checker" level=1
+      Button.outline "Swap colours" icon="swap_horiz" onTap={t=fg; fg=bg; bg=t; ratio=contrastRatio(fg,bg)}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=8
+          Text.strong "Text colour"
+          HexInput "Hex" bind=fg onChange={ratio=contrastRatio(fg,bg)}
+        Card gap=8
+          Text.strong "Background"
+          HexInput "Hex" bind=bg onChange={ratio=contrastRatio(fg,bg)}
+      Box pad=32 radius=12 fill={bg} gap=8
+        Text "Large heading sample" size=32 weight=700 color={fg}
+        Text "The quick brown fox jumps over the lazy dog." color={fg}
+      Card gap=12
+        Row between
+          Text.strong "Contrast ratio"
+          Text "{fixed(ratio,2)} : 1" size=28 weight=700
+        Grid cols=4 gap=12
+          Column gap=4
+            Text.caption "AA normal"
+            Badge {ratio >= 4.5 ? "Pass" : "Fail"} variant={ratio >= 4.5 ? "success" : "error"}
+          Column gap=4
+            Text.caption "AA large"
+            Badge {ratio >= 3 ? "Pass" : "Fail"} variant={ratio >= 3 ? "success" : "error"}
+          Column gap=4
+            Text.caption "AAA normal"
+            Badge {ratio >= 7 ? "Pass" : "Fail"} variant={ratio >= 7 ? "success" : "error"}
+          Column gap=4
+            Text.caption "AAA large"
+            Badge {ratio >= 4.5 ? "Pass" : "Fail"} variant={ratio >= 4.5 ? "success" : "error"}
+
+### Shades
+state base="#FF2A9D8F"
+state steps=["50","100","200","300","400","500","600","700","800","900"]
+App
+  Sidebar
+    Brand "Swatchbook" icon="palette"
+    NavItem "Generator" icon="auto_awesome" onTap={go palette}
+    NavItem "Contrast" icon="contrast" onTap={go contrast}
+    NavItem "Saved palettes" icon="bookmarks" onTap={go saved}
+  Main
+    Nav
+      Heading "Shades scale" level=1
+      Button.outline "Back to palette" icon="arrow_back" onTap={go palette}
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Text.strong "Base colour"
+        Row gap=12 middle
+          Box w=48 h=48 radius=8 fill={base}
+          HexInput "Hex" bind=base
+      Grid cols=5 gap=12
+        each s in steps
+          Box h=110 radius=8 fill={shade(base,s)} pad=10 bottom onTap={copy shade(base,s); toast "Copied {shade(base,s)}"} animate=scale stagger=40
+            Text.mono "{s}" color={luminance(shade(base,s)) > 0.5 ? "#FF111827" : "#FFFFFFFF"} weight=700
+            Text.caption "{upper(replace(shade(base,s),'#FF',''))}" color={luminance(shade(base,s)) > 0.5 ? "#FF111827" : "#FFFFFFFF"}
+
+### Saved
+state saved=[{"name":"Coastal Sunset","colors":["#FF264653","#FF2A9D8F","#FFE9C46A","#FFF4A261","#FFE76F51"]},{"name":"Midnight Orchid","colors":["#FF10002B","#FF3C096C","#FF7B2CBF","#FFC77DFF","#FFE0AAFF"]},{"name":"Forest Floor","colors":["#FF283618","#FF606C38","#FFFEFAE0","#FFDDA15E","#FFBC6C25"]}]
+state sel=0
+App
+  Sidebar
+    Brand "Swatchbook" icon="palette"
+    NavItem "Generator" icon="auto_awesome" onTap={go palette}
+    NavItem "Contrast" icon="contrast" onTap={go contrast}
+    NavItem "Saved palettes" icon="bookmarks" badge="{length(saved)}" selected={true} onTap={go saved}
+  Main
+    Nav
+      Heading "Saved palettes" level=1
+      Input "Search" bind=q w=220
+    Column pad=24 gap=16 scroll
+      if isEmpty(saved)
+        Text.muted "Nothing saved yet. Press Save on the generator."
+      Grid cols=3 gap=16
+        each p in saved
+          Card gap=10 animate=fade stagger=60
+            Row h=80 radius=8
+              each hx in p.colors
+                Box grow fill={hx}
+            Row between
+              Text.strong "{p.name}"
+              IconButton "more_vert" tooltip="More" onTap={sel=index; open palMenu}
+  Menu#palMenu
+    MenuItem "Open in generator" icon="open_in_new" onTap={go palette}
+    MenuItem "Copy hex codes" icon="content_copy" onTap={copy join(saved[sel].colors,", "); toast "Copied"}
+    MenuItem "Delete" icon="delete" onTap={saved=removeAt(saved,sel); toast "Deleted"}
+
+// A key shortcut has no visual form: shown as a labelled box.
+define KeyListener key="space" onPress
+  Box hidden
+    Text.caption "Key: {key}"
+
+// A hue wheel needs a canvas; shown as a labelled round box filled with the colour.
+define ColorWheel bind=color size=200
+  Box w={size} h={size} radius={size/2} fill={color}
+    Text.caption "hue wheel" center
+
+define HexInput "label" bind=value onChange
+  state value="#FF000000"
+  Row gap=8 middle
+    Box w=28 h=28 radius=6 fill={value}
+    Input "{label}" bind=value onChange={onChange}
+
+// Syntax highlighting is not drawn; the code is plain monospaced text.
+define CodeBlock lang="css" code=""
+  Box fill=#FF111827 radius=8 pad=14
+    Text.mono "{code}" color=#FFE5E7EB

@@ -1,0 +1,136 @@
+### Stage
+state time=0
+state playing=false
+state speed="1x"
+state loopOn=true
+state loopStart=4
+state loopEnd=20
+state onion=true
+state fps=30
+state sel="k2"
+state layerSel="l1"
+state keys=[{"id":"k1","prop":"Position X","t":0,"v":40},{"id":"k2","prop":"Position X","t":8,"v":220},{"id":"k3","prop":"Position X","t":20,"v":120},{"id":"k4","prop":"Scale","t":2,"v":1},{"id":"k5","prop":"Scale","t":14,"v":1.6},{"id":"k6","prop":"Opacity","t":0,"v":0},{"id":"k7","prop":"Opacity","t":6,"v":100}]
+state clip=null
+state layers=[{"id":"l1","name":"Hero circle","visible":true,"locked":false},{"id":"l2","name":"Shadow","visible":true,"locked":false},{"id":"l3","name":"Background grid","visible":true,"locked":true}]
+every 1s when playing onTick={time = time >= (loopOn ? loopEnd : 24) ? (loopOn ? loopStart : 0) : time + (speed == "0.5x" ? 0.5 : speed == "2x" ? 2 : 1)}
+App
+  Sidebar
+    Brand "Tween Lab" icon="animation"
+    Text.caption "LAYERS"
+    each l in layers
+      NavItem "{l.name}" icon={l.locked ? "lock" : "category"} selected={layerSel == l.id} onTap={layerSel = l.id}
+    Spacer grow
+    Button.outline "Add layer" icon="add" onTap={layers = append(layers, {"id":"l{length(layers)+1}","name":"Layer {length(layers)+1}","visible":true,"locked":false})}
+  Main
+    Nav
+      Heading "Bounce intro" level=1
+      Row gap=8 middle
+        IconButton "skip_previous" tooltip="Back to start" onTap={time = loopOn ? loopStart : 0}
+        IconButton {playing ? "pause" : "play_arrow"} tooltip="Play or pause" onTap={playing = !playing}
+        SegmentedButton items=["0.5x","1x","2x"] bind=speed
+        Toggle "Loop" bind=loopOn
+        Toggle "Onion skin" bind=onion
+        Button "Export" icon="movie" onTap={open export}
+    Column pad=24 gap=16 scroll
+      Row gap=16 top
+        Card grow gap=8
+          Row between
+            Text.strong "Stage"
+            Text.mono "frame {round(time,0)} / 24  ({fixed(time/fps,2)} s at {fps} fps)"
+          Stack h=280 fill=#FF111827 radius=8 center middle
+            if onion
+              Box w=56 h=56 radius=28 fill=#FF2563EB opacity=0.15
+              Box w=56 h=56 radius=28 fill=#FF2563EB opacity=0.3
+            Box w={56 * (time < 2 ? 1 : 1 + (time - 2) * 0.05)} h={56 * (time < 2 ? 1 : 1 + (time - 2) * 0.05)} radius=40 fill=#FF3B82F6 opacity={clamp(time / 6, 0, 1)}
+          Text.muted "Onion skin shows the two previous frames as ghosts."
+        Pane w=320 pad=16 gap=12
+          Text.strong "Curve: {sel == "" ? "no keyframe" : find(keys, k => k.id == sel).prop}"
+          CurveEditor bind=curve h=200 onChange={toast "Easing updated"}
+          Select "Preset" items=["Linear","Ease in","Ease out","Ease in out","Bounce"] bind=preset
+          Row gap=8
+            Input "Frame" type=number bind=kfT w=90
+            Input "Value" type=number bind=kfV grow
+          Button.outline "Apply to keyframe" onTap={keys = updateWhere(keys, k => k.id == sel, k => with(with(k, "t", kfT), "v", kfV)); toast "Keyframe updated"}
+      Card gap=8
+        Row between
+          Text.strong "Timeline"
+          Row gap=8
+            Button.outline "Copy keyframe" icon="content_copy" onTap={clip = find(keys, k => k.id == sel); toast "Copied"}
+            Button.outline "Paste at playhead" icon="content_paste" onTap={clip == null ? toast "Nothing copied" : keys = append(keys, with(with(clip, "id", "k{length(keys)+1}"), "t", round(time,0)))}
+            Button.destructive "Delete keyframe" icon="delete" onTap={keys = removeWhere(keys, k => k.id == sel); sel = ""}
+        Row gap=8 middle
+          Text.caption "Playhead" w=100
+          Slider bind=time min=0 max=24 grow
+        Row gap=8 middle
+          Text.caption "Loop region" w=100
+          Input "In" type=number bind=loopStart w=80
+          Input "Out" type=number bind=loopEnd w=80
+          Text.muted "frames {loopStart} to {loopEnd}"
+        Ruler duration=24 loopStart={loopStart} loopEnd={loopEnd} bind=time
+        each prop in ["Position X","Scale","Opacity"]
+          Row gap=8 middle
+            Text.small "{prop}" w=100
+            Row grow gap=0
+              each i in range(25)
+                Box grow h=32 border-left=#FF374151 fill={i == round(time,0) ? "#33EF4444" : (loopOn && i >= loopStart && i <= loopEnd ? "#1A2563EB" : "#00000000")} center middle drop=key onDrop={keys = updateWhere(keys, k => k.id == result.data, k => with(with(k, "t", i), "prop", prop)); sel = result.data} onTap={time = i}
+                  each k in filter(keys, k => k.prop == prop && k.t == i)
+                    Icon "diamond" size=18 color={sel == k.id ? "#FFF59E0B" : "#FF9CA3AF"} drag=key(k.id) onTap={sel = k.id; kfT = k.t; kfV = k.v}
+  Dialog#export "Export animation" "Choose how Bounce intro is rendered"
+    Column gap=12
+      SegmentedButton items=["Video","Loop (GIF)"] bind=exportKind
+      Input "Frame rate" type=number bind=fps hint="30"
+      Text.muted "{length(keys)} keyframes, 24 frames, {fixed(24/fps,2)} s at {fps} fps"
+      Row gap=8 end
+        Button.outline "Cancel" onTap={close}
+        Button "Export" onTap={emit export exportKind; toast "Export started"; close}
+
+### Layers
+state layers=[{"id":"l1","name":"Hero circle","visible":true,"locked":false},{"id":"l2","name":"Shadow","visible":true,"locked":false},{"id":"l3","name":"Background grid","visible":true,"locked":true},{"id":"l4","name":"Caption","visible":false,"locked":false}]
+state q=""
+state sel=""
+App
+  Sidebar
+    Brand "Tween Lab" icon="animation"
+    NavItem "Stage" icon="crop_free" onTap={go stage}
+    NavItem "Layers" icon="layers" selected={true}
+  Main
+    Nav
+      Heading "Layers" level=1
+      Input "Search layers" bind=q w=220
+    Column pad=24 gap=12
+      Card gap=4
+        each l in filter(layers, l => contains(lower(l.name), lower(q)))
+          Row between middle drag=layer(l.id) drop=layer onDrop={layers = concat(without(layers, find(layers, x => x.id == result.data)), [find(layers, x => x.id == result.data)])}
+            Row gap=8 middle
+              Icon "drag_indicator"
+              Text "{l.name}" strike={!l.visible}
+            Row gap=4
+              IconButton {l.visible ? "visibility" : "visibility_off"} tooltip="Show or hide" onTap={layers = updateWhere(layers, x => x.id == l.id, x => with(x, "visible", !x.visible))}
+              IconButton {l.locked ? "lock" : "lock_open"} tooltip="Lock" onTap={layers = updateWhere(layers, x => x.id == l.id, x => with(x, "locked", !x.locked))}
+              IconButton "more_vert" tooltip="More" onTap={sel = l.id; open layerMenu}
+      Text.muted "Drag a layer onto another to move it to the end of the stack."
+  Menu#layerMenu end
+    MenuItem "Duplicate" icon="content_copy" onTap={layers = append(layers, with(with(find(layers, x => x.id == sel), "id", "l{length(layers)+1}"), "name", "{find(layers, x => x.id == sel).name} copy"))}
+    MenuItem "Delete" icon="delete" onTap={layers = removeWhere(layers, x => x.id == sel)}
+
+// A curve editor with draggable bezier handles needs a canvas; this draws the curve as a LineChart of the preset and shows the handle values as two sliders.
+define CurveEditor bind=curve h=200 onChange
+  state c1=0.25
+  state c2=0.75
+  Column gap=8
+    LineChart values={map(range(11), i => 3*(1-i/10)*(1-i/10)*(i/10)*c1 + 3*(1-i/10)*(i/10)*(i/10)*c2 + (i/10)*(i/10)*(i/10))} h={h}
+    Row gap=8 middle
+      Text.caption "Handle 1" w=60
+      Slider bind=c1 min=0 max=1 grow onChange={onChange}
+    Row gap=8 middle
+      Text.caption "Handle 2" w=60
+      Slider bind=c2 min=0 max=1 grow onChange={onChange}
+
+// A time ruler with ticks every frame and the loop region shaded; scrubbing is a slider under it, drawn as a labelled strip.
+define Ruler duration=24 loopStart=0 loopEnd=24 bind=time
+  Row gap=8 middle
+    Text.caption "Frames" w=100
+    Row grow gap=0
+      each i in range(duration + 1)
+        Box grow h=20 center middle border-left=#FF374151 fill={i >= loopStart && i <= loopEnd ? "#332563EB" : "#00000000"} onTap={time = i}
+          Text.caption "{i % 4 == 0 ? i : ""}"

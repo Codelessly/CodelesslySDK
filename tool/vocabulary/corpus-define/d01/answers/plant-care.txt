@@ -1,0 +1,200 @@
+### My Plants
+state q=""
+state filter="All"
+state plants=[{"id":"p1","name":"Monstera","species":"Monstera deliciosa","photo":"https://images.fernwise.app/plants/monstera.jpg","water":0.7,"room":"Living room"},{"id":"p2","name":"Fiddle Leaf","species":"Ficus lyrata","photo":"https://images.fernwise.app/plants/fiddle.jpg","water":0.25,"room":"Living room"},{"id":"p3","name":"Snake Plant","species":"Dracaena trifasciata","photo":"https://images.fernwise.app/plants/snake.jpg","water":0.9,"room":"Bedroom"},{"id":"p4","name":"Pothos","species":"Epipremnum aureum","photo":"https://images.fernwise.app/plants/pothos.jpg","water":0.4,"room":"Kitchen"},{"id":"p5","name":"Calathea","species":"Calathea orbifolia","photo":"https://images.fernwise.app/plants/calathea.jpg","water":0.15,"room":"Bedroom"},{"id":"p6","name":"Aloe","species":"Aloe vera","photo":"https://images.fernwise.app/plants/aloe.jpg","water":0.55,"room":"Kitchen"}]
+App
+  Sidebar
+    Brand "Fernwise" icon="eco"
+    NavItem "My plants" icon="yard" selected={true} onTap={go my-plants}
+    NavItem "Today" icon="task_alt" badge="3" onTap={go today}
+    NavItem "Identify" icon="photo_camera" onTap={go identify}
+    Spacer grow
+    Text.muted "Mara Lindqvist"
+  Main
+    Nav
+      Heading "My plants" level=1
+      Row gap=8
+        Input "Search plants" bind=q w=220
+        Button "Add plant" onTap={open addPlant}
+    Column pad=24 gap=16
+      Row gap=8
+        each f in ["All","Living room","Bedroom","Kitchen"]
+          ChoiceChip "{f}" selected={filter==f} onTap={filter=f}
+      Grid cols=3 gap=16
+        each p in filter=="All" ? plants : filter(plants,x=>x.room==filter)
+          PlantTile "{p.name}" species="{p.species}" photo="{p.photo}" water={p.water} onTap={emit openPlant p.id; go plant}
+Dialog#addPlant "Add a plant" "Name it and pick where it lives"
+  Input "Name" bind=newName
+  Select "Room" items=["Living room","Bedroom","Kitchen"] bind=newRoom
+  Button "Save" onTap={newName=="" ? toast "Give it a name" : plants=append(plants,{"id":"p{length(plants)+1}","name":newName,"species":"Unknown","photo":"","water":1,"room":newRoom}); close}
+
+// Photo tile with a water-drop meter: how full the drop is shows how recently it was watered.
+define PlantTile "name" species="" photo="" water=0.5 onTap
+  Card gap=8 pad=0 onTap={onTap}
+    Image "{photo}" h=160
+    Column gap=4 pad=12
+      Row between middle
+        Text.strong "{name}"
+        WaterDrop value={water}
+      Text.muted "{species}"
+
+define WaterDrop value=0.5
+  Row gap=6 middle
+    Icon "water_drop" color={value < 0.3 ? "#FFDC2626" : "#FF2563EB"}
+    Progress {value} w=56
+
+### Plant
+state tab="Schedule"
+state waterings=[{"date":"Nov 14","note":"300 ml, top watering","by":"Mara"},{"date":"Nov 7","note":"250 ml, let it drain","by":"Mara"},{"date":"Oct 31","note":"300 ml","by":"Jonas"},{"date":"Oct 24","note":"Misted leaves too","by":"Mara"}]
+state growth=[{"date":"Aug 2","url":"https://images.fernwise.app/growth/monstera-aug.jpg","note":"3 leaves"},{"date":"Sep 12","url":"https://images.fernwise.app/growth/monstera-sep.jpg","note":"5 leaves"},{"date":"Oct 20","url":"https://images.fernwise.app/growth/monstera-oct.jpg","note":"New split leaf"}]
+state lastWatered="Nov 14"
+App
+  Sidebar
+    Brand "Fernwise" icon="eco"
+    NavItem "My plants" icon="yard" selected={true} onTap={go my-plants}
+    NavItem "Today" icon="task_alt" badge="3" onTap={go today}
+    NavItem "Identify" icon="photo_camera" onTap={go identify}
+    Spacer grow
+    Text.muted "Mara Lindqvist"
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" tooltip="Back" onTap={go my-plants}
+        Heading "Monstera" level=1
+      Row gap=8
+        Button.outline "Log watering" onTap={open logWater}
+        IconButton "more_vert" tooltip="More" onTap={open plantMenu}
+    Column pad=24 gap=16
+      Row gap=24 top
+        Image "https://images.fernwise.app/plants/monstera.jpg" w=320 h=320 radius=12
+        Column grow gap=16
+          Text.muted "Monstera deliciosa, Living room, east window"
+          Grid cols=3 gap=16
+            Card center gap=4
+              Gauge 70 min=0 max=100 unit="% water"
+              Text.caption "Soil moisture"
+            Card center gap=4
+              Gauge 6500 min=0 max=10000 unit="lux"
+              Text.caption "Light: bright, indirect"
+            Card center gap=4
+              Gauge 58 min=30 max=90 limit=70 unit="% RH"
+              Text.caption "Humidity: 50 to 70%"
+      SegmentedButton bind=tab items=["Schedule","Growth","Log"]
+      if tab=="Schedule"
+        Card gap=12
+          Text.strong "Watering schedule"
+          Row between middle
+            Text "Every 7 days"
+            Text.muted "Last watered {lastWatered}"
+          Row gap=8
+            each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+              Chip "{d}" selected={d=="Fri"}
+          Toggle "Remind me at 9:00" bind=remind
+          TimePicker "Reminder time" bind=remindAt
+      if tab=="Growth"
+        Card gap=12
+          Text.strong "Growth timeline"
+          GrowthTimeline items={growth} onSelect={photo=result.url; open zoom}
+          Button.outline "Add photo" onTap={emit addGrowthPhoto}
+      if tab=="Log"
+        Card gap=8
+          Text.strong "Watering log"
+          each w in waterings
+            ListTile "{w.date}" "{w.note} · {w.by}" icon="water_drop"
+Dialog#logWater "Log a watering" "How much did you give?"
+  Slider bind=amount min=50 max=600
+  Text.muted "{amount} ml"
+  Input "Note" bind=note
+  Button "Save" onTap={waterings=concat([{"date":formatDate(today(),"MMM d"),"note":"{amount} ml, {note}","by":"Mara"}],waterings); lastWatered=formatDate(today(),"MMM d"); toast "Watering logged"; close}
+Menu#plantMenu end
+  MenuItem "Rename" icon="edit" onTap={emit renamePlant}
+  MenuItem "Move to another room" icon="drive_file_move" onTap={emit movePlant}
+  MenuItem "Delete plant" icon="delete" onTap={emit deletePlant}
+Lightbox#zoom "{photo}" "Growth photo"
+
+// Horizontal strip of dated photos joined by a line; tapping one fires onSelect with that item as result.
+define GrowthTimeline items=[] onSelect
+  Row scroll gap=24
+    each g in items
+      Column gap=6 w=160
+        Row middle gap=0
+          Box w=12 h=12 radius=6 fill=#FF2E7D32
+          Box h=2 grow fill=#FFA5D6A7
+        Image "{g.url}" h=120 radius=8 onTap={onSelect(g)}
+        Text.strong "{g.date}"
+        Text.muted "{g.note}"
+
+### Today
+state tasks=[{"id":"t1","plant":"Fiddle Leaf","what":"Water, 400 ml","icon":"water_drop","due":"9:00"},{"id":"t2","plant":"Calathea","what":"Mist the leaves","icon":"cloud","due":"11:00"},{"id":"t3","plant":"Monstera","what":"Rotate a quarter turn","icon":"rotate_right","due":"18:00"}]
+state doneCount=0
+Page
+  Nav sticky
+    Brand "Fernwise" icon="eco"
+    Row gap=4
+      Link "My plants" onTap={go my-plants}
+      Link "Today" onTap={go today}
+      Link "Identify" onTap={go identify}
+    Avatar "Mara Lindqvist" size=36
+  Section narrow
+    Column gap=16
+      Heading "Today" level=1
+      Text.muted "{length(tasks)} tasks left. Swipe a card left to mark it done."
+      Progress {doneCount/(doneCount+length(tasks))}
+      each t in tasks
+        Card gap=8 onSwipeLeft={tasks=removeWhere(tasks,x=>x.id==t.id); doneCount=doneCount+1; toast "{t.plant}: done"} animate=slide-up stagger=80
+          Row between middle
+            Row gap=12 middle
+              IconTile "{t.icon}"
+              Column gap=2
+                Text.strong "{t.plant}"
+                Text.muted "{t.what}"
+            Column gap=2 end
+              Text.caption "{t.due}"
+              Text.caption "swipe to finish"
+      if isEmpty(tasks)
+        Card center gap=8
+          Icon "check_circle" color=#FF2E7D32 size=48
+          Text.strong "All plants are happy today"
+          Button.outline "Back to my plants" onTap={go my-plants}
+
+### Identify
+state shot=false
+state guesses=[]
+Page
+  Nav sticky
+    Brand "Fernwise" icon="eco"
+    Row gap=4
+      Link "My plants" onTap={go my-plants}
+      Link "Today" onTap={go today}
+      Link "Identify" onTap={go identify}
+    Avatar "Mara Lindqvist" size=36
+  Section narrow
+    Column gap=16
+      Heading "Identify a plant" level=1
+      Text.muted "Point the camera at a leaf or the whole plant."
+      CameraFrame h=320 hint="Fit the plant inside the frame" onCapture={shot=true; guesses=[{"name":"Monstera deliciosa","conf":0.82},{"name":"Philodendron bipinnatifidum","conf":0.11},{"name":"Rhaphidophora tetrasperma","conf":0.05}]}
+      Row gap=8 center
+        Button "Take photo" icon="photo_camera" onTap={shot=true; guesses=[{"name":"Monstera deliciosa","conf":0.82},{"name":"Philodendron bipinnatifidum","conf":0.11},{"name":"Rhaphidophora tetrasperma","conf":0.05}]}
+        Button.outline "Choose from library" onTap={emit pickFromLibrary}
+      if shot
+        Card gap=12
+          Text.strong "Top guesses"
+          each g in guesses
+            Column gap=4
+              Row between
+                Text "{g.name}"
+                Text.strong "{round(g.conf*100,0)}%"
+              Progress {g.conf}
+          Row gap=8
+            Button "Add {guesses[0].name}" onTap={emit addPlant guesses[0].name; toast "Added to my plants"; go my-plants}
+            Button.ghost "Retake" onTap={shot=false; guesses=[]}
+
+// Stands in for a live camera: a labelled box with corner marks and a shutter button, since no real camera is available.
+define CameraFrame hint="" h=300 onCapture
+  Stack h={h} fill=#FF111827 radius=12 center middle
+    Icon "photo_camera" color=#FFFFFFFF size=48
+    Column center gap=6
+      Spacer h=80
+      Text "Camera preview" color=#FFFFFFFF
+      Text.small "{hint}" color=#FFD1D5DB
+    IconButton "circle" tooltip="Shutter" onTap={onCapture}
