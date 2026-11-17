@@ -1,3 +1,15 @@
+## Unreleased
+
+Needs codelessly_api from master (after 33.0.0).
+
+### Changed
+
+- **`notation.sh vocabulary`: a word an answer defines holds for all of its screens** (the vocabulary loop's Review
+  4, D20): `define Word …` blocks anywhere in an answer (models write them after the last screen) are read for every
+  `### screen`, with codelessly_api's `parseNotation(…, definitions:)`; what is wrong in one is said once, on the
+  screen that holds it. `tool/vocabulary/hoist.py`, the stopgap that copied them to the head of each screen, is
+  removed. `notation.sh expand` reads a file's definitions wherever they are written.
+
 ## 33.0.0
 
 Needs codelessly_api 33.0.0.

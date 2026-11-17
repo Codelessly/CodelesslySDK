@@ -15,7 +15,8 @@
 // table, then --aliases over both; --no-aliases reads none (the count before
 // any alias). The words the design system defines in the notation (its
 // vocabulary/*.txt, codelessly_api docs/design/20-defined-words.md) are read
-// as words we have; --no-definitions reads none. Every word an answer used is
+// as words we have; --no-definitions reads none. A word an answer defines
+// (`define Word …`, anywhere in it) holds for all of its screens. Every word an answer used is
 // recorded with how it resolved (vocabulary_words.dart), known or not, in
 // `words` and the summary; the other sections rank what is unknown.
 // It writes <out>/vocabulary.json and <out>/VOCABULARY.md (<out>:
@@ -247,7 +248,8 @@ Future<void> main(List<String> args) async {
 
   for (final file in files) {
     final name = file.uri.pathSegments.last.replaceFirst(RegExp(r'\.txt$'), '');
-    final screens = screensOf(file.readAsStringSync(), name);
+    final whole = file.readAsStringSync();
+    final screens = screensOf(whole, name);
     final count = {'core': 0, 'component': 0, 'alias': 0, 'definition': 0, 'unknown': 0};
     var issues = 0, invalid = 0, standIns = 0, lines = 0;
     final pages = <String>[];
@@ -260,7 +262,9 @@ Future<void> main(List<String> args) async {
     NotationResult? expand(({String name, String id, String text, int from}) screen) {
       final options = NotationOptions.fromDesignSystem(ds, width: width, screen: screen.id, projectVariables: shared).open(vocabulary: table);
       try {
-        return Catalog.run(catalog, () => parseNotation(screen.text, catalog: catalog, options: options));
+        // A word the answer defines anywhere (models write the definitions
+        // after the last screen) holds for every one of its screens.
+        return Catalog.run(catalog, () => parseNotation(screen.text, catalog: catalog, options: options, definitions: whole));
       } catch (e) {
         return null;
       }
