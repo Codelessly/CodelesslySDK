@@ -1,0 +1,209 @@
+### Today
+state stories=[{"id":1,"section":"World","color":"#FF1B3A4B","scene":"globe","head":"Ports reopen as the strait clears","sum":"Container traffic resumed overnight after a week of closures. Shippers expect backlogs to ease by Friday.","by":"Lena Okafor","mins":5,"quote":"We have not seen a queue like this since 2021.","fig":"Ships waiting at anchor"},{"id":2,"section":"Politics","color":"#FF5A1E2B","scene":"dome","head":"Budget deal survives a late-night vote","sum":"The Senate passed the spending package 52 to 48. The House takes it up on Tuesday.","by":"Marcus Bell","mins":6,"quote":"Nobody got everything; everybody got something.","fig":"Vote by party"},{"id":3,"section":"Business","color":"#FF22412D","scene":"skyline","head":"Chipmakers rally on cooling inflation","sum":"Semiconductor shares led a broad gain as prices rose less than forecast. Rate cuts look closer.","by":"Priya Nair","mins":4,"quote":"The market finally heard what it wanted to hear.","fig":"Index, last five days"},{"id":4,"section":"Science","color":"#FF2D2A5E","scene":"orbit","head":"A probe finds water ice at the lunar pole","sum":"Instruments confirmed ice in a permanently shadowed crater. Future crews could drink and fuel from it.","by":"Tomas Ruiz","mins":7,"quote":"It is the most useful rock in the solar system.","fig":"Ice concentration by crater"},{"id":5,"section":"Climate","color":"#FF0F4C4A","scene":"waves","head":"Coastal towns vote to move inland","sum":"Three villages approved a managed retreat plan. Homes will be bought out over ten years.","by":"Hana Sato","mins":8,"quote":"The sea made the decision. We just signed it.","fig":"Projected shoreline"},{"id":6,"section":"Culture","color":"#FF5B2A1A","scene":"curtain","head":"The quiet film that swept the festival","sum":"A debut about a ferry crew won the top prize. Critics call it the year's most patient drama.","by":"Odile Martin","mins":5,"quote":"Two hours of silence, and not a wasted frame.","fig":"Festival award count"},{"id":7,"section":"Sport","color":"#FF4A1F1F","scene":"stadium","head":"Underdogs reach the final on penalties","sum":"A goalkeeper saved three kicks to send the club to its first final in forty years.","by":"Ben Adeyemi","mins":3,"quote":"I only dived where I felt like diving.","fig":"Shots on target"},{"id":8,"section":"Tech","color":"#FF2B2F45","scene":"circuit","head":"A phone that repairs itself, almost","sum":"A new coating heals scratches in minutes. Engineers say screens may soon outlast the phone.","by":"Ivy Chen","mins":4,"quote":"Cracks are a design choice we stopped questioning.","fig":"Scratch depth over time"}]
+state page=0
+state sheetStop="half"
+state current=1
+state read=[] persist
+state saved=[] persist
+state reactions={} persist
+state settings={"sections":["World","Politics","Business","Science","Climate","Culture","Sport","Tech"],"textSize":18,"reduceMotion":false,"theme":"Dark"} persist
+state filter="All"
+state held=false
+state pickedId=0
+state pressX=0
+state pressY=0
+state listenOn=false
+state listenPos=0.0
+state speed="1x"
+state q=""
+state savedMenuId=0
+state emoji=["heart","clap","wow","sad","angry"]
+every 1s when listenOn onTick={listenPos=min(1,listenPos+0.01*(speed=="2x"?2:speed=="1.5x"?1.5:1))}
+App
+  Sidebar w=200
+    Brand "Dispatch" icon="newspaper"
+    NavItem "Today" icon="auto_stories" selected=true onTap={go today}
+    NavItem "Saved" icon="bookmark" badge="{length(saved)}" onTap={go saved}
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "Settings" icon="tune" onTap={go settings}
+    Spacer grow
+    Text.muted "Next edition 6:00 AM" size=12
+  Main
+    Nav
+      Row scroll gap=8
+        ChoiceChip "All" selected={filter=="All"} onTap={filter="All"; page=0}
+        each sec in settings.sections
+          ChoiceChip "{sec}" selected={filter==sec} onTap={filter=sec; page=0}
+      Row gap=4
+        IconButton "search" onTap={go search}
+        IconButton "tune" onTap={go settings}
+    Stack grow
+      Pages bind=page axis=vertical items={filter=="All" ? stories : filter(stories,s=>s.section==filter)} snap=settle wheel=true keys=arrows onPageChange={current=result; read=unique(append(read,result))} pause={held}
+        Stack fill={item.color} menu=reactMenu onLongPress={pickedId=item.id; pressX=result.x; pressY=result.y; open reactMenu} onHold={held=true} onRelease={held=false} onSwipeUp={pickedId=item.id; sheetStop="half"; open story} onKey={Enter: pickedId=item.id; sheetStop="half"; open story}
+          Scene "{item.scene}" color=#33FFF4E0 animate=slide-up duration=700
+          Column pad=48 gap=16 bottom
+            Spacer grow
+            Badge.neutral "{upper(item.section)}" animate=fade delay=200 paused={held}
+            Text "{item.head}" font="condensed" size=56 weight=800 color=#FFFFF4E0 animate=slide-up delay=350 paused={held}
+            Text "{item.sum}" font="serif" size=20 color=#FFF2E6CC animate=slide-up delay=550 paused={held}
+            Row between
+              Row gap=8
+                Icon "schedule" color=#FFF2E6CC
+                Text "{item.mins} min read" color=#FFF2E6CC size=13
+              Row gap=8
+                each r in emoji
+                  if get(reactions,string(item.id)+r)>0
+                    Chip "{r} {get(reactions,string(item.id)+r)}" size=small
+                Icon "keyboard_arrow_up" color=#FFF2E6CC animate=pulse
+      Rail side=right
+        each s in stories
+          Dot "{s.id}" color={s.color} active={current==s.id} read={contains(read,s.id)} onTap={filter="All"; page=s.id-1}
+      Pages.end
+        Column center middle gap=12 fill=#FF2A2723 animate=fade
+          Icon "check_circle" size=64 color=#FFF2E6CC
+          Text "You are all caught up" font="condensed" size=44 color=#FFFFF4E0
+          Text "Tomorrow's edition arrives at 6:00 AM" font="serif" color=#FFF2E6CC
+          Countdown "Next edition in" until="06:00" color=#FFF2E6CC
+    ListenBar#listenbar
+      Row gap=12 pad=12 fill=#FF14110F
+        IconButton "{listenOn ? 'pause' : 'play_arrow'}" onTap={listenOn=!listenOn}
+        Column grow gap=2
+          Text "{find(stories,s=>s.id==current).head}" color=#FFFFF4E0 size=13 maxLines=1
+          Slider bind=listenPos min=0 max=1 onScrub={listenPos=result}
+        Text "{duration(round(listenPos*find(stories,s=>s.id==current).mins*60,0))}" color=#FFF2E6CC size=12
+        SegmentedButton items=["1x","1.5x","2x"] bind=speed
+Sheet#story "" stops=["half","full"] bind=sheetStop initial="half" dismiss=drag,escape returnTo=card
+  Column gap=12 pad=24 scroll={sheetStop=="full"}
+    Row between
+      Badge.primary "{find(stories,s=>s.id==pickedId).section}"
+      Row gap=4
+        IconButton "{contains(saved,pickedId) ? 'bookmark' : 'bookmark_border'}" onTap={saved=contains(saved,pickedId)?without(saved,pickedId):append(saved,pickedId); toast contains(saved,pickedId)?"Saved":"Removed"}
+        IconButton "share" onTap={emit share pickedId; toast "Link copied"}
+        IconButton "close" onTap={close}
+    Heading "{find(stories,s=>s.id==pickedId).head}" level=1 font="condensed"
+    Text "{find(stories,s=>s.id==pickedId).sum}" font="serif" size={settings.textSize+2}
+    if sheetStop=="half"
+      Button.outline "Read the full story" onTap={sheetStop="full"}
+    if sheetStop=="full"
+      Row gap=12
+        Avatar "{find(stories,s=>s.id==pickedId).by}" size=32
+        Text.muted "By {find(stories,s=>s.id==pickedId).by}"
+        Text.muted "{find(stories,s=>s.id==pickedId).mins} min read"
+      Text "Officials said on Thursday that the situation had changed faster than anyone expected. Interviews with people close to the matter suggest the shift began weeks ago, quietly, before any announcement was made." font="serif" size={settings.textSize}
+      PullQuote "{find(stories,s=>s.id==pickedId).quote}" cite="{find(stories,s=>s.id==pickedId).by}"
+      Figure caption="{find(stories,s=>s.id==pickedId).fig}"
+        Scene "{find(stories,s=>s.id==pickedId).scene}" h=160 fill={find(stories,s=>s.id==pickedId).color}
+      Text "Analysts caution that the full effect will take months to show. Still, the early numbers point one way, and several experts now describe the change as lasting rather than temporary." font="serif" size={settings.textSize}
+      Heading "By the numbers" level=3
+      Tabs items=["Chart","Table"] bind=view
+        BarChart values=[12,18,15,22,19] labels=["Mon","Tue","Wed","Thu","Fri"] h=180 hidden={view=="Table"}
+        Table hidden={view!="Table"} columns=["Day","Value"] rows=[["Mon",12],["Tue",18],["Wed",15],["Thu",22],["Fri",19]]
+      Heading "Related stories" level=3
+      each r in filter(stories,s=>s.id!=pickedId)
+        if r.section==find(stories,s=>s.id==pickedId).section || r.id%3==pickedId%3
+          ListTile "{r.head}" subtitle="{r.section}" onTap={pickedId=r.id; sheetStop="half"}
+Menu#reactMenu at=press grow=true
+  Row gap=8 pad=8 animate=scale origin=press
+    each r in emoji
+      IconButton "{r}" animate=pop onTap={reactions=with(reactions,string(pickedId)+r,coalesce(get(reactions,string(pickedId)+r),0)+1); close}
+  Divider
+  MenuItem "{contains(saved,pickedId) ? 'Remove from saved' : 'Save'}" icon="bookmark" onTap={saved=contains(saved,pickedId)?without(saved,pickedId):append(saved,pickedId); toast "Updated saved"}
+  MenuItem "Share" icon="share" onTap={emit share pickedId; toast "Link copied"}
+
+### Saved
+App
+  Sidebar w=200
+    Brand "Dispatch" icon="newspaper"
+    NavItem "Today" icon="auto_stories" onTap={go today}
+    NavItem "Saved" icon="bookmark" selected=true badge="{length(saved)}"
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "Settings" icon="tune" onTap={go settings}
+  Main
+    Nav
+      Heading "Saved" level=1
+      Button.ghost "Clear all" onTap={saved=[]} hidden={isEmpty(saved)}
+    Column pad=24 gap=12
+      if isEmpty(saved)
+        Column center middle gap=8
+          Icon "bookmark_border" size=56
+          Heading "Nothing saved yet" level=3
+          Text.muted "Long press a story and choose Save to keep it here."
+          Button "Back to today" onTap={go today}
+      each id in saved
+        SwipeRow onSwipeLeft={saved=without(saved,id)} action="Remove" actionColor=#FFB3261E menu=savedMenu onLongPress={savedMenuId=id; open savedMenu}
+          ListTile "{find(stories,s=>s.id==id).head}" subtitle="{find(stories,s=>s.id==id).section} · {find(stories,s=>s.id==id).mins} min" leading=Avatar
+            IconButton "more_vert" onTap={savedMenuId=id; open savedMenu}
+Menu#savedMenu end
+  MenuItem "Open" icon="open_in_full" onTap={pickedId=savedMenuId; go today; open story}
+  MenuItem "Share" icon="share" onTap={emit share savedMenuId; toast "Link copied"}
+  MenuItem "Remove" icon="delete" onTap={saved=without(saved,savedMenuId); toast "Removed"}
+
+### Search
+App
+  Sidebar w=200
+    Brand "Dispatch" icon="newspaper"
+    NavItem "Today" icon="auto_stories" onTap={go today}
+    NavItem "Saved" icon="bookmark" onTap={go saved}
+    NavItem "Search" icon="search" selected=true
+    NavItem "Settings" icon="tune" onTap={go settings}
+  Main
+    Nav
+      Input "Search stories" "Try 'chip' or 'ports'" bind=q fuzzy=true autofocus icon="search" w=420
+    Column pad=24 gap=16
+      if q==""
+        Text.muted "Search headlines and summaries across all eight sections."
+      if q!=""
+        each sec in settings.sections
+          if count(stories,s=>s.section==sec && fuzzyMatch(s.head+" "+s.sum,q))>0
+            Text.sectionTitle "{sec}"
+            each s in filter(stories,x=>x.section==sec && fuzzyMatch(x.head+" "+x.sum,q))
+              ListTile subtitle="{s.mins} min read" onTap={pickedId=s.id; go today; open story}
+                Highlight "{s.head}" match={q}
+                Highlight.muted "{s.sum}" match={q}
+        if count(stories,s=>fuzzyMatch(s.head+" "+s.sum,q))==0
+          Text.muted "No stories match '{q}'."
+
+### Listen
+Sheet#listen "Listen" stops=["half"] dismiss=drag,escape
+  Column gap=16 pad=24
+    Text.heading "{find(stories,s=>s.id==current).head}"
+    Text.muted "{find(stories,s=>s.id==current).section} · read aloud"
+    Slider bind=listenPos min=0 max=1 onScrub={listenPos=result}
+    Row between
+      Text.caption "{duration(round(listenPos*find(stories,s=>s.id==current).mins*60,0))}"
+      Text.caption "{duration(find(stories,s=>s.id==current).mins*60)}"
+    Row center gap=16
+      IconButton "replay_10" onTap={listenPos=max(0,listenPos-0.05)}
+      IconButton "{listenOn ? 'pause_circle' : 'play_circle'}" size=56 onTap={listenOn=!listenOn}
+      IconButton "forward_10" onTap={listenPos=min(1,listenPos+0.05)}
+    SegmentedButton items=["1x","1.5x","2x"] bind=speed
+
+### Settings
+App
+  Sidebar w=200
+    Brand "Dispatch" icon="newspaper"
+    NavItem "Today" icon="auto_stories" onTap={go today}
+    NavItem "Saved" icon="bookmark" onTap={go saved}
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "Settings" icon="tune" selected=true
+  Main
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=20 maxw=640 scroll
+      Card gap=8
+        Heading "Sections" level=3
+        Text.muted "Choose which sections appear, and drag the handle to reorder."
+        ReorderList bind=settings.sections handle="drag_handle" onReorder={settings=with(settings,"sections",result)}
+          each sec in settings.sections
+            ListTile "{sec}"
+              Toggle bind=sectionOn.{sec} onChange={settings=with(settings,"sections",result?append(settings.sections,sec):without(settings.sections,sec))}
+      Card gap=12
+        Heading "Text size" level=3
+        Slider bind=settings.textSize min=14 max=28 onChange={settings=with(settings,"textSize",result)}
+        Text "A calm reading serif at {settings.textSize} points shows here at once, the same size the story uses." font="serif" size={settings.textSize}
+      Card gap=8
+        Heading "Motion and theme" level=3
+        Toggle "Reduce motion" bind=settings.reduceMotion onChange={settings=with(settings,"reduceMotion",result)}
+        Text.muted "Turns off the arrivals and settling on the stack."
+        SegmentedButton items=["Light","Dark","System"] bind=settings.theme onChange={settings=with(settings,"theme",result)}
+      Button.outline "Reset reading history" onTap={read=[]; reactions={}; toast "History cleared"}

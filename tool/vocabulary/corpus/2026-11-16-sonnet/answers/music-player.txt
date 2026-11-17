@@ -1,0 +1,372 @@
+### Library
+state tracks=[{"id":"t1","album":"a1","n":1,"title":"Slow Tide","len":214},{"id":"t2","album":"a1","n":2,"title":"Amber Hours","len":187},{"id":"t3","album":"a1","n":3,"title":"Paper Lanterns","len":242},{"id":"t4","album":"a2","n":1,"title":"Velvet Static","len":201},{"id":"t5","album":"a2","n":2,"title":"Night Bus Home","len":263},{"id":"t6","album":"a3","n":1,"title":"Cinder","len":178}]
+state albums=[{"id":"a1","title":"Low Tide Hymns","artist":"Marlow Vane","year":2021,"genre":"Folk","hue":30},{"id":"a2","title":"Velvet Static","artist":"Nia Okonkwo","year":2023,"genre":"Electronic","hue":280},{"id":"a3","title":"Cinder & Salt","artist":"The Hollow Pines","year":2019,"genre":"Rock","hue":10},{"id":"a4","title":"Glasshouse","artist":"Ines Duarte","year":2022,"genre":"Jazz","hue":170}]
+state view="grid"
+state sort="Title"
+state genre="All"
+state q=""
+state current="t1" persist
+state pos=0 persist
+state playing=false
+state volume=70 persist
+state queue=["t2","t3","t4","t5"] persist
+state screen="library"
+state playlists=[{"id":"p1","name":"Late drive","tracks":["t4","t5"]}]
+state pickTrack=""
+shortcut space onPress={playing=!playing} unless=inputFocus
+every 1s when playing onTick={pos=pos+1}
+App
+  Sidebar
+    Brand "Halftone" icon="album"
+    NavItem "Library" icon="library_music" selected={screen=="library"} onTap={go library}
+    NavItem "Artists" icon="people" selected={screen=="artists"} onTap={go artists}
+    NavItem "Playlists" icon="queue_music" badge="{length(playlists)}" selected={screen=="playlists"} onTap={go playlists}
+    NavItem "Queue" icon="list" badge="{length(queue)}" selected={screen=="queue"} onTap={go queue}
+    Spacer grow
+    NavItem "Settings" icon="settings" selected={screen=="settings"} onTap={go settings}
+  Main
+    Nav
+      Heading "Library" level=1
+      Row gap=8
+        Input "Search albums, artists, tracks" bind=q w=260 fuzzy icon="search"
+        Select bind=genre items=["All","Folk","Electronic","Rock","Jazz"]
+        Select bind=sort items=["Title","Artist","Year"]
+        SegmentedButton bind=view items=["grid","list"]
+    Column pad=24 gap=16 scroll
+      if view=="grid"
+        Grid cols=4 gap=24
+          each a in sortBy(filter(albums,x=>(genre=="All"||x.genre==genre)&&(q==""||fuzzyMatch(x.title+" "+x.artist,q))),x=>sort=="Year"?x.year:(sort=="Artist"?x.artist:x.title))
+            Column gap=8 onTap={sel=a.id; go album} animate=fade stagger=60
+              AlbumCover hue={a.hue} title={a.title} radius=20 glow={current!="" && find(tracks,t=>t.id==current).album==a.id}
+              Text.strong "{a.title}"
+              Text.muted "{a.artist} · {a.year}"
+      if view=="list"
+        Column gap=4
+          each a in sortBy(filter(albums,x=>(genre=="All"||x.genre==genre)&&(q==""||fuzzyMatch(x.title+" "+x.artist,q))),x=>sort=="Year"?x.year:(sort=="Artist"?x.artist:x.title))
+            ListTile "{a.title}" subtitle="{a.artist} · {a.year} · {a.genre}" onTap={sel=a.id; go album}
+              AlbumCover hue={a.hue} title={a.title} size=48 radius=10
+      if isEmpty(filter(albums,x=>(genre=="All"||x.genre==genre)&&(q==""||fuzzyMatch(x.title+" "+x.artist,q))))
+        Column center gap=8 pad=48
+          Icon "search_off" size=48
+          Text.muted "Nothing matches “{q}”"
+          Button.outline "Clear filters" onTap={q=""; genre="All"}
+    NowPlayingBar
+      Row gap=12 middle pad=12 fill=#FF1A1512 border-top=#FF2E261F
+        AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} size=48 radius=10 glow={playing} onTap={go player}
+        Column w=200 onTap={go player}
+          Text.strong "{find(tracks,t=>t.id==current).title}"
+          Text.muted "{find(albums,a=>a.id==find(tracks,t=>t.id==current).album).artist}"
+        IconButton "skip_previous" onTap={pos>3?pos=0:pos=0; emit previous}
+        IconButton.primary "{playing?'pause':'play_arrow'}" onTap={playing=!playing}
+        IconButton "skip_next" onTap={emit next}
+        Text.small "{duration(pos)}"
+        Slider grow bind=pos min=0 max={find(tracks,t=>t.id==current).len} step=1 onChange={pos=result} keys="left:-5,right:+5" aria="Seek"
+        Text.small "-{duration(find(tracks,t=>t.id==current).len-pos)}"
+        Icon "volume_up"
+        Slider w=100 bind=volume min=0 max=100 keys="up:+5,down:-5" aria="Volume"
+        IconButton "queue_music" onTap={go queue}
+
+### Album
+state sel="a1"
+state view="grid"
+App
+  Sidebar
+    Brand "Halftone" icon="album"
+    NavItem "Library" icon="library_music" selected onTap={go library}
+    NavItem "Artists" icon="people" onTap={go artists}
+    NavItem "Playlists" icon="queue_music" onTap={go playlists}
+    NavItem "Queue" icon="list" onTap={go queue}
+  Main
+    Nav
+      Button.ghost "Library" icon="arrow_back" onTap={go library}
+      Spacer grow
+      IconButton "more_vert" onTap={open albumMenu}
+    Column pad=24 gap=24 scroll
+      Row gap=32 top
+        AlbumCover hue={find(albums,a=>a.id==sel).hue} title={find(albums,a=>a.id==sel).title} w=280 h=280 radius=24 glow
+        Column grow gap=8 bottom
+          Text.caption "ALBUM"
+          Heading "{find(albums,a=>a.id==sel).title}" level=1
+          Row gap=8
+            Link "{find(albums,a=>a.id==sel).artist}" onTap={go artist}
+            Text.muted "· {find(albums,a=>a.id==sel).year} · {count(tracks,t=>t.album==sel)} tracks"
+          Row gap=12
+            Button "Play" icon="play_arrow" onTap={queue=map(filter(tracks,t=>t.album==sel),t=>t.id); current=first(queue); pos=0; playing=true}
+            Button.outline "Shuffle" icon="shuffle" onTap={queue=shuffle(map(filter(tracks,t=>t.album==sel),t=>t.id)); current=first(queue); pos=0; playing=true}
+            Button.ghost "Add to playlist" icon="playlist_add" onTap={open addMenu}
+      Column gap=2
+        Row pad=8 border-bottom=#FF2E261F
+          Text.caption "#" w=40
+          Text.caption "Title" grow
+          Text.caption "Length" w=70
+        each t in filter(tracks,x=>x.album==sel)
+          Row pad=8 middle selected={current==t.id} menu=trackMenu onTap={current=t.id; pos=0; playing=true}
+            if current==t.id
+              Icon "{playing?'equalizer':'pause'}" color=#FFF5A524 w=40
+            if current!=t.id
+              Text.muted "{t.n}" w=40
+            Text grow color={current==t.id?"#FFF5A524":"#FFF3E6D0"} "{t.title}"
+            Text.muted "{duration(t.len)}" w=70
+            IconButton "more_vert" onTap={pickTrack=t.id; open trackMenu}
+    NowPlayingBar
+      Row gap=12 middle pad=12 fill=#FF1A1512 border-top=#FF2E261F
+        AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} size=48 radius=10 glow={playing} onTap={go player}
+        Column w=200 onTap={go player}
+          Text.strong "{find(tracks,t=>t.id==current).title}"
+          Text.muted "{find(albums,a=>a.id==find(tracks,t=>t.id==current).album).artist}"
+        IconButton "skip_previous" onTap={emit previous}
+        IconButton.primary "{playing?'pause':'play_arrow'}" onTap={playing=!playing}
+        IconButton "skip_next" onTap={emit next}
+        Text.small "{duration(pos)}"
+        Slider grow bind=pos min=0 max={find(tracks,t=>t.id==current).len} step=1 keys="left:-5,right:+5" aria="Seek"
+        Text.small "-{duration(find(tracks,t=>t.id==current).len-pos)}"
+        Icon "volume_up"
+        Slider w=100 bind=volume min=0 max=100 keys="up:+5,down:-5" aria="Volume"
+        IconButton "queue_music" onTap={go queue}
+  Menu#albumMenu end
+    MenuItem "Play next" icon="queue_play_next" onTap={queue=concat(map(filter(tracks,t=>t.album==sel),t=>t.id),queue); toast "Playing next"}
+    MenuItem "Add to queue" icon="add_to_queue" onTap={queue=concat(queue,map(filter(tracks,t=>t.album==sel),t=>t.id)); toast "Added to queue"}
+    MenuItem "Go to artist" icon="person" onTap={go artist}
+  Menu#addMenu
+    each p in playlists
+      MenuItem "{p.name}" icon="queue_music" onTap={playlists=updateWhere(playlists,x=>x.id==p.id,x=>with(x,"tracks",concat(x.tracks,map(filter(tracks,t=>t.album==sel),t=>t.id)))); toast "Added to {p.name}"}
+    MenuItem "New playlist…" icon="add" onTap={open newPlaylist}
+  Menu#trackMenu
+    MenuItem "Play next" icon="queue_play_next" onTap={queue=concat([pickTrack],queue)}
+    MenuItem "Add to queue" icon="add_to_queue" onTap={queue=append(queue,pickTrack); toast "Added to queue"}
+    MenuItem "Add to playlist" icon="playlist_add" onTap={open addMenu}
+
+### Player
+state current="t1" persist
+state pos=0 persist
+state playing=false
+state speed=1
+state repeat="off"
+state shuffleOn=false
+state volume=70 persist
+state sheet="full"
+App
+  Main
+    Nav
+      IconButton "keyboard_arrow_down" onTap={go library}
+      Text.strong "Now playing"
+      IconButton "queue_music" onTap={go queue}
+    Row gap=48 pad=32 center middle
+      AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} w=420 h=420 radius=32 glow={playing} animate={playing?"pulse":""}
+      Column grow gap=16 maxw=480
+        Column gap=4
+          Heading "{find(tracks,t=>t.id==current).title}" level=1
+          Text.muted "{find(albums,a=>a.id==find(tracks,t=>t.id==current).album).artist}"
+        Column gap=4
+          Slider bind=pos min=0 max={find(tracks,t=>t.id==current).len} step=1 keys="left:-5,right:+5,home:0" aria="Seek"
+          Row between
+            Text.small "{duration(pos)}"
+            Text.small "-{duration(find(tracks,t=>t.id==current).len-pos)}"
+        Row gap=16 center middle
+          IconButton "shuffle" selected={shuffleOn} onTap={shuffleOn=!shuffleOn}
+          IconButton "skip_previous" size=large onTap={emit previous}
+          IconButton.primary "{playing?'pause':'play_arrow'}" size=xlarge onTap={playing=!playing}
+          IconButton "skip_next" size=large onTap={emit next}
+          IconButton "{repeat=='one'?'repeat_one':'repeat'}" selected={repeat!="off"} onTap={repeat=repeat=="off"?"all":(repeat=="all"?"one":"off")}
+        Row gap=12 middle
+          Text.muted "Speed"
+          SegmentedButton bind=speed items=[0.75,1,1.25,1.5]
+        Row gap=12 middle
+          Icon "volume_down"
+          Slider grow bind=volume min=0 max=100 keys="up:+5,down:-5" aria="Volume"
+          Icon "volume_up"
+        Lyrics lines={lyrics[current]} time={pos} bind=pos onSeek={pos=result} h=200 highlight=#FFF5A524
+    Sheet#miniPlayer "" snap=["mini","full"] bind=sheet draggable show=phone
+      Row gap=12 middle
+        AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} size=48 radius=10
+        Text.strong grow "{find(tracks,t=>t.id==current).title}"
+        IconButton.primary "{playing?'pause':'play_arrow'}" onTap={playing=!playing}
+
+### Queue
+state queue=["t2","t3","t4","t5"] persist
+state current="t1" persist
+state playing=false
+state pos=0 persist
+App
+  Sidebar
+    Brand "Halftone" icon="album"
+    NavItem "Library" icon="library_music" onTap={go library}
+    NavItem "Queue" icon="list" badge="{length(queue)}" selected onTap={go queue}
+  Main
+    Nav
+      Heading "Queue" level=1
+      Button.ghost "Clear" icon="delete_sweep" onTap={open clearConfirm} hidden={isEmpty(queue)}
+    Column pad=24 gap=16 scroll
+      Text.caption "NOW PLAYING"
+      Card gap=8
+        Row gap=12 middle
+          AlbumCover hue={find(albums,a=>a.id==find(tracks,t=>t.id==current).album).hue} size=48 radius=10 glow={playing}
+          Column grow
+            Text.strong "{find(tracks,t=>t.id==current).title}"
+            Text.muted "{find(albums,a=>a.id==find(tracks,t=>t.id==current).album).artist}"
+          Text.muted "{duration(find(tracks,t=>t.id==current).len)}"
+      Text.caption "NEXT UP · {length(queue)} tracks · {duration(sum(queue,id=>find(tracks,t=>t.id==id).len))}"
+      ReorderableList bind=queue handle="drag_handle" keys="alt+up:up,alt+down:down" onReorder={queue=result}
+        each id in queue
+          Row gap=12 middle pad=8 swipeLeft={queue=without(queue,id)} onSwipeLeft={queue=without(queue,id)} drag=queue(id) onTap={current=id; pos=0; playing=true}
+            Icon "drag_handle" handle
+            Column grow
+              Text.strong "{find(tracks,t=>t.id==id).title}"
+              Text.muted "{find(albums,a=>a.id==find(tracks,t=>t.id==id).album).artist}"
+            Text.muted "{duration(find(tracks,t=>t.id==id).len)}"
+            IconButton "close" onTap={queue=without(queue,id)}
+      if isEmpty(queue)
+        Column center gap=8 pad=48
+          Icon "queue_music" size=48
+          Text.muted "The queue is empty"
+          Button "Browse library" onTap={go library}
+  Dialog#clearConfirm "Clear the queue?" "All upcoming tracks will be removed."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Clear" onTap={queue=[]; close; toast "Queue cleared"}
+
+### Playlists
+state playlists=[{"id":"p1","name":"Late drive","tracks":["t4","t5"]}] persist
+state selPl=""
+state newName=""
+state renameTo=""
+App
+  Sidebar
+    Brand "Halftone" icon="album"
+    NavItem "Library" icon="library_music" onTap={go library}
+    NavItem "Playlists" icon="queue_music" selected onTap={go playlists}
+  Main
+    Nav
+      Heading "Playlists" level=1
+      Button "New playlist" icon="add" onTap={open newPlaylist}
+    Row gap=0 top
+      Column w=260 pad=16 gap=4
+        each p in playlists
+          ListTile "{p.name}" subtitle="{length(p.tracks)} tracks" selected={selPl==p.id} onTap={selPl=p.id} menu=plMenu
+      Column grow pad=24 gap=16 scroll
+        if selPl==""
+          Column center gap=8 pad=48
+            Icon "queue_music" size=48
+            Text.muted "Pick a playlist, or make one"
+            Button "New playlist" onTap={open newPlaylist}
+        if selPl!=""
+          Row between middle
+            Heading "{find(playlists,p=>p.id==selPl).name}" level=2
+            Row gap=8
+              Button "Play" icon="play_arrow" onTap={queue=find(playlists,p=>p.id==selPl).tracks; current=first(queue); pos=0; playing=true}
+              IconButton "more_vert" onTap={open plMenu}
+          if isEmpty(find(playlists,p=>p.id==selPl).tracks)
+            Column center gap=8 pad=32
+              Text.muted "No tracks yet. Add some from an album."
+              Button.outline "Browse library" onTap={go library}
+          ReorderableList bind=playlists[selPl].tracks handle="drag_handle" onReorder={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,"tracks",result))}
+            each id in find(playlists,p=>p.id==selPl).tracks
+              Row gap=12 middle pad=8
+                Icon "drag_handle" handle
+                Text grow "{find(tracks,t=>t.id==id).title}"
+                Text.muted "{duration(find(tracks,t=>t.id==id).len)}"
+                IconButton "close" onTap={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,"tracks",without(p.tracks,id)))}
+  Dialog#newPlaylist "New playlist" "Give it a name"
+    Input "Name" bind=newName autofocus
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button "Create" disabled={trim(newName)==""} onTap={playlists=append(playlists,{"id":"p"+(length(playlists)+1),"name":trim(newName),"tracks":[]}); newName=""; close}
+  Dialog#renamePl "Rename playlist"
+    Input "Name" bind=renameTo autofocus
+    Button "Save" onTap={playlists=updateWhere(playlists,p=>p.id==selPl,p=>with(p,"name",renameTo)); close}
+  Menu#plMenu end
+    MenuItem "Rename" icon="edit" onTap={renameTo=find(playlists,p=>p.id==selPl).name; open renamePl}
+    MenuItem "Delete" icon="delete" onTap={playlists=removeWhere(playlists,p=>p.id==selPl); selPl=""}
+
+### Artists
+state sel="a1"
+state artistName="Marlow Vane"
+App
+  Sidebar
+    Brand "Halftone" icon="album"
+    NavItem "Library" icon="library_music" onTap={go library}
+    NavItem "Artists" icon="people" selected onTap={go artists}
+  Main
+    Nav
+      Heading "Artists" level=1
+      Input "Search artists" bind=q icon="search" fuzzy w=240
+    Column pad=24 gap=24 scroll
+      Grid cols=5 gap=24
+        each n in unique(map(albums,a=>a.artist))
+          Column center gap=8 onTap={artistName=n; go artist}
+            Avatar "{n}" size=96
+            Text.strong "{n}"
+            Text.muted "{count(albums,a=>a.artist==n)} albums"
+
+### Artist
+state artistName="Marlow Vane"
+App
+  Main
+    Nav
+      Button.ghost "Artists" icon="arrow_back" onTap={go artists}
+    Column pad=24 gap=24 scroll
+      Row gap=24 middle
+        Avatar "{artistName}" size=120
+        Heading "{artistName}" level=1
+      Heading "Top tracks" level=3
+      Column gap=2
+        each t in take(filter(tracks,x=>find(albums,a=>a.id==x.album).artist==artistName),5)
+          Row pad=8 middle onTap={current=t.id; pos=0; playing=true}
+            Text.muted "{index+1}" w=32
+            Text grow "{t.title}"
+            Text.muted "{duration(t.len)}"
+      Heading "Albums" level=3
+      Grid cols=4 gap=24
+        each a in filter(albums,x=>x.artist==artistName)
+          Column gap=8 onTap={sel=a.id; go album}
+            AlbumCover hue={a.hue} title={a.title} radius=20
+            Text.strong "{a.title}"
+            Text.muted "{a.year}"
+
+### Settings
+state crossfade=0 persist
+state gapless=true persist
+state normalize=true persist
+state quality="High" persist
+state accent="Amber" persist
+App
+  Sidebar
+    Brand "Halftone" icon="album"
+    NavItem "Library" icon="library_music" onTap={go library}
+    NavItem "Settings" icon="settings" selected onTap={go settings}
+  Main
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=24 maxw=640 scroll
+      Card gap=16
+        Text.sectionTitle "Playback"
+        Toggle "Gapless playback" bind=gapless
+        Toggle "Normalize volume" bind=normalize
+        Row between middle
+          Text "Crossfade"
+          Row gap=8 middle w=260
+            Slider grow bind=crossfade min=0 max=12 step=1
+            Text.muted "{crossfade}s"
+        Select "Streaming quality" bind=quality items=["Low","Normal","High","Lossless"]
+      Card gap=16
+        Text.sectionTitle "Library"
+        Row between middle
+          Column
+            Text "Music folder"
+            Text.muted "D:/Music"
+          Button.outline "Change" onTap={emit pickFolder}
+        Button.outline "Rescan library" icon="refresh" onTap={emit rescan; toast "Scanning…"}
+      Card gap=16
+        Text.sectionTitle "Shortcuts"
+        Row between
+          Text "Play / pause"
+          Text.mono "Space"
+        Row between
+          Text "Seek"
+          Text.mono "← →"
+        Row between
+          Text "Volume"
+          Text.mono "↑ ↓"
+        Row between
+          Text "Move queue item"
+          Text.mono "Alt+↑ ↓"

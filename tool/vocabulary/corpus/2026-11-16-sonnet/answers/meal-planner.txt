@@ -1,0 +1,432 @@
+### Recipes
+project recipes=[{"id":1,"name":"Shakshuka","kind":"pan","meal":"Breakfast","diet":"Vegetarian","mins":25,"lvl":"Easy","rate":4.6,"serv":2,"kcal":340,"pro":18,"carb":22,"fat":20,"ing":[{"q":4,"u":"","n":"eggs","a":"Dairy"},{"q":400,"u":"g","n":"chopped tomatoes","a":"Pantry"},{"q":1,"u":"","n":"red pepper","a":"Produce"},{"q":1,"u":"tsp","n":"smoked paprika","a":"Pantry"}],"steps":[{"t":"Soften the sliced pepper and an onion in oil with the paprika.","s":300},{"t":"Add the tomatoes and simmer until thick.","s":600},{"t":"Make wells, crack in the eggs, cover and cook until just set.","s":240}]},{"id":2,"name":"Overnight oats with berries","kind":"bowl","meal":"Breakfast","diet":"Vegan","mins":10,"lvl":"Easy","rate":4.3,"serv":2,"kcal":310,"pro":10,"carb":48,"fat":9,"ing":[{"q":100,"u":"g","n":"rolled oats","a":"Pantry"},{"q":250,"u":"ml","n":"oat milk","a":"Dairy"},{"q":150,"u":"g","n":"mixed berries","a":"Produce"},{"q":2,"u":"tbsp","n":"maple syrup","a":"Pantry"}],"steps":[{"t":"Stir the oats, milk and syrup together in a jar.","s":0},{"t":"Chill overnight, or for at least four hours.","s":0},{"t":"Top with the berries and serve cold.","s":0}]},{"id":3,"name":"Herb omelette","kind":"pan","meal":"Breakfast","diet":"Vegetarian","mins":10,"lvl":"Easy","rate":4.4,"serv":1,"kcal":290,"pro":19,"carb":3,"fat":22,"ing":[{"q":3,"u":"","n":"eggs","a":"Dairy"},{"q":1,"u":"tbsp","n":"butter","a":"Dairy"},{"q":1,"u":"handful","n":"parsley and chives","a":"Produce"}],"steps":[{"t":"Beat the eggs with salt and the chopped herbs.","s":0},{"t":"Melt the butter until foaming, pour in the eggs and stir gently.","s":60},{"t":"Fold and slide onto a warm plate.","s":0}]},{"id":4,"name":"Banana pancakes","kind":"plate","meal":"Breakfast","diet":"Vegetarian","mins":20,"lvl":"Easy","rate":4.5,"serv":4,"kcal":360,"pro":11,"carb":56,"fat":10,"ing":[{"q":2,"u":"","n":"ripe bananas","a":"Produce"},{"q":200,"u":"g","n":"plain flour","a":"Pantry"},{"q":2,"u":"","n":"eggs","a":"Dairy"},{"q":300,"u":"ml","n":"milk","a":"Dairy"}],"steps":[{"t":"Mash the bananas and whisk in the eggs, milk and flour.","s":0},{"t":"Rest the batter.","s":300},{"t":"Fry ladlefuls in a buttered pan, two minutes a side.","s":240}]},{"id":5,"name":"Avocado chickpea toast","kind":"toast","meal":"Lunch","diet":"Vegan","mins":10,"lvl":"Easy","rate":4.2,"serv":2,"kcal":380,"pro":12,"carb":44,"fat":18,"ing":[{"q":2,"u":"","n":"ripe avocados","a":"Produce"},{"q":240,"u":"g","n":"tinned chickpeas","a":"Pantry"},{"q":4,"u":"slices","n":"sourdough","a":"Bakery"},{"q":1,"u":"","n":"lemon","a":"Produce"}],"steps":[{"t":"Toast the sourdough.","s":120},{"t":"Mash the avocado with lemon juice and salt.","s":0},{"t":"Crush half the chickpeas in, pile onto the toast and scatter the rest.","s":0}]},{"id":6,"name":"Roast tomato soup","kind":"soup","meal":"Lunch","diet":"Vegan","mins":45,"lvl":"Easy","rate":4.7,"serv":4,"kcal":210,"pro":5,"carb":28,"fat":9,"ing":[{"q":1,"u":"kg","n":"ripe tomatoes","a":"Produce"},{"q":1,"u":"","n":"onion","a":"Produce"},{"q":4,"u":"cloves","n":"garlic","a":"Produce"},{"q":500,"u":"ml","n":"vegetable stock","a":"Pantry"}],"steps":[{"t":"Roast the halved tomatoes, onion and garlic with oil.","s":1500},{"t":"Tip into a pot with the stock and simmer.","s":600},{"t":"Blend until smooth and season.","s":0}]},{"id":7,"name":"Greek salad","kind":"salad","meal":"Lunch","diet":"Vegetarian","mins":15,"lvl":"Easy","rate":4.1,"serv":2,"kcal":280,"pro":9,"carb":12,"fat":22,"ing":[{"q":4,"u":"","n":"ripe tomatoes","a":"Produce"},{"q":1,"u":"","n":"cucumber","a":"Produce"},{"q":150,"u":"g","n":"feta","a":"Dairy"},{"q":60,"u":"g","n":"black olives","a":"Pantry"}],"steps":[{"t":"Cut the tomatoes and cucumber into chunks.","s":0},{"t":"Add the olives and dress with oil, oregano and salt.","s":0},{"t":"Lay the feta on top.","s":0}]},{"id":8,"name":"Caprese sandwich","kind":"toast","meal":"Lunch","diet":"Vegetarian","mins":10,"lvl":"Easy","rate":4.0,"serv":2,"kcal":420,"pro":18,"carb":40,"fat":22,"ing":[{"q":1,"u":"","n":"ciabatta","a":"Bakery"},{"q":125,"u":"g","n":"mozzarella","a":"Dairy"},{"q":2,"u":"","n":"ripe tomatoes","a":"Produce"},{"q":1,"u":"handful","n":"basil","a":"Produce"}],"steps":[{"t":"Split and lightly toast the ciabatta.","s":120},{"t":"Layer mozzarella, tomato and basil with oil and pepper.","s":0},{"t":"Press together and cut in half.","s":0}]},{"id":9,"name":"Lentil and spinach dal","kind":"bowl","meal":"Dinner","diet":"Vegan","mins":40,"lvl":"Easy","rate":4.6,"serv":4,"kcal":330,"pro":17,"carb":48,"fat":8,"ing":[{"q":250,"u":"g","n":"red lentils","a":"Pantry"},{"q":200,"u":"g","n":"spinach","a":"Produce"},{"q":1,"u":"tbsp","n":"curry powder","a":"Pantry"},{"q":1,"u":"","n":"onion","a":"Produce"}],"steps":[{"t":"Fry the onion with the curry powder.","s":300},{"t":"Add the lentils and 750 ml water and simmer.","s":1200},{"t":"Stir in the spinach until wilted and season.","s":120}]},{"id":10,"name":"Spaghetti pomodoro","kind":"pasta","meal":"Dinner","diet":"Vegan","mins":25,"lvl":"Easy","rate":4.5,"serv":4,"kcal":480,"pro":15,"carb":86,"fat":9,"ing":[{"q":400,"u":"g","n":"spaghetti","a":"Pantry"},{"q":800,"u":"g","n":"chopped tomatoes","a":"Pantry"},{"q":3,"u":"cloves","n":"garlic","a":"Produce"},{"q":1,"u":"handful","n":"basil","a":"Produce"}],"steps":[{"t":"Simmer the garlic and tomatoes into a sauce.","s":900},{"t":"Boil the spaghetti in salted water.","s":600},{"t":"Toss with the sauce and torn basil.","s":0}]},{"id":11,"name":"Lemon herb chicken traybake","kind":"tray","meal":"Dinner","diet":"Any","mins":55,"lvl":"Medium","rate":4.8,"serv":4,"kcal":520,"pro":42,"carb":28,"fat":26,"ing":[{"q":8,"u":"","n":"chicken thighs","a":"Meat"},{"q":700,"u":"g","n":"baby potatoes","a":"Produce"},{"q":2,"u":"","n":"lemons","a":"Produce"},{"q":1,"u":"tbsp","n":"dried thyme","a":"Pantry"}],"steps":[{"t":"Toss the potatoes, chicken, lemon and thyme in oil on a tray.","s":0},{"t":"Roast at 200 C.","s":2400},{"t":"Rest for a few minutes, then serve with the juices.","s":300}]},{"id":12,"name":"Beef and bean chilli","kind":"soup","meal":"Dinner","diet":"Any","mins":70,"lvl":"Medium","rate":4.4,"serv":6,"kcal":450,"pro":32,"carb":38,"fat":18,"ing":[{"q":500,"u":"g","n":"minced beef","a":"Meat"},{"q":800,"u":"g","n":"chopped tomatoes","a":"Pantry"},{"q":480,"u":"g","n":"kidney beans","a":"Pantry"},{"q":2,"u":"tsp","n":"chilli powder","a":"Pantry"}],"steps":[{"t":"Brown the beef with the chilli powder.","s":480},{"t":"Add the tomatoes and beans and simmer low.","s":2700},{"t":"Taste, season and serve with rice.","s":0}]},{"id":13,"name":"Salmon with crushed potatoes","kind":"plate","meal":"Dinner","diet":"Any","mins":35,"lvl":"Medium","rate":4.7,"serv":2,"kcal":610,"pro":40,"carb":42,"fat":30,"ing":[{"q":2,"u":"","n":"salmon fillets","a":"Meat"},{"q":400,"u":"g","n":"baby potatoes","a":"Produce"},{"q":1,"u":"bunch","n":"dill","a":"Produce"},{"q":2,"u":"tbsp","n":"capers","a":"Pantry"}],"steps":[{"t":"Boil the potatoes until tender, then crush with oil.","s":1200},{"t":"Pan-fry the salmon skin side down.","s":420},{"t":"Serve on the potatoes with dill and capers.","s":0}]},{"id":14,"name":"Mushroom risotto","kind":"bowl","meal":"Dinner","diet":"Vegetarian","mins":50,"lvl":"Hard","rate":4.5,"serv":4,"kcal":520,"pro":14,"carb":76,"fat":16,"ing":[{"q":300,"u":"g","n":"arborio rice","a":"Pantry"},{"q":300,"u":"g","n":"mushrooms","a":"Produce"},{"q":1,"u":"litre","n":"vegetable stock","a":"Pantry"},{"q":50,"u":"g","n":"parmesan","a":"Dairy"}],"steps":[{"t":"Fry the mushrooms until golden and set aside.","s":420},{"t":"Toast the rice, then add hot stock a ladle at a time, stirring.","s":1200},{"t":"Fold in the mushrooms and parmesan and rest.","s":120}]},{"id":15,"name":"Chickpea and coconut curry","kind":"bowl","meal":"Dinner","diet":"Vegan","mins":30,"lvl":"Easy","rate":4.6,"serv":4,"kcal":440,"pro":15,"carb":52,"fat":20,"ing":[{"q":480,"u":"g","n":"tinned chickpeas","a":"Pantry"},{"q":400,"u":"ml","n":"coconut milk","a":"Pantry"},{"q":2,"u":"tbsp","n":"curry paste","a":"Pantry"},{"q":200,"u":"g","n":"spinach","a":"Produce"}],"steps":[{"t":"Fry the curry paste for a minute.","s":60},{"t":"Add the chickpeas and coconut milk and simmer.","s":900},{"t":"Wilt in the spinach.","s":120}]},{"id":16,"name":"Margherita flatbread","kind":"tray","meal":"Dinner","diet":"Vegetarian","mins":30,"lvl":"Medium","rate":4.3,"serv":2,"kcal":560,"pro":22,"carb":72,"fat":18,"ing":[{"q":2,"u":"","n":"flatbreads","a":"Bakery"},{"q":150,"u":"g","n":"passata","a":"Pantry"},{"q":125,"u":"g","n":"mozzarella","a":"Dairy"},{"q":1,"u":"handful","n":"basil","a":"Produce"}],"steps":[{"t":"Spread the passata over the flatbreads.","s":0},{"t":"Top with torn mozzarella and bake hot.","s":600},{"t":"Finish with basil and oil.","s":0}]},{"id":17,"name":"Veggie fried rice","kind":"pan","meal":"Dinner","diet":"Vegan","mins":20,"lvl":"Easy","rate":4.2,"serv":3,"kcal":400,"pro":11,"carb":66,"fat":10,"ing":[{"q":300,"u":"g","n":"cooked rice","a":"Pantry"},{"q":200,"u":"g","n":"frozen peas","a":"Produce"},{"q":2,"u":"","n":"carrots","a":"Produce"},{"q":3,"u":"tbsp","n":"soy sauce","a":"Pantry"}],"steps":[{"t":"Stir-fry the diced carrots in a hot wok.","s":240},{"t":"Add the rice and peas and keep tossing.","s":240},{"t":"Splash in the soy sauce and serve.","s":0}]},{"id":18,"name":"Apple cinnamon porridge","kind":"bowl","meal":"Breakfast","diet":"Vegan","mins":15,"lvl":"Easy","rate":4.1,"serv":2,"kcal":300,"pro":7,"carb":56,"fat":6,"ing":[{"q":100,"u":"g","n":"rolled oats","a":"Pantry"},{"q":500,"u":"ml","n":"oat milk","a":"Dairy"},{"q":2,"u":"","n":"apples","a":"Produce"},{"q":1,"u":"tsp","n":"cinnamon","a":"Pantry"}],"steps":[{"t":"Simmer the oats, milk and grated apple, stirring.","s":420},{"t":"Stir in the cinnamon and rest briefly.","s":120},{"t":"Serve with sliced apple.","s":0}]},{"id":19,"name":"Tuna nicoise salad","kind":"salad","meal":"Lunch","diet":"Any","mins":30,"lvl":"Medium","rate":4.3,"serv":2,"kcal":430,"pro":34,"carb":24,"fat":22,"ing":[{"q":2,"u":"","n":"eggs","a":"Dairy"},{"q":200,"u":"g","n":"tinned tuna","a":"Pantry"},{"q":200,"u":"g","n":"green beans","a":"Produce"},{"q":200,"u":"g","n":"baby potatoes","a":"Produce"}],"steps":[{"t":"Boil the potatoes until tender.","s":900},{"t":"Boil the eggs, then add the beans for the last minutes.","s":420},{"t":"Arrange everything with the tuna and a mustard dressing.","s":0}]},{"id":20,"name":"Pesto gnocchi","kind":"pasta","meal":"Dinner","diet":"Vegetarian","mins":20,"lvl":"Easy","rate":4.4,"serv":3,"kcal":490,"pro":14,"carb":66,"fat":18,"ing":[{"q":500,"u":"g","n":"gnocchi","a":"Pantry"},{"q":4,"u":"tbsp","n":"basil pesto","a":"Pantry"},{"q":200,"u":"g","n":"cherry tomatoes","a":"Produce"},{"q":30,"u":"g","n":"parmesan","a":"Dairy"}],"steps":[{"t":"Blister the cherry tomatoes in a hot pan.","s":300},{"t":"Boil the gnocchi until they float.","s":180},{"t":"Toss with the pesto and shave over the parmesan.","s":0}]}] persist
+project week=[] persist
+project favs=[] persist
+project ratings={} persist
+project notes={} persist
+project ticked=[] persist
+project gone=[] persist
+project extra=[] persist
+project order=[] persist
+project days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+project meals=["Breakfast","Lunch","Dinner"]
+project cur={}
+project serv=2
+project have=[]
+project step=0
+state q=""
+state meal="All"
+state diet="Any"
+state maxMins=90
+computed shown={filter(recipes,x=>(meal=="All"||x.meal==meal)&&(diet=="Any"||x.diet==diet||(diet=="Vegetarian"&&x.diet=="Vegan"))&&x.mins<=maxMins&&(trim(q)==""||contains(lower(x.name),lower(trim(q)))||any(x.ing,i=>contains(lower(i.n),lower(trim(q))))))}
+App fill=#FFFBF3
+  Sidebar fill=#FFF3E2
+    Brand "Mise" icon="skillet" font=serif color=#FF4F7A3A
+    NavItem "Recipes" icon="menu_book" selected={true} onTap={go recipes}
+    NavItem "Week" icon="calendar_month" onTap={go week}
+    NavItem "Shopping list" icon="shopping_basket" onTap={go shopping}
+    NavItem "Favourites" icon="favorite" badge="{length(favs)}" onTap={go favourites}
+    Spacer grow
+    Button "Add a recipe" icon="add" onTap={go add-recipe}
+  Main
+    Nav
+      Heading "Recipes" level=1 font=serif color=#FF4F7A3A
+      Input "Search names or ingredients" bind=q icon="search" clearable w=280
+    Column pad=24 gap=16 scroll
+      Row gap=8
+        each m in ["All","Breakfast","Lunch","Dinner"]
+          ChoiceChip "{m}" selected={meal==m} onTap={meal=m}
+      Row gap=16 middle
+        Select "Diet" items=["Any","Vegetarian","Vegan"] bind=diet w=180
+        Column grow
+          Text.small "Ready in up to {maxMins} min"
+          Slider bind=maxMins min=10 max=90 step=5
+        Button.ghost "Reset" onTap={q=""; meal="All"; diet="Any"; maxMins=90}
+      Text.muted "{length(shown)} of {length(recipes)} recipes"
+      if length(shown)==0
+        Column center gap=8 pad=48
+          Dish "empty-plate" h=120
+          Heading "Nothing matches" level=3 font=serif
+          Text.muted "Try fewer filters or a different ingredient."
+          Button "Clear filters" onTap={q=""; meal="All"; diet="Any"; maxMins=90}
+      Grid cols=4 gap=16
+        each r in shown
+          Card gap=8 radius=16 fill=#FFFFFFFF onTap={cur=r; serv=r.serv; have=[]; go recipe} animate=fade stagger=40
+            Stack
+              Dish "{r.kind}" h=130
+              IconButton "{contains(favs,r.id)?'favorite':'favorite_border'}" color=#FFD9482B end top onTap={favs=contains(favs,r.id)?without(favs,r.id):append(favs,r.id)}
+            Heading "{r.name}" level=3 font=serif
+            Row gap=8
+              Icon "schedule" size=16
+              Text.small "{r.mins} min"
+              Badge.neutral "{r.lvl}"
+              Spacer grow
+              Icon "star" size=16 color=#FFE8A21C
+              Text.small "{coalesce(ratings[r.id],r.rate)}"
+            Row gap=4
+              Badge.success "{r.diet}"
+              Badge.neutral "{r.meal}"
+
+### Recipe
+state pday="Mon"
+state pmeal="Dinner"
+App fill=#FFFBF3
+  Sidebar fill=#FFF3E2
+    Brand "Mise" icon="skillet" font=serif color=#FF4F7A3A
+    NavItem "Recipes" icon="menu_book" selected={true} onTap={go recipes}
+    NavItem "Week" icon="calendar_month" onTap={go week}
+    NavItem "Shopping list" icon="shopping_basket" onTap={go shopping}
+    NavItem "Favourites" icon="favorite" onTap={go favourites}
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" onTap={go recipes}
+        Heading "{cur.name}" level=1 font=serif color=#FF4F7A3A
+      Row gap=8
+        Button.outline "{contains(favs,cur.id)?'Saved':'Save'}" icon="{contains(favs,cur.id)?'favorite':'favorite_border'}" onTap={favs=contains(favs,cur.id)?without(favs,cur.id):append(favs,cur.id); toast contains(favs,cur.id)?"Removed from favourites":"Saved to favourites"}
+        Button.outline "Add to week" icon="event" onTap={open plan}
+        Button "Start cooking" icon="play_arrow" onTap={step=0; go cook}
+    Column pad=24 gap=20 scroll
+      Row gap=24 top
+        Column grow gap=12
+          Dish "{cur.kind}" h=260 radius=24
+          Row gap=12 middle
+            Icon "schedule"
+            Text "{cur.mins} min"
+            Badge.neutral "{cur.lvl}"
+            Badge.success "{cur.diet}"
+          Row gap=12 middle
+            Text.strong "Your rating"
+            Rating value={coalesce(ratings[cur.id],0)} max=5 keyboard onChange={ratings=with(ratings,cur.id,result)}
+            Text.muted "{coalesce(ratings[cur.id],cur.rate)} of 5"
+          Input "Your note" "Less salt next time..." multiline value={coalesce(notes[cur.id],"")} onChange={notes=with(notes,cur.id,result)}
+        Column grow gap=12
+          Card gap=12 radius=16
+            Row between middle
+              Heading "Ingredients" level=3 font=serif
+              Row gap=8 middle
+                IconButton "remove" disabled={serv<=1} onTap={serv=max(1,serv-1)}
+                Column center
+                  Text.heading "{serv}" size=28 animate=pop
+                  Text.caption "servings"
+                IconButton "add" disabled={serv>=24} onTap={serv=min(24,serv+1)}
+            if serv!=cur.serv
+              Row gap=8 middle
+                Badge.warning "scaled x{round(serv/cur.serv,2)}"
+                Button.ghost "Back to {cur.serv}" onTap={serv=cur.serv}
+            each i in cur.ing
+              Checkbox "{round(i.q*serv/cur.serv,2)} {i.u} {i.n}" checked={contains(have,i.n)} strike={contains(have,i.n)} onChange={have=result?append(have,i.n):without(have,i.n)}
+            Text.small "{length(have)} of {length(cur.ing)} gathered"
+            Progress {length(have)/length(cur.ing)}
+          Card gap=8 radius=16
+            Heading "Nutrition per serving" level=3 font=serif
+            Row
+              Text.muted "Calories" w=120
+              Text.strong "{cur.kcal} kcal"
+            Divider
+            Row
+              Text.muted "Protein" w=120
+              Text.strong "{cur.pro} g"
+            Divider
+            Row
+              Text.muted "Carbohydrate" w=120
+              Text.strong "{cur.carb} g"
+            Divider
+            Row
+              Text.muted "Fat" w=120
+              Text.strong "{cur.fat} g"
+      Card gap=12 radius=16
+        Heading "Method" level=3 font=serif
+        each s in cur.steps
+          Row gap=12 top
+            Box w=32 h=32 radius=16 fill=#FF4F7A3A center middle
+              Text "{index+1}" color=#FFFFFFFF weight=700
+            Column grow
+              Text "{s.t}"
+              if s.s>0
+                Badge.info "{duration(s.s)}"
+  Sheet#plan "Add to your week"
+    SegmentedButton items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] bind=pday
+    SegmentedButton items=["Breakfast","Lunch","Dinner"] bind=pmeal
+    Text.muted "Replaces anything already in that slot."
+    Button "Add to {pday} {lower(pmeal)}" onTap={week=append(removeWhere(week,w=>w.day==indexOf(days,pday)&&w.meal==indexOf(meals,pmeal)),{"day":indexOf(days,pday),"meal":indexOf(meals,pmeal),"rid":cur.id}); toast "Planned for {pday}"; close}
+
+### Cook mode
+state left=0
+state running=false
+state ended=false
+every 1s when running&&left>0 onTick={left=left-1}
+when left==0&&running onTrue={running=false; ended=true; announce "Timer finished: {cur.steps[step].t}"; sound "chime"; toast "Time is up"}
+Shortcut "ArrowRight" onPress={step=min(length(cur.steps)-1,step+1)}
+Shortcut "ArrowLeft" onPress={step=max(0,step-1)}
+Shortcut " " onPress={running=!running}
+App fill=#FFFBF3
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "close" onTap={running=false; go recipe}
+        Heading "{cur.name}" level=2 font=serif color=#FF4F7A3A
+      Row gap=8 middle
+        Text.muted "for {serv}"
+        Button.outline "Ingredients" icon="list" onTap={open ings}
+    Column pad=32 gap=20 center
+      Row gap=12 middle
+        Text.strong "Step {step+1} of {length(cur.steps)}"
+        Progress {(step+1)/length(cur.steps)} grow
+      Pages bind=step items=cur.steps h=260 onPage={left=cur.steps[step].s; running=false; ended=false}
+        Column center middle pad=24
+          Text "{item.t}" size=34 center font=serif
+      Dots bind=step count={length(cur.steps)}
+      if cur.steps[step].s>0
+        Card gap=12 radius=24 center
+          Stack center middle
+            Ring {left==0&&!ended?1:left/cur.steps[step].s} size=160
+            Text "{duration(left==0&&!ended?cur.steps[step].s:left)}" size=36 weight=700 color={ended?"#FFD9482B":"#FF4F7A3A"}
+          if ended
+            Badge.success "Done! Take it off the heat" animate=pulse
+          Row gap=8 center
+            Button "{running?'Pause':(left>0&&left<cur.steps[step].s?'Resume':'Start timer')}" icon="{running?'pause':'timer'}" onTap={left=(left==0)?cur.steps[step].s:left; ended=false; running=!running}
+            Button.outline "Reset" icon="restart_alt" onTap={left=cur.steps[step].s; running=false; ended=false}
+            Button.ghost "+1 min" onTap={left=left+60}
+      Row gap=12 center
+        Button.outline "Back" icon="chevron_left" disabled={step==0} onTap={step=step-1}
+        if step<length(cur.steps)-1
+          Button "Next step" icon="chevron_right" iconEnd onTap={step=step+1}
+        if step==length(cur.steps)-1
+          Button "Finished" icon="check" onTap={toast "Enjoy your meal!"; running=false; go recipe}
+  Sheet#ings "Ingredients for {serv}"
+    each i in cur.ing
+      Checkbox "{round(i.q*serv/cur.serv,2)} {i.u} {i.n}" checked={contains(have,i.n)} onChange={have=result?append(have,i.n):without(have,i.n)}
+    Button "Done" onTap={close}
+
+### Week
+state dayAt=0
+state find=""
+state sel=0
+state pickTo=0
+computed placed={map(range(21),k=>find(week,w=>w.day==k%7&&w.meal==floor(k/7)))}
+computed picks={filter(recipes,x=>trim(find)==""||contains(lower(x.name),lower(trim(find))))}
+App fill=#FFFBF3
+  Sidebar fill=#FFF3E2
+    Brand "Mise" icon="skillet" font=serif color=#FF4F7A3A
+    NavItem "Recipes" icon="menu_book" onTap={go recipes}
+    NavItem "Week" icon="calendar_month" selected={true} onTap={go week}
+    NavItem "Shopping list" icon="shopping_basket" onTap={go shopping}
+    NavItem "Favourites" icon="favorite" onTap={go favourites}
+  Pane w=300 pad=16 gap=12 fill=#FFFFFFFF hide=phone
+    Heading "Drag into the week" level=3 font=serif
+    Input "Find a recipe" bind=find icon="search"
+    ListView gap=8 scroll
+      each r in picks
+        Row gap=8 middle drag=meal({"rid":r.id,"from":-1}) radius=12 pad=8 fill=#FFF3E2
+          Dish "{r.kind}" w=44 h=44
+          Column grow
+            Text.strong "{r.name}"
+            Text.caption "{r.meal} - {r.kcal} kcal"
+          IconButton "add" onTap={sel=r.id; open slotPick}
+  Main
+    Nav
+      Heading "Your week" level=1 font=serif color=#FF4F7A3A
+      Row gap=8
+        Button.outline "Clear week" icon="delete_sweep" onTap={open confirmWeek}
+        Button "Make shopping list" icon="shopping_basket" onTap={go shopping}
+    Column pad=24 gap=16 scroll
+      Card gap=16 radius=16 fill=#FFEEF4E6
+        Row gap=32 between
+          Column
+            Text.caption "Meals planned"
+            Text.heading "{length(week)} of 21" size=24
+          Column
+            Text.caption "Calories"
+            Text.heading "{sum(week,w=>find(recipes,x=>x.id==w.rid).kcal)} kcal" size=24
+          Column
+            Text.caption "Protein"
+            Text.heading "{sum(week,w=>find(recipes,x=>x.id==w.rid).pro)} g" size=24
+          Column hide=phone
+            Text.caption "Average per day"
+            Text.heading "{round(sum(week,w=>find(recipes,x=>x.id==w.rid).kcal)/7,0)} kcal" size=24
+      Grid cols=7 gap=8 hide=phone
+        each d in days
+          Text.strong "{d}" center
+        each k in range(21)
+          Box h=96 radius=12 pad=6 fill={placed[k]==null?"#FFF3E2":"#FFFFFFFF"} border=#FFE6D5B8 drop=meal onDrop={week=append(removeWhere(removeWhere(week,w=>w.day==k%7&&w.meal==floor(k/7)),w=>result.data.from>=0&&w.day==result.data.from%7&&w.meal==floor(result.data.from/7)),{"day":k%7,"meal":floor(k/7),"rid":result.data.rid})}
+            if placed[k]==null
+              Text.caption "{meals[floor(k/7)]}" center
+            if placed[k]!=null
+              Row gap=4 top drag=meal({"rid":placed[k].rid,"from":k}) focusable
+                Column grow
+                  Text.small "{find(recipes,x=>x.id==placed[k].rid).name}" lines=2
+                  Text.caption "{find(recipes,x=>x.id==placed[k].rid).kcal} kcal"
+                IconButton "more_vert" size=20 onTap={sel=k; open slotMenu}
+                Shortcut "ArrowRight" onPress={week=updateWhere(removeWhere(week,w=>w.day==(k+1)%7&&w.meal==floor(k/7)),w=>w.day==k%7&&w.meal==floor(k/7),w=>with(w,"day",(k+1)%7))}
+                Shortcut "ArrowLeft" onPress={week=updateWhere(removeWhere(week,w=>w.day==(k+6)%7&&w.meal==floor(k/7)),w=>w.day==k%7&&w.meal==floor(k/7),w=>with(w,"day",(k+6)%7))}
+                Shortcut "ArrowDown" onPress={week=updateWhere(removeWhere(week,w=>w.day==k%7&&w.meal==(floor(k/7)+1)%3),w=>w.day==k%7&&w.meal==floor(k/7),w=>with(w,"meal",(floor(k/7)+1)%3))}
+                Shortcut "ArrowUp" onPress={week=updateWhere(removeWhere(week,w=>w.day==k%7&&w.meal==(floor(k/7)+2)%3),w=>w.day==k%7&&w.meal==floor(k/7),w=>with(w,"meal",(floor(k/7)+2)%3))}
+                Shortcut "Delete" onPress={week=removeWhere(week,w=>w.day==k%7&&w.meal==floor(k/7))}
+      Column gap=12 show=phone
+        Row between middle
+          IconButton "chevron_left" disabled={dayAt==0} onTap={dayAt=dayAt-1}
+          Heading "{days[dayAt]}" level=2 font=serif
+          IconButton "chevron_right" disabled={dayAt==6} onTap={dayAt=dayAt+1}
+        each m in range(3)
+          Card gap=8 radius=16 drop=meal onDrop={week=append(removeWhere(week,w=>w.day==dayAt&&w.meal==m),{"day":dayAt,"meal":m,"rid":result.data.rid})}
+            Text.caption "{meals[m]}"
+            if placed[dayAt+m*7]==null
+              Button.outline "Choose a recipe" icon="add" onTap={sel=dayAt+m*7; open slotMenu}
+            if placed[dayAt+m*7]!=null
+              Row between middle
+                Text.strong "{find(recipes,x=>x.id==placed[dayAt+m*7].rid).name}"
+                IconButton "more_vert" onTap={sel=dayAt+m*7; open slotMenu}
+  Menu#slotMenu
+    MenuItem "Open recipe" icon="open_in_new" onTap={cur=find(recipes,x=>x.id==placed[sel].rid); serv=cur.serv; have=[]; go recipe}
+    MenuItem "Cook now" icon="play_arrow" onTap={cur=find(recipes,x=>x.id==placed[sel].rid); serv=cur.serv; step=0; go cook}
+    MenuItem "Move to previous day" icon="arrow_back" onTap={week=updateWhere(removeWhere(week,w=>w.day==(sel+6)%7&&w.meal==floor(sel/7)),w=>w.day==sel%7&&w.meal==floor(sel/7),w=>with(w,"day",(sel+6)%7))}
+    MenuItem "Move to next day" icon="arrow_forward" onTap={week=updateWhere(removeWhere(week,w=>w.day==(sel+1)%7&&w.meal==floor(sel/7)),w=>w.day==sel%7&&w.meal==floor(sel/7),w=>with(w,"day",(sel+1)%7))}
+    MenuItem "Duplicate to tomorrow" icon="content_copy" onTap={week=append(removeWhere(week,w=>w.day==(sel+1)%7&&w.meal==floor(sel/7)),{"day":(sel+1)%7,"meal":floor(sel/7),"rid":placed[sel].rid})}
+    Divider
+    MenuItem "Remove" icon="delete" onTap={week=removeWhere(week,w=>w.day==sel%7&&w.meal==floor(sel/7)); toast "Removed from your week"}
+  Sheet#slotPick "Choose a slot"
+    Text.muted "Pick the day and meal for this recipe."
+    SegmentedButton items=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"] bind=pday
+    SegmentedButton items=["Breakfast","Lunch","Dinner"] bind=pmeal
+    Button "Add to week" onTap={week=append(removeWhere(week,w=>w.day==indexOf(days,pday)&&w.meal==indexOf(meals,pmeal)),{"day":indexOf(days,pday),"meal":indexOf(meals,pmeal),"rid":sel}); close}
+  Dialog#confirmWeek "Clear the whole week?" "All 21 slots will be emptied."
+    Row gap=8 end
+      Button.ghost "Keep it" onTap={close}
+      Button.destructive "Clear week" onTap={week=[]; toast "Week cleared"; close}
+
+### Shopping list
+state newItem=""
+state newAisle="Other"
+state aisles=["Produce","Dairy","Meat","Bakery","Pantry","Other"]
+computed need={flatten(map(week,w=>map(find(recipes,x=>x.id==w.rid).ing,i=>i)))}
+computed merged={map(unique(map(need,i=>i.n)),n=>with(find(need,i=>i.n==n),"q",sum(filter(need,i=>i.n==n),i=>i.q)))}
+computed items={sortBy(filter(concat(merged,extra),x=>!contains(gone,x.n)),x=>indexOf(order,x.n))}
+App fill=#FFFBF3
+  Sidebar fill=#FFF3E2
+    Brand "Mise" icon="skillet" font=serif color=#FF4F7A3A
+    NavItem "Recipes" icon="menu_book" onTap={go recipes}
+    NavItem "Week" icon="calendar_month" onTap={go week}
+    NavItem "Shopping list" icon="shopping_basket" selected={true} badge="{count(items,x=>!contains(ticked,x.n))}" onTap={go shopping}
+    NavItem "Favourites" icon="favorite" onTap={go favourites}
+  Main
+    Nav
+      Heading "Shopping list" level=1 font=serif color=#FF4F7A3A
+      Row gap=8
+        Button.ghost "Restore cleared" hidden={length(gone)==0} onTap={gone=[]}
+        Button.outline "Clear ticked" icon="done_all" disabled={count(items,x=>contains(ticked,x.n))==0} onTap={open confirmClear}
+    Column pad=24 gap=16 scroll maxw=720
+      Text.muted "{count(items,x=>!contains(ticked,x.n))} to buy, merged from {length(week)} planned meals"
+      Progress {length(items)==0?0:count(items,x=>contains(ticked,x.n))/length(items)}
+      Row gap=8 middle
+        Input "Add an item" bind=newItem grow onSubmit={extra=trim(newItem)==""?extra:append(extra,{"n":trim(newItem),"q":1,"u":"","a":newAisle}); newItem=""}
+        Select items=aisles bind=newAisle w=140
+        Button "Add" icon="add" disabled={trim(newItem)==""} onTap={extra=append(extra,{"n":trim(newItem),"q":1,"u":"","a":newAisle}); newItem=""}
+      if length(items)==0
+        Column center gap=8 pad=48
+          Dish "empty-basket" h=120
+          Heading "Nothing to buy yet" level=3 font=serif
+          Button "Plan your week" onTap={go week}
+      each a in aisles
+        if count(items,x=>x.a==a)>0
+          Card gap=8 radius=16
+            Row between middle
+              Heading "{a}" level=3 font=serif color=#FF4F7A3A
+              Badge.neutral "{count(items,x=>x.a==a&&!contains(ticked,x.n))} left"
+            ReorderList items={filter(items,x=>x.a==a)} handle onReorder={order=concat(filter(order,n=>!contains(map(result,x=>x.n),n)),map(result,x=>x.n))}
+              each row in filter(items,x=>x.a==a)
+                Row gap=8 middle
+                  Checkbox "{row.n}" checked={contains(ticked,row.n)} strike={contains(ticked,row.n)} grow onChange={ticked=result?append(ticked,row.n):without(ticked,row.n)}
+                  Text.muted "{round(row.q,2)} {row.u}"
+                  if row.a!=null&&count(extra,x=>x.n==row.n)>0
+                    IconButton "close" size=20 onTap={extra=removeWhere(extra,x=>x.n==row.n)}
+                  Icon "drag_handle"
+  Dialog#confirmClear "Clear ticked items?" "This removes every ticked item from the list."
+    Row gap=8 end
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Clear {count(items,x=>contains(ticked,x.n))} items" onTap={gone=concat(gone,ticked); extra=removeWhere(extra,x=>contains(ticked,x.n)); ticked=[]; toast "Cleared"; close}
+
+### Favourites
+App fill=#FFFBF3
+  Sidebar fill=#FFF3E2
+    Brand "Mise" icon="skillet" font=serif color=#FF4F7A3A
+    NavItem "Recipes" icon="menu_book" onTap={go recipes}
+    NavItem "Week" icon="calendar_month" onTap={go week}
+    NavItem "Shopping list" icon="shopping_basket" onTap={go shopping}
+    NavItem "Favourites" icon="favorite" selected={true} badge="{length(favs)}" onTap={go favourites}
+  Main
+    Nav
+      Heading "Favourites" level=1 font=serif color=#FF4F7A3A
+    Column pad=24 gap=16 scroll
+      if length(favs)==0
+        Column center gap=8 pad=48
+          Dish "empty-heart" h=120
+          Heading "No favourites yet" level=3 font=serif
+          Text.muted "Tap the heart on any recipe to keep it here."
+          Button "Browse recipes" onTap={go recipes}
+      Grid cols=4 gap=16
+        each r in filter(recipes,x=>contains(favs,x.id))
+          Card gap=8 radius=16 onTap={cur=r; serv=r.serv; have=[]; go recipe}
+            Dish "{r.kind}" h=120
+            Heading "{r.name}" level=3 font=serif
+            Row between middle
+              Text.small "{r.mins} min - {r.lvl}"
+              IconButton "favorite" color=#FFD9482B onTap={favs=without(favs,r.id); toast "Removed"}
+
+### Add a recipe
+state nName=""
+state nMeal="Dinner"
+state nDiet="Vegetarian"
+state nMins=30
+state nServ=4
+state nIng=[{"q":"","u":"g","n":"","a":"Pantry"}]
+state nSteps=[{"t":"","m":0}]
+state tried=false
+computed valid={length(trim(nName))>=3&&nMins>0&&nServ>0&&count(nIng,x=>trim(x.n)!=""&&x.q>0)>=1&&count(nSteps,x=>trim(x.t)!="")>=1}
+App fill=#FFFBF3
+  Sidebar fill=#FFF3E2
+    Brand "Mise" icon="skillet" font=serif color=#FF4F7A3A
+    NavItem "Recipes" icon="menu_book" onTap={go recipes}
+    NavItem "Week" icon="calendar_month" onTap={go week}
+    NavItem "Shopping list" icon="shopping_basket" onTap={go shopping}
+    NavItem "Favourites" icon="favorite" onTap={go favourites}
+  Main
+    Nav
+      Heading "Add a recipe" level=1 font=serif color=#FF4F7A3A
+      Row gap=8
+        Button.ghost "Cancel" onTap={go recipes}
+        Button "Save recipe" icon="check" onTap={tried=true; recipes=valid?append(recipes,{"id":length(recipes)+1,"name":trim(nName),"kind":"bowl","meal":nMeal,"diet":nDiet,"mins":nMins,"lvl":"Easy","rate":0,"serv":nServ,"kcal":0,"pro":0,"carb":0,"fat":0,"ing":filter(nIng,x=>trim(x.n)!=""),"steps":map(filter(nSteps,x=>trim(x.t)!=""),x=>with(x,"s",x.m*60))}):recipes; toast valid?"Recipe added":"Please fix the highlighted fields"; nName=valid?"":nName; go {valid?"recipes":"add-recipe"}}
+    Column pad=24 gap=16 scroll maxw=720
+      Card gap=12 radius=16
+        Input "Recipe name" "Grandma's apple cake" bind=nName required error={tried&&length(trim(nName))<3?"Give it a name of at least 3 letters":""}
+        Row gap=12
+          Select "Meal" items=["Breakfast","Lunch","Dinner"] bind=nMeal grow
+          Select "Diet" items=["Any","Vegetarian","Vegan"] bind=nDiet grow
+        Row gap=12
+          Input "Minutes" type=number bind=nMins grow error={tried&&nMins<=0?"Must be more than 0":""}
+          Input "Servings" type=number bind=nServ grow error={tried&&nServ<=0?"Must be more than 0":""}
+      Card gap=12 radius=16
+        Heading "Ingredients" level=3 font=serif
+        ReorderList bind=nIng handle
+          each row in nIng
+            Row gap=8 middle
+              Icon "drag_handle"
+              Input "Qty" type=number bind=row.q w=80
+              Select items=["g","kg","ml","litre","tsp","tbsp","slices","cloves","handful",""] bind=row.u w=110
+              Input "Ingredient" bind=row.n grow error={tried&&trim(row.n)==""&&index==0?"Add at least one ingredient":""}
+              Select items=["Produce","Dairy","Meat","Bakery","Pantry","Other"] bind=row.a w=120
+              IconButton "delete" disabled={length(nIng)==1} onTap={nIng=removeAt(nIng,index)}
+        Button.outline "Add ingredient" icon="add" onTap={nIng=append(nIng,{"q":"","u":"g","n":"","a":"Pantry"})}
+      Card gap=12 radius=16
+        Heading "Steps" level=3 font=serif
+        ReorderList bind=nSteps handle
+          each row in nSteps
+            Row gap=8 top
+              Icon "drag_handle"
+              Text.strong "{index+1}."
+              Input "Describe this step" multiline bind=row.t grow error={tried&&trim(row.t)==""&&index==0?"Add at least one step":""}
+              Input "Timer min" type=number bind=row.m w=90
+              IconButton "delete" disabled={length(nSteps)==1} onTap={nSteps=removeAt(nSteps,index)}
+        Button.outline "Add step" icon="add" onTap={nSteps=append(nSteps,{"t":"","m":0})}
+      if tried&&!valid
+        Text.danger "Some fields need your attention before this can be saved."

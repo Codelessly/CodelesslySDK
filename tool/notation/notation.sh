@@ -1,10 +1,17 @@
 #!/bin/bash
 # The compact notation's tools, runnable from a fresh checkout:
 #
-#   tool/notation/notation.sh prompt [--design-system <folder>]
-#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>]
+#   tool/notation/notation.sh prompt [--design-system <folder>] [--width <canvas width>] [--open]
+#   tool/notation/notation.sh expand <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]
+#   tool/notation/notation.sh vocabulary <folder or files> [--design-system <folder>] [--aliases <file.json>] [--no-aliases] [--out <dir>] [--sites <dir>]
 #   tool/notation/notation.sh apply <document.json> <ops.json> [--design-system <folder>] [--out <file.json>]
 #   tool/notation/notation.sh migrate <file.txt> [more files] [--design-system <folder>]... [--check] [--stdout] [--dart | --markdown]
+#
+# --open is the open vocabulary (codelessly_api docs/design/19-open-vocabulary.md):
+# prompt --open teaches the grammar and the core only; expand --open lets a
+# word the notation does not have stand in and records it; vocabulary reads a
+# corpus of answers (tool/vocabulary/corpus/<name>) and writes which words
+# they reached for and how each resolved (vocabulary.json, VOCABULARY.md).
 #
 # migrate is a one-off: it rewrites files written in the grammar codelessly_api
 # read up to 32.x (key:value, =name, key:=expression, -> actions) to the
@@ -21,8 +28,8 @@ set -e
 sdk="$(cd "$(dirname "$0")/../.." && pwd)"
 cmd="${1:-}"
 case "$cmd" in
-  prompt|expand|apply|migrate) shift ;;
-  *) echo "usage: tool/notation/notation.sh prompt|expand|apply|migrate [arguments] (see the head of this file)" >&2; exit 2 ;;
+  prompt|expand|apply|migrate|vocabulary) shift ;;
+  *) echo "usage: tool/notation/notation.sh prompt|expand|apply|migrate|vocabulary [arguments] (see the head of this file)" >&2; exit 2 ;;
 esac
 
 # Flutter's dart, codelessly_api from the checkout beside the SDK (the same

@@ -1,0 +1,291 @@
+### Home
+project tx=[{"id":1,"day":"2026-11-14","merchant":"Green Grocer","cat":"Food","acct":"Checking","amt":-42.8},{"id":2,"day":"2026-11-14","merchant":"Payroll","cat":"Income","acct":"Checking","amt":3200},{"id":3,"day":"2026-11-13","merchant":"City Transit","cat":"Transport","acct":"Card","amt":-18},{"id":4,"day":"2026-11-12","merchant":"Rent","cat":"Housing","acct":"Checking","amt":-1150},{"id":5,"day":"2026-11-11","merchant":"Cinema","cat":"Fun","acct":"Card","amt":-24.5}] saved
+project budgets=[{"cat":"Housing","limit":1200,"spent":1150},{"cat":"Food","limit":500,"spent":462},{"cat":"Transport","limit":120,"spent":60},{"cat":"Fun","limit":150,"spent":24.5}] saved
+project accounts=[{"name":"Checking","bal":4820.5},{"name":"Savings","bal":12400},{"name":"Card","bal":-612.3}] saved
+project cur="$" saved
+project mode="" saved
+state tab="home"
+App
+  Sidebar fill=#FFFFFFFF
+    Brand "Ledgerly" icon="account_balance_wallet"
+    NavItem "Home" icon="home" selected={tab=="home"} onTap={go home}
+    NavItem "Transactions" icon="receipt_long" onTap={go transactions}
+    NavItem "Budgets" icon="pie_chart" onTap={go budgets}
+    NavItem "Goals" icon="flag" onTap={go goals}
+    NavItem "Categories" icon="category" onTap={go categories}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "November" level=1
+      Button "Add transaction" icon="add" onTap={open addSheet}
+    Column pad=24 gap=16 scroll
+      Grid cols=2 gap=16
+        Card gap=12 center
+          Text.caption "Spent this month"
+          Stack center middle
+            Ring {sum(budgets,b=>b.spent)/sum(budgets,b=>b.limit)} size=180 color=#FF1B6B3A
+            Column center
+              Text "{money(sum(budgets,b=>b.limit)-sum(budgets,b=>b.spent),cur,0)}" size=36 weight=700
+              Text.muted "left"
+        Card gap=8
+          Text.strong "Accounts"
+          each a in accounts
+            Row between
+              Text "{a.name}"
+              Text "{money(a.bal,cur,2)}" weight=700 color={a.bal<0?"#FFC0452F":"#FF1B6B3A"}
+      Card gap=8
+        Row between
+          Text.strong "Recent"
+          Link "See all" onTap={go transactions}
+        each t in take(sortByDesc(tx,x=>x.day),5)
+          ListTile "{t.merchant}" subtitle="{t.cat}" trailing="{money(t.amt,cur,2)}"
+      Card gap=8
+        Text.strong "Past six months"
+        BarChart values=[2100,1980,2240,2050,2310,1688] labels=["Jun","Jul","Aug","Sep","Oct","Nov"] h=200 rounded
+
+Sheet#addSheet "Add transaction" show=phone stops=[0.5,0.95]
+  Column gap=12
+    Stepper "Amount" bind=amt step=1 min=0 holdRepeat prefix={cur}
+    SegmentedButton bind=kind items=["Expense","Income"]
+    Row scroll gap=8
+      each c in ["Food","Housing","Transport","Fun","Health"]
+        ChoiceChip "{c}" selected={cat==c} onTap={cat=c}
+    Select "Account" bind=acct items=["Checking","Savings","Card"]
+    DatePicker "Date" bind=date
+    Input "Note" bind=note multiline
+    Toggle "Repeat monthly" bind=repeat
+    Button "Save" disabled={amt<=0} onTap={tx=append(tx,{"id":length(tx)+1,"day":date,"merchant":coalesce(note,cat),"cat":cat,"acct":acct,"amt":kind=="Income"?amt:-amt}); amt=0; toast "Transaction saved"; announce "Transaction saved"; close}
+
+Dialog#addDialog "Add transaction" hide=phone
+  Column gap=12
+    Stepper "Amount" bind=amt step=1 min=0 holdRepeat prefix={cur}
+    SegmentedButton bind=kind items=["Expense","Income"]
+    Row wrap gap=8
+      each c in ["Food","Housing","Transport","Fun","Health"]
+        ChoiceChip "{c}" selected={cat==c} onTap={cat=c}
+    Select "Account" bind=acct items=["Checking","Savings","Card"]
+    DatePicker "Date" bind=date
+    Input "Note" bind=note multiline
+    Toggle "Repeat monthly" bind=repeat
+    Button "Save" disabled={amt<=0} onTap={tx=append(tx,{"id":length(tx)+1,"day":date,"merchant":coalesce(note,cat),"cat":cat,"acct":acct,"amt":kind=="Income"?amt:-amt}); amt=0; toast "Transaction saved"; announce "Transaction saved"; close}
+
+### Transactions
+project tx=[] saved
+project cur="$" saved
+state q=""
+state cats=[]
+state acctF="All"
+state range=[0,2000]
+state picked=[]
+state sel=0
+App
+  Sidebar
+    Brand "Ledgerly" icon="account_balance_wallet"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Transactions" icon="receipt_long" selected onTap={go transactions}
+    NavItem "Budgets" icon="pie_chart" onTap={go budgets}
+    NavItem "Goals" icon="flag" onTap={go goals}
+    NavItem "Categories" icon="category" onTap={go categories}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Transactions" level=1
+      Row gap=8
+        Input "Search" bind=q w=220 icon="search" forgiving
+        Button.outline "Filters" icon="tune" show=phone onTap={open filterSheet}
+        Button "Add" icon="add" onTap={open addSheet}
+    Column pad=24 gap=16 scroll
+      Card gap=12 hide=phone
+        Row gap=8 wrap
+          each c in ["Food","Housing","Transport","Fun","Health","Income"]
+            FilterChip "{c}" selected={contains(cats,c)} onTap={cats=contains(cats,c)?without(cats,c):append(cats,c)}
+          Select "Account" bind=acctF items=["All","Checking","Savings","Card"] w=160
+        Column gap=4
+          Row between
+            Text.fieldLabel "Amount"
+            Text.strong "{money(range[0],cur,0)} to {money(range[1],cur,0)}"
+          RangeSlider bind=range min=0 max=2000 step=10 labels=true
+      if length(picked)>0
+        Card gap=8 fill=#FFE8F3EC
+          Row between
+            Text.strong "{length(picked)} selected"
+            Row gap=8
+              Button.outline "Recategorise" onTap={open bulkCat}
+              Button.ghost "Clear" onTap={picked=[]}
+      each d in unique(map(sortByDesc(tx,x=>x.day),x=>x.day))
+        Text.sectionTitle "{formatDate(d,"EEE, MMM d")}"
+        Card gap=0
+          each t in filter(tx,x=>x.day==d && (length(cats)==0 || contains(cats,x.cat)) && (acctF=="All" || x.acct==acctF) && abs(x.amt)>=range[0] && abs(x.amt)<=range[1] && contains(lower(x.merchant+" "+x.cat),lower(q)))
+            SwipeAction onSwipeRight={sel=t.id; open catMenu} onSwipeLeft={sel=t.id; open confirmDel} rightLabel="Category" leftLabel="Delete" leftColor=#FFC0452F
+              Row middle gap=12 pad=12 menu=rowMenu onLongPress={sel=t.id; picked=append(picked,t.id)}
+                Checkbox bind=picked value={t.id} show={length(picked)>0}
+                Avatar "{t.cat}" size=36
+                Column grow
+                  Text.strong "{t.merchant}"
+                  Text.muted "{t.cat} · {t.acct}"
+                Text "{money(t.amt,cur,2)}" weight=700 color={t.amt>0?"#FF1B6B3A":"#FF1F2937"}
+                IconButton "more_vert" onTap={sel=t.id; open rowMenu}
+
+Menu#rowMenu end
+  MenuItem "Change category" icon="label" onTap={open catMenu}
+  MenuItem "Delete" icon="delete" onTap={open confirmDel}
+
+Menu#catMenu
+  each c in ["Food","Housing","Transport","Fun","Health"]
+    MenuItem "{c}" onTap={tx=updateWhere(tx,x=>x.id==sel,x=>with(x,"cat",c)); toast "Moved to {c}"}
+
+Dialog#confirmDel "Delete this transaction?" "This cannot be undone."
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button.destructive "Delete" onTap={tx=removeWhere(tx,x=>x.id==sel); toast "Deleted"; close}
+
+Dialog#bulkCat "Recategorise {length(picked)} transactions"
+  Row wrap gap=8
+    each c in ["Food","Housing","Transport","Fun","Health"]
+      Chip "{c}" onTap={tx=map(tx,x=>contains(picked,x.id)?with(x,"cat",c):x); picked=[]; toast "Recategorised"; close}
+
+Sheet#filterSheet "Filters"
+  Column gap=12
+    Row wrap gap=8
+      each c in ["Food","Housing","Transport","Fun","Health","Income"]
+        FilterChip "{c}" selected={contains(cats,c)} onTap={cats=contains(cats,c)?without(cats,c):append(cats,c)}
+    Select "Account" bind=acctF items=["All","Checking","Savings","Card"]
+    Text.strong "{money(range[0],cur,0)} to {money(range[1],cur,0)}"
+    RangeSlider bind=range min=0 max=2000 step=10
+    Button "Done" onTap={close}
+
+Sheet#addSheet "Add transaction" show=phone stops=[0.5,0.95]
+  Column gap=12
+    Stepper "Amount" bind=amt step=1 min=0 holdRepeat prefix={cur}
+    SegmentedButton bind=kind items=["Expense","Income"]
+    Row scroll gap=8
+      each c in ["Food","Housing","Transport","Fun","Health"]
+        ChoiceChip "{c}" selected={cat==c} onTap={cat=c}
+    Select "Account" bind=acct items=["Checking","Savings","Card"]
+    DatePicker "Date" bind=date
+    Input "Note" bind=note multiline
+    Toggle "Repeat monthly" bind=repeat
+    Button "Save" disabled={amt<=0} onTap={tx=append(tx,{"id":length(tx)+1,"day":date,"merchant":coalesce(note,cat),"cat":cat,"acct":acct,"amt":kind=="Income"?amt:-amt}); amt=0; announce "Transaction saved"; close}
+
+Dialog#addDialog "Add transaction" hide=phone
+  Column gap=12
+    Stepper "Amount" bind=amt step=1 min=0 holdRepeat prefix={cur}
+    SegmentedButton bind=kind items=["Expense","Income"]
+    Row wrap gap=8
+      each c in ["Food","Housing","Transport","Fun","Health"]
+        ChoiceChip "{c}" selected={cat==c} onTap={cat=c}
+    Select "Account" bind=acct items=["Checking","Savings","Card"]
+    DatePicker "Date" bind=date
+    Input "Note" bind=note multiline
+    Toggle "Repeat monthly" bind=repeat
+    Button "Save" disabled={amt<=0} onTap={tx=append(tx,{"id":length(tx)+1,"day":date,"merchant":coalesce(note,cat),"cat":cat,"acct":acct,"amt":kind=="Income"?amt:-amt}); amt=0; announce "Transaction saved"; close}
+
+### Budgets
+project budgets=[{"cat":"Housing","limit":1200,"spent":1150},{"cat":"Food","limit":500,"spent":462},{"cat":"Transport","limit":120,"spent":60},{"cat":"Fun","limit":150,"spent":24.5}] saved
+project cur="$" saved
+state income=3200 saved
+App
+  Sidebar
+    Brand "Ledgerly" icon="account_balance_wallet"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Transactions" icon="receipt_long" onTap={go transactions}
+    NavItem "Budgets" icon="pie_chart" selected onTap={go budgets}
+    NavItem "Goals" icon="flag" onTap={go goals}
+    NavItem "Categories" icon="category" onTap={go categories}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Budgets" level=1
+    Column pad=24 gap=16 scroll
+      Card gap=8
+        Row between
+          Text.strong "Total budgeted"
+          Text.strong "{money(sum(budgets,b=>b.limit),cur,0)} of {money(income,cur,0)} income"
+        Progress {sum(budgets,b=>b.limit)/income} rounded color={sum(budgets,b=>b.limit)>income?"#FFC0452F":"#FF1B6B3A"}
+        Text.muted "{money(income-sum(budgets,b=>b.limit),cur,0)} unassigned"
+      each b in budgets
+        Card gap=8
+          Row between
+            Text.strong "{b.cat}"
+            Text "{money(b.spent,cur,0)} / {money(b.limit,cur,0)}" color={b.spent/b.limit>0.9?"#FFC0452F":"#FF1F2937"}
+          Progress {min(1,b.spent/b.limit)} rounded color={b.spent/b.limit>0.9?"#FFC0452F":"#FF1B6B3A"}
+          if b.spent/b.limit>0.9
+            Row gap=4
+              Icon "warning" color=#FFC0452F
+              Text.danger "{round(b.spent/b.limit*100,0)}% used, {money(b.limit-b.spent,cur,0)} left"
+          Slider bind=b.limit min=0 max=2000 step=10 label="Limit"
+
+### Goals
+project cur="$" saved
+state goals=[{"name":"Emergency fund","target":10000,"saved":6400,"monthly":400},{"name":"Japan trip","target":4200,"saved":1300,"monthly":250},{"name":"New laptop","target":1800,"saved":900,"monthly":150}] saved
+App
+  Sidebar
+    Brand "Ledgerly" icon="account_balance_wallet"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Transactions" icon="receipt_long" onTap={go transactions}
+    NavItem "Budgets" icon="pie_chart" onTap={go budgets}
+    NavItem "Goals" icon="flag" selected onTap={go goals}
+    NavItem "Categories" icon="category" onTap={go categories}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Goals" level=1
+    Column pad=24 gap=16 scroll
+      each g in goals
+        Card gap=10
+          Row between
+            Text.heading "{g.name}"
+            Text.strong "{money(g.saved,cur,0)} of {money(g.target,cur,0)}"
+          Progress {g.saved/g.target} rounded
+          Slider bind=g.monthly min=0 max=1000 step=25 label="Monthly: {money(g.monthly,cur,0)}"
+          Text.muted "Projected: {g.monthly>0?formatDate(addMonths(today(),ceil((g.target-g.saved)/g.monthly)),"MMM yyyy"):"never at this rate"}"
+
+### Categories
+project cats=[{"name":"Food","color":"#FF1B6B3A"},{"name":"Housing","color":"#FF2F6FB5"},{"name":"Transport","color":"#FFE0A030"},{"name":"Fun","color":"#FFC0452F"},{"name":"Health","color":"#FF7A4FB0"}] saved
+state pickIdx=0
+App
+  Sidebar
+    Brand "Ledgerly" icon="account_balance_wallet"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Transactions" icon="receipt_long" onTap={go transactions}
+    NavItem "Budgets" icon="pie_chart" onTap={go budgets}
+    NavItem "Goals" icon="flag" onTap={go goals}
+    NavItem "Categories" icon="category" selected onTap={go categories}
+    NavItem "Settings" icon="settings" onTap={go settings}
+  Main
+    Nav
+      Heading "Categories" level=1
+    Column pad=24 gap=16 scroll
+      Card gap=0
+        ReorderableList bind=cats handle="drag_handle"
+          each c in cats
+            Row middle gap=12 pad=8
+              Icon "drag_handle" reorderHandle
+              Box w=24 h=24 radius=12 fill={c.color} onTap={pickIdx=index; open colorPick}
+              Input "Name" bind=c.name grow
+
+Popover#colorPick
+  Row gap=8 wrap
+    each col in ["#FF1B6B3A","#FF2F6FB5","#FFE0A030","#FFC0452F","#FF7A4FB0","#FF3A8F8F"]
+      Box w=32 h=32 radius=16 fill={col} onTap={cats=setAt(cats,pickIdx,with(cats[pickIdx],"color",col)); close}
+
+### Settings
+project cur="$" saved
+state firstDay=1 saved
+App
+  Sidebar
+    Brand "Ledgerly" icon="account_balance_wallet"
+    NavItem "Home" icon="home" onTap={go home}
+    NavItem "Transactions" icon="receipt_long" onTap={go transactions}
+    NavItem "Budgets" icon="pie_chart" onTap={go budgets}
+    NavItem "Goals" icon="flag" onTap={go goals}
+    NavItem "Categories" icon="category" onTap={go categories}
+    NavItem "Settings" icon="settings" selected onTap={go settings}
+  Main
+    Nav
+      Heading "Settings" level=1
+    Column pad=24 gap=16 maxw=480
+      Card gap=12
+        Select "Currency" bind=cur items=["$","€","£","¥"]
+        Select "First day of the month" bind=firstDay items=[1,5,15,25]
+        Text.muted "Your month runs from day {firstDay}."

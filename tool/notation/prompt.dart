@@ -8,6 +8,9 @@ import 'dart:io';
 import 'package:codelessly_api/codelessly_api.dart';
 
 Future<void> main(List<String> args) async {
+  // --open: the open-vocabulary prompt (the grammar and the core only; a
+  // design system's components are not listed).
+  final open = args.contains('--open');
   final w = args.indexOf('--width');
   final width = w >= 0 && w + 1 < args.length ? double.tryParse(args[w + 1]) ?? 390.0 : 390.0;
   final i = args.indexOf('--design-system');
@@ -31,6 +34,7 @@ Future<void> main(List<String> args) async {
       catalog: catalog,
       options: ds == null ? NotationOptions(width: width) : NotationOptions.fromDesignSystem(ds, width: width),
       designSystem: ds,
+      open: open,
     ),
   ));
 }

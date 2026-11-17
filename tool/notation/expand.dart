@@ -13,11 +13,23 @@
 // the page uses them by name and declares none of them on its screen.
 // What the notation could not read is written to stderr, one line each;
 // the exit status is 1 when there is any.
+//
+// With --open the vocabulary is open (codelessly_api
+// docs/design/19-open-vocabulary.md): a word the notation does not have is
+// not an error, it stands in (a type) or is left out (a parameter, a flag,
+// an event, an action verb), and every such word is recorded. --vocabulary
+// <file.json> writes the record (each use: its kind, the word, the line it
+// is on, and for a type what it was given); without it the uses are listed
+// on stderr. The aliases (names read as a word we have) are the built-in
+// ones and the design system's vocabulary.json; --aliases <file.json> adds a
+// table over both.
 import 'dart:convert';
 import 'dart:io';
 
 import 'package:codelessly_api/codelessly_api.dart';
 import 'package:codelessly_api/notation.dart';
+
+import 'vocabulary.dart' show loadVocabulary;
 
 Future<void> main(List<String> args) async {
   String? opt(String name) {
@@ -27,7 +39,7 @@ Future<void> main(List<String> args) async {
 
   final file = args.where((a) => !a.startsWith('--')).firstOrNull;
   if (file == null || !File(file).existsSync()) {
-    stderr.writeln('usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>]');
+    stderr.writeln('usage: expand.dart <file.txt> [--design-system <folder>] [--named] [--id <canvas id>] [--width <canvas width>] [--no-reflow] [--site <site.json>] [--out <file.json>] [--open [--vocabulary <file.json>]] [--aliases <file.json>]');
     exit(2);
   }
   DesignSystem? ds;
@@ -60,12 +72,28 @@ Future<void> main(List<String> args) async {
       stderr.writeln('$sitePath is not JSON (${e.message}): its variables were not read.');
     }
   }
-  final options = ds == null
-      ? NotationOptions(screen: screen, width: width, reflow: !args.contains('--no-reflow'), projectVariables: projectVariables)
-      : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'), reflow: !args.contains('--no-reflow'), projectVariables: projectVariables);
+  final open = args.contains('--open');
+  final NotationVocabulary aliases;
+  try {
+    aliases = loadVocabulary(dir: opt('--design-system'), file: opt('--aliases'));
+  } on Object catch (e) {
+    stderr.writeln('The alias table does not load: $e');
+    exit(2);
+  }
+  final options = (ds == null
+          ? NotationOptions(screen: screen, width: width, reflow: !args.contains('--no-reflow'), projectVariables: projectVariables)
+          : NotationOptions.fromDesignSystem(ds, screen: screen, width: width, named: args.contains('--named'), reflow: !args.contains('--no-reflow'), projectVariables: projectVariables))
+      .open(openVocabulary: open, vocabulary: aliases);
   final result = Catalog.run(catalog, () => parseNotation(File(file).readAsStringSync(), catalog: catalog, options: options));
   for (final issue in result.issues) {
     stderr.writeln('$file: $issue');
+  }
+  if (opt('--vocabulary') case final record?) {
+    File(record).writeAsStringSync('${const JsonEncoder.withIndent(' ').convert([for (final u in result.vocabulary) u.toJson()])}\n');
+  } else if (open) {
+    for (final u in result.vocabulary) {
+      stderr.writeln('$file: vocabulary: $u');
+    }
   }
   final json = const JsonEncoder.withIndent(' ').convert(result.document);
   if (opt('--out') case final out?) {

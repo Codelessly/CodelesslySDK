@@ -1,0 +1,263 @@
+### Board
+project view="board"
+project cards=[{"id":1,"title":"Fix login redirect loop","col":"progress","labels":["bug"],"assignee":"Maya Reyes","due":"2026-11-12","desc":"Users on Safari bounce between /login and /home.","checklist":[{"t":"Reproduce on Safari 17","d":true},{"t":"Patch cookie SameSite","d":false}],"comments":[{"by":"Dan Ortiz","t":"Seen in prod logs too."}],"archived":false},{"id":2,"title":"Design empty states","col":"todo","labels":["design"],"assignee":"Lena Park","due":"2026-11-25","desc":"","checklist":[],"comments":[],"archived":false},{"id":3,"title":"Upgrade to Postgres 16","col":"backlog","labels":["infra"],"assignee":"","due":"","desc":"","checklist":[],"comments":[],"archived":false},{"id":4,"title":"Invite teammates flow","col":"review","labels":["feature"],"assignee":"Dan Ortiz","due":"2026-11-20","desc":"","checklist":[{"t":"Email template","d":true},{"t":"Resend link","d":true}],"comments":[],"archived":false},{"id":5,"title":"Export to CSV","col":"progress","labels":["feature","bug"],"assignee":"Maya Reyes","due":"2026-11-18","desc":"","checklist":[],"comments":[],"archived":false},{"id":6,"title":"Rate limit public API","col":"progress","labels":["infra"],"assignee":"Dan Ortiz","due":"","desc":"","checklist":[],"comments":[],"archived":false},{"id":7,"title":"Onboarding copy pass","col":"done","labels":["design"],"assignee":"Lena Park","due":"2026-11-10","desc":"","checklist":[],"comments":[],"archived":false}] persist
+state cols=[{"id":"backlog","name":"Backlog","limit":8},{"id":"todo","name":"To do","limit":5},{"id":"progress","name":"In progress","limit":2},{"id":"review","name":"Review","limit":3},{"id":"done","name":"Done","limit":99}] persist
+state labelDefs=[{"id":"bug","name":"Bug","color":"#FFE5484D"},{"id":"feature","name":"Feature","color":"#FF2F6FED"},{"id":"design","name":"Design","color":"#FF8E4EC6"},{"id":"infra","name":"Infra","color":"#FF30A46C"}]
+state people=["Maya Reyes","Dan Ortiz","Lena Park"]
+state q=""
+state fLabels=[]
+state fAssignee="all"
+state fDue="any"
+state openId=0
+state dirty=false
+state colId=""
+state quick={}
+state focusId=0
+state newText=""
+state newTitle=""
+state newDesc=""
+state todayStr="2026-11-16"
+Shortcut "n" hint="N" description="New card" onPress={colId="backlog"; focus quick-backlog}
+Shortcut "/" hint="/" description="Search" onPress={focus search}
+Shortcut "v" hint="V" description="Switch view" onPress={go list}
+Shortcut "?" hint="?" description="Show shortcuts" onPress={open shortcuts}
+App
+  Sidebar w=220 fill=#FFF1F3F6
+    Brand "Northwind Board" icon="view_kanban"
+    NavItem "Board" icon="view_column" selected={true} onTap={go board}
+    NavItem "List" icon="table_rows" onTap={go list}
+    NavItem "Archive" icon="inventory_2" badge="{count(cards,c=>c.archived)}" onTap={go archive}
+    Spacer grow
+    Text.caption "Shortcuts" color=#FF6B7280
+    Row between
+      Text.small "New card"
+      Badge.neutral "N"
+    Row between
+      Text.small "Search"
+      Badge.neutral "/"
+    Row between
+      Text.small "Switch view"
+      Badge.neutral "V"
+  Main fill=#FFF1F3F6
+    Nav
+      Heading "Launch board" level=1
+      Row gap=8
+        Input#search "Search cards" hint="Press /" bind=q icon="search" w=220 clearable
+        SegmentedButton items=["Board","List"] bind=view onChange={go lower(result)}
+        Button "New card" icon="add" onTap={colId="backlog"; focus quick-backlog}
+    Column pad=16 gap=12
+      Row gap=8 wrap middle
+        Text.caption "Filters" color=#FF6B7280
+        each l in labelDefs
+          FilterChip "{l.name}" selected={contains(fLabels,l.id)} dot={l.color} onTap={fLabels=contains(fLabels,l.id)?without(fLabels,l.id):append(fLabels,l.id)}
+        Select "Assignee" items=["all","Maya Reyes","Dan Ortiz","Lena Park"] bind=fAssignee w=150
+        Select "Due" items=["any","overdue","this week","none"] bind=fDue w=130
+        Spacer grow
+        Text.muted "{count(cards,c=>!c.archived && (q=='' || contains(lower(c.title),lower(q))) && (length(fLabels)==0 || any(c.labels,x=>contains(fLabels,x))) && (fAssignee=='all' || c.assignee==fAssignee) && (fDue=='any' || (fDue=='overdue' && c.due!='' && c.due<todayStr) || (fDue=='none' && c.due=='')))} cards"
+        Button.ghost "Clear filters" hidden={q=='' && length(fLabels)==0 && fAssignee=='all' && fDue=='any'} onTap={q=''; fLabels=[]; fAssignee='all'; fDue='any'}
+      if count(cards,c=>!c.archived && (q=='' || contains(lower(c.title),lower(q))) && (length(fLabels)==0 || any(c.labels,x=>contains(fLabels,x))) && (fAssignee=='all' || c.assignee==fAssignee)) == 0
+        Column center middle gap=8 pad=48
+          Icon "search_off" size=40 color=#FF9CA3AF
+          Text.strong "No cards match these filters"
+          Button.outline "Clear filters" onTap={q=''; fLabels=[]; fAssignee='all'; fDue='any'}
+      Row scroll gap=12 top grow
+        each col in cols
+          Column w=272 gap=8 pad=8 radius=8 fill=#FFE7EAF0 drop=card onDrop={cards=updateWhere(cards,c=>c.id==result.data,c=>with(c,"col",col.id))}
+            Row between middle pad=4 fill={count(cards,c=>c.col==col.id && !c.archived) > col.limit ? "#FFFFE9B8" : "#00000000"} radius=6
+              Row gap=6 middle
+                Text.strong "{col.name}"
+                Badge.neutral "{count(cards,c=>c.col==col.id && !c.archived)}/{col.limit}" hidden={col.limit==99}
+                Badge.neutral "{count(cards,c=>c.col==col.id && !c.archived)}" hidden={col.limit!=99}
+                Icon "warning" size=16 color=#FFB45309 hidden={count(cards,c=>c.col==col.id && !c.archived) <= col.limit}
+              IconButton "more_horiz" tooltip="Column menu" onTap={colId=col.id; open colMenu}
+            Column gap=8 scroll
+              each card in sortBy(filter(cards,c=>c.col==col.id && !c.archived && (q=='' || contains(lower(c.title),lower(q))) && (length(fLabels)==0 || any(c.labels,x=>contains(fLabels,x))) && (fAssignee=='all' || c.assignee==fAssignee) && (fDue=='any' || (fDue=='overdue' && c.due!='' && c.due<todayStr) || (fDue=='none' && c.due=='') || fDue=='this week')),c=>indexOf(cards,c))
+                Card#card-{card.id} gap=6 pad=10 fill=#FFFFFFFF radius=6 focusable focusRing=#FF2F6FED selected={focusId==card.id} drag=card(card.id) drop=card onDrop={cards=moveBefore(cards,result.data,card.id,card.col)} onTap={openId=card.id; dirty=false; open cardDialog} onFocus={focusId=card.id} onKey="enter"={openId=card.id; open cardDialog} onKey="alt+right"={cards=updateWhere(cards,c=>c.id==card.id,c=>with(c,"col",cols[min(length(cols)-1,indexOf(map(cols,x=>x.id),card.col)+1)].id)); toast "Moved to {cols[min(length(cols)-1,indexOf(map(cols,x=>x.id),card.col)+1)].name}"} onKey="alt+left"={cards=updateWhere(cards,c=>c.id==card.id,c=>with(c,"col",cols[max(0,indexOf(map(cols,x=>x.id),card.col)-1)].id)); toast "Moved to {cols[max(0,indexOf(map(cols,x=>x.id),card.col)-1)].name}"} onKey="alt+up"={cards=moveUp(cards,card.id)} onKey="alt+down"={cards=moveDown(cards,card.id)}
+                  Row gap=4 wrap
+                    each lb in card.labels
+                      Row gap=4 middle
+                        Box w=8 h=8 radius=4 fill={find(labelDefs,l=>l.id==lb).color}
+                        Text.caption "{find(labelDefs,l=>l.id==lb).name}"
+                  Text.strong "{card.title}" size=14
+                  if length(card.checklist) > 0
+                    Row gap=6 middle
+                      Icon "checklist" size=14 color=#FF6B7280
+                      Text.caption "{count(card.checklist,x=>x.d)}/{length(card.checklist)}"
+                      Progress {count(card.checklist,x=>x.d)/length(card.checklist)} grow
+                  Row between middle
+                    Row gap=4 middle
+                      Icon "schedule" size=14 color={card.due!='' && card.due<todayStr && card.col!='done' ? "#FFD92D20" : "#FF6B7280"} hidden={card.due==''}
+                      Text.caption "{formatDate(card.due,'MMM d')}" color={card.due<todayStr && card.col!='done' ? "#FFD92D20" : "#FF6B7280"} hidden={card.due==''}
+                      Badge.error "Overdue" hidden={card.due=='' || card.due>=todayStr || card.col=='done'}
+                    Avatar "{card.assignee}" size=24 hidden={card.assignee==''}
+            Input#quick-{col.id} "" "Add a card, press Enter" bind=newText icon="add" onSubmit={cards=append(cards,{"id":max(100,sum(cards,c=>c.id))+1,"title":newText,"col":col.id,"labels":[],"assignee":"","due":"","desc":"","checklist":[],"comments":[],"archived":false}); newText=""} onKey="escape"={newText=""; blur}
+  Menu#colMenu
+    MenuItem "Sort by due date" icon="event" onTap={cards=concat(filter(cards,c=>c.col!=colId),sortBy(filter(cards,c=>c.col==colId),c=>coalesce(c.due,"9999")))}
+    MenuItem "Sort by title" icon="sort_by_alpha" onTap={cards=concat(filter(cards,c=>c.col!=colId),sortBy(filter(cards,c=>c.col==colId),c=>c.title))}
+    Divider
+    MenuItem "Clear column" icon="delete_sweep" danger onTap={open confirmClear}
+  Dialog#confirmClear "Clear this column?" "{count(cards,c=>c.col==colId && !c.archived)} cards will be moved to the archive."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Clear column" onTap={cards=updateWhere(cards,c=>c.col==colId,c=>with(c,"archived",true)); toast "Column cleared"; close}
+  Dialog#shortcuts "Keyboard shortcuts"
+    Column gap=8
+      Row between
+        Text "New card"
+        Badge.neutral "N"
+      Row between
+        Text "Search"
+        Badge.neutral "/"
+      Row between
+        Text "Switch view"
+        Badge.neutral "V"
+      Row between
+        Text "Move card to next column"
+        Badge.neutral "Alt + Right"
+      Row between
+        Text "Move card to previous column"
+        Badge.neutral "Alt + Left"
+      Row between
+        Text "Move card up or down"
+        Badge.neutral "Alt + Up / Down"
+      Row between
+        Text "Open focused card"
+        Badge.neutral "Enter"
+  Dialog#cardDialog "{find(cards,c=>c.id==openId).title}" w=640 dismissible={!dirty} onDismissBlocked={toast "Save or discard your changes first"}
+    Column gap=16
+      Input "Title" bind=cardTitle value={find(cards,c=>c.id==openId).title} onChange={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"title",result))}
+      Input "Description" "Add more detail" multiline value={find(cards,c=>c.id==openId).desc} onChange={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"desc",result))}
+      Row gap=12
+        Column grow gap=4
+          Text.fieldLabel "Assignee"
+          Button.outline "{coalesce(find(cards,c=>c.id==openId).assignee,'Unassigned')}" icon="person" trailing="expand_more" onTap={open assigneeMenu}
+        Column grow gap=4
+          Text.fieldLabel "Due date"
+          DatePicker value={find(cards,c=>c.id==openId).due} onChange={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"due",result))}
+      Column gap=6
+        Text.fieldLabel "Labels"
+        Row gap=8 wrap
+          each l in labelDefs
+            FilterChip "{l.name}" dot={l.color} selected={contains(find(cards,c=>c.id==openId).labels,l.id)} onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"labels",contains(c.labels,l.id)?without(c.labels,l.id):append(c.labels,l.id)))}
+      Column gap=8
+        Row between middle
+          Text.fieldLabel "Checklist"
+          Text.caption "{count(find(cards,c=>c.id==openId).checklist,x=>x.d)} of {length(find(cards,c=>c.id==openId).checklist)} done"
+        Progress {length(find(cards,c=>c.id==openId).checklist)==0 ? 0 : count(find(cards,c=>c.id==openId).checklist,x=>x.d)/length(find(cards,c=>c.id==openId).checklist)}
+        each item in find(cards,c=>c.id==openId).checklist
+          Row gap=8 middle drag=check(index) drop=check onDrop={cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",moveItem(c.checklist,result.data,index))); dirty=true}
+            Icon "drag_indicator" size=18 color=#FF9CA3AF
+            Checkbox "{item.t}" selected={item.d} grow onChange={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",setAt(c.checklist,index,with(item,"d",result))))}
+            IconButton "arrow_upward" size=small hidden={index==0} onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",moveItem(c.checklist,index,index-1)))}
+            IconButton "arrow_downward" size=small hidden={index==length(find(cards,c=>c.id==openId).checklist)-1} onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",moveItem(c.checklist,index,index+1)))}
+            IconButton "close" size=small tooltip="Remove" onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",removeAt(c.checklist,index)))}
+        Input "" "Add an item" bind=newItem icon="add" onSubmit={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"checklist",append(c.checklist,{"t":newItem,"d":false}))); newItem=""}
+      Column gap=8
+        Text.fieldLabel "Comments"
+        Column gap=8 scroll h=140 followLatest
+          each cm in find(cards,c=>c.id==openId).comments
+            Row gap=8 top
+              Avatar "{cm.by}" size=28
+              Column gap=2 grow
+                Text.strong "{cm.by}" size=13
+                Text "{cm.t}"
+        Row gap=8
+          Input "" "Write a comment" bind=newComment grow onSubmit={cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"comments",append(c.comments,{"by":"Maya Reyes","t":newComment}))); newComment=""}
+          Button "Send" onTap={cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"comments",append(c.comments,{"by":"Maya Reyes","t":newComment}))); newComment=""}
+      Row between
+        Button.destructive "Delete" icon="delete" onTap={open confirmDelete}
+        Row gap=8
+          Button.outline "Archive" onTap={cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"archived",true)); toast "Archived"; dirty=false; close}
+          Button "Done" onTap={dirty=false; close}
+  Menu#assigneeMenu
+    each p in people
+      MenuItem "{p}" icon="person" onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"assignee",p))}
+    Divider
+    MenuItem "Unassigned" icon="person_off" onTap={dirty=true; cards=updateWhere(cards,c=>c.id==openId,c=>with(c,"assignee",""))}
+  Dialog#confirmDelete "Delete this card?" "This cannot be undone."
+    Row end gap=8
+      Button.outline "Cancel" onTap={close}
+      Button.destructive "Delete card" onTap={cards=removeWhere(cards,c=>c.id==openId); dirty=false; toast "Card deleted"; close; close}
+
+### List view
+state sortKey="title"
+state sortDir=1
+state sel=[]
+state anchor=0
+state q=""
+state moveTo="todo"
+Shortcut "v" hint="V" description="Switch view" onPress={go board}
+Shortcut "/" hint="/" description="Search" onPress={focus search}
+Shortcut "ctrl+a" description="Select all" onPress={sel=map(filter(cards,c=>!c.archived),c=>c.id)}
+Shortcut "escape" description="Clear selection" onPress={sel=[]}
+App
+  Sidebar w=220 fill=#FFF1F3F6
+    Brand "Northwind Board" icon="view_kanban"
+    NavItem "Board" icon="view_column" onTap={go board}
+    NavItem "List" icon="table_rows" selected={true} onTap={go list}
+    NavItem "Archive" icon="inventory_2" badge="{count(cards,c=>c.archived)}" onTap={go archive}
+  Main fill=#FFF1F3F6
+    Nav
+      Heading "List" level=1
+      Row gap=8
+        Input#search "Search cards" hint="Press /" bind=q icon="search" w=220 clearable
+        Button "New card" icon="add" onTap={go board}
+    Column pad=16 gap=12
+      if length(sel) > 0
+        Row gap=8 middle pad=8 radius=8 fill=#FFDCE8FD
+          Text.strong "{length(sel)} selected"
+          Spacer grow
+          Select "Move to" items=["backlog","todo","progress","review","done"] bind=moveTo w=140
+          Button.outline "Move" icon="drive_file_move" onTap={cards=map(cards,c=>contains(sel,c.id)?with(c,"col",moveTo):c); toast "Moved {length(sel)} cards"; sel=[]}
+          Button.outline "Archive" icon="inventory_2" onTap={cards=map(cards,c=>contains(sel,c.id)?with(c,"archived",true):c); toast "Archived {length(sel)} cards"; sel=[]}
+          Button.ghost "Clear" onTap={sel=[]}
+      Card pad=0
+        Row gap=8 pad=10 border-bottom=#FFE5E7EB fill=#FFF9FAFB
+          Checkbox "" w=28 selected={length(sel)>0 && length(sel)==count(cards,c=>!c.archived)} onChange={sel=result?map(filter(cards,c=>!c.archived),c=>c.id):[]}
+          Button.ghost "Title {sortKey=='title'?(sortDir==1?'▲':'▼'):''}" grow onTap={sortDir=sortKey=="title"?-sortDir:1; sortKey="title"}
+          Button.ghost "Column {sortKey=='col'?(sortDir==1?'▲':'▼'):''}" w=110 onTap={sortDir=sortKey=="col"?-sortDir:1; sortKey="col"}
+          Button.ghost "Assignee {sortKey=='assignee'?(sortDir==1?'▲':'▼'):''}" w=130 onTap={sortDir=sortKey=="assignee"?-sortDir:1; sortKey="assignee"}
+          Button.ghost "Due {sortKey=='due'?(sortDir==1?'▲':'▼'):''}" w=100 onTap={sortDir=sortKey=="due"?-sortDir:1; sortKey="due"}
+        each row in (sortDir==1 ? sortBy(filter(cards,c=>!c.archived && (q=='' || contains(lower(c.title),lower(q)))),c=>c[sortKey]) : sortByDesc(filter(cards,c=>!c.archived && (q=='' || contains(lower(c.title),lower(q)))),c=>c[sortKey]))
+          Row#row-{row.id} gap=8 pad=10 middle border-bottom=#FFF1F3F6 selected={contains(sel,row.id)} fill={contains(sel,row.id)?"#FFEAF1FE":"#FFFFFFFF"} focusable focusRing=#FF2F6FED onTap={sel=[row.id]; anchor=index} onTap.shift={sel=map(slice(sortBy(filter(cards,c=>!c.archived),c=>c[sortKey]),min(anchor,index),max(anchor,index)+1),c=>c.id)} onTap.ctrl={sel=contains(sel,row.id)?without(sel,row.id):append(sel,row.id); anchor=index} onKey="space"={sel=contains(sel,row.id)?without(sel,row.id):append(sel,row.id)} onKey="shift+down"={sel=append(sel,filter(cards,c=>!c.archived)[min(index+1,length(cards)-1)].id)} onDoubleTap={go board}
+            Checkbox "" w=28 selected={contains(sel,row.id)} onChange={sel=result?append(sel,row.id):without(sel,row.id)}
+            Column grow gap=2
+              Text.strong "{row.title}"
+              Row gap=6
+                each lb in row.labels
+                  Row gap=3 middle
+                    Box w=8 h=8 radius=4 fill={find(labelDefs,l=>l.id==lb).color}
+                    Text.caption "{find(labelDefs,l=>l.id==lb).name}"
+            Text.muted "{find(cols,x=>x.id==row.col).name}" w=110
+            Text "{coalesce(row.assignee,'Unassigned')}" w=130
+            Text "{row.due==''?'No date':formatDate(row.due,'MMM d')}" w=100 color={row.due!='' && row.due<todayStr && row.col!='done' ? "#FFD92D20" : "#FF374151"}
+      Text.caption "Click selects, Shift extends the range, Ctrl adds or removes one row." color=#FF6B7280
+
+### Archive
+state q=""
+Shortcut "v" hint="V" description="Switch view" onPress={go board}
+App
+  Sidebar w=220 fill=#FFF1F3F6
+    Brand "Northwind Board" icon="view_kanban"
+    NavItem "Board" icon="view_column" onTap={go board}
+    NavItem "List" icon="table_rows" onTap={go list}
+    NavItem "Archive" icon="inventory_2" badge="{count(cards,c=>c.archived)}" selected={true} onTap={go archive}
+  Main fill=#FFF1F3F6
+    Nav
+      Heading "Archive" level=1
+      Input "Search archive" bind=q icon="search" w=220 clearable
+    Column pad=16 gap=8
+      if count(cards,c=>c.archived) == 0
+        Column center middle gap=8 pad=48
+          Icon "inventory_2" size=40 color=#FF9CA3AF
+          Text.strong "Nothing archived"
+          Text.muted "Archived cards appear here and can be restored."
+      each a in filter(cards,c=>c.archived && (q=='' || contains(lower(c.title),lower(q))))
+        Card gap=8 pad=12
+          Row between middle
+            Column gap=2
+              Text.strong "{a.title}"
+              Text.caption "{find(cols,x=>x.id==a.col).name} · {coalesce(a.assignee,'Unassigned')}"
+            Row gap=8
+              Button.outline "Restore" icon="restore" onTap={cards=updateWhere(cards,c=>c.id==a.id,c=>with(c,"archived",false)); toast "Restored to {find(cols,x=>x.id==a.col).name}"}
+              Button.ghost "Delete" onTap={cards=removeWhere(cards,c=>c.id==a.id); toast "Card deleted"}

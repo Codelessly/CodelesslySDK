@@ -1,0 +1,8 @@
+{
+  "parameters": {
+    "Tabs": {"items": "tabs"}
+  },
+  "flags": {
+    "Rating": {"readonly": "readOnly"}
+  }
+}

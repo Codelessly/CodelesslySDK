@@ -1,0 +1,228 @@
+### Editor
+state tracks=[{"id":"voice","name":"Voice","color":"#FF2EC4B6","mute":false,"solo":false,"vol":0.8},{"id":"guest","name":"Guest","color":"#FFFF6B5E","mute":false,"solo":false,"vol":0.75},{"id":"music","name":"Music","color":"#FFF2B84B","mute":false,"solo":false,"vol":0.4}] saved=true
+state clips=[{"id":"c1","track":"voice","name":"Intro","start":0,"len":24,"gain":0,"fadeIn":0.5,"fadeOut":0.5,"color":"#FF2EC4B6"},{"id":"c2","track":"voice","name":"Question 1","start":26,"len":41,"gain":0,"fadeIn":0,"fadeOut":0,"color":"#FF2EC4B6"},{"id":"c3","track":"guest","name":"Answer 1","start":68,"len":112,"gain":2,"fadeIn":0,"fadeOut":1,"color":"#FFFF6B5E"},{"id":"c4","track":"music","name":"Theme bed","start":0,"len":90,"gain":-12,"fadeIn":3,"fadeOut":6,"color":"#FFF2B84B"}] saved=true
+state sel=["c2"]
+state playhead=0
+state playing=false
+state speed="1x"
+state zoom=8
+state loopOn=false
+state loopA=20
+state loopB=60
+state snap=true
+state past=[]
+state future=[]
+state markers=[{"id":"m1","name":"Cold open","t":0},{"id":"m2","name":"Guest joins","t":68}] saved=true
+state exportProgress=0
+state exporting=false
+state clipMenu=""
+every 100 when playing onTick={playhead=playhead+0.1*(speed=="2x"?2:speed=="1.5x"?1.5:speed=="0.5x"?0.5:1)}
+every 100 when playing && loopOn onTick={playhead=playhead>=loopB?loopA:playhead}
+every 200 when exporting onTick={exportProgress=min(1,exportProgress+0.04); exporting=exportProgress<1}
+Shortcut "Space" onPress={playing=!playing}
+Shortcut "S" onPress={clips=flatMap(clips,c=>c.id==first(sel)&&playhead>c.start&&playhead<c.start+c.len?[with(c,"len",playhead-c.start),with(with(with(c,"id",c.id+"b"),"start",playhead),"len",c.start+c.len-playhead)]:[c]); past=append(past,clips)}
+Shortcut "Delete" onPress={sel.length>1?open confirmDelete:clips=removeWhere(clips,c=>contains(sel,c.id))}
+Shortcut "ctrl+d" onPress={clips=concat(clips,map(filter(clips,c=>contains(sel,c.id)),c=>with(with(c,"id",c.id+"d"),"start",c.start+c.len)))}
+Shortcut "ctrl+z" onPress={clips=last(past); future=append(future,clips); past=removeAt(past,length(past)-1)}
+Shortcut "ctrl+shift+z" onPress={clips=last(future); future=removeAt(future,length(future)-1)}
+Shortcut "ArrowLeft" onPress={clips=updateWhere(clips,c=>contains(sel,c.id),c=>with(c,"start",max(0,c.start-(snap?1:0.1))))}
+Shortcut "ArrowRight" onPress={clips=updateWhere(clips,c=>contains(sel,c.id),c=>with(c,"start",c.start+(snap?1:0.1)))}
+Shortcut "ArrowUp" onPress={clips=updateWhere(clips,c=>contains(sel,c.id),c=>with(c,"track",c.track=="music"?"guest":"voice"))}
+Shortcut "ArrowDown" onPress={clips=updateWhere(clips,c=>contains(sel,c.id),c=>with(c,"track",c.track=="voice"?"guest":"music"))}
+Shortcut "alt+ArrowLeft" onPress={clips=updateWhere(clips,c=>contains(sel,c.id),c=>with(with(c,"start",c.start+0.5),"len",max(0.5,c.len-0.5)))}
+Shortcut "alt+ArrowRight" onPress={clips=updateWhere(clips,c=>contains(sel,c.id),c=>with(c,"len",c.len+0.5))}
+Shortcut "M" onPress={markers=append(markers,{"id":"m"+length(markers),"name":"Marker "+(length(markers)+1),"t":playhead})}
+Shortcut "L" onPress={loopOn=!loopOn}
+Shortcut "Home" onPress={playhead=0}
+Shortcut "End" onPress={playhead=max(map(clips,c=>c.start+c.len))}
+Shortcut "?" onPress={open shortcuts}
+App
+  Sidebar w=240 fill=#FF1B1D21
+    Brand "Cutline" icon="content_cut"
+    Text.caption "EPISODE 42: The Long Way Round" color=#FF8A8F98
+    NavItem "Timeline" icon="view_timeline" selected={true}
+    NavItem "Library" icon="library_music" onTap={open library}
+    NavItem "Markers" icon="flag" badge="{length(markers)}" onTap={open markersPanel}
+    Spacer grow
+    Button.outline "Export" icon="ios_share" onTap={exportProgress=0; open exportDlg}
+    NavItem "Shortcuts" icon="keyboard" onTap={open shortcuts}
+  Main fill=#FF121316
+    Nav
+      Row gap=8 middle
+        IconButton "undo" onTap={clips=last(past); future=append(future,clips); past=removeAt(past,length(past)-1)}
+        IconButton "redo" onTap={clips=last(future); future=removeAt(future,length(future)-1)}
+        IconButton "content_cut" tooltip="Split at playhead (S)" onTap={clips=flatMap(clips,c=>c.id==first(sel)&&playhead>c.start&&playhead<c.start+c.len?[with(c,"len",playhead-c.start),with(with(with(c,"id",c.id+"b"),"start",playhead),"len",c.start+c.len-playhead)]:[c])}
+        Toggle "Snap" bind=snap
+      Row gap=8 middle
+        IconButton "skip_previous" onTap={playhead=0}
+        IconButton "{playing?'pause':'play_arrow'}" size=large onTap={playing=!playing}
+        IconButton "skip_next" onTap={playhead=max(map(clips,c=>c.start+c.len))}
+        Text.mono "{formatTime(playhead)} / 03:00" color=#FFFFD23F size=18
+        ToggleButton "loop" selected={loopOn} onTap={loopOn=!loopOn}
+        SegmentedButton bind=speed items=["0.5x","1x","1.5x","2x"]
+      Row gap=8 middle
+        Icon "zoom_out"
+        Slider bind=zoom min=1 max=40 w=140
+        Icon "zoom_in"
+        Text.caption "{zoom} px/s" color=#FF8A8F98
+    Row grow
+      Column grow
+        Timeline zoom={zoom} playhead={playhead} onZoom={zoom=result} onScrubTo={playhead=result} scrollX heads=pinned wheelZoom
+          Ruler unit="mm:ss" loopA={loopA} loopB={loopB} loopVisible={loopOn} onLoopChange={loopA=result.a; loopB=result.b} onScrub={playhead=result} markers={markers} onMarkerTap={playhead=result.t}
+          Playhead at={playhead} color=#FFFFFFFF draggable onMove={playhead=result}
+          each tr in tracks
+            Track#{tr.id} name={tr.name} h={tr.id=="voice"?160:96} drop=clip,library onDrop={clips=result.kind=="library"?append(clips,{"id":"n"+length(clips),"track":tr.id,"name":result.data.name,"start":result.at,"len":result.data.len,"gain":0,"fadeIn":0,"fadeOut":0,"color":tr.color}):updateWhere(clips,c=>c.id==result.data,c=>with(with(c,"track",tr.id),"start",result.at)); saved=false; past=append(past,clips)}
+              Head w=200 pad=8 gap=6
+                Row between middle
+                  Text.strong "{tr.name}" color={tr.color}
+                  Row gap=4
+                    Toggle.mini "M" bind=tr.mute
+                    Toggle.mini "S" bind=tr.solo
+                Slider bind=tr.vol min=0 max=1
+              each c in filter(clips,c=>c.track==tr.id)
+                Clip#{c.id} "{c.name}" start={c.start} len={c.len} fill={c.color} selected={contains(sel,c.id)} drag=clip(c.id) snap={snap} snapTo=edges,playhead trimStart trimEnd fadeIn={c.fadeIn} fadeOut={c.fadeOut} gain={c.gain} onTap={sel=[c.id]} onShiftTap={sel=append(sel,c.id)} onCtrlTap={sel=contains(sel,c.id)?without(sel,c.id):append(sel,c.id)} onMove={clips=updateWhere(clips,x=>contains(sel,x.id),x=>with(x,"start",max(0,x.start+result.delta))); saved=false} onTrim={clips=updateWhere(clips,x=>x.id==c.id,x=>with(with(x,"start",result.start),"len",result.len)); saved=false} menu=clipMenuList onContext={clipMenu=c.id}
+                  Waveform seed={c.id} color=#66FFFFFF
+          Selection marquee onSelect={sel=map(filter(clips,c=>c.start<result.t2&&c.start+c.len>result.t1),c=>c.id)}
+        Row gap=16 pad=12 between middle
+          Row gap=8
+            Button.outline "Add marker" icon="flag" onTap={markers=append(markers,{"id":"m"+length(markers),"name":"Marker "+(length(markers)+1),"t":playhead})}
+            Button.outline "Split" icon="content_cut" onTap={clips=flatMap(clips,c=>c.id==first(sel)&&playhead>c.start&&playhead<c.start+c.len?[with(c,"len",playhead-c.start),with(with(with(c,"id",c.id+"b"),"start",playhead),"len",c.start+c.len-playhead)]:[c])}
+            Button.outline "Duplicate" icon="content_copy" onTap={clips=concat(clips,map(filter(clips,c=>contains(sel,c.id)),c=>with(with(c,"id",c.id+"d"),"start",c.start+c.len)))}
+            Button.destructive "Delete" icon="delete" onTap={sel.length>1?open confirmDelete:clips=removeWhere(clips,c=>contains(sel,c.id))}
+          Row gap=8 middle
+            Text.caption "{length(sel)} selected" color=#FF8A8F98
+            Badge.success "Saved" visible={saved}
+            Badge.warning "Unsaved" visible={!saved}
+      Pane w=300 pad=16 gap=12 fill=#FF1B1D21
+        if length(sel)==1
+          Text.panelTitle "Clip"
+          Input "Name" bind=find(clips,c=>c.id==first(sel)).name
+          Row gap=8
+            Input "Start (s)" type=number step=0.1 bind=find(clips,c=>c.id==first(sel)).start
+            Input "Length (s)" type=number step=0.1 bind=find(clips,c=>c.id==first(sel)).len
+          Text.fieldLabel "Gain {find(clips,c=>c.id==first(sel)).gain} dB"
+          Slider bind=find(clips,c=>c.id==first(sel)).gain min=-24 max=12
+          Text.fieldLabel "Fade in"
+          Slider bind=find(clips,c=>c.id==first(sel)).fadeIn min=0 max=10
+          Text.fieldLabel "Fade out"
+          Slider bind=find(clips,c=>c.id==first(sel)).fadeOut min=0 max=10
+          Text.fieldLabel "Colour"
+          ColorPicker bind=find(clips,c=>c.id==first(sel)).color swatches=["#FF2EC4B6","#FFFF6B5E","#FFF2B84B","#FF8E7CFF"]
+        if length(sel)!=1
+          Text.muted "Choose one clip to edit it. {length(sel)} chosen."
+  Menu#clipMenuList
+    MenuItem "Duplicate" icon="content_copy" onTap={clips=concat(clips,map(filter(clips,c=>c.id==clipMenu),c=>with(with(c,"id",c.id+"d"),"start",c.start+c.len)))}
+    MenuItem "Split at playhead" icon="content_cut" onTap={sel=[clipMenu]; clips=flatMap(clips,c=>c.id==clipMenu&&playhead>c.start&&playhead<c.start+c.len?[with(c,"len",playhead-c.start),with(with(with(c,"id",c.id+"b"),"start",playhead),"len",c.start+c.len-playhead)]:[c])}
+    MenuItem "Delete" icon="delete" onTap={sel.length>1?open confirmDelete:clips=removeWhere(clips,c=>c.id==clipMenu)}
+  Dialog#confirmDelete "Delete {length(sel)} clips?" "This removes every chosen clip from the timeline."
+    Row end gap=8
+      Button.ghost "Cancel" onTap={close}
+      Button.destructive "Delete" onTap={clips=removeWhere(clips,c=>contains(sel,c.id)); sel=[]; close}
+  Dialog#exportDlg "Export episode" "Mix down all three tracks"
+    Select "Format" bind=fmt items=["MP3","WAV","FLAC","AAC"]
+    SegmentedButton bind=quality items=["Draft","Good","Best"]
+    if exporting || exportProgress>0
+      Progress bind=exportProgress
+      Text.mono "{round(exportProgress*100,0)}%"
+    if exportProgress>=1
+      Row gap=8 middle
+        Icon "check_circle" color=#FF2EC4B6
+        Text.success "Done: episode-42.{lower(fmt)}"
+    Row end gap=8
+      Button.ghost "Cancel" onTap={exporting=false; exportProgress=0; close}
+      Button "Start export" onTap={exporting=true; exportProgress=0.01} hidden={exporting||exportProgress>=1}
+      Button "Download" onTap={emit download; close} hidden={exportProgress<1}
+  Dialog#shortcuts "Keyboard shortcuts"
+    Column gap=6
+      Row between
+        Text "Play / pause"
+        Text.mono "Space"
+      Row between
+        Text "Split at playhead"
+        Text.mono "S"
+      Row between
+        Text "Move clip"
+        Text.mono "Arrows"
+      Row between
+        Text "Trim clip"
+        Text.mono "Alt + Arrows"
+      Row between
+        Text "Duplicate"
+        Text.mono "Ctrl+D"
+      Row between
+        Text "Delete"
+        Text.mono "Delete"
+      Row between
+        Text "Add marker"
+        Text.mono "M"
+      Row between
+        Text "Loop"
+        Text.mono "L"
+      Row between
+        Text "Undo / redo"
+        Text.mono "Ctrl+Z / Ctrl+Shift+Z"
+      Row between
+        Text "To start / end"
+        Text.mono "Home / End"
+  Drawer#library "Library" right
+    Input "Search" bind=libq
+    each item in filter(libraryItems,i=>contains(lower(i.name),lower(libq)))
+      ListTile "{item.name}" subtitle="{duration(item.len)}" icon="graphic_eq" drag=library(item) dragData={item}
+  Drawer#markersPanel "Markers" right
+    Button "Add at playhead" icon="flag" onTap={markers=append(markers,{"id":"m"+length(markers),"name":"Marker "+(length(markers)+1),"t":playhead})}
+    each m in sortBy(markers,m=>m.t)
+      ListTile "{m.name}" subtitle="{formatTime(m.t)}" icon="flag" onTap={playhead=m.t; close}
+        IconButton "delete" onTap={markers=without(markers,m)}
+
+### Phone Timeline
+state activeTrack="voice"
+Page
+  Nav sticky
+    Brand "Cutline" icon="content_cut"
+    Row gap=4
+      IconButton "undo"
+      IconButton "redo"
+      IconButton "ios_share" onTap={open exportDlg}
+  Section compact
+    Row between middle
+      IconButton "skip_previous" onTap={playhead=0}
+      IconButton "{playing?'pause':'play_arrow'}" size=large onTap={playing=!playing}
+      IconButton "skip_next"
+      Text.mono "{formatTime(playhead)}" color=#FFFFD23F
+      Select bind=speed items=["0.5x","1x","1.5x","2x"]
+  Section
+    Timeline zoom={zoom} playhead={playhead} scrollX heads=pinned
+      Ruler unit="mm:ss" markers={markers} onScrub={playhead=result}
+      Playhead at={playhead} color=#FFFFFFFF draggable onMove={playhead=result}
+      each tr in tracks
+        Track#{tr.id} name={tr.name} h={tr.id==activeTrack?200:48} onTap={activeTrack=tr.id}
+          Head w=88 pad=4
+            Text.strong "{tr.name}" color={tr.color}
+            Toggle.mini "M" bind=tr.mute
+          each c in filter(clips,c=>c.track==tr.id)
+            Clip#{c.id} "{c.name}" start={c.start} len={c.len} fill={c.color} selected={contains(sel,c.id)} trimStart trimEnd drag=clip(c.id) snap={snap} onTap={sel=[c.id]; open clipSheet}
+              if tr.id==activeTrack
+                Waveform seed={c.id} color=#66FFFFFF
+    Row gap=8 middle
+      Icon "zoom_out"
+      Slider bind=zoom min=1 max=40 grow
+      Icon "zoom_in"
+  Section compact
+    Row gap=8
+      Button.outline "Split" icon="content_cut" grow
+      Button.outline "Marker" icon="flag" grow onTap={markers=append(markers,{"id":"m"+length(markers),"name":"Marker "+(length(markers)+1),"t":playhead})}
+      Button.outline "Library" icon="library_music" grow onTap={open library}
+  Sheet#clipSheet "Clip"
+    Input "Name" bind=find(clips,c=>c.id==first(sel)).name
+    Row gap=8
+      Input "Start (s)" type=number step=0.1 bind=find(clips,c=>c.id==first(sel)).start
+      Input "Length (s)" type=number step=0.1 bind=find(clips,c=>c.id==first(sel)).len
+    Text.fieldLabel "Gain"
+    Slider bind=find(clips,c=>c.id==first(sel)).gain min=-24 max=12
+    Text.fieldLabel "Fade in"
+    Slider bind=find(clips,c=>c.id==first(sel)).fadeIn min=0 max=10
+    Text.fieldLabel "Fade out"
+    Slider bind=find(clips,c=>c.id==first(sel)).fadeOut min=0 max=10
+    Row gap=8
+      Button.outline "Duplicate" onTap={clips=concat(clips,map(filter(clips,c=>contains(sel,c.id)),c=>with(with(c,"id",c.id+"d"),"start",c.start+c.len))); close}
+      Button.destructive "Delete" onTap={clips=removeWhere(clips,c=>contains(sel,c.id)); close}

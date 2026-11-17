@@ -1,0 +1,332 @@
+### Home
+project cart=[]
+project seq=1
+project rid=1
+project promo=""
+project promoState=""
+project favs=[] persist
+project orders=[] persist
+project restaurants=[{"id":1,"name":"Saffron & Salt","cuisine":"Indian","art":"curry","rating":4.8,"eta":25,"fee":1.99,"avg":18,"open":true,"rank":1},{"id":2,"name":"Napoli Fornace","cuisine":"Pizza","art":"pizza","rating":4.6,"eta":30,"fee":2.49,"avg":16,"open":true,"rank":2},{"id":3,"name":"Tokyo Counter","cuisine":"Sushi","art":"sushi","rating":4.7,"eta":35,"fee":3.49,"avg":26,"open":false,"rank":3},{"id":4,"name":"Smash Brothers","cuisine":"Burgers","art":"burger","rating":4.4,"eta":20,"fee":0.99,"avg":14,"open":true,"rank":4}]
+state cuisine="All"
+state cuisines=["All","Indian","Pizza","Sushi","Burgers","Vegan","Dessert"]
+state q=""
+state sort="Recommended"
+state openNow=false
+state price=[0,50]
+Page
+  Nav sticky
+    Brand "Tiffin" icon="ramen_dining" color=#FFE5391F
+    Row gap=4
+      Link "Home" onTap={go home}
+      Link "Favourites" onTap={go favourites}
+      Link "Orders" onTap={go orders}
+    Button "Basket · {sum(cart,l=>l.qty)}" onTap={open basket}
+  Section
+    Column gap=20
+      Heading "Hungry? Dinner is 25 minutes away." level=1
+      Row gap=12
+        Input "Deliver to" "Street, number" bind=address icon="location_on" grow
+        Input "Search dishes or restaurants" bind=q icon="search" grow
+        Button.outline "Filters" icon="tune" onTap={open filters}
+      Row scroll gap=8
+        each c in cuisines
+          ChoiceChip "{c}" selected={cuisine==c} onTap={cuisine=c}
+  Section tint
+    Column gap=16
+      Row between
+        Heading "{length(filter(restaurants,r=>(cuisine=='All'||r.cuisine==cuisine)&&(!openNow||r.open)&&r.avg>=price[0]&&r.avg<=price[1]&&contains(lower(r.name+' '+r.cuisine),lower(q))))} places near you" level=2
+        Text.muted "Sorted by {sort}"
+      if count(restaurants,r=>(cuisine=="All"||r.cuisine==cuisine)&&(!openNow||r.open)&&r.avg>=price[0]&&r.avg<=price[1]&&contains(lower(r.name+" "+r.cuisine),lower(q)))==0
+        Column center gap=12 pad=48
+          Icon "no_meals" size=64 color=#FFFFB300
+          Heading "Nothing matches that" level=3
+          Text.muted "Try another cuisine, widen the price range or turn off Open now."
+          Button "Clear filters" onTap={cuisine="All"; q=""; openNow=false; price=[0,50]; sort="Recommended"}
+      Grid cols=3 gap=24
+        each r in sortBy(filter(restaurants,r=>(cuisine=="All"||r.cuisine==cuisine)&&(!openNow||r.open)&&r.avg>=price[0]&&r.avg<=price[1]&&contains(lower(r.name+" "+r.cuisine),lower(q))),r=>sort=="Rating"?0-r.rating:sort=="Fastest"?r.eta:sort=="Delivery fee"?r.fee:r.rank)
+          Card gap=12 radius=24 onTap={rid=r.id; go restaurant}
+            Stack
+              DishArt kind="{r.art}" h=140 radius=20 fill=#FFFFF0D6
+              Row end pad=8
+                IconButton "{contains(favs,r.id)?'favorite':'favorite_border'}" color=#FFE5391F onTap={favs=contains(favs,r.id)?without(favs,r.id):append(favs,r.id)}
+            Row between
+              Text.heading "{r.name}"
+              Badge.warning "★ {r.rating}"
+            Text.muted "{r.cuisine} · about {money(r.avg,'$',0)} per person"
+            Row gap=12
+              Row gap=4
+                Icon "schedule" size=16
+                Text.small "{r.eta} min"
+              Row gap=4
+                Icon "delivery_dining" size=16
+                Text.small "{r.fee==0?'Free':money(r.fee,'$',2)}"
+              Spacer grow
+              if !r.open
+                Badge.neutral "Closed"
+  Footer
+    Row between
+      Text.strong "Tiffin"
+      Text.muted "Neighbourhood food, delivered"
+  StickyBar bottom visible={length(cart)>0}
+    Row between pad=12 fill=#FFE5391F radius=24 onTap={open basket}
+      Text "{sum(cart,l=>l.qty)} items" color=#FFFFFFFF weight=700
+      Text "View basket · {money(sum(cart,l=>l.unit*l.qty),'$',2)}" color=#FFFFFFFF weight=700
+Sheet#filters "Filters"
+  Column gap=16
+    Text.fieldLabel "Price per person: {money(price[0],'$',0)} to {money(price[1],'$',0)}"
+    RangeSlider bind=price min=0 max=50 step=2
+    Text.fieldLabel "Sort by"
+    Select bind=sort items=["Recommended","Rating","Fastest","Delivery fee"]
+    Toggle "Open now" bind=openNow
+    Row gap=8
+      Button.outline "Reset" grow onTap={price=[0,50]; sort="Recommended"; openNow=false}
+      Button "Show results" grow onTap={close}
+Sheet#basket "Your basket" stops=[0.6,0.92]
+  if isEmpty(cart)
+    Column center gap=8 pad=32
+      Icon "shopping_basket" size=48 color=#FFFFB300
+      Text.muted "Your basket is empty"
+      Button "Browse menu" onTap={close}
+  if !isEmpty(cart)
+    Column gap=12 scroll
+      each l in cart
+        Row gap=12 middle
+          Column grow gap=2
+            Text.strong "{l.name}"
+            Text.muted "{join(filter([l.size],s=>s!=''),'') } {join(l.extras,', ')}"
+            if l.note!=""
+              Text.caption "Note: {l.note}"
+          Row gap=8 middle
+            if l.qty>1
+              IconButton "remove" onTap={cart=updateWhere(cart,x=>x.id==l.id,x=>with(x,"qty",x.qty-1))}
+            if l.qty==1&&length(cart)>1
+              IconButton "delete" onTap={cart=removeWhere(cart,x=>x.id==l.id)}
+            if l.qty==1&&length(cart)==1
+              IconButton "delete" onTap={open confirmEmpty}
+            Text.strong "{l.qty}"
+            IconButton "add" onTap={cart=updateWhere(cart,x=>x.id==l.id,x=>with(x,"qty",x.qty+1))}
+          Text.strong "{money(l.unit*l.qty,'$',2)}" w=70
+      Divider
+      Row gap=8 middle
+        Input "Promo code" "TIFFIN10" bind=promo grow
+        Button.outline "Apply" onTap={promoState=upper(trim(promo))=="TIFFIN10"?"ok":"bad"}
+      if promoState=="ok"
+        Badge.success "TIFFIN10 applied: 10% off"
+      if promoState=="bad"
+        Text.danger "That code isn't valid or has expired"
+      Row between
+        Text.muted "Subtotal"
+        Text "{money(sum(cart,l=>l.unit*l.qty),'$',2)}"
+      if promoState=="ok"
+        Row between
+          Text.success "Promo"
+          Text.success "-{money(sum(cart,l=>l.unit*l.qty)*0.1,'$',2)}"
+      Row between
+        Text.muted "Delivery"
+        Text "{money(find(restaurants,r=>r.id==rid).fee,'$',2)}"
+      Row between
+        Text.muted "Service fee"
+        Text "$1.50"
+      Row between
+        Text.heading "Total"
+        Text "{money(sum(cart,l=>l.unit*l.qty)*(promoState=='ok'?0.9:1)+find(restaurants,r=>r.id==rid).fee+1.5,'$',2)}" size=28 weight=800 color=#FFE5391F
+      if sum(cart,l=>l.unit*l.qty)<15
+        Box fill=#FFFFF3CD radius=16 pad=12
+          Text "Minimum order is $15. Add {money(15-sum(cart,l=>l.unit*l.qty),'$',2)} more to check out."
+      Button "Go to checkout" size=large disabled={sum(cart,l=>l.unit*l.qty)<15} onTap={close; go checkout}
+Dialog#confirmEmpty "Empty your basket?" "Removing the last item clears your order."
+  Row gap=8
+    Button.outline "Keep it" grow onTap={close}
+    Button.destructive "Remove" grow onTap={cart=[]; promoState=""; promo=""; close}
+
+### Restaurant
+state cat="Starters"
+state cur={}
+state sz=-1
+state ex=[]
+state note=""
+state q=1
+state menu=[{"id":101,"rid":1,"cat":"Starters","name":"Crispy Samosas","desc":"Two pastries, spiced potato and peas, mint chutney.","art":"samosa","price":5.5,"sizes":[],"extras":[]},{"id":102,"rid":1,"cat":"Starters","name":"Onion Bhaji","desc":"Gram flour fritters with tamarind dip.","art":"fritter","price":6,"sizes":[],"extras":[]},{"id":103,"rid":1,"cat":"Mains","name":"Butter Chicken","desc":"Tandoori chicken in a silky tomato and cream sauce.","art":"curry","price":13.5,"sizes":[{"name":"Regular","price":13.5},{"name":"Large","price":17}],"extras":[{"name":"Extra naan","price":2.5},{"name":"Basmati rice","price":3},{"name":"Raita","price":1.5}]},{"id":104,"rid":1,"cat":"Mains","name":"Paneer Tikka Masala","desc":"Charred paneer, peppers, onions and cashew gravy.","art":"paneer","price":12.5,"sizes":[{"name":"Regular","price":12.5},{"name":"Large","price":16}],"extras":[{"name":"Extra naan","price":2.5},{"name":"Basmati rice","price":3}]},{"id":105,"rid":1,"cat":"Breads","name":"Garlic Naan","desc":"Blistered in the tandoor, brushed with garlic butter.","art":"naan","price":3.5,"sizes":[],"extras":[]},{"id":106,"rid":1,"cat":"Drinks","name":"Mango Lassi","desc":"Alphonso mango, yoghurt, a pinch of cardamom.","art":"lassi","price":4.5,"sizes":[],"extras":[]},{"id":201,"rid":2,"cat":"Pizza","name":"Margherita","desc":"San Marzano tomato, fior di latte, basil.","art":"pizza","price":11,"sizes":[{"name":"10 inch","price":11},{"name":"14 inch","price":15}],"extras":[{"name":"Burrata","price":3},{"name":"Nduja","price":2.5}]},{"id":202,"rid":2,"cat":"Drinks","name":"Limonata","desc":"Sicilian lemon soda.","art":"soda","price":3,"sizes":[],"extras":[]},{"id":301,"rid":3,"cat":"Rolls","name":"Salmon Avocado Roll","desc":"Eight pieces.","art":"sushi","price":9,"sizes":[],"extras":[]},{"id":401,"rid":4,"cat":"Burgers","name":"Double Smash","desc":"Two patties, American cheese, pickles, house sauce.","art":"burger","price":10.5,"sizes":[{"name":"Single","price":8},{"name":"Double","price":10.5}],"extras":[{"name":"Bacon","price":2},{"name":"Fries","price":3}]}]
+Page
+  CollapsingHeader h=220 minh=72 fill=#FFE5391F
+    Row between pad=16
+      IconButton "arrow_back" color=#FFFFFFFF onTap={go home}
+      IconButton "{contains(favs,rid)?'favorite':'favorite_border'}" color=#FFFFFFFF onTap={favs=contains(favs,rid)?without(favs,rid):append(favs,rid)}
+    Column pad=16 gap=4 shrinkable
+      Heading "{find(restaurants,r=>r.id==rid).name}" level=1 color=#FFFFFFFF
+      Text "{find(restaurants,r=>r.id==rid).cuisine} · ★ {find(restaurants,r=>r.id==rid).rating} · {find(restaurants,r=>r.id==rid).eta} min · {money(find(restaurants,r=>r.id==rid).fee,'$',2)} delivery" color=#FFFFFFFF hideOnCollapse
+  ScrollTabs#cats bind=cat items={unique(map(filter(menu,d=>d.rid==rid),d=>d.cat))} target="menu-{item}" sticky spy fill=#FFFFFAF0
+  Section
+    Column gap=24
+      each c in unique(map(filter(menu,d=>d.rid==rid),d=>d.cat))
+        Column id="menu-{c}" spyof=cat spyvalue={c} gap=12
+          Heading "{c}" level=2
+          each d in filter(menu,x=>x.rid==rid&&x.cat==c)
+            Card radius=24 pad=12
+              Row gap=16 middle
+                DishArt kind="{d.art}" w=96 h=96 radius=20 fill=#FFFFF0D6
+                Column grow gap=4
+                  Text.heading "{d.name}"
+                  Text.muted "{d.desc}"
+                  Text "{isEmpty(d.sizes)?'':'from '}{money(d.price,'$',2)}" size=22 weight=800 color=#FFE5391F
+                if sum(filter(cart,l=>l.dish==d.id),l=>l.qty)==0
+                  IconButton.filled "add" onTap={cur=d; sz=-1; ex=[]; note=""; q=1; if isEmpty(d.sizes) then null}
+                if sum(filter(cart,l=>l.dish==d.id),l=>l.qty)>0
+                  Row gap=8 middle
+                    IconButton "remove" onTap={cart=updateWhere(cart,l=>l.id==last(filter(cart,x=>x.dish==d.id)).id,l=>with(l,"qty",l.qty-1)); cart=removeWhere(cart,l=>l.qty<=0)}
+                    Text.strong "{sum(filter(cart,l=>l.dish==d.id),l=>l.qty)}"
+                    IconButton.filled "add" onTap={cur=d; sz=-1; ex=[]; note=""; q=1}
+  StickyBar bottom visible={length(cart)>0}
+    Row between pad=12 fill=#FFE5391F radius=24 onTap={open basket}
+      Text "{sum(cart,l=>l.qty)} items" color=#FFFFFFFF weight=700
+      Text "View basket · {money(sum(cart,l=>l.unit*l.qty),'$',2)}" color=#FFFFFFFF weight=700
+Sheet#dish "{cur.name}" "{cur.desc}" stops=[0.6,0.95] dialog=desktop
+  Column gap=16 scroll
+    DishArt kind="{cur.art}" h=140 radius=20 fill=#FFFFF0D6
+    if !isEmpty(cur.sizes)
+      Row between
+        Text.heading "Size"
+        Badge.error "Required"
+      each s in cur.sizes
+        Radio "{s.name}  {money(s.price,'$',2)}" selected={sz==index} onTap={sz=index}
+    if !isEmpty(cur.extras)
+      Text.heading "Extras (optional)"
+      each e in cur.extras
+        Checkbox "{e.name}  +{money(e.price,'$',2)}" checked={contains(ex,e.name)} onChange={ex=contains(ex,e.name)?without(ex,e.name):append(ex,e.name)}
+    Input "Note for the kitchen" "No coriander, please" bind=note multiline
+    Row between middle
+      Text.heading "Quantity"
+      Row gap=12 middle
+        IconButton "remove" onTap={q=max(1,q-1)}
+        Text.strong "{q}" size=20
+        IconButton "add" onTap={q=min(20,q+1)}
+    Button "Add to basket · {money((isEmpty(cur.sizes)?cur.price:(sz<0?0:cur.sizes[sz].price)+sum(filter(cur.extras,e=>contains(ex,e.name)),e=>e.price))*q,'$',2)}" size=large disabled={!isEmpty(cur.sizes)&&sz<0} onTap={cart=append(cart,{"id":seq,"dish":cur.id,"name":cur.name,"size":isEmpty(cur.sizes)?"":cur.sizes[sz].name,"extras":ex,"note":note,"qty":q,"unit":(isEmpty(cur.sizes)?cur.price:cur.sizes[sz].price)+sum(filter(cur.extras,e=>contains(ex,e.name)),e=>e.price)}); seq=seq+1; rid=cur.rid; toast "Added to basket"; close}
+    if !isEmpty(cur.sizes)&&sz<0
+      Text.caption "Choose a size to continue" center
+
+### Checkout
+state when="ASAP"
+state slot="19:30"
+state pay="Visa ending 4242"
+state address="12 Alder Street, Flat 3"
+state door=""
+Page
+  Nav sticky
+    Brand "Tiffin" icon="ramen_dining" color=#FFE5391F
+    Link "Back to menu" onTap={go restaurant}
+  Section narrow
+    Column gap=20
+      Heading "Checkout" level=1
+      Card gap=12 radius=24
+        Heading "Delivery address" level=3
+        Input "Address" bind=address icon="location_on"
+        Input "Door code or note for the courier" bind=door
+      Card gap=12 radius=24
+        Heading "Delivery time" level=3
+        Row gap=8
+          ChoiceChip "ASAP · 25 min" selected={when=="ASAP"} onTap={when="ASAP"}
+          ChoiceChip "Schedule" selected={when=="Later"} onTap={when="Later"}
+        if when=="Later"
+          TimePicker "Arrive at" bind=slot
+      Card gap=12 radius=24
+        Heading "Payment" level=3
+        Select bind=pay items=["Visa ending 4242","Apple Pay","Cash on delivery"]
+      Card gap=8 radius=24
+        Heading "Order summary" level=3
+        each l in cart
+          Row between
+            Text "{l.qty} x {l.name}"
+            Text "{money(l.unit*l.qty,'$',2)}"
+        Divider
+        Row between
+          Text.muted "Delivery and service"
+          Text "{money(find(restaurants,r=>r.id==rid).fee+1.5,'$',2)}"
+        if promoState=="ok"
+          Row between
+            Text.success "TIFFIN10"
+            Text.success "-{money(sum(cart,l=>l.unit*l.qty)*0.1,'$',2)}"
+        Row between
+          Text.heading "Total"
+          Text "{money(sum(cart,l=>l.unit*l.qty)*(promoState=='ok'?0.9:1)+find(restaurants,r=>r.id==rid).fee+1.5,'$',2)}" size=28 weight=800 color=#FFE5391F
+      Button "Place order" size=large disabled={isEmpty(cart)||trim(address)==""} onTap={orders=append(orders,{"id":1040+length(orders),"rest":find(restaurants,r=>r.id==rid).name,"date":formatDate(today(),"MMM d"),"lines":cart,"total":sum(cart,l=>l.unit*l.qty)*(promoState=="ok"?0.9:1)+find(restaurants,r=>r.id==rid).fee+1.5}); cart=[]; promoState=""; promo=""; step=0; go tracking}
+
+### Tracking
+project step=0
+state labels=["Order confirmed","Preparing your food","Courier on the way","Delivered"]
+every 4s when step<3 onTick={toast labels[step+1]; step=step+1}
+Page
+  Nav sticky
+    Brand "Tiffin" icon="ramen_dining" color=#FFE5391F
+    Link "Orders" onTap={go orders}
+  Section narrow
+    Column gap=20
+      Heading "{step==3?'Enjoy your meal!':'Arriving in about '+(25-step*8)+' min'}" level=1
+      LiveRegion "{labels[step]}"
+      Card radius=24 gap=0
+        Map style=drawn h=260 route=[[0.1,0.8],[0.3,0.6],[0.55,0.55],[0.8,0.25]] courier={step/3} start="Saffron & Salt" end="You"
+      Card radius=24 gap=12
+        Stepper bind=step
+          Step "Order confirmed" icon="receipt_long"
+          Step "Preparing your food" icon="skillet"
+          Step "Courier on the way" icon="delivery_dining"
+          Step "Delivered" icon="home"
+        Progress {step/3}
+      Card radius=24
+        Row gap=12 middle
+          Avatar "Marco Bianchi" size=48
+          Column grow gap=2
+            Text.strong "Marco is your courier"
+            Text.muted "{step<2?'Waiting at the restaurant':step==2?'Two streets away':'Delivered'} · Scooter"
+          IconButton "call" onTap={toast "Calling Marco"}
+          IconButton "chat" onTap={toast "Message sent"}
+      Button.outline "Back to home" onTap={go home}
+
+### Orders
+Page
+  Nav sticky
+    Brand "Tiffin" icon="ramen_dining" color=#FFE5391F
+    Row gap=4
+      Link "Home" onTap={go home}
+      Link "Favourites" onTap={go favourites}
+  Section narrow
+    Column gap=16
+      Heading "Your orders" level=1
+      if isEmpty(orders)
+        Column center gap=8 pad=48
+          Icon "receipt_long" size=48 color=#FFFFB300
+          Text.muted "No orders yet. Your first one is on us in spirit."
+          Button "Find something tasty" onTap={go home}
+      each o in reverse(orders)
+        Card radius=24 gap=8
+          Row between
+            Text.heading "{o.rest}"
+            Badge.success "Delivered"
+          Text.muted "Order #{o.id} · {o.date} · {sum(o.lines,l=>l.qty)} items"
+          Text "{join(map(o.lines,l=>l.qty+' x '+l.name),', ')}"
+          Row between middle
+            Text.strong "{money(o.total,'$',2)}" size=22
+            Button "Reorder" onTap={cart=o.lines; rid=find(restaurants,r=>r.name==o.rest).id; toast "Basket refilled"; open basket}
+
+### Favourites
+Page
+  Nav sticky
+    Brand "Tiffin" icon="ramen_dining" color=#FFE5391F
+    Row gap=4
+      Link "Home" onTap={go home}
+      Link "Orders" onTap={go orders}
+  Section
+    Column gap=16
+      Heading "Favourites" level=1
+      if isEmpty(favs)
+        Column center gap=8 pad=48
+          Icon "favorite_border" size=48 color=#FFE5391F
+          Text.muted "Tap the heart on a restaurant to keep it here."
+          Button "Discover restaurants" onTap={go home}
+      Grid cols=3 gap=24
+        each r in filter(restaurants,x=>contains(favs,x.id))
+          Card gap=12 radius=24 onTap={rid=r.id; go restaurant}
+            DishArt kind="{r.art}" h=120 radius=20 fill=#FFFFF0D6
+            Row between
+              Text.heading "{r.name}"
+              IconButton "favorite" color=#FFE5391F onTap={favs=without(favs,r.id)}
+            Text.muted "{r.cuisine} · ★ {r.rating} · {r.eta} min"

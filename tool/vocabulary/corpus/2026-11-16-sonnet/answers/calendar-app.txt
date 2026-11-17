@@ -1,0 +1,265 @@
+### Month
+state view="month" persist
+state hiddenCals=[] persist
+state cursor=today()
+state mini=today()
+state q=""
+state cals=[{"id":"work","name":"Work","color":"#FF2563EB"},{"id":"home","name":"Home","color":"#FF16A34A"},{"id":"family","name":"Family","color":"#FFDB2777"},{"id":"health","name":"Health","color":"#FFEA580C"},{"id":"travel","name":"Travel","color":"#FF7C3AED"},{"id":"focus","name":"Focus","color":"#FF0891B2"}]
+state events=[{"id":1,"title":"Sprint planning","cal":"work","start":"2026-11-16","end":"2026-11-16","from":"09:30","to":"10:30","allDay":false,"repeat":"Weekly","guests":["Priya","Tom"],"note":""},{"id":2,"title":"Dentist","cal":"health","start":"2026-11-17","end":"2026-11-17","from":"14:00","to":"15:00","allDay":false,"repeat":"Never","guests":[],"note":"Bring insurance card"},{"id":3,"title":"Lisbon trip","cal":"travel","start":"2026-11-20","end":"2026-11-24","from":"","to":"","allDay":true,"repeat":"Never","guests":["Sam"],"note":"Flight TP 207"},{"id":4,"title":"Deep work","cal":"focus","start":"2026-11-16","end":"2026-11-16","from":"13:00","to":"15:30","allDay":false,"repeat":"Daily","guests":[],"note":""},{"id":5,"title":"Mum's birthday","cal":"family","start":"2026-11-18","end":"2026-11-18","from":"","to":"","allDay":true,"repeat":"Yearly","guests":[],"note":""},{"id":6,"title":"Boiler service","cal":"home","start":"2026-11-19","end":"2026-11-19","from":"08:00","to":"10:00","allDay":false,"repeat":"Never","guests":[],"note":""}]
+state draft={"id":0,"title":"","cal":"work","start":"","end":"","from":"09:00","to":"10:00","allDay":false,"repeat":"Never","guests":[],"note":""}
+state guestInput=""
+state sel=0
+state selDay=""
+state visible=[]
+shortcut key=t onPress={cursor=today(); mini=today()}
+shortcut key=n onPress={draft=with(with(draft,"start",cursor),"end",cursor); open event}
+shortcut key=m onPress={view="month"}
+shortcut key=w onPress={view="week"}
+shortcut key=d onPress={view="day"}
+shortcut key=a onPress={view="agenda"}
+shortcut key=k onPress={go search}
+shortcut key=j onPress={cursor=addDays(cursor,view=="month"?30:view=="week"?7:1)}
+shortcut key=ArrowRight onPress={cursor=addDays(cursor,1)}
+shortcut key=ArrowLeft onPress={cursor=addDays(cursor,-1)}
+shortcut key=ArrowDown onPress={cursor=addDays(cursor,7)}
+shortcut key=ArrowUp onPress={cursor=addDays(cursor,-7)}
+shortcut key=Enter onPress={selDay=cursor; open dayEvents}
+App
+  Sidebar w=260
+    Brand "Margin" icon="calendar_month"
+    Button "New event" icon="add" onTap={draft=with(with(draft,"start",cursor),"end",cursor); open event}
+    MiniCalendar bind=mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result; mini=result}
+    Text.fieldLabel "Calendars"
+    each c in cals
+      Row gap=8 middle
+        Box w=10 h=10 radius=5 fill={c.color}
+        Text.body c.name grow
+        Toggle bind=c.show value={!contains(hiddenCals,c.id)} onChange={hiddenCals=result?without(hiddenCals,c.id):append(hiddenCals,c.id)}
+    Spacer grow
+    NavItem "Search" icon="search" onTap={go search}
+    NavItem "Manage calendars" icon="palette" onTap={go calendars}
+  Main
+    Nav border-bottom=#FFE5E7EB
+      Row gap=8 middle
+        IconButton "chevron_left" onTap={cursor=addDays(cursor,view=="month"?-30:view=="week"?-7:-1)}
+        Button.outline "Today" onTap={cursor=today()}
+        IconButton "chevron_right" onTap={cursor=addDays(cursor,view=="month"?30:view=="week"?7:1)}
+        Heading "{formatDate(cursor,'MMMM yyyy')}" level=2
+      Row gap=8 middle
+        Input "Search" "Find events" icon="search" bind=q w=200 hide=phone onSubmit={go search}
+        Tabs bind=view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"]
+    Column pad=16 gap=0 grow
+      Row stretch
+        each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+          Text.caption d grow center
+      MonthGrid value={cursor} weekStart=1 today={today()} showWeekNumbers=true onMove={cursor=result}
+        cell day
+          Column gap=2 pad=4 border=#FFE5E7EB tap-target
+            Text "{formatDate(day.date,'d')}" tabular weight={day.isToday?700:400} color={day.isToday?"#FFFFFFFF":"#FF111827"} fill={day.isToday?"#FF2563EB":"transparent"} radius=12 onTap={cursor=day.date; selDay=day.date; open dayEvents}
+            each e in take(filter(events,x=>x.start<=day.date&&x.end>=day.date&&!contains(hiddenCals,x.cal)),3)
+              Row gap=4 middle fill={find(cals,c=>c.id==e.cal).color} radius=4 pad=[4,1,4,1] onTap={draft=e; open event}
+                Text.caption e.title color=#FFFFFFFF
+            if count(events,x=>x.start<=day.date&&x.end>=day.date&&!contains(hiddenCals,x.cal))>3
+              Text.caption "+{count(events,x=>x.start<=day.date&&x.end>=day.date&&!contains(hiddenCals,x.cal))-3} more" onTap={selDay=day.date; open dayEvents}
+  Dialog#dayEvents "{formatDate(selDay,'EEEE, MMM d')}"
+    if count(events,x=>x.start<=selDay&&x.end>=selDay&&!contains(hiddenCals,x.cal))==0
+      EmptyState "No events" "Nothing planned for this day." icon="event_available"
+    each e in sortBy(filter(events,x=>x.start<=selDay&&x.end>=selDay&&!contains(hiddenCals,x.cal)),x=>x.from)
+      ListTile e.title subtitle={e.allDay?"All day":"{e.from} - {e.to}"} leading={find(cals,c=>c.id==e.cal).color} onTap={draft=e; close; open event}
+    Button "Add event" icon="add" onTap={draft=with(with(draft,"start",selDay),"end",selDay); close; open event}
+  Dialog#event "{draft.id==0?'New event':'Edit event'}" persistent
+    Column gap=12
+      Input "Title" "Add a title" bind=draft.title autofocus
+      Row gap=8 middle
+        Select "Calendar" bind=draft.cal items={map(cals,c=>c.id)} labels={map(cals,c=>c.name)} dots={map(cals,c=>c.color)} grow
+        Toggle "All day" bind=draft.allDay
+      DateRangePicker "Dates" start=draft.start end=draft.end onChange={draft=with(with(draft,"start",result.start),"end",result.end)}
+      if draft.end<draft.start
+        Text.danger "End must not be before start."
+      if !draft.allDay
+        Row gap=8
+          TimePicker "Starts" bind=draft.from grow
+          TimePicker "Ends" bind=draft.to grow
+        if draft.start==draft.end&&draft.to<=draft.from
+          Text.danger "End time must be after start time."
+      SegmentedButton "Repeat" bind=draft.repeat items=["Never","Daily","Weekly","Monthly"]
+      Column gap=6
+        Text.fieldLabel "Guests"
+        Row gap=6 wrap
+          each g in draft.guests
+            Chip g onDelete={draft=with(draft,"guests",without(draft.guests,g))}
+        Input "Add guest" "Name or email" bind=guestInput onSubmit={draft=with(draft,"guests",append(draft.guests,guestInput)); guestInput=""}
+      Input "Note" multiline bind=draft.note
+      Row between
+        if draft.id!=0
+          Button.destructive "Delete" onTap={open confirmDelete}
+        Spacer grow
+        Button.ghost "Cancel" onTap={close}
+        Button "Save" disabled={draft.title==""||draft.end<draft.start||(!draft.allDay&&draft.start==draft.end&&draft.to<=draft.from)} onTap={events=draft.id==0?append(events,with(draft,"id",length(events)+1)):updateWhere(events,x=>x.id==draft.id,x=>draft); toast "Saved"; close}
+  Dialog#confirmDelete "Delete this event?" "This cannot be undone."
+    Row end gap=8
+      Button.ghost "Keep" onTap={close}
+      Button.destructive "Delete" onTap={events=removeWhere(events,x=>x.id==draft.id); toast "Event deleted"; close; close}
+
+### Week
+state view="week" persist
+state hiddenCals=[] persist
+state cursor=today()
+state mini=today()
+state nowTime="10:42"
+state events=[]
+state cals=[]
+state draft={"id":0,"title":"","cal":"work","start":"","end":"","from":"09:00","to":"10:00","allDay":false,"repeat":"Never","guests":[],"note":""}
+every 60s onTick={nowTime=formatDate(now(),"HH:mm")}
+shortcut key=t onPress={cursor=today()}
+shortcut key=j onPress={cursor=addDays(cursor,7)}
+shortcut key=ArrowRight onPress={cursor=addDays(cursor,1)}
+shortcut key=ArrowLeft onPress={cursor=addDays(cursor,-1)}
+shortcut key=n onPress={open event}
+App
+  Sidebar w=260 hide=tablet
+    Brand "Margin" icon="calendar_month"
+    Button "New event" icon="add" onTap={open event}
+    MiniCalendar bind=mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result}
+  Main
+    Nav border-bottom=#FFE5E7EB
+      Row gap=8 middle
+        IconButton "chevron_left" onTap={cursor=addDays(cursor,-7)}
+        Button.outline "Today" onTap={cursor=today()}
+        IconButton "chevron_right" onTap={cursor=addDays(cursor,7)}
+        Heading "{formatDate(startOfWeek(cursor),'MMM d')} - {formatDate(addDays(startOfWeek(cursor),6),'MMM d, yyyy')}" level=3
+      Tabs bind=view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"] onChange={go {result}}
+    Column grow
+      Row stretch border-bottom=#FFE5E7EB
+        Text.caption "all-day" w=56 pad=8
+        each d in range(7)
+          Column grow gap=2 pad=4 center border-left=#FFE5E7EB
+            Text.caption "{formatDate(addDays(startOfWeek(cursor),d),'EEE')}"
+            Text.strong "{formatDate(addDays(startOfWeek(cursor),d),'d')}" tabular color={addDays(startOfWeek(cursor),d)==today()?"#FF2563EB":"#FF111827"}
+            each e in filter(events,x=>x.allDay&&x.start<=addDays(startOfWeek(cursor),d)&&x.end>=addDays(startOfWeek(cursor),d)&&!contains(hiddenCals,x.cal))
+              Box fill={find(cals,c=>c.id==e.cal).color} radius=4 pad=[4,1,4,1] onTap={draft=e; open event}
+                Text.caption e.title color=#FFFFFFFF
+      TimeGrid scroll startHour=6 endHour=22 hourHeight=48 days=7 firstDay={startOfWeek(cursor)} nowLine={nowTime} nowColor=#FFDC2626 gutter=56 onSlotTap={draft=with(with(with(draft,"start",result.date),"end",result.date),"from",result.time); open event}
+        each e in filter(events,x=>!x.allDay&&!contains(hiddenCals,x.cal))
+          TimeBlock date={e.start} from={e.from} to={e.to} fill={find(cals,c=>c.id==e.cal).color} radius=6 pad=6 onTap={draft=e; open event}
+            Text.caption "{e.from}" color=#FFFFFFFF tabular
+            Text.strong e.title color=#FFFFFFFF size=12
+  Dialog#event "Edit event"
+    Text.muted "Opens the same event form as in Month."
+
+### Day
+state view="day" persist
+state hiddenCals=[] persist
+state cursor=today()
+state mini=today()
+state nowTime="10:42"
+state events=[]
+state cals=[]
+state draft={"id":0,"title":"","cal":"work","start":"","end":"","from":"09:00","to":"10:00","allDay":false,"repeat":"Never","guests":[],"note":""}
+shortcut key=ArrowRight onPress={cursor=addDays(cursor,1)}
+shortcut key=ArrowLeft onPress={cursor=addDays(cursor,-1)}
+shortcut key=t onPress={cursor=today()}
+App
+  Sidebar w=260 hide=tablet
+    Brand "Margin" icon="calendar_month"
+    MiniCalendar bind=mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result}
+  Main
+    Nav border-bottom=#FFE5E7EB
+      Row gap=8 middle
+        IconButton "chevron_left" onTap={cursor=addDays(cursor,-1)}
+        Button.outline "Today" onTap={cursor=today()}
+        IconButton "chevron_right" onTap={cursor=addDays(cursor,1)}
+        Heading "{formatDate(cursor,'EEEE, MMMM d')}" level=3
+      Tabs bind=view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"] onChange={go {result}}
+    Column grow
+      Row gap=6 pad=8 border-bottom=#FFE5E7EB
+        Text.caption "all-day" w=56
+        each e in filter(events,x=>x.allDay&&x.start<=cursor&&x.end>=cursor&&!contains(hiddenCals,x.cal))
+          Chip e.title color={find(cals,c=>c.id==e.cal).color} onTap={draft=e; open event}
+      TimeGrid scroll startHour=6 endHour=22 hourHeight=56 days=1 firstDay={cursor} nowLine={nowTime} nowColor=#FFDC2626 gutter=56 onSlotTap={draft=with(with(with(draft,"start",cursor),"end",cursor),"from",result.time); open event}
+        each e in filter(events,x=>!x.allDay&&x.start==cursor&&!contains(hiddenCals,x.cal))
+          TimeBlock date={e.start} from={e.from} to={e.to} fill={find(cals,c=>c.id==e.cal).color} radius=6 pad=8 onTap={draft=e; open event}
+            Text.strong e.title color=#FFFFFFFF
+            Text.caption "{e.from} - {e.to}" color=#FFFFFFFF tabular
+  Dialog#event "Edit event"
+    Text.muted "Opens the same event form as in Month."
+
+### Agenda
+state view="agenda" persist
+state hiddenCals=[] persist
+state cursor=today()
+state events=[]
+state cals=[]
+state draft={"id":0,"title":"","cal":"work","start":"","end":"","from":"09:00","to":"10:00","allDay":false,"repeat":"Never","guests":[],"note":""}
+App
+  Sidebar w=260 hide=tablet
+    Brand "Margin" icon="calendar_month"
+    Button "New event" icon="add" onTap={open event}
+  Main
+    Nav border-bottom=#FFE5E7EB
+      Heading "Agenda" level=3
+      Tabs bind=view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"] onChange={go {result}}
+    Column pad=24 gap=16 scroll maxw=720
+      if count(events,x=>x.end>=cursor&&!contains(hiddenCals,x.cal))==0
+        EmptyState "Nothing coming up" "Your calendar is clear. Enjoy the quiet." icon="event_available" action="New event" onAction={open event}
+      each day in unique(map(sortBy(filter(events,x=>x.end>=cursor&&!contains(hiddenCals,x.cal)),x=>x.start),x=>x.start))
+        Column gap=8
+          Row gap=8 middle
+            Text.heading3 "{formatDate(day,'EEEE, MMM d')}" tabular
+            if day==today()
+              Badge.primary "Today"
+          each e in filter(events,x=>x.start==day&&!contains(hiddenCals,x.cal))
+            Card
+              Row gap=12 middle onTap={draft=e; open event}
+                Box w=4 h=36 radius=2 fill={find(cals,c=>c.id==e.cal).color}
+                Column grow gap=2
+                  Text.strong e.title
+                  Text.muted "{e.allDay?'All day':e.from+' - '+e.to}" tabular
+                Icon "chevron_right"
+  Dialog#event "Edit event"
+    Text.muted "Opens the same event form as in Month."
+
+### Calendars
+state hiddenCals=[] persist
+state cals=[{"id":"work","name":"Work","color":"#FF2563EB","count":14},{"id":"home","name":"Home","color":"#FF16A34A","count":5},{"id":"family","name":"Family","color":"#FFDB2777","count":7},{"id":"health","name":"Health","color":"#FFEA580C","count":3},{"id":"travel","name":"Travel","color":"#FF7C3AED","count":2},{"id":"focus","name":"Focus","color":"#FF0891B2","count":9}]
+App
+  Sidebar w=260 hide=tablet
+    Brand "Margin" icon="calendar_month"
+    NavItem "Back to calendar" icon="arrow_back" onTap={go month}
+  Main
+    Nav border-bottom=#FFE5E7EB
+      Heading "Calendars" level=3
+    Column pad=24 gap=12 maxw=560
+      Text.muted "Switch a calendar off to hide its events everywhere. Your choice is remembered."
+      each c in cals
+        Card
+          Row gap=12 middle
+            Box w=14 h=14 radius=7 fill={c.color}
+            Column grow
+              Text.strong c.name
+              Text.caption "{c.count} events"
+            Toggle value={!contains(hiddenCals,c.id)} onChange={hiddenCals=result?without(hiddenCals,c.id):append(hiddenCals,c.id)}
+
+### Search
+state q=""
+state hiddenCals=[] persist
+state events=[]
+state cals=[]
+state draft={"id":0,"title":"","cal":"work","start":"","end":"","from":"09:00","to":"10:00","allDay":false,"repeat":"Never","guests":[],"note":""}
+shortcut key=Escape onPress={go month}
+App
+  Sidebar w=260 hide=tablet
+    Brand "Margin" icon="calendar_month"
+    NavItem "Back to calendar" icon="arrow_back" onTap={go month}
+  Main
+    Nav border-bottom=#FFE5E7EB
+      Input "Search" "Title, guest or note" icon="search" bind=q autofocus fuzzy grow
+    Column pad=24 gap=12 maxw=720
+      if trim(q)==""
+        Text.muted "Type to search. Typos are fine: \"denist\" still finds Dentist."
+      if trim(q)!=""&&count(events,e=>fuzzy(e.title+" "+join(e.guests," ")+" "+e.note,q))==0
+        EmptyState "No matches" "Nothing found for \"{q}\"." icon="search_off"
+      each day in unique(map(sortBy(filter(events,e=>fuzzy(e.title+" "+join(e.guests," ")+" "+e.note,q)&&!contains(hiddenCals,e.cal)),e=>e.start),e=>e.start))
+        Text.fieldLabel "{formatDate(day,'EEE, MMM d yyyy')}" tabular
+        each e in filter(events,x=>x.start==day&&fuzzy(x.title+" "+join(x.guests," ")+" "+x.note,q))
+          ListTile e.title subtitle={e.allDay?"All day":"{e.from} - {e.to}"} leading={find(cals,c=>c.id==e.cal).color} onTap={draft=e; go month}

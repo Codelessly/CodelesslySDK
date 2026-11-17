@@ -1,0 +1,387 @@
+### Inbox
+project tickets=[{"id":4821,"requester":"Maya Reyes","email":"maya@brightpath.io","subject":"Invoice shows the wrong seat count","status":"open","priority":"high","sla":0.18,"assignee":"Sam Patel","tags":["billing","enterprise"],"age":"2h"},{"id":4820,"requester":"Tomas Berg","email":"tomas@northwind.se","subject":"Cannot reset two-factor after phone change","status":"pending","priority":"urgent","sla":0.07,"assignee":"","tags":["login"],"age":"3h"},{"id":4817,"requester":"Priya Nair","email":"priya@lumen.co","subject":"Export to CSV drops the last column","status":"open","priority":"normal","sla":0.62,"assignee":"Lena Ortiz","tags":["export","bug"],"age":"6h"},{"id":4812,"requester":"Jonas Weber","email":"jonas@kiln.de","subject":"Request: SSO for the sandbox workspace","status":"new","priority":"low","sla":0.91,"assignee":"","tags":["sso"],"age":"1d"},{"id":4806,"requester":"Aiko Tanaka","email":"aiko@sora.jp","subject":"Webhook retries arrive out of order","status":"open","priority":"high","sla":0.34,"assignee":"Sam Patel","tags":["api","bug"],"age":"1d"},{"id":4799,"requester":"Chris Dunn","email":"chris@harbor.app","subject":"Thanks, the refund arrived","status":"solved","priority":"low","sla":1.0,"assignee":"Lena Ortiz","tags":["billing"],"age":"2d"}]
+project me="Sam Patel"
+project view="mine" persist
+project selected=[]
+project sortKey="sla"
+project statusFilter="any"
+project priorityFilter="any"
+project q=""
+project incoming=[{"id":4823,"requester":"Eli Cohen","email":"eli@quarry.io","subject":"Dashboard stuck loading on Safari","status":"new","priority":"normal","sla":0.95,"assignee":"","tags":["bug"],"age":"just now"}]
+state newCount=1
+every 45s when length(incoming)>0 onTick={newCount=length(incoming)}
+Shortcut key="?" onPress={open shortcuts}
+Shortcut key="j" onPress={emit nextTicket}
+Shortcut key="k" onPress={emit previousTicket}
+Shortcut key="a" onPress={emit assignToMe}
+App
+  Sidebar fill=#FFFFFFFF
+    Brand "Beacon" icon="support_agent"
+    Text.caption "VIEWS"
+    NavItem "Mine" icon="person" badge="{count(tickets,t=>t.assignee==me && t.status!='solved')}" selected={view=="mine"} onTap={view="mine"}
+    NavItem "Unassigned" icon="inbox" badge="{count(tickets,t=>t.assignee=='')}" selected={view=="unassigned"} onTap={view="unassigned"}
+    NavItem "All tickets" icon="list" badge="{length(tickets)}" selected={view=="all"} onTap={view="all"}
+    Divider
+    Text.caption "BY STATUS"
+    NavItem "New" icon="fiber_new" badge="{count(tickets,t=>t.status=='new')}" selected={view=="new"} onTap={view="new"}
+    NavItem "Open" icon="mark_email_unread" badge="{count(tickets,t=>t.status=='open')}" selected={view=="open"} onTap={view="open"}
+    NavItem "Pending" icon="hourglass_empty" badge="{count(tickets,t=>t.status=='pending')}" selected={view=="pending"} onTap={view="pending"}
+    NavItem "Solved" icon="check_circle" badge="{count(tickets,t=>t.status=='solved')}" selected={view=="solved"} onTap={view="solved"}
+    Divider
+    NavItem "Customers" icon="groups" onTap={go customers}
+    NavItem "Saved replies" icon="quickreply" onTap={go saved-replies}
+    NavItem "Reports" icon="bar_chart" onTap={go reports}
+    NavItem "Shortcuts" icon="keyboard" onTap={open shortcuts}
+    Spacer grow
+    Row gap=8 middle
+      Avatar "Sam Patel" size=32
+      Text.muted "Sam Patel"
+  Main
+    Nav
+      Heading "Inbox" level=1
+      Row gap=8
+        Input "Search tickets" "requester, subject or tag" bind=q w=240 icon="search"
+        Select "Sort" items=["sla","priority","newest"] bind=sortKey w=140
+        Button.outline "Filters" icon="tune" onTap={open filters}
+        Button "New ticket" icon="add" onTap={open newTicket}
+    Column pad=16 gap=12 scroll
+      if length(incoming)>0
+        Button.ghost "{length(incoming)} new ticket arrived, show" icon="arrow_upward" animate=slide-up onTap={tickets=concat(incoming,tickets); incoming=[]; toast "New ticket added to the top"}
+      if length(selected)>0
+        Card gap=8 fill=#FFE8F5E9 animate=fade
+          Row between middle
+            Text.strong "{length(selected)} selected"
+            Row gap=8
+              Button.outline "Assign to me" icon="person_add" onTap={tickets=map(tickets,t=>contains(selected,t.id)?with(t,"assignee",me):t); toast "Assigned {length(selected)} tickets to you"; selected=[]}
+              Button.outline "Status" icon="flag" onTap={open bulkStatus}
+              Button.outline "Merge" icon="merge" hidden={length(selected)<2} onTap={open merge}
+              Button.ghost "Clear" onTap={selected=[]}
+      Card pad=0
+        Row gap=12 pad=[12,8,12,8] border-bottom=#FFE0E0E0 middle
+          Checkbox bind=allSel onChange={selected=result?map(tickets,t=>t.id):[]}
+          Text.caption "REQUESTER" w=140
+          Text.caption "SUBJECT" grow
+          Text.caption "STATUS" w=80
+          Text.caption "PRIORITY" w=70
+          Text.caption "TIME LEFT" w=110
+          Text.caption "ASSIGNEE" w=110
+        each t in sortBy(filter(tickets,x=>(view=="all" || (view=="mine" && x.assignee==me) || (view=="unassigned" && x.assignee=="") || x.status==view) && (q=="" || contains(lower(x.subject),lower(q)) || contains(lower(x.requester),lower(q))) && (statusFilter=="any" || x.status==statusFilter) && (priorityFilter=="any" || x.priority==priorityFilter)),x=>sortKey=="newest"?0-x.id:x.sla)
+          Row gap=12 pad=[12,10,12,10] middle border-bottom=#FFF0F0F0 selected={contains(selected,t.id)} onTap={emit openTicket t.id; go ticket} animate=fade
+            Checkbox onChange={selected=result?append(selected,t.id):without(selected,t.id)}
+            Row gap=8 w=140 middle
+              Avatar "{t.requester}" size=24
+              Text.strong "{t.requester}"
+            Column grow gap=2
+              Text.strong "{t.subject}"
+              Row gap=4
+                each tag in t.tags
+                  Chip "{tag}" size=small
+            Badge.info "{t.status}" w=80 hidden={t.status!='new'}
+            Badge.neutral "{t.status}" w=80 hidden={t.status!='open' && t.status!='pending'}
+            Badge.success "{t.status}" w=80 hidden={t.status!='solved'}
+            Badge.error "{t.priority}" w=70 hidden={t.priority!='urgent'}
+            Badge.warning "{t.priority}" w=70 hidden={t.priority!='high'}
+            Text.muted "{t.priority}" w=70 hidden={t.priority=='urgent' || t.priority=='high'}
+            Column w=110 gap=2
+              Progress {t.sla} color={t.sla<0.2?"#FFD32F2F":(t.sla<0.5?"#FFF9A825":"#FF2E7D32")}
+              Text.caption "{t.age}"
+            Text.muted "{t.assignee==''?'Unassigned':t.assignee}" w=110
+        if isEmpty(tickets)
+          Text.muted "No tickets in this view." center
+Sheet#filters "Filters"
+  Select "Status" items=["any","new","open","pending","solved"] bind=statusFilter
+  Select "Priority" items=["any","low","normal","high","urgent"] bind=priorityFilter
+  Row end gap=8
+    Button.ghost "Reset" onTap={statusFilter="any"; priorityFilter="any"}
+    Button "Apply" onTap={close}
+Dialog#bulkStatus "Set status" "For the selected tickets"
+  Column gap=8
+    each s in ["open","pending","solved"]
+      Button.outline "{s}" onTap={tickets=map(tickets,t=>contains(selected,t.id)?with(t,"status",s):t); toast "{length(selected)} tickets set to {s}"; selected=[]; close}
+Dialog#merge "Merge tickets" "The oldest ticket keeps the conversation"
+  Text "Merge {length(selected)} tickets into #{min(selected[0],selected[1])}?"
+  Row end gap=8
+    Button.ghost "Cancel" onTap={close}
+    Button "Merge" onTap={tickets=removeWhere(tickets,t=>contains(selected,t.id) && t.id!=min(selected[0],selected[1])); toast "Tickets merged"; selected=[]; close}
+Dialog#newTicket "New ticket"
+  Input "Requester email" bind=newEmail type=email
+  Input "Subject" bind=newSubject
+  Select "Priority" items=["low","normal","high","urgent"] bind=newPriority
+  Input "Message" multiline bind=newBody
+  Button "Create ticket" onTap={tickets=concat([{"id":4824,"requester":newEmail,"email":newEmail,"subject":newSubject,"status":"new","priority":newPriority,"sla":1.0,"assignee":"","tags":[],"age":"now"}],tickets); toast "Ticket created"; close}
+Dialog#shortcuts "Keyboard shortcuts"
+  Column gap=8
+    Row between
+      Text "Next ticket"
+      Badge.neutral "j"
+    Row between
+      Text "Previous ticket"
+      Badge.neutral "k"
+
+### Ticket
+project tickets=[]
+project me="Sam Patel"
+project panelW=340 persist
+state mode="Public reply"
+state draft=""
+state replyQuery=""
+state sidePanelStatus="open"
+state ticket={"id":4821,"requester":"Maya Reyes","email":"maya@brightpath.io","subject":"Invoice shows the wrong seat count","status":"open","priority":"high","assignee":"Sam Patel","tags":["billing","enterprise"],"plan":"Business","seats":42,"messages":[{"id":1,"kind":"customer","author":"Maya Reyes","time":"09:12","text":"Hi, our March invoice says 48 seats but we only have 42 active. Can you correct it before finance closes the month?"},{"id":2,"kind":"reply","author":"Lena Ortiz","time":"09:40","text":"Thanks Maya, I am checking the seat log now and will come back shortly."},{"id":3,"kind":"note","author":"Lena Ortiz","time":"09:44","text":"Six seats were deactivated on the 3rd but the sync job did not run. Needs billing to reissue."},{"id":4,"kind":"customer","author":"Maya Reyes","time":"10:58","text":"Any news? Finance closes at 5pm."}]}
+state notes=[]
+state otherTickets=[{"id":4710,"subject":"Add a billing contact","status":"solved"},{"id":4655,"subject":"Update VAT number","status":"solved"}]
+state fields=[{"label":"Account ID","value":"acc_92ab1"},{"label":"Plan","value":"Business"},{"label":"Seats","value":"42"},{"label":"Region","value":"EU"}]
+state replies=[{"title":"Seat count correction","body":"Thanks for flagging this. We have corrected the seat count and will send a revised invoice today."},{"title":"Asking for logs","body":"Could you send the request ID and a timestamp so we can look at the logs?"},{"title":"Closing the loop","body":"Glad that is sorted. We will close this ticket, reply any time to reopen it."}]
+Shortcut key="r" onPress={mode="Public reply"; focus reply}
+Shortcut key="n" onPress={mode="Internal note"; focus reply}
+Shortcut key="a" onPress={ticket=with(ticket,"assignee",me); toast "Assigned to you"}
+Shortcut key="c" onPress={draft==""?close_ticket:open discard}
+Shortcut key="?" onPress={open shortcuts}
+Shortcut key="j" onPress={emit nextTicket}
+Shortcut key="k" onPress={emit previousTicket}
+Shortcut key="/" onPress={open replyMenu}
+App
+  Main
+    Nav
+      Row gap=8 middle
+        IconButton "arrow_back" onTap={go inbox}
+        Heading "#{ticket.id} {ticket.subject}" level=1
+      Row gap=8
+        IconButton "chevron_left" onTap={emit previousTicket}
+        IconButton "chevron_right" onTap={emit nextTicket}
+        IconButton "info" show=phone onTap={open details}
+        Button.outline "Close ticket" icon="check" onTap={draft==""?(ticket=with(ticket,"status","solved"); toast "Ticket #{ticket.id} set to solved"):open discard}
+    Row grow top
+      Column grow
+        Column grow scroll follow=newest pad=16 gap=12
+          each m in ticket.messages
+            Box gap=4 pad=12 radius=8 animate=fade fill={m.kind=="note"?"#FFFFF8E1":(m.kind=="reply"?"#FFE8F5E9":"#FFFFFFFF")}
+              Row between
+                Row gap=8 middle
+                  Avatar "{m.author}" size=24
+                  Text.strong "{m.author}"
+                  Badge.warning "Internal note" hidden={m.kind!='note'}
+                Text.caption "{m.time}"
+              Text "{m.text}"
+        Card gap=8 pad=12
+          SegmentedButton items=["Public reply","Internal note"] bind=mode
+          Input#reply "Write a message" multiline bind=draft fill={mode=="Internal note"?"#FFFFF8E1":"#FFFFFFFF"}
+          Row between
+            Row gap=8
+              Button.outline "Saved replies" icon="quickreply" onTap={open replyMenu}
+              Button.ghost "Attach" icon="attach_file" onTap={emit attach}
+            Row gap=8
+              Button "Send" icon="send" disabled={draft==""} onTap={ticket=with(ticket,"messages",append(ticket.messages,{"id":length(ticket.messages)+1,"kind":mode=="Internal note"?"note":"reply","author":me,"time":formatDate(today(),"HH:mm"),"text":draft})); draft=""; toast "Sent"}
+              Button.outline icon="arrow_drop_down" onTap={open sendAs}
+      Pane w={panelW} resizable bind=panelW min=280 max=520 pad=16 gap=12 hide=phone scroll fill=#FFFFFFFF
+        Heading "Requester" level=3
+        Row gap=8 middle
+          Avatar "{ticket.requester}" size=40
+          Column
+            Text.strong "{ticket.requester}"
+            Text.muted "{ticket.email}"
+        Divider
+        Select "Status" items=["new","open","pending","solved"] value={ticket.status} onChange={ticket=with(ticket,"status",result); toast "Ticket #{ticket.id} set to {result}"}
+        Select "Priority" items=["low","normal","high","urgent"] value={ticket.priority} onChange={ticket=with(ticket,"priority",result)}
+        Select "Assignee" items=["Sam Patel","Lena Ortiz","Unassigned"] value={ticket.assignee} onChange={ticket=with(ticket,"assignee",result); toast "Assigned to {result}"}
+        Text.fieldLabel "Tags"
+        Row gap=4 wrap
+          each tag in ticket.tags
+            Chip "{tag}" onDelete={ticket=with(ticket,"tags",without(ticket.tags,tag))}
+          IconButton "add" onTap={open addTag}
+        Divider
+        Heading "Custom fields" level=3
+        each f in fields
+          Row between
+            Text.muted "{f.label}"
+            Text.strong "{f.value}"
+        Divider
+        Heading "Other tickets" level=3
+        each o in otherTickets
+          ListTile "{o.subject}" "#{o.id}, {o.status}" onTap={emit openTicket o.id}
+Sheet#details "Details"
+  Select "Status" items=["new","open","pending","solved"] value={ticket.status} onChange={ticket=with(ticket,"status",result); toast "Ticket #{ticket.id} set to {result}"}
+  Select "Priority" items=["low","normal","high","urgent"] value={ticket.priority} onChange={ticket=with(ticket,"priority",result)}
+  Select "Assignee" items=["Sam Patel","Lena Ortiz","Unassigned"] value={ticket.assignee} onChange={ticket=with(ticket,"assignee",result)}
+  each f in fields
+    Row between
+      Text.muted "{f.label}"
+      Text.strong "{f.value}"
+Menu#replyMenu
+  Input "Search saved replies" bind=replyQuery icon="search" autofocus
+  each r in filter(replies,x=>replyQuery=="" || contains(lower(x.title),lower(replyQuery)) || contains(lower(x.body),lower(replyQuery)))
+    MenuItem "{r.title}" icon="quickreply" onTap={draft=draft+r.body; replyQuery=""; close}
+Menu#sendAs end
+  MenuItem "Send and set to open" onTap={ticket=with(ticket,"status","open"); draft=""; toast "Sent, ticket #{ticket.id} set to open"}
+  MenuItem "Send and set to pending" onTap={ticket=with(ticket,"status","pending"); draft=""; toast "Sent, ticket #{ticket.id} set to pending"}
+  MenuItem "Send and set to solved" onTap={ticket=with(ticket,"status","solved"); draft=""; toast "Sent, ticket #{ticket.id} set to solved"}
+Dialog#discard "Close with an unsent draft?" "Your draft will be lost"
+  Row end gap=8
+    Button.ghost "Keep editing" onTap={close}
+    Button.destructive "Discard and close" onTap={draft=""; ticket=with(ticket,"status","solved"); toast "Ticket #{ticket.id} set to solved"; close; go inbox}
+Dialog#addTag "Add a tag"
+  Input "Tag" bind=newTag
+  Button "Add" onTap={ticket=with(ticket,"tags",append(ticket.tags,newTag)); newTag=""; close}
+Dialog#shortcuts "Keyboard shortcuts"
+  Text "j next, k previous, a assign to me, r reply, n note, c close, / saved replies"
+
+### Customers
+state q=""
+state sel=0
+state customers=[{"id":1,"name":"Maya Reyes","email":"maya@brightpath.io","company":"Brightpath","plan":"Business","tickets":6,"since":"2023-02-14"},{"id":2,"name":"Tomas Berg","email":"tomas@northwind.se","company":"Northwind","plan":"Team","tickets":3,"since":"2024-05-02"},{"id":3,"name":"Priya Nair","email":"priya@lumen.co","company":"Lumen","plan":"Business","tickets":9,"since":"2022-11-30"},{"id":4,"name":"Aiko Tanaka","email":"aiko@sora.jp","company":"Sora","plan":"Enterprise","tickets":12,"since":"2021-08-19"}]
+Shortcut key="?" onPress={open shortcuts}
+App
+  Sidebar
+    Brand "Beacon" icon="support_agent"
+    NavItem "Inbox" icon="inbox" onTap={go inbox}
+    NavItem "Customers" icon="groups" selected={true}
+    NavItem "Saved replies" icon="quickreply" onTap={go saved-replies}
+    NavItem "Reports" icon="bar_chart" onTap={go reports}
+  Main
+    Nav
+      Heading "Customers" level=1
+      Input "Search customers" bind=q w=240 icon="search"
+    Row grow top
+      Column grow pad=16 scroll
+        Card pad=0
+          Row gap=12 pad=[12,8,12,8] border-bottom=#FFE0E0E0
+            Text.caption "NAME" grow
+            Text.caption "COMPANY" w=120
+            Text.caption "PLAN" w=100
+            Text.caption "TICKETS" w=70
+          each c in filter(customers,x=>q=="" || contains(lower(x.name),lower(q)) || contains(lower(x.company),lower(q)))
+            Row gap=12 pad=[12,10,12,10] middle border-bottom=#FFF0F0F0 selected={sel==c.id} onTap={sel=c.id}
+              Row gap=8 grow middle
+                Avatar "{c.name}" size=28
+                Column
+                  Text.strong "{c.name}"
+                  Text.muted "{c.email}"
+              Text "{c.company}" w=120
+              Badge.neutral "{c.plan}" w=100
+              Text "{c.tickets}" w=70
+      Pane w=320 pad=16 gap=12 hide=phone fill=#FFFFFFFF
+        if sel==0
+          Text.muted "Select a customer."
+        if sel!=0
+          Avatar "{find(customers,c=>c.id==sel).name}" size=56
+          Heading "{find(customers,c=>c.id==sel).name}" level=3
+          Text.muted "{find(customers,c=>c.id==sel).email}"
+          Row between
+            Text.muted "Company"
+            Text.strong "{find(customers,c=>c.id==sel).company}"
+          Row between
+            Text.muted "Customer since"
+            Text.strong "{find(customers,c=>c.id==sel).since}"
+          Row between
+            Text.muted "Tickets"
+            Text.strong "{find(customers,c=>c.id==sel).tickets}"
+          Button "View tickets" icon="inbox" onTap={go inbox}
+Dialog#shortcuts "Keyboard shortcuts"
+  Text "j next, k previous, a assign to me, r reply, n note, c close"
+
+### Saved replies
+state replies=[{"id":1,"title":"Seat count correction","body":"Thanks for flagging this. We have corrected the seat count and will send a revised invoice today."},{"id":2,"title":"Asking for logs","body":"Could you send the request ID and a timestamp so we can look at the logs?"},{"id":3,"title":"Closing the loop","body":"Glad that is sorted. We will close this ticket, reply any time to reopen it."}]
+state editing=0
+state q=""
+Shortcut key="?" onPress={open shortcuts}
+App
+  Sidebar
+    Brand "Beacon" icon="support_agent"
+    NavItem "Inbox" icon="inbox" onTap={go inbox}
+    NavItem "Customers" icon="groups" onTap={go customers}
+    NavItem "Saved replies" icon="quickreply" selected={true}
+    NavItem "Reports" icon="bar_chart" onTap={go reports}
+  Main
+    Nav
+      Heading "Saved replies" level=1
+      Row gap=8
+        Input "Search" bind=q w=220 icon="search"
+        Button "New reply" icon="add" onTap={replies=append(replies,{"id":length(replies)+10,"title":"Untitled","body":""}); editing=length(replies)+9}
+    Column pad=24 gap=12 scroll
+      ReorderableList bind=replies
+        each r in filter(replies,x=>q=="" || contains(lower(x.title),lower(q)))
+          Card gap=8
+            Row between middle
+              Row gap=8 middle
+                Icon "drag_indicator"
+                Text.strong "{r.title}" hidden={editing==r.id}
+                Input "Title" bind=r.title hidden={editing!=r.id}
+              Row gap=4
+                IconButton "edit" hidden={editing==r.id} onTap={editing=r.id}
+                IconButton "check" hidden={editing!=r.id} onTap={editing=0; toast "Saved reply updated"}
+                IconButton "delete" onTap={replies=removeWhere(replies,x=>x.id==r.id); toast "Reply deleted"}
+            Text.muted "{r.body}" hidden={editing==r.id}
+            Input "Body" multiline bind=r.body hidden={editing!=r.id}
+Dialog#shortcuts "Keyboard shortcuts"
+  Text "j next, k previous, a assign to me, r reply, n note, c close"
+
+### Reports
+state range="7 days"
+state days=["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
+state firstResponse=[42,38,51,35,29,60,44]
+state resolution=[310,280,355,290,240,410,330]
+state agents=[{"name":"Sam Patel","solved":41,"frt":"31 min","res":"4h 20m","csat":"96%"},{"name":"Lena Ortiz","solved":37,"frt":"38 min","res":"4h 55m","csat":"94%"},{"name":"Noah Kim","solved":22,"frt":"52 min","res":"6h 10m","csat":"91%"}]
+Shortcut key="?" onPress={open shortcuts}
+App
+  Sidebar
+    Brand "Beacon" icon="support_agent"
+    NavItem "Inbox" icon="inbox" onTap={go inbox}
+    NavItem "Customers" icon="groups" onTap={go customers}
+    NavItem "Saved replies" icon="quickreply" onTap={go saved-replies}
+    NavItem "Reports" icon="bar_chart" selected={true}
+  Main
+    Nav
+      Heading "Reports" level=1
+      SegmentedButton items=["7 days","30 days","90 days"] bind=range
+    Column pad=24 gap=16 scroll
+      Grid cols=3 gap=16
+        Card gap=4
+          Text.muted "First response"
+          Text.strong "37 min" size=32
+          Sparkline values={firstResponse}
+        Card gap=4
+          Text.muted "Resolution time"
+          Text.strong "4h 52m" size=32
+          Sparkline values={resolution}
+        Card gap=4
+          Text.muted "Solved tickets"
+          Text.strong "100" size=32
+          Text.success "up 8% on last period"
+      Card gap=8
+        Text.strong "Tickets by day"
+        BarChart values=[24,31,28,35,22,12,9] labels={days} h=200
+      Card gap=8 pad=0
+        Text.strong "By agent" pad=16
+        Row gap=12 pad=[12,8,12,8] border-bottom=#FFE0E0E0
+          Text.caption "AGENT" grow
+          Text.caption "SOLVED" w=80
+          Text.caption "FIRST RESPONSE" w=120
+          Text.caption "RESOLUTION" w=110
+          Text.caption "CSAT" w=70
+        each a in agents
+          Row gap=12 pad=[12,10,12,10] border-bottom=#FFF0F0F0
+            Text.strong "{a.name}" grow
+            Text "{a.solved}" w=80
+            Text "{a.frt}" w=120
+            Text "{a.res}" w=110
+            Text "{a.csat}" w=70
+Dialog#shortcuts "Keyboard shortcuts"
+  Text "j next, k previous, a assign to me, r reply, n note, c close"
+
+### Shortcuts
+state groups=[{"title":"Navigate","items":[{"label":"Next ticket","key":"j"},{"label":"Previous ticket","key":"k"},{"label":"Show this list","key":"?"}]},{"title":"Act on a ticket","items":[{"label":"Assign to me","key":"a"},{"label":"Reply","key":"r"},{"label":"Internal note","key":"n"},{"label":"Saved replies","key":"/"},{"label":"Close ticket","key":"c"}]}]
+Shortcut key="Escape" onPress={go inbox}
+Page
+  Nav
+    Brand "Beacon" icon="support_agent"
+    Button.ghost "Back to inbox" onTap={go inbox}
+  Section narrow
+    Column gap=16
+      Heading "Keyboard shortcuts" level=1
+      Text.muted "Press ? anywhere to open this list."
+      each g in groups
+        Card gap=8
+          Text.strong "{g.title}"
+          each i in g.items
+            Row between
+              Text "{i.label}"
+              Badge.neutral "{i.key}"
