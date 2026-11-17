@@ -1,6 +1,6 @@
-// A long list that is added to a screenful at a time: the lines under it, and at its foot a Load more button (a spinner while loading holds); onLoadMore asks for the next. Nothing is shown at the foot of an empty list.
-InfiniteList items=[] loading=false onLoadMore
+// A long list that is added to a screenful at a time: the lines under it, and at its foot a Load more button (a spinner while loading holds); onLoadMore asks for the next. hasMore=false (all of it loaded) takes the button away. Nothing is shown at the foot of an empty list.
+InfiniteList items=[] loading=false hasMore=true onLoadMore
   Column w=fill gap=8
     ...
-    if !isEmpty(items)
-      LoadMore hasMore=true loading={loading} onLoadMore={onLoadMore}
+    if !isEmpty(items) && hasMore
+      LoadMore hasMore={hasMore} loading={loading} onLoadMore={onLoadMore}
