@@ -50,13 +50,13 @@ App
       Heading "Today"
       Text.muted "{card+1}/{length(cards)}"
     Column pad=16 gap=12 center onScrollCrown={card=clamp(card+result,0,length(cards)-1)} onSwipeUp={card=min(card+1,length(cards)-1)} onSwipeDown={card=max(card-1,0)}
-      Pages bind=card h=220 vertical items=cards
+      Pages @card h=220 vertical items=cards
         Card gap=8 center animate=slide-up
           IconTile "{item.icon}"
           Text.muted "{item.title}"
           Text "{item.value}" size=36 weight=700
           Text.caption "{item.sub}"
-      Dots bind=card count=5
+      Dots @card count=5
       Row gap=8
         Button.outline "Prev" onTap={card=max(card-1,0)}
         Button.outline "Next" onTap={card=min(card+1,length(cards)-1)}
@@ -71,12 +71,12 @@ App
       Heading "Faces"
       IconButton "tune" tooltip="Customise" onTap={go customise}
     Column pad=16 gap=12 center
-      Pages bind=face h=260 peek=0.8 items=faces
+      Pages @face h=260 peek=0.8 items=faces
         Card gap=8 center
           Clock hour={hour} minute={minute} second={second} style="analogue" w=160 h=160
           Text.strong "{item.name}"
           Text.caption "{item.style}"
-      Dots bind=face count=4
+      Dots @face count=4
       Row gap=8
         Button.outline "Customise" onTap={go customise}
         Button "Use this face" onTap={emit setFace face; toast "Face set"; go watch-face}
@@ -84,6 +84,10 @@ App
 ### Customise
 state color="Teal"
 state palette=["Teal","Coral","Gold","Violet","White"]
+state showBattery=false
+state showEvent=false
+state showTemp=false
+state dim=false
 App
   Main
     Nav
@@ -99,7 +103,7 @@ App
         each c in palette
           ChoiceChip "{c}" selected={color==c} onTap={color=c; accent=c=="Teal" ? "#FF4FD1C5" : c=="Coral" ? "#FFFF7F6B" : c=="Gold" ? "#FFFFC857" : c=="Violet" ? "#FF9B7BFF" : "#FFFFFFFF"}
       Text.sectionTitle "Dials"
-      Toggle "Battery" bind=showBattery
-      Toggle "Next event" bind=showEvent
-      Toggle "Temperature" bind=showTemp
-      Toggle "Always-on dim" bind=dim
+      Toggle "Battery" @showBattery
+      Toggle "Next event" @showEvent
+      Toggle "Temperature" @showTemp
+      Toggle "Always-on dim" @dim

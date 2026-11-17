@@ -57,7 +57,7 @@ Sheet#addReading "Add reading"
   Column gap=12
     Text "{entry == "" ? "0" : entry}" size=56 weight=700 center
     Text.muted "mg/dL" center
-    NumberPad bind=entry max=3
+    NumberPad @entry max=3
     Text.fieldLabel "Meal context"
     Row gap=8
       ChoiceChip "Fasting" selected={context=="Fasting"} onTap={context="Fasting"}
@@ -137,29 +137,29 @@ App
       Button "Save thresholds" onTap={emit saveAlerts; toast "Thresholds saved"}
     Column pad=24 gap=16 maxw=720
       Card gap=16
-        Toggle "Alert when low" bind=lowOn
+        Toggle "Alert when low" @lowOn
         if lowOn
           Column gap=4
             Row between
               Text "Low below"
               Text.strong "{lowAt} mg/dL"
-            Slider bind=lowAt min=50 max=90
+            Slider @lowAt min=50 max=90
         Divider
-        Toggle "Alert when high" bind=highOn
+        Toggle "Alert when high" @highOn
         if highOn
           Column gap=4
             Row between
               Text "High above"
               Text.strong "{highAt} mg/dL"
-            Slider bind=highAt min=140 max=300
+            Slider @highAt min=140 max=300
         Divider
         Column gap=4
           Row between
             Text "Urgent low below"
             Text.strong "{urgentLow} mg/dL"
-          Slider bind=urgentLow min=40 max=60
-        Select "Send alerts to" bind=notify items=["Phone only","Phone and watch","Phone and caregiver"]
-        Toggle "Quiet hours 22:00 to 06:00 (urgent low still sounds)" bind=quiet
+          Slider @urgentLow min=40 max=60
+        Select "Send alerts to" @notify items=["Phone only","Phone and watch","Phone and caregiver"]
+        Toggle "Quiet hours 22:00 to 06:00 (urgent low still sounds)" @quiet
       Card gap=8
         Text.strong "Recent alerts"
         ListTile "Low: 64 mg/dL" subtitle="Yesterday, 17:55" leading="warning"
@@ -190,14 +190,14 @@ App
           ChoiceChip "Last 30 days" selected={range=="Last 30 days"} onTap={range="Last 30 days"}
           ChoiceChip "Last 90 days" selected={range=="Last 90 days"} onTap={range="Last 90 days"}
         Text.strong "Format"
-        SegmentedButton bind=format items=["PDF","CSV"]
+        SegmentedButton @format items=["PDF","CSV"]
         Text.strong "Include"
         Row gap=8
           FilterChip "Readings" selected={contains(include,"Readings")} onTap={include=contains(include,"Readings") ? without(include,"Readings") : append(include,"Readings")}
           FilterChip "Insulin" selected={contains(include,"Insulin")} onTap={include=contains(include,"Insulin") ? without(include,"Insulin") : append(include,"Insulin")}
           FilterChip "Meals" selected={contains(include,"Meals")} onTap={include=contains(include,"Meals") ? without(include,"Meals") : append(include,"Meals")}
           FilterChip "Time in range" selected={contains(include,"Time in range")} onTap={include=contains(include,"Time in range") ? without(include,"Time in range") : append(include,"Time in range")}
-        Input "Note for your care team" "Dizzy most mornings this week" bind=note multiline
+        Input "Note for your care team" "Dizzy most mornings this week" @note multiline
       Card gap=8
         Text.strong "Preview"
         Text.muted "{range}, {format}: {join(include,", ")}"
@@ -216,7 +216,7 @@ define ReadingBand value=100 low=70 high=180
         Badge "{value < low ? "Low" : (value > high ? "High" : "In range")}"
 
 // a number pad with digits, a delete key and a clear key
-define NumberPad bind=value max=3
+define NumberPad @value max=3
   state value=""
   Grid cols=3 gap=8
     each d in ["1","2","3","4","5","6","7","8","9","C","0","<"]

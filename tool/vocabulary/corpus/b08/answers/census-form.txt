@@ -1,6 +1,7 @@
 ### Start
 state code=""
 state codeError=false
+state postcode=""
 Page
   Nav
     Brand "Headcount" icon="groups"
@@ -12,7 +13,7 @@ Page
       IconTile "mail"
       Heading "Start your census form" level=1
       Text.muted "Enter the 8-character code printed on the letter we mailed to your address." center
-      CodeInput length=8 bind=code onComplete={codeError=false}
+      CodeInput length=8 @code onComplete={codeError=false}
       if codeError
         Text.danger "That code was not recognised. Check the letter and try again."
       Button "Continue" size=large onTap={length(code)==8 ? go household : codeError=true}
@@ -22,7 +23,7 @@ Page
       Text.muted "Headcount 2026 Census"
       Text.muted "Your answers are protected by law"
   Dialog#help "Need a new code?" "We can send another letter within five days."
-    Input "Postcode" bind=postcode
+    Input "Postcode" @postcode
     Button "Request a letter" onTap={emit requestLetter postcode; toast "Letter requested"; close}
   Dialog#privacy "How we use your answers"
     Text "Answers are used for statistics only and are never shared with other agencies."
@@ -58,7 +59,7 @@ Page
         Button.outline "Back" onTap={go start}
         Button "Review answers" disabled={count(people, x=>x.answered<x.total)>0} onTap={go review}
   Dialog#addPerson "Add a person" "Their name as it should appear on the form"
-    Input "Full name" bind=newName
+    Input "Full name" @newName
     Button "Add" onTap={trim(newName)=="" ? toast "Enter a name" : {people=append(people, with(with(with({}, "id", length(people)+1), "name", newName), "answered", 0)); newName=""; close}}
   Menu#personMenu
     MenuItem "Answer questions" icon="edit" onTap={go question}
@@ -86,17 +87,17 @@ Page
       Card gap=12
         Text.strong "What is your date of birth?"
         Row gap=12
-          Input "Day" "DD" type=number bind=dobDay w=80
-          Input "Month" "MM" type=number bind=dobMonth w=80
-          Input "Year" "YYYY" type=number bind=dobYear w=120
+          Input "Day" "DD" type=number @dobDay w=80
+          Input "Month" "MM" type=number @dobMonth w=80
+          Input "Year" "YYYY" type=number @dobYear w=120
         if dobYear!="" && 2026 - dobYear < 16
           Badge.info "Under 16: work questions are skipped"
       if dobYear=="" || 2026 - dobYear >= 16
         Card gap=12
           Text.strong "Which best describes your main activity last week?"
-          Radio bind=employment items=["Working for an employer","Self-employed","Looking for work","Retired","Student","Looking after home or family","Other"]
+          Radio @employment items=["Working for an employer","Self-employed","Looking for work","Retired","Student","Looking after home or family","Other"]
           if employment=="Other"
-            Input "Please describe" multiline bind=employmentOther
+            Input "Please describe" multiline @employmentOther
       if skipped
         Badge.warning "Skipped: {skipReason}"
       Row between
@@ -105,7 +106,7 @@ Page
           Button.outline "Previous" onTap={go household}
           Button "Save and continue" disabled={dobDay=="" || dobMonth=="" || dobYear=="" || (employment=="" && !skipped && (dobYear=="" || 2026 - dobYear >= 16))} onTap={toast "Saved"; go review}
   Dialog#skip "Skip this question" "Tell us why you would rather not answer."
-    Select "Reason" bind=skipReason items=["I do not know the answer","I prefer not to say","It does not apply to me"]
+    Select "Reason" @skipReason items=["I do not know the answer","I prefer not to say","It does not apply to me"]
     Row end gap=8
       Button.outline "Cancel" onTap={close}
       Button "Skip" onTap={skipReason=="" ? toast "Choose a reason" : {skipped=true; close}}
@@ -136,7 +137,7 @@ Page
               Text "{p.dob}" w=140 hide=phone
               Text "{p.activity}" w=220 hide=tablet
               Link "Edit" w=60 onTap={sel=p.id; go question}
-        Checkbox "I confirm these answers are correct to the best of my knowledge" bind=confirmed
+        Checkbox "I confirm these answers are correct to the best of my knowledge" @confirmed
         Row between
           Button.outline "Back" onTap={go household}
           Button "Submit census" size=large disabled={!confirmed} onTap={ref="HC-" + upper(replace(code,"-","")) + "-" + length(people); submitted=true; emit submit ref}

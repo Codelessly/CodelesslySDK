@@ -5,6 +5,15 @@ state sel=""
 state snoozeMins=15
 state doses=[{"id":"d1","name":"Metformin","strength":"500 mg","form":"tablet","time":"8:00 AM","mins":480,"part":"Morning","status":"taken"},{"id":"d2","name":"Lisinopril","strength":"10 mg","form":"tablet","time":"8:00 AM","mins":480,"part":"Morning","status":"due"},{"id":"d3","name":"Vitamin D3","strength":"2000 IU","form":"softgel","time":"12:30 PM","mins":750,"part":"Afternoon","status":"due"},{"id":"d4","name":"Metformin","strength":"500 mg","form":"tablet","time":"6:00 PM","mins":1080,"part":"Evening","status":"due"},{"id":"d5","name":"Atorvastatin","strength":"20 mg","form":"tablet","time":"9:30 PM","mins":1290,"part":"Evening","status":"due"}]
 state parts=["Morning","Afternoon","Evening"]
+state share=false
+state newName=""
+state newStrength=""
+state newForm=""
+state newScheduleType=""
+state newEvery=""
+state newTime1=""
+state newTime2=""
+state newPills=""
 App
   Sidebar
     Brand "Dosewell" icon="medication"
@@ -12,7 +21,7 @@ App
     NavItem "Medicines" icon="vaccines" selected={tab=="medicines"} onTap={go medicines}
     NavItem "History" icon="calendar_month" selected={tab=="history"} onTap={go history}
     Spacer grow
-    Toggle "Share with caregiver" bind=share
+    Toggle "Share with caregiver" @share
     Text.muted "Sharing with Maria Alvarez"
   Main
     Nav
@@ -52,7 +61,7 @@ App
                     Button.ghost "Skip" onTap={doses=updateWhere(doses,x=>x.id==d.id,x=>with(x,"status","skipped")); emit skipped d.id}
   Sheet#snooze "Snooze this dose"
     Text.muted "Remind me again in"
-    SegmentedButton bind=snoozeMins items=[5,15,30,60]
+    SegmentedButton @snoozeMins items=[5,15,30,60]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Snooze" onTap={doses=updateWhere(doses,x=>x.id==sel,x=>with(x,"mins",nowMin+snoozeMins)); emit snooze sel; toast "Snoozed {snoozeMins} minutes"; close}
@@ -63,22 +72,22 @@ App
       Button.outline "Call pharmacy" onTap={link tel:+15555550142}
       Button "Got it" onTap={close}
   Dialog#addMed "Add medicine"
-    Input "Name" bind=newName
+    Input "Name" @newName
     Row gap=8
-      Input "Strength" "500 mg" bind=newStrength grow
-      Select bind=newForm items=["Tablet","Capsule","Liquid","Injection","Patch"] grow
-    Select bind=newScheduleType items=["Every n hours","At set times","Days of week"]
+      Input "Strength" "500 mg" @newStrength grow
+      Select @newForm items=["Tablet","Capsule","Liquid","Injection","Patch"] grow
+    Select @newScheduleType items=["Every n hours","At set times","Days of week"]
     if newScheduleType=="Every n hours"
-      Input "Hours between doses" type=number bind=newEvery
+      Input "Hours between doses" type=number @newEvery
     if newScheduleType=="At set times"
       Row gap=8
-        TimePicker "First dose" bind=newTime1
-        TimePicker "Second dose" bind=newTime2
+        TimePicker "First dose" @newTime1
+        TimePicker "Second dose" @newTime2
     if newScheduleType=="Days of week"
       Row gap=8
         each wd in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
           FilterChip "{wd}" selected={contains(newDays,wd)} onTap={newDays=contains(newDays,wd)?without(newDays,wd):append(newDays,wd)}
-    Input "Pills in the bottle" type=number bind=newPills
+    Input "Pills in the bottle" type=number @newPills
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={emit addMedicine; toast "Medicine added"; close}
@@ -87,6 +96,12 @@ App
 project tab="medicines"
 state selId="m1"
 state meds=[{"id":"m1","name":"Lisinopril","strength":"10 mg","form":"tablet","schedule":"Every day at 8:00 AM","left":9,"perDay":1,"refillAt":"Nov 25"},{"id":"m2","name":"Metformin","strength":"500 mg","form":"tablet","schedule":"Every 10 hours","left":46,"perDay":2,"refillAt":"Dec 9"},{"id":"m3","name":"Vitamin D3","strength":"2000 IU","form":"softgel","schedule":"Mon, Wed, Fri at 12:30 PM","left":21,"perDay":1,"refillAt":"Dec 20"},{"id":"m4","name":"Atorvastatin","strength":"20 mg","form":"tablet","schedule":"Every day at 9:30 PM","left":4,"perDay":1,"refillAt":"Nov 20"}]
+state share=false
+state q=""
+state schedType=""
+state everyN=""
+state t1=""
+state t2=""
 App
   Sidebar
     Brand "Dosewell" icon="medication"
@@ -94,12 +109,12 @@ App
     NavItem "Medicines" icon="vaccines" selected={tab=="medicines"} onTap={tab="medicines"}
     NavItem "History" icon="calendar_month" selected={tab=="history"} onTap={go history}
     Spacer grow
-    Toggle "Share with caregiver" bind=share
+    Toggle "Share with caregiver" @share
   Main
     Nav
       Heading "Medicines" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "Add medicine" onTap={open addMed}
     Column pad=24 gap=12 scroll
       each m in filter(sortBy(meds,x=>x.left/x.perDay),x=>contains(lower(x.name),lower(coalesce(q,""))))
@@ -138,13 +153,13 @@ App
     MenuItem "Pause reminders" icon="notifications_off" onTap={emit pause selId; toast "Reminders paused"}
     MenuItem "Remove" icon="delete" onTap={meds=removeWhere(meds,x=>x.id==selId); selId=first(meds).id}
   Dialog#editSchedule "Edit schedule"
-    Select bind=schedType items=["Every n hours","At set times","Days of week"]
+    Select @schedType items=["Every n hours","At set times","Days of week"]
     if schedType=="Every n hours"
-      Input "Hours between doses" type=number bind=everyN
+      Input "Hours between doses" type=number @everyN
     if schedType=="At set times"
       Row gap=8
-        TimePicker "Dose 1" bind=t1
-        TimePicker "Dose 2" bind=t2
+        TimePicker "Dose 1" @t1
+        TimePicker "Dose 2" @t2
     if schedType=="Days of week"
       Row gap=8
         each wd in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
@@ -158,6 +173,7 @@ project tab="history"
 state month=11
 state picked=""
 state log=[{"day":3,"taken":5,"missed":0},{"day":4,"taken":5,"missed":0},{"day":5,"taken":4,"missed":1},{"day":6,"taken":5,"missed":0},{"day":7,"taken":3,"missed":2},{"day":8,"taken":5,"missed":0},{"day":9,"taken":5,"missed":0},{"day":10,"taken":4,"missed":1},{"day":11,"taken":5,"missed":0},{"day":12,"taken":5,"missed":0},{"day":13,"taken":5,"missed":0},{"day":14,"taken":2,"missed":3},{"day":15,"taken":5,"missed":0}]
+state share=false
 App
   Sidebar
     Brand "Dosewell" icon="medication"
@@ -165,7 +181,7 @@ App
     NavItem "Medicines" icon="vaccines" selected={tab=="medicines"} onTap={go medicines}
     NavItem "History" icon="calendar_month" selected={tab=="history"} onTap={tab="history"}
     Spacer grow
-    Toggle "Share with caregiver" bind=share
+    Toggle "Share with caregiver" @share
   Main
     Nav
       Heading "History" level=1
@@ -185,7 +201,7 @@ App
           Text.muted "Adherence"
           Text.strong "{round(sum(log,x=>x.taken)*100/(sum(log,x=>x.taken)+sum(log,x=>x.missed)),0)}%" size=32
       Card gap=12
-        Calendar bind=picked month={month} marks={map(log,x=>{"day":x.day,"color":x.missed==0?"green":"red"})} onSelect={picked=result}
+        Calendar @picked month={month} marks={map(log,x=>{"day":x.day,"color":x.missed==0?"green":"red"})} onSelect={picked=result}
         Row gap=16
           Badge.success "All doses taken"
           Badge.error "Missed doses"
@@ -201,6 +217,6 @@ App
           Column gap=2
             Text.strong "Share with caregiver"
             Text.muted "Maria Alvarez sees your doses and gets a note when one is missed."
-          Toggle bind=share onChange={emit shareChanged result; toast result?"Sharing on":"Sharing off"}
+          Toggle @share onChange={emit shareChanged result; toast result?"Sharing on":"Sharing off"}
         if share
           Button.outline "Send this month to Maria" onTap={emit sendReport; toast "Report sent"}

@@ -20,7 +20,7 @@ App
     Nav
       Heading "Harbor Point, {level}" level=1
       Row gap=8
-        Select bind=level items=["Level 1","Level 2","Level 3"] w=140
+        Select @level items=["Level 1","Level 2","Level 3"] w=140
         Chip "{count(snags,s=>s.status!='Closed')} open"
         Button "Report" icon="description" onTap={go report}
     Column pad=24 gap=16
@@ -37,17 +37,17 @@ App
 
 Dialog#pinform "New snag" "Pin {length(snags)+1} at the spot you tapped"
   Column gap=12 scroll
-    Input "Title" "What is wrong" bind=draft.title
+    Input "Title" "What is wrong" @draft.title
     Row gap=12
-      Select "Trade" bind=draft.trade items=["Electrical","Plumbing","Tiling","Painting","Joinery","HVAC"] grow
-      Select "Priority" bind=draft.priority items=["Low","Medium","High"] grow
+      Select "Trade" @draft.trade items=["Electrical","Plumbing","Tiling","Painting","Joinery","HVAC"] grow
+      Select "Priority" @draft.priority items=["Low","Medium","High"] grow
     Row gap=12
-      Select "Assignee" bind=draft.assignee items=["Dana Ruiz","Omar Haddad","Lena Fischer","Tomas Berg"] grow
-      DatePicker "Due date" bind=draft.due grow
+      Select "Assignee" @draft.assignee items=["Dana Ruiz","Omar Haddad","Lena Fischer","Tomas Berg"] grow
+      DatePicker "Due date" @draft.due grow
     Text.fieldLabel "Photo"
     Button.outline "Take photo" icon="photo_camera" onTap={emit takePhoto} hidden={draft.photo!=""}
     if draft.photo!=""
-      PhotoMarkup src="{draft.photo}" bind=draft.marks tools=["arrow","circle","pen"] h=240
+      PhotoMarkup src="{draft.photo}" @draft.marks tools=["arrow","circle","pen"] h=240
       Row gap=8
         Button.ghost "Undo" icon="undo" onTap={draft=with(draft,"marks",removeAt(draft.marks,length(draft.marks)-1))}
         Button.ghost "Clear" onTap={draft=with(draft,"marks",[])}
@@ -90,7 +90,7 @@ App
     Nav
       Heading "Snags by trade" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         IconButton "filter_alt_off" tooltip="Clear filters" onTap={trade="All"; status="All"; q=""}
     Column pad=24 gap=16 scroll
       Row gap=8
@@ -131,6 +131,7 @@ App
 project snags=[]
 project sel=2
 state tab="plan"
+state note=""
 App
   Sidebar
     Brand "Snag" icon="fact_check"
@@ -158,7 +159,7 @@ App
           Text.caption "Drag the handle to compare."
         Card gap=8
           Text.strong "Note to the contractor"
-          Input "Comment" "Optional" multiline bind=note
+          Input "Comment" "Optional" multiline @note
           Row end
             Button.secondary "Send note" onTap={emit contractorNote note; toast "Note sent"}
 
@@ -169,6 +170,8 @@ state signature=""
 state signerName=""
 state agree=false
 state tab="report"
+state withPhotos=false
+state withSig=false
 App
   Sidebar
     Brand "Snag" icon="fact_check"
@@ -197,13 +200,13 @@ App
             Text.strong "{count(snags,s=>s.status!='Closed')}"
           Progress {count(snags,s=>s.status=='Closed')/max(1,length(snags))}
         Card gap=12
-          Input "Full name" bind=signerName
+          Input "Full name" @signerName
           Text.fieldLabel "Signature"
-          SignaturePad bind=signature h=140
+          SignaturePad @signature h=140
           Row between
             Button.ghost "Clear" onTap={signature=""}
             Text.caption "{formatDate(today(),'MMM d, yyyy')}"
-          Checkbox "I confirm the work listed above is accepted" bind=agree
+          Checkbox "I confirm the work listed above is accepted" @agree
           Button "Sign off" onTap={signature!="" && agree && trim(signerName)!="" ? {signed=true; emit signedOff {name:signerName}; toast "Signed off"} : toast "Add your name, signature and confirmation"}
           if signed
             Text.success "Signed by {signerName} on {formatDate(today(),'MMM d')}"
@@ -229,8 +232,8 @@ App
                 Badge.neutral "{s.status}"
           Image "{signature}" hidden={!signed} h=60
         Row gap=8
-          Switch "Include photos" bind=withPhotos
-          Switch "Include signature" bind=withSig
+          Switch "Include photos" @withPhotos
+          Switch "Include signature" @withSig
 
 Menu#sendmenu end
   MenuItem "Email to client" icon="mail" onTap={emit sendReport email; toast "Report emailed"}

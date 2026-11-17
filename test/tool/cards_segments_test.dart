@@ -30,7 +30,7 @@ void main() {
     final r = api.Catalog.run(
         catalog,
         () => parseNotation(
-            'state sort="Recommended"\nColumn pad=24 gap=12\n  Segments bind=sort options=["Recommended", "Price", "Rating"]\n',
+            'state sort="Recommended"\nColumn pad=24 gap=12\n  Segments @sort options=["Recommended", "Price", "Rating"]\n',
             catalog: catalog,
             options: NotationOptions.fromDesignSystem(ds, width: 390)));
     expect(r.issues, isEmpty);

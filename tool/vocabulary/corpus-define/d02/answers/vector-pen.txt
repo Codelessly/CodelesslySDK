@@ -32,10 +32,10 @@ App
         each t in toolbox
           IconButton "{t}" tooltip="{t}" selected={tool==t} onTap={tool=t; penOpen=false}
       Row gap=12
-        Toggle "Snap to points" bind=snap
-        Toggle "Guides" bind=showGuides
+        Toggle "Snap to points" @snap
+        Toggle "Guides" @showGuides
         IconButton "remove" tooltip="Zoom out" onTap={zoom=max(10,zoom-25)}
-        Select bind=zoom items=[25,50,100,150,200,400] w=100
+        Select @zoom items=[25,50,100,150,200,400] w=100
         IconButton "add" tooltip="Zoom in" onTap={zoom=min(800,zoom+25)}
     Row grow
       Column grow gap=0
@@ -97,9 +97,9 @@ App
       Grid cols=2 gap=16
         Card gap=12
           Text.strong "Fill"
-          SegmentedButton bind=fillKind items=["none","solid","linear","radial"]
+          SegmentedButton @fillKind items=["none","solid","linear","radial"]
           if fillKind=="linear" || fillKind=="radial"
-            GradientBar bind=stops active={activeStop} kind={fillKind} angle={angle} onPickStop={activeStop=result} onMoveStop={stops=setAt(stops,result.index,with(stops[result.index],"at",clamp(result.at,0,1)))} onAddStop={stops=sortBy(append(stops,{"at":result.at,"color":"#FFFFFFFF"}),s=>s.at); activeStop=indexOf(sortBy(append(stops,{"at":result.at,"color":"#FFFFFFFF"}),s=>s.at),find(append(stops,{"at":result.at,"color":"#FFFFFFFF"}),s=>s.at==result.at))}
+            GradientBar @stops active={activeStop} kind={fillKind} angle={angle} onPickStop={activeStop=result} onMoveStop={stops=setAt(stops,result.index,with(stops[result.index],"at",clamp(result.at,0,1)))} onAddStop={stops=sortBy(append(stops,{"at":result.at,"color":"#FFFFFFFF"}),s=>s.at); activeStop=indexOf(sortBy(append(stops,{"at":result.at,"color":"#FFFFFFFF"}),s=>s.at),find(append(stops,{"at":result.at,"color":"#FFFFFFFF"}),s=>s.at==result.at))}
             Text.caption "Drag a stop along the bar. Double-click the bar to add one."
             Row gap=12 middle
               Text.fieldLabel "Stop {activeStop+1} position"
@@ -115,24 +115,24 @@ App
             if fillKind=="linear"
               Row gap=12 middle
                 Text.fieldLabel "Angle"
-                Slider bind=angle min=0 max=360 grow
+                Slider @angle min=0 max=360 grow
                 Text.mono "{angle}"
         Card gap=12
           Text.strong "Stroke"
           Row gap=12 middle
             Text.fieldLabel "Color"
-            Input "Hex" bind=strokeColor w=140
+            Input "Hex" @strokeColor w=140
             Box w=28 h=28 radius=14 fill={strokeColor}
           Row gap=12 middle
             Text.fieldLabel "Width"
-            Slider bind=strokeWidth min=0 max=24 grow
+            Slider @strokeWidth min=0 max=24 grow
             Text.mono "{strokeWidth} px"
           Row gap=12 middle
             Text.fieldLabel "Join"
-            SegmentedButton bind=strokeJoin items=["Miter","Round","Bevel"]
+            SegmentedButton @strokeJoin items=["Miter","Round","Bevel"]
           Row gap=12 middle
             Text.fieldLabel "Opacity"
-            Slider bind=opacity min=0 max=100 grow
+            Slider @opacity min=0 max=100 grow
             Text.mono "{opacity}%"
       Card gap=8
         Text.strong "Preview"
@@ -158,7 +158,7 @@ App
     Nav
       Heading "Path points" level=1
       Row gap=8
-        Toggle "Snap to points" bind=snap
+        Toggle "Snap to points" @snap
         Button.outline "Add point" icon="add" onTap={points=append(points,{"x":points[length(points)-1].x+60,"y":points[length(points)-1].y,"hx":points[length(points)-1].x+90,"hy":points[length(points)-1].y-40,"smooth":true}); sel=length(points)-1}
         Button.destructive "Delete point" icon="delete" onTap={length(points)>2 ? points=removeAt(points,sel); sel=0 : toast "A path needs two points"}
     Row grow
@@ -175,7 +175,7 @@ App
           Input "Y" type=number value={points[sel].y} onChange={points=setAt(points,sel,with(points[sel],"y",result))}
           Input "Handle X" type=number value={points[sel].hx} onChange={points=setAt(points,sel,with(points[sel],"hx",result))}
           Input "Handle Y" type=number value={points[sel].hy} onChange={points=setAt(points,sel,with(points[sel],"hy",result))}
-        SegmentedButton bind=mode items=["Corner","Smooth","Symmetric"] onChange={points=setAt(points,sel,with(points[sel],"smooth",result!="Corner"))}
+        SegmentedButton @mode items=["Corner","Smooth","Symmetric"] onChange={points=setAt(points,sel,with(points[sel],"smooth",result!="Corner"))}
         Text.caption "Drag the point to move it, the round handle to curve the segment. Snaps to neighbouring points when Snap is on."
 
 // A ruler along one edge of the canvas with tick labels; pulling from it drops a guide. Drawn as a labelled strip: the real tick marks and the drag out of the ruler need a canvas.
@@ -198,7 +198,7 @@ define LayerRow "name" kind="path" depth=0 selected=false locked=false hidden=fa
     IconButton "{hidden ? "visibility_off" : "visibility"}" tooltip="Hide" onTap={onToggleHide}
 
 // A gradient bar with a draggable marker per stop. The real gradient and the marker drags need a canvas, so it shows as a labelled bar with a chip per stop.
-define GradientBar bind=stops active=0 kind="linear" angle=90 onPickStop onMoveStop onAddStop
+define GradientBar @stops active=0 kind="linear" angle=90 onPickStop onMoveStop onAddStop
   state stops=[]
   Column gap=6
     Box h=28 radius=6 fill={stops[0].color} border=1 onTap={onAddStop({"at":0.5})}

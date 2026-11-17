@@ -43,10 +43,10 @@ App
           Button "Score end" icon="check" onTap={length(arrows)==6 ? ends=append(ends,{"n":endNo,"shots":map(arrows,a=>a.score),"total":sum(arrows,a=>a.score)}); lastEnd=map(arrows,a=>{"x":a.x,"y":a.y}); arrows=[]; endNo=endNo+1; toast "End scored" : toast "Plot all six arrows first"}
   Sheet#roundPick "Choose a round"
     Column gap=8
-      Radio "18 m indoor, 60 arrows" bind=round
-      Radio "30 m, 72 arrows" bind=round
-      Radio "50 m, 72 arrows" bind=round
-      Radio "70 m, 72 arrows" bind=round
+      Radio "18 m indoor, 60 arrows" @round
+      Radio "30 m, 72 arrows" @round
+      Radio "50 m, 72 arrows" @round
+      Radio "70 m, 72 arrows" @round
       Button "Done" onTap={close}
 
 ### Score sheet
@@ -127,7 +127,7 @@ App
   Main
     Nav
       Heading "Personal records" level=1
-      SegmentedButton bind=filter items=["All","Indoor","Outdoor"]
+      SegmentedButton @filter items=["All","Indoor","Outdoor"]
     Column pad=24 gap=16
       Grid cols=2 gap=16
         each r in records
@@ -141,7 +141,7 @@ App
       Card gap=8
         Row between
           Text.strong "18 m progress"
-          Select bind=round items=["18 m","30 m","50 m","70 m"] w=120
+          Select @round items=["18 m","30 m","50 m","70 m"] w=120
         LineChart values={map(reverse(sessions),s=>s.score)} labels={map(reverse(sessions),s=>s.date)} h=180
       Card gap=8
         Text.strong "Recent sessions"

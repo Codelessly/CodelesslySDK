@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "Counter",
-  "doc": "A number raised and lowered with minus and plus (a party size, a count): Counter \"Guests\" bind=party min=1 max=8 keeps it in your number variable; onChanged fires with the new number.",
+  "doc": "A number raised and lowered with minus and plus (a party size, a count): Counter \"Guests\" @party min=1 max=8 keeps it in your number variable; onChanged fires with the new number.",
   "props": [
    {
     "key": "value",

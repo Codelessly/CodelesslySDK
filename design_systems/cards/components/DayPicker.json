@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "DayPicker",
-  "doc": "A strip of days to pick one from: DayPicker bind=day days=[\"Sat 14\",\"Sun 15\",\"Mon 16\"] (each a short weekday, a space, the date) keeps the chosen day's text in your variable; onChanged fires with it.",
+  "doc": "A strip of days to pick one from: DayPicker @day days=[\"Sat 14\",\"Sun 15\",\"Mon 16\"] (each a short weekday, a space, the date) keeps the chosen day's text in your variable; onChanged fires with it.",
   "props": [
    {
     "key": "value",

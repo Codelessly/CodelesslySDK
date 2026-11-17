@@ -8,6 +8,11 @@ state rota=[{"id":"mon-am","day":"Mon","slot":"Morning","adult":"Maya Reyes","ki
 state requests=[{"id":"r1","cell":"thu-pm","from":"Priya Nair","to":"Luis Ortega","status":"pending"}]
 state clubs=[{"kid":"Noah","day":"Tue","note":"Chess club until 4:30"},{"kid":"Sofia","day":"Thu","note":"Swimming until 5:00"}]
 state me="Maya Reyes"
+state day=""
+state swapnote=""
+state clubkid=""
+state clubday=""
+state clubnote=""
 App
   Sidebar
     Brand "Gate Duty" icon="school"
@@ -58,7 +63,7 @@ App
             ListTile "{k.kid}, {k.day}" subtitle="{k.note}" icon="sports_soccer"
           Button.ghost "Add a club" onTap={open club}
       if view=="month"
-        MonthView bind=day marks={map(rota,c=>{"date":c.day,"label":c.adult,"gap":c.adult==""})} onSelect={day=result; open day}
+        MonthView @day marks={map(rota,c=>{"date":c.day,"label":c.adult,"gap":c.adult==""})} onSelect={day=result; open day}
 
 Menu#cellmenu
   MenuItem "Ask someone to swap" icon="swap_horiz" onTap={open swap}
@@ -71,8 +76,8 @@ Dialog#cell "{find(rota,x=>x.id==sel).day} {find(rota,x=>x.id==sel).slot}" "{fin
     Button.outline "Take it myself" onTap={rota=updateWhere(rota,x=>x.id==sel,x=>with(x,"adult",me)); close; toast "Slot is yours"}
 
 Dialog#swap "Ask for a swap" "Pick the adult you want to swap with"
-  Select "Swap with" items={map(filter(people,p=>p.name!=me),p=>p.name)} bind=target
-  Input "Message" "Can you cover this one?" bind=swapnote multiline
+  Select "Swap with" items={map(filter(people,p=>p.name!=me),p=>p.name)} @target
+  Input "Message" "Can you cover this one?" @swapnote multiline
   Button "Send request" onTap={target=="" ? toast "Choose someone" : {requests=append(requests,{"id":concat([sel],[target]),"cell":sel,"from":me,"to":target,"status":"pending"}); emit swapRequest sel; toast "Request sent"; close}}
 
 Dialog#requests "Swap requests"
@@ -86,9 +91,9 @@ Dialog#requests "Swap requests"
           Button.outline "Decline" onTap={requests=updateWhere(requests,x=>x.id==r.id,x=>with(x,"status","declined"))}
 
 Dialog#club "Add a regular club"
-  Input "Child" bind=clubkid
-  Select "Day" items=["Mon","Tue","Wed","Thu","Fri"] bind=clubday
-  Input "What and until when" bind=clubnote
+  Input "Child" @clubkid
+  Select "Day" items=["Mon","Tue","Wed","Thu","Fri"] @clubday
+  Input "What and until when" @clubnote
   Button "Save" onTap={clubs=append(clubs,{"kid":clubkid,"day":clubday,"note":clubnote}); close}
 
 Dialog#day "{day}"
@@ -110,8 +115,8 @@ Page
     Heading "Reminder and late note" level=1
     Card gap=12
       Heading "Chime before pickup" level=3
-      Toggle "Play a chime" bind=chimeOn
-      Slider bind=lead min=5 max=60
+      Toggle "Play a chime" @chimeOn
+      Slider @lead min=5 max=60
       Text.muted "Chimes {lead} minutes before your slot, with the gate map"
       Chime when={chimeOn} minutes={lead} onPlay={emit chime}
     Card gap=12
@@ -156,7 +161,7 @@ App
         IconButton "chevron_right" tooltip="Next month" onTap={month="Dec"}
         Button.outline "Pickup code" onTap={open code}
     Column pad=24 gap=16
-      MonthView bind=picked marks={weeks} onSelect={open daysheet}
+      MonthView @picked marks={weeks} onSelect={open daysheet}
       Row gap=12
         Badge.danger "Red day: nobody on the gate"
         Badge.primary "Coloured by person"
@@ -169,7 +174,7 @@ Dialog#code "Pickup code" "For the teacher"
   PickupCode value="GD-4821" label="Show at the classroom door" ttl=300
   Button "Done" onTap={close}
 
-define MonthView bind=day marks=[] onSelect
+define MonthView @day marks=[] onSelect
   state day=""
   Card gap=8
     Grid cols=7 gap=4

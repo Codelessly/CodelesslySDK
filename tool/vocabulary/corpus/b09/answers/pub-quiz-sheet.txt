@@ -42,9 +42,9 @@ App
               Text "{sum(rounds,r=>r.s[index]*(r.joker==index ? 2 : 1))}" size=28 weight=700 center
       Card gap=8
         Text.strong "Bar tab note"
-        Input "Note" multiline bind=tabNote
+        Input "Note" multiline @tabNote
   Sheet#tabsheet "Bar tab"
-    Input "What is owed" multiline bind=tabNote
+    Input "What is owed" multiline @tabNote
     Button "Save" onTap={toast "Tab note saved"; close}
   Dialog#tiebreak "Tiebreaker" "Closest number wins: what year did the first Moon landing happen?"
     each g in tiebreak

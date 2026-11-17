@@ -17,7 +17,7 @@ App
     Nav
       Heading "Your energy" level=1
       Row gap=8
-        SegmentedButton bind=range items=["Week","Month"]
+        SegmentedButton @range items=["Week","Month"]
         Button "Submit a reading" onTap={go meter}
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
@@ -79,7 +79,7 @@ App
   Main
     Nav
       Heading "Compare tariffs" level=1
-      Select bind=sort items=["Yearly cost","Unit rate","Name"] w=180
+      Select @sort items=["Yearly cost","Unit rate","Name"] w=180
     Column pad=24 gap=16 scroll
       Card gap=8
         Text.strong "You are on Kilowatt Flex"
@@ -124,13 +124,13 @@ state electric=""
 state gas=""
 state photo=""
 state submitted=false
-define DigitBoxes "label" bind=value count=6 onChange
+define DigitBoxes "label" @value count=6 onChange
   state cells=[{"d":""},{"d":""},{"d":""},{"d":""},{"d":""},{"d":""}]
   Column gap=6
     Text.fieldLabel "{label}"
     Row gap=6
       each cell in cells
-        Input bind=cell.d type=number w=44 center onChange={value=join(map(cells,c=>c.d),""); onChange(value)}
+        Input @cell.d type=number w=44 center onChange={value=join(map(cells,c=>c.d),""); onChange(value)}
 App
   Sidebar
     Brand "Kilowatt" icon="bolt"
@@ -147,13 +147,13 @@ App
       Card gap=16
         Text.strong "Electricity meter"
         Text.muted "Last reading: 48,215 kWh on 28 October. Enter the black digits only, no decimals."
-        DigitBoxes "Electricity reading" bind=electric count=5
+        DigitBoxes "Electricity reading" @electric count=5
         Text.strong "Gas meter"
-        DigitBoxes "Gas reading" bind=gas count=5
+        DigitBoxes "Gas reading" @gas count=5
       Card gap=12
         Text.strong "Add a photo"
         Text.muted "A photo of the dial helps us check your reading."
-        ImageUpload bind=photo accept="image/*" onChange={toast "Photo added"}
+        ImageUpload @photo accept="image/*" onChange={toast "Photo added"}
         if photo!=""
           Image "{photo}" h=160 radius=8
       Row gap=8 end
@@ -173,6 +173,7 @@ state sortcode=""
 state dayOfMonth="1"
 state ddOn=true
 state payments=[{"id":"p1","date":"28 Oct","amount":104.20,"method":"Direct debit","status":"Paid"},{"id":"p2","date":"28 Sep","amount":96.75,"method":"Direct debit","status":"Paid"},{"id":"p3","date":"14 Sep","amount":40.00,"method":"Card","status":"Paid"},{"id":"p4","date":"28 Aug","amount":88.10,"method":"Direct debit","status":"Failed"},{"id":"p5","date":"28 Jul","amount":79.35,"method":"Direct debit","status":"Paid"}]
+state holder=""
 App
   Sidebar
     Brand "Kilowatt" icon="bolt"
@@ -201,7 +202,7 @@ App
       Card gap=8
         Row between
           Text.strong "History"
-          SegmentedButton bind=filter items=["All","Paid","Failed"]
+          SegmentedButton @filter items=["All","Paid","Failed"]
         Row gap=12
           Text.caption "Date" w=80
           Text.caption "Method" grow=true
@@ -220,10 +221,10 @@ App
           Divider
 
 Dialog#dd "Set up direct debit" "Pay automatically each month"
-  Input "Account holder" bind=holder
-  Input "Sort code" "00-00-00" bind=sortcode
-  Input "Account number" "8 digits" bind=bank type=number
-  Select "Collection day" bind=dayOfMonth items=["1","7","14","21","28"]
+  Input "Account holder" @holder
+  Input "Sort code" "00-00-00" @sortcode
+  Input "Account number" "8 digits" @bank type=number
+  Select "Collection day" @dayOfMonth items=["1","7","14","21","28"]
   Text.caption "Under the Direct Debit Guarantee you can cancel at any time."
   Row gap=8 end
     Button.outline "Cancel" onTap={close}

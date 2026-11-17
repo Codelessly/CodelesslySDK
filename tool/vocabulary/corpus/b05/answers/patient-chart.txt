@@ -59,7 +59,7 @@ App
         Row between
           Text.strong "Vitals trend"
           Row gap=8
-            SegmentedButton bind=range items=["12h","24h","72h"]
+            SegmentedButton @range items=["12h","24h","72h"]
         Row gap=8
           ChoiceChip "HR" selected={vital=="HR"} onTap={vital="HR"}
           ChoiceChip "RR" selected={vital=="RR"} onTap={vital="RR"}
@@ -86,7 +86,7 @@ App
           Button.destructive "Escalate" icon="campaign" onTap={emit escalate ews; toast "Medical registrar paged"}
           Button.outline "Repeat in 30 min" onTap={toast "Reminder set for 30 minutes"}
   Dialog#handover "Handover summary" "Bed 12, Harold Whitmore"
-    Input "Summary" bind=handover multiline h=160
+    Input "Summary" @handover multiline h=160
     Row gap=8 end
       Button.outline "Copy" icon="content_copy" onTap={copy handover; toast "Copied"}
       Button "Save" onTap={emit saveHandover handover; toast "Handover saved"; close}
@@ -99,13 +99,13 @@ App
     state nAvpu="Alert"
     state nO2=false
     Grid cols=2 gap=12
-      Input "Heart rate (bpm)" bind=nHr type=number
-      Input "Resp rate (per min)" bind=nRr type=number
-      Input "SpO2 (%)" bind=nSpo2 type=number
-      Input "Systolic BP (mmHg)" bind=nSbp type=number
-      Input "Temperature (deg C)" bind=nTemp type=number
-      Select "Consciousness" bind=nAvpu items=["Alert","Voice","Pain","Unresponsive"]
-    Toggle "On supplemental oxygen" bind=nO2
+      Input "Heart rate (bpm)" @nHr type=number
+      Input "Resp rate (per min)" @nRr type=number
+      Input "SpO2 (%)" @nSpo2 type=number
+      Input "Systolic BP (mmHg)" @nSbp type=number
+      Input "Temperature (deg C)" @nTemp type=number
+      Select "Consciousness" @nAvpu items=["Alert","Voice","Pain","Unresponsive"]
+    Toggle "On supplemental oxygen" @nO2
     Text.muted "Score: {(nHr!="" && nHr>130 ? 3 : nHr!="" && nHr>110 ? 2 : nHr!="" && nHr>90 ? 1 : 0) + (nRr!="" && nRr>24 ? 3 : nRr!="" && nRr>20 ? 2 : 0) + (nO2 ? 2 : 0) + (nAvpu!="Alert" ? 3 : 0)} so far"
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
@@ -117,6 +117,10 @@ state day="Today"
 state sel=""
 state mar=[{"id":1,"drug":"Ceftriaxone 1 g IV","freq":"Every 24 h","slots":{"06:00":"given","10:00":"none","14:00":"none","18:00":"none","22:00":"none"}},{"id":2,"drug":"Paracetamol 1 g oral","freq":"Every 6 h","slots":{"06:00":"given","10:00":"given","14:00":"due","18:00":"none","22:00":"none"}},{"id":3,"drug":"Enoxaparin 40 mg SC","freq":"Daily","slots":{"06:00":"none","10:00":"missed","14:00":"none","18:00":"none","22:00":"none"}},{"id":4,"drug":"Salbutamol 2.5 mg neb","freq":"Every 4 h","slots":{"06:00":"given","10:00":"given","14:00":"due","18:00":"none","22:00":"none"}}]
 state times=["06:00","10:00","14:00","18:00","22:00"]
+state dose=""
+state giveNote=""
+state missReason=""
+state missNote=""
 App
   Sidebar
     Brand "Bedside" icon="monitor_heart"
@@ -131,7 +135,7 @@ App
         Heading "Medication administration" level=1
         Text.muted "Harold Whitmore, MRN 4471920"
       Row gap=8
-        SegmentedButton bind=day items=["Yesterday","Today"]
+        SegmentedButton @day items=["Yesterday","Today"]
         Button.outline "Print" icon="print" onTap={emit print}
     Column pad=24 gap=16
       Card fill=#FFFDECEA
@@ -170,14 +174,14 @@ App
   Dialog#give "Give medication" "Check the five rights before you confirm"
     Text.strong "{find(mar,x=>x.id==sel).drug}"
     Text.muted "Patient wristband scanned, allergies checked."
-    Input "Dose given" bind=dose
-    Input "Note" multiline bind=giveNote
+    Input "Dose given" @dose
+    Input "Note" multiline @giveNote
     Row gap=8 end
       Button.outline "Withhold" onTap={mar=updateWhere(mar,x=>x.id==sel,x=>with(x,"slots",with(x.slots,"14:00","missed"))); emit withheld sel; toast "Marked as withheld"; close}
       Button "Confirm given" onTap={mar=updateWhere(mar,x=>x.id==sel,x=>with(x,"slots",with(x.slots,"14:00","given"))); emit given sel; toast "Dose recorded"; close}
   Dialog#missed "Missed dose" "Enoxaparin 40 mg SC, due 10:00"
-    Select "Reason" bind=missReason items=["Patient refused","Nil by mouth","Drug unavailable","Not recorded in time"]
-    Input "Note" multiline bind=missNote
+    Select "Reason" @missReason items=["Patient refused","Nil by mouth","Drug unavailable","Not recorded in time"]
+    Input "Note" multiline @missNote
     Row gap=8 end
       Button.outline "Close" onTap={close}
       Button "Notify prescriber" onTap={emit notifyPrescriber sel; toast "Prescriber notified"; close}
@@ -189,6 +193,7 @@ state author="All"
 state draft=""
 state orders=[{"id":1,"name":"Chest X-ray, repeat","due":"16:00","by":"Dr. Lindqvist","status":"Pending"},{"id":2,"name":"Blood cultures x2","due":"Today 08:15","by":"Dr. Lindqvist","status":"Completed"},{"id":3,"name":"Full blood count and CRP","due":"18:00","by":"Dr. Shah","status":"Pending"},{"id":4,"name":"Oxygen target SpO2 94 to 98%","due":"Ongoing","by":"Dr. Shah","status":"Active"},{"id":5,"name":"Physiotherapy review","due":"Tomorrow","by":"Dr. Lindqvist","status":"Cancelled"}]
 state notes=[{"date":"17 Nov 14:20","author":"J. Okafor RN","kind":"Nursing","text":"Febrile 38.1, tachycardic. Paracetamol due. Registrar review requested."},{"date":"17 Nov 09:30","author":"Dr. Shah","kind":"Medical","text":"Ward round. Improving cough, still productive. Continue IV antibiotics, repeat CXR this afternoon."},{"date":"16 Nov 21:10","author":"M. Reyes RN","kind":"Nursing","text":"Settled overnight, 2 L oxygen via nasal cannula. Fluids encouraged."},{"date":"16 Nov 11:00","author":"A. Brandt PT","kind":"Therapy","text":"Chest physiotherapy, sitting out of bed for 20 minutes, tolerated well."}]
+state noteKind=""
 App
   Sidebar
     Brand "Bedside" icon="monitor_heart"
@@ -236,7 +241,7 @@ App
       Card gap=12
         Row between
           Text.strong "Notes"
-          Select bind=author items=["All","Nursing","Medical","Therapy"] w=160
+          Select @author items=["All","Nursing","Medical","Therapy"] w=160
         each n in author=="All" ? notes : filter(notes,x=>x.kind==author)
           Column gap=4
             Row between
@@ -248,8 +253,8 @@ App
             Text "{n.text}"
             Divider
   Dialog#addnote "Add note" "Signed as J. Okafor RN"
-    Select "Type" bind=noteKind items=["Nursing","Medical","Therapy"]
-    Input "Note" bind=draft multiline h=140
+    Select "Type" @noteKind items=["Nursing","Medical","Therapy"]
+    Input "Note" @draft multiline h=140
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Save note" onTap={trim(draft)!="" ? {notes=concat([{"date":"17 Nov now","author":"J. Okafor RN","kind":coalesce(noteKind,"Nursing"),"text":draft}],notes); draft=""; emit noteAdded; toast "Note added"; close} : toast "Write a note first"}

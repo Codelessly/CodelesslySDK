@@ -86,7 +86,7 @@ def _menu_item(doc):
 
 def _sort_menu(doc):
     """SSUI's SortMenu is the body of a menu: an open panel of options, meant to be put in a popover. Written on
-    a page (`SortMenu bind=sort options=[...]`) it drew that panel open, over what is beside it. Under Cards it
+    a page (`SortMenu @sort options=[...]`) it drew that panel open, over what is beside it. Under Cards it
     is a closed control: a dropdown showing the choice (its menu opens on a tap, as a Select's does) and, beside
     it, the arrow that flips the direction."""
     n = doc['nodes']

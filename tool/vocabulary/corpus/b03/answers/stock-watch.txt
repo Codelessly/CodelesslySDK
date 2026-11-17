@@ -6,6 +6,7 @@ state sel="AAPL"
 state q=""
 state stocks=[{"sym":"AAPL","name":"Apple Inc.","price":227.48,"chg":1.42,"sector":"Tech","trend":[221,222,224,223,226,227],"pre":true},{"sym":"MSFT","name":"Microsoft Corp.","price":418.9,"chg":-0.63,"sector":"Tech","trend":[424,422,421,420,419,418],"pre":false},{"sym":"NVDA","name":"NVIDIA Corp.","price":131.2,"chg":3.08,"sector":"Tech","trend":[122,124,127,126,129,131],"pre":true},{"sym":"JPM","name":"JPMorgan Chase","price":212.35,"chg":0.21,"sector":"Finance","trend":[211,212,211,213,212,212],"pre":false},{"sym":"XOM","name":"Exxon Mobil","price":114.07,"chg":-1.8,"sector":"Energy","trend":[118,117,116,115,115,114],"pre":false}]
 state alertsOn=3
+state newSym=""
 App
   Sidebar
     Brand "Tickerline" icon="show_chart"
@@ -17,9 +18,9 @@ App
     Nav
       Heading "Watchlist"
       Row gap=8
-        Input "Search symbols" bind=q w=220
-        Select bind=group items=["none","Sector"]
-        SegmentedButton bind=sortBy items=["manual","name","change"]
+        Input "Search symbols" @q w=220
+        Select @group items=["none","Sector"]
+        SegmentedButton @sortBy items=["manual","name","change"]
         Button "Add symbol" onTap={open addSymbol}
     Column pad=24 gap=12
       Row gap=12
@@ -48,7 +49,7 @@ App
     MenuItem "Move to top" icon="vertical_align_top" onTap={stocks=concat([find(stocks,x=>x.sym==sel)],without(stocks,find(stocks,x=>x.sym==sel)))}
     MenuItem "Remove" icon="delete" onTap={stocks=removeWhere(stocks,x=>x.sym==sel); toast "Removed {sel}"}
   Dialog#addSymbol "Add symbol" "Search by ticker or company"
-    Input "Ticker" hint="e.g. TSLA" bind=newSym
+    Input "Ticker" hint="e.g. TSLA" @newSym
     Button "Add" onTap={stocks=append(stocks,{"sym":upper(newSym),"name":upper(newSym),"price":100,"chg":0,"sector":"Other","trend":[100,100,100],"pre":false}); newSym=""; close}
 
 ### Symbol
@@ -61,6 +62,7 @@ state at=8
 state news=[{"title":"Apple supplier ramps up output ahead of launch","src":"Reuters","ago":"2h"},{"title":"Analysts raise price target after strong services quarter","src":"Bloomberg","ago":"5h"},{"title":"Options traders position for earnings move","src":"WSJ","ago":"1d"}]
 state aSide="Above"
 state aVal=230
+state push=false
 App
   Sidebar
     Brand "Tickerline" icon="show_chart"
@@ -86,7 +88,7 @@ App
         each r in ranges
           ChoiceChip "{r}" selected={range==r} onTap={range=r}
       Card gap=8
-        LineChart values={pts} labels=["9:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30"] h=240 crosshair bind=at onCrosshair={price=pts[result.index]}
+        LineChart values={pts} labels=["9:30","10:00","10:30","11:00","11:30","12:00","12:30","13:00","13:30"] h=240 crosshair @at onCrosshair={price=pts[result.index]}
         Text.caption "Volume"
         BarChart values={vols} h=80
       Heading "Key stats" level=3
@@ -120,9 +122,9 @@ App
         each n in news
           ListTile "{n.title}" "{n.src} - {n.ago} ago" onTap={link https://example.com/news}
   Dialog#alert "Price alert" "Notify me when {sel} crosses a price"
-    SegmentedButton bind=aSide items=["Above","Below"]
-    Input "Price" type=number bind=aVal
-    Toggle "Push notification" bind=push
+    SegmentedButton @aSide items=["Above","Below"]
+    Input "Price" type=number @aVal
+    Toggle "Push notification" @push
     Button "Create alert" onTap={alertsOn=alertsOn+1; toast "Alert set: {sel} {lower(aSide)} {money(aVal,"$",2)}"; close}
 
 ### Alerts
@@ -145,7 +147,7 @@ App
               Text.strong "{a.sym}"
               Text.muted "Price {lower(a.side)} {money(a.val,"$",2)}"
             Badge.neutral "{a.side}"
-            Toggle bind=a.on
+            Toggle @a.on
             IconButton "delete" tooltip="Delete" onTap={alerts=removeWhere(alerts,x=>x.id==a.id); toast "Alert deleted"}
       if isEmpty(alerts)
         Text.muted "No alerts yet. Set one from a symbol page."

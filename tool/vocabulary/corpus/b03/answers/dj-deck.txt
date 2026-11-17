@@ -23,6 +23,8 @@ state midB=0
 state loB=0
 state xf=0
 state master=0.85
+state recName=""
+state recFormat=""
 every 100 when playA onTick={posA=posA+0.1*(1+tempoA/100+bendA)}
 every 100 when playB onTick={posB=posB+0.1*(1+tempoB/100+bendB)}
 App
@@ -33,7 +35,7 @@ App
     NavItem "Sets" icon="queue_music" onTap={go sets}
     Spacer grow
     Text.muted "Master {round(master*100,0)}%"
-    Slider bind=master min=0 max=1
+    Slider @master min=0 max=1
   Main
     Nav
       Heading "Decks"
@@ -52,9 +54,9 @@ App
               Text.strong "{round(trackA.bpm*(1+tempoA/100),1)} BPM"
               Text.muted "Key {trackA.key}"
           Row gap=16 middle
-            Platter bind=playA rpm=33 size=160 animate=spin
+            Platter @playA rpm=33 size=160 animate=spin
             Column grow gap=8
-              Waveform bind=posA values=trackA beats=true cues={cuesA} loop={loopA} h=100
+              Waveform @posA values=trackA beats=true cues={cuesA} loop={loopA} h=100
               Row between
                 Text.mono "{duration(posA)}"
                 Text.mono "-{duration(trackA.length-posA)}"
@@ -77,7 +79,7 @@ App
               Button.outline "Cue {index+1}" onTap={c>0 ? posA=c : cuesA=setAt(cuesA,index,posA)}
           Row gap=8 middle
             Text.caption "Tempo {tempoA}%"
-            Slider bind=tempoA min=-8 max=8 grow
+            Slider @tempoA min=-8 max=8 grow
         Card gap=12
           Row between
             Column gap=2
@@ -87,9 +89,9 @@ App
               Text.strong "{round(trackB.bpm*(1+tempoB/100),1)} BPM"
               Text.muted "Key {trackB.key}"
           Row gap=16 middle
-            Platter bind=playB rpm=33 size=160 animate=spin
+            Platter @playB rpm=33 size=160 animate=spin
             Column grow gap=8
-              Waveform bind=posB values=trackB beats=true cues={cuesB} loop={loopB} h=100
+              Waveform @posB values=trackB beats=true cues={cuesB} loop={loopB} h=100
               Row between
                 Text.mono "{duration(posB)}"
                 Text.mono "-{duration(trackB.length-posB)}"
@@ -112,20 +114,20 @@ App
               Button.outline "Cue {index+1}" onTap={c>0 ? posB=c : cuesB=setAt(cuesB,index,posB)}
           Row gap=8 middle
             Text.caption "Tempo {tempoB}%"
-            Slider bind=tempoB min=-8 max=8 grow
+            Slider @tempoB min=-8 max=8 grow
       Card gap=12
         Text.strong "Mixer"
         Row gap=32 center top
           Column gap=8 center
             Text.caption "A"
             Row gap=8
-              Knob "Hi" bind=hiA min=-12 max=12
-              Knob "Mid" bind=midA min=-12 max=12
-              Knob "Lo" bind=loA min=-12 max=12
-            Fader bind=volA min=0 max=1 vertical h=120
+              Knob "Hi" @hiA min=-12 max=12
+              Knob "Mid" @midA min=-12 max=12
+              Knob "Lo" @loA min=-12 max=12
+            Fader @volA min=0 max=1 vertical h=120
           Column gap=8 center grow
             Text.caption "Crossfader"
-            Crossfader bind=xf min=-1 max=1
+            Crossfader @xf min=-1 max=1
             Row between
               Text.caption "A"
               Button.ghost "Center" onTap={xf=0}
@@ -133,13 +135,13 @@ App
           Column gap=8 center
             Text.caption "B"
             Row gap=8
-              Knob "Hi" bind=hiB min=-12 max=12
-              Knob "Mid" bind=midB min=-12 max=12
-              Knob "Lo" bind=loB min=-12 max=12
-            Fader bind=volB min=0 max=1 vertical h=120
+              Knob "Hi" @hiB min=-12 max=12
+              Knob "Mid" @midB min=-12 max=12
+              Knob "Lo" @loB min=-12 max=12
+            Fader @volB min=0 max=1 vertical h=120
   Dialog#rec "Record the set" "Saved as WAV to Music/Crossfade"
-    Input "File name" bind=recName
-    Select "Format" items=["WAV 24-bit","WAV 16-bit","MP3 320"] bind=recFormat
+    Input "File name" @recName
+    Select "Format" items=["WAV 24-bit","WAV 16-bit","MP3 320"] @recFormat
     Button "Start recording" onTap={emit record recName; toast "Recording"; close}
 
 ### Library
@@ -162,8 +164,8 @@ App
     Nav
       Heading "Library"
       Row gap=8
-        Input "Search tracks" bind=q w=240
-        Select "Sort" items=["title","artist","bpm","key"] bind=sort
+        Input "Search tracks" @q w=240
+        Select "Sort" items=["title","artist","bpm","key"] @sort
     Column pad=24 gap=16
       Card gap=0
         Row pad=8 border-bottom=#FF444444
@@ -193,6 +195,8 @@ App
 
 ### Sets
 state sets=[{"name":"Friday Warehouse","tracks":18,"mins":92},{"name":"Rooftop Sunset","tracks":12,"mins":64},{"name":"Late Night Deep","tracks":22,"mins":118}]
+state setName=""
+state setBpm=100
 App
   Sidebar
     Brand "Crossfade" icon="album"
@@ -215,6 +219,6 @@ App
               Button.outline "Open" onTap={toast "Opening {s.name}"}
               Button.ghost "Delete" onTap={sets=removeWhere(sets,x=>x.name==s.name)}
   Dialog#newset "New set" "Name it and pick a target BPM range"
-    Input "Set name" bind=setName
-    Slider bind=setBpm min=100 max=150
+    Input "Set name" @setName
+    Slider @setBpm min=100 max=150
     Button "Create" onTap={sets=append(sets,{"name":setName,"tracks":0,"mins":0}); close}

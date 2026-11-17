@@ -33,13 +33,13 @@ App
             Row between middle
               Uploader "{p.by}"
               Row gap=4 middle
-                LikeButton bind=p.liked
+                LikeButton @p.liked
                 Text.small "{p.rating}/5"
-  Lightbox#shots photos={photos} bind=at
+  Lightbox#shots photos={photos} @at
 
 Dialog#upload "Add photos" "Your name tag goes on every photo you add"
   state name="Maya"
-  Input "Name tag" bind=name
+  Input "Name tag" @name
   Button.outline "Choose files" icon="upload_file" onTap={toast "Choose files"}
   Button "Upload" onTap={emit upload name; toast "Photos added"; close}
 
@@ -48,7 +48,7 @@ define Uploader "name"
     Avatar "{name}" size=24
     Text.small "{name}"
 
-define LikeButton bind=liked onChange
+define LikeButton @liked onChange
   state liked=false
   IconButton {liked ? "favorite" : "favorite_border"} tooltip="Like" onTap={liked=!liked; onChange(liked)}
 
@@ -68,11 +68,11 @@ Page
     Link "Back to album" onTap={go album}
   Section narrow
     Column gap=16
-      Pages bind=page h=420 peek=0.92
+      Pages @page h=420 peek=0.92
         each p in photos
           Image "{p.url}" radius=12
       Row center
-        Dots bind=page count={length(photos)}
+        Dots @page count={length(photos)}
       Row between middle
         Column gap=2
           Text.strong "{photos[page].caption}"
@@ -81,17 +81,17 @@ Page
       Card gap=12
         Row between middle
           Text.strong "Your vote"
-          LikeButton bind=photos[page].liked onChange={photos=setAt(photos,page,with(photos[page],"liked",result))}
+          LikeButton @photos[page].liked onChange={photos=setAt(photos,page,with(photos[page],"liked",result))}
         Row between middle
           Text "Rating"
-          Rating bind=photos[page].rating max=5 onChange={photos=setAt(photos,page,with(photos[page],"rating",result)); toast "Rated {result} of 5"}
+          Rating @photos[page].rating max=5 onChange={photos=setAt(photos,page,with(photos[page],"rating",result)); toast "Rated {result} of 5"}
       Row gap=8
         Button.outline "Previous" icon="chevron_left" onTap={page=max(0,page-1)}
         Button.outline "Next" icon="chevron_right" onTap={page=min(length(photos)-1,page+1)}
         Spacer grow
         Button.outline "Download" icon="download" onTap={emit download photos[page].id}
 
-define Rating bind=value max=5 onChange
+define Rating @value max=5 onChange
   state value=0
   Row gap=2 middle
     each i in range(max)
@@ -112,7 +112,7 @@ App
   Main
     Nav
       Heading "Top picks" level=1
-      SegmentedButton bind=period items=["Day","Week","All time"]
+      SegmentedButton @period items=["Day","Week","All time"]
     Column pad=24 gap=12 scroll
       each p in sortByDesc(photos,x=>x.score)
         Card

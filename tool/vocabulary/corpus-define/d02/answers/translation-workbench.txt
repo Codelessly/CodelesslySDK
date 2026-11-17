@@ -18,7 +18,7 @@ App
     Nav
       Heading "Shipping confirmation" level=1
       Row gap=12
-        Toggle "Unapproved only" bind=onlyOpen
+        Toggle "Unapproved only" @onlyOpen
         Button.outline "Comment to reviewer" icon="comment" onTap={open reviewer}
         Button "Approve all drafts" onTap={segs=updateWhere(segs,x=>x.status=="draft",x=>with(x,"status","approved")); toast "Drafts approved"}
     Column pad=24 gap=16
@@ -43,7 +43,7 @@ App
                     Row between
                       Text.caption "{s.words} words"
                       StatusChip status={s.status}
-                    Input "Translation" bind=s.tgt multiline onChange={segs=updateWhere(segs,x=>x.id==s.id,x=>with(with(x,"tgt",result),"status",trim(result)==""?"new":"draft"))}
+                    Input "Translation" @s.tgt multiline onChange={segs=updateWhere(segs,x=>x.id==s.id,x=>with(with(x,"tgt",result),"status",trim(result)==""?"new":"draft"))}
                     if any(s.nums,n=>s.tgt!="" && !contains(s.tgt,n))
                       Row gap=4 middle
                         Icon "warning" color=#FFD97706
@@ -71,8 +71,8 @@ App
               Text.muted "No termbase entries here."
 
 Dialog#reviewer "Comment to reviewer" "Visible on segment {sel} in the review"
-  Select "Reviewer" items=["Lena Vogt","Omar Haddad","Priya Nair"] bind=reviewer
-  Input "Comment" "What should the reviewer check?" bind=comment multiline
+  Select "Reviewer" items=["Lena Vogt","Omar Haddad","Priya Nair"] @reviewer
+  Input "Comment" "What should the reviewer check?" @comment multiline
   Row end gap=8
     Button.outline "Cancel" onTap={close}
     Button "Send" onTap={comment=="" ? toast "Write a comment first" : {emit comment {"to":reviewer,"segment":sel,"text":comment}; toast "Sent to {reviewer}"; comment=""; close}}
@@ -122,7 +122,7 @@ App
     Nav
       Heading "Termbase" level=1
       Row gap=8
-        Input "Search terms" bind=q w=220
+        Input "Search terms" @q w=220
         Button "Add term" icon="add" onTap={open addTerm}
     Column pad=24 gap=16
       Card gap=0
@@ -149,8 +149,8 @@ App
         Text.muted "No terms match \"{q}\"."
 
 Dialog#addTerm "Add term" "It is highlighted in the source of every segment"
-  Input "Source term" bind=newSrc
-  Input "Approved translation" bind=newTgt
+  Input "Source term" @newSrc
+  Input "Approved translation" @newTgt
   Row end gap=8
     Button.outline "Cancel" onTap={close}
     Button "Add" onTap={trim(newSrc)=="" || trim(newTgt)=="" ? toast "Fill in both fields" : {terms=append(terms,{"id":length(terms)+1,"src":newSrc,"tgt":newTgt,"note":"","status":"proposed"}); newSrc=""; newTgt=""; close}}
@@ -169,7 +169,7 @@ App
   Main
     Nav
       Heading "Review" level=1
-      SegmentedButton items=["All","Open","Resolved"] bind=filter
+      SegmentedButton items=["All","Open","Resolved"] @filter
     Column pad=24 gap=16
       each i in items
         if filter=="All" || (filter=="Open" && !i.resolved) || (filter=="Resolved" && i.resolved)
@@ -194,7 +194,7 @@ App
               Button.ghost "Reply" onTap={open replyBox}
 
 Dialog#replyBox "Reply" "Goes to the translator"
-  Input "Reply" bind=reply multiline
+  Input "Reply" @reply multiline
   Row end gap=8
     Button.outline "Cancel" onTap={close}
     Button "Send" onTap={reply=="" ? toast "Write a reply first" : {emit reply reply; toast "Reply sent"; reply=""; close}}

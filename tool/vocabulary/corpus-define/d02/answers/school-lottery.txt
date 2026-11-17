@@ -31,7 +31,7 @@ App
             Row between
               Text.strong "Your ranking ({length(ranked)} of 6)"
               Text.muted "Drag to reorder"
-            ReorderList bind=ranked disabled={locked}
+            ReorderList @ranked disabled={locked}
               each s in ranked
                 Row gap=12 middle
                   Badge.primary "{index+1}"
@@ -203,7 +203,7 @@ App
   Main
     Nav
       Heading "Homes and school zones" level=1
-      SegmentedButton bind=zone items=["all","mh","rv","ck"]
+      SegmentedButton @zone items=["all","mh","rv","ck"]
     Row grow top
       MapView grow h=520 center={[40.2,-75.1]} zoom=11
         each z in ["mh","rv","ck"]
@@ -252,7 +252,7 @@ define SeatBar taken=0 seats=1
 define PriorityTag "label"
   Badge.warning "{label} priority"
 
-define ReorderList bind=items disabled=false
+define ReorderList @items disabled=false
   state items=[]
   Column gap=8
     ...

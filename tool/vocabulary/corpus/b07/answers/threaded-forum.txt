@@ -5,6 +5,10 @@ state sort="Latest activity"
 state sel=0
 state topics=[{"id":1,"title":"Welcome to Hedgerow: house rules and how to ask","author":"Mara Quinn","tag":"announcements","replies":12,"last":"2026-11-16","lastBy":"Tomas","pinned":true,"locked":false,"unread":0},{"id":2,"title":"Best hardy hedging for a windy coastal plot?","author":"Ines Calloway","tag":"gardening","replies":38,"last":"2026-11-17","lastBy":"Peter O","pinned":false,"locked":false,"unread":5},{"id":3,"title":"Show and tell: this year's allotment harvest","author":"Dev Patel","tag":"showcase","replies":64,"last":"2026-11-17","lastBy":"Ines Calloway","pinned":false,"locked":false,"unread":9},{"id":4,"title":"Hawthorn or blackthorn for wildlife corridors","author":"Tomas Reyes","tag":"wildlife","replies":21,"last":"2026-11-15","lastBy":"Mara Quinn","pinned":false,"locked":false,"unread":0},{"id":5,"title":"Council notice about boundary hedge height","author":"Lena Fischer","tag":"legal","replies":7,"last":"2026-11-12","lastBy":"Dev Patel","pinned":false,"locked":true,"unread":0}]
 state tags=["all","announcements","gardening","showcase","wildlife","legal"]
+state moveTo=""
+state newTitle=""
+state newTag=""
+state newBody=""
 App
   Sidebar
     Brand "Hedgerow" icon="park"
@@ -24,8 +28,8 @@ App
     Nav
       Heading "Topics" level=1
       Row gap=8
-        Input "Search topics, posts and tags" bind=q w=280
-        Select bind=sort items=["Latest activity","Most replies","Unread first","Newest"]
+        Input "Search topics, posts and tags" @q w=280
+        Select @sort items=["Latest activity","Most replies","Unread first","Newest"]
         Button "New topic" icon="edit" onTap={open newTopic}
     Column pad=24 gap=12
       Row gap=8 scroll
@@ -65,14 +69,14 @@ App
     MenuItem "Move to tag..." icon="drive_file_move" onTap={open moveTopic}
     MenuItem "Delete topic" icon="delete" onTap={topics=removeWhere(topics,x=>x.id==sel); toast "Topic deleted"}
   Dialog#moveTopic "Move topic" "Choose the tag this topic belongs under"
-    Select "New tag" bind=moveTo items=["announcements","gardening","showcase","wildlife","legal"]
+    Select "New tag" @moveTo items=["announcements","gardening","showcase","wildlife","legal"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Move" onTap={topics=updateWhere(topics,x=>x.id==sel,x=>with(x,"tag",moveTo)); toast "Topic moved"; close}
   Dialog#newTopic "New topic"
-    Input "Title" bind=newTitle
-    Select "Tag" bind=newTag items=["gardening","showcase","wildlife","legal"]
-    Input "Body" multiline bind=newBody
+    Input "Title" @newTitle
+    Select "Tag" @newTag items=["gardening","showcase","wildlife","legal"]
+    Input "Body" multiline @newBody
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Post topic" onTap={newTitle=="" ? toast "Add a title" : {topics=append(topics,{"id":length(topics)+1,"title":newTitle,"author":"Sam Patel","tag":newTag,"replies":0,"last":today(),"lastBy":"Sam Patel","pinned":false,"locked":false,"unread":0}); newTitle=""; newBody=""; close}}
@@ -87,6 +91,8 @@ state sel=0
 state locked=false
 state following=true
 state reactions=["thumb_up","favorite","sentiment_very_satisfied","lightbulb"]
+state moveTo=""
+state mergeQ=""
 App
   Sidebar
     Brand "Hedgerow" icon="park"
@@ -153,7 +159,7 @@ App
                     Row between
                       Text.caption "{quoteText}"
                       IconButton "close" tooltip="Remove quote" onTap={quoteText=""}
-                  Input "Write a reply" multiline bind=draft
+                  Input "Write a reply" multiline @draft
                   Row end gap=8
                     Button.ghost "Cancel" onTap={replyTo=0; quoteText=""}
                     Button "Post reply" onTap={draft=="" ? toast "Write something first" : {replies=append(replies,{"id":length(replies)+1,"anc":append(r.anc,r.id),"depth":r.depth+1,"author":"Sam Patel","time":"just now","body":draft,"likes":0,"liked":false,"reaction":"","new":false,"quote":quoteText}); draft=""; quoteText=""; replyTo=0}}
@@ -161,7 +167,7 @@ App
               Text.muted "Branch folded: {count(replies,x=>contains(x.anc,r.id))} replies hidden"
     Footer
       Row gap=8 middle pad=12 border-top=#FFE0E0E0 id=composer
-        Input "{locked ? "This topic is locked" : "Reply to the topic"}" bind=draft disabled={locked} grow
+        Input "{locked ? "This topic is locked" : "Reply to the topic"}" @draft disabled={locked} grow
         Button "Reply" icon="send" disabled={locked} onTap={draft=="" ? toast "Write something first" : {replies=append(replies,{"id":length(replies)+1,"anc":[],"depth":0,"author":"Sam Patel","time":"just now","body":draft,"likes":0,"liked":false,"reaction":"","new":false,"quote":""}); draft=""}}
   Menu#modMenu end
     MenuItem "Lock topic" icon="lock" onTap={locked=!locked; toast locked ? "Topic locked" : "Topic unlocked"}
@@ -179,12 +185,12 @@ App
       each ic in reactions
         IconButton "{ic}" onTap={replies=updateWhere(replies,x=>x.id==sel,x=>with(x,"reaction",ic)); close}
   Dialog#moveTopic "Move topic" "Pick where this topic belongs"
-    Select "Tag" bind=moveTo items=["announcements","gardening","showcase","wildlife","legal"]
+    Select "Tag" @moveTo items=["announcements","gardening","showcase","wildlife","legal"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Move" onTap={toast "Moved to {moveTo}"; close}
   Dialog#mergeTopic "Merge topics"
-    Input "Topic to merge into" "Search topics" bind=mergeQ
+    Input "Topic to merge into" "Search topics" @mergeQ
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Merge" onTap={toast "Merged"; close; go topics}
@@ -211,12 +217,12 @@ Page
     Column gap=16
       Heading "Search" level=1
       Row gap=8
-        Input "Search the forum" bind=q grow
+        Input "Search the forum" @q grow
         Button "Search" icon="search" onTap={emit search q}
       Row gap=8 scroll
         each t in tags
           FilterChip "{t}" selected={tag==t} onTap={tag=t}
-      SegmentedButton bind=scope items=["Posts","Topics","People"]
+      SegmentedButton @scope items=["Posts","Topics","People"]
       Text.muted "{length(filter(results,r=>tag=="all"||r.tag==tag))} results for \"{q}\""
       each r in filter(results,x=>tag=="all"||x.tag==tag)
         Card gap=6 onTap={go topic}

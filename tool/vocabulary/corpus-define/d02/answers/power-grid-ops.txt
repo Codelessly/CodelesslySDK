@@ -25,7 +25,7 @@ App
     Nav
       Heading "Control room"
       Row gap=8
-        Toggle "Live alarms" bind=live
+        Toggle "Live alarms" @live
         Button.outline "Handover" onTap={go switching-plan}
     Column pad=24 gap=16 scroll
       Card gap=12
@@ -44,7 +44,7 @@ App
         Card grow gap=12
           Text.strong "System frequency"
           Column center gap=4
-            FrequencyDial bind=freq min=49.5 max=50.5 nominal=50
+            FrequencyDial @freq min=49.5 max=50.5 nominal=50
             Text.muted "Nominal 50.00 Hz, limits 49.80 to 50.20"
         Card grow gap=8
           Text.strong "Breakers"
@@ -67,7 +67,7 @@ App
             Button.outline "Acknowledge" hidden={a.ack} onTap={alarms=updateWhere(alarms,x=>x.id==a.id,x=>with(x,"ack",true)); toast "Alarm acknowledged"}
 Dialog#confirm "Confirm breaker operation" "This changes the live network."
   Text "{find(breakers,b=>b.id==pending).name} will be {find(breakers,b=>b.id==pending).closed ? 'opened' : 'closed'}."
-  Select "Reason" items=["Planned maintenance","Fault isolation","Load transfer","Voltage control"] bind=reason
+  Select "Reason" items=["Planned maintenance","Fault isolation","Load transfer","Voltage control"] @reason
   Row gap=8 end
     Button.outline "Cancel" onTap={close}
     Button.destructive "Confirm" onTap={reason=="" ? toast "Choose a reason" : breakers=updateWhere(breakers,b=>b.id==pending,b=>with(b,"closed",!b.closed)); close}
@@ -86,7 +86,7 @@ App
   Main
     Nav
       Heading "Demand forecast"
-      SegmentedButton items=["Today","Tomorrow","Week"] bind=horizon
+      SegmentedButton items=["Today","Tomorrow","Week"] @horizon
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
         Card gap=4
@@ -142,8 +142,8 @@ App
             IconButton {step.done ? "check_circle" : "radio_button_unchecked"} tooltip="Tick step" onTap={step.done ? toast "Already done" : step.n == count(steps,s=>s.done)+1 ? steps=updateWhere(steps,s=>s.n==step.n,s=>with(s,"done",true)) : toast "Finish step {count(steps,s=>s.done)+1} first"}
       Card gap=8
         Text.strong "Handover note"
-        Input "Outgoing operator" bind=author
-        Input "Note for the next shift" multiline bind=note
+        Input "Outgoing operator" @author
+        Input "Note for the next shift" multiline @note
         Row end
           Button "Hand over" onTap={emit handover note; toast "Handover saved"}
 
@@ -164,6 +164,6 @@ define BreakerSymbol closed=true onTap
     Icon {closed ? "power" : "power_off"}
 
 // a dial that wobbles around its nominal value; shown as a gauge with a limit band
-define FrequencyDial bind=freq min=49.5 max=50.5 nominal=50
+define FrequencyDial @freq min=49.5 max=50.5 nominal=50
   state freq=50
   Gauge {freq} min={min} max={max} limit={nominal+0.2} unit="Hz"

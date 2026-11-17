@@ -23,7 +23,7 @@ App
         Row between
           Text.sectionTitle "Plate"
           Button.ghost "Scan" icon="photo_camera" onTap={scanning=true; open scan}
-        Input "Plate number" "e.g. 7KLM402" bind=plate type=text
+        Input "Plate number" "e.g. 7KLM402" @plate type=text
         Row gap=8
           Button "Check permit" grow onTap={result=any(permits,p=>p.plate==upper(replace(plate," ",""))&&p.zone==zone&&p.until>=formatDate(today(),"yyyy-MM-dd")) ? "valid" : "invalid"; tallyChecked=tallyChecked+1; firstSeen=elapsed; running=true; elapsed=0}
           Button.outline "Clear" onTap={plate=""; result="none"; running=false; elapsed=0}
@@ -134,13 +134,13 @@ App
         Row gap=8
           Button "Take photo" icon="photo_camera" grow disabled={length(shots) >= 4} onTap={shots=append(shots,{"url":"https://img.chalkmark.app/e/" + plate + "-" + (length(shots)+1) + ".jpg"}); toast "Photo saved"}
           Button.outline "Retake last" onTap={shots=removeAt(shots,length(shots)-1)}
-        Toggle "Wheel chalk visible" bind=wheelOn
-        Toggle "Sign in frame" bind=signOn
+        Toggle "Wheel chalk visible" @wheelOn
+        Toggle "Sign in frame" @signOn
         if wheelOn && signOn && length(shots) >= 2
           Text.success "Evidence complete"
       Card gap=8
         Text.sectionTitle "Fine type"
-        Select "Violation" bind=fine items={map(fines,f=>f.name)}
+        Select "Violation" @fine items={map(fines,f=>f.name)}
         if fine != ""
           Row between
             Text.muted "Fine amount"

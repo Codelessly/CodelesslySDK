@@ -5,6 +5,10 @@ state deck="upper"
 state secs=5400
 state placed=[]
 state sel=0
+state plate=""
+state kind=""
+state length=""
+state wt=""
 every 1s onTick={secs=max(0,secs-1)}
 App
   Sidebar
@@ -26,7 +30,7 @@ App
           Row gap=8 middle
             Icon "warning" color=#FFB91C1C
             Text.strong "Trim warning: the ship is listing. Move weight towards the lighter side." color=#FF991B1B
-      SegmentedButton bind=deck items=["upper","lower"]
+      SegmentedButton @deck items=["upper","lower"]
       Card gap=12
         Row between
           Text.strong "{upper(deck)} deck, bow to the right"
@@ -50,10 +54,10 @@ App
           each v in filter(vehicles,v=>v.lane=="")
             VehicleBox vehicle={v} drag=veh(v.id) onTap={sel=v.id}
   Dialog#addveh "Add a vehicle" "Plate, type and length"
-    Input "Plate" "AB12 CDE" bind=plate
-    Select "Type" bind=kind items=["car","van","lorry","bike"]
-    Input "Length (m)" type=number bind=length
-    Input "Weight (t)" type=number bind=wt
+    Input "Plate" "AB12 CDE" @plate
+    Select "Type" @kind items=["car","van","lorry","bike"]
+    Input "Length (m)" type=number @length
+    Input "Weight (t)" type=number @wt
     Button "Add to quay" onTap={trim(plate)=="" ? toast "Enter a plate" : (vehicles=append(vehicles,{"id":length(vehicles)+1,"plate":upper(plate),"kind":kind,"len":length,"weight":wt,"lane":"","pos":0}); plate=""; close)}
 
 ### Load Order

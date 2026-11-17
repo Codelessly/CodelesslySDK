@@ -28,7 +28,7 @@ App
     Nav
       Heading "Today's page" level=1
       Row gap=8 middle
-        Toggle "Focus mode" bind=focus
+        Toggle "Focus mode" @focus
         Button.outline "Save draft" icon="save" onTap={drafts=append(drafts,{"id":length(drafts)+1,"title":title,"words":words,"when":"Just now"}); toast "Draft saved"}
         Button "Submit" icon="send" onTap={open submit}
     Column pad=24 gap=16 scroll
@@ -42,8 +42,8 @@ App
             Text.strong "{duration(left)}"
       Row gap=24 top
         Column grow gap=12
-          Input "Title" bind=title
-          TextEditor bind=text hint="Begin with the last thing that happened." dim={focus} h=320 onChange={words=trim(text)=="" ? 0 : length(text)-length(replace(text," ",""))+1; emit analyze text}
+          Input "Title" @title
+          TextEditor @text hint="Begin with the last thing that happened." dim={focus} h=320 onChange={words=trim(text)=="" ? 0 : length(text)-length(replace(text," ",""))+1; emit analyze text}
         Column w=280 gap=16
           Card gap=12 center
             Text.fieldLabel "Word count"
@@ -95,7 +95,7 @@ Page
       Text.muted "One hundred words, exactly. Winners are read aloud on the first of the month."
       Row gap=12 middle
         Badge.warning "Closes in {duration(8040)}"
-        Select bind=sort items=["Newest","Most liked"]
+        Select @sort items=["Newest","Most liked"]
   Section tint
     Grid cols=2 gap=24
       each e in sortBy(entries,x=>sort=="Newest" ? x.id : 0-x.likes)

@@ -13,6 +13,11 @@ state typed=""
 state zoom=1
 state libTab="Living"
 state roomName=""
+state paper=""
+state pdfScale=""
+state pdfDims=false
+state pdfFurn=false
+state pdfScaleBar=false
 
 App
   Sidebar
@@ -24,7 +29,7 @@ App
     Divider
     Text.caption "LAYERS"
     each l in layers
-      Toggle "{l.name}" bind=l.on
+      Toggle "{l.name}" @l.on
     Spacer grow
     Text.muted "Flat 4B, Marlow Court"
   Main
@@ -32,7 +37,7 @@ App
       Heading "Ground floor" level=1
       Row gap=8 middle
         Text.caption "Units"
-        SegmentedButton items=["m","ft"] bind=units
+        SegmentedButton items=["m","ft"] @units
         IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.25)}
         Text.strong "{round(zoom*100,0)}%"
         IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(3,zoom+0.25)}
@@ -42,7 +47,7 @@ App
         Text.muted "{tool=="wall" ? "Click to place points, double click to finish" : tool=="dim" ? "Click two points to measure" : tool=="room" ? "Click inside walls to make a room" : "Select, drag and rotate"}"
         if tool=="wall" && length(draft)>0
           Row gap=8 middle
-            Input "Type length" "e.g. 3.2" bind=typed type=number w=140
+            Input "Type length" "e.g. 3.2" @typed type=number w=140
             Button.outline "Set" onTap={walls=updateWhere(walls,w=>w.id==sel,w=>with(w,"len",typed*1));typed=""}
       PlanCanvas walls={walls} openings={openings} rooms={rooms} furniture={furniture} dims={dims} layers={layers} tool={tool} units={units} zoom={zoom} sel={sel} onPoint={tool=="wall" ? (length(draft)==0 ? draft=[result] : {walls=append(walls,{"id":"w{length(walls)+1}","x1":draft[0].x,"y1":draft[0].y,"x2":result.x,"y2":result.y,"len":max(abs(result.x-draft[0].x),abs(result.y-draft[0].y))});sel="w{length(walls)+1}";draft=[result]}) : tool=="dim" ? (length(draft)==0 ? draft=[result] : {dims=append(dims,{"id":"d{length(dims)+1}","x1":draft[0].x,"y1":draft[0].y,"x2":result.x,"y2":result.y,"len":max(abs(result.x-draft[0].x),abs(result.y-draft[0].y))});draft=[]}) : tool=="room" ? {rooms=append(rooms,{"id":"r{length(rooms)+1}","name":"Room {length(rooms)+1}","w":result.w,"d":result.d,"x":result.x,"y":result.y});sel="r{length(rooms)+1}"} : sel=result.id} onSnap={result} drop=opening,furniture onDrop={result.data.group=="opening" ? openings=append(openings,{"id":"o{length(openings)+1}","kind":result.data.kind,"wall":result.wall,"at":result.at,"width":result.data.width}) : furniture=append(furniture,{"id":"f{length(furniture)+1}","kind":result.data.kind,"x":result.x,"y":result.y,"rot":0,"w":result.data.w,"d":result.data.d})} onRotate={furniture=updateWhere(furniture,f=>f.id==result.id,f=>with(f,"rot",result.angle))} grow
       Row between middle
@@ -50,7 +55,7 @@ App
         Text.caption "{length(walls)} walls, {length(rooms)} rooms, {sum(rooms,r=>r.w*r.d)==0 ? 0 : units=="m" ? fixed(sum(rooms,r=>r.w*r.d),1) : fixed(sum(rooms,r=>r.w*r.d)*10.764,0)} {units=="m" ? "m²" : "ft²"} total"
   Pane w=320 pad=16 gap=12
     Text.sectionTitle "Library"
-    SegmentedButton items=["Living","Bed","Doors"] bind=libTab
+    SegmentedButton items=["Living","Bed","Doors"] @libTab
     if libTab=="Living"
       Grid cols=2 gap=8
         Card gap=4 drag=furniture({"group":"furniture","kind":"Sofa","w":2.1,"d":0.9}) center
@@ -88,27 +93,27 @@ App
     each w in filter(walls,w=>w.id==sel)
       Column gap=8
         Text.strong "Wall {w.id}"
-        Input "Length ({units})" type=number bind=typed hint="{units=="m" ? fixed(w.len,2) : fixed(w.len*3.281,1)}"
+        Input "Length ({units})" type=number @typed hint="{units=="m" ? fixed(w.len,2) : fixed(w.len*3.281,1)}"
         Button.outline "Apply length" onTap={walls=updateWhere(walls,x=>x.id==w.id,x=>with(x,"len",units=="m" ? typed*1 : typed/3.281));typed=""}
         Button.destructive "Delete wall" onTap={walls=removeWhere(walls,x=>x.id==w.id);openings=removeWhere(openings,o=>o.wall==w.id);sel=""}
     each r in filter(rooms,r=>r.id==sel)
       Column gap=8
-        Input "Room name" bind=r.name
+        Input "Room name" @r.name
         Text.strong "Area {units=="m" ? fixed(r.w*r.d,1) : fixed(r.w*r.d*10.764,0)} {units=="m" ? "m²" : "ft²"}"
         Button.destructive "Delete room" onTap={rooms=removeWhere(rooms,x=>x.id==r.id);sel=""}
     each f in filter(furniture,f=>f.id==sel)
       Column gap=8
         Text.strong "{f.kind}"
-        Slider bind=f.rot min=0 max=345 step=15
+        Slider @f.rot min=0 max=345 step=15
         Text.caption "Rotation {f.rot} degrees"
         Button.destructive "Delete" onTap={furniture=removeWhere(furniture,x=>x.id==f.id);sel=""}
 
 Dialog#export "Export as PDF" "Choose what goes on the sheet"
-  Select "Paper" items=["A4","A3","Letter"] bind=paper
-  Select "Scale" items=["1:50","1:100","1:20"] bind=pdfScale
-  Toggle "Include dimensions" bind=pdfDims
-  Toggle "Include furniture" bind=pdfFurn
-  Toggle "Show scale bar" bind=pdfScaleBar
+  Select "Paper" items=["A4","A3","Letter"] @paper
+  Select "Scale" items=["1:50","1:100","1:20"] @pdfScale
+  Toggle "Include dimensions" @pdfDims
+  Toggle "Include furniture" @pdfFurn
+  Toggle "Show scale bar" @pdfScaleBar
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Download PDF" onTap={emit exportPdf; toast "Plan exported"; close}
@@ -120,6 +125,7 @@ state points=[{"id":"p1","kind":"Socket","room":"Living room","height":0.3,"laye
 state layer="electrics"
 state pointKind="Socket"
 state pointRoom="Living room"
+state paper=""
 
 App
   Sidebar
@@ -130,7 +136,7 @@ App
     Nav
       Heading "Rooms and layers" level=1
       Row gap=8
-        SegmentedButton items=["m","ft"] bind=units
+        SegmentedButton items=["m","ft"] @units
         Button "Export PDF" onTap={open exportRooms}
     Column pad=24 gap=16
       Card gap=8
@@ -142,24 +148,24 @@ App
           Text.caption "" w=40
         each r in rooms
           Row gap=8 middle
-            Input "Name" bind=r.name grow
+            Input "Name" @r.name grow
             Text "{units=="m" ? fixed(r.w,1) : fixed(r.w*3.281,1)} x {units=="m" ? fixed(r.d,1) : fixed(r.d*3.281,1)}" w=120
             Text.strong "{units=="m" ? fixed(r.w*r.d,1) : fixed(r.w*r.d*10.764,0)} {units=="m" ? "m²" : "ft²"}" w=100
             IconButton "delete" tooltip="Delete room" onTap={rooms=removeWhere(rooms,x=>x.id==r.id)}
       Card gap=8
         Row between middle
           Heading "Electrics and plumbing" level=3
-          SegmentedButton items=["electrics","plumbing"] bind=layer
+          SegmentedButton items=["electrics","plumbing"] @layer
         each p in filter(points,p=>p.layer==layer)
           ListTile "{p.kind}" subtitle="{p.room}, {units=="m" ? fixed(p.height,1) : fixed(p.height*3.281,1)} {units}"
             IconButton "close" tooltip="Remove" onTap={points=removeWhere(points,x=>x.id==p.id)}
         Row gap=8 middle
-          Select "Type" items=["Socket","Switch","Light","Tap","Drain"] bind=pointKind
-          Select "Room" items=["Living room","Kitchen","Bedroom"] bind=pointRoom
+          Select "Type" items=["Socket","Switch","Light","Tap","Drain"] @pointKind
+          Select "Room" items=["Living room","Kitchen","Bedroom"] @pointRoom
           Button "Add point" onTap={points=append(points,{"id":"p{length(points)+1}","kind":pointKind,"room":pointRoom,"height":0.3,"layer":layer});toast "Point added"}
 
 Dialog#exportRooms "Export as PDF" "Rooms schedule and plan"
-  Select "Paper" items=["A4","A3"] bind=paper
+  Select "Paper" items=["A4","A3"] @paper
   Button "Download PDF" onTap={emit exportPdf; close}
 
 // A canvas of boxes: draws walls, openings, rooms and furniture as labelled boxes on a grid; real hit testing, snapping and rotation handles are not possible, so onPoint, onSnap and onRotate are given by the host.

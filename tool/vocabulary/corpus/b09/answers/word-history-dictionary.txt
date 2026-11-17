@@ -20,7 +20,7 @@ App
       Row gap=8
         IconButton "dark_mode" tooltip="Toggle theme" onTap={emit toggleTheme}
     Column pad=24 gap=20 maxw=720
-      Input "Look up a word" "serendipity, petrichor, quixotic" bind=q icon="search" onSubmit={recent=unique(concat([q],recent)); go word}
+      Input "Look up a word" "serendipity, petrichor, quixotic" @q icon="search" onSubmit={recent=unique(concat([q],recent)); go word}
       if q!=""
         Card gap=4
           Text.muted "Suggestions for {q}"
@@ -64,6 +64,7 @@ state senses=[{"n":1,"pos":"noun","def":"The faculty of making happy and unexpec
 state steps=[{"form":"Serendip","lang":"Arabic","century":"9th","note":"Sarandib, the old name for Sri Lanka"},{"form":"Serendippo","lang":"Persian","century":"13th","note":"Used in tales of travellers and merchants"},{"form":"Serendip","lang":"Italian","century":"16th","note":"Christoforo Armeno's tale of the three princes of Serendip"},{"form":"serendipity","lang":"English","century":"18th","note":"Coined by Horace Walpole in a letter, 28 Jan 1754"}]
 state usage=[1,1,2,2,3,3,4,4,5,6,8,10,12,16,22,30,41,58,80,104]
 state usageLabels=["1820","1830","1840","1850","1860","1870","1880","1890","1900","1910","1920","1930","1940","1950","1960","1970","1980","1990","2000","2010"]
+state corpus=""
 App
   Sidebar
     Brand "Etymon" icon="menu_book"
@@ -89,10 +90,10 @@ App
               Badge.neutral "noun"
               Badge.info "uncountable"
           Row gap=12 middle
-            Select bind=speed items=["0.5x","1x","1.5x"] w=90
+            Select @speed items=["0.5x","1x","1.5x"] w=90
             IconButton "{played ? 'pause' : 'play_arrow'}" tooltip="Pronounce" onTap={played=!played; play pronunciation}
-        Waveform src="audio/serendipity.mp3" bind=played h=56
-      SegmentedButton bind=tab items=["meanings","history","usage","family"]
+        Waveform src="audio/serendipity.mp3" @played h=56
+      SegmentedButton @tab items=["meanings","history","usage","family"]
       if tab=="meanings"
         Column gap=12
           each s in senses
@@ -126,7 +127,7 @@ App
         Card gap=12
           Row between
             Text.strong "Uses per million words, 1820 to 2010"
-            Select bind=corpus items=["Books","News","Speech"] w=120
+            Select @corpus items=["Books","News","Speech"] w=120
           LineChart values={usage} labels={usageLabels} h=240
           Text.muted "Rare until 1900, then rising steeply after the 1950s as the word moved from letters into everyday speech."
       if tab=="family"
@@ -144,9 +145,9 @@ App
             Chip "Sri Lanka" onTap={q="Sri Lanka"; go word}
   Dialog#saveTo "Save to a list" "Choose where serendipity goes"
     each l in lists
-      Radio "{l}" value={l} bind=listPick
+      Radio "{l}" value={l} @listPick
     Row gap=8
-      Input "New list" "Name it" bind=newList grow
+      Input "New list" "Name it" @newList grow
       Button.outline "Add" onTap={newList!="" ? {lists=append(lists,newList); listPick=newList; newList=""} : toast "Give the list a name"}
     Button "Save" onTap={saved=contains(saved,"serendipity") ? saved : append(saved,"serendipity"); toast "Saved to {listPick}"; close}
   Menu#wordMenu end
@@ -161,6 +162,7 @@ state activeList="Favourites"
 state sortBy="A to Z"
 state filterQ=""
 state sel=""
+state newName=""
 Page
   Nav sticky
     Brand "Etymon" icon="menu_book"
@@ -176,8 +178,8 @@ Page
         each l in lists
           ChoiceChip "{l.name} ({length(l.words)})" selected={activeList==l.name} onTap={activeList=l.name} menu=listMenu
         Spacer grow
-        Input "Filter words" bind=filterQ icon="filter_list" w=220
-        Select bind=sortBy items=["A to Z","Z to A","Newest"] w=140
+        Input "Filter words" @filterQ icon="filter_list" w=220
+        Select @sortBy items=["A to Z","Z to A","Newest"] w=140
       Grid cols=3 gap=16
         each w in filter(sortBy=="Z to A" ? reverse(find(lists,x=>x.name==activeList).words) : find(lists,x=>x.name==activeList).words, x=>contains(x,lower(filterQ)))
           Card gap=8 menu=wordRow
@@ -196,7 +198,7 @@ Page
       Text.strong "Etymon"
       Text.muted "Word histories from the Oxford and Wiktionary corpora"
   Dialog#newListDialog "New list" "Group words you want to keep"
-    Input "Name" "Weird words" bind=newName
+    Input "Name" "Weird words" @newName
     Button "Create" onTap={newName!="" ? {lists=append(lists,{"name":newName,"words":[]}); activeList=newName; newName=""; close} : toast "Give the list a name"}
   Menu#wordRow end
     MenuItem "Move to another list" icon="drive_file_move" onTap={open moveSheet}

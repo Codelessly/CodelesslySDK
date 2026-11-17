@@ -21,8 +21,8 @@ App
     Nav
       Heading "Explorer" level=1
       Row gap=8
-        Input "Search places" "Try Travis County" bind=q w=240
-        Select bind=measure items=["Median age","Household size","Spanish at home"] w=180
+        Input "Search places" "Try Travis County" @q w=240
+        Select @measure items=["Median age","Household size","Spanish at home"] w=180
         Button.outline "Download table" onTap={download places filename="headcount.csv"; toast "Table downloaded"}
     Column pad=24 gap=16
       Card gap=8
@@ -33,11 +33,11 @@ App
           Row between middle
             Text.panelTitle "{measure} by county"
             Text.muted "{year}"
-          ChoroplethMap measure={measure} year={year} bind=place regions={filter(places,p=>contains(lower(p.name),lower(q)))} breaks={breaks} h=360 onSelect={place=result}
-          BreakLegend bind=breaks min=20 max=60 colors=["#FFDBEAFE","#FF93C5FD","#FF3B82F6","#FF1D4ED8","#FF1E3A8A"] onChange={breaks=result}
+          ChoroplethMap measure={measure} year={year} @place regions={filter(places,p=>contains(lower(p.name),lower(q)))} breaks={breaks} h=360 onSelect={place=result}
+          BreakLegend @breaks min=20 max=60 colors=["#FFDBEAFE","#FF93C5FD","#FF3B82F6","#FF1D4ED8","#FF1E3A8A"] onChange={breaks=result}
           Row gap=12 middle
             Text.fieldLabel "Decade"
-            Slider bind=year min=1980 max=2020 step=10 grow
+            Slider @year min=1980 max=2020 step=10 grow
             Text.strong "{year}"
         Column w=320 gap=16
           Card gap=8
@@ -69,8 +69,8 @@ App
       Button.outline "Swap" icon="swap_horiz" onTap={placeA=placeB; placeB=placeA}
     Column pad=24 gap=16
       Row gap=16
-        Select "Place A" bind=placeA items={placeList} grow
-        Select "Place B" bind=placeB items={placeList} grow
+        Select "Place A" @placeA items={placeList} grow
+        Select "Place B" @placeB items={placeList} grow
       Card gap=8
         Text.panelTitle "Share of residents by age"
         GroupedBarChart labels={ages} series=[{"name":"{placeA}","values":shareA},{"name":"{placeB}","values":shareB}] h=260
@@ -105,7 +105,7 @@ App
         Button "Download CSV" icon="download" onTap={download rows filename="headcount.csv"; toast "Table downloaded"}
     Column pad=24 gap=16
       Card gap=0
-        DataTable bind=sortCol dir=sortDir rows={filter(rows,r=>r.pop>=minPop)} onSort={sortCol=result.column; sortDir=result.dir}
+        DataTable @sortCol dir=sortDir rows={filter(rows,r=>r.pop>=minPop)} onSort={sortCol=result.column; sortDir=result.dir}
           Column "Place" key=name
           Column "Population" key=pop align=right
           Column "Median age" key=age align=right
@@ -114,10 +114,10 @@ App
       Text.muted "Sorted by {sortCol}, {sortDir}. {count(rows,r=>r.pop>=minPop)} places shown."
   Sheet#filters "Filters"
     Text.fieldLabel "Minimum population: {minPop}"
-    Slider bind=minPop min=0 max=5000000 step=250000
+    Slider @minPop min=0 max=5000000 step=250000
     Button "Done" onTap={close}
 
-define ChoroplethMap measure="Median age" year=2020 bind=selected regions=[] breaks=[] h=360 onSelect
+define ChoroplethMap measure="Median age" year=2020 @selected regions=[] breaks=[] h=360 onSelect
   // a real map is a labelled box here: regions are listed as tiles shaded by break
   Box h={h} fill=#FFF1F5F9 radius=8 pad=12 gap=8
     Text.caption "Map: {measure}, {year}"
@@ -126,14 +126,14 @@ define ChoroplethMap measure="Median age" year=2020 bind=selected regions=[] bre
         Box pad=10 radius=6 fill={r.age < breaks[0] ? "#FFDBEAFE" : r.age < breaks[1] ? "#FF93C5FD" : r.age < breaks[2] ? "#FF3B82F6" : "#FF1D4ED8"} border={selected==r.name ? 2 : 0} onTap={selected=r.name; onSelect(r.name)}
           Text.small "{r.name}"
 
-define BreakLegend bind=breaks min=0 max=100 colors=[] onChange
+define BreakLegend @breaks min=0 max=100 colors=[] onChange
   Column gap=6
     Row gap=2
       each c in colors
         Box grow h=12 fill={c}
     Row gap=8
       each b in breaks
-        Slider bind=b min={min} max={max} grow onChange={onChange(breaks)}
+        Slider @b min={min} max={max} grow onChange={onChange(breaks)}
     Text.caption "Drag a break to change the shading: {join(breaks," / ")}"
 
 define PopulationPyramid ages=[] left=[] right=[] leftLabel="Left" rightLabel="Right" h=260
@@ -162,7 +162,7 @@ define GroupedBarChart labels=[] series=[] h=260
               Box w=14 h={s.values[indexOf(labels,l)]*10} fill={indexOf(series,s)==0 ? "#FF3B82F6" : "#FFF59E0B"} radius=2
           Text.caption "{l}"
 
-define DataTable bind=sortCol dir="asc" rows=[] onSort
+define DataTable @sortCol dir="asc" rows=[] onSort
   Column gap=0
     Row gap=8 pad=12 border-bottom=#FFE5E7EB
       ...

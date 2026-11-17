@@ -1,11 +1,11 @@
 state tab="Preview"
 state url="https://example.com/pricing"
 Card gap=8
-  BrowserTabs tabs=["Preview","Console"] icons=["public","terminal"] bind=tab closable=false
+  BrowserTabs tabs=["Preview","Console"] icons=["public","terminal"] @tab closable=false
   Row gap=6
     IconButton "arrow_back" onTap={emit back}
     IconButton "refresh" onTap={emit reload}
-    HeaderSearchInput bind=url grow
+    HeaderSearchInput @url grow
     IconButton "open_in_new" onTap={link https://example.com/pricing}
   if tab=="Preview"
     Box h=160 radius=8 fill=#FFF3F4F6 center

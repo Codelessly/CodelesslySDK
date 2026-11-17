@@ -24,8 +24,8 @@ App
     NavItem "Patterns" icon="library_music" selected={tab=="patterns"} onTap={go patterns}
     Spacer grow
     Text.caption "Master"
-    Slider bind=volume min=0 max=100
-    LevelMeter bind=level orientation=horizontal
+    Slider @volume min=0 max=100
+    LevelMeter @level orientation=horizontal
     Text.muted "Loop: {patterns[bank].name}"
   Main
     Nav
@@ -40,10 +40,10 @@ App
     Column pad=24 gap=16 scroll
       Row gap=24 top
         Column gap=8 items-center
-          Knob bind=tempo min=60 max=200 label="Tempo" unit="BPM" drag=vertical
+          Knob @tempo min=60 max=200 label="Tempo" unit="BPM" drag=vertical
           Text.caption "Drag up or down"
         Column gap=8
-          Knob bind=swing min=0 max=75 label="Swing" unit="%" drag=vertical
+          Knob @swing min=0 max=75 label="Swing" unit="%" drag=vertical
           Text.caption "Drag up or down"
         Column grow gap=8
           Text.strong "Pattern {patterns[bank].name}"
@@ -54,17 +54,17 @@ App
       Card gap=12
         Row gap=12
           Text.strong "Kick" w=60
-          StepRow bind=kick steps=16 playhead={step} paint=true muted={contains(mutes,"kick") || (solo!="" && solo!="kick")} onChange={patterns=updateWhere(patterns,p=>p.name==patterns[bank].name,p=>with(p,"kick",result))}
+          StepRow @kick steps=16 playhead={step} paint=true muted={contains(mutes,"kick") || (solo!="" && solo!="kick")} onChange={patterns=updateWhere(patterns,p=>p.name==patterns[bank].name,p=>with(p,"kick",result))}
           IconButton "volume_off" tooltip="Mute kick" selected={contains(mutes,"kick")} onTap={mutes=contains(mutes,"kick") ? without(mutes,"kick") : append(mutes,"kick")}
           IconButton "headphones" tooltip="Solo kick" selected={solo=="kick"} onTap={solo=solo=="kick" ? "" : "kick"}
         Row gap=12
           Text.strong "Snare" w=60
-          StepRow bind=snare steps=16 playhead={step} paint=true muted={contains(mutes,"snare") || (solo!="" && solo!="snare")} onChange={patterns=updateWhere(patterns,p=>p.name==patterns[bank].name,p=>with(p,"snare",result))}
+          StepRow @snare steps=16 playhead={step} paint=true muted={contains(mutes,"snare") || (solo!="" && solo!="snare")} onChange={patterns=updateWhere(patterns,p=>p.name==patterns[bank].name,p=>with(p,"snare",result))}
           IconButton "volume_off" tooltip="Mute snare" selected={contains(mutes,"snare")} onTap={mutes=contains(mutes,"snare") ? without(mutes,"snare") : append(mutes,"snare")}
           IconButton "headphones" tooltip="Solo snare" selected={solo=="snare"} onTap={solo=solo=="snare" ? "" : "snare"}
         Row gap=12
           Text.strong "Hats" w=60
-          StepRow bind=hats steps=16 playhead={step} paint=true muted={contains(mutes,"hats") || (solo!="" && solo!="hats")} onChange={patterns=updateWhere(patterns,p=>p.name==patterns[bank].name,p=>with(p,"hats",result))}
+          StepRow @hats steps=16 playhead={step} paint=true muted={contains(mutes,"hats") || (solo!="" && solo!="hats")} onChange={patterns=updateWhere(patterns,p=>p.name==patterns[bank].name,p=>with(p,"hats",result))}
           IconButton "volume_off" tooltip="Mute hats" selected={contains(mutes,"hats")} onTap={mutes=contains(mutes,"hats") ? without(mutes,"hats") : append(mutes,"hats")}
           IconButton "headphones" tooltip="Solo hats" selected={solo=="hats"} onTap={solo=solo=="hats" ? "" : "hats"}
         Row gap=12
@@ -87,7 +87,7 @@ App
         Card grow gap=8
           Text.strong "Level"
           Row gap=8 middle
-            Gauge bind=level min=0 max=1 limit=0.9 h=96
+            Gauge value={level} min=0 max=1 limit=0.9 h=96
             Text.mono "{round(volume*0.8,0)} dB"
 
 ### Bassline
@@ -109,13 +109,13 @@ App
     Nav
       Heading "Bassline" level=1
       Row gap=8
-        Select bind=snap items=["1/4","1/8","1/16"]
-        SegmentedButton bind=octave items=["1","2","3"]
+        Select @snap items=["1/4","1/8","1/16"]
+        SegmentedButton @octave items=["1","2","3"]
         IconButton "{playing ? 'pause' : 'play_arrow'}" tooltip="Play or pause" onTap={playing=!playing}
         Button.outline "Clear" icon="delete" onTap={notes=[]; selected=0}
     Column pad=24 gap=16
       Card gap=8
-        PianoRoll bind=notes steps=16 rows=24 lowest="C1" snap={snap} playhead={step} draw=true resize=true selected={selected} onSelect={selected=result} onChange={notes=result}
+        PianoRoll @notes steps=16 rows=24 lowest="C1" snap={snap} playhead={step} draw=true resize=true selected={selected} onSelect={selected=result} onChange={notes=result}
       Row gap=16
         Card grow gap=8
           Text.strong "Selected note"
@@ -142,6 +142,8 @@ state names=["A1 Four on the floor","A2 Broken","A3 Half time","A4 Empty","B1 Sh
 state loops=[{"id":1,"name":"Warehouse loop","bpm":124,"date":"2026-11-12","bars":4},{"id":2,"name":"Broken beat sketch","bpm":118,"date":"2026-11-14","bars":2},{"id":3,"name":"Half time groove","bpm":92,"date":"2026-11-16","bars":8}]
 state format="WAV"
 state bars=4
+state newName=""
+state loopName=""
 App
   Sidebar
     Brand "Grid Drums" icon="graphic_eq"
@@ -152,7 +154,7 @@ App
     Nav
       Heading "Patterns and loops" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "Export loop" icon="download" onTap={open exportLoop}
     Column pad=24 gap=16
       Card gap=12
@@ -178,14 +180,14 @@ App
     MenuItem "Rename" icon="edit" onTap={open renamePattern}
     MenuItem "Clear" icon="backspace" onTap={emit clearPattern sel}
   Dialog#renamePattern "Rename pattern"
-    Input "Name" bind=newName
+    Input "Name" @newName
     Button "Save" onTap={names=setAt(names,sel,newName); close}
   Dialog#exportLoop "Export loop" "Render the current pattern to a file"
-    Select "Format" bind=format items=["WAV","MP3","MIDI"]
-    SegmentedButton bind=bars items=[1,2,4]
+    Select "Format" @format items=["WAV","MP3","MIDI"]
+    SegmentedButton @bars items=[1,2,4]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Export" onTap={emit exportLoop format; toast "Exported {format}"; close}
   Dialog#saveLoop "Save loop"
-    Input "Loop name" "Untitled loop" bind=loopName
+    Input "Loop name" "Untitled loop" @loopName
     Button "Save" onTap={loops=append(loops,{"id":length(loops)+1,"name":loopName,"bpm":118,"date":today(),"bars":4}); toast "Loop saved"; close}

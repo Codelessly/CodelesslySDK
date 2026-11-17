@@ -33,20 +33,20 @@ App
         Card grow gap=12
           Text.strong "Your loan"
           Row gap=12 middle
-            Input "Home price" type=number bind=price w=160 onChange={emit recalc}
-            Slider bind=price min=100000 max=1500000 grow onChange={emit recalc}
+            Input "Home price" type=number @price w=160 onChange={emit recalc}
+            Slider @price min=100000 max=1500000 grow onChange={emit recalc}
           Row gap=12 middle
-            Input "Deposit" type=number bind=deposit w=160 onChange={emit recalc}
-            Slider bind=deposit min=0 max={price} grow onChange={emit recalc}
+            Input "Deposit" type=number @deposit w=160 onChange={emit recalc}
+            Slider @deposit min=0 max={price} grow onChange={emit recalc}
           Row gap=12 middle
-            Input "Term (years)" type=number bind=term w=160 onChange={emit recalc}
-            Slider bind=term min=5 max=40 grow onChange={emit recalc}
+            Input "Term (years)" type=number @term w=160 onChange={emit recalc}
+            Slider @term min=5 max=40 grow onChange={emit recalc}
           Row gap=12 middle
-            Input "Rate (%)" type=number bind=rate w=160 onChange={emit recalc}
-            Slider bind=rate min=0.5 max=10 grow onChange={emit recalc}
+            Input "Rate (%)" type=number @rate w=160 onChange={emit recalc}
+            Slider @rate min=0.5 max=10 grow onChange={emit recalc}
           Row between middle
             Text "Rate type"
-            SegmentedButton bind=fixed items=["Fixed","Variable"] onChange={fixed=(result=="Fixed"); emit recalc}
+            SegmentedButton @fixed items=["Fixed","Variable"] onChange={fixed=(result=="Fixed"); emit recalc}
           Text.caption "Loan amount {money(price-deposit,"$",0)}, deposit {round(deposit/price*100,1)}%"
         Card w=320 gap=8 fill=#FF1E3A5F
           Text "Monthly payment" color=#FFCBD5E1
@@ -65,14 +65,14 @@ App
         Row between middle
           Text.strong "Interest and principal by year"
           Badge.info "Year {year}: balance {money(balanceAtYear,"$",0)}"
-        StackedAreaChart labels=["1","2","3","4","5","6","7","8","9","10","11","12"] series=[{"name":"Interest","values":interestSeries},{"name":"Principal","values":principalSeries}] bind=year h=220 onChange={emit readBalance}
+        StackedAreaChart labels=["1","2","3","4","5","6","7","8","9","10","11","12"] series=[{"name":"Interest","values":interestSeries},{"name":"Principal","values":principalSeries}] @year h=220 onChange={emit readBalance}
         Text.caption "Drag the point along the chart to read the balance left at the end of a year."
       Row gap=16 top
         Card grow gap=12
           Text.strong "Pay it off sooner"
           Row gap=12 middle
             Text "Overpay" w=80
-            Slider bind=over min=0 max=1500 step=25 grow onChange={emit recalc}
+            Slider @over min=0 max=1500 step=25 grow onChange={emit recalc}
             Text.strong "{money(over,"$",0)} / mo" w=110
           Row gap=16
             Column grow gap=2
@@ -97,7 +97,7 @@ App
 
 Dialog#saveScenario "Save this scenario" "Keep it to compare with others"
   state scenarioName=""
-  Input "Name" "e.g. 5-year fix, overpay $200" bind=scenarioName
+  Input "Name" "e.g. 5-year fix, overpay $200" @scenarioName
   Text.muted "{money(price-deposit,"$",0)} at {rate}% over {term} years, {money(payment,"$",0)} a month"
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
@@ -156,8 +156,8 @@ App
           BarChart values={map(scenarios,s=>s.interest)} labels={map(scenarios,s=>s.name)} h=200
 
 // StackedAreaChart: an area chart whose series stack, with a draggable point on the years axis that sets the bound year
-define StackedAreaChart labels=[] series=[] bind=at h=220 onChange
+define StackedAreaChart labels=[] series=[] @at h=220 onChange
   state at=0
   Column gap=4
     AreaChart labels={labels} series={series} h={h}
-    Slider bind=at min=1 max={length(labels)} step=1 onChange={onChange(at)}
+    Slider @at min=1 max={length(labels)} step=1 onChange={onChange(at)}

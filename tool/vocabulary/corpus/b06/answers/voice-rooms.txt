@@ -3,6 +3,9 @@ state tab="live"
 state q=""
 state rooms=[{"id":"r1","title":"Shipping a Flutter app solo","host":"Maya Reyes","listeners":312,"speakers":["Maya Reyes","Dev Patel","Lena Fischer","Tomas Ruiz"],"topic":"Engineering"},{"id":"r2","title":"Late night lo-fi producers hangout","host":"Kai Nakamura","listeners":148,"speakers":["Kai Nakamura","Sofia Alvarez"],"topic":"Music"},{"id":"r3","title":"Ask a recruiter anything","host":"Priya Shah","listeners":89,"speakers":["Priya Shah","Omar Haddad","Jess Wu"],"topic":"Career"}]
 state topic="All"
+state newTitle=""
+state newTopic=""
+state newRecord=false
 App
   Sidebar
     Brand "Murmur" icon="graphic_eq"
@@ -17,7 +20,7 @@ App
     Nav
       Heading "Live rooms" level=1
       Row gap=8
-        Input "Search rooms" bind=q w=220
+        Input "Search rooms" @q w=220
         Button "Start a room" icon="mic" onTap={open newRoom}
     Column pad=24 gap=16
       Row scroll gap=8
@@ -40,9 +43,9 @@ App
       if length(filter(rooms, x => (topic=="All" || x.topic==topic) && contains(lower(x.title), lower(q))))==0
         Text.muted "No live rooms match. Start one?"
   Dialog#newRoom "Start a room" "Pick a title people will want to join"
-    Input "Room title" bind=newTitle
-    Select "Topic" items=["Engineering","Music","Career"] bind=newTopic
-    Toggle "Record this room" bind=newRecord
+    Input "Room title" @newTitle
+    Select "Topic" items=["Engineering","Music","Career"] @newTopic
+    Toggle "Record this room" @newRecord
     Button "Go live" onTap={rooms=append(rooms, {"id":"r4","title":newTitle,"host":"Alex Morgan","listeners":0,"speakers":["Alex Morgan"],"topic":newTopic}); emit startRoom newTitle; close; go room}
 
 ### Room
@@ -54,6 +57,7 @@ state listeners=[{"name":"Alex Morgan"},{"name":"Ines Costa"},{"name":"Ben Okafo
 state queue=[{"name":"Ines Costa"},{"name":"Ben Okafor"}]
 state reactions=[]
 state isHost=true
+state inviteWho=""
 every 3s onTick={active=speakers[(indexOf(map(speakers,s=>s.name),active)+1)%length(speakers)].name}
 App
   Main
@@ -117,7 +121,7 @@ App
     Divider
     Button.outline "Invite someone" icon="person_add" onTap={open invite}
   Dialog#invite "Invite to speak" "Send an invite to someone in the room"
-    Select "Person" items={map(listeners,l=>l.name)} bind=inviteWho
+    Select "Person" items={map(listeners,l=>l.name)} @inviteWho
     Button "Send invite" onTap={emit invite inviteWho; toast "Invite sent to {inviteWho}"; close}
 
 ### Schedule
@@ -139,7 +143,7 @@ App
       Heading "Schedule" level=1
       Badge.info "{length(reminders)} reminders set"
     Column pad=24 gap=16
-      SegmentedButton items=["Today","Tomorrow"] bind=day
+      SegmentedButton items=["Today","Tomorrow"] @day
       each e in filter(upcoming, x=>x.day==day)
         Card gap=8
           Row between middle

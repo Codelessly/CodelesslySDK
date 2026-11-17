@@ -10,7 +10,7 @@ App
     NavItem "Meeting finder" icon="schedule" selected={true}
     NavItem "Saved slots" icon="bookmark" badge="3" onTap={go saved}
     Spacer grow
-    SegmentedButton bind=h24 items=["12h","24h"]
+    SegmentedButton @h24 items=["12h","24h"]
     Text.muted "Times shown in each city's local time"
   Main
     Nav
@@ -23,7 +23,7 @@ App
         Row between
           Text.strong "Slide across the day (UTC)"
           Text.muted "{utc}:00 UTC"
-        Slider bind=utc min=0 max=23 step=1
+        Slider @utc min=0 max=23 step=1
         Row between
           Text.caption "00"
           Text.caption "06"
@@ -40,7 +40,7 @@ App
           Row gap=8 middle
             Icon "warning" color=#FFB45309
             Text.strong "{count(cities, c => ((utc + c.off + 24) % 24) >= c.from && ((utc + c.off + 24) % 24) < c.to)} of {length(cities)} cities are in working hours" color=#FF92400E
-      ReorderableList bind=cities
+      ReorderableList @cities
         each c in cities
           CityRow name={c.name} tz={c.tz} hour={(utc + c.off + 24) % 24} from={c.from} to={c.to} h24={h24} onRemove={cities=removeWhere(cities, x => x.id == c.id)} onTap={sel=c.id; open hours}
       Row gap=8
@@ -51,7 +51,7 @@ App
 Dialog#addCity "Add a city" "Search for a city or a time zone"
   state q=""
   state pool=[{"id":"tok","name":"Tokyo","tz":"JST","off":9},{"id":"syd","name":"Sydney","tz":"AEDT","off":11},{"id":"dub","name":"Dubai","tz":"GST","off":4},{"id":"mum","name":"Mumbai","tz":"IST","off":5.5},{"id":"sao","name":"Sao Paulo","tz":"BRT","off":-3},{"id":"chi","name":"Chicago","tz":"CST","off":-6},{"id":"par","name":"Paris","tz":"CET","off":1},{"id":"lag","name":"Lagos","tz":"WAT","off":1}]
-  Input "Search" "Tokyo, CET, UTC+9" bind=q
+  Input "Search" "Tokyo, CET, UTC+9" @q
   Column gap=4
     each p in filter(pool, x => contains(lower(x.name), lower(q)) || contains(lower(x.tz), lower(q)))
       ListTile "{p.name}" subtitle="{p.tz}, UTC{p.off >= 0 ? '+' : ''}{p.off}" onTap={cities=append(cities, with(with(with(p, "from", 9), "to", 17), "id", p.id)); close}
@@ -133,7 +133,7 @@ define HourStrip hour=12 from=9 to=17
     each i in range(24)
       Box grow h=14 fill={i >= from && i < to ? (i == floor(hour) ? #FF15803D : #FF86EFAC) : (i >= 6 && i < 18 ? #FFFDE68A : #FF64748B)} border={i == floor(hour) ? 2 : 0}
 
-define ReorderableList bind=items onReorder
+define ReorderableList @items onReorder
   state items=[]
   Column gap=8
     ...

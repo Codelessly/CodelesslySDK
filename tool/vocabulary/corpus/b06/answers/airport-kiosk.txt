@@ -65,7 +65,7 @@ App
       Heading "Find your booking" level=1
       Progress 0.25 w=160
     Column pad=32 gap=24
-      SegmentedButton bind=mode items=["Scan passport","Booking code"] size=large
+      SegmentedButton @mode items=["Scan passport","Booking code"] size=large
       if mode=="scan"
         Card gap=16 center
           Icon "document_scanner" size=96
@@ -77,10 +77,10 @@ App
           Button "Start scan" size=large hidden={scanning} onTap={scanning=true; idle=0}
       if mode=="code"
         Card gap=16
-          Input "Booking code" "6 letters or numbers" bind=code size=large
+          Input "Booking code" "6 letters or numbers" @code size=large
           if error!=""
             Text.danger "{error}"
-          Keyboard bind=code layout="alphanumeric" maxLength=6 onEnter={code!="" ? booking=code : error="Enter your booking code"}
+          Keyboard @code layout="alphanumeric" maxLength=6 onEnter={code!="" ? booking=code : error="Enter your booking code"}
           Row gap=16
             Button.outline "Clear" size=large onTap={code=""; error=""}
             Button "Find my flight" size=large grow onTap={length(code)==6 ? booking=upper(code); idle=0; go flight : error="Codes have 6 characters"}
@@ -139,7 +139,7 @@ App
             Row gap=8 middle
               Box w=24 h=24 radius=4 fill=#FFFFE0B2
               Text.small "Extra legroom, +$25"
-          SeatMap bind=seat rows=24 cols="ABC DEF" taken={taken} premium={legroom} onSelect={idle=0}
+          SeatMap @seat rows=24 cols="ABC DEF" taken={taken} premium={legroom} onSelect={idle=0}
           Button "Continue to bags" size=large disabled={seat==""} onTap={step="bags"; idle=0}
       if step=="bags"
         Card gap=16
@@ -195,7 +195,7 @@ App
         Card gap=16 center
           Text.heading "Printing your boarding pass"
           PrinterSlot progress={progress} animate=slide-up
-          Progress bind=progress
+          Progress value={progress}
           Text.muted "Please wait, do not pull the paper."
       if printed
         Card gap=16 center animate=pop

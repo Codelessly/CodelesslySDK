@@ -40,10 +40,10 @@ App
             Button.outline "Check microphone" onTap={open micCheck}
             Button.ghost "Dismiss" onTap={silence=0}
       Row gap=12 middle
-        Input "Highlight words" "invoice, deadline" bind=keyword w=240
-        Select bind=spoken items=["English","Spanish","French","German","Japanese"] label="Spoken"
+        Input "Highlight words" "invoice, deadline" @keyword w=240
+        Select @spoken items=["English","Spanish","French","German","Japanese"] label="Spoken"
         Icon "arrow_forward"
-        Select bind=shown items=["English","Spanish","French","German","Japanese"] label="Shown"
+        Select @shown items=["English","Spanish","French","German","Japanese"] label="Shown"
         Spacer grow
         Waveform active={listening && !paused} onVoice={silence=0}
       Box fill={theme=="Dark" ? "#FF111418" : theme=="Light" ? "#FFFFFFFF" : "#FF000000"} radius=16 pad=24 gap=20 h=420
@@ -60,7 +60,7 @@ App
           Button.ghost "Clear" onTap={lines=[]}
   Dialog#micCheck "Microphone check" "Speak normally for a few seconds."
     Waveform active={true}
-    Progress bind=micLevel
+    Progress value={micLevel}
     Text.muted "Input level: {round(micLevel*100,0)}%"
     Button "Done" onTap={silence=0; close}
 
@@ -89,13 +89,13 @@ App
           Heading "Text" level=3
           Column gap=4
             Text.fieldLabel "Size: {fontSize} px"
-            Slider bind=fontSize min=20 max=96
+            Slider @fontSize min=20 max=96
           Column gap=4
             Text.fieldLabel "Weight"
-            Slider bind=weight min=300 max=800 step=100
+            Slider @weight min=300 max=800 step=100
           Column gap=4
             Text.fieldLabel "Line spacing"
-            Slider bind=lineSpacing min=1 max=2 step=0.1
+            Slider @lineSpacing min=1 max=2 step=0.1
           Column gap=8
             Text.fieldLabel "Font"
             Row gap=8
@@ -109,7 +109,7 @@ App
               ChoiceChip "Dark" selected={theme=="Dark"} onTap={theme="Dark"}
               ChoiceChip "Light" selected={theme=="Light"} onTap={theme="Light"}
               ChoiceChip "High contrast" selected={theme=="High"} onTap={theme="High"}
-          Toggle "Show speaker names" bind=showSpeakers
+          Toggle "Show speaker names" @showSpeakers
         Card grow gap=12
           Heading "Sample" level=3
           Box fill={theme=="Dark" ? "#FF111418" : theme=="Light" ? "#FFFFFFFF" : "#FF000000"} radius=12 pad=20 gap=12
@@ -131,6 +131,9 @@ state query=""
 state keyword="invoice"
 state speakerFilter="All"
 state history=[{"id":1,"time":"10:02","speaker":"Maya","color":"#FF4FC3F7","text":"Thanks everyone for joining, let's start with the invoice from last week."},{"id":2,"time":"10:03","speaker":"Daniel","color":"#FFFFB74D","text":"I checked it this morning and the totals match the purchase order except for the shipping."},{"id":3,"time":"10:04","speaker":"Maya","color":"#FF4FC3F7","text":"Good, can you send the corrected invoice before noon today?"},{"id":4,"time":"10:06","speaker":"Priya","color":"#FF81C784","text":"The deadline for the audit is Friday, so we should file everything by Thursday."},{"id":5,"time":"10:08","speaker":"Daniel","color":"#FFFFB74D","text":"Understood, I will attach the signed invoice to the audit folder."}]
+state format=""
+state stamps=false
+state names=false
 App
   Sidebar
     Brand "Subtitler" icon="closed_caption"
@@ -147,9 +150,9 @@ App
         Button "Save transcript" icon="download" onTap={open saveFormat}
     Column pad=24 gap=16
       Row gap=12 middle
-        Input "Search transcript" bind=query w=260
-        Input "Highlight" bind=keyword w=180
-        SegmentedButton bind=speakerFilter items=["All","Maya","Daniel","Priya"]
+        Input "Search transcript" @query w=260
+        Input "Highlight" @keyword w=180
+        SegmentedButton @speakerFilter items=["All","Maya","Daniel","Priya"]
         Spacer grow
         Text.muted "{count(history,h=>speakerFilter=="All" || h.speaker==speakerFilter)} segments"
       Card gap=0
@@ -167,9 +170,9 @@ App
         Text.muted "Scrolling back pauses the live captions."
         Button.ghost "Jump to latest" icon="arrow_downward" onTap={scroll latest}
   Dialog#saveFormat "Save transcript" "Choose how to export the conversation."
-    Select "Format" bind=format items=["Plain text (.txt)","Subtitles (.srt)","Document (.docx)"]
-    Toggle "Include timestamps" bind=stamps
-    Toggle "Include speaker names" bind=names
+    Select "Format" @format items=["Plain text (.txt)","Subtitles (.srt)","Document (.docx)"]
+    Toggle "Include timestamps" @stamps
+    Toggle "Include speaker names" @names
     Row end gap=8
       Button.outline "Cancel" onTap={close}
       Button "Save" onTap={emit saveTranscript {"format":format,"timestamps":stamps,"names":names}; toast "Transcript saved"; close}
@@ -196,13 +199,13 @@ App
         Card gap=12
           Heading "Spoken language" level=3
           Text.muted "What people in the room are speaking."
-          Select bind=spoken items={langs}
-          Toggle "Detect the language automatically" bind=autoDetect
+          Select @spoken items={langs}
+          Toggle "Detect the language automatically" @autoDetect
         Card gap=12
           Heading "Shown language" level=3
           Text.muted "What appears on the caption stripe."
-          Select bind=shown items={langs}
-          Toggle "Translate the captions" bind=translate
+          Select @shown items={langs}
+          Toggle "Translate the captions" @translate
       Card gap=8
         Text.strong "Preview"
         Row gap=8 middle

@@ -17,6 +17,9 @@ state hiB=0
 state midB=0
 state loB=0
 state master=78
+state device=""
+state buffer=""
+state cuemix=false
 App
   Sidebar
     Brand "Crossfade" icon="album"
@@ -25,7 +28,7 @@ App
     NavItem "Recordings" icon="fiber_manual_record" onTap={go recordings}
     Spacer grow
     Text.muted "Master {master}%"
-    Slider bind=master min=0 max=100
+    Slider @master min=0 max=100
   Main
     Nav
       Heading "Live set" level=1
@@ -45,28 +48,28 @@ App
           Column gap=8 center
             Text.caption "DECK A EQ"
             Row gap=12
-              Knob "HI" bind=hiA
-              Knob "MID" bind=midA
-              Knob "LO" bind=loA
+              Knob "HI" @hiA
+              Knob "MID" @midA
+              Knob "LO" @loA
           Row gap=12 bottom
-            Fader "1" bind=vol1
-            Fader "2" bind=vol2
+            Fader "1" @vol1
+            Fader "2" @vol2
           Column gap=8 center
             Text.caption "CROSSFADER"
-            Slider bind=xfade min=0 max=100 w=240
+            Slider @xfade min=0 max=100 w=240
             Row between w=240
               Text.small "A"
               Button.ghost "Center" onTap={xfade=50}
               Text.small "B"
           Row gap=12 bottom
-            Fader "3" bind=vol3
-            Fader "4" bind=vol4
+            Fader "3" @vol3
+            Fader "4" @vol4
           Column gap=8 center
             Text.caption "DECK B EQ"
             Row gap=12
-              Knob "HI" bind=hiB
-              Knob "MID" bind=midB
-              Knob "LO" bind=loB
+              Knob "HI" @hiB
+              Knob "MID" @midB
+              Knob "LO" @loB
       Card gap=8
         Row between
           Text.panelTitle "Up next"
@@ -79,9 +82,9 @@ App
           Button.outline "Load to A" onTap={titleA="Neon Tides"; bpmA=128; keyA="8B"; toast "Loaded to deck A"}
           Button.outline "Load to B" onTap={titleB="Neon Tides"; bpmB=128; keyB="8B"; toast "Loaded to deck B"}
   Dialog#audio "Audio settings" "Output and latency"
-    Select "Output device" items=["Built-in output","USB interface","Bluetooth speaker"] bind=device
-    Select "Buffer size" items=["128 samples","256 samples","512 samples"] bind=buffer
-    Toggle "Headphone cue mix" bind=cuemix
+    Select "Output device" items=["Built-in output","USB interface","Bluetooth speaker"] @device
+    Select "Buffer size" items=["128 samples","256 samples","512 samples"] @buffer
+    Toggle "Headphone cue mix" @cuemix
     Button "Done" onTap={close}
 
 ### Library
@@ -104,7 +107,7 @@ App
     Nav
       Heading "Track browser" level=1
       Row gap=8
-        Input "Search tracks" bind=q w=240
+        Input "Search tracks" @q w=240
         Button.outline "Sort by BPM" onTap={sortKey="bpm"}
         Button.outline "Sort by key" onTap={sortKey="key"}
     Column pad=24 gap=12
@@ -184,21 +187,21 @@ define Waveform values=[4,6,5,8,7,9,6,5] position=0 cues=[] color=#FF22D3EE
       Text.caption "{duration(position)}"
       Text.caption "Cues: {length(cues)}"
 
-define Knob "label" bind=value min=-12 max=12
+define Knob "label" @value min=-12 max=12
   state value=0
   Column gap=4 center
     Stack center middle
       Ring {(value-min)/(max-min)} w=56 h=56
       Text.small "{value}"
-    Slider bind=value min={min} max={max} w=64
+    Slider @value min={min} max={max} w=64
     Text.caption "{label}"
 
 // Vertical fader shown as a labelled level column with a horizontal slider; no vertical slider is drawn.
-define Fader "label" bind=level
+define Fader "label" @level
   state level=75
   Column gap=4 center
     Progress {level/100} w=48
-    Slider bind=level min=0 max=100 w=80
+    Slider @level min=0 max=100 w=80
     Text.caption "CH {label}"
 
 define Deck "name" title="" bpm=120 key="" accent=#FF22D3EE
@@ -224,7 +227,7 @@ define Deck "name" title="" bpm=120 key="" accent=#FF22D3EE
           Button.outline "Bend -" onTap={tempo=clamp(tempo-1,-8,8)}
           Button.outline "Bend +" onTap={tempo=clamp(tempo+1,-8,8)}
           Text.small "Tempo {tempo}%"
-    Slider bind=tempo min=-8 max=8
+    Slider @tempo min=-8 max=8
     Row gap=8
       Button "{playing ? 'Pause' : 'Play'}" onTap={playing=!playing}
       Button.secondary "Cue" onTap={pos=0; playing=false}

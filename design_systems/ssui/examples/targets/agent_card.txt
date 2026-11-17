@@ -10,7 +10,7 @@ Card gap=10
     Badge.neutral "Repos: 3"
     Badge.neutral "Runs: 128"
     Badge.success "98% passing"
-  ToggleRow "Run on every merge" description="Off: only when asked." bind=on
+  ToggleRow "Run on every merge" description="Off: only when asked." @on
   Row end gap=8
     Button.ghost "View runs" onTap={emit runs}
     Button.outline "Configure" onTap={emit configure}

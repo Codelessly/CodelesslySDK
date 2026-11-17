@@ -17,10 +17,10 @@ App
       Card gap=8
         Row gap=8
           Icon "trip_origin"
-          Input "Pickup" bind=pickup grow
+          Input "Pickup" @pickup grow
         Row gap=8
           Icon "place"
-          Input "Where to?" bind=q grow onChange={dest=result}
+          Input "Where to?" @q grow onChange={dest=result}
       if q==""
         Text.sectionTitle "Recent places"
         each r in recents
@@ -67,6 +67,8 @@ App
 ### Driver on the way
 state eta=240
 state sent=false
+state thread=""
+state draft=""
 every 1s when eta>0 onTick={eta=eta-1}
 every 1s when eta==0 onTick={go trip}
 App
@@ -101,9 +103,9 @@ App
         Text.muted "Comfort, {money(16.90,'$',2)}"
         Button.ghost "Cancel ride" onTap={go where-to}
   Sheet#chat "Marcus"
-    ChatThread items={[{"from":"driver","text":"I am at the corner by the carousel."}]} bind=thread
+    ChatThread items={[{"from":"driver","text":"I am at the corner by the carousel."}]} @thread
     Row gap=8
-      Input "Message" bind=draft grow
+      Input "Message" @draft grow
       IconButton "send" tooltip="Send" onTap={thread=append(thread,{"from":"me","text":draft}); draft=""}
 
 ### Live trip
@@ -150,9 +152,9 @@ Page
       Avatar "Marcus Bell" size=72
       Heading "How was your ride with Marcus?" level=1
       Text.muted "Trip total {money(16.90,'$',2)}"
-      Rating bind=rating max=5 size=40
+      Rating @rating max=5 size=40
       if rating>0 && rating<4
-        Input "What went wrong?" multiline bind=note
+        Input "What went wrong?" multiline @note
       if rating>=4
         Row gap=8
           ChoiceChip "Great conversation" onTap={emit tag "conversation"}
@@ -166,7 +168,7 @@ Page
         ChoiceChip "$6" selected={tip==6} onTap={tip=6}
         ChoiceChip "Other" selected={tip==-1} onTap={tip=-1}
       if tip==-1
-        Input "Custom tip" type=number bind=custom
+        Input "Custom tip" type=number @custom
       Text.strong "Total with tip: {money(16.90+(tip==-1 ? coalesce(custom,0) : tip),'$',2)}"
       Button "Submit" size=large disabled={rating==0} onTap={emit rated {"rating":rating,"tip":tip,"note":note}; toast "Thanks for riding"; go where-to}
       Button.ghost "Skip" onTap={go where-to}

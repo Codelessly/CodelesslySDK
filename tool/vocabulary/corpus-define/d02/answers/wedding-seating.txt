@@ -6,6 +6,10 @@ state sideFilter="All"
 state dietOnly=false
 state selTable="t1"
 state grp="College"
+state apartWith=""
+state newName=""
+state newShape=""
+state newCap=""
 App
   Sidebar
     Brand "Tablecloth" icon="table_restaurant"
@@ -24,9 +28,9 @@ App
     Row top
       Pane w=320 pad=16 gap=12
         Text.panelTitle "Guests"
-        Input "Search guests" bind=q
-        SegmentedButton bind=sideFilter items=["All","Bride","Groom"]
-        Toggle "Dietary needs only" bind=dietOnly
+        Input "Search guests" @q
+        SegmentedButton @sideFilter items=["All","Bride","Groom"]
+        Toggle "Dietary needs only" @dietOnly
         Text.caption "Drag a guest onto a table"
         Column gap=8 drop=guest onDrop={guests=updateWhere(guests,g=>g.id==result.data,g=>with(g,"table",""))}
           each g in filter(guests,x=>x.table=="" && (sideFilter=="All" || x.side==sideFilter) && (!dietOnly || x.diet!="") && contains(lower(x.name),lower(q)))
@@ -53,16 +57,16 @@ Menu#guestmenu
   MenuItem "Seat at selected table" icon="chair" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"table",selTable))}
   MenuItem "Keep apart from..." icon="block" onTap={open apart}
 Dialog#apart "Keep apart" "Pick the guest this person should not sit with."
-  Select "Guest" bind=apartWith items={map(filter(guests,g=>g.id!=sel),g=>g.name)}
+  Select "Guest" @apartWith items={map(filter(guests,g=>g.id!=sel),g=>g.name)}
   Button "Save" onTap={guests=updateWhere(guests,g=>g.id==sel,g=>with(g,"apart",append(g.apart,find(guests,o=>o.name==apartWith).id))); toast "Conflict rule saved"; close}
 Dialog#addtable "Add a table"
-  Input "Name" bind=newName
-  SegmentedButton bind=newShape items=["round","long"]
-  Input "Seats" type=number bind=newCap
+  Input "Name" @newName
+  SegmentedButton @newShape items=["round","long"]
+  Input "Seats" type=number @newCap
   Button "Add" onTap={tables=append(tables,{"id":concat(["t"],[length(tables)+1])[1],"name":newName,"shape":newShape,"cap":newCap}); close}
 Dialog#autoseat "Auto-seat a group" "Seats every unseated guest of the group at one table."
-  Select "Group" bind=grp items=["Family","College","Work"]
-  Select "Table" bind=selTable items={map(tables,t=>t.id)}
+  Select "Group" @grp items=["Family","College","Work"]
+  Select "Table" @selTable items={map(tables,t=>t.id)}
   Text.muted "{count(guests,g=>g.table==\"\" && g.party==grp)} guests to seat, {find(tables,t=>t.id==selTable).cap-count(guests,g=>g.table==selTable)} seats free"
   Button "Seat group" onTap={count(guests,g=>g.table=="" && g.party==grp)>find(tables,t=>t.id==selTable).cap-count(guests,g=>g.table==selTable) ? toast "Not enough free seats at that table" : {guests=map(guests,g=>g.table=="" && g.party==grp ? with(g,"table",selTable) : g); toast "Group seated"; close}}
 
@@ -96,6 +100,7 @@ define SeatTable "name" shape="round" cap=8 filled=0 conflicts=0 onTap
     ...
 
 ### Print view
+state printSort=""
 App
   Sidebar
     Brand "Tablecloth" icon="table_restaurant"
@@ -105,7 +110,7 @@ App
     Nav
       Heading "Seating list"
       Row gap=8
-        Select "Sort" bind=printSort items=["By table","By name"]
+        Select "Sort" @printSort items=["By table","By name"]
         Button "Print" icon="print" onTap={emit print}
     Column pad=24 gap=16 scroll
       if printSort!="By name"

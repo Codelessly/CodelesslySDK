@@ -67,7 +67,7 @@ App
         Card gap=12
           Text.strong "Pick a colour"
           Column center
-            ColorWheel bind=mood bindAngle=wheelAngle size=240 labels=["Joy","Calm","Low","Anxious","Anger","Love"] onChange={mood=result}
+            ColorWheel @mood angle=@wheelAngle size=240 labels=["Joy","Calm","Low","Anxious","Anger","Love"] onChange={mood=result}
           if mood!=""
             Text.muted "You chose {mood}. Its plant will grow in this colour."
         Card gap=12
@@ -76,9 +76,9 @@ App
             PlantPreview mood={mood} animate=pop
       Card gap=12
         Text.strong "Three things I'm grateful for"
-        Input "First" "A warm cup of tea" bind=g1 maxlength=60
-        Input "Second" "A friend's message" bind=g2 maxlength=60
-        Input "Third" "The quiet after work" bind=g3 maxlength=60
+        Input "First" "A warm cup of tea" @g1 maxlength=60
+        Input "Second" "A friend's message" @g2 maxlength=60
+        Input "Third" "The quiet after work" @g3 maxlength=60
       Card gap=12
         Text.strong "Weather"
         Row gap=8 scroll
@@ -93,7 +93,7 @@ App
           FilterChip "Under 6 hours" selected={contains(sleep,"short")} onTap={sleep=contains(sleep,"short") ? without(sleep,"short") : append(sleep,"short")}
           FilterChip "Napped" selected={contains(sleep,"nap")} onTap={sleep=contains(sleep,"nap") ? without(sleep,"nap") : append(sleep,"nap")}
       Card gap=8
-        Input "Anything else?" bind=note multiline
+        Input "Anything else?" @note multiline
 
 ### Seasons
 state range="Year"
@@ -107,7 +107,7 @@ App
   Main
     Nav
       Heading "Your seasons" level=1
-      SegmentedButton bind=range items=["Month","Season","Year"]
+      SegmentedButton @range items=["Month","Season","Year"]
     Column pad=24 gap=16 scroll
       Card gap=12
         Text.strong "Mood across the year"
@@ -154,23 +154,23 @@ App
     Column pad=24 gap=16 scroll
       Card gap=12
         Text.strong "Lock"
-        Toggle "Lock Soil when I leave" bind=locked
+        Toggle "Lock Soil when I leave" @locked
         if locked
-          SegmentedButton bind=lockType items=["PIN","Biometric"]
+          SegmentedButton @lockType items=["PIN","Biometric"]
           Button.outline "Set PIN" onTap={open pinpad}
       Card gap=12
         Row between
           Text.strong "Reminders"
-          Toggle bind=remindersOn
+          Toggle @remindersOn
         if remindersOn
           each r in reminders
             ListTile "{r.label}" subtitle="{r.time}"
-              Toggle bind=r.on
+              Toggle @r.on
               IconButton "delete" tooltip="Remove" onTap={reminders=removeWhere(reminders,x=>x.id==r.id)}
           Row gap=8 middle
-            TimePicker "Time" bind=newTime
-            Input "Label" "Take a breath" bind=newLabel grow
+            TimePicker "Time" @newTime
+            Input "Label" "Take a breath" @newLabel grow
             Button "Add" onTap={newLabel=="" ? toast "Give it a label" : {reminders=append(reminders,{"id":newLabel,"time":newTime,"label":newLabel,"on":true}); newLabel=""}}
   Dialog#pinpad "Set a PIN" "Four digits"
-    PinPad bind=pin length=4 onComplete={locked=true; lockType="PIN"; toast "PIN saved"; close}
+    PinPad @pin length=4 onComplete={locked=true; lockType="PIN"; toast "PIN saved"; close}
     Button.ghost "Cancel" onTap={pin=""; close}

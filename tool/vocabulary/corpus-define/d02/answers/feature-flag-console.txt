@@ -9,6 +9,8 @@ state reason=""
 state approver="Dana Whitfield"
 state requests=[]
 state flags=[{"id":"checkout-v2","name":"checkout-v2","desc":"New one-page checkout","dev":true,"staging":true,"prod":false,"owner":"Priya Nair","changed":"2h ago","stale":false},{"id":"dark-mode","name":"dark-mode","desc":"Dark theme in settings","dev":true,"staging":true,"prod":true,"owner":"Marcus Bell","changed":"3d ago","stale":false},{"id":"legacy-search","name":"legacy-search","desc":"Old search ranking","dev":false,"staging":false,"prod":true,"owner":"Tomas Eriksen","changed":"214d ago","stale":true},{"id":"ai-summaries","name":"ai-summaries","desc":"Summaries on long threads","dev":true,"staging":false,"prod":false,"owner":"Lena Okafor","changed":"1d ago","stale":false},{"id":"promo-banner-q3","name":"promo-banner-q3","desc":"Q3 promo banner","dev":true,"staging":true,"prod":true,"owner":"Sofia Reyes","changed":"131d ago","stale":true}]
+state newKey=""
+state newDesc=""
 App
   Sidebar
     Brand "Switchyard" icon="toggle_on"
@@ -21,8 +23,8 @@ App
     Nav
       Heading "Flags" level=1
       Row gap=8
-        Input "Search flags" bind=q w=220
-        Select bind=envFilter items=["all","on in production","off in production","stale"] w=180
+        Input "Search flags" @q w=220
+        Select @envFilter items=["all","on in production","off in production","stale"] w=180
         Button "New flag" icon="add" onTap={open newFlag}
     Column pad=24 gap=16 scroll
       Row gap=8
@@ -47,8 +49,8 @@ App
                   if flag.stale
                     Badge.warning "Stale"
                 Text.muted "{flag.desc}"
-              Toggle w=70 bind=flag.dev
-              Toggle w=70 bind=flag.staging
+              Toggle w=70 @flag.dev
+              Toggle w=70 @flag.staging
               Toggle w=90 value={flag.prod} onChange={pendingId=flag.id; pendingEnv="production"; pendingTo=result; reason=""; open prodChange}
               Text.muted "{flag.owner}" w=120 hide=phone
               Text.muted "{flag.changed}" w=90 hide=tablet
@@ -63,8 +65,8 @@ Dialog#prodChange "Change production" "Production changes need a reason and an a
       Text.strong "{pendingId}"
       Icon "arrow_forward"
       Badge.danger "{pendingTo ? 'turn ON' : 'turn OFF'} in production"
-    Input "Reason for the change" "Link the ticket or describe the impact" bind=reason multiline
-    Select "Approver" bind=approver items=["Dana Whitfield","Joel Park","Amira Haddad"]
+    Input "Reason for the change" "Link the ticket or describe the impact" @reason multiline
+    Select "Approver" @approver items=["Dana Whitfield","Joel Park","Amira Haddad"]
     Text.muted "{approver} will be asked to approve before the change goes live."
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
@@ -84,8 +86,8 @@ Dialog#approvals "Pending approvals"
           Button.outline "Reject" onTap={requests=without(requests,req); toast "Rejected"}
           Button "Approve" onTap={flags=updateWhere(flags,f=>f.id==req.flag,f=>with(with(f,"prod",req.to),"changed","just now")); requests=without(requests,req); toast "Change is live"}
 Dialog#newFlag "New flag"
-  Input "Key" "checkout-v3" bind=newKey
-  Input "Description" bind=newDesc
+  Input "Key" "checkout-v3" @newKey
+  Input "Description" @newDesc
   Button "Create flag" onTap={flags=append(flags,{"id":newKey,"name":newKey,"desc":newDesc,"dev":false,"staging":false,"prod":false,"owner":"Dana Whitfield","changed":"just now","stale":false}); close}
 
 ### Flag Detail
@@ -98,14 +100,18 @@ state tcountry="DE"
 state matched=""
 state ran=false
 state rules=[{"id":"r1","name":"Internal staff","group":"plan = internal","plan":"internal","country":"any","pct":100,"on":true},{"id":"r2","name":"Beta customers in the EU","group":"plan = pro, country = DE, FR, NL","plan":"pro","country":"EU","pct":50,"on":true},{"id":"r3","name":"Everyone else","group":"all users","plan":"any","country":"any","pct":5,"on":true}]
-define RolloutBar "label" value=0 bind=value
+state dev=false
+state staging=false
+state reason=""
+state approver=""
+define RolloutBar "label" value=0 @value
   state value=0
   Column gap=4
     Row between
       Text.caption "{label}"
       Text.strong "{value}%"
     Progress {value/100}
-    Slider bind=value min=0 max=100
+    Slider @value min=0 max=100
 define KillSwitch "flag" onKill
   Card gap=12 fill=#FFFEF2F2 border=#FFDC2626
     Row gap=12 middle
@@ -145,17 +151,17 @@ App
                   Column grow gap=2
                     Text.strong "{rule.name}"
                     Text.muted "{rule.group}"
-                  Toggle bind=rule.on
+                  Toggle @rule.on
                   IconButton "delete" tooltip="Remove rule" onTap={rules=without(rules,rule)}
-                RolloutBar "Rollout" bind=rule.pct
+                RolloutBar "Rollout" @rule.pct
             Button.outline "Add rule" icon="add" onTap={rules=append(rules,{"id":"r{length(rules)+1}","name":"New rule","group":"all users","plan":"any","country":"any","pct":0,"on":true})}
           Card gap=12
             Heading "Test a user" level=3
             Text.muted "See which rule a sample user lands on."
             Row gap=8
-              Input "User id" bind=tuser grow
-              Select "Plan" bind=tplan items=["free","pro","internal"] w=140
-              Select "Country" bind=tcountry items=["DE","FR","NL","US","JP"] w=120
+              Input "User id" @tuser grow
+              Select "Plan" @tplan items=["free","pro","internal"] w=140
+              Select "Country" @tcountry items=["DE","FR","NL","US","JP"] w=120
             Button "Run test" icon="play_arrow" onTap={matched=coalesce(find(rules,x=>x.on && (x.plan=="any" || x.plan==tplan) && (x.country=="any" || (x.country=="EU" && contains(["DE","FR","NL"],tcountry)) || x.country==tcountry)).id,"none"); ran=true}
             if ran
               Card gap=4 fill=#FFF0FDF4
@@ -170,22 +176,22 @@ App
             Heading "Environments" level=3
             Row between middle
               Text "Development"
-              Toggle bind=dev
+              Toggle @dev
             Row between middle
               Text "Staging"
-              Toggle bind=staging
+              Toggle @staging
             Row between middle
               Text "Production"
               Toggle value={prod} onChange={open prodChange}
           KillSwitch flag={sel} onKill={open killConfirm}
 Dialog#prodChange "Change production" "A reason and an approval are required."
-  Input "Reason for the change" bind=reason multiline
-  Select "Approver" bind=approver items=["Dana Whitfield","Joel Park","Amira Haddad"]
+  Input "Reason for the change" @reason multiline
+  Select "Approver" @approver items=["Dana Whitfield","Joel Park","Amira Haddad"]
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button.destructive "Request approval" onTap={trim(reason)=="" ? toast "A reason is required" : {emit requestApproval sel; toast "Sent for approval"; close}}
 Dialog#killConfirm "Kill {sel}?" "This switches the flag off everywhere. It is logged and can be reversed."
-  Input "Why are you killing it?" bind=killReason multiline
+  Input "Why are you killing it?" @killReason multiline
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button.destructive "Kill now" onTap={trim(killReason)=="" ? toast "Say why first" : {prod=false; dev=false; staging=false; emit kill sel; toast "{sel} is off everywhere"; close}}
@@ -195,6 +201,7 @@ state sel="checkout-v2"
 state at="c1"
 state fenv="all"
 state changes=[{"id":"c1","flag":"checkout-v2","who":"Priya Nair","when":"Today 09:42","env":"production","summary":"Raised the beta rollout from 25% to 50%","reason":"Error rate flat at 25% for 48h (TICKET-2291)","approved":"Dana Whitfield","before":["rule: Beta customers in the EU","rollout: 25%","country: DE, FR, NL","enabled: true"],"after":["rule: Beta customers in the EU","rollout: 50%","country: DE, FR, NL","enabled: true"]},{"id":"c2","flag":"checkout-v2","who":"Marcus Bell","when":"Yesterday 16:05","env":"staging","summary":"Added the Internal staff rule at 100%","reason":"Let support try it","approved":"","before":["rules: 1","default: off"],"after":["rules: 2","default: off","rule: Internal staff, 100%"]},{"id":"c3","flag":"legacy-search","who":"Tomas Eriksen","when":"Mar 3","env":"production","summary":"Turned on in production","reason":"Fallback while the new ranker was rebuilt","approved":"Joel Park","before":["enabled: false"],"after":["enabled: true"]}]
+state reason=""
 define DiffView before=[] after=[]
   Card gap=0 pad=0
     Row top
@@ -216,7 +223,7 @@ App
   Main
     Nav
       Heading "Change history" level=1
-      Select bind=fenv items=["all","production","staging","dev"] w=160
+      Select @fenv items=["all","production","staging","dev"] w=160
     Column pad=24 gap=16
       Row gap=24 top
         Column grow gap=8
@@ -246,7 +253,7 @@ App
               Button.outline "Open flag" onTap={sel=c.flag; go flag-detail}
               Button.destructive "Revert this change" onTap={open revert}
 Dialog#revert "Revert this change?" "A production revert needs a reason and goes through approval."
-  Input "Reason" bind=reason multiline
+  Input "Reason" @reason multiline
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button.destructive "Request revert" onTap={trim(reason)=="" ? toast "A reason is required" : {emit revert at; toast "Revert requested"; close}}

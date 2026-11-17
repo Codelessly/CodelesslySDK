@@ -48,7 +48,7 @@ App
           Text.muted "{count(puzzles,p=>p.done)} of {length(puzzles)} solved"
           each p in puzzles
             ListTile "{p.name}" subtitle="{p.sensor}"
-              Checkbox bind=p.done
+              Checkbox @p.done
               Badge.success "Fired" hidden={!p.done}
       Row gap=16 top
         Card grow gap=12
@@ -66,7 +66,7 @@ App
           Row gap=8
             each pr in presets
               Chip "{pr}" onTap={roomHint=pr; toast "Hint sent to the room screen"}
-          Input "Type a hint" "Shown on the room screen" bind=typed multiline
+          Input "Type a hint" "Shown on the room screen" @typed multiline
           Row between
             Text.muted "{length(typed)} characters"
             Button "Send to room" icon="send" onTap={roomHint=typed; typed=""; toast "Hint sent to the room screen"}
@@ -79,7 +79,7 @@ App
                 Badge.error "LIVE" hidden={!c.live}
                 Badge.neutral "Offline" hidden={c.live}
   Dialog#answer "Answer hint request" "Choose what the room sees"
-    Input "Your hint" bind=typed multiline
+    Input "Your hint" @typed multiline
     Button "Send" onTap={roomHint=typed; hintQueue=removeWhere(hintQueue,x=>x.id==sel); typed=""; close}
   Dialog#resetConfirm "Reset the room?" "The clock goes back to 60:00 and every puzzle unticks."
     Row end gap=8
@@ -128,7 +128,7 @@ App
   Main
     Nav
       Heading "Leaderboard" level=1
-      SegmentedButton bind=filter items=["Today","Week","All time"]
+      SegmentedButton @filter items=["Today","Week","All time"]
     Column pad=24 gap=16 scroll
       Row gap=16 top
         Card grow gap=8

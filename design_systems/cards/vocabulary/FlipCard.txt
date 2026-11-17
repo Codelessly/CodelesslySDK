@@ -1,5 +1,5 @@
 // A card that turns over when tapped: its front, and its back.
-FlipCard bind=flipped h=240 radius=16 onTap
+FlipCard @flipped h=240 radius=16 onTap
   state flipped=false
   Stack w=fill h={h} onTap={flipped=!flipped; onTap}
     Column w=fill h=fill radius={radius} fill=card border=line visible={!flipped}

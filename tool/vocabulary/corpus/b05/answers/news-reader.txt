@@ -6,6 +6,7 @@ project theme="light" saved
 state section="Top stories"
 state breaking=true
 state stories=[{"id":"s1","sec":"World","title":"Coastal cities sign landmark flood-defence pact","dek":"Eleven mayors commit to a shared sea wall fund over twenty years.","by":"Marta Ilves","mins":6,"img":"https://images.example.com/seawall.jpg"},{"id":"s2","sec":"Business","title":"Rail freight rebounds as ports clear backlog","dek":"Volumes rose 8% in October.","by":"Dev Anand","mins":4,"img":"https://images.example.com/rail.jpg"},{"id":"s3","sec":"Science","title":"A cheaper way to read ancient ink without opening the scroll","dek":"","by":"Hana Okoye","mins":5,"img":"https://images.example.com/scroll.jpg"},{"id":"s4","sec":"Sport","title":"Late goal sends the Harriers into the final","dek":"","by":"Tom Brandt","mins":3,"img":"https://images.example.com/harriers.jpg"},{"id":"s5","sec":"Culture","title":"The quiet revival of the neighbourhood cinema","dek":"","by":"Ines Duarte","mins":7,"img":"https://images.example.com/cinema.jpg"},{"id":"s6","sec":"Politics","title":"Budget vote delayed again as talks stall","dek":"","by":"Carl Neumann","mins":4,"img":"https://images.example.com/vote.jpg"}]
+state q=""
 App
   Sidebar
     Brand "Broadsheet" icon="newspaper"
@@ -57,7 +58,7 @@ App
               Text.caption "{s.mins} min"
               IconButton "{contains(savedIds,s.id) ? 'bookmark' : 'bookmark_border'}" tooltip="Save for later" onTap={savedIds=contains(savedIds,s.id) ? without(savedIds,s.id) : append(savedIds,s.id)}
   Dialog#search "Search Broadsheet"
-    Input "Search stories" bind=q
+    Input "Search stories" @q
     Button "Search" onTap={emit search q; close}
 
 ### Article
@@ -77,7 +78,7 @@ App
   Main
     Nav sticky
       IconButton "arrow_back" tooltip="Back" onTap={go front_page}
-      Progress bind=readPct grow
+      Progress value={readPct} grow
       Row gap=4
         IconButton "text_decrease" tooltip="Smaller text" onTap={textSize=max(14,textSize-2)}
         IconButton "text_increase" tooltip="Larger text" onTap={textSize=min(28,textSize+2)}
@@ -98,7 +99,7 @@ App
           Row gap=8 middle
             Badge.error "LIVE"
             Text.strong "Live updates"
-          Toggle "Auto" bind=live
+          Toggle "Auto" @live
         if length(queued)>0
           Button.tonal "{length(queued)} new updates" icon="arrow_upward" animate=pop onTap={updates=concat(reverse(queued),updates); queued=[]; scroll top}
         each u in updates
@@ -156,7 +157,7 @@ App
       Heading "Saved for later" level=1
       Button.ghost "Clear all" onTap={savedIds=[]; toast "Cleared"}
     Column pad=24 gap=16 scroll
-      SegmentedButton bind=filter items=["All","Offline","Online only"]
+      SegmentedButton @filter items=["All","Offline","Online only"]
       if length(savedIds)==0
         EmptyState "Nothing saved yet" "Tap the bookmark on any story to read it later." icon="bookmark_border"
           Button "Browse the front page" onTap={go front_page}

@@ -42,9 +42,9 @@ App
             Button "Bid again" onTap={bid=bid+100; leader="you"; bids=concat([{"id":length(bids)+10,"who":"you","amt":bid+100,"at":"now"}],bids); emit placeBid bid+100}
       Row gap=24 top
         Column grow gap=12
-          Pages bind=photoAt h=320 items=photos
+          Pages @photoAt h=320 items=photos
             Image "{item.url}" onTap={open zoom}
-          Dots bind=photoAt count={length(photos)}
+          Dots @photoAt count={length(photos)}
           Row scroll gap=8
             each p in photos
               Image "{p.url}" w=72 h=72 radius=8 onTap={photoAt=index}
@@ -71,7 +71,7 @@ App
           Card gap=8
             Text.strong "Maximum bid"
             Text.muted "We bid for you in steps up to this amount."
-            Input "Your maximum" "5000" bind=maxInput type=number
+            Input "Your maximum" "5000" @maxInput type=number
             if myMax>0
               Badge.success "Max bid set at {money(myMax,"$",0)}"
             Button "Review max bid" disabled={maxInput==""||maxInput<=bid} onTap={open confirmMax}
@@ -93,7 +93,7 @@ App
   Menu#shareLot end
     MenuItem "Copy link" icon="link" onTap={copy "https://gavel.example/lot/1884"; toast "Link copied"}
     MenuItem "Send to a friend" icon="send" onTap={emit shareLot}
-  Lightbox#zoom photos={photos} bind=photoAt
+  Lightbox#zoom photos={photos} @photoAt
 
 ### All lots
 state filter="all"
@@ -113,7 +113,7 @@ App
     Nav
       Heading "Lots ending soon" level=1
       Row gap=8
-        Input "Search lots" bind=q w=220
+        Input "Search lots" @q w=220
         Button.outline "Filters" icon="tune" onTap={open filters}
     Column pad=24 gap=12 scroll
       each l in sortBy(filter(lots,x=>(filter=="all"||x.cat==filter)&&contains(lower(x.name),lower(q))),x=>x.left)

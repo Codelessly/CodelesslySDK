@@ -50,7 +50,7 @@ App
           Text.mono "{duration(secs)}" color=#FFFFFFFF
 
 Dialog#cmdprompt "Command prompt" "Type a command, as after the prefix and a colon"
-  Input "command" "resize-right, resize-left, swap-pane, zoom, split-cols, split-rows" bind=cmd
+  Input "command" "resize-right, resize-left, swap-pane, zoom, split-cols, split-rows" @cmd
   Row gap=8 end
     Button.outline "Cancel" onTap={cmd=""; close}
     Button "Run" onTap={cmd=="resize-right" ? {ratio=min(8,ratio+1); cmd=""; close} : cmd=="resize-left" ? {ratio=max(1,ratio-1); cmd=""; close} : cmd=="swap-pane" ? {panes=concat([panes[1],panes[0]],slice(panes,2,3)); cmd=""; close} : cmd=="zoom" ? {zoomed=(zoomed=="" ? focus : ""); cmd=""; close} : cmd=="split-cols" ? {split="cols"; cmd=""; close} : cmd=="split-rows" ? {split="rows"; cmd=""; close} : toast "unknown command: {cmd}"}
@@ -116,6 +116,7 @@ define CopyLine "text" cursor=false selected=false onTap
 state sessions=[{"name":"work","windows":3,"attached":true,"created":"Mon 09:12"},{"name":"notes","windows":1,"attached":false,"created":"Tue 18:40"},{"name":"deploy","windows":2,"attached":false,"created":"Wed 07:05"}]
 state sel="work"
 state q=""
+state newname=""
 App
   Sidebar
     Brand "Splitscreen" icon="view_quilt"
@@ -127,7 +128,7 @@ App
     Nav
       Heading "Sessions" level=1
       Row gap=8
-        Input "Filter" bind=q w=200
+        Input "Filter" @q w=200
         Button "New session" icon="add" onTap={sessions=append(sessions,{"name":"session-{length(sessions)}","windows":1,"attached":false,"created":"now"}); toast "Created"}
     Column pad=24 gap=12
       each s in filter(sessions,x=>contains(x.name,lower(q)))
@@ -150,5 +151,5 @@ Menu#sessmenu end
   MenuItem "Kill session" icon="delete" onTap={sessions=removeWhere(sessions,x=>x.name==sel); toast "Killed {sel}"}
 
 Dialog#renamer "Rename session"
-  Input "New name" bind=newname
+  Input "New name" @newname
   Button "Rename" onTap={sessions=updateWhere(sessions,x=>x.name==sel,x=>with(x,"name",newname)); newname=""; close}

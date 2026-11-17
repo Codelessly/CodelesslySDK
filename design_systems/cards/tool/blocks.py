@@ -648,7 +648,7 @@ def segments():
         P('value', var(STRING), '', 'The name of your text variable: it holds the chosen option (declare it with the starting option).'),
         P('options', STRINGS, ['7 days', '30 days', '90 days'], 'Two to four short options (a word or two each).', True),
     ]
-    return component('Segments', "A small switch between two to four short options in one track, as wide as its place (a period, a tone, a status filter; not a page's tabs: those are Tabs): write Segments bind=range options=[\"7 days\",\"30 days\"] and it keeps the chosen option's text in your variable; onChanged fires with it. The segments are equally wide while they fit; where they do not, the track scrolls sideways on one line.",
+    return component('Segments', "A small switch between two to four short options in one track, as wide as its place (a period, a tone, a status filter; not a page's tabs: those are Tabs): write Segments @range options=[\"7 days\",\"30 days\"] and it keeps the chosen option's text in your variable; onChanged fires with it. The segments are equally wide while they fit; where they do not, the track scrolls sideways on one line.",
                      props, nodes, 'place', events=[('onChanged', 'An option was chosen; the value is its text.')],
                      previews=[{'name': 'Period', 'size': [340, 40], 'props': {'value': '30 days'}}])
 
@@ -714,7 +714,7 @@ def tabs():
         P('tabs', STRINGS, ['Overview', 'Activity', 'Settings'], "The tabs' labels, any number.", True),
         P('value', var(STRING), '', "The name of your text variable: it holds the open tab's label (declare it with the tab to start on: state tab=\"Overview\"; left empty, the first tab shows as open)."),
     ]
-    return component('Tabs', "The tabs of a page or a card: labels on a hairline, the open one underlined in the accent, switching what is shown under them. Write Tabs bind=tab tabs=[\"Overview\",\"Activity\",\"Settings\"] with state tab=\"Overview\", then one if tab==\"Overview\" block per tab under it. Any number of tabs: where they do not fit, the row scrolls sideways on one line and brings the open tab into view. For a small switch of two to four options use Segments, for filter pills ChipTabs. Fires onChanged with the label.",
+    return component('Tabs', "The tabs of a page or a card: labels on a hairline, the open one underlined in the accent, switching what is shown under them. Write Tabs @tab tabs=[\"Overview\",\"Activity\",\"Settings\"] with state tab=\"Overview\", then one if tab==\"Overview\" block per tab under it. Any number of tabs: where they do not fit, the row scrolls sideways on one line and brings the open tab into view. For a small switch of two to four options use Segments, for filter pills ChipTabs. Fires onChanged with the label.",
                      props, nodes, 'bar', events=[('onChanged', 'A tab was opened; the value is its label.')],
                      previews=[{'name': 'Three', 'size': [360, 44], 'props': {'value': 'Activity'}}])
 
@@ -836,7 +836,7 @@ def input_field():
         P('success', STRING, '', 'A green confirmation under the field, e.g. "SAVE10 applied" (empty: none).'),
         P('keyboard', enum('text', 'emailAddress', 'number', 'phone', 'url'), 'text', 'The keyboard a phone shows.'),
     ]
-    return component('InputField', "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" bind=email; lines=6 makes a multi-line box, icon=\"search_rounded\" a search field, error={cond?\"message\":\"\"} shows a red message under it, success a green one.",
+    return component('InputField', "A labeled text field that keeps what is typed in your variable: InputField \"Email\" \"you@example.com\" @email; lines=6 makes a multi-line box, icon=\"search_rounded\" a search field, error={cond?\"message\":\"\"} shows a red message under it, success a green one.",
                      props, nodes, 'wrap', events=[('onChanged', 'The text changed; the value is the new text.')],
                      previews=[{'name': 'Field', 'size': [340, 72], 'props': {'label': 'Email', 'placeholder': 'you@example.com'}}])
 
@@ -882,7 +882,7 @@ def option_list():
         P('icons', STRINGS, [], 'A Material icon per option (optional).'),
         P('prices', STRINGS, [], 'A figure at the right of each option, e.g. a price (optional).'),
     ]
-    return component('OptionList', "A question and its answers as a list of rows with a radio (also a delivery method, a plan): OptionList \"What will you use it for?\" bind=answer options=[\"A\",\"B\"] keeps the chosen option's text in your variable; details, icons and prices are optional lists alongside; onChanged fires with the choice (-> step=2).",
+    return component('OptionList', "A question and its answers as a list of rows with a radio (also a delivery method, a plan): OptionList \"What will you use it for?\" @answer options=[\"A\",\"B\"] keeps the chosen option's text in your variable; details, icons and prices are optional lists alongside; onChanged fires with the choice (-> step=2).",
                      props, nodes, 'wrap', events=[('onChanged', 'An option was chosen; the value is its text.')],
                      previews=[{'name': 'Delivery', 'size': [340, 130], 'props': {'value': 'Standard', 'details': ['3 to 5 days', 'Next day'],
                                                                                 'prices': ['$4.00', '$12.00']}}])
@@ -928,7 +928,7 @@ def choice_chips():
         P('disabled', STRINGS, [], 'The options that cannot be chosen (full time slots, sizes out of stock): greyed and struck through.'),
         P('columns', INT, 4, 'Chips per row.'),
     ]
-    return component('ChoiceChips', "A single choice as a grid of equal chips (time slots, sizes, a finish; not tabs or a filter: those are Tabs, Segments and ChipTabs): ChoiceChips bind=time options=[\"18:00\",\"18:30\"] disabled=[\"18:30\"] keeps the chosen chip's text in your variable; disabled lists the ones that are unavailable (full, sold out); columns sets chips per row. Labels too long for that many columns are not squeezed: the chips are then as wide as their labels and wrap.",
+    return component('ChoiceChips', "A single choice as a grid of equal chips (time slots, sizes, a finish; not tabs or a filter: those are Tabs, Segments and ChipTabs): ChoiceChips @time options=[\"18:00\",\"18:30\"] disabled=[\"18:30\"] keeps the chosen chip's text in your variable; disabled lists the ones that are unavailable (full, sold out); columns sets chips per row. Labels too long for that many columns are not squeezed: the chips are then as wide as their labels and wrap.",
                      props, nodes, 'chips', events=[('onChanged', 'A chip was chosen; the value is its text.')],
                      previews=[{'name': 'Slots', 'size': [340, 40], 'props': {'value': '19:00', 'disabled': ['18:30']}}])
 
@@ -956,7 +956,7 @@ def day_picker():
         P('value', var(STRING), '', 'The name of your text variable: it holds the chosen day as written in days.'),
         P('days', STRINGS, ['Sat 14', 'Sun 15', 'Mon 16', 'Tue 17', 'Wed 18', 'Thu 19', 'Fri 20'], 'The days as "Sat 14": a short weekday, a space, the day of the month.', True),
     ]
-    return component('DayPicker', "A strip of days to pick one from: DayPicker bind=day days=[\"Sat 14\",\"Sun 15\",\"Mon 16\"] (each a short weekday, a space, the date) keeps the chosen day's text in your variable; onChanged fires with it.",
+    return component('DayPicker', "A strip of days to pick one from: DayPicker @day days=[\"Sat 14\",\"Sun 15\",\"Mon 16\"] (each a short weekday, a space, the date) keeps the chosen day's text in your variable; onChanged fires with it.",
                      props, nodes, 'days', events=[('onChanged', 'A day was chosen; the value is its text.')],
                      previews=[{'name': 'Week', 'size': [340, 62], 'props': {'value': 'Sun 15'}}])
 
@@ -996,7 +996,7 @@ def counter():
         P('min', NUM, 1, 'The least.'), P('max', NUM, 8, 'The most.'), P('step', NUM, 1, 'How much one tap changes it.'),
         P('icon', STRING, 'group_rounded', 'A Material icon before the label (empty: none).'),
     ]
-    return component('Counter', "A number raised and lowered with minus and plus (a party size, a count): Counter \"Guests\" bind=party min=1 max=8 keeps it in your number variable; onChanged fires with the new number.",
+    return component('Counter', "A number raised and lowered with minus and plus (a party size, a count): Counter \"Guests\" @party min=1 max=8 keeps it in your number variable; onChanged fires with the new number.",
                      props, nodes, 'row', events=[('onChanged', 'The number changed; the value is the new number.')],
                      previews=[{'name': 'Guests', 'size': [340, 56], 'props': {'value': 2, 'detail': '1 to 8'}}])
 
@@ -1076,7 +1076,7 @@ def page_dots():
     nodes = dots_nodes('dots', 'props.count', 'props.value', lambda i: [setv('props.value', i), fire('onChanged', '${index}')])
     props = [P('value', var(NUM), '', 'The name of your number variable: the page shown, from 0 (the same one Pages or Carousel keeps).'),
              P('count', INT, 3, 'How many pages there are.', True)]
-    return component('PageDots', "Pagination dots for Pages, a Carousel or any paged content: PageDots bind=page count={length(items)} draws one dot per page, the current one long and in the accent, and a tap on a dot sets your variable to that page (from 0).",
+    return component('PageDots', "Pagination dots for Pages, a Carousel or any paged content: PageDots @page count={length(items)} draws one dot per page, the current one long and in the accent, and a tap on a dot sets your variable to that page (from 0).",
                      props, nodes, 'dots', events=[('onChanged', 'A dot was tapped; the value is its page.')],
                      previews=[{'name': 'Dots', 'size': [200, 22], 'props': {'value': 1, 'count': 5}}])
 
@@ -1196,7 +1196,7 @@ def carousel():
         P('height', NUM, 196, "The pictures' height."),
         P('fade', BOOL, True, 'The peeking next item fades at the edge (false: a hard edge).'),
     ]
-    return component('Carousel', "A real carousel of products: Carousel bind=i items={shoes} slides one ProductTile per record (name, detail, price, rating, kind, tone) sideways by swipe, showing the edge of the next (peek), and keeps the position (from 0) in your number variable; dots, arrows, counter (\"2 of 6\") and thumbs are switches; a tap on an item fires onPressed with its position (-> open=true), and Pager or PageDots on the same variable drive it too.",
+    return component('Carousel', "A real carousel of products: Carousel @i items={shoes} slides one ProductTile per record (name, detail, price, rating, kind, tone) sideways by swipe, showing the edge of the next (peek), and keeps the position (from 0) in your number variable; dots, arrows, counter (\"2 of 6\") and thumbs are switches; a tap on an item fires onPressed with its position (-> open=true), and Pager or PageDots on the same variable drive it too.",
                      props, nodes, 'wrap', events=[('onPressed', 'An item was tapped; the value is its position.'),
                                                    ('onChanged', 'The position changed; the value is the new position.')],
                      previews=[{'name': 'Strip', 'size': [360, 340], 'props': {'value': 0}}])
@@ -1217,7 +1217,7 @@ def pager():
         P('count', INT, 1, 'How many pages there are (ceil(length(rows)/5)).', True),
         P('label', STRING, 'Page', 'The word before "1 of 3" (empty: the count alone, as under a carousel).'),
     ]
-    return component('Pager', "Paging for a list or for pages of content: \"Page 1 of 3\" with previous and next buttons; Pager bind=page count={ceil(length(rows)/5)} keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5), or give it the variable of Pages or a Carousel to turn their pages.",
+    return component('Pager', "Paging for a list or for pages of content: \"Page 1 of 3\" with previous and next buttons; Pager @page count={ceil(length(rows)/5)} keeps the page (from 0) in your number variable, so show slice(rows,page*5,page*5+5), or give it the variable of Pages or a Carousel to turn their pages.",
                      props, nodes, 'bar', events=[('onChanged', 'The page changed; the value is the new page.')],
                      previews=[{'name': 'Pages', 'size': [340, 36], 'props': {'count': 3}}])
 
@@ -1278,7 +1278,7 @@ def diff_hunk():
         P('start', INT, 1, 'The line number of the first line.', True),
         P('lines', STRINGS, ['-port: 8080', '+port: 9090', ' host: localhost'], 'The lines: each starts with - (removed, red), + (added, green) or a space (unchanged).', True),
     ]
-    return component('DiffHunk', "One hunk of a diff with its own Keep and Discard buttons: DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" bind=h1 start=4 lines=[\"-port: 8080\",\"+port: 9090\",\" host: localhost\"] (a line starts with -, + or a space; numbers count from start) sets your text variable to \"keep\" or \"discard\" (empty until decided).",
+    return component('DiffHunk', "One hunk of a diff with its own Keep and Discard buttons: DiffHunk \"Server port\" \"@@ -4,2 +4,2 @@\" @h1 start=4 lines=[\"-port: 8080\",\"+port: 9090\",\" host: localhost\"] (a line starts with -, + or a space; numbers count from start) sets your text variable to \"keep\" or \"discard\" (empty until decided).",
                      props, nodes, 'wrap', events=[('onChanged', 'Keep or Discard was tapped; the value is "keep" or "discard".')],
                      previews=[{'name': 'Hunk', 'size': [340, 170], 'props': {'title': 'Server port', 'detail': '@@ -4,2 +4,2 @@', 'start': 4}}])
 
@@ -1564,7 +1564,7 @@ def table_header():
         P('selectable', BOOL, False, 'True shows a tick-all box before the titles.'),
         P('checked', BOOL, False, 'Whether the tick-all box is ticked.'),
     ]
-    return component('TableHeader', "The header of a sortable table: columns are the titles, keys the fields they sort by; tapping a title sets your sort variable to its key and flips desc on a second tap, so write state desc=false, TableHeader bind=sort desc=desc columns=[...] keys=[...] and show sortBy or sortByDesc(rows,sort). selectable=true adds a tick-all box that fires onToggleAll.",
+    return component('TableHeader', "The header of a sortable table: columns are the titles, keys the fields they sort by; tapping a title sets your sort variable to its key and flips desc on a second tap, so write state desc=false, TableHeader @sort desc=@desc columns=[...] keys=[...] and show sortBy or sortByDesc(rows,sort). selectable=true adds a tick-all box that fires onToggleAll.",
                      props, nodes, 'head', events=[('onToggleAll', 'The tick-all box was tapped; the value is the new state.'),
                                                    ('onSort', 'A title was tapped; the value is its key.')],
                      previews=[{'name': 'Header', 'size': [360, 36], 'props': {'value': 'revenue', 'desc': True}}])
@@ -1701,7 +1701,7 @@ def photo_gallery():
         P('fade', BOOL, True, 'The strip fades at the edge where there are more photos (false: a hard edge).'),
         P('viewer', enum('inline', 'overlay'), 'inline', 'inline shows the large view in place of the grid or strip (a card in a chat); overlay leaves the grid as it is and only fires onChanged with the photo tapped, for a viewer shown over the window (on a page the notation opens its Lightbox there by itself).'),
     ]
-    return component('PhotoGallery', "A photo gallery with a built-in large view: PhotoGallery bind=open photos=[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: %s; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next (on a page it opens over the window, where it also zooms: a pinch, the wheel, a double tap); your variable holds the photo in view (0: none open)." % scenes,
+    return component('PhotoGallery', "A photo gallery with a built-in large view: PhotoGallery @open photos=[{\"kind\":\"harbor\",\"caption\":\"Harbour at sunrise\"},...] draws each photo as a scene (kind: %s; optional tone: dawn, day, dusk, night); layout is grid, strip (one row that scrolls sideways) or pages (full-width photos swiped one at a time, with dots); tapping a photo opens it large with its caption, a \"3 of 9\" counter, dots, arrows and a close button, and a swipe there goes to the next (on a page it opens over the window, where it also zooms: a pinch, the wheel, a double tap); your variable holds the photo in view (0: none open)." % scenes,
                      props, nodes, 'gallery', events=[('onChanged', 'A photo was opened, changed or closed; the value is its number (0: closed).')],
                      previews=[{'name': 'Grid', 'size': [360, 130], 'props': {}}, {'name': 'Strip', 'size': [360, 150], 'props': {'layout': 'strip'}},
                                {'name': 'Pages', 'size': [360, 290], 'props': {'layout': 'pages'}}])
@@ -1806,7 +1806,7 @@ def checklist():
         P('title', STRING, 'To do', 'The heading, in small caps.'),
         P('items', STRINGS, ['First', 'Second'], 'The things to tick off.', True),
     ]
-    return component('Checklist', "A titled list of things to tick off: Checklist \"Book ahead\" bind=booked items=[\"Dinner in Gion\",\"Tea ceremony\"] keeps the ticked items in your list variable, so what is left is length(items)-length(booked); it shows its own count.",
+    return component('Checklist', "A titled list of things to tick off: Checklist \"Book ahead\" @booked items=[\"Dinner in Gion\",\"Tea ceremony\"] keeps the ticked items in your list variable, so what is left is length(items)-length(booked); it shows its own count.",
                      props, nodes, 'box', events=[('onChanged', 'An item was ticked or cleared; the value is the list of ticked items.')],
                      previews=[{'name': 'List', 'size': [360, 110], 'props': {'title': 'Book ahead'}}])
 
@@ -1867,7 +1867,7 @@ def map_panel():
         P('value', var(NUM), '', 'The name of your number variable: the number of the pin chosen (0: none).'),
         P('count', INT, 5, 'How many numbered pins (up to %d).' % len(PIN_AT), True),
     ]
-    return component('MapPanel', "A drawn map (an illustration: blocks, streets, a park, water, a dot for you) with numbered pins: MapPanel bind=pick count=5 shows pins 1 to 5 and keeps the tapped pin's number in your variable (0: none), the same variable the PlaceRow lines use.",
+    return component('MapPanel', "A drawn map (an illustration: blocks, streets, a park, water, a dot for you) with numbered pins: MapPanel @pick count=5 shows pins 1 to 5 and keeps the tapped pin's number in your variable (0: none), the same variable the PlaceRow lines use.",
                      props, nodes, 'map', events=[('onChanged', 'A pin was tapped; the value is its number (0: cleared).')],
                      previews=[{'name': 'Map', 'size': [360, 178], 'props': {'value': 2}}])
 

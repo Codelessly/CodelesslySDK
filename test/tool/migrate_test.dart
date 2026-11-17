@@ -107,8 +107,9 @@ void main() {
     final files = corpus.listSync().whereType<File>().where((f) => f.path.endsWith('.txt')).toList()..sort((a, b) => a.path.compareTo(b.path));
     var read = 0;
     for (final f in files.take(6)) {
+      // The corpus is itself rewritten to this grammar: an answer already in
+      // it is read as it is, and rewriting it again changes nothing.
       final text = f.readAsStringSync();
-      if (!text.contains('bind=')) continue;
       final got = _m().notation(text);
       expect(got.contains(RegExp(r'(?<![A-Za-z0-9_.@-])bind(?:End)?=')), isFalse, reason: f.path);
       // Each screen of the answer read alone, as the tools read it.

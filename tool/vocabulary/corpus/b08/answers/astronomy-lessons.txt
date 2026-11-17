@@ -3,6 +3,7 @@ state days=0
 state scale="picture"
 state picked=""
 state planets=[{"id":"mercury","name":"Mercury","au":0.39,"diameter":4879,"moons":0,"day":"59 Earth days","year":"88 days","fact":"The smallest planet, and it has almost no atmosphere."},{"id":"venus","name":"Venus","au":0.72,"diameter":12104,"moons":0,"day":"243 Earth days","year":"225 days","fact":"Hotter than Mercury, with clouds of sulfuric acid."},{"id":"earth","name":"Earth","au":1.0,"diameter":12742,"moons":1,"day":"24 hours","year":"365 days","fact":"The only world we know that has liquid oceans on its surface."},{"id":"mars","name":"Mars","au":1.52,"diameter":6779,"moons":2,"day":"24.6 hours","year":"687 days","fact":"Home to Olympus Mons, the tallest volcano in the solar system."},{"id":"jupiter","name":"Jupiter","au":5.2,"diameter":139820,"moons":95,"day":"9.9 hours","year":"11.9 years","fact":"The Great Red Spot is a storm wider than Earth."},{"id":"saturn","name":"Saturn","au":9.58,"diameter":116460,"moons":146,"day":"10.7 hours","year":"29.4 years","fact":"Its rings are mostly water ice, and the planet is less dense than water."},{"id":"uranus","name":"Uranus","au":19.2,"diameter":50724,"moons":28,"day":"17.2 hours","year":"84 years","fact":"It rolls around the Sun tilted on its side."},{"id":"neptune","name":"Neptune","au":30.05,"diameter":49244,"moons":16,"day":"16.1 hours","year":"165 years","fact":"Winds here reach over 2,000 km/h, the fastest measured."}]
+state trueScale=false
 every 100 when days>0 onTick={days=days+1}
 App
   Sidebar
@@ -19,13 +20,13 @@ App
       Heading "The Solar System" level=1
       Row gap=12
         Text.muted "Day {days}"
-        Toggle "True distances" bind=trueScale onChange={scale=result ? "true" : "picture"}
+        Toggle "True distances" @trueScale onChange={scale=result ? "true" : "picture"}
     Column pad=24 gap=16 scroll
       Card gap=12
         SolarSystem planets={planets} day={days} scale={scale} selected={picked} h=360 onSelect={picked=result}
         Row gap=12
           Icon "schedule"
-          Slider bind=days min=0 max=3650 grow
+          Slider @days min=0 max=3650 grow
           Text.strong "{round(days/365,1)} yr"
         Row gap=8
           Button.outline "Play" icon="play_arrow" onTap={days=days+1}
@@ -89,8 +90,8 @@ App
     Column pad=24 gap=16 scroll
       if tab=="compare"
         Row gap=16
-          Select "First planet" bind=a items=["mercury","venus","earth","mars","jupiter","saturn","uranus","neptune"] grow
-          Select "Second planet" bind=b items=["mercury","venus","earth","mars","jupiter","saturn","uranus","neptune"] grow
+          Select "First planet" @a items=["mercury","venus","earth","mars","jupiter","saturn","uranus","neptune"] grow
+          Select "Second planet" @b items=["mercury","venus","earth","mars","jupiter","saturn","uranus","neptune"] grow
         Card gap=16
           Text.strong "Drawn to the same scale"
           Row center bottom gap=48
@@ -136,7 +137,7 @@ App
     Nav
       Heading "Tonight's sky" level=1
       Row gap=8
-        SegmentedButton bind=when items=["tonight","tomorrow","weekend"]
+        SegmentedButton @when items=["tonight","tomorrow","weekend"]
         IconButton "my_location" tooltip="Use my location" onTap={toast "Location set to Portland, OR"}
     Column pad=24 gap=16 scroll
       Row gap=8
@@ -169,7 +170,7 @@ App
   Main
     Nav
       Heading "Glossary" level=1
-      Input "Search terms" bind=q w=220
+      Input "Search terms" @q w=220
     Column pad=24 gap=16 scroll
       Grid cols=3 gap=16
         each w in words

@@ -17,7 +17,7 @@ App
     NavItem "Rehearsal report" icon="assignment" selected={screen=="report"} onTap={go rehearsal-report}
     NavItem "Jump to page" icon="bookmark" onTap={open jump}
     Spacer grow
-    Toggle "Night show" bind=night
+    Toggle "Night show" @night
     Text.muted "A Midsummer Night's Dream"
     Text.muted "Stage manager: Priya Nair"
   Main
@@ -26,7 +26,7 @@ App
         Heading "Act {lines[cur].act}, Scene {lines[cur].scene}" level=1
         Text.muted "Line {cur+1} of {length(lines)}  |  running {duration(elapsed)}"
       Row gap=8
-        Select bind=dept items=["All","LX","SQ","FLY"]
+        Select @dept items=["All","LX","SQ","FLY"]
         Button.outline "Jump" icon="bookmark" onTap={open jump}
         if holding
           Button.destructive "Release hold" onTap={holding=false; holdLog=append(holdLog,{"reason":holdReason,"at":elapsed}); holdReason=""; toast "Hold released"}
@@ -74,13 +74,13 @@ App
         Text.strong "Next: {lines[min(cur+1,length(lines)-1)].cue != "" ? lines[min(cur+1,length(lines)-1)].cue : "no cue"}"
         Button "GO" icon="play_arrow" size=large disabled={holding} onTap={cur=min(length(lines)-1,cur+1); emit go cur}
   Dialog#hold "Call a hold" "Say why so the log can be read back."
-    Input "Reason" "Actor missing from the wings" bind=holdReason multiline
+    Input "Reason" "Actor missing from the wings" @holdReason multiline
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Hold" onTap={holdReason=="" ? toast "Type a reason" : {holding=true; emit hold holdReason; close}}
   Sheet#jump "Jump to page"
     state jumpAct=1
-    SegmentedButton bind=jumpAct items=["Act 1","Act 2","Act 3"]
+    SegmentedButton @jumpAct items=["Act 1","Act 2","Act 3"]
     Text.caption "Scenes"
     Grid cols=3 gap=8
       each l in filter(lines,l=>l.act==1 && l.who!="")
@@ -124,18 +124,18 @@ App
         ChoiceChip "Open" selected={tab=="open"} onTap={tab="open"}
         ChoiceChip "Done" selected={tab=="done"} onTap={tab="done"}
         Spacer grow
-        Select bind=who items=["Everyone","Lighting","Sound","Flys","Wardrobe","Marcus Bell (Demetrius)"]
+        Select @who items=["Everyone","Lighting","Sound","Flys","Wardrobe","Marcus Bell (Demetrius)"]
       Card gap=8
         Heading "Notes by person" level=3
         each n in filter(notes,n=>(tab=="all" || (tab=="open" && !n.done) || (tab=="done" && n.done)) && (who=="Everyone" || n.person==who))
           ListTile "{n.person}" subtitle="{n.text}"
-            Checkbox bind=n.done
+            Checkbox @n.done
             Badge.neutral "{n.dept}"
         if count(notes,n=>(who=="Everyone" || n.person==who))==0
           Text.muted "No notes for {who}."
       Card gap=8
         Heading "Add a note" level=3
         Row gap=8
-          Select bind=noteTarget items=["Stage management","Lighting","Sound","Flys","Wardrobe"] w=220
-          Input "Note" "What needs fixing?" bind=noteText grow
+          Select @noteTarget items=["Stage management","Lighting","Sound","Flys","Wardrobe"] w=220
+          Input "Note" "What needs fixing?" @noteText grow
           Button "Add" onTap={noteText=="" ? toast "Write the note first" : {notes=append(notes,{"id":length(notes)+1,"person":noteTarget,"dept":"SM","text":noteText,"done":false}); noteText=""}}

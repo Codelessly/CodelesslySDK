@@ -3,6 +3,7 @@ state q=""
 state mode="Flight number"
 state recent=[{"id":"UA 889","route":"SFO to NRT","status":"En route"},{"id":"DL 412","route":"JFK to LAX","status":"Delayed"},{"id":"BA 286","route":"SFO to LHR","status":"Landed"}]
 state results=[{"id":"UA 889","from":"SFO","to":"NRT","dep":"11:05","arr":"15:20","status":"En route"},{"id":"NH 7","from":"SFO","to":"HND","dep":"12:40","arr":"16:55","status":"On time"},{"id":"JL 1","from":"SFO","to":"HND","dep":"13:15","arr":"17:30","status":"Delayed"}]
+state airOnly=false
 App
   Sidebar
     Brand "Contrail" icon="flight"
@@ -18,9 +19,9 @@ App
       Row gap=8
         IconButton "tune" tooltip="Filters" onTap={open filters}
     Column pad=24 gap=16 maxw=720
-      SegmentedButton bind=mode items=["Flight number","Route"]
+      SegmentedButton @mode items=["Flight number","Route"]
       Row gap=8
-        Input "Search" "UA 889 or SFO to NRT" bind=q grow
+        Input "Search" "UA 889 or SFO to NRT" @q grow
         Button "Search" onTap={emit search q; toast "Searching {q}"}
       Text.sectionTitle "Matching flights"
       each r in results
@@ -40,8 +41,8 @@ App
           Badge.neutral "{f.status}"
 Sheet#filters "Filters"
   state airline="Any"
-  Select "Airline" items=["Any","United","Delta","British Airways","ANA"] bind=airline
-  Toggle "Only flights in the air" bind=airOnly
+  Select "Airline" items=["Any","United","Delta","British Airways","ANA"] @airline
+  Toggle "Only flights in the air" @airOnly
   Button "Apply" onTap={emit filter airline; close}
 
 ### Flight
@@ -53,6 +54,7 @@ state terminal="3"
 state belt="7"
 state gateChanged=false
 state followed=false
+state shareLink=""
 every 5s onTick={progress=min(1,progress+0.01)}
 App
   Sidebar
@@ -106,7 +108,7 @@ App
         Text.muted "Operated by United Airlines. Arriving at Narita Terminal 1."
 
 Sheet#shareFlight "Share flight"
-  Input "Link" bind=shareLink
+  Input "Link" @shareLink
   Button "Copy link" onTap={copy "contrail.app/f/UA889"; toast "Link copied"; close}
 
 ### Airport board
@@ -123,9 +125,9 @@ App
   Main
     Nav
       Heading "Departures" level=1
-      Select bind=airport items=["SFO","JFK","LAX","LHR"] w=120
+      Select @airport items=["SFO","JFK","LAX","LHR"] w=120
     Column pad=24 gap=16
-      ChipTabs bind=filter items=["All","On time","Delayed","Cancelled"]
+      ChipTabs @filter items=["All","On time","Delayed","Cancelled"]
       Table
         TableHeader
           Text.caption "Time" w=70
@@ -149,6 +151,8 @@ state landingAlerts=false
 state boardingAlerts=true
 state quiet=false
 state channel="Push"
+state quietFrom=""
+state quietTo=""
 App
   Sidebar
     Brand "Contrail" icon="flight"
@@ -164,21 +168,21 @@ App
       Card gap=4
         Text.sectionTitle "For UA 889"
         SettingRow "Gate and terminal changes" "Tell me the moment a gate, terminal or belt changes"
-          Switch bind=gateAlerts
+          Switch @gateAlerts
         SettingRow "Delays" "When the departure or arrival moves by 15 minutes or more"
-          Switch bind=delayAlerts
+          Switch @delayAlerts
         SettingRow "Landing" "When the plane touches down"
-          Switch bind=landingAlerts
+          Switch @landingAlerts
         SettingRow "Boarding" "When boarding opens"
-          Switch bind=boardingAlerts
+          Switch @boardingAlerts
       Card gap=8
         Text.sectionTitle "Delivery"
-        SegmentedButton bind=channel items=["Push","Email","SMS"]
-        Toggle "Quiet hours 22:00 to 07:00" bind=quiet
+        SegmentedButton @channel items=["Push","Email","SMS"]
+        Toggle "Quiet hours 22:00 to 07:00" @quiet
         if quiet
           Row gap=12
-            TimePicker "From" bind=quietFrom
-            TimePicker "Until" bind=quietTo
+            TimePicker "From" @quietFrom
+            TimePicker "Until" @quietTo
       Button "Save" onTap={emit saveAlerts; toast "Alerts saved"}
 
 // A drawn map: the great-circle arc between two airports with a plane marker at the given share, shown as a labelled box with the arc.

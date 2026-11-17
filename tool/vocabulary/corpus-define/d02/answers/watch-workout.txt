@@ -34,7 +34,7 @@ App
             Icon "lock"
             Text.caption "Water lock on"
         Text "{duration(elapsed)}" size=44 weight=700
-        Pages bind=page h=140
+        Pages @page h=140
           Column center gap=6
             ZoneRing value={hr} zones={zones}
             Text.caption "Heart rate bpm"
@@ -44,7 +44,7 @@ App
           Column center gap=6
             Text "{fixed(km,2)}" size=40 weight=700
             Text.caption "Distance km"
-        Dots bind=page count=3
+        Dots @page count=3
         if !locked
           Row gap=12
             IconButton "pause" tooltip="Pause" onTap={running=false; go pause}

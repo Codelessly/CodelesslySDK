@@ -18,7 +18,7 @@ App
     Nav
       Heading "HeLa_0412_stack" level=1
       Row gap=8
-        Toggle "Merged sharpest" bind=merged
+        Toggle "Merged sharpest" @merged
         IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.5)}
         Text.strong "{zoom}x"
         IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(8,zoom+0.5)}
@@ -34,7 +34,7 @@ App
             Text.muted "Layer {z+1} of 30, z = {fixed(z*0.5,1)} um"
           Row gap=8
             IconButton "chevron_left" tooltip="Previous layer" onTap={z=max(0,z-1)}
-            Slider bind=z min=0 max=29 step=1 grow
+            Slider @z min=0 max=29 step=1 grow
             IconButton "chevron_right" tooltip="Next layer" onTap={z=min(29,z+1)}
       Column w=320 gap=16
         Card gap=8
@@ -53,8 +53,8 @@ App
                 Row gap=8
                   Box w=12 h=12 radius=6 fill={c.color}
                   Text "{c.name}"
-                Toggle bind=c.on
-              Slider bind=c.level min=0 max=1 step=0.05 disabled={!c.on}
+                Toggle @c.on
+              Slider @c.level min=0 max=1 step=0.05 disabled={!c.on}
 
 ### Count cells
 state z=14
@@ -73,7 +73,7 @@ App
     Nav
       Heading "Count cells" level=1
       Row gap=8
-        SegmentedButton bind=mode items=["add","remove"]
+        SegmentedButton @mode items=["add","remove"]
         Button.outline "Undo" onTap={dots=removeAt(dots,length(dots)-1)}
         Button.destructive "Clear all" onTap={open confirmClear}
     Row gap=16 pad=24 top
@@ -83,7 +83,7 @@ App
           ScaleBar zoom={zoom} pixelSize=0.325 unit="um"
         Row gap=8
           IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.5)}
-          Slider bind=z min=0 max=29 step=1 grow
+          Slider @z min=0 max=29 step=1 grow
           IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(8,zoom+0.5)}
       Column w=320 gap=16
         Card gap=8
@@ -132,7 +132,7 @@ App
           ScaleBar zoom={zoom} pixelSize=0.325 unit="um"
         Row gap=8
           IconButton "zoom_out" tooltip="Zoom out" onTap={zoom=max(0.5,zoom-0.5)}
-          Slider bind=z min=0 max=29 step=1 grow
+          Slider @z min=0 max=29 step=1 grow
           IconButton "zoom_in" tooltip="Zoom in" onTap={zoom=min(8,zoom+0.5)}
       Column w=320 gap=16
         Card gap=8

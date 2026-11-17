@@ -6,7 +6,7 @@
  ],
  "widget": {
   "type": "TableHeader",
-  "doc": "The header of a sortable table: columns are the titles, keys the fields they sort by; tapping a title sets your sort variable to its key and flips desc on a second tap, so write state desc=false, TableHeader bind=sort desc=desc columns=[...] keys=[...] and show sortBy or sortByDesc(rows,sort). selectable=true adds a tick-all box that fires onToggleAll.",
+  "doc": "The header of a sortable table: columns are the titles, keys the fields they sort by; tapping a title sets your sort variable to its key and flips desc on a second tap, so write state desc=false, TableHeader @sort desc=@desc columns=[...] keys=[...] and show sortBy or sortByDesc(rows,sort). selectable=true adds a tick-all box that fires onToggleAll.",
   "props": [
    {
     "key": "value",

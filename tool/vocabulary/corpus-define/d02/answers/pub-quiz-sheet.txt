@@ -39,12 +39,12 @@ App
               Text.strong "Joker" w=90 center
             each round in rounds
               Row gap=0 pad=8 middle border-bottom=#FFF3F4F6 fill={round.joker ? "#FFFEF3C7" : "#00FFFFFF"}
-                Input bind=round.name w=200
+                Input @round.name w=200
                 each team in teams
                   Row w=130 center
                     ScoreCell value={round.s[team.id]} joker={round.joker} onChange={rounds=updateWhere(rounds,r=>r.id==round.id,r=>with(r,"s",setAt(r.s,team.id,result)))}
                 Row w=90 center
-                  Toggle bind=round.joker
+                  Toggle @round.joker
             Row gap=0 pad=12 middle fill=#FFF9FAFB
               Text.strong "Total" w=200
               each team in teams
@@ -54,9 +54,9 @@ App
               Spacer w=90
       Text.muted "A joker doubles that round's score for every team that played it."
   Dialog#tiebreak "Tiebreaker" "Closest number wins. In what year was the Battle of Hastings?"
-    Input "Correct answer" type=number bind=tbAnswer
+    Input "Correct answer" type=number @tbAnswer
     each team in teams
-      Input "{team.name}" type=number bind=team.guess
+      Input "{team.name}" type=number @team.guess
     Card gap=4
       Text.muted "Closest so far"
       Text.heading "{first(sortBy(teams,t=>abs(t.guess-tbAnswer))).name}"
@@ -75,10 +75,10 @@ App
     Row between
       Text.strong "Tab total"
       Text.strong "{money(sum(tab,l=>l.qty*l.price),"£",2)}"
-    Input "Item" bind=newItem
-    Input "Price" type=number bind=newPrice
+    Input "Item" @newItem
+    Input "Price" type=number @newPrice
     Button.outline "Add to tab" onTap={newItem=="" ? toast "Name the item" : {tab=append(tab,{"id":length(tab)+10,"item":newItem,"qty":1,"price":newPrice}); newItem=""; newPrice=0}}
-    Input "Note" multiline bind=tabNote
+    Input "Note" multiline @tabNote
 
 ### Question reader
 state qi=0
@@ -141,7 +141,7 @@ Page
 // The fixed rows of a ranking: a name and a value, drawn from the highest down
 define ScoreCell value=0 joker=false onChange
   state v=value
-  Input type=number bind=v w=70 center onChange={onChange(result)}
+  Input type=number @v w=70 center onChange={onChange(result)}
 
 // A mystery clip: the player cannot play real sound here, so it is a labelled box that hides the title until revealed
 define MusicClip "label" title="" hideTitle=true playing=false onPlay onPause

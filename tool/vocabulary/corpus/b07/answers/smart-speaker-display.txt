@@ -66,14 +66,14 @@ App
           Text "{heard}" size=36 weight=500 center
       if phase=="answer"
         Text.muted "\"How many tablespoons are in a third of a cup\"" center
-        Pages bind=step items=answers h=320 peek=0.9
+        Pages @step items=answers h=320 peek=0.9
           Card gap=12 pad=24
             Row between
               Text.sectionTitle "{item.title}"
               Badge.info "{item.kind}"
             Text "{item.big}" size=72 weight=700
             Text.muted "{item.line}" size=22
-        Dots bind=step count=3
+        Dots @step count=3
         Row gap=8 center
           Button.outline "Ask another" onTap={heard=""; shown=0; phase="listening"}
           Button.ghost "Read it aloud" onTap={emit speak step}
@@ -85,6 +85,7 @@ state volume=45
 state playing=true
 state elapsed=83
 state track={"title":"Golden Hour","artist":"Mira Okafor","album":"Slow Mornings","length":214}
+state newName=""
 every 1s onTick={timers=map(timers,t=>t.running && t.left>0 ? with(t,"left",t.left-1) : t); elapsed=playing ? min(track.length,elapsed+1) : elapsed}
 App
   Main
@@ -122,11 +123,11 @@ App
           Text.caption "{duration(track.length)}"
         Row gap=12 middle
           Icon "volume_down"
-          Slider bind=volume min=0 max=100 h=48 grow
+          Slider @volume min=0 max=100 h=48 grow
           Icon "volume_up"
           Text.strong "{volume}" w=40
   Dialog#newTimer "New timer"
-    Input "Name" "Tea" bind=newName
+    Input "Name" "Tea" @newName
     Row gap=8
       Button.outline "5 min" onTap={timers=append(timers,{"id":length(timers)+10,"name":coalesce(newName,"Timer"),"left":300,"total":300,"running":true}); close}
       Button.outline "10 min" onTap={timers=append(timers,{"id":length(timers)+10,"name":coalesce(newName,"Timer"),"left":600,"total":600,"running":true}); close}
@@ -149,7 +150,7 @@ App
         Text "Tap anywhere to stop" size=32 color=#FFB04A3A animate=pulse
       Row gap=8 hide=phone
         Text "Dimming to {dim}%" size=16 color=#FF4A2019
-        Slider bind=dim min=5 max=100 w=200
+        Slider @dim min=5 max=100 w=200
       Row gap=12
         Button.ghost "Wake screen" onTap={dim=60; go idle}
         Button.ghost "Alarm off" onTap={nextAlarm="Off"; toast "Alarm off"}

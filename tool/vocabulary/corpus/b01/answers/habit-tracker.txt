@@ -29,7 +29,7 @@ App
       each h in habits
         Card gap=12 animate=slide-up stagger=60
           Row gap=12 middle
-            Checkbox bind=h.done onChange={habits=updateWhere(habits,x=>x.id==h.id,x=>with(with(x,"done",result),"streak",result?x.streak+1:max(0,x.streak-1))); haptic light; if result then toast "{h.name} done, streak {h.streak+1}"}
+            Checkbox @h.done onChange={habits=updateWhere(habits,x=>x.id==h.id,x=>with(with(x,"done",result),"streak",result?x.streak+1:max(0,x.streak-1))); haptic light; if result then toast "{h.name} done, streak {h.streak+1}"}
             IconTile "{h.icon}" color={h.color}
             Column grow gap=2
               Text.strong "{h.name}" strike={h.done}
@@ -49,6 +49,7 @@ state best=21
 state reminderOn=true
 state remindAt="06:30"
 state yearDays=range(365)
+state paused=false
 App
   Sidebar
     Brand "Streaks" icon="local_fire_department"
@@ -86,15 +87,15 @@ App
         Heatmap values={yearDays} start="2026-01-01" weeks=53 cols=7 onTapCell={toast "{result.date}: {result.value>0?"done":"missed"}"}
       Card gap=12
         Text.strong "Reminder"
-        Toggle "Remind me every day" bind=reminderOn
+        Toggle "Remind me every day" @reminderOn
         if reminderOn
-          TimePicker "Time" bind=remindAt
+          TimePicker "Time" @remindAt
           Row gap=8
             each d in ["M","T","W","T","F","S","S"]
               FilterChip "{d}" selected={true}
       Card gap=12
         Text.strong "Status"
-        Toggle "Pause this habit" bind=paused onChange={habits=updateWhere(habits,x=>x.id==sel,x=>with(x,"paused",result)); toast result?"Paused, your streak is kept":"Resumed"}
+        Toggle "Pause this habit" @paused onChange={habits=updateWhere(habits,x=>x.id==sel,x=>with(x,"paused",result)); toast result?"Paused, your streak is kept":"Resumed"}
         Button.destructive "Archive habit" icon="inventory_2" onTap={open archiveConfirm}
   Menu#habitMenu end
     MenuItem "Edit habit" icon="edit" onTap={go new-habit}
@@ -120,7 +121,7 @@ Page
     Button "Save" onTap={habits=append(habits,{"id":"h{length(habits)+1}","name":name,"icon":icon,"color":color,"streak":0,"best":0,"done":false,"week":[0,0,0,0,0,0,0],"target":target,"unit":unit,"paused":false,"reminder":"08:00"}); toast "Habit added"; go today}
   Section narrow
     Column gap=20
-      Input "Name" "e.g. Stretch for 10 minutes" bind=name
+      Input "Name" "e.g. Stretch for 10 minutes" @name
       Column gap=8
         Text.fieldLabel "Icon"
         Grid cols=6 gap=8
@@ -139,8 +140,8 @@ Page
           each d in ["M","T","W","T","F","S","S"]
             FilterChip "{d}" selected={dow[index]} onTap={dow=setAt(dow,index,!dow[index])}
       Row gap=12 bottom
-        Input "Target per day" type=number bind=target grow
-        Select "Unit" items=["times","minutes","pages","glasses","km"] bind=unit grow
+        Input "Target per day" type=number @target grow
+        Select "Unit" items=["times","minutes","pages","glasses","km"] @unit grow
       Card gap=8
         Row gap=12 middle
           IconTile "{icon}" color={color}

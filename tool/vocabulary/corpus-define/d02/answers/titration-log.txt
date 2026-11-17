@@ -32,8 +32,8 @@ App
           Card gap=12
             Heading "Readings" level=3
             Row gap=16
-              Input "Start volume (mL)" type=number bind=start grow
-              Input "End volume (mL)" type=number bind=end grow
+              Input "Start volume (mL)" type=number @start grow
+              Input "End volume (mL)" type=number @end grow
             Row between
               Text.muted "Volume used"
               Text size=32 weight=700 "{fixed(end-start,2)} mL"
@@ -47,16 +47,16 @@ App
                   Box w=44 h=44 radius=22 fill={ind.before} border={indicator==ind.name ? 3 : 1}
                   Text.caption "{ind.name}"
             Row gap=12 middle
-              Toggle "Endpoint reached" bind=reached
+              Toggle "Endpoint reached" @reached
               Text.muted "Colour at endpoint"
               Box w=44 h=44 radius=22 fill={reached ? find(indicators,i=>i.name==indicator).at : find(indicators,i=>i.name==indicator).before}
           Card gap=12
             Heading "Solutions" level=3
             Row gap=16
-              Input "NaOH concentration (mol/L)" type=number bind=cbase grow
-              Input "HCl aliquot (mL)" type=number bind=vacid grow
+              Input "NaOH concentration (mol/L)" type=number @cbase grow
+              Input "HCl aliquot (mL)" type=number @vacid grow
   Dialog#limits "Spread limit" "Runs further apart than this are flagged"
-    Input "Limit (mL)" type=number bind=limit
+    Input "Limit (mL)" type=number @limit
     Button "Done" onTap={close}
 
 // A burette: a tall tube with a graduated scale and the liquid level; drawn as a bordered box with a fill.
@@ -108,8 +108,8 @@ App
         each t in trials
           Row gap=12 middle
             Text "{t.id}" w=60
-            Input "Start" type=number bind=t.start w=120
-            Input "End" type=number bind=t.end w=120
+            Input "Start" type=number @t.start w=120
+            Input "End" type=number @t.end w=120
             Text.strong "{fixed(t.end-t.start,2)}" w=100
             Row grow gap=8
               if abs((t.end-t.start)-sum(trials,x=>x.end-x.start)/length(trials))>limit
@@ -153,8 +153,8 @@ App
           Badge.info "Steepest at {fixed(steepV,1)} mL"
         TitrationCurve points={pts} steepest={steepV} h=280
         Row gap=12 middle
-          Input "Volume (mL)" type=number bind=vnew grow
-          Input "pH" type=number bind=phnew grow
+          Input "Volume (mL)" type=number @vnew grow
+          Input "pH" type=number @phnew grow
           Button "Add point" onTap={(length(pts)>0 && (phnew-last(pts).ph)/(vnew-last(pts).v)>steepSlope) ? {steepSlope=(phnew-last(pts).ph)/(vnew-last(pts).v); steepV=(vnew+last(pts).v)/2; pts=append(pts,{"v":vnew,"ph":phnew})} : {pts=append(pts,{"v":vnew,"ph":phnew})}}
       Card gap=8
         Text.muted "Concentration of HCl"

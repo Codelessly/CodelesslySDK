@@ -35,7 +35,7 @@ App
                 Progress {left / max(1, floor(entry/100)*60 + entry%100)}
         Row between
           Text.muted "Power {power}%"
-          Toggle "Door open" bind=door onChange={result ? {running=false; beeping=false; toast "Door open, paused"} : }
+          Toggle "Door open" @door onChange={result ? {running=false; beeping=false; toast "Door open, paused"} : }
       Grid cols=3 gap=8
         Button.outline "1" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+1 : entry}}
         Button.outline "2" onTap={locked ? toast "Child lock on" : {entry = entry < 1000 ? entry*10+2 : entry}}
@@ -60,8 +60,8 @@ App
       Button.outline "{locked ? "Hold 3 s to unlock" : "Hold 3 s to lock"}" icon="{locked ? "lock" : "lock_open"}" holdMs=3000 onLongPress={locked=!locked; toast locked ? "Child lock off" : "Child lock on"}
   Sheet#defrost "Defrost by weight" "Enter the food weight in grams"
     state grams=500
-    Input "Weight (g)" type=number bind=grams
-    Slider bind=grams min=100 max=2000
+    Input "Weight (g)" type=number @grams
+    Slider @grams min=100 max=2000
     Text.muted "About {ceil(grams / 100 * 1.5)} minutes at 30% power"
     Row gap=8
       Button.outline grow "Cancel" onTap={close}
@@ -80,15 +80,15 @@ App
     Column pad=24 gap=16 maxw=560 center
       Card gap=12
         Heading "Sound" level=3
-        Toggle "End beep" bind=beepOn
+        Toggle "End beep" @beepOn
         Row gap=12
           Icon "volume_up"
-          Slider grow bind=beepVolume min=0 max=100
+          Slider grow @beepVolume min=0 max=100
           Text.strong "{beepVolume}"
         Text.muted "The beep repeats every second until the door opens."
       Card gap=12
         Heading "Child lock" level=3
-        SegmentedButton bind=lockSeconds items=["3 s","5 s"]
+        SegmentedButton @lockSeconds items=["3 s","5 s"]
         Text.muted "Hold the lock key for {lockSeconds} seconds to lock or unlock the keys."
       Card gap=8
         Heading "About" level=3
@@ -114,5 +114,5 @@ Page
       Text.muted "Cooking is paused. Close the door and press Start to continue."
       if beeping
         Badge.warning "Beeping until the door opens"
-      Toggle "Door open" bind=door onChange={result ? beeping=false : }
+      Toggle "Door open" @door onChange={result ? beeping=false : }
       Button "Back to panel" onTap={door ? toast "Close the door first" : go panel}

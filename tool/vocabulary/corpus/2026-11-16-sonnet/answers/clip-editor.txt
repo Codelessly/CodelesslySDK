@@ -16,6 +16,9 @@ state markers=[{"id":"m1","name":"Cold open","t":0},{"id":"m2","name":"Guest joi
 state exportProgress=0
 state exporting=false
 state clipMenu=""
+state fmt=""
+state quality=""
+state libq=""
 every 100 when playing onTick={playhead=playhead+0.1*(speed=="2x"?2:speed=="1.5x"?1.5:speed=="0.5x"?0.5:1)}
 every 100 when playing && loopOn onTick={playhead=playhead>=loopB?loopA:playhead}
 every 200 when exporting onTick={exportProgress=min(1,exportProgress+0.04); exporting=exportProgress<1}
@@ -52,17 +55,17 @@ App
         IconButton "undo" onTap={clips=last(past); future=append(future,clips); past=removeAt(past,length(past)-1)}
         IconButton "redo" onTap={clips=last(future); future=removeAt(future,length(future)-1)}
         IconButton "content_cut" tooltip="Split at playhead (S)" onTap={clips=flatMap(clips,c=>c.id==first(sel)&&playhead>c.start&&playhead<c.start+c.len?[with(c,"len",playhead-c.start),with(with(with(c,"id",c.id+"b"),"start",playhead),"len",c.start+c.len-playhead)]:[c])}
-        Toggle "Snap" bind=snap
+        Toggle "Snap" @snap
       Row gap=8 middle
         IconButton "skip_previous" onTap={playhead=0}
         IconButton "{playing?'pause':'play_arrow'}" size=large onTap={playing=!playing}
         IconButton "skip_next" onTap={playhead=max(map(clips,c=>c.start+c.len))}
         Text.mono "{formatTime(playhead)} / 03:00" color=#FFFFD23F size=18
         ToggleButton "loop" selected={loopOn} onTap={loopOn=!loopOn}
-        SegmentedButton bind=speed items=["0.5x","1x","1.5x","2x"]
+        SegmentedButton @speed items=["0.5x","1x","1.5x","2x"]
       Row gap=8 middle
         Icon "zoom_out"
-        Slider bind=zoom min=1 max=40 w=140
+        Slider @zoom min=1 max=40 w=140
         Icon "zoom_in"
         Text.caption "{zoom} px/s" color=#FF8A8F98
     Row grow
@@ -76,9 +79,9 @@ App
                 Row between middle
                   Text.strong "{tr.name}" color={tr.color}
                   Row gap=4
-                    Toggle.mini "M" bind=tr.mute
-                    Toggle.mini "S" bind=tr.solo
-                Slider bind=tr.vol min=0 max=1
+                    Toggle.mini "M" @tr.mute
+                    Toggle.mini "S" @tr.solo
+                Slider @tr.vol min=0 max=1
               each c in filter(clips,c=>c.track==tr.id)
                 Clip#{c.id} "{c.name}" start={c.start} len={c.len} fill={c.color} selected={contains(sel,c.id)} drag=clip(c.id) snap={snap} snapTo=edges,playhead trimStart trimEnd fadeIn={c.fadeIn} fadeOut={c.fadeOut} gain={c.gain} onTap={sel=[c.id]} onShiftTap={sel=append(sel,c.id)} onCtrlTap={sel=contains(sel,c.id)?without(sel,c.id):append(sel,c.id)} onMove={clips=updateWhere(clips,x=>contains(sel,x.id),x=>with(x,"start",max(0,x.start+result.delta))); saved=false} onTrim={clips=updateWhere(clips,x=>x.id==c.id,x=>with(with(x,"start",result.start),"len",result.len)); saved=false} menu=clipMenuList onContext={clipMenu=c.id}
                   Waveform seed={c.id} color=#66FFFFFF
@@ -96,18 +99,18 @@ App
       Pane w=300 pad=16 gap=12 fill=#FF1B1D21
         if length(sel)==1
           Text.panelTitle "Clip"
-          Input "Name" bind=find(clips,c=>c.id==first(sel)).name
+          Input "Name" @find(clips,c=>c.id==first(sel)).name
           Row gap=8
-            Input "Start (s)" type=number step=0.1 bind=find(clips,c=>c.id==first(sel)).start
-            Input "Length (s)" type=number step=0.1 bind=find(clips,c=>c.id==first(sel)).len
+            Input "Start (s)" type=number step=0.1 @find(clips,c=>c.id==first(sel)).start
+            Input "Length (s)" type=number step=0.1 @find(clips,c=>c.id==first(sel)).len
           Text.fieldLabel "Gain {find(clips,c=>c.id==first(sel)).gain} dB"
-          Slider bind=find(clips,c=>c.id==first(sel)).gain min=-24 max=12
+          Slider @find(clips,c=>c.id==first(sel)).gain min=-24 max=12
           Text.fieldLabel "Fade in"
-          Slider bind=find(clips,c=>c.id==first(sel)).fadeIn min=0 max=10
+          Slider @find(clips,c=>c.id==first(sel)).fadeIn min=0 max=10
           Text.fieldLabel "Fade out"
-          Slider bind=find(clips,c=>c.id==first(sel)).fadeOut min=0 max=10
+          Slider @find(clips,c=>c.id==first(sel)).fadeOut min=0 max=10
           Text.fieldLabel "Colour"
-          ColorPicker bind=find(clips,c=>c.id==first(sel)).color swatches=["#FF2EC4B6","#FFFF6B5E","#FFF2B84B","#FF8E7CFF"]
+          ColorPicker @find(clips,c=>c.id==first(sel)).color swatches=["#FF2EC4B6","#FFFF6B5E","#FFF2B84B","#FF8E7CFF"]
         if length(sel)!=1
           Text.muted "Choose one clip to edit it. {length(sel)} chosen."
   Menu#clipMenuList
@@ -119,10 +122,10 @@ App
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Delete" onTap={clips=removeWhere(clips,c=>contains(sel,c.id)); sel=[]; close}
   Dialog#exportDlg "Export episode" "Mix down all three tracks"
-    Select "Format" bind=fmt items=["MP3","WAV","FLAC","AAC"]
-    SegmentedButton bind=quality items=["Draft","Good","Best"]
+    Select "Format" @fmt items=["MP3","WAV","FLAC","AAC"]
+    SegmentedButton @quality items=["Draft","Good","Best"]
     if exporting || exportProgress>0
-      Progress bind=exportProgress
+      Progress value={exportProgress}
       Text.mono "{round(exportProgress*100,0)}%"
     if exportProgress>=1
       Row gap=8 middle
@@ -165,7 +168,7 @@ App
         Text "To start / end"
         Text.mono "Home / End"
   Drawer#library "Library" right
-    Input "Search" bind=libq
+    Input "Search" @libq
     each item in filter(libraryItems,i=>contains(lower(i.name),lower(libq)))
       ListTile "{item.name}" subtitle="{duration(item.len)}" icon="graphic_eq" drag=library(item) dragData={item}
   Drawer#markersPanel "Markers" right
@@ -176,6 +179,8 @@ App
 
 ### Phone Timeline
 state activeTrack="voice"
+state speed=""
+state zoom=1
 Page
   Nav sticky
     Brand "Cutline" icon="content_cut"
@@ -189,7 +194,7 @@ Page
       IconButton "{playing?'pause':'play_arrow'}" size=large onTap={playing=!playing}
       IconButton "skip_next"
       Text.mono "{formatTime(playhead)}" color=#FFFFD23F
-      Select bind=speed items=["0.5x","1x","1.5x","2x"]
+      Select @speed items=["0.5x","1x","1.5x","2x"]
   Section
     Timeline zoom={zoom} playhead={playhead} scrollX heads=pinned
       Ruler unit="mm:ss" markers={markers} onScrub={playhead=result}
@@ -198,14 +203,14 @@ Page
         Track#{tr.id} name={tr.name} h={tr.id==activeTrack?200:48} onTap={activeTrack=tr.id}
           Head w=88 pad=4
             Text.strong "{tr.name}" color={tr.color}
-            Toggle.mini "M" bind=tr.mute
+            Toggle.mini "M" @tr.mute
           each c in filter(clips,c=>c.track==tr.id)
             Clip#{c.id} "{c.name}" start={c.start} len={c.len} fill={c.color} selected={contains(sel,c.id)} trimStart trimEnd drag=clip(c.id) snap={snap} onTap={sel=[c.id]; open clipSheet}
               if tr.id==activeTrack
                 Waveform seed={c.id} color=#66FFFFFF
     Row gap=8 middle
       Icon "zoom_out"
-      Slider bind=zoom min=1 max=40 grow
+      Slider @zoom min=1 max=40 grow
       Icon "zoom_in"
   Section compact
     Row gap=8
@@ -213,16 +218,16 @@ Page
       Button.outline "Marker" icon="flag" grow onTap={markers=append(markers,{"id":"m"+length(markers),"name":"Marker "+(length(markers)+1),"t":playhead})}
       Button.outline "Library" icon="library_music" grow onTap={open library}
   Sheet#clipSheet "Clip"
-    Input "Name" bind=find(clips,c=>c.id==first(sel)).name
+    Input "Name" @find(clips,c=>c.id==first(sel)).name
     Row gap=8
-      Input "Start (s)" type=number step=0.1 bind=find(clips,c=>c.id==first(sel)).start
-      Input "Length (s)" type=number step=0.1 bind=find(clips,c=>c.id==first(sel)).len
+      Input "Start (s)" type=number step=0.1 @find(clips,c=>c.id==first(sel)).start
+      Input "Length (s)" type=number step=0.1 @find(clips,c=>c.id==first(sel)).len
     Text.fieldLabel "Gain"
-    Slider bind=find(clips,c=>c.id==first(sel)).gain min=-24 max=12
+    Slider @find(clips,c=>c.id==first(sel)).gain min=-24 max=12
     Text.fieldLabel "Fade in"
-    Slider bind=find(clips,c=>c.id==first(sel)).fadeIn min=0 max=10
+    Slider @find(clips,c=>c.id==first(sel)).fadeIn min=0 max=10
     Text.fieldLabel "Fade out"
-    Slider bind=find(clips,c=>c.id==first(sel)).fadeOut min=0 max=10
+    Slider @find(clips,c=>c.id==first(sel)).fadeOut min=0 max=10
     Row gap=8
       Button.outline "Duplicate" onTap={clips=concat(clips,map(filter(clips,c=>contains(sel,c.id)),c=>with(with(c,"id",c.id+"d"),"start",c.start+c.len))); close}
       Button.destructive "Delete" onTap={clips=removeWhere(clips,c=>contains(sel,c.id)); close}

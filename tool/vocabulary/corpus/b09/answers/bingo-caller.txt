@@ -52,10 +52,10 @@ App
               Text.heading "{auto ? left : gap}s"
             Progress {auto ? 1-(left/gap) : 0}
             Text.fieldLabel "Speed"
-            SegmentedButton bind=speed items=["Slow","Normal","Fast"] onChange={speed=result; gap=(result=="Slow" ? 12 : result=="Fast" ? 4 : 8); left=gap}
+            SegmentedButton @speed items=["Slow","Normal","Fast"] onChange={speed=result; gap=(result=="Slow" ? 12 : result=="Fast" ? 4 : 8); left=gap}
           Card gap=12
             Text.strong "Pattern for this game"
-            SegmentedButton bind=pattern items=["Line","Corners","Full house"]
+            SegmentedButton @pattern items=["Line","Corners","Full house"]
             Grid cols=5 gap=4 w=200
               each i in range(25)
                 Box h=32 radius=4 fill={pattern=="Full house" || (pattern=="Line" && floor(i/5)==2) || (pattern=="Corners" && (i==0 || i==4 || i==20 || i==24)) ? "#FF2E7D32" : "#FFEEEEEE"}
@@ -100,7 +100,7 @@ App
     Column pad=24 gap=16 maxw=720
       Card gap=12
         Text.strong "Type the numbers on the player's card"
-        Input "Numbers" "e.g. 7, 22, 44, 58, 77" bind=typed
+        Input "Numbers" "e.g. 7, 22, 44, 58, 77" @typed
         Row gap=8
           Button "Check claim" icon="rule" onTap={card=map(filter(map(split(typed,","),t=>trim(t)),t=>t!=""),t=>t+0); claim=(all(card,x=>contains(called,x)) && length(card)>=5 ? "valid" : "false")}
           Button.outline "Clear" onTap={typed=""; card=[]; claim=""}
@@ -156,6 +156,6 @@ App
     MenuItem "Reopen" icon="undo" onTap={prizes=updateWhere(prizes,r=>r.id==sel,r=>with(r,"won",false))}
     MenuItem "Remove" icon="delete" onTap={prizes=removeWhere(prizes,r=>r.id==sel)}
   Dialog#addPrize "Add a prize"
-    Select "Pattern" bind=newPattern items=["Line","Corners","Full house"]
-    Input "Prize" "e.g. Gift basket" bind=newPrize
+    Select "Pattern" @newPattern items=["Line","Corners","Full house"]
+    Input "Prize" "e.g. Gift basket" @newPrize
     Button "Add" onTap={newPrize!="" ? {prizes=append(prizes,{"id":length(prizes)+10,"pattern":newPattern,"prize":newPrize,"won":false,"winner":""}); newPrize=""; close} : toast "Name the prize"}

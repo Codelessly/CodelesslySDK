@@ -22,7 +22,7 @@ App
     Nav
       Heading "Live energy" level=1
       Row gap=12 middle
-        Toggle "Storm watch" bind=storm onChange={result ? toast "Storm watch on: battery reserved for outages" : toast "Storm watch off"}
+        Toggle "Storm watch" @storm onChange={result ? toast "Storm watch on: battery reserved for outages" : toast "Storm watch off"}
         IconButton "refresh" tooltip="Refresh" onTap={toast "Updated just now"}
     Column pad=24 gap=16
       if storm
@@ -60,18 +60,18 @@ App
       Card gap=12
         Row between
           Text.strong "Production and use"
-          SegmentedButton bind=range items=["Today","Week"]
+          SegmentedButton @range items=["Today","Week"]
         AreaChart labels={hours} series=[{"name":"Production","values":[0.2,1.4,3.8,5.2,4.9,3.1,0.9,0]},{"name":"Use","values":[0.8,1.9,1.6,1.8,2.1,2.6,3.2,2.4]}] h=220
       Card gap=12
         Row between
           Text.strong "Battery"
           Text.muted "Full in 1 h 40 min"
         Row gap=16 middle
-          BatteryShape bind=battery w=80 h=120
+          BatteryShape @battery w=80 h=120
           Column grow gap=4
             Text "{round(battery*100,0)}%" size=40 weight=700
             Text.muted "13.5 kWh capacity, charging at 1.9 kW"
-            Progress bind=battery
+            Progress value={battery}
 
 ### Savings
 state tab="savings"
@@ -79,6 +79,7 @@ state year="2026"
 state months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov"]
 state saved=[62,71,98,126,158,187,201,194,149,104,68]
 state selMonth=""
+state fmt=""
 App
   Sidebar
     Brand "Sunroof" icon="wb_sunny"
@@ -93,7 +94,7 @@ App
     Nav
       Heading "Savings" level=1
       Row gap=8
-        Select bind=year items=["2025","2026"] w=120
+        Select @year items=["2025","2026"] w=120
         Button.outline "Export" icon="download" onTap={open exportSheet}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -118,7 +119,7 @@ App
           ListTile "{m} {year}" subtitle="Solar offset your bill" trailing="{money(saved[indexOf(months,m)],"$",0)}" onTap={selMonth=m; open monthDetail}
   Sheet#exportSheet "Export savings"
     Column gap=12 pad=16
-      Select "Format" items=["CSV","PDF"] bind=fmt
+      Select "Format" items=["CSV","PDF"] @fmt
       Button "Download" onTap={emit exportSavings fmt; toast "Export started"; close}
   Dialog#monthDetail "{selMonth} savings" "Bill offset by your panels"
     Column gap=8

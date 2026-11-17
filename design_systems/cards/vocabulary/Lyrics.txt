@@ -1,5 +1,5 @@
-// The words of a song, line by line: lines is a list of {"t": seconds, "text": …} (or plain texts); the line sounding at time (or bind) is large and in the highlight; a tap on a line seeks to it (onSeek: result is its time).
-Lyrics lines=[] time bind=pos h=200 highlight=accent onSeek
+// The words of a song, line by line: lines is a list of {"t": seconds, "text": …} (or plain texts); the line sounding at time (or in the variable bound, @pos) is large and in the highlight; a tap on a line seeks to it (onSeek: result is its time).
+Lyrics lines=[] time @pos h=200 highlight=accent onSeek
   state pos=0
   Row w=fill h={h} stretch
     Column grow gap=8 pad=[0,4,0,4] scroll

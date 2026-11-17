@@ -11,6 +11,7 @@ state keycard=false
 state beep=false
 state idle=0
 state alarm=false
+state voice=false
 every 1s onTick={idle=idle+1; idle==20 && length(lit)==0 && doors=="closed" ? {go ads} : }
 every 1s when length(lit)>0 && weight<=800 && doors=="closed" onTick={current==first(lit) ? {lit=removeAt(lit,0); doors="open"; dir="idle"; play chime; speak "Floor {current}"} : {current=current+(first(lit)>current ? 1 : -1); dir=first(lit)>current ? "up" : "down"}}
 every 3s when doors=="open" && weight<=800 onTick={doors="closed"}
@@ -55,9 +56,9 @@ App
           Button.ghost "Cancel all" onTap={lit=[]}
           Divider
           Text.caption "Load: {weight} kg"
-          Slider bind=weight min=0 max=1000
-          Toggle "Fire mode" bind=fire onChange={result ? {lit=[0]; speak "Fire. Proceed to the exit floor."} : {lit=[]}}
-          Toggle "Voice" bind=voice
+          Slider @weight min=0 max=1000
+          Toggle "Fire mode" @fire onChange={result ? {lit=[0]; speak "Fire. Proceed to the exit floor."} : {lit=[]}}
+          Toggle "Voice" @voice
   Dialog#keycard "Key card" "Floors 8 and 9 are staff only"
     Column gap=12 center
       Icon "contactless" size=48
@@ -72,12 +73,12 @@ every 4s onTick={slide=(slide+1)%length(ads)}
 App
   Main
     Column pad=0 gap=0
-      Pages bind=slide h=360
+      Pages @slide h=360
         each a in ads
           Box fill={a.fill} pad=32 center middle gap=12 animate=fade
             Text "{a.brand}" size=40 weight=700 color=#FFFFFFFF
             Text "{a.line}" size=20 color=#FFFFFFFF
-      Dots bind=slide count={length(ads)}
+      Dots @slide count={length(ads)}
       Row between pad=16
         Column
           Text.caption "Floor"

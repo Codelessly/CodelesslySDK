@@ -1,8 +1,10 @@
-// Two days, the first and the last: a date field for each, keeping the variables start and end name (a path such as draft.start works); the use reads them from there.
-DateRangePicker "label" start end
+// Two days, the first and the last: a date field for each, keeping the variables a use binds (start=@from end=@to; a path such as start=@draft.start works); the use reads them from there.
+DateRangePicker "label" start=@ end=@
+  state start=""
+  state end=""
   Column w=fill gap=6
     if label != null
       Text.caption "{label}"
     Row w=fill gap=8
-      DatePicker "From" bind={start} grow
-      DatePicker "To" bind={end} grow
+      DatePicker "From" @start grow
+      DatePicker "To" @end grow

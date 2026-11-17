@@ -5,14 +5,15 @@ state items=[{"id":"b1","title":"The Overstory","due":"Dec 8","hold":false},{"id
 state cardOn=true
 state idle=0
 state warned=false
+state code=""
 every 1s onTick={idle=idle+1; idle>=20 && !warned ? {warned=true; open timeout} : }
 App
   Main
     Nav
       Brand "Handover" icon="local_library"
       Row gap=12 middle
-        SegmentedButton bind=lang items=["English","Español","中文"]
-        Toggle "Large text" bind=big
+        SegmentedButton @lang items=["English","Español","中文"]
+        Toggle "Large text" @big
     Column pad=24 gap=16 maxw=900 center
       Card gap=12 fill={cardOn ? #FFECFDF5 : #FFFFFBEB}
         Row gap=12 middle
@@ -21,7 +22,7 @@ App
             Text.strong "{cardOn ? 'Library card read: Jordan Alvarez' : 'Put your library card on the pad'}" size={big ? 30 : 18}
             Text.muted "Then place one book at a time on the shelf plate." size={big ? 24 : 14}
         Row gap=8 middle
-          Input "Scan or type a barcode" "3 9021 0482 7716" bind=code grow
+          Input "Scan or type a barcode" "3 9021 0482 7716" @code grow
           Button "Add" size={big ? "large" : "medium"} onTap={code=="" ? toast "Scan a book first" : {items=append(items,{"id":code,"title":"Book " + code,"due":"Dec 8","hold":false}); code=""; idle=0}}
       Row between middle
         Text.heading "Your items" size={big ? 32 : 20}
@@ -42,7 +43,7 @@ App
         Button "Finish" size={big ? "large" : "medium"} onTap={go finish}
   Dialog#timeout "Still there?" "This session ends soon."
     Text.muted "Touch the screen to keep going."
-    Progress bind=left
+    Progress value={left}
     state left=1
     every 1s when warned onTick={left=max(0,left-0.1); left<=0 ? {close; items=[]; warned=false; idle=0; go check-out} : }
     Button "Keep going" onTap={warned=false; idle=0; left=1; close}
@@ -50,6 +51,7 @@ App
 ### Finish
 state receipt="print"
 state sent=false
+state email=""
 App
   Main
     Nav
@@ -70,7 +72,7 @@ App
           ChoiceChip "Print" icon="print" selected={receipt=="print"} onTap={receipt="print"}
           ChoiceChip "Email" icon="mail" selected={receipt=="email"} onTap={receipt="email"}
         if receipt=="email"
-          Input "Email" "you@example.com" type=email bind=email
+          Input "Email" "you@example.com" type=email @email
       Button "Done" size=large onTap={receipt=="email" && trim(email)=="" ? toast "Enter an email" : {emit finish receipt; sent=true; toast receipt=="print" ? "Printing receipt" : "Receipt sent"; items=[]; go check-out}}
 
 ### Fines

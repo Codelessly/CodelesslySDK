@@ -9,6 +9,8 @@ state future=[]
 state members=[{"name":"Maya Reyes","color":"#FFE53935","x":300,"y":200},{"name":"Tomas Berg","color":"#FF1E88E5","x":520,"y":340},{"name":"Priya Nair","color":"#FF43A047","x":150,"y":380}]
 state editing=""
 state groupCount=0
+state inviteEmail=""
+state perm=""
 App
   Sidebar
     Brand "Chalk" icon="draw"
@@ -38,7 +40,7 @@ App
         Divider
         IconButton "back_hand" tooltip="Pan" selected={tool=="pan"} onTap={tool="pan"}
       Stack grow
-        Canvas#board bind=pan zoom={zoom} tool={tool} grid snap=8 minZoom=0.1 maxZoom=4 onZoom={zoom=result} onPlace={history=append(history,items); future=[]; items=append(items,{"id":concat("i",length(items)),"kind":tool,"x":result.x,"y":result.y,"w":180,"h":140,"color":"#FFFFE082","text":""}); selected=[]; tool="select"} onSelectBox={selected=result.ids} onClear={selected=[]; editing=""} onContextMenu={open canvasMenu}
+        Canvas#board @pan zoom={zoom} tool={tool} grid snap=8 minZoom=0.1 maxZoom=4 onZoom={zoom=result} onPlace={history=append(history,items); future=[]; items=append(items,{"id":concat("i",length(items)),"kind":tool,"x":result.x,"y":result.y,"w":180,"h":140,"color":"#FFFFE082","text":""}); selected=[]; tool="select"} onSelectBox={selected=result.ids} onClear={selected=[]; editing=""} onContextMenu={open canvasMenu}
           each it in items
             if it.kind=="note"
               StickyNote "{it.text}" x={it.x} y={it.y} w={it.w} h={it.h} fill={it.color} selected={contains(selected,it.id)} editing={editing==it.id} resizable handles=8 drag onSelect={selected=result.shift ? append(selected,it.id) : [it.id]} onMove={history=append(history,items); future=[]; items=updateWhere(items,r=>contains(selected,r.id),r=>with(with(r,"x",r.x+result.dx),"y",r.y+result.dy))} onResize={history=append(history,items); future=[]; items=updateWhere(items,r=>r.id==it.id,r=>with(with(with(with(r,"x",result.x),"y",result.y),"w",result.w),"h",result.h))} onDoubleTap={editing=it.id} onEdit={items=updateWhere(items,r=>r.id==it.id,r=>with(r,"text",result)); editing=""}
@@ -66,8 +68,8 @@ App
             IconButton "add" tooltip="Zoom in" onTap={zoom=clamp(zoom+0.1,0.1,4)}
             IconButton "fit_screen" tooltip="Fit to screen" onTap={zoom=1; pan=[0,0]; emit fitBoard}
   Dialog#share "Share Sprint retro" "Anyone with the link can view"
-    Input "Invite by email" "name@company.com" bind=inviteEmail
-    Select "Permission" items=["Can edit","Can comment","Can view"] bind=perm
+    Input "Invite by email" "name@company.com" @inviteEmail
+    Select "Permission" items=["Can edit","Can comment","Can view"] @perm
     Row gap=8
       Button.outline "Copy link" onTap={copy "https://chalk.app/b/sprint-retro"; toast "Link copied"}
       Button "Send invite" onTap={emit invite inviteEmail; toast "Invite sent"; close}
@@ -81,6 +83,8 @@ state q=""
 state filter="all"
 state boards=[{"id":"b1","name":"Sprint retro","owner":"Ana Silva","edited":"2 min ago","people":4,"starred":true},{"id":"b2","name":"Q3 roadmap","owner":"Maya Reyes","edited":"Yesterday","people":7,"starred":false},{"id":"b3","name":"Onboarding flow","owner":"Tomas Berg","edited":"Mar 12","people":3,"starred":false}]
 state sel=""
+state newName=""
+state template=""
 Page
   Nav sticky
     Brand "Chalk" icon="draw"
@@ -93,7 +97,7 @@ Page
     Column gap=16
       Heading "Your boards" level=1
       Row gap=12 between
-        Input "Search boards" bind=q w=280
+        Input "Search boards" @q w=280
         Row gap=8
           FilterChip "All" selected={filter=="all"} onTap={filter="all"}
           FilterChip "Starred" selected={filter=="starred"} onTap={filter="starred"}
@@ -110,8 +114,8 @@ Page
               Spacer grow
               Badge.neutral "{b.people} people"
   Dialog#newBoard "New board"
-    Input "Board name" bind=newName
-    Select "Template" items=["Blank","Retrospective","Brainstorm","Flowchart"] bind=template
+    Input "Board name" @newName
+    Select "Template" items=["Blank","Retrospective","Brainstorm","Flowchart"] @template
     Button "Create" onTap={boards=append(boards,{"id":concat("b",length(boards)),"name":newName,"owner":"Ana Silva","edited":"Just now","people":1,"starred":false}); close; go board}
   Menu#boardMenu
     MenuItem "Star" icon="star" onTap={boards=updateWhere(boards,x=>x.id==sel,x=>with(x,"starred",!x.starred))}

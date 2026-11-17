@@ -40,7 +40,7 @@ App
                     Text.caption "{seg.words} words"
                   HighlightedText "{seg.source}" terms={terms} field="source" onTermTap={sel=seg.id}
                 Column grow gap=8
-                  Input "Target" "Type the translation" bind=seg.target multiline onChange={segs=updateWhere(segs, s => s.id==seg.id, s => with(s, "status", s.status=="approved" ? "draft" : (result=="" ? "new" : "draft")))}
+                  Input "Target" "Type the translation" @seg.target multiline onChange={segs=updateWhere(segs, s => s.id==seg.id, s => with(s, "status", s.status=="approved" ? "draft" : (result=="" ? "new" : "draft")))}
                   Row between
                     Row gap=8
                       Chip "New" selected={seg.status=="new"}
@@ -71,7 +71,7 @@ App
             Badge.success "Approved" hidden={!t.approved}
             Badge.warning "Pending" hidden={t.approved}
   Dialog#comment "Comment to reviewer" "Segment {commentFor}"
-    Input "Comment" "Say what the reviewer should check" bind=comment multiline
+    Input "Comment" "Say what the reviewer should check" @comment multiline
     Row end gap=8
       Button.ghost "Cancel" onTap={comment=""; close}
       Button "Send" onTap={comment=="" ? toast "Write a comment first" : {emit comment {"segment":commentFor,"text":comment}; toast "Sent to reviewer"; comment=""; close}}
@@ -81,6 +81,7 @@ state filter="unapproved"
 state checks=[{"id":3,"kind":"number","message":"Source has $500 and $2,500; target is empty","severity":"error"},{"id":5,"kind":"number","message":"Source says 3 business days; target says 5 Werktagen","severity":"error"},{"id":4,"kind":"tag","message":"Opening tag <b> has no closing tag in the target","severity":"warning"},{"id":2,"kind":"number","message":"Date 14 March 2027 became 14. März 2027, check the format","severity":"info"}]
 state reviewSegs=[{"id":2,"status":"draft","note":"Check the date format"},{"id":3,"status":"new","note":""},{"id":4,"status":"new","note":""},{"id":5,"status":"draft","note":"Number differs"}]
 state selCheck=3
+state reviewNote=""
 App
   Sidebar
     Brand "Segment" icon="translate"
@@ -93,7 +94,7 @@ App
     Nav
       Heading "Review, Claims guide" level=1
       Row gap=8
-        SegmentedButton items=["unapproved","all"] bind=filter
+        SegmentedButton items=["unapproved","all"] @filter
         Button "Approve all clean" icon="done_all" onTap={toast "Approved 2 clean segments"}
     Column pad=24 gap=16
       Grid cols=3 gap=16
@@ -126,12 +127,14 @@ App
               Text.muted "{r.note}" grow
               IconButton "chat_bubble_outline" tooltip="Comment to reviewer" onTap={selCheck=r.id; open note}
   Dialog#note "Note for segment {selCheck}"
-    Input "Comment" bind=reviewNote multiline
+    Input "Comment" @reviewNote multiline
     Button "Save note" onTap={reviewSegs=updateWhere(reviewSegs, r => r.id==selCheck, r => with(r, "note", reviewNote)); toast "Note saved"; close}
 
 ### Projects
 state q=""
 state projects=[{"name":"Claims guide","pair":"EN to DE","done":0.64,"words":640,"due":"Dec 2"},{"name":"Mobile app strings","pair":"EN to FR","done":0.91,"words":2310,"due":"Nov 24"},{"name":"Terms of service","pair":"EN to ES","done":0.22,"words":5800,"due":"Jan 12"}]
+state newName=""
+state lang=""
 Page
   Nav
     Brand "Segment" icon="translate"
@@ -143,7 +146,7 @@ Page
   Section
     Column gap=16
       Heading "Your projects" level=1
-      Input "Search projects" bind=q
+      Input "Search projects" @q
       Grid cols=3 gap=24
         each p in filter(projects, x => contains(lower(x.name), lower(q)))
           Card gap=8
@@ -155,6 +158,6 @@ Page
               Text.caption "Due {p.due}"
             Button.outline "Open" onTap={go editor}
   Dialog#newProject "New project" "Upload a source file to split it into segments"
-    Input "Name" bind=newName
-    Select "Target language" items=["German","French","Spanish"] bind=lang
+    Input "Name" @newName
+    Select "Target language" items=["German","French","Spanish"] @lang
     Button "Create" onTap={emit createProject {"name":newName,"lang":lang}; close}

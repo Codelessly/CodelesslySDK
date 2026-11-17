@@ -31,9 +31,9 @@ App
         Row between
           Text.strong "Volume"
           Text.muted "{volume}%"
-        Slider bind=volume min=0 max=100
+        Slider @volume min=0 max=100
         Text.caption "Set your device volume to about 40% and leave it there for the whole test."
-      Checkbox "I will not change the volume during the test" bind=ack
+      Checkbox "I will not change the volume during the test" @ack
       Row gap=12
         Button.ghost "Loudness tips" icon="warning" onTap={open loud}
         Spacer grow
@@ -106,7 +106,7 @@ App
             IconButton "play_arrow" tooltip="Play word" onTap={play word text=rounds[round].say noise=noise}
             Waveform playing={true} h=40 grow
           Text.caption "Noise {noise} dB"
-        Slider bind=noise min=20 max=70
+        Slider @noise min=20 max=70
       Grid cols=2 gap=12
         each c in rounds[round].choices
           ChoiceChip "{c}" selected={picked==c} onTap={picked=c}
@@ -139,7 +139,7 @@ App
         Card grow gap=12
           Row between middle
             Heading "Hearing by pitch" level=3
-            SegmentedButton bind=band items=["all","left","right"]
+            SegmentedButton @band items=["all","left","right"]
           LineChart labels={pitches} series=[{"name":"Left ear","values":[10,10,12,15,22,35]},{"name":"Right ear","values":[12,12,14,16,20,28]}] h=260 reversed=true normalBand=[0,25] unit="dB"
           Text.caption "Shaded band is the normal range, up to 25 dB. Lower is better."
         Column w=300 gap=12

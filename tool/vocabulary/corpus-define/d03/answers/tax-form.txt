@@ -29,25 +29,25 @@ App
     Nav
       Heading "Income" level=1
       Row gap=8
-        Select bind=filing items=["Single","Married filing jointly","Head of household"]
+        Select @filing items=["Single","Married filing jointly","Head of household"]
         Button.ghost "Save and exit" onTap={toast "Progress saved"}
     Column pad=24 gap=16 scroll maxw=720
       Row between
         Text.muted "Question {q+1} of 4"
         Progress {(q+1)/4} w=160
       if q==0
-        YesNoCard "Did you work for an employer in 2025?" bind=hadJob help="If you received a W-2 from any employer, answer yes. Tips and seasonal work count too."
+        YesNoCard "Did you work for an employer in 2025?" @hadJob help="If you received a W-2 from any employer, answer yes. Tips and seasonal work count too."
         if hadJob=="yes"
-          CurrencyInput "Total wages (W-2 box 1)" bind=wages help="Add up box 1 from every W-2. Do not include tips reported separately."
-          CurrencyInput "Federal tax withheld (box 2)" bind=withheld help="This is the tax your employer already paid for you during the year."
+          CurrencyInput "Total wages (W-2 box 1)" @wages help="Add up box 1 from every W-2. Do not include tips reported separately."
+          CurrencyInput "Federal tax withheld (box 2)" @withheld help="This is the tax your employer already paid for you during the year."
       if q==1
-        YesNoCard "Did you earn interest from a bank or savings account?" bind=hasInterest help="Banks send a 1099-INT if you earned more than $10. Smaller amounts are still taxable."
+        YesNoCard "Did you earn interest from a bank or savings account?" @hasInterest help="Banks send a 1099-INT if you earned more than $10. Smaller amounts are still taxable."
         if hasInterest=="yes"
-          CurrencyInput "Total interest earned" bind=interest help="Add the amounts from all your 1099-INT forms."
+          CurrencyInput "Total interest earned" @interest help="Add the amounts from all your 1099-INT forms."
       if q==2
-        YesNoCard "Did you do any freelance or gig work?" bind=freelance help="Driving, design, tutoring, selling online: if clients paid you directly it is self-employment income."
+        YesNoCard "Did you do any freelance or gig work?" @freelance help="Driving, design, tutoring, selling online: if clients paid you directly it is self-employment income."
         if freelance=="yes"
-          CurrencyInput "Net freelance income" bind=freelanceIncome help="Income minus business expenses. We apply self-employment tax for you."
+          CurrencyInput "Net freelance income" @freelanceIncome help="Income minus business expenses. We apply self-employment tax for you."
       if q==3
         Card gap=12
           Text.strong "Dependents"
@@ -65,6 +65,7 @@ App
         Button "Continue" onTap={q<3 ? q=q+1 : step=4; go documents}
 
 ### Documents
+state fixValue=""
 App
   Sidebar
     Brand "Returnly" icon="receipt_long"
@@ -103,10 +104,11 @@ App
         Button.outline "Back" onTap={go interview}
         Button "Review my return" onTap={step=5; go review}
   Dialog#fixAmount "Correct the amount" "We read this from your upload."
-    CurrencyInput "Amount" bind=fixValue
+    CurrencyInput "Amount" @fixValue
     Button "Save" onTap={docs=updateWhere(docs,x=>x.id==sel,x=>with(x,"amount",fixValue)); close}
 
 ### Review
+state editValue=""
 App
   Sidebar
     Brand "Returnly" icon="receipt_long"
@@ -169,10 +171,13 @@ App
         Button.outline "Back" onTap={go documents}
         Button "Continue to sign" onTap={step=6; go sign}
   Dialog#editField "Edit amount"
-    CurrencyInput "New amount" bind=editValue
+    CurrencyInput "New amount" @editValue
     Button "Save" onTap={sel=="wages" ? wages=editValue : sel=="withheld" ? withheld=editValue : sel=="interest" ? interest=editValue : freelanceIncome=editValue; toast "Updated"; close}
 
 ### Sign
+state sigName=""
+state sigData=""
+state agree=false
 App
   Sidebar
     Brand "Returnly" icon="receipt_long"
@@ -189,13 +194,13 @@ App
       Card gap=8
         Text.strong "Declaration"
         Text.muted "Under penalties of perjury, I declare that I have examined this return and, to the best of my knowledge, it is true, correct and complete."
-      Input "Full legal name" bind=sigName
+      Input "Full legal name" @sigName
       Text.fieldLabel "Draw your signature"
-      SignaturePad bind=sigData h=160 onChange={signed=length(sigData)>0}
+      SignaturePad @sigData h=160 onChange={signed=length(sigData)>0}
       Row between
         Button.ghost "Clear" onTap={sigData=[]; signed=false}
         Text.caption "{signed ? 'Signature captured' : 'Sign above with your finger or mouse'}"
-      Checkbox "I agree to e-file this return" bind=agree
+      Checkbox "I agree to e-file this return" @agree
       Row between
         Button.outline "Back" onTap={go review}
         Button "File my return" onTap={signed && agree && sigName!="" ? open filed : toast "Add your name, signature and agreement"}
@@ -203,7 +208,7 @@ App
     Text "We sent your return to the IRS. {refund >= 0 ? 'Expect your refund of ' : 'Your balance due is '}{money(abs(refund),'$',2)}."
     Button "Done" onTap={close; go interview}
 
-define YesNoCard "question" bind=value help=""
+define YesNoCard "question" @value help=""
   state value=""
   state helpOpen=false
   Card gap=12
@@ -219,21 +224,21 @@ define YesNoCard "question" bind=value help=""
     if helpOpen
       Text.caption "{help}"
 
-define CurrencyInput "label" bind=value help=""
+define CurrencyInput "label" @value help=""
   state value=0
   state helpOpen=false
   Column gap=4
     Text.fieldLabel "{label}"
     Row gap=8 middle
       Text.strong "$"
-      Input type=number bind=value grow
+      Input type=number @value grow
     Text.caption "{money(value,'$',2)}"
     Text.muted "What is this?" onTap={helpOpen=!helpOpen}
     if helpOpen
       Text.caption "{help}"
 
 // A real signature capture surface is not possible; shown as a labelled box.
-define SignaturePad bind=strokes h=160 onChange
+define SignaturePad @strokes h=160 onChange
   state strokes=[]
   Box h={h} radius=8 border=1 fill=#FFFAFAFA center middle onTap={strokes=append(strokes,"stroke"); onChange(strokes)}
     Text.muted "Signature pad"

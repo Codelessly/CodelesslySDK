@@ -26,9 +26,9 @@ App
     Nav
       Heading "Issue 1: Low Tide" level=3
       Row gap=8
-        SegmentedButton bind=tool items=["Draw","Cut","Select"]
-        Toggle "Bleed and safe area" bind=showBleed
-        Toggle "Reading order" bind=showOrder
+        SegmentedButton @tool items=["Draw","Cut","Select"]
+        Toggle "Bleed and safe area" @showBleed
+        Toggle "Reading order" @showOrder
         Button.outline "Spread" icon="auto_stories" onTap={go spread}
         Button "Export" icon="ios_share" onTap={open export}
     Row grow top
@@ -57,7 +57,7 @@ App
               Button.outline "Clear" icon="delete" onTap={emit clearSketch sel}
           Card gap=8
             Text.fieldLabel "Caption box"
-            Input "Caption" "Narration text" multiline bind=draft
+            Input "Caption" "Narration text" multiline @draft
             Button.outline "Set caption" onTap={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",updateWhere(p.panels,x=>x.id==sel,x=>with(x,"caption",draft)))); draft=""}
           Card gap=8
             Row between
@@ -65,17 +65,17 @@ App
               Button.ghost "Add bubble" icon="chat_bubble" onTap={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",updateWhere(p.panels,x=>x.id==sel,x=>with(x,"bubbles",append(x.bubbles,{"id":"b"+(length(x.bubbles)+1),"text":"New line","speaker":"","tailX":0.5,"tailY":0.9})))))}
             each b in find(pages[pageIndex].panels,x=>x.id==sel).bubbles
               Column gap=4
-                Input "Line" bind=b.text
+                Input "Line" @b.text
                 Row gap=8
-                  Select bind=b.style items=["Speech","Thought","Shout","Whisper"]
+                  Select @b.style items=["Speech","Thought","Shout","Whisper"]
                   IconButton "delete" tooltip="Remove bubble" onTap={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",updateWhere(p.panels,x=>x.id==sel,x=>with(x,"bubbles",removeWhere(x.bubbles,y=>y.id==b.id)))))}
                 Text.caption "Drag the tail on the page to the speaker."
           Button.destructive "Delete panel" icon="delete" onTap={pages=updateWhere(pages,p=>p.id==pages[pageIndex].id,p=>with(p,"panels",removeWhere(p.panels,x=>x.id==sel))); sel=""}
   Dialog#export "Export" "Choose what to send out"
     Column gap=12
-      SegmentedButton bind=exportFormat items=["PDF","PNG","CBZ"]
-      Select "Pages" bind=exportScope items=["all","current","spreads"]
-      Toggle "Include bleed" bind=showBleed
+      SegmentedButton @exportFormat items=["PDF","PNG","CBZ"]
+      Select "Pages" @exportScope items=["all","current","spreads"]
+      Toggle "Include bleed" @showBleed
       Row end gap=8
         Button.outline "Cancel" onTap={close}
         Button "Export set" icon="download" onTap={emit export {"format":exportFormat,"scope":exportScope,"bleed":showBleed}; toast "Exporting {exportFormat}"; close}
@@ -85,6 +85,7 @@ state left=0
 state zoom=1
 state pages=[{"id":"p1","title":"Page 1"},{"id":"p2","title":"Page 2"},{"id":"p3","title":"Page 3"},{"id":"p4","title":"Page 4"},{"id":"p5","title":"Page 5"},{"id":"p6","title":"Page 6"}]
 state coverAlone=true
+state fmt=""
 App
   Main
     Nav
@@ -92,8 +93,8 @@ App
         IconButton "arrow_back" tooltip="Back to editor" onTap={go editor}
         Heading "Page turn preview" level=3
       Row gap=8
-        Toggle "Cover stands alone" bind=coverAlone
-        Slider bind=zoom min=0.5 max=2 w=140
+        Toggle "Cover stands alone" @coverAlone
+        Slider @zoom min=0.5 max=2 w=140
         Button "Export spreads" icon="ios_share" onTap={open exportSpreads}
     Column pad=24 gap=16 center
       Row center middle gap=0
@@ -109,7 +110,7 @@ App
           Chip "Page 3 opens on a reveal" onTap={emit flag 3}
   Dialog#exportSpreads "Export spreads" "Each spread becomes one image"
     Column gap=12
-      Select "Format" bind=fmt items=["PDF","PNG"]
+      Select "Format" @fmt items=["PDF","PNG"]
       Row end gap=8
         Button.outline "Cancel" onTap={close}
         Button "Export" onTap={emit exportSpreads fmt; toast "Spreads exported"; close}
@@ -118,6 +119,7 @@ App
 state tab="bubbles"
 state sel=""
 state lettering=[{"id":"l1","page":1,"panel":2,"kind":"Speech","speaker":"Odd","text":"You're late, Mara."},{"id":"l2","page":1,"panel":1,"kind":"Caption","speaker":"","text":"Dawn over the harbor."},{"id":"l3","page":1,"panel":3,"kind":"Shout","speaker":"Mara","text":"The tide is turning!"}]
+state fmt=""
 Page
   Nav sticky
     Brand "Gutters" icon="grid_view"
@@ -150,7 +152,7 @@ Page
               Text "{l.panel}" w=40
               Text.muted "{l.kind}" w=90
               Text "{l.speaker}" w=110
-              Input "Text" bind=l.text grow
+              Input "Text" @l.text grow
               IconButton "more_vert" tooltip="More" w=40 onTap={sel=l.id; open lineMenu}
   Footer
     Row between
@@ -162,7 +164,7 @@ Page
     MenuItem "Delete" icon="delete" onTap={lettering=removeWhere(lettering,x=>x.id==sel)}
   Dialog#exportAll "Export lettering" "A script for the letterer"
     Column gap=12
-      SegmentedButton bind=fmt items=["CSV","TXT","PDF"]
+      SegmentedButton @fmt items=["CSV","TXT","PDF"]
       Row end gap=8
         Button.outline "Cancel" onTap={close}
         Button "Export" onTap={emit exportLettering fmt; toast "Exported"; close}

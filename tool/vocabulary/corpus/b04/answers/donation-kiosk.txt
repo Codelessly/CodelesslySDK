@@ -29,12 +29,12 @@ App
           IconButton "lock" tooltip="Staff" onTap={emit admin}
       if step=="home"
         Column grow center middle gap=24 pad=48
-          Pages bind=story h=360 items=stories peek=0.9
+          Pages @story h=360 items=stories peek=0.9
             Card gap=12 animate=fade
               Image "{item.img}" h=200
               Heading "{item.title}" level=1
               Text.muted "{item.text}"
-          Dots bind=story count={length(stories)}
+          Dots @story count={length(stories)}
           Button "Tap to give" size=large animate=pulse onTap={step="amount"; idle=30}
       if step=="amount"
         Column grow center gap=24 pad=32
@@ -51,7 +51,7 @@ App
         Column grow center gap=16 pad=32 maxw=480
           Heading "Enter an amount" level=1
           Text "£{coalesce(other,'0')}" size=56 weight=700 center
-          Keypad bind=other maxlength=5 decimal
+          Keypad @other maxlength=5 decimal
           Row gap=12
             Button.ghost "Back" onTap={step="amount"; other=""}
             Button "Continue" grow onTap={other!="" && other>0 ? {amount=other; step="aid"} : toast "Enter an amount"}
@@ -59,13 +59,13 @@ App
         Column grow gap=16 pad=32
           Heading "Make your £{amount} worth £{fixed(amount*1.25,2)}" level=1
           Text.muted "Gift Aid lets us claim 25p for every £1 from the taxman, at no cost to you."
-          Toggle "Yes, I am a UK taxpayer and want to Gift Aid my donation" bind=giftAid
+          Toggle "Yes, I am a UK taxpayer and want to Gift Aid my donation" @giftAid
           if giftAid
             Row gap=12
-              Input "First name" bind=first onTap={field="first"} grow
-              Input "Last name" bind=last onTap={field="last"} grow
-              Input "Postcode" bind=postcode onTap={field="postcode"} w=160
-            Keyboard bind={field=="first" ? first : field=="last" ? last : postcode} onKey={field=="first" ? first=result : field=="last" ? last=result : postcode=result}
+              Input "First name" @first onTap={field="first"} grow
+              Input "Last name" @last onTap={field="last"} grow
+              Input "Postcode" @postcode onTap={field="postcode"} w=160
+            Keyboard value={field=="first" ? first : field=="last" ? last : postcode} onKey={field=="first" ? first=result : field=="last" ? last=result : postcode=result}
           Row gap=12
             Button.ghost "Back" onTap={step="amount"}
             Button "Continue to payment" grow onTap={giftAid && (trim(first)=="" || trim(last)=="" || trim(postcode)=="") ? toast "Please complete your name and postcode" : step="tap"}
@@ -82,9 +82,9 @@ App
             Icon "check_circle" size=96 color=#FF2E9E5B animate=pop
             Heading "Thank you, {coalesce(first,'friend')}!" level=1
             Text.muted "Your £{amount} gift has been received."
-            Checkbox "Email me a receipt" bind=wantReceipt
+            Checkbox "Email me a receipt" @wantReceipt
             if wantReceipt
-              Input "Email" "you@example.com" type=email bind=email
+              Input "Email" "you@example.com" type=email @email
             Button "Finish" size=large onTap={wantReceipt && email=="" ? toast "Enter your email" : {wantReceipt ? emit sendReceipt {"email":email,"amount":amount,"giftAid":giftAid} : emit gift {"amount":amount}; step="home"; amount=0; other=""; giftAid=false; first=""; last=""; postcode=""; email=""; wantReceipt=false}}
 
 ### Admin PIN
@@ -104,7 +104,7 @@ Page
           Text "{length(pin)>3 ? '●' : '○'}" size=32
         if tries>0
           Text.danger "Wrong PIN. {3-tries} attempts left."
-        Keypad bind=pin maxlength=4 onChange={length(result)==4 ? {result=="4817" ? {unlocked=true; tries=0} : {tries=tries+1; pin=""; tries>=3 ? emit lockout : toast "Wrong PIN"}} : }
+        Keypad @pin maxlength=4 onChange={length(result)==4 ? {result=="4817" ? {unlocked=true; tries=0} : {tries=tries+1; pin=""; tries>=3 ? emit lockout : toast "Wrong PIN"}} : }
         Button.ghost "Back to kiosk" onTap={emit home}
     if unlocked
       Column gap=16

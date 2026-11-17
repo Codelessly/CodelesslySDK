@@ -12,13 +12,13 @@ App
     NavItem "Run" icon="play_circle" onTap={go run}
     NavItem "Schema diff" icon="difference" onTap={go schema-diff}
     Spacer grow
-    Select bind=env items=["local","staging","production"]
+    Select @env items=["local","staging","production"]
     Text.muted "Connected to {env}"
   Main
     Nav
       Heading "Migrations" level=1
       Row gap=8
-        Input "Search" "name or id" bind=q w=220
+        Input "Search" "name or id" @q w=220
         Button.outline "Refresh" onTap={toast "Checked {env} for new migrations"}
         Button "Plan next" onTap={sel="0043"; go plan}
     Column pad=24 gap=16
@@ -88,7 +88,7 @@ App
     Nav
       Heading "Plan for {sel}" level=1
       Row gap=8
-        Select bind=env items=["local","staging","production"]
+        Select @env items=["local","staging","production"]
         Button.outline "Dry run" onTap={estimate=0; dry=false; estimating=true}
         Button "Run migration" onTap={env=="production" ? open prodlock : go run}
     Column pad=24 gap=16
@@ -139,8 +139,8 @@ App
           Text.muted "Dry run reads the plan against {env} and changes nothing."
   Dialog#prodlock "Unlock production" "Production is locked. Type its name to continue."
     Text.muted "You are about to run 0043 on production. It locks orders."
-    Input "Type production to confirm" bind=typed
-    Checkbox "I have checked the dry run and a recent backup exists" bind=acked
+    Input "Type production to confirm" @typed
+    Checkbox "I have checked the dry run and a recent backup exists" @acked
     Row gap=8 end
       Button.ghost "Cancel" onTap={typed=""; acked=false; close}
       Button.destructive "Unlock and run" onTap={typed=="production" && acked ? {close; go run} : toast "Type production and tick the box"}
@@ -223,7 +223,7 @@ App
     Nav
       Heading "Schema diff" level=1
       Row gap=8
-        SegmentedButton bind=view items=["split","unified"]
+        SegmentedButton @view items=["split","unified"]
         Button.outline "Copy as SQL" onTap={copy "ALTER TABLE orders ALTER COLUMN status SET NOT NULL"; toast "Copied"}
     Column pad=24 gap=16
       Row gap=12

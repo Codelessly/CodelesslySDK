@@ -11,6 +11,9 @@ state tray=[]
 state project=[]
 state current="Fraunces"
 state applied=[]
+state target=""
+state roleHead=false
+state roleBody=false
 App
   Sidebar
     Brand "Specimen" icon="match_case"
@@ -23,19 +26,19 @@ App
     Nav
       Heading "Typefaces" level=1
       Row gap=8
-        Input "Search fonts" bind=q w=220
+        Input "Search fonts" @q w=220
         Button.outline "Filters" icon="tune" show=phone onTap={open filters}
     Column pad=24 gap=16 scroll
       Card gap=12
-        Input "Sample text" bind=sample
+        Input "Sample text" @sample
         Row gap=24 middle
           Column grow gap=4
             Text.caption "Size {size}px"
-            Slider bind=size min=12 max=96
+            Slider @size min=12 max=96
           Column grow gap=4
             Text.caption "Weight {weight}"
-            Slider bind=weight min=100 max=900 step=100
-          Toggle "Italic" bind=italic
+            Slider @weight min=100 max=900 step=100
+          Toggle "Italic" @italic
       Row gap=8 hide=phone
         ChoiceChip "All" selected={cat=="All"} onTap={cat="All"}
         ChoiceChip "Serif" selected={cat=="Serif"} onTap={cat="Serif"}
@@ -44,7 +47,7 @@ App
         ChoiceChip "Display" selected={cat=="Display"} onTap={cat="Display"}
         Spacer grow
         Text.muted "Styles"
-        SegmentedButton bind=minStyles items=[1,4,12]
+        SegmentedButton @minStyles items=[1,4,12]
       Grid cols=3 gap=16
         each f in filter(fonts,f=>(cat=="All"||f.cat==cat)&&f.styles>=minStyles&&contains(lower(f.name),lower(q)))
           Card gap=8 onTap={current=f.name; go font}
@@ -76,7 +79,7 @@ Sheet#filters "Filters"
       ChoiceChip "Mono" selected={cat=="Mono"} onTap={cat="Mono"}
       ChoiceChip "Display" selected={cat=="Display"} onTap={cat="Display"}
     Text.fieldLabel "At least this many styles"
-    SegmentedButton bind=minStyles items=[1,4,12]
+    SegmentedButton @minStyles items=[1,4,12]
     Button "Show results" onTap={close}
 Dialog#tray "Compare" "Same sample, same size, side by side"
   Column gap=12
@@ -94,15 +97,22 @@ Dialog#tray "Compare" "Same sample, same size, side by side"
       Button "Done" onTap={close}
 Dialog#collect "Add to project" "{current}"
   Column gap=12
-    Select "Project" bind=target items=["Brand refresh","Marketing site","Mobile app"]
+    Select "Project" @target items=["Brand refresh","Marketing site","Mobile app"]
     Row gap=8
-      Checkbox "Headings" bind=roleHead
-      Checkbox "Body" bind=roleBody
+      Checkbox "Headings" @roleHead
+      Checkbox "Body" @roleBody
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Add" onTap={project=append(project,{"name":current,"project":coalesce(target,"Brand refresh")}); toast "{current} added to {coalesce(target,\"Brand refresh\")}"; close}
 
 ### Font page
+state sample=""
+state size=12
+state italic=false
+state weight=100
+state opsz=9
+state soft=0
+state target=""
 Page
   Nav sticky
     Brand "Specimen" icon="match_case"
@@ -119,12 +129,12 @@ Page
         Badge.info "Variable"
       Heading "{current}" level=1
       Text.muted "18 styles, designed by Undercase Type. Open source under the OFL."
-      Input "Try your own text" bind=sample
+      Input "Try your own text" @sample
       Row gap=24 middle
         Column grow gap=4
           Text.caption "Size {size}px"
-          Slider bind=size min=12 max=160
-        Toggle "Italic" bind=italic
+          Slider @size min=12 max=160
+        Toggle "Italic" @italic
       Text "{sample}" font={current} size={size} weight={weight} italic={italic}
   Section tint
     Column gap=16
@@ -140,13 +150,13 @@ Page
       Grid cols=3 gap=24
         Column gap=4
           Text.caption "Weight {weight}"
-          Slider bind=weight min=100 max=900
+          Slider @weight min=100 max=900
         Column gap=4
           Text.caption "Optical size {opsz}"
-          Slider bind=opsz min=9 max=144
+          Slider @opsz min=9 max=144
         Column gap=4
           Text.caption "Softness {soft}"
-          Slider bind=soft min=0 max=100
+          Slider @soft min=0 max=100
       Text "{sample}" font={current} size=48 weight={weight} axes={{"opsz":opsz,"SOFT":soft}}
   Section
     Column gap=16
@@ -166,7 +176,7 @@ Page
       Text.muted "Fonts shown are examples"
 Dialog#collect "Add to project" "{current}"
   Column gap=12
-    Select "Project" bind=target items=["Brand refresh","Marketing site","Mobile app"]
+    Select "Project" @target items=["Brand refresh","Marketing site","Mobile app"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Add" onTap={project=append(project,{"name":current,"project":coalesce(target,"Brand refresh")}); toast "Added to project"; close}
@@ -185,7 +195,7 @@ App
     Nav
       Heading "Project" level=1
       Row gap=8
-        Select bind=selectedProject items=["Brand refresh","Marketing site","Mobile app"] w=200
+        Select @selectedProject items=["Brand refresh","Marketing site","Mobile app"] w=200
         Button "Export CSS" icon="download" onTap={emit exportCss {selectedProject}}
     Column pad=24 gap=16 scroll
       if isEmpty(filter(project,p=>p.project==selectedProject))

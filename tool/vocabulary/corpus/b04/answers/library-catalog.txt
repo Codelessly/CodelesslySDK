@@ -22,7 +22,7 @@ App
     Nav
       Heading "Catalog" level=1
       Row gap=8
-        Input "Search title, author or ISBN" bind=q w=280
+        Input "Search title, author or ISBN" @q w=280
         Button.outline "Filters" onTap={open filters}
     Column pad=24 gap=16 scroll
       Row gap=8
@@ -30,7 +30,7 @@ App
         FilterChip "E-book" selected={contains(formats,"E-book")} onTap={formats=contains(formats,"E-book") ? without(formats,"E-book") : append(formats,"E-book")}
         FilterChip "Audiobook" selected={contains(formats,"Audiobook")} onTap={formats=contains(formats,"Audiobook") ? without(formats,"Audiobook") : append(formats,"Audiobook")}
         Spacer grow
-        Toggle "Available now" bind=onlyAvail
+        Toggle "Available now" @onlyAvail
       Text.muted "{count(books,b=>(q==\"\" || contains(lower(b.title),lower(q)) || contains(lower(b.author),lower(q))) && (length(formats)==0 || contains(formats,b.format)) && (lang==\"Any\" || b.lang==lang) && (!onlyAvail || b.avail))} results"
       Grid cols=2 gap=16
         each b in books
@@ -52,9 +52,9 @@ App
                 Button.outline "Add to list" onTap={readingList=contains(readingList,b.id) ? readingList : append(readingList,b.id); toast "Added to reading list"}
                 Button "Details" onTap={sel=b.id; go book}
   Sheet#filters "Filters"
-    Select "Language" items=["Any","English","French","Spanish"] bind=lang
+    Select "Language" items=["Any","English","French","Spanish"] @lang
     SegmentedButton items=["Print","E-book","Audiobook"] onChange={formats=[result]}
-    Toggle "Available now" bind=onlyAvail
+    Toggle "Available now" @onlyAvail
     Row gap=8
       Button.ghost "Clear" onTap={formats=[]; lang="Any"; onlyAvail=false}
       Button "Show results" onTap={close}
@@ -118,7 +118,7 @@ App
               if c.n==0
                 Badge.neutral "Out"
   Dialog#hold "Place a hold" "Pick where you want to collect it"
-    Select "Pickup branch" items=["Central","Riverside","Eastgate"] bind=pickup
+    Select "Pickup branch" items=["Central","Riverside","Eastgate"] @pickup
     Card gap=4
       Text.muted "Queue position"
       Text.strong "4 of 6 holds, about 3 weeks"
@@ -198,11 +198,11 @@ App
         IconButton "bookmark" tooltip="Bookmark this page" onTap={bookmarks=contains(bookmarks,page) ? without(bookmarks,page) : append(bookmarks,page); toast "Bookmark saved"}
         IconButton "list" tooltip="Bookmarks" onTap={open marks}
     Column pad=24 gap=16 center maxw=640
-      Pages bind=page h=360
+      Pages @page h=360
         each p in pages
           Box pad=24 fill={theme=="Dark" ? "#FF1B1B1F" : theme=="Sepia" ? "#FFF4ECD8" : "#FFFFFFFF"} radius=8
             Text "{p.text}" size={fontSize} color={theme=="Dark" ? "#FFE6E6E6" : "#FF222222"}
-      Dots bind=page count=3
+      Dots @page count=3
     Footer
       Column gap=4 pad=12
         Progress {(page+1)/length(pages)}
@@ -214,9 +214,9 @@ App
       Text.strong "Font size"
       Row gap=8 middle
         Text.small "A"
-        Slider bind=fontSize min=12 max=32 grow
+        Slider @fontSize min=12 max=32 grow
         Text "A" size=24
-      SegmentedButton items=["Light","Sepia","Dark"] bind=theme
+      SegmentedButton items=["Light","Sepia","Dark"] @theme
   Sheet#marks "Bookmarks"
     if length(bookmarks)==0
       Text.muted "No bookmarks yet."

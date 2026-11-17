@@ -4,6 +4,7 @@ state sel="c1"
 state filter="all"
 state caches=[{"id":"c1","name":"Old Mill Stash","type":"Traditional","size":"Small","diff":2,"terrain":1.5,"dist":340,"found":false,"x":0.3,"y":0.4,"hint":"Under the third stone step, behind the ivy.","desc":"A small box tucked near the old mill wheel. Bring a pen, the logbook is damp.","finds":86},{"id":"c2","name":"Heron Point Puzzle","type":"Puzzle","size":"Micro","diff":4,"terrain":2,"dist":820,"found":false,"x":0.6,"y":0.25,"hint":"Magnetic, below the bench rail.","desc":"Solve the cipher on the plaque to get the final coordinates.","finds":31},{"id":"c3","name":"Bridge Troll","type":"Mystery","size":"Regular","diff":3,"terrain":3,"dist":1260,"found":true,"x":0.75,"y":0.6,"hint":"Look up, not down.","desc":"A regular-sized box guarded by a very serious troll statue.","finds":142},{"id":"c4","name":"Kestrel Ridge","type":"Multi","size":"Large","diff":3.5,"terrain":4.5,"dist":2100,"found":false,"x":0.2,"y":0.75,"hint":"Inside the hollow trunk, wrapped in green cloth.","desc":"Three stages up the ridge. Stage one is at the trailhead sign.","finds":19}]
 state trackables=[{"id":"t1","name":"Copper Fox","code":"TB4K2Z","from":"Lisbon","miles":1284,"holder":"you"},{"id":"t2","name":"Paper Boat","code":"TB9M1Q","from":"Hamburg","miles":402,"holder":"Heron Point Puzzle"},{"id":"t3","name":"Lucky Dice","code":"TB2X7R","from":"Seattle","miles":5120,"holder":"Kestrel Ridge"}]
+state q=""
 App
   Sidebar
     Brand "Burrow" icon="travel_explore"
@@ -19,13 +20,13 @@ App
     Nav
       Heading "Nearby caches" level=1
       Row gap=8
-        Input "Search caches" bind=q w=220
+        Input "Search caches" @q w=220
         FilterChip "All" selected={filter=="all"} onTap={filter="all"}
         FilterChip "Unfound" selected={filter=="unfound"} onTap={filter="unfound"}
         FilterChip "Found" selected={filter=="found"} onTap={filter="found"}
     Row gap=0 grow
       Column grow
-        Map h=560 center=[47.61,-122.33] zoom=14 bind=sel
+        Map h=560 center=[47.61,-122.33] zoom=14 @sel
           each c in caches
             Marker "{c.name}" lat={47.6+c.y*0.02} lng={-122.34+c.x*0.02} icon={c.type=="Puzzle" ? "extension" : c.type=="Multi" ? "alt_route" : c.type=="Mystery" ? "help" : "inventory_2"} size={c.size} color={c.found ? "#FF2E7D32" : "#FFD97706"} onTap={sel=c.id}
       Pane w=340 pad=16 gap=12
@@ -133,6 +134,8 @@ state note=""
 state photos=[]
 state date=today()
 state logs=[]
+state moved=false
+state tb=""
 Page
   Nav
     Row gap=8 middle
@@ -140,12 +143,12 @@ Page
       Heading "Log Old Mill Stash" level=3
   Section narrow
     Column gap=16
-      SegmentedButton items=["Found it","Did not find it"] bind=result
-      DatePicker "Date" bind=date
-      Input "Your log" "What did you see out there?" multiline bind=note
-      Toggle "Moved a trackable" bind=moved
+      SegmentedButton items=["Found it","Did not find it"] @result
+      DatePicker "Date" @date
+      Input "Your log" "What did you see out there?" multiline @note
+      Toggle "Moved a trackable" @moved
       if moved
-        Select "Trackable" items=["Copper Fox","Paper Boat","Lucky Dice"] bind=tb
+        Select "Trackable" items=["Copper Fox","Paper Boat","Lucky Dice"] @tb
       Row gap=8
         each p in photos
           Image "{p}" h=80 w=80

@@ -33,8 +33,8 @@ App
           Card gap=12
             Text.panelTitle "New reading"
             Row gap=12
-              Input "Start volume (mL)" bind=startV type=number grow
-              Input "End volume (mL)" bind=endV type=number grow
+              Input "Start volume (mL)" @startV type=number grow
+              Input "End volume (mL)" @endV type=number grow
             Row gap=8 middle
               Text.fieldLabel "Used volume"
               Text.heading "{fixed(max(0,endV-startV),2)} mL"
@@ -54,7 +54,7 @@ App
           Text.panelTitle "Repeated trials"
           Row gap=8 middle
             Text.fieldLabel "Spread limit (mL)"
-            Input "Limit" bind=limit type=number w=90
+            Input "Limit" @limit type=number w=90
         Row gap=8 border-bottom=#FFCCCCCC
           Text.fieldLabel "#" w=40
           Text.fieldLabel "Start" w=80
@@ -78,8 +78,8 @@ App
             if last(sortBy(map(trials,t=>t.end-t.start),v=>v))-first(sortBy(map(trials,t=>t.end-t.start),v=>v))<=limit
               Badge.success "Within limit"
   Dialog#addTrial "Add trial" "Enter the burette readings"
-    Input "Start volume (mL)" bind=startV type=number
-    Input "End volume (mL)" bind=endV type=number
+    Input "Start volume (mL)" @startV type=number
+    Input "End volume (mL)" @endV type=number
     Text.muted "Used: {fixed(max(0,endV-startV),2)} mL"
     Button "Add" onTap={endV>startV ? {trials=append(trials,{"id":nextId,"start":startV,"end":endV}); nextId=nextId+1; close} : toast "End volume must exceed start"}
   Dialog#confirmClear "Clear all trials?" "This removes every logged run."
@@ -118,8 +118,8 @@ App
         Column w=300 gap=16
           Card gap=12
             Text.panelTitle "Add a point"
-            Input "Volume (mL)" bind=newV type=number
-            Input "pH" bind=newPh type=number
+            Input "Volume (mL)" @newV type=number
+            Input "pH" @newPh type=number
             Button "Plot point" onTap={phPoints=sortBy(append(phPoints,{"v":newV,"ph":newPh}),p=>p.v); toast "Point plotted"}
           Card gap=8
             Text.panelTitle "Readings"
@@ -152,8 +152,8 @@ App
       Card gap=12
         Text.panelTitle "Analyte"
         Row gap=12
-          Input "Acid concentration (mol/L)" bind=acidConc type=number grow
-          Input "Aliquot volume (mL)" bind=acidVol type=number grow
+          Input "Acid concentration (mol/L)" @acidConc type=number grow
+          Input "Aliquot volume (mL)" @acidVol type=number grow
       Card gap=8 center
         Text.fieldLabel "NaOH concentration"
         Row gap=8 middle center

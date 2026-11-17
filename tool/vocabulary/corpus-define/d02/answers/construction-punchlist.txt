@@ -18,7 +18,7 @@ App
     Nav
       Heading "Floor plan" level=1
       Row gap=8
-        SegmentedButton bind=level items=["Level 1","Level 2","Level 3"]
+        SegmentedButton @level items=["Level 1","Level 2","Level 3"]
         Button "Report" onTap={go report}
     Column pad=24 gap=16
       Row gap=16 top
@@ -26,7 +26,7 @@ App
           Row between
             Text.strong "{level}, Block B"
             Text.muted "Tap the plan to drop a pin"
-          FloorPlan pins={snags} bind=sel plan="{level}" onPlace={draft=with(draft,"title",""); open pin} onPick={open pin}
+          FloorPlan pins={snags} @sel plan="{level}" onPlace={draft=with(draft,"title",""); open pin} onPick={open pin}
         Column w=300 gap=12
           Card gap=8
             Text.strong "Pin {snags[sel].id}"
@@ -49,18 +49,18 @@ App
               Text.strong "{count(snags,s=>s.status=='Fixed')}"
 Dialog#pin "Snag pin" "Describe the defect and mark up the photo"
   Column gap=12 scroll
-    Input "Title" "What is wrong" bind=draft.title
+    Input "Title" "What is wrong" @draft.title
     Row gap=12
-      Select "Trade" items=["Tiling","Painting","Electrical","Plumbing","Joinery","Flooring"] bind=draft.trade grow
-      Select "Priority" items=["Low","Medium","High","Critical"] bind=draft.priority grow
+      Select "Trade" items=["Tiling","Painting","Electrical","Plumbing","Joinery","Flooring"] @draft.trade grow
+      Select "Priority" items=["Low","Medium","High","Critical"] @draft.priority grow
     Row gap=12
-      Select "Assignee" items=["Marta Kowalski","Dev Patel","Luis Ortega","Tom Reilly"] bind=draft.assignee grow
-      DatePicker "Due date" bind=draft.due grow
-    PhotoMarkup src="{snags[sel].photo}" bind=marks tool="arrow" color=#FFDC2626 h=200
+      Select "Assignee" items=["Marta Kowalski","Dev Patel","Luis Ortega","Tom Reilly"] @draft.assignee grow
+      DatePicker "Due date" @draft.due grow
+    PhotoMarkup src="{snags[sel].photo}" @marks tool="arrow" color=#FFDC2626 h=200
     Row between
       Text.muted "{length(marks)} arrows drawn"
       Button.ghost "Clear markup" onTap={marks=[]}
-    Input "Note" bind=draft.note multiline
+    Input "Note" @draft.note multiline
     Row end gap=8
       Button.outline "Cancel" onTap={close}
       Button "Save pin" onTap={draft.title=="" ? toast "Add a title" : {snags=append(snags,with(with(draft,"id",length(snags)+1),"status","Open")); marks=[]; toast "Pin saved"; close}}
@@ -83,7 +83,7 @@ App
     Nav
       Heading "Snag list" level=1
       Row gap=8
-        Select "Trade" items=["All","Tiling","Painting","Electrical","Plumbing","Joinery"] bind=trade w=160
+        Select "Trade" items=["All","Tiling","Painting","Electrical","Plumbing","Joinery"] @trade w=160
         Button.outline "Export" onTap={go report}
     Column pad=24 gap=16
       Row gap=8
@@ -149,12 +149,12 @@ App
           Text.danger "{count(snags,s=>s.status!='Fixed')} snags still outstanding"
       Card gap=12
         Text.strong "Contractor sign-off"
-        Input "Full name" "Print your name" bind=name
-        SignaturePad bind=sig h=160 hint="Sign here"
+        Input "Full name" "Print your name" @name
+        SignaturePad @sig h=160 hint="Sign here"
         Row between
           Text.muted "{length(sig)} strokes"
           Button.ghost "Clear" onTap={sig=[]}
-        Checkbox "I confirm the work listed as fixed is complete" bind=agreed
+        Checkbox "I confirm the work listed as fixed is complete" @agreed
         Button "Sign off" onTap={name=="" || isEmpty(sig) || !agreed ? toast "Name, signature and confirmation are needed" : {signed=true; emit signoff name; toast "Signed off"}}
       if signed
         Card gap=8 animate=fade
@@ -206,7 +206,7 @@ Page
         Button.outline "Back to list" onTap={go snag-list}
 
 // A plan with pins dropped on it; a real drawing would be an image under the pins.
-define FloorPlan pins=[] bind=selected plan="Level 1" onPlace onPick
+define FloorPlan pins=[] @selected plan="Level 1" onPlace onPick
   Stack h=360 fill=#FFF8FAFC radius=8 border=1 onTap={onPlace(result)}
     Box x=20 y=20 w=260 h=140 border=2
       Text.muted "Living"
@@ -225,7 +225,7 @@ define FloorPlan pins=[] bind=selected plan="Level 1" onPlace onPick
         Text "{pin.id}" color=#FFFFFFFF weight=700
 
 // Shows a photo; drawing arrows on it is stored as a list of strokes.
-define PhotoMarkup src="" bind=marks tool="arrow" color=#FFDC2626 h=200
+define PhotoMarkup src="" @marks tool="arrow" color=#FFDC2626 h=200
   state marks=[]
   Stack h={h} radius=8 fill=#FFE5E7EB drop=none onTap={marks=append(marks,{"tool":tool,"at":result})}
     Image "{src}" h={h}
@@ -239,13 +239,13 @@ define BeforeAfter before="" after="" h=240
     Image "{after}" h={h}
     Box w="{at}%" h={h}
       Image "{before}" h={h}
-    Slider bind=at min=0 max=100
+    Slider @at min=0 max=100
     Row between
       Badge.neutral "Before"
       Badge.success "After"
 
 // A pad you draw a signature on; strokes are collected in the list.
-define SignaturePad bind=sig hint="Sign here" h=160
+define SignaturePad @sig hint="Sign here" h=160
   state sig=[]
   Stack h={h} fill=#FFFFFFFF radius=8 border=1 onTap={sig=append(sig,result)}
     if isEmpty(sig)

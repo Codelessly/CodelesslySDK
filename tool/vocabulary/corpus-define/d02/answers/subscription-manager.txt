@@ -46,7 +46,7 @@ App
             Text.muted "{length(subs)} active subscriptions"
           Row gap=8 middle
             Text.small "Monthly"
-            Toggle bind=yearly
+            Toggle @yearly
             Text.small "Yearly"
       each s in filter(subs, x=>x.rise>0)
         Card gap=8 fill=#FFFEE2E2
@@ -83,19 +83,19 @@ App
       Button.outline "Close" onTap={close}
       Button.destructive "I cancelled it" onTap={subs=removeWhere(subs, x=>x.id==sel); toast "Marked as cancelled"; close}
   Dialog#addCatalogue "Add from catalogue" "Pick a service and set the details"
-    Select "Service" items={catalogue} bind=pick
-    Input "Price" type=number bind=newPrice
-    SegmentedButton items=["Monthly","Yearly"] bind=newCycle
-    DatePicker "First bill" bind=newFirst
-    Select "Remind me" items=["Same day","1 day before","3 days before","1 week before"] bind=newRemind
+    Select "Service" items={catalogue} @pick
+    Input "Price" type=number @newPrice
+    SegmentedButton items=["Monthly","Yearly"] @newCycle
+    DatePicker "First bill" @newFirst
+    Select "Remind me" items=["Same day","1 day before","3 days before","1 week before"] @newRemind
     Button "Add" onTap={pick=="" ? toast "Choose a service" : {subs=append(subs, {"id":length(subs)+10,"name":pick,"cat":"Other","price":coalesce(newPrice,0),"cycle":lower(newCycle),"next":formatDate(newFirst,"MMM d"),"days":7,"color":"#FF2563EB","rise":0,"trial":false}); toast "Added {pick}"; close}}
   Dialog#addManual "Add by hand" "For anything not in the catalogue"
-    Input "Name" bind=newName
-    Select "Category" items=["Streaming","Music","Work","Health","Storage","Other"] bind=newCat
-    Input "Price" type=number bind=newPrice
-    SegmentedButton items=["Monthly","Yearly"] bind=newCycle
-    DatePicker "First bill" bind=newFirst
-    Select "Remind me" items=["Same day","1 day before","3 days before","1 week before"] bind=newRemind
+    Input "Name" @newName
+    Select "Category" items=["Streaming","Music","Work","Health","Storage","Other"] @newCat
+    Input "Price" type=number @newPrice
+    SegmentedButton items=["Monthly","Yearly"] @newCycle
+    DatePicker "First bill" @newFirst
+    Select "Remind me" items=["Same day","1 day before","3 days before","1 week before"] @newRemind
     Button "Add" onTap={newName=="" ? toast "Name it first" : {subs=append(subs, {"id":length(subs)+10,"name":newName,"cat":newCat,"price":coalesce(newPrice,0),"cycle":lower(newCycle),"next":formatDate(newFirst,"MMM d"),"days":7,"color":"#FF2563EB","rise":0,"trial":false}); toast "Added {newName}"; newName=""; close}}
 
 ### Calendar

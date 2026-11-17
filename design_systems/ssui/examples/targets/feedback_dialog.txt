@@ -3,8 +3,8 @@ state note=""
 state sent=false
 Dialog "What went wrong?" description="Your note goes to the team with this answer."
   if !sent
-    SegmentedControl bind=reason options=["Not accurate","Too long","Off topic"]
-    RichTextField bind=note placeholder="Tell us more (optional)" minLines=3
+    SegmentedControl @reason options=["Not accurate","Too long","Off topic"]
+    RichTextField @note placeholder="Tell us more (optional)" minLines=3
     Row end gap=8
       Button.ghost "Cancel" onTap={emit cancel}
       Button "Send feedback" onTap={sent=true; emit feedback reason}

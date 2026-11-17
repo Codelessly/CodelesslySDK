@@ -13,8 +13,8 @@ Page
       Heading "Everyone gets a vote" level=1
       Text.muted "Join a room with its code, add songs, and let the group decide what plays next."
       Card gap=12
-        Input "Room code" "QJ-4821" bind=code
-        Input "Your name" "Maya" bind=name
+        Input "Room code" "QJ-4821" @code
+        Input "Your name" "Maya" @name
         Text.fieldLabel "Your colour"
         Row gap=8
           ChoiceChip "Violet" selected={color=="#FF7B2DFF"} onTap={color="#FF7B2DFF"}
@@ -104,7 +104,7 @@ App
       Card gap=8
         Text.strong "Add a song"
         Row gap=8 middle
-          Input "Search songs" "Title or artist" bind=q grow
+          Input "Search songs" "Title or artist" @q grow
           IconButton "close" tooltip="Clear search" hidden={q==""} onTap={q=""}
         Text.caption "You have added {count(queue,s=>s.by==\"Maya Reyes\")} of {maxAdds} songs"
         Progress {count(queue,s=>s.by=="Maya Reyes")/maxAdds}
@@ -163,7 +163,7 @@ App
     Nav
       Heading "Played tonight" level=1
       Row gap=8
-        Input "Search history" bind=hq w=220
+        Input "Search history" @hq w=220
         Button.outline "Export playlist" icon="download" onTap={emit exportHistory; toast "Playlist saved"}
     Column pad=24 gap=16 scroll
       Row gap=8
@@ -214,7 +214,7 @@ Page
   Nav
     Brand "Party mode" icon="celebration"
     Row gap=8
-      Toggle "Colours moving" bind=running
+      Toggle "Colours moving" @running
       Button.outline "Back to queue" onTap={go queue}
   Section bleed
     Stack center middle h=520
@@ -228,7 +228,7 @@ Page
   Section
     Column gap=16 maxw=720
       Heading "Lighting" level=3
-      Select "Colour scheme" items=["Neon","Sunset","Ocean","Mono"] bind=scheme onChange={palette=result=="Neon"?["#FFFF2D95","#FF7B2DFF","#FF2DD4FF","#FFFFD42D"]:result=="Sunset"?["#FFFF6B57","#FFFFB347","#FFE63E6D","#FF8E2DE2"]:result=="Ocean"?["#FF0EA5E9","#FF14B8A6","#FF3B82F6","#FF06B6D4"]:["#FF111111","#FF333333","#FF555555","#FF777777"]}
-      Slider "Speed" bind=speed min=1 max=4
-      Toggle "Strobe on the drop" bind=strobe
+      Select "Colour scheme" items=["Neon","Sunset","Ocean","Mono"] @scheme onChange={palette=result=="Neon"?["#FFFF2D95","#FF7B2DFF","#FF2DD4FF","#FFFFD42D"]:result=="Sunset"?["#FFFF6B57","#FFFFB347","#FFE63E6D","#FF8E2DE2"]:result=="Ocean"?["#FF0EA5E9","#FF14B8A6","#FF3B82F6","#FF06B6D4"]:["#FF111111","#FF333333","#FF555555","#FF777777"]}
+      Slider "Speed" @speed min=1 max=4
+      Toggle "Strobe on the drop" @strobe
       Button "Light it up" size=large animate=pulse onTap={running=true; beat=beat+1; toast "Lights on"}

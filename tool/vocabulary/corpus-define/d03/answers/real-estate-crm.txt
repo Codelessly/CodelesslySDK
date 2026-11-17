@@ -17,7 +17,7 @@ App
     Nav
       Heading "Pipeline" level=1
       Row gap=8
-        Input "Search deals" bind=q w=220
+        Input "Search deals" @q w=220
         Button.outline "Log a call" icon="call" onTap={open calllog}
         Button "New deal" icon="add" onTap={open newdeal}
     Column pad=24 gap=16
@@ -42,9 +42,9 @@ Dialog#newdeal "New deal" "Add a client and a property to the pipeline"
   state nclient=""
   state naddress=""
   state nvalue=0
-  Input "Client" bind=nclient
-  Input "Property address" bind=naddress
-  Input "Asking price" type=number bind=nvalue
+  Input "Client" @nclient
+  Input "Property address" @naddress
+  Input "Asking price" type=number @nvalue
   Row end gap=8
     Button.outline "Cancel" onTap={close}
     Button "Add deal" onTap={nclient=="" ? toast "Enter a client name" : {deals=append(deals,{"id":length(deals)+1,"client":nclient,"address":naddress,"value":nvalue,"stage":"Lead","days":0}); toast "Deal added"; close}}
@@ -59,8 +59,8 @@ Dialog#calllog "Log a call" "Record what was said and what happens next"
     ChoiceChip "Left voicemail" selected={outcome=="Left voicemail"} onTap={outcome="Left voicemail"}
     ChoiceChip "No answer" selected={outcome=="No answer"} onTap={outcome="No answer"}
     ChoiceChip "Wants a viewing" selected={outcome=="Wants a viewing"} onTap={outcome="Wants a viewing"}
-  Input "Notes" multiline bind=notes
-  DatePicker "Next action due" bind=nextdue
+  Input "Notes" multiline @notes
+  DatePicker "Next action due" @nextdue
   Row end gap=8
     Button.outline "Cancel" onTap={close}
     Button "Save call" onTap={outcome=="" ? toast "Pick an outcome" : {emit callLogged outcome; toast "Call logged"; outcome=""; notes=""; close}}
@@ -93,7 +93,7 @@ App
           Card gap=12
             Row between middle
               Text.strong "Timeline"
-              SegmentedControl bind=filter items=["All","call","email","viewing"]
+              SegmentedControl @filter items=["All","call","email","viewing"]
             Timeline
               each ev in filter(events,e=>filter=="All" || e.kind==filter)
                 TimelineItem "{ev.title}" "{ev.detail}" date="{ev.date}" icon={ev.kind=="call" ? "call" : ev.kind=="email" ? "mail" : "home"}
@@ -104,7 +104,7 @@ App
               Column gap=2
                 Text "Offer a second viewing at Alder Lane" strike={done}
                 Text.muted "Due Thu, Nov 19"
-              Checkbox bind=done onChange={done ? toast "Marked done" : toast "Reopened"}
+              Checkbox @done onChange={done ? toast "Marked done" : toast "Reopened"}
             Button.outline "Change due date" onTap={open due}
           Card gap=8
             Text.strong "Contact"
@@ -123,12 +123,12 @@ App
               each tag in tags
                 Chip "{tag}" removable onTap={tags=without(tags,tag)}
             Row gap=8
-              Input "Add a tag" bind=newtag
+              Input "Add a tag" @newtag
               Button.outline "Add" onTap={newtag=="" ? toast "Type a tag" : {tags=append(tags,newtag); newtag=""}}
 
 Dialog#due "Next action due" "When should Keystone remind you?"
   state due=""
-  DatePicker "Due date" bind=due
+  DatePicker "Due date" @due
   Row end gap=8
     Button.outline "Cancel" onTap={close}
     Button "Save" onTap={toast "Due date updated"; close}
@@ -142,7 +142,7 @@ Dialog#calllog "Log a call" "Record what was said and what happens next"
     ChoiceChip "Left voicemail" selected={outcome=="Left voicemail"} onTap={outcome="Left voicemail"}
     ChoiceChip "No answer" selected={outcome=="No answer"} onTap={outcome="No answer"}
     ChoiceChip "Wants a viewing" selected={outcome=="Wants a viewing"} onTap={outcome="Wants a viewing"}
-  Input "Notes" multiline bind=notes
+  Input "Notes" multiline @notes
   Row end gap=8
     Button.outline "Cancel" onTap={close}
     Button "Save call" onTap={outcome=="" ? toast "Pick an outcome" : {events=append(events,{"id":length(events)+1,"kind":"call","title":"Call, {outcome}","detail":notes,"date":formatDate(today(),"MMM d")}); outcome=""; notes=""; toast "Call logged"; close}}
@@ -153,6 +153,7 @@ state slot=""
 state viewings=[{"day":1,"time":"10:00","who":"Priya Natarajan"},{"day":3,"time":"14:30","who":"The Okafor family"}]
 state times=["09:00","10:00","11:30","14:30","16:00"]
 state buyer="Priya Natarajan"
+state photo=0
 App
   Sidebar
     Brand "Keystone" icon="vpn_key"
@@ -172,23 +173,23 @@ App
       Row gap=24 top
         Column grow gap=16
           Card gap=12
-            Pages bind=photo h=220 peek=0.9
+            Pages @photo h=220 peek=0.9
               Image "https://images.example.com/alder-front.jpg"
               Image "https://images.example.com/alder-kitchen.jpg"
               Image "https://images.example.com/alder-garden.jpg"
-            Dots bind=photo count=3
+            Dots @photo count=3
             Row between
               Heading "$685,000" level=3
               Text.muted "4 bed, 2 bath, 2,150 sq ft"
             Text.muted "Renovated 1960s family home with a south-facing garden, new kitchen and a double garage."
           Card gap=12
             Text.strong "Schedule a viewing"
-            WeekStrip bind=day start={today()}
+            WeekStrip @day start={today()}
             Text.fieldLabel "Time"
             Row gap=8
               each t in times
                 ChoiceChip "{t}" selected={slot==t} disabled={any(viewings,v=>v.day==day && v.time==t)} onTap={slot=t}
-            Select "Buyer" items=["Priya Natarajan","The Okafor family","Marcus Bell","Elena Rossi"] bind=buyer
+            Select "Buyer" items=["Priya Natarajan","The Okafor family","Marcus Bell","Elena Rossi"] @buyer
             Button "Book viewing" onTap={slot=="" ? toast "Pick a time" : {viewings=append(viewings,{"day":day,"time":slot,"who":buyer}); toast "Viewing booked for {slot}"; slot=""}}
         Column w=320 gap=16
           Card gap=8
@@ -223,10 +224,10 @@ App
   Main
     Nav
       Heading "Today's follow-ups" level=1
-      SegmentedButton bind=show items=["Open","Done","All"]
+      SegmentedButton @show items=["Open","Done","All"]
     Column pad=24 gap=16
       Row gap=8
-        Input "Add a follow-up" bind=newtask grow
+        Input "Add a follow-up" @newtask grow
         Button "Add" onTap={newtask=="" ? toast "Describe the follow-up" : {tasks=append(tasks,{"id":length(tasks)+1,"who":"General","what":newtask,"due":"Today","done":false}); newtask=""}}
       Progress {count(tasks,t=>t.done)/length(tasks)}
       Text.muted "{count(tasks,t=>t.done)} of {length(tasks)} done"
@@ -234,7 +235,7 @@ App
         each task in filter(tasks,t=>show=="All" || (show=="Done" && t.done) || (show=="Open" && !t.done))
           Row between middle
             Row gap=12 middle
-              Checkbox bind=task.done
+              Checkbox @task.done
               Column gap=2
                 Text "{task.what}" strike={task.done}
                 Text.muted "{task.who}"
@@ -254,7 +255,7 @@ Dialog#calllog "Log a call" "Record what was said and what happens next"
     ChoiceChip "Left voicemail" selected={outcome=="Left voicemail"} onTap={outcome="Left voicemail"}
     ChoiceChip "No answer" selected={outcome=="No answer"} onTap={outcome="No answer"}
     ChoiceChip "Wants a viewing" selected={outcome=="Wants a viewing"} onTap={outcome="Wants a viewing"}
-  Input "Notes" multiline bind=notes
+  Input "Notes" multiline @notes
   Row end gap=8
     Button.outline "Cancel" onTap={close}
     Button "Save call" onTap={outcome=="" ? toast "Pick an outcome" : {toast "Call logged"; outcome=""; notes=""; close}}

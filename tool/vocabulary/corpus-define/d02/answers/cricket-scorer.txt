@@ -69,9 +69,9 @@ App
         Button "Share scorecard" icon="image" onTap={go scorecard}
 
 Dialog#wicket "Wicket" "Record how the batter is out"
-  Select "How out" bind=how items=["Bowled","Caught","LBW","Run out","Stumped","Hit wicket"]
-  Select "Who is out" bind=outName items={map(filter(batters,b=>!b.out),b=>b.name)}
-  Input "Incoming batter" "Name" bind=newBatter
+  Select "How out" @how items=["Bowled","Caught","LBW","Run out","Stumped","Hit wicket"]
+  Select "Who is out" @outName items={map(filter(batters,b=>!b.out),b=>b.name)}
+  Input "Incoming batter" "Name" @newBatter
   Button "Confirm wicket" onTap={trim(newBatter)=="" ? toast "Name the next batter" : {history=append(history,{"balls":balls,"over":over,"batters":batters,"pstart":pstart}); balls=append(balls,{"r":0,"k":"run","w":true}); over=append(over,{"r":0,"k":"run","w":true}); batters=append(updateWhere(batters,b=>b.name==outName,b=>with(with(b,"out",true),"how",how)),{"name":newBatter,"runs":0,"balls":0,"strike":find(batters,b=>b.name==outName).strike,"out":false,"how":""}); pstart=length(balls)+1; newBatter=""; close}}
 
 // The six circles of the over: each fills with its runs, a W or an extra mark

@@ -4,6 +4,8 @@ project alert="Front door has been open for 10 minutes"
 project rooms=["Living room","Kitchen","Bedroom","Hallway"]
 state room="Living room"
 state sel=""
+state newName=""
+state detailLevel=0
 App
   Sidebar fill=#FFFAF5F0
     Brand "Hearth" icon="local_fire_department"
@@ -42,17 +44,17 @@ App
             if d.online && d.kind=="light"
               Row between middle
                 Text "{d.on ? d.level + '%' : 'Off'}" size=28 weight=700 color={d.on ? "#FF2B2926" : "#FFFAF5F0"}
-                Toggle bind=d.on size=large
-              Slider bind=d.level min=1 max=100 disabled={!d.on}
-              SegmentedButton items=["warm","neutral","cool"] bind=d.ct disabled={!d.on}
+                Toggle @d.on size=large
+              Slider @d.level min=1 max=100 disabled={!d.on}
+              SegmentedButton items=["warm","neutral","cool"] @d.ct disabled={!d.on}
             if d.online && d.kind=="thermostat"
               Row between middle
                 Text "{d.cur}°" size=44 weight=700 color=#FFFAF5F0
                 Text.small "now" color=#FFD9D4CC
-              RangeSlider lo={d.heat} hi={d.cool} min=55 max=85 labels=["Heat to {d.heat}°","Cool to {d.cool}°"] onChange={devices=updateWhere(devices,x=>x.id==d.id,x=>with(with(x,"heat",result[0]),"cool",result[1]))}
+              RangeSlider @d.heat @d.cool min=55 max=85 labels=["Heat to {d.heat}°","Cool to {d.cool}°"] onChange={devices=updateWhere(devices,x=>x.id==d.id,x=>with(with(x,"heat",result[0]),"cool",result[1]))}
             if d.online && d.kind=="blind"
               Text "{d.pos}% open" size=24 weight=700 color=#FFFAF5F0
-              Slider bind=d.pos min=0 max=100 step=5
+              Slider @d.pos min=0 max=100 step=5
               Row gap=8
                 Button.outline "Close" onTap={d.pos=0}
                 Button.outline "Open" onTap={d.pos=100}
@@ -63,7 +65,7 @@ App
               Text.small "{d.playing ? d.track : 'Paused'}" color={d.playing ? "#FF2B2926" : "#FFFAF5F0"}
               Row gap=8 middle
                 IconButton "{d.playing ? 'pause' : 'play_arrow'}" size=large onTap={d.playing=!d.playing}
-                Slider grow bind=d.vol min=0 max=100
+                Slider grow @d.vol min=0 max=100
                 Text.small "{d.vol}" color={d.playing ? "#FF2B2926" : "#FFFAF5F0"}
             if d.online && d.kind=="sensor"
               Text "{d.value}" size=36 weight=700 color=#FFFAF5F0
@@ -73,14 +75,14 @@ App
     MenuItem "Rename" icon="edit" onTap={open renameDevice}
     MenuItem "Add to scene" icon="auto_awesome" onTap={go scenes}
   Dialog#renameDevice "Rename device"
-    Input "Name" bind=newName
+    Input "Name" @newName
     Button "Save" onTap={devices=updateWhere(devices,x=>x.id==sel,x=>with(x,"name",newName)); close}
   Sheet#details "{find(devices,x=>x.id==sel).name}"
     Column gap=16 pad=16
       Text.muted "{find(devices,x=>x.id==sel).room} · {find(devices,x=>x.id==sel).kind}"
       if find(devices,x=>x.id==sel).kind=="light"
         Text.fieldLabel "Brightness"
-        Slider bind=detailLevel min=0 max=100 stops=[0,25,50,75,100] stopLabels=["Off","Dim","Mid","Bright","Full"] onChange={devices=updateWhere(devices,x=>x.id==sel,x=>with(with(x,"level",max(1,result)),"on",result>0))}
+        Slider @detailLevel min=0 max=100 stops=[0,25,50,75,100] stopLabels=["Off","Dim","Mid","Bright","Full"] onChange={devices=updateWhere(devices,x=>x.id==sel,x=>with(with(x,"level",max(1,result)),"on",result>0))}
         Text.fieldLabel "Colour temperature"
         Slider min=2200 max=6500 stops=[2200,2700,4000,5000,6500] stopLabels=["Candle","Warm","Neutral","Day","Cool"]
       if find(devices,x=>x.id==sel).kind=="blind"
@@ -133,12 +135,12 @@ App
             Text.small "{length(s.targets)} devices" color=#FFD9D4CC
   Dialog#editScene "{sceneId=='' ? 'New scene' : 'Edit scene'}" "Set each device's target"
     Column gap=12
-      Input "Scene name" bind=dname
+      Input "Scene name" @dname
       each t in dtargets
         Row between middle gap=12
           Text.strong "{t.name}" grow
-          Slider w=160 bind=t.level min=0 max=100
-          Toggle bind=t.on
+          Slider w=160 @t.level min=0 max=100
+          Toggle @t.on
           IconButton "close" onTap={dtargets=removeWhere(dtargets,x=>x.name==t.name)}
       Select "Add a device" items=["Ceiling light","Pendant lights","Bedside lamp","West blind","Sonos Beam","Thermostat","Front door"] onChange={dtargets=append(dtargets,{"name":result,"on":true,"level":50})}
       Row between
@@ -178,12 +180,12 @@ App
               Row gap=4
                 each day in alldays
                   Chip "{day}" selected={contains(s.days,day)}
-            Toggle bind=s.on size=large
+            Toggle @s.on size=large
             IconButton "delete" onTap={schedules=removeWhere(schedules,x=>x.id==s.id)}
   Dialog#addSchedule "New schedule" "Pick a time and the days it repeats"
     Column gap=12
-      Input "Name" "e.g. Wake up" bind=slabel
-      TimePicker "Time" bind=stime
+      Input "Name" "e.g. Wake up" @slabel
+      TimePicker "Time" @stime
       Text.fieldLabel "Repeat on"
       Row gap=8 wrap
         each day in alldays
@@ -223,22 +225,22 @@ App
             Column grow gap=4
               Text.strong "{r.name}"
               Text.muted "When {lower(r.trigger)}{isEmpty(r.conds) ? '' : ', if ' + join(map(r.conds,c=>lower(c.field)+' '+c.op+' '+c.value),' and ')}, then {join(map(r.acts,a=>lower(a.device)+': '+lower(a.value)),', ')}."
-            Toggle bind=r.on size=large
+            Toggle @r.on size=large
             IconButton "edit" onTap={ruleId=r.id; rname=r.name; rtrigger=r.trigger; dconds=r.conds; dacts=r.acts; open builder}
             IconButton "delete" onTap={rsel=r.id; open confirmDelete}
   Dialog#builder "{ruleId==0 ? 'New automation' : 'Edit automation'}" "When, if, then"
     Column gap=16 scroll
-      Input "Name" bind=rname
+      Input "Name" @rname
       Text.sectionTitle "When"
-      Select "Trigger" bind=rtrigger items=["Motion is detected","A door opens","Someone arrives","Sunset","Temperature rises above","Time of day"]
+      Select "Trigger" @rtrigger items=["Motion is detected","A door opens","Someone arrives","Sunset","Temperature rises above","Time of day"]
       Text.sectionTitle "If"
       Column gap=8 reorder onReorder={dconds=result}
         each c in dconds
           Row gap=8 middle drag=cond(index)
             Icon "drag_indicator"
-            Select bind=c.field items=["Time","Sun","Anyone home","Temperature","Mode"] grow
-            Select bind=c.op items=["is","is not","is after","is before","above","below"]
-            Input bind=c.value w=100
+            Select @c.field items=["Time","Sun","Anyone home","Temperature","Mode"] grow
+            Select @c.op items=["is","is not","is after","is before","above","below"]
+            Input @c.value w=100
             IconButton "close" onTap={dconds=removeAt(dconds,index)}
       Button.outline "Add condition" icon="add" onTap={dconds=append(dconds,{"field":"Time","op":"is after","value":"20:00"})}
       Text.sectionTitle "Then"
@@ -246,8 +248,8 @@ App
         each a in dacts
           Row gap=8 middle drag=act(index)
             Icon "drag_indicator"
-            Select bind=a.device items=["Ceiling light","Hall light","Thermostat","West blind","Front door","Sonos Beam","Phone"] grow
-            Select bind=a.value items=["On","Off","Lock","Unlock","Open","Close","Send alert"]
+            Select @a.device items=["Ceiling light","Hall light","Thermostat","West blind","Front door","Sonos Beam","Phone"] grow
+            Select @a.value items=["On","Off","Lock","Unlock","Open","Close","Send alert"]
             IconButton "close" onTap={dacts=removeAt(dacts,index)}
       Button.outline "Add action" icon="add" onTap={dacts=append(dacts,{"device":"Ceiling light","value":"On"})}
       Box pad=16 radius=16 fill=#FFFFF1D6 gap=4
@@ -285,8 +287,8 @@ App
     Nav
       Heading "Activity" level=1
       Row gap=8
-        Select "Room" bind=froom items=["All","Living room","Kitchen","Bedroom","Hallway"] w=160
-        Select "Kind" bind=fkind items=["All","light","lock","blind","speaker","sensor","thermostat"] w=140
+        Select "Room" @froom items=["All","Living room","Kitchen","Bedroom","Hallway"] w=160
+        Select "Kind" @fkind items=["All","light","lock","blind","speaker","sensor","thermostat"] w=140
     Column pad=24 gap=12 grow
       Banner.warning "{alert}" announce=assertive visible={alert!=""} onDismiss={alert=""}
       Stack grow
@@ -315,7 +317,7 @@ App
   Main fill=#FFFAF5F0
     Nav
       Heading "Energy" level=1
-      SegmentedButton items=["Today","Week"] bind=range
+      SegmentedButton items=["Today","Week"] @range
     Column pad=24 gap=16 scroll
       Banner.warning "{alert}" announce=assertive visible={alert!=""} onDismiss={alert=""}
       Grid cols=3 gap=16
@@ -331,7 +333,7 @@ App
       Card gap=12
         Row between middle
           Text.strong "{range=='Today' ? 'By hour' : 'By day'}"
-          Toggle "Show as table" bind=asTable
+          Toggle "Show as table" @asTable
         if !asTable
           if range=="Today"
             AreaChart values={hours} labels=["12a","2a","4a","6a","8a","10a","12p","2p","4p","6p","8p","10p"] unit="kWh" h=240
@@ -369,17 +371,17 @@ App
       Banner.warning "{alert}" announce=assertive visible={alert!=""} onDismiss={alert=""}
       Card gap=12
         Text.strong "Home"
-        Input "Home name" bind=home
-        SegmentedButton items=["°F","°C"] bind=units
+        Input "Home name" @home
+        SegmentedButton items=["°F","°C"] @units
       Card gap=12
         Text.strong "Alerts"
-        Toggle "Notify me on this device" bind=notify
-        Toggle "Door left open" bind=doorAlert
-        Toggle "Quiet hours" bind=quiet
+        Toggle "Notify me on this device" @notify
+        Toggle "Door left open" @doorAlert
+        Toggle "Quiet hours" @quiet
         if quiet
           Row gap=12
-            TimePicker "From" bind=quietFrom grow
-            TimePicker "To" bind=quietTo grow
+            TimePicker "From" @quietFrom grow
+            TimePicker "To" @quietTo grow
       Card gap=12
         Text.strong "Members"
         ListTile "Ray Li" subtitle="Owner" leading="person"

@@ -80,7 +80,7 @@ App
     Nav
       Heading "Usage" level=1
       Row gap=8
-        SegmentedButton bind=view items=["Daily","Half-hourly"] onChange={result=="Daily" ? day=null : empty}
+        SegmentedButton @view items=["Daily","Half-hourly"] onChange={result=="Daily" ? day=null : empty}
         IconButton "download" tooltip="Download readings" onTap={toast "Readings exported"}
     Column pad=24 gap=16 scroll
       if day==null
@@ -130,7 +130,7 @@ App
       Card gap=12
         Row gap=8 middle
           Text.strong "Your yearly use"
-          Slider bind=usage min=1500 max=9000 grow
+          Slider @usage min=1500 max=9000 grow
           Text.strong "{usage} kWh"
         Row gap=0 border-bottom=#FFE5E7EB
           Text.muted "Tariff" grow
@@ -180,6 +180,7 @@ state photo=null
 state lastReading=48213
 state debit={"on":false,"day":"1st","account":"","sort":""}
 state payments=[{"date":"3 Nov","method":"Direct debit","amount":94.20,"status":"Paid"},{"date":"3 Oct","method":"Direct debit","amount":94.20,"status":"Paid"},{"date":"14 Sep","method":"Card","amount":118.45,"status":"Paid"},{"date":"3 Aug","method":"Direct debit","amount":87.10,"status":"Paid"},{"date":"3 Jul","method":"Direct debit","amount":87.10,"status":"Refunded"}]
+state holder=""
 App
   Sidebar
     Brand "Kilowatt" icon="bolt"
@@ -195,8 +196,8 @@ App
         Card grow gap=12
           Heading "Submit a meter reading" level=3
           Text.muted "Last reading {lastReading} kWh on 3 Nov. Type the five digits on the dial, or take a photo."
-          DigitBoxes bind=reading digits=5
-          PhotoPicker bind=photo label="Photo of your meter"
+          DigitBoxes @reading digits=5
+          PhotoPicker @photo label="Photo of your meter"
           Row gap=8
             Button "Submit reading" disabled={length(reading)<5} onTap={lastReading=reading; emit submitReading {"reading":reading,"photo":photo}; toast "Reading sent"; reading=""; photo=null}
             Button.ghost "Clear" onTap={reading=""; photo=null}
@@ -231,25 +232,25 @@ Sheet#debitSheet "Direct debit"
   state day="1st"
   state agree=false
   Column gap=12
-    Input "Name on the account" bind=holder
-    Input "Sort code" "00-00-00" bind=sort type=number
-    Input "Account number" "8 digits" bind=acct type=number
-    Select "Collection day" bind=day items=["1st","8th","15th","22nd"]
-    Checkbox "I am the account holder and can authorise payments alone" bind=agree
+    Input "Name on the account" @holder
+    Input "Sort code" "00-00-00" @sort type=number
+    Input "Account number" "8 digits" @acct type=number
+    Select "Collection day" @day items=["1st","8th","15th","22nd"]
+    Checkbox "I am the account holder and can authorise payments alone" @agree
     Text.caption "You will receive written notice of the amount at least 10 days before each collection."
     Row gap=8 end
       Button.ghost "Cancel" onTap={close}
       Button "Confirm direct debit" disabled={!agree || length(acct)<8 || length(sort)<6} onTap={debit={"on":true,"day":day,"account":acct,"sort":sort}; emit setupDirectDebit; toast "Direct debit set up"; close}
 
 // Shows a row of single digit boxes that fill from one reading; the value is the digits joined.
-define DigitBoxes bind=value digits=5 onChange
+define DigitBoxes @value digits=5 onChange
   state cells=[{"d":""},{"d":""},{"d":""},{"d":""},{"d":""}]
   Row gap=8
     each c in cells
-      Input bind=c.d type=number w=48 center onChange={value=join(map(cells,x=>x.d),""); onChange(value)}
+      Input @c.d type=number w=48 center onChange={value=join(map(cells,x=>x.d),""); onChange(value)}
 
 // A camera or file picker cannot be drawn here, so it shows a labelled box that fills in once a photo is chosen.
-define PhotoPicker bind=photo label="Photo"
+define PhotoPicker @photo label="Photo"
   Box h=120 radius=8 border=1 center middle gap=4 onTap={photo="meter.jpg"}
     Icon "photo_camera"
     Text.muted "{label}"

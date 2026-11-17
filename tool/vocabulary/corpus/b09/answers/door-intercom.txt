@@ -36,7 +36,7 @@ App
           Button "Call" icon="call" size=large onTap={mode="calling"; ringLeft=30; emit call flats[at].no}
         Divider
         Text.strong "Have a code?" center
-        Input "Door code" "Digits only" bind=code type=number
+        Input "Door code" "Digits only" @code type=number
         if codeError!=""
           Text.danger "{codeError}"
         Row gap=8 center
@@ -107,13 +107,13 @@ App
           if !talking
             Button "Answer" icon="call" onTap={talking=true; seconds=0; emit answer}
           if talking
-            Toggle "Mic" bind=mic
+            Toggle "Mic" @mic
           Button.secondary "Open door" icon="lock_open" onTap={doorOpen=true; emit openDoor; beep; toast "Door unlocked for 5 s"}
           Button.destructive "Hang up" icon="call_end" onTap={talking=false; seconds=0; emit hangUp; toast "Call ended"}
         if doorOpen
           Text.success "Door unlocked" animate=fade
         Text.caption "Camera {camera+1} of 2"
-        SegmentedButton bind=camera items=["Entrance","Courtyard"]
+        SegmentedButton @camera items=["Entrance","Courtyard"]
 
 ### Missed visitors
 state log=[{"id":1,"time":"09:12","day":"Today","photo":"https://images.buzzin.example/visits/1.jpg","note":"Courier, left a card"},{"id":2,"time":"11:47","day":"Today","photo":"https://images.buzzin.example/visits/2.jpg","note":"Unknown visitor"},{"id":3,"time":"18:05","day":"Yesterday","photo":"https://images.buzzin.example/visits/3.jpg","note":"Neighbour, Flat 4B"}]
@@ -181,15 +181,15 @@ App
             Button.outline "New code" icon="refresh" onTap={todayCode=fixed(1000+floor(random()*9000),0); codeUses=1; emit newCode todayCode}
         Row gap=8 middle
           Text "Valid for"
-          SegmentedButton bind=codeDay items=["Today","Tomorrow"]
+          SegmentedButton @codeDay items=["Today","Tomorrow"]
         Row gap=8 middle
           Text "Uses"
-          Select bind=codeUses items=[1,2,3,5]
+          Select @codeUses items=[1,2,3,5]
       Card gap=12
         Heading "Trades button" level=3
         Text.muted "Leaves the door on release for a set time."
         Row gap=8 middle
-          Select bind=tradesFor items=["30 minutes","1 hour","2 hours"]
+          Select @tradesFor items=["30 minutes","1 hour","2 hours"]
           if !trades
             Button "Start" onTap={trades=true; tradesLeft=tradesFor=="30 minutes" ? 1800 : tradesFor=="1 hour" ? 3600 : 7200; emit tradesOpen}
           if trades
@@ -200,9 +200,9 @@ App
             Ring {tradesLeft/3600}
       Card gap=12
         Heading "Night mode" level=3
-        Toggle "Night mode" bind=night
+        Toggle "Night mode" @night
         if night
           Row gap=12
-            TimePicker "From" bind=nightFrom
-            TimePicker "To" bind=nightTo
+            TimePicker "From" @nightFrom
+            TimePicker "To" @nightTo
           Text.muted "From {nightFrom} to {nightTo} the panel dims and rings quietly."

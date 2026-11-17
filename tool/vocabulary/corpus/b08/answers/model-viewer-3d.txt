@@ -12,10 +12,11 @@ state section=50
 state zoom=1
 state pts=[]
 state q=""
+state fmt=""
 App
   Sidebar w=280
     Brand "Turntable" icon="view_in_ar"
-    Input "Filter parts" bind=q
+    Input "Filter parts" @q
     Text.caption "Hierarchy, {count(parts,p=>p.visible)} of {length(parts)} visible"
     each p in parts
       if contains(lower(p.name),lower(q))
@@ -28,14 +29,14 @@ App
     Nav
       Heading "Roadster-v2.glb" level=3
       Row gap=8
-        SegmentedButton bind=tool items=["orbit","pan","measure"]
-        Toggle "Wireframe" bind=wireframe
+        SegmentedButton @tool items=["orbit","pan","measure"]
+        Toggle "Wireframe" @wireframe
         IconButton "restart_alt" tooltip="Reset camera" onTap={zoom=1; view="Front"; lightX=0.4; lightY=0.7}
         Button "Export" onTap={open export}
     Stack grow
       Viewport3D src="roadster-v2.glb" mode={tool} wireframe={wireframe} view={view} zoom={zoom} isolate={isolated} section={sectionOn ? section : -1} light=[lightX,lightY] hidden={map(filter(parts,p=>!p.visible),p=>p.id)} onOrbit={emit orbit result} onPinch={zoom=clamp(zoom*result,0.3,6)} onWheel={zoom=clamp(zoom-result*0.001,0.3,6)} onPan={emit pan result} onPick={selected=result.part} onMeasurePoint={pts=(length(pts)>=2 ? [result] : append(pts,result))}
       Column top right pad=16 gap=8
-        ViewCube bind=view faces=["Front","Back","Left","Right","Top","Bottom"]
+        ViewCube @view faces=["Front","Back","Left","Right","Top","Bottom"]
         LightBall x=lightX y=lightY onChange={lightX=result.x; lightY=result.y}
       if tool=="measure"
         Column bottom left pad=16
@@ -60,14 +61,14 @@ App
     Slider value={find(parts,p=>p.id==selected).metal} min=0 max=1 onChange={parts=updateWhere(parts,x=>x.id==selected,x=>with(x,"metal",result))}
     Divider
     Heading "Section plane" level=3
-    Toggle "Cut the model" bind=sectionOn
+    Toggle "Cut the model" @sectionOn
     if sectionOn
-      Slider bind=section min=0 max=100
+      Slider @section min=0 max=100
       Text.caption "Cut at {section}% of the height"
     Divider
     Button.outline "Open measurements" onTap={go measurements}
   Dialog#export "Export view" "Save what you see"
-    Select "Format" items=["PNG","JPG","GLB"] bind=fmt
+    Select "Format" items=["PNG","JPG","GLB"] @fmt
     Button "Save" onTap={emit exportView; toast "Exported"; close}
 
 ### Measurements
@@ -83,7 +84,7 @@ App
     Nav
       Heading "Measurements" level=1
       Row gap=8
-        SegmentedButton bind=unit items=["mm","cm","in"]
+        SegmentedButton @unit items=["mm","cm","in"]
         Button.outline "Clear all" onTap={saved=[]}
     Column pad=24 gap=16
       if isEmpty(saved)

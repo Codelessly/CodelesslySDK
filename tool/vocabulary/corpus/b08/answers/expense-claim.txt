@@ -42,16 +42,16 @@ App
           Column gap=8
             Row gap=12 middle
               Image "{row.img}" w=56 h=56 radius=8 onTap={sel=row.id; open receipt}
-              Input "Merchant" bind=row.merchant grow
-              DatePicker "Date" bind=row.date w=150
-              Input "Amount" type=number bind=row.amount w=110
-              Select "Category" bind=row.cat items=cats w=140
+              Input "Merchant" @row.merchant grow
+              DatePicker "Date" @row.date w=150
+              Input "Amount" type=number @row.amount w=110
+              Select "Category" @row.cat items=cats w=140
               IconButton "delete" tooltip="Remove line" onTap={lines=removeWhere(lines,l=>l.id==row.id)}
             if row.amount > row.limit
               Row gap=8 middle
                 Badge.warning "Over policy"
                 Text.danger "{row.cat} limit is {money(row.limit,"$",2)} per item; this line is {money(row.amount-row.limit,"$",2)} over. Add a note for your approver."
-                Input "Note" bind=row.note grow
+                Input "Note" @row.note grow
             Divider
       Card gap=12
         Row between
@@ -60,9 +60,9 @@ App
         Row gap=16 top
           MiniMap from={startPt} to={endPt} h=180 grow
           Column gap=8 w=280
-            Input "Start" bind=startPt
-            Input "End" bind=endPt
-            Input "Distance (km)" type=number bind=km
+            Input "Start" @startPt
+            Input "End" @endPt
+            Input "Distance (km)" type=number @km
             Text.muted "{fixed(km*0.7,2)} mi at $0.67 per mile = {money(km*0.7*0.67,"$",2)}"
         each t in trips
           Row between
@@ -71,12 +71,12 @@ App
       Card gap=12
         Heading "Currency" level=3
         Row gap=12 middle
-          Select "Receipts are in" bind=cur items=["EUR","GBP","CAD","JPY"] w=140
-          Input "Rate to {homeCur}" type=number bind=rate w=140
+          Select "Receipts are in" @cur items=["EUR","GBP","CAD","JPY"] w=140
+          Input "Rate to {homeCur}" type=number @rate w=140
           Text.muted "1 {cur} = {rate} {homeCur}, rate of {formatDate(today(),"MMM d")}"
           Button.ghost "Refresh rate" icon="sync" onTap={emit refreshRate cur}
       Card gap=12
-        Input "Business purpose" bind=purpose multiline
+        Input "Business purpose" @purpose multiline
         Divider
         Row between
           Text.muted "Receipts ({cur})"
@@ -99,10 +99,10 @@ App
     Text.muted "{find(lines,l=>l.id==sel).merchant}, {find(lines,l=>l.id==sel).date}"
     Button.outline "Close" onTap={close}
   Dialog#trip "Add a mileage trip" "Start and end are placed on the map"
-    Input "Start" bind=startPt
-    Input "End" bind=endPt
+    Input "Start" @startPt
+    Input "End" @endPt
     MiniMap from={startPt} to={endPt} h=160
-    Input "Distance (km)" type=number bind=km
+    Input "Distance (km)" type=number @km
     Button "Add trip" onTap={trips=append(trips,{"id":length(trips)+1,"from":startPt,"to":endPt,"km":km}); close}
   Dialog#confirm "Submit this claim?" "Your approver, Marcus Lee, is notified."
     Text "Total {money(sum(lines,l=>l.amount)*rate+km*0.7*0.67,"$",2)} across {length(lines)} receipts and {length(trips)} trip."
@@ -130,7 +130,7 @@ App
       Text.muted "Marcus Lee"
   Pane w=300 pad=16 gap=12
     Heading "Waiting for you" level=3
-    SegmentedButton bind=filter items=["Pending","Queried","Done"]
+    SegmentedButton @filter items=["Pending","Queried","Done"]
     each q in queue
       Card gap=4 onTap={emit openClaim q.id}
         Row between
@@ -190,14 +190,14 @@ App
             Divider
       Card gap=12
         Heading "Comment for Dana" level=3
-        Input "Comment" "Anything she should know before this is paid" bind=comment multiline
+        Input "Comment" "Anything she should know before this is paid" @comment multiline
         Row end gap=8
           Button.outline "Send comment" onTap={emit comment comment; comment=""; toast "Comment sent"}
   Dialog#receipt "Receipt"
     Lightbox#zoom "{find(claim.lines,l=>l.id==sel).img}" "{find(claim.lines,l=>l.id==sel).merchant}"
     Button.outline "Close" onTap={close}
   Dialog#query "Query this line" "Dana is asked to explain or replace the receipt."
-    Input "Your question" bind=comment multiline
+    Input "Your question" @comment multiline
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Send query" onTap={claim=with(claim,"lines",updateWhere(claim.lines,l=>l.id==sel,l=>with(l,"status","queried"))); emit query {"line":sel,"text":comment}; comment=""; toast "Query sent"; close}
@@ -207,6 +207,7 @@ state tab="payments"
 state sel="EX-2291"
 state claims=[{"id":"EX-2291","trip":"Trip to Paris, Nov 3-5","total":412.3,"state":"Approved","step":2},{"id":"EX-2270","trip":"Sales offsite, Oct 14","total":688.9,"state":"Paid","step":4},{"id":"EX-2259","trip":"Client visit, Oct 2","total":143.2,"state":"Queried","step":1}]
 state steps=[{"title":"Submitted","when":"Nov 6, 9:12 AM","note":"Sent by Dana Whitfield"},{"title":"Manager review","when":"Nov 7, 2:40 PM","note":"Marcus Lee queried the hotel receipt; replaced Nov 7"},{"title":"Approved","when":"Nov 8, 10:05 AM","note":"Four lines approved, $380.10 in total"},{"title":"Payment sent","when":"Expected Nov 12","note":"To account ending 4471"},{"title":"Paid","when":"","note":""}]
+state msg=""
 App
   Sidebar
     Brand "Claimant" icon="receipt_long"
@@ -266,7 +267,7 @@ App
             Text.mono "CLM-{sel}-DW"
             IconButton "content_copy" tooltip="Copy reference" onTap={copy "CLM-{sel}-DW"; toast "Copied"}
   Dialog#help "Ask finance" "We reply within one working day."
-    Input "Your message" bind=msg multiline
+    Input "Your message" @msg multiline
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Send" onTap={emit askFinance {"claim":sel,"text":msg}; msg=""; toast "Sent"; close}

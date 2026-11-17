@@ -18,7 +18,7 @@ App
     Nav
       Heading "Find a book" level=1
       Row gap=8
-        Input "Search title, author or ISBN" bind=q w=280
+        Input "Search title, author or ISBN" @q w=280
         IconButton "tune" tooltip="Filters" onTap={open filters}
     Column pad=24 gap=16
       Row gap=8
@@ -27,7 +27,7 @@ App
         ChoiceChip "E-book" selected={format=="E-book"} onTap={format="E-book"}
         ChoiceChip "Audiobook" selected={format=="Audiobook"} onTap={format="Audiobook"}
         Spacer grow
-        Toggle "Available now" bind=onlyAvail
+        Toggle "Available now" @onlyAvail
       Text.muted "{length(filter(books, b => (format==\"All\" || b.format==format) && (lang==\"All\" || b.lang==lang) && (!onlyAvail || sum(b.branches, x => x.n) > 0) && (q==\"\" || contains(lower(b.title), lower(q)) || contains(lower(b.author), lower(q)))))} results"
       each b in filter(books, b => (format=="All" || b.format==format) && (lang=="All" || b.lang==lang) && (!onlyAvail || sum(b.branches, x => x.n) > 0) && (q=="" || contains(lower(b.title), lower(q)) || contains(lower(b.author), lower(q))))
         Card onTap={sel=b.id; go book}
@@ -55,7 +55,7 @@ Sheet#filters "Filters"
       ChoiceChip "English" selected={lang=="English"} onTap={lang="English"}
       ChoiceChip "Spanish" selected={lang=="Spanish"} onTap={lang="Spanish"}
       ChoiceChip "French" selected={lang=="French"} onTap={lang="French"}
-    Toggle "Only show copies available now" bind=onlyAvail
+    Toggle "Only show copies available now" @onlyAvail
     Row gap=8 end
       Button.ghost "Reset" onTap={format="All"; lang="All"; onlyAvail=false; q=""}
       Button "Show results" onTap={close}
@@ -109,7 +109,7 @@ Page
                 Badge.error "All out"
         Card gap=12
           Text.strong "Place a hold"
-          Select "Pick up at" items=["Central","Eastside","Riverside"] bind=pickup
+          Select "Pick up at" items=["Central","Eastside","Riverside"] @pickup
           Text.muted "Queue position: {book.queue + 1} of {book.queue + 1}. Estimated wait {(book.queue + 1) * 2} weeks."
           if holdPlaced
             Badge.success "Hold placed. We will email you when it is ready at {pickup}."
@@ -141,7 +141,7 @@ App
       Heading "My shelf" level=1
       Button.outline "Show library card" onTap={open card}
     Column pad=24 gap=16
-      SegmentedButton bind=tab items=["loans","list"]
+      SegmentedButton @tab items=["loans","list"]
       if tab=="loans"
         Banner "You owe $1.75 in overdue fines on Braiding Sweetgrass." icon="warning"
         each l in loans
@@ -202,7 +202,7 @@ App
       Text "She did not speak much, and when she did, it was in the careful voice of someone counting coins." size={size} color={inks[theme]}
     Footer
       Column gap=6 pad=12
-        Slider bind=page min=1 max=502
+        Slider @page min=1 max=502
         Row between
           Text.muted "Page {page} of {total}"
           Text.muted "{round(page / total * 100, 0)}% read"
@@ -214,7 +214,7 @@ Sheet#style "Text and theme"
       Text.strong "{size}"
       IconButton "add" tooltip="Larger" onTap={size=min(32, size+2)}
     Text.fieldLabel "Theme"
-    SegmentedButton bind=theme items=["Light","Sepia","Dark"]
+    SegmentedButton @theme items=["Light","Sepia","Dark"]
     Button "Done" onTap={close}
 Sheet#marksSheet "Bookmarks"
   Column gap=8

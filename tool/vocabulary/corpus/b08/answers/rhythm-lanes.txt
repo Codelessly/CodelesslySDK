@@ -13,11 +13,11 @@ App
   Main
     Nav
       Heading "Choose a song" level=1
-      SegmentedButton bind=diff items=["Easy","Normal","Hard"]
+      SegmentedButton @diff items=["Easy","Normal","Hard"]
     Column pad=24 gap=16
       Row gap=24
         Column grow gap=8
-          Wheel bind=at h=420 onSelect={at=result}
+          Wheel @at h=420 onSelect={at=result}
             each s in songs
               Card gap=4 selected={at==s.id} onTap={at=s.id}
                 Row between
@@ -25,7 +25,7 @@ App
                   Badge.primary "{s.grade}"
                 Text.muted "{s.artist} - {s.bpm} BPM"
                 Row gap=2
-                  Rating value={s.stars} max=10 readonly
+                  Rating value=@s.stars max=10 readonly
         Card w=320 gap=12
           Heading "{find(songs,s=>s.id==at).title}" level=3
           Text.muted "{find(songs,s=>s.id==at).artist}"
@@ -146,7 +146,7 @@ App
       Card gap=12
         Text.strong "Audio latency"
         Text.muted "Tap the pad on every beat of the metronome. Then fine tune with the slider."
-        Slider bind=latency min=-200 max=200 step=1
+        Slider @latency min=-200 max=200 step=1
         Row between
           Text.muted "-200 ms"
           Text.strong "{latency} ms"

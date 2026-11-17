@@ -17,7 +17,7 @@ App
     Nav
       Heading "Splits: {runner}" level=1
       Row gap=8
-        Select bind=runner items=["Elin Sjoberg","Marta Koval","Jonas Berg","Aiko Tanaka"]
+        Select @runner items=["Elin Sjoberg","Marta Koval","Jonas Berg","Aiko Tanaka"]
         Button.outline "Download card readout" icon="download" onTap={emit downloadCard runner; toast "Card readout downloaded"}
     Column pad=24 gap=16
       Row gap=16 top
@@ -52,6 +52,7 @@ App
     Button "Close" onTap={close}
 
 ### Time Lost
+state runner=""
 App
   Sidebar
     Brand "Control Point" icon="explore"
@@ -63,7 +64,7 @@ App
   Main
     Nav
       Heading "Time lost per leg" level=1
-      Select bind=runner items=["Elin Sjoberg","Marta Koval","Jonas Berg","Aiko Tanaka"]
+      Select @runner items=["Elin Sjoberg","Marta Koval","Jonas Berg","Aiko Tanaka"]
     Column pad=24 gap=16
       Card gap=12
         Text.strong "Seconds lost against the best split"
@@ -83,7 +84,7 @@ Page
   Section
     Heading "Finish board" level=1
     Text.muted "Runners are ranked as they punch the finish."
-    LiveFeed bind=finished source="finish" onPunch={finished=sortBy(append(finished,result),r=>r.time)}
+    LiveFeed @finished source="finish" onPunch={finished=sortBy(append(finished,result),r=>r.time)}
     Card gap=8
       each r in finished
         Row between animate=slide-up
@@ -117,8 +118,8 @@ Page
   Section tint
     Heading "Compare two runners" level=1
     Row gap=12
-      Select bind=a items=["Elin Sjoberg","Marta Koval","Jonas Berg"]
-      Select bind=b items=["Elin Sjoberg","Marta Koval","Jonas Berg"]
+      Select @a items=["Elin Sjoberg","Marta Koval","Jonas Berg"]
+      Select @b items=["Elin Sjoberg","Marta Koval","Jonas Berg"]
     Card
       CourseMap controls={controls} routes=[routes[a],routes[b]] h=320
     Card

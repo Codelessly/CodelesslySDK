@@ -6,7 +6,7 @@ Card gap=10
   Row between
     Text.sectionTitle "Find the right laptop"
     Text.caption "{step<3 ? "Question " : "Done"}{step<3 ? step+1 : ""}{step<3 ? " of 3" : ""}"
-  Progress bind={step/3}
+  Progress value={step/3}
   if step==0
     Column gap=6
       Text.strong "What will you mostly use it for?"

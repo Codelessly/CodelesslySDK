@@ -17,7 +17,7 @@ Stack w=240 h=240 radius=120 fill=#FF000000 onTap={idle=0; dim=false} onRaise={i
       Text "{battery}%" color=#FFFFFFFF size=36 weight=700
       Text.caption "Charging" color=#FF9CA3AF
   if !charging
-    Pages bind=page h=240 onSwipeLeft={idle=0} onSwipeRight={idle=0}
+    Pages @page h=240 onSwipeLeft={idle=0} onSwipeRight={idle=0}
       Column center middle gap=4 opacity={dim ? 0.3 : 1}
         Stack center middle w=170 h=170
           Ring {min(steps/goal,1)} size=170 thickness=14 color=#FF22C55E
@@ -43,7 +43,7 @@ Stack w=240 h=240 radius=120 fill=#FF000000 onTap={idle=0; dim=false} onRaise={i
         Text "{hr}" size=44 weight=700 color=#FFFFFFFF
         Text.caption "bpm" color=#FF9CA3AF
         Sparkline values=[68,70,71,74,72,75,73,{hr}] w=120 h=30
-    Dots bind=page count=4
+    Dots @page count=4
 
 ### Stopwatch and Sleep
 state page=0
@@ -53,7 +53,7 @@ state laps=[]
 state lastLap=0
 every 100 when running onTick={ms=ms+100}
 Stack w=240 h=240 radius=120 fill=#FF000000
-  Pages bind=page h=240
+  Pages @page h=240
     Column center middle gap=8
       Text.caption "STOPWATCH" color=#FF9CA3AF
       Text.mono "{duration(floor(ms/1000))}.{floor((ms%1000)/100)}" size=38 weight=700 color=#FFFFFFFF
@@ -68,7 +68,7 @@ Stack w=240 h=240 radius=120 fill=#FF000000
       Text "7 h 24 min" size=32 weight=700 color=#FFFFFFFF
       Text.caption "slept last night" color=#FF9CA3AF
       BarChart values=[6.5,7,5.8,7.4,8,6.9,7.4] labels=["M","T","W","T","F","S","S"] w=170 h=60
-  Dots bind=page count=2
+  Dots @page count=2
 
 ### Alarm and Alerts
 state hour=6
@@ -88,10 +88,10 @@ Stack w=240 h=240 radius=120 fill=#FF000000 onRaise={dim=false} onWristDown={dim
     Divider w=150
     Text.caption "ALARM" color=#FF9CA3AF
     Row middle gap=6
-      DigitWheel bind=hour min=0 max=23 pad=2 onChange={vibrate 20}
+      DigitWheel @hour min=0 max=23 pad=2 onChange={vibrate 20}
       Text "{':'}" size=34 color=#FFFFFFFF
-      DigitWheel bind=minute min=0 max=59 pad=2 onChange={vibrate 20}
-    Toggle "On" bind=alarmOn
+      DigitWheel @minute min=0 max=59 pad=2 onChange={vibrate 20}
+    Toggle "On" @alarmOn
     Row gap=6 middle
       Battery level={battery} charging={charging} size=18
       Text.caption "{battery}%" color=#FF9CA3AF
@@ -116,7 +116,7 @@ define Marquee "text" speed=40 w=180 color=#FFFFFFFF
     Text "{text}" color={color}
 
 // A column of digits turned by swiping up or down; tap steps it by one.
-define DigitWheel bind=value min=0 max=59 pad=2 onChange
+define DigitWheel @value min=0 max=59 pad=2 onChange
   state value=0
   Column center gap=0 onSwipeUp={value=value>=max ? min : value+1; onChange(value)} onSwipeDown={value=value<=min ? max : value-1; onChange(value)}
     Text.caption "{value<=min ? max : value-1}" color=#FF6B7280

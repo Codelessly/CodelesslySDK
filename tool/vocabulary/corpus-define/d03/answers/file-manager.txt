@@ -21,11 +21,13 @@ state used=64.2
 state quota=100
 state expanded=["root","docs"]
 state files=[{"id":"root","name":"My files","kind":"folder","parent":"","size":0,"modified":"2026-11-10","type":"folder"},{"id":"docs","name":"Documents","kind":"folder","parent":"root","size":0,"modified":"2026-11-14","type":"folder"},{"id":"pics","name":"Pictures","kind":"folder","parent":"root","size":0,"modified":"2026-11-02","type":"folder"},{"id":"work","name":"Work","kind":"folder","parent":"docs","size":0,"modified":"2026-11-12","type":"folder"},{"id":"f1","name":"Q3-report.pdf","kind":"file","parent":"root","size":2400,"modified":"2026-11-16","type":"pdf"},{"id":"f2","name":"budget.xlsx","kind":"file","parent":"root","size":880,"modified":"2026-11-15","type":"sheet"},{"id":"f3","name":"beach.jpg","kind":"file","parent":"root","size":3100,"modified":"2026-10-28","type":"image"},{"id":"f4","name":"notes.txt","kind":"file","parent":"root","size":4,"modified":"2026-09-30","type":"text"},{"id":"f5","name":"launch-plan.docx","kind":"file","parent":"root","size":410,"modified":"2026-11-09","type":"doc"}]
+state shareWith=""
+state access=""
 every 1s when length(uploads) > 0 onTick={uploads=filter(map(uploads,u=>with(u,"pct",min(1,u.pct+0.05))),u=>u.pct<1)}
 App
   Sidebar
     Brand "Shelf" icon="folder_open"
-    FileTree items={filter(files,f=>f.kind=="folder")} bind=cwd expanded={expanded} onSelect={cwd=result; sel=[]} onToggle={expanded=contains(expanded,result) ? without(expanded,result) : append(expanded,result)} drop=file onDrop={files=updateWhere(files,f=>contains(sel,f.id),f=>with(f,"parent",result.target))}
+    FileTree items={filter(files,f=>f.kind=="folder")} @cwd expanded={expanded} onSelect={cwd=result; sel=[]} onToggle={expanded=contains(expanded,result) ? without(expanded,result) : append(expanded,result)} drop=file onDrop={files=updateWhere(files,f=>contains(sel,f.id),f=>with(f,"parent",result.target))}
     NavItem "Trash" icon="delete" badge="{length(trash)}" onTap={open trashSheet}
     Spacer grow
     Column gap=6
@@ -38,10 +40,10 @@ App
     Nav
       Breadcrumb items={map(files,f=>f)} current={cwd} onNavigate={cwd=result; sel=[]}
       Row gap=8
-        Input "Search" "Search files" bind=q w=220
-        Select "Type" items=["all","image","pdf","doc","sheet","text","folder"] bind=kind
-        Select "Modified" items=["any","today","7 days","30 days"] bind=when
-        SegmentedButton items=["list","grid"] bind=view
+        Input "Search" "Search files" @q w=220
+        Select "Type" items=["all","image","pdf","doc","sheet","text","folder"] @kind
+        Select "Modified" items=["any","today","7 days","30 days"] @when
+        SegmentedButton items=["list","grid"] @view
         Button "Upload" icon="upload" onTap={uploads=append(uploads,{"id":"u{length(uploads)+1}","name":"new-file.zip","pct":0}); toast "Upload started"}
     Column gap=0 grow
       if length(sel) > 0
@@ -68,7 +70,7 @@ App
             Row pad=[16,8,16,8] gap=8 middle fill={contains(sel,f.id) ? "#FFE8F0FE" : "#00FFFFFF"} drag=file(f.id) drop={f.kind=="folder" ? "file" : ""} menu=fileMenu onDrop={files=updateWhere(files,x=>contains(sel,x.id) || x.id==result.data,x=>with(x,"parent",f.id)); toast "Moved to {f.name}"} onTap={result.shift ? sel=map(slice(files,min(indexOf(files,find(files,x=>x.id==anchor)),indexOf(files,f)),max(indexOf(files,find(files,x=>x.id==anchor)),indexOf(files,f))+1),x=>x.id) : (result.ctrl ? sel=(contains(sel,f.id) ? without(sel,f.id) : append(sel,f.id)) : sel=[f.id]); anchor=f.id} onDoubleTap={f.kind=="folder" ? cwd=f.id : emit open f.id} onRightClick={ctxId=f.id; sel=contains(sel,f.id) ? sel : [f.id]}
               Icon "{f.kind=='folder' ? 'folder' : 'description'}"
               if renaming==f.id
-                Input "Name" bind=draftName grow onSubmit={files=updateWhere(files,x=>x.id==f.id,x=>with(x,"name",draftName)); renaming=""} onBlur={renaming=""}
+                Input "Name" @draftName grow onSubmit={files=updateWhere(files,x=>x.id==f.id,x=>with(x,"name",draftName)); renaming=""} onBlur={renaming=""}
               if renaming!=f.id
                 Text.strong "{f.name}" grow onDoubleTap={renaming=f.id; draftName=f.name}
               Text.muted "{f.kind=='folder' ? '-' : f.size + ' KB'}" w=90
@@ -103,8 +105,8 @@ Menu#fileMenu
   MenuItem "Share" icon="share" onTap={open shareDlg}
   MenuItem "Delete" icon="delete" onTap={lastDeleted=filter(files,f=>contains(sel,f.id)); trash=concat(trash,lastDeleted); files=removeWhere(files,f=>contains(sel,f.id)); sel=[]; toast "Moved to trash"}
 Dialog#shareDlg "Share" "Anyone with the link can view"
-  Input "Add people" "name@example.com" bind=shareWith
-  Select "Access" items=["Can view","Can edit"] bind=access
+  Input "Add people" "name@example.com" @shareWith
+  Select "Access" items=["Can view","Can edit"] @access
   Row between
     Button.outline "Copy link" onTap={copy "https://shelf.app/s/k29fj"; toast "Link copied"}
     Button "Done" onTap={emit share sel; close}
@@ -125,17 +127,18 @@ state kind="all"
 state when="30 days"
 state results=[{"id":"r1","name":"Q3-report.pdf","path":"My files","type":"pdf","modified":"2026-11-16","size":2400},{"id":"r2","name":"annual-report-2025.pdf","path":"My files / Documents","type":"pdf","modified":"2026-02-20","size":5200},{"id":"r3","name":"report-draft.docx","path":"My files / Work","type":"doc","modified":"2026-11-03","size":310}]
 state picked=""
+state range=""
 Page
   Nav
     Brand "Shelf" icon="folder_open"
     Row gap=8
-      Input "Search" bind=q w=320
+      Input "Search" @q w=320
       Button "Back to files" onTap={go files}
   Section
     Row gap=12
-      Select "Type" items=["all","image","pdf","doc","sheet","text","folder"] bind=kind
-      Select "Modified" items=["any","today","7 days","30 days","this year"] bind=when
-      DateRangePicker bind=range
+      Select "Type" items=["all","image","pdf","doc","sheet","text","folder"] @kind
+      Select "Modified" items=["any","today","7 days","30 days","this year"] @when
+      DateRangePicker @range
       Button.ghost "Clear" onTap={kind="all"; when="any"; q=""}
     Text.muted "{length(filter(results,r=>(kind=='all' || r.type==kind) && contains(lower(r.name),lower(q))))} results for \"{q}\""
     Card gap=0

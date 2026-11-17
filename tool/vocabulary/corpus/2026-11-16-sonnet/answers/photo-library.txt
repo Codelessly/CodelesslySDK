@@ -24,14 +24,14 @@ App
       Heading "Photos" level=1
       Row gap=12
         Icon "photo_size_select_small"
-        Slider bind=gridSize min=2 max=6 step=1 w=140
+        Slider @gridSize min=2 max=6 step=1 w=140
         Icon "photo_size_select_large"
     if length(sel)>0
       SelectionBar "{length(sel)} selected" sticky onClear={sel=[]}
         Button.ghost "Add to album" icon="add" onTap={open addAlbum}
         Button.ghost "Favourite" icon="favorite" onTap={favs=concat(favs,sel); toast "Added to favourites"}
         Button.ghost "Delete" icon="delete" onTap={open confirmDelete}
-    PhotoGrid photos={filter(photos,p=>!p.deleted)} cols={gridSize} gap=2 groupBy=month stickyHeaders bind=sel selectMode=range,toggle,drag onOpen={at=result; go viewer} onDropOnto=albums
+    PhotoGrid photos={filter(photos,p=>!p.deleted)} cols={gridSize} gap=2 groupBy=month stickyHeaders @sel selectMode=range,toggle,drag onOpen={at=result; go viewer} onDropOnto=albums
   Dialog#addAlbum "Add to album" "{length(sel)} pictures"
     each a in albums
       ListTile "{a.name}" subtitle="{length(a.ids)} pictures" onTap={albums=updateWhere(albums,x=>x.id==a.id,x=>with(x,"ids",concat(x.ids,sel))); sel=[]; toast "Added to {a.name}"; close}
@@ -45,9 +45,10 @@ App
 state info=false
 state zoom=1
 state compare=false
+state at=""
 Page
   Stack
-    Zoomable bind=zoom pinch wheel doubleTap pan onSwipeLeft={at=min(at+1,59)} onSwipeRight={at=max(at-1,0)} onDragDown={go photos} onKey="Escape" onEscape={go photos}
+    Zoomable @zoom pinch wheel doubleTap pan onSwipeLeft={at=min(at+1,59)} onSwipeRight={at=max(at-1,0)} onDragDown={go photos} onKey="Escape" onEscape={go photos}
       Image "{photos[at].url}" fit=contain
     Row between pad=16 top
       IconButton "close" onTap={go photos}
@@ -59,7 +60,7 @@ Page
         IconButton "delete" onTap={open confirmOne}
     IconButton "chevron_left" onTap={at=max(at-1,0)} shortcut="ArrowLeft"
     IconButton "chevron_right" onTap={at=min(at+1,59)} shortcut="ArrowRight"
-    ThumbnailStrip photos={photos} bind=at bottom h=64 gap=2
+    ThumbnailStrip photos={photos} @at bottom h=64 gap=2
   Sheet#infoSheet "Info" right
     Column gap=12 pad=16
       Text.strong "{formatDate(photos[at].date,"MMM d, yyyy")}"
@@ -95,21 +96,22 @@ App
         Button "Save" onTap={emit saveEdit; toast "Saved"; go viewer}
     Row gap=24 pad=24 top
       Column grow gap=8
-        BeforeAfter before="{photos[at].url}" after="{photos[at].url}" bind=split showBefore={showBefore} light={light} contrast={contrast} warmth={warmth} crop={ratio} h=520
+        BeforeAfter before="{photos[at].url}" after="{photos[at].url}" @split showBefore={showBefore} light={light} contrast={contrast} warmth={warmth} crop={ratio} h=520
         Button.outline "Hold to compare" icon="compare" onPressStart={showBefore=true} onPressEnd={showBefore=false}
       Column w=320 gap=16
         Text.fieldLabel "Light"
-        Slider bind=light min=-100 max=100
+        Slider @light min=-100 max=100
         Text.fieldLabel "Contrast"
-        Slider bind=contrast min=-100 max=100
+        Slider @contrast min=-100 max=100
         Text.fieldLabel "Warmth"
-        Slider bind=warmth min=-100 max=100
+        Slider @warmth min=-100 max=100
         Text.fieldLabel "Crop"
-        SegmentedButton bind=ratio items=["Original","1:1","4:3","16:9"]
+        SegmentedButton @ratio items=["Original","1:1","4:3","16:9"]
 
 ### Albums
 state albumId=""
 state order=[]
+state newName=""
 App
   Main
     Nav
@@ -135,7 +137,7 @@ App
           each id in find(albums,x=>x.id==albumId).ids
             Image "{photos[id].url}" drag=photo(id)
   Dialog#newAlbum "New album" "Give it a name"
-    Input "Name" "Summer 2026" bind=newName
+    Input "Name" "Summer 2026" @newName
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Create" onTap={albums=append(albums,{"id":"a{length(albums)+1}","name":newName,"ids":[]}); newName=""; close}
@@ -143,11 +145,12 @@ App
 ### Search
 state placeF=""
 state monthF=""
+state q=""
 App
   Main
     Nav
       Heading "Search" level=1
-      Input "Search tags, places, months" bind=q w=320 icon="search"
+      Input "Search tags, places, months" @q w=320 icon="search"
     Column pad=24 gap=16
       Row gap=8 wrap
         if q!=""
@@ -157,8 +160,8 @@ App
         if monthF!=""
           FilterChip "{monthF}" selected onTap={monthF=""}
       Row gap=8 wrap
-        Select "Place" bind=placeF items=["","Lisbon","Oslo","Kyoto"]
-        Select "Month" bind=monthF items=["","January","February","March"]
+        Select "Place" @placeF items=["","Lisbon","Oslo","Kyoto"]
+        Select "Month" @monthF items=["","January","February","March"]
       PhotoGrid photos={filter(photos,p=>!p.deleted && (q=="" || fuzzy(p.tags,q) || fuzzy(p.place,q)) && (placeF=="" || p.place==placeF) && (monthF=="" || formatDate(p.date,"MMMM")==monthF))} cols={gridSize} gap=2 onOpen={at=result; go viewer}
       if count(photos,p=>!p.deleted && contains(lower(p.place),lower(q)))==0
         Text.muted "No pictures match."
@@ -174,6 +177,7 @@ App
       PhotoGrid photos={filter(photos,p=>contains(favs,p.id) && !p.deleted)} cols={gridSize} gap=2 onOpen={at=result; go viewer}
 
 ### Recently deleted
+state sel=""
 App
   Main
     Nav
@@ -184,7 +188,7 @@ App
     Column pad=24 gap=16
       if count(photos,p=>p.deleted)==0
         EmptyState "Nothing here" "Deleted pictures stay for 30 days." icon="delete"
-      PhotoGrid photos={filter(photos,p=>p.deleted)} cols={gridSize} gap=2 bind=sel selectMode=range,toggle,drag
+      PhotoGrid photos={filter(photos,p=>p.deleted)} cols={gridSize} gap=2 @sel selectMode=range,toggle,drag
   Dialog#confirmForever "Delete for ever?" "This cannot be undone."
     Row end gap=8
       Button.ghost "Cancel" onTap={close}

@@ -73,7 +73,7 @@ App
   Main
     Nav
       Heading "Scorecard" level=1
-      SegmentedButton items=["Mine","Side by side"] bind=view
+      SegmentedButton items=["Mine","Side by side"] @view
     Column pad=24 gap=16
       Row gap=24
         Column gap=2
@@ -121,7 +121,7 @@ App
   Main
     Nav
       Heading "Stats" level=1
-      SegmentedButton items=["Round","Season"] bind=range
+      SegmentedButton items=["Round","Season"] @range
     Column pad=24 gap=16
       Grid cols=3 gap=16
         Card gap=8 center

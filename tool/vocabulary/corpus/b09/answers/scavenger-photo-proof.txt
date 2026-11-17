@@ -121,7 +121,7 @@ App
   Dialog#review "Review photo" "Say why when you reject"
     Image "{cur.url}" h=240 radius=8
     Text.strong "{cur.team}: {cur.item}"
-    Input "Comment" "Blurry, or the wrong door" bind=comment multiline
+    Input "Comment" "Blurry, or the wrong door" @comment multiline
     Row end gap=8
       Button.outline "Cancel" onTap={close}
       Button.destructive "Reject" onTap={comment=="" ? toast "Add a comment first" : {shots=updateWhere(shots,x=>x.id==cur.id,x=>with(x,"status","rejected")); emit reject {"id":cur.id,"comment":comment}; comment=""; close}}
@@ -141,7 +141,7 @@ Page
     Badge.success "+{bonus} bonus min"
   Section
     Column gap=16
-      SegmentedButton bind=view items=["board","map"]
+      SegmentedButton @view items=["board","map"]
       if view=="board"
         Heading "Teams" level=1
         each t in sortByDesc(teams,x=>x.points)

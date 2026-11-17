@@ -34,8 +34,8 @@ App
       Card gap=12
         Text.strong "Set for all photos"
         Row gap=12 middle
-          Select "Size" bind=allSize items=["4x6","5x7","8x10","11x14"] w=140
-          Select "Paper" bind=allPaper items=["Glossy","Matte","Lustre","Metallic"] w=160
+          Select "Size" @allSize items=["4x6","5x7","8x10","11x14"] w=140
+          Select "Paper" @allPaper items=["Glossy","Matte","Lustre","Metallic"] w=160
           Button.secondary "Apply to all" onTap={photos=map(photos,p=>with(with(p,"size",allSize),"paper",allPaper)); toast "Applied to {length(photos)} photos"}
       if length(photos)==0
         Card center
@@ -49,7 +49,7 @@ App
                 Box fill=#99000000 pad=8 bottom
                   Text "Uploading {round(p.progress*100,0)}%" color=#FFFFFFFF size=12
             if p.progress<1
-              Progress bind=p.progress
+              Progress value={p.progress}
             Row between middle
               Text.strong "{p.name}" size=13
               IconButton "delete" tooltip="Remove photo" onTap={photos=removeWhere(photos,x=>x.id==p.id)}
@@ -58,8 +58,8 @@ App
                 Badge.warning "Low resolution"
               Badge.neutral "Crop {p.crop}"
             Row gap=8
-              Select bind=p.size items=["4x6","5x7","8x10","11x14"] grow
-              Select bind=p.paper items=["Glossy","Matte","Lustre","Metallic"] grow
+              Select @p.size items=["4x6","5x7","8x10","11x14"] grow
+              Select @p.paper items=["Glossy","Matte","Lustre","Metallic"] grow
             Row between middle
               Text.muted "Copies"
               Row gap=8 middle
@@ -103,7 +103,7 @@ App
     Progress {min(1,sum(photos,p=>p.qty)/50)}
     Text.muted "{sum(photos,p=>p.qty)>=50?"Top tier reached":"Add "+(sum(photos,p=>p.qty)>=25?50-sum(photos,p=>p.qty):(sum(photos,p=>p.qty)>=10?25-sum(photos,p=>p.qty):10-sum(photos,p=>p.qty)))+" more prints for the next tier"}" size=13
 Dialog#crop "Crop photo" "{cropName}"
-  Cropper "{cropUrl}" ratio={cropRatio} zoom={cropZoom} bind=cropBox h=300
+  Cropper "{cropUrl}" ratio={cropRatio} zoom={cropZoom} @cropBox h=300
   Row gap=8
     ChoiceChip "2:3" selected={cropRatio=="2:3"} onTap={cropRatio="2:3"}
     ChoiceChip "5:7" selected={cropRatio=="5:7"} onTap={cropRatio="5:7"}
@@ -111,7 +111,7 @@ Dialog#crop "Crop photo" "{cropName}"
     ChoiceChip "1:1" selected={cropRatio=="1:1"} onTap={cropRatio="1:1"}
   Row gap=12 middle
     Icon "zoom_out"
-    Slider bind=cropZoom min=1 max=4 grow
+    Slider @cropZoom min=1 max=4 grow
     Icon "zoom_in"
   Row gap=8 end
     Button.ghost "Reset" onTap={cropZoom=1; cropRatio="2:3"}
@@ -129,6 +129,8 @@ state zip="97205"
 state phone="503 555 0142"
 state agree=false
 state subtotal=0
+state pickupDay=""
+state pickupTime=""
 App
   Sidebar
     Brand "Pressroom" icon="photo_library"
@@ -142,26 +144,26 @@ App
     Column pad=24 gap=16
       Card gap=12
         Text.strong "How do you want them?"
-        SegmentedButton bind=method items=["Delivery","Pickup"]
+        SegmentedButton @method items=["Delivery","Pickup"]
       if method=="Delivery"
         Card gap=12
           Text.strong "Ship to"
-          Input "Full name" bind=fullName
-          Input "Street address" bind=street
+          Input "Full name" @fullName
+          Input "Street address" @street
           Row gap=12
-            Input "City" bind=city grow
-            Input "ZIP" bind=zip type=number w=120
-          Input "Phone" bind=phone type=phone
+            Input "City" @city grow
+            Input "ZIP" @zip type=number w=120
+          Input "Phone" @phone type=phone
           Text.strong "Delivery speed"
-          Radio "Standard, 4 to 6 days, $4.99" value="Standard" bind=speed
-          Radio "Express, 2 days, $12.50" value="Express" bind=speed
-          Radio "Next day, $19.00" value="Next day" bind=speed
+          Radio "Standard, 4 to 6 days, $4.99" value="Standard" @speed
+          Radio "Express, 2 days, $12.50" value="Express" @speed
+          Radio "Next day, $19.00" value="Next day" @speed
       if method=="Pickup"
         Card gap=12
           Text.strong "Pick up at"
-          Select "Store" bind=store items=["Pressroom Downtown, 214 Main St","Pressroom Eastside, 9 Burnside Ave","Pressroom Airport Road, 1200 Airport Rd"]
-          DatePicker "Pickup day" bind=pickupDay
-          TimePicker "Pickup time" bind=pickupTime
+          Select "Store" @store items=["Pressroom Downtown, 214 Main St","Pressroom Eastside, 9 Burnside Ave","Pressroom Airport Road, 1200 Airport Rd"]
+          DatePicker "Pickup day" @pickupDay
+          TimePicker "Pickup time" @pickupTime
           Text.muted "Ready within 1 hour. Free."
       Card gap=8
         Text.strong "Order summary"
@@ -173,7 +175,7 @@ App
                 Text "{p.name}" size=13
                 Text.muted "{p.qty} x {p.size}, {p.paper}" size=12
             Text "{money(p.qty*(p.size=="4x6"?0.29:(p.size=="5x7"?0.89:(p.size=="8x10"?2.49:6.99)))*(p.paper=="Metallic"?1.4:(p.paper=="Lustre"?1.1:1)),"$",2)}"
-      Checkbox "I confirm the low-resolution photos may print soft" bind=agree visible={count(photos,p=>p.lowres)>0}
+      Checkbox "I confirm the low-resolution photos may print soft" @agree visible={count(photos,p=>p.lowres)>0}
     Footer
       Row between middle
         Column gap=2
@@ -197,6 +199,7 @@ App
 ### Tracking
 state step=2
 state trackId="PR-482913"
+state helpText=""
 every 5s when step<4 onTick={step=step+0}
 Page
   Nav sticky
@@ -245,5 +248,5 @@ Page
       Text.strong "Pressroom"
       Text.muted "Questions? help@pressroom.app"
 Dialog#help "Need help?" "We reply within a few hours."
-  Input "Message" bind=helpText multiline
+  Input "Message" @helpText multiline
   Button "Send" onTap={emit support helpText; toast "Message sent"; close}

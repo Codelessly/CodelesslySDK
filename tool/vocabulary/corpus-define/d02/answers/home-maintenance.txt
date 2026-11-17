@@ -5,6 +5,7 @@ state sel=0
 state month=10
 state tab="calendar"
 state autumn=[{"t":"Drain outdoor taps","done":true},{"t":"Bleed radiators","done":false},{"t":"Check roof for loose tiles","done":false},{"t":"Test smoke and CO alarms","done":false},{"t":"Seal draughty windows","done":false},{"t":"Service the boiler","done":false}]
+state first=""
 App
   Sidebar
     Brand "Upkeep" icon="home_repair_service"
@@ -40,7 +41,7 @@ App
             Text.muted "{count(autumn,a=>a.done)} of {length(autumn)}"
           Progress {count(autumn,a=>a.done)/length(autumn)}
           each a in autumn
-            Checkbox "{a.t}" bind=a.done
+            Checkbox "{a.t}" @a.done
           Button.outline "Mark all done" onTap={autumn=map(autumn,a=>with(a,"done",true)); toast "Autumn checklist complete"}
 
 Dialog#addTask "New task" "Repeats until you stop it"
@@ -48,12 +49,12 @@ Dialog#addTask "New task" "Repeats until you stop it"
   state every=12
   state unit="months"
   state who=""
-  Input "Task" bind=name
+  Input "Task" @name
   Row gap=8
-    Input "Repeat every" type=number bind=every
-    Select bind=unit items=["weeks","months","years"]
-  Input "Who to call" bind=who
-  DatePicker "First due" bind=first
+    Input "Repeat every" type=number @every
+    Select @unit items=["weeks","months","years"]
+  Input "Who to call" @who
+  DatePicker "First due" @first
   Button "Save task" onTap={name=="" ? toast "Give it a name" : {tasks=append(tasks,{"id":length(tasks)+10,"name":name,"every":every,"unit":unit,"last":"","due":first,"days":0,"month":month,"who":who,"phone":"","done":false}); close}}
 
 Dialog#call "Who to call"
@@ -64,10 +65,10 @@ Dialog#call "Who to call"
 Sheet#contacts "Trusted contacts"
   state q=""
   state people=[{"name":"Harlow Heating","job":"Boiler and gas","phone":"020 7946 0112","rating":5},{"name":"Dave Okafor","job":"Gutters and roofing","phone":"07700 900421","rating":4},{"name":"Priya Nair","job":"Electrician","phone":"07700 900188","rating":5},{"name":"Clearflow Plumbing","job":"Plumber","phone":"020 7946 0733","rating":4}]
-  Input "Search contacts" bind=q
+  Input "Search contacts" @q
   each p in filter(people,x=>contains(lower(x.name),lower(q)) || contains(lower(x.job),lower(q)))
     ListTile "{p.name}" "{p.job}" icon="person"
-      Rating value={p.rating} readonly
+      Rating value=@p.rating readonly
       IconButton "call" tooltip="Call" onTap={link "tel:{p.phone}"}
 
 ### Home plan
@@ -89,7 +90,7 @@ App
     Column pad=24 gap=16
       Row gap=16 top
         Card grow gap=8
-          FloorPlan bind=room rooms=[{"name":"Kitchen","x":0,"y":0,"w":5,"h":4},{"name":"Hall","x":5,"y":0,"w":2,"h":4},{"name":"Living room","x":0,"y":4,"w":5,"h":4},{"name":"Utility","x":5,"y":4,"w":2,"h":2},{"name":"Bathroom","x":5,"y":6,"w":2,"h":2},{"name":"Bedroom","x":7,"y":0,"w":3,"h":8}] pins={map(tasks,t=>{"room":t.room,"label":t.name,"urgent":t.days<0})} onPick={room=result}
+          FloorPlan @room rooms=[{"name":"Kitchen","x":0,"y":0,"w":5,"h":4},{"name":"Hall","x":5,"y":0,"w":2,"h":4},{"name":"Living room","x":0,"y":4,"w":5,"h":4},{"name":"Utility","x":5,"y":4,"w":2,"h":2},{"name":"Bathroom","x":5,"y":6,"w":2,"h":2},{"name":"Bedroom","x":7,"y":0,"w":3,"h":8}] pins={map(tasks,t=>{"room":t.room,"label":t.name,"urgent":t.days<0})} onPick={room=result}
         Pane w=320 pad=16 gap=12
           Row between
             Text.heading "{room}"
@@ -102,7 +103,7 @@ App
 
 Dialog#addRoom "New room"
   state rname=""
-  Input "Room name" bind=rname
+  Input "Room name" @rname
   Button "Add" onTap={rname=="" ? toast "Name the room" : {room=rname; close}}
 
 ### Spend and warranties
@@ -111,6 +112,7 @@ state view="spend"
 state spend=[{"id":1,"task":"Boiler service","amount":96,"date":"2025-10-02","photo":"https://example.com/receipts/boiler.jpg"},{"id":2,"task":"Clean gutters","amount":120,"date":"2026-05-14","photo":"https://example.com/receipts/gutters.jpg"},{"id":3,"task":"Furnace filter","amount":18.5,"date":"2026-09-01","photo":"https://example.com/receipts/filter.jpg"},{"id":4,"task":"Smoke alarms","amount":42,"date":"2025-11-30","photo":"https://example.com/receipts/alarms.jpg"}]
 state warranties=[{"item":"Boiler","end":"2030-03-01","days":1204,"remind":true},{"item":"Dishwasher","end":"2026-12-20","days":33,"remind":true},{"item":"Washing machine","end":"2027-06-10","days":205,"remind":false},{"item":"Roof repair","end":"2026-11-25","days":8,"remind":true}]
 state at=0
+state photo=""
 App
   Sidebar
     Brand "Upkeep" icon="home_repair_service"
@@ -123,7 +125,7 @@ App
     Nav
       Heading "Spend and warranties"
       Row gap=8
-        SegmentedButton bind=view items=["spend","warranties"]
+        SegmentedButton @view items=["spend","warranties"]
         Button "Add receipt" icon="photo_camera" onTap={open addReceipt}
     Column pad=24 gap=16
       if view=="spend"
@@ -149,14 +151,14 @@ App
                   Badge.warning "{w.days} days left"
                 FilterChip "Remind me" selected={w.remind} onTap={warranties=updateWhere(warranties,x=>x.item==w.item,x=>with(x,"remind",!x.remind))}
 
-Lightbox#shots photos={map(spend,s=>{"url":s.photo,"caption":s.task})} bind=at
+Lightbox#shots photos={map(spend,s=>{"url":s.photo,"caption":s.task})} @at
 
 Dialog#addReceipt "Add a receipt" "Photograph it or pick a task"
   state task=""
   state amount=0
-  Select "Task" bind=task items={map(spend,s=>s.task)}
-  Input "Amount" type=number bind=amount
-  PhotoPicker "Photograph the receipt" bind=photo
+  Select "Task" @task items={map(spend,s=>s.task)}
+  Input "Amount" type=number @amount
+  PhotoPicker "Photograph the receipt" @photo
   Button "Save" onTap={task=="" ? toast "Pick a task" : {spend=append(spend,{"id":length(spend)+10,"task":task,"amount":amount,"date":today(),"photo":photo}); close}}
 
 define MonthTile name=0 year=2026 tasks=[] selected=false onPick
@@ -185,7 +187,7 @@ define Rating value=0 readonly
       Icon {i<value ? "star" : "star_border"}
 
 // shows the rooms as labelled boxes; a real drawn plan is not possible
-define FloorPlan bind=room rooms=[] pins=[] onPick
+define FloorPlan @room rooms=[] pins=[] onPick
   Card gap=8
     Grid cols=10 gap=2
       each r in rooms
@@ -196,7 +198,7 @@ define FloorPlan bind=room rooms=[] pins=[] onPick
               Box w=10 h=10 radius=5 fill={p.urgent ? "#FFDC2626" : "#FF2563EB"}
 
 // a camera is not possible; shown as a labelled box
-define PhotoPicker "label" bind=photo
+define PhotoPicker "label" @photo
   Box pad=24 fill="#FFF3F4F6" radius=8 center middle onTap={photo="https://example.com/receipts/new.jpg"; toast "Photo attached"}
     Icon "photo_camera"
     Text.muted "{label}"

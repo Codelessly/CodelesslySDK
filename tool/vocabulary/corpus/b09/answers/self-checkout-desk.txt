@@ -12,8 +12,8 @@ App
     NavItem "Check out" icon="qr_code_scanner" selected={true} onTap={go scan}
     NavItem "Fines" icon="payments" badge="1" onTap={go fines}
     Spacer grow
-    Select "Language" items=["English","Español","Français"] bind=lang
-    Toggle "Large mode" bind=large
+    Select "Language" items=["English","Español","Français"] @lang
+    Toggle "Large mode" @large
   Main
     Nav
       Heading "{lang=="English" ? "Check out your books" : lang=="Español" ? "Retire sus libros" : "Empruntez vos livres"}" level=1
@@ -23,7 +23,7 @@ App
         Row gap=12
           Icon "contactless" size={large ? 48 : 28}
           Text.strong "{lang=="English" ? "Put your library card on the pad, then a book on the shelf plate." : lang=="Español" ? "Ponga su tarjeta en la almohadilla y un libro en la placa." : "Posez votre carte sur le lecteur, puis un livre sur la plaque."}" size={large ? 28 : 16}
-        Input "Scan or type a barcode" bind=code onSubmit={loans=append(loans,{"id":code,"title":"Item "+code,"due":"Dec 8","hold":false}); code=""; left=45}
+        Input "Scan or type a barcode" @code onSubmit={loans=append(loans,{"id":code,"title":"Item "+code,"due":"Dec 8","hold":false}); code=""; left=45}
         Button.outline "Read item" onTap={loans=append(loans,{"id":code,"title":"Item "+code,"due":"Dec 8","hold":false}); code=""; left=45}
       Card gap=8
         Row between
@@ -75,9 +75,9 @@ App
             Text.muted "Due {b.due}"
       Card gap=12
         Text.panelTitle "Receipt"
-        SegmentedButton items=["Print","Email"] bind=receipt
+        SegmentedButton items=["Print","Email"] @receipt
         if receipt=="Email"
-          Input "Email" "you@example.com" type=email bind=email
+          Input "Email" "you@example.com" type=email @email
       Row gap=8
         Button "Done" size=large onTap={receipt=="Email" && email=="" ? toast "Enter an email address" : emit finish receipt; toast "Thank you. Enjoy your books."; go scan}
         Button.outline "Back" size=large onTap={go scan}
@@ -95,7 +95,7 @@ App
   Main
     Nav
       Heading "Fines" level=1
-      Toggle "Large mode" bind=large
+      Toggle "Large mode" @large
     Column pad=24 gap=16
       Card gap=8
         each f in fines

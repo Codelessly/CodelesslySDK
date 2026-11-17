@@ -16,6 +16,11 @@ state asks=[{"px":482.55,"qty":800},{"px":482.60,"qty":1900},{"px":482.65,"qty":
 state positions=[{"id":1,"sym":"NVDA","qty":300,"avg":451.20,"last":482.50},{"id":2,"sym":"AAPL","qty":-150,"avg":236.80,"last":231.14},{"id":3,"sym":"TSLA","qty":80,"avg":325.10,"last":318.77},{"id":4,"sym":"AMZN","qty":200,"avg":205.40,"last":212.60}]
 state headlines=["Fed holds rates, signals one cut in December","NVIDIA beats on data-center revenue, guides above consensus","Oil slips 1.8% as inventories build","Apple supplier flags weaker iPhone demand","Treasury 10-year yield at 4.21%","Tesla deliveries up 9% year on year"]
 state spread=0.10
+state q=""
+state newSym=""
+state flash=false
+state sound=false
+state theme=""
 every 1s onTick={spread=round(0.05+abs(sin(spread*100))*0.1,2)}
 App
   Sidebar
@@ -32,15 +37,15 @@ App
         Heading "{symbol}" level=1
         Text.success "482.50  +1.84%"
       Row gap=8
-        SegmentedButton bind=interval items=["1m","5m","15m","1h"]
+        SegmentedButton @interval items=["1m","5m","15m","1h"]
         Button.outline "Add panel" icon="add" onTap={open addPanel}
         Button.ghost "Reset layout" onTap={layout=["watch","chart","book","ticket","positions"]; toast "Layout reset"}
         IconButton "settings" tooltip="Terminal settings" onTap={open settings}
     Column pad=12 gap=12 fill=#FF0B0E14
-      PanelGrid cols=12 gap=12 bind=layout
+      PanelGrid cols=12 gap=12 @layout
         Panel#watch "Watchlist" span=3 resizable drag=panel("watch") drop=panel onDrop={layout=move(layout,result.data,"watch")}
           Row gap=8
-            Input "Search symbols" bind=q w=160
+            Input "Search symbols" @q w=160
             IconButton "add" tooltip="Add symbol" onTap={open addSymbol}
           Row between
             Text.caption "Symbol" w=70
@@ -78,11 +83,11 @@ App
           Row gap=8
             Button "Buy" variant={side=="buy" ? "primary" : "outline"} grow onTap={side="buy"}
             Button.destructive "Sell" grow onTap={side="sell"}
-          Select "Order type" bind=orderType items=["Market","Limit","Stop","Stop limit"]
-          Input "Size (shares)" bind=size type=number
-          Slider bind=size min=0 max=1000
+          Select "Order type" @orderType items=["Market","Limit","Stop","Stop limit"]
+          Input "Size (shares)" @size type=number
+          Slider @size min=0 max=1000
           if orderType!="Market"
-            Input "Limit price" bind=limitPrice type=number
+            Input "Limit price" @limitPrice type=number
           Row between
             Text.muted "Estimated value"
             Text.strong "{money(size*limitPrice,'$',2)}"
@@ -133,7 +138,7 @@ App
         Button.outline "Edit" onTap={close}
         Button "Confirm {side}" onTap={emit placeOrder {"sym":symbol,"side":side,"qty":size,"px":limitPrice}; toast "Order sent: {upper(side)} {size} {symbol}"; close}
   Dialog#addSymbol "Add symbol"
-    Input "Ticker" "e.g. GOOGL" bind=newSym
+    Input "Ticker" "e.g. GOOGL" @newSym
     Button "Add to watchlist" onTap={watchlist=append(watchlist,{"sym":upper(newSym),"name":upper(newSym),"last":100.00,"chg":0,"dir":"up"}); newSym=""; close}
   Dialog#indicatorList "Indicators" "Add an overlay to the chart"
     ListView
@@ -147,9 +152,9 @@ App
       Button.outline "Heatmap" onTap={layout=append(layout,"heatmap"); close}
       Button.outline "Option chain" onTap={layout=append(layout,"chain"); close}
   Sheet#settings "Terminal settings"
-    Toggle "Flash price ticks" bind=flash
-    Toggle "Sound on fill" bind=sound
-    Select "Theme" bind=theme items=["Dark","Midnight","High contrast"]
+    Toggle "Flash price ticks" @flash
+    Toggle "Sound on fill" @sound
+    Select "Theme" @theme items=["Dark","Midnight","High contrast"]
     Button "Done" onTap={close}
   Menu#rowMenu
     MenuItem "Open chart" icon="show_chart" onTap={symbol=sel}
@@ -164,6 +169,7 @@ App
 ### Orders
 state filter="Open"
 state orders=[{"id":"A1042","sym":"NVDA","side":"buy","qty":100,"px":480.00,"status":"Open","time":"09:41:12"},{"id":"A1041","sym":"AAPL","side":"sell","qty":150,"px":236.80,"status":"Filled","time":"09:35:40"},{"id":"A1040","sym":"TSLA","side":"buy","qty":80,"px":325.10,"status":"Filled","time":"09:31:05"},{"id":"A1039","sym":"AMZN","side":"buy","qty":50,"px":205.00,"status":"Open","time":"09:30:18"},{"id":"A1038","sym":"META","side":"sell","qty":20,"px":601.00,"status":"Cancelled","time":"09:30:02"}]
+state q=""
 App
   Sidebar
     Brand "Floor Five" icon="candlestick_chart"
@@ -176,7 +182,7 @@ App
     Nav
       Heading "Orders" level=1
       Row gap=8
-        Input "Search orders" bind=q w=220
+        Input "Search orders" @q w=220
         Button.outline "Export" icon="download" onTap={emit exportOrders}
     Column pad=24 gap=16
       Row gap=8

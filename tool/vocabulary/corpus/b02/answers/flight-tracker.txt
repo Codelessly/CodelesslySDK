@@ -4,6 +4,8 @@ state q=""
 state mode="Flight"
 state recent=[{"id":"UA512","route":"SFO to JFK","status":"En route"},{"id":"DL88","route":"ATL to LHR","status":"Delayed"},{"id":"BA286","route":"LHR to SFO","status":"Landed"},{"id":"AA100","route":"JFK to LAX","status":"Scheduled"}]
 state sel=""
+state from=""
+state to=""
 App
   Sidebar
     Brand "Contrail" icon="flight"
@@ -19,16 +21,16 @@ App
       Row gap=8
         IconButton "history" tooltip="Recent searches" onTap={open recentMenu}
     Column pad=24 gap=16 maxw=720
-      SegmentedButton bind=mode items=["Flight","Route"]
+      SegmentedButton @mode items=["Flight","Route"]
       if mode=="Flight"
         Row gap=8
-          Input "Flight number" "e.g. UA512" bind=q grow
+          Input "Flight number" "e.g. UA512" @q grow
           Button "Track" onTap={go flight}
       if mode=="Route"
         Row gap=8
-          Input "From" "SFO" bind=from grow
+          Input "From" "SFO" @from grow
           IconButton "swap_horiz" tooltip="Swap airports" onTap={tmp=from; from=to; to=tmp}
-          Input "To" "JFK" bind=to grow
+          Input "To" "JFK" @to grow
           Button "Find flights" onTap={emit searchRoute {"from":from,"to":to}}
       Text.sectionTitle "Recent"
       each f in recent
@@ -81,7 +83,7 @@ App
             Text "16:35" strike color=#FF8A8A8A size=24
             Text "17:10" size=56 weight=700
             Text.muted "Arrives in {duration(9000)}"
-        FlightProgress bind=progress from="SFO" to="JFK" label="{round(progress*100,0)}% of 2,586 mi"
+        FlightProgress @progress from="SFO" to="JFK" label="{round(progress*100,0)}% of 2,586 mi"
       Row gap=8
         if gateChanged
           Chip "Gate {gate}" icon="meeting_room" animate=pulse duration=800
@@ -129,6 +131,7 @@ state airport="SFO"
 state filter="All"
 state board=[{"time":"08:40","flight":"UA512","to":"New York JFK","gate":"B14","status":"Departed"},{"time":"09:15","flight":"AS330","to":"Seattle SEA","gate":"C3","status":"Boarding"},{"time":"09:50","flight":"DL1204","to":"Atlanta ATL","gate":"D9","status":"On time"},{"time":"10:20","flight":"BA284","to":"London LHR","gate":"G12","status":"Delayed"},{"time":"11:05","flight":"JL001","to":"Tokyo HND","gate":"A7","status":"On time"},{"time":"11:40","flight":"AA177","to":"Dallas DFW","gate":"E2","status":"Cancelled"}]
 state sel=""
+state search=""
 App
   Sidebar
     Brand "Contrail" icon="flight"
@@ -140,8 +143,8 @@ App
     Nav
       Heading "Departures" level=1
       Row gap=8
-        Select bind=airport items=["SFO","JFK","LHR","ATL"]
-        Input "Filter" bind=search w=200
+        Select @airport items=["SFO","JFK","LHR","ATL"]
+        Input "Filter" @search w=200
     Column pad=24 gap=16
       Row gap=8
         ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}
@@ -174,6 +177,8 @@ App
 state alerts={"gate":true,"delay":true,"cancel":true,"landing":false,"belt":true}
 state quiet=false
 state minDelay=15
+state quietFrom=""
+state quietTo=""
 App
   Sidebar
     Brand "Contrail" icon="flight"
@@ -188,21 +193,21 @@ App
     Column pad=24 gap=16 maxw=720
       Card gap=12
         Text.panelTitle "Tell me when"
-        Toggle "Gate or terminal changes" bind=alerts.gate
-        Toggle "Delays" bind=alerts.delay
-        Toggle "Cancellations" bind=alerts.cancel
-        Toggle "Baggage belt is assigned" bind=alerts.belt
-        Toggle "The plane lands" bind=alerts.landing
+        Toggle "Gate or terminal changes" @alerts.gate
+        Toggle "Delays" @alerts.delay
+        Toggle "Cancellations" @alerts.cancel
+        Toggle "Baggage belt is assigned" @alerts.belt
+        Toggle "The plane lands" @alerts.landing
       Card gap=12
         Text.panelTitle "Delays"
         Text.muted "Only alert me when a delay is longer than {minDelay} min"
-        Slider bind=minDelay min=0 max=120
+        Slider @minDelay min=0 max=120
       Card gap=12
-        Toggle "Quiet hours" bind=quiet
+        Toggle "Quiet hours" @quiet
         if quiet
           Row gap=8
-            TimePicker "From" bind=quietFrom
-            TimePicker "To" bind=quietTo
+            TimePicker "From" @quietFrom
+            TimePicker "To" @quietTo
       Card gap=8
         Text.panelTitle "Recent alerts"
         ListTile "UA512 gate changed to B14" icon="meeting_room"

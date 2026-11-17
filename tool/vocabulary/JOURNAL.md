@@ -6,6 +6,10 @@ hard about whether the direction is right, write it here, and act on it in the n
 
 ## How it runs
 
+The answers (`corpus*/<batch>/answers/*.txt`) were rewritten to the 34 binding form (`@name` for `bind=name`) by
+`tool/notation/notation.sh migrate` on 2026-11-17 and are otherwise as written. The prompts (`prompt.txt`) are as
+the writers had them.
+
 1. **Write.** A batch of briefs from `briefs.txt` (one line each: what the app does, never which words to use).
    Each goes to a Sonnet writer with the open prompt (`tool/notation/notation.sh prompt --open --width 1280`:
    grammar and core only, any word allowed) and the instruction to write two to four screens under `### name`
@@ -562,7 +566,7 @@ case and has no parameter for the next one. `confirm` has no affirmative label, 
    scratch on UI SDK and compared side by side) is the first measure of that.
 
 **Decisions.**
-- D31. Definitions: `bind=`, loop items in `drag=` and events forward through a definition; until they do,
+- D31. Definitions: a binding (`bind=` then, `@value` in the signature since 34), loop items in `drag=` and events forward through a definition; until they do,
   the tool reports them as errors.
 - D32. The vocabulary tool warns on a signature parameter or event the body never uses and on a definition
   that reads a global; a `primitive Word …` declaration is counted apart; one "unknown" number.
@@ -580,3 +584,34 @@ case and has no parameter for the next one. `confirm` has no affirmative label, 
   and zoom as values, cells as one coordinate mode), the path, `shortcut=` and arrow-focus groups, host
   actions with a result, scroll position and viewport events. Each gets a design note before code.
 - D38. Aliases carry a variant, fixed parameters and a main-string mapping; a definition may shadow a named word.
+
+### 34.0.0: the binding form (2026-11-17)
+
+`bind=name` looked like a key and was not one: it names a variable a control reads and writes, where every other
+key takes a value. Before choosing what replaces it, a probe: 19 Sonnet writers each wrote six small screens from
+the open prompt with binding taken out of it, in three groups.
+
+| told | writers | wrote |
+|---|---|---|
+| nothing about binding | 6 | `value={x} onChange={x=result}` 4, `bind` 2 |
+| the concept, not the form | 6 | `bind=x` or `bind={x}` 5 |
+| that binding is not key=value, and to choose a mark | 7 | `@x` 5, `bind x` 2 |
+
+All seven of the last group used the mark bare, and all wrote a range as two marks in order. All 19 declared
+every variable with `state`.
+
+**What it says.** Told nothing, writers spell a binding out as a value and an event; told the concept, they
+write the old key again. Asked for a mark, most pick `@` and use it the way 34 reads it: bare for the control's
+value, two for a range, the variable declared.
+
+**Decision.** 34.0.0: `@name` bare is the control's value, `key=@name` another property, a range `@low @high`; a
+bound variable is declared (`state`, a site variable, a loop item or a definition's parameter). `bind=` is gone
+with no legacy reading: a line that writes it is one issue showing the rewrite. The answers here were rewritten
+by `notation.sh migrate` (How it runs); the prompts were not.
+
+Counted after the rewrite, with Cards migrated: the first corpus 41.8% resolved, 360 grammar issues, 445
+validation errors; d01 94.2%, 20, 19; d02 92.1%, 119, 69; d03 97.2%, 31, 37. No answer binds a variable it does
+not declare. What the rewrite got wrong is a handful of lines: a block's one-way `value={…}` made a binding
+(`Rating value={s.stars}` to `value=@s.stars`, 10 lines and one `Stepper`), `Column reorder bind=list` made
+`selected=@list`, a signature's `value=0 bind=value` made `value=0 @value`, and state lines added for names the
+runtime owns (`theme`, `device`).

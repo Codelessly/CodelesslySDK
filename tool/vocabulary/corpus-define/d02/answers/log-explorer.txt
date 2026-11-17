@@ -11,6 +11,8 @@ state tab="search"
 state hits=[{"id":1,"time":"14:02:11.482","level":"error","service":"checkout","msg":"Payment gateway timeout after 3000ms","fields":[{"k":"service","v":"checkout"},{"k":"trace_id","v":"9f2c71ab"},{"k":"http.status","v":"504"},{"k":"region","v":"eu-west-1"}]},{"id":2,"time":"14:02:09.117","level":"warn","service":"checkout","msg":"Retrying charge attempt 2 of 3","fields":[{"k":"service","v":"checkout"},{"k":"attempt","v":"2"},{"k":"region","v":"eu-west-1"}]},{"id":3,"time":"14:02:07.930","level":"info","service":"cart","msg":"Cart 88421 updated, 3 items","fields":[{"k":"service","v":"cart"},{"k":"items","v":"3"},{"k":"region","v":"us-east-1"}]},{"id":4,"time":"14:02:04.006","level":"error","service":"checkout","msg":"Card declined: insufficient_funds","fields":[{"k":"service","v":"checkout"},{"k":"code","v":"insufficient_funds"},{"k":"region","v":"us-east-1"}]},{"id":5,"time":"14:01:58.651","level":"debug","service":"auth","msg":"Token refreshed for session 4417","fields":[{"k":"service","v":"auth"},{"k":"session","v":"4417"}]}]
 state saved=[{"name":"Checkout errors","q":"service:checkout AND level:error"},{"name":"Slow requests","q":"duration_ms:>2000"},{"name":"Auth failures","q":"service:auth AND level:warn"}]
 state fieldTop=[{"name":"level","top":[{"v":"error","n":412},{"v":"warn","n":233},{"v":"info","n":98}]},{"name":"region","top":[{"v":"eu-west-1","n":377},{"v":"us-east-1","n":290}]},{"name":"http.status","top":[{"v":"504","n":201},{"v":"500","n":144},{"v":"402","n":67}]}]
+state fieldQ=""
+state shareUrl=""
 every 2s when live && !paused onTick={hits=hits}
 App
   Sidebar
@@ -28,8 +30,8 @@ App
         Button "Share link" icon="link" onTap={open share}
     Column pad=24 gap=16 scroll
       Row gap=12 top
-        QueryBar bind=query grow onSubmit={toast "Searching: {query}"}
-        TimeRangePicker bind=range presets=["Last 5 min","Last 15 min","Last hour","Last 24 hours","Last 7 days"] onPick={toast "Range: {result}"}
+        QueryBar @query grow onSubmit={toast "Searching: {query}"}
+        TimeRangePicker @range presets=["Last 5 min","Last 15 min","Last hour","Last 24 hours","Last 7 days"] onPick={toast "Range: {result}"}
       Row gap=8
         each f in filters
           Chip "{f.field} {f.op=='+' ? 'is' : 'is not'} {f.value}" icon="close" onTap={filters=removeWhere(filters,x=>x.field==f.field && x.value==f.value)}
@@ -39,7 +41,7 @@ App
         Row between
           Text.strong "Log volume"
           Text.caption "{round(to-from,0)}% of the range selected. Drag across the bars to zoom."
-        Histogram values=[12,18,15,22,40,95,130,88,41,27,19,16,22,31,28,20,17,14,19,24] labels=["13:48","13:50","13:52","13:54","13:56","13:58","14:00","14:02"] h=110 bind=range onSelect={from=result.from; to=result.to; toast "Zoomed to selection"}
+        Histogram values=[12,18,15,22,40,95,130,88,41,27,19,16,22,31,28,20,17,14,19,24] labels=["13:48","13:50","13:52","13:54","13:56","13:58","14:00","14:02"] h=110 @range onSelect={from=result.from; to=result.to; toast "Zoomed to selection"}
       Row gap=16 top
         Column grow gap=8
           Row between middle
@@ -50,12 +52,12 @@ App
               if paused
                 Badge.warning "PAUSED"
               Button.outline "{paused ? 'Resume' : 'Pause'}" icon="{paused ? 'play_arrow' : 'pause'}" onTap={paused=!paused}
-              Toggle "Live tail" bind=live
+              Toggle "Live tail" @live
           each hit in hits
             LogRow log={hit} expanded={openId==hit.id} onToggle={openId=(openId==hit.id ? 0 : hit.id)} onInclude={filters=append(filters,{"field":result.k,"value":result.v,"op":"+"})} onExclude={filters=append(filters,{"field":result.k,"value":result.v,"op":"-"})}
         Pane w=320 pad=16 gap=12
           Text.strong "Fields"
-          Input "Filter fields" "e.g. region" bind=fieldQ
+          Input "Filter fields" "e.g. region" @fieldQ
           each fld in fieldTop
             FieldSummary name={fld.name} top={fld.top} total=745 onPick={filters=append(filters,{"field":fld.name,"value":result,"op":"+"})}
 
@@ -65,7 +67,7 @@ Sheet#savedSheet "Saved searches"
   Button.outline "Close" onTap={close}
 
 Dialog#share "Share this search" "Anyone in the workspace with the link sees the same query and range."
-  Input "Link" bind=shareUrl readonly
+  Input "Link" @shareUrl readonly
   Row gap=8
     Button "Copy link" icon="content_copy" onTap={copy shareUrl; toast "Link copied"; close}
     Button.outline "Cancel" onTap={close}
@@ -85,7 +87,7 @@ App
   Main
     Nav
       Heading "Saved searches" level=1
-      Input "Find a search" bind=find w=220
+      Input "Find a search" @find w=220
     Column pad=24 gap=12 scroll
       each s in filter(saved,x=>contains(lower(x.name),lower(find)))
         Card gap=8
@@ -105,16 +107,16 @@ Menu#rowMenu end
   MenuItem "Delete" icon="delete" onTap={saved=removeWhere(saved,x=>x.id==sel); toast "Deleted"}
 
 // A query field that colours field names and operators as it is typed.
-define QueryBar bind=query placeholder="service:checkout AND level:error" onSubmit
+define QueryBar @query placeholder="service:checkout AND level:error" onSubmit
   state query=""
   Column gap=4
-    Input "Query" "{placeholder}" bind=query onSubmit={onSubmit}
+    Input "Query" "{placeholder}" @query onSubmit={onSubmit}
     Row gap=6
       each tok in split(query," ")
         Text.mono "{tok}" color={contains(tok,":") ? "#FF2563EB" : (tok=="AND" || tok=="OR" || tok=="NOT") ? "#FFDC2626" : "#FF111827"}
 
 // A time range menu with presets and a custom range.
-define TimeRangePicker bind=range presets=["Last 15 min"] onPick
+define TimeRangePicker @range presets=["Last 15 min"] onPick
   state range=""
   state openMenu=false
   Column gap=4
@@ -125,7 +127,7 @@ define TimeRangePicker bind=range presets=["Last 15 min"] onPick
           ListTile "{p}" selected={range==p} onTap={range=p; openMenu=false; onPick(p)}
 
 // Bars of log counts; a drag across them selects a span (shown as the highlighted bars).
-define Histogram values=[] labels=[] h=100 bind=range onSelect
+define Histogram values=[] labels=[] h=100 @range onSelect
   state range=""
   state lo=-1
   state hi=-1

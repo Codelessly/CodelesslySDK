@@ -1,5 +1,5 @@
-// Pictures as a grid of square tiles: a tap opens one (onOpen: result is its place), or, with selectMode, ticks it into the list bind keeps.
-PhotoGrid photos=[] cols=3 gap=2 h=120 bind=sel selectMode onOpen onTapPhoto
+// Pictures as a grid of square tiles: a tap opens one (onOpen: result is its place), or, with selectMode, ticks it into the list variable bound (@sel).
+PhotoGrid photos=[] cols=3 gap=2 h=120 @sel selectMode onOpen onTapPhoto
   state sel=[]
   Grid cols={cols} keep gap={gap}
     each p in photos

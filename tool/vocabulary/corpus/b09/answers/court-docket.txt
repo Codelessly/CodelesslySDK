@@ -6,6 +6,7 @@ state sel=""
 state checkName=""
 state checkRole="Counsel"
 state hearings=[{"id":"h1","room":"3A","time":"09:00","case":"24-CV-01873","parties":"Alvarez v. Northgate Property Group","status":"done","interpreter":false,"present":["Dana Whitt","R. Okafor"]},{"id":"h2","room":"3A","time":"09:45","case":"24-CR-00412","parties":"State v. Marcus Delaney","status":"in progress","interpreter":false,"present":["A. Brandt"]},{"id":"h3","room":"3A","time":"10:30","case":"23-FA-02210","parties":"In re Marriage of Petrov","status":"called","interpreter":true,"present":[]},{"id":"h4","room":"3A","time":"11:15","case":"24-CV-02044","parties":"Hollis Credit v. Tran","status":"continued","interpreter":true,"present":[]},{"id":"h5","room":"4B","time":"09:30","case":"24-SC-00931","parties":"Kimura v. Eastside Auto","status":"done","interpreter":false,"present":["H. Kimura"]},{"id":"h6","room":"4B","time":"10:15","case":"24-PR-00155","parties":"Estate of Lorraine Baptiste","status":"called","interpreter":false,"present":["J. Baptiste"]}]
+state checkHearing=""
 App
   Sidebar
     Brand "Calendar Call" icon="gavel"
@@ -18,7 +19,7 @@ App
     Nav
       Heading "Today's docket" level=1
       Row gap=8
-        Input "Search case or party" bind=q w=240
+        Input "Search case or party" @q w=240
         Button.outline "Lawyer check-in" icon="how_to_reg" onTap={open checkin}
     Column pad=24 gap=16
       Row gap=8
@@ -58,9 +59,9 @@ App
     MenuItem "Open case" icon="folder_open" onTap={go case-page}
     MenuItem "Continue..." icon="event_repeat" onTap={go case-page}
   Dialog#checkin "Lawyer check-in" "Mark yourself present for your hearing"
-    Input "Full name" bind=checkName
-    Select "Role" items=["Counsel","Co-counsel","Self-represented","Guardian ad litem"] bind=checkRole
-    Select "Hearing" items={map(filter(hearings, x=>x.status!="done"), x=>x.case + "  " + x.parties)} bind=checkHearing
+    Input "Full name" @checkName
+    Select "Role" items=["Counsel","Co-counsel","Self-represented","Guardian ad litem"] @checkRole
+    Select "Hearing" items={map(filter(hearings, x=>x.status!="done"), x=>x.case + "  " + x.parties)} @checkHearing
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "I am present" icon="check_circle" onTap={checkName=="" ? toast "Enter your name" : {hearings=updateWhere(hearings,x=>contains(checkHearing,x.case),x=>with(x,"present",append(x.present,checkName))); toast "Checked in: {checkName}"; checkName=""; close}}
@@ -104,9 +105,9 @@ App
           Button.outline "Open case file" icon="folder_open" onTap={go case-page}
         Card gap=12
           Text.strong "Notes for this hearing"
-          Input "Type notes" "Arguments, findings, orders to enter" bind=notes multiline h=160
+          Input "Type notes" "Arguments, findings, orders to enter" @notes multiline h=160
           Row between
-            SegmentedButton items=["Granted","Denied","Under advisement"] bind=ruling
+            SegmentedButton items=["Granted","Denied","Under advisement"] @ruling
             Row gap=8
               Button.ghost "Clear" onTap={notes=""}
               Button "Save notes" icon="save" onTap={saved=append(saved,{"case":first(queue).case,"note":notes,"ruling":ruling}); toast "Notes saved to {first(queue).case}"}
@@ -185,8 +186,8 @@ Page
   Footer
     Text.muted "Calendar Call - Clerk's office"
   Dialog#continuance "Continue this hearing" "Pick a new date from the calendar"
-    Calendar bind=newDate min={today()} disableWeekends=true
-    Select "Reason" items=["Counsel unavailable","Interpreter unavailable","Party not served","Joint request","Court's own motion"] bind=reason
+    Calendar @newDate min={today()} disableWeekends=true
+    Select "Reason" items=["Counsel unavailable","Interpreter unavailable","Party not served","Joint request","Court's own motion"] @reason
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Confirm continuance" icon="event_available" onTap={newDate=="" ? toast "Pick a new date" : {continued=true; emit continued newDate; toast "Continued to {formatDate(newDate,'MMM d')}"; close}}

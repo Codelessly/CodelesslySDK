@@ -69,19 +69,19 @@ App
         Card gap=12
           Text.caption "Matching, 3 marks, draw a line from each term to its meaning"
           Text.title "Match each structure to its function."
-          MatchLines bind=pairs left=["Mitochondrion","Ribosome","Golgi apparatus"] right=["Packages proteins","Makes ATP","Builds proteins"] onChange={answered=unique(append(answered,3))}
+          MatchLines @pairs left=["Mitochondrion","Ribosome","Golgi apparatus"] right=["Packages proteins","Makes ATP","Builds proteins"] onChange={answered=unique(append(answered,3))}
       if cur==4
         Card gap=12
           Text.caption "Fill the blank, 1 mark"
           Row gap=8 middle wrap
             Text.title "The enzyme that unwinds DNA at the replication fork is"
-            Input "Answer" bind=blank w=160 onChange={blank!="" ? answered=unique(append(answered,4)) : answered=without(answered,4)}
+            Input "Answer" @blank w=160 onChange={blank!="" ? answered=unique(append(answered,4)) : answered=without(answered,4)}
             Text.title "."
       if cur==5
         Card gap=12
           Text.caption "Hotspot, 2 marks, tap the image"
           Text.title "Tap the nucleolus in this micrograph."
-          Hotspot "https://img.viva.example/bio/cell-micrograph.jpg" bind=spot h=300 onChange={answered=unique(append(answered,5))}
+          Hotspot "https://img.viva.example/bio/cell-micrograph.jpg" @spot h=300 onChange={answered=unique(append(answered,5))}
           Text.muted "Marked at {spot}" visible={spot!=null}
     Footer
       Row between pad=12

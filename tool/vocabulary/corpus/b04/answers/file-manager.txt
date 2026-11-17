@@ -14,6 +14,9 @@ project folder="brand"
 project files=[{"id":"f1","name":"logo-final.svg","type":"image","size":48,"modified":"2026-11-10","folder":"brand"},{"id":"f2","name":"Brand guidelines.pdf","type":"pdf","size":5200,"modified":"2026-11-02","folder":"brand"},{"id":"f3","name":"Q4 budget.xlsx","type":"sheet","size":312,"modified":"2026-11-14","folder":"brand"},{"id":"f4","name":"Launch deck.pptx","type":"slides","size":18400,"modified":"2026-10-28","folder":"brand"},{"id":"f5","name":"hero-photo.jpg","type":"image","size":2900,"modified":"2026-11-16","folder":"brand"},{"id":"f6","name":"notes.md","type":"doc","size":6,"modified":"2026-11-15","folder":"brand"}]
 project folders=[{"id":"brand","name":"Brand","parent":"projects"},{"id":"web","name":"Website","parent":"projects"},{"id":"docs","name":"Documents","parent":"root"},{"id":"photos","name":"Photos","parent":"root"}]
 state undoItem=[]
+state q=""
+state shareWith=""
+state perm=""
 App
   Sidebar
     Brand "Shelf" icon="folder_open"
@@ -41,9 +44,9 @@ App
           if index < length(path)-1
             Icon "chevron_right"
       Row gap=8
-        Input "Search files" "Search" bind=q icon="search" w=240 onChange={q=result} onSubmit={go search}
+        Input "Search files" "Search" @q icon="search" w=240 onChange={q=result} onSubmit={go search}
         IconButton "filter_list" tooltip="Filters" onTap={go search}
-        SegmentedButton bind=view items=["list","grid"] icons=["view_list","grid_view"]
+        SegmentedButton @view items=["list","grid"] icons=["view_list","grid_view"]
     Row top grow
       Column grow pad=24 gap=12
         Row between
@@ -86,7 +89,7 @@ App
                 Checkbox {contains(sel,f.id)} onChange={sel=result ? append(sel,f.id) : without(sel,f.id)}
                 Icon "{f.type=='image' ? 'image' : f.type=='pdf' ? 'picture_as_pdf' : 'description'}"
                 if renaming==f.id
-                  Input bind=f.name autofocus grow onSubmit={renaming=""; files=updateWhere(files, x=>x.id==f.id, x=>with(x,"name",result))} onBlur={renaming=""}
+                  Input @f.name autofocus grow onSubmit={renaming=""; files=updateWhere(files, x=>x.id==f.id, x=>with(x,"name",result))} onBlur={renaming=""}
                 if renaming!=f.id
                   Text grow "{f.name}"
                 Text.muted w=100 "{upper(f.type)}"
@@ -141,8 +144,8 @@ App
     Divider
     MenuItem "Move to trash" icon="delete" onTap={trash=concat(trash, filter(files, x=>contains(sel,x.id))); undoItem=sel; files=filter(files, x=>!contains(sel,x.id)); sel=[]; toast "Moved to trash" action="Undo" onAction={files=concat(files, filter(trash, x=>contains(undoItem,x.id))); trash=filter(trash, x=>!contains(undoItem,x.id))}}
   Dialog#shareDialog "Share" "Anyone with the link can view"
-    Input "Add people" "name@company.com" bind=shareWith
-    Select "Permission" items=["Can view","Can edit"] bind=perm
+    Input "Add people" "name@company.com" @shareWith
+    Select "Permission" items=["Can view","Can edit"] @perm
     Row gap=8
       Button.outline "Copy link" icon="link" onTap={copy "https://shelf.app/s/k29fd"; toast "Link copied"}
       Button "Send" onTap={emit share; toast "Shared"; close}
@@ -157,7 +160,7 @@ App
         Icon "insert_drive_file"
         Column grow gap=4
           Text "{u.name}"
-          Progress bind=u.progress
+          Progress value={u.progress}
         Text.muted w=48 "{round(u.progress*100,0)}%"
         IconButton "close" tooltip="Cancel" onTap={uploads=without(uploads,u)}
   every 500 when length(filter(uploads, u=>u.progress<1)) > 0 onTick={uploads=map(uploads, u=>with(u,"progress",min(1,u.progress+0.1)))}
@@ -201,6 +204,7 @@ state q=""
 state kind="all"
 state when="any"
 state hits=[]
+state after=""
 App
   Sidebar
     Brand "Shelf" icon="folder_open"
@@ -209,7 +213,7 @@ App
     NavItem "Trash" icon="delete" onTap={go trash}
   Main
     Nav
-      Input "Search files" "Search all of Shelf" bind=q icon="search" w=420 onChange={q=result}
+      Input "Search files" "Search all of Shelf" @q icon="search" w=420 onChange={q=result}
       Button.ghost "Clear" onTap={q=""; kind="all"; when="any"}
     Column pad=24 gap=16
       Row gap=8 wrap
@@ -218,8 +222,8 @@ App
         ChoiceChip "PDFs" selected={kind=="pdf"} onTap={kind="pdf"}
         ChoiceChip "Sheets" selected={kind=="sheet"} onTap={kind="sheet"}
         ChoiceChip "Slides" selected={kind=="slides"} onTap={kind="slides"}
-        Select "Modified" items=["any","today","last 7 days","last 30 days"] bind=when
-        DatePicker "After" bind=after
+        Select "Modified" items=["any","today","last 7 days","last 30 days"] @when
+        DatePicker "After" @after
       Text.muted "{length(filter(files, x=>(kind=='all' or x.type==kind) and contains(lower(x.name), lower(q))))} results for \"{q}\""
       each f in filter(files, x=>(kind=="all" or x.type==kind) and contains(lower(x.name), lower(q)) and (when=="any" or x.modified >= (when=="today" ? today() : when=="last 7 days" ? formatDate(today()-7,"yyyy-MM-dd") : formatDate(today()-30,"yyyy-MM-dd"))))
         ListTile "{f.name}" subtitle="in {f.folder} · {formatDate(f.modified,'MMM d')}" icon="description" onTap={folder=f.folder; sel=[f.id]; go files}

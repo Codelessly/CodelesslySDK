@@ -37,7 +37,7 @@ App theme={night ? "dark" : "light"}
           Button.outline "Dismiss" onTap={toast "Warning dismissed"}
       Row between middle
         Row gap=16
-          Gauge bind=speed min=0 max=15 unit="km/h" w=120 h=120
+          Gauge value={speed} min=0 max=15 unit="km/h" w=120 h=120
           Column gap=2
             Text.caption "Heading"
             Text.strong "{heading} deg"
@@ -67,6 +67,7 @@ state points=[]
 state seconds=0
 state fieldName="East Paddock"
 state distance=0
+state makePasses=false
 every 1s when recording onTick={seconds=seconds+1; distance=distance+8; points=append(points,{"id":seconds})}
 App theme={night ? "dark" : "light"}
   Main
@@ -76,7 +77,7 @@ App theme={night ? "dark" : "light"}
         Heading "Record boundary" level=3
       Badge.error "REC {duration(seconds)}" visible={recording}
     Column gap=12 pad=16 grow
-      Input "Field name" bind=fieldName
+      Input "Field name" @fieldName
       Card grow pad=0
         FieldMap recording={recording} points={points} tractor="arrow" showBoundary closeLoop
       Grid cols=3 gap=12
@@ -100,7 +101,7 @@ App theme={night ? "dark" : "light"}
           Button.outline "Discard" size=large grow onTap={points=[]; seconds=0; distance=0}
           Button "Save field" size=large grow onTap={open saveField}
   Dialog#saveField "Save {fieldName}?" "{length(points)} points, {fixed(distance*0.0012,2)} ha"
-    Toggle "Generate passes" bind=makePasses
+    Toggle "Generate passes" @makePasses
     Row gap=8 end
       Button.ghost "Keep driving" onTap={recording=true; close}
       Button "Save" onTap={emit saveField fieldName; toast "Field saved"; close; go guidance}
@@ -127,25 +128,25 @@ App theme={night ? "dark" : "light"}
           Row gap=8
             IconButton "remove" tooltip="Narrower" onTap={width=max(1,round(width-0.5,1))}
             IconButton "add" tooltip="Wider" onTap={width=min(40,round(width+0.5,1))}
-        Slider bind=width min=1 max=40
-        Input "Exact width (m)" type=number bind=width
+        Slider @width min=1 max=40
+        Input "Exact width (m)" type=number @width
       Card gap=12
         Text.strong "Overlap"
         Row between
           Text "{round(overlap*100,0)}% of width"
           Text.muted "Pass spacing {fixed(width*(1-overlap),2)} m"
-        Slider bind=overlap min=0 max=0.5
+        Slider @overlap min=0 max=0.5
         PassPreview width={width} overlap={overlap} passes=3 h=120
       Card gap=12
         Text.strong "Headland and turns"
-        Select "Turn pattern" items=["Keep-left","Skip one","Skip two","U-turn"] bind=turn
+        Select "Turn pattern" items=["Keep-left","Skip one","Skip two","U-turn"] @turn
         Row between middle
           Text "Headland passes"
           Row gap=8 middle
             IconButton "remove" tooltip="Fewer" onTap={headland=max(0,headland-1)}
             Text.strong "{headland}"
             IconButton "add" tooltip="More" onTap={headland=min(6,headland+1)}
-        Toggle "Warn before headland (150 m)" bind=lift
+        Toggle "Warn before headland (150 m)" @lift
       Card gap=12
         Text.strong "Display"
         SegmentedButton items=["Day","Night"] selected={night ? "Night" : "Day"} onChange={night=(result=="Night")}

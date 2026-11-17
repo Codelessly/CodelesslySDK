@@ -21,7 +21,7 @@ App
     Nav
       Heading "Harbour Lofts, Unit 204" level=1
       Row gap=8
-        Select bind=level items=["Level 1","Level 2","Level 3"] w=140
+        Select @level items=["Level 1","Level 2","Level 3"] w=140
         Button.outline "Drop a pin" icon="push_pin" onTap={placing=true; toast "Tap the plan where the defect is"}
         Button "Report" onTap={go sign-off}
     Row gap=16 pad=24 top
@@ -42,14 +42,14 @@ App
               Text.caption "Due {formatDate(p.due,'MMM d')}"
 
 Sheet#newPin "New snag"
-  Input "Title" "What is wrong?" bind=draft.title
+  Input "Title" "What is wrong?" @draft.title
   Row gap=12
-    Select "Trade" bind=draft.trade items=["Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"] grow
-    SegmentedButton bind=draft.priority items=["Low","Medium","High"]
+    Select "Trade" @draft.trade items=["Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"] grow
+    SegmentedButton @draft.priority items=["Low","Medium","High"]
   Row gap=12
-    Select "Assignee" bind=draft.who items=["Priya Nair","Marco Bellini","Dana Whitfield","Luis Ortega"] grow
-    DatePicker "Due date" bind=draft.due grow
-  PhotoMarkup "Photo" src="https://example.com/photos/new.jpg" bind=draft.markup tools=["arrow","circle","text"] color=#FFDC2626 h=220
+    Select "Assignee" @draft.who items=["Priya Nair","Marco Bellini","Dana Whitfield","Luis Ortega"] grow
+    DatePicker "Due date" @draft.due grow
+  PhotoMarkup "Photo" src="https://example.com/photos/new.jpg" @draft.markup tools=["arrow","circle","text"] color=#FFDC2626 h=220
   Row end gap=8
     Button.ghost "Cancel" onTap={close}
     Button "Save pin" onTap={draft.title=="" ? toast "Give the snag a title" : {pins=append(pins,{"id":length(pins)+1,"x":newX,"y":newY,"title":draft.title,"trade":draft.trade,"priority":draft.priority,"who":draft.who,"due":draft.due,"status":"Open","fixed":false}); draft={"title":"","trade":"Electrical","priority":"Medium","who":"Priya Nair","due":"","markup":[]}; toast "Pin dropped"; close}}
@@ -62,11 +62,11 @@ Sheet#pinForm "Snag details"
           Heading "#{p.id} {p.title}" level=3
           StatusBadge "{p.status}"
         Row gap=12
-          Select "Trade" bind=p.trade items=["Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"] grow
-          SegmentedButton bind=p.priority items=["Low","Medium","High"]
+          Select "Trade" @p.trade items=["Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"] grow
+          SegmentedButton @p.priority items=["Low","Medium","High"]
         Row gap=12
-          Select "Assignee" bind=p.who items=["Priya Nair","Marco Bellini","Dana Whitfield","Luis Ortega"] grow
-          DatePicker "Due date" bind=p.due grow
+          Select "Assignee" @p.who items=["Priya Nair","Marco Bellini","Dana Whitfield","Luis Ortega"] grow
+          DatePicker "Due date" @p.due grow
         PhotoMarkup "Photo" src="https://example.com/photos/snag-{p.id}.jpg" tools=["arrow","circle","text"] color=#FFDC2626 h=220
         if p.fixed
           BeforeAfter before="https://example.com/photos/snag-{p.id}.jpg" after="https://example.com/photos/snag-{p.id}-fixed.jpg" h=220
@@ -84,7 +84,7 @@ define FloorPlan "name" pins=[] selected=0 placing=false onPick onPlace
         Text "{p.id}" color=#FFFFFFFF weight=700
 
 // A photo with drawn markup (arrows, circles, text); a real drawing surface shown as a labelled box.
-define PhotoMarkup "label" src="" bind=marks tools=["arrow"] color=#FFDC2626 h=200
+define PhotoMarkup "label" src="" @marks tools=["arrow"] color=#FFDC2626 h=200
   state marks=[]
   state tool="arrow"
   Column gap=6
@@ -104,6 +104,7 @@ state pins=[{"id":1,"title":"Cracked tile at entry","trade":"Tiling","priority":
 state filter="All"
 state trade="All"
 state compare=0
+state q=""
 App
   Sidebar
     Brand "Snag" icon="fact_check"
@@ -118,14 +119,14 @@ App
     Nav
       Heading "Punch list" level=1
       Row gap=8
-        Input "Search" bind=q w=220
+        Input "Search" @q w=220
         Button "Sign off" onTap={go sign-off}
     Column pad=24 gap=16
       Row gap=8
         each f in ["All","Open","In progress","Fixed"]
           ChoiceChip "{f} ({f=='All' ? length(pins) : count(pins,p=>p.status==f)})" selected={filter==f} onTap={filter=f}
         Spacer grow
-        Select bind=trade items=["All","Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"] w=160
+        Select @trade items=["All","Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"] w=160
       each t in ["Electrical","Plumbing","Tiling","Painting","Carpentry","HVAC"]
         if (trade=="All" || trade==t) && count(pins,p=>p.trade==t && (filter=="All" || p.status==filter))>0
           Card gap=8
@@ -183,9 +184,9 @@ App
       Card gap=12
         Heading "Handover acceptance" level=3
         Text.muted "By signing, the site manager confirms the snags marked Fixed were inspected and accepted."
-        Input "Printed name" bind=signer
-        SignaturePad "Sign here" bind=signature h=140
-        Checkbox "I confirm the Fixed items are accepted; {count(pins,p=>p.status!='Fixed')} remain open" bind=agreed
+        Input "Printed name" @signer
+        SignaturePad "Sign here" @signature h=140
+        Checkbox "I confirm the Fixed items are accepted; {count(pins,p=>p.status!='Fixed')} remain open" @agreed
         Row end gap=8
           Button.ghost "Clear" onTap={signature=[]; signed=false}
           Button "Sign off" onTap={length(signature)==0 ? toast "Please sign first" : (agreed ? {signed=true; toast "Signed off by {signer}"} : toast "Tick the confirmation")}
@@ -214,7 +215,7 @@ Dialog#report "Report preview" "Harbour Lofts, Unit 204"
       Button "Send to client" onTap={emit sendReport; toast "Report sent"; close}
 
 // A signature drawing surface; shown as a labelled box where the stroke would be drawn.
-define SignaturePad "label" bind=strokes h=140
+define SignaturePad "label" @strokes h=140
   state strokes=[]
   Column gap=6
     Text.fieldLabel "{label}"

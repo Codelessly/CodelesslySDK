@@ -24,7 +24,7 @@ App
     Button "New note" icon="add" onTap={emit newNote}
     Input "Search" "Ctrl K" icon="search" readonly onTap={open palette}
     Text.caption "NOTEBOOKS"
-    Tree items={notebooks} bind=nb parent="parent" foldable foldedBind=folded label="name" count={n=>count(notes,x=>!x.trashed && (n.id=="all" || x.nb==n.id))} onSelect={nb=result; view="workspace"; pane="list"}
+    Tree items={notebooks} @nb parent="parent" foldable foldedBind=folded label="name" count={n=>count(notes,x=>!x.trashed && (n.id=="all" || x.nb==n.id))} onSelect={nb=result; view="workspace"; pane="list"}
     Divider
     NavItem "Tags" icon="sell" selected={view=="tags"} onTap={view="tags"}
     NavItem "Trash" icon="delete" badge="{count(notes,x=>x.trashed)}" selected={view=="trash"} onTap={view="trash"}
@@ -43,7 +43,7 @@ App
         Nav
           Heading "{first(map(filter(notebooks,x=>x.id==nb),x=>x.name))}" level=3
           Row gap=4
-            Select bind=sort items=["Edited","Created","Title"] w=110
+            Select @sort items=["Edited","Created","Title"] w=110
             IconButton "checklist" onTap={selecting=!selecting; picked=[]}
         if selecting
           Row gap=8 pad=8 fill=#FFEFE4CC
@@ -59,7 +59,7 @@ App
           each n in sortBy(sortByDesc(filter(notes,x=>!x.trashed && (nb=="all" || x.nb==nb)),x=>sort=="Title"?0:(sort=="Created"?x.created:x.edited)),x=>x.pinned?0:1)
             ListTile selected={openId==n.id} onTap={openId=n.id; pane="note"} onLongPress={selecting=true; picked=append(picked,n.id)} menu=noteMenu
               if selecting
-                Checkbox bind=picked value={n.id}
+                Checkbox @picked value={n.id}
               Column gap=2 grow
                 Row gap=6
                   if n.pinned
@@ -76,7 +76,7 @@ App
           Heading "Note" level=3
         Column pad=32 gap=12 maxw=760 scroll
           Row between
-            Input.plain "Title" bind={find(notes,x=>x.id==openId).title} size=28 font="serif" weight=700 onChange={saved=false; notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"edited",today()))} debounce=600 onSaved={saved=true}
+            Input.plain "Title" @find(notes,x=>x.id==openId).title size=28 font="serif" weight=700 onChange={saved=false; notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"edited",today()))} debounce=600 onSaved={saved=true}
             Row gap=8
               if saved
                 Row gap=4
@@ -84,14 +84,14 @@ App
                   Text.caption "Saved"
               if !saved
                 Text.caption "Saving..."
-              Toggle "Pin" bind={find(notes,x=>x.id==openId).pinned}
+              Toggle "Pin" @find(notes,x=>x.id==openId).pinned
               IconButton "folder_open" onTap={open moveNote}
               IconButton "delete" onTap={open confirmOne}
           Row gap=6 wrap
             each t in find(notes,x=>x.id==openId).tags
               Chip "{t}" removable onRemove={notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"tags",without(x.tags,t)))}
-            Autocomplete "Add tag" bind=tagDraft suggestions={unique(concat(["journal","work","reading","recipes","planning","habit","baking"],[]))} w=160 onSubmit={notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"tags",unique(append(x.tags,lower(result))))); tagDraft=""}
-          Input.plain "Start writing..." multiline autogrow bind={find(notes,x=>x.id==openId).body} font="serif" size={fontSize} lineHeight=1.7 onChange={saved=false} debounce=600 onSaved={saved=true}
+            Autocomplete "Add tag" @tagDraft suggestions={unique(concat(["journal","work","reading","recipes","planning","habit","baking"],[]))} w=160 onSubmit={notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"tags",unique(append(x.tags,lower(result))))); tagDraft=""}
+          Input.plain "Start writing..." multiline autogrow @find(notes,x=>x.id==openId).body font="serif" size={fontSize} lineHeight=1.7 onChange={saved=false} debounce=600 onSaved={saved=true}
           Text.caption "{length(filter(split(find(notes,x=>x.id==openId).body," "),w=>w!=""))} words"
       Main grow show={view=="tags"}
         Column pad=24 gap=16
@@ -118,13 +118,13 @@ App
     each b in notebooks
       MenuItem "{b.name}" icon="folder" onTap={notes=map(notes,x=>contains(picked,x.id)?with(x,"nb",b.id):x); picked=[]; selecting=false}
   Popover#tagPopover
-    Autocomplete "Tag" bind=tagDraft suggestions=["journal","work","reading","recipes","planning","habit","baking"] onSubmit={notes=map(notes,x=>contains(picked,x.id)?with(x,"tags",unique(append(x.tags,lower(result)))):x); tagDraft=""; picked=[]; selecting=false; close}
+    Autocomplete "Tag" @tagDraft suggestions=["journal","work","reading","recipes","planning","habit","baking"] onSubmit={notes=map(notes,x=>contains(picked,x.id)?with(x,"tags",unique(append(x.tags,lower(result)))):x); tagDraft=""; picked=[]; selecting=false; close}
   Menu#noteMenu
     MenuItem "Pin" icon="push_pin" onTap={notes=updateWhere(notes,x=>x.id==openId,x=>with(x,"pinned",!x.pinned))}
     MenuItem "Move to..." icon="drive_file_move" onTap={open moveNote}
     MenuItem "Delete" icon="delete" onTap={open confirmOne}
   Sheet#nbSheet "Notebooks"
-    Tree items={notebooks} bind=nb parent="parent" foldable foldedBind=folded label="name" onSelect={nb=result; view="workspace"; pane="list"; close}
+    Tree items={notebooks} @nb parent="parent" foldable foldedBind=folded label="name" onSelect={nb=result; view="workspace"; pane="list"; close}
     NavItem "Tags" icon="sell" onTap={view="tags"; close}
     NavItem "Trash" icon="delete" onTap={view="trash"; close}
     NavItem "Settings" icon="settings" onTap={view="settings"; close}
@@ -133,8 +133,8 @@ App
 state pq=""
 state pcursor=0
 Dialog#palette "" top w=560
-  Input "Search notes, notebooks, actions" bind=pq autofocus icon="search" onChange={pcursor=0} onKeyDown={key=="ArrowDown"?pcursor=pcursor+1:(key=="ArrowUp"?pcursor=max(0,pcursor-1):pcursor=pcursor)}
-  CommandList query={pq} bind=pcursor fuzzy highlight onEnter={emit paletteRun result} onPick={close}
+  Input "Search notes, notebooks, actions" @pq autofocus icon="search" onChange={pcursor=0} onKeyDown={key=="ArrowDown"?pcursor=pcursor+1:(key=="ArrowUp"?pcursor=max(0,pcursor-1):pcursor=pcursor)}
+  CommandList query={pq} @pcursor fuzzy highlight onEnter={emit paletteRun result} onPick={close}
     Group "Notes"
       each n in filter(notes,x=>!x.trashed)
         CommandItem "{n.title}" hint="{first(map(filter(notebooks,b=>b.id==n.nb),b=>b.name))}" icon="description" keywords="{n.body} {join(n.tags," ")}" onTap={openId=n.id; view="workspace"; pane="note"; close}
@@ -185,6 +185,9 @@ App
       Button.destructive "Empty trash" onTap={notes=removeWhere(notes,x=>x.trashed); toast "Trash emptied"; close}
 
 ### Settings
+state theme=""
+state fontSize=14
+state sort=""
 App
   Sidebar w=240 fill=#FFF3EBDA
     Brand "Inkwell" icon="auto_stories"
@@ -198,16 +201,16 @@ App
     Column pad=24 gap=20 maxw=640
       Card gap=12
         Text.strong "Theme"
-        SegmentedButton bind=theme items=["Paper","Sepia","Dark"]
+        SegmentedButton @theme items=["Paper","Sepia","Dark"]
       Card gap=12
         Text.strong "Font size"
-        Slider bind=fontSize min=14 max=28 step=1
+        Slider @fontSize min=14 max=28 step=1
         Text.caption "{fontSize} px"
         Box fill=#FFFBF6EA radius=8 pad=16
           Text "The quiet hour is the only one that belongs to me." font="serif" size={fontSize} lineHeight=1.7
       Card gap=12
         Text.strong "Default sort"
-        Select bind=sort items=["Edited","Created","Title"]
+        Select @sort items=["Edited","Created","Title"]
       Card gap=8
         Text.strong "Shortcuts"
         Row between

@@ -66,6 +66,10 @@ Menu#rowMenu end
   MenuItem "Delete" icon="delete" onTap={invoices=removeWhere(invoices,i=>i.id==sel); toast "Invoice deleted"}
 
 ### Editor
+state clientQ=""
+state discType=""
+state discVal=""
+state newClient=""
 App
   Sidebar
     Brand "Ledger Lane" icon="receipt_long"
@@ -89,7 +93,7 @@ App
         Card gap=12
           Text.strong "Client"
           Row gap=8
-            Input "Search clients" "Start typing a name" bind=clientQ grow
+            Input "Search clients" "Start typing a name" @clientQ grow
             Button.outline "Add client" onTap={open addClient}
           Row gap=8 scroll
             each c in filter(clients,c=>clientQ=="" || contains(lower(c),lower(clientQ)))
@@ -105,10 +109,10 @@ App
               Column gap=0
                 IconButton "keyboard_arrow_up" tooltip="Move up" onTap={index>0 ? lines=setAt(setAt(lines,index-1,row),index,lines[index-1]) : toast "Already first"}
                 IconButton "keyboard_arrow_down" tooltip="Move down" onTap={index<length(lines)-1 ? lines=setAt(setAt(lines,index+1,row),index,lines[index+1]) : toast "Already last"}
-              Input "Description" bind=row.desc grow
-              Input "Qty" bind=row.qty type=number w=70
-              Input "Rate" bind=row.rate type=number w=100
-              Input "Tax %" bind=row.tax type=number w=70
+              Input "Description" @row.desc grow
+              Input "Qty" @row.qty type=number w=70
+              Input "Rate" @row.rate type=number w=100
+              Input "Tax %" @row.tax type=number w=70
               Text.strong "{money(row.qty*row.rate,"$",2)}" w=90
               IconButton "delete" tooltip="Remove line" onTap={lines=removeWhere(lines,l=>l.id==row.id)}
           if isEmpty(lines)
@@ -116,15 +120,15 @@ App
         Card gap=12
           Text.strong "Discount"
           Row gap=12 middle
-            SegmentedButton bind=discType items=["percent","amount"]
-            Input "Discount" bind=discVal type=number w=120
+            SegmentedButton @discType items=["percent","amount"]
+            Input "Discount" @discVal type=number w=120
           Totals lines={lines} discType={discType} discVal={discVal}
       Pane w=420 pad=16 gap=12 hide=tablet
         Text.muted "Preview"
         PaperInvoice number={number} client={client} lines={lines} discType={discType} discVal={discVal} status={status}
 
 Dialog#addClient "Add a client" "They will be picked for this invoice."
-  Input "Client name" "Studio or person" bind=newClient
+  Input "Client name" "Studio or person" @newClient
   Button "Add client" onTap={newClient=="" ? toast "Enter a name" : {clients=append(clients,newClient); client=newClient; newClient=""; close}}
 
 ### Overdue

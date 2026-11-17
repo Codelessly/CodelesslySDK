@@ -13,6 +13,8 @@ state cursorsOn=true
 state ch1on=true
 state ch2on=true
 state captured=false
+state fmt=""
+state withReadings=false
 every 1s when running onTick={captured=captured}
 App
   Sidebar
@@ -29,7 +31,7 @@ App
         Badge.success "RUN" visible={running && !armed}
         Badge.danger "STOP" visible={!running}
         Badge.warning "ARMED" visible={armed}
-        Select bind=mode items=["auto","normal","single"] onChange={armed=(result=="single"); running=(result!="single")}
+        Select @mode items=["auto","normal","single"] onChange={armed=(result=="single"); running=(result!="single")}
         Button.secondary "Run" visible={!running} onTap={running=true; armed=false}
         Button.destructive "Stop" visible={running} onTap={running=false; armed=false}
         Button.outline "Single" icon="filter_1" onTap={mode="single"; armed=true; running=false}
@@ -41,19 +43,19 @@ App
             Scope#screen h=360 divisions=[10,8] frozen={!running} timePerDiv={tdiv} onCursorMove={curA=result.a; curB=result.b}
               Trace "CH1" channel=1 color=#FFFFD600 volts={v1} visible={ch1on} source="sine" freq=1200 amp=3.2
               Trace "CH2" channel=2 color=#FF00E5FF volts={v2} visible={ch2on} source="square" freq=600 amp=1.5
-              TriggerMarker bind=trig edge="left" label="T" color=#FFFF6D00
-              Cursor#cursorA bind=curA axis="x" label="A" visible={cursorsOn}
-              Cursor#cursorB bind=curB axis="x" label="B" visible={cursorsOn}
+              TriggerMarker @trig edge="left" label="T" color=#FFFF6D00
+              Cursor#cursorA @curA axis="x" label="A" visible={cursorsOn}
+              Cursor#cursorB @curB axis="x" label="B" visible={cursorsOn}
             Row between
               Text.caption "CH1 {v1} V/div"
               Text.caption "CH2 {v2} V/div"
               Text.caption "{tdiv} ms/div"
               Text.caption "Trig {trigSrc} {fixed(trig,2)} V"
           Row gap=12
-            Knob "Time/div" bind=tdiv items=[0.1,0.2,0.5,1,2,5,10] unit="ms" detents
-            Knob "CH1 V/div" bind=v1 items=[0.1,0.2,0.5,1,2,5] unit="V" detents
-            Knob "CH2 V/div" bind=v2 items=[0.1,0.2,0.5,1,2,5] unit="V" detents
-            Knob "Trig level" bind=trig min=-4 max=4 step=0.05 unit="V"
+            Knob "Time/div" @tdiv items=[0.1,0.2,0.5,1,2,5,10] unit="ms" detents
+            Knob "CH1 V/div" @v1 items=[0.1,0.2,0.5,1,2,5] unit="V" detents
+            Knob "CH2 V/div" @v2 items=[0.1,0.2,0.5,1,2,5] unit="V" detents
+            Knob "Trig level" @trig min=-4 max=4 step=0.05 unit="V"
         Pane w=240 pad=0 gap=12
           Card gap=12
             Text.panelTitle "Automatic readings"
@@ -74,13 +76,13 @@ App
               Text.mono "50 %"
           Card gap=8
             Text.panelTitle "Channels"
-            Toggle "CH1" bind=ch1on
-            Toggle "CH2" bind=ch2on
-            Select "Trigger source" bind=trigSrc items=["CH1","CH2","EXT"]
-            Toggle "Cursors" bind=cursorsOn
+            Toggle "CH1" @ch1on
+            Toggle "CH2" @ch2on
+            Select "Trigger source" @trigSrc items=["CH1","CH2","EXT"]
+            Toggle "Cursors" @cursorsOn
   Dialog#savePic "Save trace as picture"
-    Select "Format" bind=fmt items=["PNG","SVG","JPEG"]
-    Toggle "Include readings" bind=withReadings
+    Select "Format" @fmt items=["PNG","SVG","JPEG"]
+    Toggle "Include readings" @withReadings
     Row end gap=8
       Button.outline "Cancel" onTap={close}
       Button "Save" onTap={download "wavepost-trace.png" from=screen; toast "Trace saved"; captured=true; close}
@@ -107,10 +109,10 @@ Page
       Card gap=8
         Scope#measureScreen h=320 divisions=[10,8] frozen timePerDiv={tdiv}
           Trace "CH1" channel=1 color=#FFFFD600 volts={v1} source="sine" freq=1200 amp=3.2
-          Cursor#cursorA bind=curA axis="x" label="A"
-          Cursor#cursorB bind=curB axis="x" label="B"
-          Cursor#levelA bind=yA axis="y" label="1"
-          Cursor#levelB bind=yB axis="y" label="2"
+          Cursor#cursorA @curA axis="x" label="A"
+          Cursor#cursorB @curB axis="x" label="B"
+          Cursor#levelA @yA axis="y" label="1"
+          Cursor#levelB @yB axis="y" label="2"
       Grid cols=4 gap=16
         Card gap=4
           Text.caption "A to B (time)"
@@ -152,4 +154,4 @@ App
             Row gap=8
               IconButton "download" tooltip="Download" onTap={download t.url}
               IconButton "delete" tooltip="Delete" onTap={traces=removeAt(traces,index); toast "Deleted"}
-  Lightbox#zoom photos={map(traces,t=>t.url)} bind=sel
+  Lightbox#zoom photos={map(traces,t=>t.url)} @sel

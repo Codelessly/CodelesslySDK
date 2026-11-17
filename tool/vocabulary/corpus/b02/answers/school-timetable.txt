@@ -12,6 +12,7 @@ state exams=[{"subject":"Maths","date":"2026-12-02","days":16,"room":"Hall"},{"s
 state absentTeacher="Dr Haddad"
 state absentLesson=3
 state coverTeacher="Mr Obi"
+state noteDraft=""
 App
   Sidebar
     Brand "Period" icon="schedule"
@@ -26,7 +27,7 @@ App
     Nav
       Heading "Week {week}"
       Row gap=8
-        SegmentedButton items=["A","B"] bind=week
+        SegmentedButton items=["A","B"] @week
         Button.outline "Absence notice" icon="campaign" onTap={open absence}
     Column pad=24 gap=16 scroll
       each n in filter(lessons,l=>l.cover!="")
@@ -76,15 +77,15 @@ App
           Badge.warning "Due {find(lessons,x=>x.id==sel).due}"
           Checkbox "Done" selected={find(lessons,x=>x.id==sel).done} onChange={lessons=updateWhere(lessons,x=>x.id==sel,x=>with(x,"done",result))}
       Text.strong "Notes"
-      Input "Notes" bind=noteDraft multiline
+      Input "Notes" @noteDraft multiline
       Row end gap=8
         Button.ghost "Close" onTap={close}
         Button "Save note" onTap={lessons=updateWhere(lessons,x=>x.id==sel,x=>with(x,"notes",noteDraft)); toast "Note saved"; close}
   Dialog#absence "Teacher absence notice" "Replaces a lesson in the grid"
     Column gap=12
-      Select "Absent teacher" bind=absentTeacher items=["Dr Haddad","Ms Okafor","Mr Lindqvist","Mrs Bianchi"]
-      Select "Cover teacher" bind=coverTeacher items=["Mr Obi","Ms Tanaka","Mr Reyes"]
-      Input "Lesson id" bind=absentLesson type=number
+      Select "Absent teacher" @absentTeacher items=["Dr Haddad","Ms Okafor","Mr Lindqvist","Mrs Bianchi"]
+      Select "Cover teacher" @coverTeacher items=["Mr Obi","Ms Tanaka","Mr Reyes"]
+      Input "Lesson id" @absentLesson type=number
       Row end gap=8
         Button.ghost "Cancel" onTap={close}
         Button "Post notice" onTap={lessons=updateWhere(lessons,x=>x.id==absentLesson,x=>with(x,"cover",coverTeacher)); toast "Notice posted"; close}
@@ -108,7 +109,7 @@ App
   Main
     Nav
       Heading "Today, {days[todayIdx]}"
-      SegmentedButton items=["A","B"] bind=week
+      SegmentedButton items=["A","B"] @week
     Column pad=24 gap=12 scroll maxw=720
       Text.muted "Week {week}. {count(lessons,l=>l.wk==week&&l.day==todayIdx)} lessons, {6-count(lessons,l=>l.wk==week&&l.day==todayIdx)} free periods."
       each p in periods

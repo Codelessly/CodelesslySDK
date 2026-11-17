@@ -168,7 +168,7 @@ void main() {
     await session.applyNotation(Stream.value('ChatCard "Poll" "Friday"\n  Row\n    Text "Ramen"\n    Text "45%"\n  Row\n    Text "Taco"\n    Text "30%"\n'));
     expect(blocks.mostlyPlainParts, isTrue);
     await session.applyNotation(
-      Stream.value('ChatCard "Plan" "Team"\n  Counter "Seats" bind=seats min=1 max=9\n  ActionButton "Upgrade"\n  Text "Billed monthly"\n'),
+      Stream.value('state seats=1\nChatCard "Plan" "Team"\n  Counter "Seats" @seats min=1 max=9\n  ActionButton "Upgrade"\n  Text "Billed monthly"\n'),
       replace: true,
     );
     expect(blocks.mostlyPlainParts, isFalse);

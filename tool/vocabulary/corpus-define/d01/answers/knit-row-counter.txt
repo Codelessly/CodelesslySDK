@@ -57,12 +57,12 @@ App
             IconButton "remove" tooltip="One stitch fewer" onTap={stitches=max(0,stitches-1)}
             Text "{stitches}" size=40 weight=700
             IconButton "add" tooltip="One stitch more" onTap={stitches=stitches+1}
-          Input "Note" bind=note multiline
+          Input "Note" @note multiline
 Dialog#newRepeat "New repeat" "Chime every so many rows"
   state repName=""
   state repEvery=6
-  Input "Name" "Increase" bind=repName
-  Input "Every (rows)" bind=repEvery type=number
+  Input "Name" "Increase" @repName
+  Input "Every (rows)" @repEvery type=number
   Button "Add" onTap={repName!="" ? repeats=append(repeats,{"name":repName,"every":repEvery,"left":repEvery}); close : toast "Give it a name"}
 
 ### Pattern
@@ -138,9 +138,9 @@ Dialog#newProject "New project" "Name it and set its rows and yarn"
   state pName=""
   state pRows=80
   state pYarn=400
-  Input "Name" "Cable Beanie" bind=pName
-  Input "Total rows" bind=pRows type=number
-  Input "Yarn in grams" bind=pYarn type=number
+  Input "Name" "Cable Beanie" @pName
+  Input "Total rows" @pRows type=number
+  Input "Yarn in grams" @pYarn type=number
   Button "Create" onTap={pName!="" ? projects=append(projects,{"name":pName,"done":0,"total":pRows,"yarn":pYarn,"yarnTotal":pYarn}); close : toast "Name the project"}
 
 ### Session

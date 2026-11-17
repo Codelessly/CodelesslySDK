@@ -22,7 +22,7 @@ App
         IconButton "tune" tooltip="Set up tiles" onTap={go setup}
         IconButton "route" tooltip="Route" onTap={go route}
     Column pad=16 gap=16 center
-      Gauge bind=speed min=0 max=60 limit=45 unit="km/h"
+      Gauge value={speed} min=0 max=60 limit=45 unit="km/h"
       if !running
         Badge.warning "Paused" animate=pulse
       Grid cols=3 gap=12
@@ -34,7 +34,7 @@ App
         Button "Lap" size=large grow onTap={laps=append(laps,{"n":length(laps)+1,"time":elapsed,"km":distance}); toast "Lap {length(laps)+1} marked"}
         Button.outline "{running ? "Pause" : "Resume"}" size=large grow onTap={running=!running}
         Button.destructive "Finish" size=large onTap={open finish}
-      Toggle "Auto pause below 2 km/h" bind=autoPause
+      Toggle "Auto pause below 2 km/h" @autoPause
       Card gap=8
         Text.panelTitle "Laps"
         each l in laps
@@ -75,7 +75,7 @@ App
         ListTile "{s.name}" subtitle="{s.kind}"
           Row gap=8 middle
             SignalBars value={s.bars} max=4
-            Toggle bind=s.on
+            Toggle @s.on
 
 ### Route
 state dist=48.2
@@ -90,10 +90,10 @@ App
       Heading "Route" level=1
       Text.muted "{fixed(dist,1)} of 92 km"
     Column pad=16 gap=16
-      Pages bind=page h=420
+      Pages @page h=420
         Column gap=12
           RouteMap route="Hartley Loop" progress={dist/92} h=340
-          Dots bind=page count=2
+          Dots @page count=2
         Column gap=12
           Card gap=8
             Row between
@@ -103,7 +103,7 @@ App
             Row between
               Text.muted "Gain 129 m"
               Text.muted "Max 11.2%"
-          Dots bind=page count=2
+          Dots @page count=2
       if toTurn<400
         Card fill=#FFFFF3CD gap=4 animate=shake
           Row gap=12 middle

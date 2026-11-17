@@ -15,7 +15,7 @@ App
     Nav
       Heading "My books" level=1
       Row gap=8
-        Input "Search books" bind=query w=220
+        Input "Search books" @query w=220
         IconButton "mic" tooltip="Search by voice" onTap={emit voiceSearch}
     Column pad=24 gap=16 scroll
       Card gap=8
@@ -61,13 +61,13 @@ App
       Row gap=8
         IconButton "text_fields" tooltip="Text settings" onTap={go text-settings}
         IconButton "palette" tooltip="Colours" onTap={open colours}
-        Toggle "Line focus" bind=focusOn
-        Toggle "Magnifier" bind=magOn
+        Toggle "Line focus" @focusOn
+        Toggle "Magnifier" @magOn
     Stack
       Box fill={bgColor} pad=24 gap=12 h=fill
         Text.muted "Chapter 3" color={textColor} size=20
         if focusOn
-          LineFocus text={passage} bind=line size={size} lineHeight={lineHeight} letterSpacing={letterGap} font={font} color={textColor} dim=0.25 onSwipeUp={line=max(0,line-1)} onSwipeDown={line=line+1}
+          LineFocus text={passage} @line size={size} lineHeight={lineHeight} letterSpacing={letterGap} font={font} color={textColor} dim=0.25 onSwipeUp={line=max(0,line-1)} onSwipeDown={line=line+1}
         if !focusOn
           HighlightedText text={passage} highlight={word} highlightColor=#FFFFD600 size={size} lineHeight={lineHeight} letterSpacing={letterGap} font={font} color={textColor}
       if magOn
@@ -77,7 +77,7 @@ App
         IconButton "skip_previous" tooltip="Previous line" onTap={line=max(0,line-1)}
         Button "{speaking ? \"Pause\" : \"Read aloud\"}" icon={speaking ? "pause" : "volume_up"} size=large onTap={speaking ? {speaking=false; speak stop} : {speaking=true; speak passage}}
         IconButton "skip_next" tooltip="Next line" onTap={line=line+1}
-        Slider bind=word min=0 max=26 w=200
+        Slider @word min=0 max=26 w=200
         Text.strong "Page 136 of 212"
   Sheet#colours "Reading colours"
     Column gap=12
@@ -129,13 +129,13 @@ App
               if theme=="blackOnCream"
                 Icon "check_circle" color=#FF000000
           Text.sectionTitle "Letter size"
-          Stepper "Size" bind=size min=20 max=96 step=4 unit="pt"
+          Stepper "Size" @size min=20 max=96 step=4 unit="pt"
           Text.sectionTitle "Line spacing"
-          Stepper "Line spacing" bind=lineHeight min=1 max=3 step=0.1 unit="x"
+          Stepper "Line spacing" @lineHeight min=1 max=3 step=0.1 unit="x"
           Text.sectionTitle "Letter spacing"
-          Stepper "Letter spacing" bind=letterGap min=0 max=12 step=1 unit="px"
+          Stepper "Letter spacing" @letterGap min=0 max=12 step=1 unit="px"
           Text.sectionTitle "Font"
-          SegmentedButton bind=font items=["Atkinson Hyperlegible","Lexend","Verdana"]
+          SegmentedButton @font items=["Atkinson Hyperlegible","Lexend","Verdana"]
         Column grow gap=8 sticky
           Text.sectionTitle "Live preview"
           Box fill={bgColor} pad=24 radius=16

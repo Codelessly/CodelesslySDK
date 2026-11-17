@@ -25,7 +25,7 @@ App
     Nav
       Heading "Check-in" level=1
       Row gap=8
-        Input "Name or code" "Type a name or scan a code" bind=q w=300
+        Input "Name or code" "Type a name or scan a code" @q w=300
         IconButton "qr_code_scanner" tooltip="Scan a badge code" onTap={emit scan}
     Column pad=24 gap=16
       Row gap=16 top
@@ -54,8 +54,8 @@ App
                 each r in ribbons
                   Chip "{r}"
           Text.caption "Drag the badge onto a printer"
-          Input "Pronouns" "e.g. she/her" bind=current.pronouns
-          Input "Company" bind=current.company
+          Input "Pronouns" "e.g. she/her" @current.pronouns
+          Input "Company" @current.company
           Text.fieldLabel "Ribbons"
           Row gap=8
             each r in allRibbons
@@ -72,7 +72,7 @@ App
           if printing
             Column gap=4
               Text.caption "Printing on {find(printers,p=>p.id==printer).name}..."
-              Progress bind=progress
+              Progress value={progress}
           if !printing && progress>=1
             Row gap=8
               Icon "check_circle"
@@ -85,7 +85,7 @@ App
               Badge.{s.left<s.low ? "warning" : "success"} "{s.left}"
           Button.ghost "Lost badge" icon="report" onTap={go lost-badge}
   Dialog#reprint "Reprint badge" "Say why so the count stays honest"
-    Select "Reason" bind=reason items=["Misprint","Name changed","Damaged","Printer jam","Other"]
+    Select "Reason" @reason items=["Misprint","Name changed","Damaged","Printer jam","Other"]
     Input "Note" multiline hidden={reason!="Other"}
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
@@ -131,8 +131,8 @@ App
       Card gap=12
         Text.strong "Loaded new paper"
         Row gap=8 bottom
-          Select "Stock" bind=stockName items=["Standard 4x3","Speaker 4x6","Staff 4x3"]
-          Input "Badges added" bind=add type=number w=160
+          Select "Stock" @stockName items=["Standard 4x3","Speaker 4x6","Staff 4x3"]
+          Input "Badges added" @add type=number w=160
           Button "Add to count" onTap={stock=updateWhere(stock,s=>s.name==stockName,s=>with(s,"left",s.left+add)); toast "Added {add} to {stockName}"}
 
 ### Lost badge
@@ -145,6 +145,7 @@ state fee=false
 state lostNote=""
 state replacing=false
 state progress=0
+state reason=""
 every 200 when replacing onTick={progress>=1 ? {replacing=false; step=3; stock=updateWhere(stock,s=>s.name==current.paper,s=>with(s,"left",s.left-1))} : progress=progress+0.125}
 App
   Sidebar
@@ -167,15 +168,15 @@ App
         Card gap=12
           Heading "Confirm who this is" level=3
           Text "{current.name}, {current.company}, {current.ticket}"
-          Checkbox "Photo ID matches the registration" bind=idCheck
-          Input "Note" "Where was it last seen?" bind=lostNote multiline
+          Checkbox "Photo ID matches the registration" @idCheck
+          Input "Note" "Where was it last seen?" @lostNote multiline
           Button "Continue" onTap={idCheck ? step=1 : toast "Check the ID first"}
       if step==1
         Card gap=12
           Heading "Void the old badge" level=3
           Text.muted "The code {current.code} stops scanning at every door once it is voided."
-          Toggle "Void {current.code}" bind=voided
-          Toggle "Waive the replacement fee" bind=fee
+          Toggle "Void {current.code}" @voided
+          Toggle "Waive the replacement fee" @fee
           Row gap=8
             Button.ghost "Back" onTap={step=0}
             Button "Void and continue" onTap={voided ? {emit voidBadge current.id; step=2} : toast "Switch on void first"}
@@ -184,7 +185,7 @@ App
           Heading "Print the replacement" level=3
           Text.muted "New code: {replace(current.code,'LN-','LR-')}"
           if replacing
-            Progress bind=progress
+            Progress value={progress}
             Text.caption "Printing on {current.paper}..."
           Button "Print replacement" hidden={replacing} onTap={progress=0; replacing=true}
       if step==3
@@ -197,7 +198,7 @@ App
             Button "Back to check-in" onTap={step=0; idCheck=false; voided=false; go check-in}
             Button.outline "Print again" onTap={open lostReprint}
   Dialog#lostReprint "Reprint replacement" "The replacement did not come out right"
-    Select "Reason" bind=reason items=["Misprint","Printer jam","Name changed"]
+    Select "Reason" @reason items=["Misprint","Printer jam","Name changed"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Reprint" onTap={progress=0; replacing=true; step=2; close}

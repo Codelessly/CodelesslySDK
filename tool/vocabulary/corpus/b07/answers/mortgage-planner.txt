@@ -8,6 +8,7 @@ state rateType="Fixed"
 state extra=150
 state readYear=10
 state scenarios=[{"id":1,"name":"Baseline","price":385000,"deposit":57750,"term":25,"rate":4.6,"extra":0,"payment":1819,"interest":218700,"years":25},{"id":2,"name":"Bigger deposit","price":385000,"deposit":90000,"term":25,"rate":4.4,"extra":0,"payment":1620,"interest":191000,"years":25}]
+state scenarioName=""
 App
   Sidebar
     Brand "Hearthloan" icon="home"
@@ -20,7 +21,7 @@ App
     Nav
       Heading "Mortgage planner" level=1
       Row gap=8
-        SegmentedButton items=["Fixed","Variable"] bind=rateType
+        SegmentedButton items=["Fixed","Variable"] @rateType
         Button.outline "Save scenario" icon="bookmark_add" onTap={open saveScenario}
     Column pad=24 gap=16 scroll
       Row gap=16 top
@@ -29,23 +30,23 @@ App
           Column gap=4
             Row between
               Text.fieldLabel "Property price"
-              Input type=number bind=price w=140
-            Slider bind=price min=50000 max=1500000 step=5000
+              Input type=number @price w=140
+            Slider @price min=50000 max=1500000 step=5000
           Column gap=4
             Row between
               Text.fieldLabel "Deposit ({round(deposit/price*100,1)}%)"
-              Input type=number bind=deposit w=140
-            Slider bind=deposit min=0 max={price} step=1000
+              Input type=number @deposit w=140
+            Slider @deposit min=0 max={price} step=1000
           Column gap=4
             Row between
               Text.fieldLabel "Term (years)"
-              Input type=number bind=term w=140
-            Slider bind=term min=5 max=40 step=1
+              Input type=number @term w=140
+            Slider @term min=5 max=40 step=1
           Column gap=4
             Row between
               Text.fieldLabel "Interest rate (%)"
-              Input type=number bind=rate w=140
-            Slider bind=rate min=0.5 max=12 step=0.05
+              Input type=number @rate w=140
+            Slider @rate min=0.5 max=12 step=0.05
         Column grow gap=16
           Card gap=8 fill=#FF16324F
             Text "Monthly payment" color=#FFB8CCE0
@@ -62,7 +63,7 @@ App
             Row between
               Heading "Overpay each month" level=3
               Text.strong "{money(extra,'$',0)}"
-            Slider bind=extra min=0 max=1000 step=25
+            Slider @extra min=0 max=1000 step=25
             Row gap=12
               Card grow gap=4
                 Text.caption "Time saved"
@@ -75,7 +76,7 @@ App
           Heading "Interest and principal by year" level=3
           Text.muted "Drag the slider to read the balance at a year"
         BarChart stacked labels={map(range(term),i=>"Y{i+1}")} series=[{"name":"Interest","values":{map(amortize(price-deposit,rate,term,extra),r=>r.interest)}},{"name":"Principal","values":{map(amortize(price-deposit,rate,term,extra),r=>r.principal)}}] h=220
-        Slider bind=readYear min=1 max={term} step=1
+        Slider @readYear min=1 max={term} step=1
         Row between
           Text.strong "Year {readYear}"
           Text "Balance remaining: {money(amortize(price-deposit,rate,term,extra)[readYear-1].balance,'$',0)}"
@@ -99,7 +100,7 @@ App
         if rateType=="Fixed"
           Text.muted "Your rate is fixed for the term, so the stress test applies when you remortgage."
   Dialog#saveScenario "Save this scenario" "It will appear in your comparison"
-    Input "Name" "e.g. Smaller house" bind=scenarioName
+    Input "Name" "e.g. Smaller house" @scenarioName
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={scenarioName=="" ? toast "Give it a name" : {scenarios=append(scenarios,{"id":length(scenarios)+1,"name":scenarioName,"price":price,"deposit":deposit,"term":term,"rate":rate,"extra":extra,"payment":pmt(price-deposit,rate,term),"interest":amortInterest(price-deposit,rate,term,extra),"years":amortYears(price-deposit,rate,term,extra)}; scenarioName=""; toast "Scenario saved"; close}}
@@ -124,7 +125,7 @@ App
     Nav
       Heading "Repayment table" level=1
       Row gap=8
-        Toggle "Include overpayment" bind=showExtra
+        Toggle "Include overpayment" @showExtra
         Button.outline "Export CSV" icon="download" onTap={copy table; toast "Table copied"}
     Column pad=24 gap=16 scroll
       Card gap=4

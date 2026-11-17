@@ -13,13 +13,14 @@ state attached=false
 state progress=0
 state fileName="search_spec.pdf"
 state followups=["Add a cancel method","Show it in Flutter","Compare with throttle"]
+state q=""
 every 120 when streaming onTick={shown=shown+1; shown>=length(words) ? streaming=false : shown=shown}
 every 200 when attached && progress<1 onTick={progress=min(1,progress+0.1)}
 App
   Sidebar
     Brand "Sidekick" icon="auto_awesome"
     Button "New chat" icon="add" onTap={current=0; shown=0; toast "New chat"}
-    Input "Search chats" bind=q
+    Input "Search chats" @q
     Column scroll grow gap=4
       each day in unique(map(convs,c=>c.day))
         Text.caption "{upper(day)}"
@@ -47,7 +48,7 @@ App
           Image "https://images.example.com/diagrams/debounce-timeline.png" h=180 radius=8
         if streaming
           Row gap=8 middle
-            Progress bind=shown
+            Progress value={shown}
             Button.outline "Stop" icon="stop" onTap={streaming=false}
         if !streaming && shown>=length(words)
           Row gap=4
@@ -65,7 +66,7 @@ App
           FileChip "{fileName}" progress={progress} onRemove={attached=false; progress=0}
         Row gap=8 middle
           IconButton "attach_file" tooltip="Attach a file" onTap={attached=true; progress=0}
-          Input "Message Sidekick" bind=draft multiline grow
+          Input "Message Sidekick" @draft multiline grow
           Button "Send" icon="send" onTap={draft!="" ? {shown=0; streaming=true; draft=""} : toast "Type a message"}
   Menu#convMenu
     MenuItem "Rename" icon="edit" onTap={renameText=find(convs,c=>c.id==sel).title; open renameDlg}
@@ -75,7 +76,7 @@ App
     MenuItem "Sidekick 4 Opus" icon="psychology" onTap={model="Sidekick 4 Opus"}
     MenuItem "Sidekick 4 Haiku" icon="speed" onTap={model="Sidekick 4 Haiku"}
   Dialog#renameDlg "Rename chat"
-    Input "Title" bind=renameText
+    Input "Title" @renameText
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Save" onTap={convs=updateWhere(convs,c=>c.id==sel,c=>with(c,"title",renameText)); toast "Renamed"; close}
@@ -118,7 +119,7 @@ App
     Footer
       Row pad=12 gap=8 middle
         IconButton "attach_file" tooltip="Attach a file"
-        Input "Message Sidekick" bind=draft grow
+        Input "Message Sidekick" @draft grow
         Button "Send" icon="send" onTap={go chat}
   Sheet#picker "Choose a model"
     ListTile "Sidekick 4 Sonnet" "Fast and balanced" onTap={model="Sidekick 4 Sonnet"; close}

@@ -215,7 +215,7 @@ state arrival="2026-11-20"
 state departure="2026-11-22"
 Page
   Section
-    Calendar#stay bind=arrival bindEnd=departure disabledDates=["2026-11-24"]
+    Calendar#stay @arrival @departure disabledDates=["2026-11-24"]
     Text#chosen "{arrival} to {departure}"
 '''),
     );

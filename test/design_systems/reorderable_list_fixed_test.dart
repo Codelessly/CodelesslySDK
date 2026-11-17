@@ -9,7 +9,7 @@ String _page(String more) => '''
 state steps=["Mix","Rest","Bake"]
 Page
   Section
-    ReorderableList#list "Steps" bind=steps $more
+    ReorderableList#list "Steps" @steps $more
     Text#count "{length(steps)} steps"
 ''';
 

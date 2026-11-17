@@ -18,8 +18,8 @@ App
     Nav
       Heading "Units" level=1
       Row gap=8
-        Input "Search units" bind=q w=220
-        SegmentedButton bind=filter items=["all","fridge","truck"]
+        Input "Search units" @q w=220
+        SegmentedButton @filter items=["all","fridge","truck"]
     Column pad=24 gap=16
       if count(units,u=>u.alarm && !contains(acked,u.id))>0
         Card gap=8 fill=#FFFDECEA
@@ -48,8 +48,8 @@ App
             if u.out==0
               Badge.success "In range"
   Dialog#ack "Acknowledge alarm" "Choose why the reading went out of range"
-    Select "Reason" bind=reason items=["Door left open","Loading in progress","Defrost cycle","Compressor fault","Sensor error","Power loss"]
-    Input "Note" "Optional detail for the audit log" bind=note multiline
+    Select "Reason" @reason items=["Door left open","Loading in progress","Defrost cycle","Compressor fault","Sensor error","Power loss"]
+    Input "Note" "Optional detail for the audit log" @note multiline
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button.destructive "Acknowledge" onTap={reason=="" ? toast "Pick a reason first" : {acked=append(acked,sel); toast "Alarm acknowledged: {reason}"; emit acknowledge sel; close}}
@@ -57,6 +57,7 @@ App
 ### Unit
 state tab="timeline"
 state units=[{"id":"u2","name":"Truck 14 Reefer","temp":9.6,"lo":2,"hi":8,"out":37}]
+state reason=""
 Page
   Nav
     Brand "Frostwatch" icon="ac_unit"
@@ -97,7 +98,7 @@ Page
         Button "Acknowledge alarm" onTap={open ack}
         Button.outline "Start handover" onTap={go handover}
   Dialog#ack "Acknowledge alarm" "Choose why the reading went out of range"
-    Select "Reason" bind=reason items=["Door left open","Loading in progress","Defrost cycle","Compressor fault","Sensor error","Power loss"]
+    Select "Reason" @reason items=["Door left open","Loading in progress","Defrost cycle","Compressor fault","Sensor error","Power loss"]
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Acknowledge" onTap={reason=="" ? toast "Pick a reason first" : {emit acknowledge "u2"; toast "Alarm acknowledged: {reason}"; close}}
@@ -134,8 +135,8 @@ Page
           Badge.error "Last reading is outside the 2 to 8 °C band"
         if last<=8
           Badge.success "Delivered within the safe band"
-      Input "Received by" bind=signedBy
-      Checkbox "I accept this delivery with the readings shown" bind=accepted
+      Input "Received by" @signedBy
+      Checkbox "I accept this delivery with the readings shown" @accepted
       Row gap=8
         Button.outline "Reject load" onTap={open reject}
         Button "Confirm handover" onTap={accepted && signedBy!="" ? {emit handover signedBy; toast "Handover recorded"; go certificate} : toast "Enter a name and accept first"}
@@ -146,6 +147,9 @@ Page
 
 ### Certificate
 state signedBy="M. Okafor"
+state unitPick=""
+state when=""
+state recipient=""
 Page
   Nav
     Brand "Frostwatch" icon="ac_unit"
@@ -158,8 +162,8 @@ Page
       Column grow gap=12
         Heading "Temperature certificate" level=1
         Text.muted "Proof that the load stayed cold, ready to send with the invoice."
-        Select "Unit" bind=unitPick items=["Truck 14 Reefer","Truck 09 Reefer","Walk-in Fridge 2"]
-        DatePicker "Delivery date" bind=when
+        Select "Unit" @unitPick items=["Truck 14 Reefer","Truck 09 Reefer","Walk-in Fridge 2"]
+        DatePicker "Delivery date" @when
         Row gap=8
           Button "Download PDF" onTap={emit downloadCertificate; toast "Certificate downloaded"}
           Button.outline "Email to customer" onTap={open send}
@@ -186,7 +190,7 @@ Page
         Divider
         Text.caption "Received by {signedBy}"
   Dialog#send "Email certificate" "Send a copy to the receiving customer"
-    Input "Recipient" "buyer@greenleaf.example" bind=recipient type=email
+    Input "Recipient" "buyer@greenleaf.example" @recipient type=email
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Send" onTap={emit sendCertificate recipient; toast "Certificate sent"; close}

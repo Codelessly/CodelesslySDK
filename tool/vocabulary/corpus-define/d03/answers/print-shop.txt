@@ -28,8 +28,8 @@ App
         Card gap=12
           Text.strong "Apply to all photos"
           Row gap=12 middle
-            Select "Size" bind=allSize items=["4x6","5x7","8x10","11x14"]
-            Select "Paper" bind=allPaper items=["Luster","Glossy","Matte"]
+            Select "Size" @allSize items=["4x6","5x7","8x10","11x14"]
+            Select "Paper" @allPaper items=["Luster","Glossy","Matte"]
             Button.secondary "Apply to all" onTap={photos=map(photos,p=>with(with(p,"size",allSize),"paper",allPaper)); toast "Applied to {length(photos)} photos"}
         Grid cols=2 gap=16
           each photo in photos
@@ -40,29 +40,29 @@ App
                   Box fill=#99000000 radius=8
                     Column center middle gap=6
                       Text "Uploading {round(photo.progress*100,0)}%" color=#FFFFFFFF
-                      Progress bind=photo.progress
+                      Progress value={photo.progress}
               Row between middle
                 Text.strong "{photo.name}"
                 IconButton "crop" tooltip="Crop" onTap={cropId=photo.id; cropUrl=photo.url; ratio=photo.ratio; zoom=1; open crop}
               if photo.low
                 Banner.warning "Low resolution: may print soft at {photo.size}" icon="warning"
               Row gap=8
-                Select "Size" bind=photo.size items=["4x6","5x7","8x10","11x14"] grow
-                Select "Paper" bind=photo.paper items=["Luster","Glossy","Matte"] grow
+                Select "Size" @photo.size items=["4x6","5x7","8x10","11x14"] grow
+                Select "Paper" @photo.paper items=["Luster","Glossy","Matte"] grow
               Row between middle
                 Text.muted "Copies"
-                Stepper bind=photo.qty min=1 max=99
+                Stepper @photo.qty min=1 max=99
                 Button.ghost "Remove" icon="delete" onTap={photos=removeWhere(photos,p=>p.id==photo.id)}
       Pane w=320 pad=16 gap=12
         PriceSummary qty={sum(photos,p=>p.qty)} subtotal={sum(photos,p=>p.qty*(p.size=="4x6" ? 0.29 : p.size=="5x7" ? 0.79 : p.size=="8x10" ? 2.49 : 5.99))}
         Button "Checkout" size=large onTap={go checkout}
 Dialog#crop "Crop photo" "Drag the frame, zoom to fit"
   Column gap=12
-    SegmentedButton bind=ratio items=["1:1","3:2","4:5","5:7"]
-    CropFrame src={cropUrl} ratio={ratio} bind=zoom
+    SegmentedButton @ratio items=["1:1","3:2","4:5","5:7"]
+    CropFrame src={cropUrl} ratio={ratio} @zoom
     Row gap=12 middle
       Icon "zoom_out"
-      Slider bind=zoom min=1 max=4 grow
+      Slider @zoom min=1 max=4 grow
       Icon "zoom_in"
     Row end gap=8
       Button.outline "Cancel" onTap={close}
@@ -96,7 +96,7 @@ define PriceTiers qty=0
         Text.muted "{tier.off}% off" visible={qty<tier.min}
 
 // a real draggable crop needs pointer tracking; shown as the photo with a ratio frame over it
-define CropFrame src="" ratio="3:2" bind=zoom
+define CropFrame src="" ratio="3:2" @zoom
   state zoom=1
   Stack h=280 radius=8
     Image "{src}" h=280 fill=#FF111827
@@ -124,20 +124,20 @@ Page
     Row gap=32 top
       Column grow gap=16
         Heading "Delivery" level=1
-        SegmentedButton bind=mode items=["delivery","pickup"]
+        SegmentedButton @mode items=["delivery","pickup"]
         if mode=="delivery"
           Card gap=12
-            Input "Full name" bind=name
-            Input "Street address" bind=street
+            Input "Full name" @name
+            Input "Street address" @street
             Row gap=12
-              Input "City" bind=city grow
-              Input "ZIP" bind=zip w=120
-            Radio "Standard, 4 to 6 days, $4.99" bind=method value="Standard"
-            Radio "Express, 2 days, $12.99" bind=method value="Express"
+              Input "City" @city grow
+              Input "ZIP" @zip w=120
+            Radio "Standard, 4 to 6 days, $4.99" @method value="Standard"
+            Radio "Express, 2 days, $12.99" @method value="Express"
         if mode=="pickup"
           Card gap=12
             Text.strong "Pick up in store, free"
-            Select "Store" bind=store items=["Downtown, 120 Pine St","Riverside, 8 Mill Rd","Airport Plaza, Terminal B"]
+            Select "Store" @store items=["Downtown, 120 Pine St","Riverside, 8 Mill Rd","Airport Plaza, Terminal B"]
             Text.muted "Ready in about 2 hours. We email you when it is."
       Column w=320 gap=12 sticky
         Card gap=10

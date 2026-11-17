@@ -8,6 +8,8 @@ state pairings=[{"id":"P7K21","start":"2026-12-03","end":"2026-12-06","route":"S
 state delay={"pairing":"P3M08","leg":"AS 771","oldDep":"14:00","newDep":"15:20","reason":"Late inbound aircraft"}
 state delayAck=false
 state restGap=9.5
+state swapPairing=""
+state swapNote=""
 App
   Sidebar
     Brand "Rotation" icon="flight_takeoff"
@@ -92,14 +94,16 @@ every 1s onTick={dutySeconds=min(dutyLimit,dutySeconds+1)}
         Button "Offer for swap" onTap={emit offerSwap sel.id; close; tab="swaps"}
         Button.outline "Close" onTap={close}
   Dialog#swapRequest "Request a swap" "Offer a pairing to other crew"
-    Select "Pairing" bind=swapPairing items=["P7K21","P3M08","P9D44","P5B16"]
-    Input "Note to crew" multiline bind=swapNote
+    Select "Pairing" @swapPairing items=["P7K21","P3M08","P9D44","P5B16"]
+    Input "Note to crew" multiline @swapNote
     Button "Post request" onTap={emit swapPosted swapPairing; toast "Swap posted"; close}
 
 ### Swaps
 state tab="swaps"
 state filter="all"
 state swaps=[{"id":1,"pairing":"P9D44","dates":"Dec 12 to 14","route":"SEA-DEN-PHX-SEA","with":"Marcus Webb","status":"offered"},{"id":2,"pairing":"P5B16","dates":"Dec 19 to 22","route":"SEA-SFO-HNL-SFO-SEA","with":"Priya Nair","status":"accepted"},{"id":3,"pairing":"P3M08","dates":"Dec 9 to 11","route":"SEA-ORD-MSY-SEA","with":"Lena Fischer","status":"declined"},{"id":4,"pairing":"P2A90","dates":"Dec 26 to 28","route":"SEA-LAX-SEA","with":"Tom Abara","status":"offered"}]
+state np=""
+state nd=""
 App
   Sidebar
     Brand "Rotation" icon="flight_takeoff"
@@ -139,8 +143,8 @@ App
           if s.status=="accepted"
             Text.success "Awaiting scheduling approval"
   Dialog#newSwap "New swap request"
-    Select "Pairing" bind=np items=["P7K21","P3M08","P9D44","P5B16"]
-    DatePicker "Trade for dates on or after" bind=nd
+    Select "Pairing" @np items=["P7K21","P3M08","P9D44","P5B16"]
+    DatePicker "Trade for dates on or after" @nd
     Button "Offer" onTap={swaps=append(swaps,{"id":length(swaps)+1,"pairing":np,"dates":formatDate(nd,"MMM d"),"route":"","with":"Open to all","status":"offered"}); close; toast "Offered"}
 
 ### Bids
@@ -162,7 +166,7 @@ App
         Button "Submit bid" onTap={submitted=true; emit bidSubmit bids; toast "Bid submitted"}
     Column pad=24 gap=12 scroll
       Text.muted "Drag to reorder. Your top choice is awarded first by seniority."
-      ReorderableList bind=bids
+      ReorderableList @bids
         each b in sortBy(bids,x=>x.rank)
           Card drag=bid(b.id) drop=bid onDrop={bids=moveItem(bids,result.data,b.id)}
             Row between middle
@@ -183,6 +187,8 @@ state tab="pay"
 state period="2026-12"
 state lines=[{"id":"P7K21","label":"P7K21 SEA-JFK-LHR-JFK-SEA","hours":22.4,"kind":"Flying"},{"id":"P3M08","label":"P3M08 SEA-ORD-MSY-SEA","hours":14.1,"kind":"Flying"},{"id":"P9D44","label":"P9D44 SEA-DEN-PHX-SEA","hours":12.8,"kind":"Flying"},{"id":"P5B16","label":"P5B16 SEA-SFO-HNL-SFO-SEA","hours":19.6,"kind":"Flying"},{"id":"DH1","label":"Deadhead SEA to SFO","hours":2.1,"kind":"Deadhead"},{"id":"INTL","label":"International override","hours":4.0,"kind":"Premium"}]
 state rate=62.5
+state dline=""
+state dnote=""
 Page
   Nav sticky
     Brand "Rotation" icon="flight_takeoff"
@@ -204,7 +210,7 @@ Page
           Text "{money(sum(lines,l=>l.hours)*rate,"$",2)}" size=40 weight=700
         Card grow gap=4
           Text.muted "Rate per hour"
-          Input "Rate" type=number bind=rate
+          Input "Rate" type=number @rate
   Section tint
     Column gap=12
       Heading "Breakdown" level=2
@@ -225,6 +231,6 @@ Page
         Button.outline "Export PDF" icon="download" onTap={emit exportPay period}
         Button.ghost "Dispute a line" onTap={open dispute}
   Dialog#dispute "Dispute pay hours"
-    Select "Line" bind=dline items=["P7K21","P3M08","P9D44","P5B16","DH1","INTL"]
-    Input "What is wrong" multiline bind=dnote
+    Select "Line" @dline items=["P7K21","P3M08","P9D44","P5B16","DH1","INTL"]
+    Input "What is wrong" multiline @dnote
     Button "Send to crew pay" onTap={emit payDispute dline; close; toast "Dispute sent"}

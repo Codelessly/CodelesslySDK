@@ -52,11 +52,11 @@ App
             Divider
             Text.strong "Confirm quantity"
             Row gap=12 middle
-              Stepper bind=n min=0 max={picks[cur].qty}
+              Stepper @n min=0 max={picks[cur].qty}
               Text.muted "of {picks[cur].qty}"
           Card w=320 gap=12
             Text.strong "Scan to verify"
-            Scanner "Scan the item barcode" bind=code onScan={code==picks[cur].sku ? verified=true : open mismatch}
+            Scanner "Scan the item barcode" @code onScan={code==picks[cur].sku ? verified=true : open mismatch}
             if verified
               Banner.success "Item matches {picks[cur].sku}"
             Row gap=8
@@ -81,11 +81,11 @@ App
       Button.destructive "Report bin issue" onTap={emit binIssue picks[cur].bin; toast "Reported"; close}
   Sheet#short "Short pick"
     Text "Found {found} of {picks[cur].qty} for {picks[cur].name}."
-    Stepper bind=found min=0 max={picks[cur].qty}
-    Select "Reason" bind=reason items=["Damaged","Bin empty","Not found","Expired"]
+    Stepper @found min=0 max={picks[cur].qty}
+    Select "Reason" @reason items=["Damaged","Bin empty","Not found","Expired"]
     Button.destructive "Confirm short pick" onTap={picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(with(with(p,"picked",found),"status","short"),"reason",reason)); cur=cur+1; n=0; code=""; verified=false; emit shortPick reason; close}
   Dialog#tote "Assign a tote" "Scan or choose an empty tote."
-    ChoiceChips bind=tote items=["T-14","T-17","T-21","T-22"]
+    ChoiceChips @tote items=["T-14","T-17","T-21","T-22"]
     Button "Done" onTap={toast "Tote {tote} assigned"; close}
 
 ### Route map
@@ -140,7 +140,7 @@ Page
           Text.strong "Tote {tote}"
           Badge.warning "1 short"
         Text.muted "4 lines complete, Olive Oil 750ml short by 1 (bin empty)."
-        Checkbox "Tote sealed and labelled" bind=checked
+        Checkbox "Tote sealed and labelled" @checked
         Button "Send to pack bench" onTap={!checked ? toast "Seal the tote first" : {emit handOff tote; toast "Sent to pack"; go pick-list}}
       Card gap=8
         Row between
@@ -149,13 +149,13 @@ Page
         Progress {1-next/118}
 
 // A camera barcode scanner cannot be drawn here; it shows as a labelled box with a field to type the code.
-define Scanner "hint" bind=code onScan
+define Scanner "hint" @code onScan
   state typed=""
   Column gap=8
     Box h=120 radius=8 fill=#FF111827 center middle
       Icon "qr_code_scanner" color=#FFFFFFFF
       Text "{hint}" color=#FFFFFFFF
-    Input "Barcode" bind=typed
+    Input "Barcode" @typed
     Button.outline "Verify" onTap={code=typed; onScan(typed)}
 
 // A floor plan with the pick path; drawn as aisle boxes with the stops highlighted.

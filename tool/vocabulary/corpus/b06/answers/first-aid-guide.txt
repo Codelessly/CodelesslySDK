@@ -22,7 +22,7 @@ App
             Text.strong "Not sure it is an emergency?"
             Text.muted "Answer a few questions and Steady tells you what to do."
         Button.secondary "Start triage" onTap={go triage}
-      Input "Search situations" "choking, burn, bite" bind=q icon="search"
+      Input "Search situations" "choking, burn, bite" @q icon="search"
       Text.sectionTitle "Situations"
       Grid cols=2 gap=12
         each s in filter(situations, x=>contains(lower(x.name), lower(q)))
@@ -58,7 +58,7 @@ App
       Text.muted "{step+1} of {length(steps)}"
     Column pad=16 gap=16 grow
       Progress {(step+1)/length(steps)}
-      Pages bind=step h=260
+      Pages @step h=260
         each s in steps
           Image "{s.img}" h=260 radius=16
       Column gap=8 center

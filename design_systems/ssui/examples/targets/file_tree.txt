@@ -3,7 +3,7 @@ Card gap=10
   Row gap=8
     Text.sectionTitle "Files in this change" grow
     Text.caption "7 entries"
-  FileTree names=["lib","main.dart","widgets","card.dart","assets","logo.png","README.md"] depths=["0","1","1","2","0","1","0"] bind=file
+  FileTree names=["lib","main.dart","widgets","card.dart","assets","logo.png","README.md"] depths=["0","1","1","2","0","1","0"] @file
   Row gap=8
     Text.caption "Selected" 
     ResourceChip "{file}"

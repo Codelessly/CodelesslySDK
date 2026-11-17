@@ -65,7 +65,7 @@ App
                 Icon "notifications_active"
                 Text.success "Sold to the room"
           Card gap=12
-            SegmentedButton bind=step items=[1,2,5]
+            SegmentedButton @step items=[1,2,5]
             Button "Bid +£{step}" size=large disabled={sold} onTap={lots=updateWhere(lots,l=>l.id==lots[at].id,l=>with(with(with(l,"price",l.price+step),"bids",l.bids+1),"reserveMet",l.price+step>=l.reserve)); myBids=append(myBids,{"lot":lots[at].id,"amount":lots[at].price+step}); running=true; window=30; count=0}
             Button.outline "Start the window" disabled={running} onTap={running=true; window=30; sold=false}
             Button.tertiary "Ring the bell" icon="notifications" onTap={sold=true; running=false; toast "Bell rung, lot {at+1} sold"}
@@ -89,6 +89,7 @@ state kg=0
 state guess=0
 state reserve=0
 state entered=[{"id":11,"name":"Dozen duck eggs","qty":12,"unit":"eggs","kg":1,"guess":9,"reserve":6,"status":"Listed"},{"id":12,"name":"Basket of damsons","qty":1,"unit":"basket","kg":4,"guess":14,"reserve":10,"status":"In auction"},{"id":13,"name":"Raw honey, 6 jars","qty":6,"unit":"jars","kg":2.7,"guess":30,"reserve":24,"status":"Sold"}]
+state hideReserve=false
 App
   Sidebar
     Brand "Barrow Bids" icon="gavel"
@@ -133,17 +134,17 @@ App
             IconButton "more_vert" tooltip="Lot options" onTap={sel=l.id; open lotMenu}
   Dialog#newLot "Enter a lot" "Photograph it, weigh it, guess a price"
     Column gap=12
-      Camera bind=photo facing=back onCapture={photo=result}
+      Camera @photo facing=back onCapture={photo=result}
       if photo!=""
         Image "{photo}" h=160 radius=8
-      Input "Lot name" "Crate of Bramley apples" bind=name
+      Input "Lot name" "Crate of Bramley apples" @name
       Row gap=12
-        Input "Quantity" type=number bind=qty grow
-        Select "Unit" bind=unit items=["crate","sack","hens","jars","dozen","bunch"] grow
-      Input "Weight (kg)" type=number bind=kg
-      Input "Price guess (£)" type=number bind=guess
-      Input "Reserve (£)" type=number bind=reserve
-      Toggle "Hide the reserve from buyers" bind=hideReserve
+        Input "Quantity" type=number @qty grow
+        Select "Unit" @unit items=["crate","sack","hens","jars","dozen","bunch"] grow
+      Input "Weight (kg)" type=number @kg
+      Input "Price guess (£)" type=number @guess
+      Input "Reserve (£)" type=number @reserve
+      Toggle "Hide the reserve from buyers" @hideReserve
       Button "Enter lot" onTap={name=="" || photo=="" ? toast "Add a name and a photo" : {entered=append(entered,{"id":length(entered)+20,"name":name,"qty":qty,"unit":unit,"kg":kg,"guess":guess,"reserve":reserve,"status":"Listed"}); name=""; photo=""; toast "Lot entered"; close}}
   Menu#lotMenu end
     MenuItem "Edit price guess" icon="edit" onTap={open newLot}

@@ -21,7 +21,7 @@ App
         Text.muted "{stars} stars"
         Icon "star" color=#FFF5B301
     Column pad=24 gap=20 center
-      Pages bind=at h=420 items={letters} peek=0.9
+      Pages @at h=420 items={letters} peek=0.9
         Card gap=16 center
           Row gap=40 middle center
             Text "{letters[at].l}" size=220 weight=800 color=#FF3B6FE0
@@ -32,7 +32,7 @@ App
             SoundWave active color=#FF3B6FE0 bars=24 h=60 animate=pulse
           if !playing
             SoundWave idle bars=24 h=60 color=#FFB8C4E0
-      Dots bind=at count={length(letters)}
+      Dots @at count={length(letters)}
       Row gap=12 center
         IconButton "chevron_left" tooltip="Previous letter" onTap={at=max(0,at-1)}
         Text.muted "{at+1} of {length(letters)}"
@@ -42,7 +42,7 @@ App
     state b=6
     state guess=""
     Text.heading "{a} + {b} = ?"
-    Input "Your answer" bind=guess type=number
+    Input "Your answer" @guess type=number
     Button "Open" onTap={guess==a+b ? go parent : toast "Not quite, try again"}
 
 ### Catch the sound
@@ -88,7 +88,7 @@ App
   Dialog#gate "Grown-ups only" "Answer the sum to open the parent corner"
     state guess=""
     Text.heading "7 + 6 = ?"
-    Input "Your answer" bind=guess type=number
+    Input "Your answer" @guess type=number
     Button "Open" onTap={guess==13 ? go parent : toast "Not quite, try again"}
 
 ### Blend a word
@@ -119,7 +119,7 @@ App
       if merged
         Box fill=#FF2E9E5B radius=28 pad=24 center animate=pop
           Text "{join(tiles,"")}" size=96 weight=800 color=#FFFFFFFF
-      Slider bind=spread min=0 max=100 onChange={result>=90 ? {merged=true; emit speak join(tiles,""); stars=stars+1; toast "cat!"} : {merged=false}}
+      Slider @spread min=0 max=100 onChange={result>=90 ? {merged=true; emit speak join(tiles,""); stars=stars+1; toast "cat!"} : {merged=false}}
       Text.muted "Slide to push the tiles together"
       Row gap=12
         Button.outline "Hear each sound" icon="hearing" onTap={emit speakEach tiles}
@@ -135,7 +135,7 @@ App
   Dialog#gate "Grown-ups only" "Answer the sum to open the parent corner"
     state guess=""
     Text.heading "9 + 4 = ?"
-    Input "Your answer" bind=guess type=number
+    Input "Your answer" @guess type=number
     Button "Open" onTap={guess==13 ? go parent : toast "Not quite, try again"}
 
 ### Parent corner
@@ -176,7 +176,7 @@ App
               Progress {x.score/100}
       if tab=="settings"
         Card gap=12
-          Toggle "Sound effects" bind=sound_on
-          Slider "Daily play limit (minutes)" bind=limit min=5 max=60
+          Toggle "Sound effects" @sound_on
+          Slider "Daily play limit (minutes)" @limit min=5 max=60
           Text.muted "Soundbox pauses after {limit} minutes."
           Button "Save" onTap={emit saveSettings; toast "Saved"}

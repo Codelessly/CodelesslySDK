@@ -103,7 +103,7 @@ App
         Heading "Hold time" level=3
         Text.muted "A touch must last this long before it counts."
         Row gap=16 middle
-          Slider bind=holdMs min=100 max=2000 step=100 grow
+          Slider @holdMs min=100 max=2000 step=100 grow
           Text.heading2 "{fixed(holdMs/1000,1)} s"
         Row gap=16 middle
           Stack center middle
@@ -112,15 +112,15 @@ App
           Button "Try it" size=large onTap={testProgress=0; testing=true}
       Card gap=12
         Heading "Dwell mode" level=3
-        Toggle "Choose by resting the pointer" bind=dwell
+        Toggle "Choose by resting the pointer" @dwell
         if dwell
           Row gap=16 middle
-            Slider bind=dwellMs min=500 max=3000 step=100 grow
+            Slider @dwellMs min=500 max=3000 step=100 grow
             Text.strong "{fixed(dwellMs/1000,1)} s"
           DwellPointer size=64 duration={dwellMs}
       Card gap=12
         Heading "Voice" level=3
-        Toggle "Read messages aloud" bind=voice
+        Toggle "Read messages aloud" @voice
         Button.outline "Hear a sample" onTap={speak "This is how your messages will sound"}
       Card gap=12
         Heading "Accidental touches" level=3

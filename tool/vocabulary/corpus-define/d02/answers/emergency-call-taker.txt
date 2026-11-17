@@ -39,7 +39,7 @@ App
             Text.strong "Caller location"
             LocationMap lat=47.6205 lng=-122.3493 accuracy=35 h=220
             Row gap=8 middle
-              Input "Address" bind=address grow
+              Input "Address" @address grow
               Button.outline "Re-locate" icon="my_location" onTap={toast "Location refreshed, accuracy 35 m"}
           Card gap=12
             Text.strong "Type of emergency"
@@ -102,7 +102,7 @@ App
             Timeline items={log}
           Card gap=8
             Text.strong "Notes"
-            Input "Notes" "Door code, pets, hazards" multiline bind=notes
+            Input "Notes" "Door code, pets, hazards" multiline @notes
             Button "Save notes" onTap={log=append(log,{"time":duration(callSecs),"who":"Note","text":notes}); notes=""; toast "Note saved"}
 Sheet#hold "Caller on hold"
   Column center gap=12
@@ -129,7 +129,7 @@ App
     Nav
       Heading "Incident log" level=1
       Row gap=8
-        SegmentedButton items=["All","Active","Closed"] bind=filter
+        SegmentedButton items=["All","Active","Closed"] @filter
     Column pad=24 gap=16 scroll
       Card gap=8
         Row gap=8

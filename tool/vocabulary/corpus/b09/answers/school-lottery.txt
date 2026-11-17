@@ -28,7 +28,7 @@ App
       Row gap=16 top
         Column grow gap=12
           Text.muted "Drag to reorder. Your first choice is tried first. You can rank up to six schools."
-          ReorderableList bind=ranked onReorder={emit reorder result}
+          ReorderableList @ranked onReorder={emit reorder result}
             each s in ranked
               Card gap=8 drag=rank(s.id) drop=rank onDrop={ranked=moveTo(ranked,result.data,index)}
                 Row between middle

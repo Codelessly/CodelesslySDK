@@ -4,6 +4,9 @@ state level="Intermediate"
 state hourSel=9
 state alertsOn=true
 state tab="today"
+state minH=1
+state maxWind=0
+state windDir=""
 App
   Sidebar
     Brand "Swell Table" icon="waves"
@@ -17,8 +20,8 @@ App
     Nav
       Heading "{spot}" level=1
       Row gap=8
-        Select bind=spot items=["Ocean Beach","Linda Mar","Mavericks","Steamer Lane"]
-        SegmentedButton bind=level items=["Beginner","Intermediate","Expert"]
+        Select @spot items=["Ocean Beach","Linda Mar","Mavericks","Steamer Lane"]
+        SegmentedButton @level items=["Beginner","Intermediate","Expert"]
         IconButton "notifications" tooltip="Alerts" onTap={open alerts}
     Column pad=24 gap=16 scroll
       Grid cols=4 gap=16
@@ -72,10 +75,10 @@ App
         ListTile "Steamer Lane" "5 ft, bumpy" icon="place" onTap={spot="Steamer Lane"}
           Rating value=3 max=5
   Dialog#alerts "Surf alerts" "Tell me when conditions match my level"
-    Toggle "Alerts on" bind=alertsOn
-    Slider "Minimum height (ft)" bind=minH min=1 max=15
-    Slider "Max wind (kt)" bind=maxWind min=0 max=30
-    Select "Wind direction" bind=windDir items=["Offshore","Any","Onshore"]
+    Toggle "Alerts on" @alertsOn
+    Slider "Minimum height (ft)" @minH min=1 max=15
+    Slider "Max wind (kt)" @maxWind min=0 max=30
+    Select "Wind direction" @windDir items=["Offshore","Any","Onshore"]
     Button "Save alert" onTap={toast "Alert saved for {level}"; close}
 
 ### Spots
@@ -83,6 +86,7 @@ state q=""
 state sel="Ocean Beach"
 state minStars=0
 state spots=[{"name":"Ocean Beach","stars":4,"height":"4.5 ft","wind":"Light offshore","temp":56},{"name":"Linda Mar","stars":5,"height":"3 ft","wind":"Calm","temp":57},{"name":"Mavericks","stars":3,"height":"18 ft","wind":"Offshore 8 kt","temp":53},{"name":"Steamer Lane","stars":4,"height":"5 ft","wind":"Cross 10 kt","temp":55},{"name":"Rockaway","stars":2,"height":"2 ft","wind":"Onshore 14 kt","temp":57},{"name":"Half Moon Bay","stars":3,"height":"4 ft","wind":"Light","temp":54}]
+state minH=1
 App
   Sidebar
     Brand "Swell Table" icon="waves"
@@ -94,8 +98,8 @@ App
     Nav
       Heading "Spots" level=1
       Row gap=8
-        Input "Search spots" bind=q w=220
-        Select bind=minStars items=["Any rating","3 stars+","4 stars+"]
+        Input "Search spots" @q w=220
+        Select @minStars items=["Any rating","3 stars+","4 stars+"]
     Column pad=24 gap=16
       Card gap=0 grow
         MapView h=260 center="37.7,-122.5" zoom=8
@@ -104,19 +108,21 @@ App
       Card gap=8
         each s in filter(spots, x => contains(lower(x.name), lower(q)) && x.stars >= minStars)
           ListTile "{s.name}" "{s.height}, {s.wind}, {s.temp} F" icon="place" selected={sel==s.name} onTap={sel=s.name}
-            Rating value={s.stars} max=5
+            Rating value=@s.stars max=5
             IconButton "more_vert" onTap={sel=s.name; open spotMenu}
   Menu#spotMenu end
     MenuItem "Open forecast" icon="water" onTap={go today}
     MenuItem "Set alert" icon="notifications" onTap={open spotAlert}
     MenuItem "Favourite" icon="star" onTap={toast "Added to favourites"}
   Dialog#spotAlert "Alert for {sel}" "Notify me when it is firing"
-    Slider "Minimum height (ft)" bind=minH min=1 max=15
+    Slider "Minimum height (ft)" @minH min=1 max=15
     Button "Save" onTap={toast "Alert saved"; close}
 
 ### Week
 state day=2
 state days=[{"d":"Mon","h":"3 ft","score":42},{"d":"Tue","h":"4 ft","score":61},{"d":"Wed","h":"5.5 ft","score":92},{"d":"Thu","h":"4.5 ft","score":74},{"d":"Fri","h":"3 ft","score":48},{"d":"Sat","h":"2 ft","score":30},{"d":"Sun","h":"3.5 ft","score":55}]
+state level=""
+state alertsOn=false
 Page
   Nav sticky
     Brand "Swell Table" icon="waves"
@@ -161,6 +167,6 @@ Page
       Text.strong "Swell Table"
       Text.muted "Data from NOAA buoys"
   Dialog#weekAlert "Alert me" "When a window matches my level"
-    Select "My level" bind=level items=["Beginner","Intermediate","Expert"]
-    Toggle "Push notifications" bind=alertsOn
+    Select "My level" @level items=["Beginner","Intermediate","Expert"]
+    Toggle "Push notifications" @alertsOn
     Button "Save" onTap={toast "Alert saved"; close}

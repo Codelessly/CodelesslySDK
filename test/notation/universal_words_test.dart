@@ -32,7 +32,7 @@ const items = 'state items=[{"id":"a","name":"Alpha"},{"id":"b","name":"Beta"},{
 
 void main() {
   group('selectable', () {
-    const page = '${items}state said=""\nColumn selectable bind=sel onSelect={said="{length(result)} chosen"}\n  each it in items\n    Row pad=8\n      Text "{it.name}"\n';
+    const page = 'state sel=[]\n${items}state said=""\nColumn selectable selected=@sel onSelect={said="{length(result)} chosen"}\n  each it in items\n    Row pad=8\n      Text "{it.name}"\n';
 
     // A row of a list that is not reordered is told apart by its index (the
     // first is the item's own node).

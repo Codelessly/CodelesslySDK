@@ -65,7 +65,7 @@ Drawer#friends "Friends" right
 
 Menu#quick end
   Text.caption "Volume {muted ? 0 : volume}%"
-  Slider bind=volume min=0 max=100 onChange={muted=false; play tick}
+  Slider @volume min=0 max=100 onChange={muted=false; play tick}
   MenuItem "{muted ? \"Unmute\" : \"Mute\"}" icon="volume_off" onTap={muted=!muted}
   MenuItem "Downloads" icon="download" onTap={go downloads}
   MenuItem "Controllers" icon="sports_esports" onTap={emit controllers}

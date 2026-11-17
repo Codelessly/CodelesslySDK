@@ -28,7 +28,7 @@ App
         Row between
           Text.panelTitle "Brightness vs wavelength"
           Text.mono "{range[0]} to {range[1]} nm"
-        SpectrumChart#plot values={spectrum} min=4000 max=7000 h=320 zoomable brush="box" bind=range matches={matched} onZoom={range=result; toast "Zoomed to {result[0]} to {result[1]} nm"} onLineTap={selected=result.name; open lineInfo}
+        SpectrumChart#plot values={spectrum} min=4000 max=7000 h=320 zoomable brush="box" @range matches={matched} onZoom={range=result; toast "Zoomed to {result[0]} to {result[1]} nm"} onLineTap={selected=result.name; open lineInfo}
         Row gap=8
           Chip "H-alpha 6563" onTap={selected="H-alpha"; open lineInfo}
           Chip "Na D 5893" onTap={selected="Na D"; open lineInfo}
@@ -82,7 +82,7 @@ App
     Nav
       Heading "Lamp calibration" level=1
       Row gap=8
-        Toggle "Neon lamp" bind=lampOn
+        Toggle "Neon lamp" @lampOn
         Button.outline "Start over" onTap={peaks=[]; step=1; ref1=0; ref2=0}
     Column pad=24 gap=16
       Card gap=12
@@ -100,10 +100,10 @@ App
         Grid cols=2 gap=16
           Card gap=8
             Text.fieldLabel "Peak A at pixel {peaks[0].px}"
-            Input "Known wavelength (nm)" "585.249" type=number bind=ref1
+            Input "Known wavelength (nm)" "585.249" type=number @ref1
           Card gap=8
             Text.fieldLabel "Peak B at pixel {peaks[1].px}"
-            Input "Known wavelength (nm)" "640.225" type=number bind=ref2
+            Input "Known wavelength (nm)" "640.225" type=number @ref2
         Row end gap=8
           Button.outline "Use neon table" onTap={ref1=585.249; ref2=640.225}
           Button "Apply calibration" onTap={ref1>0 && ref2>ref1 ? step=3; emit calibrate {"a":ref1,"b":ref2}; toast "Calibration applied" : toast "Enter both wavelengths"}
@@ -114,6 +114,7 @@ state exposure=120
 state remaining=120
 state running=false
 state frames=[{"n":1,"noise":9.4},{"n":2,"noise":6.8},{"n":3,"noise":5.5},{"n":4,"noise":4.8},{"n":5,"noise":4.2},{"n":6,"noise":3.9}]
+state binning=""
 every 1s when running onTick={remaining=remaining-1; remaining<=0 ? running=false; frames=append(frames,{"n":length(frames)+1,"noise":round(9.4/(length(frames)+1)*1.6,1)}); remaining=exposure; toast "Frame {length(frames)+1} stored" : }
 App
   Sidebar
@@ -141,13 +142,13 @@ App
             Button.destructive "Stop" icon="stop" visible={running} onTap={running=false; remaining=exposure}
         Card grow gap=12
           Text.panelTitle "Exposure time"
-          Slider bind=exposure min=10 max=600 onChange={remaining=result}
+          Slider @exposure min=10 max=600 onChange={remaining=result}
           Text.mono "{exposure} s"
           Row gap=8
             ChoiceChip "30 s" selected={exposure==30} onTap={exposure=30; remaining=30}
             ChoiceChip "120 s" selected={exposure==120} onTap={exposure=120; remaining=120}
             ChoiceChip "300 s" selected={exposure==300} onTap={exposure=300; remaining=300}
-          Select "Binning" items=["1x1","2x2","4x4"] bind=binning
+          Select "Binning" items=["1x1","2x2","4x4"] @binning
           Text.caption "Total on target {duration(length(frames)*exposure)}"
       Card gap=12
         Row between
@@ -168,6 +169,7 @@ state tab="targets"
 state filter="All"
 state targets=[{"name":"Vega","type":"A0V star","alt":78,"set":"04:12"},{"name":"Deneb","type":"A2Ia star","alt":71,"set":"05:40"},{"name":"Altair","type":"A7V star","alt":54,"set":"02:55"},{"name":"M57 Ring Nebula","type":"Planetary nebula","alt":69,"set":"03:30"},{"name":"Albireo","type":"Double star","alt":62,"set":"03:48"},{"name":"Capella","type":"G8III star","alt":22,"set":"never"},{"name":"Arcturus","type":"K1.5III star","alt":14,"set":"23:50"}]
 state sel=""
+state q=""
 App
   Sidebar
     Brand "Stellarline" icon="auto_awesome"
@@ -182,7 +184,7 @@ App
       Column
         Heading "Tonight's targets" level=1
         Text.caption "Ordered by height in the sky, {formatDate(today(),"MMM d")}"
-      Input "Search" bind=q w=220
+      Input "Search" @q w=220
     Column pad=24 gap=16
       Row gap=8
         ChoiceChip "All" selected={filter=="All"} onTap={filter="All"}

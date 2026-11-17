@@ -59,7 +59,7 @@ App
       Column w=320 gap=12
         Card gap=8
           Text.panelTitle "Moves"
-          MoveList moves={moves} bind=view onStep={emit viewPosition result}
+          MoveList moves={moves} @view onStep={emit viewPosition result}
           Row gap=8 center
             IconButton "first_page" tooltip="Start" onTap={view=0; emit viewPosition 0}
             IconButton "chevron_left" tooltip="Back" onTap={view=max(0,view-1); emit viewPosition view}
@@ -102,7 +102,7 @@ App
   Main
     Nav
       Heading "Game history"
-      Input "Search opponent" bind=q w=220
+      Input "Search opponent" @q w=220
     Column pad=24 gap=16
       Row gap=8
         ChoiceChip "All" selected={filter=="all"} onTap={filter="all"}
@@ -179,7 +179,7 @@ define Clock time=600 active=false
     else
       Text "{floor(time/60)}:{time%60 < 10 ? '0' : ''}{time%60}" size=28 weight=700 color={active ? "#FFFFFFFF" : "#FF374151"}
 
-define MoveList moves=[] bind=view onStep
+define MoveList moves=[] @view onStep
   state view=0
   Column gap=2 h=220 scroll
     each m in moves

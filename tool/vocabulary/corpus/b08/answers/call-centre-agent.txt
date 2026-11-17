@@ -28,7 +28,7 @@ App
         Badge.warning "Wrap-up" visible={status=="wrap-up"}
         Badge.neutral "Break" visible={status=="break"}
         Text.mono "{duration(elapsed)}"
-        Select bind=status items=["ready","on a call","wrap-up","break"] onChange={elapsed=0}
+        Select @status items=["ready","on a call","wrap-up","break"] onChange={elapsed=0}
     Column pad=24 gap=16
       Row gap=16 top
         Card grow gap=12
@@ -133,12 +133,12 @@ App
             Text.caption "{count(steps,s=>s.done)} of {length(steps)} steps"
           Progress {count(steps,s=>s.done)/length(steps)}
           each step in steps
-            Checkbox "{step.label}" bind=step.done
+            Checkbox "{step.label}" @step.done
         Card gap=8
           Row between
             Text.sectionTitle "Notes"
             Text.caption "Saved on this device"
-          Input "Call notes" "What did the customer say, and what did you promise?" bind=notes multiline h=140
+          Input "Call notes" "What did the customer say, and what did you promise?" @notes multiline h=140
           Row end gap=8
             Button.outline "Insert template" onTap={notes=notes+"Issue: \nAction taken: \nFollow-up: "}
             Button "Save note" onTap={emit saveNote notes; toast "Note saved"}
@@ -159,7 +159,7 @@ App
           Text.muted "Balance"
           Text.strong "$0.00"
   Sheet#transfer "Transfer call"
-    Input "Search the directory" bind=query
+    Input "Search the directory" @query
     each person in filter(directory,p=>contains(lower(p.name),lower(query)) || contains(lower(p.team),lower(query)))
       ListTile "{person.name}" subtitle="{person.team}" onTap={target=person.name}
         Avatar "{person.name}" size=32
@@ -202,11 +202,11 @@ App
         Text.caption "Pick every code that applies"
         Row gap=8
           each c in codes
-            FilterChip "{c.name}" bind=c.on
+            FilterChip "{c.name}" @c.on
       Card gap=12
         Text.sectionTitle "Outcome"
-        SegmentedButton bind=outcome items=["Resolved","Follow-up","Escalated"]
-        Input "Wrap-up comment" bind=comment multiline
+        SegmentedButton @outcome items=["Resolved","Follow-up","Escalated"]
+        Input "Wrap-up comment" @comment multiline
       Row end gap=8
         Button.outline "Back to the call" onTap={go active-call}
         Button "Finish and go ready" onTap={count(codes,c=>c.on)>0 && outcome!="" ? {emit wrapUp {"codes":filter(codes,c=>c.on),"outcome":outcome}; toast "Wrap-up saved"; go desk} : toast "Pick a code and an outcome"}

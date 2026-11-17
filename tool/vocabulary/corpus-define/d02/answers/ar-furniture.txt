@@ -24,11 +24,11 @@ Page
         Viewer3D "Oslo Lounge Chair" angle={angle} color={colors[colorIdx].hex} dims={showDims} onRotate={angle=result}
         Row gap=12 middle
           IconButton "rotate_left" tooltip="Rotate left" onTap={angle=(angle+330)%360}
-          Slider bind=angle min=0 max=359
+          Slider @angle min=0 max=359
           IconButton "rotate_right" tooltip="Rotate right" onTap={angle=(angle+30)%360}
         Row between
           Text.muted "Drag the chair or the slider to turn it. {angle} degrees"
-          Toggle "Dimensions" bind=showDims
+          Toggle "Dimensions" @showDims
       Column grow gap=16
         Row between
           Badge.success "In stock, ships in 5 days"
@@ -106,7 +106,7 @@ App
               IconButton "rotate_right" tooltip="Rotate right" onTap={turn=(turn+15)%360}
           Row gap=12 middle
             Icon "zoom_out_map"
-            Slider bind=scale min=70 max=130
+            Slider @scale min=70 max=130
             Text.muted w=50 "{scale}%"
         Row gap=12 center
           IconButton "refresh" tooltip="Reset" onTap={placed=false; turn=0; scale=100}
@@ -210,13 +210,13 @@ Page
             Text.muted "Subtotal"
             Text "{money(sum(items,x=>x.price*x.qty),'$',0)}"
           Row gap=8
-            Input "Promo code" bind=promo grow
+            Input "Promo code" @promo grow
             Button.outline "Apply" onTap={promo=="NEST10" ? promoApplied=true : toast "Code not valid"}
           if promoApplied
             Row between
               Text.success "Promo NEST10"
               Text.success "-{money(sum(items,x=>x.price*x.qty)*0.1,'$',0)}"
-          Select "Delivery" items=["standard","white glove"] bind=shipping
+          Select "Delivery" items=["standard","white glove"] @shipping
           Row between
             Text.muted "Delivery"
             Text "{shipping=='standard' ? 'Free' : '$79'}"

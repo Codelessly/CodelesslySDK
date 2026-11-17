@@ -28,13 +28,13 @@ App
   Sidebar w=260
     Brand "Margin" icon="calendar_month"
     Button "New event" icon="add" onTap={draft=with(with(draft,"start",cursor),"end",cursor); open event}
-    MiniCalendar bind=mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result; mini=result}
+    MiniCalendar @mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result; mini=result}
     Text.fieldLabel "Calendars"
     each c in cals
       Row gap=8 middle
         Box w=10 h=10 radius=5 fill={c.color}
         Text.body c.name grow
-        Toggle bind=c.show value={!contains(hiddenCals,c.id)} onChange={hiddenCals=result?without(hiddenCals,c.id):append(hiddenCals,c.id)}
+        Toggle @c.show value={!contains(hiddenCals,c.id)} onChange={hiddenCals=result?without(hiddenCals,c.id):append(hiddenCals,c.id)}
     Spacer grow
     NavItem "Search" icon="search" onTap={go search}
     NavItem "Manage calendars" icon="palette" onTap={go calendars}
@@ -46,8 +46,8 @@ App
         IconButton "chevron_right" onTap={cursor=addDays(cursor,view=="month"?30:view=="week"?7:1)}
         Heading "{formatDate(cursor,'MMMM yyyy')}" level=2
       Row gap=8 middle
-        Input "Search" "Find events" icon="search" bind=q w=200 hide=phone onSubmit={go search}
-        Tabs bind=view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"]
+        Input "Search" "Find events" icon="search" @q w=200 hide=phone onSubmit={go search}
+        Tabs @view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"]
     Column pad=16 gap=0 grow
       Row stretch
         each d in ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"]
@@ -69,27 +69,27 @@ App
     Button "Add event" icon="add" onTap={draft=with(with(draft,"start",selDay),"end",selDay); close; open event}
   Dialog#event "{draft.id==0?'New event':'Edit event'}" persistent
     Column gap=12
-      Input "Title" "Add a title" bind=draft.title autofocus
+      Input "Title" "Add a title" @draft.title autofocus
       Row gap=8 middle
-        Select "Calendar" bind=draft.cal items={map(cals,c=>c.id)} labels={map(cals,c=>c.name)} dots={map(cals,c=>c.color)} grow
-        Toggle "All day" bind=draft.allDay
+        Select "Calendar" @draft.cal items={map(cals,c=>c.id)} labels={map(cals,c=>c.name)} dots={map(cals,c=>c.color)} grow
+        Toggle "All day" @draft.allDay
       DateRangePicker "Dates" start=draft.start end=draft.end onChange={draft=with(with(draft,"start",result.start),"end",result.end)}
       if draft.end<draft.start
         Text.danger "End must not be before start."
       if !draft.allDay
         Row gap=8
-          TimePicker "Starts" bind=draft.from grow
-          TimePicker "Ends" bind=draft.to grow
+          TimePicker "Starts" @draft.from grow
+          TimePicker "Ends" @draft.to grow
         if draft.start==draft.end&&draft.to<=draft.from
           Text.danger "End time must be after start time."
-      SegmentedButton "Repeat" bind=draft.repeat items=["Never","Daily","Weekly","Monthly"]
+      SegmentedButton "Repeat" @draft.repeat items=["Never","Daily","Weekly","Monthly"]
       Column gap=6
         Text.fieldLabel "Guests"
         Row gap=6 wrap
           each g in draft.guests
             Chip g onDelete={draft=with(draft,"guests",without(draft.guests,g))}
-        Input "Add guest" "Name or email" bind=guestInput onSubmit={draft=with(draft,"guests",append(draft.guests,guestInput)); guestInput=""}
-      Input "Note" multiline bind=draft.note
+        Input "Add guest" "Name or email" @guestInput onSubmit={draft=with(draft,"guests",append(draft.guests,guestInput)); guestInput=""}
+      Input "Note" multiline @draft.note
       Row between
         if draft.id!=0
           Button.destructive "Delete" onTap={open confirmDelete}
@@ -120,7 +120,7 @@ App
   Sidebar w=260 hide=tablet
     Brand "Margin" icon="calendar_month"
     Button "New event" icon="add" onTap={open event}
-    MiniCalendar bind=mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result}
+    MiniCalendar @mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result}
   Main
     Nav border-bottom=#FFE5E7EB
       Row gap=8 middle
@@ -128,7 +128,7 @@ App
         Button.outline "Today" onTap={cursor=today()}
         IconButton "chevron_right" onTap={cursor=addDays(cursor,7)}
         Heading "{formatDate(startOfWeek(cursor),'MMM d')} - {formatDate(addDays(startOfWeek(cursor),6),'MMM d, yyyy')}" level=3
-      Tabs bind=view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"] onChange={go {result}}
+      Tabs @view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"] onChange={go {result}}
     Column grow
       Row stretch border-bottom=#FFE5E7EB
         Text.caption "all-day" w=56 pad=8
@@ -162,7 +162,7 @@ shortcut key=t onPress={cursor=today()}
 App
   Sidebar w=260 hide=tablet
     Brand "Margin" icon="calendar_month"
-    MiniCalendar bind=mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result}
+    MiniCalendar @mini value={cursor} marks={map(events,e=>e.start)} onSelect={cursor=result}
   Main
     Nav border-bottom=#FFE5E7EB
       Row gap=8 middle
@@ -170,7 +170,7 @@ App
         Button.outline "Today" onTap={cursor=today()}
         IconButton "chevron_right" onTap={cursor=addDays(cursor,1)}
         Heading "{formatDate(cursor,'EEEE, MMMM d')}" level=3
-      Tabs bind=view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"] onChange={go {result}}
+      Tabs @view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"] onChange={go {result}}
     Column grow
       Row gap=6 pad=8 border-bottom=#FFE5E7EB
         Text.caption "all-day" w=56
@@ -198,7 +198,7 @@ App
   Main
     Nav border-bottom=#FFE5E7EB
       Heading "Agenda" level=3
-      Tabs bind=view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"] onChange={go {result}}
+      Tabs @view items=["month","week","day","agenda"] labels=["Month","Week","Day","Agenda"] shortcuts=["m","w","d","a"] onChange={go {result}}
     Column pad=24 gap=16 scroll maxw=720
       if count(events,x=>x.end>=cursor&&!contains(hiddenCals,x.cal))==0
         EmptyState "Nothing coming up" "Your calendar is clear. Enjoy the quiet." icon="event_available" action="New event" onAction={open event}
@@ -253,7 +253,7 @@ App
     NavItem "Back to calendar" icon="arrow_back" onTap={go month}
   Main
     Nav border-bottom=#FFE5E7EB
-      Input "Search" "Title, guest or note" icon="search" bind=q autofocus fuzzy grow
+      Input "Search" "Title, guest or note" icon="search" @q autofocus fuzzy grow
     Column pad=24 gap=12 maxw=720
       if trim(q)==""
         Text.muted "Type to search. Typos are fine: \"denist\" still finds Dentist."

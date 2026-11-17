@@ -73,7 +73,7 @@ App
                 Text "{p.text}"
         Row gap=8 middle
           IconButton "mic" tooltip="Record a voice note" onTap={toast "Recording"}
-          Input "Message in English" bind=draft grow
+          Input "Message in English" @draft grow
           Button "Send" onTap={draft=="" ? toast "Write something first" : {emit send draft; draft=""; replyTo=""}}
   Popover#react
     Row gap=8
@@ -111,14 +111,14 @@ App
         Text.muted "Nothing here yet" hidden={length(gl)>0}
       Card gap=8
         Text.strong "Try it"
-        Input "Type a sentence" bind=note
+        Input "Type a sentence" @note
         if note != ""
           Row gap=8 middle
             LangFlag "JP"
             Text "{note}"
           Text.caption "Words in the glossary are kept: {join(filter(gl, g=>contains(note,g)), ', ')}"
   Dialog#addTerm "Add a name" "It will stay as written everywhere"
-    Input "Name or word" bind=newTerm
+    Input "Name or word" @newTerm
     Button "Add" onTap={newTerm=="" ? toast "Write the name" : {gl=append(gl,newTerm); newTerm=""; close}}
 
 ### Voice note
@@ -144,7 +144,7 @@ Page
           IconButton {playing ? "pause" : "play_arrow"} tooltip="Play" onTap={playing=!playing}
           Waveform values=[3,5,8,6,9,4,7,10,6,3,5,8,4,2] progress={pos/14} grow
           Text.caption "{duration(pos)} / {duration(14)}"
-        SegmentedButton bind=lang items=["EN","JP"]
+        SegmentedButton @lang items=["EN","JP"]
         Text "There is a small place near the station, they do not take reservations, so we should go early." hidden={lang!="EN"}
         Text "駅の近くに小さなお店があります。予約はできないので、早めに行きましょう。" hidden={lang!="JP"}
         Row gap=8

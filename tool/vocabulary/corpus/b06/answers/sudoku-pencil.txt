@@ -10,7 +10,7 @@ Page
     Column gap=20 center
       Heading "Nine Lines" level=1
       Text.muted "A quiet number puzzle. Every row, column and box holds 1 to 9 once."
-      SegmentedButton bind=level items=["Easy","Medium","Hard"]
+      SegmentedButton @level items=["Easy","Medium","Hard"]
       Row gap=12 center
         Button "New game" size=large onTap={go game}
         Button.outline "Daily puzzle" size=large onTap={go game}
@@ -75,7 +75,7 @@ App
               Text.strong "Hint"
             Text "{hint}"
         Row between
-          Toggle "Pencil" bind=pencil
+          Toggle "Pencil" @pencil
           Row gap=8
             Button.outline "Erase" onTap={sel>=0 && givens[sel]==0 ? {vals=setAt(vals,sel,0); notes=removeWhere(notes,n=>n.c==sel); hl=0} : {}}
             Button.outline "Hint" onTap={hintCell=first(filter(range(81),j=>vals[j]!=sol[j])); sel=hintCell; hl=0; hints=hints+1; hint="Row {floor(hintCell/9)+1}, column {hintCell%9+1} must be {sol[hintCell]}: every other digit already appears in its row, its column or its box."}

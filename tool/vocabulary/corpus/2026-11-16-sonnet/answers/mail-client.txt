@@ -17,6 +17,9 @@ state signature="Ray\nPostbox user"
 state visible={filter(msgs, m => m.folder==folder && (!fUnread || m.unread) && (!fStarred || m.starred) && (!fAttach || length(m.attach)>0))}
 state current={find(msgs, m => m.id==openId)}
 state unreadIn={count(msgs, m => m.folder==folder && m.unread)}
+state paneA=240
+state allSelected=false
+state paneB=240
 Shortcut "c" onPress={open compose}
 Shortcut "r" when openId!=0 onPress={open compose}
 Shortcut "e" when openId!=0 onPress={msgs=updateWhere(msgs, m=>m.id==openId, m=>with(m,"folder","archive")); openId=0; toast "Archived"}
@@ -36,7 +39,7 @@ App
         Spacer grow
         NavItem "Search" icon="search" onTap={open search}
         NavItem "Settings" icon="settings" onTap={go settings}
-    Splitter bind=paneA step=16 label="Resize folders and message list" hide=phone
+    Splitter @paneA step=16 label="Resize folders and message list" hide=phone
     Pane#list w=380 min=280 max=560 show={pane=="list"} grow-phone
       Nav
         Row gap=8 middle
@@ -49,7 +52,7 @@ App
       if length(sel) > 0
         Row between middle pad=[12,6,12,6] fill=#FFE6F4F2 animate=slide-up duration=150
           Row gap=8 middle
-            Checkbox bind=allSelected onChange={sel=result ? map(visible, m=>m.id) : []} checked={length(sel)==length(visible)}
+            Checkbox @allSelected onChange={sel=result ? map(visible, m=>m.id) : []} checked={length(sel)==length(visible)}
             Text.strong "{length(sel)} selected"
           Row gap=4
             IconButton "archive" tooltip="Archive" onTap={msgs=map(msgs, m=>contains(sel,m.id) ? with(m,"folder","archive") : m); sel=[]; toast "Archived"}
@@ -58,9 +61,9 @@ App
             IconButton "delete" tooltip="Delete" onTap={open confirmBulkDelete}
             IconButton "close" tooltip="Clear selection" onTap={sel=[]}
       Row gap=6 pad=[12,8,12,8] scroll border-bottom=#FFE2E8F0
-        FilterChip "Unread" bind=fUnread
-        FilterChip "Starred" bind=fStarred
-        FilterChip "Attachments" icon="attach_file" bind=fAttach
+        FilterChip "Unread" @fUnread
+        FilterChip "Starred" @fStarred
+        FilterChip "Attachments" icon="attach_file" @fAttach
       if length(visible) == 0
         EmptyState icon="{(fUnread||fStarred||fAttach) ? 'filter_list_off' : 'inbox'}" title="{(fUnread||fStarred||fAttach) ? 'No messages match' : 'Nothing in ' + folder}" text="{(fUnread||fStarred||fAttach) ? 'Try turning off a filter.' : 'Messages you move here will show up.'}"
           Button.outline "Clear filters" visible={fUnread||fStarred||fAttach} onTap={fUnread=false; fStarred=false; fAttach=false}
@@ -83,7 +86,7 @@ App
       Row between pad=[12,6,12,6] border-top=#FFE2E8F0
         Text.caption "{length(visible)} messages"
         Text.caption "Shift for a range, Ctrl to add" hide=phone color=#FF64748B
-    Splitter bind=paneB step=16 label="Resize message list and reading pane" hide=phone
+    Splitter @paneB step=16 label="Resize message list and reading pane" hide=phone
     Pane#read grow show={pane=="read"} show-tablet
       if openId == 0
         EmptyState icon="drafts" title="Select a message" text="Pick one from the list to read it here."
@@ -162,9 +165,9 @@ state attachments=[]
 state discardAsk=false
 Dialog#compose "New message" onClose={bodyText!="" || subject!="" || length(to)>0 ? open keepDraft : close} resizable maxw=640
   Column gap=8
-    ChipInput "To" bind=to text=toText suggestions={filter(contacts, c => toText!="" && (contains(lower(c.name),lower(toText)) || contains(lower(c.email),lower(toText))) && !contains(to,c.email))} suggestionLabel="{item.name}" suggestionHint="{item.email}" separators=",; " validate=email onInvalid={toast "Not a valid address"}
-    Input "Subject" bind=subject
-    Input "Message" multiline bind=bodyText minLines=10 initial="\n\n-- \n{signature}"
+    ChipInput "To" @to text=toText suggestions={filter(contacts, c => toText!="" && (contains(lower(c.name),lower(toText)) || contains(lower(c.email),lower(toText))) && !contains(to,c.email))} suggestionLabel="{item.name}" suggestionHint="{item.email}" separators=",; " validate=email onInvalid={toast "Not a valid address"}
+    Input "Subject" @subject
+    Input "Message" multiline @bodyText minLines=10 initial="\n\n-- \n{signature}"
     Row gap=8 scroll visible={length(attachments)>0}
       each a in attachments
         AttachmentTile "{a.name}" subtitle="{a.size}" icon="description" removable onRemove={attachments=without(attachments,a)}
@@ -184,7 +187,7 @@ state q=""
 state results={filter(msgs, m => q!="" && (fuzzy(m.subject,q) || fuzzy(m.from,q) || fuzzy(m.body,q)))}
 Dialog#search "Search mail" maxw=640
   Column gap=12
-    Input "Search" "Sender, subject or words in a message" bind=q icon="search" autofocus clearable
+    Input "Search" "Sender, subject or words in a message" @q icon="search" autofocus clearable
     if q == ""
       Text.muted "Typos are fine: 'robmap' finds 'roadmap'."
     if q != "" && length(results) == 0
@@ -205,6 +208,7 @@ Dialog#search "Search mail" maxw=640
 ### Settings
 state signatureDraft={signature}
 state shortcuts=[{"keys":"C","does":"Compose a new message"},{"keys":"R","does":"Reply to the open message"},{"keys":"E","does":"Archive the open message"},{"keys":"J","does":"Next message"},{"keys":"K","does":"Previous message"},{"keys":"Ctrl+A","does":"Select all messages"},{"keys":"Shift+Click","does":"Select a range"},{"keys":"Ctrl+Click","does":"Add to the selection"},{"keys":"Ctrl+K","does":"Search"},{"keys":"Esc","does":"Clear the selection"}]
+state density=""
 App
   Sidebar
     Brand "Postbox" icon="mail"
@@ -219,11 +223,11 @@ App
     Column scroll pad=24 gap=16 maxw=720
       Card gap=12
         Heading "Signature" level=3
-        Input "Signature" multiline bind=signatureDraft minLines=4
+        Input "Signature" multiline @signatureDraft minLines=4
         Text.caption "Added below every new message." color=#FF64748B
       Card gap=12
         Heading "Density" level=3
-        SegmentedButton bind=density items=["comfortable","compact","dense"]
+        SegmentedButton @density items=["comfortable","compact","dense"]
         Text.caption "Compact shows about 12 rows in the list on a laptop." color=#FF64748B
       Card gap=12
         Heading "Panes" level=3

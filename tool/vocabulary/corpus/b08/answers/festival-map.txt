@@ -35,7 +35,7 @@ App
         FilterChip "Camping" icon="camping" selected={contains(filters,"camping")} onTap={filters=contains(filters,"camping") ? without(filters,"camping") : append(filters,"camping")}
       Row gap=16 top
         Card grow
-          SiteMap h=440 zones={filter(zones,z=>contains(filters,z.kind))} bind=selected onSelect={selected=result}
+          SiteMap h=440 zones={filter(zones,z=>contains(filters,z.kind))} @selected onSelect={selected=result}
         Column w=320 gap=12
           Text.strong "Nearby"
           each z in filter(zones,z=>contains(filters,z.kind))
@@ -52,11 +52,11 @@ App
     state place="Main Stage"
     state when=""
     state contact=""
-    Input "What did you lose?" "Black wallet with a red lanyard" bind=item
-    Select "Type" items=["Phone","Wallet","Keys","Bag","Other"] bind=kind
-    Select "Last seen near" items=["Main Stage","The Barn","Noodle Yard","Meadow Camping","Toilets North"] bind=place
-    TimePicker "About what time" bind=when
-    Input "Phone or email to reach you" type=phone bind=contact
+    Input "What did you lose?" "Black wallet with a red lanyard" @item
+    Select "Type" items=["Phone","Wallet","Keys","Bag","Other"] @kind
+    Select "Last seen near" items=["Main Stage","The Barn","Noodle Yard","Meadow Camping","Toilets North"] @place
+    TimePicker "About what time" @when
+    Input "Phone or email to reach you" type=phone @contact
     Button "Send report" onTap={trim(item)!="" && trim(contact)!="" ? emit lostReport {item:item,kind:kind,place:place,when:when,contact:contact}; toast "Reported. Check the info tent at the south gate."; close : toast "Add what you lost and a contact"}
 
 ### Line-up
@@ -75,7 +75,7 @@ App
   Main
     Nav
       Heading "Line-up" level=1
-      SegmentedButton items=["Friday","Saturday","Sunday"] bind=day
+      SegmentedButton items=["Friday","Saturday","Sunday"] @day
     Column pad=24 gap=16 scroll
       Row between
         Text.muted "{count(starred,i=>true)} sets starred"
@@ -111,7 +111,7 @@ App
   Main
     Nav
       Heading "My day" level=1
-      Toggle "Leave-now alerts" bind=leaveAlert
+      Toggle "Leave-now alerts" @leaveAlert
     Column pad=24 gap=16 scroll
       if leaveAlert
         Card fill=#FFB3261E gap=8 animate=pulse
@@ -149,12 +149,12 @@ App
   Main
     Nav
       Heading "Friends and queues" level=1
-      Toggle "Share my location" bind=sharing
+      Toggle "Share my location" @sharing
     Column pad=24 gap=16 scroll
       Row gap=16 top
         Card grow gap=8
           Text.strong "Friend finder"
-          FriendMap h=320 friends={friends} me={{"x":0.5,"y":0.5}} bind=picked onSelect={picked=result}
+          FriendMap h=320 friends={friends} me={{"x":0.5,"y":0.5}} @picked onSelect={picked=result}
         Column w=320 gap=8
           each f in friends
             ListTile "{f.name}" subtitle="{f.where}, {f.seen}" selected={picked==f.id} onTap={picked=f.id}
@@ -165,7 +165,7 @@ App
       Card gap=12
         Row between
           Text.strong "Queue times"
-          SegmentedButton items=["food","toilets"] bind=qFilter
+          SegmentedButton items=["food","toilets"] @qFilter
         each q in filter(queues,q=>q.kind==qFilter)
           Row between middle
             Text "{q.name}"
@@ -176,6 +176,6 @@ App
   Sheet#reportQueue "How long is the queue?"
     state qName="Noodle Yard"
     state qMin=10
-    Select "Where" items=["Noodle Yard","Woodfire Pizza","Toilets North","Toilets Meadow"] bind=qName
-    Slider "Minutes" bind=qMin min=0 max=45
+    Select "Where" items=["Noodle Yard","Woodfire Pizza","Toilets North","Toilets Meadow"] @qName
+    Slider "Minutes" @qMin min=0 max=45
     Button "Submit" onTap={queues=updateWhere(queues,q=>q.name==qName,q=>with(q,"wait",qMin)); toast "Thanks, updated"; close}

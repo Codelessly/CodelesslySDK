@@ -133,9 +133,9 @@ App
           Text.muted "Nothing marked"
       Row gap=16
         Column grow gap=8
-          Select "Recipe one" bind=leftId items=["a","b","c","d"]
+          Select "Recipe one" @leftId items=["a","b","c","d"]
         Column grow gap=8
-          Select "Recipe two" bind=rightId items=["a","b","c","d"]
+          Select "Recipe two" @rightId items=["a","b","c","d"]
       Grid cols=2 gap=16
         Card gap=12 opacity={any(find(recipes,r=>r.id==leftId).allergens,a=>contains(allergies,a)) ? 0.4 : 1}
           Heading "{find(recipes,r=>r.id==leftId).name}" level=3
@@ -195,7 +195,7 @@ App
     Nav
       Heading "Your plate" level=1
       Row gap=8
-        SegmentedButton bind=servings items=["1","2","3"]
+        SegmentedButton @servings items=["1","2","3"]
     Column pad=24 gap=16
       Row gap=8
         ChoiceChip "All" selected={groupSel=="all"} onTap={groupSel="all"}

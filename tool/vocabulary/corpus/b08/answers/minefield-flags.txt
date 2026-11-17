@@ -71,7 +71,7 @@ App
     MenuItem "Flag" icon="flag" onTap={flag index}
     MenuItem "Open neighbours" icon="open_with" onTap={chord index}
   Dialog#size "Size and difficulty" "Pick a level or set your own."
-    SegmentedButton bind=level items=["Beginner","Intermediate","Expert","Custom"] onChange={level=="Beginner" ? {cols=9; rows=9; bombs=10} : level=="Intermediate" ? {cols=16; rows=16; bombs=40} : level=="Expert" ? {cols=30; rows=16; bombs=99} : {cols=customCols; rows=customRows; bombs=customBombs}}
+    SegmentedButton @level items=["Beginner","Intermediate","Expert","Custom"] onChange={level=="Beginner" ? {cols=9; rows=9; bombs=10} : level=="Intermediate" ? {cols=16; rows=16; bombs=40} : level=="Expert" ? {cols=30; rows=16; bombs=99} : {cols=customCols; rows=customRows; bombs=customBombs}}
     if level=="Custom"
       Column gap=12
         Row between middle

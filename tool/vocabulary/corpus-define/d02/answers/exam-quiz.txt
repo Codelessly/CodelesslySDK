@@ -6,13 +6,14 @@ state flagged=[]
 state seen=[0]
 state answers=["",[],["Mitochondria","Nucleus","Ribosome","Golgi"],[],"",""]
 state qs=[{"topic":"Cell biology","type":"single","text":"Which organelle produces most of a cell's ATP?","options":["Nucleus","Mitochondrion","Ribosome","Lysosome"]},{"topic":"Cell biology","type":"multi","text":"Select all structures found in a plant cell but not in an animal cell.","options":["Cell wall","Chloroplast","Centriole","Large central vacuole"]},{"topic":"Genetics","type":"order","text":"Put the steps of protein synthesis in order. Drag to reorder.","options":["Mitochondria","Nucleus","Ribosome","Golgi"]},{"topic":"Genetics","type":"match","text":"Match each molecule to its role.","left":["DNA","mRNA","tRNA","rRNA"],"right":["Stores the genetic code","Carries the code to the ribosome","Delivers amino acids","Forms the ribosome"]},{"topic":"Genetics","type":"blank","text":"The base pairing rule says adenine always pairs with ____ in DNA."},{"topic":"Anatomy","type":"spot","text":"Tap the part of the heart that pumps blood to the body.","src":"https://img.viva.example/heart-diagram.png","regions":["Right atrium","Right ventricle","Left atrium","Left ventricle","Aorta","Vena cava"]}]
+state pairs=""
 every 1s when running onTick={remaining=max(0,remaining-1); remaining==0 ? {running=false; go result} : {}}
 App
   Sidebar
     Brand "Viva" icon="school"
     Text.strong "Biology midterm"
     Text.muted "{count(answers,a=>!isEmpty(a))} of {length(qs)} answered"
-    QuestionPalette count={length(qs)} bind=cur answers={answers} flagged={flagged} seen={seen}
+    QuestionPalette count={length(qs)} @cur answers={answers} flagged={flagged} seen={seen}
     Row gap=12 wrap
       Row gap=4
         Icon "check_circle"
@@ -43,7 +44,7 @@ App
       if qs[cur].type=="order"
         OrderList items={answers[cur]} onChange={answers=setAt(answers,cur,result)}
       if qs[cur].type=="match"
-        MatchPairs left={qs[cur].left} right={qs[cur].right} bind=pairs onChange={answers=setAt(answers,cur,result)}
+        MatchPairs left={qs[cur].left} right={qs[cur].right} @pairs onChange={answers=setAt(answers,cur,result)}
       if qs[cur].type=="blank"
         Input "Your answer" "one word" onChange={answers=setAt(answers,cur,result)}
       if qs[cur].type=="spot"
@@ -135,7 +136,7 @@ define Countdown seconds=0 warnAt=300 onWarn
     if seconds==warnAt
       Badge.warning "5 min left"
 
-define QuestionPalette bind=cur count=0 answers=[] flagged=[] seen=[]
+define QuestionPalette @cur count=0 answers=[] flagged=[] seen=[]
   Grid cols=5 gap=6
     each i in range(count)
       Box w=36 h=36 radius=18 center middle fill={contains(flagged,i) ? "#FFFDE68A" : !isEmpty(answers[i]) ? "#FFBBF7D0" : contains(seen,i) ? "#FFE5E7EB" : "#FFFFFFFF"} border={cur==i ? 2 : 1} onTap={cur=i}
@@ -151,7 +152,7 @@ define OrderList items=[] onChange
           Text "{index+1}. {item}"
 
 // Matching by lines cannot be drawn; a pair is made by tapping a left item then a right item and shown as a connected row.
-define MatchPairs left=[] right=[] bind=pairs onChange
+define MatchPairs left=[] right=[] @pairs onChange
   state pairs=[]
   state pick=-1
   Row gap=24 top

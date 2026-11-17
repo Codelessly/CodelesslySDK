@@ -23,7 +23,7 @@ App
     Nav
       Heading "shop_schema" level=1
       Row gap=8
-        Toggle "SQL pane" bind=showSql
+        Toggle "SQL pane" @showSql
         IconButton "undo" tooltip="Undo" onTap={emit undo}
         IconButton "redo" tooltip="Redo" onTap={emit redo}
         Button "Export SQL" icon="download" onTap={emit exportSql}
@@ -39,8 +39,8 @@ App
               IconButton "close" tooltip="Remove column" onTap={tables=updateWhere(tables,q=>q.id==t.id,q=>with(q,"cols",without(q.cols,c)))}
           if sel==t.id
             Row gap=8
-              Input "Column name" bind=newName
-              Select bind=newType items=["uuid","text","varchar(255)","integer","bigint","boolean","timestamp","numeric(10,2)","jsonb"]
+              Input "Column name" @newName
+              Select @newType items=["uuid","text","varchar(255)","integer","bigint","boolean","timestamp","numeric(10,2)","jsonb"]
               IconButton "add" tooltip="Add column" onTap={newName!="" ? {tables=updateWhere(tables,q=>q.id==t.id,q=>with(q,"cols",append(q.cols,{"id":"c{length(q.cols)+1}{newName}","name":newName,"type":newType,"key":""}))); newName=""} : toast "Name the column first"}
       each l in links
         Relation#{l.id} from="{l.from}.{l.fromCol}" to="{l.to}.{l.toCol}" fromEnd={l.kind=="many" ? "crows-foot" : "one"} toEnd="one" menu=linkMenu onTap={sel=l.id}
@@ -73,11 +73,11 @@ App
     Nav
       Heading "Indexes" level=1
       Row gap=8
-        Input "Search indexes" bind=q w=220
+        Input "Search indexes" @q w=220
         Button "New index" icon="add" onTap={open newIndex}
     Column pad=24 gap=16
       Row gap=8
-        Select bind=tableFilter items=["All","users","orders","order_items"]
+        Select @tableFilter items=["All","users","orders","order_items"]
         Spacer grow
         Text.muted "{count(idxs,x=>(tableFilter==\"All\" || x.table==tableFilter) && contains(lower(x.name),lower(q)))} shown"
       Card gap=0
@@ -103,10 +103,10 @@ App
     MenuItem "Toggle unique" icon="fingerprint" onTap={idxs=updateWhere(idxs,i=>i.id==sel,i=>with(i,"unique",!i.unique))}
     MenuItem "Delete" icon="delete" onTap={idxs=removeWhere(idxs,i=>i.id==sel)}
   Dialog#newIndex "New index" "Pick a table and the columns to cover"
-    Select "Table" bind=draft.table items=["users","orders","order_items"]
-    Input "Index name" "orders_total_idx" bind=draft.name
-    Input "Columns" "total, created_at" bind=draft.cols
-    Toggle "Unique" bind=draft.unique
+    Select "Table" @draft.table items=["users","orders","order_items"]
+    Input "Index name" "orders_total_idx" @draft.name
+    Input "Columns" "total, created_at" @draft.cols
+    Toggle "Unique" @draft.unique
     Row end gap=8
       Button.ghost "Cancel" onTap={close}
       Button "Create index" onTap={draft.name!="" && draft.cols!="" ? {idxs=append(idxs,with(draft,"id","x{length(idxs)+1}")); draft={"table":"users","name":"","cols":"","unique":false}; toast "Index created"; close} : toast "Name and columns are required"}

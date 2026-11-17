@@ -7,7 +7,7 @@ Card gap=10
     Column gap=1 grow
       Text.sectionTitle "Weekly revenue summary"
       Text.bodySecondary "Every Monday at 09:00, Europe/London"
-    Toggle bind=on
+    Toggle @on
   Divider
   Column gap=0
     each r in runs

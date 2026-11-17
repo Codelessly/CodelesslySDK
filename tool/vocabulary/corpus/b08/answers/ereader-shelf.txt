@@ -14,6 +14,7 @@ state chapters=[{"title":"1. The Ferry at Dusk","page":0},{"title":"2. Salt and 
 state pages=["By the time the ferry reached Calder Point, the harbor lights went out one by one, as they always did when the wind turned north. Ines held the rail and counted them, a habit from childhood.","Her father had taught her to count lights the way other fathers taught their children prayers. Seven for the breakwater, four for the mill, and one, always, for the house that no longer had a name.","The deckhand coiled a rope with the slow patience of a man paid by the hour. He nodded at her bag, then at the water, and said nothing, which she took as kindness.","Salt had worked its way into everything: the bench, the buckles, the pages of the book she had not opened since Lisbon. She opened it now, and the spine cracked like a knuckle.","Chapter two began with a recipe for fish stew and ended with a confession. She read both twice.","Somewhere below, an engine changed its note. The ferry leaned toward the quay and the town came up out of the dark in pieces.","A letter lay folded in the book's back cover, addressed in a hand she knew and had hoped not to see again.","She did not open it. She set it on the bench beside her and watched the wind decide what to do.","By the time the porter arrived, the envelope was gone, and Ines found she did not mind as much as she had expected.","The lamp keeper's cottage stood at the end of the mole, its window the only square of yellow on that side of the bay.","He answered the door before she knocked, as though the knocking had been audible for years.","Come in, he said. The kettle has been waiting longer than I have."]
 state defs={"quay":{"pos":"noun","def":"A platform lying alongside or projecting into water for loading and unloading ships.","ipa":"kee"},"mole":{"pos":"noun","def":"A stone structure serving as a pier or breakwater.","ipa":"mohl"},"porter":{"pos":"noun","def":"A person employed to carry luggage.","ipa":"PAWR-ter"}}
 state hl=[]
+state q=""
 every 1s when ui==false onTick={}
 App
   Main
@@ -28,7 +29,7 @@ App
         IconButton "search" tooltip="Search in book" onTap={open bookSearch}
         IconButton "text_fields" tooltip="Display settings" onTap={ui=true; open settings}
     Stack grow
-      Pages bind=page items=pages onSwipeLeft={page=min(page+1,length(pages)-1)} onSwipeRight={page=max(page-1,0)}
+      Pages @page items=pages onSwipeLeft={page=min(page+1,length(pages)-1)} onSwipeRight={page=max(page-1,0)}
         Column pad=[margin,32,margin,32]
           SelectableText "{item}" font=font size=size lineHeight=spacing highlights={filter(highlights,h=>h.page==page)} colors={{"yellow":"#66FFEB3B","green":"#6666BB6A","blue":"#6642A5F5","pink":"#66F06292"}} onSelect={sel={"text":result.text,"page":page}; open highlightMenu} onLongPress={word=lower(result.word); open dictionary} onHighlightTap={note=result.note; sel=result; open noteEditor}
       Row
@@ -46,18 +47,18 @@ App
       Card gap=4
         Text "Her father had taught her to count lights the way other fathers taught their children prayers." font=font size=size lineHeight=spacing
         Text.caption "Live sample"
-      Select "Typeface" bind=font items=["Georgia","Merriweather","Literata","Helvetica","OpenDyslexic"]
+      Select "Typeface" @font items=["Georgia","Merriweather","Literata","Helvetica","OpenDyslexic"]
       Row gap=12
         Icon "text_decrease"
-        Slider bind=size min=12 max=32 step=1 grow
+        Slider @size min=12 max=32 step=1 grow
         Icon "text_increase"
         Text.strong "{size}"
       Column gap=4
         Text.fieldLabel "Line spacing"
-        SegmentedButton bind=spacing items=[1.2,1.5,1.8,2.1]
+        SegmentedButton @spacing items=[1.2,1.5,1.8,2.1]
       Column gap=4
         Text.fieldLabel "Margins"
-        Slider bind=margin min=8 max=64 step=4
+        Slider @margin min=8 max=64 step=4
       Row gap=8
         ChoiceChip "Paper" onTap={emit theme "paper"}
         ChoiceChip "Sepia" onTap={emit theme "sepia"}
@@ -73,7 +74,7 @@ App
     MenuItem "Copy" icon="content_copy" onTap={copy sel.text; toast "Copied"}
     MenuItem "Look up" icon="menu_book" onTap={word=lower(sel.text); open dictionary}
   Dialog#noteEditor "Note" "On: {sel.text}"
-    Input "Your note" bind=note multiline
+    Input "Your note" @note multiline
     Row end gap=8
       Button.ghost "Remove highlight" onTap={highlights=removeWhere(highlights,h=>h.text==sel.text); close}
       Button "Save" onTap={highlights=updateWhere(highlights,h=>h.text==sel.text,h=>with(h,"note",note)); toast "Note saved"; close}
@@ -97,7 +98,7 @@ App
       each h in highlights
         ListTile "{h.text}" subtitle={h.note==""?"Page {h.page+1}":h.note} onTap={page=h.page; close}
   Dialog#bookSearch "Search in book"
-    Input "Search" bind=q
+    Input "Search" @q
     ListView
       each p in pages
         if contains(lower(p),lower(q)) && q!=""
@@ -123,8 +124,8 @@ App
     Nav
       Heading "Library" level=1
       Row gap=8
-        Input "Search title or author" bind=q w=220
-        Select "Sort" bind=sort items=["recent","title","author","progress"] w=140
+        Input "Search title or author" @q w=220
+        Select "Sort" @sort items=["recent","title","author","progress"] w=140
         Button "Add book" icon="add" onTap={emit importBook}
     Column pad=24 gap=16 scroll
       if shelf=="all" && q==""

@@ -25,7 +25,7 @@ App
     Column pad=24 gap=16
       Row gap=24 top
         Column grow gap=12
-          HoleMap bind=shots yards=412 par={par} onShot={shots=append(shots,{"club":club,"yards":result.yards})}
+          HoleMap @shots yards=412 par={par} onShot={shots=append(shots,{"club":club,"yards":result.yards})}
           Text.muted "Tap the map where each ball landed. The club chosen below is used for the next shot."
           Row scroll gap=8
             each c in ["Driver","3 Wood","5 Iron","7 Iron","9 Iron","PW","SW","Putter"]
@@ -61,7 +61,7 @@ App
       Button "Save and next hole" onTap={holes=updateWhere(holes,h=>h.n==hole,h=>with(h,"score",length(shots)+putts)); hole=hole+1; shots=[]; putts=0; toast "Saved"; close}
 
 // the hole drawn from above with a tap placing a shot is a labelled map: fairway, green and bunkers as boxes, a dot for each shot, each leg labelled with its distance
-define HoleMap bind=shots yards=400 par=4 onShot
+define HoleMap @shots yards=400 par=4 onShot
   Stack h=420 fill=#FF3F7D3A radius=12 onTap={onShot({"yards":150})}
     Box w=60 h=60 radius=30 fill=#FFD9C48A
     Box w=90 h=90 radius=45 fill=#FF86C77E
@@ -84,7 +84,7 @@ App
   Main
     Nav
       Heading "Scorecard"
-      SegmentedButton bind=sel items=["you","friend"]
+      SegmentedButton @sel items=["you","friend"]
     Column pad=24 gap=16
       Card gap=12
         Text.strong "Pebble Ridge - 18 holes"
@@ -127,7 +127,7 @@ App
   Main
     Nav
       Heading "Stats"
-      SegmentedButton bind=range items=["Round","Month","Season"]
+      SegmentedButton @range items=["Round","Month","Season"]
     Column pad=24 gap=16
       Grid cols=3 gap=16
         Card gap=8 center
@@ -166,7 +166,7 @@ App
   Main
     Nav
       Heading "Compare cards"
-      Select bind=friend items=["Dana Whitfield","Marcus Lee","Priya Nair"]
+      Select @friend items=["Dana Whitfield","Marcus Lee","Priya Nair"]
     Column pad=24 gap=16
       Row gap=16 top
         Card grow gap=8

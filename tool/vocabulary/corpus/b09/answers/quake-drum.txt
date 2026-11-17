@@ -20,19 +20,19 @@ App
     Nav
       Heading "Daily drum" level=1
       Row gap=8
-        DatePicker bind=day
-        Select bind=filterBand items=["all","0.5-2 Hz","2-8 Hz","8-20 Hz"]
+        DatePicker @day
+        Select @filterBand items=["all","0.5-2 Hz","2-8 Hz","8-20 Hz"]
         IconButton "download" tooltip="Export the chart" onTap={emit exportChart day}
     Column pad=24 gap=16
-      Tabs bind=station items=stations
+      Tabs @station items=stations
       Row gap=16 top
         Column grow gap=12
           Row between
             Text.muted "{station} - BHZ - {day} (UTC), one row per hour"
             Row gap=8
               Text.caption "Gain"
-              Slider bind=gain min=1 max=16 w=160
-              Toggle "Align stations" bind=aligned
+              Slider @gain min=1 max=16 w=160
+              Toggle "Align stations" @aligned
           Card
             Seismogram station={station} date={day} rows=24 rowHeight=44 gain={gain} band={filterBand} picks={filter(picks,p=>p.station==station)} h=620 scroll onTapBurst={sel=result; open pick}
         Pane w=320 pad=16 gap=12
@@ -57,11 +57,11 @@ App
       Column gap=12
         Seismogram.zoom station={station} date={day} row={sel.row} h=160 span=600 cursors={[{"name":"P","at":sel.p},{"name":"Strong","at":sel.strong}]} onMoveCursor={sel=with(sel,lower(result.name),result.at)}
         Row gap=12
-          Input "First arrival (P)" bind=sel.p
-          Input "Strong part starts" bind=sel.strong
+          Input "First arrival (P)" @sel.p
+          Input "Strong part starts" @sel.strong
         Row gap=12 middle
           Text.strong "Magnitude"
-          Slider bind=sel.mag min=2 max=9 w=240
+          Slider @sel.mag min=2 max=9 w=240
           Text.heading "M {fixed(sel.mag,1)}"
         Row gap=8 end
           Button.outline "Cancel" onTap={close}
@@ -86,8 +86,8 @@ App
     Nav
       Heading "Locate the epicentre" level=1
       Row gap=8
-        Select bind=active items={map(events,e=>e.id)}
-        SegmentedButton bind=layer items=["terrain","dark","plain"]
+        Select @active items={map(events,e=>e.id)}
+        SegmentedButton @layer items=["terrain","dark","plain"]
     Column pad=24 gap=16
       Row gap=16 top
         Card grow
@@ -104,8 +104,8 @@ App
           each s in stations
             ListTile "{s.code} - {s.name}" subtitle="{s.dist} km" leading="sensors"
           Divider
-          Toggle "Show distance circles" bind=showRings
-          Toggle "Show stations" bind=showStations
+          Toggle "Show distance circles" @showRings
+          Toggle "Show stations" @showStations
           Card gap=4
             Text.strong "{find(events,e=>e.id==active).place}"
             Text.small "M {find(events,e=>e.id==active).mag} - depth {find(events,e=>e.id==active).depth} km"
@@ -130,12 +130,12 @@ App
     Nav
       Heading "Events" level=1
       Row gap=8
-        Input "Search" bind=q w=220
-        Select bind=sortKey items=["time","mag","depth"]
+        Input "Search" @q w=220
+        Select @sortKey items=["time","mag","depth"]
     Column pad=24 gap=16
       Row gap=12 middle
         Text.fieldLabel "Minimum magnitude"
-        Slider bind=minMag min=0 max=8 w=220
+        Slider @minMag min=0 max=8 w=220
         Text.strong "{fixed(minMag,1)}"
       Card gap=0
         Row pad=8 border-bottom=#FFDDDDDD

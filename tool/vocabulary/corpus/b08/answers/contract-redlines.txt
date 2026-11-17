@@ -60,7 +60,7 @@ App
               Badge.neutral "Redline rejected"
     Footer
       Row gap=8 pad=12
-        Input "Add a comment on clause {sel}" bind=draft grow
+        Input "Add a comment on clause {sel}" @draft grow
         Button "Comment" onTap={draft=="" ? toast "Write a comment first" : {comments=append(comments,{"id":length(comments)+1,"clause":sel,"who":"Dana Whitfield","role":"Legal","text":draft,"when":"now"}); draft=""}}
   Pane w=320 pad=16 gap=12
     Text.panelTitle "Comments on clause {sel}"
@@ -100,7 +100,7 @@ App
     Nav
       Heading "Required clauses" level=1
       Row gap=8
-        Toggle "Show missing only" bind=showMissing
+        Toggle "Show missing only" @showMissing
         Button.outline "Rescan contract" icon="refresh" onTap={toast "Scan complete: 5 of 7 found"}
     Column pad=24 gap=16 scroll
       Row gap=16
@@ -225,16 +225,16 @@ App
               IconButton "more_vert" tooltip="More" onTap={who=a.name; open approverMenu}
       Card gap=8
         Text.strong "Approve as Dana Whitfield"
-        Input "Note for the record" bind=note multiline
-        Checkbox "I have reviewed all redlines and the required-clause checklist" bind=confirmed
+        Input "Note for the record" @note multiline
+        Checkbox "I have reviewed all redlines and the required-clause checklist" @confirmed
         Button "Approve contract" onTap={confirmed ? {approvers=updateWhere(approvers,a=>a.name=="Dana Whitfield",a=>with(a,"status","approved")); toast "Approved"} : toast "Confirm your review first"}
 Menu#approverMenu end
   MenuItem "Send reminder" icon="notifications" onTap={toast "Reminder sent to {who}"}
   MenuItem "Reassign approver" icon="swap_horiz" onTap={open request}
   MenuItem "Remove from sign-off" icon="person_remove" onTap={approvers=removeWhere(approvers,a=>a.name==who); toast "{who} removed"}
 Dialog#request "Request approval" "Choose who signs off on this version."
-  Select "Approver" bind=who items=["Marcus Chen","Priya Nair","Tom Okafor","Legal team"]
-  Input "Message" bind=note multiline
+  Select "Approver" @who items=["Marcus Chen","Priya Nair","Tom Okafor","Legal team"]
+  Input "Message" @note multiline
   Row gap=8 end
     Button.ghost "Cancel" onTap={close}
     Button "Send request" onTap={toast "Request sent to {who}"; close}

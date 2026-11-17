@@ -36,7 +36,7 @@ App
           SingleLineDiagram nodes={subs} lines={lines} h=320 colorBy=load scale="green-red" showFigures onSelectNode={sel=result.id}
         Card w=320 gap=8
           Heading "System frequency" level=3
-          Gauge bind=freq min=49.5 max=50.5 limit=50.2 unit="Hz"
+          Gauge value={freq} min=49.5 max=50.5 limit=50.2 unit="Hz"
           Text.muted "Target 50.00 Hz, limits 49.80 to 50.20"
       Card gap=8
         Heading "Substations" level=3
@@ -58,8 +58,8 @@ App
   Dialog#breaker "Operate breaker" "Confirm the switching and record why"
     Text.strong "{sel}"
     Text.muted "This will {find(breakers,b=>b.id==sel).closed ? 'OPEN' : 'CLOSE'} the breaker on the live network."
-    Input "Reason for operation" "Planned outage, fault isolation..." bind=reason multiline
-    Checkbox "I have the control engineer's approval and have checked the loads either side" bind=confirmed
+    Input "Reason for operation" "Planned outage, fault isolation..." @reason multiline
+    Checkbox "I have the control engineer's approval and have checked the loads either side" @confirmed
     Row end gap=8
       Button.outline "Cancel" onTap={close}
       Button.destructive "Operate" onTap={trim(reason)!="" && confirmed ? {breakers=updateWhere(breakers,b=>b.id==sel,b=>with(b,"closed",!b.closed)); emit breakerOperated sel; toast "{sel} operated"; close} : toast "Give a reason and tick the confirmation"}
@@ -81,7 +81,7 @@ App
     Nav
       Heading "Alarms" level=1
       Row gap=8
-        Toggle "Show acknowledged" bind=showAcked
+        Toggle "Show acknowledged" @showAcked
         Button.outline "Acknowledge all" onTap={alarms=map(alarms,a=>with(a,"acked",true)); toast "All alarms acknowledged"}
     Column pad=24 gap=12
       Text.muted "{count(alarms,a=>!a.acked)} unacknowledged of {length(alarms)}"
@@ -129,7 +129,7 @@ App
           Progress {count(steps,s=>s.done)/length(steps)}
           each s in steps
             Row gap=12 middle
-              Checkbox bind=s.done enabled={s.n==count(steps,x=>x.done)+1 || s.done} onChange={result ? toast "Step {s.n} ticked" : steps=map(steps,x=>x.n>=s.n ? with(x,"done",false) : x)}
+              Checkbox @s.done enabled={s.n==count(steps,x=>x.done)+1 || s.done} onChange={result ? toast "Step {s.n} ticked" : steps=map(steps,x=>x.n>=s.n ? with(x,"done",false) : x)}
               Text "{s.n}. {s.text}" strike={s.done}
           Button "Complete plan" enabled={count(steps,s=>s.done)==length(steps)} onTap={emit planComplete; toast "Plan SP-2291 complete"}
         Card grow gap=8
@@ -161,13 +161,13 @@ App
           Column grow gap=4
             Text.fieldLabel "Outgoing"
             Text.strong "{outgoing}"
-          Select "Incoming operator" items=["Priya Nair","Tom Becker","Lena Haas"] bind=incoming grow
-        Input "Handover note" bind=note multiline h=160
+          Select "Incoming operator" items=["Priya Nair","Tom Becker","Lena Haas"] @incoming grow
+        Input "Handover note" @note multiline h=160
         Row between
           Text.muted "{length(note)} characters"
           Button.outline "Insert open alarms" onTap={note=note+" Open alarms: 5."}
       Card gap=8
-        Checkbox "I have briefed the incoming operator on open alarms and the active switching plan" bind=ack
+        Checkbox "I have briefed the incoming operator on open alarms and the active switching plan" @ack
         Row end gap=8
           Button.outline "Save draft" onTap={toast "Draft saved"}
           Button "Hand over" onTap={ack && incoming!="Select" ? {emit handover incoming; toast "Handed over to {incoming}"} : toast "Choose the incoming operator and confirm the briefing"}

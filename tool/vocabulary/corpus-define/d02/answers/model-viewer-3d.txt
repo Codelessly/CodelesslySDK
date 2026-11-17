@@ -18,6 +18,8 @@ state dist=0
 state color="#FFB45309"
 state rough=0.4
 state metal=0.8
+state exportSize=""
+state exportAlpha=false
 
 App
   Sidebar
@@ -36,16 +38,16 @@ App
     Nav
       Heading "Kettle v3" level=1
       Row gap=8
-        Toggle "Wireframe" bind=wireframe
+        Toggle "Wireframe" @wireframe
         Button.outline "Measure" onTap={measuring=!measuring; points=[]; dist=0}
         Button.outline "Section" onTap={sectionOn=!sectionOn}
         Button.outline "Reset view" onTap={yaw=30; pitch=20; zoom=1; panX=0; panY=0; view="iso"}
         IconButton "more_vert" tooltip="More" onTap={open more}
     Column pad=24 gap=16
       Stack h=520
-        Model3D src="kettle_v3.glb" bind=yaw pitch={pitch} zoom={zoom} panX={panX} panY={panY} view={view} wireframe={wireframe} sectionAt={sectionOn ? section : 100} light={light} measuring={measuring} hidden={map(filter(parts, p => p.hidden), p => p.id)} isolated={isolated} selected={selected} color={color} roughness={rough} metalness={metal} onOrbit={yaw=result.yaw; pitch=result.pitch} onZoom={zoom=result} onPan={panX=result.x; panY=result.y} onPick={selected=result} onMeasure={points=result.points; dist=result.distance}
+        Model3D src="kettle_v3.glb" @yaw pitch={pitch} zoom={zoom} panX={panX} panY={panY} view={view} wireframe={wireframe} sectionAt={sectionOn ? section : 100} light={light} measuring={measuring} hidden={map(filter(parts, p => p.hidden), p => p.id)} isolated={isolated} selected={selected} color={color} roughness={rough} metalness={metal} onOrbit={yaw=result.yaw; pitch=result.pitch} onZoom={zoom=result} onPan={panX=result.x; panY=result.y} onPick={selected=result} onMeasure={points=result.points; dist=result.distance}
         Box top right pad=12
-          ViewCube bind=view onPick={view=result; yaw=0; pitch=0}
+          ViewCube @view onPick={view=result; yaw=0; pitch=0}
         Box bottom left pad=12
           Text.caption "Drag to orbit, wheel or pinch to zoom, two fingers to pan"
         if measuring
@@ -56,7 +58,7 @@ App
           Row between
             Text.strong "Section plane"
             Text.muted "{section}%"
-          Slider bind=section min=0 max=100
+          Slider @section min=0 max=100
       if measuring && length(points) == 2
         Card gap=8
           Row between
@@ -69,15 +71,15 @@ App
     Text.muted "{selected}"
     Column gap=12
       Text.fieldLabel "Colour"
-      ColorPicker bind=color swatches=["#FFB45309","#FFDC2626","#FF2563EB","#FF16A34A","#FF9CA3AF","#FF111827"]
+      ColorPicker @color swatches=["#FFB45309","#FFDC2626","#FF2563EB","#FF16A34A","#FF9CA3AF","#FF111827"]
       Text.fieldLabel "Roughness"
-      Slider bind=rough min=0 max=1 step=0.01
+      Slider @rough min=0 max=1 step=0.01
       Text.fieldLabel "Metal"
-      Slider bind=metal min=0 max=1 step=0.01
+      Slider @metal min=0 max=1 step=0.01
     Divider
     Text.panelTitle "Light"
     Row gap=16 middle
-      LightBall bind=light size=96
+      LightBall @light size=96
       Column gap=4
         Text.caption "x {fixed(light[0],2)}"
         Text.caption "y {fixed(light[1],2)}"
@@ -93,7 +95,7 @@ define Model3D "src" yaw=30 pitch=20 zoom=1 panX=0 panY=0 view="iso" wireframe=f
     Text "3D view of {src}: yaw {yaw}, pitch {pitch}, zoom {zoom}" color=#FF9CA3AF
 
 // A real cube widget is drawn as a grid of the six face buttons.
-define ViewCube bind=view onPick
+define ViewCube @view onPick
   state view="iso"
   Card gap=4 pad=6
     Row gap=4
@@ -107,21 +109,21 @@ define ViewCube bind=view onPick
       Chip "Bottom" selected={view == "bottom"} onTap={view="bottom"; onPick("bottom")}
 
 // A draggable ball needs pointer capture the core words lack, so it shows as a labelled ball.
-define LightBall bind=light size=96 onChange
+define LightBall @light size=96 onChange
   state light=[0.5,0.7,0.5]
   Stack w={size} h={size}
     Box w={size} h={size} radius={size/2} fill=#FF374151
     Box w=14 h=14 radius=7 fill=#FFFBBF24 left={light[0]*size/2+size/2-7} top={size/2-light[1]*size/2-7}
 
-define ColorPicker bind=color swatches=["#FF111827","#FFDC2626","#FF2563EB"] size=28 onPick
+define ColorPicker @color swatches=["#FF111827","#FFDC2626","#FF2563EB"] size=28 onPick
   state color=""
   Row gap=8
     each swatch in swatches
       Box w={size} h={size} radius={size/2} fill={swatch} border={swatch == color ? 2 : 0} onTap={color=swatch; onPick(swatch)}
 
 Dialog#export "Export image" "Render the current view"
-  Select "Size" items=["1024 x 1024","2048 x 2048","4096 x 4096"] bind=exportSize
-  Toggle "Transparent background" bind=exportAlpha
+  Select "Size" items=["1024 x 1024","2048 x 2048","4096 x 4096"] @exportSize
+  Toggle "Transparent background" @exportAlpha
   Button "Export" onTap={emit exportImage; toast "Saved to Downloads"; close}
 
 ### Parts
@@ -140,8 +142,8 @@ App
     Nav
       Heading "Parts" level=1
       Row gap=8
-        Input "Search" bind=q w=220
-        Select "Sort" items=["name","triangles"] bind=sort
+        Input "Search" @q w=220
+        Select "Sort" items=["name","triangles"] @sort
     Column pad=24 gap=16
       Card gap=8
         Row gap=8
@@ -166,6 +168,7 @@ App
 state measures=[{"id":1,"label":"Body width","mm":182.4},{"id":2,"label":"Spout to handle","mm":264.0},{"id":3,"label":"Lid height","mm":38.5}]
 state unit="mm"
 state sel=0
+state newLabel=""
 
 App
   Sidebar
@@ -176,7 +179,7 @@ App
   Main
     Nav
       Heading "Measurements" level=1
-      SegmentedButton items=["mm","in"] bind=unit
+      SegmentedButton items=["mm","in"] @unit
     Column pad=24 gap=16
       if length(measures) == 0
         Text.muted "No measurements yet. Use Measure in the viewer to place two points."
@@ -191,5 +194,5 @@ App
               IconButton "delete" tooltip="Delete" onTap={measures=removeWhere(measures, x => x.id == m.id); toast "Deleted"}
       Button.outline "Clear all" onTap={measures=[]}
   Dialog#rename "Rename measurement"
-    Input "Label" bind=newLabel
+    Input "Label" @newLabel
     Button "Save" onTap={measures=updateWhere(measures, x => x.id == sel, x => with(x,"label",newLabel)); close}

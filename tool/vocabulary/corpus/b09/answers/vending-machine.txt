@@ -81,13 +81,13 @@ App
                   Text.muted "{money(h.price,"$",2)}"
               Button "Brew" onTap={!cupSensed ? toast "Place a cup in the chute" : credit<h.price ? toast "Insert {money(h.price-credit,"$",2)} more" : {credit=credit-h.price; dispensing=true; dropProgress=0; delivered=""; emit brew h.id}}
         Row gap=8 middle
-          Toggle "Cup in chute" bind=cupSensed
+          Toggle "Cup in chute" @cupSensed
       if dispensing
         Card gap=8 animate=pulse
           Row gap=8 middle
             Icon "south" animate=slide-up
             Text.strong "Dispensing..."
-          Progress bind=dropProgress
+          Progress value={dropProgress}
       if delivered!=""
         Card gap=8 fill=#FFE3F5E6 animate=pop
           Row between middle
@@ -124,15 +124,15 @@ App
         Text.strong "Change return"
         Text "{money(changeDue,"$",2)}"
       if returning
-        Progress bind=returnProgress
+        Progress value={returnProgress}
       Button.outline "Return credit" onTap={credit>0 ? {changeDue=credit; credit=0; returnProgress=0; returning=true} : toast "No credit to return"}
   Dialog#keypad "Enter a code" "Two characters, a letter then a number"
-    Input "Code" bind=code
+    Input "Code" @code
     Row gap=8
       Button.outline "Cancel" onTap={code=""; close}
       Button "Vend" onTap={find(slots,s=>s.id==code)==null ? toast "No such slot" : find(slots,s=>s.id==code).stock==0 ? toast "Sold out" : credit<find(slots,s=>s.id==code).price ? toast "Insert {money(find(slots,s=>s.id==code).price-credit,"$",2)} more" : {credit=credit-find(slots,s=>s.id==code).price; slots=updateWhere(slots,s=>s.id==code,s=>with(s,"stock",s.stock-1)); code=""; dispensing=true; dropProgress=0; delivered=""; emit vend; close}}
   Dialog#keyEntry "Service mode" "Turn the key to continue"
-    Input "Service key" bind=serviceKey password
+    Input "Service key" @serviceKey password
     Button "Unlock" onTap={serviceKey=="4417" ? {serviceOn=true; serviceKey=""; close; go service} : toast "Wrong key"}
 
 ### Service
@@ -209,8 +209,8 @@ App
             Text "Door"
             Badge.neutral "Closed"
   Dialog#restockDlg "Restock a slot" "Set the new count"
-    Input "Slot code" bind=restock
-    Input "Quantity" type=number bind=restockQty
+    Input "Slot code" @restock
+    Input "Quantity" type=number @restockQty
     Row gap=8
       Button.outline "Cancel" onTap={close}
       Button "Save" onTap={slots=updateWhere(slots,s=>s.id==restock,s=>with(s,"stock",restockQty)); toast "Slot {restock} now {restockQty}"; close}

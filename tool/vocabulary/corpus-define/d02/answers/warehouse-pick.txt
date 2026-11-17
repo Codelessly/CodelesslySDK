@@ -53,13 +53,13 @@ App
             Divider
             Row between middle
               Text.strong "Confirm quantity"
-              Stepper bind=qty min=0 max={picks[cur].need} onChange={qty=result}
+              Stepper @qty min=0 max={picks[cur].need} onChange={qty=result}
             Row gap=8
               Button "Confirm pick" icon="check" grow onTap={qty==picks[cur].need && scanState=="ok" ? {picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(with(p,"got",qty),"status","done")); cur=min(cur+1,length(picks)-1); qty=0; scanned=""; scanState="idle"; toast "Line confirmed"} : toast "Scan the bin item and set the full quantity first"}
               Button.outline "Short pick" icon="report" onTap={open short}
           Card gap=12
             Text.strong "Scan to verify"
-            ScanInput "Scan item barcode" bind=scanned onScan={scanned=result; scanState=result==picks[cur].sku ? "ok" : "mismatch"; result==picks[cur].sku ? toast "Item verified" : open mismatch}
+            ScanInput "Scan item barcode" @scanned onScan={scanned=result; scanState=result==picks[cur].sku ? "ok" : "mismatch"; result==picks[cur].sku ? toast "Item verified" : open mismatch}
             if scanState=="ok"
               Row gap=8 middle
                 Icon "check_circle" color=#FF16A34A
@@ -92,10 +92,10 @@ App
     Text.muted "{picks[cur].name}, bin {picks[cur].bin}, needed {picks[cur].need}"
     Row gap=8 middle
       Text.strong "Quantity found"
-      Stepper bind=qty min=0 max={picks[cur].need} onChange={qty=result}
-    Select "Reason" bind=reason items=["Not found in bin","Damaged","Bin empty","Wrong item in bin","Other"]
+      Stepper @qty min=0 max={picks[cur].need} onChange={qty=result}
+    Select "Reason" @reason items=["Not found in bin","Damaged","Bin empty","Wrong item in bin","Other"]
     if reason=="Other"
-      Input "Note" bind=note multiline
+      Input "Note" @note multiline
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Submit short pick" onTap={picks=updateWhere(picks,p=>p.id==picks[cur].id,p=>with(with(p,"got",qty),"status","short")); emit shortPick {"sku":picks[cur].sku,"found":qty,"reason":reason,"note":note}; cur=min(cur+1,length(picks)-1); qty=0; scanned=""; scanState="idle"; note=""; toast "Short pick recorded"; close}
@@ -103,7 +103,7 @@ App
     Grid cols=3 gap=8
       each t in ["T-12","T-13","T-14","T-15","T-16","T-17"]
         ChoiceChip "{t}" selected={tote==t} onTap={tote=t}
-    Input "Or scan tote label" bind=tote
+    Input "Or scan tote label" @tote
     Row gap=8 end
       Button.outline "Cancel" onTap={close}
       Button "Assign {tote}" onTap={emit toteAssigned tote; toast "Tote {tote} assigned"; close}
@@ -194,16 +194,16 @@ App
               Badge.warning "Short"
 
 // A scan field: a text field with a scan button; a real camera or laser scanner is shown as a labelled box.
-define ScanInput "label" bind=value onScan
+define ScanInput "label" @value onScan
   state value=""
   Column gap=8
     Row gap=8 middle
-      Input "{label}" bind=value grow
+      Input "{label}" @value grow
       Button.outline "Scan" icon="qr_code_scanner" onTap={onScan(value)}
     Box h=64 radius=8 fill=#FF111827 center middle
       Text.caption "Camera viewfinder" color=#FFD1D5DB
 
-define Stepper bind=value min=0 max=99 step=1 onChange
+define Stepper @value min=0 max=99 step=1 onChange
   state value=0
   Row gap=8 middle
     IconButton "remove" tooltip="Less" onTap={value=max(min,value-step); onChange(value)}

@@ -24,7 +24,7 @@ App
     Nav
       Heading "Till" level=1
       Row gap=8
-        Select "Table" bind=table items=["Takeaway","Table 1","Table 2","Table 3","Table 4","Table 5","Table 6","Bar 1","Bar 2"] w=160
+        Select "Table" @table items=["Takeaway","Table 1","Table 2","Table 3","Table 4","Table 5","Table 6","Bar 1","Bar 2"] w=160
         Button.outline "Hold ticket" icon="pause" onTap={length(ticket)>0 ? {held=append(held,{"id":nextId,"table":table,"lines":ticket,"disc":disc,"total":sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08}); nextId=nextId+1; ticket=[]; disc=0; table="Takeaway"; toast "Ticket parked"} : toast "Nothing to hold"}
     Row top
       Column grow gap=12 pad=16
@@ -101,19 +101,19 @@ Sheet#discount "Discount"
     ChoiceChip "10%" selected={disc==10} onTap={disc=10; close}
     ChoiceChip "15%" selected={disc==15} onTap={disc=15; close}
     ChoiceChip "20%" selected={disc==20} onTap={disc=20; close}
-  Input "Custom percent" type=number bind=disc
+  Input "Custom percent" type=number @disc
   Button "Apply" onTap={disc=clamp(disc,0,100); close}
 Dialog#pay "Payment" "Split between cash and card"
   Text.caption "AMOUNT DUE"
   Text "{money(sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08,"$",2)}" size=56 weight=700
-  Input "Cash received" type=number bind=cashIn
+  Input "Cash received" type=number @cashIn
   Row gap=8 wrap
     Button.outline "$5" onTap={cashIn=cashIn+5}
     Button.outline "$10" onTap={cashIn=cashIn+10}
     Button.outline "$20" onTap={cashIn=cashIn+20}
     Button.outline "$50" onTap={cashIn=cashIn+50}
     Button.outline "Exact" onTap={cashIn=round(sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08,2)}
-  Input "Card amount" type=number bind=cardIn
+  Input "Card amount" type=number @cardIn
   Button.secondary "Rest on card" onTap={cardIn=max(0,round(sum(ticket,l=>l.price*l.qty)*(1-disc/100)*1.08-cashIn,2))}
   Divider
   Row between
@@ -198,7 +198,7 @@ App
           each d in denoms
             Row gap=12 middle
               Text grow "{d.label}"
-              Input "Count" type=number bind=d.count w=90
+              Input "Count" type=number @d.count w=90
               Text w=90 right "{money(d.value*d.count,"$",2)}"
         Button.secondary "Compare with expected" onTap={counted=true}
       Pane w=340 pad=16 gap=12
@@ -235,7 +235,7 @@ App
           Text.muted "Day total"
           Text.strong "{money(cardSales+cashSales,"$",2)}"
         Text.caption "Leave in drawer for tomorrow"
-        Input "Next day float" type=number bind=floatAmt
+        Input "Next day float" type=number @floatAmt
 Dialog#confirmClose "Close the till?" "The counts are saved with the day's report."
   Row between
     Text.muted "Counted"
