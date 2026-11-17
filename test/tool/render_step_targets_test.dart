@@ -1,6 +1,7 @@
 // The render command's step targets: a step that names a block whose one
 // tappable or typeable part is inside it reaches that part, and a step whose
-// node is not found (or takes no tap) says which nodes it may have meant.
+// node is not found (or takes no tap) says which nodes it may have meant;
+// and a control's label is checked for glyphs its font lacks, as a text is.
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' show Size;
@@ -137,6 +138,22 @@ void main() {
     final (report, label) = await run(tester, const [Step('type', 'form/field', 'Paris')]);
     expect(report.diagnostics, isEmpty, reason: '${report.diagnostics}');
     expect(label, endsWith('typed Paris'));
+  });
+
+  testWidgets('a control\'s label with a character its font lacks is a missing_glyph', (tester) async {
+    final doc = jsonDecode(jsonEncode(_doc)) as Map<String, Object?>;
+    final nodes = doc['nodes']! as Map<String, Object?>;
+    (nodes['col']! as Map)['children'] = [...((nodes['col']! as Map)['children'] as List), 'snow'];
+    nodes['snow'] = {
+      'type': 'filledButton',
+      'layout': {'width': 120, 'height': 40},
+      'props': {'label': 'Go ☃'},
+    };
+    final file = File('${out.path}/page.json')..writeAsStringSync(jsonEncode(doc));
+    final report = await runRender(tester, RenderArgs(inputs: [file.path], out: '${out.path}/o', sizes: const [Size(390, 700)]));
+    final glyph = report.diagnostics.singleWhere((d) => d['code'] == 'missing_glyph');
+    expect(glyph['nodeId'], 'snow');
+    expect(glyph['message'], contains('U+2603'));
   });
 
   testWidgets('a part named under a block that has none names what is in it', (tester) async {

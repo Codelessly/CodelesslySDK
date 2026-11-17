@@ -164,7 +164,7 @@ screen, the file's name), not an error: write the site page by page. The render 
 | `step_skipped` | warning | A step names a node not shown at that size (hidden there by a media rule or a binding, or on another breakpoint's canvas; a component's node named by its path too): skipped there, one note per size listing the steps; the other steps ran and the capture was made. Nothing to fix when the node is meant to be hidden at that width (a menu button shown only on phones). |
 | `tap_no_reaction` | warning | A `--tap` hit its node, but neither it nor anything around it reacts to a tap: nothing happened. |
 | `long_press_no_reaction` | warning | A `--long-press` held its node, but nothing there reacts to a hold: the hold ended as a tap does (the message says whether its tap reactions ran). |
-| `missing_glyph` | warning | A text has characters its font has no glyph for (drawn as empty boxes): the message lists them. |
+| `missing_glyph` | warning | A text (or a control's label: a button's `"←"`) has characters its font has no glyph for (drawn as empty boxes): the message lists them. |
 | `icon_not_drawn` | warning | An icon names no glyph the renderer can draw. |
 | `expression_not_evaluated` | warning | A text shows `${` on screen: an expression that did not evaluate. |
 | `path_overflow` | warning | A `path` (or a box's `path`) draws outside its box; it is not clipped to it, as Flutter's `CustomPaint` is not. |

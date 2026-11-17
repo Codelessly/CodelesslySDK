@@ -2285,6 +2285,10 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       await _unfocusFieldOutside(tester, _boxOf(binding, step.target));
       final mouse = TestPointer(93, PointerDeviceKind.mouse, 93, kSecondaryMouseButton);
       await tester.sendEventToBinding(mouse.hover(at));
+      // What the pointer coming over it changed (a hover state that shows a
+      // node) is laid out before the press is hit-tested, as a frame comes
+      // between the two on a device.
+      await tester.pump();
       await tester.sendEventToBinding(mouse.down(at));
       await tester.pump(const Duration(milliseconds: 40));
       await tester.sendEventToBinding(mouse.up());
@@ -2853,6 +2857,31 @@ List<RuntimeIssue> _check(
       }
     }
     // Text.
+    // A control's own label (a button's "←"): its font may lack a glyph too.
+    if (node.type != 'text' && b.drawn) {
+      final missing = <String>{};
+      void visit(RenderObject o) {
+        if (o is NodeBox && !identical(o, b)) return;
+        if (o is LabeledControl) {
+          for (final l in o.labels) {
+            final cov = coverage(l.fontFamily);
+            if (cov == null) continue;
+            for (final r in l.text.runes) {
+              if (r > 0x20 && r != 0xA0 && !cov.contains(r)) missing.add(String.fromCharCode(r));
+            }
+          }
+        }
+        o.visitChildren(visit);
+      }
+
+      visit(b);
+      if (missing.isNotEmpty) {
+        out.add(RuntimeIssue('missing_glyph', 'warning',
+            'The ${node.type} "${nameOf(b)}" shows ${missing.map((c) => '"$c" (U+${c.runes.first.toRadixString(16).toUpperCase().padLeft(4, '0')})').join(', ')} in its label, which its font has no glyph for: drawn as an empty box. '
+            'Use a character the font has, or an icon (an IconButton, or the button\'s icon).',
+            nodeId: nameOf(b), screen: screen, size: size, file: file));
+      }
+    }
     if (node.type == 'text') {
       final p = _descendants(b).whereType<RenderParagraph>().firstOrNull;
       if (p == null || !p.hasSize) continue;
