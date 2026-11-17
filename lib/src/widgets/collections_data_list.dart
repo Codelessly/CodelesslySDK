@@ -682,16 +682,25 @@ class DataListViewState extends State<DataListView> {
 
     if (_pending.isNotEmpty) {
       final pending = _pending.last;
-      list = Stack(
-        children: [
-          Positioned.fill(child: list),
-          Positioned(
-            left: 8,
-            right: 8,
-            bottom: 8,
-            child: UndoBar(message: _m.undoMessage(pending), onUndo: () => _undo(pending)),
-          ),
-        ],
+      final bar = UndoBar(message: _m.undoMessage(pending), onUndo: () => _undo(pending));
+      final inner = list;
+      // Over the foot of a list as tall as its box; under a list that hugs
+      // its rows (it has no height of its own to lay the bar over, and the
+      // bar would hide its last row).
+      list = LayoutBuilder(
+        builder: (context, constraints) {
+          if (!constraints.hasBoundedHeight) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: constraints.hasBoundedWidth ? CrossAxisAlignment.stretch : CrossAxisAlignment.start,
+              children: [inner, Padding(padding: const EdgeInsets.fromLTRB(8, 8, 8, 0), child: bar)],
+            );
+          }
+          return Stack(
+            fit: StackFit.passthrough,
+            children: [inner, Positioned(left: 8, right: 8, bottom: 8, child: bar)],
+          );
+        },
       );
     }
     if (sticky) {

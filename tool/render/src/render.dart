@@ -1805,6 +1805,25 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       final handle = handles.lastOrNull?.renderObject;
       if (handle is RenderBox && handle.attached && handle.hasSize) return (handle.localToGlobal(handle.size.center(ui.Offset.zero)), null);
     }
+    // A list row's swipe action, revealed by a --drag before: by its id or
+    // label (`--tap delete`, `--tap Delete`), or under its row
+    // (`--tap ListRow1#0/delete`).
+    if (box == null && part == null) {
+      final cut = id.lastIndexOf('/');
+      final name = id.substring(cut + 1);
+      final row = cut < 0 ? null : _locate(binding, id.substring(0, cut)).box;
+      final actions = [
+        for (final e in find.byWidgetPredicate((w) => w.key is ValueKey<(String, String, String)>).evaluate())
+          if ((e.widget.key! as ValueKey<(String, String, String)>).value case (final marker, final aid, final label)
+              when marker == 'Codelessly swipe action' && (aid == name || label == name))
+            if (e.renderObject case final RenderBox r when r.attached && r.hasSize && r.size.width > 0)
+              if (row == null || _sharesSwipeRow(r, row)) r,
+      ];
+      if (actions.length == 1) return (actions.single.localToGlobal(actions.single.size.center(ui.Offset.zero)), null);
+      if (actions.length > 1) {
+        return (null, '--$verb $id: ${actions.length} rows show the swipe action "$name": name its row (--$verb <row id>#<n>/$name).');
+      }
+    }
     if (box == null && part == null && !id.contains('/')) {
       // A tab, segment or destination named by its own id (`--tap stay` for
       // the tab {"id": "stay"}): the part of the one control that has it.
@@ -2165,6 +2184,15 @@ Future<String?> _apply(WidgetTester tester, Step step, CodelesslyWidgetControlle
       return null;
   }
   return 'Unknown step ${step.kind}.';
+}
+
+/// Whether the revealed swipe [action] belongs to the row [row] (or a node
+/// in it): the stack that lays the action under the row holds both.
+bool _sharesSwipeRow(RenderObject action, RenderObject row) {
+  for (RenderObject? p = action.parent; p != null; p = p.parent) {
+    if (p is RenderStack) return _isInside(row, p);
+  }
+  return false;
 }
 
 /// Takes the focus from a text field before a step acts elsewhere (a tap,
